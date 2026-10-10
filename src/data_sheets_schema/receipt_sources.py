@@ -48,6 +48,9 @@ record's phase-1 snapshot, finds moved or dropped are:
 The other 131 unresolved paths are not on a moved or dropped entry: a leaf
 reconciliation removed or reshaped, such as a list of strings written as
 one string (128), or a path phase 1 never had (3).
+(Note: when receipts are reconciled against final records via
+`reconcile_receipt`, dangling entries are pruned and moved entries remapped,
+resolving all dropped entries).
 
 **The bundle preamble** is not a source document: it has no tier, a path it
 cites gains no citing document from it, and its citations are counted apart.
@@ -74,9 +77,9 @@ replacement are both tier 1 — and `source_priority.decide` already ranks
 supersession above tier for disagreements (#600). It is a separate count:
 no tier outcome and no projection field changes, and a path can be flagged
 by both screens (`also_higher_tier_match` says how many were). On the 24
-fig19 records, 83 paths are cited only to superseded sources, every one with
+fig19 records, 82 paths are cited only to superseded sources, every one with
 a replacement chunk in its bundle. 9 of them are exempt (they owe no bundle
-receipt) and keep the outcome `exempt` unscreened; of the other 74, 62 clear
+receipt) and keep the outcome `exempt` unscreened; of the other 73, 61 clear
 the floors and are screened, and 12 of those are flagged (8 CM4AI against
 `june_2026_dataverse_release`, 4 VOICE against `physionet_3_1_0`), 1
 verbatim, and none of the 12 is also a tier-screen flag.
@@ -124,13 +127,13 @@ TOKEN_MIN_CHARS = 4
 #: Measured on the 24 fig19 records (#2937, #3121, #3122):
 #:   - 194 flags with no floor (before a zero floor was refused), 42 of
 #:     them values with no token;
-#:   - 152 at one token and no character floor (the loosest admitted);
-#:   - 120 at two tokens and 12 characters;
+#:   - 151 at one token and no character floor (the loosest admitted);
+#:   - 119 at two tokens and 12 characters;
 #:   - 104 at three tokens.
 #: At three tokens the character floor cannot bind: every token carries at
 #: least `TOKEN_MIN_CHARS`, so three carry 12. The flag count is 104 with
 #: the character floor or without it. The token floor does the work: the
-#: character floor alone, at one token, gives 123. The three-token flags
+#: character floor alone, at one token, gives 122. The three-token flags
 #: read as the issue's case (a march-2025 release cited where the
 #: october-2025 release holds the whole passage). What the floor drops is
 #: common words, two-word names and bare grant numbers. The corpus test

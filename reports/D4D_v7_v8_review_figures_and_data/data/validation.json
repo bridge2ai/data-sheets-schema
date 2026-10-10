@@ -3,8 +3,8 @@
   "unique_input_records": 24,
   "primary_score_arithmetic_checks": 48,
   "historical_chunk_manifests_recovered": 24,
-  "source_links": 4289,
-  "links_to_unpopulated_root_fields": 58,
+  "source_links": 4089,
+  "links_to_unpopulated_root_fields": 0,
   "issue_count_primary": 562,
   "source_overlap_excludes_unpopulated_roots": true
 }

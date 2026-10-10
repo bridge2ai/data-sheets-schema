@@ -1,7 +1,7 @@
 {
   "sample_id": "S05",
   "record": "AI_READI_v7_rep3",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml",
   "d4d_sha256": "d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409",
   "d4d_fields": {
     "data_protection_impacts": null,
@@ -56,19 +56,6 @@
       "chunk": "c019",
       "source": "fairhub_api_dataset_3_2026-07-27.txt",
       "source_type": "structured metadata",
-      "slot": "data_protection_impacts[0].impact_details",
-      "root": "data_protection_impacts",
-      "section": "Ethics",
-      "snippet": "No, a data protection impact analysis has not been conducted.",
-      "root_present": false
-    },
-    {
-      "record": "AI_READI_v7_rep3",
-      "project": "AI_READI",
-      "version": "v7",
-      "chunk": "c019",
-      "source": "fairhub_api_dataset_3_2026-07-27.txt",
-      "source_type": "structured metadata",
       "slot": "future_use_impacts[0].impact_details",
       "root": "future_use_impacts",
       "section": "Uses",
@@ -93,25 +80,5 @@
     "source": "git blob",
     "path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
     "commit": "b8f2aa4616d438495d9153f683784602413c9bc8"
-  },
-  "source_search_queries": [
-    "impact analysis",
-    "data protection impact"
-  ],
-  "source_excerpts": [
-    {
-      "query": "impact analysis",
-      "chunk": "c019",
-      "source": "fairhub_api_dataset_3_2026-07-27.txt",
-      "chunk_sha256": "2e01e462052cc2725ddd4ae08bcfc6fcd9b439502686a2bcf0e40b36cb1e5817",
-      "excerpt": " \"USA\"\n        },\n        {\n          \"id\": 12,\n          \"question\": \"Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.\",\n          \"response\": \"No, a data protection impact analysis has not been conducted.\"\n        }\n      ],\n      \"inclusion\": [\n   "
-    },
-    {
-      "query": "data protection impact",
-      "chunk": "c019",
-      "source": "fairhub_api_dataset_3_2026-07-27.txt",
-      "chunk_sha256": "2e01e462052cc2725ddd4ae08bcfc6fcd9b439502686a2bcf0e40b36cb1e5817",
-      "excerpt": "     \"response\": \"USA\"\n        },\n        {\n          \"id\": 12,\n          \"question\": \"Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.\",\n          \"response\": \"No, a data protection impact analysis has not been conducted.\"\n        }\n      ],\n      \"inclusio"
-    }
-  ]
+  }
 }

@@ -2384,6 +2384,35 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
                      snapshot_spec=spec, snapshot_record=record)
 
 
+def _sync_receipt_after_reconciliation(spec: RunSpec, carry: dict[str, Any]) -> None:
+    """Synchronize the coverage receipt against the reconciled/final record (#4858)."""
+    rp = _receipt_path(spec)
+    if not rp.exists():
+        return
+    try:
+        from data_sheets_schema.receipts import reconcile_receipt
+        raw_rc = rp.read_text(encoding="utf-8")
+        rc_content = yaml.safe_load(raw_rc)
+        if not isinstance(rc_content, dict):
+            return
+        orig_body = carry.get("Original full record")
+        orig_record = yaml.safe_load(orig_body) if isinstance(orig_body, str) else None
+        if orig_record is None:
+            snap = _intermediate_dir(spec) / f"{spec.project}_full.yaml"
+            if snap.exists():
+                orig_record = yaml.safe_load(snap.read_text(encoding="utf-8"))
+        final_record = yaml.safe_load(spec.full_path.read_text(encoding="utf-8")) if spec.full_path.exists() else None
+        if not isinstance(final_record, dict):
+            return
+        clean_rc, stats = reconcile_receipt(rc_content, orig_record, final_record)
+        if stats["dropped"] > 0 or stats["remapped"] > 0:
+            clean_yaml = yaml.safe_dump(clean_rc, sort_keys=False)
+            rp.write_text(clean_yaml, encoding="utf-8")
+            _snapshot(spec, f"{spec.project}_coverage_receipt.yaml", clean_yaml)
+    except Exception as exc:
+        print(f"   warning: failed to synchronize coverage receipt for {spec.project}: {exc}")
+
+
 def core_inventory_block() -> str:
     """The core class's top-level slot names, for the report phase (#998).
 
@@ -6655,6 +6684,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             require_evidence_checks(spec, carry, stage="audit")
         elif ph == "reconcile_full":
             require_evidence_checks(spec, carry, stage="reconcile")
+            _sync_receipt_after_reconciliation(spec, carry)
         elif ph == "report":
             require_source_reviews(spec, carry)
 
@@ -6891,10 +6921,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # The coverage receipt checked against the manifest and the bundle
     # (#708/#710). Under a receipt condition an absent or failing receipt is
     # what the canary gate stops on; under any other it is not a metric.
-    # The receipt describes the record the `full` phase wrote; reconcile_full
-    # and repair rewrite that record afterwards, and on this path nothing
-    # adds a receipt for what they change — their slots are receiptless,
-    # reported under `slots.without_receipt`, never gated (#742).
+    # Synchronize receipt against the final record on disk (#4858).
+    _sync_receipt_after_reconciliation(spec, carry)
     rec.data["receipts"] = _receipts_block(spec, rec.data)
     rec.data["intermediates"] = _intermediates_block(spec)
 

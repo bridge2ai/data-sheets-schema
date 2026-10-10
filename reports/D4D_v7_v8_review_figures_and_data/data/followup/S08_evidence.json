@@ -1,7 +1,7 @@
 {
   "sample_id": "S08",
   "record": "AI_READI_v8_rep2",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml",
   "d4d_sha256": "225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8",
   "d4d_fields": {
     "anomalies": [
@@ -1449,18 +1449,6 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
-  },
-  "source_search_queries": [
-    "Optomed Aurora"
-  ],
-  "source_excerpts": [
-    {
-      "query": "Optomed Aurora",
-      "chunk": "c018",
-      "source": "fairhub_api_dataset_3_2026-07-27.txt",
-      "chunk_sha256": "edb0ce22f469ba36f1625d083b46ff23d03dc97b4efcb19e0c4842693beaf20a",
-      "excerpt": "es across the study include: NIDEK LM-600P Auto Lensometer, Topcon-CL-200 computerized Lensometer, and Topcon-CL-300 computerized Lensometer\\n\\n   **Undilated fundus photography - Optomed Aurora**\\n\\n   The Optomed Aurora IQ is a handheld fundus camera that can take non-mydriatic images of the ocular fundus. It has a 50\u00b0 field of view, 5 Mpix sensor, and high-contrast optical design. The camera is non-mydriatic, meaning it doesn't require the pupil to be dilated, so it can be used for deta"
-    }
-  ]
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
+  }
 }

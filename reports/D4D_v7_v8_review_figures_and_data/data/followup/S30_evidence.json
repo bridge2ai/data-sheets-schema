@@ -1,7 +1,7 @@
 {
   "sample_id": "S30",
   "record": "VOICE_v7_rep1",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml",
   "d4d_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
   "d4d_fields": {
     "doi": "10.13026/8xbn-nq66",
@@ -152,17 +152,5 @@
     "source": "git blob",
     "path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
     "commit": "4fc4d6b22d5522389692e746a4bc715a93163871"
-  },
-  "source_search_queries": [
-    "10.13026/8xbn-nq66"
-  ],
-  "source_excerpts": [
-    {
-      "query": "10.13026/8xbn-nq66",
-      "chunk": "c018",
-      "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
-      "chunk_sha256": "4ed4ba310cf7606fb57c8957129892e472a758353f1bc4cfb0a1d79cf338bfc7",
-      "excerpt": ", J., ... Ghosh, S. (2026). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 3.1.0).\nPhysioNet\n. RRID:SCR_007345.\nhttps://doi.org/10.13026/8xbn-nq66\n@article{PhysioNet-b2ai-voice-3.1.0,\nauthor = {Bensoussan, Yael and Sigaras, Alexandros and Rameau, Anais and Elemento, Olivier and Powell, Maria and Dorr, David and Payne, Philip and Ravitsky, Vardit and B\u00e9lisle-Pipon, Jean-Christophe and Bahr, Ruth and Watts, Stephanie and Bolser, Donald and Siu,"
-    }
-  ]
+  }
 }

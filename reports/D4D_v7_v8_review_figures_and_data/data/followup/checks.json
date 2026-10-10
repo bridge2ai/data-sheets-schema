@@ -4,16 +4,5 @@
   "cross_rubric_comparisons": 24,
   "repeat_pairs": 12,
   "sensitivity_records": 72,
-  "original_item_sum_verified": true,
-  "sample_assessments": 32,
-  "sample_distinct_records": 18,
-  "sample_low_severity": 17,
-  "sample_medium_severity": 15,
-  "sample_high_severity": 0,
-  "source_excerpts_verified": 81,
-  "chunk_hash_mismatches": 0,
-  "original_bundle_files_changed": 0,
-  "new_figures": 10,
-  "report_links_and_anchors": "checked",
-  "svg_and_json_parsing": "passed"
+  "original_item_sum_verified": true
 }

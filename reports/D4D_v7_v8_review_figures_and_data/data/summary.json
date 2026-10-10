@@ -207,7 +207,7 @@
       80.0
     ]
   },
-  "receipt_links": 4289,
+  "receipt_links": 4089,
   "unclassified_links": 0,
   "q19_qualified": [
     "AI_READI_v8_rep1_r20_rating1",
@@ -220,5 +220,5 @@
     "CM4AI_v8_rep2_r20_rating1",
     "CM4AI_v8_rep3_r20_rating1"
   ],
-  "git_commit": "60452ab4e1de922da2bd6581c9f0a34672a2057c"
+  "git_commit": "d9e5c9dd0d1345b176918bdedaefcedad93f6012"
 }

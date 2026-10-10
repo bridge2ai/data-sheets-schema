@@ -1,7 +1,7 @@
 {
   "sample_id": "S16",
   "record": "CHORUS_v8_rep3",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml",
   "d4d_sha256": "82963f6ea262f9cff93d4216ba18dacef48c4a6b7286445f83e195782e162759",
   "d4d_fields": {
     "labeling_strategies": [
@@ -117,18 +117,6 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
-  },
-  "source_search_queries": [
-    "holdout test set"
-  ],
-  "source_excerpts": [
-    {
-      "query": "holdout test set",
-      "chunk": "c002",
-      "source": "reporter_nih_gov_project-details-10472824_row7.txt",
-      "chunk_sha256": "635b28dccf617547dda689a417c43e3d242a317bdbe12bf4e74b5c8e2525f361",
-      "excerpt": "ile ensuring the methods promote privacy, accountability, and clinical benefit, while promoting a new generation of AI clinicians and scientists. The dataset will also provision a holdout test set, accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care. Drawing expertise from a comprehensive set of disciplines such as team science, law, ethics, health services, biomedical science, engineering, and scientific j"
-    }
-  ]
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+  }
 }

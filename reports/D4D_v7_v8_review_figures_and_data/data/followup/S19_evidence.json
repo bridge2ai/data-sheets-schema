@@ -1,7 +1,7 @@
 {
   "sample_id": "S19",
   "record": "CM4AI_v7_rep1",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml",
   "d4d_sha256": "4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9",
   "d4d_fields": {
     "distribution_formats": [
@@ -23,18 +23,6 @@
   "receipt_links": [],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
-  },
-  "source_search_queries": [
-    "dataset.xhtml\\?persistentId=doi:10.18130/V3/HIGT4C"
-  ],
-  "source_excerpts": [
-    {
-      "query": "dataset.xhtml\\?persistentId=doi:10.18130/V3/HIGT4C",
-      "chunk": "c026",
-      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
-      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
-      "excerpt": "----------------------------------\n\nSOURCE METADATA\nProject: CM4AI\nSource ID: june_2026_dataverse_release\nSource type: data resource\nSource URL: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C\nRaw file: data/raw/CM4AI/dataverse_10.18130_V3_HIGT4C_2026-07-24.html\n--------------------------------------------------------------------------------\nCell Maps for Artificial Intelligence - June 2026 Data Release (Beta) - Cell Maps for Artificial Intelligence\nSkip to main content\nToggle navigation"
-    }
-  ]
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+  }
 }

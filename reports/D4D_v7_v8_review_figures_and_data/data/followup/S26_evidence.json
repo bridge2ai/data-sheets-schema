@@ -1,7 +1,7 @@
 {
   "sample_id": "S26",
   "record": "VOICE_v8_rep2",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml",
   "d4d_sha256": "0766cb45aa40e3557eb0501fd4883cedbaf7462f6c2f59099c05dac4b3d59aea",
   "d4d_fields": {
     "distribution_dates": [
@@ -194,18 +194,6 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/VOICE_preprocessed.txt"
-  },
-  "source_search_queries": [
-    "semi.annual"
-  ],
-  "source_excerpts": [
-    {
-      "query": "semi.annual",
-      "chunk": "c009",
-      "source": "docs_b2ai-voice_org_row10.txt",
-      "chunk_sha256": "7ce385094acb63c7c5a04d241f757c89d862b7728f291726d7a2a1367a12f919",
-      "excerpt": "? If so, please describe how often, by whom, and how updates will be communicated to users (e.g., mailing list, GitHub)?\nYes, further versions of the dataset will be released on a semi-annual (twice a year) basis. These updates will be distributed as new versions of the dataset on the Health Data Nexus platform. Users will be notified through news items on the platform as well as through standard communication channels.\nIf the dataset relates to people, are there applicable limits on th"
-    }
-  ]
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/VOICE_preprocessed.txt"
+  }
 }

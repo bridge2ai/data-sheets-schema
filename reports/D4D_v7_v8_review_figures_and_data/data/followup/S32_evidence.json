@@ -1,7 +1,7 @@
 {
   "sample_id": "S32",
   "record": "VOICE_v7_rep1",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml",
   "d4d_sha256": "7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048",
   "d4d_fields": {
     "collection_mechanisms": [
@@ -286,62 +286,5 @@
     "source": "git blob",
     "path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
     "commit": "4fc4d6b22d5522389692e746a4bc715a93163871"
-  },
-  "source_search_queries": [
-    "pediatric voice",
-    "participants.*18",
-    "adult"
-  ],
-  "source_excerpts": [
-    {
-      "query": "pediatric voice",
-      "chunk": "c007",
-      "source": "docs_b2ai-voice_org_row10.txt",
-      "chunk_sha256": "552d711069bd4a33b257fe4277c4094c0c98b838ec81e5d78790bb7c5523ca9a",
-      "excerpt": "met needs and for which our data acquisition efforts are focused:\nVoice Disorders\nNeurological and Neurodegenerative Disorders\nMood and Psychiatric Disorders\nRespiratory disorders\nPediatric Voice and Speech Disorders\nPlease Note:\nThe public data releases do not contain an equal distribution of these categories of diseases. Further releases will contain additional data.\nData Access\nAdult Dataset\nA derived dataset containing spectrograms and combined phenotypic data is available on PhysioNet "
-    },
-    {
-      "query": "pediatric voice",
-      "chunk": "c011",
-      "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
-      "chunk_sha256": "49097cd09aaf725c17a32be50890375c6bb728ad1c6563a2a71bd0d050559c88",
-      "excerpt": "our data acquisition efforts on the following disease categories:\nVoice Disorders\nNeurological and Neurodegenerative Disorders\nMood and Psychiatric Disorders\nRespiratory disorders\nPediatric Voice and Speech Disorders\nThe voice data acquisition efforts will be facilitated by partnerships with High Volume Expert Clinics as well as Community Clinics representing underserved populations.\nData Sharing and Federated Learning\nFederated Learning is an emerging method in deep learning where multiple"
-    },
-    {
-      "query": "participants.*18",
-      "chunk": "c002",
-      "source": "pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt",
-      "chunk_sha256": "0d6896cf4da4376fe5854c35d7f5f8e83846750c429454f0ba418f42cdc40f1d",
-      "excerpt": "d at a tertiary academic voice center, University of South Florida Health Voice Center, in Tampa, Florida between June 5, 2023, and July 28, 2023. The study used a mixed sample of participants, with and without voice disorders. The eligibility criteria included: participants who were at least 18 years old and could read the English language. Exclusion criteria were as follows: an inability to provide informed consent in English and inability to read English. All patients meeting inclusion criteria were offered to participate in the study.\nEnrollment\nParticipants were recruited by providers"
-    },
-    {
-      "query": "participants.*18",
-      "chunk": "c020",
-      "source": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
-      "chunk_sha256": "e1a5c764be4e78e6033c70bf44b92a476b48a3fdc3acb67c2aadd6700c6cc62f",
-      "excerpt": "ed from voice recordings with corresponding clinical information.\nBridge2AI-Voice Pediatric Dataset v1.1.0 contains derived audio features for 23,533 recordings collected from 300 participants aged 2-18. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.\nBackground\nUnderstanding voice and speech development in children is essential "
-    },
-    {
-      "query": "adult",
-      "chunk": "c002",
-      "source": "pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt",
-      "chunk_sha256": "0d6896cf4da4376fe5854c35d7f5f8e83846750c429454f0ba418f42cdc40f1d",
-      "excerpt": "kers, and mood biomarkers. The aim of the app was to collect demographic information, validated questionnaires, and acoustic tasks for four different categories of diseases in the adult population: vocal pathologies, neurological and neurodegenerative disorders, mood and psychiatric disorders, and respiratory disorders. Full protocols for data acquisition were developed including the following categories:\n-\nDemographics: The group was asked to include common demographic data and i"
-    },
-    {
-      "query": "adult",
-      "chunk": "c007",
-      "source": "docs_b2ai-voice_org_row10.txt",
-      "chunk_sha256": "552d711069bd4a33b257fe4277c4094c0c98b838ec81e5d78790bb7c5523ca9a",
-      "excerpt": "-----------------------------------------------\nBridge2AI - Voice\nSkip to content\nHome\nAbout\nOur Consortium\nAdvisory Board and Collaborators\nJoin Us\nData & Tools\nProtocols\nDataset\nAdult Dashboard\nPediatric Dashboard\nTools\nTraining Resources\nWebinars\nTraining and Mentorship\nVoice AI Symposium\nVoice AI Symposium\nImpact\nPublications\nPress\nSocial Media\nHome\nAbout\nOur Consortium\nAdvisory Board and Collaborators\nJoin Us\nData & Tools\nProtocols\nDataset\nAdult Dashboard\nPediatric Dashboard\n"
-    },
-    {
-      "query": "Participants were selected",
-      "chunk": "c018",
-      "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
-      "chunk_sha256": "4ed4ba310cf7606fb57c8957129892e472a758353f1bc4cfb0a1d79cf338bfc7",
-      "excerpt": "voice recordings with corresponding clinical information. Bridge2AI-Voice v3.1 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available. Background The production of human voice involves the complex interac",
-      "whitespace_normalized": true
-    }
-  ]
+  }
 }

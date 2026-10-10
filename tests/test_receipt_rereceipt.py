@@ -361,3 +361,110 @@ def test_the_helper_counts_what_every_committed_v8_api_block_states(receipt, mon
     assert len(paths) == block["slots"]["receiptable"] - block["slots"]["with_receipt"]
     assert paths[:50] == block["slots"]["without_receipt"] == stored["without_receipt"]
     assert prov.read_bytes() == before
+
+
+# ---------------------------------------------------------------- reconcile_receipt
+def test_reconcile_receipt_retains_and_prunes():
+    receipt = {
+        "bundle_md5": "abc",
+        "chunks": [
+            {
+                "id": "c001",
+                "status": "extracted",
+                "extracted": [
+                    {"slot": "title", "snippet": "AI-READI Dataset"},
+                    {"slot": "extension_mechanism.extension_details", "snippet": "none"},
+                ],
+            },
+            {
+                "id": "c002",
+                "status": "extracted",
+                "extracted": [
+                    {"slot": "download_url", "snippet": "https://fairhub.io/dataset/1"},
+                ],
+            },
+            {
+                "id": "c003",
+                "status": "nothing_relevant",
+                "reason": "references",
+            },
+        ],
+    }
+    orig = {
+        "title": "AI-READI Dataset",
+        "extension_mechanism": {"extension_details": "none"},
+        "download_url": "https://fairhub.io/dataset/1",
+        "funders": [
+            {"name": "NIH", "grant_id": "OT2OD032644"},
+            {"name": "NSF", "grant_id": "12345"},
+        ],
+    }
+    final = {
+        "title": "AI-READI Dataset",
+        "funders": [
+            {"name": "NSF", "grant_id": "12345"},
+            {"name": "NIH", "grant_id": "OT2OD032644"},
+        ],
+    }
+    clean_rc, stats = rc.reconcile_receipt(receipt, orig, final)
+    assert stats["retained"] == 1
+    assert stats["dropped"] == 2
+    assert stats["emptied"] == 1
+
+    c1 = next(c for c in clean_rc["chunks"] if c["id"] == "c001")
+    assert c1["status"] == "extracted"
+    assert c1["extracted"] == [{"slot": "title", "snippet": "AI-READI Dataset"}]
+
+    c2 = next(c for c in clean_rc["chunks"] if c["id"] == "c002")
+    assert c2["status"] == "nothing_relevant"
+    assert "dropped during reconciliation" in c2["reason"]
+    assert "extracted" not in c2
+
+    c3 = next(c for c in clean_rc["chunks"] if c["id"] == "c003")
+    assert c3["status"] == "nothing_relevant"
+    assert c3["reason"] == "references"
+
+
+def test_reconcile_receipt_remaps_moved_list_entry():
+    receipt = {
+        "bundle_md5": "abc",
+        "chunks": [
+            {
+                "id": "c001",
+                "status": "extracted",
+                "extracted": [
+                    {"slot": "funders[0].grant_id", "snippet": "OT2OD032644"},
+                ],
+            },
+        ],
+    }
+    orig = {
+        "funders": [
+            {"name": "NIH", "grant_id": "OT2OD032644"},
+        ],
+    }
+    final = {
+        "funders": [
+            {"name": "Other", "grant_id": "99999"},
+            {"name": "NIH", "grant_id": "OT2OD032644"},
+        ],
+    }
+    clean_rc, stats = rc.reconcile_receipt(receipt, orig, final)
+    assert stats["remapped"] == 1
+    assert stats["dropped"] == 0
+    c1 = clean_rc["chunks"][0]
+    assert c1["extracted"] == [{"slot": "funders[1].grant_id", "snippet": "OT2OD032644"}]
+
+
+def test_reconcile_receipt_is_pure():
+    receipt = {
+        "bundle_md5": "abc",
+        "chunks": [
+            {"id": "c001", "status": "extracted", "extracted": [{"slot": "drop_me", "snippet": "foo"}]},
+        ],
+    }
+    before = copy.deepcopy(receipt)
+    clean_rc, stats = rc.reconcile_receipt(receipt, None, {"keep_me": "bar"})
+    assert receipt == before
+    assert clean_rc["chunks"][0]["status"] == "nothing_relevant"
+

@@ -3,11 +3,12 @@ import json,re,hashlib,collections,itertools,statistics,html,math,random
 from pathlib import Path
 import yaml,numpy as np
 from PIL import Image,ImageDraw,ImageFont
-O=Path('/Users/obanks/Documents/Codex/2026-09-29/r/outputs');D=O/'data/followup';P=['AI_READI','CHORUS','CM4AI','VOICE']
+O=Path(__file__).resolve().parents[1];D=O/'data/followup';P=['AI_READI','CHORUS','CM4AI','VOICE'];ROOT=Path(__file__).resolve().parents[3]
 load=lambda n:json.loads((O/'data'/f'{n}.json').read_text())
 R=load('ratings');I=load('issues');Q=load('items');primary=[x for x in R if x['rating']==1];issues=[x for x in I if x['rating']==1];recmeta={x['record']:x for x in primary};rids=sorted(recmeta);A=load('input_audit');records={}
 for a in A:
- p=Path(a['d4d_file']);assert hashlib.sha256(p.read_bytes()).hexdigest()==a['input_sha256'];r=re.match(r'(.+_v[78]_rep\d+)',Path(a['file']).name)[1];records[r]=yaml.safe_load(p.read_text())
+ p=Path(a['d4d_file']);p=p if p.exists() else (ROOT/str(a['d4d_file'])[str(a['d4d_file']).index('data/'):] if 'data/' in str(a['d4d_file']) else p)
+ assert hashlib.sha256(p.read_bytes()).hexdigest()==a['input_sha256'];r=re.match(r'(.+_v[78]_rep\d+)',Path(a['file']).name)[1];records[r]=yaml.safe_load(p.read_text())
 assert len(records)==24
 present=lambda x:x is not None and x!='' and x!=[] and x!={}
 family=lambda t:'Accuracy/correctness' if t in ['correctness','content_accuracy'] else {'completeness':'Completeness','consistency':'Consistency','semantic_understanding':'Semantic understanding'}[t]

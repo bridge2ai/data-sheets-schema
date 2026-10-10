@@ -1,7 +1,7 @@
 {
   "sample_id": "S31",
   "record": "VOICE_v7_rep2",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml",
   "d4d_sha256": "9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459",
   "d4d_fields": {
     "at_risk_populations": {
@@ -100,32 +100,6 @@
       "record": "VOICE_v7_rep2",
       "project": "VOICE",
       "version": "v7",
-      "chunk": "c012",
-      "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
-      "source_type": "IRB",
-      "slot": "at_risk_populations.assent_procedures",
-      "root": "at_risk_populations",
-      "section": "Human",
-      "snippet": "children will provide verbal assent where appropriate",
-      "root_present": true
-    },
-    {
-      "record": "VOICE_v7_rep2",
-      "project": "VOICE",
-      "version": "v7",
-      "chunk": "c012",
-      "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
-      "source_type": "IRB",
-      "slot": "at_risk_populations.guardian_consent",
-      "root": "at_risk_populations",
-      "section": "Human",
-      "snippet": "this research is minimal risk and does not require permission from both parents or legal guardians",
-      "root_present": true
-    },
-    {
-      "record": "VOICE_v7_rep2",
-      "project": "VOICE",
-      "version": "v7",
       "chunk": "c015",
       "source": "physionet_b2ai-voice_1.1_row17.txt",
       "source_type": "data resource",
@@ -153,18 +127,5 @@
     "source": "git blob",
     "path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
     "commit": "4fc4d6b22d5522389692e746a4bc715a93163871"
-  },
-  "source_search_queries": [
-    "potential impact.*data subjects",
-    "impact analysis"
-  ],
-  "source_excerpts": [
-    {
-      "query": "potential impact.*data subjects",
-      "chunk": "c009",
-      "source": "docs_b2ai-voice_org_row10.txt",
-      "chunk_sha256": "7ce385094acb63c7c5a04d241f757c89d862b7728f291726d7a2a1367a12f919",
-      "excerpt": "cordings) cannot be removed from the database once the voice data collection process is completed.\nIn which countries was the data collected?\nUSA and Canada\nHas an analysis of the potential impact of the dataset and its use on data subjects been conducted?\nNo\nInclusion Criteria-Accessibility in data collection\nIs there any language-based communication with patients (e.g.: English, French)? If yes, describe the choices of language(s) for communication. (for example, if there is an app used for communication, what are the language optio"
-    }
-  ]
+  }
 }

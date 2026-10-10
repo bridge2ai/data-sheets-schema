@@ -122,12 +122,11 @@
       "CHORUS_v8_rep1",
       "CHORUS_v8_rep2",
       "CHORUS_v8_rep3",
-      "CM4AI_v8_rep1",
       "VOICE_v8_rep1",
       "VOICE_v8_rep2",
       "VOICE_v8_rep3"
     ],
-    "record_count": 10,
+    "record_count": 9,
     "denominator": 12
   },
   {
@@ -280,19 +279,16 @@
     "source_group": "IRB",
     "records": [
       "AI_READI_v8_rep2",
-      "AI_READI_v8_rep3",
-      "VOICE_v8_rep2"
+      "AI_READI_v8_rep3"
     ],
-    "record_count": 3,
+    "record_count": 2,
     "denominator": 12
   },
   {
     "section": "Data Governance",
     "source_group": "Awards",
-    "records": [
-      "CHORUS_v8_rep2"
-    ],
-    "record_count": 1,
+    "records": [],
+    "record_count": 0,
     "denominator": 12
   },
   {
@@ -323,10 +319,9 @@
       "CHORUS_v8_rep1",
       "CM4AI_v8_rep2",
       "VOICE_v8_rep1",
-      "VOICE_v8_rep2",
-      "VOICE_v8_rep3"
+      "VOICE_v8_rep2"
     ],
-    "record_count": 6,
+    "record_count": 5,
     "denominator": 12
   },
   {
@@ -453,10 +448,9 @@
     "records": [
       "AI_READI_v8_rep2",
       "VOICE_v8_rep1",
-      "VOICE_v8_rep2",
       "VOICE_v8_rep3"
     ],
-    "record_count": 4,
+    "record_count": 3,
     "denominator": 12
   },
   {
@@ -568,12 +562,11 @@
     "records": [
       "CHORUS_v8_rep1",
       "CHORUS_v8_rep2",
-      "CHORUS_v8_rep3",
       "VOICE_v8_rep1",
       "VOICE_v8_rep2",
       "VOICE_v8_rep3"
     ],
-    "record_count": 6,
+    "record_count": 5,
     "denominator": 12
   },
   {
@@ -961,11 +954,9 @@
       "AI_READI_v8_rep1",
       "AI_READI_v8_rep2",
       "AI_READI_v8_rep3",
-      "CM4AI_v8_rep1",
-      "CM4AI_v8_rep2",
-      "CM4AI_v8_rep3"
+      "CM4AI_v8_rep1"
     ],
-    "record_count": 6,
+    "record_count": 4,
     "denominator": 12
   },
   {
@@ -1054,12 +1045,11 @@
     "source_group": "Docs",
     "records": [
       "CHORUS_v8_rep3",
-      "CM4AI_v8_rep3",
       "VOICE_v8_rep1",
       "VOICE_v8_rep2",
       "VOICE_v8_rep3"
     ],
-    "record_count": 5,
+    "record_count": 4,
     "denominator": 12
   },
   {
@@ -1088,12 +1078,11 @@
     "section": "Uses",
     "source_group": "Terms",
     "records": [
-      "AI_READI_v8_rep1",
       "AI_READI_v8_rep2",
       "AI_READI_v8_rep3",
       "VOICE_v8_rep2"
     ],
-    "record_count": 4,
+    "record_count": 3,
     "denominator": 12
   },
   {

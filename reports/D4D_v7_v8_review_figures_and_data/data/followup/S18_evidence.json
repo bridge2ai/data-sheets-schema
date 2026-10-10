@@ -1,7 +1,7 @@
 {
   "sample_id": "S18",
   "record": "CM4AI_v8_rep3",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml",
   "d4d_sha256": "e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800",
   "d4d_fields": {
     "external_resources": [
@@ -105,71 +105,6 @@
       "chunk": "c011",
       "source": "biorxiv_2024.05.21.589311v1_row4.txt",
       "source_type": "preprint",
-      "slot": "preprocessing_strategies[0].preprocessing_details",
-      "root": "preprocessing_strategies",
-      "section": "Preprocessing",
-      "snippet": "Downloaded PPI networks are processed using the node2vec deep learning model31\nto reduce dimensionality, producing a PPI embedding",
-      "root_present": false
-    },
-    {
-      "record": "CM4AI_v8_rep3",
-      "project": "CM4AI",
-      "version": "v8",
-      "chunk": "c011",
-      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
-      "source_type": "preprint",
-      "slot": "preprocessing_strategies[1].preprocessing_details",
-      "root": "preprocessing_strategies",
-      "section": "Preprocessing",
-      "snippet": "IF images are processed using a Human Protein Atlas deep learning model32 to\nreduce dimensionality, producing an image embedding",
-      "root_present": false
-    },
-    {
-      "record": "CM4AI_v8_rep3",
-      "project": "CM4AI",
-      "version": "v8",
-      "chunk": "c011",
-      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
-      "source_type": "preprint",
-      "slot": "preprocessing_strategies[2].preprocessing_details",
-      "root": "preprocessing_strategies",
-      "section": "Preprocessing",
-      "snippet": "The PPI and image embeddings are integrated to obtain a co-embedding for each\nprotein using contrastive deep learning.",
-      "root_present": false
-    },
-    {
-      "record": "CM4AI_v8_rep3",
-      "project": "CM4AI",
-      "version": "v8",
-      "chunk": "c011",
-      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
-      "source_type": "preprint",
-      "slot": "preprocessing_strategies[3].preprocessing_details",
-      "root": "preprocessing_strategies",
-      "section": "Preprocessing",
-      "snippet": "Community detection is performed based on the all-by-all similarities of pairs of\nproteins in the co-embedding space.",
-      "root_present": false
-    },
-    {
-      "record": "CM4AI_v8_rep3",
-      "project": "CM4AI",
-      "version": "v8",
-      "chunk": "c011",
-      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
-      "source_type": "preprint",
-      "slot": "machine_annotation_tools[0].tool_descriptions",
-      "root": "machine_annotation_tools",
-      "section": "Preprocessing",
-      "snippet": "assemblies in the cell maps are annotated using a large\nlanguage model (LLM) approach that we developed to name sets of proteins and assign\na name confidence score",
-      "root_present": false
-    },
-    {
-      "record": "CM4AI_v8_rep3",
-      "project": "CM4AI",
-      "version": "v8",
-      "chunk": "c011",
-      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
-      "source_type": "preprint",
       "slot": "external_resources[6].external_resources",
       "root": "external_resources",
       "section": "Composition",
@@ -244,41 +179,6 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
-  },
-  "source_search_queries": [
-    "not contain predicted cell maps",
-    "Cell Mapping Toolkit"
-  ],
-  "source_excerpts": [
-    {
-      "query": "not contain predicted cell maps",
-      "chunk": "c020",
-      "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
-      "chunk_sha256": "147a4351b49f6975821dd04531dd6b7c69a9c590f658cd96755c5f95d647b5af",
-      "excerpt": "ence of specific disease processes, treatment conditions, or genetic perturbations\nLimitations\nResearchers should be aware of inherent limitations:\nThis is an interim release\nDoes not contain predicted cell maps, which will be added in future releases\nThe current release is most suitable for bioinformatics analysis of the individual datasets\nRequires domain expertise for meaningful analysis\nProhibited Uses\nThese laboratory data are not to be used in clinical decision-making or in any context involving pati"
-    },
-    {
-      "query": "not contain predicted cell maps",
-      "chunk": "c023",
-      "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
-      "chunk_sha256": "a52130ba08aae4d3be8169404e7bc07695f2b644614ba48a87f406a6f9ef805a",
-      "excerpt": "ence of specific disease processes, treatment conditions, or genetic perturbations\nLimitations\nResearchers should be aware of inherent limitations:\nThis is an interim release\nDoes not contain predicted cell maps, which will be added in future releases\nThe current release is most suitable for bioinformatics analysis of the individual datasets\nRequires domain expertise for meaningful analysis\nProhibited Uses\nThese laboratory data are not to be used in clinical decision-making or in any context involving pati"
-    },
-    {
-      "query": "Cell Mapping Toolkit",
-      "chunk": "c003",
-      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
-      "chunk_sha256": "9fbd71fc29fccba883d227d94b174b28cf1d5659ce2336fa105e1a064fb00703",
-      "excerpt": "rpretations\n3\n. To facilitate continued map improvement, incorporation of new datasets, and construction of new cell maps across subtypes and disease states, we also developed the Cell Mapping Toolkit (\nhttps://github.com/idekerlab/cellmaps_pipeline\n), which implements the end-to-end pipeline described here as a series of Python packages complete with full user documentation. This toolkit provides a flexible and generalizable framework for cell map construction, enabling researchers to integrate"
-    },
-    {
-      "query": "Does not contain predicted cell maps",
-      "chunk": "c026",
-      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
-      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
-      "excerpt": "processes, treatment conditions, or genetic perturbations Limitations Researchers should be aware of inherent limitations: This is an interim release Does not contain predicted cell maps, which will be added in future releases The current release is most suitable for bioinformatics analysis of the individual datasets Requires domain expertise for meaningful analysis Prohibited Uses These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval Potential Sources of Bias Users should be aware of potential biases: Data in this relea",
-      "whitespace_normalized": true
-    }
-  ]
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+  }
 }

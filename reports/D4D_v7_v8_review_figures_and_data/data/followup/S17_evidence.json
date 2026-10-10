@@ -1,7 +1,7 @@
 {
   "sample_id": "S17",
   "record": "CM4AI_v7_rep1",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml",
   "d4d_sha256": "4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9",
   "d4d_fields": {
     "anomalies": null,
@@ -15,26 +15,6 @@
   "receipt_links": [],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
-  },
-  "source_search_queries": [
-    "quality control"
-  ],
-  "source_excerpts": [
-    {
-      "query": "quality control",
-      "chunk": "c002",
-      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
-      "chunk_sha256": "0a21353ca32a94454b39451c7ad871be33e638c3783e6e2dfe22c9c8540f36ea",
-      "excerpt": "us publication\n12\n, and the remaining 3,292 images were more recently generated and validated according to the Human Protein Atlas (HPA) standard procedures for image and antibody quality control.\nCombining across the interaction and imaging data, a total of 5,147 proteins was well represented in both modalities. These proteins captured approximately half of the detectable U2OS proteome\n12\nand provided representative coverage over the full catalogue of human protein functions, other than un"
-    },
-    {
-      "query": "QCed",
-      "chunk": "c010",
-      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
-      "chunk_sha256": "0ec9e9009f76d400fe041a0726f62b5a4c905c8790994c1a0d823601e09ad45c",
-      "excerpt": "/\u2013 drug) in MDA-MB-468 cells and in undifferentiated KOLF2.1J iPSCs were done using the 10x Genomics 3\u2019HT kit. The resulting data are currently being QCed. 5 bioRxiv preprint doi: https://doi.org/10.1101/2024.05.21.589311 ; this version posted May 24, 2024. The copyright holder for this preprint (which was not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It is made available under a CC-BY-NC-ND 4.0 International license . 3. Tools: Cell Map Data Integration Pipeline and VNN Tools The Tools Module of CM4AI is responsible fo",
-      "whitespace_normalized": true
-    }
-  ]
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+  }
 }

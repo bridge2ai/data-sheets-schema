@@ -1,8 +1,13 @@
-import sys,json,re,hashlib,subprocess,collections,statistics,html,math
+import sys
+_orig_sys_path = list(sys.path)
+sys.path = [p for p in sys.path if not p.endswith('reports/D4D_v7_v8_review_figures_and_data') and p != '']
+import statistics
+sys.path = _orig_sys_path
+import json,re,hashlib,subprocess,collections,html,math
 from pathlib import Path
 import yaml,numpy as np
 from PIL import Image,ImageDraw,ImageFont
-ROOT=Path('/Users/obanks/data-sheets-schema'); OUT=Path('/Users/obanks/Documents/Codex/2026-09-29/r/outputs')
+ROOT=Path(__file__).resolve().parents[2]; OUT=Path(__file__).resolve().parent
 sys.path.insert(0,str(ROOT/'src'))
 from data_sheets_schema.receipt_sources import run_chunks
 H=lambda x:hashlib.sha256(x).hexdigest()
@@ -25,7 +30,7 @@ def section(f):
 def present(v):return v is not None and v!='' and v!=[] and v!={}
 records={}; ratings=[];issues=[];items=[];audit=[]
 for r in [10,20]:
- for f in sorted(Path(f'/Users/obanks/Downloads/rubric{r}_semantic').rglob('*.json')):
+ for f in sorted((ROOT/f'data/evaluation_llm/rubric{r}_semantic/reference_2026-09-12_cborg_runtime').glob('*.json')):
   d=json.loads(f.read_text());m=re.match(r'(.+)_(v[78])_rep(\d+)_r\d+_rating(\d+)',f.stem);p,v,rep,rat=m.groups();rep=int(rep);rat=int(rat);rid=f'{p}_{v}_rep{rep}';jid=f.stem.removesuffix('_evaluation');inp=ROOT/d['d4d_file'];data=yaml.safe_load(inp.read_text());score=d['overall_score'];den=score['adjusted_max_points'];pct=100*score['total_points']/den
   assert H(inp.read_bytes())==manifest['pinned_files'][d['d4d_file']]
   repo=ROOT/f'data/evaluation_llm/rubric{r}_semantic/reference_2026-09-12_cborg_runtime'/f.name

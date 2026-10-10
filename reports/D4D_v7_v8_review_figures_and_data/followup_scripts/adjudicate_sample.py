@@ -1,7 +1,7 @@
 """Evidence-reviewed labels; this is a transparent assistant assessment, not a gold standard."""
 import json,collections
 from pathlib import Path
-D=Path('/Users/obanks/Documents/Codex/2026-09-29/r/outputs/data/followup')
+D=Path(__file__).resolve().parents[1]/'data/followup'
 # Each judgment was written after inspecting the stored record fields and recovered source excerpts.
 C={
 'R':'Representation / selective summary',

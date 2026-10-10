@@ -1,7 +1,7 @@
 {
   "sample_id": "S13",
   "record": "CHORUS_v8_rep2",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml",
   "d4d_sha256": "960c3500b4c6b43bd1eb1a17508148529a021c7ee3205c81aa19b021f75aa943",
   "d4d_fields": {
     "discouraged_uses": null,
@@ -89,18 +89,6 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
-  },
-  "source_search_queries": [
-    "sign a licensing"
-  ],
-  "source_excerpts": [
-    {
-      "query": "sign a licensing",
-      "chunk": "c003",
-      "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
-      "chunk_sha256": "7dc281080f359050015dba0a1b8c72ad97340ef64709296d51a0872de86c09c3",
-      "excerpt": "t a registration form with name, email, and institution\n\nOnce access is granted and compute is provisioned, an email will be sent\n\n1\n\n2\n\nLicensing Agreement\n\nAll participants must sign a licensing agreement included in the registration form before gaining\n"
-    }
-  ]
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+  }
 }

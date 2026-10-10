@@ -11,7 +11,7 @@
     "outcome": "Completeness",
     "project": "CHORUS",
     "eligible_records": 3,
-    "mean_difference_pp": 0.37037037037037024
+    "mean_difference_pp": -3.2222222222222223
   },
   {
     "source_type": "NIH project page",
@@ -39,7 +39,7 @@
     "outcome": "Accuracy/correctness",
     "project": "CHORUS",
     "eligible_records": 3,
-    "mean_difference_pp": -11.203703703703706
+    "mean_difference_pp": -8.185185185185185
   },
   {
     "source_type": "NIH project page",
@@ -88,7 +88,7 @@
     "outcome": "Completeness",
     "project": "AI_READI",
     "eligible_records": 3,
-    "mean_difference_pp": 11.306089743589745
+    "mean_difference_pp": 11.252670940170942
   },
   {
     "source_type": "data resource",
@@ -102,7 +102,7 @@
     "outcome": "Completeness",
     "project": "CM4AI",
     "eligible_records": 3,
-    "mean_difference_pp": -1.3341473341473342
+    "mean_difference_pp": -5.638176638176638
   },
   {
     "source_type": "data resource",
@@ -130,7 +130,7 @@
     "outcome": "Accuracy/correctness",
     "project": "CM4AI",
     "eligible_records": 3,
-    "mean_difference_pp": 0.7126577126577132
+    "mean_difference_pp": 7.102564102564103
   },
   {
     "source_type": "data resource",
@@ -144,7 +144,7 @@
     "outcome": "Consistency",
     "project": "AI_READI",
     "eligible_records": 3,
-    "mean_difference_pp": 20.77457264957265
+    "mean_difference_pp": 21.25534188034188
   },
   {
     "source_type": "data resource",
@@ -158,7 +158,7 @@
     "outcome": "Consistency",
     "project": "CM4AI",
     "eligible_records": 3,
-    "mean_difference_pp": 14.707366707366706
+    "mean_difference_pp": 10.25071225071225
   },
   {
     "source_type": "data resource",
@@ -172,91 +172,91 @@
     "outcome": "Completeness",
     "project": "AI_READI",
     "eligible_records": 3,
-    "mean_difference_pp": 15.004430267588164
+    "mean_difference_pp": 16.9404572036151
   },
   {
     "source_type": "documentation",
     "outcome": "Completeness",
     "project": "CHORUS",
     "eligible_records": 3,
-    "mean_difference_pp": 11.38888888888889
+    "mean_difference_pp": 12.092592592592592
   },
   {
     "source_type": "documentation",
     "outcome": "Completeness",
     "project": "CM4AI",
     "eligible_records": 3,
-    "mean_difference_pp": 17.57987382987383
+    "mean_difference_pp": 22.458791208791208
   },
   {
     "source_type": "documentation",
     "outcome": "Completeness",
     "project": "VOICE",
     "eligible_records": 3,
-    "mean_difference_pp": -15.715811965811966
+    "mean_difference_pp": -7.752136752136753
   },
   {
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
     "project": "AI_READI",
     "eligible_records": 3,
-    "mean_difference_pp": 3.480122866087778
+    "mean_difference_pp": 5.416149802114715
   },
   {
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
     "project": "CHORUS",
     "eligible_records": 3,
-    "mean_difference_pp": 26.11111111111111
+    "mean_difference_pp": 25.25925925925926
   },
   {
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
     "project": "CM4AI",
     "eligible_records": 3,
-    "mean_difference_pp": 39.44597069597069
+    "mean_difference_pp": 36.02716727716728
   },
   {
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
     "project": "VOICE",
     "eligible_records": 3,
-    "mean_difference_pp": 7.297008547008548
+    "mean_difference_pp": 5.576923076923077
   },
   {
     "source_type": "documentation",
     "outcome": "Consistency",
     "project": "AI_READI",
     "eligible_records": 3,
-    "mean_difference_pp": -5.37037037037037
+    "mean_difference_pp": -11.599326599326599
   },
   {
     "source_type": "documentation",
     "outcome": "Consistency",
     "project": "CHORUS",
     "eligible_records": 3,
-    "mean_difference_pp": 8.88888888888889
+    "mean_difference_pp": 8.11111111111111
   },
   {
     "source_type": "documentation",
     "outcome": "Consistency",
     "project": "CM4AI",
     "eligible_records": 3,
-    "mean_difference_pp": 7.83984533984534
+    "mean_difference_pp": 13.021469271469272
   },
   {
     "source_type": "documentation",
     "outcome": "Consistency",
     "project": "VOICE",
     "eligible_records": 3,
-    "mean_difference_pp": 2.756410256410257
+    "mean_difference_pp": -7.891025641025641
   },
   {
     "source_type": "publication",
     "outcome": "Completeness",
     "project": "AI_READI",
     "eligible_records": 3,
-    "mean_difference_pp": 15.223096548560946
+    "mean_difference_pp": 17.190689141153538
   },
   {
     "source_type": "publication",
@@ -270,7 +270,7 @@
     "outcome": "Completeness",
     "project": "CM4AI",
     "eligible_records": 2,
-    "mean_difference_pp": 19.166666666666668
+    "mean_difference_pp": 22.916666666666668
   },
   {
     "source_type": "publication",
@@ -284,7 +284,7 @@
     "outcome": "Accuracy/correctness",
     "project": "AI_READI",
     "eligible_records": 3,
-    "mean_difference_pp": 0.08980034508930308
+    "mean_difference_pp": -3.0351996549106963
   },
   {
     "source_type": "publication",
@@ -298,7 +298,7 @@
     "outcome": "Accuracy/correctness",
     "project": "CM4AI",
     "eligible_records": 2,
-    "mean_difference_pp": -0.8333333333333321
+    "mean_difference_pp": -2.083333333333332
   },
   {
     "source_type": "publication",
@@ -312,7 +312,7 @@
     "outcome": "Consistency",
     "project": "AI_READI",
     "eligible_records": 3,
-    "mean_difference_pp": 6.807085797281875
+    "mean_difference_pp": 7.478382093578172
   },
   {
     "source_type": "publication",
@@ -326,7 +326,7 @@
     "outcome": "Consistency",
     "project": "CM4AI",
     "eligible_records": 2,
-    "mean_difference_pp": 35.833333333333336
+    "mean_difference_pp": 39.583333333333336
   },
   {
     "source_type": "publication",

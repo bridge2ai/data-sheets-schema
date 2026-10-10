@@ -3,120 +3,120 @@
     "record": "AI_READI_v8_rep1",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
     },
     "bundle_md5": "d22b61a9f8443545c9ae14ee941c3e88",
-    "receipt_sha256": "645b00ded6ebbce5a5bca529592ef84669938b41655bb77377d70b4642b6d947",
+    "receipt_sha256": "575d108a3412dae6b514ad3f4bbdb1d2617c94e167124f0a2b03947a8e5d471b",
     "provenance_sha256": "25b431b81c48245d6766ef5c48abbca8a4979661f067e23b8f1ae95372ff5ac7"
   },
   {
     "record": "AI_READI_v8_rep2",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
     },
     "bundle_md5": "d22b61a9f8443545c9ae14ee941c3e88",
-    "receipt_sha256": "eb9c2737178609f642dd5db98965c864860bd7d562d047fc201e22c8636bb0a7",
+    "receipt_sha256": "1eeaa2e76490f2b89b73cc88b74c00322c216e2cabc0b97670b108ce201793fb",
     "provenance_sha256": "9debb857c95777dea107954bf2d51e77e7b829cf2084b495b43d5628b0773a61"
   },
   {
     "record": "AI_READI_v8_rep3",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
     },
     "bundle_md5": "d22b61a9f8443545c9ae14ee941c3e88",
-    "receipt_sha256": "cca232f11853fc7efeef3db98f8d9407e16e1c2bd277dd491c60dafd101cea06",
+    "receipt_sha256": "2dadab7ff7560fb25ac91fa76c9387a7e4d15e0adbbc87f615191a4a134b29fe",
     "provenance_sha256": "a3b311e5f7cd59f370a1b30a0e098f323b85336e2d81f48511768d8337c5962a"
   },
   {
     "record": "CHORUS_v8_rep1",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
     },
     "bundle_md5": "9b2ef4b65d67957f79362266cab0bc7a",
-    "receipt_sha256": "4849792f64b7c3178c3484ac751bf3816882775aa4f59260645893509080cd24",
+    "receipt_sha256": "e5177500b235e0c0a394aa46b018e8cf042aef33a0475d4465cb91161191cfdb",
     "provenance_sha256": "49e29d0b9882e27a11d0cf3a7d16990b6405df585eb2659f6ed635ae3fabc85d"
   },
   {
     "record": "CHORUS_v8_rep2",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
     },
     "bundle_md5": "9b2ef4b65d67957f79362266cab0bc7a",
-    "receipt_sha256": "fe640454761c9ba88b645ba44b36ec49bb6b15128cfa95cfac623bcb5fc5ae7b",
+    "receipt_sha256": "a2742940a67f273db58a61ea2a6e276ec59a067623d0d0d77736717ccda2f4b0",
     "provenance_sha256": "fde00d1d09ce32b874e6de4bffebde97b2077a725da670ee3474df0df1cc7eba"
   },
   {
     "record": "CHORUS_v8_rep3",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
     },
     "bundle_md5": "9b2ef4b65d67957f79362266cab0bc7a",
-    "receipt_sha256": "861d0abb5b679952236a994c0eab1d2c9ed6ce0c007ebb15020c8c2275f03f2b",
+    "receipt_sha256": "d9cf5bdec0a511d30105e22e32e1d619347566e3f2eeb41b04b5a6517705c69a",
     "provenance_sha256": "fbafb60adb190e40f5ff305ade0bb1dc572b2a43499473eb112c1a4e7f853356"
   },
   {
     "record": "CM4AI_v8_rep1",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
     },
     "bundle_md5": "50037fc631eafda807e19f83f6579818",
-    "receipt_sha256": "09a51cae6cd21a4b561e4c1d53ceae8474278cecb1b6d089b458381ef3f7b6d7",
+    "receipt_sha256": "3854ac3f0a9c9026988c46c5b8189ac3e92fb95ffb7d141d43ae07a7d6db4d99",
     "provenance_sha256": "ac9f6dedd874e6ff0fdcef663efd004c52f063298acd5e480ba97258270fc2eb"
   },
   {
     "record": "CM4AI_v8_rep2",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
     },
     "bundle_md5": "50037fc631eafda807e19f83f6579818",
-    "receipt_sha256": "a9e8d454a16f655d20a3a2e33c12d9088ef521a8dcc56531e210bf398d4d4513",
+    "receipt_sha256": "525d12bf14e91ad62460a8b3d109181bc6cfe969cf87b79f424e5ca0f7115cad",
     "provenance_sha256": "1d4a520f503ab4810f2e5977ed5ae122ed219337b23ca13ce1fe5c67619895f6"
   },
   {
     "record": "CM4AI_v8_rep3",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
     },
     "bundle_md5": "50037fc631eafda807e19f83f6579818",
-    "receipt_sha256": "7218afd40dde3572e7ea2563d4d7c10c532ae4f3660307827b7717e112cfbad6",
+    "receipt_sha256": "3b8940e2cecca34a5873bb26246120c1c0761189932cac183f714c20ece6f79a",
     "provenance_sha256": "63a8d3adf1bf650c33ebe3addd69f82700bd7eca07199158ef21e418e45030b1"
   },
   {
     "record": "VOICE_v8_rep1",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/VOICE_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/VOICE_preprocessed.txt"
     },
     "bundle_md5": "9193c3cbe60b62a2fc0f704a2c4d23a3",
-    "receipt_sha256": "9ffe181580be46bc8eb1475c63ccb66c49c859e1dee3542f08c33647b09aed89",
+    "receipt_sha256": "199666641a906a5b83185e24746a0d65da9363f6f77ac68e428cc3e9792210f8",
     "provenance_sha256": "c8536ee18cdbef989165c7b1dcc62616358d5717fe8b19a4f1aa5514ce58b924"
   },
   {
     "record": "VOICE_v8_rep2",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/VOICE_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/VOICE_preprocessed.txt"
     },
     "bundle_md5": "9193c3cbe60b62a2fc0f704a2c4d23a3",
-    "receipt_sha256": "663009757730ecd8fb5ee5a79ed8f5d1e492985a76247338ef12df019835ef06",
+    "receipt_sha256": "a2174a383834ada0a2eda0c052f5d37d58514fbe9a4b01fdd0ae960a86471db4",
     "provenance_sha256": "ff69edd52fb5448cd58872a5200fbf35632f50578ba20b81ab88354b2270ce5d"
   },
   {
     "record": "VOICE_v8_rep3",
     "basis": {
       "source": "bundle on disk",
-      "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/VOICE_preprocessed.txt"
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/VOICE_preprocessed.txt"
     },
     "bundle_md5": "9193c3cbe60b62a2fc0f704a2c4d23a3",
-    "receipt_sha256": "1aef6730cd90233dc4fa82faef2d63cedc7f3035fbc416570cd6492ac5f449c0",
+    "receipt_sha256": "cc7dd5572fcab18fe6ae42934c7319831821b8bcc19a59403634bcf089f3b4b2",
     "provenance_sha256": "fb6cf4554e84b6a75e50001d845c3077f20377d639b644179ddb7033aea1c499"
   }
 ]

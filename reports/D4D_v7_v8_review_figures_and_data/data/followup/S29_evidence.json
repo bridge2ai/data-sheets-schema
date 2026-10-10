@@ -1,7 +1,7 @@
 {
   "sample_id": "S29",
   "record": "VOICE_v8_rep1",
-  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml",
+  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml",
   "d4d_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
   "d4d_fields": {
     "instances": [
@@ -341,41 +341,6 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/VOICE_preprocessed.txt"
-  },
-  "source_search_queries": [
-    "distribution.*disease",
-    "833"
-  ],
-  "source_excerpts": [
-    {
-      "query": "distribution.*disease",
-      "chunk": "c007",
-      "source": "docs_b2ai-voice_org_row10.txt",
-      "chunk_sha256": "552d711069bd4a33b257fe4277c4094c0c98b838ec81e5d78790bb7c5523ca9a",
-      "excerpt": "Neurodegenerative Disorders\nMood and Psychiatric Disorders\nRespiratory disorders\nPediatric Voice and Speech Disorders\nPlease Note:\nThe public data releases do not contain an equal distribution of these categories of diseases. Further releases will contain additional data.\nData Access\nAdult Dataset\nA derived dataset containing spectrograms and combined phenotypic data is available on PhysioNet under a permissioned access mechanism. Registration on PhysioNet and signing of a data use agreement will enable access. Raw au"
-    },
-    {
-      "query": "833",
-      "chunk": "c007",
-      "source": "docs_b2ai-voice_org_row10.txt",
-      "chunk_sha256": "552d711069bd4a33b257fe4277c4094c0c98b838ec81e5d78790bb7c5523ca9a",
-      "excerpt": "disorders), validated questionnaires, and demographics. It is collected from multiple sites across North America, with version 3.0 containing ~61,937 voice-derived recordings from 833 adult participants. The pediatric dataset v1.0 is now available containing data from 300 participants. Access to the original raw audio is restricted to controlled access due to privacy concerns. Access can be requested by emailing\n[email\u00a0protected]\nB2AI-Voice v3.1.0 adult dataset and v1.1.0 pediat"
-    },
-    {
-      "query": "833",
-      "chunk": "c016",
-      "source": "physionet_b2ai-voice_3.0.0_row18.txt",
-      "chunk_sha256": "c707beb1a666ce6e8d4b5d3df0bebfc3219cac8de87711e0c187b399f4dc3749",
-      "excerpt": ". Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.\nBridge2AI-Voice v3.0 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including deriv"
-    },
-    {
-      "query": "10.2 Inclusion criteria",
-      "chunk": "c011",
-      "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
-      "chunk_sha256": "ded4955a2213ed9ebdbd0a5752adf995362c25fea3f7e57feb27240faec53db7",
-      "excerpt": "urce access 10.0 Inclusion and Exclusion Criteria 10.1 Eligibility screening: -Patients will be screened for eligibility prior to the consent process 10.2 Inclusion criteria: For treatment population: - Being diagnosed and/or treated for a voice, respiratory, pediatric, mood, or neurological disorder affecting voice, cough, breath and/or speech (see Section 3: Background) at one of USF Health\u2019s or participating institutions\u2019 HVEC (see Annex C table 4 for participating institutions) - Consenting to provide a voice/speech sample for an open-sourced database - Being 18 years old or older (exception of pediatric data co",
-      "whitespace_normalized": true
-    }
-  ]
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/VOICE_preprocessed.txt"
+  }
 }

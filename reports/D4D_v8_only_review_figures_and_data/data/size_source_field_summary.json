@@ -187,9 +187,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 89,
-    "pooled_percent": 69.53125
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 85,
+    "pooled_percent": 69.10569105691057
   },
   {
     "level": "family",
@@ -199,9 +199,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 33,
-    "pooled_percent": 25.78125
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 31,
+    "pooled_percent": 25.203252032520325
   },
   {
     "level": "family",
@@ -211,9 +211,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 27,
-    "pooled_percent": 21.09375
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 26,
+    "pooled_percent": 21.13821138211382
   },
   {
     "level": "family",
@@ -727,9 +727,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
-    "flagged_record_field_pairs": 21,
-    "pooled_percent": 56.75675675675676
+    "eligible_record_field_pairs": 36,
+    "flagged_record_field_pairs": 20,
+    "pooled_percent": 55.55555555555556
   },
   {
     "level": "family",
@@ -739,9 +739,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
+    "eligible_record_field_pairs": 36,
     "flagged_record_field_pairs": 6,
-    "pooled_percent": 16.216216216216218
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "family",
@@ -751,9 +751,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
+    "eligible_record_field_pairs": 36,
     "flagged_record_field_pairs": 8,
-    "pooled_percent": 21.62162162162162
+    "pooled_percent": 22.22222222222222
   },
   {
     "level": "family",
@@ -1267,9 +1267,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 21.951219512195124
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 20.0
   },
   {
     "level": "family",
@@ -1279,9 +1279,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 5,
-    "pooled_percent": 12.195121951219512
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 4,
+    "pooled_percent": 10.0
   },
   {
     "level": "family",
@@ -1291,9 +1291,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 2.4390243902439024
+    "pooled_percent": 2.5
   },
   {
     "level": "family",
@@ -1591,9 +1591,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 89,
-    "pooled_percent": 69.53125
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 85,
+    "pooled_percent": 69.10569105691057
   },
   {
     "level": "family",
@@ -1603,9 +1603,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 33,
-    "pooled_percent": 25.78125
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 31,
+    "pooled_percent": 25.203252032520325
   },
   {
     "level": "family",
@@ -1615,9 +1615,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 27,
-    "pooled_percent": 21.09375
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 26,
+    "pooled_percent": 21.13821138211382
   },
   {
     "level": "family",
@@ -2131,9 +2131,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
-    "flagged_record_field_pairs": 21,
-    "pooled_percent": 56.75675675675676
+    "eligible_record_field_pairs": 36,
+    "flagged_record_field_pairs": 20,
+    "pooled_percent": 55.55555555555556
   },
   {
     "level": "family",
@@ -2143,9 +2143,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
+    "eligible_record_field_pairs": 36,
     "flagged_record_field_pairs": 6,
-    "pooled_percent": 16.216216216216218
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "family",
@@ -2155,9 +2155,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
+    "eligible_record_field_pairs": 36,
     "flagged_record_field_pairs": 8,
-    "pooled_percent": 21.62162162162162
+    "pooled_percent": 22.22222222222222
   },
   {
     "level": "family",
@@ -2671,9 +2671,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 21.951219512195124
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 20.0
   },
   {
     "level": "family",
@@ -2683,9 +2683,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 5,
-    "pooled_percent": 12.195121951219512
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 4,
+    "pooled_percent": 10.0
   },
   {
     "level": "family",
@@ -2695,9 +2695,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 2.4390243902439024
+    "pooled_percent": 2.5
   },
   {
     "level": "family",
@@ -2995,9 +2995,9 @@
     "outcome": "Any comment",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 83,
-    "flagged_record_field_pairs": 51,
-    "pooled_percent": 61.44578313253012
+    "eligible_record_field_pairs": 82,
+    "flagged_record_field_pairs": 50,
+    "pooled_percent": 60.97560975609756
   },
   {
     "level": "family",
@@ -3007,9 +3007,9 @@
     "outcome": "Completeness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 83,
+    "eligible_record_field_pairs": 82,
     "flagged_record_field_pairs": 15,
-    "pooled_percent": 18.072289156626507
+    "pooled_percent": 18.29268292682927
   },
   {
     "level": "family",
@@ -3019,9 +3019,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 83,
+    "eligible_record_field_pairs": 82,
     "flagged_record_field_pairs": 13,
-    "pooled_percent": 15.662650602409638
+    "pooled_percent": 15.853658536585366
   },
   {
     "level": "family",
@@ -4075,9 +4075,9 @@
     "outcome": "Any comment",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 24,
-    "flagged_record_field_pairs": 5,
-    "pooled_percent": 20.833333333333332
+    "eligible_record_field_pairs": 23,
+    "flagged_record_field_pairs": 4,
+    "pooled_percent": 17.391304347826086
   },
   {
     "level": "family",
@@ -4087,9 +4087,9 @@
     "outcome": "Completeness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 24,
-    "flagged_record_field_pairs": 2,
-    "pooled_percent": 8.333333333333334
+    "eligible_record_field_pairs": 23,
+    "flagged_record_field_pairs": 1,
+    "pooled_percent": 4.3478260869565215
   },
   {
     "level": "family",
@@ -4099,9 +4099,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 24,
+    "eligible_record_field_pairs": 23,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 4.166666666666667
+    "pooled_percent": 4.3478260869565215
   },
   {
     "level": "family",
@@ -4399,9 +4399,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 69,
-    "pooled_percent": 65.71428571428571
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 66,
+    "pooled_percent": 64.70588235294117
   },
   {
     "level": "family",
@@ -4411,9 +4411,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 24,
-    "pooled_percent": 22.857142857142858
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 23,
+    "pooled_percent": 22.54901960784314
   },
   {
     "level": "family",
@@ -4423,9 +4423,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 16,
-    "pooled_percent": 15.238095238095237
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 15,
+    "pooled_percent": 14.705882352941176
   },
   {
     "level": "family",
@@ -5479,9 +5479,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 6,
-    "pooled_percent": 19.35483870967742
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 5,
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "family",
@@ -5491,9 +5491,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 9.67741935483871
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 6.666666666666667
   },
   {
     "level": "family",
@@ -5503,9 +5503,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
+    "eligible_record_field_pairs": 30,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 3.225806451612903
+    "pooled_percent": 3.3333333333333335
   },
   {
     "level": "family",
@@ -5803,9 +5803,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 69,
-    "pooled_percent": 65.71428571428571
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 66,
+    "pooled_percent": 64.70588235294117
   },
   {
     "level": "family",
@@ -5815,9 +5815,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 24,
-    "pooled_percent": 22.857142857142858
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 23,
+    "pooled_percent": 22.54901960784314
   },
   {
     "level": "family",
@@ -5827,9 +5827,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 16,
-    "pooled_percent": 15.238095238095237
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 15,
+    "pooled_percent": 14.705882352941176
   },
   {
     "level": "family",
@@ -6883,9 +6883,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 6,
-    "pooled_percent": 19.35483870967742
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 5,
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "family",
@@ -6895,9 +6895,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 9.67741935483871
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 6.666666666666667
   },
   {
     "level": "family",
@@ -6907,9 +6907,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
+    "eligible_record_field_pairs": 30,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 3.225806451612903
+    "pooled_percent": 3.3333333333333335
   },
   {
     "level": "family",
@@ -7207,9 +7207,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 25,
-    "pooled_percent": 60.97560975609756
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 24,
+    "pooled_percent": 60.0
   },
   {
     "level": "family",
@@ -7219,9 +7219,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 5,
-    "pooled_percent": 12.195121951219512
+    "pooled_percent": 12.5
   },
   {
     "level": "family",
@@ -7231,9 +7231,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 4,
-    "pooled_percent": 9.75609756097561
+    "pooled_percent": 10.0
   },
   {
     "level": "family",
@@ -8287,9 +8287,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 37.5
+    "eligible_record_field_pairs": 7,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 28.571428571428573
   },
   {
     "level": "family",
@@ -8299,9 +8299,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
-    "flagged_record_field_pairs": 1,
-    "pooled_percent": 12.5
+    "eligible_record_field_pairs": 7,
+    "flagged_record_field_pairs": 0,
+    "pooled_percent": 0.0
   },
   {
     "level": "family",
@@ -8311,9 +8311,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
+    "eligible_record_field_pairs": 7,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 12.5
+    "pooled_percent": 14.285714285714286
   },
   {
     "level": "family",
@@ -8611,9 +8611,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 69,
-    "pooled_percent": 65.71428571428571
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 66,
+    "pooled_percent": 64.70588235294117
   },
   {
     "level": "family",
@@ -8623,9 +8623,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 24,
-    "pooled_percent": 22.857142857142858
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 23,
+    "pooled_percent": 22.54901960784314
   },
   {
     "level": "family",
@@ -8635,9 +8635,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 16,
-    "pooled_percent": 15.238095238095237
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 15,
+    "pooled_percent": 14.705882352941176
   },
   {
     "level": "family",
@@ -9691,9 +9691,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 6,
-    "pooled_percent": 19.35483870967742
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 5,
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "family",
@@ -9703,9 +9703,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 9.67741935483871
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 6.666666666666667
   },
   {
     "level": "family",
@@ -9715,9 +9715,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
+    "eligible_record_field_pairs": 30,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 3.225806451612903
+    "pooled_percent": 3.3333333333333335
   },
   {
     "level": "family",
@@ -10015,9 +10015,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
-    "flagged_record_field_pairs": 20,
-    "pooled_percent": 86.95652173913044
+    "eligible_record_field_pairs": 21,
+    "flagged_record_field_pairs": 19,
+    "pooled_percent": 90.47619047619048
   },
   {
     "level": "family",
@@ -10027,9 +10027,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 39.130434782608695
+    "eligible_record_field_pairs": 21,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 38.095238095238095
   },
   {
     "level": "family",
@@ -10039,9 +10039,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
+    "eligible_record_field_pairs": 21,
     "flagged_record_field_pairs": 11,
-    "pooled_percent": 47.82608695652174
+    "pooled_percent": 52.38095238095238
   },
   {
     "level": "family",
@@ -10555,8 +10555,8 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
-    "flagged_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
+    "flagged_record_field_pairs": 4,
     "pooled_percent": 100.0
   },
   {
@@ -10567,9 +10567,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 20.0
+    "pooled_percent": 25.0
   },
   {
     "level": "family",
@@ -10579,9 +10579,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
     "flagged_record_field_pairs": 2,
-    "pooled_percent": 40.0
+    "pooled_percent": 50.0
   },
   {
     "level": "family",
@@ -12823,9 +12823,9 @@
     "outcome": "Any comment",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 83,
-    "flagged_record_field_pairs": 51,
-    "pooled_percent": 61.44578313253012
+    "eligible_record_field_pairs": 82,
+    "flagged_record_field_pairs": 50,
+    "pooled_percent": 60.97560975609756
   },
   {
     "level": "native",
@@ -12835,9 +12835,9 @@
     "outcome": "Completeness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 83,
+    "eligible_record_field_pairs": 82,
     "flagged_record_field_pairs": 15,
-    "pooled_percent": 18.072289156626507
+    "pooled_percent": 18.29268292682927
   },
   {
     "level": "native",
@@ -12847,9 +12847,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 83,
+    "eligible_record_field_pairs": 82,
     "flagged_record_field_pairs": 13,
-    "pooled_percent": 15.662650602409638
+    "pooled_percent": 15.853658536585366
   },
   {
     "level": "native",
@@ -13903,9 +13903,9 @@
     "outcome": "Any comment",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 24,
-    "flagged_record_field_pairs": 5,
-    "pooled_percent": 20.833333333333332
+    "eligible_record_field_pairs": 23,
+    "flagged_record_field_pairs": 4,
+    "pooled_percent": 17.391304347826086
   },
   {
     "level": "native",
@@ -13915,9 +13915,9 @@
     "outcome": "Completeness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 24,
-    "flagged_record_field_pairs": 2,
-    "pooled_percent": 8.333333333333334
+    "eligible_record_field_pairs": 23,
+    "flagged_record_field_pairs": 1,
+    "pooled_percent": 4.3478260869565215
   },
   {
     "level": "native",
@@ -13927,9 +13927,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 24,
+    "eligible_record_field_pairs": 23,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 4.166666666666667
+    "pooled_percent": 4.3478260869565215
   },
   {
     "level": "native",
@@ -14227,9 +14227,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 89,
-    "pooled_percent": 69.53125
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 85,
+    "pooled_percent": 69.10569105691057
   },
   {
     "level": "native",
@@ -14239,9 +14239,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 33,
-    "pooled_percent": 25.78125
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 31,
+    "pooled_percent": 25.203252032520325
   },
   {
     "level": "native",
@@ -14251,9 +14251,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 27,
-    "pooled_percent": 21.09375
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 26,
+    "pooled_percent": 21.13821138211382
   },
   {
     "level": "native",
@@ -14767,9 +14767,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
-    "flagged_record_field_pairs": 21,
-    "pooled_percent": 56.75675675675676
+    "eligible_record_field_pairs": 36,
+    "flagged_record_field_pairs": 20,
+    "pooled_percent": 55.55555555555556
   },
   {
     "level": "native",
@@ -14779,9 +14779,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
+    "eligible_record_field_pairs": 36,
     "flagged_record_field_pairs": 6,
-    "pooled_percent": 16.216216216216218
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "native",
@@ -14791,9 +14791,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
+    "eligible_record_field_pairs": 36,
     "flagged_record_field_pairs": 8,
-    "pooled_percent": 21.62162162162162
+    "pooled_percent": 22.22222222222222
   },
   {
     "level": "native",
@@ -15307,9 +15307,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 21.951219512195124
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 20.0
   },
   {
     "level": "native",
@@ -15319,9 +15319,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 5,
-    "pooled_percent": 12.195121951219512
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 4,
+    "pooled_percent": 10.0
   },
   {
     "level": "native",
@@ -15331,9 +15331,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 2.4390243902439024
+    "pooled_percent": 2.5
   },
   {
     "level": "native",
@@ -15631,9 +15631,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 25,
-    "pooled_percent": 60.97560975609756
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 24,
+    "pooled_percent": 60.0
   },
   {
     "level": "native",
@@ -15643,9 +15643,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 5,
-    "pooled_percent": 12.195121951219512
+    "pooled_percent": 12.5
   },
   {
     "level": "native",
@@ -15655,9 +15655,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 4,
-    "pooled_percent": 9.75609756097561
+    "pooled_percent": 10.0
   },
   {
     "level": "native",
@@ -16711,9 +16711,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 37.5
+    "eligible_record_field_pairs": 7,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 28.571428571428573
   },
   {
     "level": "native",
@@ -16723,9 +16723,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
-    "flagged_record_field_pairs": 1,
-    "pooled_percent": 12.5
+    "eligible_record_field_pairs": 7,
+    "flagged_record_field_pairs": 0,
+    "pooled_percent": 0.0
   },
   {
     "level": "native",
@@ -16735,9 +16735,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
+    "eligible_record_field_pairs": 7,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 12.5
+    "pooled_percent": 14.285714285714286
   },
   {
     "level": "native",
@@ -17035,9 +17035,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 69,
-    "pooled_percent": 65.71428571428571
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 66,
+    "pooled_percent": 64.70588235294117
   },
   {
     "level": "native",
@@ -17047,9 +17047,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 24,
-    "pooled_percent": 22.857142857142858
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 23,
+    "pooled_percent": 22.54901960784314
   },
   {
     "level": "native",
@@ -17059,9 +17059,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 16,
-    "pooled_percent": 15.238095238095237
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 15,
+    "pooled_percent": 14.705882352941176
   },
   {
     "level": "native",
@@ -18115,9 +18115,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 6,
-    "pooled_percent": 19.35483870967742
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 5,
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "native",
@@ -18127,9 +18127,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 9.67741935483871
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 6.666666666666667
   },
   {
     "level": "native",
@@ -18139,9 +18139,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
+    "eligible_record_field_pairs": 30,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 3.225806451612903
+    "pooled_percent": 3.3333333333333335
   },
   {
     "level": "native",
@@ -18439,9 +18439,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 89,
-    "pooled_percent": 69.53125
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 85,
+    "pooled_percent": 69.10569105691057
   },
   {
     "level": "native",
@@ -18451,9 +18451,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 33,
-    "pooled_percent": 25.78125
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 31,
+    "pooled_percent": 25.203252032520325
   },
   {
     "level": "native",
@@ -18463,9 +18463,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 128,
-    "flagged_record_field_pairs": 27,
-    "pooled_percent": 21.09375
+    "eligible_record_field_pairs": 123,
+    "flagged_record_field_pairs": 26,
+    "pooled_percent": 21.13821138211382
   },
   {
     "level": "native",
@@ -18979,9 +18979,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
-    "flagged_record_field_pairs": 21,
-    "pooled_percent": 56.75675675675676
+    "eligible_record_field_pairs": 36,
+    "flagged_record_field_pairs": 20,
+    "pooled_percent": 55.55555555555556
   },
   {
     "level": "native",
@@ -18991,9 +18991,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
+    "eligible_record_field_pairs": 36,
     "flagged_record_field_pairs": 6,
-    "pooled_percent": 16.216216216216218
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "native",
@@ -19003,9 +19003,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 37,
+    "eligible_record_field_pairs": 36,
     "flagged_record_field_pairs": 8,
-    "pooled_percent": 21.62162162162162
+    "pooled_percent": 22.22222222222222
   },
   {
     "level": "native",
@@ -19519,9 +19519,9 @@
     "outcome": "Any comment",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 21.951219512195124
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 20.0
   },
   {
     "level": "native",
@@ -19531,9 +19531,9 @@
     "outcome": "Completeness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 5,
-    "pooled_percent": 12.195121951219512
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 4,
+    "pooled_percent": 10.0
   },
   {
     "level": "native",
@@ -19543,9 +19543,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 12,
     "eligible_records": 12,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 2.4390243902439024
+    "pooled_percent": 2.5
   },
   {
     "level": "native",
@@ -19843,9 +19843,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 22,
-    "flagged_record_field_pairs": 18,
-    "pooled_percent": 81.81818181818181
+    "eligible_record_field_pairs": 20,
+    "flagged_record_field_pairs": 16,
+    "pooled_percent": 80.0
   },
   {
     "level": "native",
@@ -19855,9 +19855,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 22,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 40.90909090909091
+    "eligible_record_field_pairs": 20,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 40.0
   },
   {
     "level": "native",
@@ -19867,9 +19867,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 22,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 13.636363636363637
+    "eligible_record_field_pairs": 20,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 10.0
   },
   {
     "level": "native",
@@ -21247,9 +21247,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
-    "flagged_record_field_pairs": 20,
-    "pooled_percent": 86.95652173913044
+    "eligible_record_field_pairs": 21,
+    "flagged_record_field_pairs": 19,
+    "pooled_percent": 90.47619047619048
   },
   {
     "level": "native",
@@ -21259,9 +21259,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 39.130434782608695
+    "eligible_record_field_pairs": 21,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 38.095238095238095
   },
   {
     "level": "native",
@@ -21271,9 +21271,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
+    "eligible_record_field_pairs": 21,
     "flagged_record_field_pairs": 11,
-    "pooled_percent": 47.82608695652174
+    "pooled_percent": 52.38095238095238
   },
   {
     "level": "native",
@@ -21787,8 +21787,8 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
-    "flagged_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
+    "flagged_record_field_pairs": 4,
     "pooled_percent": 100.0
   },
   {
@@ -21799,9 +21799,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 20.0
+    "pooled_percent": 25.0
   },
   {
     "level": "native",
@@ -21811,9 +21811,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
     "flagged_record_field_pairs": 2,
-    "pooled_percent": 40.0
+    "pooled_percent": 50.0
   },
   {
     "level": "native",
@@ -22651,9 +22651,9 @@
     "outcome": "Any comment",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 63,
-    "flagged_record_field_pairs": 43,
-    "pooled_percent": 68.25396825396825
+    "eligible_record_field_pairs": 60,
+    "flagged_record_field_pairs": 40,
+    "pooled_percent": 66.66666666666667
   },
   {
     "level": "native",
@@ -22663,9 +22663,9 @@
     "outcome": "Completeness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 63,
-    "flagged_record_field_pairs": 14,
-    "pooled_percent": 22.22222222222222
+    "eligible_record_field_pairs": 60,
+    "flagged_record_field_pairs": 13,
+    "pooled_percent": 21.666666666666668
   },
   {
     "level": "native",
@@ -22675,9 +22675,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 63,
-    "flagged_record_field_pairs": 7,
-    "pooled_percent": 11.11111111111111
+    "eligible_record_field_pairs": 60,
+    "flagged_record_field_pairs": 6,
+    "pooled_percent": 10.0
   },
   {
     "level": "native",
@@ -23731,9 +23731,9 @@
     "outcome": "Any comment",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 15,
-    "flagged_record_field_pairs": 4,
-    "pooled_percent": 26.666666666666668
+    "eligible_record_field_pairs": 14,
+    "flagged_record_field_pairs": 3,
+    "pooled_percent": 21.428571428571427
   },
   {
     "level": "native",
@@ -23743,9 +23743,9 @@
     "outcome": "Completeness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 15,
-    "flagged_record_field_pairs": 2,
-    "pooled_percent": 13.333333333333334
+    "eligible_record_field_pairs": 14,
+    "flagged_record_field_pairs": 1,
+    "pooled_percent": 7.142857142857143
   },
   {
     "level": "native",
@@ -23755,9 +23755,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 6,
     "eligible_records": 6,
-    "eligible_record_field_pairs": 15,
+    "eligible_record_field_pairs": 14,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 6.666666666666667
+    "pooled_percent": 7.142857142857143
   },
   {
     "level": "native",
@@ -24055,9 +24055,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 22,
-    "flagged_record_field_pairs": 18,
-    "pooled_percent": 81.81818181818181
+    "eligible_record_field_pairs": 20,
+    "flagged_record_field_pairs": 16,
+    "pooled_percent": 80.0
   },
   {
     "level": "native",
@@ -24067,9 +24067,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 22,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 40.90909090909091
+    "eligible_record_field_pairs": 20,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 40.0
   },
   {
     "level": "native",
@@ -24079,9 +24079,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 22,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 13.636363636363637
+    "eligible_record_field_pairs": 20,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 10.0
   },
   {
     "level": "native",
@@ -25459,9 +25459,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 69,
-    "pooled_percent": 65.71428571428571
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 66,
+    "pooled_percent": 64.70588235294117
   },
   {
     "level": "native",
@@ -25471,9 +25471,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 24,
-    "pooled_percent": 22.857142857142858
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 23,
+    "pooled_percent": 22.54901960784314
   },
   {
     "level": "native",
@@ -25483,9 +25483,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 105,
-    "flagged_record_field_pairs": 16,
-    "pooled_percent": 15.238095238095237
+    "eligible_record_field_pairs": 102,
+    "flagged_record_field_pairs": 15,
+    "pooled_percent": 14.705882352941176
   },
   {
     "level": "native",
@@ -26539,9 +26539,9 @@
     "outcome": "Any comment",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 6,
-    "pooled_percent": 19.35483870967742
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 5,
+    "pooled_percent": 16.666666666666668
   },
   {
     "level": "native",
@@ -26551,9 +26551,9 @@
     "outcome": "Completeness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 9.67741935483871
+    "eligible_record_field_pairs": 30,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 6.666666666666667
   },
   {
     "level": "native",
@@ -26563,9 +26563,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 9,
     "eligible_records": 9,
-    "eligible_record_field_pairs": 31,
+    "eligible_record_field_pairs": 30,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 3.225806451612903
+    "pooled_percent": 3.3333333333333335
   },
   {
     "level": "native",
@@ -26863,9 +26863,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
-    "flagged_record_field_pairs": 25,
-    "pooled_percent": 60.97560975609756
+    "eligible_record_field_pairs": 40,
+    "flagged_record_field_pairs": 24,
+    "pooled_percent": 60.0
   },
   {
     "level": "native",
@@ -26875,9 +26875,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 5,
-    "pooled_percent": 12.195121951219512
+    "pooled_percent": 12.5
   },
   {
     "level": "native",
@@ -26887,9 +26887,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 41,
+    "eligible_record_field_pairs": 40,
     "flagged_record_field_pairs": 4,
-    "pooled_percent": 9.75609756097561
+    "pooled_percent": 10.0
   },
   {
     "level": "native",
@@ -27943,9 +27943,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
-    "flagged_record_field_pairs": 3,
-    "pooled_percent": 37.5
+    "eligible_record_field_pairs": 7,
+    "flagged_record_field_pairs": 2,
+    "pooled_percent": 28.571428571428573
   },
   {
     "level": "native",
@@ -27955,9 +27955,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
-    "flagged_record_field_pairs": 1,
-    "pooled_percent": 12.5
+    "eligible_record_field_pairs": 7,
+    "flagged_record_field_pairs": 0,
+    "pooled_percent": 0.0
   },
   {
     "level": "native",
@@ -27967,9 +27967,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 8,
+    "eligible_record_field_pairs": 7,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 12.5
+    "pooled_percent": 14.285714285714286
   },
   {
     "level": "native",
@@ -28267,9 +28267,9 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
-    "flagged_record_field_pairs": 20,
-    "pooled_percent": 86.95652173913044
+    "eligible_record_field_pairs": 21,
+    "flagged_record_field_pairs": 19,
+    "pooled_percent": 90.47619047619048
   },
   {
     "level": "native",
@@ -28279,9 +28279,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
-    "flagged_record_field_pairs": 9,
-    "pooled_percent": 39.130434782608695
+    "eligible_record_field_pairs": 21,
+    "flagged_record_field_pairs": 8,
+    "pooled_percent": 38.095238095238095
   },
   {
     "level": "native",
@@ -28291,9 +28291,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 23,
+    "eligible_record_field_pairs": 21,
     "flagged_record_field_pairs": 11,
-    "pooled_percent": 47.82608695652174
+    "pooled_percent": 52.38095238095238
   },
   {
     "level": "native",
@@ -28807,8 +28807,8 @@
     "outcome": "Any comment",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
-    "flagged_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
+    "flagged_record_field_pairs": 4,
     "pooled_percent": 100.0
   },
   {
@@ -28819,9 +28819,9 @@
     "outcome": "Completeness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
     "flagged_record_field_pairs": 1,
-    "pooled_percent": 20.0
+    "pooled_percent": 25.0
   },
   {
     "level": "native",
@@ -28831,9 +28831,9 @@
     "outcome": "Accuracy/correctness",
     "available_records": 3,
     "eligible_records": 3,
-    "eligible_record_field_pairs": 5,
+    "eligible_record_field_pairs": 4,
     "flagged_record_field_pairs": 2,
-    "pooled_percent": 40.0
+    "pooled_percent": 50.0
   },
   {
     "level": "native",

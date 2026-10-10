@@ -123,7 +123,7 @@
         "VOICE": -8.4241452991453
       },
       "unadjusted_dataset_effects": {
-        "VOICE": -2.0133394702360223
+        "VOICE": -2.04358750411382
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -140,7 +140,7 @@
         "VOICE": -0.7727920227920224
       },
       "unadjusted_dataset_effects": {
-        "VOICE": -1.8786178699971805
+        "VOICE": -1.621509582035898
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -157,7 +157,7 @@
         "VOICE": -7.448361823361824
       },
       "unadjusted_dataset_effects": {
-        "VOICE": 6.634447927551377
+        "VOICE": 6.604199893673578
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -169,14 +169,14 @@
     {
       "source_type": "IRB",
       "outcome": "Completeness flags",
-      "mean_difference_pp": -0.620856766690099,
+      "mean_difference_pp": 0.32306736473403175,
       "dataset_effects": {
-        "AI_READI": -2.0496031746031727,
-        "VOICE": 0.8078896412229746
+        "AI_READI": 0.4188311688311695,
+        "VOICE": 0.22730356063689397
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": -3.2679045834523204,
-        "VOICE": -7.992394549953057
+        "AI_READI": -2.4738327548977335,
+        "VOICE": -6.996755573799599
       },
       "section_matched_records": 12,
       "datasets": 2,
@@ -188,14 +188,14 @@
     {
       "source_type": "IRB",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 0.6307417505334172,
+      "mean_difference_pp": -2.584369527077861,
       "dataset_effects": {
-        "AI_READI": 4.073908730158731,
-        "VOICE": -2.8124252290918967
+        "AI_READI": 2.375676406926407,
+        "VOICE": -7.544415461082129
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": -1.0589422891199096,
-        "VOICE": 7.330798783992965
+        "AI_READI": -0.7536919838696045,
+        "VOICE": 4.137822927131103
       },
       "section_matched_records": 12,
       "datasets": 2,
@@ -207,14 +207,14 @@
     {
       "source_type": "IRB",
       "outcome": "Consistency flags",
-      "mean_difference_pp": -4.149366836866838,
+      "mean_difference_pp": -5.847025659525659,
       "dataset_effects": {
-        "AI_READI": -0.1898148148148143,
-        "VOICE": -8.10891885891886
+        "AI_READI": -3.270622895622895,
+        "VOICE": -8.423428423428424
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": 6.166790040670615,
-        "VOICE": -1.233389826843337
+        "AI_READI": 4.389812229210046,
+        "VOICE": -0.29412542384240464
       },
       "section_matched_records": 12,
       "datasets": 2,
@@ -226,18 +226,18 @@
     {
       "source_type": "NIH project page",
       "outcome": "Completeness flags",
-      "mean_difference_pp": 3.492081900799006,
+      "mean_difference_pp": 3.1124522711693765,
       "dataset_effects": {
         "AI_READI": -1.4554615705931482,
-        "CHORUS": 2.4537037037037037,
-        "CM4AI": 2.5,
+        "CHORUS": 0.6574074074074074,
+        "CM4AI": 2.7777777777777786,
         "VOICE": 10.470085470085468
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": -13.847746287618934,
-        "CHORUS": -9.467157294926848,
-        "CM4AI": -22.6225564953043,
-        "VOICE": -5.309522105507102
+        "AI_READI": -13.700995149729737,
+        "CHORUS": -10.682398956392761,
+        "CM4AI": -22.33228620985233,
+        "VOICE": -5.25578533302033
       },
       "section_matched_records": 24,
       "datasets": 4,
@@ -250,18 +250,18 @@
     {
       "source_type": "NIH project page",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 11.581315401216717,
+      "mean_difference_pp": 10.396130216031533,
       "dataset_effects": {
         "AI_READI": 20.71628724589251,
-        "CHORUS": -4.305555555555556,
-        "CM4AI": -11.805555555555557,
-        "VOICE": 41.72008547008547
+        "CHORUS": -2.7962962962962963,
+        "CM4AI": -22.916666666666668,
+        "VOICE": 46.581196581196586
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": 22.18144008844041,
-        "CHORUS": -15.679533405253556,
-        "CM4AI": -4.340584207154392,
-        "VOICE": 31.019908628619376
+        "AI_READI": 22.106182807026414,
+        "CHORUS": -15.40265755629533,
+        "CM4AI": -8.586443344249597,
+        "VOICE": 36.88688524506633
       },
       "section_matched_records": 24,
       "datasets": 4,
@@ -274,18 +274,183 @@
     {
       "source_type": "NIH project page",
       "outcome": "Consistency flags",
-      "mean_difference_pp": 11.850166615791615,
+      "mean_difference_pp": 8.864055504680506,
       "dataset_effects": {
         "AI_READI": 24.694113756613756,
-        "CHORUS": 12.129629629629632,
-        "CM4AI": 6.9444444444444455,
+        "CHORUS": 12.685185185185185,
+        "CM4AI": -5.5555555555555545,
         "VOICE": 3.6324786324786316
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": -1.346604360171037,
-        "CHORUS": 0.3278776376602461,
-        "CM4AI": -15.42669304325114,
-        "VOICE": -10.925715262683866
+        "AI_READI": -1.218709607742702,
+        "CHORUS": 1.5210970803076058,
+        "CM4AI": -19.49875236317918,
+        "VOICE": -10.880245685964288
+      },
+      "section_matched_records": 24,
+      "datasets": 4,
+      "nonzero_datasets": 4,
+      "records_with_contrast": 24,
+      "p": 0.625,
+      "test": "exact two-sided sign test across dataset contrasts",
+      "q_BH": 0.8333333333333334
+    },
+    {
+      "source_type": "RO-Crate",
+      "outcome": "Completeness flags",
+      "mean_difference_pp": 18.26683023636805,
+      "dataset_effects": {
+        "AI_READI": 18.26683023636805
+      },
+      "unadjusted_dataset_effects": {
+        "AI_READI": 15.378323541415094
+      },
+      "section_matched_records": 6,
+      "datasets": 1,
+      "nonzero_datasets": 1,
+      "records_with_contrast": 6,
+      "p": null,
+      "test": "not tested: fewer than 3 datasets"
+    },
+    {
+      "source_type": "RO-Crate",
+      "outcome": "Accuracy/correctness flags",
+      "mean_difference_pp": 16.772497460522672,
+      "dataset_effects": {
+        "AI_READI": 16.772497460522672
+      },
+      "unadjusted_dataset_effects": {
+        "AI_READI": 13.12567004064129
+      },
+      "section_matched_records": 6,
+      "datasets": 1,
+      "nonzero_datasets": 1,
+      "records_with_contrast": 6,
+      "p": null,
+      "test": "not tested: fewer than 3 datasets"
+    },
+    {
+      "source_type": "RO-Crate",
+      "outcome": "Consistency flags",
+      "mean_difference_pp": 19.076281153487038,
+      "dataset_effects": {
+        "AI_READI": 19.076281153487038
+      },
+      "unadjusted_dataset_effects": {
+        "AI_READI": 16.487747824766846
+      },
+      "section_matched_records": 6,
+      "datasets": 1,
+      "nonzero_datasets": 1,
+      "records_with_contrast": 6,
+      "p": null,
+      "test": "not tested: fewer than 3 datasets"
+    },
+    {
+      "source_type": "data resource",
+      "outcome": "Completeness flags",
+      "mean_difference_pp": 5.5605631080168125,
+      "dataset_effects": {
+        "AI_READI": -3.6097756410256387,
+        "CM4AI": 6.056573056573058,
+        "VOICE": 14.234891908503018
+      },
+      "unadjusted_dataset_effects": {
+        "AI_READI": 4.084899259805976,
+        "CM4AI": 7.279675240372311,
+        "VOICE": 15.08500550533492
+      },
+      "section_matched_records": 18,
+      "datasets": 3,
+      "nonzero_datasets": 3,
+      "records_with_contrast": 18,
+      "p": 1,
+      "test": "exact two-sided sign test across dataset contrasts",
+      "q_BH": 1
+    },
+    {
+      "source_type": "data resource",
+      "outcome": "Accuracy/correctness flags",
+      "mean_difference_pp": 8.890724287715027,
+      "dataset_effects": {
+        "AI_READI": 15.399814306064306,
+        "CM4AI": 8.369403744403744,
+        "VOICE": 2.9029548126770357
+      },
+      "unadjusted_dataset_effects": {
+        "AI_READI": 16.17352891373414,
+        "CM4AI": 7.63533895347021,
+        "VOICE": 1.2025750658652365
+      },
+      "section_matched_records": 18,
+      "datasets": 3,
+      "nonzero_datasets": 3,
+      "records_with_contrast": 18,
+      "p": 0.25,
+      "test": "exact two-sided sign test across dataset contrasts",
+      "q_BH": 0.6
+    },
+    {
+      "source_type": "data resource",
+      "outcome": "Consistency flags",
+      "mean_difference_pp": 9.757034332265816,
+      "dataset_effects": {
+        "AI_READI": 11.162558506308509,
+        "CM4AI": 13.458689458689461,
+        "VOICE": 4.6498550317994765
+      },
+      "unadjusted_dataset_effects": {
+        "AI_READI": 14.121661229870185,
+        "CM4AI": 9.97065699512863,
+        "VOICE": 6.0435749222928905
+      },
+      "section_matched_records": 18,
+      "datasets": 3,
+      "nonzero_datasets": 3,
+      "records_with_contrast": 18,
+      "p": 0.25,
+      "test": "exact two-sided sign test across dataset contrasts",
+      "q_BH": 0.6
+    },
+    {
+      "source_type": "documentation",
+      "outcome": "Completeness flags",
+      "mean_difference_pp": 9.005103374803667,
+      "dataset_effects": {
+        "AI_READI": 10.505461887040838,
+        "CHORUS": 5.9305555555555545,
+        "CM4AI": 31.07066544566544,
+        "VOICE": -11.486269389047166
+      },
+      "unadjusted_dataset_effects": {
+        "AI_READI": 3.6127668101102635,
+        "CHORUS": 1.931586931586933,
+        "CM4AI": 24.830827763329182,
+        "VOICE": -4.355088430286134
+      },
+      "section_matched_records": 24,
+      "datasets": 4,
+      "nonzero_datasets": 4,
+      "records_with_contrast": 24,
+      "p": 0.625,
+      "test": "exact two-sided sign test across dataset contrasts",
+      "q_BH": 0.8333333333333334
+    },
+    {
+      "source_type": "documentation",
+      "outcome": "Accuracy/correctness flags",
+      "mean_difference_pp": 11.069824158000328,
+      "dataset_effects": {
+        "AI_READI": 0.5964827894652461,
+        "CHORUS": 22.675925925925924,
+        "CM4AI": 15.434218559218559,
+        "VOICE": 5.57266935739158
+      },
+      "unadjusted_dataset_effects": {
+        "AI_READI": 5.434414310125887,
+        "CHORUS": 17.204554704554706,
+        "CM4AI": 2.691013364581146,
+        "VOICE": 2.8379751085255656
       },
       "section_matched_records": 24,
       "datasets": 4,
@@ -296,185 +461,20 @@
       "q_BH": 0.6
     },
     {
-      "source_type": "RO-Crate",
-      "outcome": "Completeness flags",
-      "mean_difference_pp": 18.26683023636805,
-      "dataset_effects": {
-        "AI_READI": 18.26683023636805
-      },
-      "unadjusted_dataset_effects": {
-        "AI_READI": 14.736048112725102
-      },
-      "section_matched_records": 6,
-      "datasets": 1,
-      "nonzero_datasets": 1,
-      "records_with_contrast": 6,
-      "p": null,
-      "test": "not tested: fewer than 3 datasets"
-    },
-    {
-      "source_type": "RO-Crate",
-      "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 15.730830793856006,
-      "dataset_effects": {
-        "AI_READI": 15.730830793856006
-      },
-      "unadjusted_dataset_effects": {
-        "AI_READI": 12.812444750525245
-      },
-      "section_matched_records": 6,
-      "datasets": 1,
-      "nonzero_datasets": 1,
-      "records_with_contrast": 6,
-      "p": null,
-      "test": "not tested: fewer than 3 datasets"
-    },
-    {
-      "source_type": "RO-Crate",
-      "outcome": "Consistency flags",
-      "mean_difference_pp": 17.861003375709263,
-      "dataset_effects": {
-        "AI_READI": 17.861003375709263
-      },
-      "unadjusted_dataset_effects": {
-        "AI_READI": 15.732245623886492
-      },
-      "section_matched_records": 6,
-      "datasets": 1,
-      "nonzero_datasets": 1,
-      "records_with_contrast": 6,
-      "p": null,
-      "test": "not tested: fewer than 3 datasets"
-    },
-    {
-      "source_type": "data resource",
-      "outcome": "Completeness flags",
-      "mean_difference_pp": 5.441897051850757,
-      "dataset_effects": {
-        "AI_READI": -3.583066239316237,
-        "CM4AI": 6.125254375254376,
-        "VOICE": 13.78350301961413
-      },
-      "unadjusted_dataset_effects": {
-        "AI_READI": 3.915421746578462,
-        "CM4AI": 8.110361111911324,
-        "VOICE": 14.886592806922222
-      },
-      "section_matched_records": 18,
-      "datasets": 3,
-      "nonzero_datasets": 3,
-      "records_with_contrast": 18,
-      "p": 1,
-      "test": "exact two-sided sign test across dataset contrasts",
-      "q_BH": 1
-    },
-    {
-      "source_type": "data resource",
-      "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 8.404443593101,
-      "dataset_effects": {
-        "AI_READI": 15.399814306064306,
-        "CM4AI": 6.910561660561661,
-        "VOICE": 2.9029548126770357
-      },
-      "unadjusted_dataset_effects": {
-        "AI_READI": 16.252067273522496,
-        "CM4AI": 7.87531868464264,
-        "VOICE": 0.7563884611420463
-      },
-      "section_matched_records": 18,
-      "datasets": 3,
-      "nonzero_datasets": 3,
-      "records_with_contrast": 18,
-      "p": 0.25,
-      "test": "exact two-sided sign test across dataset contrasts",
-      "q_BH": 0.6
-    },
-    {
-      "source_type": "data resource",
-      "outcome": "Consistency flags",
-      "mean_difference_pp": 10.199774462505944,
-      "dataset_effects": {
-        "AI_READI": 10.922173890923892,
-        "CM4AI": 15.131461131461132,
-        "VOICE": 4.54568836513281
-      },
-      "unadjusted_dataset_effects": {
-        "AI_READI": 13.981118901827855,
-        "CM4AI": 10.766449569005529,
-        "VOICE": 5.924527303245273
-      },
-      "section_matched_records": 18,
-      "datasets": 3,
-      "nonzero_datasets": 3,
-      "records_with_contrast": 18,
-      "p": 0.25,
-      "test": "exact two-sided sign test across dataset contrasts",
-      "q_BH": 0.6
-    },
-    {
-      "source_type": "documentation",
-      "outcome": "Completeness flags",
-      "mean_difference_pp": 7.069812970763262,
-      "dataset_effects": {
-        "AI_READI": 9.537448419027369,
-        "CHORUS": 5.578703703703703,
-        "CM4AI": 28.63120675620675,
-        "VOICE": -15.468106995884774
-      },
-      "unadjusted_dataset_effects": {
-        "AI_READI": 1.1380193353627897,
-        "CHORUS": 1.2863360472056133,
-        "CM4AI": 24.03639913737833,
-        "VOICE": -4.240350633014797
-      },
-      "section_matched_records": 24,
-      "datasets": 4,
-      "nonzero_datasets": 4,
-      "records_with_contrast": 24,
-      "p": 0.625,
-      "test": "exact two-sided sign test across dataset contrasts",
-      "q_BH": 0.8333333333333334
-    },
-    {
-      "source_type": "documentation",
-      "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 11.646107828033998,
-      "dataset_effects": {
-        "AI_READI": -0.3715306785482226,
-        "CHORUS": 23.37962962962963,
-        "CM4AI": 17.143620268620268,
-        "VOICE": 6.432712092434315
-      },
-      "unadjusted_dataset_effects": {
-        "AI_READI": 4.045525421236998,
-        "CHORUS": 16.84115964550747,
-        "CM4AI": 4.171750435520325,
-        "VOICE": 1.248341569072625
-      },
-      "section_matched_records": 24,
-      "datasets": 4,
-      "nonzero_datasets": 4,
-      "records_with_contrast": 24,
-      "p": 0.625,
-      "test": "exact two-sided sign test across dataset contrasts",
-      "q_BH": 0.8333333333333334
-    },
-    {
       "source_type": "documentation",
       "outcome": "Consistency flags",
-      "mean_difference_pp": 6.220095812109702,
+      "mean_difference_pp": 4.5915831210970115,
       "dataset_effects": {
-        "AI_READI": 7.374037999038002,
-        "CHORUS": 13.680555555555557,
-        "CM4AI": 7.788970288970288,
-        "VOICE": -3.963180595125039
+        "AI_READI": 4.259559884559887,
+        "CHORUS": 13.013888888888891,
+        "CM4AI": 10.379782254782254,
+        "VOICE": -9.286898543842987
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": 13.063594814069198,
-        "CHORUS": 10.211997342432122,
-        "CM4AI": 10.890517637763658,
-        "VOICE": 2.2729961515960335
+        "AI_READI": 8.088847339321724,
+        "CHORUS": 10.776075776075773,
+        "CM4AI": 12.007914795776394,
+        "VOICE": 0.9320965063878234
       },
       "section_matched_records": 24,
       "datasets": 4,
@@ -487,12 +487,12 @@
     {
       "source_type": "historical data release",
       "outcome": "Completeness flags",
-      "mean_difference_pp": 1.2468549968549978,
+      "mean_difference_pp": 1.4055851555851568,
       "dataset_effects": {
-        "CM4AI": 1.2468549968549978
+        "CM4AI": 1.4055851555851568
       },
       "unadjusted_dataset_effects": {
-        "CM4AI": 2.5696119994365603
+        "CM4AI": 3.3130509130101125
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -504,12 +504,12 @@
     {
       "source_type": "historical data release",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": -1.1889129389129396,
+      "mean_difference_pp": 0.7555315055315047,
       "dataset_effects": {
-        "CM4AI": -1.1889129389129396
+        "CM4AI": 0.7555315055315047
       },
       "unadjusted_dataset_effects": {
-        "CM4AI": -3.372486837399118
+        "CM4AI": -2.344538978565907
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -521,12 +521,12 @@
     {
       "source_type": "historical data release",
       "outcome": "Consistency flags",
-      "mean_difference_pp": 24.13995263995264,
+      "mean_difference_pp": 24.06058756058756,
       "dataset_effects": {
-        "CM4AI": 24.13995263995264
+        "CM4AI": 24.06058756058756
       },
       "unadjusted_dataset_effects": {
-        "CM4AI": 25.563297975578678
+        "CM4AI": 25.814885818965788
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -538,12 +538,12 @@
     {
       "source_type": "historical documentation",
       "outcome": "Completeness flags",
-      "mean_difference_pp": -13.833333333333334,
+      "mean_difference_pp": -10.615740740740739,
       "dataset_effects": {
-        "CHORUS": -13.833333333333334
+        "CHORUS": -10.615740740740739
       },
       "unadjusted_dataset_effects": {
-        "CHORUS": -1.5628423434150986
+        "CHORUS": -1.2025362551678336
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -555,12 +555,12 @@
     {
       "source_type": "historical documentation",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 7.166666666666667,
+      "mean_difference_pp": 7.976851851851854,
       "dataset_effects": {
-        "CHORUS": 7.166666666666667
+        "CHORUS": 7.976851851851854
       },
       "unadjusted_dataset_effects": {
-        "CHORUS": 6.317625858260533
+        "CHORUS": 7.008386350491615
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -572,12 +572,12 @@
     {
       "source_type": "historical documentation",
       "outcome": "Consistency flags",
-      "mean_difference_pp": -21.675925925925924,
+      "mean_difference_pp": -18.875,
       "dataset_effects": {
-        "CHORUS": -21.675925925925924
+        "CHORUS": -18.875
       },
       "unadjusted_dataset_effects": {
-        "CHORUS": -10.112079154648812
+        "CHORUS": -11.826682089839986
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -589,14 +589,14 @@
     {
       "source_type": "license",
       "outcome": "Completeness flags",
-      "mean_difference_pp": -25.39290935672515,
+      "mean_difference_pp": -27.01327972709552,
       "dataset_effects": {
-        "AI_READI": -35.97100389863548,
+        "AI_READI": -39.21174463937622,
         "CM4AI": -14.814814814814815
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": -1.812706782464847,
-        "CM4AI": -25.93509096515572
+        "AI_READI": -4.312706782464848,
+        "CM4AI": -26.06181826130675
       },
       "section_matched_records": 12,
       "datasets": 2,
@@ -608,14 +608,14 @@
     {
       "source_type": "license",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 0.9360786224821306,
+      "mean_difference_pp": 2.2478070175438587,
       "dataset_effects": {
-        "AI_READI": 3.0295646523716684,
+        "AI_READI": 5.653021442495125,
         "CM4AI": -1.1574074074074072
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": 28.716762068576585,
-        "CM4AI": -16.388434260774684
+        "AI_READI": 28.456345401909918,
+        "CM4AI": -16.346827842991527
       },
       "section_matched_records": 12,
       "datasets": 2,
@@ -627,14 +627,14 @@
     {
       "source_type": "license",
       "outcome": "Consistency flags",
-      "mean_difference_pp": -11.419753086419755,
+      "mean_difference_pp": -10.416666666666668,
       "dataset_effects": {
-        "AI_READI": -14.274691358024695,
+        "AI_READI": -12.26851851851852,
         "CM4AI": -8.564814814814815
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": 15.620566709276389,
-        "CM4AI": -7.0332847078915535
+        "AI_READI": 15.620566709276387,
+        "CM4AI": -6.942495318454398
       },
       "section_matched_records": 12,
       "datasets": 2,
@@ -646,12 +646,12 @@
     {
       "source_type": "preprint",
       "outcome": "Completeness flags",
-      "mean_difference_pp": -10.691290191290191,
+      "mean_difference_pp": -10.08943833943834,
       "dataset_effects": {
-        "CM4AI": -10.691290191290191
+        "CM4AI": -10.08943833943834
       },
       "unadjusted_dataset_effects": {
-        "CM4AI": -7.976745805849222
+        "CM4AI": -7.903990380271215
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -663,12 +663,12 @@
     {
       "source_type": "preprint",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": -0.3380647130647135,
+      "mean_difference_pp": -1.7071123321123327,
       "dataset_effects": {
-        "CM4AI": -0.3380647130647135
+        "CM4AI": -1.7071123321123327
       },
       "unadjusted_dataset_effects": {
-        "CM4AI": 0.0865582194646084
+        "CM4AI": -1.1710374803353936
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -680,12 +680,12 @@
     {
       "source_type": "preprint",
       "outcome": "Consistency flags",
-      "mean_difference_pp": -9.684167684167685,
+      "mean_difference_pp": -8.090252340252341,
       "dataset_effects": {
-        "CM4AI": -9.684167684167685
+        "CM4AI": -8.090252340252341
       },
       "unadjusted_dataset_effects": {
-        "CM4AI": -10.255049002874747
+        "CM4AI": -9.68326950300385
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -697,21 +697,21 @@
     {
       "source_type": "publication",
       "outcome": "Completeness flags",
-      "mean_difference_pp": 20.31063050376346,
+      "mean_difference_pp": 21.056992937625893,
       "dataset_effects": {
-        "AI_READI": 18.40010847950734,
-        "CM4AI": 17.595238095238095,
+        "AI_READI": 19.573719590618456,
+        "CM4AI": 18.660714285714285,
         "VOICE": 24.936544936544934
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": 14.202015011165669,
-        "CM4AI": 26.684715305519763,
-        "VOICE": -2.156156633185826
+        "AI_READI": 14.954319929619656,
+        "CM4AI": 17.693567737172387,
+        "VOICE": -2.1891133186848837
       },
-      "section_matched_records": 17,
+      "section_matched_records": 16,
       "datasets": 3,
       "nonzero_datasets": 3,
-      "records_with_contrast": 17,
+      "records_with_contrast": 16,
       "p": 0.25,
       "test": "exact two-sided sign test across dataset contrasts",
       "q_BH": 0.6
@@ -719,21 +719,21 @@
     {
       "source_type": "publication",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": -3.5099461201757376,
+      "mean_difference_pp": -1.3859381836678013,
       "dataset_effects": {
-        "AI_READI": 0.07329924261038874,
-        "CM4AI": -5.261904761904761,
+        "AI_READI": -1.4058674240562776,
+        "CM4AI": 2.5892857142857153,
         "VOICE": -5.341232841232841
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": -2.0088198604376557,
-        "CM4AI": 6.131312917793472,
-        "VOICE": -1.146255491359139
+        "AI_READI": -2.9874564182667602,
+        "CM4AI": 14.81704503506829,
+        "VOICE": -0.8967263011519826
       },
-      "section_matched_records": 17,
+      "section_matched_records": 16,
       "datasets": 3,
       "nonzero_datasets": 3,
-      "records_with_contrast": 17,
+      "records_with_contrast": 16,
       "p": 1,
       "test": "exact two-sided sign test across dataset contrasts",
       "q_BH": 1
@@ -741,21 +741,21 @@
     {
       "source_type": "publication",
       "outcome": "Consistency flags",
-      "mean_difference_pp": 13.454009619042298,
+      "mean_difference_pp": 12.349953181652529,
       "dataset_effects": {
-        "AI_READI": 17.52607777117581,
-        "CM4AI": 21.630952380952383,
+        "AI_READI": 17.556170363768405,
+        "CM4AI": 18.288690476190478,
         "VOICE": 1.2049987049987039
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": 10.03713278258273,
-        "CM4AI": 38.834954178859086,
-        "VOICE": -9.9859909386699
+        "AI_READI": 9.699950698506235,
+        "CM4AI": 30.91362126245847,
+        "VOICE": -10.018947624168959
       },
-      "section_matched_records": 17,
+      "section_matched_records": 16,
       "datasets": 3,
       "nonzero_datasets": 3,
-      "records_with_contrast": 17,
+      "records_with_contrast": 16,
       "p": 0.25,
       "test": "exact two-sided sign test across dataset contrasts",
       "q_BH": 0.6
@@ -763,12 +763,12 @@
     {
       "source_type": "structured metadata",
       "outcome": "Completeness flags",
-      "mean_difference_pp": -1.9031015281015282,
+      "mean_difference_pp": 1.530513468013468,
       "dataset_effects": {
-        "AI_READI": -1.9031015281015282
+        "AI_READI": 1.530513468013468
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": -0.5619205729499243
+        "AI_READI": 1.3417353193649904
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -780,12 +780,12 @@
     {
       "source_type": "structured metadata",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 16.341509680795394,
+      "mean_difference_pp": 12.649380051165764,
       "dataset_effects": {
-        "AI_READI": 16.341509680795394
+        "AI_READI": 12.649380051165764
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": 2.8752829306128347
+        "AI_READI": -0.3428417450143331
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -797,12 +797,12 @@
     {
       "source_type": "structured metadata",
       "outcome": "Consistency flags",
-      "mean_difference_pp": -1.9887460423174723,
+      "mean_difference_pp": -1.6065587851302148,
       "dataset_effects": {
-        "AI_READI": -1.9887460423174723
+        "AI_READI": -1.6065587851302148
       },
       "unadjusted_dataset_effects": {
-        "AI_READI": -7.739591698559253
+        "AI_READI": -9.628420785169995
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -814,12 +814,12 @@
     {
       "source_type": "tutorial",
       "outcome": "Completeness flags",
-      "mean_difference_pp": -0.8333333333333325,
+      "mean_difference_pp": 0.09259259259259345,
       "dataset_effects": {
-        "CHORUS": -0.8333333333333325
+        "CHORUS": 0.09259259259259345
       },
       "unadjusted_dataset_effects": {
-        "CHORUS": 7.373945498945499
+        "CHORUS": 8.740449365449367
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -831,12 +831,12 @@
     {
       "source_type": "tutorial",
       "outcome": "Accuracy/correctness flags",
-      "mean_difference_pp": 1.2830687830687844,
+      "mean_difference_pp": -1.0251322751322742,
       "dataset_effects": {
-        "CHORUS": 1.2830687830687844
+        "CHORUS": -1.0251322751322742
       },
       "unadjusted_dataset_effects": {
-        "CHORUS": -0.2612125528792197
+        "CHORUS": -0.02074314574314558
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -848,12 +848,12 @@
     {
       "source_type": "tutorial",
       "outcome": "Consistency flags",
-      "mean_difference_pp": 2.4173280423280428,
+      "mean_difference_pp": 0.9656084656084672,
       "dataset_effects": {
-        "CHORUS": 2.4173280423280428
+        "CHORUS": 0.9656084656084672
       },
       "unadjusted_dataset_effects": {
-        "CHORUS": 6.719985261651928
+        "CHORUS": 8.227073852073852
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -870,7 +870,7 @@
         "VOICE": 3.1351981351981344
       },
       "unadjusted_dataset_effects": {
-        "VOICE": -5.49083952186479
+        "VOICE": -5.523796207363849
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -887,7 +887,7 @@
         "VOICE": -10.383320383320385
       },
       "unadjusted_dataset_effects": {
-        "VOICE": -4.044999768932425
+        "VOICE": -3.79547057872527
       },
       "section_matched_records": 6,
       "datasets": 1,
@@ -904,7 +904,7 @@
         "VOICE": 10.27065527065527
       },
       "unadjusted_dataset_effects": {
-        "VOICE": -3.9118149565549527
+        "VOICE": -3.9447716420540115
       },
       "section_matched_records": 6,
       "datasets": 1,
