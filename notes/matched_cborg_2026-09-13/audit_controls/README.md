@@ -80,7 +80,10 @@ Two optional fields bound what stalls may cost.
   - Audit27 sent one request seven times, and each failed at 272–277 s; with a
     stop at 2, five of those resends would not have been sent.
   - Under this field the stall evidence also records `upstream_elapsed_seconds`,
-    measured from the send to the provider and not including token counting.
+    measured from the moment the proxy hands the request to its transport, not
+    including token counting. Under the stall policy that transport is the
+    bounded worker, so the figure includes the worker's start-up and the upload,
+    a fraction of a second at normal load (#2605).
     That covers buffered stalls too. The stopping stall keeps its `stall.json`,
     recording the 402 reply. The stop itself does not compare elapsed times:
     identical bytes that stall twice are enough.
@@ -124,8 +127,18 @@ The strict JSON object is `{"kind":"complete_response_v1","max_bytes":16777216,
 "total_seconds":1200}` for a 16 MiB, 20-minute selection. This has no default and
 requires the registered stall policy, an explicit SDK timeout with margin, and
 the native fetch idle timer disabled. The byte limit must be a positive integer
-at most 64 MiB; the absolute exchange limit must be positive and no greater than
-the registered upstream read bound. Both limits are pinned in the registration
+at most 64 MiB; the absolute exchange limit must be a whole number of seconds,
+at least 60 and no greater than the registered upstream read bound, so
+buffering also needs a read bound of at least 60 seconds and is refused by that
+name otherwise (#2940). The floor
+exists because a limit of a few seconds, entered by mistake, is shorter than a
+complete provider response, so buffered requests would be debited as stalls
+after the send (#2605). The bounded worker's start-up is charged to the same
+limit by design (#2159) and shortens it further; a start-up that uses it all up
+stops the attempt before the send, as a ConnectTimeout, which is never debited
+(#2952). The proxy's own
+check stays at "positive", because the transport modules are pinned and the
+registration is where a selection is admitted. Both limits are pinned in the registration
 and offline plan. Generation, Phase 4 and evaluation reject this selector.
 
 Under this option, the proxy withholds HTTP 200 headers and all response bytes
