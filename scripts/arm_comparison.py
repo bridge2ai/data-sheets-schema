@@ -12,10 +12,8 @@ Bases, stated once and printed into the output:
 
 - **pair errors, report findings, grounding** come from each record's own
   blocks. Pair consistency is a deterministic artifact check. Grounding is
-  measured against the record's declared bundle — for every arm shown, the
-  record's `inputs.bundle_md5` still matches the bundle on disk, and the
-  block was written either by the run or by `backfill-checks` against that
-  same bundle (the record's `recorded_by` says which).
+  measured against the record's declared bundle (the record's `recorded_by`
+  says whether the run or `backfill-checks` wrote it).
 - **form metrics** (British spellings, undeclared prefixes, organisational
   fragments, GC label variants) are recomputed live from the artifacts with
   the current instrument (`grounding.form_facts`) and the merged-schema
@@ -1524,8 +1522,7 @@ def render_markdown(data, scores, *, attainability=None, ancestor_diagnostics=Fa
              "## Bases", "",
              "- pair errors, report findings, grounding: each record's own blocks. Pair "
              "is a deterministic artifact check; grounding is against the record's "
-             "declared bundle, whose md5 still matches disk for every arm shown "
-             "(`recorded_by` says whether the run or backfill-checks wrote it).",
+             "declared bundle (`recorded_by` says whether the run or backfill-checks wrote it).",
              "- British spellings, undeclared prefixes, organisational fragments, GC "
              "label variants: **recomputed live** from the artifacts under the current "
              "instrument (`grounding.form_facts`), using each run's recorded merged-schema "

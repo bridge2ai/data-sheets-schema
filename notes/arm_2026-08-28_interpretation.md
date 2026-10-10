@@ -7,10 +7,11 @@ the 2026-08-24 analysis:
 - **v6 agentic** — 12/12 runs, condition `generic_v6` (v5 + the minting
   density norm) under the receipt protocol (#709) and the derived core.
 - **v7 API — partial** — five canary runs (CHORUS ×2, AI_READI ×3) under
-  `generic_v7` (v6 + the receipt rule); the fan-out of the remaining runs is
-  deferred to 2026-08-31 after two nights of proxy stalls in the 02:00–10:00
-  UTC window (#777). Every v7 number below is n=2 or n=3, and CM4AI and VOICE
-  have none.
+  `generic_v7` (v6 + the receipt rule); per the #838 cohort exclusion, the
+  five repeated-rep1 canaries are not part of the 12-run arm. The fan-out of
+  the remaining runs is deferred to 2026-08-31 after two nights of proxy
+  stalls in the 02:00–10:00 UTC window (#777). Every v7 number below is n=2
+  or n=3, and CM4AI and VOICE have none.
 
 Comparisons are against **v5 API (2026-08-22c)** and **v5 agentic
 (2026-08-24)**, both n=3 per project. Mean ± SD over replicates; the
@@ -188,4 +189,5 @@ the other, and the CHORUS case is where they pull apart.
   v7 canaries) — one record reviewed so far.
 - **Canonical selection** for v6 (safe since #677) — after the review pass.
 - The v7 arm's other 7 runs, and with them any v7 statement about CM4AI and
-  VOICE.
+  VOICE (per the #838 cohort exclusion, the five repeated-rep1 canaries are
+  not part of the 12-run arm).
