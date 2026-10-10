@@ -107,6 +107,30 @@ verdict. For example `/resources/0/creators/1` maps to the old `/resources` fiel
 An independently versioned nested fitness instrument can replace that basis in
 a later, reviewed integration.
 
+## Engineering review — 2026-10-10
+
+The nested engineering requested by #3342 is already available through the
+deliberately separate v3 instrument introduced by
+[PR #4252](https://github.com/bridge2ai/data-sheets-schema/pull/4252).
+Extending `SupportJudgeV2` or adding another traversal would duplicate that path
+and risk changing historical requests. This review found the following existing
+coverage:
+
+| Requirement | Implementation and regression coverage |
+| --- | --- |
+| Nested schema meaning and entity context | `support_targets` resolves exact pointers, induced nested slot specifications and the nearest containing entity. [Public defect-path controls](../tests/test_evaluation/test_nested_support_defect_context.py) exercise the shapes discussed in #1782/#1801/#1815 against the public full schema, including the maintainer-role enum, caveats and identical claims in different entities. The records are neutral examples, not adjudicated defect labels. |
+| Usable offline planning with explicit identity | [Planner v2](offline_support_plan.md#nested-version-2) selects artifact kind, root class, schema and profile, records blocked paths, and captures target/context/specification/request identities. [Planner tests](../tests/test_evaluation/test_nested_support_plan.py) cover CLI opt-in, request reconstruction and unchanged default/explicit-v1 outputs. |
+| Separate measurement denominators | Relationship edges and attribute values have separate support counts; top-level fitness remains a separate stratum. An edge asks about the relationship rather than grading its descendants again. Fitness mappings are many-to-one, and total requests are accounting totals. [Saved-result tests](../tests/test_evaluation/test_nested_support_results.py) distinguish selected-subset completion from all planned nested targets and reject altered count or target claims. |
+| Saved judgment and actual request binding | The [saved-response reader](nested-support-results.md) reconstructs selected targets from captured inputs. The [registered executor](nested-support-execution.md) binds planned and effective request bytes, model, output limit, target and attempt. Its [local HTTP regression](../tests/test_evaluation/test_nested_support_execution.py) compares the actual received POST bytes with the captured effective request and checks offline readback. This is transport capability, not evidence of a provider scoring run. |
+
+These controls establish software behavior only. Context projection and question
+design still need independent instrument review; a supported path does not show
+that a model detects its defect. Real-roster blocked paths, curator-adjudicated
+controls and their provenance, #3343 empirical calibration, and per-run
+registration and authorization remain separate obligations. This review grants
+no approval, records no semantic scoring, and does not close #3342 or #2929.
+Historical v2 prompts, defaults and saved artifacts remain unchanged.
+
 ## Remaining work before #3342 completion or paid calibration
 
 - Independently review this resolver, context and question contract, including
