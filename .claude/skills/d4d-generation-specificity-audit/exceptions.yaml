@@ -102,3 +102,20 @@ exceptions:
       biomedical/clinical data). Naming what it audits states no fact about
       a study; a project name there would still be a violation.
     decision: '#4131 (review round 4 of #4021)'
+
+  # ---- deterministic arm text ----------------------------------------------------
+  - path: src/data_sheets_schema/healthsheet.py
+    token: 'IRB'
+    category: biomedical_clinical
+    context: string_literal
+    reason: >-
+      The healthsheet-only bundle's header lists what the bundle leaves out
+      ("no publications, no documentation, no license, no IRB protocol"):
+      true of every such bundle by construction, and a statement about the
+      input, not a fact about a dataset. The arm exists only for a record
+      that carries a Healthsheet, a documentation format for health
+      datasets, whose companion documents include a human-subjects
+      protocol. Not reworded ("ethics approval"): the sentence is in the
+      tracked study bundle, whose bytes its chunk manifest and the
+      healthsheet arm's provenance records pin.
+    decision: '#4009; #4007 owner: biomedical/clinical is acceptable if tracked'
