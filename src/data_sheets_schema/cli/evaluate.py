@@ -712,8 +712,11 @@ def audit_recall_cmd(audits, originals, ground_truth, arm, replicates, output, a
 @click.option("--relationship-policy", type=click.Choice(["strict", "inline-class-strings"]),
               default="strict", show_default=True,
               help="Version 2 opt-in: retain invalid inline strings as relationship claims, without schema repair.")
+@click.option("--context-policy", type=click.Choice(["nearest-owner", "ancestor-qualifiers"]),
+              default="nearest-owner", show_default=True,
+              help="Version 2 opt-in: retain origin-scoped ancestor scalar fields and qualifiers as untrusted context.")
 def support_plan_cmd(roster, output, profile, model, class_name, schema_path, max_tokens, prices,
-                     plan_version, artifact_kind, vocabulary_path, relationship_policy):
+                     plan_version, artifact_kind, vocabulary_path, relationship_policy, context_policy):
     """Freeze an OFFLINE typed-support/fitness plan; makes no model calls.
 
     Version 1 preserves the current top-level instrument; version 2 opts into
@@ -728,7 +731,9 @@ def support_plan_cmd(roster, output, profile, model, class_name, schema_path, ma
                               max_tokens=max_tokens, prices=prices, plan_version=int(plan_version),
                               artifact_kind=artifact_kind, vocabulary_path=vocabulary_path,
                               relationship_policy=(support_targets.POLICY if relationship_policy == "strict"
-                                                   else support_targets.SCALAR_POLICY))
+                                                   else support_targets.SCALAR_POLICY),
+                              context_policy=(support_targets.CONTEXT_POLICY if context_policy == "nearest-owner"
+                                              else support_targets.ANCESTOR_CONTEXT_POLICY))
     except (OSError, ValueError, KeyError) as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"Saved {manifest['counts']['records']} records / "

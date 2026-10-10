@@ -62,13 +62,14 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
                       profile: str, class_name: str, schema_path: Path | None,
                       max_tokens: int, prices: Path | None, root: Path,
                       artifact_kind: str | None, vocabulary_path: Path | None,
-                      relationship_policy: str = nested.POLICY) -> dict:
+                      relationship_policy: str = nested.POLICY,
+                      context_policy: str = nested.CONTEXT_POLICY) -> dict:
     """Pin and render draft nested support plus separate top-level fitness.
 
     One explicit artifact kind/schema/profile per plan. No v2 support request,
     measured verdict, provider transport or judgement-cache reuse is produced.
     """
-    instrument, system = nested.policy_instrument(relationship_policy)
+    instrument, system = nested.policy_instrument(relationship_policy, context_policy=context_policy)
     scalar_policy = relationship_policy == nested.SCALAR_POLICY
     root, output = Path(root).resolve(), Path(output)
     if output.exists() or output.is_symlink():
@@ -130,7 +131,8 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
         record_raw, record_pin, record, provenance_pin, bundle_raw, bundle_pin, bundle, generator = common._record_inputs(
             root, input_path, identity, jobs, pins, artifacts, recovered, artifact_kind=artifact_kind)
         inventory = nested.inventory_targets(record_raw, captured, artifact_kind=artifact_kind,
-                                             relationship_policy=relationship_policy)
+                                             relationship_policy=relationship_policy,
+                                             context_policy=context_policy)
         inventory_doc = inventory.to_dict()
         # This is a plan, not an executable target inventory: only the engineering
         # planner-integration blocker has been completed here.
@@ -257,6 +259,8 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
                      "prices": price, "scenarios": scenarios(totals),
                      "by_stratum": {name: scenarios(count) for name, count in by_stratum.items()}},
     }
+    if context_policy != nested.CONTEXT_POLICY:
+        manifest["instruments"][nested.AXIS]["context_policy"] = context_policy
     if scalar_policy:
         manifest["representation_issues"] = representation_issues
         manifest["counts"]["representation_issue_count"] = len(representation_issues)

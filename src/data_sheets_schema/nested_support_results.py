@@ -256,7 +256,8 @@ def _instrument(capture, manifest):
     instrument = _mapping(manifest.get("instruments"), "plan instruments").get(targets.AXIS)
     _require(isinstance(instrument, dict), "nested instrument is missing")
     policy = instrument.get("policy")
-    name, system = targets.policy_instrument(policy)
+    context_policy = instrument.get("context_policy", targets.CONTEXT_POLICY)
+    name, system = targets.policy_instrument(policy, context_policy=context_policy)
     _require(instrument.get("name") == name and capture.get(instrument["system"]) == system.encode(),
              "nested instrument differs")
     return policy
@@ -399,6 +400,7 @@ def _bindings(capture, manifest, records, planned, selections):
         seen_attempts.add(attempt_id)
     schema = _schema(capture, _mapping(manifest.get("schema"), "plan schema"))
     policy = _instrument(capture, manifest)
+    context_policy = manifest["instruments"][targets.AXIS].get("context_policy", targets.CONTEXT_POLICY)
     roster = capture.document(manifest["roster"], "roster")
     from data_sheets_schema.support_plan import _roster_records
     groups, pins = _roster_records(canonical(roster))
@@ -450,7 +452,7 @@ def _bindings(capture, manifest, records, planned, selections):
         _require(record.get("generator") == generator and record.get("same_family") ==
                  same_family_label(manifest["model"]["name"], generator), "generator/family metadata conflicts")
         inventory = targets.inventory_targets(record_raw, schema, artifact_kind=kind,
-                                              relationship_policy=policy)
+                                              relationship_policy=policy, context_policy=context_policy)
         expected_inventory = inventory.to_dict()
         expected_inventory["readiness_blockers"].remove("nested_planner_integration_3342")
         _require(canonical(capture.document(record["inventory"], "target inventory")) == canonical(expected_inventory), "inventory differs from captured record/schema")
@@ -492,6 +494,8 @@ def _bindings(capture, manifest, records, planned, selections):
                 "request": capture.add(request_raw), "max_tokens": cap}
             if policy == targets.SCALAR_POLICY:
                 derived[tid].update(policy=policy, representation=payload.get("representation"))
+            if context_policy != targets.CONTEXT_POLICY:
+                derived[tid]["context_policy"] = context_policy
     bindings = [{**s, "binding": derived[s["target_id"]]} for s in selections]
     accounting = None
     if policy == targets.SCALAR_POLICY:
@@ -518,6 +522,9 @@ def _descriptor(capture, manifest_raw, selections):
             "readiness": manifest["readiness"], "limitations": LIMITATIONS}
     if accounting is not None:
         result["representation_accounting"] = accounting
+    context_policy = manifest["instruments"][targets.AXIS].get("context_policy", targets.CONTEXT_POLICY)
+    if context_policy != targets.CONTEXT_POLICY:
+        result["context_policy"] = context_policy
     return result
 
 
@@ -748,4 +755,6 @@ def report(descriptor: Path, results: list[Path]) -> dict:
         "readiness": selected["readiness"], "limitations": LIMITATIONS}
     if "representation_accounting" in selected:
         report["representation_accounting"] = selected["representation_accounting"]
+    if "context_policy" in selected:
+        report["context_policy"] = selected["context_policy"]
     return report

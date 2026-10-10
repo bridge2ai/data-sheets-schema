@@ -152,6 +152,50 @@ a later, reviewed integration.
 
 ## Engineering review — 2026-10-10
 
+### Optional ancestor context (#4904)
+
+Version 2 plans can select `--context-policy ancestor-qualifiers`, independently
+of `--relationship-policy strict|inline-class-strings`. The Python APIs use
+`context_policy="ancestor_scalar_qualifiers_v1"`. The default
+`nearest_owner_and_ancestor_identity_v1` retains the original nearest-owner and
+ancestor-identity projection. Its field is omitted from serialized artifacts,
+so existing strict and scalar-reference target/request bytes remain unchanged.
+Version 1 rejects the new context choice.
+
+The new choice addresses a specific missing question context: a Creator's
+`source_caveats` can attribute an affiliation to Document A, while the old
+Organization/name target below it shows only Creator identity. The new target
+retains that caveat at its actual Creator pointer. It does not certify the
+affiliation, endorse a claimed source ranking, or assign a support verdict.
+
+Each actual ancestor on the selected path contributes its complete scalar fields
+and scalar-only lists, plus explicit qualifier fields (`attributed_to`,
+`claim_status`, `source_status`, `description`, `notes`, `source_caveats`). Each
+projection carries its class, original pointer, escaped field-origin pointers,
+full source-mapping digest, projected-value digest and faithful YAML. It excludes
+the selected path branch and records that branch's pointer, chosen child pointer,
+digest and cardinality. Other omitted containers have explicit pointers, digests
+and sizes. Sibling Creator values are not copied through the excluded collection.
+Direct-owner context is unchanged; ancestor declarations are not merged into the
+target's declarations. `collection_metadata_inherited` remains false. Seeing an
+ancestor fact does not make it a fact about a descendant resource.
+
+The selected context policy has a distinct instrument name and prompt for each
+relationship policy. Target/context, inventory, request, descriptor, registration,
+execution and calibration identities bind that choice. Logical target IDs remain
+plan-local; exact captured plan/request bindings prevent cross-policy replay.
+Historical artifacts with no context-policy field retain their old interpretation.
+No alternate executor, cache or top-level fitness instrument is introduced.
+
+Expanded context consumes the existing inventory and request byte budgets.
+There is no qualifier truncation, increased limit or partial inventory on overflow.
+The request carries ancestor YAML once, omitting the duplicate JSON value preview.
+The required 24-record comparison must report target/block/specification/value
+invariance and context/request size changes separately. More context is not proof
+of support, improved accuracy or calibration acceptance. Independent context and
+instrument review, adjudicated controls, empirical calibration and paid-run
+authorization remain open.
+
 The nested engineering requested by #3342 is already available through the
 deliberately separate v3 instrument introduced by
 [PR #4252](https://github.com/bridge2ai/data-sheets-schema/pull/4252).
