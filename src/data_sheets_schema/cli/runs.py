@@ -1507,6 +1507,9 @@ def merge_cmd(method, project, labels, config, out_method, out_label, unguarded,
               fitness_context, fitness_cache):
     """Combine generated replicates into one derived record.
 
+    The historical 2026-07-31 generic-v2 agreement matrix measured
+    disagreement on 47-63% of shared slots across projects (outward bounds).
+
     By default, contested slots use the base replicate's value, or the first
     holder's where the base lacks the slot. Referent-bearing fields stay with
     the base unless --unguarded is requested. Optional --fitness-context and
