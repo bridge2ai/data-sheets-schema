@@ -85,7 +85,9 @@ generation — it consumes generated records as declared inputs rather than as a
 shortcut around evidence, introduces no new facts, and states what it consumed by
 md5. Five conditions bound it, and three are enforced in code rather than trusted
 to prose: a source must be complete and attested, a derived record may not
-contribute to another, and the output goes under a distinct method. The remaining
+contribute to another, and the writing path refuses a source method or run-directory
+alias before publication. `d4d runs merge --method` selects sources; `--out-method`
+selects the distinct destination (default: `<source method>_merged`). The remaining
 two (generation phases never derive; a derived record is not a replicate) are
 structural.
 

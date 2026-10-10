@@ -65,10 +65,10 @@ def test_actual_writer_reports_base_and_first_holder_instead_of_best_fit(tmp_pat
                                 "keywords": "rep1", "title": "base"}
     assert result.contested == 2
     assert records == original_records
-    output = root / "claudecode_agent" / "merged-api" / "P_d4d.yaml"
-    merge.write_merge(result, output, sources=paths, project="P", method="claudecode_agent",
+    output = root / "claudecode_agent_merged" / "merged-api" / "P_d4d.yaml"
+    merge.write_merge(result, output, sources=paths, project="P", method="claudecode_agent_merged",
                       label="merged-api")
-    provenance = yaml.safe_load((root / "claudecode_agent_core" / "merged-api" /
+    provenance = yaml.safe_load((root / "claudecode_agent_merged_core" / "merged-api" /
                                  "P_provenance.yaml").read_text())
     assert yaml.safe_load(output.read_text()) == result.record
     _assert_sources_preserved(before, paths, provenance)
@@ -106,8 +106,8 @@ def test_actual_cli_no_scorer_provenance_does_not_claim_fit(tmp_path, monkeypatc
     actual = CliRunner().invoke(runs_cli, [*arguments, "--execute"])
     assert actual.exit_code == 0, actual.output
     label = "2026-08-01_cfg_merged"
-    output = root / "claudecode_agent" / label / "P_d4d.yaml"
-    provenance = yaml.safe_load((root / "claudecode_agent_core" / label /
+    output = root / "claudecode_agent_merged" / label / "P_d4d.yaml"
+    provenance = yaml.safe_load((root / "claudecode_agent_merged_core" / label /
                                  "P_provenance.yaml").read_text())
     assert yaml.safe_load(output.read_text()) == {**records[first], "only_second": "b"}
     _assert_sources_preserved(before, paths, provenance)
@@ -120,9 +120,9 @@ def test_actual_cli_no_scorer_provenance_does_not_claim_fit(tmp_path, monkeypatc
 
 
 def _publish(root, result, paths, label="merged-api"):
-    output = root / "claudecode_agent" / label / "P_d4d.yaml"
-    provenance_path = root / "claudecode_agent_core" / label / "P_provenance.yaml"
-    merge.write_merge(result, output, sources=paths, project="P", method="claudecode_agent", label=label)
+    output = root / "claudecode_agent_merged" / label / "P_d4d.yaml"
+    provenance_path = root / "claudecode_agent_merged_core" / label / "P_provenance.yaml"
+    merge.write_merge(result, output, sources=paths, project="P", method="claudecode_agent_merged", label=label)
     assert yaml.safe_load(output.read_text()) == result.record
     return yaml.safe_load(provenance_path.read_text())
 
@@ -289,7 +289,7 @@ def test_invalid_result_metadata_refuses_before_output_or_directory_creation(tmp
     provenance = tmp_path / "uncreated-provenance" / "P_provenance.yaml"
     with pytest.raises(ValueError):
         merge.write_merge(result, output, sources=paths if with_sources else None, project="P",
-                          method="claudecode_agent", label="merged", provenance_path=provenance)
+                          method="claudecode_agent_merged", label="merged", provenance_path=provenance)
     assert not output.parent.exists() and not provenance.parent.exists()
     assert _snapshot(root) == before
 
