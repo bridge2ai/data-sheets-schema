@@ -11,8 +11,8 @@
 # ==============================================================================
 # D4D to RO-Crate SKOS Semantic Alignment
 # ==============================================================================
-# Version: 1.4
-# Date: 2026-09-30
+# Version: 1.5
+# Date: 2026-10-05
 # Description: Formal semantic mappings between D4D LinkML schema and RO-Crate
 #              properties using SKOS mapping predicates.
 #
@@ -227,7 +227,7 @@ d4d:FormatDialect skos:closeMatch schema:encodingFormat .
 # notice and revocation are not sensitive personal attributes, and no
 # offline vocabulary here names a consent term.
 
-# Direct/Exact Mappings (46 triples)
+# Direct/Exact Mappings (45 triples)
 # ==============================================================================
 # These properties map directly without transformation
 
@@ -267,7 +267,6 @@ d4d:was_derived_from skos:exactMatch schema:isBasedOn .
 # humanSubjectResearch).
 
 # RAI namespace - exact matches
-d4d:acquisition_methods skos:exactMatch rai:dataCollection .
 d4d:collection_mechanisms skos:exactMatch rai:dataCollection .
 d4d:collection_timeframes skos:exactMatch rai:dataCollectionTimeframe .
 d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
@@ -288,10 +287,33 @@ d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
 # specification names neither, checked 2026-09-30), and schema.org defines
 # neither prohibitedUses nor ethicalReview, the unprefixed keys FAIRSCAPE
 # crates emit. A discouraged use is also not a prohibited one.
-d4d:errata skos:exactMatch schema:correction .
+
+# Settled 2026-10-05 (#4036): ten slot-level triples disagreed in strength
+# with the class-level triple of the class the slot holds (its range), on
+# the same target. Nine now carry their class's predicate, each for the
+# reason in the comment above it, taken from the target's definition and
+# the slot's and the class's descriptions in the merged schema. Four whose
+# class the schema maps exactly (exact_mappings) moved here from "Close
+# Matches" (annotation_analyses, cleaning_strategies,
+# machine_annotation_tools, preprocessing_strategies); five whose class is
+# close moved there (acquisition_methods, errata, related_datasets, tasks,
+# other_tasks). The tenth, distribution_formats, is left as found (see
+# "FAIRSCAPE Evidence namespace" below). A test checks the rule for every
+# slot whose range is a class with a class-level triple, and lists that one
+# exception with its reason
+# (tests/test_semantic_exchange/test_skos_alignment_header.py).
+
+# Intended uses. rai:dataUseCases is "Intended applications and usage
+# guidelines" (the repository's Croissant RAI 1.0 list,
+# data/schema_comparison/schemas/croissant_rai/). intended_uses holds
+# IntendedUse objects, "explicit intended and recommended uses", and the
+# schema maps IntendedUse exactly to this term (exact_mappings), so the slot
+# and the class carry the one exact match to it. tasks and other_tasks said
+# exactMatch too, and exactMatch is transitive, so the three slots were one
+# concept although the schema asks three questions. They are close now, as
+# their classes are (see "Close Matches"), and so are purposes and
+# existing_uses (#4036).
 d4d:intended_uses skos:exactMatch rai:dataUseCases .
-d4d:other_tasks skos:exactMatch rai:dataUseCases .
-d4d:tasks skos:exactMatch rai:dataUseCases .
 d4d:purposes skos:closeMatch rai:dataUseCases .
 d4d:known_biases skos:exactMatch rai:dataBiases .
 d4d:known_limitations skos:exactMatch rai:dataLimitations .
@@ -306,7 +328,41 @@ d4d:raw_data_sources skos:exactMatch rai:dataCollectionRawData .
 d4d:sensitive_elements skos:exactMatch rai:personalSensitiveInformation .
 d4d:updates skos:exactMatch rai:dataReleaseMaintenancePlan .
 
+# Annotation analyses, machine annotation tools, cleaning and
+# preprocessing. Each slot holds objects of a class the schema maps exactly
+# to the term (exact_mappings), and the slot's description names what the
+# term names (the repository's Croissant RAI 1.0 list):
+# - annotation_analyses (AnnotationAnalysis): "analyses of annotation
+#   quality and inter-annotator agreement"; the term, "Analysis of
+#   annotation quality and agreement".
+# - machine_annotation_tools (MachineAnnotationTools): "automated annotation
+#   tools used in dataset creation"; the term, "Automated annotation tools
+#   and models".
+# - cleaning_strategies (CleaningStrategy): "data cleaning and quality
+#   control procedures"; the term, "Data cleaning and transformation
+#   procedures". The schema puts transformation steps under
+#   preprocessing_strategies, so the two vocabularies divide this work
+#   differently; the class's exact_mappings is what makes this exact.
+# - preprocessing_strategies (PreprocessingStrategy): "preprocessing steps
+#   applied to the raw data", normalization and transformation among them;
+#   the term, "Preparation steps for ML processing".
+# Exact, as each class is (was closeMatch, #4036). They sat under a heading
+# that read close as a string-to-object transformation, but every
+# slot-level rai: triple in this file is on a slot that holds class
+# objects, the exact matches above included, so that does not separate
+# close from exact.
+d4d:annotation_analyses skos:exactMatch rai:dataAnnotationAnalysis .
+d4d:cleaning_strategies skos:exactMatch rai:dataManipulationProtocol .
+d4d:machine_annotation_tools skos:exactMatch rai:machineAnnotationTools .
+d4d:preprocessing_strategies skos:exactMatch rai:dataPreprocessingProtocol .
+
 # FAIRSCAPE Evidence namespace - exact matches
+# distribution_formats is left as found (#4036): it says exactMatch where
+# the DistributionFormat class it holds says closeMatch. EVI 1.6 defines no
+# formats term (#4037), so no definition settles either strength, and #4037
+# decides every triple on evi:formats. Until then the test of the
+# slot/class strength rule lists this disagreement as an exception, with
+# that reason.
 d4d:distribution_formats skos:exactMatch evi:formats .
 d4d:encoding skos:closeMatch evi:formats .
 d4d:funders skos:exactMatch schema:funder .
@@ -315,14 +371,13 @@ d4d:funders skos:exactMatch schema:funder .
 d4d:citation skos:exactMatch schema:citation .
 d4d:format skos:exactMatch schema:encodingFormat .
 d4d:parent_datasets skos:exactMatch schema:isPartOf .
-d4d:related_datasets skos:exactMatch schema:isRelatedTo .
 d4d:same_as skos:exactMatch schema:sameAs .
 d4d:variables skos:exactMatch schema:variableMeasured .
 
 # JSON-LD identifier
 d4d:id skos:exactMatch rdf:ID .
 
-# Close Matches (19 triples)
+# Close Matches (20 triples)
 # ==============================================================================
 # Semantically close but require transformation
 
@@ -348,11 +403,47 @@ d4d:distribution_dates skos:closeMatch schema:datePublished .
 # class is (was exactMatch, #3971).
 d4d:raw_sources skos:closeMatch rai:dataCollectionRawData .
 
-# String to structured object array
-d4d:cleaning_strategies skos:closeMatch rai:dataManipulationProtocol .
-d4d:preprocessing_strategies skos:closeMatch rai:dataPreprocessingProtocol .
-d4d:annotation_analyses skos:closeMatch rai:dataAnnotationAnalysis .
-d4d:machine_annotation_tools skos:closeMatch rai:machineAnnotationTools .
+# Tasks. tasks holds Task objects, "Tasks the dataset is intended to
+# support" (specific machine learning, research or analytical tasks), and
+# other_tasks holds OtherTask objects, "Additional tasks the dataset may
+# support beyond its original intent". Both name applications of the
+# dataset, which rai:dataUseCases ("Intended applications and usage
+# guidelines") covers; but intended_uses carries the exact match to that
+# term, and three exact matches made three questions one concept. Close, as
+# the Task and OtherTask classes are (both were exactMatch, #4036).
+d4d:tasks skos:closeMatch rai:dataUseCases .
+d4d:other_tasks skos:closeMatch rai:dataUseCases .
+
+# Instance acquisition. The slot holds InstanceAcquisition objects, which
+# say how the data for each instance was acquired: directly observed,
+# reported by subjects, inferred or derived, validated. rai:dataCollection
+# is the "Description of the data collection process", and
+# collection_mechanisms carries the exact match to it, as the
+# CollectionMechanism class it holds does (exact_mappings): "What mechanisms
+# or procedures were used to collect the data". How each instance's data
+# was acquired answers another question about collection, and two exact
+# matches made the two one concept. Close, as the InstanceAcquisition class
+# is (was exactMatch, #4036).
+d4d:acquisition_methods skos:closeMatch rai:dataCollection .
+
+# Errata. The slot holds Erratum objects: "Known errors or corrections to
+# the dataset since publication", each with a link to the erratum
+# (erratum_url) and a description of "the error, its scope, the affected
+# data or records, and the correction applied" (erratum_details).
+# schema:correction "Indicates a correction to a CreativeWork" (schema.org,
+# as rdflib ships it). A known error that has no correction yet is not one.
+# Close, as the Erratum class is (was exactMatch, #4036).
+d4d:errata skos:closeMatch schema:correction .
+
+# Related datasets. The slot holds DatasetRelationship objects, each a typed
+# relationship (relationship_type: supplements, derives from, is version
+# of) to another dataset (target_dataset). schema:isRelatedTo is "A pointer
+# to another, somehow related product (or multiple products)" (schema.org,
+# as rdflib ships it): untyped, and between products. Close, as the
+# DatasetRelationship class is (was exactMatch, #4036). The schema
+# serialises the slot as this term (slot_uri), so the comprehensive
+# generator lists the slot as an accepted disagreement of strength only.
+d4d:related_datasets skos:closeMatch schema:isRelatedTo .
 
 # Multiple properties to single field
 d4d:license_and_use_terms skos:closeMatch schema:license .
@@ -458,8 +549,8 @@ d4d:conforms_to_schema skos:narrowMatch schema:conformsTo .
 # - Slot-level: 81
 #
 # By predicate:
-# - Exact matches: 76 (50.7%)
-# - Close matches: 47 (31.3%)
+# - Exact matches: 75 (50.0%)
+# - Close matches: 48 (32.0%)
 # - Related matches: 17 (11.3%)
 # - Narrow matches: 6 (4.0%)
 # - Broad matches: 4 (2.7%)

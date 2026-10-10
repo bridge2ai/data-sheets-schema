@@ -4,9 +4,11 @@ did not review are settled against the merged schemas (#3976), a slot that
 holds a class #3942, #3974 or #3976 changed carries that class's targets
 only as the class now carries them, whether a triple's subject is the slot
 (``d4d:<slot>``) or the slot in a class (``d4d:<Class>_<slot>``) (#3971,
-#3995, #4002, #3974, #4052, #4078), no triple names an RAI term Croissant
-RAI 1.0 does not define, and every EVI term a triple names is recorded with
-the outcome of a check against EVI.
+#3995, #4002, #3974, #4052, #4078), a slot that holds any class with a
+class-level triple carries each of that class's targets with the class's
+predicate unless a listed exception gives a reason (#4036), no triple names
+an RAI term Croissant RAI 1.0 does not define, and every EVI term a triple
+names is recorded with the outcome of a check against EVI.
 
 Before #3942 the header said 189 triples (exact 112, close 59, related 10,
 narrow 7, broad 1) while the file held 184 (111/58/9/6/0), and the per-section
@@ -397,7 +399,7 @@ class TestClassRows3942DidNotReview(unittest.TestCase):
 #: of the check. #3942 left eleven marked (#3971, #3995, #4002) and nine
 #: unmarked: labeling_strategies, raw_sources and the seven twins of its
 #: d4d: class removals, which review round 1 of #4031 found (#4052). All
-#: twenty are settled (SETTLED_TWINS below), so no TODO(#3942) is left in
+#: twenty are settled (#4031), so no TODO(#3942) is left in
 #: the TTL, and the derived check below
 #: (test_a_slot_that_holds_a_changed_class_follows_it) reads every slot that
 #: holds a changed class in either merged schema, listed or not, under its
@@ -472,47 +474,6 @@ class TestSlotLevelTwinsAreMarked(unittest.TestCase):
                  "d4d:c skos:exactMatch x:z ."]
         self.assertFalse(todo_above(lines, 2, twins))
 
-
-#: The slot-level twins #3942 left as found, and sampling_strategies (#3974),
-#: as #3971, #3995, #4002, #3974 and #4052 settled them: the class the slot
-#: holds (its range), and the pairs the slot and that class both carry. A
-#: twin follows its class unless the slot's semantics differ; none of these
-#: do. An empty set is a removed triple: its target is not a term its
-#: vocabulary defines (rai:prohibitedUses, rai:ethicalReview,
-#: rai:confidentialityLevel, evi:samplingPlan), names another notion
-#: (schema:license for an extension mechanism), or is a D4D term, which is
-#: not an alignment to an external vocabulary (#3054; the last seven, whose
-#: class triples #3942 removed for that reason). labeling_strategies,
-#: raw_sources and those seven are the twins no TODO marked.
-SETTLED_TWINS = {
-    "discouraged_uses": ("DiscouragedUse", set()),
-    "prohibited_uses": ("ProhibitedUse", set()),
-    "ethical_reviews": ("EthicalReview", set()),
-    "is_deidentified": ("Deidentification", set()),
-    "extension_mechanism": ("ExtensionMechanism", set()),
-    "sampling_strategies": ("SamplingStrategy", set()),
-    "distribution_dates": ("DistributionDate",
-                           {("closeMatch", "schema:datePublished")}),
-    "retention_limit": ("RetentionLimits",
-                        {("relatedMatch", "schema:conditionsOfAccess")}),
-    "confidential_elements": ("Confidentiality",
-                              {("relatedMatch", "rai:personalSensitiveInformation")}),
-    "sensitive_elements": ("SensitiveElement",
-                           {("exactMatch", "rai:personalSensitiveInformation")}),
-    "existing_uses": ("ExistingUse", {("closeMatch", "rai:dataUseCases")}),
-    "data_protection_impacts": ("DataProtectionImpact",
-                                {("broadMatch", "rai:dataSocialImpact")}),
-    "labeling_strategies": ("LabelingStrategy",
-                            {("narrowMatch", "rai:dataAnnotationProtocol")}),
-    "raw_sources": ("RawData", {("closeMatch", "rai:dataCollectionRawData")}),
-    "addressing_gaps": ("AddressingGap", set()),
-    "anomalies": ("DataAnomaly", set()),
-    "content_warnings": ("ContentWarning", set()),
-    "informed_consent": ("InformedConsent", set()),
-    "human_subject_research": ("HumanSubjectResearch", set()),
-    "at_risk_populations": ("AtRiskPopulations", set()),
-    "participant_compensation": ("HumanSubjectCompensation", set()),
-}
 
 #: The class-level pairs #3942 removed or replaced (5463875a9), by class: the
 #: pairs each class carried before that commit and not after it, read from
@@ -646,7 +607,7 @@ def slots_not_following(pairs, changed, holders, classes):
 
 class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
     """#3971, #3995, #4002, #3974, #4052, #4078. Until these changes each of
-    the 21 twins in SETTLED_TWINS disagreed with its class, in the TTL at
+    the 21 twins #4031 settled disagreed with its class, in the TTL at
     8a19955b5, the main commit #4031 branched from:
 
     - twelve carried a triple on a term whose class triple #3942 removed:
@@ -664,12 +625,16 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
       SamplingStrategy said exactMatch. #3942 did not change that class;
       #3974 removed both triples, since EVI defines no samplingPlan.
 
-    SETTLED_TWINS is a list, so the seven twins of #3942's d4d: class
-    removals, which no list named, kept the removed triple with every test
-    passing (#4052). The derived check reads every slot that holds a
-    changed class in either merged schema, listed or not, under its own
-    name and under every class-scoped name, ``d4d:<Class>_<slot>``, the
-    form the /d4d-add-mapping playbook writes for a class's slots (#4078).
+    #4031 checked them against a list of the 21 and their settled pairs
+    (SETTLED_TWINS). Because it was a list, the seven twins of #3942's d4d:
+    class removals, which it did not name until #4052, kept the removed
+    triple with every test passing. The derived check reads every slot that
+    holds a changed class in either merged schema, under its own name and
+    under every class-scoped name, ``d4d:<Class>_<slot>``, the form the
+    /d4d-add-mapping playbook writes for a class's slots (#4078). #4036
+    removed the list: TestASlotAgreesWithTheClassItHolds holds every slot
+    that holds a class with a class-level triple, changed or not, to the
+    class's strength on each target the class carries.
     """
 
     @classmethod
@@ -683,30 +648,6 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
         # reads the changed classes' among them.
         cls.every = slots_holding(cls.classes)
         cls.holders = {c: cls.every[c] for c in cls.changed if c in cls.every}
-
-    def test_each_twin_is_the_slot_that_holds_its_class(self):
-        """Read from the full schema: every declaration of the slot name that
-        sets a range (top-level, attribute or slot_usage) ranges over the
-        class, so the slot's value is that class's object."""
-        schema = raw_schema(SCHEMAS[0])
-        for slot, (cls, _) in SETTLED_TWINS.items():
-            definitions = [(schema.get("slots") or {}).get(slot)]
-            for cdef in (schema.get("classes") or {}).values():
-                for group in ("attributes", "slot_usage"):
-                    definitions.append(((cdef or {}).get(group) or {}).get(slot))
-            ranges = {d["range"] for d in definitions if d and d.get("range")}
-            with self.subTest(slot=slot):
-                self.assertEqual(ranges, {cls})
-
-    def test_a_twin_and_its_class_carry_the_settled_pairs(self):
-        """What the TTL says for the twin, slot-level and class-scoped
-        together (pairs_on_slot), is what it says for the class."""
-        for slot, (cls, pairs) in SETTLED_TWINS.items():
-            with self.subTest(slot=slot):
-                self.assertEqual(pairs_on_slot(self.pairs, slot, self.classes),
-                                 pairs)
-            with self.subTest(cls=cls):
-                self.assertEqual(self.pairs.get(cls, set()), pairs)
 
     def test_the_record_holds_3942s_count_and_no_class_kept_a_lost_pair(self):
         """CLASS_PAIRS_3942_REPLACED is complete by #3942's own count: of
@@ -734,13 +675,13 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
         schema:Person, a type."""
         self.assertEqual(slots_not_following(self.pairs, self.changed,
                                              self.holders, self.classes), {})
-        # Not vacuous: every settled twin is among the slots read, by the
-        # schemas and not by the list.
-        checked = set().union(*self.holders.values())
-        self.assertLessEqual(set(SETTLED_TWINS), checked)
-        for slot, (cls, _) in SETTLED_TWINS.items():
-            with self.subTest(twin=slot):
-                self.assertIn(slot, self.holders.get(cls, ()))
+        # Not vacuous: the check reads holders for 35 of the 38 changed
+        # classes. No slot of either merged schema holds the other three:
+        # DatasetCollection and CoreDatasetCollection are tree roots, and
+        # FundingMechanism.grantor has range string, not Grantor.
+        self.assertEqual(set(self.changed) - set(self.holders),
+                         {"CoreDatasetCollection", "DatasetCollection",
+                          "Grantor"})
 
     def test_the_check_reads_a_triple_in_either_form(self):
         """#4078: each triple below, added to the TTL's own, is reported,
@@ -817,6 +758,222 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
                 (SCHEMAS[1], SCHEMAS[0], ("CoreDistribution", "distributions"))):
             with self.subTest(schema=path.name):
                 self.assertIn(own, alone[path] - alone[other])
+
+
+#: One disagreement the strength rule allows, as it was reviewed: the class
+#: the slot holds, the target, the predicates the slot carries on it
+#: (slot-level and class-scoped together, pairs_on_slot), the predicates the
+#: class carries on it, and why the disagreement stands.
+StrengthException = collections.namedtuple(
+    "StrengthException",
+    "cls target slot_predicates class_predicates reason")
+
+#: The disagreements TestASlotAgreesWithTheClassItHolds allows, by slot
+#: (#4036). A listing holds only while the TTL and the merged schemas give
+#: exactly the disagreement it names, as a listing in
+#: generate_comprehensive_sssom.py's ACCEPTED_DISAGREEMENTS holds only for
+#: the pairs it names (#2991). One that gives no reason, names a slot neither
+#: merged schema declares, or no longer disagrees fails the rule, and so does
+#: one whose predicates have changed.
+STRENGTH_EXCEPTIONS = {
+    "distribution_formats": StrengthException(
+        "DistributionFormat", "evi:formats", ("exactMatch",), ("closeMatch",),
+        "EVI 1.6 defines no formats term (EVI_TARGETS_CHECKED), so no "
+        "definition settles either strength. #4037 decides every triple on "
+        "evi:formats, this slot's and its class's among them."),
+}
+
+
+def strength_disagreements(pairs, holders, classes):
+    """{(slot, class, target): (slot predicates, class predicates)}: for each
+    class in ``holders`` and each slot that holds it, every target the class
+    carries on which the slot, slot-level and class-scoped together
+    (pairs_on_slot), carries other predicates than the class. Only a target
+    both carry is compared: the rule is about the strength of one
+    alignment, and a slot that carries another target, or none, says
+    nothing about this one."""
+    found = {}
+    for cls, slots in holders.items():
+        held = collections.defaultdict(set)
+        for predicate, obj in pairs.get(cls, ()):
+            held[obj].add(predicate)
+        for slot in slots:
+            carried = collections.defaultdict(set)
+            for predicate, obj in pairs_on_slot(pairs, slot, classes):
+                if obj in held:
+                    carried[obj].add(predicate)
+            for obj, predicates in carried.items():
+                if predicates != held[obj]:
+                    found[(slot, cls, obj)] = (tuple(sorted(predicates)),
+                                              tuple(sorted(held[obj])))
+    return found
+
+
+def strength_problems(found, exceptions, slot_names):
+    """[(slot, problem)]: each disagreement in ``found`` that no listing in
+    ``exceptions`` names, or names with other predicates; and each listing
+    whose reason has 20 characters or fewer (a listing in the generator
+    must give more, test_the_lists_are_disjoint_and_give_reasons), that
+    names a slot not in ``slot_names`` (every slot name of either merged
+    schema), or that names a disagreement ``found`` does not hold. Empty
+    when the rule holds."""
+    problems = []
+    for (slot, cls, obj), (carried, held) in sorted(found.items()):
+        listing = exceptions.get(slot)
+        said = f"{'/'.join(carried)} {obj} where {cls} carries {'/'.join(held)}"
+        if listing is None or (listing.cls, listing.target) != (cls, obj):
+            problems.append((slot, "unlisted: " + said))
+        elif (tuple(listing.slot_predicates),
+              tuple(listing.class_predicates)) != (carried, held):
+            problems.append((slot, "not the listed disagreement: " + said))
+    for slot, listing in sorted(exceptions.items()):
+        if len((listing.reason or "").strip()) <= 20:
+            problems.append((slot, "listed without a reason"))
+        if slot not in slot_names:
+            problems.append((slot, "stale: neither merged schema declares it"))
+        elif (slot, listing.cls, listing.target) not in found:
+            problems.append((slot, f"stale: no disagreement with {listing.cls} "
+                                   f"on {listing.target}"))
+    return problems
+
+
+class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
+    """#4036: a slot whose range is a class with a class-level triple carries
+    each target that class carries with the class's predicate, whether its
+    subject is the slot (``d4d:<slot>``) or the slot in a class
+    (``d4d:<Class>_<slot>``), unless STRENGTH_EXCEPTIONS lists the
+    disagreement with a reason. The slot holds the class's objects, so a
+    slot and its class that align one target at different strengths say
+    two things about one value.
+
+    Until #4036 ten slots disagreed with their classes and every test
+    passed. The checks were a list of the 21 twins #4031 settled
+    (SETTLED_TWINS) and the derived check above, which reads only the
+    classes #3942, #3974 and #3976 changed; none of the ten classes is one
+    of those. Nine slots follow their classes now. The tenth,
+    distribution_formats, is listed until #4037 decides evi:formats.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.pairs = pairs_by_subject(parsed_triples())
+        cls.classes = schema_classes()
+        cls.aligned = {s for s in cls.pairs if subject_kind(s) == "class"}
+        cls.holders = slots_holding(cls.aligned)
+        cls.slot_names = schema_slot_names()
+
+    def problems(self, pairs=None):
+        """What the rule reports on the merged schemas and the TTL's pairs,
+        or ``pairs`` in their place."""
+        found = strength_disagreements(
+            self.pairs if pairs is None else pairs, self.holders, self.classes)
+        return strength_problems(found, STRENGTH_EXCEPTIONS, self.slot_names)
+
+    def changed(self, subject, add, drop=None):
+        """The TTL's pairs, with ``add`` added to ``subject`` and ``drop``
+        removed from it."""
+        pairs = {s: set(p) for s, p in self.pairs.items()}
+        pairs.setdefault(subject, set()).add(add)
+        pairs[subject].discard(drop)
+        return pairs
+
+    def test_every_slot_agrees_with_the_class_it_holds_or_is_listed(self):
+        problems = self.problems()
+        self.assertEqual(problems, [], "\n" + "\n".join(
+            f"{slot}: {problem}" for slot, problem in problems))
+
+    def test_the_rule_reads_the_holders_of_every_aligned_class(self):
+        """Not vacuous: every class with a class-level triple has a holder
+        the rule reads, but the three no slot of either merged schema holds
+        (see test_a_slot_that_holds_a_changed_class_follows_it). The listed
+        disagreement is one the rule finds, or the first test would report
+        it stale."""
+        self.assertEqual(self.aligned - set(self.holders),
+                         {"CoreDatasetCollection", "DatasetCollection",
+                          "Grantor"})
+
+    def test_a_planted_disagreement_fails_in_either_form(self):
+        """known_biases holds DatasetBias, and both say exactMatch
+        rai:dataBiases. A closeMatch on the slot is reported whether its
+        subject is the slot or the slot in a class, a class of either merged
+        schema (CoreDataset is a class only the core schema defines), and so
+        is the class changing strength without its slot. Each is all it adds
+        to what the TTL alone reports, as in
+        test_the_check_reads_a_triple_in_either_form, so a problem in the
+        TTL fails the test above and not this one."""
+        exact = ("exactMatch", "rai:dataBiases")
+        close = ("closeMatch", "rai:dataBiases")
+        self.assertEqual(self.pairs["known_biases"], {exact})
+        self.assertEqual(self.pairs["DatasetBias"], {exact})
+        alone = set(self.problems())
+        for subject, drop, carried, held in (
+                ("known_biases", exact, "closeMatch", "exactMatch"),
+                ("Dataset_known_biases", None, "closeMatch/exactMatch",
+                 "exactMatch"),
+                ("CoreDataset_known_biases", None, "closeMatch/exactMatch",
+                 "exactMatch"),
+                ("DatasetBias", exact, "exactMatch", "closeMatch")):
+            with self.subTest(subject=subject):
+                added = set(self.problems(
+                    pairs=self.changed(subject, close, drop))) - alone
+                self.assertEqual(
+                    added,
+                    {("known_biases", f"unlisted: {carried} rai:dataBiases "
+                                      f"where DatasetBias carries {held}")})
+
+    #: The listing tests use a world of their own, so a problem in the TTL
+    #: or in STRENGTH_EXCEPTIONS fails only the test that reads them: class C
+    #: carries closeMatch x:t, and slot s, which holds C, says exactMatch
+    #: x:t, the disagreement this listing allows.
+    LISTING = StrengthException("C", "x:t", ("exactMatch",), ("closeMatch",),
+                                "C and s are a fixture of these tests")
+
+    def listed(self, carried="exactMatch", exceptions=None, held=True,
+               declared=True):
+        """What the rule reports in that world: s carries ``carried`` on x:t,
+        holds C unless ``held`` is false, and is a slot name of the schemas
+        unless ``declared`` is false; ``exceptions`` is {s: LISTING} unless
+        given."""
+        found = strength_disagreements(
+            {"C": {("closeMatch", "x:t")}, "s": {(carried, "x:t")}},
+            {"C": {"s"} if held else set()}, {"C"})
+        return strength_problems(
+            found, {"s": self.LISTING} if exceptions is None else exceptions,
+            {"s"} if declared else set())
+
+    def test_a_listed_disagreement_holds_and_an_unlisted_one_fails(self):
+        self.assertEqual(self.listed(), [])
+        self.assertEqual(
+            self.listed(exceptions={}),
+            [("s", "unlisted: exactMatch x:t where C carries closeMatch")])
+
+    def test_a_listing_without_a_reason_fails(self):
+        for reason in (None, "", "   ", "see #4037"):
+            with self.subTest(reason=reason):
+                self.assertEqual(
+                    self.listed(exceptions={
+                        "s": self.LISTING._replace(reason=reason)}),
+                    [("s", "listed without a reason")])
+
+    def test_a_stale_listing_fails(self):
+        """A listing whose disagreement is gone fails: the slot agrees with
+        its class, no longer holds it, or is gone from both merged schemas;
+        so does a listing that names a slot neither schema declares. A
+        listing whose predicates changed fails as not the listed
+        disagreement."""
+        gone = ("s", "stale: no disagreement with C on x:t")
+        undeclared = "stale: neither merged schema declares it"
+        self.assertEqual(self.listed(carried="closeMatch"), [gone])
+        self.assertEqual(self.listed(held=False), [gone])
+        self.assertEqual(self.listed(held=False, declared=False),
+                         [("s", undeclared)])
+        self.assertEqual(
+            self.listed(exceptions={"s": self.LISTING, "t": self.LISTING}),
+            [("t", undeclared)])
+        self.assertEqual(
+            self.listed(carried="relatedMatch"),
+            [("s", "not the listed disagreement: relatedMatch x:t where C "
+                   "carries closeMatch")])
 
 
 #: Each EVI term the TTL names, with whether EVI defines it. The repository
