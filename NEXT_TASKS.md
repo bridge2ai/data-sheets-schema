@@ -72,26 +72,39 @@ evidence this section was written to be able to claim.
 
 ---
 
-## 3. Ship merged records — provenance done, playbook carve-out remains
+## 3. Merged records — provenance and carve-out implemented; shipping decision pending
 
-**Done:** `record_mode: derived` exists. A merged record now carries a provenance
-record naming every contributing replicate by md5, how many slots each supplied,
-and the rule that combined them, with `model`, `prompts` and `inputs.bundle_md5`
-explicitly marked not-applicable rather than left absent. All four guarded merges
-under `2026-07-29_guarded-union/` have one.
+**Implemented:** `record_mode: derived` names contributing records by hash,
+records their slot contributions and the combination rule, and marks generation
+metadata that does not apply. All four guarded merges under
+`2026-07-29_guarded-union/` have derived provenance.
 
-**Done:** the playbook now carries an explicit carve-out. Derivation is not
-generation — it consumes generated records as declared inputs rather than as a
-shortcut around evidence, introduces no new facts, and states what it consumed by
-md5. Five conditions bound it, and three are enforced in code rather than trusted
-to prose: a source must be complete and attested, a derived record may not
-contribute to another, and the writing path refuses a source method or run-directory
-alias before publication. `d4d runs merge --method` selects sources; `--out-method`
-selects the distinct destination (default: `<source method>_merged`). The remaining
-two (generation phases never derive; a derived record is not a replicate) are
-structural.
+**Implemented:** the playbook has an explicit derivation carve-out. Derivation
+is separate from generation, only complete and attested non-derived sources may
+contribute, and a derived output is not a replicate. The writer now preflights a
+distinct destination method and refuses aliases of contributing paths before
+writing. `d4d runs merge --method` selects sources; `--out-method` selects the
+destination (default: `<source method>_merged`). Historical outputs are not moved.
+This preflight does not make the record and provenance writes an atomic
+transaction.
 
-Merged records are now shippable.
+**Implemented:** default unscored merges record the base/first-holder rule.
+Opt-in `--fitness-context` and `--fitness-cache` select from saved judgments under
+a checked, pinned instrument and record consumed cache provenance. A cache miss
+refuses rather than calling a provider. Provenance and software checks do not
+certify scientific correctness or shipping eligibility.
+
+**Pending in [#4765](https://github.com/bridge2ai/data-sheets-schema/issues/4765):**
+record whether merged records remain investigation artifacts, with selection as
+the shipping route, or become a supported output under stated conditions.
+`d4d runs select` chooses an existing replicate; `d4d runs merge` combines values.
+Neither command alone establishes that an output is approved to ship.
+
+If merged records are to ship, #4765 requires current-arm scoring under a pinned
+instrument after #2929, replay of the rule over pinned source bytes, a derived
+core, recorded current-schema validation, and pair checks. Its Part B also awaits
+current-arm failure-class measurements and explicit generation-rule decisions.
+No fresh campaign, calibration acceptance or scientific benefit is claimed here.
 
 ---
 
