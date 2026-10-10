@@ -6,6 +6,49 @@ schema, target inventory, contextual specifications and pure request rendering.
 It does not execute a judge, reuse caches, calibrate a model, or authorize a run.
 The existing support-v2 instrument, prompts, caches and behavior are unchanged.
 
+An additional explicit policy addresses original strings where the selected
+schema requires an inline class mapping ([#4902](https://github.com/bridge2ai/data-sheets-schema/issues/4902)).
+The default remains strict. For an offline version-2 plan, select
+`--relationship-policy inline-class-strings`; the Python inventory/planner
+argument is `relationship_policy=support_targets.SCALAR_POLICY`.
+This is a distinct draft instrument and prompt, using policy
+`relationship_edge_and_attribute_value_inline_class_strings_v1`. It applies to
+class-valued inline slots generally, rather than depending on a class named
+`Person`. The observed 24-record coverage gap was Person-specific; that observation
+does not establish scientific validity for other class ranges.
+
+The opt-in policy retains a nonempty original string as one `relationship_edge`,
+with its exact pointer, value, nearest containing entity and current induced
+schema specification. It neither splits the string into people nor invents
+identifiers, mappings or child attributes. The target's `representation` records
+`schema_invalid_inline_class_string`; inventory and plan `representation_issues`
+retain each affected pointer and range. This is a known shape mismatch, not a
+successful schema validation, and a support verdict cannot repair it. Existing
+seven-verdict precedence is unchanged. Unknown slots, malformed cardinality,
+missing vocabularies and unsupported owner/slot constraints remain blocked;
+the new scalar case also refuses inherited constraints on its range class.
+Boolean/numeric/container values are not coerced into references. Proper inline
+mappings keep their existing traversal.
+
+Policy, instrument and request bytes are checked again during saved-result and
+registered-execution reconstruction. Record/target IDs remain plan-local: equal
+IDs do not permit evidence to cross plans or policies. Historical strict plans
+retain their original interpretation and request identities. New-policy reports
+separate selected-target representation issues, all issues verified in the
+chosen records, and full-plan **declared** counts; unselected record evidence is
+not reconstructed. These issues are a subset of relationship edges, not an
+additional pooled denominator. Attribute values and top-level fitness remain
+separate, and no verdict propagates to children or another facet.
+Calibration reports retain their all-edge groups and additionally expose
+`representation_counts` and `representation_groups` for the selected relationship
+controls. These distinguish inline-string mismatches from other edges; "other"
+does not mean schema-valid. The subsets contain the same observations, and their
+metrics retain the existing pending-control and scientific-eligibility limits.
+
+Instrument/context review, independently adjudicated controls, calibration,
+private-source handling and paid-run authorization remain separate requirements.
+Producing an additional question is not a semantic label or a scientific result.
+
 ```python
 from pathlib import Path
 from data_sheets_schema.support_targets import (

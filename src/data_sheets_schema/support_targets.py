@@ -21,6 +21,8 @@ import yaml
 INSTRUMENT = "support_targets v3 draft (#3342)"
 AXIS = "grounding_v3"
 POLICY = "relationship_edge_and_attribute_value_v2"
+SCALAR_POLICY = "relationship_edge_and_attribute_value_inline_class_strings_v1"
+SCALAR_INSTRUMENT = "support_targets v3 scalar-reference draft (#4902)"
 KINDS = ("relationship_edge", "attribute_value")
 DECLARATIONS = ("attributed_to", "claim_status", "source_status")
 IDENTITY = ("id", "name", "title", "doi", "version")
@@ -54,6 +56,29 @@ facets, infer that an unsupported fact is false, or treat a caveat as permission
 for an unsupported structured role. Reply with exactly a JSON object containing
 verdict and a nonempty reason, with no other keys. This draft is uncalibrated.
 """
+
+SCALAR_SYSTEM = SYSTEM + """
+This instrument explicitly permits an original string in a slot whose schema
+requires an inline class mapping to be judged as one relationship_edge. Its
+representation metadata records that schema-shape failure; support cannot make
+the representation schema-valid. Judge only the relationship asserted by the
+original string in this containing slot, retaining its exact wording. Do not
+split it into invented entities, infer identifiers, or fabricate child
+attributes. A composite string remains one facet with the same seven verdicts
+and precedence above. Schema-shape failure alone is not evidence for or against
+source support. This extension still requires instrument/context review.
+"""
+
+
+def policy_instrument(policy: str) -> tuple[str, str]:
+    """Resolve only the two captured contracts; never reinterpret an old one."""
+    if type(policy) is not str:
+        raise ValueError("relationship policy must be a known string")
+    if policy == POLICY:
+        return INSTRUMENT, SYSTEM
+    if policy == SCALAR_POLICY:
+        return SCALAR_INSTRUMENT, SCALAR_SYSTEM
+    raise ValueError("unknown relationship policy")
 
 
 def _canonical(value: Any) -> str:
@@ -259,6 +284,8 @@ class TargetInventory:
     blocked_json: str
     artifact_json: str
     specifications_json: str
+    relationship_policy: str = POLICY
+    representation_issues_json: str = "[]"
 
     def target(self, pointer: str, *, kind: str) -> SupportTarget:
         pointer_tokens(pointer)
@@ -269,7 +296,8 @@ class TargetInventory:
 
     def to_dict(self):
         counts = Counter(t.kind for t in self.targets)
-        return {"instrument": INSTRUMENT, "axis": AXIS, "policy": POLICY,
+        instrument, _ = policy_instrument(self.relationship_policy)
+        result = {"instrument": instrument, "axis": AXIS, "policy": self.relationship_policy,
                 "artifact": json.loads(self.artifact_json),
                 "eligible_by_kind": {k: counts[k] for k in KINDS},
                 "blocked": json.loads(self.blocked_json),
@@ -277,18 +305,24 @@ class TargetInventory:
                 "specifications": json.loads(self.specifications_json),
                 "fitness_basis": "top_level_only; many nested targets map to one parent field",
                 "targets": [json.loads(t.payload_json) for t in self.targets]}
+        if self.relationship_policy == SCALAR_POLICY:
+            issues = json.loads(self.representation_issues_json)
+            result.update(representation_issues=issues, representation_issue_count=len(issues))
+        return result
 
 
 def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *,
                       artifact_kind: str, max_nodes: int = 100_000,
                       max_depth: int = 64, max_input_bytes: int = 4_000_000,
-                      max_inventory_bytes: int = 64_000_000) -> TargetInventory:
+                      max_inventory_bytes: int = 64_000_000,
+                      relationship_policy: str = POLICY) -> TargetInventory:
     """Capture a deterministic inventory from exact input bytes, without I/O.
 
     No wrappers are unwrapped: every pointer addresses these exact bytes.
     Malformed shapes and unsupported schema constructs are explicit blockers.
     Fitness mappings refer to the original document's top-level field only.
     """
+    instrument, _ = policy_instrument(relationship_policy)
     if artifact_kind not in {"full", "core", "collection"}:
         raise ValueError("artifact_kind must be full, core or collection")
     limits = (max_nodes, max_depth, max_input_bytes, max_inventory_bytes)
@@ -309,6 +343,7 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                 "max_nodes": max_nodes, "max_depth": max_depth,
                 "max_input_bytes": max_input_bytes, "max_inventory_bytes": max_inventory_bytes}
     targets, blocked, specifications = [], [], {}
+    representation_issues = []
     rendered_bytes = 0
 
     def block(pointer, code):
@@ -381,7 +416,8 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                                 "reason": "other_container_not_selected_assertion"})
         return kept, sorted(omitted, key=lambda item: item["pointer"])
 
-    def emit(pointer, kind, value, owner, owner_pointer, owner_class, chain, ancestors):
+    def emit(pointer, kind, value, owner, owner_pointer, owner_class, chain, ancestors,
+             representation=None):
         nonlocal rendered_bytes
         # Retain complete scalar siblings and named qualifier fields without
         # repeating unrelated containers. Every omission is explicit and pinned.
@@ -413,7 +449,7 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                    "ancestors": ancestors, "declarations": declared,
                    "collection_metadata_inherited": False}
         first = pointer_tokens(pointer)[0]
-        payload = {"instrument": INSTRUMENT, "axis": AXIS, "policy": POLICY,
+        payload = {"instrument": instrument, "axis": AXIS, "policy": relationship_policy,
                    "pointer": pointer, "kind": kind, "artifact": artifact,
                    "value": value, "value_sha256": _digest(value),
                    "value_type": _typed(value)[0], "value_yaml": yaml.safe_dump(value, sort_keys=True),
@@ -421,6 +457,8 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                    "context_sha256": _digest(context),
                    "fitness": {"basis": "top_level_only", "mapping": "many_to_one",
                                "pointer": "/" + _token(first)}}
+        if representation is not None:
+            payload["representation"] = representation
         encoded = _canonical(payload)
         rendered_bytes += len(encoded.encode("utf-8"))
         if rendered_bytes > max_inventory_bytes:
@@ -428,6 +466,7 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
         targets.append(SupportTarget(encoded, specifications[spec_key]))
 
     def walk(entity, class_name, pointer, chain, ancestors):
+        nonlocal rendered_bytes
         cls = classes[class_name]
         if has_class_constraint(class_name):
             block(pointer, "unsupported_class_constraint")
@@ -468,6 +507,22 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                 if entry["range_class"]:
                     if entry["inline"]:
                         if not isinstance(member, dict):
+                            if relationship_policy == SCALAR_POLICY and type(member) is str:
+                                if has_class_constraint(rng):
+                                    block(path, "unsupported_class_constraint")
+                                    continue
+                                issue = {"pointer": path, "kind": "relationship_edge",
+                                         "code": "inline_class_requires_mapping", "range": rng}
+                                representation_issues.append(issue)
+                                rendered_issue = _canonical(issue).encode("utf-8")
+                                # The extra ledger is retained alongside the target.
+                                # Charge it to the same finite inventory budget.
+                                rendered_bytes += len(rendered_issue)
+                                emit(path, "relationship_edge", member, entity, pointer, class_name,
+                                     next_chain, ancestors, representation={
+                                         "status": "schema_invalid_inline_class_string",
+                                         "expected": "mapping", "observed": "str", "range": rng})
+                                continue
                             block(path, "inline_class_requires_mapping")
                             continue
                         emit(path, "relationship_edge", member, entity, pointer, class_name,
@@ -486,7 +541,8 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
 
     walk(document, root_class, "", [], [])
     return TargetInventory(tuple(targets), _canonical(blocked), _canonical(artifact),
-                           _canonical({key: json.loads(value) for key, value in specifications.items()}))
+                           _canonical({key: json.loads(value) for key, value in specifications.items()}),
+                           relationship_policy, _canonical(representation_issues))
 
 
 def render_request(target: SupportTarget, *, bundle: str, model: str,
@@ -499,12 +555,15 @@ def render_request(target: SupportTarget, *, bundle: str, model: str,
     if type(max_tokens) is not int or max_tokens < 1:
         raise ValueError("max_tokens must be a positive integer")
     payload = target.to_dict()
+    instrument, system = policy_instrument(payload["policy"])
+    if payload["instrument"] != instrument:
+        raise ValueError("target instrument and relationship policy disagree")
     # YAML already carries the complete value and native types. Avoid sending
     # the JSON preview as a second copy of every source/context paragraph.
     payload.pop("value")
     payload["context"]["containing_entity"].pop("value")
     return {"model": model, "max_tokens": max_tokens, "temperature": None,
-            "system": SYSTEM, "messages": [{"role": "user", "content": [
+            "system": system, "messages": [{"role": "user", "content": [
                 {"type": "text", "text": "# Source documents\n\n" + bundle,
                  "cache_control": {"type": "ephemeral"}},
                 {"type": "text", "text": "# Exact assertion target and untrusted record context\n\n"

@@ -243,11 +243,14 @@ def _registration(capture, descriptor_raw, declaration, identity):
     overhead = len(canonical(descriptor)) + 16_384 * len(requests)
     response_budget = declaration["limits"]["total_response_bytes"]
     _need(8 * response_budget + 2 * overhead <= saved.MAX_MANIFEST_BYTES, "declared responses exceed bounded report storage")
-    return {"format": protocol, "kind": "registration", "descriptor": capture.add(descriptor_raw),
+    result = {"format": protocol, "kind": "registration", "descriptor": capture.add(descriptor_raw),
             "declaration": declaration, "implementation": identity,
             "requests": requests,
             "original_readiness": descriptor["readiness"], "scientific_eligibility": False,
             "limitations": _limitations(protocol)}
+    if "representation_accounting" in descriptor:
+        result["representation_accounting"] = descriptor["representation_accounting"]
+    return result
 
 
 def _load(capture, raw):
@@ -610,6 +613,8 @@ def recheck_captured(capture, ledger):
               "fitness": "separate_and_unscored", "limitations": _limitations(reg["format"])}
     if reg["format"] == FITNESS_FORMAT:
         result["axis"] = "fitness"
+    if "representation_accounting" in reg:
+        result["representation_accounting"] = reg["representation_accounting"]
     _need(len(canonical(result)) <= saved.MAX_MANIFEST_BYTES, "report exceeds storage bound")
     return result
 

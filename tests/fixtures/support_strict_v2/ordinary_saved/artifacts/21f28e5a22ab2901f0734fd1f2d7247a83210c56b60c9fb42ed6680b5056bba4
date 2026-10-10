@@ -1,0 +1,9 @@
+inputs:
+  bundle_md5: 85d9b581837aa8ed5fd14a2a51b66691
+  bundle_path: bundle.txt
+model:
+  model: claude-opus-5
+run:
+  label: condition_rep1
+  method: api
+  project: Harbor

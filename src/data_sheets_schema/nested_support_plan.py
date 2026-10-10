@@ -61,12 +61,15 @@ def _request_counts(request, *, support: bool, first: bool):
 def build_nested_plan(roster: Path, output: Path, *, model: str | None,
                       profile: str, class_name: str, schema_path: Path | None,
                       max_tokens: int, prices: Path | None, root: Path,
-                      artifact_kind: str | None, vocabulary_path: Path | None) -> dict:
+                      artifact_kind: str | None, vocabulary_path: Path | None,
+                      relationship_policy: str = nested.POLICY) -> dict:
     """Pin and render draft nested support plus separate top-level fitness.
 
     One explicit artifact kind/schema/profile per plan. No v2 support request,
     measured verdict, provider transport or judgement-cache reuse is produced.
     """
+    instrument, system = nested.policy_instrument(relationship_policy)
+    scalar_policy = relationship_policy == nested.SCALAR_POLICY
     root, output = Path(root).resolve(), Path(output)
     if output.exists() or output.is_symlink():
         raise common.PlanError(f"output already exists: {output}")
@@ -106,6 +109,7 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
     schema_sources = [{"import_key": key, "path": str(source), **artifacts.put(content)}
                       for key, source, content in before.sources]
     records, targets, recovered, missing_joins, all_blocked = [], [], {}, [], []
+    representation_issues = []
     totals = _totals()
     by_stratum = {stratum: _totals() for stratum in STRATA}
 
@@ -125,7 +129,8 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
         project, label, method, cohort, replicate = identity
         record_raw, record_pin, record, provenance_pin, bundle_raw, bundle_pin, bundle, generator = common._record_inputs(
             root, input_path, identity, jobs, pins, artifacts, recovered, artifact_kind=artifact_kind)
-        inventory = nested.inventory_targets(record_raw, captured, artifact_kind=artifact_kind)
+        inventory = nested.inventory_targets(record_raw, captured, artifact_kind=artifact_kind,
+                                             relationship_policy=relationship_policy)
         inventory_doc = inventory.to_dict()
         # This is a plan, not an executable target inventory: only the engineering
         # planner-integration blocker has been completed here.
@@ -160,6 +165,10 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
                         "fitness_top_level_targets": len(fitness_slots),
                         "blocked_paths": blocked, "blocked_count": len(blocked),
                         "inventory": inventory_pin, "rubric_join_jobs": join_jobs})
+        if scalar_policy:
+            issues = [{"record_id": record_id, **row} for row in inventory_doc["representation_issues"]]
+            records[-1].update(representation_issues=issues, representation_issue_count=len(issues))
+            representation_issues.extend(issues)
         fitness_ids = {slot: f"{record_id}:fitness:/{nested._token(slot)}" for slot in fitness_slots}
         for ordinal, target in enumerate(inventory.targets):
             payload = target.to_dict()
@@ -228,8 +237,8 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
                    "vocabulary": artifacts.put(vocabulary_raw) if vocabulary_raw is not None else None,
                    "vocabulary_path": str(vocabulary_file) if vocabulary_file is not None else None,
                    "vocabulary_basis": vocabulary_basis, "vocabulary_names": sorted(vocabulary)},
-        "instruments": {nested.AXIS: {"name": nested.INSTRUMENT, "policy": nested.POLICY,
-                                      "system": artifacts.put(nested.SYSTEM.encode())},
+        "instruments": {nested.AXIS: {"name": instrument, "policy": relationship_policy,
+                                      "system": artifacts.put(system.encode())},
                         "fitness": {"name": "LLMSlotFitnessScorer", "granularity": "top_level_field",
                                     "system": artifacts.put(evidence_score.FITNESS_SYSTEM.encode())}},
         "request_boundary": "pure renderer keyword arguments, before unregistered provider transport; canonical UTF-8 JSON, not wire bytes",
@@ -248,6 +257,9 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
                      "prices": price, "scenarios": scenarios(totals),
                      "by_stratum": {name: scenarios(count) for name, count in by_stratum.items()}},
     }
+    if scalar_policy:
+        manifest["representation_issues"] = representation_issues
+        manifest["counts"]["representation_issue_count"] = len(representation_issues)
     encoded_manifest = json.dumps(manifest, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
     output.mkdir()
     (output / "artifacts").mkdir()
