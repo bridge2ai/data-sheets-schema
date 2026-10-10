@@ -628,7 +628,8 @@ def reconcile_receipt(receipt: dict[str, Any], original: dict[str, Any] | None,
                 continue
             rm = remap_path(slot, original, final)
             resolved_path = rm.get("path")
-            if resolved_path and resolve(final, resolved_path):
+            ok, val = _resolve_value(final, resolved_path) if resolved_path else (False, None)
+            if ok and _populated(val):
                 if resolved_path != slot:
                     new_entry = dict(pair)
                     new_entry["slot"] = resolved_path

@@ -468,3 +468,44 @@ def test_reconcile_receipt_is_pure():
     assert receipt == before
     assert clean_rc["chunks"][0]["status"] == "nothing_relevant"
 
+
+def test_reconcile_receipt_prunes_unpopulated_leaves():
+    """Empty string and None leaf slots in final must be pruned as dropped (#4905)."""
+    receipt = {
+        "bundle_md5": "abc",
+        "chunks": [
+            {
+                "id": "c001",
+                "status": "extracted",
+                "extracted": [
+                    {"slot": "title", "snippet": "AI-READI Dataset"},
+                    {"slot": "version", "snippet": "v1.0.0"},
+                    {"slot": "description", "snippet": "Empty description"},
+                    {"slot": "license", "snippet": "Null license"},
+                ],
+            },
+        ],
+    }
+    orig = {
+        "title": "AI-READI Dataset",
+        "version": "v1.0.0",
+        "description": "Empty description",
+        "license": "Null license",
+    }
+    final = {
+        "title": "AI-READI Dataset",
+        "version": "v1.0.0",
+        "description": "",      # emptied during repair
+        "license": None,        # blanked during repair
+    }
+    clean_rc, stats = rc.reconcile_receipt(receipt, orig, final)
+    assert stats["retained"] == 2
+    assert stats["dropped"] == 2
+    c1 = clean_rc["chunks"][0]
+    assert c1["status"] == "extracted"
+    assert c1["extracted"] == [
+        {"slot": "title", "snippet": "AI-READI Dataset"},
+        {"slot": "version", "snippet": "v1.0.0"},
+    ]
+
+

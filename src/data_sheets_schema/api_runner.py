@@ -2395,8 +2395,17 @@ def _sync_receipt_after_reconciliation(spec: RunSpec, carry: dict[str, Any]) -> 
         rc_content = yaml.safe_load(raw_rc)
         if not isinstance(rc_content, dict):
             return
-        orig_body = carry.get("Original full record")
+        orig_body = carry.get("Original full record") or carry.get("Completed full record")
         orig_record = yaml.safe_load(orig_body) if isinstance(orig_body, str) else None
+        if orig_record is None:
+            try:
+                from data_sheets_schema import snapshot_store
+                _, snap_entry = snapshot_store.read_latest(
+                    spec.provenance_path.parent, spec.project, f"{spec.project}_full.yaml", spec=spec)
+                if snap_entry is not None:
+                    orig_record = yaml.safe_load(snap_entry[1].decode("utf-8"))
+            except Exception:
+                orig_record = None
         if orig_record is None:
             snap = _intermediate_dir(spec) / f"{spec.project}_full.yaml"
             if snap.exists():
