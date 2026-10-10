@@ -250,6 +250,8 @@ def _registration(capture, descriptor_raw, declaration, identity):
             "limitations": _limitations(protocol)}
     if "representation_accounting" in descriptor:
         result["representation_accounting"] = descriptor["representation_accounting"]
+    if "context_policy" in descriptor:
+        result["context_policy"] = descriptor["context_policy"]
     return result
 
 
@@ -615,6 +617,8 @@ def recheck_captured(capture, ledger):
         result["axis"] = "fitness"
     if "representation_accounting" in reg:
         result["representation_accounting"] = reg["representation_accounting"]
+    if "context_policy" in reg:
+        result["context_policy"] = reg["context_policy"]
     _need(len(canonical(result)) <= saved.MAX_MANIFEST_BYTES, "report exceeds storage bound")
     return result
 

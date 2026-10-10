@@ -23,6 +23,10 @@ AXIS = "grounding_v3"
 POLICY = "relationship_edge_and_attribute_value_v2"
 SCALAR_POLICY = "relationship_edge_and_attribute_value_inline_class_strings_v1"
 SCALAR_INSTRUMENT = "support_targets v3 scalar-reference draft (#4902)"
+CONTEXT_POLICY = "nearest_owner_and_ancestor_identity_v1"
+ANCESTOR_CONTEXT_POLICY = "ancestor_scalar_qualifiers_v1"
+ANCESTOR_INSTRUMENT = "support_targets v3 ancestor-context draft (#4904)"
+SCALAR_ANCESTOR_INSTRUMENT = "support_targets v3 scalar-reference ancestor-context draft (#4902/#4904)"
 KINDS = ("relationship_edge", "attribute_value")
 DECLARATIONS = ("attributed_to", "claim_status", "source_status")
 IDENTITY = ("id", "name", "title", "doi", "version")
@@ -69,14 +73,35 @@ and precedence above. Schema-shape failure alone is not evidence for or against
 source support. This extension still requires instrument/context review.
 """
 
+ANCESTOR_CONTEXT_INSTRUCTION = """
+This context policy includes complete scalar fields, scalar-only lists and
+explicit qualifier fields from the actual ancestors on this target's path.
+Each projection identifies its original pointer, class and field origins;
+omission and path-branch metadata identify values not repeated here. This is
+untrusted record context, not independent source evidence. Use scoped attribution
+to understand what the selected facet purports to assert, without endorsing a
+claimed source ranking or resolving a conflict merely because the record does.
+Ancestor declarations are not inherited declarations of this facet. Visibility
+of a collection fact does not make it apply to a resource. Do not regrade other
+facets, excuse an unsupported role, or invent missing context. The same seven
+verdicts and precedence apply. This context extension remains uncalibrated and
+requires independent instrument and context review.
+"""
 
-def policy_instrument(policy: str) -> tuple[str, str]:
-    """Resolve only the two captured contracts; never reinterpret an old one."""
+
+def policy_instrument(policy: str, *, context_policy: str = CONTEXT_POLICY) -> tuple[str, str]:
+    """Resolve finite relationship/context pairs without reinterpreting old ones."""
+    if type(context_policy) is not str or context_policy not in (CONTEXT_POLICY, ANCESTOR_CONTEXT_POLICY):
+        raise ValueError("context policy must be a known string")
     if type(policy) is not str:
         raise ValueError("relationship policy must be a known string")
     if policy == POLICY:
+        if context_policy == ANCESTOR_CONTEXT_POLICY:
+            return ANCESTOR_INSTRUMENT, SYSTEM + ANCESTOR_CONTEXT_INSTRUCTION
         return INSTRUMENT, SYSTEM
     if policy == SCALAR_POLICY:
+        if context_policy == ANCESTOR_CONTEXT_POLICY:
+            return SCALAR_ANCESTOR_INSTRUMENT, SCALAR_SYSTEM + ANCESTOR_CONTEXT_INSTRUCTION
         return SCALAR_INSTRUMENT, SCALAR_SYSTEM
     raise ValueError("unknown relationship policy")
 
@@ -286,6 +311,7 @@ class TargetInventory:
     specifications_json: str
     relationship_policy: str = POLICY
     representation_issues_json: str = "[]"
+    context_policy: str = CONTEXT_POLICY
 
     def target(self, pointer: str, *, kind: str) -> SupportTarget:
         pointer_tokens(pointer)
@@ -296,7 +322,7 @@ class TargetInventory:
 
     def to_dict(self):
         counts = Counter(t.kind for t in self.targets)
-        instrument, _ = policy_instrument(self.relationship_policy)
+        instrument, _ = policy_instrument(self.relationship_policy, context_policy=self.context_policy)
         result = {"instrument": instrument, "axis": AXIS, "policy": self.relationship_policy,
                 "artifact": json.loads(self.artifact_json),
                 "eligible_by_kind": {k: counts[k] for k in KINDS},
@@ -305,6 +331,8 @@ class TargetInventory:
                 "specifications": json.loads(self.specifications_json),
                 "fitness_basis": "top_level_only; many nested targets map to one parent field",
                 "targets": [json.loads(t.payload_json) for t in self.targets]}
+        if self.context_policy != CONTEXT_POLICY:
+            result["context_policy"] = self.context_policy
         if self.relationship_policy == SCALAR_POLICY:
             issues = json.loads(self.representation_issues_json)
             result.update(representation_issues=issues, representation_issue_count=len(issues))
@@ -315,14 +343,15 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                       artifact_kind: str, max_nodes: int = 100_000,
                       max_depth: int = 64, max_input_bytes: int = 4_000_000,
                       max_inventory_bytes: int = 64_000_000,
-                      relationship_policy: str = POLICY) -> TargetInventory:
+                      relationship_policy: str = POLICY,
+                      context_policy: str = CONTEXT_POLICY) -> TargetInventory:
     """Capture a deterministic inventory from exact input bytes, without I/O.
 
     No wrappers are unwrapped: every pointer addresses these exact bytes.
     Malformed shapes and unsupported schema constructs are explicit blockers.
     Fitness mappings refer to the original document's top-level field only.
     """
-    instrument, _ = policy_instrument(relationship_policy)
+    instrument, _ = policy_instrument(relationship_policy, context_policy=context_policy)
     if artifact_kind not in {"full", "core", "collection"}:
         raise ValueError("artifact_kind must be full, core or collection")
     limits = (max_nodes, max_depth, max_input_bytes, max_inventory_bytes)
@@ -416,6 +445,31 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                                 "reason": "other_container_not_selected_assertion"})
         return kept, sorted(omitted, key=lambda item: item["pointer"])
 
+    def ancestor_context(owner, pointer, class_name, branch_slot, child_pointer):
+        kept, omitted = {}, []
+        for name, value in owner.items():
+            if name == branch_slot:
+                continue
+            scalar_or_scalar_list = (not isinstance(value, (dict, list)) or
+                                    isinstance(value, list) and
+                                    all(not isinstance(v, (dict, list)) for v in value))
+            if scalar_or_scalar_list or name in QUALIFIERS:
+                kept[name] = value
+            else:
+                omitted.append({"pointer": pointer + "/" + _token(name),
+                                "sha256": _digest(value), "size": len(value),
+                                "reason": "other_container_not_selected_assertion"})
+        branch = owner[branch_slot]
+        return {"pointer": pointer, "class": class_name, "projection": ANCESTOR_CONTEXT_POLICY,
+                "value": kept, "value_yaml": yaml.safe_dump(kept, sort_keys=True),
+                "source_mapping_sha256": _digest(owner), "value_sha256": _digest(kept),
+                "field_origins": {name: pointer + "/" + _token(name) for name in sorted(kept)},
+                "omitted_containers": sorted(omitted, key=lambda item: item["pointer"]),
+                "path_branch": {"pointer": pointer + "/" + _token(branch_slot),
+                                "selected_entity_pointer": child_pointer,
+                                "sha256": _digest(branch), "size": len(branch),
+                                "reason": "selected_path_branch_represented_separately"}}
+
     def emit(pointer, kind, value, owner, owner_pointer, owner_class, chain, ancestors,
              representation=None):
         nonlocal rendered_bytes
@@ -448,6 +502,8 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                                           "omitted_containers": omitted},
                    "ancestors": ancestors, "declarations": declared,
                    "collection_metadata_inherited": False}
+        if context_policy != CONTEXT_POLICY:
+            context["context_policy"] = context_policy
         first = pointer_tokens(pointer)[0]
         payload = {"instrument": instrument, "axis": AXIS, "policy": relationship_policy,
                    "pointer": pointer, "kind": kind, "artifact": artifact,
@@ -457,6 +513,8 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                    "context_sha256": _digest(context),
                    "fitness": {"basis": "top_level_only", "mapping": "many_to_one",
                                "pointer": "/" + _token(first)}}
+        if context_policy != CONTEXT_POLICY:
+            payload["context_policy"] = context_policy
         if representation is not None:
             payload["representation"] = representation
         encoded = _canonical(payload)
@@ -527,7 +585,9 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                             continue
                         emit(path, "relationship_edge", member, entity, pointer, class_name,
                              next_chain, ancestors)
-                        walk(member, rng, path, next_chain, ancestry)
+                        next_ancestors = (ancestors + [ancestor_context(entity, pointer, class_name, name, path)]
+                                          if context_policy == ANCESTOR_CONTEXT_POLICY else ancestry)
+                        walk(member, rng, path, next_chain, next_ancestors)
                     elif isinstance(member, str):
                         emit(path, "relationship_edge", member, entity, pointer, class_name,
                              next_chain, ancestors)
@@ -542,7 +602,7 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
     walk(document, root_class, "", [], [])
     return TargetInventory(tuple(targets), _canonical(blocked), _canonical(artifact),
                            _canonical({key: json.loads(value) for key, value in specifications.items()}),
-                           relationship_policy, _canonical(representation_issues))
+                           relationship_policy, _canonical(representation_issues), context_policy)
 
 
 def render_request(target: SupportTarget, *, bundle: str, model: str,
@@ -555,13 +615,17 @@ def render_request(target: SupportTarget, *, bundle: str, model: str,
     if type(max_tokens) is not int or max_tokens < 1:
         raise ValueError("max_tokens must be a positive integer")
     payload = target.to_dict()
-    instrument, system = policy_instrument(payload["policy"])
+    context_policy = payload.get("context_policy", CONTEXT_POLICY)
+    instrument, system = policy_instrument(payload["policy"], context_policy=context_policy)
     if payload["instrument"] != instrument:
         raise ValueError("target instrument and relationship policy disagree")
     # YAML already carries the complete value and native types. Avoid sending
     # the JSON preview as a second copy of every source/context paragraph.
     payload.pop("value")
     payload["context"]["containing_entity"].pop("value")
+    if context_policy == ANCESTOR_CONTEXT_POLICY:
+        for ancestor in payload["context"]["ancestors"]:
+            ancestor.pop("value")
     return {"model": model, "max_tokens": max_tokens, "temperature": None,
             "system": system, "messages": [{"role": "user", "content": [
                 {"type": "text", "text": "# Source documents\n\n" + bundle,

@@ -107,18 +107,22 @@ def _manifest(capture, registration_raw, controls_raw):
         else:
             _need(control["review"] is None, "pending/synthetic control cannot claim completed review")
         resolved[target] = {**control, "binding": binding}
-    return {"format": FORMAT, "kind": "control_manifest", "calibration_id": controls["calibration_id"],
+    result = {"format": FORMAT, "kind": "control_manifest", "calibration_id": controls["calibration_id"],
             "registration": capture.add(registration_raw), "controls": capture.add(controls_raw),
             "resolved_controls": [resolved[s["target_id"]] for s in selections],
             "purpose": registration["declaration"]["purpose"],
             "original_readiness": registration["original_readiness"],
             "scientific_eligibility": False, "limitations": list(LIMITATIONS)}
+    if "context_policy" in descriptor:
+        result["context_policy"] = descriptor["context_policy"]
+    return result
 
 
 def _load_manifest(capture, raw):
     value = saved._read(raw, "calibration manifest", limit=MAX_CALIBRATION_BYTES)
+    context_keys = {"context_policy"} if type(value) is dict and "context_policy" in value else set()
     _keys(value, {"format", "kind", "calibration_id", "registration", "controls", "resolved_controls",
-                  "purpose", "original_readiness", "scientific_eligibility", "limitations"}, "manifest")
+                  "purpose", "original_readiness", "scientific_eligibility", "limitations"} | context_keys, "manifest")
     expected = _manifest(capture, capture.get(value["registration"], limit=execution.MAX_REGISTRATION_BYTES),
                          capture.get(value["controls"], limit=MAX_CONTROLS_BYTES))
     _need(raw == canonical(expected) + b"\n", "calibration manifest differs from reconstructed inputs")
@@ -198,6 +202,8 @@ def _result(capture, manifest, ledger):
         if "policy" in control["binding"]:
             row.update(policy=control["binding"]["policy"],
                        representation=control["binding"]["representation"])
+        if "context_policy" in control["binding"]:
+            row["context_policy"] = control["binding"]["context_policy"]
         rows.append(row)
     unresolved = sum(not row["scored"] for row in rows)
     groups, verdict_groups = [], []
@@ -227,6 +233,8 @@ def _result(capture, manifest, ledger):
             "execution_accounting": execution_report,
             "original_readiness": manifest["original_readiness"], "scientific_eligibility": False,
             "limitations": list(LIMITATIONS)}
+    if "context_policy" in manifest:
+        result["context_policy"] = manifest["context_policy"]
     if any("policy" in row for row in rows):
         # These are subsets of the existing relationship controls, not new
         # observations. Absence of this issue does not establish schema validity.

@@ -338,7 +338,8 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
                max_tokens: int = 8000, prices: Path | None = None,
                root: Path = ROOT, plan_version: int = 1,
                artifact_kind: str | None = None, vocabulary_path: Path | None = None,
-               relationship_policy: str = support_targets.POLICY) -> dict:
+               relationship_policy: str = support_targets.POLICY,
+               context_policy: str = support_targets.CONTEXT_POLICY) -> dict:
     """Freeze a fresh offline plan. Failure never changes existing artifacts.
 
     ``root`` anchors roster paths and recovery history. Profile selection is
@@ -352,9 +353,11 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
         return build_nested_plan(roster, output, model=model, profile=profile,
             class_name=class_name, schema_path=schema_path, max_tokens=max_tokens,
             prices=prices, root=root, artifact_kind=artifact_kind, vocabulary_path=vocabulary_path,
-            relationship_policy=relationship_policy)
+            relationship_policy=relationship_policy, context_policy=context_policy)
     if relationship_policy != support_targets.POLICY:
         raise PlanError("nondefault relationship_policy requires plan_version=2")
+    if type(context_policy) is not str or context_policy != support_targets.CONTEXT_POLICY:
+        raise PlanError("nondefault context_policy requires plan_version=2")
     if artifact_kind is not None or vocabulary_path is not None:
         raise PlanError("artifact_kind and vocabulary_path require plan_version=2")
     root, output = Path(root).resolve(), Path(output)
