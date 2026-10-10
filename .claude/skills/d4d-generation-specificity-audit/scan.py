@@ -107,10 +107,12 @@ MODEL_FACING_MODULES = frozenset({
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
     "shared_generation", "typed_audit_runtime", "typed_audit", "audit_omissions", "audit_batches",
+    "native_shared_render", "native_shared_stage", "native_shared_receipts", "native_shared_contract",
+    "source_heading_runtime",
 })
 
-# Explicitly reviewed builders outside every live generation call path. Keep
-# this separate from MODEL_FACING_MODULES: the latter asserts live reachability.
+# Offline draft text remains distinct from live request text. The compiler can
+# also be a run-shaping dependency of the explicit captured routing adapter.
 OFFLINE_DRAFT_MODULES = ("src/data_sheets_schema/source_heading_routing.py",)
 
 #: How strongly an approach reaches a file. Per approach the strongest wins:
@@ -1577,7 +1579,10 @@ def condition_table(root: Path) -> dict:
         raise _not_derived("the current generic condition", "no generic_vN in CONDITION_PROMPTS")
     current = max(versions, key=versions.get)
     default = derive_cli_default(_tree(root / CLI_API), prompts)
-    live = sorted({current, default})
+    routed = _required(env, "SOURCE_HEADING_CONDITIONS", tuple) if "SOURCE_HEADING_CONDITIONS" in env else ()
+    if any(name not in prompts for name in routed):
+        raise _not_derived("selected routing conditions", "a declared condition lacks its prompt")
+    live = sorted({current, default, *routed})
     tuned = "tuned" in prompts
     reads = None
     if tuned:
@@ -1585,6 +1590,7 @@ def condition_table(root: Path) -> dict:
         reads["sends_tuned_prompt"] = "TUNED_PROMPT" in reads["reads"]
         reads["sends_components"] = "COMPONENTS" in reads["reads"]
     return {"prompts": prompts, "current": current, "default": default, "live": live,
+            **({"registered_routing_conditions": list(routed)} if routed else {}),
             "tuned_prompt": _required(env, "TUNED_PROMPT", str) if tuned else None,
             "components": _required(env, "COMPONENTS", str) if tuned else None,
             "tuned": reads,
@@ -4115,6 +4121,634 @@ def derive_admitted_renderers(tree: ast.Module) -> list[int]:
     raise _not_derived("the renderers RunSpec admits", "no raising `render_version not in (...)` in api_runner.py")
 
 
+def _early_axis_refusal(tree: ast.Module) -> dict:
+    """A positive version-axis refusal at the first executable statement.
+
+    This proves an API continuation has a false axis; it does not infer what
+    an opaque native validator admits. Only a default-zero integer field and
+    the literal ``getattr(spec, field, 0) or spec.render_version == N`` guard
+    are supported. A reordered, weakened or rebound guard is not evidence.
+    """
+    fn = _function(tree, 'execute')
+    if fn is None:
+        raise _not_derived('early API axis refusal', 'missing execute')
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+    fields = {n.target.id for n in cls.body if isinstance(n, ast.AnnAssign)
+              and isinstance(n.target, ast.Name) and isinstance(n.annotation, ast.Name)
+              and n.annotation.id == 'int' and isinstance(n.value, ast.Constant)
+              and type(n.value.value) is int and n.value.value == 0} if cls else set()
+    candidates = [n for n in ast.walk(fn) if isinstance(n, ast.If)
+        and any(isinstance(x, ast.Call) and isinstance(x.func, ast.Name) and x.func.id == 'getattr'
+                and len(x.args) >= 2 and ast.unparse(x.args[0]) == 'spec'
+                and isinstance(x.args[1], ast.Constant) and x.args[1].value in fields
+                for x in ast.walk(n.test))
+        and any(isinstance(x, ast.Raise) for x in ast.walk(n))]
+    # Later ordinary optional dispatches may contain refusals. Only direct
+    # raising guards claim an API boundary; the selected native guard must be
+    # one of these, not a nested check reached after effects.
+    candidates = [n for n in candidates if any(isinstance(x, ast.Raise) for x in n.body)]
+    if not candidates:
+        return {}
+    body = fn.body[1:] if (isinstance(fn.body[0], ast.Expr)
+        and isinstance(fn.body[0].value, ast.Constant) and type(fn.body[0].value.value) is str) else fn.body
+    fail = lambda: _not_derived('early API axis refusal', 'unsupported guard, default, binding or statement order')
+    if len(candidates) != 1 or candidates[0] is not body[0] or fn.decorator_list or 'getattr' in _params(fn):
+        raise fail()
+    guard = candidates[0]
+    if sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == 'execute' for n in tree.body) != 1:
+        raise fail()
+    if guard.orelse or len(guard.body) != 1 or not isinstance(guard.body[0], ast.Raise):
+        raise fail()
+    if not isinstance(guard.test, ast.BoolOp) or not isinstance(guard.test.op, ast.Or) or len(guard.test.values) != 2:
+        raise fail()
+    call, compare = guard.test.values
+    if not (isinstance(call, ast.Call) and len(call.args) == 3 and not call.keywords
+            and isinstance(call.args[1], ast.Constant) and call.args[1].value in fields
+            and isinstance(call.args[2], ast.Constant) and type(call.args[2].value) is int and call.args[2].value == 0
+            and isinstance(compare, ast.Compare) and len(compare.ops) == 1
+            and isinstance(compare.ops[0], ast.Eq) and ast.unparse(compare.left) == 'spec.render_version'
+            and isinstance(compare.comparators[0], ast.Constant) and type(compare.comparators[0].value) is int):
+        raise fail()
+    field, renderer = call.args[1].value, compare.comparators[0].value
+    expected = ast.parse(f"getattr(spec, {field!r}, 0) or spec.render_version == {renderer}", mode='eval').body
+    if ast.dump(guard.test) != ast.dump(expected):
+        raise fail()
+    if any((isinstance(n, ast.Name) and n.id == 'getattr' and isinstance(n.ctx, (ast.Store, ast.Del)))
+           or _rebinding(n, 'getattr', fn) for n in ast.walk(tree)):
+        raise fail()
+    return {'field': field, 'api_value': 0, 'renderer': renderer, 'line': guard.lineno}
+
+
+def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:
+    """Source proof of a separate native render selector, not launch approval.
+
+    Recognize the closed validator prefix and its actual RunSpec/CLI call
+    sites. No generation module is imported. The remaining capture validators
+    can narrow admission; they cannot be used to infer an API procedure or a
+    successful controller execution.
+    """
+    field = 'native_shared_generation_version'
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+    declarations = [n for n in cls.body if isinstance(n, ast.AnnAssign)
+                    and isinstance(n.target, ast.Name) and n.target.id == field] if cls else []
+    if not declarations:
+        return None
+    fail = lambda detail: _not_derived('separate native shared render route', detail)
+    dump = lambda n: ast.dump(n, include_attributes=False)
+    declaration = ast.parse(f'{field}: int = 0').body[0]
+    if len(declarations) != 1 or dump(declarations[0]) != dump(declaration):
+        raise fail('axis is not one default-zero integer declaration')
+    early = _early_axis_refusal(tree)
+    if not early or early['field'] != field:
+        raise fail('missing proven early API refusal')
+    relative = 'src/data_sheets_schema/native_shared_render.py'
+    contract_path = 'src/data_sheets_schema/native_shared_contract.py'
+    renderer_tree, contract = _tree(root / relative), _tree(root / contract_path)
+    constants = {}
+    for name, expected_type in (('RENDERER', int), ('CONDITION', str), ('RUNTIME', str), ('VERSION', int)):
+        bindings = [n for n in contract.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                    and isinstance(n.targets[0], ast.Name) and n.targets[0].id == name]
+        if len(bindings) != 1 or not isinstance(bindings[0].value, ast.Constant) or type(bindings[0].value.value) is not expected_type:
+            raise fail('contract constants lack unique typed literal bindings')
+        binding = bindings[0]
+        if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                and n is not binding.targets[0]) or isinstance(n, ast.arg) and n.arg == name
+               or _rebinding(n, name, None) for n in ast.walk(contract)):
+            raise fail('contract constant is rebound')
+        constants[name] = binding.value.value
+    if (constants['VERSION'] != 1 or constants['RENDERER'] != early['renderer']
+            or constants['RENDERER'] not in derive_admitted_renderers(tree)):
+        raise fail('validator contract and API refusal disagree')
+    fn = _function(renderer_tree, 'validate_spec')
+    if (fn is None or fn.decorator_list or ast.unparse(fn.args) != 'spec'
+            or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == 'validate_spec'
+                   for n in renderer_tree.body) != 1):
+        raise fail('unsupported validator signature or decorator')
+    imports = [n for n in renderer_tree.body if isinstance(n, ast.ImportFrom) and n.level == 1
+               and n.module is None and len(n.names) == 1 and n.names[0].name == 'native_shared_contract'
+               and n.names[0].asname == 'c']
+    if len(imports) != 1:
+        raise fail('validator contract import is not exact')
+    for name in ('c', 'getattr', 'type', 'int'):
+        if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+               or _rebinding(n, name, fn) for n in ast.walk(renderer_tree)
+               if n is not imports[0].names[0]):
+            raise fail('validator authority or builtin is rebound')
+    # Exception messages are diagnostics, not selector authority. Everything
+    # else in these six statements is exact, including zero/default semantics.
+    class RaisingShape(ast.NodeTransformer):
+        def visit_Raise(self, node):
+            return ast.Raise(exc=None, cause=None)
+    def shape(nodes):
+        return dump(RaisingShape().visit(ast.parse('\n'.join(ast.unparse(n) for n in nodes))))
+    companions = ('native_source_attribution_version', 'shared_generation_version',
+                  'api_playbook_version', 'receipt_completion_version', 'removal_repair_version')
+    prefix = ast.parse(f'''version = getattr(spec, {field!r}, 0)
+registration = getattr(spec, 'native_shared_generation_registration', None)
+if type(version) is not int or version not in (0, 1):
+    raise ValueError()
+if not version:
+    if registration is not None or spec.render_version == {constants['RENDERER']}:
+        raise ValueError()
+    return None
+if (spec.condition != c.CONDITION or type(spec.render_version) is not int
+        or spec.render_version != c.RENDERER or spec.runtime != c.RUNTIME
+        or spec.method != 'claudecode_direct' or spec.out_dir is not None
+        or spec.prompt_text_env is not True):
+    raise ValueError()
+for key in {companions!r}:
+    if type(getattr(spec, key)) is not int or getattr(spec, key) != 0:
+        raise ValueError()
+''').body
+    if shape(fn.body[:len(prefix)]) != shape(prefix):
+        raise fail('unsupported delegated admission prefix')
+    if any((isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
+            and ast.unparse(n.value) == 'spec') or isinstance(n, ast.Name) and n.id == 'spec'
+           and isinstance(n.ctx, (ast.Store, ast.Del)) or _rebinding(n, 'spec', fn)
+           or isinstance(n, ast.Call) and ast.unparse(n.func) in {'setattr', 'delattr'}
+           or isinstance(n, ast.Call) and ast.unparse(n.func) != 'getattr'
+              and (any(isinstance(x, ast.Name) and x.id == 'spec' for x in n.args)
+                   or isinstance(n.func, ast.Attribute) and ast.unparse(n.func.value) == 'spec')
+           for n in ast.walk(fn)):
+        raise fail('delegated selector mutates its spec')
+    init = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == '__post_init__'), None)
+    expected_import = ast.parse('from .native_shared_render import validate_spec as validate_native_shared').body[0]
+    expected_call = ast.parse('validate_native_shared(self)').body[0]
+    imports_at = [i for i, n in enumerate(init.body) if dump(n) == dump(expected_import)] if init else []
+    if (len(imports_at) != 1 or imports_at[0] + 1 >= len(init.body)
+            or dump(init.body[imports_at[0] + 1]) != dump(expected_call)):
+        raise fail('RunSpec does not call the exact validator directly')
+    if any(isinstance(n, (ast.Return, ast.Yield, ast.YieldFrom)) for n in ast.walk(init)):
+        raise fail('RunSpec can exit before completing selector validation')
+    allowed_alias = init.body[imports_at[0]].names[0]
+    if any((isinstance(n, ast.Name) and n.id == 'validate_native_shared' and isinstance(n.ctx, (ast.Store, ast.Del)))
+           or _rebinding(n, 'validate_native_shared', init) for n in ast.walk(init) if n is not allowed_alias):
+        raise fail('RunSpec validator is rebound')
+    guard_test = ast.parse(f"getattr(spec, {field!r}, 0) or spec.render_version == {constants['RENDERER']}", mode='eval').body
+    evidence = [f'{RUNNER}:{declarations[0].lineno}', f'{RUNNER}:{early["line"]}',
+                f'{RUNNER}:{init.body[imports_at[0]+1].lineno}', f'{relative}:{fn.lineno}']
+    for name in ('resolve_prompt', 'build_phase'):
+        caller = _function(tree, name)
+        body = caller.body if caller else []
+        if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and type(body[0].value.value) is str:
+            body = body[1:]
+        guard = body[0] if body else None
+        if not isinstance(guard, ast.If) or dump(guard.test) != dump(guard_test) or guard.orelse:
+            raise fail('prompt/phase route is not an early exact guarded branch')
+        expected = ast.parse('from .native_shared_render import instruction\nreturn instruction(spec)').body
+        if name == 'resolve_prompt':
+            if [dump(n) for n in guard.body] != [dump(n) for n in expected]:
+                raise fail('selected instruction delegates another spec or builder')
+        elif len(guard.body) != 1 or not isinstance(guard.body[0], ast.Raise):
+            raise fail('API phase builder does not refuse the selected native route')
+        evidence.append(f'{RUNNER}:{guard.lineno}')
+
+    cli_path = 'src/data_sheets_schema/cli/prompt.py'
+    cli = _tree(root / cli_path)
+    command = _function(cli, 'render_native_shared')
+    if command is None or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                              and n.name == 'render_native_shared' for n in cli.body) != 1:
+        raise fail('missing offline render CLI consumer')
+    command_decorators = [n for n in command.decorator_list if isinstance(n, ast.Call)
+                          and ast.unparse(n.func) == 'prompt.command']
+    if (len(command_decorators) != 1 or command_decorators[0].keywords
+            or [ast.unparse(n) for n in command_decorators[0].args] != [repr('render-native-shared')]):
+        raise fail('offline CLI command spelling is not derived')
+    expected_imports = ast.parse('''from data_sheets_schema.api_runner import RunSpec
+from data_sheets_schema import native_shared_contract as contract
+from data_sheets_schema.native_shared_selection import capture
+from data_sheets_schema.native_shared_controller import bind_runtime
+''').body
+    for imp in expected_imports:
+        matches = [n for n in command.body if dump(n) == dump(imp)]
+        if len(matches) != 1:
+            raise fail('CLI uses an unproved constructor, contract or runtime binding')
+        alias = matches[0].names[0]
+        name = alias.asname or alias.name
+        if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+               or _rebinding(n, name, command) for n in ast.walk(command) if n is not alias):
+            raise fail('CLI selected binding is rebound')
+    tries = [n for n in command.body if isinstance(n, ast.Try)]
+    if len(tries) != 1:
+        raise fail('unsupported offline CLI structure')
+    statements = tries[0].body
+    capture_prefix = ast.parse("captured = capture(selection)\ndocument = captured.document()\ninputs = document['inputs']").body
+    if [dump(n) for n in statements[:3]] != [dump(n) for n in capture_prefix]:
+        raise fail('CLI does not capture its actual selection argument')
+    assignments = [(i, n) for i, n in enumerate(statements) if isinstance(n, ast.Assign)
+                   and len(n.targets) == 1 and ast.unparse(n.targets[0]) == 'spec']
+    if len(assignments) != 1:
+        raise fail('CLI lacks one selected spec')
+    index, assignment = assignments[0]
+    call = assignment.value
+    if not isinstance(call, ast.Call) or ast.unparse(call.func) != 'RunSpec' or call.args:
+        raise fail('CLI spec constructor is not proven')
+    keywords = {k.arg: k.value for k in call.keywords}
+    required = {'condition': 'contract.CONDITION', 'render_version': 'contract.RENDERER',
+                'runtime': 'contract.RUNTIME', field: '1', 'prompt_text_env': 'True'}
+    if len(keywords) != len(call.keywords) or any(k not in keywords or ast.unparse(keywords[k]) != v for k,v in required.items()):
+        raise fail('CLI native identity differs from the contract')
+    tail = ast.parse('bind_runtime(spec, runtime_declaration, max_draft_checks)\ntext = spec.instruction').body
+    if [dump(n) for n in statements[index+1:index+3]] != [dump(n) for n in tail]:
+        raise fail('CLI does not bind the explicit runtime before rendering the same spec')
+    # The consumer is render-only. A new call here is not silently relabeled an
+    # execution gate; its source shape needs a separate derivation/review.
+    allowed_calls = {'capture', 'captured.document', 'ValueError', 'RunSpec', 'Path',
+        'captured.registration.raw.decode', 'run_date.strftime', 'bind_runtime',
+        'Path(out).resolve', 'destination.open', 'stream.write', 'click.ClickException',
+        'str', 'text.encode', 'click.echo', 'hashlib.sha256', 'hashlib.sha256(raw).hexdigest', 'len'}
+    if any(ast.unparse(n.func) not in allowed_calls for statement in command.body
+           for n in ast.walk(statement) if isinstance(n, ast.Call)):
+        raise fail('offline render consumer contains an unsupported call')
+    evidence.append(f'{cli_path}:{command.lineno}')
+    binder = 'src/data_sheets_schema/native_shared_controller.py'
+    binder_present = (root / binder).is_file()
+    if binder_present:
+        _tree(root / binder)  # a present but unreadable/unparsed module is not coverage
+    return {'field': field, 'default': 0, 'enabled_values': [constants['VERSION']],
+            'condition': constants['CONDITION'], 'renderer': constants['RENDERER'],
+            'runtime': constants['RUNTIME'], 'companion_axes': dict.fromkeys(companions, 0),
+            'api_execute': 'refused before dry-run, locks or dispatch',
+            'api_phase_builder': 'refused', 'instruction_builder': relative + ':instruction',
+            'cli': 'd4d prompt render-native-shared',
+            'runtime_binding': {'path': binder, 'source_present': binder_present,
+                'basis': 'Source presence only; the binder is not executed or its acceptance inferred.'
+                if binder_present else 'Referenced binder source is absent in this snapshot; runnable rendering is not established.'},
+            'scope': 'Offline rendering of the explicit native selection and runtime declaration; '
+                     'separate execution registration and controller acceptance are not established by this scan.',
+            'model_calls_minimum': None, 'evidence': evidence}
+
+
+def derive_native_shared_procedure(root: Path) -> dict:
+    """Read the selected response roster, not native execution/acceptance.
+
+    This deliberately recognizes a few concrete producer shapes. Phase,
+    correction and terminal obligations are source-linked descriptions below,
+    not another implementation of their runtime validators.
+    """
+    prefix = 'src/data_sheets_schema/'
+    paths = {name: prefix + name + '.py' for name in (
+        'native_shared_stage', 'native_shared_receipts', 'typed_audit',
+        'audit_omissions', 'native_shared_render')}
+    trees = {name: _tree(root / path) for name, path in paths.items()}
+    fail = lambda detail: _not_derived('native shared response roster', detail)
+    dump = lambda node: ast.dump(node, include_attributes=False)
+    same = lambda node, text: dump(node) == dump(ast.parse(text).body[0])
+
+    def function(module, name, owner=None):
+        body = trees[module].body
+        if owner:
+            classes = [n for n in body if isinstance(n, ast.ClassDef) and n.name == owner]
+            if len(classes) != 1:
+                raise fail('missing unique ' + owner)
+            if any((isinstance(n, ast.Name) and n.id == owner and isinstance(n.ctx, (ast.Store, ast.Del)))
+                   or (isinstance(n, ast.Attribute) and ast.unparse(n) == owner + '.' + name
+                       and isinstance(n.ctx, (ast.Store, ast.Del))) for n in ast.walk(trees[module])):
+                raise fail('fixed producer class/method is replaced: ' + owner + '.' + name)
+            body = classes[0].body
+        found = [n for n in body if isinstance(n, ast.FunctionDef) and n.name == name]
+        if len(found) != 1 or found[0].decorator_list:
+            raise fail('unsupported producer ' + name)
+        if owner is None and any((isinstance(n, ast.Name) and n.id == name
+                                  and isinstance(n.ctx, (ast.Store, ast.Del)))
+                                 or (isinstance(n, ast.alias) and (n.asname or n.name) == name)
+                                 or (isinstance(n, ast.arg) and n.arg == name)
+                                 for n in ast.walk(trees[module])):
+            raise fail('producer binding is replaced or shadowed: ' + name)
+        return found[0]
+
+    def statement(fn, text):
+        found = [n for n in fn.body if same(n, text)]
+        if len(found) != 1:
+            raise fail('unsupported ' + fn.name + ' producer: ' + text.splitlines()[0])
+        return found[0]
+
+    def assignment(fn, target):
+        found = [n for n in fn.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                 and ast.unparse(n.targets[0]) == target]
+        if len(found) != 1:
+            raise fail('missing unique ' + target + ' binding in ' + fn.name)
+        return found[0]
+
+    def fixed_import(module, source, name, alias):
+        tree = trees[module]
+        expected = ast.parse(f'from .{source} import {name} as {alias}' if source else
+                             f'from . import {name} as {alias}').body[0]
+        found = [n for n in tree.body if dump(n) == dump(expected)]
+        if len(found) != 1:
+            raise fail('missing fixed producer import ' + alias)
+        binding = found[0].names[0]
+        if any((isinstance(n, ast.Name) and n.id == alias and isinstance(n.ctx, (ast.Store, ast.Del)))
+               or (isinstance(n, ast.alias) and n is not binding and (n.asname or n.name) == alias)
+               or (isinstance(n, ast.arg) and n.arg == alias) for n in ast.walk(tree)):
+            raise fail('producer import is shadowed: ' + alias)
+
+    def field(value, name):
+        if not isinstance(value, ast.Dict):
+            raise fail('producer does not return a literal mapping')
+        if any(not isinstance(key, ast.Constant) or type(key.value) is not str for key in value.keys):
+            raise fail('counted authority mapping has unpacked or dynamic keys')
+        keys = [key.value for key in value.keys]
+        if len(keys) != len(set(keys)):
+            raise fail('counted authority mapping has duplicate keys')
+        found = [v for k, v in zip(value.keys, value.values)
+                 if isinstance(k, ast.Constant) and k.value == name]
+        if len(found) != 1:
+            raise fail('missing unique payload field ' + name)
+        return found[0]
+
+    def unchanged(fn, name, allowed, *, after=None):
+        """Only the matched producer/consumer nodes may use this value.
+
+        This is a closed local-use check, not an alias or control-flow engine.
+        An extra read can hand a mutable value to an unknown helper, so it is
+        unsupported just like an extra store or subscript/method mutation.
+        """
+        def selected(node):
+            return isinstance(node, (ast.Name, ast.Attribute)) and ast.unparse(node) == name
+        permitted = {id(n) for tree in allowed for n in ast.walk(tree) if selected(n)}
+        region = [fn] if after is None else fn.body[fn.body.index(after):]
+        nodes = [n for tree in region for n in ast.walk(tree)]
+        actual = {id(n) for n in nodes if selected(n)}
+        if actual != permitted or (name.isidentifier() and any(
+                _rebinding(n, name, fn) for n in nodes)):
+            raise fail(fn.name + ' changes or escapes counted ' + name)
+
+    def body(fn):
+        return [n for n in fn.body if not (isinstance(n, ast.Expr)
+                and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str))]
+
+    def exact_body(fn, text):
+        expected = ast.parse('def expected():\n    ' + text).body[0].body
+        if [dump(n) for n in body(fn)] != [dump(n) for n in expected]:
+            raise fail('unsupported fixed delegation in ' + fn.name)
+
+    def sole_return(fn, expected):
+        if [n for n in ast.walk(fn) if isinstance(n, ast.Return)] != [expected]:
+            raise fail('alternate counted result in ' + fn.name)
+
+    fixed_import('native_shared_stage', '', 'native_shared_receipts', 'nr')
+    fixed_import('native_shared_stage', '', 'typed_audit', 'typed')
+    fixed_import('native_shared_stage', '', 'native_catalog_reuse', 'catalog_reuse')
+    # typed_audit's existing grouped import is intentionally read as a binding,
+    # rather than imposing a new import layout on that producer.
+    for module, name, alias in (('typed_audit', 'audit_batches', 'batches'),
+                                ('typed_audit', 'audit_omissions', 'omissions')):
+        tree = trees[module]
+        bindings = [a for n in tree.body if isinstance(n, ast.ImportFrom) and n.level == 1 and n.module is None
+                    for a in n.names if a.name == name and a.asname == alias]
+        if len(bindings) != 1 or any(isinstance(n, ast.Name) and n.id == alias
+                                   and isinstance(n.ctx, (ast.Store, ast.Del)) for n in ast.walk(tree)):
+            raise fail('missing fixed typed producer ' + alias)
+
+    run = function('native_shared_stage', 'run', '_Replay')
+    requested = statement(run, "requested = nr._prepare(self.s, self.e, self.p, self.catalogs)['requested_paths']")
+    branches = [n for n in run.body if isinstance(n, ast.If) and ast.unparse(n.test) == 'requested']
+    if len(branches) != 1:
+        raise fail('receipt work lacks its exact positive conditional')
+    branch = branches[0]
+    expected = ast.parse("if not self._stage(c.StageCursor(ordinal=ordinal, kind='receipt', target_id='receipt')):\n    return self\nordinal += 1").body
+    if [dump(n) for n in branch.body] != [dump(n) for n in expected]:
+        raise fail('receipt is not one conditional response-bearing stage')
+    if not branch.orelse or not same(branch.orelse[0],
+            'self.receipt = nr._complete(self.s, self.e, self.p, None, self.catalogs)'):
+        raise fail('zero-work receipt does not complete without an answer')
+    stages = [n for n in ast.walk(run) if isinstance(n, ast.Call) and ast.unparse(n.func) == 'self._stage']
+    if len(stages) != 2 or sum(isinstance(n, ast.Name) and n.id == 'requested' for n in ast.walk(run)) != 2:
+        raise fail('unsupported extra stage or receipt-condition use')
+    receipt_fn = function('native_shared_receipts', '_prepare')
+    receipt_paths = statement(receipt_fn, 'paths = receipts.uncovered_receiptable_leaves(receipt, manifest, texts, full, md5, original=full, identifier_bases=bases)')
+    returns = [n for n in receipt_fn.body if isinstance(n, ast.Return)]
+    if len(returns) != 1 or ast.unparse(field(returns[0].value, 'requested_paths')) != 'paths':
+        raise fail('receipt condition is not the uncovered-leaf result')
+    unchanged(receipt_fn, 'paths', [receipt_paths.targets[0], field(returns[0].value, 'requested_paths')])
+    sole_return(receipt_fn, returns[0])
+
+    packet_fn = function('native_shared_stage', '_packet', '_Replay')
+    packet_assignment = assignment(packet_fn, 'packet')
+    packet_call = packet_assignment.value
+    if not isinstance(packet_call, ast.Call) or ast.unparse(packet_call.func) != 'typed._prepare' or packet_call.args:
+        raise fail('native worker packet is not the fixed typed preparation')
+    kwargs = {k.arg: ast.unparse(k.value) for k in packet_call.keywords}
+    if kwargs.get('_catalog_lookup') != 'catalog_reuse._CatalogLookup(self.catalogs, self.s)':
+        raise fail('native packet lacks its fixed private receipt-catalog association')
+    for key, value in {'original_full': 'self.p.full.raw', 'max_paths': "limits['max_paths_per_worker']",
+                       'max_inventory_bytes': "limits['max_inventory_bytes']", 'max_workers': "limits['max_workers']"}.items():
+        if kwargs.get(key) != value:
+            raise fail('worker plan does not use the original record and selected partition limits')
+    packet_bound = statement(packet_fn, "if len(packet['plan']['inventory']['values']) > limits['max_populated_paths']:\n    raise ValueError('native global populated path bound exceeded')")
+    packet_return = statement(packet_fn, 'return packet')
+    unchanged(packet_fn, 'packet', [packet_assignment.targets[0], packet_bound, packet_return])
+    sole_return(packet_fn, packet_return)
+
+    # The public producer must actually reach the inspected fresh derivation.
+    # The cache branch below recognizes only its fixed product transport; it
+    # does not reproduce cache limits, key security or runtime validation.
+    exact_body(function('typed_audit', 'prepare'), '''return _prepare(
+        protocol=protocol, original_full=original_full, bundle=bundle, manifest=manifest,
+        receipt=receipt, context=context, schema_path=schema_path,
+        max_output_tokens=max_output_tokens, original_core=original_core,
+        source_manifest=source_manifest, project=project, max_request_bytes=max_request_bytes,
+        max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers,
+        schema_snapshot=schema_snapshot, derivations=derivations, captured_assets=captured_assets)''')
+    prepare = function('typed_audit', '_prepare')
+    inputs = statement(prepare, '''inputs = {key: _blob(value) for key, value in dict(
+        original_full=original_full, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, original_core=original_core, source_manifest=source_manifest).items()
+        if value is not None}''')
+    limits = statement(prepare, '''limits = dict(max_output_tokens=max_output_tokens,
+        max_request_bytes=max_request_bytes, max_paths=max_paths,
+        max_inventory_bytes=max_inventory_bytes, max_workers=max_workers)''')
+    derive_call = statement(prepare, 'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)')
+    seal = statement(prepare, '''packet = _seal(dict(kind=PACKET,
+        protocol=audit_protocol.select(protocol), inputs=inputs, schema_sources=rows,
+        project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))''')
+    packet_size = statement(prepare, '_bounded_json(_json(packet), "packet", MAX_PACKET_BYTES)')
+    packet_validation = statement(prepare, '''for worker in packet['plan']['workers']:
+        worker_request(packet, worker['id'], derivations=derivations, captured_assets=captured_assets)''')
+    returned = statement(prepare, 'return packet')
+    sole_return(prepare, returned)
+    for name, uses in (('inputs', [inputs.targets[0], derive_call, seal]),
+                       ('limits', [limits.targets[0], derive_call, seal]),
+                       ('derived', [derive_call.targets[0], seal]),
+                       ('packet', [seal.targets[0], packet_size, packet_validation, returned])):
+        unchanged(prepare, name, uses)
+    if not (prepare.body.index(inputs) < prepare.body.index(derive_call)
+            and prepare.body.index(limits) < prepare.body.index(derive_call)
+            < prepare.body.index(seal) < prepare.body.index(packet_size)
+            < prepare.body.index(packet_validation) < prepare.body.index(returned)):
+        raise fail('typed preparation does not preserve producer/return order')
+    exact_body(function('typed_audit', '_seal'), 'return {**value, "sha256": _sha(_json(value))}')
+
+    dispatch = function('typed_audit', '_derive')
+    exact_body(dispatch, '''if derivations is not None:
+        if type(derivations) is not DerivationCache:
+            raise ValueError('derivations must be an explicit DerivationCache')
+        return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
+    if captured_assets is None:
+        return _derive_uncached(inputs, schema_rows, project, limits)
+    if _schema_reuse is not None:
+        return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
+    return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets)''')
+    cache_init = function('typed_audit', '__init__', 'DerivationCache')
+    empty = statement(cache_init, 'self._rows, self._bytes = {}, 0')
+    unchanged(cache_init, 'self._rows', [empty.targets[0]])
+    cache = function('typed_audit', '_derive', 'DerivationCache')
+    lookup = statement(cache, 'encoded = self._rows.get(key)')
+    misses = [n for n in cache.body if isinstance(n, ast.If) and ast.unparse(n.test) == 'encoded is None']
+    if len(misses) != 1:
+        raise fail('cache producer lacks its unique miss branch')
+    miss = misses[0]
+    expected_miss = ast.parse('''if encoded is None:
+        derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
+        encoded = _json({'derived': derived, 'raw': {name: _blob(value) for name, value in raw.items()},
+                         'prepared_payload_json': prepared.payload_json})
+        if len(encoded) <= self.max_bytes:
+            while self._rows and (len(self._rows) >= self.max_entries or self._bytes + len(encoded) > self.max_bytes):
+                self._bytes -= len(self._rows.pop(next(iter(self._rows))))
+            self._rows[key] = encoded
+            self._bytes += len(encoded)''').body[0]
+    if dump(miss) != dump(expected_miss):
+        raise fail('cache miss does not transport the complete fixed derivation')
+    decoded = statement(cache, 'value = json.loads(encoded)')
+    cache_return = statement(cache, '''return value['derived'], {
+        name: _unblob(blob) for name, blob in value['raw'].items()}, omissions.Prepared(value['prepared_payload_json'])''')
+    sole_return(cache, cache_return)
+    for name, uses in (('encoded', [lookup, miss, decoded]),
+                       ('value', [miss.body[1], decoded, cache_return]),
+                       ('derived', [miss.body[0], miss.body[1]]),
+                       ('self._rows', [lookup, miss])):
+        unchanged(cache, name, uses, after=None if name == 'self._rows' else lookup)
+    if not (cache.body.index(lookup) < cache.body.index(miss)
+            < cache.body.index(decoded) < cache.body.index(cache_return)):
+        raise fail('cache product lookup/producer/return order changed')
+    derived = function('typed_audit', '_derive_uncached')
+    plan = assignment(derived, 'plan')
+    if not same(plan, "plan = batches.make_plan(raw['original_full'].decode('utf-8'), version=2, **{k: limits[k] for k in ('max_paths', 'max_inventory_bytes', 'max_workers')})"):
+        raise fail('typed plan is not derived from the original full and partition limits')
+    prepared = assignment(derived, 'prepared').value
+    if not isinstance(prepared, ast.Call) or ast.unparse(prepared.func) != 'omissions._prepare':
+        raise fail('typed omission request does not use its actual constructor')
+    statement(derived, '''prepared = omissions._prepare(record=raw['original_full'], bundle=raw['bundle'],
+        manifest=raw['manifest'], receipt=raw['receipt'], context=raw['context'],
+        schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
+        max_output_tokens=limits['max_output_tokens'], max_request_bytes=limits['max_request_bytes'],
+        captured_assets=captured_assets, _catalog=(_schema_reuse.for_snapshot(snapshot)
+            if captured_assets is not None and type(_schema_reuse) is _SchemaReuse else None))''')
+    result = [n for n in derived.body if isinstance(n, ast.Return) and isinstance(n.value, ast.Tuple)]
+    if len(result) != 1 or ast.unparse(field(result[0].value.elts[0], 'plan')) != 'plan' or \
+            ast.unparse(field(result[0].value.elts[0], 'omission_request')) != 'prepared.request()':
+        raise fail('typed result replaces its worker plan or omission request')
+    sole_return(derived, result[0])
+    worker_payloads = statement(derived, '''workers = {worker['id']: _json({
+        'stage': 'worker', 'shared_context_sha256': _sha(shared.encode()),
+        'plan_sha256': plan['sha256'], 'assignment': worker, 'inventory': plan['inventory'],
+        'output_contract': contracts['worker']}).decode('utf-8') for worker in plan['workers']}''')
+    unchanged(derived, 'plan', [plan.targets[0], worker_payloads, field(result[0].value.elts[0], 'plan')])
+    shared = assignment(derived, 'shared').value
+    if not (isinstance(shared, ast.Call) and isinstance(shared.func, ast.Attribute)
+            and isinstance(shared.func.value, ast.Call) and ast.unparse(shared.func.value.func) == '_json'
+            and len(shared.func.value.args) == 1):
+        raise fail('typed shared context lacks the fixed payload')
+    shared_fields = shared.func.value.args[0]
+    prepared_reads = [field(shared_fields, key) for key in ('context', 'schema')]
+    if [ast.unparse(n) for n in prepared_reads] != [
+            "prepared.request()['payload']['context']", "prepared.request()['payload']['schema']"]:
+        raise fail('typed context does not read its actual omission request')
+    unchanged(derived, 'prepared', [assignment(derived, 'prepared').targets[0], *prepared_reads,
+        field(result[0].value.elts[0], 'omission_request'), result[0].value.elts[2]])
+
+    packet_binding = statement(run, 'self.packet = self._packet()')
+    workers = statement(run, "roster = [('worker', worker['id']) for worker in self.packet['plan']['workers']]")
+    unchanged(run, 'self.packet', [packet_binding.targets[0], workers])
+    fixed = statement(run, "roster += [('omission', 'omission'), ('integration', 'integration')]")
+    loops = [n for n in run.body if isinstance(n, ast.For) and ast.unparse(n.iter) == 'roster']
+    loop_text = 'for kind, target in roster:\n    if not self._stage(c.StageCursor(ordinal=ordinal, kind=kind, target_id=target)):\n        return self\n    ordinal += 1'
+    if len(loops) != 1 or not same(loops[0], loop_text):
+        raise fail('required worker/omission/integration roster is not fully iterated')
+    bound = statement(run, "if ordinal - 1 + len(roster) > self.s.bounds()['max_submissions']:\n    raise ValueError('complete native stage roster exceeds declared submissions; no truncation')")
+    if not (run.body.index(requested) < run.body.index(branch) < run.body.index(packet_binding)
+            < run.body.index(workers) < run.body.index(fixed) < run.body.index(bound) < run.body.index(loops[0])):
+        raise fail('required response roster order changed')
+    if sum(isinstance(n, ast.Name) and n.id == 'roster' for n in ast.walk(run)) != 4:
+        raise fail('required roster is filtered, extended or otherwise reused')
+
+    # Public and typed callers reach the same fixed chunk/request constructor.
+    # The private catalog handoff does not establish runtime schema validity.
+    exact_body(function('audit_omissions', 'prepare'), '''return _prepare(
+        record=record, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, schema_path=schema_path, max_output_tokens=max_output_tokens,
+        schema_snapshot=schema_snapshot, max_request_bytes=max_request_bytes,
+        captured_assets=captured_assets)''')
+    omission = function('audit_omissions', '_prepare')
+    chunk_calls = [n for n in ast.walk(omission) if isinstance(n, ast.Assign) and
+                   same(n, 'chunks, _pins = evidence.source_chunks_from_bytes(bundle, manifest)')]
+    if len(chunk_calls) != 1:
+        raise fail('omission chunks are not the canonical captured bundle/manifest chunks')
+    payload = assignment(omission, 'payload')
+    chunk_list = field(payload.value, 'chunks')
+    expected_chunks = ast.parse("[{'chunk': key, **value, 'prior_receipt_status': prior.get(key, 'unreviewed')} for key, value in chunks.items()]", mode='eval').body
+    if dump(chunk_list) != dump(expected_chunks):
+        raise fail('omission payload filters or replaces canonical chunks')
+    stores = [n for n in ast.walk(omission) if isinstance(n, ast.Name) and n.id == 'chunks' and isinstance(n.ctx, (ast.Store, ast.Del))]
+    if len(stores) != 1 or any(isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                              and ast.unparse(n.func.value) == 'chunks' and n.func.attr != 'items' for n in ast.walk(omission)):
+        raise fail('canonical chunk map is modified before omission enumeration')
+    encoded_payload = statement(omission, 'encoded = _json(payload)')
+    omission_bound = statement(omission, '''if len(_json(Prepared(encoded).request()).encode()) > max_request_bytes:
+        raise ValueError('complete request exceeds max_request_bytes; no partial request returned')''')
+    omission_return = statement(omission, 'return Prepared(encoded)')
+    sole_return(omission, omission_return)
+    unchanged(omission, 'payload', [payload.targets[0], encoded_payload])
+    unchanged(omission, 'encoded', [encoded_payload.targets[0], omission_bound, omission_return])
+    if not (omission.body.index(payload) < omission.body.index(encoded_payload)
+            < omission.body.index(omission_bound) < omission.body.index(omission_return)):
+        raise fail('omission payload does not reach its captured return')
+    exact_body(function('audit_omissions', 'request', 'Prepared'), '''payload = json.loads(self.payload_json)
+    return {'format': FORMAT, 'request_sha256': _sha(self.payload_json.encode()),
+            'payload': payload, 'limitations': list(LIMITATIONS)}''')
+
+    commands = function('native_shared_render', 'commands')
+    mapping = assignment(commands, 'result')
+    if not isinstance(mapping.value, ast.Dict) or any(not isinstance(k, ast.Constant) or type(k.value) is not str
+                                                     for k in mapping.value.keys):
+        raise fail('helper kinds are not a literal command mapping')
+    keys = [k.value for k in mapping.value.keys]
+    extra = [n for n in commands.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+             and isinstance(n.targets[0], ast.Subscript) and ast.unparse(n.targets[0].value) == 'result']
+    for node in extra:
+        key = node.targets[0].slice
+        if not isinstance(key, ast.Constant) or type(key.value) is not str:
+            raise fail('helper key is dynamic')
+        keys.append(key.value)
+    statement(commands, 'return result')
+    if len(keys) != len(set(keys)) or sum(isinstance(n, ast.Name) and n.id == 'result' for n in ast.walk(commands)) != 2 + len(extra):
+        raise fail('helper mapping is mutated or has duplicate kinds')
+
+    evidence = [f'{paths[module]}:{node.lineno}' for module, node in (
+        ('native_shared_stage', run), ('native_shared_stage', packet_fn),
+        ('native_shared_receipts', receipt_fn), ('typed_audit', derived),
+        ('audit_omissions', omission), ('native_shared_render', commands))]
+    return {'basis': 'Source-derived required response-bearing roster; no observed execution or enforcement proof.',
+        'stages': [{'kind': 'receipt', 'cardinality': 'R = 0 or 1', 'condition': 'captured uncovered receiptable leaves; verified zero-work has no answer'},
+                   {'kind': 'worker', 'cardinality': 'W, unknown until the original record is partitioned', 'requirement': 'every worker in the complete derived plan'},
+                   {'kind': 'omission', 'cardinality': '1', 'requirement': 'all canonical chunks, including prior negative/redundant chunks'},
+                   {'kind': 'integration', 'cardinality': '1', 'requirement': 'after all workers and omission'}],
+        'protocol_responses': {'formula': 'R + W + 2', 'minimum': None, 'actual_count': None,
+                               'unit': 'required response-bearing stage roster, not model calls or observed answers'},
+        'helper_commands': keys, 'helper_kind_count': len(keys),
+        'model_calls_minimum': None, 'evidence': evidence,
+        'procedure_notes': [
+            {'description': 'The selected renderer describes initial validation/sealing, genuine core derivation, reconciliation after checked assembly, final validations, report draft and recorder-last. These are runtime obligations, not scanner-verified execution.',
+             'source': paths['native_shared_render'] + ':instruction'},
+            {'description': 'The phase observer owns ordered helper and protected-artifact admission; this scanner does not duplicate those checks.',
+             'source': prefix + 'native_shared_phase.py:PhaseState'},
+            {'description': 'Report correction uses the explicit execution.max_draft_checks allowance. Actual checks and report rewrite count are unknown; a check allowance is not a rewrite count.',
+             'source': prefix + 'native_shared_attribution.py:_Attribution'},
+            {'description': 'Final gates and saved reconstruction remain separate acceptance obligations; helper kinds and source presence do not establish completion.',
+             'source': prefix + 'native_shared_gates.py:check'}]}
+
+
 def derive_execute_refusal(tree: ast.Module, admitted: list[int]) -> dict:
     """The renderers `api_runner.execute` refuses before it runs anything: a
     raising `render_version in (...)` or `>= N` test in its body (#4055). No
@@ -4122,7 +4756,8 @@ def derive_execute_refusal(tree: ast.Module, admitted: list[int]) -> dict:
     fn = _function(tree, "execute")
     if fn is None:
         raise _not_derived("what api_runner.execute refuses", "api_runner.py defines no execute()")
-    refused, line = set(), None
+    early = _early_axis_refusal(tree)
+    refused, line = ({early['renderer']}, early['line']) if early else (set(), None)
     for node in ast.walk(fn):
         if not (isinstance(node, ast.If) and any(isinstance(b, ast.Raise) for b in node.body)):
             continue
@@ -4750,6 +5385,26 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
     attrs = lambda node: {n.attr for n in ast.walk(node) if isinstance(n, ast.Attribute)
                          and isinstance(n.value, ast.Name) and n.value.id == 'self'}
     dump = lambda n: ast.dump(n, include_attributes=False)
+    early = _early_axis_refusal(tree)
+    api_fixed = {early['field']: early['api_value']} if early else {}
+    # Reduce only comparisons whose operand is proved by the actual early
+    # execute refusal. This does not grant a native case or interpret its
+    # delegated validation as an API selector.
+    def api_test(node):
+        if (isinstance(node, ast.Compare) and len(node.ops) == 1
+                and isinstance(node.left, ast.Attribute) and ast.unparse(node.left.value) == 'self'
+                and node.left.attr in api_fixed and isinstance(node.comparators[0], ast.Constant)
+                and type(node.comparators[0].value) is int and isinstance(node.ops[0], (ast.Eq, ast.NotEq))):
+            equal = api_fixed[node.left.attr] == node.comparators[0].value
+            return ast.Constant(equal if isinstance(node.ops[0], ast.Eq) else not equal)
+        if isinstance(node, ast.BoolOp):
+            values = [api_test(x) for x in node.values]
+            if isinstance(node.op, ast.And):
+                values = [x for x in values if not (isinstance(x, ast.Constant) and x.value is True)]
+            elif isinstance(node.op, ast.Or):
+                values = [x for x in values if not (isinstance(x, ast.Constant) and x.value is False)]
+            return values[0] if len(values) == 1 else ast.BoolOp(op=node.op, values=values)
+        return node
     domains, domain_nodes = {}, {}
     for name, declaration in declarations.items():
         if not (isinstance(declaration.value, ast.Constant) and type(declaration.value.value) is int
@@ -4855,7 +5510,7 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
                 raise fail('exclusive nested protocol must have one enabled value')
             name, value = compare.left.attr, compare.comparators[0].value
             expected = ast.parse(f'self.{name} == {value!r} and self.{parent_field} != {enabled[0]}',mode='eval').body
-            if not any(p is None and dump(g.test) == dump(expected) for g,p in relevant):
+            if not any(p is None and dump(api_test(g.test)) == dump(expected) for g,p in relevant):
                 raise fail('exclusive nested protocol lacks a reciprocal direct guard')
     constants = {}
     parents = _parents(tree)
@@ -4929,7 +5584,7 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
         if not axes[field]: continue
         allowed = []
         for renderer, native, condition in product(admitted, (False, True), conditions):
-            row = {**axes, 'render_version': renderer, 'is_agentic': native, 'condition': condition}
+            row = {**axes, **api_fixed, 'render_version': renderer, 'is_agentic': native, 'condition': condition}
             violated = []
             for guard, parent in relevant:
                 test_value = evaluate(guard.test, row)
@@ -4952,19 +5607,517 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
             'evidence': [f'api_runner.py:{line}' for line in evidence]}
 
 
-def _optional_turn_selection(tree: ast.Module, test) -> dict:
+def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
+    """Prove the fixed shared selector's closed tuples from source (#4503).
+
+    This deliberately does not execute a validator, interpret arbitrary Python,
+    or use a known renderer/condition table as a fallback.
+    """
+    from itertools import product
+    fail = lambda detail: _not_derived('which conditions make a follow-up turn', detail)
+    dump = lambda node: ast.dump(node, include_attributes=False)
+    same = lambda node, text: dump(node) == dump(ast.parse(text).body[0])
+    attrs = lambda node, owner='self': {n.attr for n in ast.walk(node) if isinstance(n, ast.Attribute)
+        and isinstance(n.value, ast.Name) and n.value.id == owner}
+    if root is None or not (isinstance(test, ast.Attribute) and ast.unparse(test).startswith('spec.')):
+        raise fail('delegated selection needs an actual source root and direct positive axis')
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+    init = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == '__post_init__'), None) if cls else None
+    if init is None:
+        raise fail('missing delegated selector constructor')
+    helper_path = root / 'src/data_sheets_schema/shared_generation.py'
+    helper_tree = _tree(helper_path)
+    helper = _function(helper_tree, 'select')
+    if helper is None or _params(helper) != ['spec']:
+        raise fail('shared selector signature changed')
+    # Resolve the effective exported definition, not merely the first AST.
+    # Reuse the scanner's binding classifier for imports/defs/args/global names.
+    def effective_definition(source, definition, name):
+        if (definition is None or definition not in source.body or definition.decorator_list
+                or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                       and n.name == name for n in source.body) != 1):
+            raise fail('selector authority is not one undecorated effective definition')
+        for node in ast.walk(source):
+            if (isinstance(node, ast.Name) and node.id == name and isinstance(node.ctx, (ast.Store, ast.Del))) \
+                    or _rebinding(node, name, definition):
+                raise fail('selector authority is shadowed or rebound')
+            if isinstance(node, ast.ImportFrom) and any(alias.name == '*' for alias in node.names):
+                raise fail('selector authority has an unproved wildcard import')
+    effective_definition(helper_tree, helper, 'select')
+    for source, owner, builtins in ((helper_tree, helper, ('getattr', 'type', 'int', 'str')),
+                                    (tree, init, ('type', 'int'))):
+        for name in builtins:
+            if any(_rebinding(node, name, owner) or isinstance(node, ast.arg) and node.arg == name
+                    or isinstance(node, ast.Name) and node.id == name and isinstance(node.ctx, (ast.Store, ast.Del))
+                    for node in ast.walk(source)):
+                raise fail('selector builtin identity is shadowed')
+    body = helper.body
+    if len(body) != 9:
+        raise fail('unsupported shared selector body')
+    if not (isinstance(body[0], ast.Assign) and len(body[0].targets) == 1
+            and isinstance(body[0].targets[0], ast.Name) and body[0].targets[0].id == 'version'
+            and isinstance(body[0].value, ast.Call) and ast.unparse(body[0].value.func) == 'getattr'
+            and len(body[0].value.args) == 3 and not body[0].value.keywords
+            and ast.unparse(body[0].value.args[0]) == 'spec'
+            and isinstance(body[0].value.args[1], ast.Constant)
+            and type(body[0].value.args[1].value) is str
+            and ast.literal_eval(body[0].value.args[2]) == 0):
+        raise fail('shared selector lacks its exact version binding')
+    axis = body[0].value.args[1].value
+
+    def raising(node):
+        return (isinstance(node, ast.If) and not node.orelse and len(node.body) == 1
+                and isinstance(node.body[0], ast.Raise))
+
+    domain_guard = body[1]
+    if not raising(domain_guard):
+        raise fail('shared selector domain must raise directly')
+    try:
+        domain = ast.literal_eval(domain_guard.test.values[1].comparators[0])
+    except (AttributeError, IndexError, ValueError, TypeError):
+        raise fail('shared selector lacks a finite integer domain')
+    if (type(domain) is not tuple or len(domain) != 3 or len(set(domain)) != 3 or 0 not in domain
+            or any(type(v) is not int or v < 0 for v in domain)
+            or dump(domain_guard.test) != dump(ast.parse(
+                f'type(version) is not int or version not in {domain!r}', mode='eval').body)):
+        raise fail('shared selector domain is not exact')
+    if not same(body[2], 'registration = getattr(spec, "shared_generation_registration", None)'):
+        raise fail('shared registration binding changed')
+    if not same(body[3], 'from .source_heading_runtime import MODES'):
+        raise fail('shared condition map import changed')
+    modes_path = root / 'src/data_sheets_schema/source_heading_runtime.py'
+    modes_tree = _tree(modes_path)
+    declarations = [n for n in modes_tree.body if isinstance(n, ast.Assign)
+        and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name) and n.targets[0].id == 'MODES']
+    if len(declarations) != 1:
+        raise fail('condition map has no unique declaration')
+    modes_line = declarations[0].lineno
+    try:
+        modes = ast.literal_eval(declarations[0].value)
+    except (ValueError, TypeError):
+        raise fail('condition map is not literal')
+    if (type(modes) is not dict or not modes or any(type(k) is not str or not k
+            or type(v) is not str or not v for k, v in modes.items())
+            or len(set(modes.values())) != len(modes)):
+        raise fail('condition map must have unique nonempty literal names')
+    if (not isinstance(declarations[0].value, ast.Dict)
+            or len(declarations[0].value.keys) != len(modes)):
+        raise fail('condition map repeats a literal key')
+    modes_parents = _parents(modes_tree)
+    for node in ast.walk(modes_tree):
+        if _rebinding(node, 'MODES', helper) or isinstance(node, ast.arg) and node.arg == 'MODES':
+            raise fail('condition map is shadowed')
+        if isinstance(node, ast.ImportFrom) and any(alias.name == '*' for alias in node.names):
+            raise fail('condition map has an unproved wildcard import')
+        if isinstance(node, ast.Name) and node.id == 'MODES' and node is not declarations[0].targets[0]:
+            parent = modes_parents.get(id(node))
+            membership = (isinstance(parent, ast.Compare) and len(parent.ops) == 1
+                and isinstance(parent.ops[0], (ast.In, ast.NotIn)) and node is parent.comparators[0])
+            lookup = (isinstance(parent, ast.Subscript) and parent.value is node
+                and isinstance(parent.ctx, ast.Load))
+            if not (isinstance(node.ctx, ast.Load) and (membership or lookup)):
+                raise fail('condition map has an unproved use, escape or mutation')
+    for node in ast.walk(helper):
+        if isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            raise fail('shared selector mutates an input')
+        if isinstance(node, ast.Name) and node.id in {'MODES', 'spec', 'getattr', 'type', 'int', 'str', 'descriptor'} \
+                and isinstance(node.ctx, (ast.Store, ast.Del)):
+            raise fail('shared selector shadows an authority')
+
+    def tuple_guard(guard):
+        if not raising(guard) or not isinstance(guard.test, ast.BoolOp) or not isinstance(guard.test.op, ast.Or):
+            raise fail('shared tuple is not an unconditional OR refusal')
+        required = {}
+        for term in guard.test.values:
+            if isinstance(term, ast.Attribute) and ast.unparse(term).startswith('spec.'):
+                key, value = term.attr, 0
+            elif (isinstance(term, ast.Compare) and len(term.ops) == 1
+                    and isinstance(term.left, ast.Attribute) and ast.unparse(term.left).startswith('spec.')):
+                key = term.left.attr
+                if isinstance(term.ops[0], ast.NotEq) and isinstance(term.comparators[0], ast.Constant):
+                    value = term.comparators[0].value
+                    if type(value) not in (str, int):
+                        raise fail('unsupported tuple literal')
+                elif (key == 'condition' and isinstance(term.ops[0], ast.NotIn)
+                        and ast.unparse(term.comparators[0]) == 'MODES.values()'):
+                    value = tuple(sorted(modes.values()))
+                else:
+                    raise fail('unsupported shared tuple comparison')
+            else:
+                raise fail('unsupported shared tuple term')
+            if key in required:
+                raise fail('duplicate shared tuple field')
+            required[key] = value
+        if not {'condition', 'render_version', 'runtime'} <= required.keys():
+            raise fail('shared tuple omits condition, renderer or runtime')
+        return required
+
+    branch = body[5]
+    if not (isinstance(branch, ast.If) and not branch.orelse and len(branch.body) == 3
+            and isinstance(branch.test, ast.Compare) and len(branch.test.ops) == 1
+            and isinstance(branch.test.ops[0], ast.Eq) and ast.unparse(branch.test.left) == 'version'
+            and isinstance(branch.test.comparators[0], ast.Constant)):
+        raise fail('unsupported enabled shared branch')
+    explicit = branch.test.comparators[0].value
+    if type(explicit) is not int or explicit not in set(domain) - {0}:
+        raise fail('enabled shared branch is outside its domain')
+    implicit = next(v for v in domain if v not in (0, explicit))
+    protocols = {explicit: tuple_guard(branch.body[0]), implicit: tuple_guard(body[6])}
+    registration_test = ast.parse('type(registration) is not str or not registration', mode='eval').body
+    for guard in (branch.body[1], body[7]):
+        if not raising(guard) or dump(guard.test) != dump(registration_test):
+            raise fail('shared branch loses its required registration')
+    if not same(branch.body[2], f'return descriptor(version={explicit!r}, condition=spec.condition)') \
+            or not same(body[8], 'return descriptor()'):
+        raise fail('shared descriptor return is not bound to its branch')
+    descriptor_fn = _function(helper_tree, 'descriptor')
+    effective_definition(helper_tree, descriptor_fn, 'descriptor')
+    defaults = dict(zip((a.arg for a in descriptor_fn.args.kwonlyargs), descriptor_fn.args.kw_defaults)) if descriptor_fn else {}
+    if not isinstance(defaults.get('version'), ast.Constant) or defaults['version'].value != implicit:
+        raise fail('implicit shared branch differs from descriptor default')
+    zero = body[4]
+    if not (isinstance(zero, ast.If) and not zero.orelse and ast.unparse(zero.test) == 'not version'
+            and same(zero.body[-1], 'return None')):
+        raise fail('disabled shared branch changed')
+    zero_body = zero.body[:-1]
+    native_evidence = []
+    native_domain = None
+    if len(zero_body) == 2:
+        native = zero_body.pop(0)
+        expected = ast.parse("if getattr(spec, 'native_shared_generation_version', 0):\n    from .native_shared_render import validate_spec\n    validate_spec(spec)\n    return None").body[0]
+        if dump(native) != dump(expected):
+            raise fail('unsupported separate native dispatch')
+        native_path = root / 'src/data_sheets_schema/native_shared_render.py'
+        native_tree = _tree(native_path)
+        native_fn = _function(native_tree, 'validate_spec')
+        effective_definition(native_tree, native_fn, 'validate_spec')
+        for builtin in ('getattr', 'type', 'int', 'str'):
+            if any(_rebinding(n, builtin, native_fn) or isinstance(n, ast.arg) and n.arg == builtin
+                    or isinstance(n, ast.Name) and n.id == builtin and isinstance(n.ctx, (ast.Store, ast.Del))
+                    for n in ast.walk(native_tree)):
+                raise fail('native selector builtin identity is shadowed')
+        native_axis = 'native_shared_generation_version'
+        prefix = native_fn.body[:6]
+        if (_params(native_fn) != ['spec'] or len(prefix) != 6
+                or not same(prefix[0], f'version = getattr(spec, {native_axis!r}, 0)')
+                or not same(prefix[1], 'registration = getattr(spec, "native_shared_generation_registration", None)')
+                or not raising(prefix[2]) or not isinstance(prefix[3], ast.If)
+                or ast.unparse(prefix[3].test) != 'not version' or prefix[3].orelse
+                or len(prefix[3].body) != 2 or not raising(prefix[3].body[0])
+                or not same(prefix[3].body[1], 'return None') or not raising(prefix[4])):
+            raise fail('native selector does not reach its zero-axis loop through proved refusals')
+        try:
+            native_domain = ast.literal_eval(prefix[2].test.values[1].comparators[0])
+        except (AttributeError, IndexError, ValueError, TypeError):
+            raise fail('native selector lacks a finite integer domain')
+        if (type(native_domain) is not tuple or len(native_domain) != 2 or 0 not in native_domain
+                or any(type(v) is not int or v < 0 for v in native_domain) or len(set(native_domain)) != 2
+                or dump(prefix[2].test) != dump(ast.parse(
+                    f'type(version) is not int or version not in {native_domain!r}', mode='eval').body)):
+            raise fail('native selector domain is not exact')
+        for expression in (prefix[0].value, prefix[1].value, prefix[2].test,
+                           prefix[3].test, prefix[3].body[0].test, prefix[4].test):
+            for node in ast.walk(expression):
+                if (isinstance(node, ast.Call) and ast.unparse(node.func) not in {'getattr', 'type'}
+                        or isinstance(node, ast.Attribute) and isinstance(node.ctx, (ast.Store, ast.Del))):
+                    raise fail('unproved work before native zero-axis validation')
+        loop = prefix[5]
+        if (not isinstance(loop, ast.For) or loop.orelse or ast.unparse(loop.target) != 'key'
+                or len(loop.body) != 1 or not raising(loop.body[0])
+                or ast.unparse(loop.body[0].test) != 'type(getattr(spec, key)) is not int or getattr(spec, key) != 0'):
+            raise fail('native zero-axis loop is not unconditional and exact')
+        try:
+            zero_axes = ast.literal_eval(loop.iter)
+        except (ValueError, TypeError):
+            raise fail('native zero-axis roster is not literal')
+        if (type(zero_axes) is not tuple or any(type(v) is not str for v in zero_axes)
+                or len(set(zero_axes)) != len(zero_axes) or test.attr not in zero_axes
+                or axis not in zero_axes or 'receipt_completion_version' not in zero_axes):
+            raise fail('native dispatch does not exclude API companion axes')
+        if any(isinstance(n, ast.Attribute) and attrs(n, 'spec') and isinstance(n.ctx, (ast.Store, ast.Del))
+               or isinstance(n, ast.Name) and n.id == 'spec' and isinstance(n.ctx, (ast.Store, ast.Del))
+               or _rebinding(n, 'spec', native_fn) for n in ast.walk(native_fn)):
+            raise fail('native selector mutates its validated spec')
+        native_evidence = [f'{_rel(root, native_path)}:{native_fn.lineno}',
+                           f'{_rel(root, native_path)}:{loop.lineno}']
+    if len(zero_body) != 1 or not raising(zero_body[0]) or not isinstance(zero_body[0].test, ast.BoolOp) \
+            or not isinstance(zero_body[0].test.op, ast.Or):
+        raise fail('disabled shared exclusions changed')
+    exclusions = set()
+    for term in zero_body[0].test.values:
+        if ast.unparse(term) == 'registration is not None':
+            exclusions.add(('registration', None))
+        elif (isinstance(term, ast.Compare) and len(term.ops) == 1
+                and isinstance(term.left, ast.Attribute) and ast.unparse(term.left).startswith('spec.')):
+            if isinstance(term.ops[0], ast.Eq) and isinstance(term.comparators[0], ast.Constant):
+                exclusions.add((term.left.attr, term.comparators[0].value))
+            elif term.left.attr == 'condition' and isinstance(term.ops[0], ast.In) \
+                    and ast.unparse(term.comparators[0]) == 'MODES.values()':
+                exclusions.update(('condition', value) for value in modes.values())
+            else: raise fail('unsupported disabled shared comparison')
+        else: raise fail('unsupported disabled shared exclusion')
+    expected_exclusions = {('registration', None)}
+    for required in protocols.values():
+        for name, value in required.items():
+            if name == 'runtime' or value == 0: continue
+            expected_exclusions.update((name, item) for item in (value if type(value) is tuple else (value,)))
+    if exclusions != expected_exclusions:
+        raise fail('disabled shared exclusions do not cover exactly its enabled tuples')
+
+    imports = [n for n in ast.walk(init) if isinstance(n, ast.ImportFrom) and n.module == 'shared_generation'
+               and n.level == 1 and any(a.name == 'select' for a in n.names)]
+    if len(imports) != 2:
+        raise fail('constructor lacks its two exact shared selector calls')
+    parent_map = _parents(init)
+    calls = []
+    for imported in imports:
+        if len(imported.names) != 1:
+            raise fail('ambiguous shared selector import')
+        alias = imported.names[0].asname or 'select'
+        uses = [n for n in ast.walk(init) if isinstance(n, ast.Call) and ast.unparse(n.func) == alias]
+        if len(uses) != 1 or ast.unparse(uses[0]) != alias + '(self)':
+            raise fail('shared selector is not called once with the same spec')
+        _require_followup_binding(RUNNER, tree, init, uses[0])
+        calls.append(uses[0])
+    guarded = [call for call in calls if any(isinstance(n, ast.If) and ast.unparse(n.test) == 'self.' + axis
+        and len(n.body) == 2 and n.body[0] in imports and isinstance(n.body[1], ast.Expr)
+        and n.body[1].value is call and not n.orelse for n in init.body)]
+    final = [call for call in calls if isinstance(parent_map.get(id(call)), ast.Expr)
+        and parent_map.get(id(parent_map[id(call)])) is init]
+    if len(guarded) != 1 or len(final) != 1 or final[0].lineno <= guarded[0].lineno:
+        raise fail('shared selector call guards/order changed')
+
+    inactive_native = {}
+    if native_domain is not None:
+        native_imports = [n for n in init.body if isinstance(n, ast.ImportFrom)
+            and n.level == 1 and n.module == 'native_shared_render'
+            and len(n.names) == 1 and n.names[0].name == 'validate_spec']
+        if len(native_imports) != 1:
+            raise fail('native domain lacks its unconditional constructor import')
+        imported = native_imports[0]
+        alias = imported.names[0].asname or imported.names[0].name
+        index = init.body.index(imported)
+        following = init.body[index + 1] if index + 1 < len(init.body) else None
+        if (not isinstance(following, ast.Expr) or not isinstance(following.value, ast.Call)
+                or ast.unparse(following.value) != alias + '(self)'
+                or following.lineno >= min(call.lineno for call in calls)):
+            raise fail('native domain is not validated on the same spec before shared admission')
+        _require_followup_binding(RUNNER, tree, init, following.value)
+        native_declarations = [n for n in cls.body if isinstance(n, ast.AnnAssign)
+            and isinstance(n.target, ast.Name) and n.target.id == native_axis]
+        if (len(native_declarations) != 1 or ast.unparse(native_declarations[0].annotation) != 'int'
+                or not isinstance(native_declarations[0].value, ast.Constant)
+                or type(native_declarations[0].value.value) is not int or native_declarations[0].value.value != 0):
+            raise fail('native selector lacks its exact inactive default')
+        if any(isinstance(n, ast.Attribute) and native_axis in attrs(n) and isinstance(n.ctx, (ast.Store, ast.Del))
+                and n.lineno > following.lineno for n in ast.walk(init)):
+            raise fail('native selector changes after its domain validation')
+        # The reached validator rejects every positive native choice when
+        # this requested API axis is positive. Its only surviving value is0.
+        inactive_native[native_axis] = 0
+        native_evidence.append(f'api_runner.py:{following.lineno}')
+
+    declarations = {n.target.id: n for n in cls.body if isinstance(n, ast.AnnAssign)
+        and isinstance(n.target, ast.Name) and isinstance(n.annotation, ast.Name) and n.annotation.id == 'int'}
+    domains, domain_nodes = {}, {}
+    for node in init.body:
+        if not raising(node) or not isinstance(node.test, ast.BoolOp): continue
+        try:
+            compare = node.test.values[1]
+            field = compare.left.attr
+            values = ast.literal_eval(compare.comparators[0])
+        except (AttributeError, IndexError, ValueError, TypeError): continue
+        if dump(node.test) != dump(ast.parse(f'type(self.{field}) is not int or self.{field} not in {values!r}', mode='eval').body): continue
+        declaration = declarations.get(field)
+        if (declaration is None or not isinstance(declaration.value, ast.Constant) or type(declaration.value.value) is not int
+                or declaration.value.value != 0 or type(values) is not tuple or not values or 0 not in values
+                or any(type(v) is not int or v < 0 for v in values) or field in domains):
+            raise fail('delegated axes lack exact unique integer/default/domain guards')
+        domains[field], domain_nodes[field] = sorted(set(values)), node
+    if domains.get(axis) != sorted(domain) or test.attr not in domains:
+        raise fail('constructor/helper domain differs or requested axis is unproved')
+    names = sorted(domains)
+    semantic = set(names) | set(inactive_native) | {'condition', 'render_version', 'runtime', 'is_agentic'}
+    first_domain = min(n.lineno for n in domain_nodes.values())
+    if any(isinstance(n, ast.Attribute) and attrs(n) & semantic and isinstance(n.ctx, (ast.Store, ast.Del))
+           and n.lineno > first_domain for n in ast.walk(init)):
+        raise fail('constructor mutates a selected axis after admission')
+    if any(isinstance(n, (ast.Return, ast.Yield, ast.YieldFrom, ast.Assert)) for n in ast.walk(init)):
+        raise fail('constructor bypasses delegated admission')
+
+    constants = {}
+    literal_parents = _parents(tree)
+    def constant_set(name):
+        if name in constants: return constants[name]
+        bindings = [n for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                    and isinstance(n.targets[0], ast.Name) and n.targets[0].id == name]
+        if len(bindings) != 1: raise fail('selector set lacks one literal binding')
+        binding = bindings[0]
+        value = binding.value
+        if isinstance(value, ast.Call) and isinstance(value.func, ast.Name) and value.func.id in {'set','frozenset','tuple'}:
+            if len(value.args) != 1 or value.keywords or any(_rebinding(n, value.func.id, init)
+                    or isinstance(n, ast.Name) and n.id == value.func.id and isinstance(n.ctx, (ast.Store, ast.Del))
+                    for n in ast.walk(tree)):
+                raise fail('selector set constructor is ambiguous')
+            value = value.args[0]
+        if not isinstance(value, (ast.Set, ast.Tuple, ast.List)) or not value.elts or any(
+                not isinstance(n, ast.Constant) or type(n.value) is not str or not n.value for n in value.elts):
+            raise fail('selector set is not a nonempty literal string set')
+        # Same finite membership-only uses as the legacy correlated reader.
+        for node in ast.walk(tree):
+            if _rebinding(node, name, init) or isinstance(node, ast.arg) and node.arg == name:
+                raise fail('selector set is shadowed')
+            if isinstance(node, ast.Name) and node.id == name and node is not binding.targets[0]:
+                parent = literal_parents.get(id(node))
+                if not (isinstance(node.ctx, ast.Load) and isinstance(parent, ast.Compare)
+                        and len(parent.ops) == 1 and isinstance(parent.ops[0], (ast.In, ast.NotIn))
+                        and node is parent.comparators[0]):
+                    raise fail('selector set has an unproved use, escape or mutation')
+        constants[name] = tuple(n.value for n in value.elts)
+        return constants[name]
+
+    def evaluate(node, row):
+        if isinstance(node, ast.Attribute) and ast.unparse(node).startswith('self.') and node.attr in row:
+            return row[node.attr]
+        if isinstance(node, ast.Constant) and type(node.value) in (str, int, bool): return node.value
+        if isinstance(node, ast.Name): return constant_set(node.id)
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not): return not evaluate(node.operand, row)
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, (ast.And, ast.Or)):
+            values = [bool(evaluate(n, row)) for n in node.values]
+            return all(values) if isinstance(node.op, ast.And) else any(values)
+        if isinstance(node, ast.Compare) and len(node.ops) == 1:
+            a, b = evaluate(node.left, row), evaluate(node.comparators[0], row)
+            if isinstance(node.ops[0], ast.Eq): return type(a) is type(b) and a == b
+            if isinstance(node.ops[0], ast.NotEq): return type(a) is not type(b) or a != b
+            if isinstance(node.ops[0], ast.In): return a in b
+            if isinstance(node.ops[0], ast.NotIn): return a not in b
+        raise fail('unsupported delegated constructor constraint')
+    constraints = []
+    parents = _parents(init)
+    for node in ast.walk(init):
+        if not raising(node) or node in domain_nodes.values() or not (attrs(node.test) & (set(names) | {'condition'})):
+            continue
+        chain, child = [(node.test, True)], node
+        while id(child) in parents:
+            parent = parents[id(child)]
+            if isinstance(parent, ast.If):
+                chain.append((parent.test, child in parent.body))
+            child = parent
+        constraints.append((node, chain))
+    # _module_constants intentionally does not evaluate prompt Paths; only keys
+    # of the actual literal mapping determine the complete condition universe.
+    mapping = next((n.value for n in tree.body if isinstance(n, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == 'CONDITION_PROMPTS' for t in n.targets)), None)
+    if not isinstance(mapping, ast.Dict) or any(not isinstance(k, ast.Constant) or type(k.value) is not str for k in mapping.keys):
+        raise fail('condition universe is not literal')
+    conditions = sorted(k.value for k in mapping.keys)
+    admitted = derive_admitted_renderers(tree)
+    refused = set(derive_execute_refusal(tree, admitted)['refused'])
+    agentic = constant_set('AGENTIC_RUNTIMES')
+    is_agentic = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == 'is_agentic'), None)
+    agentic_returns = [n for n in is_agentic.body if not isinstance(n, ast.Expr)] if is_agentic else []
+    if len(agentic_returns) != 1 or not same(agentic_returns[0], 'return self.runtime in AGENTIC_RUNTIMES'):
+        raise fail('agentic property does not use the proved runtime set')
+    for required in protocols.values():
+        if type(required['runtime']) is not str or required['runtime'] in agentic:
+            raise fail('shared tuple is not API-only')
+        wanted = required['condition'] if type(required['condition']) is tuple else (required['condition'],)
+        if not set(wanted) <= set(conditions): raise fail('shared conditions are outside the actual prompt universe')
+
+    def clauses(node):
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or):
+            result = [clause for term in node.values for clause in clauses(term)]
+        elif isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And):
+            result = [[]]
+            for term in node.values: result = [a+b for a in result for b in clauses(term)]
+        else: result = [[node]]
+        if len(result) > 64: raise fail('reciprocal guard exceeds finite clause bound')
+        return result
+
+    reciprocal = []
+    for _, chain in constraints:
+        if not all(polarity for _, polarity in chain): continue
+        combined = [[]]
+        for expr, _ in chain: combined = [a+b for a in combined for b in clauses(expr)]
+        reciprocal += combined
+    for version, required in protocols.items():
+        wrong = dump(ast.parse(f'self.{axis} != {version!r}', mode='eval').body)
+        for name, value in required.items():
+            if name == 'runtime' or value == 0: continue
+            for wanted in (value if type(value) is tuple else (value,)):
+                matched = False
+                for clause in reciprocal:
+                    if inactive_native:
+                        enabled_native = next(value for value in native_domain if value)
+                        inactive_fact = dump(ast.parse(f'self.{native_axis} != {enabled_native}', mode='eval').body)
+                        clause = [term for term in clause if dump(term) != inactive_fact]
+                    if len(clause) != 2 or not any(dump(term) == wrong for term in clause): continue
+                    atom = next(term for term in clause if dump(term) != wrong)
+                    if not (isinstance(atom, ast.Compare) and len(atom.ops) == 1
+                            and ast.unparse(atom.left) == 'self.' + name): continue
+                    if isinstance(atom.ops[0], ast.Eq) and isinstance(atom.comparators[0], ast.Constant):
+                        matched |= type(atom.comparators[0].value) is type(wanted) and atom.comparators[0].value == wanted
+                    elif name == 'condition' and isinstance(atom.ops[0], ast.In) and isinstance(atom.comparators[0], ast.Name):
+                        matched |= wanted in constant_set(atom.comparators[0].id)
+                if not matched: raise fail('shared tuple lacks an exact reciprocal constructor guard')
+    cases, evaluations = [], 0
+    for values in product(*(domains[n] for n in names)):
+        axes = {**dict(zip(names, values)), **inactive_native}
+        if not axes[test.attr]: continue
+        version = axes[axis]
+        required = protocols.get(version)
+        if required and any(name in axes and axes[name] != value for name, value in required.items()): continue
+        renderers = [required['render_version']] if required else admitted
+        allowed = []
+        for renderer, native, condition in product(renderers, (False, True), conditions):
+            evaluations += 1
+            if evaluations > 100000: raise fail('delegated selection exceeds finite derivation bound')
+            row = {**axes, 'render_version':renderer, 'is_agentic':native, 'condition':condition}
+            violations = [all([bool(evaluate(expr, row)) == polarity for expr, polarity in chain])
+                          for _, chain in constraints]
+            if any(violations): continue
+            if required:
+                wanted = required['condition'] if type(required['condition']) is tuple else (required['condition'],)
+                if native or condition not in wanted: continue
+            elif any((name, row.get(name)) in exclusions for name in row): continue
+            allowed.append((renderer, native, condition))
+        if not allowed: continue
+        renderers = {r for r, _, _ in allowed}
+        if len(renderers) != 1 or any(n for _, n, _ in allowed) or renderers & refused:
+            raise fail('delegated case lacks one admitted API-only renderer')
+        extra = {name:value for name,value in (required or {}).items() if name not in semantic}
+        if any(type(value) is not int or value != 0 or name not in declarations for name,value in extra.items()):
+            raise fail('unproved companion selector')
+        cases.append({'values':{**axes, **extra},'runtime':'api','renderers':sorted(renderers),
+                      'conditions':sorted({c for _,_,c in allowed})})
+    if {case['values'][test.attr] for case in cases} != set(domains[test.attr]) - {0}:
+        raise fail('delegated enabled domain has an impossible or unproved case')
+    evidence = [f'api_runner.py:{node.lineno}' for node in [*domain_nodes.values(), *calls, *[n for n,_ in constraints]]]
+    evidence += [f'{_rel(root, helper_path)}:{helper.lineno}', f'{_rel(root, modes_path)}:{modes_line}', *native_evidence]
+    return {'field':test.attr,'default':0,'enabled_values':[v for v in domains[test.attr] if v],
+            'runtime':'api','renderers':sorted({r for c in cases for r in c['renderers']}),
+            'conditions':sorted({v for c in cases for v in c['conditions']}),'cases':cases,'evidence':sorted(set(evidence))}
+
+
+def _optional_turn_selection(tree: ast.Module, test, *, root=None) -> dict:
     try:
         return _simple_optional_turn_selection(tree, test)
     except ConfigError as original:
         try:
             return _correlated_turn_selection(tree, test)
         except ConfigError as changed:
+            if root is not None:
+                cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+                init = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == '__post_init__'), None) if cls else None
+                if init is not None and any(isinstance(n, ast.ImportFrom) and n.module == 'shared_generation'
+                        and any(a.name == 'select' for a in n.names) for n in ast.walk(init)):
+                    return _delegated_turn_selection(tree, test, root)
             if "unsupported optional selector shape" in str(changed):
                 raise original
             raise
 
 
-def _local_plan_scopes(tree: ast.Module, consts: dict) -> dict:
+def _local_plan_scopes(tree: ast.Module, consts: dict, *, root=None) -> dict:
     """Condition and explicit opt-in selection, from plan()'s actual syntax."""
     plan = _function(tree, "plan")
     if plan is None:
@@ -4985,7 +6138,7 @@ def _local_plan_scopes(tree: ast.Module, consts: dict) -> dict:
                     return {"conditions": sorted(consts[right.id])}
                 if isinstance(op, ast.Eq) and isinstance(right, ast.Constant) and isinstance(right.value, str):
                     return {"conditions": [right.value]}
-        selection = _optional_turn_selection(tree, test)
+        selection = _optional_turn_selection(tree, test, root=root)
         return {"conditions": selection.get("conditions"), "selection": selection}
 
     def visit(node, gate):
@@ -5060,7 +6213,7 @@ def _delegated_plan(root, tree):
             or not isinstance(branch.body[1], ast.Return) or not isinstance(branch.body[1].value, ast.Call)):
         raise _not_derived('the optional plan', 'expected exact import and early delegate return')
     call = branch.body[1].value
-    selection = _optional_turn_selection(tree, branch.test)
+    selection = _optional_turn_selection(tree, branch.test, root=root)
     runner = _resolved(root / RUNNER)
     binding = _imported_target(call, _bindings(root, runner, tree, {}))
     if binding is None or binding[1] is None:
@@ -5093,11 +6246,22 @@ def _delegated_plan(root, tree):
     for item in value.elts:
         if isinstance(item, ast.Constant) and type(item.value) is str:
             text = item.value
-        elif (isinstance(item, ast.JoinedStr) and len(item.values) == 2
+        elif (isinstance(item, ast.JoinedStr) and len(item.values) >= 2
                 and isinstance(item.values[0], ast.FormattedValue)
                 and item.values[0].conversion == -1 and item.values[0].format_spec is None
                 and isinstance(item.values[1], ast.Constant) and type(item.values[1].value) is str):
             text = _literal_phase(root, target, helper_tree, helper, item.values[0].value) + item.values[1].value
+            if not re.match(r'^\w+:', text):
+                raise _not_derived('the optional plan', 'phase prefix is not fixed before description interpolation')
+            axes = {key for case in selection.get('cases', []) for key in case['values']}
+            for suffix in item.values[2:]:
+                if isinstance(suffix, ast.Constant) and type(suffix.value) is str:
+                    continue
+                if not (isinstance(suffix, ast.FormattedValue) and suffix.conversion == -1
+                        and suffix.format_spec is None and isinstance(suffix.value, ast.Attribute)
+                        and ast.unparse(suffix.value) == 'spec.' + suffix.value.attr
+                        and suffix.value.attr in axes):
+                    raise _not_derived('the optional plan', 'description interpolation is not a proved finite selector')
         else:
             raise _not_derived('the optional plan', 'unknown delegated phase expression')
         match = re.match(r'^(\w+):', text)
@@ -5113,7 +6277,7 @@ def _delegated_plan(root, tree):
 
 
 def _plan_scopes(tree: ast.Module, consts: dict, *, root=None) -> dict:
-    scopes = _local_plan_scopes(tree, consts)
+    scopes = _local_plan_scopes(tree, consts, root=root)
     delegate = _delegated_plan(root, tree) if root is not None else None
     if delegate is None:
         return scopes
@@ -5449,6 +6613,23 @@ def _selected_template(root, tree, selection, body):
     if fn is None:
         raise fail('resolve_prompt is missing')
     statements = [n for n in fn.body if not isinstance(n, ast.Expr) or not isinstance(n.value, ast.Constant)]
+    # A standalone legacy adapter fixture need not define an executor. Without
+    # one, no new branch may be skipped; full api_meaning still requires it.
+    early = _early_axis_refusal(tree) if _function(tree, 'execute') is not None else {}
+    if early and statements and isinstance(statements[0], ast.If):
+        expected = ast.parse(f"getattr(spec, {early['field']!r}, 0) or spec.render_version == {early['renderer']}", mode='eval').body
+        cases = selection.get('cases', [])
+        guard = statements[0]
+        # This branch is unreachable on each selected API case: the early
+        # execute refusal fixes its axis to zero, and no selected renderer is
+        # the refused native renderer. Its exact instruction delegate is
+        # separately reported; no native prompt is adapted as an API prompt.
+        if (ast.dump(guard.test) == ast.dump(expected) and not guard.orelse and cases
+                and all(case.get('renderers') and early['renderer'] not in case['renderers']
+                        and case.get('values', {}).get(early['field'], 0) == 0 for case in cases)
+                and [ast.dump(n) for n in guard.body] == [ast.dump(n) for n in
+                     ast.parse('from .native_shared_render import instruction\nreturn instruction(spec)').body]):
+            statements = statements[1:]
     if len(statements) < 2 or ast.unparse(statements[0]) != 'body = prompt_body(spec.base_prompt)':
         raise fail('base prompt does not enter an unchanged body')
     branch = statements[1]
@@ -5483,6 +6664,11 @@ def _selected_template(root, tree, selection, body):
     policy = _function(adapter_tree, 'policy_text')
     if policy is None or sum(isinstance(n, ast.FunctionDef) and n.name == 'policy_text' for n in adapter_tree.body) != 1:
         raise fail('policy text binding is ambiguous')
+    if (policy.args.posonlyargs or policy.args.args or policy.args.vararg or policy.args.kwarg
+            or [arg.arg for arg in policy.args.kwonlyargs] != ['version']
+            or any(isinstance(n, ast.Name) and n.id == 'version' and isinstance(n.ctx, (ast.Store, ast.Del))
+                   for n in ast.walk(policy))):
+        raise fail('policy version is not the unchanged keyword parameter')
     if adapter.decorator_list or policy.decorator_list:
         raise fail('decorated template/policy function is not a direct source binding')
     for binding_name, binding_fn in ((name, adapter), ('policy_text', policy)):
@@ -5515,20 +6701,41 @@ def _selected_template(root, tree, selection, body):
     if not isinstance(domain, tuple) or any(type(n) is not int for n in domain) or version not in domain:
         raise fail('selected policy version is not admitted')
     route = prefix[1]
-    if (not isinstance(route, ast.If) or ast.unparse(route.test) != f'version == {version}' or route.orelse
+    if (not isinstance(route, ast.If) or route.orelse
             or len(route.body) != 2 or not isinstance(route.body[0], ast.ImportFrom)
             or not isinstance(route.body[1], ast.Return)):
         raise fail('selected policy is not the direct captured-asset route')
     expression = route.body[1].value
-    if ast.unparse(expression) != "captured_assets()[API_POLICY].decode('utf-8').split('## Prompt body', 1)[1].strip()":
+    old_expression = "captured_assets()[API_POLICY].decode('utf-8').split('## Prompt body', 1)[1].strip()"
+    if ast.unparse(route.test) == f'version == {version}' and ast.unparse(expression) == old_expression:
+        asset_name = 'API_POLICY'
+    elif (isinstance(route.test, ast.Compare) and ast.unparse(route.test.left) == 'version'
+          and len(route.test.ops) == 1 and isinstance(route.test.ops[0], ast.In)):
+        try:
+            selected_versions = ast.literal_eval(route.test.comparators[0])
+        except (ValueError, TypeError):
+            raise fail('selected policy versions are not literal')
+        if (type(selected_versions) is not tuple or len(selected_versions) != 2
+                or any(type(v) is not int for v in selected_versions)
+                or len(set(selected_versions)) != 2 or version not in selected_versions
+                or not set(selected_versions) < set(domain)):
+            raise fail('selected policy versions are not a closed subset')
+        first, second = selected_versions
+        expected = (f"captured_assets(version=version - 1)[API_POLICY if version == {first} else "
+                    "ROUTING_API_POLICY].decode('utf-8').split('## Prompt body', 1)[1].strip()")
+        if ast.dump(expression) != ast.dump(ast.parse(expected, mode='eval').body):
+            raise fail('unsupported captured policy expression')
+        asset_name = 'API_POLICY' if version == first else 'ROUTING_API_POLICY'
+    else:
         raise fail('unsupported captured policy expression')
     names = [n for n in ast.walk(expression) if isinstance(n, ast.Name)]
     for used in names:
-        _require_followup_binding(_rel(root, path), adapter_tree, policy, used)
-    asset_node = next(n for n in names if n.id == 'API_POLICY')
+        if used.id != 'version':
+            _require_followup_binding(_rel(root, path), adapter_tree, policy, used)
+    asset_node = next(n for n in names if n.id == asset_name)
     asset = _literal_phase(root, path, adapter_tree, policy, asset_node)
     policy_bindings = _bindings(root, path, adapter_tree, {})
-    if (policy_bindings.get('captured_assets', (None,))[0] != policy_bindings.get('API_POLICY', (None,))[0]):
+    if (policy_bindings.get('captured_assets', (None,))[0] != policy_bindings.get(asset_name, (None,))[0]):
         raise fail('policy loader and asset have different source authorities')
     asset_path = _resolved(root / asset)
     if _resolved(root) not in asset_path.parents or not asset_path.is_file():
@@ -5630,6 +6837,12 @@ def api_meaning(root: Path, facts: dict) -> dict:
     floor = derive_agentic_audit_from(build)
     continuation = audit_continuations(root, floor, sorted(facts["controllers"]), tree, cond["agentic_runtimes"])
     followups = derive_followups(tree, phases, consts, root=root)
+    native_shared = derive_native_shared_route(root, tree)
+    if native_shared:
+        native_shared['procedure'] = derive_native_shared_procedure(root)
+    if native_shared and (native_shared['runtime'] not in cond['agentic_runtimes']
+                          or native_shared['condition'] not in cond['prompts']):
+        raise _not_derived('native shared runtime/condition', 'contract is outside the declared runtime/condition universe')
     gh = facts.get("github_assistant_run") or {}
 
     def turns_for(c, *, optional=False):
@@ -5705,7 +6918,9 @@ def api_meaning(root: Path, facts: dict) -> dict:
                     item['builder'] for item in procedure['request_additions']) + ' (outside the legacy digest-only estimate)'
             if row['prompt_body_references']:
                 raw_body = (root / row['prompt']).read_text(encoding='utf-8').split('## Prompt body', 1)[-1]
-                adapted, adaptation = _selected_template(root, tree, procedure['selection'], raw_body)
+                condition_selection = {**procedure['selection'], 'cases': [
+                    case for case in procedure['selection'].get('cases', []) if name in case['conditions']]}
+                adapted, adaptation = _selected_template(root, tree, condition_selection, raw_body)
                 row['raw_prompt_body_references'] = row['prompt_body_references']
                 row['prompt_body_references'] = sorted(_named_claude_files(adapted, claude_names))
                 row['selected_template_adaptation'] = adaptation
@@ -5716,7 +6931,7 @@ def api_meaning(root: Path, facts: dict) -> dict:
                     row['hybrid_reasons'].append('the source-derived adapted base prompt retains references to '
                         + ', '.join(row['prompt_body_references']))
             conditions[name]['optional_followup_turns'] = [turn for turn in conditions[name]['optional_followup_turns']
-                if any(case['conditions'] == procedure['selection']['conditions']
+                if any(name in case['conditions'] and name in selected_case['conditions']
                        and all(case['values'].get(k) == v for k, v in selected_case['values'].items())
                        for case in followups[turn].get('selection', {}).get('cases', [])
                        for selected_case in procedure['selection'].get('cases', []))]
@@ -5841,10 +7056,16 @@ def api_meaning(root: Path, facts: dict) -> dict:
             + ".")
     verdict.append("The agentic runtimes " + ", ".join(cond["agentic_runtimes"]) + (" render the legacy condition " if selected_procedures else " render the same condition ")
                    + "names (one name, two procedures); a run is one or the other, not a hybrid.")
+    if native_shared:
+        verdict.append('Separate native selection ' + native_shared['field'] + '=1, '
+            + native_shared['condition'] + ', renderer ' + str(native_shared['renderer'])
+            + ': API execution and API phase construction refuse it. '
+            + native_shared['cli'] + ' binds the explicit runtime before rendering. ' + native_shared['scope'])
     return {"definition": ("api = MONOLITHIC: one model call whose input is the prompt, the full LinkML "
                            "schema and the input documents concatenated with separators"),
             "phases": phases, "derived_phases": derived, "model_phases": model_phases,
             **({"selected_procedures": selected_procedures} if selected_procedures else {}),
+            **({'native_shared_route': native_shared} if native_shared else {}),
             "schema_form": schema_form, "followup_turns": followups,
             "agentic_audit_from_renderer": floor,
             "default_renderer": continuation["default_renderer"],
@@ -6241,6 +7462,28 @@ def render_markdown(result: dict) -> str:
     nv = m["native"]
     L += [f"Native: `{nv['playbook']}` — {nv['shape']}; {nv['schema_form']}; "
           f"{len(nv['phases'])} phase headings.", ""]
+    if m.get('native_shared_route'):
+        selected = m['native_shared_route']
+        L += [f"Separate native shared route: `{selected['field']}=1`, `{selected['condition']}`, "
+              f"renderer {selected['renderer']}, `{selected['runtime']}`. API execution: {selected['api_execute']}; "
+              f"API phase construction: {selected['api_phase_builder']}. Offline consumer: `{selected['cli']}`. "
+              + selected['scope'],
+              selected['runtime_binding']['basis'],
+              'Companion axes: ' + ', '.join(f'`{key}={value}`' for key,value in selected['companion_axes'].items())
+              + '. Evidence: ' + ', '.join(selected['evidence']) + '.', '']
+    if m.get('native_shared_route', {}).get('procedure'):
+        procedure = m['native_shared_route']['procedure']
+        L += [procedure['basis'], 'Required response-bearing stage roster: `'
+              + procedure['protocol_responses']['formula'] + '`. Actual count and model-call count: unknown. '
+              'This is not observed answer or provider accounting.', '']
+        L += _table([[row['kind'], row['cardinality'], row.get('condition', row.get('requirement', ''))]
+                     for row in procedure['stages']], ['selected native stage', 'required cardinality', 'basis']) + ['']
+        L += [str(procedure['helper_kind_count']) + ' helper command kinds (not invocation counts): '
+              + ', '.join('`' + key + '`' for key in procedure['helper_commands']) + '.',
+              'Structural evidence: ' + ', '.join(procedure['evidence']) + '.',
+              'Source-linked procedure descriptions; runtime enforcement is not proved by this scanner:', '']
+        L += ['- ' + note['description'] + ' Source: `' + note['source'] + '`.'
+              for note in procedure['procedure_notes']] + ['']
     L += ["Verdict:", ""] + [f"- {v}" for v in m["verdict"]] + [""]
     return "\n".join(L)
 

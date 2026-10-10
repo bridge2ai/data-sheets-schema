@@ -136,6 +136,9 @@ def resource_paths(specs) -> tuple[Path, ...]:
     from .profiles import PROFILES
 
     paths = [resource_path(name) for name in shared_generation.ASSET_HASHES]
+    if any(spec.shared_generation_version == 2 for spec in specs):
+        paths.extend(resource_path(name) for name in (*shared_generation.ROUTING_ASSET_HASHES,
+                                                     *shared_generation.ROUTING_CODE))
     # Omission assets are module-adjacent, unlike the resource_path assets.
     paths.extend(audit_omissions.ASSETS / name for name in audit_omissions.ASSET_SHA256)
     paths.extend(resource_path(Path(

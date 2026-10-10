@@ -137,6 +137,11 @@ def _read(spec) -> dict:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise UsageLedgerError(f"cannot recover API usage from {path}: {exc}") from exc
+    return _validate_data(spec, data, path)
+
+
+def _validate_data(spec, data, path):
+    """Shared ledger shape/identity validation, independent of its byte reader."""
     if (not isinstance(data, dict) or data.get("version") != 1
             or data.get("identity") != run_identity(spec) or not isinstance(data.get("rows"), list)):
         raise UsageLedgerError(f"invalid API usage ledger identity or version: {path}")
@@ -335,6 +340,9 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     if getattr(spec, "shared_generation_version", 0):
         from .typed_audit_runtime import require_admission
         require_admission(spec, phase, data=data, usage_id=identifier)
+    if getattr(spec, "shared_generation_version", 0) == 2:
+        from .source_heading_admission import bind_admission
+        bind_admission(spec, phase, attempt, data=data, usage_id=identifier)
     data["pending_call"] = {"usage_id": identifier, "phase": phase,
                             "attempt": attempt, "started_at": started_at}
     _write(spec, data)

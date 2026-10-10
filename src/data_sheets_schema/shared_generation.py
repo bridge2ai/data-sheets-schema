@@ -36,6 +36,63 @@ ASSET_HASHES = {'.claude/agents/d4d-provenance-guard-v2.md': '10dc4689e1855096ef
  'src/download/prompts/shared_generation_v1.md': '34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450'}
 
 
+ROUTING_FORMAT = "shared_generation_registration_v2"
+ROUTING_ASSET_HASHES = {'src/download/prompts/shared_generation_v2.md': '1e444c4b7f099fc1f35ecf52d78ff7bf4a9ca874697ae7252d452aee40c2d2e9', 'src/download/prompts/api_playbook_v3.md': 'cd4c4880f1ce50370718d604b6eb2a438e87b3b7b6a2df91b04662c6865397c4', 'src/download/prompts/receipt_completion_runtime_v3.md': '1246095f7e6366e58a78be4c9f5be2afd80dcc057d090a31d28068b49f12be84'}
+ROUTING_POLICY = "src/download/prompts/shared_generation_v2.md"
+ROUTING_API_POLICY = "src/download/prompts/api_playbook_v3.md"
+ROUTING_RECEIPT_POLICY = "src/download/prompts/receipt_completion_runtime_v3.md"
+ROUTING_CODE = ("src/data_sheets_schema/source_heading_runtime.py",
+                "src/data_sheets_schema/source_heading_admission.py",
+                "src/data_sheets_schema/shared_generation.py",
+                "src/data_sheets_schema/api_runner.py",
+                "src/data_sheets_schema/american_spelling.py",
+                "src/data_sheets_schema/profiles.py",
+                "src/data_sheets_schema/usage_ledger.py",
+                "src/data_sheets_schema/receipt_completion.py",
+                "src/data_sheets_schema/receipt_completion_policy.py",
+                "src/data_sheets_schema/typed_audit_runtime.py",
+                "src/data_sheets_schema/chunking.py",
+                "src/data_sheets_schema/source_heading_completed.py",
+                "src/data_sheets_schema/audit_omissions.py",
+                "src/data_sheets_schema/schema_snapshot.py",
+                "src/data_sheets_schema/record_schema.py",
+                "src/data_sheets_schema/report_claims.py",
+                "src/data_sheets_schema/grounding.py",
+                "src/data_sheets_schema/schema_view.py",
+                "src/data_sheets_schema/source_heading_routing.py",
+                "src/data_sheets_schema/api_playbook.py",
+                "src/data_sheets_schema/shared_generation_resources.py",
+                "src/data_sheets_schema/typed_audit.py",
+                "src/data_sheets_schema/audit_batches.py",
+                "src/data_sheets_schema/audit_batch_format.py",
+                "src/data_sheets_schema/audit_grammar.py",
+                "src/data_sheets_schema/audit_protocol.py",
+                "src/data_sheets_schema/source_review.py",
+                "src/data_sheets_schema/source_metadata.py",
+                "src/data_sheets_schema/registry.py",
+                "src/data_sheets_schema/source_priority.py",
+                "src/data_sheets_schema/scope.py",
+                "src/data_sheets_schema/evidence_assertions.py",
+                "src/data_sheets_schema/anonymous_removals.py",
+                "src/data_sheets_schema/receipts.py",
+                "src/data_sheets_schema/rereceipt.py",
+                "src/data_sheets_schema/receipt_sources.py",
+                "src/data_sheets_schema/duplicate_keys.py",
+                "src/data_sheets_schema/support_targets.py",
+                "src/data_sheets_schema/derive_core.py",
+                "src/data_sheets_schema/schema_digest.py",
+                "src/data_sheets_schema/identifiers.py",
+                "src/data_sheets_schema/reasoning.py",
+                "src/data_sheets_schema/snapshot_store.py",
+                "src/data_sheets_schema/resources.py",
+                "src/data_sheets_schema/d4d_pair_consistency.py",
+                "src/data_sheets_schema/provenance.py",
+                "src/data_sheets_schema/profile_identity.py",
+                "src/data_sheets_schema/cache_dependencies.py",
+                "src/data_sheets_schema/historical_digest.py",
+                "src/data_sheets_schema/run_schema.py")
+
+
 def sha(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
@@ -45,7 +102,7 @@ def canonical(value) -> bytes:
                       separators=(",", ":")).encode("utf-8")
 
 
-def captured_assets() -> dict[str, bytes]:
+def captured_assets(*, version=1) -> dict[str, bytes]:
     """Verify installed bytes, then resolve references from those same bytes.
 
     The released provenance walker is deliberately tolerant for historical
@@ -69,19 +126,45 @@ def captured_assets() -> dict[str, bytes]:
     expected = {name for name in ASSET_HASHES if name.startswith(".claude/")}
     if reached != expected:
         raise ValueError("selected playbook closure differs from the frozen protocol")
+    if type(version) is not int or version not in (1, 2):
+        raise ValueError("unsupported shared generation asset version")
+    if version == 2:
+        for name, expected in ROUTING_ASSET_HASHES.items():
+            raw = resource_path(name).read_bytes()
+            if sha(raw) != expected:
+                raise ValueError("selected routing asset changed: " + name)
+            captured[name] = raw
     return captured
 
 
-def descriptor() -> dict:
-    captured_assets()
+def descriptor(*, version=1, condition=None) -> dict:
+    captured_assets(version=version)
+    if version == 2:
+        from .source_heading_runtime import MODES
+        from .resources import resource_path
+        from importlib.metadata import version as package_version
+        import sys
+        if condition not in MODES.values():
+            raise ValueError("routing descriptor requires its explicit condition")
+        return {"protocol": "shared_generation_v2", "version": 2,
+            "condition": condition, "renderer": 27, "runtime": "Claude API (direct)",
+            "typed_protocol": "typed_audit_protocol_v1", "api_playbook_version": 3,
+            "receipt_completion_version": 3,
+            "assets": {**ASSET_HASHES, **ROUTING_ASSET_HASHES},
+            "routing_code": {name: sha(resource_path(name).read_bytes()) for name in ROUTING_CODE},
+            "reader_runtime": {"python": list(sys.version_info[:2]), "packages": {name: package_version(name)
+                for name in ("linkml", "linkml-runtime", "PyYAML", "jsonschema", "referencing")}},
+            "scientific_readiness": "draft/unreviewed"}
+    if condition not in (None, "generic_v10"):
+        raise ValueError("shared v1 descriptor requires generic_v10")
     return {"protocol": NAME, "version": 1, "condition": "generic_v10",
             "renderer": 25, "runtime": "Claude API (direct)",
             "typed_protocol": "typed_audit_protocol_v1", "api_playbook_version": 2,
             "receipt_completion_version": 2, "assets": dict(ASSET_HASHES)}
 
 
-def policy_text() -> str:
-    return captured_assets()[POLICY].decode("utf-8").split("## Prompt body", 1)[1].strip()
+def policy_text(*, version=1) -> str:
+    return captured_assets(version=version)[POLICY if version == 1 else ROUTING_POLICY].decode("utf-8").split("## Prompt body", 1)[1].strip()
 
 
 def role_instruction() -> str:
@@ -90,15 +173,27 @@ def role_instruction() -> str:
 
 def select(spec) -> dict | None:
     version = getattr(spec, "shared_generation_version", 0)
-    if type(version) is not int or version not in (0, 1):
-        raise ValueError("shared_generation_version must be the integer 0 or 1")
+    if type(version) is not int or version not in (0, 1, 2):
+        raise ValueError("shared_generation_version must be the integer 0, 1 or 2")
     registration = getattr(spec, "shared_generation_registration", None)
+    from .source_heading_runtime import MODES
     if not version:
-        if (registration is not None or spec.condition == "generic_v10"
+        if (spec.condition in MODES.values() or spec.render_version == 27
+                or spec.api_playbook_version == 3 or spec.receipt_completion_version == 3
+                or registration is not None or spec.condition == "generic_v10"
                 or spec.render_version == 25 or spec.api_playbook_version == 2
                 or spec.receipt_completion_version == 2):
             raise ValueError("shared-generation selections require explicit version 1 and registration")
         return None
+    if version == 2:
+        if (spec.condition not in MODES.values() or spec.render_version != 27
+                or spec.runtime != "Claude API (direct)" or spec.api_playbook_version != 3
+                or spec.receipt_completion_version != 3 or spec.removal_repair_version
+                or spec.native_source_attribution_version):
+            raise ValueError("shared generation v2 requires its explicit routing/API27/playbook3/receipt3 tuple")
+        if type(registration) is not str or not registration:
+            raise ValueError("shared generation requires captured immutable registration JSON")
+        return descriptor(version=2, condition=spec.condition)
     if (spec.condition != "generic_v10" or spec.render_version != 25
             or spec.runtime != "Claude API (direct)" or spec.api_playbook_version != 2
             or spec.receipt_completion_version != 2 or spec.removal_repair_version
@@ -162,9 +257,17 @@ def parse_registration(raw: bytes) -> dict:
                            parse_constant=_invalid_constant)
     except (UnicodeError, RecursionError, json.JSONDecodeError) as exc:
         raise ValueError("shared registration requires strict UTF-8 JSON") from exc
+    if type(value) is not dict:
+        raise ValueError("shared registration must be an object")
+    version = {FORMAT: 1, ROUTING_FORMAT: 2}.get(value.get("format"))
+    if version is None:
+        raise ValueError("unsupported shared registration format")
     _exact(value, {"format", "registration_id", "registration_path", "selection", "inputs",
-                   "runtime", "audit_limits", "audit_transport", "receipt", "run"}, "shared registration")
-    if value["format"] != FORMAT or canonical(value["selection"]) != canonical(descriptor()):
+                   "runtime", "audit_limits", "audit_transport", "receipt", "run"}
+                   | ({"routing"} if version == 2 else set()), "shared registration")
+    if type(value['selection']) is not dict:
+        raise ValueError("selected descriptor must be an object")
+    if canonical(value["selection"]) != canonical(descriptor(version=version, condition=value['selection'].get('condition'))):
         raise ValueError("shared registration names a different protocol or selected assets")
     _text(value["registration_id"], "registration_id")
     _path(value["registration_path"], "registration_path")
@@ -227,9 +330,27 @@ def parse_registration(raw: bytes) -> dict:
                                                            "malformed_response_retries": 0}):
         raise ValueError("shared audit v1 admits exactly one delivery and no automatic answer retries")
     from .receipt_completion_policy import parse_registration as parse_receipt
-    receipt = parse_receipt(canonical(value["receipt"]), version=2)
-    if receipt["condition"] != "generic_v10":
-        raise ValueError("shared receipt registration requires generic_v10")
+    receipt = parse_receipt(canonical(value["receipt"]), version=version + 1)
+    if receipt["condition"] != value['selection']['condition']:
+        raise ValueError("shared receipt registration requires its exact selected condition")
+    if version == 2:
+        from .source_heading_runtime import MODES
+        routing = value['routing']
+        _exact(routing, {'mode', 'artifact', 'generation_limits'}, 'routing selection')
+        if type(routing['mode']) is not str or MODES.get(routing['mode']) != receipt['condition']:
+            raise ValueError("routing mode and condition differ")
+        _validate_pin(routing['artifact'], 'routing artifact')
+        limits = routing['generation_limits']
+        _exact(limits, {'max_request_bytes', 'max_input_tokens_per_call', 'max_output_tokens',
+            'context_limit_tokens', 'context_limit_basis', 'max_calls',
+            'aggregate_input_tokens', 'aggregate_output_tokens'}, 'routing generation limits')
+        for key in set(limits) - {'context_limit_basis'}:
+            _integer(limits[key], key)
+        _text(limits['context_limit_basis'], 'generation context basis')
+        if limits['max_calls'] > 512 or limits['max_request_bytes'] > MAX_AUTHORITY_BYTES:
+            raise ValueError('routing generation exceeds finite call/request bounds')
+        if limits['max_output_tokens'] >= limits['context_limit_tokens']:
+            raise ValueError("generation output cap leaves no input context")
     return value
 
 
@@ -260,6 +381,7 @@ class Capture:
     files: tuple[tuple[str, bytes], ...]
     full_schema: object
     core_schema: object
+    routing: bytes | None = None
 
     def document(self) -> dict:
         return parse_registration(self.registration)
@@ -325,6 +447,8 @@ def capture(spec) -> Capture:
         return saved
     files = {reg["registration_path"]: raw}
     pins = [selected[k] for k in ("bundle", "chunk_manifest", "source_manifest", "context") if selected[k] is not None]
+    if "routing" in reg:
+        pins.append(reg["routing"]["artifact"])
     if reg["runtime"]["config"] is not None:
         pins.append(reg["runtime"]["config"])
     if vocabulary is not None:
@@ -343,6 +467,14 @@ def capture(spec) -> Capture:
             data = files[pin["path"]] = path.read_bytes()
         if file_pin(path, data) != pin:
             raise ValueError(f"registered authority hash/size differs: {path}")
+    result = _capture_bytes(raw, reg, files)
+    spec._shared_generation_capture = result
+    return result
+
+
+def _capture_bytes(raw, reg, files, *, captured_only=False):
+    """Reconstruct the same actual schema/context/routing from exact bytes."""
+    selected = reg['inputs']
     from . import api_runner as api
     from .resources import resource_path, physical
     from .schema_snapshot import capture_schema
@@ -351,13 +483,17 @@ def capture(spec) -> Capture:
     for key, installed, cls in (("full_schema", api.FULL_SCHEMA_PATH, "Dataset"),
                                 ("core_schema", api.CORE_SCHEMA_PATH, "CoreDataset")):
         root = Path(selected[key]["root"])
-        if root != physical(resource_path(installed)):
+        if not captured_only and root != physical(resource_path(installed)):
             raise ValueError("registered schema differs from the actual API validation/digest schema")
         def read(path):
             if str(path) not in files:
                 raise ValueError("schema import is outside registered captured authority")
             return files[str(path)]
-        snapshot = capture_schema(root, read_bytes=read, strict=True)
+        if captured_only:
+            from .schema_snapshot import _capture_schema
+            snapshot = _capture_schema(root, read, strict=True)
+        else:
+            snapshot = capture_schema(root, read_bytes=read, strict=True)
         if schema_pin(snapshot) != selected[key]:
             raise ValueError("registered schema closure/order differs from its actual imports")
         with captured_view(snapshot) as view:
@@ -380,9 +516,21 @@ def capture(spec) -> Capture:
             raise ValueError('selected input exceeds typed audit input bound')
     if any(sum(len(raw) for _name, _path, raw in snapshot.sources) > omissions.MAX_SCHEMA_BYTES for snapshot in snapshots):
         raise ValueError('selected schema exceeds typed audit schema bound')
-    result = Capture(raw, tuple(sorted(files.items())), *snapshots)
-    spec._shared_generation_capture = result
-    return result
+    routing_raw = None
+    if 'routing' in reg:
+        from . import source_heading_runtime as routing
+        routing_raw = files[reg['routing']['artifact']['path']]
+        checked = routing.check_condition(routing_raw)
+        if (checked['projection']['mode'] != reg['routing']['mode']
+                or checked['projection']['condition'] != reg['selection']['condition']
+                or checked['schema_sources'] != selected['full_schema']['sources']):
+            raise ValueError('routing authority/schema differs from generation selection')
+        parsed = routing.draft._parse(routing_raw, 'routing capture', routing.MAX_CAPTURE)
+        for key in ('bundle', 'manifest'):
+            target = 'chunk_manifest' if key == 'manifest' else key
+            if routing.draft._unblob(parsed['inputs'][key], routing.MAX_CAPTURE) != files[selected[target]['path']]:
+                raise ValueError('routing factual corpus differs from selected generation inputs')
+    return Capture(raw, tuple(sorted(files.items())), *snapshots, routing=routing_raw)
 
 
 def identity(spec) -> dict:
@@ -392,11 +540,17 @@ def identity(spec) -> dict:
 def assert_current(spec) -> Capture:
     """Refuse drift before admission; requests still use the original capture."""
     captured = capture(spec)
-    captured_assets()
+    captured_assets(version=spec.shared_generation_version)
     for path, expected in captured.files:
         if Path(path).read_bytes() != expected:
             raise ValueError(f"shared-generation authority changed: {path}")
     return captured
+
+
+def _request_settings(settings):
+    from . import api_runner as api
+    return {"model": settings["name"], "temperature": settings["temperature"] if api.accepts_temperature(settings["name"]) else None,
+            "thinking": settings.get("thinking"), "effort": settings.get("effort")}
 
 
 def preflight(spec, settings) -> Capture:
@@ -405,8 +559,7 @@ def preflight(spec, settings) -> Capture:
     expected = reg["runtime"]
     from . import api_runner as api
     endpoint = api.provider_identity()
-    actual = {"model": settings["name"], "temperature": settings["temperature"] if api.accepts_temperature(settings["name"]) else None,
-              "thinking": settings.get("thinking"), "effort": settings.get("effort")}
+    actual = _request_settings(settings)
     for key, value in actual.items():
         if canonical(value) != canonical(expected[key]):
             raise ValueError(f"registered {key} differs from resolved request settings")
@@ -431,10 +584,25 @@ def preflight(spec, settings) -> Capture:
     known_window = api.context_facts(settings["name"], [])["limit_tokens"]
     if known_window is not None and limits["context_limit_tokens"] > known_window:
         raise ValueError("registered audit context exceeds the named route window")
+    if 'routing' in reg:
+        generation_limits = reg['routing']['generation_limits']
+        if generation_limits['max_output_tokens'] > api.output_limit(settings['name']):
+            raise ValueError('routing generation output cap exceeds actual route')
+        if known_window is not None and generation_limits['context_limit_tokens'] > known_window:
+            raise ValueError('routing generation context exceeds actual route')
     return captured
 
 GENERATION_CONTEXT_HEADER = '# Shared generation: captured generation scope and vocabulary\n\n'
 SCHEMA_CONTEXT_HEADER = '# Shared generation: captured schema owners and complete containing values\n\n'
+
+
+def _context_capture(spec):
+    # Only read-only builders accept this fixed private captured context. The
+    # live capture/assert_current/admission paths do not take this branch.
+    from .source_heading_completed import _CompletedSpec
+    if type(spec) is _CompletedSpec:
+        return spec._captured_authority
+    return assert_current(spec)
 
 
 def generation_context(spec) -> str:
@@ -444,7 +612,7 @@ def generation_context(spec) -> str:
     no source manifest. This is omission_context_v1, not scientific approval
     or the separately reviewed applicability packet.
     """
-    captured = assert_current(spec)
+    captured = _context_capture(spec)
     inputs = captured.document()['inputs']
     context = inputs['context']
     profile = copy.deepcopy(inputs['profile'])
@@ -479,7 +647,7 @@ def schema_context(spec, record: str | None = None) -> str:
     of role names. The instruction asks for scientific relationship review.
     Software's induced keys are included for generation before values exist.
     """
-    captured = assert_current(spec)
+    captured = _context_capture(spec)
     return memo(spec, 'schema_context', [canonical(schema_pin(captured.full_schema)),
         *[raw for _name, _path, raw in captured.full_schema.sources],
         canonical(record)], lambda: _schema_context(captured, record))
@@ -552,7 +720,7 @@ def plan(spec, settings):
         'condition': spec.condition, 'runtime': spec.runtime, 'model': copy.deepcopy(settings),
         'bundle': str(spec.bundle), 'bundle_bytes': len(captured.raw(reg['inputs']['bundle']['path'])),
         'profile': spec.profile, 'profile_basis': spec.profile_basis,
-        'api_playbook_version': 2, 'receipt_completion_version': 2, 'shared_generation_version': 1,
+        'api_playbook_version': spec.api_playbook_version, 'receipt_completion_version': spec.receipt_completion_version, 'shared_generation_version': spec.shared_generation_version,
         'shared_generation_registration': captured.identity()['registration'],
         'prompt_files': [str(path) for path in spec.prompt_files],
         'schema_digest_md5': None,
@@ -564,13 +732,13 @@ def plan(spec, settings):
         'registered_audit_allowances': copy.deepcopy(reg['audit_limits']),
         'estimate_basis': 'Only the actual full request has an approximate byte-derived count. Future record-dependent requests/roster are unknown; declared audit allowances are bounds, not measured tokens or prices.',
         'outputs': {'full': str(spec.full_path), 'core': str(spec.core_path), 'report': str(spec.report_path)},
-        'conditional_calls': [f'{RECEIPT_PHASE}: receipt completion2 before core; exact explicit receipt cap and coverage floor',
+        'conditional_calls': [f'{RECEIPT_PHASE}: receipt completion{spec.receipt_completion_version} before core; exact explicit receipt cap and coverage floor',
                               f'{WORKER_PHASE}: every partition worker; count depends on the complete captured originals, no answer retries',
                               f'{OMISSION_PHASE}: one complete source-chunk omission pass; no answer retries',
                               f'{INTEGRATION_PHASE}: one integration of every worker and omission candidate; no answer retries',
                               'full_readdress: existing one-time full receipt-path correction',
                               'report_regate: existing one-time report disposition correction'],
-        'readiness': {'software_protocol': NAME, 'native_direct': 'unsupported; separate adapter required',
+        'readiness': {'software_protocol': reg['selection']['protocol'], 'native_direct': 'unsupported; separate adapter required',
                       'scientific_approval': 'unverified', 'campaign_launch': 'not authorized by a plan',
                       'coverage_floor': copy.deepcopy(reg['receipt']['coverage_floor'])}}
 
@@ -600,7 +768,7 @@ def memo(spec, namespace, raw_parts, build):
 
 
 def source_raw(spec):
-    captured = assert_current(spec)
+    captured = _context_capture(spec)
     pin = captured.document()['inputs']['source_manifest']
     return captured.raw(pin['path']) if pin else None
 
@@ -622,24 +790,29 @@ def source_registry(spec):
 
 def digest_text(spec, cls):
     from . import schema_digest
-    captured = assert_current(spec)
+    from .source_heading_completed import _CompletedSpec
+    captured = _context_capture(spec)
     snapshot = captured.core_schema if cls == 'CoreDataset' else captured.full_schema
     pin = captured.document()['inputs']['profile']['vocabulary']
     vocabulary = captured.raw(pin['path']) if pin else b''
     return memo(spec, 'digest:' + cls,
         [canonical(schema_pin(snapshot)), *[raw for _name, _path, raw in snapshot.sources], vocabulary],
         lambda: schema_digest.render(schema_digest._build_cached(cls, snapshot.sources[0][1], snapshot),
-            vocabulary=schema_digest.vocabularies(content=vocabulary, profile=spec.profile_obj)))
+            vocabulary=(schema_digest._vocabularies_from_bytes(vocabulary) if type(spec) is _CompletedSpec
+                else schema_digest.vocabularies(content=vocabulary, profile=spec.profile_obj))))
 
 
 def marked_bundle(spec):
     from .audit_omissions import _mapping
     from .chunking import canonical_name, validate_manifest_mapping
-    captured = assert_current(spec)
+    captured = _context_capture(spec)
     inputs = captured.document()['inputs']
     raw = captured.raw(inputs['bundle']['path'])
     manifest = _mapping(captured.raw(inputs['chunk_manifest']['path']), 'captured chunk manifest')
-    validate_manifest_mapping(manifest, raw, canonical_name(spec.bundle, source_manifest=spec.manifest))
+    from .source_heading_completed import _CompletedSpec
+    name = (spec._captured_path_display['bundle_name'] if type(spec) is _CompletedSpec
+            else canonical_name(spec.bundle, source_manifest=spec.manifest))
+    validate_manifest_mapping(manifest, raw, name)
     starts = {chunk['lines'][0]: chunk['id'] for chunk in manifest['chunks']}
     out = []
     for number, line in enumerate(raw.decode('utf-8', errors='ignore').split('\n'), 1):
@@ -651,7 +824,7 @@ def marked_bundle(spec):
 
 def core_inventory(spec):
     from .schema_view import captured_view
-    captured = assert_current(spec)
+    captured = _context_capture(spec)
     def build():
         with captured_view(captured.core_schema) as view:
             return [str(slot.name) for slot in view.class_induced_slots('CoreDataset')]
@@ -667,22 +840,57 @@ def core_text(spec, *, phase4_complete=False):
     import yaml
     captured = assert_current(spec)
     raw = spec.full_path.read_bytes()
+    return _core_text(captured, raw, spec.full_path, phase4_complete=phase4_complete)
+
+
+def _core_text(captured, raw, full_path, *, phase4_complete=False, _source_display=None):
+    from . import derive_core as derive
+    from .d4d_pair_consistency import pair_schema_from_views
+    from .schema_view import captured_view
+    from .audit_omissions import _mapping
+    import yaml
     full = _mapping(raw, 'full record to derive core')
     with captured_view(captured.full_schema) as full_view, captured_view(captured.core_schema) as core_view:
         pair = pair_schema_from_views(full_view, core_view)
         core = derive.derive_core(full, pair)
         facts = {'derived': True, 'rule': derive.RULE,
-            'from': {'path': str(spec.full_path), 'md5': hashlib.md5(raw).hexdigest()},
+            'from': {'path': str(full_path), 'md5': hashlib.md5(raw).hexdigest()},
             'identity_slots': len(pair.identity_slots), 'projected_slots': list(pair.projected_slots),
             'distribution_slots': derive._distribution_slots(pair), 'conditional': dict(derive.CONDITIONAL)}
     body = yaml.safe_dump(core, sort_keys=False, allow_unicode=True, width=88)
-    header = '\n'.join(derive.core_header(raw.decode('utf-8'), spec.full_path, phase4_complete))
+    header = '\n'.join(derive.core_header(raw.decode('utf-8'), full_path, phase4_complete)
+        if _source_display is None else derive._core_header(raw.decode('utf-8'), _source_display, phase4_complete))
     return (header + '\n\n' if header else '') + body, facts
 
 
 def source_chunks(spec):
     from .evidence_assertions import source_chunks_from_bytes
-    captured = assert_current(spec)
+    captured = _context_capture(spec)
     inputs = captured.document()['inputs']
     return source_chunks_from_bytes(captured.raw(inputs['bundle']['path']),
                                    captured.raw(inputs['chunk_manifest']['path']))
+
+
+def routing_context(spec):
+    """Exact checked factual projection, never the separate control archive."""
+    if getattr(spec, 'shared_generation_version', 0) != 2:
+        return None
+    captured = _context_capture(spec)
+    # The raw closure was genuinely reconstructed at capture. Memoization here
+    # concerns only that pure immutable derivation, after fresh authority reads.
+    from .source_heading_runtime import check_condition
+    return memo(spec, 'routing_context', [captured.routing],
+                lambda: check_condition(captured.routing))['wire']
+
+
+def require_routing_context(spec, messages):
+    if getattr(spec, 'shared_generation_version', 0) != 2:
+        return
+    from .source_heading_runtime import MARKER
+    from .usage_ledger import UsageLedgerError
+    selected = [block for message in messages if message.get('role') == 'user'
+        and isinstance(message.get('content'), list) for block in message['content']
+        if isinstance(block, dict) and isinstance(block.get('text'), str)
+        and block['text'].startswith(MARKER)]
+    if selected != [{'type': 'text', 'text': routing_context(spec)}]:
+        raise UsageLedgerError('actual request changes, omits or duplicates the registered routing projection')

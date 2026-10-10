@@ -82,7 +82,7 @@ def _shape(value, schema):
 def _schema(path: Path, *, schema_snapshot=None) -> dict:
     """Capture and validate each file once before constructing a schema view."""
     from linkml_runtime.dumpers import json_dumper
-    from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
+    from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema, _capture_schema
     from data_sheets_schema.schema_view import captured_view
     total = 0
 
@@ -125,7 +125,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
                 raise ValueError("schema import is outside the captured closure")
             return frozen[selected]
 
-        replay = capture_schema(root, read_bytes=frozen_read, strict=True)
+        replay = _capture_schema(root, frozen_read, strict=True)
         if replay.sources != schema_snapshot.sources:
             raise ValueError("schema snapshot is not the exact declared import closure")
         captured = replay

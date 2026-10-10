@@ -188,11 +188,18 @@ def vocabularies(*, content: bytes | None = None,
         return {}
     key = content_key(prof.pin_path or VOCABULARY_PIN, content=data)
     if _VOCABULARIES is None or key != _VOCABULARY_KEY:
-        import yaml as _yaml
-        doc = _yaml.safe_load(data) or {}
-        _VOCABULARIES = doc.get("vocabularies") or {}
+        _VOCABULARIES = _vocabularies_from_bytes(data)
         _VOCABULARY_KEY = key
     return copy.deepcopy(_VOCABULARIES)
+
+
+def _vocabularies_from_bytes(data: bytes) -> dict[str, dict[str, str]]:
+    """The same vocabulary parser, without a live path/cache identity."""
+    if not data:
+        return {}
+    import yaml as _yaml
+    doc = _yaml.safe_load(data) or {}
+    return copy.deepcopy(doc.get("vocabularies") or {})
 
 
 def term_sources_of(slot) -> str | None:

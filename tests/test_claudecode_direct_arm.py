@@ -698,7 +698,7 @@ def test_a_redundant_receipt_flag_on_a_registered_line_is_accepted(env_native):
 def test_writes_receipt_is_one_answer_for_the_record_and_the_launcher(native, tmp_path):  # noqa: F811
     """#2350: an agentic specification that binds the receipt's destination writes one whatever its
     condition; any other run writes one only under a receipt condition (#710)."""
-    from data_sheets_schema.api_runner import RECEIPT_CONDITIONS, RunSpec
+    from data_sheets_schema.api_runner import RECEIPT_CONDITIONS, SOURCE_HEADING_CONDITIONS, RunSpec
     from tests.test_evidence_generation_gate import specification
     spec, _, _ = native
     assert spec.is_agentic and "receipt" in spec.render_spec()["agentic_artifact_paths"]
@@ -710,7 +710,7 @@ def test_writes_receipt_is_one_answer_for_the_record_and_the_launcher(native, tm
     assert not api.is_agentic
     # v10 has a distinct registered API selection, covered with its actual
     # receipt policy in test_shared_generation_condition_compatibility.
-    for condition in ("generic", "generic_v6", *sorted(set(RECEIPT_CONDITIONS) - {"generic_v10"})):
+    for condition in ("generic", "generic_v6", *sorted(set(RECEIPT_CONDITIONS) - {"generic_v10"} - SOURCE_HEADING_CONDITIONS)):
         assert replace(api, condition=condition).writes_receipt is (condition in RECEIPT_CONDITIONS)
     with pytest.raises(ValueError, match="requires shared generation 1"):
         replace(api, condition="generic_v10")

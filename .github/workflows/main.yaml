@@ -42,7 +42,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       # Assignment uses the actual pytest collection, including new test files
-      # and both filename conventions. No maintained test allowlist or -m filter.
+      # and both filename conventions. Four separately required API cases are
+      # removed only by the shared explicit lane partition, not a test allowlist.
       # Use the runner's logical CPUs (up to four); -n auto selected only two
       # physical cores on the standard four-vCPU public Linux runner.
       # Long checks start first; small scheduling chunks keep each worker
@@ -55,7 +56,7 @@ jobs:
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
           -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 6 || 4 }}
-          --ci-shard-timings=utils/ci_test_durations.json
+          --ci-shard-timings=utils/ci_test_durations.json --ci-lane=ordinary
           --durations=25 -n logical --maxprocesses=4 --dist load --maxschedchunk=1
           --junitxml=test-results/pytest.xml
 
@@ -74,6 +75,50 @@ jobs:
         with:
           name: tests-py${{ matrix.python-version }}-shard${{ matrix.shard }}
           path: test-results/*.xml
+          retention-days: 14
+
+  # Each long offline API case gets its own unchanged job budget (#4517).
+  # The shared collection partition keeps every other test in ordinary shards.
+  api-completion:
+    name: Python 3.12 / API case ${{ matrix.case }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [routing-dispatch, routing-portable, routing-regate, routing-default-layout]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
+      - name: Run the required offline API case
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/d4d-tests-pycache
+        run: |
+          mkdir -p test-results
+          set -o pipefail
+          poetry run python -m pytest tests -v -p no:cacheprovider \
+            -p utils.pytest_shard --ci-lane=${{ matrix.case }} \
+            --durations=25 --junitxml=test-results/pytest.xml \
+            2>&1 | tee test-results/pytest.log
+      - name: Require the case to leave notes/, tests/ and utils/ untouched
+        if: always()
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/ tests/ utils/)"
+          test -z "$changed" || { printf '%s\n' "$changed"; exit 1; }
+      - name: Preserve test results, timings and incomplete-case output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py3.12-api-${{ matrix.case }}
+          path: test-results/*
           retention-days: 14
 
   # Run these controls once with their own existing 45-minute job budget.
@@ -264,13 +309,14 @@ jobs:
   # skip in any required test lane must make this aggregate fail (#1812, #2237).
   test:
     if: always()
-    needs: [python-tests, offline-canary, offline-audit, offline-evaluation, schema-examples]
+    needs: [python-tests, api-completion, offline-canary, offline-audit, offline-evaluation, schema-examples]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Require every applicable job to pass
         env:
           PYTHON_RESULT: ${{ needs.python-tests.result }}
+          API_RESULT: ${{ needs.api-completion.result }}
           CANARY_RESULT: ${{ needs.offline-canary.result }}
           AUDIT_RESULT: ${{ needs.offline-audit.result }}
           EVALUATION_RESULT: ${{ needs.offline-evaluation.result }}
@@ -278,6 +324,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         run: |
           test "$PYTHON_RESULT" = success
+          test "$API_RESULT" = success
           test "$CANARY_RESULT" = success
           test "$AUDIT_RESULT" = success
           test "$EVALUATION_RESULT" = success

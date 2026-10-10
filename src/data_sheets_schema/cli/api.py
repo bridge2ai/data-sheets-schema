@@ -38,6 +38,8 @@ ARMS = {
 # from every CLI entry point — the condition was staged, tested, and could not be
 # launched.
 _CONDITIONS = sorted(CONDITION_PROMPTS)
+_CONDITION_SCOPE = (" API generic_v10 requires registered API25; source-heading conditions require "
+                    "registered API27/shared2/playbook3/receipt3. Source-heading selections do not support native/direct launchers.")
 
 
 def _explicit(name, value, default=None):
@@ -88,9 +90,9 @@ def _shared_spec(project, arm, label, condition, bundle, out_dir, runtime, provi
     matches = [key for key, row in ARMS.items() if row[:2] == (run['arm'], run['method'])]
     if len(matches) != 1 or run['project'] != project or run['label'] != label:
         raise click.ClickException('shared registration belongs to another project, arm, method or label')
-    expected = {'arm': matches[0], 'condition': 'generic_v10', 'runtime': api.RUNTIME,
-                'provider': reg['runtime']['provider'], 'api_playbook_version': 2,
-                'receipt_completion_version': 2, 'removal_repair_version': 0}
+    expected = {'arm': matches[0], 'condition': reg['selection']['condition'], 'runtime': api.RUNTIME,
+                'provider': reg['runtime']['provider'], 'api_playbook_version': reg['selection']['api_playbook_version'],
+                'receipt_completion_version': reg['selection']['receipt_completion_version'], 'removal_repair_version': 0}
     supplied = dict(arm=arm, condition=condition, runtime=runtime, provider=provider,
                     api_playbook_version=api_playbook_version,
                     receipt_completion_version=receipt_completion_version,
@@ -113,20 +115,20 @@ def _shared_spec(project, arm, label, condition, bundle, out_dir, runtime, provi
     if receipt_completion_registration is not None:
         try:
             from data_sheets_schema.receipt_completion_policy import parse_registration
-            other = parse_registration(_bounded_registration_bytes(receipt_completion_registration), version=2)
+            other = parse_registration(_bounded_registration_bytes(receipt_completion_registration), version=reg['selection']['receipt_completion_version'])
             if shared.canonical(other) != shared.canonical(reg['receipt']):
                 raise ValueError('receipt registration conflicts with shared registration')
         except ValueError as exc:
             raise click.ClickException(str(exc)) from exc
     try:
         return api.RunSpec(project=project, arm=run['arm'], method=run['method'], label=label,
-            condition='generic_v10', condition_stated=True, render_version=25,
+            condition=reg['selection']['condition'], condition_stated=True, render_version=reg['selection']['renderer'],
             bundle=Path(inputs['bundle']['path']), chunk_manifest=Path(inputs['chunk_manifest']['path']),
             manifest=selected_manifest, profile=inputs['profile']['name'],
             profile_basis=inputs['profile']['basis'], runtime=api.RUNTIME,
             provider=expected['provider'], out_dir=Path(out_dir) if out_dir else None,
-            shared_generation_version=1, shared_generation_registration=raw.decode('utf-8'),
-            api_playbook_version=2, receipt_completion_version=2,
+            shared_generation_version=reg['selection']['version'], shared_generation_registration=raw.decode('utf-8'),
+            api_playbook_version=reg['selection']['api_playbook_version'], receipt_completion_version=reg['selection']['receipt_completion_version'],
             receipt_completion_registration=receipt_raw)
     except (ValueError, OSError) as exc:
         raise click.ClickException(str(exc)) from exc
@@ -236,9 +238,11 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     a run without a manifest records that it had none.
     """
     if shared_generation_version or shared_generation_registration is not None:
-        if shared_generation_version != 1 or shared_generation_registration is None:
-            raise click.ClickException("shared generation requires explicit version 1 and registration")
+        if shared_generation_version not in (1, 2) or shared_generation_registration is None:
+            raise click.ClickException("shared generation requires an explicit supported version and registration")
         captured = _shared_capture or _capture_shared_registration(shared_generation_registration)
+        if captured['document']['selection']['version'] != shared_generation_version:
+            raise click.ClickException('selected shared version differs from registration')
         return _shared_spec(project, arm, label, condition, bundle, out_dir,
                             runtime, provider, manifest, chunk_manifest,
                             api_playbook_version, removal_repair_version,
@@ -417,25 +421,25 @@ def api():
 
 
 @api.command("render-prompt")
-@click.option("--shared-generation-version", type=click.IntRange(0, 1), default=0,
+@click.option("--shared-generation-version", type=click.IntRange(0, 2), default=0,
               help="explicit shared-generation API condition; requires its immutable registration")
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
-@click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
-              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 3), default=0,
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
-@click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
+@click.option("--api-playbook-version", type=click.IntRange(0, 3), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
-              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
+              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)" + _CONDITION_SCOPE)
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for a dataset the selected manifest does not declare")
 @click.option("--manifest", default=None,
@@ -520,25 +524,25 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 
 
 @api.command("plan")
-@click.option("--shared-generation-version", type=click.IntRange(0, 1), default=0,
+@click.option("--shared-generation-version", type=click.IntRange(0, 2), default=0,
               help="explicit shared-generation API condition; requires its immutable registration")
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
-@click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
-              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 3), default=0,
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
-@click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
+@click.option("--api-playbook-version", type=click.IntRange(0, 3), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--label", required=True, help="run label, e.g. 2026-07-29_claude-opus-5-api-generic_rep1")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
-              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
+              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)" + _CONDITION_SCOPE)
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for a dataset the selected manifest does not declare")
 @click.option("--manifest", default=None,
@@ -587,18 +591,18 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 
 
 @api.command("run")
-@click.option("--shared-generation-version", type=click.IntRange(0, 1), default=0,
+@click.option("--shared-generation-version", type=click.IntRange(0, 2), default=0,
               help="explicit shared-generation API condition; requires its immutable registration")
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
-@click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
-              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 3), default=0,
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
-@click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
+@click.option("--api-playbook-version", type=click.IntRange(0, 3), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -606,7 +610,7 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--label", required=True)
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies and the record derives its "
-                   "condition from the prompt it hashes rather than calling the default a choice (#1094)")
+                   "condition from the prompt it hashes rather than calling the default a choice (#1094)" + _CONDITION_SCOPE)
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="run even though the label names a different condition (#1094)")
 @click.option("--bundle", type=click.Path(), default=None,
@@ -673,18 +677,18 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 
 
 @api.command("batch")
-@click.option("--shared-generation-version", type=click.IntRange(0, 1), default=0,
+@click.option("--shared-generation-version", type=click.IntRange(0, 2), default=0,
               help="explicit shared-generation API condition; requires its immutable registration")
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
-@click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
-              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 3), default=0,
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
-@click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
+@click.option("--api-playbook-version", type=click.IntRange(0, 3), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--projects", default=None,
               help="comma-separated; default: every project the selected manifest declares "
                    "(#623), or the --project-bundle names")
@@ -699,7 +703,7 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
               show_default=True)
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies and each record derives its "
-                   "condition from the prompt it hashes rather than calling the default a choice (#1094)")
+                   "condition from the prompt it hashes rather than calling the default a choice (#1094)" + _CONDITION_SCOPE)
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="run even though the label prefix names a different condition (#1094)")
 @click.option("--replicates", type=int, default=3, show_default=True)
@@ -753,8 +757,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             "was given; pass --projects, --project-bundle NAME=PATH, or --manifest")
     roster = None
     if shared_generation_version or shared_generation_registration is not None:
-        if shared_generation_version != 1 or shared_generation_registration is None:
-            raise click.ClickException('shared batch requires explicit version 1 and registration roster')
+        if shared_generation_version not in (1, 2) or shared_generation_registration is None:
+            raise click.ClickException('shared batch requires an explicit supported version and registration roster')
         if replicates < 1 or len(names) != len(set(names)) or set(bundles) - set(names):
             raise click.ClickException('shared batch requires positive replicates and distinct exact projects')
         pairs = [(p, f'{label_prefix}_rep{n}') for p in names for n in range(1, replicates + 1)]
@@ -762,7 +766,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     specs = []
     for p in names:
         for n in range(1, replicates + 1):
-            shared_kw = ({'shared_generation_version': 1,
+            shared_kw = ({'shared_generation_version': shared_generation_version,
                           'shared_generation_registration': str(roster['registrations'][(p, f'{label_prefix}_rep{n}')]['path']),
                           '_shared_capture': roster['registrations'][(p, f'{label_prefix}_rep{n}')]} if roster else {})
             s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
@@ -1180,3 +1184,17 @@ def prompts_pin_cmd(path, reason):
     if res.get("previous"):
         click.echo(f"  previous {res['previous'][:12]}… kept as superseded, so "
                    "runs made under it still verify")
+
+
+@api.command("check-routing-completed")
+@click.argument("capture", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+def check_routing_completed_cmd(capture):
+    """Recheck a complete selected-v2 capture without original paths or calls."""
+    from data_sheets_schema.source_heading_completed import recheck_completed, MAX_ENVELOPE_BYTES
+    try:
+        with capture.open('rb') as stream:
+            raw = stream.read(MAX_ENVELOPE_BYTES + 1)
+        result = recheck_completed(raw)
+    except (ValueError, OSError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(json.dumps(result, sort_keys=True, indent=2))

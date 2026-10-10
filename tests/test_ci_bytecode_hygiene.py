@@ -7,6 +7,7 @@ scrubbed environment can still leave __pycache__/ under notes/: the trailing
 checks on offline-canary and offline-audit report that as a warning and fail on any
 other path; offline-evaluation fails on any path. This is why #3865 stays open.
 """
+from copy import deepcopy
 import os
 from pathlib import Path
 import subprocess
@@ -46,6 +47,8 @@ def runs_pytest_on(step, tree):
 NOTES_STEPS = [(job, index, step) for job, index, step in steps() if runs_pytest_on(step, "notes/")]
 CHECKS = [(job, index, step) for job, index, step in steps()
           if "git status --ignored --porcelain -- notes/" in step.get("run", "")]
+SUITE_STEPS = [s for s in steps() if runs_pytest_on(s[2], "tests ")]
+SUITE_IDS = [job for job, _, _ in SUITE_STEPS]
 
 
 def test_the_notes_controls_run_without_bytecode_and_without_a_prefix():
@@ -58,8 +61,12 @@ def test_the_notes_controls_run_without_bytecode_and_without_a_prefix():
         assert "PYTHONPYCACHEPREFIX" not in env, (job, step["name"])
 
 
-def test_the_tests_lane_compiles_its_conftest_outside_the_checkout():
-    [(job, _, step)] = [s for s in steps() if runs_pytest_on(s[2], "tests ")]
+def test_suite_discovery_includes_ordinary_and_dedicated_api_jobs():
+    assert {"python-tests", "api-completion"} <= set(SUITE_IDS)
+
+
+@pytest.mark.parametrize("job,suite,step", SUITE_STEPS, ids=SUITE_IDS)
+def test_the_tests_lane_compiles_its_conftest_outside_the_checkout(job, suite, step):
     env = effective_env(job, step)
     assert env["PYTHONPYCACHEPREFIX"].startswith("${{ runner.temp }}/")
     assert "PYTHONDONTWRITEBYTECODE" not in env
@@ -85,11 +92,10 @@ def trailing_check(job):
     return later[0]
 
 
-def suite_check():
-    """The check after the tests/ suite step, including when controls are separate."""
-    [(_, suite, _)] = [s for s in steps() if runs_pytest_on(s[2], "tests ")]
+def suite_check(job, suite):
+    """The same job must check the checkout after its actual tests/ step."""
     [step] = [step for name, index, step in CHECKS
-              if name == "python-tests" and suite < index]
+              if name == job and suite < index]
     return step
 
 
@@ -148,12 +154,50 @@ SUITE_BYTECODE = "!! tests/__pycache__/\n"
 UTILS_BYTECODE = "!! utils/__pycache__/\n"
 
 
-def test_the_suite_check_covers_notes_tests_and_utils_and_fails_on_any_path(tmp_path):
+@pytest.mark.parametrize("job,suite,step", SUITE_STEPS, ids=SUITE_IDS)
+def test_the_suite_check_covers_notes_tests_and_utils_and_fails_on_any_path(tmp_path, job, suite, step):
     """#3866: the prefix keeps tests/ and utils/ free of bytecode, so any path fails."""
-    step = suite_check()
+    step = suite_check(job, suite)
     spec = "notes/ tests/ utils/"
     assert check(step, tmp_path, CLEAN, spec).returncode == 0
     for porcelain in (SUITE_BYTECODE, UTILS_BYTECODE, BYTECODE, LOCK, EDITED):
         failed = check(step, tmp_path, porcelain, spec)
         assert failed.returncode == 1, porcelain
         assert porcelain.strip() in failed.stdout
+
+
+@pytest.mark.parametrize("job,suite,step", SUITE_STEPS, ids=SUITE_IDS)
+@pytest.mark.parametrize("mutation", ["missing", "inside-checkout"])
+def test_each_suite_lane_rejects_an_absent_or_wrong_pycache_prefix(monkeypatch, job, suite, step, mutation):
+    """Exercise the real environment assertion against each actual workflow lane."""
+    changed = deepcopy(WORKFLOW)
+    altered = changed["jobs"][job]["steps"][suite]
+    if mutation == "missing":
+        del altered["env"]["PYTHONPYCACHEPREFIX"]
+    else:
+        altered["env"]["PYTHONPYCACHEPREFIX"] = "${{ github.workspace }}/pycache"
+    monkeypatch.setitem(globals(), "WORKFLOW", changed)
+    with pytest.raises((AssertionError, KeyError)):
+        test_the_tests_lane_compiles_its_conftest_outside_the_checkout(job, suite, altered)
+
+
+@pytest.mark.parametrize("job,suite,step", SUITE_STEPS, ids=SUITE_IDS)
+@pytest.mark.parametrize("omitted", ["notes/", "tests/", "utils/"])
+def test_each_suite_lane_rejects_an_omitted_cleanup_path(tmp_path, monkeypatch, job, suite, step, omitted):
+    """The original check must still ask Git about all three trees in every lane."""
+    original = suite_check(job, suite)
+    altered = {**original, "run": original["run"].replace(
+        "notes/ tests/ utils/", " ".join(x for x in ("notes/", "tests/", "utils/") if x != omitted))}
+    assert altered["run"] != original["run"]
+    monkeypatch.setitem(globals(), "CHECKS", [(name, index, altered if row is original else row)
+                                             for name, index, row in CHECKS])
+    with pytest.raises(AssertionError):
+        test_the_suite_check_covers_notes_tests_and_utils_and_fails_on_any_path(tmp_path, job, suite, step)
+
+
+@pytest.mark.parametrize("job,suite,step", SUITE_STEPS, ids=SUITE_IDS)
+def test_each_suite_lane_requires_its_own_trailing_check(tmp_path, monkeypatch, job, suite, step):
+    """A different job's valid check cannot cover a missing check in this one."""
+    monkeypatch.setitem(globals(), "CHECKS", [row for row in CHECKS if row[0] != job])
+    with pytest.raises(ValueError):
+        test_the_suite_check_covers_notes_tests_and_utils_and_fails_on_any_path(tmp_path, job, suite, step)

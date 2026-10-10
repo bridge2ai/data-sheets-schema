@@ -179,8 +179,13 @@ def core_header(full_text: str, full_path: Path, phase4_complete: bool = False) 
     BLOCK has it — the provenance guard reads it), the core schema, and —
     only once Phase 4 has actually run — its completion line."""
     from data_sheets_schema.provenance import repo_relative
+    return _core_header(full_text, repo_relative(full_path), phase4_complete)
+
+
+def _core_header(full_text: str, source_display: str, phase4_complete: bool = False) -> list[str]:
+    """Render the literal header from an already recorded source spelling."""
     out = []
-    sources = f"# Sources: {repo_relative(full_path)}"
+    sources = f"# Sources: {source_display}"
     sources_written = False
     for line in _header_lines(full_text):
         if line.startswith("# D4D Datasheet for"):

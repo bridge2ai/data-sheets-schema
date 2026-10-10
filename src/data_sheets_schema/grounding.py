@@ -480,6 +480,70 @@ def declared_naming(manifest_path: Path | None = None) -> dict[str, Any]:
     return data.get("naming") or {}
 
 
+# Only the selected completed-reader producer uses this bounded observation.
+MAX_CAPTURED_NAMING_BYTES = 8_000_000
+
+
+def _naming_from_bytes(raw):
+    if raw is None:
+        return {}
+    if type(raw) is not bytes or len(raw) > MAX_CAPTURED_NAMING_BYTES:
+        raise ValueError('captured naming instrument exceeds byte bound')
+    import io
+    import yaml as _yaml
+    # Match read_text's universal-newline decoding, including literal scalars.
+    with io.TextIOWrapper(io.BytesIO(raw), encoding='utf-8') as stream:
+        data = _yaml.safe_load(stream.read()) or {}
+    return data.get('naming') or {}
+
+
+def _capture_declared_naming():
+    path = Path('data/preprocessed/source_manifest.yaml')
+    raw = None
+    if path.exists():
+        with path.open('rb') as stream:
+            raw = stream.read(MAX_CAPTURED_NAMING_BYTES + 1)
+    return _naming_from_bytes(raw), {'path': str(path.absolute()), 'raw': raw}
+
+
+def _form_facts_with_naming(full, core):
+    from .identifiers import uriorcurie_slots
+    observed = []
+    rows = _CapturedFormRows(full, core)
+    result = _form_facts(rows, full, uriorcurie_slots(), _naming_capture=observed)
+    if len(observed) != 1:
+        raise ValueError('selected form measurement requires existing records and one naming observation')
+    return result, observed[0], rows.raw
+
+
+class _CapturedFormRows:
+    """Selected-only lazy snapshot; every pass consumes the same exact bytes."""
+    def __init__(self, full, core):
+        self.paths = (full, core)
+        self.raw = {}
+
+    def __iter__(self):
+        for path in self.paths:
+            if path not in self.raw:
+                raw = None
+                if path.exists():
+                    with path.open('rb') as stream:
+                        raw = stream.read(64_000_001)
+                    if len(raw) > 64_000_000:
+                        raise ValueError('captured form record exceeds byte bound')
+                self.raw[path] = raw
+            raw = self.raw[path]
+            if raw is not None:
+                yield path, _form_text(raw)
+
+
+def _form_text(raw):
+    """Match live read_text's decoding, while callers retain raw byte pins."""
+    import io
+    with io.TextIOWrapper(io.BytesIO(raw), encoding='utf-8', errors='replace') as stream:
+        return stream.read()
+
+
 def form_facts(full: Path, core: Path, slots: set[str] | None = None, *,
                record: dict[str, Any] | None = None) -> dict[str, Any]:
     """Counts that are properties of the records alone (#602).
@@ -508,15 +572,29 @@ def form_facts(full: Path, core: Path, slots: set[str] | None = None, *,
         rules, basis = identifier_rules(record)
     if slots is None:
         slots = rules.slots if rules is not None else uriorcurie_slots()
+    rows = _FormRows(full, core)
+    return _form_facts(rows, full, slots, rules=rules, basis=basis)
+
+
+class _FormRows:
+    """Repeat the live wrapper's ordered reads on each original validation pass."""
+    def __init__(self, full, core):
+        self.paths = (full, core)
+
+    def __iter__(self):
+        for path in self.paths:
+            if path.exists():
+                yield path, path.read_text(encoding='utf-8', errors='replace')
+
+
+def _form_facts(rows, full, slots, *, rules=None, basis=None, naming=None, _naming_capture=None):
+    import yaml as _yaml
     prefixes: dict[str, int] = {}
     british = 0
     fragments: set[str] = set()
     present = []
-    for path in (full, core):
-        if not path.exists():
-            continue
+    for path, raw in rows:
         present.append(str(path))
-        raw = path.read_text(encoding="utf-8", errors="replace")
         british += british_spellings(raw)
         doc = _yaml.safe_load(raw) or {}
         for prefix, n in undeclared_prefixes(
@@ -536,15 +614,18 @@ def form_facts(full: Path, core: Path, slots: set[str] | None = None, *,
     # contributes nothing rather than failing — absence of a declaration is
     # not a defect in the record.
     label_variants: dict[str, int] = {}
-    naming = declared_naming()
+    if naming is None:
+        if _naming_capture is None:
+            naming = declared_naming()
+        else:
+            naming, observation = _capture_declared_naming()
+            _naming_capture.append(observation)
     project = full.name.split("_d4d")[0] if full.name else ""
     declared = naming.get(project) or {}
     if declared.get("canonical_label"):
-        for path in (full, core):
-            if not path.exists():
-                continue
+        for path, raw in rows:
             found = gc_label_variants(
-                path.read_text(encoding="utf-8", errors="replace"),
+                raw,
                 declared["canonical_label"],
                 list(declared.get("variants") or []))
             for k, v in found.items():
@@ -645,6 +726,13 @@ def check_run(full: Path, core: Path, bundle: Path,
     if slots is None:
         slots = rules.slots if rules is not None else uriorcurie_slots()
     text = bundle.read_text(encoding="utf-8", errors="replace")
+    rows = ((which, path.read_text(encoding='utf-8'))
+            for which, path in (('full', full), ('core', core)) if path.exists())
+    return _check_run(rows, text, slots, rules=rules, basis=basis)
+
+
+def _check_run(rows, text, slots, *, rules=None, basis=None):
+    import yaml
     out: dict[str, Any] = {"checked": True, "instrument": GROUNDING_INSTRUMENT,
                            "counts": {"grounded": 0, "minted_fragment": 0,
                                       "absent": 0},
@@ -654,10 +742,8 @@ def check_run(full: Path, core: Path, bundle: Path,
     # 7 organisational fragments read as 14.
     pooled: dict[str, set] = {"grounded": set(), "minted_fragment": set(),
                               "absent": set()}
-    for which, path in (("full", full), ("core", core)):
-        if not path.exists():
-            continue
-        doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    for which, raw in rows:
+        doc = yaml.safe_load(raw) or {}
         r = check_record(doc, text, slots)
         for key, n in r["counts"].items():
             out["counts"][key] += n

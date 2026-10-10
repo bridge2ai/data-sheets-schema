@@ -937,6 +937,14 @@ def check_report(report: Path, full: dict, core: dict,
         return {"checked": False, "reason": f"no report at {report}",
                 "findings": []}
     text = report.read_text(encoding="utf-8", errors="replace")
+    return _check_report_text(text, full, core, declared, snapshot, dispositions_expected,
+                              ranges, instrument_version=instrument_version)
+
+
+def _check_report_text(text, full, core, declared, snapshot=None, dispositions_expected=None,
+                       ranges=None, *, instrument_version=8):
+    if type(instrument_version) is not int or instrument_version not in (7, 8):
+        raise ValueError(f"unsupported report-claims instrument version: {instrument_version}")
     findings: list[dict[str, str]] = []
     claims = unnamed = core_cannot_hold = 0
     # Refused up front, not only on the row that would consult it (#993): a

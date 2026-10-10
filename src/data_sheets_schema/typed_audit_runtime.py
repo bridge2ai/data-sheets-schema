@@ -82,6 +82,12 @@ def prepare_packet(spec, *, record=None):
     originals = _originals(spec, record=record)
     receipts.recover(spec)  # Effective receipt must be the accepted one-use result.
     receipt_raw = api._receipt_path(spec).read_bytes()
+    return _prepare_packet_bytes(spec, captured, originals, receipt_raw)
+
+
+def _prepare_packet_bytes(spec, captured, originals, receipt_raw):
+    reg = captured.document()
+    inputs, limits = reg['inputs'], reg['audit_limits']
     key = [captured.registration, *[raw for _path, raw in captured.files], *originals.values(), receipt_raw]
     packet = sg.memo(spec, 'typed_packet', key, lambda: typed.prepare(protocol='typed_audit_protocol_v1', **originals,
         bundle=captured.raw(inputs['bundle']['path']),
@@ -124,24 +130,34 @@ def build_request(spec, packet, stage, workers, omission, settings):
     from . import api_runner as api
     captured = sg.assert_current(spec)
     reg = captured.document()
+    return _build_request_bytes(spec, captured, packet, stage, workers, omission, settings, _live=True)
+
+
+def _build_request_bytes(spec, captured, packet, stage, workers, omission, settings, generation=None, receipt_carry=None, *, _live=False):
+    from . import api_runner as api
+    reg = captured.document()
     inner = _inner(spec, packet, stage, workers, omission)
     label = {WORKER_PHASE: 'worker', OMISSION_PHASE: 'omission', INTEGRATION_PHASE: 'integration'}[stage['phase']]
     limit = reg['audit_limits'][label + '_output_tokens']
     full = typed._unblob(packet['inputs']['original_full']).decode('utf-8')
-    binding = {'protocol': sg.NAME, 'generation_id': ledger.generation_id(spec),
+    binding = {'protocol': reg['selection']['protocol'], 'generation_id': ledger.generation_id(spec) if _live else generation,
                'registration_sha256': sg.sha(captured.registration), 'packet_sha256': packet['sha256'],
                'stage': stage, 'inner_request_sha256': sg.sha(sg.canonical(inner)),
                'scope': 'Declared response association, not provider authentication or scientific approval.'}
-    parts = [{'type': 'text', 'text': sg.policy_text()},
+    parts = [{'type': 'text', 'text': sg.policy_text(version=spec.shared_generation_version)},
              {'type': 'text', 'text': api.shared_evidence_contract()},
-             {'type': 'text', 'text': receipts.audit_carry(spec)},
+             {'type': 'text', 'text': receipts.audit_carry(spec) if _live else receipt_carry},
              {'type': 'text', 'text': sg.schema_context(spec, full)},
              {'type': 'text', 'text': sg.generation_context(spec)},
              {'type': 'text', 'text': '# Registered audit request identity\n\n' + sg.canonical(binding).decode()},
              {'type': 'text', 'text': '# Exact typed stage request\n\n' + sg.canonical(inner).decode()}]
+    routing = sg.routing_context(spec)
+    if routing is not None:
+        parts.append({'type': 'text', 'text': routing})
     req = api.PhaseRequest(phase=stage['phase'], system=SYSTEM,
                           messages=[{'role': 'user', 'content': parts}])
-    receipts.require_audit_carry(spec, req)
+    if _live:
+        receipts.require_audit_carry(spec, req)
     payload = receipts.request_payload(req, settings, {'max_output_tokens': limit})
     if len(sg.canonical(payload)) > reg['audit_limits']['max_request_bytes']:
         raise ledger.UsageLedgerError('complete typed request exceeds registered bytes; carry and chunks cannot be truncated')
@@ -169,14 +185,19 @@ def _check_response(spec, packet, stage, inner, response, workers, omission):
     return workers, omission, None
 
 
-def _validate_base(spec, state, *, record=None):
+def _validate_base(spec, state, *, record=None, _reader=None):
+    if _reader is not None:
+        from .source_heading_completed import _Reader, _CompletedSpec
+        if type(_reader) is not _Reader or type(spec) is not _CompletedSpec:
+            raise TypeError('invalid completed typed validation context')
     if type(state) is not dict or state.get('format') != STATE or state.get('state') not in ('prepared', 'running', 'assembled', 'accepted', 'failed'):
         raise ledger.UsageLedgerError('invalid typed audit journal')
-    if (state.get('generation_id') != ledger.generation_id(spec)
-            or state.get('authority') != sg.identity(spec)):
+    if (state.get('generation_id') != (ledger.generation_id(spec) if _reader is None else spec._ledger['generation_id'])
+            or state.get('authority') != (sg.identity(spec) if _reader is None else spec._captured_authority.identity())):
         raise ledger.UsageLedgerError('typed audit belongs to another generation or authority')
-    packet = _load(state['packet'])
-    expected = prepare_packet(spec, record=record)
+    packet = _load(state['packet']) if _reader is None else _reader.load(state['packet'])
+    expected = (prepare_packet(spec, record=record) if _reader is None else
+        _prepare_packet_bytes(spec, spec._captured_authority, spec._originals, spec._effective_receipt))
     if sg.canonical(packet) != sg.canonical(expected) or state.get('roster') != roster(packet):
         raise ledger.UsageLedgerError('typed audit packet/originals/effective receipt/roster changed')
     stages = state.get('stages')
@@ -213,19 +234,31 @@ def _settle(spec, row, response, payload):
     receipts._recover_reasoning(spec, response, usage, payload, phase=row['selection']['phase'])
 
 
-def _rebuild(spec, state, *, settle=False, record=None):
-    packet = _validate_base(spec, state, record=record)
+def _rebuild(spec, state, *, settle=False, record=None, _reader=None):
+    if _reader is not None and settle:
+        raise ValueError('captured typed readback cannot settle or publish')
+    packet = _validate_base(spec, state, record=record, _reader=_reader)
     settings = state['settings']
-    sg.preflight(spec, settings)
+    if _reader is None:
+        sg.preflight(spec, settings)
+    else:
+        reg = spec._captured_authority.document()
+        expected = reg['runtime']
+        actual = sg._request_settings(settings)
+        if any(sg.canonical(actual[k]) != sg.canonical(expected[k]) for k in actual):
+            raise ledger.UsageLedgerError('captured typed settings differ from registration')
     workers, omission, assembly = {}, None, None
     reserved_input = reserved_output = 0
     for index, row in enumerate(state['stages']):
         stage = row['selection']
-        _, payload, inner = build_request(spec, packet, stage, workers, omission, settings)
-        if _load(row['request']) != payload:
+        _, payload, inner = (build_request(spec, packet, stage, workers, omission, settings)
+            if _reader is None else _build_request_bytes(spec, spec._captured_authority,
+                packet, stage, workers, omission, settings, spec._ledger['generation_id'],
+                receipts._audit_carry(spec._receipt_outcome)))
+        if (_load(row['request']) if _reader is None else _reader.load(row['request'])) != payload:
             raise ledger.UsageLedgerError('typed saved whole request differs from reconstructed wire')
-        count = _load(row['context'])
-        limits = sg.capture(spec).document()['audit_limits']
+        count = (_load(row['context']) if _reader is None else _reader.load(row['context']))
+        limits = sg._context_capture(spec).document()['audit_limits']
         receipts._context_check(count, payload, limits)
         if type(count['input_tokens']) is not int or not 0 < count['input_tokens'] <= limits['max_input_tokens_per_call']:
             raise ledger.UsageLedgerError('typed count is unknown, zero or exceeds registered input limit')
@@ -237,13 +270,13 @@ def _rebuild(spec, state, *, settle=False, record=None):
             continue
         if 'response' not in row:
             raise ledger.UsageLedgerError('typed admission has no saved response; never repurchase')
-        response = _load(row['response'])
+        response = (_load(row['response']) if _reader is None else _reader.load(row['response']))
         if response.get('request_sha256') != row['request']['sha256']:
             raise ledger.UsageLedgerError('typed response names another whole request')
         if settle:
             _settle(spec, row, response, payload)
         else:
-            rows = [r for r in ledger._read(spec)['rows'] if r.get('usage_id') == row.get('usage_id')]
+            rows = [r for r in (ledger._read(spec) if _reader is None else spec._ledger)['rows'] if r.get('usage_id') == row.get('usage_id')]
             if rows != [response.get('usage')] or receipts._usage_problems(response.get('usage') or {}):
                 raise ledger.UsageLedgerError('typed stage lacks settled exact response accounting')
         used = response['usage']['output_tokens']
@@ -256,7 +289,7 @@ def _rebuild(spec, state, *, settle=False, record=None):
         if settle and row['state'] != 'checked':
             row['state'] = 'checked'
             _store(spec, state)
-    limits = sg.capture(spec).document()['audit_limits']
+    limits = sg._context_capture(spec).document()['audit_limits']
     if reserved_input > limits['aggregate_input_tokens'] or reserved_output > limits['aggregate_output_tokens']:
         raise ledger.UsageLedgerError('typed aggregate usage/reservation exceeds its declared ceiling')
     return packet, workers, omission, assembly, reserved_input, reserved_output
@@ -316,7 +349,11 @@ def recover(spec, *, carry=None, terminal=False, independent=False, record=None)
 
 def completion_check(spec, carry=None, *, record=None):
     outcome = recover(spec, carry=carry, terminal=True, independent=True, record=record)
-    return {'protocol': sg.NAME, 'generation_id': ledger.generation_id(spec),
+    routing = {}
+    if spec.shared_generation_version == 2:
+        from .source_heading_admission import completion_check as check_routing
+        routing['routing'] = check_routing(spec)
+    return {**routing, 'protocol': sg.capture(spec).document()['selection']['protocol'], 'generation_id': ledger.generation_id(spec),
             'assembly_sha256': outcome.assembly_sha256, 'audit_sha256': sg.sha(outcome.audit.encode()),
             'acceptance': outcome.acceptance, 'authority': sg.identity(spec),
             'scientific_support': 'unverified evaluator declarations'}
@@ -390,6 +427,7 @@ def require_admission(spec, phase, *, data=None, usage_id=None):
 
 def require_request(spec, phase, kwargs):
     sg.require_generation_context(spec, kwargs['messages'])
+    sg.require_routing_context(spec, kwargs['messages'])
     if phase not in PHASES:
         if phase in ('reconcile_full', 'report', 'report_regate', 'report_after_repair'):
             from . import api_runner as api
