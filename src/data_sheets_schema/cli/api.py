@@ -1,5 +1,7 @@
 """API generation commands — D4D runs over the Anthropic API (four model phases; the core is derived, #694)."""
 
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path

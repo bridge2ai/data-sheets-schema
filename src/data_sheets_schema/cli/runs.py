@@ -1,5 +1,7 @@
 """Run-tracking commands for the D4D CLI."""
 
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -1431,6 +1433,51 @@ def validate_cmd(method, project, label, recheck, dry_run):
                    "one with `d4d provenance backfill` first.")
 
 
+def _merge_fitness_scorer(context_path, cache_path, *, project, method, labels, root):
+    """Offline opt-in using the existing fitness context and cache loader."""
+    import json
+    import yaml
+    from data_sheets_schema import profiles
+    from data_sheets_schema.evidence_score import JudgementContext, LLMSlotFitnessScorer
+    from data_sheets_schema.provenance import record_path_for
+
+    def unique_fields(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate fitness context field: {key}")
+            result[key] = value
+        return result
+
+    document = json.loads(context_path.read_text(encoding="utf-8"), object_pairs_hook=unique_fields)
+    if type(document) is not dict or set(document) != {
+            "axis", "model", "rubric", "corpus", "schema", "specification"}:
+        raise ValueError("fitness context must contain all six JudgementContext fields")
+    context = JudgementContext(**document)
+    selected = []
+    for label in labels:
+        source = yaml.safe_load(record_path_for(project, method, label, root).read_bytes())
+        if not isinstance(source, dict):
+            raise ValueError("source provenance is not a record")
+        schema = source.get("schema") or {}
+        if type(schema) is not dict:
+            raise ValueError("source provenance schema is not a mapping")
+        declared = schema.get("profile")
+        # None/omitted is historical absence. Other false-like values are still
+        # explicit declarations, not permission to select the study profile.
+        if declared is not None and (type(declared) is not str or not declared.strip()):
+            raise ValueError(f"source provenance {label!r}: schema.profile must be "
+                             "a nonempty profile name or null")
+        # Keep exact registered-name lookup, without stringifying malformed
+        # values or silently falling back for unknown names.
+        selected.append(profiles.profile_named(declared) if declared is not None
+                        else profiles.for_record(source))
+    if len({profile.name for profile in selected}) != 1:
+        raise ValueError("saved fitness merge requires one source profile")
+    return LLMSlotFitnessScorer(model=context.model, profile=selected[0],
+                                cache_path=cache_path, expected_context=context, cache_only=True)
+
+
 @runs.command("merge")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--project", required=True)
@@ -1450,7 +1497,12 @@ def validate_cmd(method, project, label, recheck, dry_run):
                    "something no replicate said.")
 @click.option("--execute", is_flag=True,
               help="Write the record. Without this, report and write nothing.")
-def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
+@click.option("--fitness-context", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Opt in to saved fitness scores with this complete JudgementContext JSON; requires --fitness-cache.")
+@click.option("--fitness-cache", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Saved fitness JSONL; misses refuse, and no provider is called. Requires --fitness-context.")
+def merge_cmd(method, project, labels, config, out_label, unguarded, execute,
+              fitness_context, fitness_cache):
     """Combine replicates into one record that maximises coverage.
 
     Replicates differ in *coverage* more than in quality — each populates slots
@@ -1471,6 +1523,8 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     other is how a reader ends up believing whichever help text they opened.
     Use this when a union is what you want and you can defend the splice.
     """
+    if (fitness_context is None) != (fitness_cache is None):
+        raise click.ClickException("--fitness-context and --fitness-cache must be supplied together")
     from data_sheets_schema.cli.method import resolve_method
     if method is None:
         found = {resolve_method(lab, project) for lab in (labels or [config])}
@@ -1503,9 +1557,12 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
         records[lab], sources[lab] = loaded, path
 
     try:
+        scorer = (_merge_fitness_scorer(
+            fitness_context, fitness_cache, project=project, method=method,
+            labels=labels, root=_corpus_path(CONCAT_DIR)) if fitness_context else None)
         result = union_merge(records, project=project, source_paths=sources,
-                             guarded=not unguarded)
-    except ValueError as exc:
+                             guarded=not unguarded, scorer=scorer)
+    except (ValueError, OSError) as exc:
         # `check_sources` refuses to combine runs whose conditions cannot be
         # established — a derived record inherits its contributors' standing,
         # so merging an unattested run would launder it. That is a refusal to
@@ -1521,7 +1578,12 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     best = max(len(r) for r in records.values())
     click.echo(f"   {'merged':52s} {union:3d} slots "
                f"(+{union - best} over the best single replicate)")
-    if result.contested:
+    if result.scorer_instrument is not None:
+        import json
+        click.echo("Pinned fitness context: " + json.dumps(result.scorer_instrument, sort_keys=True))
+        click.echo("Saved scores used for contested slots; no provider calls."
+                   if result.contested else "No contested slots; saved scorer was not invoked.")
+    elif result.contested:
         click.echo(f"\n{result.contested} slot(s) are held by more than one "
                    f"replicate. Without a scorer the base's value is used for "
                    f"each slot it holds; otherwise the first holder in sorted "
