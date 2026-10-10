@@ -223,6 +223,7 @@ class MergeResult:
     contested: int = 0
     selection_mode: str | None = None
     scorer_identity: str | None = None
+    scorer_instrument: dict[str, Any] | None = None
 
     @property
     def contributions(self) -> dict[str, int]:
@@ -342,6 +343,13 @@ def union_merge(records: dict[str, dict[str, Any]], *,
     _validate_scorer_identity(scorer_identity)
     if scorer_identity is not None and not callable(scorer):
         raise ValueError("scorer_identity requires a supplied callable scorer")
+    # Only the real fitness scorer can supply this context; generic callables
+    # keep the existing caller-declared label/unknown behavior.
+    instrument = None
+    if scorer is not None:
+        from data_sheets_schema.evidence_score import LLMSlotFitnessScorer
+        if type(scorer) is LLMSlotFitnessScorer:
+            instrument = scorer.pinned_instrument()
     labels = sorted(records)
     if source_paths:
         check_sources(source_paths, project)
@@ -390,11 +398,14 @@ def union_merge(records: dict[str, dict[str, Any]], *,
         merged[slot] = records[best[1]][slot]
         source_of[slot] = best[1]
 
+    if instrument is not None and scorer.pinned_instrument() != instrument:
+        raise ValueError("fitness instrument changed during merge")
     return MergeResult(record=merged, source_of=source_of, base=base,
                        guarded=guarded, report=report, contested=contested,
                        selection_mode=("base_or_first_holder" if scorer is None
                                        else "maximum_supplied_score"),
-                       scorer_identity=scorer_identity)
+                       scorer_identity=scorer_identity,
+                       scorer_instrument=instrument)
 
 
 def _validate_scorer_identity(identity: str | None) -> None:
@@ -411,6 +422,9 @@ def _selection_description(result: MergeResult) -> str:
         raise ValueError("unrecognized merge selection_mode")
     if result.scorer_identity is not None and mode != "maximum_supplied_score":
         raise ValueError("scorer_identity requires maximum_supplied_score selection_mode")
+    instrument = _instrument_description(result.scorer_instrument)
+    if instrument is not None and mode != "maximum_supplied_score":
+        raise ValueError("scorer_instrument requires maximum_supplied_score selection_mode")
     if mode is None:
         return "Selection mode was not recorded; whether a scorer ran is unknown."
     if mode == "base_or_first_holder":
@@ -422,8 +436,40 @@ def _selection_description(result: MergeResult) -> str:
                  f"`{result.base}`, otherwise the first holder in sorted label order.")
     invocation = ("No contested slots; the supplied scorer was not invoked."
                   if result.contested == 0 else "The supplied scorer was invoked for contested slots.")
+    if instrument is not None:
+        return (f"{selection} {invocation} Pinned fitness context: {instrument}. "
+                "This records the checked context and scoring mode, not provider authenticity, "
+                "calibration or scientific validity.")
     return (f"{selection} {invocation} Scorer identity: {identity}; "
             "this does not authenticate an instrument, model, calibration or scientific validity.")
+
+
+def _instrument_description(instrument: dict[str, Any] | None) -> str | None:
+    if instrument is None:
+        return None
+    from data_sheets_schema.evidence_score import JudgementContext, validate_fitness_context
+    fields = {"context", "class_name", "profile", "schema_guidance", "mode",
+              "cache_sha256", "cache_bytes"}
+    if type(instrument) is not dict or set(instrument) != fields:
+        raise ValueError("invalid scorer_instrument fields")
+    context = instrument["context"]
+    if type(context) is not dict or set(context) != {
+            "axis", "model", "rubric", "corpus", "schema", "specification"}:
+        raise ValueError("invalid scorer_instrument context")
+    validate_fitness_context(JudgementContext(**context))
+    if (type(instrument["class_name"]) is not str or not instrument["class_name"]
+            or any(value is not None and (type(value) is not str or not value)
+                   for value in (instrument["profile"], instrument["schema_guidance"]))):
+        raise ValueError("invalid scorer_instrument selection")
+    mode = instrument["mode"]
+    if mode == "cache_only":
+        if (type(instrument["cache_sha256"]) is not str
+                or re.fullmatch(r"[0-9a-f]{64}", instrument["cache_sha256"]) is None
+                or type(instrument["cache_bytes"]) is not int or instrument["cache_bytes"] < 0):
+            raise ValueError("invalid scorer_instrument cache pin")
+    elif mode != "live_or_cache" or instrument["cache_sha256"] is not None or instrument["cache_bytes"] is not None:
+        raise ValueError("invalid scorer_instrument mode")
+    return json.dumps(instrument, sort_keys=True)
 
 
 def _fitness(j: Any) -> float:

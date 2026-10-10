@@ -1,5 +1,7 @@
 """Provenance commands for the D4D CLI."""
 
+from __future__ import annotations
+
 import functools
 
 import os
