@@ -667,3 +667,309 @@ class TestTheSplitResult(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+# #1541: profile inference follows the exact records loaded for attribution.
+# This is software plumbing, not a fresh judgement or calibration campaign.
+import contextlib as _profile_contextlib
+import hashlib as _profile_hashlib
+import io as _profile_io
+
+import pytest as _profile_pytest
+
+
+def _profile_case(tmp_path):
+    return {"root": tmp_path / "corpus", "judgements": tmp_path / "judgements",
+            "cache": tmp_path / "subtypes.jsonl", "failures": [], "sources": [],
+            "sidecars": []}
+
+
+def _profile_record(case, *, project="AI_READI", config="cfgA", rep=1,
+                    method="claudecode_agent", provenance='schema:\n  profile: neutral\n'):
+    from data_sheets_schema.provenance import record_path_for
+
+    label = f"{config}_rep{rep}"
+    value = [f"{project}-{label}-{method}"]
+    path = case["root"] / method / label / f"{project}_d4d.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(yaml.safe_dump({"creators": value}), encoding="utf-8")
+    sidecar = record_path_for(project, method, label, concat_dir=case["root"])
+    if provenance is not None:
+        sidecar.parent.mkdir(parents=True, exist_ok=True)
+        sidecar.write_text(provenance, encoding="utf-8")
+    failure = FormFailure(project, "creators", json.dumps(value), "fixture form issue",
+                          0.5, schema="frozen-schema", specification="a" * 64)
+    case["failures"].append(failure)
+    case["sources"].append(path)
+    case["sidecars"].append(sidecar)
+    return failure, sidecar
+
+
+def _profile_caches(case):
+    """Real complete parent/subtype cache; no provider or live schema needed."""
+    case["judgements"].mkdir(parents=True, exist_ok=True)
+    by_project = {}
+    entries = []
+    for failure in case["failures"]:
+        by_project.setdefault(failure.project, []).append({
+            "failure": "form", "slot": failure.slot, "value": failure.value,
+            "reason": failure.reason, "fitness": failure.fitness,
+            "schema": failure.schema, "specification": failure.specification,
+            "model": "fixture-fitness-model", "rubric": "fixture-fitness-rubric"})
+        entries.append({
+            "rubric": _digest(FORM_SUBTYPE_SYSTEM), "model": "frozen-subtype-model",
+            "chars": 4000, "schema": failure.schema,
+            "specification": failure.specification,
+            "input_reason_sha256": _profile_hashlib.sha256(
+                failure.reason.encode("utf-8")).hexdigest(),
+            "key": failure.key, "slot": failure.slot,
+            "subtype": "hollow_object", "reason": "saved synthetic control"})
+    for project, rows in by_project.items():
+        (case["judgements"] / f"{project}_fitness.jsonl").write_text(
+            "".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+    case["cache"].write_text(
+        "".join(json.dumps(row) + "\n" for row in entries), encoding="utf-8")
+
+
+def _profile_main(case, monkeypatch, *, extra=()):
+    from data_sheets_schema import form_defects as fd
+    from data_sheets_schema import evidence_score
+
+    original_attribute = fd.attribute
+    original_load = fd.load_replicates
+    original_classifier = fd.FormSubtypeClassifier
+    constructed, kwargs_seen, source_calls, attribution_calls = [], [], [], []
+    before = {str(p.relative_to(case["root"].parent)): p.read_bytes()
+              for p in case["root"].parent.rglob("*") if p.is_file()}
+    out, err = _profile_io.StringIO(), _profile_io.StringIO()
+
+    def attribute_in_root(failures, **kwargs):
+        attribution_calls.append(dict(kwargs))
+        return original_attribute(failures, root=case["root"], **kwargs)
+
+    def real_sources(*args, **kwargs):
+        source_calls.append((args, kwargs))
+        return original_load(*args, **kwargs)
+
+    def construct(*args, **kwargs):
+        kwargs_seen.append(dict(kwargs))
+        value = original_classifier(*args, **kwargs)
+        constructed.append(value)
+        return value
+
+    def no_live_snapshot(*args, **kwargs):
+        raise AssertionError("a complete frozen cache must not request a live instrument")
+
+    with monkeypatch.context() as patched:
+        patched.setattr(fd, "attribute", attribute_in_root)
+        patched.setattr(fd, "load_replicates", real_sources)
+        patched.setattr(fd, "FormSubtypeClassifier", construct)
+        patched.setattr(evidence_score, "slot_specification_snapshot", no_live_snapshot)
+        with _profile_contextlib.redirect_stdout(out), _profile_contextlib.redirect_stderr(err):
+            code = fd.main(["--offline", "--judgement-cache", str(case["judgements"]),
+                            "--cache", str(case["cache"]), "--config", "a=cfgA",
+                            "--config", "b=cfgB", *extra])
+    after = {str(p.relative_to(case["root"].parent)): p.read_bytes()
+             for p in case["root"].parent.rglob("*") if p.is_file()}
+    assert after == before, "inference/replay changed input or cache bytes"
+    assert len(attribution_calls) == 1 and source_calls
+    assert all(args[0] == case["root"] for args, _ in source_calls)
+    return {"code": code, "stdout": out.getvalue(), "stderr": err.getvalue(),
+            "constructed": constructed, "kwargs": kwargs_seen,
+            "attribute_kwargs": attribution_calls[0], "source_calls": source_calls}
+
+
+@_profile_pytest.mark.parametrize("profile,ambient", [
+    ("neutral", "bridge2ai"), ("bridge2ai", "neutral")])
+def test_1541_main_infers_actual_provenance_and_preserves_frozen_cache(
+        tmp_path, monkeypatch, profile, ambient):
+    from data_sheets_schema import profiles
+
+    monkeypatch.setenv(profiles.ENV_VAR, ambient)
+    case = _profile_case(tmp_path)
+    for project, config, rep in (("AI_READI", "cfgA", 1),
+                                 ("VOICE_PEDIATRIC", "cfgA", 3),
+                                 ("AI_READI", "cfgB", 2)):
+        _profile_record(case, project=project, config=config, rep=rep,
+                        provenance=f"schema:\n  profile: {profile}\n")
+    _profile_caches(case)
+    result = _profile_main(case, monkeypatch)
+    assert result["code"] == 0
+    assert result["kwargs"][0]["profile"] is profiles.profile_named(profile)
+    classifier = result["constructed"][0]
+    assert classifier.profile is profiles.profile_named(profile)
+    assert (classifier.model, classifier.schema, classifier.specification) == (
+        "frozen-subtype-model", "frozen-schema", "a" * 64)
+    assert (classifier.calls, classifier.memo_hits) == (0, 3)
+    assert "selected provenance" in result["stderr"]
+    assert {"a", "b"} <= set(result["stdout"].split())
+    # Complete-cache replay still takes the original real attribution pass.
+    assert len(result["source_calls"]) == 2 * len(PROJECTS)
+    assert set(result["attribute_kwargs"]["_provenance_paths"]) == set(case["sidecars"])
+
+
+@_profile_pytest.mark.parametrize("document", [
+    "{}", "schema: null\n", "schema: {}\n", "schema:\n  profile: null\n"])
+def test_1541_legacy_mapping_is_study_profile_even_under_neutral_ambient(
+        tmp_path, monkeypatch, document):
+    from data_sheets_schema import profiles
+
+    monkeypatch.setenv(profiles.ENV_VAR, "neutral")
+    case = _profile_case(tmp_path)
+    _profile_record(case, provenance=document)
+    _profile_caches(case)
+    result = _profile_main(case, monkeypatch)
+    assert result["code"] == 0
+    assert result["kwargs"][0]["profile"] is profiles.BRIDGE2AI
+    assert result["constructed"][0].memo_hits == 1
+
+
+def test_1541_entirely_absent_sidecars_keep_ambient_fallback(tmp_path, monkeypatch):
+    from data_sheets_schema import profiles
+
+    monkeypatch.setenv(profiles.ENV_VAR, "neutral")
+    case = _profile_case(tmp_path)
+    _profile_record(case, provenance=None)
+    _profile_record(case, project="CHORUS", config="cfgB", rep=2, provenance=None)
+    _profile_caches(case)
+    result = _profile_main(case, monkeypatch)
+    assert result["code"] == 0 and result["kwargs"][0]["profile"] is None
+    assert profiles.active_profile().name == "neutral"
+    assert "ambient fallback: no selected provenance" in result["stderr"]
+    assert result["constructed"][0].memo_hits == 2
+
+
+@_profile_pytest.mark.parametrize("document", [
+    "[]\n", "null\n", "false\n", "schema: []\n", "schema: false\n",
+    "schema:\n  profile: unknown-fixture-profile\n",
+    "schema:\n  profile: []\n", "schema:\n  profile: {}\n",
+    "schema:\n  profile: false\n", "schema:\n  profile: 0\n",
+    "schema:\n  profile: ''\n", "schema:\n  profile: '   '\n",
+    "schema: [unterminated\n",
+    "schema:\n  profile: neutral\n  profile: bridge2ai\n",
+])
+def test_1541_malformed_provenance_refuses_before_classifier_or_cache_write(
+        tmp_path, monkeypatch, document):
+    case = _profile_case(tmp_path)
+    _, sidecar = _profile_record(case, provenance=document)
+    _profile_caches(case)
+    result = _profile_main(case, monkeypatch)
+    assert result["code"] == 2 and not result["kwargs"] and not result["constructed"]
+    assert "cannot infer --profile" in result["stderr"]
+    assert str(sidecar) in result["stderr"] and "--profile explicitly" in result["stderr"]
+
+
+@_profile_pytest.mark.parametrize("second", [None, "schema:\n  profile: bridge2ai\n"])
+def test_1541_limit_cannot_hide_missing_or_conflicting_selected_provenance(
+        tmp_path, monkeypatch, second):
+    case = _profile_case(tmp_path)
+    _profile_record(case, project="AI_READI", config="cfgA", rep=1)
+    _profile_record(case, project="CHORUS", config="cfgB", rep=3, provenance=second)
+    _profile_caches(case)
+    result = _profile_main(case, monkeypatch, extra=("--limit", "1"))
+    assert result["code"] == 2 and not result["constructed"] and not result["kwargs"]
+    assert "cannot infer --profile" in result["stderr"]
+    assert set(result["attribute_kwargs"]["_provenance_paths"]) == set(case["sidecars"])
+
+
+@_profile_pytest.mark.parametrize("explicit,ambient", [
+    ("neutral", "bridge2ai"), ("bridge2ai", "neutral")])
+def test_1541_explicit_profile_bypasses_sidecar_reads_and_ambient(
+        tmp_path, monkeypatch, explicit, ambient):
+    from data_sheets_schema import form_defects as fd, profiles
+
+    monkeypatch.setenv(profiles.ENV_VAR, ambient)
+    case = _profile_case(tmp_path)
+    _, sidecar = _profile_record(case, provenance="malformed: [\n")
+    _profile_caches(case)
+    original_read = Path.read_text
+
+    def guarded_read(path, *args, **kwargs):
+        assert path != sidecar, "explicit profile opened provenance"
+        return original_read(path, *args, **kwargs)
+
+    def forbidden_inference(*args, **kwargs):
+        raise AssertionError("explicit --profile must not infer")
+
+    monkeypatch.setattr(Path, "read_text", guarded_read)
+    monkeypatch.setattr(fd, "_profile_from_provenance", forbidden_inference)
+    result = _profile_main(case, monkeypatch, extra=("--profile", explicit))
+    assert result["code"] == 0
+    assert result["kwargs"][0]["profile"] is profiles.profile_named(explicit)
+    assert "_provenance_paths" not in result["attribute_kwargs"]
+    assert result["constructed"][0].memo_hits == 1
+    assert "explicit --profile" in result["stderr"]
+
+
+def test_1541_actual_attribution_collects_only_loaded_reps_and_normalizes_core_method(
+        tmp_path, monkeypatch):
+    from data_sheets_schema import form_defects as fd, profiles
+    from data_sheets_schema.provenance import record_path_for
+
+    case = _profile_case(tmp_path)
+    for project, config, rep in (("AI_READI", "cfgA", 1),
+                                 ("CHORUS", "cfgA", 3), ("AI_READI", "cfgB", 2)):
+        _profile_record(case, project=project, config=config, rep=rep,
+                        method="fixture_core")
+    # Unselected provenance must not cause an artificial mixed-profile refusal.
+    unrelated = record_path_for("VOICE", "fixture_core", "cfgA_rep2",
+                                concat_dir=case["root"])
+    unrelated.parent.mkdir(parents=True, exist_ok=True)
+    unrelated.write_text("schema:\n  profile: bridge2ai\n", encoding="utf-8")
+    paths = []
+    attributed = fd.attribute(case["failures"], root=case["root"], method="fixture_core",
+                              configs={"a": "cfgA", "b": "cfgB"}, _provenance_paths=paths)
+    assert set(paths) == set(case["sidecars"]) and len(paths) == 3
+    assert unrelated not in paths
+    assert all("fixture_core_core" not in str(path) for path in paths)
+    assert [failure.config for failure in attributed] == ["a", "a", "b"]
+    assert fd._profile_from_provenance(paths) is profiles.NEUTRAL
+
+
+def test_1541_ordinary_attribute_retains_no_provenance_read_contract(tmp_path, monkeypatch):
+    from data_sheets_schema import form_defects as fd
+
+    case = _profile_case(tmp_path)
+    _, sidecar = _profile_record(case, provenance="schema: [invalid\n")
+    original_read = Path.read_text
+    reads = []
+
+    def guarded_read(path, *args, **kwargs):
+        reads.append(path)
+        assert path != sidecar, "ordinary attribute read provenance"
+        return original_read(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", guarded_read)
+    actual = fd.attribute(case["failures"], root=case["root"], configs={"a": "cfgA"})
+    assert actual[0].config == "a"
+    assert reads == case["sources"]
+
+
+
+def test_1541_relative_default_root_pairs_the_actually_loaded_corpus(tmp_path, monkeypatch):
+    from data_sheets_schema import form_defects as fd, profiles
+    from data_sheets_schema.provenance import record_path_for
+
+    monkeypatch.chdir(tmp_path)
+    relative_root = Path("data/d4d_concatenated")
+    label, method, project = "cfgA_rep2", "fixture_core", "AI_READI"
+    source = relative_root / method / label / f"{project}_d4d.yaml"
+    source.parent.mkdir(parents=True)
+    source.write_text(yaml.safe_dump({"creators": ["from temporary cwd"]}),
+                      encoding="utf-8")
+    # The fixture itself uses an absolute root: record_path_for's intentional
+    # DEFAULT_ROOT anchoring must not write into the checkout in this control.
+    expected = record_path_for(project, method, label,
+                               concat_dir=relative_root.absolute())
+    assert expected.is_relative_to(tmp_path)
+    expected.parent.mkdir(parents=True, exist_ok=True)
+    expected.write_text("schema:\n  profile: neutral\n", encoding="utf-8")
+    paths = []
+    failure = FormFailure(project, "creators", '["from temporary cwd"]', "", 0.5)
+    actual = fd.attribute([failure], root=relative_root, method=method,
+                          configs={"a": "cfgA"}, _provenance_paths=paths)
+    assert actual[0].config == "a"
+    # Check exact path before inference could open a wrongly anchored sidecar.
+    assert paths == [expected]
+    assert fd._profile_from_provenance(paths) is profiles.NEUTRAL
