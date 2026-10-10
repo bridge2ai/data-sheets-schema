@@ -468,19 +468,19 @@
 
 
 <h1 id="datasheets-for-datasets-schema">Datasheets for Datasets Schema</h1>
-<p><strong>📚 View:</strong> <a href="../">Schema Documentation</a> | <a href="../cli/">CLI Reference</a> | <a href="../d4d_examples/">D4D Examples</a> | <a href="../about/">About</a></p>
+<p><strong>📚 View:</strong> <a href="../">Schema Documentation</a> | <a href="../cli/">CLI Reference</a> | <a href="https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples">D4D Examples</a> | <a href="../about/">About</a></p>
 <p>A LinkML schema for Datasheets for Datasets model as published in <a href="https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext">Datasheets for Datasets</a>. Inspired by datasheets as used in the electronics and other industries, Gebru et al. proposed that every dataset "be accompanied with a datasheet that documents its motivation, composition, collection process, recommended uses, and so on".</p>
 <h2 id="bridge2ai-generating-center-datasheets">Bridge2AI Generating Center Datasheets</h2>
-<p>Curated comprehensive datasheets for each Bridge2AI data generating project:</p>
+<p>ChatGPT-chat comparison arm datasheets for Bridge2AI data generating projects (note: these records were generated via a ChatGPT chat interface rather than hand-curated, document superseded data releases, and there is no CHORUS record; see CLAUDE.md and issue #177):</p>
 <ul>
-<li><strong><a href="../html_output/concatenated/curated/AI_READI_human_readable.html">AI-READI</a></strong> - Retinal imaging and diabetes dataset</li>
-<li><strong><a href="../html_output/concatenated/curated/CM4AI_human_readable.html">CM4AI</a></strong> - Cell maps for AI dataset</li>
-<li><strong><a href="../html_output/concatenated/curated/VOICE_human_readable.html">VOICE</a></strong> - Voice biomarker dataset</li>
-<li><strong><a href="../html_output/concatenated/curated/CHORUS_human_readable.html">CHORUS</a></strong> - Health data for underrepresented populations</li>
+<li><strong><a href="../html_output/concatenated/curated/AI_READI_human_readable.html">AI-READI</a></strong> - Retinal imaging and diabetes dataset (ChatGPT-chat arm, superseded v2.0.0 release)</li>
+<li><strong><a href="../html_output/concatenated/curated/CM4AI_human_readable.html">CM4AI</a></strong> - Cell maps for AI dataset (ChatGPT-chat arm, superseded B35XWX v1.4 release)</li>
+<li><strong><a href="../html_output/concatenated/curated/VOICE_human_readable.html">VOICE</a></strong> - Voice biomarker dataset (ChatGPT-chat arm, superseded v2.0 release)</li>
+<li><strong><a href="../html_output/concatenated/curated/CHORUS_human_readable.html">CHORUS</a></strong> - Health data for underrepresented populations (d4d-core rendering; no CHORUS ChatGPT-chat record exists)</li>
 </ul>
-<p><a href="../d4d_examples/">View all D4D examples →</a></p>
+<p><a href="https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples">View all D4D examples →</a></p>
 <h2 id="d4d-core-schema-recommended-entry-point">D4D-Core Schema (Recommended Entry Point)</h2>
-<p>A curated, interop-focused subset of D4D — the recommended starting point for new datasheets and for systems that exchange datasheets with RO-Crate / FAIRSCAPE / DCAT consumers. See <strong><a href="../d4d_core/">D4D-Core →</a></strong> for the schema YAMLs, merged form, validation targets, and curated HTML examples. Each d4d-core slot is paired with a SKOS-aligned external term in the <strong><a href="../semantic_exchange/">Semantic Exchange Layer →</a></strong>.</p>
+<p>A curated, interop-focused subset of D4D — the recommended starting point for new datasheets and for systems that exchange datasheets with RO-Crate / FAIRSCAPE / DCAT consumers. See <strong><a href="../d4d_core/">D4D-Core →</a></strong> for the schema YAMLs, merged form, validation targets, and HTML examples. Each d4d-core slot is paired with a SKOS-aligned external term in the <strong><a href="../semantic_exchange/">Semantic Exchange Layer →</a></strong>.</p>
 <h2 id="semantic-exchange-layer-d4d-ro-crate-fairscape">Semantic Exchange Layer (D4D ↔ RO-Crate / FAIRSCAPE)</h2>
 <p>The canonical SKOS + SSSOM mapping that lets a D4D datasheet round-trip through RO-Crate, FAIRSCAPE EVI, schema.org, DCAT, and Croissant RAI. See <strong><a href="../semantic_exchange/">Semantic Exchange →</a></strong> for the SKOS TTL, semantic + structural SSSOM, generator scripts, and the <code>/d4d-add-mapping</code> workflow for new mappings.</p>
 <h2 id="repository-structure">Repository Structure</h2>
@@ -503,7 +503,7 @@
 <li><strong><a href="../semantic_exchange/">Semantic Exchange</a></strong> - SKOS + SSSOM mapping to RO-Crate / FAIRSCAPE</li>
 <li><strong><a href="../">Schema Documentation</a></strong> - Complete schema reference (classes, slots, enumerations)</li>
 <li><strong><a href="../cli/">CLI Reference</a></strong> - Command groups, flags, and workflow examples for <code>d4d</code></li>
-<li><strong><a href="../d4d_examples/">D4D Examples</a></strong> - View rendered datasheets for Bridge2AI projects</li>
+<li><strong><a href="https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples">D4D Examples</a></strong> - View rendered datasheets for Bridge2AI projects</li>
 <li><strong><a href="https://github.com/bridge2ai/data-sheets-schema">GitHub Repository</a></strong> - Source code and development</li>
 <li><strong><a href="https://github.com/bridge2ai/data-sheets-schema/issues">Issues</a></strong> - Report bugs or request features</li>
 </ul>
