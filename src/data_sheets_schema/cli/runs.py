@@ -367,11 +367,10 @@ def archive(labels, unattested, project, reason, execute):
             if run.is_core or run.deterministic:
                 continue
             for proj in run.projects:
-                # PARTIAL only — never NO_RECORD. A run with no provenance at
-                # all is a different problem, and archiving is not its answer:
-                # the merged records have none because provenance.py cannot yet
-                # express a derived record, which is tracked work rather than an
-                # unattestable run.
+                # PARTIAL only — never NO_RECORD. This option targets partial
+                # attestations, not every record lacking provenance. Derived
+                # provenance is supported; the mode and shipping policy do not
+                # change this archival selection rule.
                 if attestation(run.method, run.label, proj) == PARTIAL:
                     targets.add(run.label)
                     unplaceable.add(proj)
@@ -1506,25 +1505,28 @@ def _merge_fitness_scorer(context_path, cache_path, *, project, method, labels, 
               help="Saved fitness JSONL; misses refuse, and no provider is called. Requires --fitness-context.")
 def merge_cmd(method, project, labels, config, out_method, out_label, unguarded, execute,
               fitness_context, fitness_cache):
-    """Combine replicates into one record that maximises coverage.
+    """Combine generated replicates into one derived record.
 
-    Replicates differ in *coverage* more than in quality — each populates slots
-    the others miss — so a union covers more of the schema than any single
-    replicate, without preferring one on a score that could not discriminate
-    them (#176).
+    The historical 2026-07-31 generic-v2 agreement matrix measured
+    disagreement on 47-63% of shared slots across projects (outward bounds).
 
-    The merged record is `record_mode: derived`, never `live`: it is not
-    something a model produced, and provenance names every contributor by hash
-    and states the rule that combined them.
+    By default, contested slots use the base replicate's value, or the first
+    holder's where the base lacks the slot. Referent-bearing fields stay with
+    the base unless --unguarded is requested. Optional --fitness-context and
+    --fitness-cache use saved judgments under a checked, pinned instrument;
+    a cache miss refuses rather than calling a provider.
 
-    **`d4d runs select` is the recommended way to get a shippable record, and
-    it argues against this command.** Replicates state different facts on
-    47-63% of the slots they share, so a union splices across referents — one
-    replicate's participant count beside another's DOI — to gain 1-5 slots.
-    That objection is about coherence and this command's case is about
-    coverage; both are true, and the two commands existing without naming each
-    other is how a reader ends up believing whichever help text they opened.
-    Use this when a union is what you want and you can defend the splice.
+    Provenance records the source contributions and selection rule. --method
+    selects contributing runs; --out-method selects a distinct destination
+    (default: <source method>_merged). Destination preflight does not make the
+    record and provenance writes an atomic transaction.
+
+    `d4d runs select` chooses one existing replicate; this command combines
+    values. Neither command alone grants shipping approval. #4765 tracks the
+    unresolved choice of whether merged records are a supported shipping
+    alternative, its conditions, and current-arm verification. Coverage and
+    saved-score selection do not replace coherence, current-schema validation,
+    derived-core and pair checks.
     """
     if (fitness_context is None) != (fitness_cache is None):
         raise click.ClickException("--fitness-context and --fitness-cache must be supplied together")
