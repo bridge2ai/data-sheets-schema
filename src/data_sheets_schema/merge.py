@@ -563,6 +563,93 @@ def _parse_referent(text: str) -> ReferentJudgement:
     raise ValueError(f"no JSON object in referent judgement: {text[:200]!r}")
 
 
+def check_merge_destination(path: Path, *, sources: dict[str, Path],
+                            project: str, method: str, label: str,
+                            provenance_path: Path | None = None) -> Path:
+    """Validate sourced publication before writes; return its provenance path.
+
+    A distinct label is insufficient: the destination method must differ from
+    every source family, including the provenance ``_core`` alias. Conventional
+    corpus paths must agree with the declared method/label. Explicit disjoint
+    destinations outside a corpus remain supported for library callers.
+
+    Existing symlinks and hard links to contributor artifacts are checked. This
+    preflight does not promise atomic publication against concurrent path edits.
+    """
+    from data_sheets_schema.provenance import record_path_for
+
+    for name, value in (("method", method), ("label", label), ("project", project)):
+        if (not isinstance(value, str) or not value.strip() or value in (".", "..")
+                or any(char in value for char in "/\\\0")):
+            raise ValueError(f"merge destination {name} must be one nonempty path component")
+    if method.endswith("_core"):
+        raise ValueError("merge destination method must be a base method, not a _core alias")
+
+    path = Path(path)
+    provenance = (Path(provenance_path) if provenance_path is not None else
+                  record_path_for(project, method, label, _source_root(path)))
+
+    def resolved(candidate):
+        try:
+            return candidate.resolve()
+        except RuntimeError as exc:  # pathlib on Python 3.9: symlink loop
+            raise ValueError(f"cannot resolve merge destination/source: {candidate}") from exc
+
+    def conventional(candidate, expected_method):
+        if "d4d_concatenated" in candidate.parts:
+            root = _source_root(candidate)
+            expected = root / expected_method / label
+            if (candidate.parent != expected or
+                    resolved(candidate.parent) != resolved(root) / expected_method / label or
+                    resolved(candidate).parent != resolved(root) / expected_method / label):
+                raise ValueError("merge destination path does not match its declared method/label")
+
+    conventional(path, method)
+    conventional(provenance, f"{method}_core")
+    conventional(resolved(path), method)
+    conventional(resolved(provenance), f"{method}_core")
+    targets = (path, provenance)
+    real_targets = tuple(resolved(target) for target in targets)
+
+    def same_file(first, second):
+        return (resolved(first) == resolved(second) or
+                (first.exists() and second.exists() and first.samefile(second)))
+
+    if same_file(path, provenance):
+        raise ValueError("merge full record and provenance must be distinct files")
+
+    for src in sources.values():
+        src = Path(src)
+        source_method = _source_method(src)
+        source_base = source_method[:-5] if source_method.endswith("_core") else source_method
+        source_provenance = record_path_for(
+            project, source_method, _source_label(src), _source_root(src))
+        protected = {src.parent, source_provenance.parent}
+        for source_path in (src, resolved(src)):
+            if "d4d_concatenated" in source_path.parts:
+                source_root = _source_root(source_path)
+                family = _source_method(source_path)
+                family = family[:-5] if family.endswith("_core") else family
+                if method == family:
+                    raise ValueError("merge output method must be distinct from every source method")
+                protected.update((source_root / family, source_root / f"{family}_core"))
+        if method == source_base:
+            raise ValueError("merge output method must be distinct from every source method")
+        for directory in protected:
+            directory = resolved(directory)
+            if any(target == directory or directory in target.parents or
+                   (directory.exists() and any(parent.exists() and parent.samefile(directory)
+                                               for parent in target.parents))
+                   for target in real_targets):
+                raise ValueError("merge destination aliases a contributing method/run directory")
+        artifacts = (src, source_provenance,
+                     source_provenance.parent / f"{project}_d4d_core.yaml",
+                     source_provenance.parent / f"{project}_reconciliation.md")
+        if any(same_file(target, artifact) for target in targets for artifact in artifacts):
+            raise ValueError("merge destination aliases a contributing artifact")
+    return provenance
+
+
 def write_merge(result: MergeResult, path: Path, *,
                 sources: dict[str, Path] | None = None,
                 project: str = "", method: str = "", label: str = "",
@@ -578,6 +665,11 @@ def write_merge(result: MergeResult, path: Path, *,
     the result carries no provenance and must not be treated as a datasheet.
     """
     selection = _selection_description(result)
+    if sources:
+        destination = check_merge_destination(
+            path, sources=sources, project=project, method=method, label=label,
+            provenance_path=provenance_path)
+        check_sources(sources, project)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         yaml.safe_dump(result.record, sort_keys=False, allow_unicode=True),
@@ -587,8 +679,6 @@ def write_merge(result: MergeResult, path: Path, *,
 
     from data_sheets_schema.provenance import (
         build_derived_record, contribution)
-
-    check_sources(sources, project)
 
     contributions = [
         contribution(src, label=lab, project=project,
@@ -616,8 +706,5 @@ def write_merge(result: MergeResult, path: Path, *,
     # default one. `record_path_for` defaults to the working corpus, so a merge
     # written to a temp directory would have deposited its provenance in the
     # real repository — right convention, wrong tree.
-    from data_sheets_schema.provenance import record_path_for
-    rec.write(provenance_path
-              or record_path_for(project, method, label,
-                                 _source_root(path)))
+    rec.write(destination)
     return path

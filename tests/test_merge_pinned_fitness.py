@@ -61,9 +61,9 @@ def test_real_scorer_selection_and_writer_pin_consumed_bytes(saved, tmp_path):
     assert result.scorer_instrument["context"] == saved[0].as_entry()
     assert result.scorer_instrument["cache_sha256"] == hashlib.sha256(original).hexdigest()
     assert result.scorer_instrument["cache_bytes"] == len(original)
-    output = root / "claudecode_agent" / "derived" / "P_d4d.yaml"
-    merge.write_merge(result, output, sources=paths, project="P", method="claudecode_agent", label="derived")
-    provenance = yaml.safe_load((root / "claudecode_agent_core" / "derived" / "P_provenance.yaml").read_text())
+    output = root / "claudecode_agent_merged" / "derived" / "P_d4d.yaml"
+    merge.write_merge(result, output, sources=paths, project="P", method="claudecode_agent_merged", label="derived")
+    provenance = yaml.safe_load((root / "claudecode_agent_merged_core" / "derived" / "P_provenance.yaml").read_text())
     _assert_sources_preserved(before, paths, provenance)
     rule = provenance["derivation"]["rule"]
     assert "Pinned fitness context: " + json.dumps(result.scorer_instrument, sort_keys=True) in rule
@@ -157,9 +157,9 @@ def test_real_cli_opt_in_and_unscored_default(saved, tmp_path, monkeypatch):
     assert _snapshot(root) == before
     actual = CliRunner().invoke(cli, [*pinned, "--execute"])
     assert actual.exit_code == 0, actual.output
-    output = root / "claudecode_agent" / "cfg_merged" / "P_d4d.yaml"
+    output = root / "claudecode_agent_merged" / "cfg_merged" / "P_d4d.yaml"
     assert yaml.safe_load(output.read_text())["description"] == "second"
-    provenance = yaml.safe_load((root / "claudecode_agent_core" / "cfg_merged" / "P_provenance.yaml").read_text())
+    provenance = yaml.safe_load((root / "claudecode_agent_merged_core" / "cfg_merged" / "P_provenance.yaml").read_text())
     _assert_sources_preserved(before, paths, provenance)
     assert saved[0].specification in provenance["derivation"]["rule"]
     assert hashlib.sha256(saved[2].read_bytes()).hexdigest() in provenance["derivation"]["rule"]
@@ -256,9 +256,9 @@ def test_cli_retains_historical_profile_absence_with_real_saved_scores(saved, tm
                                     "--fitness-cache", str(saved[2]), "--execute"])
     assert result.exit_code == 0, result.output
     assert '"profile": "bridge2ai"' in result.output
-    output = root / "claudecode_agent" / "cfg_merged" / "P_d4d.yaml"
+    output = root / "claudecode_agent_merged" / "cfg_merged" / "P_d4d.yaml"
     assert yaml.safe_load(output.read_text()) == {**RECORDS["cfg_rep1"], "description": "second", "only_second": "b"}
-    provenance = yaml.safe_load((root / "claudecode_agent_core" / "cfg_merged" / "P_provenance.yaml").read_text())
+    provenance = yaml.safe_load((root / "claudecode_agent_merged_core" / "cfg_merged" / "P_provenance.yaml").read_text())
     _assert_sources_preserved(before, paths, provenance)
     rule = provenance["derivation"]["rule"]
     assert context.specification in rule and '"profile": "bridge2ai"' in rule

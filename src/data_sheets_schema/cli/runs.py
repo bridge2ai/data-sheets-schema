@@ -1487,6 +1487,9 @@ def _merge_fitness_scorer(context_path, cache_path, *, project, method, labels, 
 @click.option("--config", default=None,
               help="Merge every replicate sharing this config prefix, e.g. "
                    "2026-07-31_claude-opus-5-generic-v2.")
+@click.option("--out-method", default=None,
+              help="Distinct destination method (default: <source method>_merged). "
+                   "--method continues to select the contributing runs.")
 @click.option("--out-label", default=None,
               help="Label to write the merged record under "
                    "(default: <config>_merged).")
@@ -1501,7 +1504,7 @@ def _merge_fitness_scorer(context_path, cache_path, *, project, method, labels, 
               help="Opt in to saved fitness scores with this complete JudgementContext JSON; requires --fitness-cache.")
 @click.option("--fitness-cache", type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="Saved fitness JSONL; misses refuse, and no provider is called. Requires --fitness-context.")
-def merge_cmd(method, project, labels, config, out_label, unguarded, execute,
+def merge_cmd(method, project, labels, config, out_method, out_label, unguarded, execute,
               fitness_context, fitness_cache):
     """Combine replicates into one record that maximises coverage.
 
@@ -1532,7 +1535,7 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute,
             raise click.ClickException(f'labels live under {sorted(found)}; pass --method')
         method = found.pop()
     import yaml as _yaml
-    from data_sheets_schema.merge import union_merge, write_merge
+    from data_sheets_schema.merge import check_merge_destination, union_merge, write_merge
 
     from data_sheets_schema.runs import CONCAT_DIR
     base_dir = _corpus_path(CONCAT_DIR) / method
@@ -1556,7 +1559,13 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute,
             raise click.ClickException(f"{path} is not a record")
         records[lab], sources[lab] = loaded, path
 
+    out = (out_label if out_label is not None else
+           f"{(config or labels[0].rsplit('_rep', 1)[0])}_merged")
+    destination_method = out_method if out_method is not None else f"{method}_merged"
+    target = _corpus_path(CONCAT_DIR) / destination_method / out / f"{project}_d4d.yaml"
     try:
+        check_merge_destination(target, sources=sources, project=project,
+                                method=destination_method, label=out)
         scorer = (_merge_fitness_scorer(
             fitness_context, fitness_cache, project=project, method=method,
             labels=labels, root=_corpus_path(CONCAT_DIR)) if fitness_context else None)
@@ -1593,14 +1602,15 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute,
         click.echo("Referent-bearing fields taken from the base replicate only "
                    f"({result.base}); --unguarded to merge them too.")
 
-    out = out_label or f"{(config or labels[0].rsplit('_rep', 1)[0])}_merged"
-    target = base_dir / out / f"{project}_d4d.yaml"
     if not execute:
         click.echo(f"\nDry run. Would write {target}")
         click.echo("Re-run with --execute to write it.")
         return
-    write_merge(result, target, sources=sources, project=project,
-                method=method, label=out)
+    try:
+        write_merge(result, target, sources=sources, project=project,
+                    method=destination_method, label=out)
+    except (ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
     click.echo(f"\nWrote {target}")
     click.echo("record_mode: derived — not a generated record. `d4d runs "
                "compare` excludes it from agreement figures and says so, "
