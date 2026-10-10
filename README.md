@@ -33,7 +33,7 @@ The **D4D-Core schema** is the curated, interop-focused subset of D4D — the re
 | Source schema | [`src/data_sheets_schema/schema/data_sheets_schema_core.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/data_sheets_schema_core.yaml) | Core schema entry point (imports `D4D_Core.yaml`) |
 | Module | [`src/data_sheets_schema/schema/D4D_Core.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/D4D_Core.yaml) | `CoreDataset`, `CoreDatasetCollection`, `CoreDistribution` definitions |
 | Merged form | [`src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml) | Single-file merged schema (auto-generated) |
-| HTML examples | [Bridge2AI generating-center datasheets](#bridge2ai-generating-center-datasheets) (above) | ChatGPT-chat arm HTML renderings |
+| HTML examples | [Bridge2AI generating-center datasheets](#bridge2ai-generating-center-datasheets) (above) | ChatGPT-chat arm HTML renderings (AI_READI, CM4AI, VOICE) and d4d-core rendering (CHORUS) |
 | Validate / build | `make validate-core`, `make gen-core-schema`, `make lint-core` | Core-schema-only Make targets |
 
 **Scope:** ~95 fields across `CoreDataset`, `CoreDatasetCollection`, `CoreDistribution` and supporting classes (`Person`, `Organization`, `Creator`, `Grant`, `FundingMechanism`). The full schema (`data_sheets_schema.yaml`, ~284 attributes) remains the extended reservoir.

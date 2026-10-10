@@ -1,6 +1,6 @@
 # Datasheets for Datasets Schema
 
-**📚 View:** [Schema Documentation](index.md) | [CLI Reference](cli.md) | [D4D Examples](d4d_examples.md) | [About](about.md)
+**📚 View:** [Schema Documentation](index.md) | [CLI Reference](cli.md) | [D4D Examples](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples) | [About](about.md)
 
 A LinkML schema for Datasheets for Datasets model as published in [Datasheets for Datasets](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext). Inspired by datasheets as used in the electronics and other industries, Gebru et al. proposed that every dataset "be accompanied with a datasheet that documents its motivation, composition, collection process, recommended uses, and so on".
 
@@ -13,11 +13,11 @@ ChatGPT-chat comparison arm datasheets for Bridge2AI data generating projects (n
 * **[VOICE](html_output/concatenated/curated/VOICE_human_readable.html)** - Voice biomarker dataset (ChatGPT-chat arm, superseded v2.0 release)
 * **[CHORUS](html_output/concatenated/curated/CHORUS_human_readable.html)** - Health data for underrepresented populations (d4d-core rendering; no CHORUS ChatGPT-chat record exists)
 
-[View all D4D examples →](d4d_examples.md)
+[View all D4D examples →](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)
 
 ## D4D-Core Schema (Recommended Entry Point)
 
-A curated, interop-focused subset of D4D — the recommended starting point for new datasheets and for systems that exchange datasheets with RO-Crate / FAIRSCAPE / DCAT consumers. See **[D4D-Core →](d4d_core.md)** for the schema YAMLs, merged form, validation targets, and curated HTML examples. Each d4d-core slot is paired with a SKOS-aligned external term in the **[Semantic Exchange Layer →](semantic_exchange.md)**.
+A curated, interop-focused subset of D4D — the recommended starting point for new datasheets and for systems that exchange datasheets with RO-Crate / FAIRSCAPE / DCAT consumers. See **[D4D-Core →](d4d_core.md)** for the schema YAMLs, merged form, validation targets, and HTML examples. Each d4d-core slot is paired with a SKOS-aligned external term in the **[Semantic Exchange Layer →](semantic_exchange.md)**.
 
 ## Semantic Exchange Layer (D4D ↔ RO-Crate / FAIRSCAPE)
 
@@ -44,7 +44,7 @@ Browse the source code repository on GitHub:
 - **[Semantic Exchange](semantic_exchange.md)** - SKOS + SSSOM mapping to RO-Crate / FAIRSCAPE
 - **[Schema Documentation](index.md)** - Complete schema reference (classes, slots, enumerations)
 - **[CLI Reference](cli.md)** - Command groups, flags, and workflow examples for `d4d`
-- **[D4D Examples](d4d_examples.md)** - View rendered datasheets for Bridge2AI projects
+- **[D4D Examples](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)** - View rendered datasheets for Bridge2AI projects
 - **[GitHub Repository](https://github.com/bridge2ai/data-sheets-schema)** - Source code and development
 - **[Issues](https://github.com/bridge2ai/data-sheets-schema/issues)** - Report bugs or request features
 

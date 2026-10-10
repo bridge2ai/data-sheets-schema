@@ -21,16 +21,16 @@ make validate-core       # metamodel check of every core file, gen-python resolu
 make lint-core           # linkml-lint on the core module
 ```
 
-## Curated example datasheets
+## Example datasheets
 
-Each Bridge2AI generating center has a curated d4d-core-aligned datasheet:
+Bridge2AI generating center datasheet renderings (note: AI-READI, CM4AI, and VOICE reflect the ChatGPT-chat comparison arm on superseded releases; CHORUS is a d4d-core rendering):
 
-* **[AI-READI](html_output/concatenated/curated/AI_READI_human_readable.html)** — Retinal imaging and diabetes
-* **[CHORUS](html_output/concatenated/curated/CHORUS_human_readable.html)** — Health data for underrepresented populations
-* **[CM4AI](html_output/concatenated/curated/CM4AI_human_readable.html)** — Cell maps for AI
-* **[VOICE](html_output/concatenated/curated/VOICE_human_readable.html)** — Voice biomarker
+* **[AI-READI](html_output/concatenated/curated/AI_READI_human_readable.html)** — Retinal imaging and diabetes (ChatGPT-chat arm, superseded v2.0.0 release)
+* **[CHORUS](html_output/concatenated/curated/CHORUS_human_readable.html)** — Health data for underrepresented populations (d4d-core rendering; no CHORUS ChatGPT-chat record exists)
+* **[CM4AI](html_output/concatenated/curated/CM4AI_human_readable.html)** — Cell maps for AI (ChatGPT-chat arm, superseded B35XWX v1.4 release)
+* **[VOICE](html_output/concatenated/curated/VOICE_human_readable.html)** — Voice biomarker (ChatGPT-chat arm, superseded v2.0 release)
 
-[All D4D examples →](d4d_examples.md)
+[All D4D examples →](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)
 
 ## Core classes
 
