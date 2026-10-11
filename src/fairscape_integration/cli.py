@@ -7,6 +7,7 @@ integration tasks: parsing, converting, validating, and merging.
 """
 
 import sys
+import json
 import click
 from pathlib import Path
 from typing import Optional

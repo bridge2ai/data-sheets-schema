@@ -540,3 +540,61 @@ def test_repeated_path_is_two_occurrences_with_nonzero_primary(implementation, t
             if unit['disposition'] == 'constructed'] == ['/tasks/2/response', '/tasks/3/response']
     policy.validate_evidence(evidence, record, loader)
     assert_recovered(evidence)
+
+
+@pytest.mark.parametrize('default_mapping', [False, True])
+def test_transform_report_publishes_unmapped_root_text_and_exact_evidence(
+        tmp_path, default_mapping):
+    from fairscape_integration.cli import cli
+    prop = 'unmapped/report~field'
+    unmapped = 'Unmapped "quoted"\nvalue \ud800 and \U0001f600'
+    task = '  Whole intended task; unchanged.\n'
+    path = source(tmp_path / 'input.json', {'rai:dataUseCases': task, prop: unmapped})
+    mapping_path = (Path(__file__).resolve().parents[2] /
+                    'data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv'
+                    if default_mapping else mapping(tmp_path))
+    original = {p: p.read_bytes() for p in (path, mapping_path)}
+    output = tmp_path / 'published' / 'record.yaml'
+    result = CliRunner().invoke(cli, ['transform', str(path), '--mapping', str(mapping_path),
+                                      '--output', str(output), '--report'])
+    assert result.exit_code == 0, result.output
+    report_path = output.with_name('record_report.txt')
+    evidence_path = sidecar(output)
+    assert {p.name for p in output.parent.iterdir()} == {
+        'record.yaml', 'record_report.txt', 'record_route_dispositions.json'}
+    dataset_raw = output.read_bytes()
+    record = yaml.safe_load(dataset_raw)
+    assert record['tasks'] == [{'response': task}]
+    assert prop not in record and 'route_dispositions' not in record
+    # Real schema gate, readback and saved-byte identity, without a mock validator.
+    assert publication.prepare_dataset(record, text=dataset_raw.decode('utf-8')) == dataset_raw
+    report_text = report_path.read_bytes().decode('utf-8')
+    assert json.dumps(prop, ensure_ascii=True, allow_nan=False) in report_text
+    assert json.dumps(unmapped, ensure_ascii=True, allow_nan=False) in report_text
+    assert 'Construction counts are not source coverage or validation success.' in report_text
+    document = json.loads(evidence_path.read_bytes())
+    assert document['dataset'] == {'path': str(output.resolve()), 'bytes': len(dataset_raw),
+                                   'sha256': sha256(dataset_raw).hexdigest()}
+    schema_raw = Path(document['schema']['path']).read_bytes()
+    assert document['schema']['bytes'] == len(schema_raw)
+    assert document['schema']['sha256'] == sha256(schema_raw).hexdigest()
+    evidence = document['evidence']
+    assert evidence['mapping'] == {'path': str(mapping_path.resolve()),
+        'bytes': len(original[mapping_path]), 'sha256': sha256(original[mapping_path]).hexdigest()}
+    assert len(evidence['sources']) == 1
+    occurrence = evidence['sources'][0]
+    snapshot = occurrence['snapshot']
+    assert snapshot['kind'] == 'original_file'
+    assert snapshot['json_text'].encode('utf-8') == original[path]
+    assert snapshot['original_file'] == {'path': str(path.resolve()), 'bytes': len(original[path]),
+                                         'sha256': sha256(original[path]).hexdigest()}
+    assert snapshot['serialization'] == {'bytes': len(original[path]),
+                                          'sha256': sha256(original[path]).hexdigest()}
+    captured = json.loads(snapshot['json_text'])
+    root = pointer(captured, snapshot['root_pointer'])
+    assert root[prop] == unmapped and root['rai:dataUseCases'] == task
+    assertion, = occurrence['routes']['tasks']
+    assert assertion['raw'] == task and pointer(captured, assertion['pointer']) == task
+    unit, = assertion['units']
+    assert unit['raw'] == task and pointer(record, unit['output_pointer']) == task
+    assert all(p.read_bytes() == raw for p, raw in original.items())
