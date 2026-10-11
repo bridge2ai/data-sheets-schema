@@ -324,7 +324,8 @@ def test_default_table_types_only_selected_routes_and_keeps_semantic_declaration
     assert record['raw_data_sources'] == [{'source_description': TEXT}]
     assert record['license_and_use_terms'] == {'license_terms': TEXT}
     assert record['raw_sources'] == [{'description': TEXT}]
-    for field in ('acquisition_methods', 'ip_restrictions', 'extension_mechanism'):
+    assert record['acquisition_methods'] == [{'acquisition_details': TEXT}]
+    for field in ('ip_restrictions', 'extension_mechanism'):
         assert record[field] == TEXT
     with pytest.raises(publication.PublicationError):
         publication.prepare_dataset(record)

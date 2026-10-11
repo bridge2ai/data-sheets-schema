@@ -1,13 +1,18 @@
-"""#4929: whole-text constructors for three closed legacy documentary routes.
+"""Whole-text constructors for closed legacy documentary routes (#4929, #4931).
 
 Source selection and merge precedence remain distinct from construction. These
 objects preserve assertions, not verified mechanisms, access rights or licenses.
 The scalar licensing route never collapses a list into a single assertion.
+The separately marked acquisition route never infers acquisition or validation flags.
 """
 from copy import deepcopy
 
 
 MARKER = 'root_documentary_fields_v1'
+ACQUISITION_MARKER = 'root_acquisition_methods_v1'
+ACQUISITION_ROUTES = {
+    'acquisition_methods': ('rai:dataCollection', 'rai:dataCollectionType'),
+}
 COVERED = 'Covered by FAIRSCAPE? Yes =1; No = 0'
 ROUTES = {
     'collection_mechanisms': ('rai:dataCollection', 'rai:dataCollectionType'),
@@ -15,6 +20,7 @@ ROUTES = {
     'license_and_use_terms': ('license', 'conditionsOfAccess'),
 }
 FIELDS = {
+    'acquisition_methods': 'acquisition_details',
     'collection_mechanisms': 'mechanism_details',
     'raw_data_sources': 'source_description',
     'license_and_use_terms': 'license_terms',
@@ -25,7 +31,12 @@ def validate_rows(rows):
     """Refuse conflicting explicit routes before filtering or building output."""
     selected = {}
     for row in rows:
-        if (row.get('Func') or '').strip() != MARKER:
+        marker = (row.get('Func') or '').strip()
+        if marker == MARKER:
+            routes = ROUTES
+        elif marker == ACQUISITION_MARKER:
+            routes = ACQUISITION_ROUTES
+        else:
             continue
         field = (row.get('D4D Property') or '').strip()
         sources = tuple(part.strip() for part in
@@ -33,9 +44,9 @@ def validate_rows(rows):
         covered = [other for other in rows
                    if (other.get('D4D Property') or '').strip() == field
                    and (other.get(COVERED) or '').strip() == '1']
-        if (field not in ROUTES or sources != ROUTES[field]
+        if (field not in routes or sources != routes[field]
                 or len(covered) != 1 or covered[0] is not row):
-            raise ValueError(f'{MARKER} requires one covered row for each marked '
+            raise ValueError(f'{marker} requires one covered row for each marked '
                              'target and its ordered declared sources; duplicate '
                              'or conflicting documentary routes are not supported')
         selected[field] = sources
