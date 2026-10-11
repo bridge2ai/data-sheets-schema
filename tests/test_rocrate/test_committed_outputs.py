@@ -237,7 +237,8 @@ class TestCommittedMapperOutputs(unittest.TestCase):
                 self.assertEqual(len(evidence["rows"]), 136)
                 self.assertEqual([row["rule_id"] for row in evidence["rows"]],
                                  [row["Rule_ID"] for row in table_rows])
-                for row, original in zip(evidence["rows"], table_rows, strict=True):
+                self.assertEqual(len(evidence["rows"]), len(table_rows))
+                for row, original in zip(evidence["rows"], table_rows):
                     self.assertEqual(row["execution"], original["Execution"])
                     self.assertEqual(row["d4d_path"], original["D4D_Full_Path"])
                     self.assertEqual(row["source_expression"], original["RO_Crate_JSON_Path"])

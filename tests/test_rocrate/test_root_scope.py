@@ -5,8 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from data_sheets_schema.rocrate_map import FULL_SCHEMA, map_crate, write_provenance
-from data_sheets_schema.rocrate_sources import present, resolve_path, select_root
+from data_sheets_schema.rocrate_map import FULL_SCHEMA, FieldResult, map_crate, write_provenance
+from data_sheets_schema.rocrate_sources import present, resolve_path, select_root, source_report
 from data_sheets_schema.schema_view import shared_view
 
 
@@ -437,6 +437,104 @@ class TestRootScopeMapperIntegration(unittest.TestCase):
         for disposition in ("retired", "deferred"):
             with self.subTest(disposition=disposition), self.assertRaises(ValueError):
                 self.map(root, [row("Dataset.title", "name", Execution=disposition)])
+
+
+class TestSourceReportPairing(unittest.TestCase):
+    """#4948: preserve strict evidence pairing on every supported Python."""
+
+    def fields(self):
+        return [FieldResult("Dataset.title", "name", "", "", "filled", rule_id="first"),
+                FieldResult("Dataset.probe", "flag", "", "", "filled", rule_id="second")]
+
+    def rows(self):
+        return [row("Dataset.title", "name"), row("Dataset.probe", "flag")]
+
+    def report(self, rows, fields):
+        root = {"@id": ROOT_ID, "@type": "Dataset", "name": "Root", "flag": False}
+        return source_report([root], root, rows, fields, {}, "explicit test root", {"title", "probe"})
+
+    def test_equal_pairs_preserve_complete_ordered_evidence(self):
+        expected = {"format_version": 1,
+            "root": {"id": ROOT_ID, "graph_index": 0, "selection_note": "explicit test root",
+                     "properties": {"@id": ROOT_ID, "@type": "Dataset", "name": "Root", "flag": False}},
+            "rows": [{"rule_id": rule_id, "execution": "active", "d4d_path": "Dataset." + slot,
+                "destination_slot": slot, "mapping_rule": "", "source_expression": source,
+                "status": "filled", "resolution_note": "",
+                "root_assertions": [{"entity_id": ROOT_ID, "json_pointer": "/@graph/0/" + source,
+                                     "property": source, "value": value}],
+                "member_assertions": [], "linked_assertions": []}
+                for rule_id, slot, source, value in [("first", "title", "name", "Root"),
+                                                     ("second", "probe", "flag", False)]]}
+        for iterator in (False, True):
+            with self.subTest(iterator=iterator):
+                rows, fields = self.rows(), self.fields()
+                actual = self.report(iter(rows) if iterator else rows, iter(fields) if iterator else fields)
+                self.assertEqual(actual, expected)
+                self.assertIs(actual["rows"][1]["root_assertions"][0]["value"], False)
+
+    def test_empty_pairs_keep_root_and_empty_rows(self):
+        for rows, fields in (([], []), (iter([]), iter([]))):
+            actual = self.report(rows, fields)
+            self.assertEqual(actual["rows"], [])
+            self.assertEqual(actual["root"]["id"], ROOT_ID)
+            self.assertIs(actual["root"]["properties"]["flag"], False)
+
+    def test_more_rows_refuse_instead_of_truncating(self):
+        for iterator in (False, True):
+            with self.subTest(iterator=iterator):
+                rows = self.rows()
+                with self.assertRaises(ValueError) as caught:
+                    self.report(iter(rows) if iterator else rows, self.fields()[:1])
+                self.assertEqual(str(caught.exception), "zip() argument 2 is shorter than argument 1")
+
+    def test_more_results_refuse_instead_of_truncating(self):
+        for iterator in (False, True):
+            with self.subTest(iterator=iterator):
+                fields = self.fields()
+                with self.assertRaises(ValueError) as caught:
+                    self.report(self.rows()[:1], iter(fields) if iterator else fields)
+                self.assertEqual(str(caught.exception), "zip() argument 2 is longer than argument 1")
+
+    def test_non_table_results_do_not_take_a_source_pair(self):
+        ignored = FieldResult("Dataset.id", "@id", "", "", "filled", from_table=False)
+        first, second = self.fields()
+        self.assertEqual(self.report(self.rows(), iter([ignored, first, ignored, second, ignored])),
+                         self.report(self.rows(), self.fields()))
+        self.assertEqual(self.report([], [ignored]), self.report([], []))
+
+    def test_row_generator_stops_after_first_unpaired_value(self):
+        rows = [*self.rows(), row("Dataset.title", "name")]
+        visits = []
+        def generate():
+            for index, item in enumerate(rows):
+                visits.append(index)
+                yield item
+        stream = generate()
+        with self.assertRaises(ValueError) as caught:
+            self.report(stream, self.fields()[:1])
+        self.assertEqual(str(caught.exception), "zip() argument 2 is shorter than argument 1")
+        self.assertEqual(visits, [0, 1])
+        self.assertIs(next(stream), rows[2])
+
+    def test_iterator_errors_keep_identity_and_filtering_order(self):
+        error = RuntimeError("iterator sentinel")
+        def broken_rows():
+            yield self.rows()[0]
+            raise error
+        with self.assertRaises(RuntimeError) as caught:
+            self.report(broken_rows(), self.fields()[:1])
+        self.assertIs(caught.exception, error)
+        visited = []
+        def rows():
+            visited.append("row")
+            yield self.rows()[0]
+        def broken_fields():
+            yield self.fields()[0]
+            raise error
+        with self.assertRaises(RuntimeError) as caught:
+            self.report(rows(), broken_fields())
+        self.assertIs(caught.exception, error)
+        self.assertEqual(visited, [])
 
 
 if __name__ == "__main__":
