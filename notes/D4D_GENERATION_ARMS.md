@@ -18,21 +18,22 @@ runner uses and the design described here cannot drift apart.
 
 ## The arms
 
-| Arm | Method | Model? | Input | Measures |
+| Arm | Method | Model? | Input | Output / comparison purpose |
 |-----|--------|--------|-------|----------|
 | **baseline** | `claudecode_agent` (+`_core`) | yes | `{project}_preprocessed.txt` | what the document corpus alone supports |
-| **deterministic_upstream** | `rocrate_mapped` | **no** | `{project}_crate_d4d.yaml` | fidelity of **upstream's** crate→D4D mapping |
-| **deterministic_ours** | `rocrate_static_map` | **no** | `{project}_crate_mapped_d4d.yaml` | fidelity of **our** mapping table, with per-field declared quality |
+| **deterministic_upstream** | `rocrate_mapped` | **no** | `{project}_crate_d4d.yaml` | upstream's crate→D4D rendering after reported schema repairs; fidelity unmeasured |
+| **deterministic_ours** | `rocrate_static_map` | **no** | `{project}_crate_mapped_d4d.yaml` | our mapping table's output with per-field source paths and declared relation/loss labels; fidelity unmeasured |
 | **healthsheet_only** | `claudecode_agent_healthsheet` | yes | `{project}_healthsheet_only.txt` | **AI-READI only** — what one structured source yields alone |
 | **de novo** | `claudecode_agent_crate` (+`_core`) | yes | `{project}_preprocessed_with_crate.txt` | extraction — what an agent recovers from documents **plus** crate evidence |
 
 ### Two deterministic arms, not one
 
-They consume different things and can therefore claim different things:
+They consume different inputs and produce different deterministic outputs:
 
 - **`deterministic_upstream`** repairs `ro-crate-linkml.yaml`, a D4D-shaped
   rendering produced upstream. It runs only where upstream ships one — so **not
-  for VOICE** — and is opaque about how good each mapping is.
+  for VOICE**. Its changes report records normalization and validation, not a
+  fidelity measurement.
 - **`deterministic_ours`** (`d4d rocrate map`) reads `ro-crate-metadata.json`,
   which every crate has, and applies
   `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (136 historical
@@ -41,8 +42,9 @@ They consume different things and can therefore claim different things:
   source provenance and any declared mapping/loss claims; blank claims mean
   unassessed. Those declarations are not measured scientific fidelity.
 
-Keeping both is what makes the comparison possible; collapsing them under one
-method name would have hidden that they measure different mappings.
+Keeping both method names preserves the different input and mapping conditions
+for comparison. Neither schema validity nor a declared mapping/loss label
+establishes semantic equivalence, scientific support or lossless conversion.
 
 ### Running both mappings diagnosed the table — and fixed it
 
