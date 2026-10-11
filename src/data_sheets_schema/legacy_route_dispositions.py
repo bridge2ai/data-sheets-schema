@@ -498,3 +498,33 @@ def protected_sources(evidence):
         for source in evidence['sources']:
             visit(source['snapshot'])
     return paths
+
+
+def supplemental_report(evidence):
+    """Separate present supplemental assertions from the TSV-unmapped report.
+
+    Accounting for an assertion does not mean it produced a Dataset value.
+    The sidecar retains the complete raw value, including declined inputs.
+    This helper never changes the mapping, ranking or construction counts.
+    """
+    accounted, rows = set(), []
+    if evidence is not None:
+        for source in evidence['sources']:
+            for field, assertions in source['routes'].items():
+                for assertion in assertions:
+                    if assertion['supplemental'] and assertion['present']:
+                        accounted.add(assertion['property'])
+                        rows.append('  ' + encoded({
+                            'source_occurrence': source['occurrence_id'],
+                            'legacy_field': field, 'property': assertion['property'],
+                            'pointer': assertion['pointer'],
+                            'disposition': assertion['disposition'],
+                            'output_pointers': [unit['output_pointer'] for unit in assertion['units']
+                                                if unit['output_pointer'] is not None],
+                        }).decode('ascii'))
+    lines = (['SUPPLEMENTAL ROUTE ASSERTIONS',
+              'Present supplemental root assertions are accounted for in the disposition sidecar, outside the TSV property roster.',
+              "Only 'constructed' indicates a Dataset value; declined/null assertions add no construction credit.",
+              'Evidence accounting alone is not mapping, source coverage or validation success.',
+              *rows, ''] if rows else [])
+    return accounted, lines

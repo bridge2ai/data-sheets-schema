@@ -45,7 +45,7 @@ from rocrate_merger import ROCrateMerger
 from informativeness_scorer import InformativenessScorer
 from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
 from data_sheets_schema.legacy_route_dispositions import (
-    routes as disposition_routes, prepare_sidecar, protected_sources, validate_evidence,
+    routes as disposition_routes, prepare_sidecar, protected_sources, validate_evidence, supplemental_report,
 )
 from data_sheets_schema.legacy_root_identity import root_identity_route, scoring_fields
 from data_sheets_schema.legacy_creator_references import reference_evidence, reference_lines
@@ -92,7 +92,11 @@ def render_transformation_report(
 
     # Unmapped RO-Crate properties
     mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
-    unmapped = rocrate_parser.get_unmapped_properties(mapped_props)
+    evidence = d4d_builder.get_route_dispositions() if disposition_routes(mapping_loader) else None
+    accounted, supplemental_lines = supplemental_report(evidence)
+    if supplemental_lines:
+        f.write("\n".join(supplemental_lines) + "\n")
+    unmapped = rocrate_parser.get_unmapped_properties(mapped_props | accounted)
 
     f.write("UNMAPPED RO-CRATE PROPERTIES\n")
     f.write("-"*80 + "\n")

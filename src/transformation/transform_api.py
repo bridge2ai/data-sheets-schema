@@ -370,9 +370,22 @@ class SemanticTransformer:
             # Required root identity is construction, not additional source
             # coverage. Unmarked custom ID mappings keep their prior meaning.
             covered_fields = scoring_fields(self.mapping_loader)
-            mapped_count = len([f for f in covered_fields if d4d_dict.get(f) is not None])
+            # Count each covered route's constructed value, retaining its TSV
+            # identity in diagnostics even when the output slot is renamed.
+            # Deferred assertions and supplemental evidence alone are not
+            # constructed values or measurements of scientific source coverage.
+            unmapped_fields = []
+            for field in covered_fields:
+                if field in marked_routes:
+                    target = marked_routes[field][1]
+                    value = (route_evidence['constructed_values'].get(target)
+                             if target is not None else None)
+                else:
+                    value = d4d_dict.get(field)
+                if value is None:
+                    unmapped_fields.append(field)
+            mapped_count = len(covered_fields) - len(unmapped_fields)
             coverage_percentage = (mapped_count / len(covered_fields) * 100) if covered_fields else 0.0
-            unmapped_fields = [f for f in covered_fields if d4d_dict.get(f) is None]
             basis = construction_basis(mapped_count, len(covered_fields))
             source_presence = author_source_presence(
                 self.mapping_loader, [parser], [source_path])
@@ -401,7 +414,7 @@ class SemanticTransformer:
                 'unmapped_fields': deepcopy(unmapped_fields) if mapping is not None else unmapped_fields,
                 'transformer_version': 'semantic_transformer_1.0'
             }
-            if marked_creators:
+            if marked_creators or marked_routes:
                 metadata['coverage_basis'] = deepcopy(basis)
             if mapping is None:
                 d4d_dict['transformation_metadata'] = metadata

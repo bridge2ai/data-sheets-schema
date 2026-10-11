@@ -13,7 +13,9 @@ from pathlib import Path
 from typing import Optional
 from io import StringIO
 from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
-from data_sheets_schema.legacy_route_dispositions import prepare_sidecar, protected_sources, validate_evidence
+from data_sheets_schema.legacy_route_dispositions import (
+    prepare_sidecar, protected_sources, validate_evidence, supplemental_report,
+)
 
 # Resolve repository root for bundled schema lookup.
 # Works both from a repo checkout and when installed as a package.
@@ -545,7 +547,10 @@ def transform(input_file, output, mapping, report, validate):
             if identity_construction:
                 f.write("Required Dataset.id construction is excluded from this count.\n\n")
             mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
-            unmapped = parser.get_unmapped_properties(mapped_props)
+            accounted, supplemental_lines = supplemental_report(route_evidence)
+            if supplemental_lines:
+                f.write("\n".join(supplemental_lines) + "\n")
+            unmapped = parser.get_unmapped_properties(mapped_props | accounted)
             f.write("UNMAPPED RO-CRATE PROPERTIES\n" + "-"*80 + "\n")
             f.write(f"Found {len(unmapped)} properties with no D4D mapping:\n\n")
             for prop_path, sample_value in sorted(unmapped.items()):
