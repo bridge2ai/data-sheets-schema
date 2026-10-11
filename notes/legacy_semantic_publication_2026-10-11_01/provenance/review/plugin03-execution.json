@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/Users/marcin/.nvm/versions/node/v22.16.0/bin/node",
+    "/Users/marcin/.claude/plugins/cache/openai-codex/codex/1.0.4/scripts/codex-companion.mjs",
+    "adversarial-review",
+    "--wait --base ab13b8e1d3e216ad11359de3c66047a6af32c05b --scope branch Review the complete legacy route-disposition implementation, including corrections for findings 4940 and 4941. Challenge supplemental-assertion reporting, API renamed-slot construction counts, root/member isolation, source-evidence fidelity, mutable source lifetimes, publication and output-preservation claims. Verify that deferred routes and retained raw evidence do not earn scientific source-coverage credit. Inspect the full branch for additional concrete issues, not just the last commit. Perform static file and diff analysis only: do not run tests, import application modules, execute project code, modify files, or call providers. Scope is this PR legacy mapping implementation and tests; do not inspect native-generation work or external native artifacts. Report actionable code findings with locations, distinguish software validation from pending publication and scientific evaluation, and avoid unsupported claims."
+  ],
+  "artifacts": [
+    {
+      "bytes": 887,
+      "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/stdout.txt",
+      "sha256": "76fa0908971580d1b119c0efeb9c104be8ee10cf48e0dd0a711c9308b4031ac6"
+    },
+    {
+      "bytes": 17402,
+      "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/stderr.txt",
+      "sha256": "6c5cc1ef80527d9bc5d33f957ddfd2841eb973371870caf08119b0952dd7ea00"
+    }
+  ],
+  "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+  "elapsed_seconds": 182.54698179199477,
+  "error": null,
+  "exit_code": 0,
+  "head": "00b80002371fe119bc089445234d6b2f5bd5e24d",
+  "head_after": "00b80002371fe119bc089445234d6b2f5bd5e24d",
+  "source_preserved": true,
+  "status_after": "",
+  "tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe",
+  "tree_after": "be88ffebf9c55bcf28d6602d66414ba2725df6fe"
+}

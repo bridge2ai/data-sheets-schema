@@ -1,0 +1,123 @@
+{
+  "application_acceptance": false,
+  "classifier": {
+    "bytes": 6270,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02/confirm_baseline.py",
+    "sha256": "ff92a8c0bcaa7229ef10f3dfc1cd295ac1c1ce4fa95c21d03bfafb40ed4e15b6"
+  },
+  "current_test_pins": [
+    {
+      "bytes": 8626,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_supplemental_report.py",
+      "sha256": "fe4af1e6290dc215a2a6c9770f34b6b1ab2320ccb9d27691e581774d551b7ad2"
+    },
+    {
+      "bytes": 14115,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_route_disposition_api_counts.py",
+      "sha256": "cc514fc77b7c66d17e8ee49ca9d02f79f1a7b028b54b44dc613fbc450f314392"
+    }
+  ],
+  "exact_failure_contract": [
+    {
+      "assertion_lineno": 135,
+      "assertion_text": "assert EXACT not in report.split('UNMAPPED RO-CRATE PROPERTIES\\n', 1)[1]",
+      "junit_name": "tests.test_rocrate.test_legacy_supplemental_report::test_default_supplement_only_constructs_and_reports_exact_size[0-packaged]",
+      "nodeid": "tests/test_rocrate/test_legacy_supplemental_report.py::test_default_supplement_only_constructs_and_reports_exact_size[0-packaged]",
+      "required_call_modules": [
+        "fairscape_integration.cli",
+        "data_sheets_schema.legacy_route_dispositions"
+      ],
+      "semantic_fragments": [
+        "'evi:totalContentSizeBytes' is contained here:",
+        "Sample: \"0\""
+      ],
+      "semantic_prefix": "assert 'evi:totalContentSizeBytes' not in ",
+      "test_relative": "tests/test_rocrate/test_legacy_supplemental_report.py"
+    },
+    {
+      "assertion_lineno": 135,
+      "assertion_text": "assert EXACT not in report.split('UNMAPPED RO-CRATE PROPERTIES\\n', 1)[1]",
+      "junit_name": "tests.test_rocrate.test_legacy_supplemental_report::test_default_supplement_only_constructs_and_reports_exact_size[0-hidden]",
+      "nodeid": "tests/test_rocrate/test_legacy_supplemental_report.py::test_default_supplement_only_constructs_and_reports_exact_size[0-hidden]",
+      "required_call_modules": [
+        "rocrate_to_d4d",
+        "data_sheets_schema.legacy_route_dispositions"
+      ],
+      "semantic_fragments": [
+        "'evi:totalContentSizeBytes' is contained here:",
+        "Sample value: \"0\""
+      ],
+      "semantic_prefix": "assert 'evi:totalContentSizeBytes' not in ",
+      "test_relative": "tests/test_rocrate/test_legacy_supplemental_report.py"
+    },
+    {
+      "assertion_lineno": 76,
+      "assertion_text": "assert result.unmapped_fields == ['version_access']",
+      "junit_name": "tests.test_rocrate.test_legacy_route_disposition_api_counts::test_alias_counts_follow_constructed_slots_in_both_api_contracts[path-False-dataset_v1]",
+      "nodeid": "tests/test_rocrate/test_legacy_route_disposition_api_counts.py::test_alias_counts_follow_constructed_slots_in_both_api_contracts[path-False-dataset_v1]",
+      "required_call_modules": [
+        "_root_gates_transform_api",
+        "data_sheets_schema.legacy_route_dispositions"
+      ],
+      "semantic_fragments": [
+        "At index 0 diff: 'bytes' != 'version_access'",
+        "Left contains 3 more items, first extra item: 'external_resource'"
+      ],
+      "semantic_prefix": "AssertionError: assert ['bytes',",
+      "test_relative": "tests/test_rocrate/test_legacy_route_disposition_api_counts.py"
+    }
+  ],
+  "format": "legacy4942_saved_semantic_failure_confirmation_v1",
+  "limitations": [
+    "Saved evidence only; no pytest rerun and no original receipt rewrite.",
+    "The expected three product tests still failed; confirmation establishes intended red-test coverage, not product acceptance.",
+    "Current production postimages may already be applied. Historical preimages are bound through unchanged saved before/after inventory and original phase pins.",
+    "Candidate2273 checks and publication/merge/plugin gates remain separate."
+  ],
+  "original_after": {
+    "bytes": 2387953,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01-results/baseline313/after.json",
+    "sha256": "30190a1c83ea8006431891efc787eb725060f80829d4539fd0d72e6caf2498c7"
+  },
+  "original_before": {
+    "bytes": 2387953,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01-results/baseline313/before.json",
+    "sha256": "30190a1c83ea8006431891efc787eb725060f80829d4539fd0d72e6caf2498c7"
+  },
+  "original_config": {
+    "bytes": 50324,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01/configuration.disabled.json",
+    "sha256": "714b0038f7329d4271617b33fb99bde3ec49a4ace032f670bea4163c5dc81585"
+  },
+  "original_execution": {
+    "bytes": 6133,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01-results/baseline313/execution.json",
+    "sha256": "fd47def98151d1292aa8fed94e54137d417c8d1471c72a76115c9e600e6eacef"
+  },
+  "original_junit": {
+    "cases": 3,
+    "errors": 0,
+    "failures": 3,
+    "skipped": 0
+  },
+  "original_junit_pin": {
+    "bytes": 8302,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01-results/baseline313/junit.xml",
+    "sha256": "3fad7c9101385205e897a91d1734770d1000321b2556a9d526e5203fef664fd8"
+  },
+  "original_pytest_exit": 1,
+  "original_source_entries": 10791,
+  "original_source_head": "d9005cca0ce54e8764ca9fdd740b51444c8a08ab",
+  "original_source_tree": "859078630d3ef8ac5bb3c8f4096a8ec0af21e4a6",
+  "original_worker": {
+    "bytes": 78324,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01-results/baseline313/worker.json",
+    "sha256": "a77d2945c64f4c0aa273e7324a3dd04938faab8ac4e2d5865d14534f53c962db"
+  },
+  "original_wrapper_error": {
+    "message": "Expected diagnostic assertion failures were not observed",
+    "type": "AssertionError"
+  },
+  "original_wrapper_passed": false,
+  "saved_semantic_failures_confirmed": true
+}

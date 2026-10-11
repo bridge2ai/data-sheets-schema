@@ -1,0 +1,9 @@
+{
+  "parsed_type_exact_equal": true,
+  "actual_canonical_sha256": "094e764ba68018b07b13ddc37bc0301470ccb5bbe7dac71a7326df8f15606467",
+  "expected_canonical_sha256": "094e764ba68018b07b13ddc37bc0301470ccb5bbe7dac71a7326df8f15606467",
+  "canonical_matches": true,
+  "actual_bytes": 7791,
+  "oracle_bytes": 7640,
+  "scope": "Saved artifact diagnosis only; original failed worker and publication coordinator remain FAIL, no rerun or acceptance credit."
+}

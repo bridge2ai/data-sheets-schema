@@ -1,0 +1,297 @@
+acquisition_methods:
+- acquisition_details: 'Data collection processes are generally described in Clark
+    T et al. (2024) "Cell Maps for Artificial Intelligence: AI-Ready Maps of Human
+    Cell Architecture from Disease-Relevant Cell Lines" bioRxiv 2024.05.21.589311;
+    doi: https://doi.org/10.1101/2024.05.21.589311. Additional data collection details
+    will be subsequently published once finalized. '
+total_size_bytes: 21051331945400
+collection_mechanisms:
+- mechanism_details: 'Data collection processes are generally described in Clark T
+    et al. (2024) "Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell
+    Architecture from Disease-Relevant Cell Lines" bioRxiv 2024.05.21.589311; doi:
+    https://doi.org/10.1101/2024.05.21.589311. Additional data collection details
+    will be subsequently published once finalized. '
+creators:
+- id: https://orcid.org/0000-0003-4060-7360
+  name: Clark, T
+  affiliations:
+  - name: University of Virginia
+- id: https://orcid.org/0000-0003-4535-3486
+  name: Parker, J
+  affiliations:
+  - name: University of California, San Diego
+- id: https://orcid.org/0000-0003-4647-3877
+  name: Al Manir, S
+  affiliations:
+  - name: University of Virginia
+- description: Axelsson, U
+- id: https://orcid.org/0000-0002-4180-422X
+  name: Ballllosero Navarro, F
+  affiliations:
+  - name: Stanford University
+- description: Chinn, B
+- id: https://orcid.org/0000-0001-9998-705X
+  name: Churas, CP
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0002-6711-8260
+  name: Dailamy, A
+  affiliations:
+  - name: University of California, San Diego
+- id: https://orcid.org/0009-0009-0483-7506
+  name: Doctor, Y
+  affiliations:
+  - name: University of California, San Diego
+- description: Fall, J
+- id: https://orcid.org/0000-0003-0223-0312
+  name: Forget, A
+  affiliations:
+  - name: University of California San Francisco
+- id: https://orcid.org/0000-0002-6311-3526
+  name: Gao, J
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0002-4650-9094
+  name: Hansen, JN
+  affiliations:
+  - name: Stanford University
+- id: https://orcid.org/0000-0002-1571-8029
+  name: Hu, M
+  affiliations:
+  - name: University of California San Diego
+- description: Johannesson, A
+- description: Khaliq, H
+- id: https://orcid.org/0000-0003-0917-355X
+  name: Lee, YH
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0001-7252-8638
+  name: Lenkiewicz, J
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0003-0384-8499
+  name: Levinson, MA
+  affiliations:
+  - name: University of Virginia
+- id: https://orcid.org/0000-0003-3960-420X
+  name: Marquez, C
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0003-2404-3040
+  name: Metallo, C
+  affiliations:
+  - name: University of California San Diego
+- description: Muralidharan, M
+- id: https://orcid.org/0000-0003-3881-7588
+  name: Nourreddine, S
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0002-1103-3882
+  name: Niestroy, J
+  affiliations:
+  - name: University of Virginia
+- id: https://orcid.org/0000-0002-4025-1299
+  name: Obernier, K
+  affiliations:
+  - name: University of California San Francisco
+- description: Pan, E
+- description: Polacco, B
+- id: https://orcid.org/0000-0002-1471-9513
+  name: Pratt, D
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0009-0005-4217-2745
+  name: Qian, G
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0001-6339-9141
+  name: Schaffer, L
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0003-3361-3797
+  name: Sigaeva, A
+  affiliations:
+  - name: KTH Royal Institute of Technology
+- id: https://orcid.org/0000-0001-6730-2773
+  name: Thaker, S
+  affiliations:
+  - name: University of Alabama at Birmingham
+- description: Zhang, Y
+- id: https://orcid.org/0000-0002-8965-8153
+  name: "B\xE9lisle-Pipon, JC"
+  affiliations:
+  - name: Simon Fraser University
+- id: https://orcid.org/0000-0001-8179-1796
+  name: Brandt, C
+  affiliations:
+  - name: Yale University
+- id: https://orcid.org/0000-0002-6112-415X
+  name: Chen, JY
+  affiliations:
+  - name: The University of Alabama at Birmingham
+- id: https://orcid.org/0000-0003-2567-2009
+  name: Ding, Y
+  affiliations:
+  - name: University of Texas at Austin
+- id: https://orcid.org/0000-0003-4664-3143
+  name: Fodeh, S
+  affiliations:
+  - name: Yale University
+- id: https://orcid.org/0000-0003-4902-337X
+  name: Krogan, N
+  affiliations:
+  - name: University of California San Francisco
+- id: https://orcid.org/0000-0001-7034-0850
+  name: Lundberg, E
+  affiliations:
+  - name: Stanford University
+- id: https://orcid.org/0000-0002-3383-1287
+  name: Mali, P
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0002-3508-3577
+  name: Payne-Foster, P
+  affiliations:
+  - name: University of Alabama
+- id: https://orcid.org/0000-0002-6644-8284
+  name: Ratcliffe, S
+  affiliations:
+  - name: University of Virginia
+- id: https://orcid.org/0000-0002-7080-8801
+  name: Ravitsky, V
+  affiliations:
+  - name: University of Montreal
+- id: https://orcid.org/0000-0003-0435-6197
+  name: Sali, A
+  affiliations:
+  - name: University of California San Diego
+- id: https://orcid.org/0000-0002-2048-4028
+  name: Schulz, W
+  affiliations:
+  - name: Yale University
+- id: https://orcid.org/0000-0002-1708-8454
+  name: Ideker, T
+  affiliations:
+  - name: University of California San Diego
+description: This dataset is the June 2026 Data Release of Cell Maps for Artificial
+  Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the
+  NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated
+  KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived
+  NPCs, neurons, and cardiomyocytes; AP-MS data in MDA-MB-468 breast cancer cells
+  in the presence of chemotherapy (vorinostat and paclitaxel); and IF images in MDA-MB-468
+  breast cancer cells in the presence and absence of chemotherapy (vorinostat and
+  paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata
+  as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented
+  here will be augmented regularly through the end of the project. CM4AI is a collaboration
+  of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and
+  the Hastings Center.
+discouraged_uses:
+- discouragement_details: These laboratory data are not to be used in clinical decision-making
+    or in any context involving patient care without appropriate regulatory oversight
+    and approval.
+distribution_formats:
+- description: .d
+- description: .d directory group
+- description: .tsv
+- description: .xml
+- description: TSV
+- description: csv
+- description: executable
+- description: fastq.gz
+- description: h5
+- description: h5ad
+- description: image/jpeg
+- description: pdf
+- description: unknown
+doi: 10.18130/V3/HIGT4C
+ethical_reviews:
+- description: Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe
+    Belisle-Pipon jean-christophe_belisle-pipon@sfu.ca.
+external_resources:
+- external_resources:
+  - 'Clark T, Parker J, Al Manir S, et al. (2024) Cell Maps for Artificial Intelligence:
+    AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. bioRxiv
+    2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311'
+- external_resources:
+  - 'Nourreddine S, et al. (2024) A Perturbation Cell Atlas of Human Induced Pluripotent
+    Stem Cells. bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.11.03.621734'
+- external_resources:
+  - "Qin, Y., Huttlin, E.L., Winsnes, C.F. et al. A multi-scale map of cell structure\
+    \ fusing protein images and interactions. Nature 600, 536\u2013542 (2021). https://doi.org/10.1038/s41586-021-04115-9"
+- external_resources:
+  - 'Schaffer LV, Hu M, Qian G, et al. Multimodal cell maps as a foundation for structural
+    and functional genomics. Nature [Internet]. 2025 Apr 9; Available from: https://www.nature.com/articles/s41586-025-08878-3'
+intended_uses:
+- description: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+keywords:
+- AI
+- affinity purification
+- AP-MS
+- artificial intelligence
+- breast cancer
+- Bridge2AI
+- cardiomyocyte
+- CM4AI
+- CRISPR/Cas9
+- induced pluripotent stem cell
+- iPSC
+- KOLF2.1J
+- machine learning
+- mass spectroscopy
+- MDA-MB-468
+- neural progenitor cell
+- NPC
+- neuron
+- paclitaxel
+- perturb-seq
+- perturbation sequencing
+- protein-protein interaction
+- protein localization
+- single-cell RNA sequencing
+- scRNAseq
+- SEC-MS
+- size exclusion chromatography
+- subcellular imaging
+- vorinostat
+- Artificial intelligence
+- Breast cancer
+- CRISPR perturbation
+- Cell maps
+- IPSC
+- Machine learning
+- Mass spectroscopy
+- Perturb-seq
+- Protein-protein interaction
+- cell maps
+license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+license_and_use_terms:
+  license_terms: https://creativecommons.org/licenses/by-nc-sa/4.0/
+missing_data_documentation:
+- description: Some datasets are under temporary pre-publication embargo. Protein-protein
+    interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq
+    data interrogate sets of proteins which incompletely overlap. Computed cell maps
+    not included in this release.
+prohibited_uses:
+- description: These laboratory data are not to be used in clinical decision-making
+    or in any context involving patient care without appropriate regulatory oversight
+    and approval.
+publisher: https://dataverse.lib.virginia.edu/
+tasks:
+- response: 'AI-ready datasets to support research in functional genomics, AI/machine
+    learning model training, cellular process analysis, cell architectural changes,
+    and interactions in presence of specific disease processes, treatment conditions,
+    or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+    ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+    Kuenzi et al. 2020 (PMID: 33096023).'
+title: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
+updates:
+  update_details: Dataset will be regularly updated and augmented on a quarterly basis
+    through the end of the project (November, 2026). Long term preservation in the
+    https://dataverse.lib.virginia.edu/, supported by committed institutional funds.
+version: '1.0'
+id: doi:10.18130/V3/HIGT4C
