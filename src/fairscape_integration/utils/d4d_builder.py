@@ -6,13 +6,17 @@ This module builds the D4D datasheet structure by mapping RO-Crate properties
 to D4D classes and fields according to the TSV mapping specification.
 """
 
+from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 from data_sheets_schema.legacy_doi import doi_value, source_value
 from data_sheets_schema.legacy_root_identity import root_identity_route, resolve_root_identity
 from data_sheets_schema.legacy_update_plan import update_plan_route, update_plan_value
-from data_sheets_schema.legacy_creators import creator_route, creator_value
+from data_sheets_schema.legacy_creators import (
+    creator_route, creator_value, creator_reference_route,
+)
+from data_sheets_schema.legacy_creator_references import construct_creators
 from data_sheets_schema.legacy_description_lists import (
     description_list_routes, description_list_value,
 )
@@ -34,6 +38,7 @@ class D4DBuilder:
         """
         self.mapping = mapping_loader
         self.d4d_data: Dict[str, Any] = {}
+        self.creator_reference_construction = None
         self.verbose = verbose
 
     def build_dataset(self, rocrate_parser) -> Dict[str, Any]:
@@ -55,7 +60,12 @@ class D4DBuilder:
         marked_descriptions = description_list_routes(self.mapping)
         marked_sensitive = sensitive_elements_route(self.mapping)
         identity = resolve_root_identity(root) if marked_id else None
+        referenced = creator_reference_route(self.mapping)
+        creator_data, construction = (
+            construct_creators(root, rocrate_parser.rocrate_data.get('@graph', []))
+            if referenced else (None, None))
         self.d4d_data = {}
+        self.creator_reference_construction = construction
 
         # Get all covered D4D fields
         covered_fields = self.mapping.get_covered_fields()
@@ -80,10 +90,11 @@ class D4DBuilder:
                     mapped_count += 1
                 continue
             if marked_creators and d4d_field == 'creators':
-                # The closed marker selects the root's exact property, not a
-                # cached/custom lookup or a referenced member's person record.
+                # Both markers select only the root's author property; the
+                # reference marker alone may resolve its exact same-crate IDs.
                 if root.get('author') is not None:
-                    self.d4d_data['creators'] = creator_value(root['author'])
+                    self.d4d_data['creators'] = (creator_data if referenced
+                                                else creator_value(root['author']))
                     mapped_count += 1
                 continue
             if marked_id and d4d_field == 'id':
@@ -119,6 +130,10 @@ class D4DBuilder:
 
         return self.d4d_data
 
+    def get_creator_reference_construction(self):
+        """Return detached source evidence, never a Dataset field."""
+        return deepcopy(self.creator_reference_construction)
+
     def apply_field_transformation(self, field_name: str, value: Any) -> Any:
         """
         Apply field-specific transformations to values.
@@ -137,6 +152,8 @@ class D4DBuilder:
 
         # Explicit constructors precede generic Type/list/person/string coercion.
         if field_name == 'creators' and creator_route(self.mapping):
+            # Without a supplied crate graph, preserve the literal constructor
+            # and unresolved references; never reuse a prior build's graph.
             return creator_value(value)
 
         if field_name == 'updates' and update_plan_route(self.mapping):

@@ -78,6 +78,8 @@ from data_sheets_schema.legacy_creators import (
     VALUE_BASIS_LABEL, MEASUREMENT_LIMIT,
 )
 
+from data_sheets_schema.legacy_creator_references import reference_evidence, reference_lines
+
 RESULT_CONTRACTS = frozenset({"legacy", "dataset_v1"})
 RESULT_FORMAT = "d4d_transformation_result_v1"
 
@@ -187,6 +189,13 @@ class TransformationResult:
     # These remain available when optional provenance is disabled.
     coverage_basis: Optional[Dict[str, Any]] = None
     source_presence: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class CreatorReferenceTransformationResult(TransformationResult):
+    """Only the explicit reference policy adds source-member evidence."""
+
+    creator_reference_construction: Optional[Dict[str, Any]] = None
 
 
 class SemanticTransformer:
@@ -346,6 +355,8 @@ class SemanticTransformer:
             source_presence = author_source_presence(
                 self.mapping_loader, [parser], [source_path])
             marked_creators = creator_route(self.mapping_loader)
+            references = reference_evidence(
+                source_presence, [builder.get_creator_reference_construction()])
 
         finally:
             # Clean up temp file if created
@@ -422,7 +433,11 @@ class SemanticTransformer:
             self._mapping_identity()
 
         # Return result
-        return TransformationResult(
+        result_type = (CreatorReferenceTransformationResult if references is not None
+                       else TransformationResult)
+        reference_fields = ({'creator_reference_construction': references}
+                            if references is not None else {})
+        return result_type(
             data=d4d_dict,
             source=source_path,
             target="d4d",
@@ -433,7 +448,7 @@ class SemanticTransformer:
             validation_passed=validation_passed,
             validation_errors=validation_errors,
             transformation_metadata=d4d_dict.get('transformation_metadata') if mapping is None else metadata,
-            coverage_basis=basis, source_presence=source_presence
+            coverage_basis=basis, source_presence=source_presence, **reference_fields
         )
 
     # =========================================================================
@@ -533,6 +548,9 @@ class SemanticTransformer:
         # Get merge report
         merge_report = merger.generate_merge_report(parsers, source_names=source_names)
         source_presence = merger.get_source_presence()
+        references = merger.get_creator_reference_construction()
+        reference_fields = ({'creator_reference_construction': references}
+                            if references is not None else {})
 
         # Metadata is separate only in the explicitly selected contract.
         metadata = None
@@ -606,12 +624,12 @@ class SemanticTransformer:
             self._mapping_identity()
             return {'format': RESULT_FORMAT, 'data': merged_d4d,
                     'transformation_metadata': metadata, 'merge_report': merge_report,
-                    'source_presence': source_presence}
+                    'source_presence': source_presence, **reference_fields}
 
         return {
             'd4d': merged_d4d,
             'merge_report': merge_report,
-            'source_presence': source_presence
+            'source_presence': source_presence, **reference_fields
         }
 
     # =========================================================================
@@ -819,11 +837,18 @@ def main(argv=None):
             result = perform()
         if args.command == 'transform':
             document = {'format': RESULT_FORMAT, **asdict(result)}
+            reference_output = isinstance(result, CreatorReferenceTransformationResult)
         elif args.command == 'batch':
             document = {'format': RESULT_FORMAT, 'results': [asdict(item) for item in result]}
+            reference_output = any(isinstance(item, CreatorReferenceTransformationResult)
+                                   for item in result)
         else:
             document = result
-        print(json.dumps(document, ensure_ascii=False, indent=2))
+            reference_output = 'creator_reference_construction' in result
+        # Only the new reference policy carries arbitrary matched-member JSON.
+        # ASCII escaping preserves those parsed values, including lone surrogate
+        # escapes, without changing the older result policies' wire spelling.
+        print(json.dumps(document, ensure_ascii=reference_output, indent=2))
         return
 
     result = perform()
@@ -832,6 +857,8 @@ def main(argv=None):
         print(f"  {VALUE_BASIS_LABEL}: {result.coverage_percentage:.1f}%")
         print(f"  {MEASUREMENT_LIMIT}")
         print('\n'.join(source_presence_lines(result.source_presence, raw=False)))
+        if getattr(result, 'creator_reference_construction', None) is not None:
+            print('\n'.join(reference_lines(getattr(result, 'creator_reference_construction', None))))
         if result.validation_passed is not None:
             print(f"  Validation: {'PASS' if result.validation_passed else 'FAIL'}")
 
@@ -840,10 +867,14 @@ def main(argv=None):
         for item in result:
             print(f"  {item.source}: {VALUE_BASIS_LABEL}: {item.coverage_percentage:.1f}%")
             print('\n'.join(source_presence_lines(item.source_presence, raw=False)))
+            if getattr(item, 'creator_reference_construction', None) is not None:
+                print('\n'.join(reference_lines(getattr(item, 'creator_reference_construction', None))))
         print(MEASUREMENT_LIMIT)
     elif args.command == "merge":
         print(f"✓ Merged {len(args.inputs)} RO-Crates → {args.output}")
         print('\n'.join(source_presence_lines(result['source_presence'], raw=False)))
+        if 'creator_reference_construction' in result:
+            print('\n'.join(reference_lines(result.get('creator_reference_construction'))))
     elif args.command == "stats":
         print("\nMapping Statistics:")
         print("=" * 50)
