@@ -4,10 +4,12 @@ import json,re,hashlib,statistics
 import yaml
 O=Path(__file__).resolve().parent;D=O/'data';load=lambda n:json.loads((D/f'{n}.json').read_text())
 R=load('ratings');I=load('issues');L=load('source_links');cross=load('section_mapping');scores=load('size_score_records');fields=load('size_field_records');summary=load('size_score_summary');docs={}
+ROOT=Path(__file__).resolve().parents[2]
 for a in load('input_audit'):
  rid=re.match(r'(.+_v8_rep\d+)',Path(a['file']).name)[1]
  if rid not in docs:
-  b=Path(a['d4d_file']).read_bytes();assert hashlib.sha256(b).hexdigest()==a['input_sha256'];docs[rid]=yaml.safe_load(b)
+  p=Path(a['d4d_file']);p=p if p.exists() else (ROOT/str(a['d4d_file'])[str(a['d4d_file']).index('data/'):] if 'data/' in str(a['d4d_file']) else p)
+  b=p.read_bytes();assert hashlib.sha256(b).hexdigest()==a['input_sha256'];docs[rid]=yaml.safe_load(b)
 for r in R:
  if r['rubric']!=10:continue
  rr=[x for x in scores if x['record']==r['record']];assert sum(x['applicable_points'] for x in rr)==r['denominator'];assert sum(x['lost_points'] for x in rr)==r['denominator']-r['points']

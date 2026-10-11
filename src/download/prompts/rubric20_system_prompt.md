@@ -58,6 +58,15 @@ applicable-item sets must not be pooled or used as a common ranking.
 
 {RUBRIC_SPECIFICATION}
 
+## Evaluation Principles and Clarifications
+
+When evaluating datasheets, apply the following domain and schema principles:
+1. **Access Points vs Direct Downloads**: Distinguish repository/portal landing pages (e.g., `distribution_formats.access_urls`, FAIRhub, Dataverse, PhysioNet) from direct file endpoints (`download_url`). Many biomedical and controlled-access datasets require credentialed access or portal navigation; the absence of an open, direct download link must not be penalized when valid access or repository landing URLs are documented.
+2. **Identifier Formats**: LinkML schema specifies `doi` as a bare DOI identifier (e.g., `10.5281/zenodo.123456`) and `id` as a URI or CURIE. Do not penalize bare DOIs in the `doi` field as malformed URLs or missing protocols.
+3. **Faithful Negative Findings**: When documentation faithfully reflects the source—for instance, explicitly stating that no data protection impact analysis (DPIA) was conducted, or that instances are unlinked—record this as accurate source documentation rather than as an omission, hallucination, or error in the datasheet.
+4. **Deposit vs Dataset Versioning**: Distinguish deposit or release versions (such as repository deposit versions V2 vs. semantic version 2.0.0) from chronological regressions. Re-deposits or platform version tags should be evaluated in context.
+5. **Data vs Software Licensing**: Differentiate software processing licenses (e.g., MIT, Apache 2.0 for associated code repositories) from data usage agreements and content licenses (e.g., CC-BY-4.0, DUA, OpenRAIL). Ensure license assessments target the data resource rather than tooling code.
+
 ## Common output fields
 
 Return only a JSON object with `rubric`, `version: "2.0-general-context"`,

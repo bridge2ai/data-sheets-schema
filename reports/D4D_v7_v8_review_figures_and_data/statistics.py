@@ -2,7 +2,7 @@ import json,collections,itertools,math,html,base64
 from pathlib import Path
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
-O=Path('/Users/obanks/Documents/Codex/2026-09-29/r/outputs');load=lambda n:json.loads((O/'data'/f'{n}.json').read_text());R=[x for x in load('ratings') if x['rating']==1];I=[x for x in load('issues') if x['rating']==1];L=load('source_links');Q=load('items');P=['AI_READI','CHORUS','CM4AI','VOICE'];rng=np.random.default_rng(29092026)
+O=Path(__file__).resolve().parent;load=lambda n:json.loads((O/'data'/f'{n}.json').read_text());R=[x for x in load('ratings') if x['rating']==1];I=[x for x in load('issues') if x['rating']==1];L=load('source_links');Q=load('items');P=['AI_READI','CHORUS','CM4AI','VOICE'];rng=np.random.default_rng(29092026)
 records=sorted(set(r['record'] for r in R));meta={r['record']:r for r in R};groups={'Completeness flags':['completeness'],'Accuracy/correctness flags':['correctness','content_accuracy'],'Consistency flags':['consistency']}
 y={name:{rid:sum(i['record']==rid and i['type'] in types for i in I) for rid in records} for name,types in groups.items()}
 for r in [10,20]:y[f'Rubric{r} adjusted score']={x['record']:x['adjusted_pct'] for x in R if x['rubric']==r}

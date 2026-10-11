@@ -3,13 +3,15 @@ from pathlib import Path
 import json,re,hashlib,collections,statistics,math,html,base64,zipfile
 import yaml
 from plotting import Canvas,heat,stacked
-O=Path(__file__).resolve().parent;D=O/'data';D.mkdir(exist_ok=True);(O/'figures').mkdir(exist_ok=True)
-BASE=O/'data' if (O/'data/ratings.json').exists() else O.parent/'data';load=lambda n:json.loads((BASE/f'{n}.json').read_text());P=['AI_READI','CHORUS','CM4AI','VOICE'];T=['completeness','consistency','content_accuracy','correctness','semantic_understanding']
+O=Path(__file__).resolve().parent;D=O/'data';D.mkdir(exist_ok=True);(O/'figures').mkdir(exist_ok=True);ROOT=Path(__file__).resolve().parents[2]
+BASE=O.parent/'D4D_v7_v8_review_figures_and_data/data' if (O.parent/'D4D_v7_v8_review_figures_and_data/data/ratings.json').exists() else O/'data';load=lambda n:json.loads((BASE/f'{n}.json').read_text());P=['AI_READI','CHORUS','CM4AI','VOICE'];T=['completeness','consistency','content_accuracy','correctness','semantic_understanding']
 R=[r for r in load('ratings') if r['version']=='v8' and r['rating']==1];I=[r for r in load('issues') if r['version']=='v8' and r['rating']==1];Q=[r for r in load('items') if r['version']=='v8' and r['rating']==1];L=[r for r in load('source_links') if r['version']=='v8'];rids=sorted({r['record'] for r in R});meta={r['record']:r for r in R};cross=load('section_mapping')
 assert len(R)==24 and len(rids)==12 and all(r['version']=='v8' for r in R)
 A=[a for a in load('input_audit') if '_v8_' in Path(a['file']).name];records={};audit=[]
 for a in A:
- p=Path(a['d4d_file']);f=Path(a['file']);assert hashlib.sha256(p.read_bytes()).hexdigest()==a['input_sha256'];assert hashlib.sha256(f.read_bytes()).hexdigest()==a['sha256'];rid=re.match(r'(.+_v8_rep\d+)',f.name)[1];records[rid]=yaml.safe_load(p.read_text());audit.append(a)
+ p=Path(a['d4d_file']);p=p if p.exists() else (ROOT/str(a['d4d_file'])[str(a['d4d_file']).index('data/'):] if 'data/' in str(a['d4d_file']) else p)
+ f=Path(a['file']);f=f if f.exists() else (ROOT/str(a['file'])[str(a['file']).index('data/'):] if 'data/' in str(a['file']) else f)
+ assert hashlib.sha256(p.read_bytes()).hexdigest()==a['input_sha256'];assert hashlib.sha256(f.read_bytes()).hexdigest()==a['sha256'];rid=re.match(r'(.+_v8_rep\d+)',f.name)[1];records[rid]=yaml.safe_load(p.read_text());audit.append(a)
 assert len(records)==12 and len(A)==24
 for r in R:
  q=[q for q in Q if q['job']==r['job'] and q['applicable']];assert sum(x['score'] for x in q)==r['points'];assert sum(x['max'] for x in q)==r['denominator']
