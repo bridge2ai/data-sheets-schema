@@ -97,9 +97,12 @@ publication completed; exit 2 indicates a refused input or failed publication.
 
 This is the standalone software consumer in
 [#4340](https://github.com/bridge2ai/data-sheets-schema/issues/4340).
-It does not close #2930/#3336 or select their v9 versus v8 comparator: actual
-generation/reconciliation integration, the common condition decision, new
-prompt/renderer registration, pre-run predictions and independently reviewed
+It does not establish completion of #2930/#3336 or select their v9 versus v8
+comparator. The separately selected
+[shared-generation API protocol](shared-generation-api-v1.md) already connects
+typed auditing to reconciliation and generation completion; this figure remains
+an offline consumer. Native/direct acceptance, scientific condition adoption,
+registered comparator and pre-run predictions, and independently reviewed
 empirical canaries remain separate. Synthetic engineering proofs are not
 scientific labels or a paid execution authorization.
 

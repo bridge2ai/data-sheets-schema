@@ -111,11 +111,16 @@ findings, candidates and their lineage. The standalone
 [typed audit Figure 7](typed-audit-figure.md) plots those checked assemblies by
 declared finding kind, with untyped findings and separate candidate counts.
 The protected historical keyword figure and its outputs remain unchanged.
-These counts do not establish scientific support or recall, and the offline
-consumers do not deliver omission findings to live generation or reconciliation.
-Follow-up work remains in #2930/#3336/#2921: integrated generation delivery,
-reconciliation routing, approved observation/hit rules, registered
-comparator/predictions and independently reviewed empirical canaries.
+These counts do not establish scientific support or recall. The offline
+consumers remain model-free; the separately selected
+[shared-generation API protocol](shared-generation-api-v1.md) already runs the
+typed audit and complete omission/integration stages, carries the checked audit
+into reconciliation, and rechecks it at generation completion and resume.
+That API path explicitly selects `generic_v10`, renderer 25, API playbook 2 and
+receipt completion 2. Native/direct acceptance, approved observation/hit rules,
+scientific condition adoption, registered comparator/predictions and independently
+reviewed empirical canaries remain separate obligations under #2930/#3336/#2921
+and their linked follow-ups.
 
 The separate [registered receipt-completion runtime](receipt-completion-runtime.md)
 implements execution and shared coverage-policy gates for explicitly selected
