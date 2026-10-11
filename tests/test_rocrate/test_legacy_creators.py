@@ -9,7 +9,7 @@ import pytest
 import yaml
 
 from data_sheets_schema import legacy_publication as publication
-from data_sheets_schema.legacy_creators import MARKER, KEY_BASIS_LABEL, VALUE_BASIS_LABEL
+from data_sheets_schema.legacy_creators import MARKER, REFERENCE_MARKER, KEY_BASIS_LABEL, VALUE_BASIS_LABEL
 from .test_legacy_root_identity import implementation, crate
 from .test_legacy_publication import legacy
 
@@ -169,7 +169,7 @@ def test_default_table_has_only_explicit_creator_marker_and_historical_labels(im
     assert len(rows) == 84
     loader = implementation['loader'].MappingLoader(str(DEFAULT))
     assert len(loader.mappings) == 83 and len(loader.covered_mappings) == 82
-    selected = [row for row in rows if row['Func'] == MARKER]
+    selected = [row for row in rows if row['Func'] == REFERENCE_MARKER]
     assert len(selected) == 1
     assert selected[0]['D4D Property'] == 'creators'
     assert selected[0]['FAIRSCAPE RO-Crate Property'] == 'author'
