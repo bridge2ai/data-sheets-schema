@@ -196,16 +196,17 @@ def test_default_route_keeps_four_previous_constructors_and_fidelity_declaration
     }
     source = source_file(tmp_path / 'source.json', TEXT,
                          extra={source: [TEXT, TEXT] for source in original_routes.values()})
-    record, _, _ = build(implementation, source, DEFAULT)
+    record, _, builder = build(implementation, source, DEFAULT)
     assert record['sensitive_elements'] == [{'sensitivity_details': TEXT}]
     for field in original_routes:
         assert record[field] == [{'description': TEXT}, {'description': TEXT}]
-    # The existing separate confidential route shares this predicate; leave its
-    # raw value and resulting schema refusal unchanged (#4046 is not this fix).
-    assert record['confidential_elements'] == TEXT
+    # #4932 now explicitly declines the stronger confidentiality claim while
+    # preserving the same raw predicate outside Dataset; sensitivity is unchanged.
+    assert 'confidential_elements' not in record
+    assertion = builder.get_route_dispositions()['sources'][0]['routes']['confidential_elements'][0]
+    assert assertion['raw'] == TEXT and assertion['disposition'] == 'declined'
     assert 'sensitive_elements_present' not in record
-    with pytest.raises(publication.PublicationError):
-        publication.prepare_dataset(record)
+    publication.prepare_dataset(record)
     loader = implementation['loader'].MappingLoader(str(DEFAULT))
     row = loader.get_mapping_info('sensitive_elements')
     assert row['Func'] == MARKER and row['FAIRSCAPE RO-Crate Property'] == SOURCE

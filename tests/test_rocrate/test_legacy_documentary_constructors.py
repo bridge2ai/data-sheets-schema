@@ -325,10 +325,15 @@ def test_default_table_types_only_selected_routes_and_keeps_semantic_declaration
     assert record['license_and_use_terms'] == {'license_terms': TEXT}
     assert record['raw_sources'] == [{'description': TEXT}]
     assert record['acquisition_methods'] == [{'acquisition_details': TEXT}]
+    # The reviewed #4932 default declines IP/contribution claims from a
+    # license literal, retaining each original assertion outside Dataset.
+    evidence = builder.get_route_dispositions()
     for field in ('ip_restrictions', 'extension_mechanism'):
-        assert record[field] == TEXT
-    with pytest.raises(publication.PublicationError):
-        publication.prepare_dataset(record)
+        assert field not in record
+        assertions = evidence['sources'][0]['routes'][field]
+        assert assertions[0]['raw'] == TEXT
+        assert assertions[0]['disposition'] == 'declined'
+    publication.prepare_dataset(record)
     for field in SOURCES:
         row = builder.mapping.get_mapping_info(field)
         assert row['Func'] == MARKER and row['FAIRSCAPE RO-Crate Property'] == SOURCES[field]

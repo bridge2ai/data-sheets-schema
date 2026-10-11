@@ -7,11 +7,15 @@ integration tasks: parsing, converting, validating, and merging.
 """
 
 import sys
+import json
 import click
 from pathlib import Path
 from typing import Optional
 from io import StringIO
 from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
+from data_sheets_schema.legacy_route_dispositions import (
+    prepare_sidecar, protected_sources, validate_evidence, supplemental_report,
+)
 
 # Resolve repository root for bundled schema lookup.
 # Works both from a repo checkout and when installed as a package.
@@ -409,10 +413,13 @@ def merge(input_files, output, mapping, primary, report, verbose):
         prepared = [(output_path, prepare_dataset(
             dataset, default_flow_style=False, sort_keys=False,
             context=f"Inputs {input_files}; output {output_path}"))]
+        route_evidence = merger.get_route_dispositions()
+        prepared.extend(prepare_sidecar(output_path, dataset, prepared[0][1], route_evidence, mapping_loader))
         if report:
             report_path = output_path.with_name(f"{output_path.stem}_merge_report.txt")
             prepared.append((report_path, merger.generate_merge_report(parsers).encode("utf-8")))
-        publish(prepared, protected=[*input_files, mapping])
+        validate_evidence(merger.get_route_dispositions(), dataset, mapping_loader)
+        publish(prepared, protected=[*input_files, mapping, *protected_sources(route_evidence)])
         click.echo(f"✓ Merged D4D YAML written to: {output}")
 
         # Show statistics
@@ -517,7 +524,9 @@ def transform(input_file, output, mapping, report, validate):
         output_path = Path(output)
         raw = prepare_dataset(dataset, default_flow_style=False, sort_keys=False,
                               context=f"Input {input_file}; output {output_path}")
-        prepared = [(output_path, raw)]
+        route_evidence = builder.get_route_dispositions()
+        prepared = [(output_path, raw), *prepare_sidecar(
+            output_path, dataset, raw, route_evidence, mapping_loader)]
         covered_fields = scoring_fields(mapping_loader)
         identity_construction = root_identity_route(mapping_loader)
         populated_count = len(dataset) - int(identity_construction and 'id' in dataset)
@@ -538,10 +547,16 @@ def transform(input_file, output, mapping, report, validate):
             if identity_construction:
                 f.write("Required Dataset.id construction is excluded from this count.\n\n")
             mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
-            unmapped = parser.get_unmapped_properties(mapped_props)
+            accounted, supplemental_lines = supplemental_report(route_evidence)
+            if supplemental_lines:
+                f.write("\n".join(supplemental_lines) + "\n")
+            unmapped = parser.get_unmapped_properties(mapped_props | accounted)
             f.write("UNMAPPED RO-CRATE PROPERTIES\n" + "-"*80 + "\n")
             f.write(f"Found {len(unmapped)} properties with no D4D mapping:\n\n")
             for prop_path, sample_value in sorted(unmapped.items()):
+                if route_evidence is not None:
+                    prop_path = json.dumps(prop_path, ensure_ascii=True, allow_nan=False)
+                    sample_value = json.dumps(sample_value, ensure_ascii=True, allow_nan=False)
                 f.write(f"  • {prop_path}\n    Sample: {sample_value}\n\n")
             prepared.append((report_path, f.getvalue().encode("utf-8")))
         if validate:
@@ -549,7 +564,8 @@ def transform(input_file, output, mapping, report, validate):
             schema = str(resource_path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml"))
             validator = D4DValidator(schema)
             diagnostic(raw, validator.validate_d4d_yaml)
-        publish(prepared, protected=[input_file, mapping])
+        validate_evidence(builder.get_route_dispositions(), dataset, mapping_loader)
+        publish(prepared, protected=[input_file, mapping, *protected_sources(route_evidence)])
         click.echo(f"✓ D4D YAML written to: {output}")
         click.echo(f"  Constructed output keys: {populated_count}/{len(covered_fields)}")
         click.echo(f"  {KEY_BASIS_LABEL}: {coverage:.1f}%")

@@ -250,15 +250,15 @@ def test_secondary_wins_retains_explicit_units_and_falls_back_only_for_missing_v
 def test_default_row_keeps_old_routes_shared_source_and_fidelity_declarations(implementation, tmp_path):
     source = source_file(tmp_path / 'source.json', [TEXT, TEXT],
                          extra={name: [TEXT, TEXT] for name in ROUTES.values()})
-    record, _, _ = build(implementation, source, DEFAULT)
+    record, _, builder = build(implementation, source, DEFAULT)
     assert record[FIELD] == [{'description': TEXT}, {'description': TEXT}]
     for field in ROUTES:
         assert record[field] == [{'description': TEXT}, {'description': TEXT}]
-    # The separate legacy encoding route shares evi:formats; this repair does
-    # not remove or repair its value, or weaken the full Dataset gate.
-    assert record['encoding'] == [TEXT, TEXT]
-    with pytest.raises(publication.PublicationError):
-        publication.prepare_dataset(record)
+    # #4932 separately declines an unsupported encoding claim, retaining the
+    # complete evi:formats assertion outside Dataset. Distribution is unchanged.
+    assert 'encoding' not in record
+    assert builder.get_route_dispositions()['sources'][0]['routes']['encoding'][0]['raw'] == [TEXT, TEXT]
+    publication.prepare_dataset(record)
     loader = implementation['loader'].MappingLoader(str(DEFAULT))
     row = loader.get_mapping_info(FIELD)
     assert row['Func'] == DISTRIBUTION_MARKER and row['FAIRSCAPE RO-Crate Property'] == SOURCE

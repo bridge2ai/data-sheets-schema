@@ -15,6 +15,10 @@ from ..constants import MergeStrategy
 from .field_prioritizer import FieldPrioritizer
 from .d4d_builder import D4DBuilder
 
+from data_sheets_schema.legacy_route_dispositions import (
+    routes as disposition_routes, build_evidence, validate_source, prepare_sidecar, protected_sources,
+)
+
 from data_sheets_schema.legacy_creators import (
     creator_route, author_source_presence, merge_creator_values,
     source_presence_lines, creator_assertion_lines,
@@ -43,6 +47,8 @@ class ROCrateMerger:
         self.source_presence = None
         self.creator_assertion_sources = None
         self.creator_reference_construction = None
+        self.route_dispositions = None
+        self._route_inputs = ()
         self.prioritizer = FieldPrioritizer()
         self.merged_data: Dict[str, Any] = {}
         self.provenance: Dict[str, List[str]] = {}
@@ -62,7 +68,8 @@ class ROCrateMerger:
         self,
         rocrate_parsers: List,
         primary_index: int = 0,
-        source_names: Optional[List[str]] = None
+        source_names: Optional[List[str]] = None,
+        *, source_snapshots=None, source_indices=None
     ) -> Dict[str, Any]:
         """
         Merge multiple RO-Crate parsers into single D4D dataset.
@@ -97,6 +104,13 @@ class ROCrateMerger:
                 '-ro-crate-metadata.json', '') for parser in rocrate_parsers]
         if len(source_names) != len(rocrate_parsers):
             raise ValueError('source_names must match the selected RO-Crates')
+        marked_dispositions = disposition_routes(self.mapping)
+        route_values, route_evidence = build_evidence(
+            self.mapping, rocrate_parsers, snapshots=source_snapshots,
+            source_indices=source_indices, source_names=source_names, primary_index=primary_index)
+        if route_evidence is not None:
+            source_snapshots = [row["snapshot"] for row in route_evidence["sources"]]
+            source_indices = [row["original_index"] for row in route_evidence["sources"]]
         presence = author_source_presence(
             self.mapping, rocrate_parsers, source_names, primary_index)
         identity_sources = (merge_identity_evidence(
@@ -105,6 +119,9 @@ class ROCrateMerger:
         self.source_presence = presence
         self.creator_assertion_sources = None
         self.creator_reference_construction = None
+        self.route_dispositions = route_evidence
+        self._route_inputs = (() if route_evidence is None else
+                              tuple(zip(rocrate_parsers, source_snapshots)))
 
         # Reset state so the same instance can be reused for multiple merges
         self.merged_data = {}
@@ -158,13 +175,18 @@ class ROCrateMerger:
             print(f"\nBuilding D4D from each source...")
 
         primary_builder = D4DBuilder(self.mapping, verbose=False)
-        primary_data = primary_builder.build_dataset(primary_parser)
+        primary_data = primary_builder.build_dataset(primary_parser, **(
+            {"source_snapshot": source_snapshots[primary_index], "source_index": source_indices[primary_index]}
+            if marked_dispositions else {}))
 
         constructions = [primary_builder.get_creator_reference_construction()]
         secondary_data = []
-        for parser, name in secondary_parsers:
+        for source_index, (parser, name) in zip(
+                [i for i in range(len(rocrate_parsers)) if i != primary_index], secondary_parsers):
             builder = D4DBuilder(self.mapping, verbose=False)
-            data = builder.build_dataset(parser)
+            data = builder.build_dataset(parser, **(
+                {"source_snapshot": source_snapshots[source_index], "source_index": source_indices[source_index]}
+                if marked_dispositions else {}))
             secondary_data.append((data, name))
             constructions.append(builder.get_creator_reference_construction())
 
@@ -179,6 +201,16 @@ class ROCrateMerger:
             print(f"\nMerging fields...")
 
         for field_name in covered_fields:
+            if field_name in marked_dispositions:
+                target = marked_dispositions[field_name][1]
+                if target in route_values:
+                    self.merged_data[target] = deepcopy(route_values[target])
+                    self.provenance[target] = [source["display_name"]
+                        for occurrence in route_evidence["merge_order"]
+                        for source in route_evidence["sources"] if source["occurrence_id"] == occurrence
+                        if any(a["selected_for_merge"] and a["disposition"] == "constructed"
+                               for a in source["routes"][field_name])]
+                continue
             primary_value = primary_data.get(field_name)
             secondary_values = [
                 (data.get(field_name), name)
@@ -217,6 +249,8 @@ class ROCrateMerger:
                 elif strategy == MergeStrategy.UNION:
                     self.merge_stats['fields_merged_as_arrays'] += 1
 
+        if marked_dispositions:
+            self.merge_stats['marked_route_fields'] = len(route_values)
         self.merge_stats['total_unique_fields'] = len(self.merged_data)
 
         if self.verbose:
@@ -254,6 +288,13 @@ class ROCrateMerger:
         sources = [primary_name if s == "primary" else s for s in sources]
 
         return merged_value, sources
+
+    def get_route_dispositions(self):
+        """Return complete detached assertion evidence with current source binding."""
+        disposition_routes(self.mapping)
+        for parser, snapshot in self._route_inputs:
+            validate_source(parser, snapshot)
+        return deepcopy(self.route_dispositions)
 
     def get_creator_reference_construction(self):
         """Return the complete detached per-source reference evidence."""
@@ -326,7 +367,9 @@ class ROCrateMerger:
         report.append("-"*80)
         for i, (parser, name) in enumerate(zip(rocrate_parsers, source_names)):
             file_path = Path(parser.rocrate_path)
-            file_size = file_path.stat().st_size if file_path.exists() else 0
+            file_size = (self.route_dispositions["sources"][i]["snapshot"]["serialization"]["bytes"]
+                         if self.route_dispositions is not None else
+                         (file_path.stat().st_size if file_path.exists() else 0))
             file_size_kb = file_size / 1024
 
             # Count fields this source contributed
@@ -400,10 +443,20 @@ class ROCrateMerger:
         """
         from data_sheets_schema.legacy_publication import prepare_dataset, publish
         report_path = output_path.parent / f"{output_path.stem}_merge_report.txt"
-        prepare_dataset(self.merged_data, context=f"Merge report output {report_path}")
+        evidence = self.get_route_dispositions()
+        # A report-only wrapper can bind a marked sidecar only to the existing
+        # accepted Dataset, never to hypothetical bytes it has not published.
+        acquired = Path(output_path).read_bytes() if evidence is not None else None
+        text = acquired.decode("utf-8") if acquired is not None else None
+        raw = prepare_dataset(self.merged_data, text=text, context=f"Merge report output {report_path}")
+        if acquired is not None and raw != acquired:
+            raise ValueError("Marked report must bind exact existing Dataset bytes")
+        prepared = prepare_sidecar(output_path, self.merged_data, raw, evidence, self.mapping)
         report = self.generate_merge_report(rocrate_parsers, source_names)
-        publish([(report_path, report.encode("utf-8"))],
-                protected=[self.mapping.tsv_path, *(p.rocrate_path for p in rocrate_parsers)])
+        prepared.append((report_path, report.encode("utf-8")))
+        publish(prepared, protected=[self.mapping.tsv_path, *(p.rocrate_path for p in rocrate_parsers),
+                                     *([Path(output_path)] if evidence is not None else []),
+                                     *protected_sources(evidence)])
 
         if self.verbose:
             print(f"\n✓ Merge report saved: {report_path}")
