@@ -276,16 +276,19 @@ def test_raw_presence_and_ranking_do_not_count_constructor_output(implementation
 
 def test_default_table_preserves_sibling_routes_and_unassessed_declarations(implementation, tmp_path):
     source = source_file(tmp_path / 'source.json', dict.fromkeys(EXPECTED_ROUTES, TEXT))
-    record, _, _ = build(implementation, source, DEFAULT)
+    record, _, builder = build(implementation, source, DEFAULT)
     for field in EXPECTED_ROUTES:
         assert record[field] == [{'description': TEXT}]
-    # Related slots keep their existing raw values and errors; no silent rerouting.
-    for field in ('tasks', 'existing_uses', 'other_tasks', 'discouraged_uses'):
-        assert record[field] == TEXT
+    # #4932 types intended/prohibited tasks and retains stronger declined claims
+    # outside Dataset; the older narrative constructors themselves are unchanged.
+    assert record['tasks'] == [{'response': TEXT}]
+    assert record['discouraged_uses'] == [{'discouragement_details': TEXT}]
+    for field in ('existing_uses', 'other_tasks'):
+        assert field not in record
+        assert builder.get_route_dispositions()['sources'][0]['routes'][field][0]['raw'] == TEXT
     # The separately marked documentary route now types this sibling assertion.
     assert record['raw_data_sources'] == [{'source_description': TEXT}]
-    with pytest.raises(publication.PublicationError):
-        publication.prepare_dataset(record)
+    publication.prepare_dataset(record)
     loader = implementation['loader'].MappingLoader(str(DEFAULT))
     for field, source_name in EXPECTED_ROUTES.items():
         row = loader.get_mapping_info(field)

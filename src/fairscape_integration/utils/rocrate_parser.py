@@ -9,7 +9,7 @@ properties for transformation to D4D YAML format.
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from data_sheets_schema.rocrate_map import TRANSCODE_HINT, read_crate_json
+from data_sheets_schema.rocrate_map import TRANSCODE_HINT, _crate_json_from_bytes
 from data_sheets_schema.rocrate_sources import select_root
 
 
@@ -67,7 +67,9 @@ class ROCrateParser:
         end theirs, not by pointing to crate_manifest.yaml's
         `encoding_note` (#4192).
         """
-        self.rocrate_data = read_crate_json(self.rocrate_path, hint=TRANSCODE_HINT)
+        raw = self.rocrate_path.read_bytes()
+        self.rocrate_data = _crate_json_from_bytes(raw, self.rocrate_path, hint=TRANSCODE_HINT)
+        self._route_source_capture = (str(self.rocrate_path.resolve()), raw)
 
         # Extract @context
         self.context = self.rocrate_data.get('@context', {})

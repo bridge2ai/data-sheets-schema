@@ -7,6 +7,7 @@ for transforming RO-Crate metadata to D4D YAML format.
 """
 
 import csv
+import io
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
@@ -22,6 +23,9 @@ from data_sheets_schema.legacy_creators import validate_rows as validate_creator
 from data_sheets_schema.legacy_description_lists import validate_rows as validate_description_rows
 from data_sheets_schema.legacy_sensitive_elements import validate_rows as validate_sensitive_rows
 from data_sheets_schema.legacy_documentary import validate_rows as validate_documentary_rows
+from data_sheets_schema.legacy_route_dispositions import (
+    capture_mapping, validate_rows as validate_disposition_rows,
+)
 
 
 class MappingLoader:
@@ -48,7 +52,8 @@ class MappingLoader:
 
     def _load_mappings(self):
         """Load and parse the TSV mapping file."""
-        with open(self.tsv_path, 'r', encoding='utf-8') as f:
+        raw = self.tsv_path.read_bytes()
+        with io.StringIO(raw.decode('utf-8'), newline=None) as f:
             rows = list(csv.DictReader(f, delimiter='\t'))
             validate_rows(rows)
             validate_update_rows(rows)
@@ -56,6 +61,8 @@ class MappingLoader:
             validate_description_rows(rows)
             validate_sensitive_rows(rows)
             validate_documentary_rows(rows)
+            validate_disposition_rows(rows)
+            capture_mapping(self, raw, rows)
 
             for row in rows:
                 # Skip header rows and empty rows

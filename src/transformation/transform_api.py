@@ -73,6 +73,9 @@ except ImportError as e:
 
 from data_sheets_schema.legacy_publication import PublicationError, prepare_dataset, publish
 from data_sheets_schema.legacy_root_identity import scoring_fields
+from data_sheets_schema.legacy_route_dispositions import (
+    routes as disposition_routes, source_snapshot, prepare_sidecar, protected_sources, validate_evidence,
+)
 from data_sheets_schema.legacy_creators import (
     creator_route, author_source_presence, construction_basis, source_presence_lines,
     VALUE_BASIS_LABEL, MEASUREMENT_LIMIT,
@@ -196,6 +199,20 @@ class CreatorReferenceTransformationResult(TransformationResult):
     """Only the explicit reference policy adds source-member evidence."""
 
     creator_reference_construction: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class RouteDispositionTransformationResult(TransformationResult):
+    """Only marked routes add mandatory evidence outside Dataset."""
+
+    route_dispositions: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class RouteCreatorReferenceTransformationResult(CreatorReferenceTransformationResult):
+    """Both independent explicit policies retain their evidence."""
+
+    route_dispositions: Optional[Dict[str, Any]] = None
 
 
 class SemanticTransformer:
@@ -342,7 +359,12 @@ class SemanticTransformer:
 
             # Build D4D structure
             builder = D4DBuilder(self.mapping_loader)
-            d4d_dict = builder.build_dataset(parser)
+            marked_routes = disposition_routes(self.mapping_loader)
+            snapshot = (source_snapshot(parser, raw=rocrate_path.read_bytes(), kind="generated_dict", input_value=rocrate_input)
+                        if cleanup_temp and marked_routes else None)
+            d4d_dict = builder.build_dataset(parser, **(
+                {"source_snapshot": snapshot} if snapshot is not None else {}))
+            route_evidence = builder.get_route_dispositions()
 
             # Track coverage statistics
             # Required root identity is construction, not additional source
@@ -424,8 +446,10 @@ class SemanticTransformer:
                                   indent=self.config.output_indent, sort_keys=False)
             if mapping is not None:
                 self._mapping_identity()
-            publish([(Path(output_path), raw)],
-                    protected=[self.config.mapping_file, rocrate_path])
+            builder.get_route_dispositions()  # Recheck any parser changes during requested diagnostics.
+            sidecars = prepare_sidecar(output_path, d4d_dict, raw, route_evidence, self.mapping_loader)
+            publish([(Path(output_path), raw), *sidecars],
+                    protected=[self.config.mapping_file, rocrate_path, *protected_sources(route_evidence)])
             if mapping is not None and metadata is not None:
                 metadata['publication'] = _publication_binding(output_path, raw, self.config.output_encoding)
 
@@ -433,10 +457,14 @@ class SemanticTransformer:
             self._mapping_identity()
 
         # Return result
-        result_type = (CreatorReferenceTransformationResult if references is not None
-                       else TransformationResult)
+        result_type = ((RouteCreatorReferenceTransformationResult if references is not None
+                        else RouteDispositionTransformationResult) if route_evidence is not None else
+                       (CreatorReferenceTransformationResult if references is not None else TransformationResult))
         reference_fields = ({'creator_reference_construction': references}
                             if references is not None else {})
+        if route_evidence is not None:
+            validate_evidence(route_evidence, d4d_dict, self.mapping_loader)
+            reference_fields['route_dispositions'] = deepcopy(route_evidence)
         return result_type(
             data=d4d_dict,
             source=source_path,
@@ -531,6 +559,9 @@ class SemanticTransformer:
             parsers.append(parser)
             source_names.append(Path(rocrate_path).stem)
 
+        # Preserve supplied occurrence identity before ranking changes processing order.
+        original_indices = {id(parser): i for i, parser in enumerate(parsers)}
+
         # Rank by informativeness if requested
         primary_index = 0
         if auto_prioritize:
@@ -543,7 +574,10 @@ class SemanticTransformer:
 
         # Merge using field prioritization
         merger = ROCrateMerger(self.mapping_loader)
-        merged_d4d = merger.merge_rocrates(parsers, primary_index=primary_index, source_names=source_names)
+        marked_routes = disposition_routes(self.mapping_loader)
+        merged_d4d = merger.merge_rocrates(parsers, primary_index=primary_index, source_names=source_names,
+            **({"source_indices": [original_indices[id(parser)] for parser in parsers]} if marked_routes else {}))
+        route_evidence = merger.get_route_dispositions()
 
         # Get merge report
         merge_report = merger.generate_merge_report(parsers, source_names=source_names)
@@ -551,6 +585,9 @@ class SemanticTransformer:
         references = merger.get_creator_reference_construction()
         reference_fields = ({'creator_reference_construction': references}
                             if references is not None else {})
+
+        if route_evidence is not None:
+            reference_fields["route_dispositions"] = deepcopy(route_evidence)
 
         # Metadata is separate only in the explicitly selected contract.
         metadata = None
@@ -615,11 +652,15 @@ class SemanticTransformer:
                                   indent=self.config.output_indent, sort_keys=False)
             if mapping is not None:
                 self._mapping_identity()
-            publish([(Path(output_path), raw)],
-                    protected=[self.config.mapping_file, *rocrate_inputs])
+            merger.get_route_dispositions()
+            sidecars = prepare_sidecar(output_path, merged_d4d, raw, route_evidence, self.mapping_loader)
+            publish([(Path(output_path), raw), *sidecars],
+                    protected=[self.config.mapping_file, *rocrate_inputs, *protected_sources(route_evidence)])
             if mapping is not None and metadata is not None:
                 metadata['publication'] = _publication_binding(output_path, raw, self.config.output_encoding)
 
+        if route_evidence is not None:
+            validate_evidence(route_evidence, merged_d4d, self.mapping_loader)
         if mapping is not None:
             self._mapping_identity()
             return {'format': RESULT_FORMAT, 'data': merged_d4d,
@@ -760,6 +801,7 @@ def batch_transform_rocrates(
     config = TransformationConfig(validate_output=validate, result_contract=contract, **mapping_options)
     transformer = SemanticTransformer(config)
     prepared = []
+    dataset_outputs = []
     results = []
     for rocrate_file in rocrate_files:
         out_file = output_path / f"{rocrate_file.stem}_d4d.yaml"
@@ -768,21 +810,29 @@ def batch_transform_rocrates(
             raise PublicationError(
                 f"Input {rocrate_file}; output {out_file}: requested Dataset "
                 f"validation failed: {result.validation_errors}")
-        prepared.append((out_file, prepare_dataset(
+        raw = prepare_dataset(
             result.data, context=f"Input {rocrate_file}; output {out_file}",
-            encoding=config.output_encoding,
-            indent=config.output_indent, sort_keys=False)))
+            encoding=config.output_encoding, indent=config.output_indent, sort_keys=False)
+        dataset_outputs.append((out_file, raw))
+        prepared.append((out_file, raw))
+        prepared.extend(prepare_sidecar(out_file, result.data, raw,
+            getattr(result, "route_dispositions", None), transformer.mapping_loader))
         results.append(result)
     if contract == "dataset_v1":
         transformer._mapping_identity()
-    publish(prepared, protected=[config.mapping_file, *rocrate_files])
+    evidence_paths = []
+    for result in results:
+        evidence = getattr(result, "route_dispositions", None)
+        validate_evidence(evidence, result.data, transformer.mapping_loader)
+        evidence_paths.extend(protected_sources(evidence))
+    publish(prepared, protected=[config.mapping_file, *rocrate_files, *evidence_paths])
     if contract == "dataset_v1":
         transformer._mapping_identity()
-        for result, (out_file, raw) in zip(results, prepared):
+        for result, (out_file, raw) in zip(results, dataset_outputs):
             if result.transformation_metadata is not None:
                 result.transformation_metadata['publication'] = _publication_binding(
                     out_file, raw, config.output_encoding)
-    for rocrate_file, (out_file, _) in zip(rocrate_files, prepared):
+    for rocrate_file, (out_file, _) in zip(rocrate_files, dataset_outputs):
         print(f"✓ Transformed: {rocrate_file.name} → {out_file.name}")
 
     return results
@@ -837,18 +887,21 @@ def main(argv=None):
             result = perform()
         if args.command == 'transform':
             document = {'format': RESULT_FORMAT, **asdict(result)}
-            reference_output = isinstance(result, CreatorReferenceTransformationResult)
+            reference_output = (isinstance(result, CreatorReferenceTransformationResult)
+                                or isinstance(result, RouteDispositionTransformationResult))
         elif args.command == 'batch':
             document = {'format': RESULT_FORMAT, 'results': [asdict(item) for item in result]}
-            reference_output = any(isinstance(item, CreatorReferenceTransformationResult)
+            reference_output = any(isinstance(item, (CreatorReferenceTransformationResult,
+                                                     RouteDispositionTransformationResult))
                                    for item in result)
         else:
             document = result
-            reference_output = 'creator_reference_construction' in result
-        # Only the new reference policy carries arbitrary matched-member JSON.
+            reference_output = ('creator_reference_construction' in result or 'route_dispositions' in result)
+        # The explicit reference and route policies carry arbitrary source JSON.
         # ASCII escaping preserves those parsed values, including lone surrogate
         # escapes, without changing the older result policies' wire spelling.
-        print(json.dumps(document, ensure_ascii=reference_output, indent=2))
+        print(json.dumps(document, ensure_ascii=reference_output, indent=2,
+                         **({"allow_nan": False} if reference_output else {})))
         return
 
     result = perform()

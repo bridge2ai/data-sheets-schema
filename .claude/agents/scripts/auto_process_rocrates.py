@@ -39,6 +39,9 @@ from rocrate_merger import ROCrateMerger
 from d4d_builder import D4DBuilder
 from data_sheets_schema.rocrate_sources import select_root
 from data_sheets_schema.legacy_publication import publish, diagnostic
+from data_sheets_schema.legacy_route_dispositions import (
+    routes as disposition_routes, source_snapshot, prepare_sidecar, protected_sources, validate_evidence,
+)
 
 
 def discover_rocrates(input_dir: Path) -> List[Path]:
@@ -69,7 +72,7 @@ def discover_rocrates(input_dir: Path) -> List[Path]:
 
 def rank_rocrates(
     rocrate_paths: List[Path],
-    mapping_loader: MappingLoader
+    mapping_loader: MappingLoader, *, include_occurrences=False
 ) -> List[Tuple[Path, float, int]]:
     """
     Rank RO-Crates by informativeness.
@@ -93,6 +96,7 @@ def rank_rocrates(
     if not parsers:
         raise ValueError("No valid RO-Crate files found")
 
+    original_indices = {id(parser): i for i, parser in enumerate(parsers)}
     # Score and rank
     scorer = InformativenessScorer()
     ranked_parsers = scorer.rank_rocrates(parsers, mapping_loader)
@@ -102,7 +106,8 @@ def rank_rocrates(
     for parser, scores, rank in ranked_parsers:
         path = Path(parser.rocrate_path)
         score = scores['total_score']
-        ranked_paths.append((path, score, rank))
+        item = (path, score, rank)
+        ranked_paths.append(item + (original_indices[id(parser)],) if include_occurrences else item)
 
     return ranked_paths
 
@@ -254,7 +259,12 @@ def main():
     # Step 3: Rank by informativeness
     print("\n[3/5] Ranking by informativeness...")
     try:
-        ranked = rank_rocrates(rocrate_paths, mapping)
+        marked_routes = disposition_routes(mapping)
+        if marked_routes:
+            ranked_details = rank_rocrates(rocrate_paths, mapping, include_occurrences=True)
+            ranked = [row[:3] for row in ranked_details]
+        else:
+            ranked = rank_rocrates(rocrate_paths, mapping)
     except Exception as e:
         print(f"✗ Error ranking RO-Crates: {e}", file=sys.stderr)
         return 1
@@ -278,6 +288,13 @@ def main():
         ]
         print(f"\n✓ Selected {len(selected_paths)} RO-Crates above score threshold {args.min_score}")
 
+    selected_indices = None
+    if marked_routes:
+        selected_details = ranked_details[:args.top_n] if args.top_n else ranked_details
+        if args.min_score:
+            selected_details = [row for row in ranked_details if row[1] >= args.min_score]
+        selected_indices = [row[3] for row in selected_details]
+
     # Validate the selected inputs and any combined intermediate graph before
     # creating the output directory or replacing an existing artifact.
     try:
@@ -286,6 +303,7 @@ def main():
         parsers = [ROCrateParser(str(path)) for path in selected_paths]
         for parser in parsers:
             parser.require_root_dataset()
+        snapshots = ([source_snapshot(parser) for parser in parsers] if marked_routes else None)
         combined = None
         if args.strategy == 'concatenate':
             combined = _combined_crate(parsers)
@@ -307,40 +325,67 @@ def main():
                 private_path = Path(directory) / concat_path.name
                 private_path.write_bytes(combined_raw)
                 combined_parser = ROCrateParser(str(private_path))
+                combined_snapshot = None
+                if marked_routes:
+                    start = 1 if args.strategy == "hybrid" else 0
+                    parents = []
+                    for index in range(start, len(parsers)):
+                        parent = deepcopy(snapshots[index])
+                        parent.update(occurrence_id="input:" + str(selected_indices[index]),
+                                      original_index=selected_indices[index], processed_index=index,
+                                      combined_source_label=Path(parsers[index].rocrate_path).name)
+                        parents.append(parent)
+                    combined_snapshot = source_snapshot(combined_parser, raw=combined_raw,
+                        kind="generated_combined", parents=parents)
             # The intended source label is retained in headers and provenance.
             combined_parser.rocrate_path = concat_path
             prepared.append((concat_path, combined_raw))
 
         if args.strategy == 'concatenate':
             builder = D4DBuilder(mapping)
-            dataset = builder.build_dataset(combined_parser)
+            dataset = builder.build_dataset(combined_parser, **(
+                {"source_snapshot": combined_snapshot, "source_index": None} if marked_routes else {}))
+            producer = builder
+            route_evidence = builder.get_route_dispositions()
             raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
                                    rocrate_path=concat_path)
         elif args.strategy == 'hybrid' and len(parsers) == 1:
             builder = D4DBuilder(mapping)
-            dataset = builder.build_dataset(parsers[0])
+            dataset = builder.build_dataset(parsers[0], **(
+                {"source_snapshot": snapshots[0], "source_index": selected_indices[0]} if marked_routes else {}))
+            producer = builder
+            route_evidence = builder.get_route_dispositions()
             raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
                                    rocrate_path=selected_paths[0])
         else:
             if args.strategy == 'hybrid':
+                if marked_routes:
+                    snapshots = [snapshots[0], combined_snapshot]
+                    selected_indices = [selected_indices[0], None]
                 parsers = [parsers[0], combined_parser]
                 header_paths = [selected_paths[0], concat_path]
             else:
                 header_paths = selected_paths
             merger = ROCrateMerger(mapping)
-            dataset = merger.merge_rocrates(parsers, primary_index=0)
+            dataset = merger.merge_rocrates(parsers, primary_index=0, **(
+                {"source_snapshots": snapshots, "source_indices": selected_indices} if marked_routes else {}))
+            producer = merger
+            route_evidence = merger.get_route_dispositions()
             raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
                                    rocrate_paths=header_paths,
                                    provenance=merger.get_provenance())
             report_path = output_path.with_name(f"{output_path.stem}_merge_report.txt")
             prepared.append((report_path, merger.generate_merge_report(parsers).encode("utf-8")))
         prepared.append((output_path, raw))
+        prepared.extend(prepare_sidecar(output_path, dataset, raw, route_evidence, mapping))
         if args.validate:
             from validator import D4DValidator
             validator = D4DValidator(str(Path(args.schema)))
             detail = diagnostic(raw, validator.validate_d4d_yaml)
             print(validator.get_validation_summary(True, detail))
-        publish(prepared, protected=[mapping_path, Path(args.schema), *rocrate_paths])
+        validate_evidence(producer.get_route_dispositions(), dataset, mapping)
+        publish(prepared, protected=[mapping_path, Path(args.schema), *rocrate_paths,
+                                    *protected_sources(route_evidence)])
     except Exception as exc:
         print(f"✗ Error preparing or publishing Dataset: {exc}", file=sys.stderr)
         return 1

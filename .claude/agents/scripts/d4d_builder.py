@@ -17,6 +17,10 @@ _source = Path(__file__).resolve().parents[3] / 'src'
 if (_source / 'data_sheets_schema/legacy_doi.py').is_file() and str(_source) not in sys.path:
     sys.path.insert(0, str(_source))
 
+from data_sheets_schema.legacy_route_dispositions import (
+    routes as disposition_routes, build_evidence, validate_source,
+)
+
 from data_sheets_schema.legacy_doi import doi_value, source_value
 from data_sheets_schema.legacy_root_identity import root_identity_route, resolve_root_identity
 from data_sheets_schema.legacy_update_plan import update_plan_route, update_plan_value
@@ -48,8 +52,10 @@ class D4DBuilder:
         self.mapping = mapping_loader
         self.d4d_data: Dict[str, Any] = {}
         self.creator_reference_construction = None
+        self.route_dispositions = None
+        self._route_inputs = ()
 
-    def build_dataset(self, rocrate_parser) -> Dict[str, Any]:
+    def build_dataset(self, rocrate_parser, *, source_snapshot=None, source_index=0) -> Dict[str, Any]:
         """
         Build complete D4D Dataset from RO-Crate parser.
 
@@ -67,6 +73,10 @@ class D4DBuilder:
         marked_descriptions = description_list_routes(self.mapping)
         marked_sensitive = sensitive_elements_route(self.mapping)
         marked_documentary = documentary_routes(self.mapping)
+        marked_dispositions = disposition_routes(self.mapping)
+        route_values, route_evidence = build_evidence(
+            self.mapping, [rocrate_parser], snapshots=None if source_snapshot is None else [source_snapshot],
+            source_indices=[source_index])
         identity = resolve_root_identity(root) if marked_id else None
         referenced = creator_reference_route(self.mapping)
         creator_data, construction = (
@@ -74,6 +84,9 @@ class D4DBuilder:
             if referenced else (None, None))
         self.d4d_data = {}
         self.creator_reference_construction = construction
+        self.route_dispositions = route_evidence
+        self._route_inputs = (() if route_evidence is None else
+                              ((rocrate_parser, route_evidence["sources"][0]["snapshot"]),))
 
         # Get all covered D4D fields
         covered_fields = self.mapping.get_covered_fields()
@@ -83,6 +96,12 @@ class D4DBuilder:
         # Map each covered field
         mapped_count = 0
         for d4d_field in covered_fields:
+            if d4d_field in marked_dispositions:
+                target = marked_dispositions[d4d_field][1]
+                if target in route_values:
+                    self.d4d_data[target] = deepcopy(route_values[target])
+                    mapped_count += 1
+                continue
             if d4d_field in marked_documentary:
                 value = documentary_source(root, marked_documentary[d4d_field])
                 if value is not None:
@@ -142,6 +161,13 @@ class D4DBuilder:
 
         return self.d4d_data
 
+    def get_route_dispositions(self):
+        """Return detached assertions only while their input binding remains current."""
+        disposition_routes(self.mapping)
+        for parser, snapshot in self._route_inputs:
+            validate_source(parser, snapshot)
+        return deepcopy(self.route_dispositions)
+
     def get_creator_reference_construction(self):
         """Return detached source evidence, never a Dataset field."""
         return deepcopy(self.creator_reference_construction)
@@ -157,6 +183,9 @@ class D4DBuilder:
         Returns:
             Transformed value appropriate for D4D field
         """
+        if field_name in disposition_routes(self.mapping):
+            raise ValueError("Marked disposition requires build_dataset and its source evidence")
+
         # Get mapping info for this field
         mapping_info = self.mapping.get_mapping_info(field_name)
         if not mapping_info:
