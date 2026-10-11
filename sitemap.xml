@@ -1306,6 +1306,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/fairscape_parent_admission/</loc>
+         <lastmod>2026-10-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/file_collections/</loc>
          <lastmod>2026-10-11</lastmod>
          <changefreq>daily</changefreq>
