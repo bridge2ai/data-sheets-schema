@@ -1096,6 +1096,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/cross-family-judges/</loc>
+         <lastmod>2026-10-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/cross-family-panel-analysis/</loc>
          <lastmod>2026-10-11</lastmod>
          <changefreq>daily</changefreq>

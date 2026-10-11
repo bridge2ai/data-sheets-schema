@@ -1,0 +1,559 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/cross-family-judges/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>Offline paired support and fitness analysis - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#offline-paired-support-and-fitness-analysis" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Offline paired support and fitness analysis
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home/" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_core/" class="md-nav__link">
+        D4D-Core
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic_exchange/" class="md-nav__link">
+        Semantic Exchange
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Schema Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        CLI Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#four-portable-packages" class="md-nav__link">
+    Four portable packages
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#declarations-and-missing-evidence" class="md-nav__link">
+    Declarations and missing evidence
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#explicit-statistical-policy" class="md-nav__link">
+    Explicit statistical policy
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/cross-family-judges.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="offline-paired-support-and-fitness-analysis">Offline paired support and fitness analysis</h1>
+<p><code>d4d evaluate cross-family-judges</code> captures and checks two declared rating slots
+for each registered target, then computes descriptive paired statistics. It does
+not dispatch requests, choose raters or thresholds, manufacture missing ratings,
+authenticate provider identities, or approve a study. Parent #3328 and the
+support/fitness calibration and human review obligations remain separate.</p>
+<p>The feature accepts the existing <code>nested_support_result_v1</code> and
+<code>top_level_fitness_result_v1</code> descriptor/result contracts. Each original
+acceptor reconstructs its captured record, provenance, source bundle, schema,
+instrument, target and request. The new panel compares a fixed common subject:
+logical generation identity, exact input pins, logical schema closure, axis,
+kind, pointer, typed value and actual prompt/context. Only the original request's
+top-level <code>model</code> and <code>max_tokens</code>, and fitness context's <code>model</code>, are excluded
+from exposure equality. Their complete values remain evaluator settings. Original
+path labels remain evidence; schema import keys and bytes remain exact. Paths
+embedded in prompt/specification content are not removed.</p>
+<p>Specification comparison is axis-specific: support reconstructs its nested
+specification; fitness reconstructs its fitness specification and generation
+digest. Only locator metadata is omitted from the comparison. Recapturing a
+custom schema at another path can change its verified generation digest and
+fitness context even when the fitness request text is identical; such fitness
+pairs remain incompatible. Moving an already captured package preserves those
+original context values and remains supported. Opposite-axis manifest
+declarations remain preserved, not newly verified. The consumer does not demand
+an uncaptured, unused opposite-axis artifact.</p>
+<h2 id="four-portable-packages">Four portable packages</h2>
+<p>The Python entry points live in <code>cross_family_judge_panel</code> and
+<code>cross_family_judge_analysis</code>:</p>
+<ol>
+<li><code>prepare_panel(declaration, output, root=...)</code> creates <code>panel.json</code>.
+   <code>recheck_panel(directory)</code> reconstructs it.</li>
+<li><code>accept_panel_results(panel, submissions, output, root=...)</code> creates
+   <code>results.json</code>. <code>recheck_panel_results(directory)</code> reconstructs it.</li>
+<li><code>prepare_analysis_spec(panel, declaration, output)</code> creates
+   <code>specification.json</code>. <code>recheck_analysis_spec(directory)</code> reconstructs it.</li>
+<li><code>analyze_panel_results(specification, results, output)</code> creates
+   <code>analysis.json</code>. <code>recheck_panel_analysis(directory)</code> reconstructs it.</li>
+</ol>
+<p>Each package contains its needed content-addressed artifact closure and current
+checker source pins. Rechecking after relocation uses those artifacts, without
+original input paths or executing captured Python. It reconstructs outputs and
+compares the complete saved document. An unsupported protocol, tampered artifact
+or incompatible reconstructed contract refuses; hashes are not proof of human
+review or preregistration timing. Historical execution implementation metadata
+is retained separately from current checking authority.</p>
+<p>The CLI exposes the same eight actions:</p>
+<pre><code class="language-sh">d4d evaluate cross-family-judges prepare --declaration panel.json --root evidence --output panel-package
+d4d evaluate cross-family-judges recheck --panel panel-package
+d4d evaluate cross-family-judges accept-results --panel panel-package --submissions submissions.json --root evidence --output results-package
+d4d evaluate cross-family-judges recheck-results --results results-package
+d4d evaluate cross-family-judges prepare-analysis --panel panel-package --declaration policy.json --output policy-package
+d4d evaluate cross-family-judges recheck-analysis-spec --specification policy-package
+d4d evaluate cross-family-judges analyze --specification policy-package --results results-package --output analysis-package
+d4d evaluate cross-family-judges recheck-analysis --analysis analysis-package
+</code></pre>
+<p>A zero exit means the package was consistently created or rechecked, including
+an honestly incomplete roster. It does not mean all expected ratings exist or
+are scientifically eligible. Invalid input or publication failure exits nonzero.
+Publication stages a complete package and installs it without replacing an
+existing destination, including a concurrent empty directory. It checks source
+bytes again before publication. This observed equality is not proof of continuous
+source immutability.</p>
+<h2 id="declarations-and-missing-evidence">Declarations and missing evidence</h2>
+<p>Panel declarations use <code>cross_family_judge_panel_declaration_v1</code>, with all keys
+explicit: <code>panel_id</code>, nullable <code>predecessor_sha256</code>, project/cohort <code>matrix</code>,
+<code>descriptors</code>, <code>pairs</code>, and <code>decisions</code>. Descriptor entries name <code>descriptor_id</code>,
+<code>protocol</code>, and a <code>source</code> containing a normalized relative directory <code>path</code> and
+SHA256 of its exact <code>descriptor.json</code>. Every descriptor must be referenced.</p>
+<p>A pair declares <code>pair_id</code>, <code>record_id</code>, a supported <code>anchor</code> descriptor/target,
+<code>selection_stratum</code>, and exactly <code>same_family</code>/<code>cross_family</code> slots. The anchor
+is required even when both slots are null. A non-null slot names its descriptor,
+exact <code>target_id</code>/<code>attempt_id</code>, nullable declared <code>rater</code>/<code>route</code> identities, and
+nullable <code>execution_registration</code> directory reference. Source-derived subjects
+cannot be duplicated by assigning another pair or descriptor alias. Distinct
+actual generation identities remain separate even with identical input bytes.</p>
+<p>The ten explicit decision keys are <code>selection_policy</code>, <code>rater_policy</code>, <code>route</code>,
+<code>budget</code>, <code>scientific_review</code>, <code>context_review</code>, <code>calibration</code>,
+<code>private_control_handling</code>, <code>canary</code>, and <code>execution_authorization</code>. Each is
+<code>{status: pending|declared, reference: null|{path,sha256}}</code>; a declared decision
+requires a captured reference. Selection strata use the same status/reference
+with a nullable <code>label</code>: support's <code>supported|unsupported</code> or fitness's
+<code>fit|unfit</code>. These labels are reviewer declarations, never derived from scores.</p>
+<p>Submissions use <code>cross_family_judge_submissions_v1</code>, <code>panel_sha256</code>, and <code>slots</code>.
+Every submitted row contains <code>pair_id</code>, <code>role</code>, nullable <code>saved_result</code> directory
+reference (hash of <code>result.json</code>), and nullable <code>execution</code> containing relative
+run <code>path</code> and <code>registration_sha256</code>. Omitted rows stay missing; foreign,
+duplicate or completely empty submitted rows refuse.</p>
+<p>A panel-pinned execution registration fixes the evidence basis. A missing or
+failed run cannot be downgraded to caller-saved evidence. Existing ledger
+reconstruction checks the full descriptor/request order and durable frontier.
+If both a saved result and run are submitted, the result must equal the ledger's
+actual saved result, including envelope and response pins. A valid response in a
+failed HTTP/usage-limit dispatch remains visible but ineligible. Slot state,
+assessment state, dispatch state, spent status, evidence basis, problems and raw
+artifacts are retained separately. Unselected descriptor targets remain declared
+scope, not additional panel observations.</p>
+<h2 id="explicit-statistical-policy">Explicit statistical policy</h2>
+<p>Analysis declarations use <code>cross_family_judge_analysis_declaration_v1</code>, an
+<code>analysis_id</code>, exact <code>panel_sha256</code>, explicit <code>pair_ids</code>, and:</p>
+<ul>
+<li><code>agreement: {weighting: equal_target|null}</code> and
+  <code>gap: {weighting: equal_record|null}</code>;</li>
+<li><code>support_indicator: {favorable_verdicts: null|[...]}</code> from the seven existing
+  support verdicts, with empty/full sets allowed as explicit constant policies;</li>
+<li><code>fitness_threshold: null|{cutoff: number, boundary: ge|gt}</code>, cutoff in [0,1];</li>
+<li><code>grouping: instrument_context_kind_ordered_rater_configuration_and_evidence_basis</code>;</li>
+<li><code>uncertainty</code>, with every key explicit: <code>method</code>, <code>confidence</code>, <code>resamples</code>,
+  <code>seed</code>, <code>quantile</code>, <code>blocks</code>, and <code>strata</code>.</li>
+</ul>
+<p>A null choice is pending and only suppresses dependent metrics. Confidence,
+resample count and seed have no defaults. The supported method is
+<code>paired_cluster_percentile_v1</code>, quantile <code>linear_n_minus_one</code>; confidence lies
+strictly between zero and one, resamples are 2–100000, and seed is an unsigned
+64-bit integer. Blocks and strata each partition exactly the selected records,
+using <code>{block_id,record_ids}</code> and <code>{stratum_id,record_ids}</code>. Identical record-byte
+hashes must share one block; different bytes do not establish independence.</p>
+<p>Agreement uses all compatible accepted pairs, including unknown-family pairs,
+with declared slot A/B orientation. Support has a seven-category nominal matrix
+and unweighted Cohen kappa. Fitness reports exact accepted numeric equality,
+separate four-category failure-label agreement, and optional threshold agreement.
+There is no kappa over arbitrary continuous scores or rounded prompt anchors.
+Matrices retain zero categories, marginal counts, observed/expected agreement and
+explicit undefined reasons at n=0 or Pe=1.</p>
+<p>Directional gaps additionally require known generator and rater families,
+exactly one matching family, correct declared role assignment and non-null rater
+and route identities. Otherwise the raw pair remains but its directional gap is
+unavailable. Positive same-minus-cross values do not isolate a causal family
+effect from evaluator severity or route differences. Within each record, both
+sides average over the <strong>same eligible paired targets</strong>; those record differences
+then receive equal weight. Records without an eligible pair are not zero gaps.</p>
+<p>Groups preserve instrument, schema, context policy, target kind and ordered
+rater settings/evidence basis. Target-specific request hashes are row evidence,
+not grouping keys. Anonymous raters retain descriptor identity. The report keeps
+the whole original roster, selected flags, exclusions, missing slots and groups
+with zero eligible observations.</p>
+<p>Fitness int/float operands retain their accepted JSON types and raw response
+bytes. Arithmetic uses exact integer or binary64 rational values; 1 and 1.0 are
+equal scores, and signed zero remains in source evidence. No extra precision
+from the original decimal token is claimed. Boundaries and degeneracy are tested
+before deterministic floating-point export.</p>
+<p>Bootstrap resamples whole declared blocks with paired roles/targets intact,
+retaining multiplicity. Original target proportions weight agreement strata;
+original eligible record proportions weight gaps. The existing semantic kernel's
+<code>sha256_counter_rejection_v1</code> draw schedule is reused without changing its source.
+Draw statistics and linear quantiles are recomputed from original exact
+contributions, not rounded helper outputs. Every declared stratum is required:
+zero or one contributing block, a block crossing strata, pending uncertainty or
+undefined point statistics makes the corresponding interval unavailable while
+preserving point estimates/counts. No empty stratum or undefined draw is dropped.</p>
+<p>Capture is bounded to 512 MB, each output to 64 MB, and panel size to 10000
+records/100000 pairs. Computational/output budgets cover group projection,
+resampling and exact recomputation before admitted loops; excessive work refuses
+instead of truncating. These are engineering bounds, not study-size advice.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>
