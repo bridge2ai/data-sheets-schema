@@ -1,9 +1,8 @@
 # FAIRSCAPE declared assertions
 
 The paired converters expose a detached `route_evidence` dictionary alongside
-their existing return values. This implements the seven non-annotation routes
-in Part A of #4046; the four paired canonical routes and annotation grouping
-remain separate work. No schema, mapping table, ranking denominator, or
+their existing return values. The thirteen #4046 root assertions have finite
+canonical constructions and explicit projection limits. No schema, mapping table, ranking denominator, or
 scientific mapping-strength claim changes here.
 
 | Selected root assertion | Dataset construction |
@@ -14,6 +13,12 @@ scientific mapping-strength claim changes here.
 | `humanSubjects`, `humanSubjectResearch` | Shared approved human-subject rule: source-labelled description, conditional explicit boolean |
 | `dataGovernanceCommittee` | Whole string in `data_governance.description` |
 | `completeness` | Detached assertion evidence; no Dataset metric or slot is invented |
+| `rai:personalSensitiveInformation` | Whole strings in `sensitive_elements[].sensitivity_details`; no confidentiality flag |
+| `rai:dataCollection` | Scalar text in `collection_mechanisms[].mechanism_details`; no acquisition-method inference |
+| `rai:dataSocialImpact` | Scalar text in `future_use_impacts[].impact_details`; no completed DPIA inference |
+| `rai:dataAnnotationProtocol` | Whole strings in `labeling_strategies[].data_annotation_protocol` |
+| `rai:dataAnnotationPlatform` | Whole strings in `labeling_strategies[].data_annotation_platform` |
+| `rai:annotationsPerItem` | Exact integer or reversible ASCII decimal string in `annotations_per_item` |
 
 Immediate cleaning/funder string-list occurrences keep order, duplicates and
 empty strings. Unsupported units remain raw evidence and are reported in
@@ -46,6 +51,31 @@ Forward conversion emits a scalar citation, one text-only cleaning or funder
 object, or an explicit research boolean as `Yes`/`No`. Rich or multiple scalar
 candidates are preserved in outgoing diagnostics rather than concatenated or
 first-picked. This is a typed projection, not literal JSON-shape equality.
+
+The four independent compatibility carriers are `d4d:confidentialElements`,
+`d4d:acquisitionMethods`, `d4d:dataProtectionImpacts`, and
+`d4d:labelingStrategies`. Forward conversion preserves complete object/list
+structure through ordinary model extras. Reverse conversion fits their explicit
+objects with the ordinary final D4D validator, preserving internal
+duplicates and order; malformed/unretained parts remain recoverable in evidence.
+Carrier transport does not assert that its content is schema-valid.
+
+One protocol, at most one platform, and an admitted count form an explicit
+root-summary annotation group. Multi-platform or raw multi-protocol input instead
+produces independent protocol-only, platform-only, and count-only records. There
+is no zip, broadcast, workflow inference, or first-value selection. Matching
+canonical projections of an explicit labeling carrier candidate are marked
+`redundant_projection` and track its final retention. Conflicts append independent
+canonical groups after the carrier. Duplicates inside a carrier are not removed.
+
+An exact integer count projects to `str(value)`, and only ASCII `0` or
+`-?[1-9][0-9]*` that survives `int` and exact string round-trip is decoded.
+Booleans, floats, padded/decimal/exponential text and conversion-limit failures
+are declined, with raw evidence retained. No new nonnegative bound is invented.
+Sensitivity and platform use list-of-string wire fields. Multiple/richer
+collection or impact objects have no scalar projection; their complete source
+values remain in diagnostics. Rich annotation objects retain their full carrier
+even when a finite protocol/platform/count projection is also available.
 
 `forward.convert(record, source_evidence=reverse.route_evidence)` optionally
 re-emits separately supplied human, completeness and committee assertions when

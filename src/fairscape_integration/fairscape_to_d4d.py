@@ -848,11 +848,27 @@ class FairscapeToD4DConverter:
 
         fitted = self._fit(d4d, TARGET_CLASS, origin, rivals=rivals)
         if self._declared_assertions is not None:
-            self._declared_assertions.apply(fitted, origin, rivals, self.dropped)
+            self._declared_assertions.apply(
+                fitted, origin, rivals, self.dropped, self._prepare_declared_carrier)
         settled = self._settle(fitted, origin, rivals)
         if self._declared_assertions is not None:
             self._declared_assertions.finish(settled, origin)
         return settled
+
+    def _prepare_declared_carrier(self, values):
+        """Index detached D4D objects for the unchanged final validator.
+
+        Generic prose fitting would discard valid empty strings and normalize
+        explicit types. These four carriers already assert structured D4D
+        objects; _settle still removes and reports every invalid field/value.
+        """
+        objects, indices = [], []
+        for index, obj in enumerate(values):
+            if obj is not None:
+                self._read_at[id(obj)] = (obj, index)
+                objects.append(obj)
+                indices.append(index)
+        return objects, indices
 
     def _not_a_dataset_slot_value(self, source: str, slot: str,
                                   value: Any) -> None:
@@ -1805,7 +1821,9 @@ class FairscapeToD4DConverter:
             'rai:dataUseCases': 'intended_uses',
             'rai:dataBiases': 'known_biases',
             'rai:dataLimitations': 'known_limitations',
-            'rai:dataCollection': 'acquisition_methods',
+            # The finite declared-assertion helper constructs dataCollection,
+            # sensitivity, future impact and annotation summaries after generic
+            # fitting. They must not also populate the historical wrong homes.
             'rai:dataCollectionMissingData': 'missing_data_documentation',
             'rai:dataCollectionRawData': 'raw_data_sources',
             'rai:dataCollectionTimeframe': 'collection_timeframes',
@@ -1820,11 +1838,8 @@ class FairscapeToD4DConverter:
             'prohibitedUses': 'prohibited_uses',
             'rai:ethicalReview': 'ethical_reviews',
             'ethicalReview': 'ethical_reviews',
-            'rai:personalSensitiveInformation': 'confidential_elements',
-            'rai:dataSocialImpact': 'data_protection_impacts',
             'rai:dataReleaseMaintenancePlan': 'updates',
             'rai:dataPreprocessingProtocol': 'preprocessing_strategies',
-            'rai:dataAnnotationProtocol': 'labeling_strategies',
             'rai:dataAnnotationAnalysis': 'annotation_analyses',
             # MachineAnnotationTools is the class the schema maps to
             # rai:machineAnnotationTools; there is no

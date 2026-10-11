@@ -447,6 +447,7 @@ class TestDroppedValuesAreRecorded(unittest.TestCase):
     CANNOT_HOLD = {
         BUNDLED[0]: {"contentSize": "a size with a unit, not a byte count",
                      "additionalProperty[Human Subject]": "superseded by humanSubjectResearch",
+                     "rai:annotationsPerItem": "unsupported assertion unit",
                      "hasPart": "does not describe it",
                      "isPartOf[0]": "no explicit Dataset type",
                      "isPartOf[1]": "no explicit Dataset type",
@@ -1980,16 +1981,22 @@ class TestDatasetParts(unittest.TestCase):
         the same value, apart from a split author string, a start and end
         date, `prohibited_uses`, which this converter fills from two crate
         properties. #4046 now shares the approved human-subject construction,
-        but explicitly places grantor and cleaning_details instead of the
-        static arm's generic name/description objects. This is a declared
+        but explicitly places grantor, cleaning_details and the four #4046
+        canonical fields instead of the static arm's generic name/description
+        objects. Annotation platform/count assertions are separate inputs.
+        This is a declared
         representation difference, not a new semantic-fidelity claim."""
         from data_sheets_schema.rocrate_map import (
             MAPPING_TSV, load_mapping, map_crate)
         rows = load_mapping(repo_root / MAPPING_TSV)
         view = FairscapeToD4DConverter()._schema_view()
         expected = {BUNDLED[0]: {"creators", "collection_timeframes",
-                                 "prohibited_uses", "funders", "cleaning_strategies"},
-                    BUNDLED[1]: {"creators", "collection_timeframes"},
+                                 "prohibited_uses", "funders", "cleaning_strategies",
+                                 "collection_mechanisms", "future_use_impacts",
+                                 "sensitive_elements", "labeling_strategies"},
+                    BUNDLED[1]: {"creators", "collection_timeframes",
+                                 "collection_mechanisms", "future_use_impacts",
+                                 "sensitive_elements", "labeling_strategies"},
                     BUNDLED[2]: {"creators"},
                     BUNDLED[3]: {"creators"}}
         for path, differ in expected.items():
@@ -1999,6 +2006,18 @@ class TestDatasetParts(unittest.TestCase):
                 theirs = map_crate(crate_json["@graph"], rows, view).record
                 self.assertEqual({slot for slot in set(ours) & set(theirs)
                                   if ours[slot] != theirs[slot]}, differ)
+                if path in BUNDLED[:2]:
+                    root = root_data_entity(crate_json["@graph"])
+                    self.assertEqual(ours["collection_mechanisms"], [
+                        {"mechanism_details": root["rai:dataCollection"]}])
+                    self.assertEqual(ours["future_use_impacts"], [
+                        {"impact_details": root["rai:dataSocialImpact"]}])
+                    self.assertEqual(ours["sensitive_elements"], [
+                        {"sensitivity_details": value} for value in root["rai:personalSensitiveInformation"]])
+                    self.assertEqual(ours["labeling_strategies"][0],
+                                     {"data_annotation_protocol": root["rai:dataAnnotationProtocol"]})
+                    self.assertTrue(all(key not in ours for key in (
+                        "acquisition_methods", "confidential_elements", "data_protection_impacts")))
                 if path == BUNDLED[0]:
                     root = root_data_entity(crate_json["@graph"])
                     human = theirs["human_subject_research"]

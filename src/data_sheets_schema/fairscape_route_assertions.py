@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 
 from data_sheets_schema.rocrate_assertions import HUMAN_KEYS, human_subject_record
 from data_sheets_schema.rocrate_parent_admission import snapshot
@@ -22,7 +23,22 @@ ROUTES = {
     "humanSubjectResearch": "human_subject_research",
     "completeness": None,
     "dataGovernanceCommittee": "data_governance",
+    "rai:personalSensitiveInformation": "sensitive_elements",
+    "rai:dataCollection": "collection_mechanisms",
+    "rai:dataSocialImpact": "future_use_impacts",
+    "rai:dataAnnotationProtocol": "labeling_strategies",
+    "rai:dataAnnotationPlatform": "labeling_strategies",
+    "rai:annotationsPerItem": "labeling_strategies",
 }
+CARRIERS = {
+    "d4d:confidentialElements": "confidential_elements",
+    "d4d:acquisitionMethods": "acquisition_methods",
+    "d4d:dataProtectionImpacts": "data_protection_impacts",
+    "d4d:labelingStrategies": "labeling_strategies",
+}
+LIST_TARGETS = frozenset(("funders", "cleaning_strategies", "sensitive_elements",
+                         "collection_mechanisms", "future_use_impacts",
+                         "labeling_strategies", *CARRIERS.values()))
 PROPERTY_VALUES = {
     "Citation": "citation", "Cleaning Strategies": "cleaning_strategies",
     "Funders": "funders", "Human Subject": "human_subject_research",
@@ -43,7 +59,7 @@ def property_value_target(name):
     if name in PROPERTY_VALUES:
         return True, PROPERTY_VALUES[name]
     slot = name.lower().replace(" ", "_")
-    if slot in ("citation", "cleaning_strategies", "funders", "human_subject_research", "data_governance"):
+    if slot in LIST_TARGETS or slot in ("citation", "human_subject_research", "data_governance"):
         return True, slot
     if slot in ("completeness", "data_governance_committee"):
         return True, None
@@ -69,6 +85,43 @@ def same_json(left, right):
     return dataset_digest({"value": left}) == dataset_digest({"value": right})
 
 
+def canonical_count(value):
+    """Exact integers or reversible ASCII decimal strings; never a bool."""
+    if type(value) is int:
+        return value
+    if type(value) is str and re.fullmatch(r"(?:0|-?[1-9][0-9]*)", value):
+        try:
+            parsed = int(value)
+            if str(parsed) == value:
+                return parsed
+        except (ValueError, OverflowError):
+            pass
+    return None
+
+
+def annotation_projection(groups):
+    """Finite wire summary; multiple groups never acquire a shared count."""
+    result = {}
+    if type(groups) is not list or not groups or not all(type(g) is dict for g in groups):
+        return result
+    if len(groups) == 1:
+        item = groups[0]
+        if type(item.get("data_annotation_protocol")) is str:
+            result["rai:dataAnnotationProtocol"] = item["data_annotation_protocol"]
+        if type(item.get("data_annotation_platform")) is str:
+            result["rai:dataAnnotationPlatform"] = [item["data_annotation_platform"]]
+        count = item.get("annotations_per_item")
+        if type(count) is int:
+            try:
+                result["rai:annotationsPerItem"] = str(count)
+            except (ValueError, OverflowError):
+                pass
+    elif all(set(g) == {"data_annotation_platform"}
+             and type(g["data_annotation_platform"]) is str for g in groups):
+        result["rai:dataAnnotationPlatform"] = [g["data_annotation_platform"] for g in groups]
+    return result
+
+
 def failed(state, exc):
     state["status"] = "failed"
     state["error"] = type(exc).__name__ + ": " + str(exc)
@@ -88,7 +141,7 @@ def assertion(source, pointer, present, raw, target):
 
 
 class DeclaredAssertions:
-    """One reverse conversion's seven routes and their finite read evidence."""
+    """One reverse conversion's thirteen routes and finite read evidence."""
 
     def __init__(self, state, root, graph, root_index):
         self.state = state
@@ -101,6 +154,8 @@ class DeclaredAssertions:
         self.legacy = {}
         self.scalar_bindings = {}
         self.list_bindings = {}
+        self.carrier_rows = {}
+        self.carrier_tracks = []
         prefix = "/@graph/" + str(root_index) + "/"
         for key, target in ROUTES.items():
             row = assertion(key, prefix + pointer_key(key), key in root, root.get(key), target)
@@ -112,6 +167,12 @@ class DeclaredAssertions:
                                 root.get(key), "human_subject_research")
                 self.rows.append(row)
                 self.direct[key] = row
+
+        for key, target in CARRIERS.items():
+            if key in root:
+                row = assertion(key, prefix + pointer_key(key), True, root[key], target)
+                self.rows.append(row)
+                self.carrier_rows[key] = row
 
         # These candidates still use the pre-existing fitter and priority rules.
         # Record their full source objects, not reconstructed names/values.
@@ -141,6 +202,9 @@ class DeclaredAssertions:
         self._units("rai:dataManipulationProtocol", root.get("rai:dataManipulationProtocol"), "cleaning_details")
         self._units("funder", root.get("funder"), "grantor", references=True)
         self._text("dataGovernanceCommittee", root.get("dataGovernanceCommittee"), member="description")
+        self._units("rai:personalSensitiveInformation", root.get("rai:personalSensitiveInformation"), "sensitivity_details")
+        self._text("rai:dataCollection", root.get("rai:dataCollection"), member="mechanism_details", listed=True)
+        self._text("rai:dataSocialImpact", root.get("rai:dataSocialImpact"), member="impact_details", listed=True)
         completeness = self.direct["completeness"]
         if completeness["presence"] != "missing":
             completeness.update(decision="deferred", reason="no Dataset completeness slot; no metric inferred")
@@ -191,14 +255,13 @@ class DeclaredAssertions:
         if state is not None and state["row"]["target"] is None:
             state["row"]["reason"] = "existing fitter has no Dataset target for this occurrence"
             return
-        if slot not in ("citation", "human_subject_research", "data_governance",
-                         "funders", "cleaning_strategies"):
+        if slot not in LIST_TARGETS and slot not in ("citation", "human_subject_research", "data_governance"):
             return
         if value in (None, '', [], {}):
             if state is not None:
                 state["row"]["reason"] = "existing fitter does not construct an empty candidate"
             return
-        if slot not in ("funders", "cleaning_strategies"):
+        if slot not in LIST_TARGETS:
             key = slot, source, id(value)
             actual = [(origin.get(slot), record.get(slot))] + list(rivals.get(slot, []))
             if state is not None:
@@ -293,8 +356,8 @@ class DeclaredAssertions:
                     row["reason"] += "; genuine shaping produced no retained constructor"
                 continue
             final = record.get(target)
-            outputs = final if target in ("funders", "cleaning_strategies") and type(final) is list else [final]
-            if target not in ("funders", "cleaning_strategies") and origin.get(target) != state.get("source"):
+            outputs = final if target in LIST_TARGETS and type(final) is list else [final]
+            if target not in LIST_TARGETS and origin.get(target) != state.get("source"):
                 outputs = []
             intact = surviving = 0
             for obj, expected, lost in constructed:
@@ -310,10 +373,11 @@ class DeclaredAssertions:
             row.update(decision="constructed", reason=reason)
         self.candidates.append((rows, slot, value))
 
-    def _text(self, key, value, member=None):
+    def _text(self, key, value, member=None, listed=False):
         if type(value) is str:
+            constructed = {member: value} if member else value
             self._candidate([self.direct[key]], ROUTES[key],
-                            {member: value} if member else value,
+                            [constructed] if listed else constructed,
                             "whole source string; no splitting or inferred details")
 
     def _units(self, key, value, member, references=False):
@@ -336,13 +400,94 @@ class DeclaredAssertions:
             self._candidate([self.direct[key]], ROUTES[key], objects,
                             "immediate supported units in source order, including duplicates; unsupported units remain raw evidence")
 
-    def apply(self, record, origin, rivals, dropped):
+    def _carriers(self, record, origin, dropped, prepare_carrier):
+        """Place explicit structured candidates for genuine final validation."""
+        fitted_labeling = []
+        for key, row in self.carrier_rows.items():
+            raw, slot = row["raw"], row["target"]
+            values = raw if type(raw) is list else [raw]
+            row["units"] = [{"index": i if type(raw) is list else None,
+                             "decision": "unplaced"} for i in range(len(values))]
+            # These are explicit D4D objects, not prose for generic shaping.
+            # The ordinary final validator decides their fields and types;
+            # pre-shaping would discard valid empty strings/group structure.
+            admitted = [snapshot(item) if type(item) is dict else None for item in values]
+            built, indices = prepare_carrier(admitted) if any(item is not None for item in admitted) else ([], [])
+            expected = []
+            for obj, index in zip(built, indices):
+                row["units"][index]["decision"] = "constructed"
+                expected.append(snapshot(values[index]))
+            if built or type(raw) is list and not raw:
+                row.update(decision="constructed", reason="explicit structured carrier submitted to final validation; independent groups and duplicates retained")
+                record[slot] = built + record.get(slot, [])
+                origin[slot] = key
+                self.carrier_tracks.append((row, slot, built, expected))
+            for unit in row["units"]:
+                if unit["decision"] == "unplaced":
+                    dropped.append((key, "carrier occurrence not constructed; exact value retained in route_evidence"))
+            if key == "d4d:labelingStrategies":
+                fitted_labeling = built
+        return fitted_labeling
+
+    def _annotations(self, carrier):
+        keys = ("rai:dataAnnotationProtocol", "rai:dataAnnotationPlatform", "rai:annotationsPerItem")
+        fields = ("data_annotation_protocol", "data_annotation_platform", "annotations_per_item")
+        projected = annotation_projection(carrier)
+        independent = []
+        raw_protocol = self.direct[keys[0]]["raw"]
+        raw_platform = self.direct[keys[1]]["raw"]
+        summary = type(raw_protocol) is not list and not (type(raw_platform) is list and len(raw_platform) > 1)
+        grouped, grouped_rows = {}, []
+        for key, field in zip(keys, fields):
+            row = self.direct[key]
+            raw = row["raw"]
+            if row["presence"] in ("missing", "null"):
+                continue
+            if field == "annotations_per_item":
+                value = canonical_count(raw)
+                values = [] if value is None else [value]
+                compare = str(value) if value is not None and type(raw) is str else raw
+                if type(raw) is int:
+                    try:
+                        compare = str(raw)
+                    except (ValueError, OverflowError):
+                        compare = None
+                row["units"] = [{"index": None, "decision": "constructed" if values else "unplaced"}]
+            else:
+                units = raw if type(raw) is list else [raw]
+                values = [v for v in units if type(v) is str]
+                row["units"] = [{"index": i if type(raw) is list else None,
+                                 "decision": "constructed" if type(v) is str else "unplaced"}
+                                for i, v in enumerate(units)]
+                compare = raw
+            if key in projected and same_json(compare, projected[key]):
+                row.update(decision="redundant_projection", construction_observed=True,
+                           reason="exact finite projection of explicit carrier candidate; final validation still determines retention")
+                self.tracks.append(([row], "labeling_strategies", list(carrier), snapshot(carrier), key))
+                continue
+            if not values:
+                continue
+            reason = ("independent canonical assertion differs from carrier projection; no overwrite or inferred association"
+                      if carrier else "declared root annotation summary; no inferred workflow")
+            row.update(decision="constructed", reason=reason)
+            if summary and len(values) == 1:
+                grouped[field] = values[0]
+                grouped_rows.append(row)
+            else:
+                independent.append(([row], "labeling_strategies", [{field: value} for value in values]))
+        if grouped:
+            independent.append((grouped_rows, "labeling_strategies", [grouped]))
+        return independent
+
+    def apply(self, record, origin, rivals, dropped, prepare_carrier):
         """Place precise constructors after generic shaping, before validation.
 
         Lists retain all canonical occurrences; old fitted list candidates follow.
         A singular old candidate remains available if final validation rejects
         the canonical value. Genuine ``_settle`` still decides the final record.
         """
+        carrier = self._carriers(record, origin, dropped, prepare_carrier)
+        annotations = self._annotations(carrier)
         for row in self.direct.values():
             unplaced = [unit for unit in row.get("units", []) if unit["decision"] == "unplaced"]
             if unplaced:
@@ -366,12 +511,26 @@ class DeclaredAssertions:
             origin[slot] = source
             expected = snapshot(value)
             self.tracks.append((rows, slot, refs, expected, source))
+        # Preserve explicit carrier groups first; canonical disagreements are
+        # independent groups after them, never merged into a carrier object.
+        for rows, slot, value in annotations:
+            record[slot] = record.get(slot, []) + value
+            origin[slot] = rows[0]["source"]
+            self.tracks.append((rows, slot, list(value), snapshot(value), rows[0]["source"]))
 
     def finish(self, record, origin):
         for row in self.rows:
             slot = row["target"]
             row["final_value"] = snapshot(record.get(slot)) if slot else None
         self._finish_legacy(record, origin)
+        for row, slot, refs, expected in self.carrier_tracks:
+            actual = record.get(slot, [])
+            intact = sum(any(item is ref and same_json(item, wanted) for item in actual)
+                         for ref, wanted in zip(refs, expected))
+            surviving = sum(any(item is ref for item in actual) for ref in refs)
+            omitted = any(unit["decision"] == "unplaced" for unit in row["units"])
+            row["retention"] = ("retained" if type(actual) is list and slot in record and intact == len(refs) and not omitted
+                                else "partial" if surviving else "not_retained")
         for rows, slot, refs, expected, source in self.tracks:
             value = record.get(slot)
             if type(expected) is list:
@@ -411,6 +570,9 @@ def forward_projections(state, data):
     routes = (("citation", "citation", None),
               ("cleaning_strategies", "rai:dataManipulationProtocol", "cleaning_details"),
               ("funders", "funder", "grantor"),
+              ("collection_mechanisms", "rai:dataCollection", "mechanism_details"),
+              ("future_use_impacts", "rai:dataSocialImpact", "impact_details"),
+              ("sensitive_elements", "rai:personalSensitiveInformation", "sensitivity_details"),
               ("human_subject_research", "humanSubjectResearch", "involves_human_subjects"),
               ("data_governance", "dataGovernanceCommittee", None))
     for source, target, member in routes:
@@ -420,10 +582,14 @@ def forward_projections(state, data):
         value = None
         if source == "citation" and type(raw) is str:
             value = raw
-        elif source in ("cleaning_strategies", "funders"):
+        elif source in ("cleaning_strategies", "funders", "collection_mechanisms", "future_use_impacts"):
             if (type(raw) is list and len(raw) == 1 and type(raw[0]) is dict
                     and set(raw[0]) == {member} and type(raw[0][member]) is str):
                 value = raw[0][member]
+        elif source == "sensitive_elements":
+            if (type(raw) is list and all(type(item) is dict and set(item) == {member}
+                                         and type(item[member]) is str for item in raw)):
+                value = [item[member] for item in raw]
         elif source == "human_subject_research" and type(raw) is dict and type(raw.get(member)) is bool:
             value = "Yes" if raw[member] else "No"
         if value is not None:
@@ -432,6 +598,28 @@ def forward_projections(state, data):
                        reason="canonical scalar projection; original typed value retained in raw evidence")
         elif source in data:
             row["reason"] = "no unambiguous scalar projection; no flattening or narrative inference"
+    for target, source in CARRIERS.items():
+        raw = data.get(source)
+        row = assertion(source, "/" + source, source in data, raw, target)
+        state["assertions"].append(row)
+        if type(raw) in (dict, list):
+            result[target] = snapshot(raw)
+            row.update(decision="constructed", projected_value=snapshot(raw),
+                       reason="complete explicit compatibility carrier; model extra transport does not validate D4D semantics")
+        elif source in data:
+            row["reason"] = "structured carrier requires an object or list; source value remains evidence"
+    groups = data.get("labeling_strategies")
+    summary = annotation_projection(groups)
+    for target in ("rai:dataAnnotationProtocol", "rai:dataAnnotationPlatform", "rai:annotationsPerItem"):
+        row = assertion("labeling_strategies", "/labeling_strategies",
+                        "labeling_strategies" in data, groups, target)
+        state["assertions"].append(row)
+        if target in summary:
+            result[target] = summary[target]
+            row.update(decision="constructed", projected_value=summary[target],
+                       reason="finite annotation projection; exact count integers use canonical ASCII decimal strings")
+        elif "labeling_strategies" in data:
+            row["reason"] = "no unambiguous typed annotation projection; full grouping remains in compatibility carrier"
     return result
 
 
@@ -462,7 +650,7 @@ def supplied_projections(state, data, evidence, projected):
     if type(rows) is not list:
         raise ValueError("source_evidence assertions must be a finite list")
     direct = {}
-    allowed = set(ROUTES) | set(HUMAN_KEYS) | {"d4d:humanSubject", "irb.referenced_entity"}
+    allowed = set(ROUTES) | set(CARRIERS) | set(HUMAN_KEYS) | {"d4d:humanSubject", "irb.referenced_entity"}
     allowed.update("additionalProperty: " + key for key in PROPERTY_VALUES)
     root_index = evidence.get("root_graph_index")
     if type(root_index) is not int or root_index < 0:
@@ -523,6 +711,6 @@ def finish_forward(state, root):
         row["final_value"] = snapshot(root.get(target))
         if row["decision"] == "constructed":
             expected = row.pop("projected_value")
-            row["retention"] = ("retained" if target in root and type(root[target]) is type(expected)
-                                and root[target] == expected else "not_retained")
+            row["retention"] = ("retained" if target in root and same_json(root[target], expected)
+                                else "not_retained")
     state["status"] = "complete"

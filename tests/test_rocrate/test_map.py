@@ -1276,6 +1276,7 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
                     probe._map_evi_properties, probe._map_rai_properties,
                     probe._map_d4d_properties)
         shared = set()
+        table_pairs = set()
         for row in self.table:
             if row.get("Execution", "active") != "active" or row.get("Mapping_Rule"):
                 continue
@@ -1285,6 +1286,7 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
                     and match["type"] == "Dataset" and not match["name"]):
                 continue
             prop, slot = match["prop"], path.partition(".")[2]
+            table_pairs.add((prop, slot))
             # A number is accepted by exact_bytes, so that mapping is not
             # lost merely because a text sentinel would be refused.
             mapped = {(p, s) for mapping in mappings
@@ -1298,7 +1300,29 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
                    ("d4d:humanSubject", "human_subject_research"),
                    ("rai:imputationProtocol", "imputation_protocols")}
         self.assertFalse(shared & removed)
-        self.assertGreaterEqual(len(shared), 35)
+        # #4046 moves exactly four more converter pairs to explicit canonical
+        # constructors. The static table is unchanged, and these adapters no
+        # longer promise generic-coercion agreement with its historical rows.
+        adapters = {
+            ("rai:dataCollection", "acquisition_methods"):
+                ("collection_mechanisms", "mechanism_details", "x"),
+            ("rai:personalSensitiveInformation", "confidential_elements"):
+                ("sensitive_elements", "sensitivity_details", ["x"]),
+            ("rai:dataSocialImpact", "data_protection_impacts"):
+                ("future_use_impacts", "impact_details", "x"),
+            ("rai:dataAnnotationProtocol", "labeling_strategies"):
+                ("labeling_strategies", "data_annotation_protocol", "x"),
+        }
+        self.assertLessEqual(set(adapters), table_pairs)
+        self.assertFalse(shared & set(adapters))
+        # Retain the old coverage floor, accounting for each moved pair rather
+        # than silently weakening the test if another generic mapping vanishes.
+        self.assertGreaterEqual(len(shared | set(adapters)), 35)
+        for (prop, old_slot), (slot, detail, value) in adapters.items():
+            with self.subTest(explicit_adapter=prop):
+                self.assertEqual(self.converter(prop, slot, value), [{detail: "x"}])
+                if old_slot != slot:
+                    self.assertIsNone(self.converter(prop, old_slot, value))
         self.assertLessEqual({(p, s) for p, (s, _) in self.PAIRS.items()}, shared)
         kinds = {
             "text": "x", "iso_date": "2022-09-01",
