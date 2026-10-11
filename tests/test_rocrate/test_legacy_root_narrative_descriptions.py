@@ -280,8 +280,10 @@ def test_default_table_preserves_sibling_routes_and_unassessed_declarations(impl
     for field in EXPECTED_ROUTES:
         assert record[field] == [{'description': TEXT}]
     # Related slots keep their existing raw values and errors; no silent rerouting.
-    for field in ('tasks', 'existing_uses', 'other_tasks', 'discouraged_uses', 'raw_data_sources'):
+    for field in ('tasks', 'existing_uses', 'other_tasks', 'discouraged_uses'):
         assert record[field] == TEXT
+    # The separately marked documentary route now types this sibling assertion.
+    assert record['raw_data_sources'] == [{'source_description': TEXT}]
     with pytest.raises(publication.PublicationError):
         publication.prepare_dataset(record)
     loader = implementation['loader'].MappingLoader(str(DEFAULT))
