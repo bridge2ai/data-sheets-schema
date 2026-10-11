@@ -1,0 +1,590 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/cross-family-panel-analysis/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>Offline paired semantic analysis - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#offline-paired-semantic-analysis" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Offline paired semantic analysis
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home/" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_core/" class="md-nav__link">
+        D4D-Core
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic_exchange/" class="md-nav__link">
+        Semantic Exchange
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Schema Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        CLI Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#capture-analyze-recheck" class="md-nav__link">
+    Capture, analyze, recheck
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#explicit-declaration" class="md-nav__link">
+    Explicit declaration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pairing-categories-and-score-bases" class="md-nav__link">
+    Pairing, categories and score bases
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#declared-paired-cluster-uncertainty" class="md-nav__link">
+    Declared paired cluster uncertainty
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/cross-family-panel-analysis.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="offline-paired-semantic-analysis">Offline paired semantic analysis</h1>
+<p>The #4962 software slice under #3328 computes descriptive exact agreement,
+unweighted Cohen's kappa, signed score differences, and paired cluster
+percentile intervals from captured rubric10/rubric20 ratings. It does not run
+raters, authenticate declarations, approve context, establish scientific
+eligibility, or complete #3328's canary, actual second ratings, or separate
+fitness/support panels.</p>
+<h2 id="capture-analyze-recheck">Capture, analyze, recheck</h2>
+<pre><code class="language-sh">d4d evaluate cross-family-panel prepare-analysis \
+  --panel /path/to/panel --declaration analysis-policy.json --output /path/to/new-spec
+
+d4d evaluate cross-family-panel recheck-analysis-spec --specification /path/to/new-spec
+
+d4d evaluate cross-family-panel analyze \
+  --specification /path/to/new-spec --results /path/to/accepted-results \
+  --output /path/to/new-analysis
+
+d4d evaluate cross-family-panel recheck-analysis --analysis /path/to/new-analysis
+</code></pre>
+<p>Preparation captures a specification and the exact registered panel. Analysis
+reconstructs existing saved-result acceptance from its captured artifacts,
+checks the same panel bytes, and captures the specification, all result inputs
+(including rejected submissions), and the computed report. Recheck reconstructs
+all decisions and draws after relocation, without following original corpus or
+rating paths. Captured Python is never executed. The supported imported
+acceptor and analysis source identities must still match; a changed authority
+needs a reviewed successor, not reinterpretation of an old report.</p>
+<p>Captured instrument YAML uses a separate bounded safe loader because rubric
+score descriptions have numeric mapping keys. It preserves scalar key types,
+refuses duplicate keys (including equal numeric/Boolean keys), aliases, unsafe
+tags and nonfinite values, and checks byte, node and collection-depth bounds
+before construction. Manifest and record parsers retain their string-key rules.</p>
+<p>Every output is a new directory. The publisher bounds and serializes the
+report first, stages all artifacts and the manifest beside the destination,
+fsyncs them, and installs the complete directory with an atomic no-replace
+rename. An occupied destination, including a concurrently created one, is
+preserved. Artifact-write failure exposes no partial destination. Only the
+owned unpublished staging directory is cleaned up. This uses Darwin
+<code>renamex_np(RENAME_EXCL)</code> or Linux <code>renameat2(RENAME_NOREPLACE)</code>; other platforms
+refuse rather than use a replacing rename. A post-install directory-fsync
+failure can report an error with a complete package already present; there is
+no claim of rollback after installation or recovery from power loss.
+Output paths containing a NUL character refuse before input capture or staging;
+the native rename boundary independently checks both encoded path arguments.</p>
+<h2 id="explicit-declaration">Explicit declaration</h2>
+<p>All keys below are mandatory; unknown keys refuse. These are <strong>synthetic example
+choices</strong>, not defaults or an adopted study policy. Replace the digest and IDs
+with those from the selected panel.</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;cross_family_panel_analysis_declaration_v1&quot;,
+  &quot;analysis_id&quot;: &quot;synthetic-example&quot;,
+  &quot;panel_sha256&quot;: &quot;&lt;SHA256 of exact panel.json bytes including newline&gt;&quot;,
+  &quot;record_ids&quot;: [&quot;record1&quot;, &quot;record2&quot;],
+  &quot;instruments&quot;: [{&quot;rubric&quot;: &quot;rubric10&quot;, &quot;version&quot;: &quot;3.0&quot;}],
+  &quot;agreement&quot;: {&quot;unit&quot;: &quot;record_item&quot;, &quot;weighting&quot;: &quot;equal_observation&quot;},
+  &quot;gap&quot;: {&quot;scale&quot;: &quot;fixed_percentage_points&quot;, &quot;weighting&quot;: &quot;equal_record&quot;},
+  &quot;grouping&quot;: &quot;instrument_domain_ordered_rater_pair&quot;,
+  &quot;uncertainty&quot;: {
+    &quot;method&quot;: &quot;paired_cluster_percentile_v1&quot;,
+    &quot;confidence&quot;: 0.9,
+    &quot;resamples&quot;: 20,
+    &quot;seed&quot;: 7,
+    &quot;quantile&quot;: &quot;linear_n_minus_one&quot;,
+    &quot;blocks&quot;: [
+      {&quot;block_id&quot;: &quot;b1&quot;, &quot;record_ids&quot;: [&quot;record1&quot;]},
+      {&quot;block_id&quot;: &quot;b2&quot;, &quot;record_ids&quot;: [&quot;record2&quot;]}
+    ],
+    &quot;strata&quot;: [{&quot;stratum_id&quot;: &quot;all&quot;, &quot;record_ids&quot;: [&quot;record1&quot;, &quot;record2&quot;]}]
+  }
+}
+</code></pre>
+<p><code>record_ids</code> is a unique explicit subset of the panel, possibly empty; instrument
+selections are a nonempty unique subset of its exact rubric/version choices.
+The full original pair/slot roster is retained, including records not selected
+for this analysis. Each non-null block or stratum mapping must partition
+exactly the selected records. Known byte-identical selected records cannot be
+split across blocks. They remain separate records; there is no deduplication
+or assertion that different hashes imply independence.</p>
+<p>Every field <em>inside</em> <code>agreement</code>, <code>gap</code>, and <code>uncertainty</code> may explicitly be null
+while its policy is pending. No missing field receives a default. Pending
+agreement does not suppress a complete gap policy, pending gap does not
+suppress agreement, and pending uncertainty does not suppress point estimates.
+Preparing a policy before results is possible, but timestamps or hashes do not
+prove it was chosen before outcomes or scientifically preregistered.</p>
+<h2 id="pairing-categories-and-score-bases">Pairing, categories and score bases</h2>
+<p>Analysis joins the exact registered record/rubric/version and common
+input/context/scope/instrument binding, retaining both attempts and each
+model/family/rater/route identity. <code>score_pair_complete</code> requires two accepted
+ratings after reconstruction. <code>attributed_role_pair</code> additionally requires
+fully declared identities, recognized generator/evaluator families, and exactly
+one evaluator matching the generator family in the registered same-family
+role. Missing attribution does not rewrite an accepted rating. Complete but
+unattributed raw score pairs remain visible; they do not enter the primary
+attributed agreement or signed-gap groups.</p>
+<p>Groups remain separate by instrument identity/version and actual ordered rater
+pair. Agreement additionally separates captured domains <code>{0,1}</code> and
+<code>{0,3,5}</code>. Selected groups with no eligible observations still have denominator
+rows and null estimates with reasons. The report retains all required matrix
+cells, accepted/rejected/missing/unsupported slot states, selection flags,
+unknown context, original applicability review status and all pending decisions.</p>
+<p><code>record_item</code> uses one score for each captured item ID and record. The existing
+instrument defines it as the minimum of that item's resource scores. The
+alternative <code>resource_item</code> uses each exact resource pointer/item pair; larger
+collections then contribute more observations. Both use explicit
+<code>equal_observation</code> weighting. Neither joins by array position or display name.
+N/A remains null and outside the score categories; zero is a scored failure.
+Both accepted ratings already obey the same captured applicability, so this
+feature does not present that invariant as empirical applicability agreement.</p>
+<p>For each agreement group, the report contains its full confusion matrix, row
+and column marginals, agreeing count and n. With <code>Po = agreeing/n</code> and
+<code>Pe = sum(row_total[c] * column_total[c]) / n²</code>, kappa is
+<code>(Po-Pe)/(1-Pe)</code>. n=0 and Pe=1 are explicitly undefined, not zero or perfect
+kappa. Exact rational arithmetic establishes degeneracy; there is no tolerance
+that collapses a legitimate near-degenerate result. Values are converted to
+unrounded floating outputs only for JSON reporting. No weighted kappa,
+category recoding, interpretation thresholds, p-values, or significance labels
+are introduced. See <a href="https://doi.org/10.1177/001316446002000104">Cohen (1960)</a>.</p>
+<p>Gap scales are <code>raw_total_points</code>, <code>fixed_percentage_points</code>, and
+<code>adjusted_percentage_points</code>. The declared one is averaged with <code>equal_record</code>
+weighting within each compatible instrument/rater group. Every pair retains
+canonical totals, full/applicable maxima, both percentages and excluded item
+IDs. Percentages are derived from canonical scores and exact maxima; rounded
+payload percentages are not subtracted. A zero applicable denominator is
+unavailable, not zero. Positive differences mean the same-family rating was
+higher; they do not distinguish family preference from severity or route.
+Different rubrics are never pooled.</p>
+<h2 id="declared-paired-cluster-uncertainty">Declared paired cluster uncertainty</h2>
+<p>For each metric group, every declared stratum is reported, including zero
+contribution. Eligible records project onto original whole blocks; both raters
+and all observations of a record stay together. In each stratum with G
+contributing blocks, draw exactly G blocks with replacement for each replicate,
+retaining repeated-block multiplicity. Original members stay in the captured
+policy even when some members have unavailable ratings. There is no resampling
+of individual items, permutation of roles, silent removal of required strata,
+or retry of a degenerate statistic.</p>
+<p>The original stratum weights are fixed before any draw: <code>N_h/N</code> eligible
+records for gaps, <code>n_h/n</code> eligible observations for agreement. Each resampled
+stratum mean or contingency proportion is combined using those original
+weights; unequal sampled block sizes cannot change between-stratum allocation.
+Within strata the declared equal-record/equal-observation estimand remains.
+Contingency proportions and Pe=1 checks use exact fractions. The report emits
+original counts, rational weights, every draw's block IDs and statistics,
+undefined causes, and a schedule digest.</p>
+<p>The interval is unavailable if the policy is pending, any whole block crosses
+strata, any required stratum has fewer than two contributing blocks, the
+observed statistic is undefined, or any requested replicate for that statistic
+is undefined. Undefined draws are counted, never discarded or redrawn.
+Constant finite replicate distributions can yield equal endpoints; that is
+not evidence of verified precision. For confidence c, sort all B finite values
+and interpolate at <code>(1-c)/2</code> and <code>(1+c)/2</code> using <code>h=(B-1)*p</code>, the adjacent order
+statistics and h's fractional part. These are conditional resampling intervals,
+not claims of representative sampling, independence, or verified population
+coverage. A one-record canary can have point results and no interval.
+<a href="https://doi.org/10.1111/j.1467-9868.2007.00593.x">Field and Welsh (2007)</a>
+discuss how cluster-bootstrap validity depends on the dependence model.</p>
+<p>The RNG is the runtime-independent <code>sha256_counter_rejection_v1</code>, fully defined
+as follows. For every group start counter zero; the prefix is ASCII
+<code>cross-family-analysis-index-v1</code>, one NUL byte, then the unsigned 64-bit seed in
+big-endian bytes. A candidate is the big-endian integer from
+<code>SHA256(prefix || counter_as_8_big_endian_bytes)</code>. Increment the counter even
+on rejection. For range G, accept only values below
+<code>floor(2^256/G)*G</code>, and return value modulo G. At most 128 candidates are allowed
+per index; exhausting this engineering bound refuses, without a biased fallback.
+Process strata and block IDs in lexical order and replicates in ascending
+zero-based order. Reset the same explicit seed per group; resamples across
+groups are not asserted independent. Hash each canonical JSON object
+<code>{"index": i, "strata": drawn_strata}</code> followed by one newline into the
+schedule SHA256. No Python-version-specific PRNG state is required.</p>
+<p>The implementation bounds manifest bytes, observations, resamples, worst-case
+block-expansion/matrix work and emitted draw size before the corresponding
+loops/publication. Bounds refuse rather than truncate results; they are
+engineering limits, not recommended sample sizes or study defaults.</p>
+<p>The Python APIs are <code>prepare_analysis_spec</code>, <code>recheck_analysis_spec</code>,
+<code>analyze_panel_results</code>, <code>recheck_panel_analysis</code>, and the pure
+<code>agreement_statistics(score_pairs, categories)</code> algebra function, all in
+<code>data_sheets_schema.cross_family_panel_analysis</code>. Software tests use explicitly
+synthetic ratings and cannot establish human approval or empirical calibration.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>
