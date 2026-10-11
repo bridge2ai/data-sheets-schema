@@ -187,7 +187,8 @@ def render(prepared: dict, output: Path) -> None:
     left = [0] * len(projects)
     for status, color in zip(STATUSES, COLORS):
         values = [row["outcome"].get(status, 0) for row in projects]
-        axes[0].barh(list(positions), values, left=left, color=color, label=status)
+        axes[0].barh(list(positions), values, left=left, color=color,
+                     label="empty (valid path, no crate value)" if status == "empty" else status)
         left = [a + b for a, b in zip(left, values)]
     for i, row in enumerate(projects):
         if row["status"] == "mapped":
@@ -201,16 +202,35 @@ def render(prepared: dict, output: Path) -> None:
     axes[0].legend(ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.22), fontsize=8)
     axes[0].set_xlim(0, max(left, default=0) * 1.65 + 1)
 
+    # Each bar independently partitions the same filled-report-entry denominator.
+    # Preserve explicit additional labels accepted by the report parser as well.
+    mapping_colors = {"exactMatch": "#256abf", "closeMatch": "#1baf7a",
+                      "relatedMatch": "#eda100", "narrowMatch": "#4a3aa7", "—": "#898781"}
+    mapping_types = list(mapping_colors) + sorted(
+        {label for row in projects for label in row["maptype"]} - set(mapping_colors))
+    type_positions = [i - 0.2 for i in positions]
+    loss_positions = [i + 0.2 for i in positions]
+    left = [0] * len(projects)
+    for mapping_type in mapping_types:
+        values = [row["maptype"].get(mapping_type, 0) for row in projects]
+        label = "unassessed" if mapping_type == "—" else mapping_type
+        axes[1].barh(type_positions, values, left=left, height=0.34,
+                     color=mapping_colors.get(mapping_type, "#636363"), label=f"type: {label}")
+        left = [a + b for a, b in zip(left, values)]
     left = [0] * len(projects)
     for loss, color in zip(("none", "minimal", "moderate", "high", "—"),
                            ("#86b6ef", "#3987e5", "#1c5cab", "#0d366b", "#898781")):
         values = [row["loss"].get(loss, 0) for row in projects]
-        axes[1].barh(list(positions), values, left=left, color=color,
-                     label="unassessed" if loss == "—" else loss)
+        label = "unassessed" if loss == "—" else loss
+        axes[1].barh(loss_positions, values, left=left, height=0.34, color=color,
+                     label=f"loss: {label}")
         left = [a + b for a, b in zip(left, values)]
-    axes[1].set_title("B  Filled entries by the table's declared information loss", loc="left")
-    axes[1].set_xlabel("filled report entries; declarations are not an independent fidelity assessment")
-    axes[1].legend(ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.22), fontsize=8)
+    axes[1].set_yticks([y for pair in zip(type_positions, loss_positions) for y in pair],
+                      [f"{name} · {dimension}" for name in names for dimension in ("type", "loss")])
+    axes[1].set_title("B  Filled entries by table-declared mapping type and information loss", loc="left")
+    axes[1].set_xlabel("filled report entries (same denominator in both bars)\n"
+                       "copied text alone does not establish exactMatch or loss=none")
+    axes[1].legend(ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.32), fontsize=8)
 
     left = [0] * len(projects)
     labels = ("both: serialized/DOI agreement", "both: scalar difference",
@@ -262,6 +282,10 @@ def publish(prepared: dict, output: Path, code_commit: str) -> dict:
             "Nested differences are serialization differences, not scientific disagreements.\n"
             "The source_observations CSV retains every original row, raw source values and entity pointers.\n"
             "Root presence, member-only presence, empty properties and checked-source absence are distinct.\n"
+            "Panel A empty means a valid mapped path has no value in the crate, not source-wide absence.\n"
+            "Panel B shows mapping type and loss as separate partitions of the same filled report entries.\n"
+            "These are table declarations, not independent fidelity assessments; copied text alone establishes\n"
+            "neither exactMatch nor loss=none, and does not establish round-trip losslessness.\n"
             "A retired/deferred row can repeat evidence placed elsewhere; this is not unique-source coverage.\n"
             "generated_only is strictly record-slot overlap and does not establish source absence.\n"
             "VOICE's differing release DOIs remain different identities. No human scientific review is implied.\n")
