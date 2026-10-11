@@ -547,8 +547,8 @@ receipts:
       nothing_relevant: 1
       duplicate_of: 0
   snippets:
-    total: 84
-    verified: 81
+    total: 90
+    verified: 87
     linewrap_joined: 0
     adjacent: 1
     elsewhere: 0
@@ -574,7 +574,7 @@ receipts:
     exempt: 30
     exempt_on_carried_identifier: 0
     receiptable: 248
-    with_receipt: 82
+    with_receipt: 83
     without_receipt:
     - id
     - name
@@ -626,20 +626,23 @@ receipts:
     - instances[0].instance_type
     - instances[0].data_topic
     - instances[0].description
-    without_receipt_truncated: 116
+    without_receipt_truncated: 115
     never_receipted: 157
-    added_after_receipt: 9
-    receipt_paths: 75
+    added_after_receipt: 8
+    receipt_paths: 79
     unresolved: []
     path_off_by_one: []
     path_off_by_one_count: 0
     addressing_slips: []
     addressing_slips_count: 0
     remapped_by_identity:
-    - path: distribution_formats[3].notes
-      resolved_path: distribution_formats[1].notes
+    - path: distribution_formats[0].notes
+      resolved_path: distribution_formats[3].notes
       basis: by_overlap
-    remapped_by_identity_count: 1
+    - path: maintainers[1].maintainer_details
+      resolved_path: maintainers[2].maintainer_details
+      basis: by_name
+    remapped_by_identity_count: 2
     value_changed_after_receipt:
     - path: collection_mechanisms[2].mechanism_details
       resolved_path: collection_mechanisms[2].mechanism_details
@@ -647,8 +650,6 @@ receipts:
       resolved_path: conforms_to
     - path: description
       resolved_path: description
-    - path: distribution_formats[3].notes
-      resolved_path: distribution_formats[1].notes
     - path: ethical_reviews[0].review_details
       resolved_path: ethical_reviews[0].review_details
     - path: external_resources[1].description
@@ -679,16 +680,19 @@ receipts:
       resolved_path: subsets[5].description
     - path: subsets[7].conforms_to
       resolved_path: subsets[7].conforms_to
-    value_changed_after_receipt_count: 19
+    value_changed_after_receipt_count: 18
     index_reused_by_another_entry: []
     index_reused_by_another_entry_count: 0
     located_after_key_stripped: []
     located_after_key_stripped_count: 0
-    path_not_in_snapshot:
-    - maintainers[2].maintainer_details
-    path_not_in_snapshot_count: 1
-    reshaped_by_reconcile: []
-    receipts_to_removed_values: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
+    reshaped_by_reconcile:
+    - existing_uses[1].examples
+    - labeling_strategies[0].labeling_details
+    - notes
+    - regulatory_restrictions.regulatory_restrictions
+    receipts_to_removed_values: 4
   findings:
   - kind: snippet_mismatch
     chunk: c003
@@ -708,22 +712,22 @@ receipts:
     snippet: Apache-2.0
   findings_truncated: null
   findings_gated: 0
-  summary: chunks 8/8 reviewed · snippets 81/84 verified (1 in an adjacent chunk)
-    (2 bearing on no token of their value) · slots 82/248 with a receipt (157 never
-    receipted, 9 added after the receipt) (30 exempt) · 1 receipt path(s) followed
-    by identity · 19 value(s) changed after the receipt · 1 receipt path(s) not in
-    the snapshot
+  summary: chunks 8/8 reviewed · snippets 87/90 verified (1 in an adjacent chunk)
+    (2 bearing on no token of their value) · slots 83/248 with a receipt (157 never
+    receipted, 8 added after the receipt) (30 exempt) · 4 receipt path(s) reshaped
+    by reconcile · 2 receipt path(s) followed by identity · 18 value(s) changed after
+    the receipt
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_coverage_receipt.yaml
-      sha256: a2742940a67f273db58a61ea2a6e276ec59a067623d0d0d77736717ccda2f4b0
+      sha256: fe640454761c9ba88b645ba44b36ec49bb6b15128cfa95cfac623bcb5fc5ae7b
     manifest:
-      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/chunks/CHORUS_chunks.yaml
+      path: data/preprocessed/chunks/CHORUS_chunks.yaml
       sha256: ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a
   bundle_basis:
     source: bundle on disk
-    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CHORUS_preprocessed.txt
-  recorded_by: d4d receipts check
+    path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/intermediate/CHORUS_audit.json
   sha256: 25de08486707c9526ed7f182cdd490c12c18c4e458ca0317fc4046c74cbb4810

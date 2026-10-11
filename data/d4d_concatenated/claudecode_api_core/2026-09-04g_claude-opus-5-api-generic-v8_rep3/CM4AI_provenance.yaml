@@ -590,10 +590,10 @@ receipts:
       nothing_relevant: 7
       duplicate_of: 0
   snippets:
-    total: 166
-    verified: 123
+    total: 184
+    verified: 136
     linewrap_joined: 0
-    adjacent: 38
+    adjacent: 43
     elsewhere: 4
     spans_boundary: 0
     split_at_linebreaks: 2
@@ -651,7 +651,7 @@ receipts:
     exempt: 90
     exempt_on_carried_identifier: 0
     receiptable: 389
-    with_receipt: 225
+    with_receipt: 226
     without_receipt:
     - name
     - status
@@ -703,17 +703,20 @@ receipts:
     - instances[0].data_topic
     - instances[0].label
     - instances[1].instance_type
-    without_receipt_truncated: 114
+    without_receipt_truncated: 113
     never_receipted: 155
-    added_after_receipt: 9
-    receipt_paths: 142
+    added_after_receipt: 8
+    receipt_paths: 160
     unresolved: []
     path_off_by_one: []
     path_off_by_one_count: 0
     addressing_slips: []
     addressing_slips_count: 0
-    remapped_by_identity: []
-    remapped_by_identity_count: 0
+    remapped_by_identity:
+    - path: maintainers[2].maintainer_details
+      resolved_path: maintainers[3].maintainer_details
+      basis: by_overlap
+    remapped_by_identity_count: 1
     value_changed_after_receipt:
     - path: addressing_gaps[1].response
       resolved_path: addressing_gaps[1].response
@@ -756,15 +759,50 @@ receipts:
     - path: creators[2]
       resolved_path: creators[2]
     value_changed_after_receipt_count: 70
-    index_reused_by_another_entry: []
-    index_reused_by_another_entry_count: 0
+    index_reused_by_another_entry:
+    - path: creators[14]
+      basis: entry_dropped
+    - path: creators[15]
+      basis: entry_dropped
+    - path: creators[21]
+      basis: entry_dropped
+    - path: creators[25]
+      basis: entry_dropped
+    - path: creators[26]
+      basis: entry_dropped
+    - path: creators[32]
+      basis: entry_dropped
+    - path: creators[3]
+      basis: entry_dropped
+    - path: creators[5]
+      basis: entry_dropped
+    - path: creators[9]
+      basis: entry_dropped
+    index_reused_by_another_entry_count: 9
     located_after_key_stripped: []
     located_after_key_stripped_count: 0
-    path_not_in_snapshot:
-    - maintainers[3].maintainer_details
-    path_not_in_snapshot_count: 1
-    reshaped_by_reconcile: []
-    receipts_to_removed_values: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
+    reshaped_by_reconcile:
+    - creators[14]
+    - creators[15]
+    - creators[21]
+    - creators[25]
+    - creators[26]
+    - creators[32]
+    - creators[3]
+    - creators[5]
+    - creators[9]
+    - labeling_strategies[0].labeling_details
+    - machine_annotation_tools[0].tool_descriptions
+    - parent_datasets[0].description
+    - parent_datasets[0].id
+    - preprocessing_strategies[0].preprocessing_details
+    - preprocessing_strategies[1].preprocessing_details
+    - preprocessing_strategies[2].preprocessing_details
+    - preprocessing_strategies[3].preprocessing_details
+    - use_repository[0].repository_details
+    receipts_to_removed_values: 18
   findings:
   - kind: snippet_elsewhere_chunk
     chunk: c002
@@ -967,10 +1005,28 @@ receipts:
     - c020
     - c023
     - c026
+    slot: creators[3]
+    snippet: Axelsson U (KTH Royal Institute of Technology,)
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c018
+    - c020
+    - c023
+    - c026
     slot: creators[4]
     snippet: 'Ballllosero Navarro F (Stanford University) - ORCID:
 
       https:/'
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c018
+    - c020
+    - c023
+    - c026
+    slot: creators[5]
+    snippet: Chinn B (University of California San Diego)
   - kind: snippet_adjacent_chunk
     chunk: c019
     found_in:
@@ -1002,6 +1058,15 @@ receipts:
     snippet: 'Doctor Y (University of California, San Diego) - ORCID:
 
       http'
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c018
+    - c020
+    - c023
+    - c026
+    slot: creators[9]
+    snippet: Fall J (KTH - Royal Institute of Technology)
   - kind: snippet_adjacent_chunk
     chunk: c019
     found_in:
@@ -1044,6 +1109,24 @@ receipts:
     - c026
     slot: creators[13]
     snippet: Hu M (University of California San Diego) https://orcid.org/
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c018
+    - c020
+    - c023
+    - c026
+    slot: creators[14]
+    snippet: Johannesson A (KTH - Royal Institute of Technology)
+  - kind: snippet_adjacent_chunk
+    chunk: c019
+    found_in:
+    - c018
+    - c020
+    - c023
+    - c026
+    slot: creators[15]
+    snippet: Khaliq H (University of California San Diego)
   - kind: snippet_adjacent_chunk
     chunk: c019
     found_in:
@@ -1117,22 +1200,23 @@ receipts:
       https://ror.org/0153tk833'
   findings_truncated: null
   findings_gated: 0
-  summary: chunks 28/28 reviewed · snippets 123/166 verified (2 split at line breaks)
-    (38 in an adjacent chunk) (4 in another chunk) (11 entry receipt(s) overlapping
-    one leaf) · slots 225/389 with a receipt (155 never receipted, 9 added after the
-    receipt) (90 exempt) · 70 value(s) changed after the receipt · 1 receipt path(s)
-    not in the snapshot
+  summary: chunks 28/28 reviewed · snippets 136/184 verified (2 split at line breaks)
+    (43 in an adjacent chunk) (4 in another chunk) (11 entry receipt(s) overlapping
+    one leaf) · slots 226/389 with a receipt (155 never receipted, 8 added after the
+    receipt) (90 exempt) · 18 receipt path(s) reshaped by reconcile · 1 receipt path(s)
+    followed by identity · 70 value(s) changed after the receipt · 9 receipt index(es)
+    reused by another entry
   artifacts:
     receipt:
       path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_coverage_receipt.yaml
-      sha256: 3b8940e2cecca34a5873bb26246120c1c0761189932cac183f714c20ece6f79a
+      sha256: 7218afd40dde3572e7ea2563d4d7c10c532ae4f3660307827b7717e112cfbad6
     manifest:
-      path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/chunks/CM4AI_chunks.yaml
+      path: data/preprocessed/chunks/CM4AI_chunks.yaml
       sha256: 3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4
   bundle_basis:
     source: bundle on disk
-    path: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt
-  recorded_by: d4d receipts check
+    path: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+  recorded_by: backfill_checks
 intermediates:
 - path: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/intermediate/CM4AI_audit.json
   sha256: 905101e77a90c622499f27c2782f14cd21f05eaa04718150e0b12450e98350b8

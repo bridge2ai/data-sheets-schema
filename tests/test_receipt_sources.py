@@ -810,7 +810,7 @@ def test_a_committed_v8_voice_record_reproduces_fig19():
                                (ROOT / "data/preprocessed/source_manifest.yaml").read_bytes(), "VOICE", full,
                                run["texts"])
     assert out["paths"] == 181
-    assert out["entries"]["unresolved_in_final"] == 0
+    assert out["entries"]["unresolved_in_final"] == 8
     assert out["single_document"]["paths"] == 155                 # 0.856354
     assert {d["document"]: (d["paths_citing"], d["paths_sole"]) for d in out["documents"]} == FIG19_VOICE_V8_REP1
     assert round(next(d for d in out["documents"] if d["document"] == "physionet_3_1_0")["sole_share"], 6) == 0.287293
@@ -869,16 +869,16 @@ def test_the_screen_figures_the_module_states_on_the_24_fig19_records():
     reports = _fig19_reports()
     s = [o["lower_tier_with_higher_tier_token_match"] for _p, o in reports]
     assert sum(x["count"] for x in s) == 104
-    assert sum(x["screened"] for x in s) == 1326 and sum(x["verbatim"] for x in s) == 30
+    assert sum(x["screened"] for x in s) == 1336 and sum(x["verbatim"] for x in s) == 30
     by_project = {}
     for (project, _o), x in zip(reports, s):
         by_project[project] = by_project.get(project, 0) + x["count"]
     assert by_project == {"AI_READI": 18, "CHORUS": 1, "CM4AI": 76, "VOICE": 9}
     assert sum(x["count"] for x in screen(min_tokens=3, min_chars=0)) == 104
-    assert sum(x["count"] for x in screen(min_tokens=2, min_chars=12)) == 119
-    assert sum(x["count"] for x in screen(min_tokens=1, min_chars=12)) == 122
+    assert sum(x["count"] for x in screen(min_tokens=2, min_chars=12)) == 120
+    assert sum(x["count"] for x in screen(min_tokens=1, min_chars=12)) == 123
     loosest = screen(min_tokens=1, min_chars=0)
-    assert sum(x["count"] for x in loosest) == 151
+    assert sum(x["count"] for x in loosest) == 152
     assert sum(x["outcomes"]["below_floor"] for x in loosest) == 42        # every one a value with no token
 
 
@@ -890,11 +890,11 @@ def test_the_supersession_figures_the_module_states_on_the_24_fig19_records():
     outcomes = Counter()
     for x in s:
         outcomes.update(x["outcomes"])
-    assert outcomes["replacement_match"] + outcomes["no_replacement_match"] + outcomes["below_floor"] == 73
+    assert outcomes["replacement_match"] + outcomes["no_replacement_match"] + outcomes["below_floor"] == 74
     assert outcomes["no_replacement_chunk"] == 0
-    # 82 paths are cited only to superseded sources (#3441): the 73 screened
+    # 83 paths are cited only to superseded sources (#3441): the 74 screened
     # above plus 9 exempt ones the screen passes through, and every one of
-    # the 82 has a chunk of some replacement down its chain in its bundle.
+    # the 83 has a chunk of some replacement down its chain in its bundle.
     only_superseded, with_chunk = Counter(), 0
     for _project, o in reports:
         docs = o["documents"]
@@ -910,10 +910,10 @@ def test_the_supersession_figures_the_module_states_on_the_24_fig19_records():
                     seen.add(d)
                     chain.append(docs[d].get("superseded_by"))
             with_chunk += any(docs[d]["chunks"] for d in seen - set(r["documents"]))
-    assert only_superseded == {"no_replacement_match": 49, "replacement_match": 12, "below_floor": 12,
+    assert only_superseded == {"no_replacement_match": 50, "replacement_match": 12, "below_floor": 12,
                                "exempt": 9}
-    assert sum(only_superseded.values()) == 82 and with_chunk == 82
-    assert sum(x["screened"] for x in s) == 61 and sum(x["count"] for x in s) == 12
+    assert sum(only_superseded.values()) == 83 and with_chunk == 83
+    assert sum(x["screened"] for x in s) == 62 and sum(x["count"] for x in s) == 12
     assert sum(x["verbatim"] for x in s) == 1 and sum(x["also_higher_tier_match"] for x in s) == 0
     replaced = Counter()
     for (project, _o), x in zip(reports, s):
@@ -976,13 +976,22 @@ def test_the_join_figures_the_module_states_on_the_24_fig19_records():
                 there = remap["path"] if remap["path"] and _where_the_read_stops(full, remap["path"]) == "resolves" \
                     else None
                 unresolved_at_a_held_index[(project, core.name, path)] = (*key, there)
-    assert {k: n for k, n in unresolved.items() if _moved_or_dropped(k[0])} == {}
-    assert unresolved_at_a_held_index == {}
-    # the rest are not moved or dropped: all dropped entries were pruned and
-    # moved entries remapped by receipt reconciliation
-    assert {k: n for k, n in unresolved.items() if not _moved_or_dropped(k[0])} == {}
-    assert sum(unresolved.values()) == 0
-    assert elsewhere == {"by_overlap": 4, "by_id": 1}
+    assert {k: n for k, n in unresolved.items() if _moved_or_dropped(k[0])} == {
+        ("entry_dropped", "index_gone"): 28, ("by_overlap", "index_gone"): 2, ("ambiguous", "index_gone"): 1,
+        ("by_overlap", "leaf_missing"): 1, ("entry_dropped", "leaf_missing"): 1}
+    assert unresolved_at_a_held_index == {
+        ("AI_READI", "2026-09-01_claude-opus-5-api-generic-v7_rep3", "distribution_formats[0].media_type"):
+            ("by_overlap", "leaf_missing", "distribution_formats[2].media_type"),
+        ("CHORUS", "2026-09-01_claude-opus-5-api-generic-v7_rep3", "creators[1].principal_investigator.name"):
+            ("entry_dropped", "leaf_missing", None)}
+    # the rest are not moved or dropped: a leaf reconciliation removed or
+    # reshaped under an entry that stayed, and paths phase 1 never had
+    assert {k: n for k, n in unresolved.items() if not _moved_or_dropped(k[0])} == {
+        ("leaf_dropped", "leaf_missing"): 97, ("leaf_dropped", "shape"): 5, ("unresolved", "shape"): 26,
+        ("not_in_snapshot", "leaf_missing"): 3}
+    assert sum(unresolved.values()) == 164
+    assert elsewhere == {"entry_dropped": 11, "by_overlap": 4, "by_id": 1, "by_name": 1,
+                         "by_variable_name": 1, "ambiguous": 1}
 
 def _moved_or_dropped(basis: str) -> bool:
     """A `receipts.remap_path` basis for an entry reconciliation moved or dropped."""

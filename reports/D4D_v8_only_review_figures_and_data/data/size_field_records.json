@@ -1160,9 +1160,9 @@
     "section": "Uses",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Any comment",
-    "eligible_fields": 2,
-    "flagged_fields": 1,
-    "percent": 50.0,
+    "eligible_fields": 3,
+    "flagged_fields": 2,
+    "percent": 66.66666666666667,
     "absent_flagged_candidate_fields": 1
   },
   {
@@ -1171,9 +1171,9 @@
     "section": "Uses",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Completeness",
-    "eligible_fields": 2,
-    "flagged_fields": 0,
-    "percent": 0.0,
+    "eligible_fields": 3,
+    "flagged_fields": 1,
+    "percent": 33.333333333333336,
     "absent_flagged_candidate_fields": 1
   },
   {
@@ -1182,9 +1182,9 @@
     "section": "Uses",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Accuracy/correctness",
-    "eligible_fields": 2,
+    "eligible_fields": 3,
     "flagged_fields": 1,
-    "percent": 50.0,
+    "percent": 33.333333333333336,
     "absent_flagged_candidate_fields": 0
   },
   {
@@ -1457,9 +1457,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Any comment",
-    "eligible_fields": 13,
-    "flagged_fields": 7,
-    "percent": 53.84615384615385,
+    "eligible_fields": 14,
+    "flagged_fields": 8,
+    "percent": 57.142857142857146,
     "absent_flagged_candidate_fields": 0
   },
   {
@@ -1468,9 +1468,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Completeness",
-    "eligible_fields": 13,
+    "eligible_fields": 14,
     "flagged_fields": 1,
-    "percent": 7.6923076923076925,
+    "percent": 7.142857142857143,
     "absent_flagged_candidate_fields": 0
   },
   {
@@ -1479,7 +1479,7 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Accuracy/correctness",
-    "eligible_fields": 13,
+    "eligible_fields": 14,
     "flagged_fields": 0,
     "percent": 0.0,
     "absent_flagged_candidate_fields": 0
@@ -4031,9 +4031,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Any comment",
-    "eligible_fields": 6,
-    "flagged_fields": 5,
-    "percent": 83.33333333333333,
+    "eligible_fields": 7,
+    "flagged_fields": 6,
+    "percent": 85.71428571428571,
     "absent_flagged_candidate_fields": 2
   },
   {
@@ -4042,9 +4042,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Completeness",
-    "eligible_fields": 6,
-    "flagged_fields": 2,
-    "percent": 33.333333333333336,
+    "eligible_fields": 7,
+    "flagged_fields": 3,
+    "percent": 42.857142857142854,
     "absent_flagged_candidate_fields": 2
   },
   {
@@ -4053,9 +4053,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Accuracy/correctness",
-    "eligible_fields": 6,
+    "eligible_fields": 7,
     "flagged_fields": 4,
-    "percent": 66.66666666666667,
+    "percent": 57.142857142857146,
     "absent_flagged_candidate_fields": 0
   },
   {
@@ -6605,9 +6605,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Any comment",
-    "eligible_fields": 7,
+    "eligible_fields": 8,
     "flagged_fields": 7,
-    "percent": 100.0,
+    "percent": 87.5,
     "absent_flagged_candidate_fields": 1
   },
   {
@@ -6616,9 +6616,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Completeness",
-    "eligible_fields": 7,
+    "eligible_fields": 8,
     "flagged_fields": 2,
-    "percent": 28.571428571428573,
+    "percent": 25.0,
     "absent_flagged_candidate_fields": 1
   },
   {
@@ -6627,9 +6627,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Accuracy/correctness",
-    "eligible_fields": 7,
+    "eligible_fields": 8,
     "flagged_fields": 2,
-    "percent": 28.571428571428573,
+    "percent": 25.0,
     "absent_flagged_candidate_fields": 0
   },
   {
@@ -7100,8 +7100,8 @@
     "section": "Human",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Any comment",
-    "eligible_fields": 1,
-    "flagged_fields": 1,
+    "eligible_fields": 2,
+    "flagged_fields": 2,
     "percent": 100.0,
     "absent_flagged_candidate_fields": 2
   },
@@ -7111,7 +7111,7 @@
     "section": "Human",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Completeness",
-    "eligible_fields": 1,
+    "eligible_fields": 2,
     "flagged_fields": 0,
     "percent": 0.0,
     "absent_flagged_candidate_fields": 0
@@ -7122,7 +7122,7 @@
     "section": "Human",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Accuracy/correctness",
-    "eligible_fields": 1,
+    "eligible_fields": 2,
     "flagged_fields": 0,
     "percent": 0.0,
     "absent_flagged_candidate_fields": 0
@@ -7892,9 +7892,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Any comment",
-    "eligible_fields": 6,
-    "flagged_fields": 5,
-    "percent": 83.33333333333333,
+    "eligible_fields": 7,
+    "flagged_fields": 6,
+    "percent": 85.71428571428571,
     "absent_flagged_candidate_fields": 0
   },
   {
@@ -7903,9 +7903,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Completeness",
-    "eligible_fields": 6,
+    "eligible_fields": 7,
     "flagged_fields": 2,
-    "percent": 33.333333333333336,
+    "percent": 28.571428571428573,
     "absent_flagged_candidate_fields": 0
   },
   {
@@ -7914,9 +7914,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Accuracy/correctness",
-    "eligible_fields": 6,
-    "flagged_fields": 0,
-    "percent": 0.0,
+    "eligible_fields": 7,
+    "flagged_fields": 1,
+    "percent": 14.285714285714286,
     "absent_flagged_candidate_fields": 0
   },
   {
@@ -9179,9 +9179,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Any comment",
-    "eligible_fields": 6,
-    "flagged_fields": 4,
-    "percent": 66.66666666666667,
+    "eligible_fields": 7,
+    "flagged_fields": 5,
+    "percent": 71.42857142857143,
     "absent_flagged_candidate_fields": 2
   },
   {
@@ -9190,9 +9190,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Completeness",
-    "eligible_fields": 6,
-    "flagged_fields": 2,
-    "percent": 33.333333333333336,
+    "eligible_fields": 7,
+    "flagged_fields": 3,
+    "percent": 42.857142857142854,
     "absent_flagged_candidate_fields": 2
   },
   {
@@ -9201,9 +9201,9 @@
     "section": "Composition",
     "denominator_definition": "Receipt-linked populated roots",
     "outcome": "Accuracy/correctness",
-    "eligible_fields": 6,
+    "eligible_fields": 7,
     "flagged_fields": 2,
-    "percent": 33.333333333333336,
+    "percent": 28.571428571428573,
     "absent_flagged_candidate_fields": 0
   },
   {

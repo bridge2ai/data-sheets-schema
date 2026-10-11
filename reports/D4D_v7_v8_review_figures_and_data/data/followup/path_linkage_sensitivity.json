@@ -927,6 +927,19 @@
     "issue_id": "AI_READI_v7_rep1_r10_rating1:10",
     "record": "AI_READI_v7_rep1",
     "source_type": "structured metadata",
+    "field": "variables",
+    "normalized_path": "variables",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "variables.notes"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r10_rating1:10",
+    "record": "AI_READI_v7_rep1",
+    "source_type": "structured metadata",
     "field": "file_collections.clinical_data.conforms_to",
     "normalized_path": "file_collections.clinical_data.conforms_to",
     "exact_nested_match": false,
@@ -963,7 +976,8 @@
     "root_only_comment": true,
     "candidate_receipt_paths": [
       "creators",
-      "creators.affiliations"
+      "creators.affiliations",
+      "creators.principal_investigator"
     ]
   },
   {
@@ -1003,7 +1017,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "data_governance.access_review_process",
-      "data_governance.accountable_organization"
+      "data_governance.accountable_organization",
+      "data_governance.committee_contact"
     ]
   },
   {
@@ -1384,7 +1399,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "data_governance.access_review_process",
-      "data_governance.accountable_organization"
+      "data_governance.accountable_organization",
+      "data_governance.committee_contact"
     ]
   },
   {
@@ -1461,12 +1477,13 @@
     "source_type": "structured metadata",
     "field": "data_governance.committee_contact",
     "normalized_path": "data_governance.committee_contact",
-    "exact_nested_match": false,
+    "exact_nested_match": true,
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "data_governance.access_review_process",
-      "data_governance.accountable_organization"
+      "data_governance.accountable_organization",
+      "data_governance.committee_contact"
     ]
   },
   {
@@ -1506,7 +1523,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "data_governance.access_review_process",
-      "data_governance.accountable_organization"
+      "data_governance.accountable_organization",
+      "data_governance.committee_contact"
     ]
   },
   {
@@ -1546,7 +1564,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "data_governance.access_review_process",
-      "data_governance.accountable_organization"
+      "data_governance.accountable_organization",
+      "data_governance.committee_contact"
     ]
   },
   {
@@ -2603,6 +2622,32 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "missing_data_documentation.missing_data_causes"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:1",
+    "record": "AI_READI_v8_rep1",
+    "source_type": "IRB",
+    "field": "sensitive_elements",
+    "normalized_path": "sensitive_elements",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "sensitive_elements.notes"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:1",
+    "record": "AI_READI_v8_rep1",
+    "source_type": "documentation",
+    "field": "sensitive_elements",
+    "normalized_path": "sensitive_elements",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "sensitive_elements.notes"
     ]
   },
   {
@@ -3800,6 +3845,7 @@
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
+      "is_deidentified.identifiers_removed",
       "is_deidentified.method",
       "is_deidentified.notes"
     ]
@@ -3840,6 +3886,7 @@
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
+      "is_deidentified.identifiers_removed",
       "is_deidentified.method",
       "is_deidentified.notes"
     ]
@@ -4983,6 +5030,7 @@
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
+      "creators.affiliations",
       "creators.description",
       "creators.name",
       "creators.principal_investigator.orcid"
@@ -5362,6 +5410,19 @@
     "issue_id": "CHORUS_v7_rep1_r10_rating1:9",
     "record": "CHORUS_v7_rep1",
     "source_type": "documentation",
+    "field": "external_resources",
+    "normalized_path": "external_resources",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "external_resources.external_resources"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:9",
+    "record": "CHORUS_v7_rep1",
+    "source_type": "historical documentation",
     "field": "external_resources",
     "normalized_path": "external_resources",
     "exact_nested_match": false,
@@ -7516,6 +7577,19 @@
   {
     "issue_id": "CHORUS_v8_rep3_r10_rating1:2",
     "record": "CHORUS_v8_rep3",
+    "source_type": "historical documentation",
+    "field": "data_governance",
+    "normalized_path": "data_governance",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "data_governance.committee_contact.email"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r10_rating1:2",
+    "record": "CHORUS_v8_rep3",
     "source_type": "tutorial",
     "field": "data_governance",
     "normalized_path": "data_governance",
@@ -7550,6 +7624,19 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "is_deidentified.method"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r10_rating1:3",
+    "record": "CHORUS_v8_rep3",
+    "source_type": "historical documentation",
+    "field": "participant_privacy",
+    "normalized_path": "participant_privacy",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "participant_privacy.privacy_techniques"
     ]
   },
   {
@@ -7914,6 +8001,19 @@
   {
     "issue_id": "CHORUS_v8_rep3_r10_rating1:12",
     "record": "CHORUS_v8_rep3",
+    "source_type": "historical documentation",
+    "field": "data_governance.access_review_process",
+    "normalized_path": "data_governance.access_review_process",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "data_governance.committee_contact.email"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r10_rating1:12",
+    "record": "CHORUS_v8_rep3",
     "source_type": "tutorial",
     "field": "data_governance.access_review_process",
     "normalized_path": "data_governance.access_review_process",
@@ -8235,6 +8335,7 @@
     "ancestor_match_only": false,
     "root_only_comment": true,
     "candidate_receipt_paths": [
+      "related_datasets.description",
       "related_datasets.target_dataset"
     ]
   },
@@ -8248,6 +8349,7 @@
     "ancestor_match_only": false,
     "root_only_comment": true,
     "candidate_receipt_paths": [
+      "related_datasets.description",
       "related_datasets.target_dataset"
     ]
   },
@@ -8891,6 +8993,7 @@
     "ancestor_match_only": false,
     "root_only_comment": true,
     "candidate_receipt_paths": [
+      "instances.instance_details",
       "instances.notes"
     ]
   },
@@ -9120,6 +9223,19 @@
     "issue_id": "CM4AI_v7_rep3_r10_rating1:2",
     "record": "CM4AI_v7_rep3",
     "source_type": "preprint",
+    "field": "external_resources",
+    "normalized_path": "external_resources",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "external_resources.external_resources"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r10_rating1:2",
+    "record": "CM4AI_v7_rep3",
+    "source_type": "publication",
     "field": "external_resources",
     "normalized_path": "external_resources",
     "exact_nested_match": false,
@@ -9374,6 +9490,32 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "file_collections.description"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r10_rating1:9",
+    "record": "CM4AI_v7_rep3",
+    "source_type": "NIH project page",
+    "field": "funders.grants.id",
+    "normalized_path": "funders.grants.id",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "funders.notes"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r10_rating1:9",
+    "record": "CM4AI_v7_rep3",
+    "source_type": "data resource",
+    "field": "funders.grants.id",
+    "normalized_path": "funders.grants.id",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "funders.notes"
     ]
   },
   {
@@ -9752,6 +9894,32 @@
   {
     "issue_id": "CM4AI_v8_rep1_r10_rating1:5",
     "record": "CM4AI_v8_rep1",
+    "source_type": "documentation",
+    "field": "sampling_strategies.source_caveats",
+    "normalized_path": "sampling_strategies.source_caveats",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:5",
+    "record": "CM4AI_v8_rep1",
+    "source_type": "preprint",
+    "field": "sampling_strategies.source_caveats",
+    "normalized_path": "sampling_strategies.source_caveats",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:5",
+    "record": "CM4AI_v8_rep1",
     "source_type": "data resource",
     "field": "file_collections.source_caveats",
     "normalized_path": "file_collections.source_caveats",
@@ -10024,6 +10192,58 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "ethical_reviews.contact_person"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:12",
+    "record": "CM4AI_v8_rep1",
+    "source_type": "documentation",
+    "field": "sampling_strategies.is_sample",
+    "normalized_path": "sampling_strategies.is_sample",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:12",
+    "record": "CM4AI_v8_rep1",
+    "source_type": "preprint",
+    "field": "sampling_strategies.is_sample",
+    "normalized_path": "sampling_strategies.is_sample",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:12",
+    "record": "CM4AI_v8_rep1",
+    "source_type": "documentation",
+    "field": "sampling_strategies.source_caveats",
+    "normalized_path": "sampling_strategies.source_caveats",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:12",
+    "record": "CM4AI_v8_rep1",
+    "source_type": "preprint",
+    "field": "sampling_strategies.source_caveats",
+    "normalized_path": "sampling_strategies.source_caveats",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
     ]
   },
   {
@@ -10348,6 +10568,19 @@
     "root_only_comment": true,
     "candidate_receipt_paths": [
       "notes"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r10_rating1:8",
+    "record": "CM4AI_v8_rep2",
+    "source_type": "data resource",
+    "field": "instances",
+    "normalized_path": "instances",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "instances.instance_details"
     ]
   },
   {
@@ -12652,10 +12885,11 @@
     "field": "data_governance.committee_contact",
     "normalized_path": "data_governance.committee_contact",
     "exact_nested_match": false,
-    "ancestor_match_only": false,
+    "ancestor_match_only": true,
     "root_only_comment": false,
     "candidate_receipt_paths": [
-      "data_governance.access_review_process"
+      "data_governance.access_review_process",
+      "data_governance.committee_contact.email"
     ]
   },
   {
@@ -14389,6 +14623,19 @@
   {
     "issue_id": "AI_READI_v7_rep1_r20_rating1:4",
     "record": "AI_READI_v7_rep1",
+    "source_type": "publication",
+    "field": "sensitive_elements.sensitive_elements_present",
+    "normalized_path": "sensitive_elements.sensitive_elements_present",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sensitive_elements.sensitivity_details"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r20_rating1:4",
+    "record": "AI_READI_v7_rep1",
     "source_type": "structured metadata",
     "field": "confidential_elements.confidential_elements_present",
     "normalized_path": "confidential_elements.confidential_elements_present",
@@ -15121,7 +15368,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "creators",
-      "creators.affiliations"
+      "creators.affiliations",
+      "creators.principal_investigator"
     ]
   },
   {
@@ -15161,7 +15409,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "data_governance.access_review_process",
-      "data_governance.accountable_organization"
+      "data_governance.accountable_organization",
+      "data_governance.committee_contact"
     ]
   },
   {
@@ -15698,7 +15947,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "data_governance.access_review_process",
-      "data_governance.accountable_organization"
+      "data_governance.accountable_organization",
+      "data_governance.committee_contact"
     ]
   },
   {
@@ -16657,6 +16907,32 @@
     "root_only_comment": true,
     "candidate_receipt_paths": [
       "description"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:1",
+    "record": "AI_READI_v8_rep1",
+    "source_type": "IRB",
+    "field": "sensitive_elements.sensitive_elements_present",
+    "normalized_path": "sensitive_elements.sensitive_elements_present",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sensitive_elements.notes"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:1",
+    "record": "AI_READI_v8_rep1",
+    "source_type": "documentation",
+    "field": "sensitive_elements.sensitive_elements_present",
+    "normalized_path": "sensitive_elements.sensitive_elements_present",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sensitive_elements.notes"
     ]
   },
   {
@@ -18069,6 +18345,19 @@
   {
     "issue_id": "AI_READI_v8_rep1_r20_rating1:14",
     "record": "AI_READI_v8_rep1",
+    "source_type": "license",
+    "field": "prohibited_uses",
+    "normalized_path": "prohibited_uses",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "prohibited_uses.description"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:14",
+    "record": "AI_READI_v8_rep1",
     "source_type": "IRB",
     "field": "known_biases",
     "normalized_path": "known_biases",
@@ -18237,6 +18526,7 @@
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
+      "is_deidentified.identifiers_removed",
       "is_deidentified.method",
       "is_deidentified.notes"
     ]
@@ -18277,6 +18567,7 @@
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
+      "is_deidentified.identifiers_removed",
       "is_deidentified.method",
       "is_deidentified.notes"
     ]
@@ -18313,10 +18604,11 @@
     "source_type": "publication",
     "field": "is_deidentified.identifiers_removed",
     "normalized_path": "is_deidentified.identifiers_removed",
-    "exact_nested_match": false,
+    "exact_nested_match": true,
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
+      "is_deidentified.identifiers_removed",
       "is_deidentified.method",
       "is_deidentified.notes"
     ]
@@ -18384,6 +18676,45 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "confidential_elements.confidentiality_details"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:2",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "IRB",
+    "field": "sensitive_elements.sensitive_elements_present",
+    "normalized_path": "sensitive_elements.sensitive_elements_present",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sensitive_elements.sensitivity_details"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:2",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "documentation",
+    "field": "sensitive_elements.sensitive_elements_present",
+    "normalized_path": "sensitive_elements.sensitive_elements_present",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sensitive_elements.sensitivity_details"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:2",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "structured metadata",
+    "field": "sensitive_elements.sensitive_elements_present",
+    "normalized_path": "sensitive_elements.sensitive_elements_present",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sensitive_elements.sensitivity_details"
     ]
   },
   {
@@ -18436,6 +18767,32 @@
     "root_only_comment": true,
     "candidate_receipt_paths": [
       "license_and_use_terms.notes"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:2",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "license",
+    "field": "license_and_use_terms",
+    "normalized_path": "license_and_use_terms",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "license_and_use_terms.license_terms"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:2",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "structured metadata",
+    "field": "license_and_use_terms",
+    "normalized_path": "license_and_use_terms",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "license_and_use_terms.license_terms"
     ]
   },
   {
@@ -18586,6 +18943,32 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "participant_privacy.data_linkage"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:4",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "publication",
+    "field": "participant_privacy.reidentification_risk",
+    "normalized_path": "participant_privacy.reidentification_risk",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "participant_privacy.privacy_techniques"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:4",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "structured metadata",
+    "field": "participant_privacy.reidentification_risk",
+    "normalized_path": "participant_privacy.reidentification_risk",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "participant_privacy.privacy_techniques"
     ]
   },
   {
@@ -18854,6 +19237,32 @@
   {
     "issue_id": "AI_READI_v8_rep2_r20_rating1:5",
     "record": "AI_READI_v8_rep2",
+    "source_type": "license",
+    "field": "license_and_use_terms",
+    "normalized_path": "license_and_use_terms",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "license_and_use_terms.license_terms"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:5",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "structured metadata",
+    "field": "license_and_use_terms",
+    "normalized_path": "license_and_use_terms",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "license_and_use_terms.license_terms"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:5",
+    "record": "AI_READI_v8_rep2",
     "source_type": "IRB",
     "field": "source_caveats",
     "normalized_path": "source_caveats",
@@ -18984,7 +19393,22 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "sampling_strategies.source_data",
+      "sampling_strategies.strategies",
       "sampling_strategies.why_not_representative"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:7",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "structured metadata",
+    "field": "sampling_strategies.is_sample",
+    "normalized_path": "sampling_strategies.is_sample",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.notes",
+      "sampling_strategies.strategies"
     ]
   },
   {
@@ -19011,7 +19435,22 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "sampling_strategies.source_data",
+      "sampling_strategies.strategies",
       "sampling_strategies.why_not_representative"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:7",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "structured metadata",
+    "field": "sampling_strategies.source_caveats",
+    "normalized_path": "sampling_strategies.source_caveats",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.notes",
+      "sampling_strategies.strategies"
     ]
   },
   {
@@ -19247,6 +19686,32 @@
   {
     "issue_id": "AI_READI_v8_rep2_r20_rating1:10",
     "record": "AI_READI_v8_rep2",
+    "source_type": "license",
+    "field": "license_and_use_terms.license_terms",
+    "normalized_path": "license_and_use_terms.license_terms",
+    "exact_nested_match": true,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "license_and_use_terms.license_terms"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:10",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "structured metadata",
+    "field": "license_and_use_terms.license_terms",
+    "normalized_path": "license_and_use_terms.license_terms",
+    "exact_nested_match": true,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "license_and_use_terms.license_terms"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:10",
+    "record": "AI_READI_v8_rep2",
     "source_type": "IRB",
     "field": "license_and_use_terms.notes",
     "normalized_path": "license_and_use_terms.notes",
@@ -19268,6 +19733,32 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "license_and_use_terms.notes"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:10",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "license",
+    "field": "license_and_use_terms.notes",
+    "normalized_path": "license_and_use_terms.notes",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "license_and_use_terms.license_terms"
+    ]
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:10",
+    "record": "AI_READI_v8_rep2",
+    "source_type": "structured metadata",
+    "field": "license_and_use_terms.notes",
+    "normalized_path": "license_and_use_terms.notes",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "license_and_use_terms.license_terms"
     ]
   },
   {
@@ -19457,7 +19948,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "funders.grantor",
-      "funders.grants.grant_number"
+      "funders.grants.grant_number",
+      "funders.notes"
     ]
   },
   {
@@ -19499,7 +19991,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "funders.grantor",
-      "funders.grants.grant_number"
+      "funders.grants.grant_number",
+      "funders.notes"
     ]
   },
   {
@@ -19541,7 +20034,8 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "funders.grantor",
-      "funders.grants.grant_number"
+      "funders.grants.grant_number",
+      "funders.notes"
     ]
   },
   {
@@ -20196,6 +20690,7 @@
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
+      "creators.affiliations",
       "creators.description",
       "creators.name",
       "creators.principal_investigator.orcid"
@@ -20949,6 +21444,19 @@
     ]
   },
   {
+    "issue_id": "CHORUS_v7_rep1_r20_rating1:5",
+    "record": "CHORUS_v7_rep1",
+    "source_type": "historical documentation",
+    "field": "external_resources",
+    "normalized_path": "external_resources",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "external_resources.external_resources"
+    ]
+  },
+  {
     "issue_id": "CHORUS_v7_rep1_r20_rating1:6",
     "record": "CHORUS_v7_rep1",
     "source_type": "NIH project page",
@@ -21374,6 +21882,19 @@
   {
     "issue_id": "CHORUS_v7_rep2_r20_rating1:4",
     "record": "CHORUS_v7_rep2",
+    "source_type": "historical documentation",
+    "field": "data_governance.access_review_process",
+    "normalized_path": "data_governance.access_review_process",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "data_governance.committee_members.id"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r20_rating1:4",
+    "record": "CHORUS_v7_rep2",
     "source_type": "tutorial",
     "field": "data_governance.access_review_process",
     "normalized_path": "data_governance.access_review_process",
@@ -21381,7 +21902,8 @@
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
-      "data_governance.access_review_process"
+      "data_governance.access_review_process",
+      "data_governance.committee_members.name"
     ]
   },
   {
@@ -21485,7 +22007,22 @@
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
-      "creators.affiliations.name"
+      "creators.affiliations.name",
+      "creators.principal_investigator.name"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r20_rating1:9",
+    "record": "CHORUS_v7_rep2",
+    "source_type": "tutorial",
+    "field": "creators.notes",
+    "normalized_path": "creators.notes",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "creators.principal_investigator.name",
+      "creators.source_caveats"
     ]
   },
   {
@@ -21498,7 +22035,22 @@
     "ancestor_match_only": true,
     "root_only_comment": false,
     "candidate_receipt_paths": [
-      "creators.affiliations.name"
+      "creators.affiliations.name",
+      "creators.principal_investigator.name"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r20_rating1:9",
+    "record": "CHORUS_v7_rep2",
+    "source_type": "tutorial",
+    "field": "creators.affiliations",
+    "normalized_path": "creators.affiliations",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "creators.principal_investigator.name",
+      "creators.source_caveats"
     ]
   },
   {
@@ -22569,6 +23121,32 @@
     ]
   },
   {
+    "issue_id": "CHORUS_v8_rep1_r20_rating1:12",
+    "record": "CHORUS_v8_rep1",
+    "source_type": "NIH project page",
+    "field": "sampling_strategies.source_caveats",
+    "normalized_path": "sampling_strategies.source_caveats",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v8_rep1_r20_rating1:12",
+    "record": "CHORUS_v8_rep1",
+    "source_type": "historical documentation",
+    "field": "sampling_strategies.source_caveats",
+    "normalized_path": "sampling_strategies.source_caveats",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
+    ]
+  },
+  {
     "issue_id": "CHORUS_v8_rep1_r20_rating1:13",
     "record": "CHORUS_v8_rep1",
     "source_type": "documentation",
@@ -23478,6 +24056,19 @@
     "issue_id": "CHORUS_v8_rep3_r20_rating1:3",
     "record": "CHORUS_v8_rep3",
     "source_type": "historical documentation",
+    "field": "participant_privacy",
+    "normalized_path": "participant_privacy",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "participant_privacy.privacy_techniques"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r20_rating1:3",
+    "record": "CHORUS_v8_rep3",
+    "source_type": "historical documentation",
     "field": "external_resources",
     "normalized_path": "external_resources",
     "exact_nested_match": false,
@@ -23537,6 +24128,19 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "is_deidentified.method"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r20_rating1:4",
+    "record": "CHORUS_v8_rep3",
+    "source_type": "historical documentation",
+    "field": "participant_privacy.privacy_techniques",
+    "normalized_path": "participant_privacy.privacy_techniques",
+    "exact_nested_match": true,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "participant_privacy.privacy_techniques"
     ]
   },
   {
@@ -23693,6 +24297,19 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "third_party_sharing.notes"
+    ]
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r20_rating1:9",
+    "record": "CHORUS_v8_rep3",
+    "source_type": "historical documentation",
+    "field": "data_governance.access_review_process",
+    "normalized_path": "data_governance.access_review_process",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "data_governance.committee_contact.email"
     ]
   },
   {
@@ -24157,6 +24774,7 @@
     "ancestor_match_only": false,
     "root_only_comment": true,
     "candidate_receipt_paths": [
+      "related_datasets.description",
       "related_datasets.target_dataset"
     ]
   },
@@ -24170,6 +24788,7 @@
     "ancestor_match_only": false,
     "root_only_comment": true,
     "candidate_receipt_paths": [
+      "related_datasets.description",
       "related_datasets.target_dataset"
     ]
   },
@@ -24419,7 +25038,22 @@
     "ancestor_match_only": false,
     "root_only_comment": true,
     "candidate_receipt_paths": [
+      "funders.grants.grant_number",
+      "funders.grants.grant_title",
       "funders.notes"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r20_rating1:5",
+    "record": "CM4AI_v7_rep1",
+    "source_type": "historical data release",
+    "field": "funders",
+    "normalized_path": "funders",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "funders.grants.grant_number"
     ]
   },
   {
@@ -24445,7 +25079,8 @@
     "ancestor_match_only": false,
     "root_only_comment": true,
     "candidate_receipt_paths": [
-      "creators.affiliations.id"
+      "creators.affiliations.id",
+      "creators.source_caveats"
     ]
   },
   {
@@ -24984,7 +25619,8 @@
     "ancestor_match_only": false,
     "root_only_comment": true,
     "candidate_receipt_paths": [
-      "creators.id"
+      "creators.id",
+      "creators.source_caveats"
     ]
   },
   {
@@ -24998,6 +25634,20 @@
     "root_only_comment": true,
     "candidate_receipt_paths": [
       "creators.affiliations.name"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r20_rating1:10",
+    "record": "CM4AI_v7_rep2",
+    "source_type": "NIH project page",
+    "field": "collection_timeframes.source_caveats",
+    "normalized_path": "collection_timeframes.source_caveats",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "collection_timeframes.end_date",
+      "collection_timeframes.start_date"
     ]
   },
   {
@@ -25046,11 +25696,12 @@
     "source_type": "historical data release",
     "field": "creators.source_caveats",
     "normalized_path": "creators.source_caveats",
-    "exact_nested_match": false,
+    "exact_nested_match": true,
     "ancestor_match_only": false,
     "root_only_comment": false,
     "candidate_receipt_paths": [
-      "creators.id"
+      "creators.id",
+      "creators.source_caveats"
     ]
   },
   {
@@ -25175,6 +25826,19 @@
     "issue_id": "CM4AI_v7_rep3_r20_rating1:1",
     "record": "CM4AI_v7_rep3",
     "source_type": "preprint",
+    "field": "external_resources",
+    "normalized_path": "external_resources",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "external_resources.external_resources"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r20_rating1:1",
+    "record": "CM4AI_v7_rep3",
+    "source_type": "publication",
     "field": "external_resources",
     "normalized_path": "external_resources",
     "exact_nested_match": false,
@@ -25360,6 +26024,19 @@
     "issue_id": "CM4AI_v7_rep3_r20_rating1:4",
     "record": "CM4AI_v7_rep3",
     "source_type": "preprint",
+    "field": "external_resources",
+    "normalized_path": "external_resources",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "external_resources.external_resources"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r20_rating1:4",
+    "record": "CM4AI_v7_rep3",
+    "source_type": "publication",
     "field": "external_resources",
     "normalized_path": "external_resources",
     "exact_nested_match": false,
@@ -25670,6 +26347,32 @@
     "root_only_comment": true,
     "candidate_receipt_paths": [
       "notes"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r20_rating1:1",
+    "record": "CM4AI_v8_rep1",
+    "source_type": "documentation",
+    "field": "sampling_strategies",
+    "normalized_path": "sampling_strategies",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r20_rating1:1",
+    "record": "CM4AI_v8_rep1",
+    "source_type": "preprint",
+    "field": "sampling_strategies",
+    "normalized_path": "sampling_strategies",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "sampling_strategies.strategies"
     ]
   },
   {
@@ -26850,6 +27553,19 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "file_collections.description"
+    ]
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r20_rating1:10",
+    "record": "CM4AI_v8_rep2",
+    "source_type": "data resource",
+    "field": "instances.notes",
+    "normalized_path": "instances.notes",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "instances.instance_details"
     ]
   },
   {
@@ -28380,6 +29096,20 @@
   {
     "issue_id": "VOICE_v7_rep2_r20_rating1:2",
     "record": "VOICE_v7_rep2",
+    "source_type": "IRB",
+    "field": "at_risk_populations",
+    "normalized_path": "at_risk_populations",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "at_risk_populations.assent_procedures",
+      "at_risk_populations.guardian_consent"
+    ]
+  },
+  {
+    "issue_id": "VOICE_v7_rep2_r20_rating1:2",
+    "record": "VOICE_v7_rep2",
     "source_type": "data resource",
     "field": "is_deidentified",
     "normalized_path": "is_deidentified",
@@ -29238,6 +29968,19 @@
   {
     "issue_id": "VOICE_v8_rep1_r20_rating1:5",
     "record": "VOICE_v8_rep1",
+    "source_type": "documentation",
+    "field": "preprocessing_strategies",
+    "normalized_path": "preprocessing_strategies",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "preprocessing_strategies.preprocessing_details"
+    ]
+  },
+  {
+    "issue_id": "VOICE_v8_rep1_r20_rating1:5",
+    "record": "VOICE_v8_rep1",
     "source_type": "data resource",
     "field": "external_resources",
     "normalized_path": "external_resources",
@@ -29497,6 +30240,19 @@
     "root_only_comment": false,
     "candidate_receipt_paths": [
       "updates.update_details"
+    ]
+  },
+  {
+    "issue_id": "VOICE_v8_rep1_r20_rating1:8",
+    "record": "VOICE_v8_rep1",
+    "source_type": "documentation",
+    "field": "updates.update_details",
+    "normalized_path": "updates.update_details",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": false,
+    "candidate_receipt_paths": [
+      "updates.frequency"
     ]
   },
   {
@@ -30066,6 +30822,19 @@
   {
     "issue_id": "VOICE_v8_rep2_r20_rating1:7",
     "record": "VOICE_v8_rep2",
+    "source_type": "IRB",
+    "field": "ethical_reviews",
+    "normalized_path": "ethical_reviews",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "ethical_reviews.review_details"
+    ]
+  },
+  {
+    "issue_id": "VOICE_v8_rep2_r20_rating1:7",
+    "record": "VOICE_v8_rep2",
     "source_type": "data resource",
     "field": "ethical_reviews",
     "normalized_path": "ethical_reviews",
@@ -30210,6 +30979,19 @@
     "issue_id": "VOICE_v8_rep2_r20_rating1:10",
     "record": "VOICE_v8_rep2",
     "source_type": "data resource",
+    "field": "preprocessing_strategies",
+    "normalized_path": "preprocessing_strategies",
+    "exact_nested_match": false,
+    "ancestor_match_only": false,
+    "root_only_comment": true,
+    "candidate_receipt_paths": [
+      "preprocessing_strategies.preprocessing_details"
+    ]
+  },
+  {
+    "issue_id": "VOICE_v8_rep2_r20_rating1:10",
+    "record": "VOICE_v8_rep2",
+    "source_type": "documentation",
     "field": "preprocessing_strategies",
     "normalized_path": "preprocessing_strategies",
     "exact_nested_match": false,

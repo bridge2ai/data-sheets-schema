@@ -1,7 +1,7 @@
 {
   "sample_id": "S23",
   "record": "CM4AI_v7_rep3",
-  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml",
   "d4d_sha256": "206c62821db4d7dc688ccff5de23020294dca149aa36de7682cafdfd9a083ad6",
   "d4d_fields": {
     "keywords": [
@@ -53,6 +53,33 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
-  }
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "mass spectroscopy"
+  ],
+  "source_excerpts": [
+    {
+      "query": "mass spectroscopy",
+      "chunk": "c010",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "chunk_sha256": "0ec9e9009f76d400fe041a0726f62b5a4c905c8790994c1a0d823601e09ad45c",
+      "excerpt": "nabling\ncapabilities for this work.\n\nCM4AI input data streams are generated using immunofluorescence (IF) subcellular\nmicroscopy for spatial proteomics data; affinity purification mass spectroscopy (AP-MS)\n\n1\n\n\n\nbioRxiv preprint\n\ndoi:\n\nhttps://doi.org/10.1101/2024.05.21.589311\n\n;\n\nthis version posted May 24, 2024.\n\nThe copyright holder for this preprint (which\n\nwas not certified by peer review) is the author/funder, who has granted bioRxiv a license to display the preprint in perpetuity. It i"
+    },
+    {
+      "query": "mass spectroscopy",
+      "chunk": "c018",
+      "source": "dataverse_10.18130_V3_B35XWX_row16.txt",
+      "chunk_sha256": "c4b70727c37a87d02772ba09bbc0f1a935e1cf6a95ff4967455093885e08c4d4",
+      "excerpt": "ffinity purification, AP-MS, artificial intelligence, breast cancer, Bridge2AI, cardiomyocyte, CM4AI, CRISPR/Cas9, induced pluripotent stem cell, iPSC, KOLF2.1J, machine learning, mass spectroscopy, MDA-MB-468, neural progenitor cell, NPC, neuron, paclitaxel, perturb-seq, perturbation sequencing, protein-protein interaction, protein localization, single-cell RNA sequencing, scRNAseq, SEC-MS, size exclusion chromatography, subcellular imaging, vorinostat\nRelated Publication\nReferences: Clark T"
+    },
+    {
+      "query": "mass spectroscopy",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
+      "excerpt": "rtificial intelligence, breast cancer, Bridge2AI, cardiomyocyte, CM4AI, CRISPR/Cas9, induced pluripotent stem cell, iPSC, KOLF2.1J, machine learning, mass spectroscopy, MDA-MB-468, neural progenitor cell, NPC, neuron, paclitaxel, perturb-seq, perturbation sequencing, protein-protein interaction, protein localization, single-cell RNA sequencing, scRNAseq, SEC-MS, size exclusion chromatography, subcellular imaging, vorinostat Related Publication References: Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourr",
+      "whitespace_normalized": true
+    }
+  ]
 }

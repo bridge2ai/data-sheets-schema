@@ -77,11 +77,11 @@
     "source_type": "NIH project page",
     "outcome": "Completeness",
     "section": "Composition",
-    "linked_fields": 2,
-    "linked_flagged": 0,
+    "linked_fields": 3,
+    "linked_flagged": 1,
     "comparison_fields": 4,
     "comparison_flagged": 2,
-    "difference_pp": -50.0
+    "difference_pp": -16.666666666666668
   },
   {
     "record": "CHORUS_v8_rep1",
@@ -197,11 +197,23 @@
     "source_type": "NIH project page",
     "outcome": "Completeness",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
     "comparison_fields": 5,
     "comparison_flagged": 2,
     "difference_pp": -40.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "source_type": "NIH project page",
+    "outcome": "Completeness",
+    "section": "Human",
+    "linked_fields": 1,
+    "linked_flagged": 0,
+    "comparison_fields": 1,
+    "comparison_flagged": 0,
+    "difference_pp": 0.0
   },
   {
     "record": "CHORUS_v8_rep3",
@@ -425,11 +437,11 @@
     "source_type": "NIH project page",
     "outcome": "Accuracy/correctness",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 1,
     "comparison_fields": 4,
     "comparison_flagged": 3,
-    "difference_pp": -25.0
+    "difference_pp": -41.66666666666667
   },
   {
     "record": "CHORUS_v8_rep1",
@@ -545,11 +557,23 @@
     "source_type": "NIH project page",
     "outcome": "Accuracy/correctness",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 1,
     "comparison_fields": 5,
     "comparison_flagged": 1,
-    "difference_pp": 30.0
+    "difference_pp": 13.33333333333333
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "source_type": "NIH project page",
+    "outcome": "Accuracy/correctness",
+    "section": "Human",
+    "linked_fields": 1,
+    "linked_flagged": 0,
+    "comparison_fields": 1,
+    "comparison_flagged": 0,
+    "difference_pp": 0.0
   },
   {
     "record": "CHORUS_v8_rep3",
@@ -773,7 +797,7 @@
     "source_type": "NIH project page",
     "outcome": "Consistency",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
     "comparison_fields": 4,
     "comparison_flagged": 1,
@@ -893,11 +917,23 @@
     "source_type": "NIH project page",
     "outcome": "Consistency",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
     "comparison_fields": 5,
     "comparison_flagged": 4,
     "difference_pp": -80.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "source_type": "NIH project page",
+    "outcome": "Consistency",
+    "section": "Human",
+    "linked_fields": 1,
+    "linked_flagged": 1,
+    "comparison_fields": 1,
+    "comparison_flagged": 1,
+    "difference_pp": 0.0
   },
   {
     "record": "CHORUS_v8_rep3",
@@ -1099,9 +1135,9 @@
     "section": "Composition",
     "linked_fields": 1,
     "linked_flagged": 0,
-    "comparison_fields": 12,
+    "comparison_fields": 13,
     "comparison_flagged": 1,
-    "difference_pp": -8.333333333333332
+    "difference_pp": -7.6923076923076925
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -1204,6 +1240,18 @@
     "project": "CM4AI",
     "source_type": "data resource",
     "outcome": "Completeness",
+    "section": "Composition",
+    "linked_fields": 6,
+    "linked_flagged": 2,
+    "comparison_fields": 1,
+    "comparison_flagged": 0,
+    "difference_pp": 33.33333333333333
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source_type": "data resource",
+    "outcome": "Completeness",
     "section": "Data Governance",
     "linked_fields": 2,
     "linked_flagged": 0,
@@ -1265,11 +1313,11 @@
     "source_type": "data resource",
     "outcome": "Completeness",
     "section": "Composition",
-    "linked_fields": 3,
-    "linked_flagged": 1,
+    "linked_fields": 4,
+    "linked_flagged": 2,
     "comparison_fields": 3,
     "comparison_flagged": 1,
-    "difference_pp": 0.0
+    "difference_pp": 16.666666666666668
   },
   {
     "record": "CM4AI_v8_rep2",
@@ -1747,7 +1795,7 @@
     "section": "Composition",
     "linked_fields": 1,
     "linked_flagged": 0,
-    "comparison_fields": 12,
+    "comparison_fields": 13,
     "comparison_flagged": 0,
     "difference_pp": 0.0
   },
@@ -1852,6 +1900,18 @@
     "project": "CM4AI",
     "source_type": "data resource",
     "outcome": "Accuracy/correctness",
+    "section": "Composition",
+    "linked_fields": 6,
+    "linked_flagged": 0,
+    "comparison_fields": 1,
+    "comparison_flagged": 1,
+    "difference_pp": -100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source_type": "data resource",
+    "outcome": "Accuracy/correctness",
     "section": "Data Governance",
     "linked_fields": 2,
     "linked_flagged": 0,
@@ -1913,11 +1973,11 @@
     "source_type": "data resource",
     "outcome": "Accuracy/correctness",
     "section": "Composition",
-    "linked_fields": 3,
+    "linked_fields": 4,
     "linked_flagged": 1,
     "comparison_fields": 3,
     "comparison_flagged": 1,
-    "difference_pp": 0.0
+    "difference_pp": -8.333333333333332
   },
   {
     "record": "CM4AI_v8_rep2",
@@ -2395,9 +2455,9 @@
     "section": "Composition",
     "linked_fields": 1,
     "linked_flagged": 1,
-    "comparison_fields": 12,
-    "comparison_flagged": 3,
-    "difference_pp": 75.0
+    "comparison_fields": 13,
+    "comparison_flagged": 4,
+    "difference_pp": 69.23076923076923
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -2500,6 +2560,18 @@
     "project": "CM4AI",
     "source_type": "data resource",
     "outcome": "Consistency",
+    "section": "Composition",
+    "linked_fields": 6,
+    "linked_flagged": 3,
+    "comparison_fields": 1,
+    "comparison_flagged": 0,
+    "difference_pp": 50.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source_type": "data resource",
+    "outcome": "Consistency",
     "section": "Data Governance",
     "linked_fields": 2,
     "linked_flagged": 2,
@@ -2561,11 +2633,11 @@
     "source_type": "data resource",
     "outcome": "Consistency",
     "section": "Composition",
-    "linked_fields": 3,
-    "linked_flagged": 2,
+    "linked_fields": 4,
+    "linked_flagged": 3,
     "comparison_fields": 3,
     "comparison_flagged": 0,
-    "difference_pp": 66.66666666666666
+    "difference_pp": 75.0
   },
   {
     "record": "CM4AI_v8_rep2",
@@ -2993,11 +3065,11 @@
     "source_type": "documentation",
     "outcome": "Completeness",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 1,
-    "comparison_fields": 12,
+    "comparison_fields": 11,
     "comparison_flagged": 1,
-    "difference_pp": 41.66666666666667
+    "difference_pp": 24.24242424242424
   },
   {
     "record": "AI_READI_v8_rep1",
@@ -3029,7 +3101,7 @@
     "source_type": "documentation",
     "outcome": "Completeness",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
     "comparison_fields": 11,
     "comparison_flagged": 1,
@@ -3115,9 +3187,9 @@
     "section": "Composition",
     "linked_fields": 1,
     "linked_flagged": 1,
-    "comparison_fields": 5,
-    "comparison_flagged": 1,
-    "difference_pp": 80.0
+    "comparison_fields": 6,
+    "comparison_flagged": 2,
+    "difference_pp": 66.66666666666667
   },
   {
     "record": "CHORUS_v8_rep1",
@@ -3247,9 +3319,9 @@
     "section": "Composition",
     "linked_fields": 2,
     "linked_flagged": 1,
-    "comparison_fields": 5,
+    "comparison_fields": 6,
     "comparison_flagged": 1,
-    "difference_pp": 30.0
+    "difference_pp": 33.333333333333336
   },
   {
     "record": "CHORUS_v8_rep3",
@@ -3297,6 +3369,18 @@
     "linked_flagged": 0,
     "comparison_fields": 3,
     "comparison_flagged": 1,
+    "difference_pp": -33.33333333333333
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source_type": "documentation",
+    "outcome": "Completeness",
+    "section": "Composition",
+    "linked_fields": 1,
+    "linked_flagged": 0,
+    "comparison_fields": 6,
+    "comparison_flagged": 2,
     "difference_pp": -33.33333333333333
   },
   {
@@ -3413,23 +3497,11 @@
     "source_type": "documentation",
     "outcome": "Completeness",
     "section": "Ethics",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
-    "comparison_fields": 2,
-    "comparison_flagged": 0,
-    "difference_pp": 0.0
-  },
-  {
-    "record": "VOICE_v8_rep1",
-    "project": "VOICE",
-    "source_type": "documentation",
-    "outcome": "Completeness",
-    "section": "Maintenance",
-    "linked_fields": 5,
-    "linked_flagged": 1,
     "comparison_fields": 1,
     "comparison_flagged": 0,
-    "difference_pp": 20.0
+    "difference_pp": 0.0
   },
   {
     "record": "VOICE_v8_rep1",
@@ -3442,18 +3514,6 @@
     "comparison_fields": 10,
     "comparison_flagged": 1,
     "difference_pp": -10.0
-  },
-  {
-    "record": "VOICE_v8_rep1",
-    "project": "VOICE",
-    "source_type": "documentation",
-    "outcome": "Completeness",
-    "section": "Preprocessing",
-    "linked_fields": 3,
-    "linked_flagged": 1,
-    "comparison_fields": 1,
-    "comparison_flagged": 1,
-    "difference_pp": -66.66666666666667
   },
   {
     "record": "VOICE_v8_rep2",
@@ -3492,18 +3552,6 @@
     "difference_pp": 25.64102564102564
   },
   {
-    "record": "VOICE_v8_rep2",
-    "project": "VOICE",
-    "source_type": "documentation",
-    "outcome": "Completeness",
-    "section": "Preprocessing",
-    "linked_fields": 4,
-    "linked_flagged": 2,
-    "comparison_fields": 1,
-    "comparison_flagged": 0,
-    "difference_pp": 50.0
-  },
-  {
     "record": "VOICE_v8_rep3",
     "project": "VOICE",
     "source_type": "documentation",
@@ -3512,6 +3560,18 @@
     "linked_fields": 5,
     "linked_flagged": 0,
     "comparison_fields": 1,
+    "comparison_flagged": 0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source_type": "documentation",
+    "outcome": "Completeness",
+    "section": "Distribution",
+    "linked_fields": 1,
+    "linked_flagged": 0,
+    "comparison_fields": 2,
     "comparison_flagged": 0,
     "difference_pp": 0.0
   },
@@ -3557,9 +3617,9 @@
     "source_type": "documentation",
     "outcome": "Completeness",
     "section": "Preprocessing",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
-    "comparison_fields": 2,
+    "comparison_fields": 1,
     "comparison_flagged": 0,
     "difference_pp": 0.0
   },
@@ -3569,11 +3629,11 @@
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 1,
-    "comparison_fields": 12,
+    "comparison_fields": 11,
     "comparison_flagged": 1,
-    "difference_pp": 41.66666666666667
+    "difference_pp": 24.24242424242424
   },
   {
     "record": "AI_READI_v8_rep1",
@@ -3605,7 +3665,7 @@
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
     "section": "Composition",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
     "comparison_fields": 11,
     "comparison_flagged": 0,
@@ -3691,9 +3751,9 @@
     "section": "Composition",
     "linked_fields": 1,
     "linked_flagged": 1,
-    "comparison_fields": 5,
+    "comparison_fields": 6,
     "comparison_flagged": 3,
-    "difference_pp": 40.0
+    "difference_pp": 50.0
   },
   {
     "record": "CHORUS_v8_rep1",
@@ -3823,9 +3883,9 @@
     "section": "Composition",
     "linked_fields": 2,
     "linked_flagged": 1,
-    "comparison_fields": 5,
+    "comparison_fields": 6,
     "comparison_flagged": 1,
-    "difference_pp": 30.0
+    "difference_pp": 33.333333333333336
   },
   {
     "record": "CHORUS_v8_rep3",
@@ -3874,6 +3934,18 @@
     "comparison_fields": 3,
     "comparison_flagged": 0,
     "difference_pp": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source_type": "documentation",
+    "outcome": "Accuracy/correctness",
+    "section": "Composition",
+    "linked_fields": 1,
+    "linked_flagged": 1,
+    "comparison_fields": 6,
+    "comparison_flagged": 0,
+    "difference_pp": 100.0
   },
   {
     "record": "CM4AI_v8_rep1",
@@ -3989,19 +4061,7 @@
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
     "section": "Ethics",
-    "linked_fields": 2,
-    "linked_flagged": 0,
-    "comparison_fields": 2,
-    "comparison_flagged": 0,
-    "difference_pp": 0.0
-  },
-  {
-    "record": "VOICE_v8_rep1",
-    "project": "VOICE",
-    "source_type": "documentation",
-    "outcome": "Accuracy/correctness",
-    "section": "Maintenance",
-    "linked_fields": 5,
+    "linked_fields": 3,
     "linked_flagged": 0,
     "comparison_fields": 1,
     "comparison_flagged": 0,
@@ -4018,18 +4078,6 @@
     "comparison_fields": 10,
     "comparison_flagged": 0,
     "difference_pp": 50.0
-  },
-  {
-    "record": "VOICE_v8_rep1",
-    "project": "VOICE",
-    "source_type": "documentation",
-    "outcome": "Accuracy/correctness",
-    "section": "Preprocessing",
-    "linked_fields": 3,
-    "linked_flagged": 0,
-    "comparison_fields": 1,
-    "comparison_flagged": 0,
-    "difference_pp": 0.0
   },
   {
     "record": "VOICE_v8_rep2",
@@ -4068,12 +4116,12 @@
     "difference_pp": -23.076923076923077
   },
   {
-    "record": "VOICE_v8_rep2",
+    "record": "VOICE_v8_rep3",
     "project": "VOICE",
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
-    "section": "Preprocessing",
-    "linked_fields": 4,
+    "section": "Collection",
+    "linked_fields": 5,
     "linked_flagged": 0,
     "comparison_fields": 1,
     "comparison_flagged": 0,
@@ -4084,10 +4132,10 @@
     "project": "VOICE",
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
-    "section": "Collection",
-    "linked_fields": 5,
+    "section": "Distribution",
+    "linked_fields": 1,
     "linked_flagged": 0,
-    "comparison_fields": 1,
+    "comparison_fields": 2,
     "comparison_flagged": 0,
     "difference_pp": 0.0
   },
@@ -4133,9 +4181,9 @@
     "source_type": "documentation",
     "outcome": "Accuracy/correctness",
     "section": "Preprocessing",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
-    "comparison_fields": 2,
+    "comparison_fields": 1,
     "comparison_flagged": 0,
     "difference_pp": 0.0
   },
@@ -4145,11 +4193,11 @@
     "source_type": "documentation",
     "outcome": "Consistency",
     "section": "Composition",
-    "linked_fields": 2,
-    "linked_flagged": 1,
-    "comparison_fields": 12,
-    "comparison_flagged": 4,
-    "difference_pp": 16.666666666666668
+    "linked_fields": 3,
+    "linked_flagged": 2,
+    "comparison_fields": 11,
+    "comparison_flagged": 3,
+    "difference_pp": 39.39393939393939
   },
   {
     "record": "AI_READI_v8_rep1",
@@ -4181,11 +4229,11 @@
     "source_type": "documentation",
     "outcome": "Consistency",
     "section": "Composition",
-    "linked_fields": 2,
-    "linked_flagged": 0,
+    "linked_fields": 3,
+    "linked_flagged": 1,
     "comparison_fields": 11,
     "comparison_flagged": 4,
-    "difference_pp": -36.36363636363637
+    "difference_pp": -3.030303030303033
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -4267,9 +4315,9 @@
     "section": "Composition",
     "linked_fields": 1,
     "linked_flagged": 0,
-    "comparison_fields": 5,
+    "comparison_fields": 6,
     "comparison_flagged": 1,
-    "difference_pp": -20.0
+    "difference_pp": -16.666666666666664
   },
   {
     "record": "CHORUS_v8_rep1",
@@ -4399,9 +4447,9 @@
     "section": "Composition",
     "linked_fields": 2,
     "linked_flagged": 1,
-    "comparison_fields": 5,
+    "comparison_fields": 6,
     "comparison_flagged": 3,
-    "difference_pp": -9.999999999999998
+    "difference_pp": 0.0
   },
   {
     "record": "CHORUS_v8_rep3",
@@ -4450,6 +4498,18 @@
     "comparison_fields": 3,
     "comparison_flagged": 0,
     "difference_pp": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source_type": "documentation",
+    "outcome": "Consistency",
+    "section": "Composition",
+    "linked_fields": 1,
+    "linked_flagged": 0,
+    "comparison_fields": 6,
+    "comparison_flagged": 3,
+    "difference_pp": -50.0
   },
   {
     "record": "CM4AI_v8_rep1",
@@ -4565,23 +4625,11 @@
     "source_type": "documentation",
     "outcome": "Consistency",
     "section": "Ethics",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
-    "comparison_fields": 2,
+    "comparison_fields": 1,
     "comparison_flagged": 0,
     "difference_pp": 0.0
-  },
-  {
-    "record": "VOICE_v8_rep1",
-    "project": "VOICE",
-    "source_type": "documentation",
-    "outcome": "Consistency",
-    "section": "Maintenance",
-    "linked_fields": 5,
-    "linked_flagged": 1,
-    "comparison_fields": 1,
-    "comparison_flagged": 1,
-    "difference_pp": -80.0
   },
   {
     "record": "VOICE_v8_rep1",
@@ -4594,18 +4642,6 @@
     "comparison_fields": 10,
     "comparison_flagged": 3,
     "difference_pp": -30.0
-  },
-  {
-    "record": "VOICE_v8_rep1",
-    "project": "VOICE",
-    "source_type": "documentation",
-    "outcome": "Consistency",
-    "section": "Preprocessing",
-    "linked_fields": 3,
-    "linked_flagged": 0,
-    "comparison_fields": 1,
-    "comparison_flagged": 0,
-    "difference_pp": 0.0
   },
   {
     "record": "VOICE_v8_rep2",
@@ -4644,18 +4680,6 @@
     "difference_pp": -7.6923076923076925
   },
   {
-    "record": "VOICE_v8_rep2",
-    "project": "VOICE",
-    "source_type": "documentation",
-    "outcome": "Consistency",
-    "section": "Preprocessing",
-    "linked_fields": 4,
-    "linked_flagged": 1,
-    "comparison_fields": 1,
-    "comparison_flagged": 1,
-    "difference_pp": -75.0
-  },
-  {
     "record": "VOICE_v8_rep3",
     "project": "VOICE",
     "source_type": "documentation",
@@ -4666,6 +4690,18 @@
     "comparison_fields": 1,
     "comparison_flagged": 0,
     "difference_pp": 20.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source_type": "documentation",
+    "outcome": "Consistency",
+    "section": "Distribution",
+    "linked_fields": 1,
+    "linked_flagged": 0,
+    "comparison_fields": 2,
+    "comparison_flagged": 1,
+    "difference_pp": -50.0
   },
   {
     "record": "VOICE_v8_rep3",
@@ -4709,9 +4745,9 @@
     "source_type": "documentation",
     "outcome": "Consistency",
     "section": "Preprocessing",
-    "linked_fields": 2,
+    "linked_fields": 3,
     "linked_flagged": 0,
-    "comparison_fields": 2,
+    "comparison_fields": 1,
     "comparison_flagged": 0,
     "difference_pp": 0.0
   },
@@ -4831,9 +4867,9 @@
     "section": "Uses",
     "linked_fields": 1,
     "linked_flagged": 0,
-    "comparison_fields": 1,
-    "comparison_flagged": 0,
-    "difference_pp": 0.0
+    "comparison_fields": 2,
+    "comparison_flagged": 1,
+    "difference_pp": -50.0
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -4855,9 +4891,9 @@
     "section": "Composition",
     "linked_fields": 4,
     "linked_flagged": 0,
-    "comparison_fields": 9,
+    "comparison_fields": 10,
     "comparison_flagged": 1,
-    "difference_pp": -11.11111111111111
+    "difference_pp": -10.0
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -4877,11 +4913,11 @@
     "source_type": "publication",
     "outcome": "Completeness",
     "section": "Human",
-    "linked_fields": 3,
+    "linked_fields": 4,
     "linked_flagged": 1,
-    "comparison_fields": 2,
+    "comparison_fields": 1,
     "comparison_flagged": 0,
-    "difference_pp": 33.33333333333333
+    "difference_pp": 25.0
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -5047,9 +5083,9 @@
     "section": "Composition",
     "linked_fields": 2,
     "linked_flagged": 1,
-    "comparison_fields": 4,
-    "comparison_flagged": 1,
-    "difference_pp": 25.0
+    "comparison_fields": 5,
+    "comparison_flagged": 2,
+    "difference_pp": 9.999999999999998
   },
   {
     "record": "CM4AI_v8_rep2",
@@ -5275,7 +5311,7 @@
     "section": "Uses",
     "linked_fields": 1,
     "linked_flagged": 1,
-    "comparison_fields": 1,
+    "comparison_fields": 2,
     "comparison_flagged": 0,
     "difference_pp": 100.0
   },
@@ -5299,7 +5335,7 @@
     "section": "Composition",
     "linked_fields": 4,
     "linked_flagged": 0,
-    "comparison_fields": 9,
+    "comparison_fields": 10,
     "comparison_flagged": 0,
     "difference_pp": 0.0
   },
@@ -5321,11 +5357,11 @@
     "source_type": "publication",
     "outcome": "Accuracy/correctness",
     "section": "Human",
-    "linked_fields": 3,
-    "linked_flagged": 0,
-    "comparison_fields": 2,
-    "comparison_flagged": 1,
-    "difference_pp": -50.0
+    "linked_fields": 4,
+    "linked_flagged": 1,
+    "comparison_fields": 1,
+    "comparison_flagged": 0,
+    "difference_pp": 25.0
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -5491,9 +5527,9 @@
     "section": "Composition",
     "linked_fields": 2,
     "linked_flagged": 1,
-    "comparison_fields": 4,
+    "comparison_fields": 5,
     "comparison_flagged": 1,
-    "difference_pp": 25.0
+    "difference_pp": 30.0
   },
   {
     "record": "CM4AI_v8_rep2",
@@ -5719,7 +5755,7 @@
     "section": "Uses",
     "linked_fields": 1,
     "linked_flagged": 1,
-    "comparison_fields": 1,
+    "comparison_fields": 2,
     "comparison_flagged": 0,
     "difference_pp": 100.0
   },
@@ -5743,9 +5779,9 @@
     "section": "Composition",
     "linked_fields": 4,
     "linked_flagged": 2,
-    "comparison_fields": 9,
-    "comparison_flagged": 2,
-    "difference_pp": 27.77777777777778
+    "comparison_fields": 10,
+    "comparison_flagged": 3,
+    "difference_pp": 20.0
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -5765,11 +5801,11 @@
     "source_type": "publication",
     "outcome": "Consistency",
     "section": "Human",
-    "linked_fields": 3,
+    "linked_fields": 4,
     "linked_flagged": 1,
-    "comparison_fields": 2,
+    "comparison_fields": 1,
     "comparison_flagged": 0,
-    "difference_pp": 33.33333333333333
+    "difference_pp": 25.0
   },
   {
     "record": "AI_READI_v8_rep2",
@@ -5935,9 +5971,9 @@
     "section": "Composition",
     "linked_fields": 2,
     "linked_flagged": 1,
-    "comparison_fields": 4,
-    "comparison_flagged": 1,
-    "difference_pp": 25.0
+    "comparison_fields": 5,
+    "comparison_flagged": 2,
+    "difference_pp": 9.999999999999998
   },
   {
     "record": "CM4AI_v8_rep2",

@@ -9,8 +9,11 @@ for s in S:
  rid=s['record'];path,data=records[rid]
  if rid not in runs:
   prov=path.parent.parent.parent/(path.parent.parent.name+'_core')/path.parent.name/f"{s['project']}_provenance.yaml";runs[rid]=run_chunks(prov)
- run=runs[rid];ev={'sample_id':s['sample_id'],'record':rid,'d4d_file':str(path),'d4d_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'d4d_fields':{f:data.get(f) for f in s['roots']},'receipt_links':[x for x in links if x['record']==rid and x['root'] in s['roots']],'source_recovery':run['basis']}
- (O/'data/followup'/f"{s['sample_id']}_evidence.json").write_text(json.dumps(ev,indent=2,default=str))
+ run=runs[rid];ef=O/'data/followup'/f"{s['sample_id']}_evidence.json";ex=json.loads(ef.read_text()) if ef.exists() else {}
+ ev={'sample_id':s['sample_id'],'record':rid,'d4d_file':str(path),'d4d_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'d4d_fields':{f:data.get(f) for f in s['roots']},'receipt_links':[x for x in links if x['record']==rid and x['root'] in s['roots']],'source_recovery':run['basis']}
+ if 'source_search_queries' in ex:ev['source_search_queries']=ex['source_search_queries']
+ if 'source_excerpts' in ex:ev['source_excerpts']=ex['source_excerpts']
+ ef.write_text(json.dumps(ev,indent=2,default=str))
  # Store historical source texts for reproducible evidence review, in work only.
  dest=O/'work/followup'/rid;dest.mkdir(parents=True,exist_ok=True)
  for cid,txt in run['texts'].items():(dest/f'{cid}.txt').write_text(txt)

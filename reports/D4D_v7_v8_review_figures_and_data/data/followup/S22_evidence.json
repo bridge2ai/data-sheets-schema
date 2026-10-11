@@ -1,7 +1,7 @@
 {
   "sample_id": "S22",
   "record": "CM4AI_v8_rep2",
-  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml",
   "d4d_sha256": "9fce395dfcba6684dbf183e6c5cf2acc7b6b656c2f76b4ba519974025ca80200",
   "d4d_fields": {
     "related_datasets": [
@@ -235,6 +235,49 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
-  }
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "Version 2\\.1",
+    "Version 2\\.0"
+  ],
+  "source_excerpts": [
+    {
+      "query": "Version 2\\.1",
+      "chunk": "c011",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "chunk_sha256": "9bf180d0fbe2d8421519cfa7a8958e9e655a25771c96e2ce8bdfc76d316bb33a",
+      "excerpt": "ocol was scripted using the Python Modeling\nInterface package, a library for modeling macromolecular complexes based on our\nopen-source Integrative Modeling Platform (IMP) package version 2.18\n(https://integrativemodeling.org).\n\n7\n\n\n\n\n\n\nbioRxiv preprint\n\ndoi:\n\nhttps://doi.org/10.1101/2024.05.21.589311\n\n;\n\nthis version posted May 24, 2024.\n\nThe copyright holder for this preprint (which\n\nwas not certified by peer review) is the author/funder, who has granted bioRxiv a license to display t"
+    },
+    {
+      "query": "Version 2\\.1",
+      "chunk": "c020",
+      "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+      "chunk_sha256": "147a4351b49f6975821dd04531dd6b7c69a9c590f658cd96755c5f95d647b5af",
+      "excerpt": "ne\n>\nCell Maps for Artificial Intelligence\n>\nInfo\n\u2013 The \"DRAFT\" version was not found.\u00a0This is version \"2.1\".\nCell Maps for Artificial Intelligence - June 2025 Data Release (Beta)\nVersion 2.1\nClark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacc"
+    },
+    {
+      "query": "Version 2\\.0",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
+      "excerpt": "ataverse\n>\nLibraData: UVa's Scholarly Research\n>\nSchool of Medicine\n>\nCell Maps for Artificial Intelligence\n>\nCell Maps for Artificial Intelligence - June 2026 Data Release (Beta)\nVersion 2.0\nClark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacc"
+    },
+    {
+      "query": "Version 2.1",
+      "chunk": "c023",
+      "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+      "chunk_sha256": "a52130ba08aae4d3be8169404e7bc07695f2b644614ba48a87f406a6f9ef805a",
+      "excerpt": "arly Research > School of Medicine > Cell Maps for Artificial Intelligence > Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta) Version 2.1 Clark, T; Parker, J; Al Manir, S; Axelsson, U; Ballllosero Navarro, F; Chinn, B; Churas, CP; Dailamy, A; Doctor, Y; Fall, J; Forget, A; Gao, J; Hansen, JN; Hu, M; Johannesson, A; Khaliq, H; Lee, YH; Lenkiewicz, J; Levinson, MA; Marquez, C; Metallo, C; Muralidharan, M; Nourreddine, S; Niestroy, J; Obernier, K; Pan, E; Polacco, B; Pratt, D; Qian, G; Schaffer, L; Sigaeva, A; Thaker, S; Zhang, Y; B\u00e9lisle-Pipon, JC; Brandt, C; Chen, JY; Ding, Y; Fode",
+      "whitespace_normalized": true
+    },
+    {
+      "query": "Version 2.0",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
+      "excerpt": "holarly Research > School of Medicine > Cell Maps for Artificial Intelligence > Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) Version 2.0 Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; B\u00e9lisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Pa",
+      "whitespace_normalized": true
+    }
+  ]
 }

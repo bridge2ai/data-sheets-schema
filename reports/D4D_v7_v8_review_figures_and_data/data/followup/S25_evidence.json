@@ -1,7 +1,7 @@
 {
   "sample_id": "S25",
   "record": "VOICE_v8_rep1",
-  "d4d_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml",
   "d4d_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
   "d4d_fields": {
     "file_collections": [
@@ -362,6 +362,56 @@
   ],
   "source_recovery": {
     "source": "bundle on disk",
-    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/bankso-eval-review/data/preprocessed/concatenated/VOICE_preprocessed.txt"
-  }
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/VOICE_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "n_frames",
+    "data dictionary"
+  ],
+  "source_excerpts": [
+    {
+      "query": "n_frames",
+      "chunk": "c017",
+      "source": "physionet_b2ai-voice_3.0.0_row18.txt",
+      "chunk_sha256": "3ae0a74407197ca8e006f69afef7b4ece64f2bcd5c88230107a23681fb69a877",
+      "excerpt": "e participant (participant_id), a unique identifier for the recording session (session_id), the task performed (task_name), the number of time frames associated with that feature (n_frames) and the tensor data for that associated feature which are described in more detail below where the feature is after the software used to extract it:\ntorchaudio_spectrograms.parquet (n=29020) contains spectrograms of dimension 201xT generated using the short-time Fast Fourier Transform (FFT) with a"
+    },
+    {
+      "query": "n_frames",
+      "chunk": "c019",
+      "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "chunk_sha256": "63b2e29ba70d4b7a6975ef172870e73b6a426ad32d8b1637905f2fc27c07e94d",
+      "excerpt": "e participant (participant_id), a unique identifier for the recording session (session_id), the task performed (task_name), the number of time frames associated with that feature (n_frames) and the tensor data for that associated feature which are described in more detail below where the feature is after the software used to extract it:\ntorchaudio_spectrograms.parquet (n=29278) contains spectrograms of dimension 201xT generated using the short-time Fast Fourier Transform (FFT) with a"
+    },
+    {
+      "query": "data dictionary",
+      "chunk": "c007",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "chunk_sha256": "552d711069bd4a33b257fe4277c4094c0c98b838ec81e5d78790bb7c5523ca9a",
+      "excerpt": "inical expertise, bioethics, standards, and DEI.\u201d Proc. Interspeech 2024. 2024.\nhttps://www.isca-archive.org/interspeech_2024/bensoussan24_interspeech.html\n.\nThe supporting REDCap data dictionary, metadata, and instrument PDFs are available at\nhttps://github.com/eipm/bridge2ai-redcap\n.\nWhen using the REDCap data dictionary and metadata, please cite:\nBensoussan, Y., Ghosh, S. S., Rameau, A., Boyer, M., Bahr, R., Watts, S., Rudzicz, F., Bolser, D., Lerner-Ellis, J., Awan, S., Powell, M. E., B"
+    },
+    {
+      "query": "data dictionary",
+      "chunk": "c015",
+      "source": "physionet_b2ai-voice_1.1_row17.txt",
+      "chunk_sha256": "11db4b98b1ba1227c07c94427a6453d7abcda011e07b62e087b1e3973017f8c6",
+      "excerpt": "ove spectrograms\nphenotype.tsv - Information collected during the visit including demographics, acoustic confounders, and responses to validated\u00a0questionnaires.\nphenotype.json - A data dictionary for the phenotype data.\nstatic_features.tsv - Features derived from the raw audio, with one feature per audio recording.\nstatic_features.json - A data dictionary for the features data.\nThe above data dictionaries have the same overall structure: a dictionary where keys are the column names matching"
+    },
+    {
+      "query": "phenotype",
+      "chunk": "c019",
+      "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "chunk_sha256": "63b2e29ba70d4b7a6975ef172870e73b6a426ad32d8b1637905f2fc27c07e94d",
+      "excerpt": "des specific information about the recording, including task instructions and prompts, as well as information about the microphone used and its gain. Phenotype The phenotype subfolder contains organized information collected from the participant or other individual during their encounter: . \u251c\u2500\u2500 confounders \u2502 \u251c\u2500\u2500 confounders.json \u2502 \u2514\u2500\u2500 confounders.tsv \u251c\u2500\u2500 demographics \u2502 \u251c\u2500\u2500 demographics.json \u2502 \u2514\u2500\u2500 demographics.tsv \u251c\u2500\u2500 diagnosis \u2502 \u251c\u2500\u2500 airway_stenosis.json \u2502 \u251c\u2500\u2500 airway_stenosis.tsv \u2502 \u251c\u2500\u2500 amyotrophic_lateral_sclerosis.json \u2502 \u251c\u2500\u2500 amyotrophic_lateral_sclerosis.tsv \u2502 \u251c\u2500\u2500 anxiety.json \u2502 \u251c\u2500\u2500 anxiety.tsv \u2502 \u251c\u2500\u2500 b",
+      "whitespace_normalized": true
+    },
+    {
+      "query": "data dictionary",
+      "chunk": "c019",
+      "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "chunk_sha256": "63b2e29ba70d4b7a6975ef172870e73b6a426ad32d8b1637905f2fc27c07e94d",
+      "excerpt": "etrics. static_features.tsv - Features derived from the raw audio, with one feature per audio recording. All of the above files are associated with a data dictionary file which has the same file stem and a JSON suffixes (e.g. torch_spectrogram.json). These data dictionary files contain a description of the feature and detail on the processing done to prepare the feature. Each of the parquet files is formatted similarly. Each element of the parquet formatted dataset contains a unique identifier for the participant (participant_id), a unique identifier for the recording session (session_id), the task performed",
+      "whitespace_normalized": true
+    }
+  ]
 }
