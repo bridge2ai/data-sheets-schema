@@ -16,6 +16,9 @@ from data_sheets_schema.legacy_creators import creator_route, creator_value
 from data_sheets_schema.legacy_description_lists import (
     description_list_routes, description_list_value,
 )
+from data_sheets_schema.legacy_sensitive_elements import (
+    SOURCE as SENSITIVE_SOURCE, sensitive_elements_route, sensitive_elements_value,
+)
 
 
 class D4DBuilder:
@@ -50,6 +53,7 @@ class D4DBuilder:
         update_plan_route(self.mapping)  # Refuse changed invalid routes before state reset.
         marked_creators = creator_route(self.mapping)
         marked_descriptions = description_list_routes(self.mapping)
+        marked_sensitive = sensitive_elements_route(self.mapping)
         identity = resolve_root_identity(root) if marked_id else None
         self.d4d_data = {}
 
@@ -67,6 +71,12 @@ class D4DBuilder:
                 value = root.get(marked_descriptions[d4d_field])
                 if value is not None:
                     self.d4d_data[d4d_field] = description_list_value(value)
+                    mapped_count += 1
+                continue
+            if marked_sensitive and d4d_field == 'sensitive_elements':
+                value = root.get(SENSITIVE_SOURCE)
+                if value is not None:
+                    self.d4d_data[d4d_field] = sensitive_elements_value(value)
                     mapped_count += 1
                 continue
             if marked_creators and d4d_field == 'creators':
@@ -134,6 +144,9 @@ class D4DBuilder:
 
         if field_name in description_list_routes(self.mapping):
             return description_list_value(value)
+
+        if field_name == 'sensitive_elements' and sensitive_elements_route(self.mapping):
+            return sensitive_elements_value(value)
 
         # Dataset.doi requires the bare form, independently of stale TSV types.
         if field_name == 'doi':
