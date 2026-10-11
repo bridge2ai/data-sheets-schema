@@ -3,6 +3,7 @@ import copy
 import csv
 import hashlib
 import io
+from pathlib import Path
 import xml.etree.ElementTree as ET
 
 import pytest
@@ -161,17 +162,17 @@ def test_publication_keeps_csv_and_pins_and_refuses_historical_output(
     inputs_before = {path: raw for path, raw in prepared["captured"].items()}
     output = tmp_path / "fresh-figure"
     completed = module.publish(prepared, output, "f" * 40)
-    # Explicit pre-display-change CSV contract from the existing neutral fixture.
+    # Existing values and columns are retained; #4918 adds explicit portable locator scope.
     columns = [
         "project", "status", "original_rows", "active_rows", "root_identifier_rows", "distinct_slots",
         "outcome_filled", "outcome_subsumed", "outcome_empty", "outcome_unresolvable",
         "outcome_unplaceable", "outcome_retired", "outcome_deferred", "loss_none", "loss_minimal",
         "loss_moderate", "loss_high", "loss_unassessed", "maptype_exactMatch", "overlap_both_agree",
         "overlap_both_differ_scalar", "overlap_both_differ_nested", "overlap_crate_only",
-        "overlap_generated_only", "generated_record",
+        "overlap_generated_only", "generated_record", "generated_record_path_base",
     ]
     values = ["P", "mapped", 3, 2, 1, 2, 2, 0, 1, 0, 0, 1, 0, 2, 0, 0, 0, 0,
-              2, 2, 0, 0, 0, 0, str(tmp_path / "historical.yaml")]
+              2, 2, 0, 0, 0, 0, "historical.yaml", "repository_root"]
     expected = io.StringIO(newline="")
     csv.writer(expected).writerows([columns, values])
     assert (output / "fig09_crate_vs_generation.csv").read_bytes() == expected.getvalue().encode()
@@ -182,8 +183,13 @@ def test_publication_keeps_csv_and_pins_and_refuses_historical_output(
     assert len(observed) == 3  # No inactive source-evidence row disappears.
     assert completed["scientific_scoring"] is False
     assert completed["historical_generated_comparator"] == "generic-v8 rep 1, API arm"
-    assert {row["path"]: row["sha256"] for row in completed["inputs"]} == {
-        str(path): hashlib.sha256(raw).hexdigest() for path, raw in inputs_before.items()}
+    assert completed["format_version"] == 2
+    assert set(completed["path_bases"]) == {"repository_root", "external_absolute"}
+    resolved_inputs = {
+        (tmp_path / row["path"] if row["path_base"] == "repository_root" else Path(row["path"])):
+        row["sha256"] for row in completed["inputs"]}
+    assert resolved_inputs == {path: hashlib.sha256(raw).hexdigest()
+                               for path, raw in inputs_before.items()}
     assert all(path.read_bytes() == raw for path, raw in inputs_before.items())
     assert all(hashlib.sha256((output / name).read_bytes()).hexdigest() == digest
                for name, digest in completed["artifacts"].items())
