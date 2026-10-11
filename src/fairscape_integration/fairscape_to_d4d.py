@@ -41,6 +41,8 @@ Features:
 """
 
 import re
+import hashlib
+from copy import deepcopy
 import sys
 import yaml
 from functools import lru_cache
@@ -60,11 +62,15 @@ from data_sheets_schema.rocrate_map import (
     _type_matches,
     doi_for_slot,
     read_crate_json,
+    _crate_json_from_bytes,
 )
 from data_sheets_schema.schema_view import shared_view
 from data_sheets_schema.rocrate_sources import select_root
 from data_sheets_schema.rocrate_parent_admission import ParentAdmission, snapshot, refusal_text
 from data_sheets_schema.scope import _norm, bare_doi
+from data_sheets_schema.fairscape_route_assertions import (
+    DeclaredAssertions, evidence_state, failed,
+)
 
 # Add fairscape_models to path
 fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
@@ -567,6 +573,8 @@ class FairscapeToD4DConverter:
         #: `_settle` says which value the slot holds instead (#4125).
         self._instead: List[Tuple[int, str]] = []
         self._parent_evidence = []
+        self._route_evidence = evidence_state("fairscape_to_d4d")
+        self._declared_assertions = None
         self._parent_admitted = {}
         self._parent_admission = None
         self._parent_root_output_id = None
@@ -575,6 +583,11 @@ class FairscapeToD4DConverter:
     def parent_evidence(self):
         """Detached parent admission decisions; not proof of final retention."""
         return snapshot(self._parent_evidence)
+
+    @property
+    def route_evidence(self):
+        """Detached consulted assertions and their final Dataset retention."""
+        return snapshot(self._route_evidence)
 
     def _refuse_parent(self, decision, reason):
         decision.update(decision="refused", reason=reason)
@@ -632,46 +645,72 @@ class FairscapeToD4DConverter:
         self._read_at = {}
         self._instead = []
 
-        # Load RO-Crate data
-        if isinstance(rocrate_input, dict):
-            rocrate_data = rocrate_input
-        elif isinstance(rocrate_input, (str, Path)):
-            # As the static-map arm reads a crate: UTF-8, or refused (#4089).
-            # The refusal says to transcode the file and does not point to
-            # crate_manifest.yaml's `encoding_note`: a path here can name any
-            # crate, which the manifest need not declare (#4192).
-            path = Path(rocrate_input)
-            rocrate_data = read_crate_json(path, hint=TRANSCODE_HINT)
-            if not isinstance(rocrate_data, dict):
-                # Read as a mapping, an array, a string, a number, a boolean
-                # or null ended in an AttributeError naming a method it
-                # lacks (#4192).
-                kind = JSON_KINDS.get(type(rocrate_data),
-                                      type(rocrate_data).__name__)
-                raise ValueError(
-                    f"{path} is not an RO-Crate's metadata: its JSON is "
-                    f"{kind}, not an object. An RO-Crate's metadata is one "
-                    "JSON object, whose `@graph` lists the crate's entities")
-        elif FAIRSCAPE_AVAILABLE and isinstance(rocrate_input, ROCrateV1_2):
-            rocrate_data = rocrate_input.model_dump(by_alias=True, exclude_none=True)
-        else:
-            raise ValueError(f"Unsupported input type: {type(rocrate_input)}")
+        self._route_evidence = evidence_state("fairscape_to_d4d")
+        self._declared_assertions = None
+        try:
+            # Load RO-Crate data
+            if isinstance(rocrate_input, dict):
+                # Existing mappings do not mutate the input; the optional
+                # model validator below receives its own defensive copy.
+                rocrate_data = rocrate_input
+                evidence_data = rocrate_data
+                self._route_evidence["input"]["kind"] = "dict"
+            elif isinstance(rocrate_input, (str, Path)):
+                # As the static-map arm reads a crate: UTF-8, or refused (#4089).
+                # The refusal says to transcode the file and does not point to
+                # crate_manifest.yaml's `encoding_note`: a path here can name any
+                # crate, which the manifest need not declare (#4192).
+                path = Path(rocrate_input)
+                raw = path.read_bytes()
+                self._route_evidence["input"].update(
+                    kind="path", source_path=str(path), source_bytes=len(raw),
+                    source_sha256=hashlib.sha256(raw).hexdigest())
+                rocrate_data = _crate_json_from_bytes(raw, path, hint=TRANSCODE_HINT)
+                evidence_data = rocrate_data
+                if not isinstance(rocrate_data, dict):
+                    # Read as a mapping, an array, a string, a number, a boolean
+                    # or null ended in an AttributeError naming a method it
+                    # lacks (#4192).
+                    kind = JSON_KINDS.get(type(rocrate_data),
+                                          type(rocrate_data).__name__)
+                    raise ValueError(
+                        f"{path} is not an RO-Crate's metadata: its JSON is "
+                        f"{kind}, not an object. An RO-Crate's metadata is one "
+                        "JSON object, whose `@graph` lists the crate's entities")
+            elif FAIRSCAPE_AVAILABLE and isinstance(rocrate_input, ROCrateV1_2):
+                rocrate_data = rocrate_input.model_dump(by_alias=True, exclude_none=True)
+                evidence_data = rocrate_input.model_dump(
+                    by_alias=True, exclude_unset=True, exclude_none=False)
+                self._route_evidence["input"].update(
+                    kind="model", model_projection="by_alias_exclude_unset")
+            else:
+                raise ValueError(f"Unsupported input type: {type(rocrate_input)}")
 
-        # Validate with Pydantic if available
-        if FAIRSCAPE_AVAILABLE and isinstance(rocrate_data, dict):
-            try:
-                rocrate_model = ROCrateV1_2(**rocrate_data)
-                print("✓ Input RO-Crate validated with FAIRSCAPE Pydantic models")
-            except Exception as e:
-                print(f"⚠ Warning: RO-Crate validation failed: {e}")
+            # Validate with Pydantic if available
+            if FAIRSCAPE_AVAILABLE and isinstance(rocrate_data, dict):
+                try:
+                    rocrate_model = ROCrateV1_2(**deepcopy(rocrate_data))
+                    print("✓ Input RO-Crate validated with FAIRSCAPE Pydantic models")
+                except Exception as e:
+                    print(f"⚠ Warning: RO-Crate validation failed: {e}")
 
-        # The crate's root data entity, and the datasets its hasPart names
-        dataset, nested_datasets = self._extract_datasets(rocrate_data)
+            # The crate's root data entity, and the datasets its hasPart names
+            dataset, nested_datasets = self._extract_datasets(rocrate_data)
 
-        # Convert to D4D
-        d4d_dict = self._build_d4d(dataset, nested_datasets, rocrate_data)
+            graph = rocrate_data.get("@graph", [])
+            root_index = next(i for i, node in enumerate(graph) if node is dataset)
+            evidence_graph = evidence_data.get("@graph", [])
+            evidence_root = evidence_graph[root_index]
+            self._declared_assertions = DeclaredAssertions(
+                self._route_evidence, evidence_root, evidence_graph, root_index)
 
-        return d4d_dict
+            # Convert to D4D
+            d4d_dict = self._build_d4d(dataset, nested_datasets, rocrate_data)
+
+            return d4d_dict
+        except BaseException as exc:
+            failed(self._route_evidence, exc)
+            raise
 
     def _extract_datasets(self, rocrate_data: Dict) -> Tuple[Dict, List[Dict]]:
         """The crate's root data entity and the datasets its `hasPart` names.
@@ -800,10 +839,20 @@ class FairscapeToD4DConverter:
                 # records `isPartOf` text for the same reason (#4125).
                 self._not_a_dataset_slot_value(prop, slot, value)
                 continue
+            before = (self._declared_assertions.before_place(slot, d4d, origin, rivals)
+                      if self._declared_assertions is not None else None)
             self._place(d4d, origin, rivals, slot, value, prop)
+            if self._declared_assertions is not None:
+                self._declared_assertions.after_place(
+                    prop, slot, value, before, d4d, origin, rivals)
 
         fitted = self._fit(d4d, TARGET_CLASS, origin, rivals=rivals)
-        return self._settle(fitted, origin, rivals)
+        if self._declared_assertions is not None:
+            self._declared_assertions.apply(fitted, origin, rivals, self.dropped)
+        settled = self._settle(fitted, origin, rivals)
+        if self._declared_assertions is not None:
+            self._declared_assertions.finish(settled, origin)
+        return settled
 
     def _not_a_dataset_slot_value(self, source: str, slot: str,
                                   value: Any) -> None:
@@ -1002,7 +1051,11 @@ class FairscapeToD4DConverter:
             source, value = candidates.pop(0)
             if value in (None, '', [], {}):
                 continue
+            drops_before = len(self.dropped)
             shaped, why, left = self._shape(value, slot, f"{where}{key}")
+            if not where and self._declared_assertions is not None:
+                self._declared_assertions.scalar_shaped(
+                    key, source, value, shaped, left or len(self.dropped) != drops_before)
             for part, reason in left:
                 self.dropped.append((source, (
                     f"part of the value not placed in `{key}`: "
@@ -1325,7 +1378,11 @@ class FairscapeToD4DConverter:
             if item is None:
                 continue
             path = f"{where}[{n}]." if slot.multivalued else f"{where}."
+            drops_before = len(self.dropped)
             obj = self._object(item, cls, slot, path)
+            if self._declared_assertions is not None:
+                self._declared_assertions.object_shaped(
+                    where, value, n, obj, len(self.dropped) != drops_before)
             parent = self._parent_admitted.get(id(item)) if where == 'parent_datasets' else None
             if parent is not None and parent[0] is item:
                 decision = parent[1]

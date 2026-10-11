@@ -5,9 +5,15 @@ Converts D4D YAML/dict to FAIRSCAPE RO-Crate using Pydantic models.
 """
 
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Any, List, Optional, TYPE_CHECKING
 from datetime import datetime
+
+from data_sheets_schema.rocrate_parent_admission import snapshot
+from data_sheets_schema.fairscape_route_assertions import (
+    evidence_state, failed, forward_projections, supplied_projections, finish_forward,
+)
 
 # Add fairscape_models to path
 fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
@@ -46,50 +52,74 @@ class D4DToFairscapeConverter:
     def __init__(self):
         if not FAIRSCAPE_AVAILABLE:
             raise RuntimeError("FAIRSCAPE models not available")
+        self._route_evidence = evidence_state("d4d_to_fairscape", "dict")
+        self._projections = {}
     
-    def convert(self, d4d_dict: Dict[str, Any]) -> ROCrateV1_2:
+    @property
+    def route_evidence(self):
+        """Detached finite source values and actual model projection outcomes."""
+        return snapshot(self._route_evidence)
+
+    def convert(self, d4d_dict: Dict[str, Any], *, source_evidence=None) -> ROCrateV1_2:
         """
         Convert D4D dictionary to FAIRSCAPE RO-Crate.
 
         Args:
             d4d_dict: D4D metadata dictionary
+            source_evidence: Optional completed reverse evidence bound to this
+                entire Dataset; permits re-emitting separate supplied assertions.
 
         Returns:
             FAIRSCAPE ROCrateV1_2 Pydantic model
         """
-        # Build graph elements
-        graph = []
+        self._route_evidence = evidence_state("d4d_to_fairscape", "dict")
+        self._projections = {}
+        try:
+            # The model's before-validator mutates its submitted graph. Caller
+            # objects and diagnostic raw values must not share that lifecycle.
+            d4d_dict = deepcopy(d4d_dict)
+            self._projections = forward_projections(self._route_evidence, d4d_dict)
+            supplied_projections(self._route_evidence, d4d_dict,
+                                 source_evidence, self._projections)
+            # Build graph elements
+            graph = []
 
-        # 1. Add metadata descriptor
-        metadata_descriptor = ROCrateMetadataFileElem(**{
-            "@id": "ro-crate-metadata.json",
-            "@type": "CreativeWork",
-            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
-            "about": {"@id": "./"}
-        })
-        graph.append(metadata_descriptor)
+            # 1. Add metadata descriptor
+            metadata_descriptor = ROCrateMetadataFileElem(**{
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
+                "about": {"@id": "./"}
+            })
+            graph.append(metadata_descriptor)
 
-        # 2. Build file collections (nested Datasets)
-        file_collections, hasPart_ids = self._build_file_collections(d4d_dict)
-        graph.extend(file_collections)
+            # 2. Build file collections (nested Datasets)
+            file_collections, hasPart_ids = self._build_file_collections(d4d_dict)
+            graph.extend(file_collections)
 
-        # 3. Add root dataset (with hasPart references to file collections)
-        dataset = self._build_dataset(d4d_dict, hasPart_ids)
-        graph.append(dataset)
+            # 3. Add root dataset (with hasPart references to file collections)
+            dataset = self._build_dataset(d4d_dict, hasPart_ids)
+            graph.append(dataset)
 
-        # 4. Create RO-Crate
-        rocrate = ROCrateV1_2(**{
-            "@context": {
-                "@vocab": "https://schema.org/",
-                "evi": "https://w3id.org/EVI#",
-                "rai": "http://mlcommons.org/croissant/RAI/",
-                "d4d": "https://w3id.org/bridge2ai/data-sheets-schema/"
-            },
-            "@graph": graph
-        })
+            # 4. Create RO-Crate
+            rocrate = ROCrateV1_2(**{
+                "@context": {
+                    "@vocab": "https://schema.org/",
+                    "evi": "https://w3id.org/EVI#",
+                    "rai": "http://mlcommons.org/croissant/RAI/",
+                    "d4d": "https://w3id.org/bridge2ai/data-sheets-schema/"
+                },
+                "@graph": graph
+            })
 
-        return rocrate
-    
+            final_graph = rocrate.model_dump(by_alias=True, exclude_none=False)["@graph"]
+            final_root = next(node for node in final_graph if node.get("@id") == "./")
+            finish_forward(self._route_evidence, final_root)
+            return rocrate
+        except BaseException as exc:
+            failed(self._route_evidence, exc)
+            raise
+
     def _build_dataset(self, d4d_dict: Dict[str, Any], hasPart_ids: List[str] = None) -> ROCrateMetadataElem:
         """
         Build Dataset from D4D metadata.
@@ -222,6 +252,8 @@ class D4DToFairscapeConverter:
         for d4d_field, d4d_prop in d4d_mapping.items():
             if d4d_field in d4d_dict:
                 dataset_params[d4d_prop] = d4d_dict[d4d_field]
+
+        dataset_params.update(self._projections)
 
         # Create Dataset element
         dataset = ROCrateMetadataElem(**dataset_params)
