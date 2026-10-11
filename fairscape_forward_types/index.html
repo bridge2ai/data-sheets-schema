@@ -1,0 +1,619 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/fairscape_forward_types/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>Finite FAIRSCAPE forward projections - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#finite-fairscape-forward-projections" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Finite FAIRSCAPE forward projections
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home/" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_core/" class="md-nav__link">
+        D4D-Core
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic_exchange/" class="md-nav__link">
+        Semantic Exchange
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Schema Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        CLI Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#evidence-and-warnings" class="md-nav__link">
+    Evidence and warnings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nested-collections-and-json-readback" class="md-nav__link">
+    Nested collections and JSON readback
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/fairscape_forward_types.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="finite-fairscape-forward-projections">Finite FAIRSCAPE forward projections</h1>
+<p>The forward converter returns a genuine FAIRSCAPE model. Model validity does
+not mean that every D4D assertion or its original structure was preserved.
+The fifteen fields below now use explicit text projections instead of passing
+structured values into incompatible model fields (#4954).</p>
+<table>
+<thead>
+<tr>
+<th>D4D source</th>
+<th>FAIRSCAPE alias</th>
+<th>Source shape</th>
+<th>Wire shape</th>
+<th>Admitted single text member</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>known_limitations</code></td>
+<td><code>rai:dataLimitations</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>limitation_description</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>known_biases</code></td>
+<td><code>rai:dataBiases</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>bias_description</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>intended_uses</code></td>
+<td><code>rai:dataUseCases</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>usage_notes</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>updates</code></td>
+<td><code>rai:dataReleaseMaintenancePlan</code></td>
+<td>object</td>
+<td>string</td>
+<td><code>update_details</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>missing_data_documentation</code></td>
+<td><code>rai:dataCollectionMissingData</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>missing_data_patterns</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>raw_data_sources</code></td>
+<td><code>rai:dataCollectionRawData</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>source_description</code></td>
+</tr>
+<tr>
+<td><code>collection_timeframes</code></td>
+<td><code>rai:dataCollectionTimeframe</code></td>
+<td>list</td>
+<td>list of strings</td>
+<td><code>timeframe_details</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>preprocessing_strategies</code></td>
+<td><code>rai:dataPreprocessingProtocol</code></td>
+<td>list</td>
+<td>list of strings</td>
+<td><code>preprocessing_details</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>annotation_analyses</code></td>
+<td><code>rai:dataAnnotationAnalysis</code></td>
+<td>list</td>
+<td>list of strings</td>
+<td><code>annotation_quality_details</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>distribution_formats</code></td>
+<td><code>evi:formats</code></td>
+<td>list</td>
+<td>list of strings</td>
+<td><code>format</code>, <code>media_type</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>addressing_gaps</code></td>
+<td><code>d4d:addressingGaps</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>response</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>anomalies</code></td>
+<td><code>d4d:dataAnomalies</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>anomaly_details</code>, <code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>content_warnings</code></td>
+<td><code>d4d:contentWarning</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>informed_consent</code></td>
+<td><code>d4d:informedConsent</code></td>
+<td>list</td>
+<td>string</td>
+<td><code>description</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>at_risk_populations</code></td>
+<td><code>d4d:atRiskPopulations</code></td>
+<td>object</td>
+<td>string</td>
+<td><code>description</code>, <code>name</code></td>
+</tr>
+</tbody>
+</table>
+<p>An object is admitted only when it has exactly one listed member and that
+member's value is an exact string. Even a second equal narrative member, an
+explicit null extra member, or an identifier makes the richer object
+unsupported. Strings retain their whitespace, newlines, Unicode and empty
+values. Dates, booleans, numbers, nested lists and dictionary representations
+are never converted into invented narrative text.</p>
+<p>For a scalar wire field with a list source, exactly one narrative object is
+required. Multiple entries, including duplicates, are omitted; they are not
+joined, deduplicated or first-picked. An object-shaped source requires the
+object directly. Existing direct scalar strings remain supported and are
+labelled as legacy input compatibility, not schema-valid D4D objects.</p>
+<p>List wire fields require an outer list. Each immediate narrative object or
+legacy string can contribute one value, in original order with duplicates and
+empty strings retained. Unsupported units keep their original indices and raw
+values in evidence. A mixed list can produce a partial projection. Explicit
+<code>[]</code> stays <code>[]</code>; a nonempty list with no supported units is omitted, not turned
+into an invented empty list. A missing key and explicit null both emit no wire
+value but have distinct evidence. Null normalization is reported separately
+from unsupported non-null omission.</p>
+<p>The existing compatibility alias <code>vulnerable_populations</code>, when present, wins
+over <code>at_risk_populations</code>, including when its value is null or unsupported.
+Both raw assertions remain visible. Superseded non-null canonical data is
+reported as omitted even when the winning alias successfully projects. A
+refused projection never falls back to the original invalid pass-through.</p>
+<h2 id="evidence-and-warnings">Evidence and warnings</h2>
+<p><code>D4DToFairscapeConverter.route_evidence</code> returns a detached snapshot. Existing
+assertion fields remain; rows for these fields are tagged with
+<code>projection_scope: fairscape-forward-types-v1</code>. Their <code>units</code> preserve each
+original <code>source_index</code>, pointer, raw value, projection decision and reason,
+projected value, and observed final model retention. <code>projection_index</code> is the
+separate output position for an admitted list value. No raw index is compacted.
+A retained projection describes text surviving the model, not equality to the
+original object shape.</p>
+<p><code>projection_summary</code> contains <code>omitted</code>, <code>partial</code>, <code>null_not_emitted</code> and
+<code>superseded</code> source-pointer/reason lists, plus <code>incomplete</code>, <code>model_valid</code> and
+<code>status</code>. Its scope is these fifteen fields and their one compatibility alias.
+An empty omission list does not establish complete conversion of other fields,
+file resources, inverse preservation or scientific coverage. <code>status: complete</code>
+means conversion completed. Failure retains the current rows with failed
+status; reuse starts a new conversion and clears earlier results.</p>
+<p>The convenience <code>convert_d4d_to_fairscape</code> helper keeps its existing
+<code>(model, (valid, errors))</code> return type. On incomplete projection it emits
+<code>ForwardProjectionWarning</code> naming omitted or partial source pointers, and says
+that raw evidence was not saved. Use the converter instance when full detached
+evidence is needed. The validity flag concerns model validity and exact JSON
+readback, not complete source preservation.</p>
+<h2 id="nested-collections-and-json-readback">Nested collections and JSON readback</h2>
+<p>FileCollections are emitted as plain schema.org Datasets with the explicit
+<code>https://schema.org/Dataset</code> type (#4956). The previous compact <code>Dataset</code>
+spelling denotes the same IRI under this converter's fixed <code>@vocab</code>, but the
+pinned FAIRSCAPE model dispatches that compact name to its stricter EVI Dataset
+class when reading JSON. A file collection does not thereby assert an EVI
+Dataset's publication date or format, or that it is itself an RO-Crate.</p>
+<p>The converter first retains the existing <code>ROCrateMetadataElem</code> validation of
+collection fields, including its defaults and invalid-input refusals. It then
+transfers all validated alias fields into a genuine <code>GenericMetadataElem</code>,
+changing only the collection's type spelling. Optional nulls are retained in
+that transfer; the existing <code>exclude_none=True</code> publication policy still omits
+null values. Collection IDs, order, root <code>hasPart</code> references and aggregate
+metadata remain. The actual root retains its existing RO-Crate type. The
+reverse reader recognizes both compact and explicit Dataset types; this does
+not add file-resource conversion or an EVI Dataset enumeration guarantee.</p>
+<p>Before conversion marks evidence complete, the validated model's Python-mode
+dump is checked for nonfinite floats, including ordinary dictionary keys and
+values and nested lists, tuples, sets and frozen sets (#4957). This happens
+before JSON-mode serialization can silently turn infinity or NaN into null.
+It does not scan unrelated caller input, arbitrary attributes or custom
+iterators. Finite values and supported date serialization keep their existing
+behavior. The resulting readback model receives the same check.</p>
+<p>The entire published model is serialized to finite JSON, decoded into
+independent objects, and read back by the genuine <code>ROCrateV1_2</code> validator.
+The resulting JSON tree must retain exact
+value types and array order. Object-key ordering is not a byte-preservation
+claim. <code>validate()</code> performs this same check rather than merely dumping an
+already constructed model. Readback or serialization failures leave conversion
+evidence failed and propagate the original error; they cannot reach the CLI's
+publication step or model-valid success message. Reusing a converter starts
+fresh evidence as before.</p>
+<p>The forward CLI always writes incomplete-projection warnings to stderr,
+including when no report was requested:</p>
+<pre><code class="language-sh">fairscape-cli d4d-to-rocrate dataset.yaml --output crate.json --report projection.json
+</code></pre>
+<p><code>--report PATH</code> explicitly saves the complete detached evidence as ASCII-safe
+JSON. Without it, the warning says that the raw evidence was not saved. With
+no <code>--output</code>, stdout contains only the RO-Crate JSON and diagnostics stay on
+stderr. Valid partial conversion remains successful, with mandatory warnings;
+actual model, serialization and report-write errors remain failures.</p>
+<p>Input, output and report collisions, including symlink and existing hardlink
+aliases, are refused before writes. The command reuses existing staged
+publication: all bytes are prepared and staged before replacement, but OS
+errors during replacement can leave a partially published set. It does not
+promise a multi-file transaction or reserve paths against another writer.</p>
+<p>This outgoing policy leaves reverse <code>ROUTES</code>, optional supplied-evidence
+identity checks, schemas, model definitions, ranking and scientific decisions
+unchanged. Supplied reverse evidence cannot authorize an unsupported
+fifteen-field projection. The separate #4044 root/alias/Make concerns and
+parent #2915 obligations are not resolved by model-valid output.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>
