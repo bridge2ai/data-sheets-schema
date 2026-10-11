@@ -772,3 +772,6 @@ evaluate.add_command(fitness_results)
 
 from data_sheets_schema.cli.cross_family_panel import cross_family_panel
 evaluate.add_command(cross_family_panel)
+
+from data_sheets_schema.cli.cross_family_judges import cross_family_judges
+evaluate.add_command(cross_family_judges)
