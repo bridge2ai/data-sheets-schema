@@ -63,6 +63,7 @@ from data_sheets_schema.rocrate_map import (
 )
 from data_sheets_schema.schema_view import shared_view
 from data_sheets_schema.rocrate_sources import select_root
+from data_sheets_schema.rocrate_parent_admission import ParentAdmission, snapshot, refusal_text
 from data_sheets_schema.scope import _norm, bare_doi
 
 # Add fairscape_models to path
@@ -565,6 +566,19 @@ class FairscapeToD4DConverter:
         #: not take, by index, with the slot: once the record is valid,
         #: `_settle` says which value the slot holds instead (#4125).
         self._instead: List[Tuple[int, str]] = []
+        self._parent_evidence = []
+        self._parent_admitted = {}
+        self._parent_admission = None
+        self._parent_root_output_id = None
+
+    @property
+    def parent_evidence(self):
+        """Detached parent admission decisions; not proof of final retention."""
+        return snapshot(self._parent_evidence)
+
+    def _refuse_parent(self, decision, reason):
+        decision.update(decision="refused", reason=reason)
+        self.dropped.append((f"isPartOf[{decision['occurrence']}]", refusal_text(decision)))
 
     def convert(self, rocrate_input: Any) -> Dict[str, Any]:
         """
@@ -610,6 +624,10 @@ class FairscapeToD4DConverter:
                 `dropped` instead (#4159).
         """
         self.dropped = []
+        self._parent_evidence = []
+        self._parent_admitted = {}
+        self._parent_admission = None
+        self._parent_root_output_id = None
         self._minted = {}
         self._read_at = {}
         self._instead = []
@@ -739,6 +757,10 @@ class FairscapeToD4DConverter:
                            for entity in nested_datasets}
 
         record_id, id_source = self._record_id(dataset)
+        self._parent_root_output_id = record_id
+        if 'isPartOf' in dataset:
+            self._parent_admission = ParentAdmission(
+                dataset, full_rocrate.get("@graph", []), resolvable_id)
         if record_id:
             d4d['id'] = record_id
             origin['id'] = id_source
@@ -1304,6 +1326,15 @@ class FairscapeToD4DConverter:
                 continue
             path = f"{where}[{n}]." if slot.multivalued else f"{where}."
             obj = self._object(item, cls, slot, path)
+            parent = self._parent_admitted.get(id(item)) if where == 'parent_datasets' else None
+            if parent is not None and parent[0] is item:
+                decision = parent[1]
+                decision['output_id'] = snapshot(obj.get('id')) if obj else None
+                # Compare the identifiers actually produced, without repeating
+                # _record_id or fitting and its diagnostics (#4946).
+                if obj and obj.get('id') == self._parent_root_output_id:
+                    self._refuse_parent(decision, 'produced parent id equals the produced root id')
+                    continue
             if obj:
                 built.append(obj)
                 if slot.multivalued:
@@ -1484,16 +1515,17 @@ class FairscapeToD4DConverter:
             found.append(('hasPart', 'resources',
                           self._parts(dataset['hasPart'], dataset.get('@id'))))
 
-        # isPartOf → parent_datasets, the Dataset slot whose slot_uri is
-        # schema:isPartOf; there is no `is_part_of` slot (#3969). What the
-        # crate names there is not checked to be a dataset (#4047). Each
-        # reference's keys are fitted to Dataset or recorded (#4098), and
-        # text, which is not a reference, is recorded (#4125). The slot
-        # takes nothing from any other property (`DATASET_SLOTS`, #4138).
+        # Only explicit, unambiguous Dataset parents enter the unchanged
+        # fitter. Keep occurrence placeholders and complete refusals (#4047).
         if 'isPartOf' in dataset:
+            references, self._parent_evidence = self._parent_admission.prepare(dataset['isPartOf'])
+            for reference, decision in zip(references, self._parent_evidence):
+                if reference is None:
+                    self._refuse_parent(decision, decision['reason'])
+                else:
+                    self._parent_admitted[id(reference)] = (reference, decision)
             found.append(('isPartOf', 'parent_datasets',
-                          self._references('isPartOf',
-                                           _as_list(dataset['isPartOf']))))
+                          references if any(ref is not None for ref in references) else None))
 
         # additionalProperty → custom metadata
         if 'additionalProperty' in dataset:

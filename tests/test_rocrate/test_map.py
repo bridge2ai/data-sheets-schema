@@ -302,7 +302,8 @@ def unplaced_problems(rows, sv):
     reason must be reported instead of trying placement."""
     fields = [f for f in map_crate([], rows, sv, "TABLE").fields if f.from_table]
     problems = []
-    for row, field in zip(rows, fields, strict=True):
+    assert len(rows) == len(fields), "mapping rows and table results must pair exactly"
+    for row, field in zip(rows, fields):
         execution = (row.get("Execution") or "active").strip()
         if execution in ("retired", "deferred"):
             if (field.status != execution
@@ -441,7 +442,8 @@ class TestTableAgainstSchema(unittest.TestCase):
         self.assertEqual(len(table_fields), 136)
         self.assertEqual(Counter(f.execution for f in table_fields),
                          {"active": 85, "retired": 19, "deferred": 32})
-        for row, field in zip(self.rows, table_fields, strict=True):
+        self.assertEqual(len(self.rows), len(table_fields))
+        for row, field in zip(self.rows, table_fields):
             self.assertEqual(field.rule_id, row["Rule_ID"])
             if row["Execution"] != "active":
                 self.assertEqual(field.status, row["Execution"])

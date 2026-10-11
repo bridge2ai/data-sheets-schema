@@ -7,6 +7,7 @@ separately for audit; they cannot fill a missing root property.
 from __future__ import annotations
 
 from copy import deepcopy
+from itertools import zip_longest
 import re
 from typing import Any
 
@@ -177,7 +178,14 @@ def source_report(graph, root, rows, fields, placement, root_note, dataset_slots
     """
     entries = []
     root_index = next((i for i, e in enumerate(graph) if e is root), None)
-    for row, result in zip(rows, [f for f in fields if f.from_table], strict=True):
+    missing = object()
+    for row, result in zip_longest(rows, [f for f in fields if f.from_table], fillvalue=missing):
+        # Strict pairing also on Python 3.9: never omit an unmatched row or
+        # result, and do not materialize or drain a row iterator in advance.
+        if row is missing:
+            raise ValueError("zip() argument 2 is longer than argument 1")
+        if result is missing:
+            raise ValueError("zip() argument 2 is shorter than argument 1")
         expr = (row.get("RO_Crate_JSON_Path") or "").strip()
         rule = (row.get("Mapping_Rule") or "").strip()
         match = GRAPH_RE.match(expr)
