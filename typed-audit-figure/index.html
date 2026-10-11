@@ -439,9 +439,12 @@ destination. The tool never removes or replaces a caller's output. Exit 0 means
 publication completed; exit 2 indicates a refused input or failed publication.</p>
 <p>This is the standalone software consumer in
 <a href="https://github.com/bridge2ai/data-sheets-schema/issues/4340">#4340</a>.
-It does not close #2930/#3336 or select their v9 versus v8 comparator: actual
-generation/reconciliation integration, the common condition decision, new
-prompt/renderer registration, pre-run predictions and independently reviewed
+It does not establish completion of #2930/#3336 or select their v9 versus v8
+comparator. The separately selected
+<a href="../shared-generation-api-v1/">shared-generation API protocol</a> already connects
+typed auditing to reconciliation and generation completion; this figure remains
+an offline consumer. Native/direct acceptance, scientific condition adoption,
+registered comparator and pre-run predictions, and independently reviewed
 empirical canaries remain separate. Synthetic engineering proofs are not
 scientific labels or a paid execution authorization.</p>
 <p>Completion publication uses a shared helper whose exact source is captured in
