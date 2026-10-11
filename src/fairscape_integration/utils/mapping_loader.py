@@ -14,6 +14,7 @@ from typing import Dict, List, Optional, Set
 from data_sheets_schema.legacy_root_identity import MARKER, validate_rows
 from data_sheets_schema.legacy_update_plan import validate_rows as validate_update_rows
 from data_sheets_schema.legacy_creators import validate_rows as validate_creator_rows
+from data_sheets_schema.legacy_description_lists import validate_rows as validate_description_rows
 
 
 class MappingLoader:
@@ -47,6 +48,7 @@ class MappingLoader:
             validate_rows(rows)
             validate_update_rows(rows)
             validate_creator_rows(rows)
+            validate_description_rows(rows)
 
             for row in rows:
                 # Skip header rows and empty rows
