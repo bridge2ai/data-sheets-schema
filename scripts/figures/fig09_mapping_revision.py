@@ -38,8 +38,23 @@ INK = "#0b0b0b"
 SURFACE = "#fcfcfb"
 
 
+PATH_BASES = {
+    "repository_root": "Resolve this relative path from the repository root, including after relocation.",
+    "external_absolute": "Absolute acquisition path outside the repository; relocation is not implied.",
+}
+
+
+def _locator(repo: Path, path: Path) -> dict[str, str]:
+    """Describe an already-resolved acquisition path without changing its bytes."""
+    try:
+        return {"path": path.relative_to(repo).as_posix(), "path_base": "repository_root"}
+    except ValueError:
+        return {"path": str(path), "path_base": "external_absolute"}
+
+
 def prepare(repo: Path, packages: Path, static_records: Path, manifest: Path) -> dict:
     """Read each input once, retain exact hashes, and reconcile report/sidecar."""
+    repo = repo.resolve()
     captured = {}
 
     def read(path: Path) -> bytes:
@@ -53,12 +68,14 @@ def prepare(repo: Path, packages: Path, static_records: Path, manifest: Path) ->
     for project in PROJECTS:
         if project not in generated:
             raise ValueError(f"historical manifest has no {project} comparator")
-        gen_path = repo / generated[project]
+        gen_path = (repo / generated[project]).resolve()
+        gen_locator = _locator(repo, gen_path)
         full = yaml.safe_load(read(gen_path))
-        mapped = static_records / f"{project}_d4d.yaml"
+        mapped = (static_records / f"{project}_d4d.yaml").resolve()
         if not mapped.exists():
             panels.append({"project": project, "status": "no published static-map record",
-                           "generated_record": str(gen_path), "outcome": {},
+                           "generated_record": gen_locator["path"],
+                           "generated_record_path_base": gen_locator["path_base"], "outcome": {},
                            "loss": {}, "maptype": {}, "overlap": {}})
             continue
         processed = packages / project / "processed"
@@ -134,8 +151,10 @@ def prepare(repo: Path, packages: Path, static_records: Path, manifest: Path) ->
             raise ValueError(f"reported slot count differs for {project}")
         counts, detail = compare_records(project, crate, full)
         panels.append({"project": project, "status": "mapped", **report,
-                       "overlap": counts, "generated_record": str(gen_path),
-                       "static_record": str(mapped),
+                       "overlap": counts, "generated_record": gen_locator["path"],
+                       "generated_record_path_base": gen_locator["path_base"],
+                       "static_record": _locator(repo, mapped)["path"],
+                       "static_record_path_base": _locator(repo, mapped)["path_base"],
                        "source_observation_counts": dict(Counter(row["source_evidence"] for row in rows))})
         overlaps.extend(detail)
         observations.extend(rows)
@@ -147,7 +166,7 @@ def prepare(repo: Path, packages: Path, static_records: Path, manifest: Path) ->
                  ROOT / "src/data_sheets_schema/schema_view.py",
                  ROOT / "src/data_sheets_schema/figure_publication.py"):
         read(path)
-    return {"projects": panels, "overlap_slots": overlaps,
+    return {"repository_root": repo, "projects": panels, "overlap_slots": overlaps,
             "source_observations": observations, "captured": captured}
 
 
@@ -271,7 +290,8 @@ def publish(prepared: dict, output: Path, code_commit: str) -> dict:
                        **{f"loss_{'unassessed' if key == '—' else key}": None if missing else row["loss"].get(key, 0) for key in ("none", "minimal", "moderate", "high", "—")},
                        **{f"maptype_{key}": value for key, value in row["maptype"].items()},
                        **{f"overlap_{key}": None if missing else row["overlap"].get(key, 0) for key in OVERLAP},
-                       "generated_record": row["generated_record"]})
+                       "generated_record": row["generated_record"],
+                       "generated_record_path_base": row["generated_record_path_base"]})
     for suffix, rows in (("", panels), ("_overlap_slots", prepared["overlap_slots"]),
                          ("_source_observations", prepared["source_observations"])):
         (output / f"{STEM}{suffix}.csv").write_bytes(_csv_bytes(rows))
@@ -288,14 +308,18 @@ def publish(prepared: dict, output: Path, code_commit: str) -> dict:
             "neither exactMatch nor loss=none, and does not establish round-trip losslessness.\n"
             "A retired/deferred row can repeat evidence placed elsewhere; this is not unique-source coverage.\n"
             "generated_only is strictly record-slot overlap and does not establish source absence.\n"
-            "VOICE's differing release DOIs remain different identities. No human scientific review is implied.\n")
+            "VOICE's differing release DOIs remain different identities. No human scientific review is implied.\n"
+            "Paths tagged repository_root resolve from the relocated repository root.\n"
+            "Paths tagged external_absolute record outside acquisitions and are not portable repository references.\n")
     (output / "README.txt").write_text(note, encoding="utf-8")
     verify_inputs()
     artifacts = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
                  for path in sorted(output.iterdir()) if path.is_file()}
-    manifest = {"state": "complete", "format_version": 1, "code_commit": code_commit,
+    manifest = {"state": "complete", "format_version": 2, "code_commit": code_commit,
+                "path_bases": dict(PATH_BASES),
                 "historical_generated_comparator": "generic-v8 rep 1, API arm",
-                "inputs": [{"path": str(path), "sha256": hashlib.sha256(raw).hexdigest()}
+                "inputs": [{**_locator(prepared["repository_root"], path),
+                            "sha256": hashlib.sha256(raw).hexdigest()}
                            for path, raw in inputs.items()], "artifacts": artifacts,
                 "scientific_scoring": False}
     def verify():
