@@ -1,0 +1,60 @@
+{
+  "applications_executed": false,
+  "checks": {
+    "all114_predecessor_config_pins_retained": true,
+    "all_scripts_python39_AST_parse": true,
+    "controls_case_roster_equals_config": true,
+    "declared_controls": 22,
+    "exact_run_and_controls_delta": true,
+    "fresh_control_output_publication_output_bound_and_enabled_paths_absent": true,
+    "only_config_changes": [
+      "format",
+      "pins",
+      "output",
+      "serialization_controls_receipt",
+      "serialization_control_cases"
+    ],
+    "pin_mismatches": 0,
+    "unchanged_actual_input_forms": 5,
+    "unchanged_source_postimages": 26,
+    "unique_declared_file_pins": 126,
+    "worker_and_serialization_oracle_byte_exact04": true
+  },
+  "commands": {
+    "controls": "ACTUAL_BOUND_PYTHON -I -B /private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/controls.py --run",
+    "publication": "ROOT_METADATA_PYTHON -I -S -B /private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/run.py --run"
+  },
+  "finding_resolution": {
+    "actual_guard": "run.py require_natural_success requires no wait error, exit0, owned_group_absent and no signals. main calls this exact predicate after preserving each execution receipt and before worker PASS admission. A refusal retains partial outputs and failure manifest.",
+    "controls": "controls imports this exact external runner predicate; normal exit0/no signals admitted, exit0/SIGTERM and exit0/SIGKILL each require AssertionError. These do not mirror an independent test-only predicate.",
+    "prior": "P04-CLOSURE",
+    "status": "CLOSED_STATIC"
+  },
+  "format": "independent_publisher05_static_review_v1",
+  "freeze": {
+    "bytes": 3826,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/freeze.json",
+    "sha256": "490dd679063a3363edfb344817cd82412db597571fe115f16f146746d540c771"
+  },
+  "limits": [
+    "Static review is not a controls or five-publication pass.",
+    "No scientific source coverage, fidelity, denominator, study-arm or held-adoption change.",
+    "Group absence and zero coordinator signals do not alone claim full application-level graceful shutdown.",
+    "Historical failed03 and original4942 failed baseline wrapper remain failed evidence, not relabeled success."
+  ],
+  "predecessor_review": {
+    "bytes": 4892,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution04-independent-review.json",
+    "sha256": "ca8735f032d9b465dc138e8e853be2d06c90d00f44757ac488a3aaf8701a86ed"
+  },
+  "readers_released": true,
+  "required_root_sequence": [
+    "Run22 frozen controls with actual bound Python; require successful exact receipt, runtime/YAML/config/input pins and no project imports/pin changes.",
+    "Transfer exact accepted merge/CI/plugin/dual2273/readiness binding to05 bound disabled template only; no other config changes. Recheck root-owned current source inventory/Git/interpreter before enable.",
+    "Enable only enabled=true and run actual five CLI publications serially. Require all five exit0, passed worker, owned-group absence, signals=[], complete preservation and completed manifest; retain failed03 and unused04."
+  ],
+  "scope": "Complete04 serialization review plus narrow05 correction; no applications, project/YAML imports, controls, tests, source mutation or publication by reviewer.",
+  "serialization_and_evidence": "04 review remains applicable: pre-execution saved-record CLI serializer independent of current output, old historical Dataset/sidecar pins retained, full typed graph/canonical hash/current schema gate/sidecar raw bytes and raw-source evidence preserved with only derived Dataset hash/size and existing finite locator rebindings. Both retained writer references join exact26-postimage roster. Five historical record canonical hashes/sidecar pins and top-level key order independently joined. No current output is an oracle.",
+  "source_writes": false,
+  "verdict": "STATIC_CLEAR_FOR_ROOT_CONTROLS_THEN_EXACT_BINDING_AND_PUBLICATION"
+}

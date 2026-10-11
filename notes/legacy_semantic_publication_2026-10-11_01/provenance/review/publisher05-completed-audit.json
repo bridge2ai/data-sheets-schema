@@ -1,0 +1,357 @@
+{
+  "actual_results": {
+    "actual_cli_attempts": 5,
+    "changed_pins": 0,
+    "changed_source_entries": 0,
+    "cli_exit_codes": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "controls_passed": 22,
+    "empty_worker_stderr_logs": 5,
+    "late_cleanup": null,
+    "manifest_retained_artifacts": 44,
+    "owned_groups_absent": true,
+    "project_origin_rows": 150,
+    "publication_artifacts": 15,
+    "python_version": [
+      3,
+      13,
+      12
+    ],
+    "root_authoritative_exit": 0,
+    "root_authoritative_session": 17526,
+    "signals_by_form": {
+      "CHORUS": [],
+      "CM4AI_original": [],
+      "CM4AI_reduced": [],
+      "VOICE": [],
+      "VOICE_provenance": []
+    },
+    "source_git_clean_before_after": true,
+    "source_postimages": 26,
+    "whole_source_entries": 10791,
+    "worker_passes": 5
+  },
+  "completed": {
+    "bytes": 32527,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/completed.json",
+    "sha256": "5473f9008794d190cb8bc4c6733ba2dbcc9199dac7bbe17a693c27dfbec38623"
+  },
+  "controls": {
+    "bytes": 41429,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-controls05-results/result.json",
+    "sha256": "f453b05a2171c336bc9f3c5ff33efb980a8d6f267e0ee4e4dbf9f4091e3ca3fd"
+  },
+  "detailed_evidence": {
+    "bytes": 59323,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05-completed-evidence.json",
+    "sha256": "f6580dc6d184fd487033d74439f443b1dcf266366b2a95c2ac15986962968346"
+  },
+  "format": "independent_legacy_publication4594_completed_audit_v5",
+  "forms": [
+    {
+      "actual_schema_readback_gate": "PASS",
+      "canonical_sha256": "094e764ba68018b07b13ddc37bc0301470ccb5bbe7dac71a7326df8f15606467",
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "complete_sidecar_reconstructed_independently": true,
+      "controls_derived_bytes_equal": true,
+      "dataset": {
+        "bytes": 7791,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d.yaml",
+        "sha256": "97bec858efba1da5372ffbbb5894fbbb6d797dc38f7995c6615816f0d7bae13b"
+      },
+      "form": "CHORUS",
+      "origin_rows": 30,
+      "pid": 61267,
+      "pointer_counts": {
+        "constructed_units": 0,
+        "declined_units": 5,
+        "missing": 10,
+        "output_pointers": 0,
+        "present": 7,
+        "route_assertions": 17,
+        "units": 5
+      },
+      "raw_input_bytes": 20635,
+      "record_keys": 17,
+      "report": {
+        "bytes": 12116,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d_report.txt",
+        "sha256": "f935a526cb804ef64c73f8e02d036ab2f2e3ee82a7e1a35ede7274e40f913ddd"
+      },
+      "sidecar": {
+        "bytes": 30422,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d_route_dispositions.json",
+        "sha256": "201569d165267c878a77de7905c714636f0e43068768285c7f26c139d7253de1"
+      },
+      "supplemental_report_rows": []
+    },
+    {
+      "actual_schema_readback_gate": "PASS",
+      "canonical_sha256": "c2a4e0a154a43065807689044ef8f5ee1e6274683d1d758d468a536978ae8b82",
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "complete_sidecar_reconstructed_independently": true,
+      "controls_derived_bytes_equal": true,
+      "dataset": {
+        "bytes": 21274,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d.yaml",
+        "sha256": "4e102b473be6d493cad5aa5c2cb670912fe24f5927588ef147cee1539a02af23"
+      },
+      "form": "VOICE",
+      "origin_rows": 30,
+      "pid": 61404,
+      "pointer_counts": {
+        "constructed_units": 11,
+        "declined_units": 8,
+        "missing": 3,
+        "output_pointers": 11,
+        "present": 14,
+        "route_assertions": 17,
+        "units": 19
+      },
+      "raw_input_bytes": 726461,
+      "record_keys": 27,
+      "report": {
+        "bytes": 38733,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d_report.txt",
+        "sha256": "99a827f0f9090b32cb1e67e15180bc0eeaa1380570564f797edda9d3256458fe"
+      },
+      "sidecar": {
+        "bytes": 829227,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d_route_dispositions.json",
+        "sha256": "0ea926301865df14abfe10484bd1d3315c1b3daf450aee79b454dbfd579f2345"
+      },
+      "supplemental_report_rows": []
+    },
+    {
+      "actual_schema_readback_gate": "PASS",
+      "canonical_sha256": "ac9f7b67b5faea5d9b698abc082dcc69deb5881ac242fab02d55d2bd0c7bcf53",
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "complete_sidecar_reconstructed_independently": true,
+      "controls_derived_bytes_equal": true,
+      "dataset": {
+        "bytes": 11022,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d.yaml",
+        "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+      },
+      "form": "CM4AI_reduced",
+      "origin_rows": 30,
+      "pid": 61408,
+      "pointer_counts": {
+        "constructed_units": 7,
+        "declined_units": 7,
+        "missing": 4,
+        "output_pointers": 7,
+        "present": 13,
+        "route_assertions": 17,
+        "units": 14
+      },
+      "raw_input_bytes": 107388,
+      "record_keys": 22,
+      "report": {
+        "bytes": 41982,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d_report.txt",
+        "sha256": "a4d715a8814d22311a6d8803df1b07a1a919ea224746b97a0e9cdf68236f0f25"
+      },
+      "sidecar": {
+        "bytes": 130220,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d_route_dispositions.json",
+        "sha256": "4ebdb36ff6d5553f609421798a0ab1c10d38186061fb56a4f314aa06335e5016"
+      },
+      "supplemental_report_rows": [
+        {
+          "disposition": "constructed",
+          "legacy_field": "bytes",
+          "output_pointers": [
+            "/total_size_bytes"
+          ],
+          "pointer": "/@graph/1/evi:totalContentSizeBytes",
+          "property": "evi:totalContentSizeBytes",
+          "source_occurrence": "input:0"
+        }
+      ]
+    },
+    {
+      "actual_schema_readback_gate": "PASS",
+      "canonical_sha256": "722bed9e218a0c505557de3ea1238f5259cb2f177e77b251505635c55bfaa023",
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "complete_sidecar_reconstructed_independently": true,
+      "controls_derived_bytes_equal": true,
+      "dataset": {
+        "bytes": 739,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d.yaml",
+        "sha256": "79623548f0ba57b8501ab427e6e41fbc99f20c1aa0a6087837356412dabb4827"
+      },
+      "form": "VOICE_provenance",
+      "origin_rows": 30,
+      "pid": 61416,
+      "pointer_counts": {
+        "constructed_units": 0,
+        "declined_units": 0,
+        "missing": 17,
+        "output_pointers": 0,
+        "present": 0,
+        "route_assertions": 17,
+        "units": 0
+      },
+      "raw_input_bytes": 1232,
+      "record_keys": 4,
+      "report": {
+        "bytes": 2620,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d_report.txt",
+        "sha256": "e27360b27f5db71c13312878abeb5e7242ef82fa8c2bf639bdba923e2a95ec93"
+      },
+      "sidecar": {
+        "bytes": 7814,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d_route_dispositions.json",
+        "sha256": "b5702fc79bdcd3337f2e0c533086c8a07508abcc4b5f15972c7ed3058b17d4ae"
+      },
+      "supplemental_report_rows": []
+    },
+    {
+      "actual_schema_readback_gate": "PASS",
+      "canonical_sha256": "ac9f7b67b5faea5d9b698abc082dcc69deb5881ac242fab02d55d2bd0c7bcf53",
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "complete_sidecar_reconstructed_independently": true,
+      "controls_derived_bytes_equal": true,
+      "dataset": {
+        "bytes": 11022,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d.yaml",
+        "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+      },
+      "form": "CM4AI_original",
+      "origin_rows": 30,
+      "pid": 61426,
+      "pointer_counts": {
+        "constructed_units": 7,
+        "declined_units": 7,
+        "missing": 4,
+        "output_pointers": 7,
+        "present": 13,
+        "route_assertions": 17,
+        "units": 14
+      },
+      "raw_input_bytes": 12242926,
+      "record_keys": 22,
+      "report": {
+        "bytes": 40904,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d_report.txt",
+        "sha256": "c7725cf8d5fd3e03503ea382a2c5f49f127470cc1baebd2dc09f0a7090460299"
+      },
+      "sidecar": {
+        "bytes": 13033881,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d_route_dispositions.json",
+        "sha256": "50f39f4c7d362d96cca866de939f82d3f3b02791760bb35419be72a661d3de62"
+      },
+      "supplemental_report_rows": [
+        {
+          "disposition": "constructed",
+          "legacy_field": "bytes",
+          "output_pointers": [
+            "/total_size_bytes"
+          ],
+          "pointer": "/@graph/1/evi:totalContentSizeBytes",
+          "property": "evi:totalContentSizeBytes",
+          "source_occurrence": "input:0"
+        }
+      ]
+    }
+  ],
+  "frozen_package": {
+    "bytes": 3826,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/freeze.json",
+    "sha256": "490dd679063a3363edfb344817cd82412db597571fe115f16f146746d540c771"
+  },
+  "independent_checks": [
+    "Disabled\u2192bound changes only binding; bound\u2192active only enabled=true; root readiness/config/controls/producer joins exact.",
+    "22 ordered control outcomes pass, including genuine actual-coordinator normal-exit and forced-cleanup refusal predicates; no project imports/pin drift.",
+    "All declared immutable external pins, result manifest artifacts and controls YAML source pins rehashed. Ignored-inclusive completed output walk matches44 declared artifacts pluscompleted.json, with no symlinks.",
+    "Five staged source JSON byte strings equal historical raw input hashes; full original source bytes reappear intact in corresponding sidecars.",
+    "Five actual Dataset byte sizes/SHA256 independently equal root-controls values derived from saved export record before CLI, and equal worker expected-oracle pins. All historical canonical-record hashes remain equal.",
+    "Five complete sidecars independently reconstructed from historical saved full documents, changing only expected CLI Dataset path/size/hash and declared schema/mapping/source locator fields; rawJSON bytes match exactly.",
+    "All14 route families per form,85 source assertions,47present/38missing,52units,27declined/25constructed independently resolved. Every raw source pointer and25output pointers match full literals/types, including singleton-list target contracts.",
+    "Each selected root ID, pointer and root hash matches raw source; complete snapshot canonical hash, original serialization byte size/hash, single original occurrence and merge/primary indices verified.",
+    "Every constructed_values entry equals the corresponding saved full-record entry; no declined unit has an output pointer.",
+    "Reports retain exact input/output/mapping names, historical81 denominator and construction-is-not-coverage label. Two CM4AI supplemental rows are independently derived from present exact-size assertions and excluded from unmapped report; no supplemental heading in remaining three forms.",
+    "Five original unchanged CLI calls and actual saved-byte prepare_dataset checks passed; each worker owns all30 loaded project-file origins under bound source, joined to preserved inventory.",
+    "Before/after/bound source inventories equal10791 entries; all26 producer postimages and whole-source Git identity unchanged; no source writes by reviewer.",
+    "Five exit0 receipts each show owned_group_absent=true, signals=[]; actual fixed predicate requires these beforePASS. No late coordinator cleanup."
+  ],
+  "limits": [
+    "This completes the bounded actual legacy semantic TSV publication evidence for4932/4943. Repository delivery/documentation still belongs to4594/2915.",
+    "Five input forms are not five independent datasets. Equal CM4AI reduced/original Dataset bytes retain distinct full source evidence and sidecars.",
+    "CM4AI original raw source12242926bytes and complete sidecar13033881bytes were actually read and compared, not truncated.",
+    "No scientific coverage/fidelity gain, exactMatch/none relabeling, registered-arm/static-map/fig09 adoption, denominator change, or closure of broad held issues follows.",
+    "Publication remains atomic per file. Completed process-group absence and no signals are recorded coordinator evidence, not an independent OS requery or proof of every unrecorded descendant/application cleanup.",
+    "No performance or native60/900/regression credit follows from this legacy publication."
+  ],
+  "metadata_audit_script": {
+    "bytes": 15594,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05-audit-metadata.py",
+    "sha256": "4d4c9447d58722682ba5af9dad60b041d769e88bfeebb0ad050493320a7a8e22"
+  },
+  "method": "Independent stdlib readback, hashes, JSON type-exact graph and pointer reconstruction from completed/frozen artifacts only. No project/YAML imports, application reruns, serializers, schema validators, tests, publication, source or Git mutations by reviewer. Actual YAML type/duplicate/schema acceptance is joined to the reviewed worker and control receipts; exact bytes independently match their pre-execution saved-record oracle hashes. No newly observed output was adopted as expected data.",
+  "readers_released": true,
+  "retained_failed03": {
+    "actual_cli_attempts": 1,
+    "cli_exit_code": 0,
+    "failure": {
+      "bytes": 22856,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results03/failure.json",
+      "sha256": "6f72a93e1e15729388f92d98c1ae32da3ed334452fbfc5f358ab0aa2975171b1"
+    },
+    "interpretation": "Original03 remains failed despite its CHORUS CLIexit0;04 was unused;05 supplies five newly executed successes, not relabeled prior output.",
+    "verification_error": {
+      "message": "Published Dataset bytes differ",
+      "type": "AssertionError"
+    },
+    "worker": {
+      "bytes": 10258,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results03/receipts/CHORUS.worker.json",
+      "sha256": "0d98fbb4d9e7ea15b0c1b097379341b30fedfc804508549215fdca2d4cb39ce4"
+    },
+    "worker_passed": false
+  },
+  "route_counts": {
+    "constructed_units": 25,
+    "declined_units": 27,
+    "missing": 38,
+    "output_pointers": 25,
+    "present": 47,
+    "route_assertions": 85,
+    "units": 52
+  },
+  "source_identity": {
+    "actual_merge_and_ci_plugin_readiness_bound": true,
+    "dual_runtime_prerequisites": "Exact actual2273 PASS receipts for3.13/3.9, same ordered nodes, original4942 failed baseline-wrapper receipt plus saved confirmation retained. Prior merge/CI/plugin independent review remains bound; no claim of rerun here.",
+    "head": "ffc4ca922723caa620af2e32a31ad538bc5a5ac9",
+    "pr": 4938,
+    "reviewed_pr_head": "00b80002371fe119bc089445234d6b2f5bd5e24d",
+    "tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe"
+  },
+  "static_review": {
+    "bytes": 4049,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05-independent-review.json",
+    "sha256": "df6f84e970b59ebc542fdd4097c198c72bf0e86fbfe138da889efdc86fe1e0db"
+  },
+  "verdict": "PASS_BOUNDED_FIVE_ACTUAL_CLI_PUBLICATIONS"
+}

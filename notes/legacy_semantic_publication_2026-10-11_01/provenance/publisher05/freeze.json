@@ -1,0 +1,82 @@
+{
+  "all_prior_files_retained": true,
+  "binding": null,
+  "controls_executed": false,
+  "controls_expected": 22,
+  "external_pins": 125,
+  "files": [
+    {
+      "bytes": 16045,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/run.py",
+      "sha256": "c20f1aa06372ec645041b29a8392d59e9160cf7430c276c6316b5e4cc29caf4e"
+    },
+    {
+      "bytes": 12080,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/worker.py",
+      "sha256": "c2301c8e25c5726fad3540c9580ddb13dc5ff0e7880a107ceb53f889446314bd"
+    },
+    {
+      "bytes": 1962,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/serialization_oracle.py",
+      "sha256": "0bdd791741598c72f543b5c843acb614ce3848da0bd407c7d5e0166da7916943"
+    },
+    {
+      "bytes": 12563,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/controls.py",
+      "sha256": "058251b0ea2fb0c89084061aa2664c930b0d8bfc70f5da2ea16ccf448576f628"
+    },
+    {
+      "bytes": 49525,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/configuration.disabled.json",
+      "sha256": "e52f02898f59410a8a34f72db445f9f6803bdf70f8d70164349af2283431561f"
+    },
+    {
+      "bytes": 23795,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/references/cli.py",
+      "sha256": "5d8020f0764e35af99f72e5d6e61e83d90455302dd28b075f75121d770b97a1d"
+    },
+    {
+      "bytes": 6374,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/references/legacy_publication.py",
+      "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9"
+    },
+    {
+      "bytes": 6696,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/plan.json",
+      "sha256": "ee3235b573b52b3f8f4aae8b533bd50d5708542230e6297fd39679300bfee700"
+    },
+    {
+      "bytes": 2184,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/handoff.md",
+      "sha256": "029dc396397a2555d5d5aeba0d8d7759246a27ca8afb735794cb56f18dddc786"
+    },
+    {
+      "bytes": 3064,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/change04-to05.patch",
+      "sha256": "71cf5aadd7c72c3172a61ceda09892042e61f30fe4de0c9cb859f66220628cb7"
+    }
+  ],
+  "format": "legacy4594_disabled_execution_freeze_v5",
+  "fresh_paths_absent": {
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-controls05-results": true,
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/configuration.bound.disabled.json": true,
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/configuration.enabled.json": true,
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05": true
+  },
+  "issue": 4943,
+  "new_cli_output": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05",
+  "new_controls_output": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-controls05-results/result.json",
+  "no_source_mutation_or_application": true,
+  "old_config_pins_retained": 114,
+  "predecessor": {
+    "bytes": 3770,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution04/freeze.json",
+    "sha256": "b6cd2270df808725e6a812b78f1e8da8e034eb6508f901e7c666b98ad9e429ba"
+  },
+  "python39_ast_compile_only": true,
+  "readers_writers_released": true,
+  "same_five_inputs_and_all_source_postimages": true,
+  "status": "DISABLED_STATIC_ONLY",
+  "unchanged_source_postimages": 26,
+  "worker_and_serialization_oracle_byte_exact04": true
+}

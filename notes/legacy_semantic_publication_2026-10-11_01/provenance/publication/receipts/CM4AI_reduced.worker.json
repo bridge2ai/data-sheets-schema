@@ -1,0 +1,274 @@
+{
+  "cli_error": null,
+  "cli_exit_code": 0,
+  "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+  "elapsed_seconds": 2.096041124983458,
+  "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+  "form": "CM4AI_reduced",
+  "literal_cli_argv": [
+    "fairscape-cli",
+    "transform",
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_reduced.json",
+    "--mapping",
+    "/private/tmp/d4d-legacy-dispositions-4932-20261011/data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+    "--output",
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d.yaml",
+    "--report"
+  ],
+  "origin_findings": [],
+  "origin_rows": [
+    {
+      "bytes": 6424,
+      "module": "data_sheets_schema.legacy_creator_references",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_creator_references.py",
+      "sha256": "4f8a230c1779caf256e3ad19f1364c362713bdad262844bd10f8a291afd707f0"
+    },
+    {
+      "bytes": 6894,
+      "module": "data_sheets_schema.legacy_creators",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_creators.py",
+      "sha256": "d1da2432ac304391b4d5bc03d8ecd99ccb2383cfb1f8410c6bacda37c3941377"
+    },
+    {
+      "bytes": 3525,
+      "module": "data_sheets_schema.legacy_description_lists",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_description_lists.py",
+      "sha256": "3c4d40487c96d6cd348f77dc2bdacc442b0abfb95fe718c44d625555a3522a11"
+    },
+    {
+      "bytes": 3104,
+      "module": "data_sheets_schema.legacy_documentary",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_documentary.py",
+      "sha256": "6e38cdb39c78c91d0db0e36218c1da1035dce55fb91e3767ab6e0982c34f1b6f"
+    },
+    {
+      "bytes": 2148,
+      "module": "data_sheets_schema.legacy_doi",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_doi.py",
+      "sha256": "6313c18f41feb74254834e886cb55ddb608e1872494a227150b7166cd780a606"
+    },
+    {
+      "bytes": 6374,
+      "module": "data_sheets_schema.legacy_publication",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_publication.py",
+      "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9"
+    },
+    {
+      "bytes": 3882,
+      "module": "data_sheets_schema.legacy_root_identity",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_root_identity.py",
+      "sha256": "d839ec3a8af433d30624f8fe02518b9e4ce149f5bb8ba0a32db0101ea9b6df93"
+    },
+    {
+      "bytes": 28634,
+      "module": "data_sheets_schema.legacy_route_dispositions",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_route_dispositions.py",
+      "sha256": "1bf8af7c24d2a27f22995f9a84c7b141d168763d617d06358be31c13fdd9daf1"
+    },
+    {
+      "bytes": 1804,
+      "module": "data_sheets_schema.legacy_sensitive_elements",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_sensitive_elements.py",
+      "sha256": "c86451cfc5fb455fc25c276303d14c916a2a6bec3072835d395299dcc424a3d0"
+    },
+    {
+      "bytes": 1459,
+      "module": "data_sheets_schema.legacy_update_plan",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_update_plan.py",
+      "sha256": "4078e94c2a412f99de7469590cda3dc327363640aa9fcacfe745d001e9218242"
+    },
+    {
+      "bytes": 15272,
+      "module": "data_sheets_schema.resources",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/resources.py",
+      "sha256": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435"
+    },
+    {
+      "bytes": 52876,
+      "module": "data_sheets_schema.rocrate_map",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/rocrate_map.py",
+      "sha256": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592"
+    },
+    {
+      "bytes": 11731,
+      "module": "data_sheets_schema.rocrate_sources",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/rocrate_sources.py",
+      "sha256": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75"
+    },
+    {
+      "bytes": 6234,
+      "module": "data_sheets_schema.schema_snapshot",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/schema_snapshot.py",
+      "sha256": "33e2928f435d1f1ca9c6d13edb0ec0c3e393d4ee28c5e9e4957c60c089ef52b1"
+    },
+    {
+      "bytes": 12420,
+      "module": "data_sheets_schema.schema_view",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/schema_view.py",
+      "sha256": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff"
+    },
+    {
+      "bytes": 25356,
+      "module": "data_sheets_schema.scope",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/scope.py",
+      "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199"
+    },
+    {
+      "bytes": 1229,
+      "module": "fairscape_integration",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/__init__.py",
+      "sha256": "633429f2a848b9e582c6d79d5f67199ade9885b662beb8e6478b2698a3526f75"
+    },
+    {
+      "bytes": 8887,
+      "module": "fairscape_integration.constants",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/constants.py",
+      "sha256": "bba150257a445af4326f186decf18b37c0878f5d53cb84c2fa1674de2188f1e6"
+    },
+    {
+      "bytes": 13558,
+      "module": "fairscape_integration.d4d_to_fairscape",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/d4d_to_fairscape.py",
+      "sha256": "e13bacaab74e893b22c65da3237cdae755d2f2f55c93224b1825e6670e25c7e2"
+    },
+    {
+      "bytes": 97645,
+      "module": "fairscape_integration.fairscape_to_d4d",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/fairscape_to_d4d.py",
+      "sha256": "7d5f91de8c6af1712899ddfc76f5b87fa5bb6c35c7ba079e586cc6522700f6fd"
+    },
+    {
+      "bytes": 2307,
+      "module": "fairscape_integration.utils",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/__init__.py",
+      "sha256": "bb6816ed5be1c00b8c3adeb3013cd5e5584193fe8d77b15e5a48a854ef3d3afd"
+    },
+    {
+      "bytes": 15792,
+      "module": "fairscape_integration.utils.d4d_builder",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/d4d_builder.py",
+      "sha256": "d921541e73e23f2815d46bd3f25ef2102deed883b953ccd830933b103dbf9357"
+    },
+    {
+      "bytes": 6815,
+      "module": "fairscape_integration.utils.field_prioritizer",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/field_prioritizer.py",
+      "sha256": "3cfc67a3609ed766825184bd6e1750e79e2358053960f09dcfee8279daae889e"
+    },
+    {
+      "bytes": 11026,
+      "module": "fairscape_integration.utils.informativeness_scorer",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/informativeness_scorer.py",
+      "sha256": "952b8941a2ef26e28ddd95d5a6ce5ec09e874c169b12562dd84d32978c05e782"
+    },
+    {
+      "bytes": 7613,
+      "module": "fairscape_integration.utils.mapping_loader",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/mapping_loader.py",
+      "sha256": "d259c2fb4694300d7cb0f7af3f7a0bb4e62170258e3840382cad438a127b27e7"
+    },
+    {
+      "bytes": 18933,
+      "module": "fairscape_integration.utils.rocrate_merger",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/rocrate_merger.py",
+      "sha256": "71d5d9210d7472c610dccffe3a10c736a8fe8335732bf0c8c82a9d2177b7fed7"
+    },
+    {
+      "bytes": 11414,
+      "module": "fairscape_integration.utils.rocrate_parser",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/rocrate_parser.py",
+      "sha256": "452b617186c12d17cd054ffe1fb23532b412a54e77f816591fd16a399f3a0110"
+    },
+    {
+      "bytes": 11942,
+      "module": "fairscape_integration.utils.sssom_integration",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/sssom_integration.py",
+      "sha256": "a3b83fb7fde11c6a8b3021fb5e8e128da35aa30a2e0b75ab05df07ca88d63a81"
+    },
+    {
+      "bytes": 9487,
+      "module": "fairscape_integration.utils.sssom_reader",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/sssom_reader.py",
+      "sha256": "e736ae6d4e01bcc35d34b713fab48956efa7565d0967a8ee4f4730d8bdfe8324"
+    },
+    {
+      "bytes": 7214,
+      "module": "fairscape_integration.utils.validator",
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/validator.py",
+      "sha256": "5277590c5e019d47dda586c8f1c16fabf5b1457bf249a5d80c4b49f9648288e3"
+    }
+  ],
+  "passed": true,
+  "scope": "One natural CLI publication plus one explicit actual saved-byte Dataset recheck; no provider or scientific scoring.",
+  "sys_path": [
+    "/private/tmp/d4d-legacy-dispositions-4932-20261011/fairscape_models",
+    "/private/tmp/d4d-legacy-dispositions-4932-20261011/src",
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05",
+    "/opt/homebrew/Caskroom/miniforge/base/lib/python313.zip",
+    "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13",
+    "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/lib-dynload",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages",
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/src"
+  ],
+  "verification_error": null,
+  "verified": {
+    "actual_saved_byte_gate": "PASS",
+    "cli_origin": {
+      "bytes": 23795,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/cli.py",
+      "sha256": "5d8020f0764e35af99f72e5d6e61e83d90455302dd28b075f75121d770b97a1d"
+    },
+    "cli_serialization_oracle": {
+      "bytes": 11022,
+      "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a",
+      "source": "saved full record before CLI"
+    },
+    "dataset": {
+      "bytes": 11022,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d.yaml",
+      "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+    },
+    "exact_dataset_bytes_equal": true,
+    "full_type_exact_record_equal": true,
+    "permitted_rebindings": [
+      "dataset.path",
+      "dataset.bytes",
+      "dataset.sha256",
+      "schema.path",
+      "evidence.mapping.path",
+      "evidence.sources[0].display_name",
+      "evidence.sources[0].snapshot.original_file.path"
+    ],
+    "report": {
+      "bytes": 41982,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d_report.txt",
+      "sha256": "a4d715a8814d22311a6d8803df1b07a1a919ea224746b97a0e9cdf68236f0f25"
+    },
+    "report_labels_present": true,
+    "sidecar": {
+      "bytes": 130220,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d_route_dispositions.json",
+      "sha256": "4ebdb36ff6d5553f609421798a0ab1c10d38186061fb56a4f314aa06335e5016"
+    },
+    "sidecar_exact_after_declared_cli_bytes_and_locator_rebinding": true,
+    "source_snapshot_raw_bytes_equal": true,
+    "supplemental_report_rows": [
+      {
+        "disposition": "constructed",
+        "legacy_field": "bytes",
+        "output_pointers": [
+          "/total_size_bytes"
+        ],
+        "pointer": "/@graph/1/evi:totalContentSizeBytes",
+        "property": "evi:totalContentSizeBytes",
+        "source_occurrence": "input:0"
+      }
+    ],
+    "supplemental_report_rows_exact": true
+  },
+  "version": [
+    3,
+    13,
+    12
+  ]
+}
