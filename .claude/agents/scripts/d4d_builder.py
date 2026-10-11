@@ -24,6 +24,9 @@ from data_sheets_schema.legacy_creators import (
     creator_route, creator_value, creator_reference_route,
 )
 from data_sheets_schema.legacy_creator_references import construct_creators
+from data_sheets_schema.legacy_documentary import (
+    documentary_routes, documentary_source, documentary_value,
+)
 from data_sheets_schema.legacy_description_lists import (
     description_list_routes, description_list_value,
 )
@@ -63,6 +66,7 @@ class D4DBuilder:
         marked_creators = creator_route(self.mapping)
         marked_descriptions = description_list_routes(self.mapping)
         marked_sensitive = sensitive_elements_route(self.mapping)
+        marked_documentary = documentary_routes(self.mapping)
         identity = resolve_root_identity(root) if marked_id else None
         referenced = creator_reference_route(self.mapping)
         creator_data, construction = (
@@ -79,6 +83,12 @@ class D4DBuilder:
         # Map each covered field
         mapped_count = 0
         for d4d_field in covered_fields:
+            if d4d_field in marked_documentary:
+                value = documentary_source(root, marked_documentary[d4d_field])
+                if value is not None:
+                    self.d4d_data[d4d_field] = documentary_value(d4d_field, value)
+                    mapped_count += 1
+                continue
             if d4d_field in marked_descriptions:
                 # Only the selected root's named property supplies this route.
                 value = root.get(marked_descriptions[d4d_field])
@@ -166,6 +176,9 @@ class D4DBuilder:
 
         if field_name == 'sensitive_elements' and sensitive_elements_route(self.mapping):
             return sensitive_elements_value(value)
+
+        if field_name in documentary_routes(self.mapping):
+            return documentary_value(field_name, value)
 
         # Dataset.doi requires the bare form, independently of stale TSV types.
         if field_name == 'doi':

@@ -16,6 +16,7 @@ from data_sheets_schema.legacy_update_plan import validate_rows as validate_upda
 from data_sheets_schema.legacy_creators import validate_rows as validate_creator_rows
 from data_sheets_schema.legacy_description_lists import validate_rows as validate_description_rows
 from data_sheets_schema.legacy_sensitive_elements import validate_rows as validate_sensitive_rows
+from data_sheets_schema.legacy_documentary import validate_rows as validate_documentary_rows
 
 
 class MappingLoader:
@@ -51,6 +52,7 @@ class MappingLoader:
             validate_creator_rows(rows)
             validate_description_rows(rows)
             validate_sensitive_rows(rows)
+            validate_documentary_rows(rows)
 
             for row in rows:
                 # Skip header rows and empty rows
