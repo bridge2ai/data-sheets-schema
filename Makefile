@@ -517,7 +517,7 @@ test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
 		import yaml, json; \
 		d4d = yaml.safe_load(open('data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml')); \
 		rocrate, (valid, errors) = convert_d4d_to_fairscape(d4d); \
-		print('✓ D4D → FAIRSCAPE: PASSED' if valid else '✗ D4D → FAIRSCAPE: FAILED'); \
+		print('✓ D4D → FAIRSCAPE model validation: PASSED (not source preservation)' if valid else '✗ D4D → FAIRSCAPE model validation: FAILED'); \
 		json.dump(rocrate.model_dump(exclude_none=True, by_alias=True), \
 		          open('data/ro-crate/examples/voice_d4d_to_fairscape.json', 'w'), indent=2)"
 
