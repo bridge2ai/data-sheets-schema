@@ -1,0 +1,505 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/fairscape_declared_assertions/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>FAIRSCAPE declared assertions - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fairscape-declared-assertions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              FAIRSCAPE declared assertions
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home/" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_core/" class="md-nav__link">
+        D4D-Core
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic_exchange/" class="md-nav__link">
+        Semantic Exchange
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Schema Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        CLI Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/fairscape_declared_assertions.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="fairscape-declared-assertions">FAIRSCAPE declared assertions</h1>
+<p>The paired converters expose a detached <code>route_evidence</code> dictionary alongside
+their existing return values. The thirteen #4046 root assertions have finite
+canonical constructions and explicit projection limits. No schema, mapping table, ranking denominator, or
+scientific mapping-strength claim changes here.</p>
+<table>
+<thead>
+<tr>
+<th>Selected root assertion</th>
+<th>Dataset construction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>citation</code></td>
+<td>Whole scalar <code>citation</code> string</td>
+</tr>
+<tr>
+<td><code>rai:dataManipulationProtocol</code></td>
+<td>Whole strings in <code>cleaning_strategies[].cleaning_details</code></td>
+</tr>
+<tr>
+<td><code>funder</code></td>
+<td>Whole strings or sole explicit reference IDs in <code>funders[].grantor</code></td>
+</tr>
+<tr>
+<td><code>humanSubjects</code>, <code>humanSubjectResearch</code></td>
+<td>Shared approved human-subject rule: source-labelled description, conditional explicit boolean</td>
+</tr>
+<tr>
+<td><code>dataGovernanceCommittee</code></td>
+<td>Whole string in <code>data_governance.description</code></td>
+</tr>
+<tr>
+<td><code>completeness</code></td>
+<td>Detached assertion evidence; no Dataset metric or slot is invented</td>
+</tr>
+<tr>
+<td><code>rai:personalSensitiveInformation</code></td>
+<td>Whole strings in <code>sensitive_elements[].sensitivity_details</code>; no confidentiality flag</td>
+</tr>
+<tr>
+<td><code>rai:dataCollection</code></td>
+<td>Scalar text in <code>collection_mechanisms[].mechanism_details</code>; no acquisition-method inference</td>
+</tr>
+<tr>
+<td><code>rai:dataSocialImpact</code></td>
+<td>Scalar text in <code>future_use_impacts[].impact_details</code>; no completed DPIA inference</td>
+</tr>
+<tr>
+<td><code>rai:dataAnnotationProtocol</code></td>
+<td>Whole strings in <code>labeling_strategies[].data_annotation_protocol</code></td>
+</tr>
+<tr>
+<td><code>rai:dataAnnotationPlatform</code></td>
+<td>Whole strings in <code>labeling_strategies[].data_annotation_platform</code></td>
+</tr>
+<tr>
+<td><code>rai:annotationsPerItem</code></td>
+<td>Exact integer or reversible ASCII decimal string in <code>annotations_per_item</code></td>
+</tr>
+</tbody>
+</table>
+<p>Immediate cleaning/funder string-list occurrences keep order, duplicates and
+empty strings. Unsupported units remain raw evidence and are reported in
+<code>dropped</code>; mixed lists are <code>partial</code>. References do not create grant identifiers.
+Human-subject processing also records the consulted exemption, IRB and protocol
+assertions and exact referenced graph candidates. It does not infer approval.
+Covered <code>additionalProperty</code> assertions and <code>d4d:humanSubject</code> retain their
+existing fitter behavior, with complete raw evidence. Explicit canonical
+assertions precede singular legacy candidates; a superseded candidate remains
+visible. The ordinary final Dataset validator still runs.</p>
+<p>Each reverse evidence row records the selected-root source pointer, missing vs
+null vs present state, exact parsed JSON value, target, decision and observed
+final retention. <code>retained</code>, <code>partial</code>, <code>not_retained</code> and <code>not_constructed</code>
+distinguish construction from the result after final validation. Legacy rows
+join actual fitter admission, produced object identities and final settlement.
+Equal competing values cannot both claim the same retained occurrence.
+Failure resets the conversion state, retains this attempt's error and marks
+constructed outcomes unknown. Accessors return detached copies.</p>
+<p>For path inputs, <code>input.source_sha256</code> and <code>source_bytes</code> bind the exact bytes
+acquired once and parsed, even if the path later changes. Dict inputs have no
+original-file hash. Model evidence uses alias dumps with <code>exclude_unset=True</code>
+and <code>exclude_none=False</code> to distinguish supplied null from defaults; it cannot
+recover values before model coercion. The existing execution projection still
+uses <code>exclude_none=True</code>. Unrelated root/member properties are not scanned for
+new evidence. Serialize diagnostics using <code>ensure_ascii=True, allow_nan=False</code>.</p>
+<p>Forward conversion emits a scalar citation, one text-only cleaning or funder
+object, or an explicit research boolean as <code>Yes</code>/<code>No</code>. Rich or multiple scalar
+candidates are preserved in outgoing diagnostics rather than concatenated or
+first-picked. This is a typed projection, not literal JSON-shape equality.</p>
+<p>The four independent compatibility carriers are <code>d4d:confidentialElements</code>,
+<code>d4d:acquisitionMethods</code>, <code>d4d:dataProtectionImpacts</code>, and
+<code>d4d:labelingStrategies</code>. Forward conversion preserves complete object/list
+structure through ordinary model extras. Reverse conversion fits their explicit
+objects with the ordinary final D4D validator, preserving internal
+duplicates and order; malformed/unretained parts remain recoverable in evidence.
+Carrier transport does not assert that its content is schema-valid.</p>
+<p>One protocol, at most one platform, and an admitted count form an explicit
+root-summary annotation group. Multi-platform or raw multi-protocol input instead
+produces independent protocol-only, platform-only, and count-only records. There
+is no zip, broadcast, workflow inference, or first-value selection. Matching
+canonical projections of an explicit labeling carrier candidate are marked
+<code>redundant_projection</code> and track its final retention. Conflicts append independent
+canonical groups after the carrier. Duplicates inside a carrier are not removed.</p>
+<p>An exact integer count projects to <code>str(value)</code>, and only ASCII <code>0</code> or
+<code>-?[1-9][0-9]*</code> that survives <code>int</code> and exact string round-trip is decoded.
+Booleans, floats, padded/decimal/exponential text and conversion-limit failures
+are declined, with raw evidence retained. No new nonnegative bound is invented.
+Sensitivity and platform use list-of-string wire fields. Multiple/richer
+collection or impact objects have no scalar projection; their complete source
+values remain in diagnostics. Rich annotation objects retain their full carrier
+even when a finite protocol/platform/count projection is also available.</p>
+<p><code>forward.convert(record, source_evidence=reverse.route_evidence)</code> optionally
+re-emits separately supplied human, completeness and committee assertions when
+they fit the declared model fields. The evidence must be complete, have the
+finite known source roster, and bind the <strong>entire</strong> final Dataset via canonical
+ASCII JSON SHA-256, including fields outside these routes. If an unrelated
+schema-accepted value cannot receive that finite JSON binding, conversion still
+returns it unchanged: <code>final_dataset_binding</code> is <code>unavailable</code>, its SHA is null,
+and optional evidence reuse refuses. No unrelated value is sanitized or dropped.
+Unsupported richer
+assertions stay in diagnostics. Arbitrary governance prose does not establish
+a committee name, and a research boolean does not establish <code>humanSubjects</code>.
+Caller-supplied evidence is not authenticated file provenance; its input hash is
+retained only under <code>supplied_source_evidence</code>, never claimed as a forward read.</p>
+<p>This evidence is finite source-value recovery, not an archive of input files,
+an all-fields round-trip guarantee, or publication/semantic-fidelity credit.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>
