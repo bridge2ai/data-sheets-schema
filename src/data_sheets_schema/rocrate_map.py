@@ -8,13 +8,14 @@ This is the *our-mapping* deterministic arm. It differs from
   opaque about how good each mapping is.
 - This module reads ``ro-crate-metadata.json``, which **every** crate has, and
   applies ``data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv``. Each
-  emitted field therefore carries its own declared provenance: the source path,
-  the SKOS mapping type, and the expected information loss.
+  report entry carries its source path and declared mapping relation and
+  information-loss label.
 
 No member-to-root gap-filling: fields use the selected root and explicit
 construction rules. Every original row has a reported disposition, including
 retired and deferred rules. Complete root/member source assertions are retained
-separately; placement and table-declared fidelity are not source-coverage scores.
+separately; placement and these declarations do not measure source coverage,
+transformation loss or scientific support.
 """
 
 from __future__ import annotations
@@ -879,8 +880,9 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         f"deferred: {c.get('deferred', 0)}; original table rows: {table_rows}",
         "- Retired/deferred rows remain in the original-row denominator; their removal "
         "from execution is not increased source coverage.",
-        "- Mapping relations and loss labels are table declarations, not verified "
-        "semantic equivalence; blank labels are unassessed. Inactive labels are historical.",
+        "- Mapping relations and loss labels are table declarations, not measured "
+        "fidelity, verified semantic equivalence or scientific support. Blank labels "
+        "are unassessed; inactive labels are retained for historical accounting.",
         f"- Root selection: {res.sources.get('root', {}).get('selection_note', '(not recorded)')}",
         f"- Validation: **{res.validation.splitlines()[0]}** — {verdict_basis()}",
         f"- Distinct top-level `{TARGET_CLASS}` slots filled: {slots} "
@@ -910,7 +912,7 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         + (f"; the mapping table says why for {len(declared)} of them: "
            f"{declared_kinds}" if declared else "") + " |",
         "",
-        "## Fidelity of what was filled",
+        "## Table-declared mapping and loss",
         "",
     ]
     if "sources" in res.outputs:
@@ -930,9 +932,10 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     lines += [f"| {k or '(unstated)'} | {v} |" for k, v in sorted(by_loss.items())]
     lines += [
         "",
-        "Fields marked `moderate` or `high` loss carry a value that the mapping",
-        "table itself flags as an imperfect representation of the crate's",
-        "content. Treat them as weaker evidence than `none`/`minimal` fields.",
+        "These tables count relation and loss labels on filled entries. The labels",
+        "do not measure transformation loss or rank the scientific strength of",
+        "source evidence; `none` does not establish lossless conversion. Actual",
+        "construction and coercion details are reported per field below.",
         "",
         "## Per-field detail",
         "",

@@ -33,6 +33,8 @@ def parse_report(text: str) -> dict[str, Any]:
     The Outcome table counts report entries, including the separately reported
     root identifier. Original table rows, active rules and populated slots are
     different denominators. Counts are checked against the per-field table.
+    The historical "Fidelity" heading and its successor both report declared
+    labels, not measured fidelity or scientific support.
     """
     result: dict[str, Any] = {"outcome": {}, "loss": {}, "maptype": {},
                               "fields": [], "original_rows": None,
@@ -55,6 +57,7 @@ def parse_report(text: str) -> dict[str, Any]:
         if line.startswith("## "):
             section = {"## Outcome": "outcome",
                        "## Fidelity of what was filled": "fidelity",
+                       "## Table-declared mapping and loss": "fidelity",
                        "## Per-field detail": "fields"}.get(line)
             continue
         if not line.startswith("|"):
