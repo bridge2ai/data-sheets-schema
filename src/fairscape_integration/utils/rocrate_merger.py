@@ -20,6 +20,8 @@ from data_sheets_schema.legacy_creators import (
     source_presence_lines, creator_assertion_lines,
 )
 
+from data_sheets_schema.legacy_creator_references import reference_evidence, reference_lines
+
 from data_sheets_schema.legacy_root_identity import (
     root_identity_route, merge_identity_evidence, identity_report_lines,
 )
@@ -40,6 +42,7 @@ class ROCrateMerger:
         self.root_identity_sources = None
         self.source_presence = None
         self.creator_assertion_sources = None
+        self.creator_reference_construction = None
         self.prioritizer = FieldPrioritizer()
         self.merged_data: Dict[str, Any] = {}
         self.provenance: Dict[str, List[str]] = {}
@@ -101,6 +104,7 @@ class ROCrateMerger:
         self.root_identity_sources = identity_sources
         self.source_presence = presence
         self.creator_assertion_sources = None
+        self.creator_reference_construction = None
 
         # Reset state so the same instance can be reused for multiple merges
         self.merged_data = {}
@@ -156,16 +160,19 @@ class ROCrateMerger:
         primary_builder = D4DBuilder(self.mapping, verbose=False)
         primary_data = primary_builder.build_dataset(primary_parser)
 
+        constructions = [primary_builder.get_creator_reference_construction()]
         secondary_data = []
         for parser, name in secondary_parsers:
             builder = D4DBuilder(self.mapping, verbose=False)
             data = builder.build_dataset(parser)
             secondary_data.append((data, name))
+            constructions.append(builder.get_creator_reference_construction())
 
         if marked_creators:
             creator_merged, creator_sources, self.creator_assertion_sources = merge_creator_values(
                 presence, [primary_data.get('creators')]
                 + [data.get('creators') for data, _ in secondary_data])
+            self.creator_reference_construction = reference_evidence(presence, constructions)
 
         # Merge field by field
         if self.verbose:
@@ -247,6 +254,10 @@ class ROCrateMerger:
         sources = [primary_name if s == "primary" else s for s in sources]
 
         return merged_value, sources
+
+    def get_creator_reference_construction(self):
+        """Return the complete detached per-source reference evidence."""
+        return deepcopy(self.creator_reference_construction)
 
     def get_source_presence(self):
         """Return detached raw source measurements, independent of provenance flags."""
@@ -333,6 +344,7 @@ class ROCrateMerger:
         report.extend(identity_report_lines(self.root_identity_sources))
         report.extend(source_presence_lines(self.source_presence))
         report.extend(creator_assertion_lines(self.creator_assertion_sources))
+        report.extend(reference_lines(self.creator_reference_construction))
 
         # Merge statistics
         report.append("MERGE STATISTICS")

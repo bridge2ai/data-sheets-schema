@@ -44,6 +44,7 @@ from rocrate_merger import ROCrateMerger
 from informativeness_scorer import InformativenessScorer
 from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
 from data_sheets_schema.legacy_root_identity import root_identity_route, scoring_fields
+from data_sheets_schema.legacy_creator_references import reference_evidence, reference_lines
 from data_sheets_schema.legacy_creators import (
     author_source_presence, source_presence_lines, KEY_BASIS_LABEL, MEASUREMENT_LIMIT,
 )
@@ -78,6 +79,10 @@ def render_transformation_report(
     presence = author_source_presence(
         mapping_loader, [rocrate_parser], [str(rocrate_parser.rocrate_path)])
     f.write("\n".join(source_presence_lines(presence)) + "\n")
+    references = reference_evidence(
+        presence, [d4d_builder.get_creator_reference_construction()])
+    if references is not None:
+        f.write("\n".join(reference_lines(references)) + "\n")
     if identity_construction:
         f.write("Required Dataset.id construction is excluded from this count.\n\n")
 
@@ -479,6 +484,10 @@ Examples:
     presence = (merger.get_source_presence() if args.merge else
                 author_source_presence(mapping, [rocrate], [str(input_path)]))
     print("\n".join(source_presence_lines(presence, raw=False)))
+    references = (merger.get_creator_reference_construction() if args.merge else
+                  reference_evidence(presence, [builder.get_creator_reference_construction()]))
+    if references is not None:
+        print("\n".join(reference_lines(references)))
     if identity_construction:
         print("Required Dataset.id construction is excluded from this count.")
 

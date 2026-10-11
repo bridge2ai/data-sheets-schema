@@ -1,6 +1,7 @@
 """Explicit Creator assertion construction and separately measured source facts.
 
-The marker wraps whole literal assertions, never people or identity references.
+The literal marker wraps whole assertions; the separate reference marker opts
+into the bounded same-crate author projection in legacy_creator_references.
 Construction counts and the raw author measurement are not source coverage.
 """
 from copy import deepcopy
@@ -8,6 +9,7 @@ import json
 
 
 MARKER = 'creator_author_literals_v1'
+REFERENCE_MARKER = 'creator_author_references_v1'
 COVERED = 'Covered by FAIRSCAPE? Yes =1; No = 0'
 SOURCE_FORMAT = 'legacy_author_source_presence_v1'
 KEY_BASIS_LABEL = 'Constructed-field presence (output keys; null-valued keys included)'
@@ -23,19 +25,27 @@ def _creator_rows(rows):
 
 def validate_rows(rows):
     """Check the marker before ignored-row filtering; custom Func text is inert."""
-    marked = [row for row in rows if (row.get('Func') or '').strip() == MARKER]
+    marked = [row for row in rows
+              if (row.get('Func') or '').strip() in (MARKER, REFERENCE_MARKER)]
     if not marked:
         return False
     creators = _creator_rows(rows)
     if (len(marked) != 1 or len(creators) != 1 or marked[0] is not creators[0]
             or (marked[0].get('FAIRSCAPE RO-Crate Property') or '').strip() != 'author'):
-        raise ValueError(f'{MARKER} requires one covered creators row with author; '
+        marker = (marked[0].get('Func') or '').strip()
+        raise ValueError(f'{marker} requires one covered creators row with author; '
                          'duplicate or conflicting Creator routes are not supported')
     return True
 
 
 def creator_route(mapping):
     return validate_rows(getattr(mapping, 'mappings', ()))
+
+
+def creator_reference_route(mapping):
+    rows = getattr(mapping, 'mappings', ())
+    return validate_rows(rows) and any(
+        (row.get('Func') or '').strip() == REFERENCE_MARKER for row in rows)
 
 
 def creator_value(value):

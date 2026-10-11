@@ -26,6 +26,7 @@ from fairscape_integration.utils.d4d_builder import D4DBuilder
 from fairscape_integration.utils.rocrate_merger import ROCrateMerger
 from fairscape_integration.utils.informativeness_scorer import InformativenessScorer
 from data_sheets_schema.legacy_root_identity import root_identity_route, scoring_fields
+from data_sheets_schema.legacy_creator_references import reference_evidence, reference_lines
 from data_sheets_schema.legacy_creators import (
     author_source_presence, source_presence_lines, KEY_BASIS_LABEL, MEASUREMENT_LIMIT,
 )
@@ -510,6 +511,8 @@ def transform(input_file, output, mapping, report, validate):
         builder = D4DBuilder(mapping_loader, verbose=False)
         dataset = builder.build_dataset(parser)
         source_presence = author_source_presence(mapping_loader, [parser], [str(input_file)])
+        references = reference_evidence(
+            source_presence, [builder.get_creator_reference_construction()])
 
         output_path = Path(output)
         raw = prepare_dataset(dataset, default_flow_style=False, sort_keys=False,
@@ -530,6 +533,8 @@ def transform(input_file, output, mapping, report, validate):
             f.write(f"Constructed output keys: {populated_count}/{len(covered_fields)}\n")
             f.write(f"{KEY_BASIS_LABEL}: {coverage:.1f}%\n{MEASUREMENT_LIMIT}\n\n")
             f.write("\n".join(source_presence_lines(source_presence)) + "\n")
+            if references is not None:
+                f.write("\n".join(reference_lines(references)) + "\n")
             if identity_construction:
                 f.write("Required Dataset.id construction is excluded from this count.\n\n")
             mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
@@ -550,6 +555,8 @@ def transform(input_file, output, mapping, report, validate):
         click.echo(f"  {KEY_BASIS_LABEL}: {coverage:.1f}%")
         click.echo(f"  {MEASUREMENT_LIMIT}")
         click.echo("\n".join(source_presence_lines(source_presence, raw=False)))
+        if references is not None:
+            click.echo("\n".join(reference_lines(references)))
         if identity_construction:
             click.echo("  Required Dataset.id construction is excluded from this count.")
         if report:
