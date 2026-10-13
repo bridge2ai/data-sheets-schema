@@ -15,20 +15,32 @@ def build(results, root, run_id, commit):
             ["git", "ls-files", "tests"], cwd=root, text=True).splitlines():
         if name.endswith(".py"):
             modules[name[:-3].replace("/", ".")] = name
-    weights, cases, artifacts = defaultdict(Decimal), set(), []
+    weights, owners, artifacts = defaultdict(Decimal), {}, []
+    cases = 0
+    artifact_paths, artifact_hashes = set(), set()
     files = sorted(results.rglob("pytest.xml"))
     if not files:
         raise ValueError("no pytest.xml artifacts found")
     for path in files:
+        resolved = path.resolve()
+        raw = path.read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        if resolved in artifact_paths or digest in artifact_hashes:
+            raise ValueError(f"duplicate artifact input: {path}")
+        artifact_paths.add(resolved)
+        artifact_hashes.add(digest)
         artifacts.append({"path": str(path.relative_to(results)),
-                          "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
-        for case in ET.parse(path).iter("testcase"):
+                          "sha256": digest})
+        for case in ET.fromstring(raw).iter("testcase"):
             if case.find("failure") is not None or case.find("error") is not None:
                 raise ValueError("use a successful run for timing estimates")
             identity = (case.attrib["classname"], case.attrib["name"])
-            if identity in cases:
+            if identity in owners and owners[identity] != resolved:
                 raise ValueError(f"duplicate case across artifacts: {identity}")
-            cases.add(identity)
+            # Parameter IDs can collide within one collection (#4520/#5020).
+            # Keep every occurrence, but require one owning artifact per label.
+            owners[identity] = resolved
+            cases += 1
             candidates = [module for module in modules
                           if identity[0] == module or identity[0].startswith(module + ".")]
             if not candidates:
@@ -42,7 +54,7 @@ def build(results, root, run_id, commit):
     return {"schema_version": 1,
             "source": {"run_id": run_id, "commit": commit,
                        "url": f"https://github.com/bridge2ai/data-sheets-schema/actions/runs/{run_id}",
-                       "test_cases": len(cases), "artifacts": artifacts},
+                       "test_cases": cases, "artifacts": artifacts},
             "method": "Sum JUnit case times by collected file, with a 0.001-second floor. These are scheduling estimates, not wall-clock predictions or a test allowlist. Untimed collected files use the median known duration; obsolete entries are ignored.",
             "file_seconds": {name: float(max(seconds, Decimal("0.001")))
                              for name, seconds in sorted(weights.items())}}

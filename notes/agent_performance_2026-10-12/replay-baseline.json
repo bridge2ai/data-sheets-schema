@@ -1,0 +1,169 @@
+{
+  "kind": "instrumented_local_baseline",
+  "commit": "df2aa6c663c8d5712e3bd51885a6806f00982d79",
+  "node": "tests/test_shared_generation_runtime.py::test_real_complete_api_pipeline_and_completed_recheck",
+  "python": "3.12.11 (main, Aug 15 2025, 11:56:45) [Clang 14.0.3 (clang-1403.0.22.14.1)]",
+  "phases": [
+    {
+      "when": "setup",
+      "outcome": "passed",
+      "duration": 5.336005250050221
+    },
+    {
+      "when": "call",
+      "outcome": "passed",
+      "duration": 791.641012875014
+    },
+    {
+      "when": "teardown",
+      "outcome": "passed",
+      "duration": 0.0003182920045219362
+    }
+  ],
+  "pytest_wall_seconds": 799.95,
+  "pytest_exit": 0,
+  "bindings_restored": true,
+  "instrumentation_errors": [],
+  "source_pins": [
+    {
+      "module": "data_sheets_schema.api_runner",
+      "path": "src/data_sheets_schema/api_runner.py",
+      "bytes": 431747,
+      "sha256": "554084e2e0bd3fd777a177905f27f741937b6b61026111b379578344747c1ef6"
+    },
+    {
+      "module": "data_sheets_schema.schema_sync",
+      "path": "src/data_sheets_schema/schema_sync.py",
+      "bytes": 29871,
+      "sha256": "28aaefb527d00f7ceb470c6e54863929928b89da369b54b750badc6ac7f9b0e2"
+    },
+    {
+      "module": "data_sheets_schema.shared_generation",
+      "path": "src/data_sheets_schema/shared_generation.py",
+      "bytes": 35896,
+      "sha256": "0815064dbaea7427155a20c865531bf54c7dd53a6c3a666289173324d7f775e8"
+    },
+    {
+      "module": "data_sheets_schema.typed_audit_runtime",
+      "path": "src/data_sheets_schema/typed_audit_runtime.py",
+      "bytes": 30118,
+      "sha256": "1efb6a1eb2f82b65c6a2c4a64d0b02fe128372dad1b777af638dc19d4e041206"
+    },
+    {
+      "module": "data_sheets_schema.typed_audit",
+      "path": "src/data_sheets_schema/typed_audit.py",
+      "bytes": 35073,
+      "sha256": "dc8b14ef2f9e32c064cb54bb0cf6aa6bb0b9fa8b47a837a7ea5e45cbfead31db"
+    },
+    {
+      "module": "data_sheets_schema.audit_omissions",
+      "path": "src/data_sheets_schema/audit_omissions.py",
+      "bytes": 21606,
+      "sha256": "17e9acf1255d7a4c325988e229afd7d3f8f48d598acc5b06cb2662f0e2e2ea1b"
+    },
+    {
+      "module": "data_sheets_schema.schema_view",
+      "path": "src/data_sheets_schema/schema_view.py",
+      "bytes": 12420,
+      "sha256": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff"
+    }
+  ],
+  "functions": {
+    "schema_view.version_document": {
+      "calls": 123,
+      "inclusive_wall_seconds": 66.492122,
+      "exclusive_wall_seconds": 66.492122,
+      "thread_cpu_seconds": 61.54806
+    },
+    "shared_generation.capture": {
+      "calls": 2341,
+      "inclusive_wall_seconds": 63.971573,
+      "exclusive_wall_seconds": 43.610064,
+      "thread_cpu_seconds": 58.025759
+    },
+    "shared_generation.assert_current": {
+      "calls": 2032,
+      "inclusive_wall_seconds": 31.700754,
+      "exclusive_wall_seconds": 3.195557,
+      "thread_cpu_seconds": 27.252885
+    },
+    "schema_sync.check": {
+      "calls": 19,
+      "inclusive_wall_seconds": 15.217103,
+      "exclusive_wall_seconds": 15.217103,
+      "thread_cpu_seconds": 2.659565
+    },
+    "api_runner._validator_lines": {
+      "calls": 13,
+      "inclusive_wall_seconds": 29.666563,
+      "exclusive_wall_seconds": 29.666563,
+      "thread_cpu_seconds": 0.143348
+    },
+    "audit_omissions._schema": {
+      "calls": 50,
+      "inclusive_wall_seconds": 290.390084,
+      "exclusive_wall_seconds": 261.326397,
+      "thread_cpu_seconds": 264.77284
+    },
+    "typed_audit._derive_uncached": {
+      "calls": 33,
+      "inclusive_wall_seconds": 211.553176,
+      "exclusive_wall_seconds": 2.826292,
+      "thread_cpu_seconds": 192.37334
+    },
+    "typed_audit.DerivationCache._derive": {
+      "calls": 450,
+      "inclusive_wall_seconds": 221.835903,
+      "exclusive_wall_seconds": 10.282727,
+      "thread_cpu_seconds": 201.91858
+    },
+    "typed_audit_runtime.prepare_packet": {
+      "calls": 66,
+      "inclusive_wall_seconds": 252.280363,
+      "exclusive_wall_seconds": 54.158447,
+      "thread_cpu_seconds": 227.969809
+    },
+    "typed_audit_runtime._rebuild": {
+      "calls": 53,
+      "inclusive_wall_seconds": 471.026393,
+      "exclusive_wall_seconds": 207.549441,
+      "thread_cpu_seconds": 429.764124
+    },
+    "typed_audit.check": {
+      "calls": 16,
+      "inclusive_wall_seconds": 165.277338,
+      "exclusive_wall_seconds": 58.940566,
+      "thread_cpu_seconds": 151.172377
+    },
+    "typed_audit_runtime.completion_check": {
+      "calls": 23,
+      "inclusive_wall_seconds": 277.543375,
+      "exclusive_wall_seconds": 1.292553,
+      "thread_cpu_seconds": 255.753369
+    },
+    "api_runner.validate_outputs": {
+      "calls": 6,
+      "inclusive_wall_seconds": 26.942782,
+      "exclusive_wall_seconds": 0.015406,
+      "thread_cpu_seconds": 0.136011
+    },
+    "api_runner.execute": {
+      "calls": 19,
+      "inclusive_wall_seconds": 718.498957,
+      "exclusive_wall_seconds": 37.217011,
+      "thread_cpu_seconds": 611.312773
+    }
+  },
+  "raw_profile_sha256": "18aae8a9ee6f175b65029cf4b16cdbe5304ccaa7407ea73555425d5ce9055a34",
+  "limits": [
+    "Instrumented attribution, not an uninstrumented speed measurement",
+    "Thread CPU excludes child CPU; nested inclusive times overlap",
+    "Exclusive time subtracts only instrumented descendants",
+    "Child CPU deltas are process-wide reaped-child counters",
+    "Graceful pytest/atexit persistence only; SIGKILL cannot be handled",
+    "Local concurrent host load varied; this is not a comparison with historical CI speed.",
+    "Raw detailed profile retained externally; this public summary excludes private paths and process IDs.",
+    "Outer time -l wrapper exited1 on sandboxed sysctl; pytest and instrumentation exited0."
+  ],
+  "erratum": "Measured19 execute calls including5 mutation replays; original static21 count was wrong."
+}
