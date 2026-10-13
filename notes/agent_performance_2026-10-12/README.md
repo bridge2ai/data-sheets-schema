@@ -3,7 +3,8 @@
 
 > Correction from implementation profiling: the original static estimate below
 > of 21 execution attempts was incorrect. The unchanged test at `df2aa6c`
-> executes 19 attempts, including five mutation replays. All controls remain
+> enters API execute 19 times. All seven mutation cases remain: two refuse
+> during fresh run construction, before execute. All controls remain
 > required. See [implementation results](implementation.md).
 
 2026-10-12, America/Los_Angeles

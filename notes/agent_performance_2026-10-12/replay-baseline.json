@@ -165,5 +165,5 @@
     "Raw detailed profile retained externally; this public summary excludes private paths and process IDs.",
     "Outer time -l wrapper exited1 on sandboxed sysctl; pytest and instrumentation exited0."
   ],
-  "erratum": "Measured19 execute calls including5 mutation replays; original static21 count was wrong."
+  "erratum": "Measured 19 API execute calls across 21 attempted operations. All seven mutation cases remain; two refuse during fresh RunSpec construction before execute, while five enter execute. The static description of 21 execute calls was inaccurate."
 }

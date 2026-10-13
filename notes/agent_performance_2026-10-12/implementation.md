@@ -15,9 +15,9 @@ criteria; unrelated new behavior is a separate scope decision.
 
 | Priority | Issue | Scope | Current evidence/status |
 | --- | --- | --- | --- |
-| 1 | [#5015](https://github.com/bridge2ai/data-sheets-schema/issues/5015) | Long shared-generation replay test | Baseline passed in799.95s;19 execute calls; catalog reuse prioritized |
+| 1 | [#5015](https://github.com/bridge2ai/data-sheets-schema/issues/5015) | Long shared-generation replay test | Baseline passed in799.95 s;19 execute calls; catalog reuse prioritized |
 | 1 | [#5016](https://github.com/bridge2ai/data-sheets-schema/issues/5016) | Current shard weights | Refreshed18,848 occurrences/524 files; focused regressions passed; PR pending |
-| 1 prerequisite | [#5020](https://github.com/bridge2ai/data-sheets-schema/issues/5020) | Legitimate repeated JUnit labels | Independent review clear;13 updater and24 partition/workflow tests passed |
+| 1 prerequisite | [#5020](https://github.com/bridge2ai/data-sheets-schema/issues/5020) | Legitimate repeated JUnit labels | Independent review clear;13 updater and 24 partition/workflow tests passed |
 | 2 | [#5017](https://github.com/bridge2ai/data-sheets-schema/issues/5017) | Agent instructions and workflow routes | 178-line guide drafted; independent review underway; incorporates #3863 |
 | 2 | [#5018](https://github.com/bridge2ai/data-sheets-schema/issues/5018) | Collection and nested concurrency | Planned measurement and coverage-preserving implementation |
 | 2 | [#5019](https://github.com/bridge2ai/data-sheets-schema/issues/5019) | Workspace/search/guard costs | Guard traversal improvement reviewed; runtime comparison pending; existing work preserved |
@@ -76,12 +76,12 @@ review rounds, PR checks and merge receipts will be recorded as they occur.
 
 ### Critical replay baseline
 
-The unchanged node passed in799.95s in the locked Python3.12.11 environment. The instrumentation recorded19 execution attempts (five mutation replays), correcting the audit’s static21 estimate. All source pins remained unchanged; instrumentation reported no errors and restored all bindings. The outer timing command returned1 only because `/usr/bin/time -l` could not read sandboxed `sysctl` metadata; pytest itself exited0. No unchanged rerun is needed.
+The unchanged node passed in799.95 s in the locked Python3.12.11 environment. The instrumentation recorded 19 API execute entries: five of seven mutation cases enter execute; two refuse during fresh run construction, correcting the audit’s static 21 estimate. All source pins remained unchanged; instrumentation reported no errors and restored all bindings. The outer timing command returned1 only because `/usr/bin/time -l` could not read sandboxed `sysctl` metadata; pytest itself exited0. No unchanged rerun is needed.
 
-The profile attributes290.390 inclusive seconds to50 schema catalog calls,471.026 to53 runtime rebuilds, and29.667 to13 validator subprocess calls. These nested inclusive times overlap. Catalog construction is the next optimization target; final independent checks and all original replay assertions remain required. This local profile establishes attribution, not a speedup against earlier CI runs.
+The profile attributes 290.390 inclusive seconds to 50 schema catalog calls,471.026 to 53 runtime rebuilds, and 29.667 to 13 validator subprocess calls. These nested inclusive times overlap. Catalog construction is the next optimization target; final independent checks and all original replay assertions remain required. This local profile establishes attribution, not a speedup against earlier CI runs.
 
 ### Timing refresh validation
 
-The corrected updater retained all18,848 testcase occurrences and524 file totals from the four verified core artifacts. All four recorded XML hashes match the downloaded evidence. The13 new updater cases and24 existing partition/workflow tests passed in89.73s; the refreshed-weight balance test passed again in0.06s. [Refresh evidence](timing-refresh.json) records provenance and scheduling estimates. Full PR CI remains pending.
+The corrected updater retained all 18,848 testcase occurrences and 524 file totals from the four verified core artifacts. All four recorded XML hashes match the downloaded evidence. The 13 new updater cases and 24 existing partition/workflow tests passed in 89.73 s; the refreshed-weight balance test passed again in 0.06 s. [Refresh evidence](timing-refresh.json) records provenance and scheduling estimates. Full PR CI remains pending.
 
 The instruction compaction exposed [#5021](https://github.com/bridge2ai/data-sheets-schema/issues/5021): an existing smoke test required actual project leakage in the root guide. The bounded correction preserves nonvacuous root discovery, classification and gates while retaining the separate planted-leak regression. Independent static review of the guide and guard changes is clear; their runtime checks are underway.
