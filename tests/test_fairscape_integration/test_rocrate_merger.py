@@ -312,12 +312,24 @@ RO-Crate: Root Dataset\tlicense\tstr\t\tLicense\tlicense\t1\t1
 
     def test_save_merge_report(self):
         """Test saving merge report to file."""
-        parsers = [self.primary_parser, self.secondary1_parser]
-        self.merger.merge_rocrates(parsers)
-
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = Path(tmpdir) / "merge_output.yaml"
-            self.merger.save_merge_report(output_path, parsers)
+            root = Path(tmpdir)
+            mapping_path = root / "mapping.tsv"
+            mapping_path.write_text(
+                "D4D Property\tType\tFAIRSCAPE RO-Crate Property\t"
+                "Covered by FAIRSCAPE? Yes =1; No = 0\tDirect mapping? Yes =1; No = 0\n"
+                "id\tstr\tidentifier\t1\t1\n"
+                "title\tstr\tname\t1\t1\n", encoding="utf-8")
+            source = root / "crate.json"
+            source.write_text(json.dumps({"@graph": [{
+                "@id": "./", "@type": "Dataset", "name": "Report control",
+                "identifier": "https://example.org/dataset/report",
+            }]}), encoding="utf-8")
+            parsers = [ROCrateParser(str(source))]
+            merger = ROCrateMerger(MappingLoader(str(mapping_path)))
+            merger.merge_rocrates(parsers)
+            output_path = root / "merge_output.yaml"
+            merger.save_merge_report(output_path, parsers)
 
             # Check report file was created
             report_path = Path(tmpdir) / "merge_output_merge_report.txt"

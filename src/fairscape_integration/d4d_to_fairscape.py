@@ -4,10 +4,23 @@ D4D to FAIRSCAPE RO-Crate Converter
 Converts D4D YAML/dict to FAIRSCAPE RO-Crate using Pydantic models.
 """
 
+import json
+import math
 import sys
+import warnings
+from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Any, List, Optional, TYPE_CHECKING
 from datetime import datetime
+
+from data_sheets_schema.rocrate_parent_admission import snapshot
+from data_sheets_schema.fairscape_forward_types import (
+    ForwardProjectionWarning, initialize as initialize_typed,
+    projections as typed_projections, finish as finish_typed, warning_messages,
+)
+from data_sheets_schema.fairscape_route_assertions import (
+    evidence_state, failed, forward_projections, supplied_projections, finish_forward,
+)
 
 # Add fairscape_models to path
 fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
@@ -18,14 +31,16 @@ if TYPE_CHECKING:
     from fairscape_models.rocrate import (
         ROCrateV1_2,
         ROCrateMetadataFileElem,
-        ROCrateMetadataElem
+        ROCrateMetadataElem,
+        GenericMetadataElem
     )
 
 try:
     from fairscape_models.rocrate import (
         ROCrateV1_2,
         ROCrateMetadataFileElem,
-        ROCrateMetadataElem
+        ROCrateMetadataElem,
+        GenericMetadataElem
     )
     from fairscape_models.dataset import Dataset
     from fairscape_models.fairscape_base import IdentifierValue
@@ -38,6 +53,29 @@ except ImportError as e:
     ROCrateV1_2 = Any  # type: ignore
     ROCrateMetadataFileElem = Any  # type: ignore
     ROCrateMetadataElem = Any  # type: ignore
+    GenericMetadataElem = Any  # type: ignore
+
+
+def _require_finite_floats(value) -> None:
+    """Check ordinary containers in a validated model's Python-mode dump."""
+    pending = [value]
+    seen = set()
+    while pending:
+        item = pending.pop()
+        if isinstance(item, float) and not math.isfinite(item):
+            raise ValueError(
+                "Non-finite float in validated FAIRSCAPE model before JSON serialization")
+        kind = type(item)
+        if kind is dict or kind is list or kind is tuple or kind is set or kind is frozenset:
+            identity = id(item)
+            if identity in seen:
+                continue
+            seen.add(identity)
+            if kind is dict:
+                pending.extend(item.keys())
+                pending.extend(item.values())
+            else:
+                pending.extend(item)
 
 
 class D4DToFairscapeConverter:
@@ -46,50 +84,82 @@ class D4DToFairscapeConverter:
     def __init__(self):
         if not FAIRSCAPE_AVAILABLE:
             raise RuntimeError("FAIRSCAPE models not available")
+        self._route_evidence = evidence_state("d4d_to_fairscape", "dict")
+        self._projections = {}
+        initialize_typed(self._route_evidence)
     
-    def convert(self, d4d_dict: Dict[str, Any]) -> ROCrateV1_2:
+    @property
+    def route_evidence(self):
+        """Detached finite source values and actual model projection outcomes."""
+        return snapshot(self._route_evidence)
+
+    def convert(self, d4d_dict: Dict[str, Any], *, source_evidence=None) -> ROCrateV1_2:
         """
         Convert D4D dictionary to FAIRSCAPE RO-Crate.
 
         Args:
             d4d_dict: D4D metadata dictionary
+            source_evidence: Optional completed reverse evidence bound to this
+                entire Dataset; permits re-emitting separate supplied assertions.
 
         Returns:
             FAIRSCAPE ROCrateV1_2 Pydantic model
         """
-        # Build graph elements
-        graph = []
+        self._route_evidence = evidence_state("d4d_to_fairscape", "dict")
+        self._projections = {}
+        initialize_typed(self._route_evidence)
+        try:
+            # The model's before-validator mutates its submitted graph. Caller
+            # objects and diagnostic raw values must not share that lifecycle.
+            d4d_dict = deepcopy(d4d_dict)
+            self._projections = forward_projections(self._route_evidence, d4d_dict)
+            supplied_projections(self._route_evidence, d4d_dict,
+                                 source_evidence, self._projections)
+            self._projections.update(typed_projections(self._route_evidence, d4d_dict))
+            # Build graph elements
+            graph = []
 
-        # 1. Add metadata descriptor
-        metadata_descriptor = ROCrateMetadataFileElem(**{
-            "@id": "ro-crate-metadata.json",
-            "@type": "CreativeWork",
-            "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
-            "about": {"@id": "./"}
-        })
-        graph.append(metadata_descriptor)
+            # 1. Add metadata descriptor
+            metadata_descriptor = ROCrateMetadataFileElem(**{
+                "@id": "ro-crate-metadata.json",
+                "@type": "CreativeWork",
+                "conformsTo": {"@id": "https://w3id.org/ro/crate/1.2"},
+                "about": {"@id": "./"}
+            })
+            graph.append(metadata_descriptor)
 
-        # 2. Build file collections (nested Datasets)
-        file_collections, hasPart_ids = self._build_file_collections(d4d_dict)
-        graph.extend(file_collections)
+            # 2. Build file collections (nested Datasets)
+            file_collections, hasPart_ids = self._build_file_collections(d4d_dict)
+            graph.extend(file_collections)
 
-        # 3. Add root dataset (with hasPart references to file collections)
-        dataset = self._build_dataset(d4d_dict, hasPart_ids)
-        graph.append(dataset)
+            # 3. Add root dataset (with hasPart references to file collections)
+            dataset = self._build_dataset(d4d_dict, hasPart_ids)
+            graph.append(dataset)
 
-        # 4. Create RO-Crate
-        rocrate = ROCrateV1_2(**{
-            "@context": {
-                "@vocab": "https://schema.org/",
-                "evi": "https://w3id.org/EVI#",
-                "rai": "http://mlcommons.org/croissant/RAI/",
-                "d4d": "https://w3id.org/bridge2ai/data-sheets-schema/"
-            },
-            "@graph": graph
-        })
+            # 4. Create RO-Crate
+            rocrate = ROCrateV1_2(**{
+                "@context": {
+                    "@vocab": "https://schema.org/",
+                    "evi": "https://w3id.org/EVI#",
+                    "rai": "http://mlcommons.org/croissant/RAI/",
+                    "d4d": "https://w3id.org/bridge2ai/data-sheets-schema/"
+                },
+                "@graph": graph
+            })
 
-        return rocrate
-    
+            # Existing model objects bypass the envelope's dictionary dispatch.
+            # Check the actual published JSON before claiming completed evidence.
+            self._validate_wire(rocrate)
+            final_graph = rocrate.model_dump(by_alias=True, exclude_none=False)["@graph"]
+            final_root = next(node for node in final_graph if node.get("@id") == "./")
+            finish_forward(self._route_evidence, final_root)
+            finish_typed(self._route_evidence, final_root)
+            return rocrate
+        except BaseException as exc:
+            failed(self._route_evidence, exc)
+            finish_typed(self._route_evidence)
+            raise
+
     def _build_dataset(self, d4d_dict: Dict[str, Any], hasPart_ids: List[str] = None) -> ROCrateMetadataElem:
         """
         Build Dataset from D4D metadata.
@@ -171,7 +241,6 @@ class D4DToFairscapeConverter:
             'software_count': 'evi:softwareCount',
             'schema_count': 'evi:schemaCount',
             'total_entities': 'evi:totalEntities',
-            'distribution_formats': 'evi:formats',
         }
 
         # Only add file-level properties if no file_collections
@@ -185,21 +254,8 @@ class D4DToFairscapeConverter:
 
         # Add RAI namespace properties (responsible AI)
         rai_mapping = {
-            'intended_uses': 'rai:dataUseCases',
-            'known_biases': 'rai:dataBiases',
-            'known_limitations': 'rai:dataLimitations',
-            'acquisition_methods': 'rai:dataCollection',
-            'missing_data_documentation': 'rai:dataCollectionMissingData',
-            'raw_data_sources': 'rai:dataCollectionRawData',
-            'collection_timeframes': 'rai:dataCollectionTimeframe',
             'prohibited_uses': 'rai:prohibitedUses',
             'ethical_reviews': 'rai:ethicalReview',
-            'confidential_elements': 'rai:personalSensitiveInformation',
-            'data_protection_impacts': 'rai:dataSocialImpact',
-            'updates': 'rai:dataReleaseMaintenancePlan',
-            'preprocessing_strategies': 'rai:dataPreprocessingProtocol',
-            'labeling_strategies': 'rai:dataAnnotationProtocol',
-            'annotation_analyses': 'rai:dataAnnotationAnalysis',
             'machine_annotation_analyses': 'rai:machineAnnotationTools',
             'imputation_protocols': 'rai:imputationProtocol',
         }
@@ -210,25 +266,21 @@ class D4DToFairscapeConverter:
 
         # Add D4D namespace properties
         d4d_mapping = {
-            'addressing_gaps': 'd4d:addressingGaps',
-            'anomalies': 'd4d:dataAnomalies',
-            'content_warnings': 'd4d:contentWarning',
-            'informed_consent': 'd4d:informedConsent',
             'human_subject_research': 'd4d:humanSubject',
-            'at_risk_populations': 'd4d:atRiskPopulations',
-            'vulnerable_populations': 'd4d:atRiskPopulations',  # Backward compatibility
         }
 
         for d4d_field, d4d_prop in d4d_mapping.items():
             if d4d_field in d4d_dict:
                 dataset_params[d4d_prop] = d4d_dict[d4d_field]
 
+        dataset_params.update(self._projections)
+
         # Create Dataset element
         dataset = ROCrateMetadataElem(**dataset_params)
 
         return dataset
 
-    def _build_file_collections(self, d4d_dict: Dict[str, Any]) -> tuple[List[ROCrateMetadataElem], List[str]]:
+    def _build_file_collections(self, d4d_dict: Dict[str, Any]) -> tuple[List[GenericMetadataElem], List[str]]:
         """
         Build nested Dataset entities for FileCollections.
 
@@ -294,27 +346,59 @@ class D4DToFairscapeConverter:
             # Future work: iterate fc.get('resources', []), create RO-Crate File entities,
             # and add their @ids to hasPart.
 
-            # Create nested Dataset element
-            collection_elem = ROCrateMetadataElem(**collection_params)
+            # Retain the existing field validation and defaults before using the
+            # generic class. These collections assert schema.org Dataset, not
+            # the EVI Dataset class (which requires a publication date/format)
+            # or the ROCrate class used for the actual root.
+            validated = ROCrateMetadataElem(**collection_params)
+            validated_fields = validated.model_dump(
+                mode="python", by_alias=True, exclude_none=False)
+            validated_fields["@type"] = ["https://schema.org/Dataset"]
+            collection_elem = GenericMetadataElem(**validated_fields)
             file_collections.append(collection_elem)
 
         return file_collections, hasPart_ids
 
+    @staticmethod
+    def _validate_wire(rocrate: ROCrateV1_2) -> None:
+        """Require genuine JSON readback to retain the complete published tree."""
+        # JSON-mode serializers can silently replace non-finite floats with
+        # null. Inspect the validated model first, not unrelated raw input.
+        _require_finite_floats(rocrate.model_dump(
+            mode="python", by_alias=True, exclude_none=True))
+        wire = json.dumps(
+            rocrate.model_dump(mode="json", by_alias=True, exclude_none=True),
+            ensure_ascii=True, allow_nan=False, sort_keys=True,
+            separators=(",", ":"))
+        # The before-validator mutates its submitted graph; JSON decoding gives
+        # it an independent graph, without changing the returned model.
+        readback = ROCrateV1_2.model_validate(json.loads(wire))
+        _require_finite_floats(readback.model_dump(
+            mode="python", by_alias=True, exclude_none=True))
+        returned_wire = json.dumps(
+            readback.model_dump(mode="json", by_alias=True, exclude_none=True),
+            ensure_ascii=True, allow_nan=False, sort_keys=True,
+            separators=(",", ":"))
+        # Sorted JSON distinguishes false/0, integers/floats and array order;
+        # ordinary Python equality would incorrectly equate some of them.
+        if returned_wire != wire:
+            raise ValueError("FAIRSCAPE JSON readback changed the serialized metadata")
+
     def validate(self, rocrate: ROCrateV1_2) -> tuple[bool, Optional[List[str]]]:
         """
-        Validate FAIRSCAPE RO-Crate.
+        Validate FAIRSCAPE RO-Crate serialization and genuine JSON readback.
         
         Returns:
             (is_valid, errors)
         """
         try:
-            # Pydantic validation happens on construction
-            # Try to serialize to ensure all fields are valid
-            rocrate.model_dump()
+            self._validate_wire(rocrate)
             return True, None
         except ValidationError as e:
             errors = [str(err) for err in e.errors()]
             return False, errors
+        except (TypeError, ValueError) as e:
+            return False, [type(e).__name__ + ": " + str(e)]
 
 
 def convert_d4d_to_fairscape(d4d_dict: Dict[str, Any]) -> tuple[ROCrateV1_2, tuple[bool, Optional[List[str]]]]:
@@ -330,8 +414,13 @@ def convert_d4d_to_fairscape(d4d_dict: Dict[str, Any]) -> tuple[ROCrateV1_2, tup
     converter = D4DToFairscapeConverter()
     rocrate = converter.convert(d4d_dict)
 
-    # Validate
+    # This flag checks the model, not whether every source value was emitted.
     validation_result = converter.validate(rocrate)
+    messages = warning_messages(converter.route_evidence)
+    if messages:
+        warnings.warn("\n".join(messages) + "\nRaw evidence was not saved; use "
+                      "D4DToFairscapeConverter.route_evidence or CLI --report PATH.",
+                      ForwardProjectionWarning, stacklevel=2)
 
     return rocrate, validation_result
 
@@ -352,7 +441,7 @@ if __name__ == "__main__":
     rocrate, (is_valid, errors) = convert_d4d_to_fairscape(test_d4d)
 
     if is_valid:
-        print("✓ Validation PASSED")
+        print("✓ Model validation PASSED (not a source-preservation claim)")
     else:
         print(f"✗ Validation FAILED: {errors}")
 

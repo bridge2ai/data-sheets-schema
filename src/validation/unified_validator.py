@@ -34,6 +34,16 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 import sys
 
+# The source-only CLI is also invoked directly by path. Resolve its sibling
+# package without depending on the caller's cwd or an editable installation.
+if __name__ == "__main__" and not __package__:
+    _source = Path(__file__).resolve().parents[1]
+    if (_source / "data_sheets_schema/rocrate_sources.py").is_file():
+        if str(_source) not in sys.path:
+            sys.path.insert(0, str(_source))
+
+from data_sheets_schema.rocrate_sources import select_root
+
 # Optional imports for advanced features
 try:
     from linkml.validators.jsonschemavalidator import JsonSchemaDataValidator
@@ -69,7 +79,10 @@ class ValidationReport:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __str__(self) -> str:
-        status = "✓ PASS" if self.passed else "✗ FAIL"
+        if self.metadata.get("status") == "unavailable":
+            status = "UNAVAILABLE"
+        else:
+            status = "✓ PASS" if self.passed else "✗ FAIL"
         lines = [f"{status} - {self.level.value.upper()} Validation"]
 
         if self.errors:
@@ -120,8 +133,8 @@ LEVEL_REQUIREMENTS = {
         ]
     },
     "complete": {
-        "required_count": 100,
-        "required_fields": []  # All D4D sections populated
+        "required_count": None,  # No implemented denominator; not a target of 100 fields.
+        "required_fields": []  # Complete-profile criteria have not been defined.
     }
 }
 
@@ -333,7 +346,9 @@ class UnifiedValidator:
         Args:
             input_path: Path to file to validate
             schema: Which schema to validate against ("d4d" or "rocrate")
-            target_class: Specific class to validate (default: Dataset)
+            target_class: D4D class to validate; None leaves class selection to
+                LinkML and the schema (currently DatasetCollection). Ignored
+                for RO-Crate validation.
 
         Returns:
             ValidationReport with semantic errors
@@ -507,7 +522,9 @@ class UnifiedValidator:
             level: Profile level ("minimal", "basic", "complete")
 
         Returns:
-            ValidationReport with profile conformance details
+            ValidationReport with profile conformance details. A profile with
+            no defined requirements is unavailable, with no coverage value;
+            its report does not pass or assert that the input is incomplete.
         """
         report = ValidationReport(level=ValidationLevel.PROFILE, passed=True)
 
@@ -532,15 +549,23 @@ class UnifiedValidator:
             report.errors.append(f"Failed to load file: {e}")
             return report
 
-        # Extract Dataset entity from RO-Crate @graph
-        if '@graph' in data and isinstance(data['@graph'], list):
-            datasets = [e for e in data['@graph'] if 'Dataset' in str(e.get('@type', ''))]
-            if not datasets:
+        # A graph always takes precedence over a top-level record. Select its
+        # authoritative root before counting fields; an invalid descriptor
+        # must not let a richer member (or the graph wrapper) supply coverage.
+        if isinstance(data, dict) and '@graph' in data:
+            graph = data['@graph']
+            # JSON-LD permits a one-node object, as in VOICE's provenance
+            # graph. Preserve that reader behavior without importing a parser.
+            if isinstance(graph, dict):
+                graph = [graph]
+            dataset, reason = select_root(graph)
+            if dataset is None:
                 report.passed = False
-                report.errors.append("No Dataset entity found in RO-Crate @graph")
+                report.errors.append(
+                    f"No unambiguous root data entity in RO-Crate @graph: {reason}"
+                )
                 return report
-            dataset = datasets[0]  # Use first Dataset
-        elif '@type' in data:
+        elif isinstance(data, dict) and '@type' in data:
             dataset = data  # Direct D4D format
         else:
             report.passed = False
@@ -550,6 +575,18 @@ class UnifiedValidator:
         # Check required fields
         requirements = LEVEL_REQUIREMENTS[level]
         required_fields = requirements["required_fields"]
+        if not required_fields:
+            # An empty implementation is not a vacuously complete dataset.
+            # Preserve load/root errors above and do not invent criteria or
+            # turn an undefined denominator into either zero or 100 percent.
+            report.passed = False
+            report.metadata.update(level=level, status="unavailable",
+                                   reason="required_fields_not_defined",
+                                   required_count=None, found_count=None)
+            report.errors.append(
+                f"Profile '{level}' validation is unavailable: required fields have not been defined."
+            )
+            return report
         missing_fields = []
 
         for field in required_fields:
@@ -558,7 +595,7 @@ class UnifiedValidator:
 
         # Calculate coverage
         found_count = len(required_fields) - len(missing_fields)
-        coverage = (found_count / len(required_fields) * 100) if required_fields else 100.0
+        coverage = found_count / len(required_fields) * 100
 
         report.coverage_percentage = coverage
         report.missing_fields = missing_fields
@@ -641,7 +678,9 @@ class UnifiedValidator:
         format: str = "yaml",
         schema: str = "d4d",
         profile_level: str = "basic",
-        skip_levels: Optional[List[ValidationLevel]] = None
+        skip_levels: Optional[List[ValidationLevel]] = None,
+        *,
+        target_class: Optional[str] = None
     ) -> Dict[ValidationLevel, ValidationReport]:
         """
         Run all validation levels and return comprehensive report.
@@ -652,6 +691,8 @@ class UnifiedValidator:
             schema: Schema to validate against ("d4d", "rocrate")
             profile_level: Profile level for Level 3 ("minimal", "basic", "complete")
             skip_levels: Optional levels to skip
+            target_class: D4D class to validate; None preserves LinkML's schema
+                default. Ignored for RO-Crate validation.
 
         Returns:
             Dict mapping ValidationLevel to ValidationReport
@@ -676,7 +717,11 @@ class UnifiedValidator:
 
         # Level 2: Semantic
         if ValidationLevel.SEMANTIC not in skip_levels:
-            semantic = self.validate_semantic(input_path, schema=schema)
+            if target_class is None:
+                semantic = self.validate_semantic(input_path, schema=schema)
+            else:
+                semantic = self.validate_semantic(
+                    input_path, schema=schema, target_class=target_class)
             reports[ValidationLevel.SEMANTIC] = semantic
 
         # Level 3: Profile

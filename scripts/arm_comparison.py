@@ -12,10 +12,8 @@ Bases, stated once and printed into the output:
 
 - **pair errors, report findings, grounding** come from each record's own
   blocks. Pair consistency is a deterministic artifact check. Grounding is
-  measured against the record's declared bundle — for every arm shown, the
-  record's `inputs.bundle_md5` still matches the bundle on disk, and the
-  block was written either by the run or by `backfill-checks` against that
-  same bundle (the record's `recorded_by` says which).
+  measured against the record's declared bundle (the record's `recorded_by`
+  says whether the run or `backfill-checks` wrote it).
 - **form metrics** (British spellings, undeclared prefixes, organisational
   fragments, GC label variants) are recomputed live from the artifacts with
   the current instrument (`grounding.form_facts`) and the merged-schema
@@ -53,7 +51,8 @@ Bases, stated once and printed into the output:
   bytes recovered from git where they drifted
   (`replicate_structure.record_chunk_texts`); `–` exactly where no replicate
   of the group has a readable receipt; the receipts instrument's exempt keys
-  (`notes`, `source_caveats`, `conforms_to_*`) are commentary, never a
+  (`conforms_to_class`, `conforms_to_schema`, `notes`, `source_caveats`; not
+  `conforms_to` or `conforms_to_standard`, #4434) are commentary, never a
   candidate (#3892, #3893).
 - **release inventory** (#3282): `release_inventory` on today's source and
   crate manifests, and on the source-manifest version each arm's records
@@ -478,13 +477,14 @@ def run_metrics(label: str, project: str) -> dict[str, Any] | None:
     }
 
 
-def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[dict[str, Any]]:
+def rubric_scores(prefix: str, project: str, rubric: str = "rubric10", *, capture_raw: bool = False) -> list[dict[str, Any]]:
     out = []
     evals = EVAL_DIRS[rubric]
     if not evals.exists():
         return out
     for path in sorted(evals.glob(f"{project}_*_evaluation.json")):
-        d = json.loads(path.read_text(encoding="utf-8"))
+        raw = path.read_bytes()
+        d = json.loads(raw.decode("utf-8"))
         label = str(d.get("label", ""))
         if label in arm_labels(prefix) and (label, project) not in EXCLUDED_INVALID:
             # The same exclusion as the metric table (#1052): an evaluation
@@ -497,6 +497,8 @@ def rubric_scores(prefix: str, project: str, rubric: str = "rubric10") -> list[d
                         "evaluator": evaluator_key(d),
                         "generator": generator_model(label, project),
                         "file": path.name, "doc": d})
+            if capture_raw:
+                out[-1].update(_evaluation_path=path, _evaluation_raw=raw)
     return out
 
 
@@ -990,12 +992,32 @@ def nested_structure_section(data) -> list[str]:
             "| arm | paths |", "|---|---|", *(top or ["| – | none |"]), ""]
 
 
+def _replicate_resolved(tags: dict[str, str], project: str,
+                        recs: dict[str, Any]) -> tuple[dict[str, dict[str, int] | None], dict[str, int]]:
+    """(replicate tag -> its verified receipt paths resolved into its final
+    record, `replicate_structure.resolve_verified`'s `paths`, or None where
+    it has no readable receipt; basis -> the group's verified snippets,
+    resolved or not) for one arm x project group."""
+    from data_sheets_schema.replicate_structure import resolve_verified
+    resolved: dict[str, dict[str, int] | None] = {}
+    basis: dict[str, int] = {}
+    for t, lab in tags.items():
+        paths, snapshot, unusable = _replicate_receipt(lab, project)
+        if paths is None:
+            resolved[t] = None
+            continue
+        rv = resolve_verified(paths, snapshot, recs[t], unusable=unusable)
+        resolved[t] = rv["paths"]
+        for b, n in rv["basis"].items():
+            basis[b] = basis.get(b, 0) + n
+    return resolved, basis
+
+
 def entry_omission_section(data) -> list[str]:
     """Receipt-backed omission candidates among list entries (#3880 (1)),
     over the groups the replicate-structure table compares."""
     from data_sheets_schema.replicate_structure import (
         CANDIDATE, NOT_CANDIDATE, UNMEASURED, compare_structure, dataset_slots, entry_omission_candidates,
-        resolve_verified,
     )
     slots = dataset_slots()
     rows = []
@@ -1005,16 +1027,7 @@ def entry_omission_section(data) -> list[str]:
         tot = {"n": 0, "keyless": 0, CANDIDATE: 0, NOT_CANDIDATE: 0, UNMEASURED: 0}
         measured_any = False
         for p, tags, recs in _replicate_groups(data, key):
-            resolved, basis = {}, {}
-            for t, lab in tags.items():
-                paths, snapshot, unusable = _replicate_receipt(lab, p)
-                if paths is None:
-                    resolved[t] = None
-                    continue
-                rv = resolve_verified(paths, snapshot, recs[t], unusable=unusable)
-                resolved[t] = rv["paths"]
-                for b, n in rv["basis"].items():
-                    basis[b] = basis.get(b, 0) + n
+            resolved, basis = _replicate_resolved(tags, p, recs)
             eo = entry_omission_candidates(recs, compare_structure(recs, slots), resolved)
             n = len(eo["entries"])
             tot["n"] += n
@@ -1059,12 +1072,135 @@ def entry_omission_section(data) -> list[str]:
             "**receipt paths by basis** counts the group's "
             "verified snippets, resolved or not. **not** and **unmeasured** as above, and `–` "
             "exactly where no replicate of the group has a readable receipt. **Omitted candidate "
-            "entries per record**: how many candidate entries each replicate lacks. Only entries "
-            "of top-level lists are classified; deeper lists and the fields of single objects are "
-            "not.", "",
+            "entries per record**: how many candidate entries each replicate lacks. This table "
+            "classifies the entries of top-level lists; the fields of objects and the entries of "
+            "deeper lists are in the table after this one (#3934).", "",
             "| arm | project | entries in some replicates | candidates / not / unmeasured | keyless "
             "entries | receipt paths by basis | omitted candidate entries per record |",
             "|---|---|---|---|---|---|---|", *(rows or ["| – | – | – | – | – | – | – |"]), ""]
+
+
+def nested_omission_section(data, *, ancestor_diagnostics=False) -> list[str]:
+    """Receipt-backed omission candidates below the first level (#3934): the
+    fields of objects and the entries of nested lists, over the groups the
+    replicate-structure table compares."""
+    from data_sheets_schema.replicate_structure import (
+        CANDIDATE, COMMENTARY, COMMENTARY_KEYS, EXCLUDED_SLOTS, NESTED_KINDS, NOT_CANDIDATE, UNMEASURED,
+        compare_structure, dataset_slots, nested_omission_candidates,
+    )
+    slots = dataset_slots()
+    shown = {"field": (CANDIDATE, NOT_CANDIDATE, UNMEASURED, COMMENTARY),     # an entry is never commentary
+             "entry": (CANDIDATE, NOT_CANDIDATE, UNMEASURED)}
+    rows, top = [], []
+    # The legend names the keys the walk reads, not a wildcard (#4434):
+    # `conforms_to_standard` matches `conforms_to_*` and is classified.
+    skipped = ", ".join(f"`{k}`" for k in EXCLUDED_SLOTS)
+    commentary = ", ".join(f"`{k}`" for k in COMMENTARY_KEYS if k not in EXCLUDED_SLOTS)
+
+    def cells(counts: dict[str, dict[str, int]], measured: bool) -> list[str]:
+        return [c for kind in NESTED_KINDS for c in (
+            str(sum(counts[kind].values())),
+            " / ".join(str(counts[kind][s]) for s in shown[kind]) if measured else "–")]
+
+    def ancestor_cells(counts, measured):
+        if not ancestor_diagnostics:
+            return []
+        return [f"{counts['field']} + {counts['entry']}" if measured else "–"]
+
+    for key, disp, _pfx, _rt, _role in ARMS:
+        if key in NOT_REPLICATES:
+            continue
+        tot = {kind: dict.fromkeys(shown["field"], 0) for kind in NESTED_KINDS}
+        unread = {"keyless": 0, "values": 0}
+        ancestor_tot = dict.fromkeys(NESTED_KINDS, 0)
+        measured_any, paths = False, {}
+        for p, tags, recs in _replicate_groups(data, key):
+            resolved, _basis = _replicate_resolved(tags, p, recs)
+            no = nested_omission_candidates(recs, compare_structure(recs, slots), resolved,
+                                           ancestor_diagnostics=ancestor_diagnostics)
+            for kind in NESTED_KINDS:              # an unmeasured group adds its rows as unmeasured
+                for s, v in no["counts"][kind].items():
+                    tot[kind][s] += v
+            for k in unread:
+                unread[k] += no[k]
+            ancestor_counts = no.get("ancestor_only_counts")
+            if ancestor_diagnostics:
+                for kind in NESTED_KINDS:
+                    ancestor_tot[kind] += ancestor_counts[kind]
+            left = f"{no['keyless']} / {no['values']}"
+            if not no["measured"]:
+                rows.append("| " + " | ".join([disp, p, *cells(no["counts"], False),
+                                             *ancestor_cells(ancestor_counts, False), left, "–"]) + " |")
+                continue
+            measured_any = True
+            for r in no["rows"]:
+                if r["status"] == CANDIDATE:
+                    paths[r["path"]] = paths.get(r["path"], 0) + 1
+            per = " · ".join(f"{t} {v['field']} + {v['entry']}" for t, v in no["per_replicate"].items())
+            rows.append("| " + " | ".join([disp, p, *cells(no["counts"], True),
+                                         *ancestor_cells(ancestor_counts, True), left, per]) + " |")
+        if measured_any:
+            rows.append(f"| **{disp}** | **all projects** | "
+                        + " | ".join([*cells(tot, True), *ancestor_cells(ancestor_tot, True)])
+                        + f" | {unread['keyless']} / {unread['values']} | |")
+            ranked = sorted(paths.items(), key=lambda x: (-x[1], x[0]))[:5]
+            top.append(f"| {disp} | " + (", ".join(f"`{path}` {n}" for path, n in ranked) or "none") + " |")
+    return ["### Receipt-backed omission candidates below the first level (#3934)", "",
+            "Below the table above, from the same class-ranged slots every replicate fills — a slot "
+            "holding one object as well as one holding a list — the fields and list entries that "
+            "some replicates carry and others do not, wherever a chain of steps identifies them in "
+            "every replicate (`replicate_structure.nested_omission_candidates`): a "
+            "**single-object** step, into a field of an object every replicate holds there, and a "
+            "**keyed-list** step, into an entry every replicate holds, identified as in the table "
+            "above. A **field** is filled, as in the replicate-structure table, in some "
+            "replicates' object and not in all. Of the keys the receipts instrument exempts (as in "
+            "the omission-candidates table, #3335), " + skipped + " is skipped at any depth, as in "
+            "the paths below the top level (#3337), and a field that is one of the others (" + commentary
+            + ") is **commentary**: counted, never classified, never an omitted candidate; every "
+            "other field is classified. A **nested entry** is an identified object in a list below "
+            "the first level that some replicates' lists carry and others' do not. A keyed identity "
+            "is that key's value as `receipts._entry_key` reads it, as in the table above: stripped "
+            "of surrounding whitespace, and a resolver URL of a declared prefix read as its CURIE "
+            "(`https://doi.org/10.x/y` and `doi:10.x/y` are one entry). Nothing else is "
+            "normalised: an entry one replicate names otherwise, or identifies by another key (an "
+            "affiliation by its ROR `id` in one replicate and by its `name` in another), reads as "
+            "two entries, each missing from the other. Below the first "
+            "level only objects are identified: a **keyless** object has no identity to be missing "
+            "by (#908), and a string entry is a **value** whose only identity is its exact text — "
+            "mostly the prose items of a list of values (`ip_restrictions.restrictions`, "
+            "`version_access.versions_available`), where one replicate's rewording of another's "
+            "item would read as two items, each missing from the other. Both are counted, never "
+            "classified, as the items of a top-level list of values are not; whether such a list "
+            "is filled at all is a field like any other. Nothing is read below a keyless entry at "
+            "any level, below a field or entry some replicate lacks (it is a row, here or in the "
+            "table above), or below a value that is a list in one replicate and not in another. A "
+            "field or entry is a **candidate** when a replicate carrying it has a verified receipt "
+            "path, resolved into its final record as in the table above, on it or below it at its "
+            "own path in that replicate: a receipt credits it only through the same chain of "
+            "entries, and one on an object or entry above it, or on the list holding an entry "
+            "(#721), does not. **not**, **unmeasured** and `–` as above. **Omitted "
+            "candidates per record**: the candidate fields + candidate nested entries each "
+            "replicate lacks, each in an object or list that replicate holds.", "",
+            *(["**Ancestor-only diagnostics (#4397)** are a subset of the existing **not** rows: "
+               "at least one holder has a verified receipt on a proper ancestor under "
+               "`receipts._covers`, but no holder receipts the row on or below it. Each row counts "
+               "once, regardless of snippets or holders. A list receipt does not cover its entries; "
+               "paths refer to the same holder's resolved final record. Commentary is excluded, "
+               "and without an on/below receipt, any unreadable holder keeps a row unmeasured "
+               "rather than ancestor-only. "
+               "Candidate counts and omitted candidates per record are unchanged. These diagnostics "
+               "do not establish scientific support or recall. The historical 17 rows in #4397 "
+               "have not been revalidated by adding this option.", ""] if ancestor_diagnostics else []),
+            "| arm | project | fields in some replicates | candidates / not / unmeasured / commentary "
+            "| nested entries in some replicates | candidates / not / unmeasured | "
+            + ("of not: ancestor-only fields + entries | " if ancestor_diagnostics else "")
+            + "keyless / value "
+            "entries | omitted candidates per record (fields + entries) |",
+            "|---|---|---|---|---|---|---|---|" + ("---|" if ancestor_diagnostics else ""),
+            *(rows or ["| – | – | – | – | – | – | – | – |" + (" – |" if ancestor_diagnostics else "")]), "",
+            "Paths with the most candidates, fields and nested entries together, per arm over its "
+            "projects (`[*]` for each keyed-list step):", "",
+            "| arm | paths |", "|---|---|", *(top or ["| – | none |"]), ""]
 
 
 def receipted_where_empty_section(data) -> list[str]:
@@ -1379,15 +1515,14 @@ def removal_schema_section(data) -> list[str]:
     return lines + [""]
 
 
-def render_markdown(data, scores) -> str:
+def render_markdown(data, scores, *, attainability=None, ancestor_diagnostics=False) -> str:
     lines = ["# Cross-arm comparison (regenerated)", "",
              f"Generated by `scripts/arm_comparison.py` from the provenance records under "
              f"`data/d4d_concatenated/`; do not edit by hand — re-run the script.", "",
              "## Bases", "",
              "- pair errors, report findings, grounding: each record's own blocks. Pair "
              "is a deterministic artifact check; grounding is against the record's "
-             "declared bundle, whose md5 still matches disk for every arm shown "
-             "(`recorded_by` says whether the run or backfill-checks wrote it).",
+             "declared bundle (`recorded_by` says whether the run or backfill-checks wrote it).",
              "- British spellings, undeclared prefixes, organisational fragments, GC "
              "label variants: **recomputed live** from the artifacts under the current "
              "instrument (`grounding.form_facts`), using each run's recorded merged-schema "
@@ -1451,6 +1586,7 @@ def render_markdown(data, scores) -> str:
     lines += nested_structure_section(data)
     lines += omission_candidate_section(data)
     lines += entry_omission_section(data)
+    lines += nested_omission_section(data, ancestor_diagnostics=ancestor_diagnostics)
     lines += receipted_where_empty_section(data)
 
     lines += ["## Per-metric caveats (attached, not footnoted elsewhere)", ""]
@@ -1500,6 +1636,10 @@ def render_markdown(data, scores) -> str:
                   "under more than one version is measured per version (#3290). A project the "
                   "rubric tables flag has too few distinct totals across these arms' records to "
                   "rank them against each other on that rubric.", ""]
+    if attainability is not None:
+        from data_sheets_schema.attainability_aggregation import bind_report, render
+        captured = _attainability_evaluations(scores)
+        lines.append(render(attainability, unselected=bind_report(attainability, captured)))
     return "\n".join(lines)
 
 
@@ -1653,20 +1793,63 @@ def _rubric_figure(rubric, scores, colors) -> None:
     print(f"wrote {out.relative_to(ROOT)}")
 
 
+def _attainability_evaluations(scores):
+    out = {}
+    for rubric in scores.values():
+        for arm in rubric.values():
+            for rows in arm.values():
+                for row in rows:
+                    path, raw = row["_evaluation_path"], row["_evaluation_raw"]
+                    if json.loads(raw) != row["doc"]:
+                        raise ValueError("arm score document changed after raw capture")
+                    if path in out and out[path] != raw:
+                        raise ValueError("arm evaluation changed between selections")
+                    out[path] = raw
+    return list(out.items())
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--no-figures", action="store_true")
     ap.add_argument("--check", action="store_true",
                     help="check committed Markdown against current records; write no outputs")
+    ap.add_argument("--attainability-selection", type=Path)
+    ap.add_argument("--ancestor-receipt-diagnostics", action="store_true",
+                    help="add nested ancestor-only receipt counts without changing omission candidates")
+    ap.add_argument("--output", type=Path, help="new output for explicit attainability or ancestor diagnostics")
     args = ap.parse_args()
+    if args.attainability_selection is not None:
+        if args.output is None or not args.no_figures or args.check:
+            ap.error("attainability requires new --output, --no-figures and no --check")
+    if args.ancestor_receipt_diagnostics:
+        if args.output is None or not args.no_figures or args.check:
+            ap.error("ancestor diagnostics require new --output, --no-figures and no --check")
+    elif args.output is not None and args.attainability_selection is None:
+        ap.error("--output requires --attainability-selection or --ancestor-receipt-diagnostics")
     data = collect()
-    scores = {rubric: {key: {p: rubric_scores(pfx, p, rubric) for p in PROJECTS}
+    scores = {rubric: {key: {p: rubric_scores(pfx, p, rubric, capture_raw=args.attainability_selection is not None) for p in PROJECTS}
                        for key, _d, pfx, *_ in ARMS} for rubric in EVAL_DIRS}
     missing = [(k, p) for k in data for p in PROJECTS if not data[k][p]]
     if missing:
         print(f"note: no complete runs for {missing}", file=sys.stderr)
     if EXCLUDED_INVALID:
         print(f"note: excluded as invalid by their own validation block: {EXCLUDED_INVALID}", file=sys.stderr)
+    if args.attainability_selection is not None or args.ancestor_receipt_diagnostics:
+        from data_sheets_schema import attainability_aggregation as aa
+        try:
+            prepared = (aa.prepare_report(args.attainability_selection, _attainability_evaluations(scores))
+                        if args.attainability_selection is not None else None)
+            extra = {"ancestor_diagnostics": True} if args.ancestor_receipt_diagnostics else {}
+            rendered = render_markdown(data, scores, attainability=prepared, **extra)
+            protected = aa.protected_paths(prepared) if prepared is not None else []
+            if args.output.exists() or args.output.is_symlink() or args.output.resolve() in {p.resolve() for p in protected}:
+                ap.error("explicit report output must be a new file outside all inputs")
+            if prepared is not None:
+                aa.save_sidecar(args.output, prepared)
+            aa.write_new(args.output, rendered.encode("utf-8"), protected)
+            return 0
+        except (ValueError, OSError) as exc:
+            ap.error(str(exc))
     if args.check:
         if not OUT_MD.exists() or OUT_MD.read_text(encoding="utf-8") != render_markdown(data, scores):
             print("stale comparison Markdown; run scripts/arm_comparison.py to regenerate the table and figures",

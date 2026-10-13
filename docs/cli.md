@@ -22,7 +22,7 @@ Most subcommands assume they can import repo-local modules from `src/` and `.cla
 | `d4d download` | Download, preprocess, and concatenate source documents |
 | `d4d evaluate` | Run datasheet evaluation workflows |
 | `d4d render` | Render datasheets and evaluation outputs to HTML |
-| `d4d rocrate` | Parse, merge, and transform RO-Crate metadata |
+| `d4d rocrate` | Parse and transform RO-Crate metadata; raw merge is retired |
 | `d4d schema` | Generate schema metrics and validate YAML against the schema |
 | `d4d utils` | Inspect pipeline status and validate preprocessing results |
 
@@ -88,6 +88,26 @@ make download-and-preprocess
 ```
 
 ## `d4d evaluate`
+
+### Captured support and fitness workflows
+
+These explicit commands separate planning, saved-evidence checks, registered
+execution and reporting. Only `support-execution run` below dispatches requests;
+the other listed commands operate offline. Available software and declared
+decision references do not grant scientific acceptance or paid-run authority.
+
+| Command | Purpose and detailed workflow |
+| --- | --- |
+| `d4d evaluate support-plan`, `support-request` | [Capture a plan and reconstruct exact requests](offline_support_plan.md); `--plan-version 2` selects nested support targets and separate top-level fitness. |
+| `d4d evaluate support-results prepare/accept/recheck/report` | [Bind selected target attempts and check saved nested-support responses](nested-support-results.md). |
+| `d4d evaluate support-execution prepare/run/recheck` | [Register and execute one explicitly selected support or fitness instrument](nested-support-execution.md), then reconstruct its captured execution evidence. |
+| `d4d evaluate support-calibration prepare/report/recheck` | [Bind declared control labels and inspect captured calibration evidence](../notes/support_calibration_2026-10-07/README.md); unresolved labels and missing observations remain visible. |
+| `d4d evaluate fitness-results prepare/accept/recheck/index/recheck-index` | [Check top-level fitness and build a portable index](top-level-fitness-results.md); `--support-execution` includes all registered support selections, and `--rubric-associations` adds declared rubric identity checks. |
+
+Saved-response acceptance is mechanical. Rubric association checks do not accept
+ratings or certify scores. Independently reviewed controls, empirical calibration
+and applicable campaign authorization remain separate requirements under #2929,
+#3342 and #3343.
 
 ### `d4d evaluate presence`
 
@@ -220,6 +240,9 @@ Transform one RO-Crate or a merged set of RO-Crates into D4D YAML.
 
 ```bash
 poetry run d4d rocrate transform path/to/ro-crate-metadata.json -o output.yaml
+# Explicit compatible legacy TSV; also supported with --merge:
+poetry run d4d rocrate transform path/to/ro-crate-metadata.json -o output.yaml \
+  --mapping path/to/reviewed-mapping.tsv
 ```
 
 Options:
@@ -231,22 +254,54 @@ Options:
 | `--merge` | Enable merge mode |
 | `--inputs PATH` | Additional RO-Crate inputs for merge mode |
 | `--primary PATH` | Primary RO-Crate for conflict resolution in merge mode |
+| `--mapping PATH` | Explicit legacy mapping TSV. Omitted uses `data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv` |
 
-### `d4d rocrate merge`
+The selected table is passed to the existing legacy transformer for both single
+and merge modes. Dataset files must pass the mandatory closed-schema publication
+gate before any output or report is replaced. The default table now has explicit
+root-identity, maintenance-narrative and Creator-literal constructors, but other
+construction defects and unsupported reference assertions can still refuse
+publication. An explicit mapping must produce a valid Dataset;
+this option does not repair a table or switch to another mapper. Source files,
+the selected mapping, and existing outputs are preserved on validation refusal.
+See [the mapping-selection scope](../notes/legacy_cli_mapping_2026-10-07/README.md).
 
-Merge multiple RO-Crate files into one JSON document.
+The default Creator route preserves complete root `author` strings as
+`Creator.description`, and preserves other assertions without inferring people,
+IDs or PI roles. Marked merges retain every assertion, including duplicates.
+Reports label their existing output-key count as **constructed-field presence**,
+including null-valued keys; it is neither source coverage nor validation success.
+A separate raw-author diagnostic distinguishes missing, null, empty and present
+assertions. The API retains its different non-null-value count with an explicit
+`coverage_basis` and exposes `source_presence` even when provenance is disabled.
+See the [Creator construction and measurement contract](../notes/legacy_creator_assertions_2026-10-08/README.md).
 
-```bash
-poetry run d4d rocrate merge crate1.json crate2.json -o merged.json
-```
+### `d4d rocrate merge` (retired)
 
-Options:
+Raw RO-Crate merging is unsupported. The command remains recognizable but
+always refuses with a nonzero exit and an explanation of
+[#4593](https://github.com/bridge2ai/data-sheets-schema/issues/4593), before
+loading a merger, reading crate contents or writing an output. Keep the source
+crates separate. Existing files are preserved.
 
-| Option | Description |
+The former implementation called a Dataset-producing merger through methods
+that did not exist. No raw-graph identity, root/descriptor, context or source
+provenance contract was defined. `--primary` did not resolve those missing
+policies. Restoring raw merge requires an explicit contract and real producer
+tests; this retirement does not invent one.
+
+The legacy syntax is retained for a useful diagnostic:
+
+| Option | Status |
 | --- | --- |
-| `INPUT_FILES...` | Required positional arguments. One or more RO-Crate files |
-| `-o, --output PATH` | Required. Output merged RO-Crate path |
-| `--primary PATH` | Primary RO-Crate file for conflict precedence |
+| `INPUT_FILES...` | Required positional paths; their contents are not read. |
+| `-o, --output PATH` | Required legacy option; no output is created or replaced. |
+| `--primary PATH` | Recognized legacy option; no conflict precedence is applied. |
+
+`d4d rocrate transform --merge` remains a separate Dataset YAML operation.
+The retired command does not redirect to it or to the graph-concatenation
+helper. Dataset mapping construction remains tracked in #4594, and #2915
+retains its linked fidelity, comparison and publication obligations.
 
 ## `d4d schema`
 

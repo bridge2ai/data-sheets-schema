@@ -3644,13 +3644,18 @@ class TestTheWholeAudit(unittest.TestCase):
         self.assertNotIn("does not change a registered run's verdict", markdown)
 
     def test_claude_md_and_the_agent_script_demo_are_judged_as_they_run(self):
-        """CLAUDE.md's GC names are interactive-session violations, and
-        run_controllers ones while no registered launch is shown to switch
-        it off (#4156); the field_prioritizer demo list in a __main__ block
+        """Root memory remains model-facing when its project examples move
+        to historical reference (#5017). Any actual GC hits still gate in
+        interactive sessions and unproven-safe run controllers (#4156);
+        the field_prioritizer demo list in a __main__ block
         no approach runs is not a violation (#4054)."""
         result = _full_run()
+        surface = _discovered()[0].files["CLAUDE.md"]
+        self.assertEqual(surface.roles, dict.fromkeys(SESSION_GATES, "model_facing"))
+        self.assertIn("CLAUDE.md", result["facts"]["interactive"]["memory"])
         claude = [v for v in result["violations"] if v["path"] == "CLAUDE.md"]
-        self.assertTrue(claude)
+        # The planted-memory test independently requires a nonempty violation.
+        # Removing real project examples must not require keeping one as a fixture.
         self.assertTrue(all(v["gates_in"] == SESSION_GATES for v in claude))
         demo = [h for h in result["hits"] if h["path"] == ".claude/agents/scripts/field_prioritizer.py"
                 and h.get("main_block") and h["category"] == "gc_project"]

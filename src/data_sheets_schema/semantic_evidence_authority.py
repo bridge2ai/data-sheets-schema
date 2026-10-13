@@ -15,9 +15,10 @@ from data_sheets_schema.resources import resource_path
 AUTHORITY_PATH = "data/rubric/semantic_evidence_authority_v3.json"
 
 
-def load_authority() -> tuple[frozenset[str], str]:
+def load_authority(*, resource_reader=None) -> tuple[frozenset[str], str]:
     """Return the trusted frozen names and the SHA256 of their exact artifact."""
-    raw = resource_path(AUTHORITY_PATH).read_bytes()
+    raw = (resource_path(AUTHORITY_PATH).read_bytes() if resource_reader is None
+           else resource_reader(AUTHORITY_PATH))
     authority = json.loads(raw)
     names = authority.get("names") if isinstance(authority, dict) else None
     if (not isinstance(authority, dict) or authority.get("semantic_version") != "3.0"
@@ -33,8 +34,8 @@ def authority_digest() -> str:
     return load_authority()[1]
 
 
-def verify_authority(metadata: dict) -> frozenset[str]:
-    names, digest = load_authority()
+def verify_authority(metadata: dict, *, resource_reader=None) -> frozenset[str]:
+    names, digest = load_authority(resource_reader=resource_reader)
     if metadata.get("evidence_authority_sha256") != digest:
         raise ValueError("semantic evidence authority does not match its recorded SHA256; "
                          "validate with the pinned authority")

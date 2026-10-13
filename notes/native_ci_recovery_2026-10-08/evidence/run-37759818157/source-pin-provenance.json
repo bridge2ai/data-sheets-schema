@@ -1,0 +1,68 @@
+{
+  "files": [
+    {
+      "bytes": 12788,
+      "git_blob": "eb128688163f1063f6fa5d15ce89613242f8e914",
+      "repository_path": "utils/native_ci_evidence.py",
+      "retained_bytes": "source-bytes/00-native_ci_evidence.py.txt",
+      "sha256": "7931517c28fcdc90d2b3ad572095c738ecad5db5c69be4fa61822cf329d62f30"
+    },
+    {
+      "bytes": 10131,
+      "git_blob": "4144a25835a2821827909cf28d979134ce70d793",
+      "repository_path": "utils/native_shared_acceptance.py",
+      "retained_bytes": "source-bytes/01-native_shared_acceptance.py.txt",
+      "sha256": "9e793fb0c9ce9b6d9bb5c9df985a653ec94a8d50692503d936c6b5061acfd9d3"
+    },
+    {
+      "bytes": 8137,
+      "git_blob": "132a176192a6b4eb63fc07050bec21016c699758",
+      "repository_path": "tests/test_native_shared_execution.py",
+      "retained_bytes": "source-bytes/02-test_native_shared_execution.py.txt",
+      "sha256": "31ac17b1d66f60570ab0e26b5f96dc9170a8707a56f0798643897822383212c1"
+    },
+    {
+      "bytes": 7957,
+      "git_blob": "b9f98c24a438cca623e539ef4c8f27364fdf5d76",
+      "repository_path": "tests/test_native_shared_execution_variant.py",
+      "retained_bytes": "source-bytes/03-test_native_shared_execution_variant.py.txt",
+      "sha256": "54e31f2b3740c96bc1dfefe9c377aa7525a2657fc115ef961f55cf0894a4feb5"
+    },
+    {
+      "bytes": 14883,
+      "git_blob": "1b8800074cf4942aff8c4e54639d076c804bb151",
+      "repository_path": "tests/native_shared_fixture.py",
+      "retained_bytes": "source-bytes/04-native_shared_fixture.py.txt",
+      "sha256": "305ccabdcdf1a511f562d842d22a1c26ca5b0857acff0b57abf6e0e94acfe582"
+    },
+    {
+      "bytes": 17977,
+      "git_blob": "75840d54c17e3b2640e6badce294174254339fae",
+      "repository_path": "tests/native_shared_omission_fixture.py",
+      "retained_bytes": "source-bytes/05-native_shared_omission_fixture.py.txt",
+      "sha256": "35229bcbe1be3867ad5b2a7b85023c94eac0f948ee9ed749735f36d0731c610d"
+    },
+    {
+      "bytes": 9434,
+      "git_blob": "e9ea332dd223f7a5d2a039d64352532381184b14",
+      "repository_path": "tests/fixtures/native_shared_execution/fake_cli.py",
+      "retained_bytes": "source-bytes/06-fake_cli.py.txt",
+      "sha256": "82622dc176fff332fc2d44dcb5de2920a3e70fdc00a0605ef8b87550d47bb646"
+    },
+    {
+      "bytes": 13867,
+      "git_blob": "249896f4e5bd5a7f26ee4c3081d877eb52862ac8",
+      "repository_path": ".github/workflows/main.yaml",
+      "retained_bytes": "source-bytes/07-main.yaml.txt",
+      "sha256": "7e56e902e3177a19ff36de56394510fba3a37b35872c6fdc74f77d9ef951a496"
+    }
+  ],
+  "format": "native_ci_source_pin_provenance_v1",
+  "merge": "cfe68ee650e3de0f775bd476f055f25c29eb7a72",
+  "parents": [
+    "0125eebbc214d0907c3b69d23758cd9441911a78",
+    "aa845f2e083185707feab0ee8b090d6d9c9f52ef"
+  ],
+  "scope": "GitHub raw contents at the explicit tested merge were compared byte-for-byte with Git show of that same fetched commit. Saved declarations and content identity, not authenticated execution or full imported-code closure.",
+  "tree": "8bdb68b58a410756871bf5b99cba90fbc8d6581b"
+}

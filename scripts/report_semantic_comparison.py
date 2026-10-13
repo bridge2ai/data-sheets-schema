@@ -45,7 +45,8 @@ def report(paths: list[Path], cohort: list[Path] | None = None, *,
            evidence_contexts: dict[Path, Path] | None = None,
            disclosure_policy: str | None = None,
            generation_bindings=None,
-           disclosure_root: Path | None = None) -> str:
+           disclosure_root: Path | None = None,
+           attainability: dict | None = None) -> str:
     """`cohort` names the evaluations the discrimination block measures — one
     rating per record, e.g. the primaries of a set that also holds repeats.
     The table still lists every named evaluation, and the block names those
@@ -72,8 +73,10 @@ def report(paths: list[Path], cohort: list[Path] | None = None, *,
     if set(contexts) - set(inputs):
         raise ValueError("each evidence context requires an input for the same evaluation")
     documents, rows = [], []
+    captured_evaluations = []
     for path in paths:
         raw = path.read_bytes()
+        captured_evaluations.append((path, raw))
         if disclosure is not None:
             declared = disclosure["rows"][len(documents)]
             if (declared["evaluation_resolved_path"] != str(path.resolve()) or
@@ -162,6 +165,9 @@ def report(paths: list[Path], cohort: list[Path] | None = None, *,
         # association checks. Nest its headings without changing its content.
         appendix = render(disclosure).rstrip("\n").splitlines()
         text.extend(["", *("#" + line if line.startswith("#") else line for line in appendix)])
+    if attainability is not None:
+        from data_sheets_schema.attainability_aggregation import bind_report, render
+        text.append(render(attainability, unselected=bind_report(attainability, captured_evaluations)))
     return "\n".join(text).rstrip("\n") + "\n"
 
 
@@ -251,6 +257,7 @@ def main() -> None:
                         help="explicit generation association; requires --model-disclosure")
     parser.add_argument("--disclosure-root", type=Path,
                         help="root for recorded binding paths; requires --model-disclosure")
+    parser.add_argument("--attainability-selection", type=Path, help="explicit source-item policy/capture selection; never rescores")
     args = parser.parse_args()
     if args.output.resolve() in {p.resolve() for p in args.evaluations}:
         parser.error("output must not replace an evaluation")
@@ -268,16 +275,30 @@ def main() -> None:
             parser.error("output must not replace an evaluation, evidence input or context")
         if args.model_disclosure is not None and (args.output.exists() or args.output.is_symlink()):
             parser.error("model disclosure output must be a new file")
+        attainment = None
+        if args.attainability_selection is not None:
+            from data_sheets_schema import attainability_aggregation as aa
+            attainment = aa.prepare_report(args.attainability_selection,
+                                           [(p, p.read_bytes()) for p in args.evaluations])
+            protected.update(aa.protected_paths(attainment))
+            if args.output.exists() or args.output.is_symlink() or args.output.resolve() in {p.resolve() for p in protected}:
+                parser.error("attainability output must be a new file outside all inputs")
         rendered = report(args.evaluations, args.cohort, evidence_inputs=inputs, evidence_contexts=contexts,
                           disclosure_policy=args.model_disclosure, generation_bindings=bindings,
-                          disclosure_root=args.disclosure_root)
+                          disclosure_root=args.disclosure_root, attainability=attainment)
     except ValueError as exc:
         parser.error(str(exc))
     except OSError as exc:
         if args.model_disclosure is None:
             raise
         parser.error(str(exc))
-    if args.model_disclosure is None:
+    if attainment is not None:
+        try:
+            aa.save_sidecar(args.output, attainment)
+            aa.write_new(args.output, rendered.encode("utf-8"), protected)
+        except (ValueError, OSError) as exc:
+            parser.error(str(exc))
+    elif args.model_disclosure is None:
         args.output.write_text(rendered, encoding="utf-8")
     else:
         # Exclusive creation refuses existing files and closes the publication

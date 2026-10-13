@@ -1,0 +1,578 @@
+{
+  "archive": {
+    "bytes": 530121,
+    "sha256": "f5092f972f34ebc1e8e78e27b1abc3227b9ba3305c0b9edc79e0ba57164e0f15"
+  },
+  "artifact_id": 11541743902,
+  "artifact_name": "native-synthetic-cases-cfe68ee650e3de0f775bd476f055f25c29eb7a72-37759818157-1-shard1",
+  "cases": [
+    {
+      "actual_archive": {
+        "bytes": 489261,
+        "sha256": "34ae8df52af6089a2bea6df3b99bc6a79a1f3bae304ae86ec04fae52da8f8189"
+      },
+      "actual_inventory": {
+        ".": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "actual-result.json": {
+          "bytes": 12235,
+          "mode": 420,
+          "sha256": "96287c2ca7222d3feb70427e6fe21513197f4344e38081c405fb5c33d25bfb85",
+          "type": "file"
+        },
+        "authority": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "authority/bundle.txt": {
+          "bytes": 415,
+          "mode": 420,
+          "sha256": "1e9eb348adb30acf7e64ab74710845ac757fcdaab151359946f06adb9795772c",
+          "type": "file"
+        },
+        "authority/chunks.json": {
+          "bytes": 534,
+          "mode": 420,
+          "sha256": "3179251da34ff5c7c803742ecd50b043c8e0628c2af2398990f315f5a5f33892",
+          "type": "file"
+        },
+        "authority/composition-execution.json": {
+          "bytes": 147116,
+          "mode": 420,
+          "sha256": "fb540938e8341c498d4102b851e2fdf221a6139b41e068d3a90e6e6f1aaed3c6",
+          "type": "file"
+        },
+        "authority/composition.json": {
+          "bytes": 146624,
+          "mode": 420,
+          "sha256": "d61640b14ba1a005ad98f72e7b96ef54b3880df50be5bc671a85223ba5473ffe",
+          "type": "file"
+        },
+        "authority/context.json": {
+          "bytes": 292,
+          "mode": 420,
+          "sha256": "0a662240879422235cf3be641d05ed9e26a7b4b6b8ad2e257b9629f6ebde6ad1",
+          "type": "file"
+        },
+        "authority/instruction-execution.md": {
+          "bytes": 103797,
+          "mode": 420,
+          "sha256": "26456cc7376968551efd9fbcbc0641503fcfcd4b603d024b109cee0ec1c95a45",
+          "type": "file"
+        },
+        "authority/instruction.md": {
+          "bytes": 103720,
+          "mode": 420,
+          "sha256": "d0821bfed1d4d3dcf4fced5755b8f563879573d5aac3df7f0acb2bbfe106f217",
+          "type": "file"
+        },
+        "authority/invented-ci.json": {
+          "bytes": 2491,
+          "mode": 420,
+          "sha256": "ce033151434d5868bb6c7e1bd303ffe1fb445f575d13a93067190a480723c9da",
+          "type": "file"
+        },
+        "authority/invented-owner.json": {
+          "bytes": 687,
+          "mode": 420,
+          "sha256": "8c5986285d2ab7e2c2c7c87a5a81a7522286b34b5eb42d8ed31b2974453e56f7",
+          "type": "file"
+        },
+        "authority/invented-permissions.json": {
+          "bytes": 3120154,
+          "mode": 420,
+          "sha256": "1a79dc4bef2b554a5fa713f068eaefba6c15b8c283fa42735741bc43a56f1e50",
+          "type": "file"
+        },
+        "authority/invented-review.json": {
+          "bytes": 531,
+          "mode": 420,
+          "sha256": "ba7d8e3b59a0e8ab6aa8dd8bb32d382823b7288034409e3d4ac9248a3ce29a04",
+          "type": "file"
+        },
+        "authority/receipt-policy.json": {
+          "bytes": 327,
+          "mode": 420,
+          "sha256": "9ecc2d8b7c1ecea131acd0a0592a32fa7d94fc8e20c6ffd70d368556284aff1c",
+          "type": "file"
+        },
+        "authority/runtime-execution.json": {
+          "bytes": 1144,
+          "mode": 420,
+          "sha256": "b77d9ae6027827cea73b0b8237b7fa84d0b6db65b5674976348c4cbda5e5a486",
+          "type": "file"
+        },
+        "authority/runtime.json": {
+          "bytes": 1077,
+          "mode": 420,
+          "sha256": "d60c6aae571672bc328ca6c2a02b6b29be1cd85f722587ee62415d16f111d9d8",
+          "type": "file"
+        },
+        "authority/selection.json": {
+          "bytes": 6620,
+          "mode": 420,
+          "sha256": "6c410c6f0c0712cd7ba592547d466199b1ddc86b5fb2b9e103743344a19a511a",
+          "type": "file"
+        },
+        "authority/synthetic-seeds.json": {
+          "bytes": 903,
+          "mode": 420,
+          "sha256": "a219c764281c8ed0e7e77d9bca9cc38fdee700e6a9536565dc67a0b77136cfb5",
+          "type": "file"
+        },
+        "authority/system.txt": {
+          "bytes": 73,
+          "mode": 420,
+          "sha256": "ed3ef8205712aad869ff9dab0ae315069acf4af33fcbac8fa8d67f90c9610e20",
+          "type": "file"
+        },
+        "data": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct/offline-neutral": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct_core": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct_core/offline-neutral": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "declared-never-invoked": {
+          "bytes": 18,
+          "mode": 448,
+          "sha256": "0a5fb2d3a9e42d8cd0cd06a68ffdbc8cdd3e26ad2ec801c47867e457e7433e1a",
+          "type": "file"
+        },
+        "fresh-attempt": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/binding": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/binding/execution.json": {
+          "bytes": 359113,
+          "mode": 384,
+          "sha256": "b19f807de883e2bb0b2d1e9bce1a5dec0c74dbefaa84ac38721ae48ae08cdea9",
+          "type": "file"
+        },
+        "fresh-attempt/stages/binding/session.json": {
+          "bytes": 1462,
+          "mode": 384,
+          "sha256": "ba57093cd6b83f525c6c3c8f934aab7d34f28799a7b951f5ea8bf988c95521b2",
+          "type": "file"
+        },
+        "fresh-attempt/stages/binding/started.json": {
+          "bytes": 1316,
+          "mode": 384,
+          "sha256": "6db06aed8ab0d6b397e308eb25e372822a0b0758917c1dd10ccb39d83aca02f8",
+          "type": "file"
+        },
+        "fresh-attempt/stages/journal.json": {
+          "bytes": 825,
+          "mode": 384,
+          "sha256": "e89cd49e3be71e719d199f1666be8e06f554845ac9a786700fa0a1bbe8436bd0",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/observations/000000.json": {
+          "bytes": 1841,
+          "mode": 384,
+          "sha256": "1b7602327e7b127491755bbce5ffd1eb1e62ebae40735a22c33449e85bdb3c3a",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/records/000000.json": {
+          "bytes": 878,
+          "mode": 384,
+          "sha256": "70a98a5f6d72b07389983489a3b1e895b1bdbc76d271bbf8e4573023b1f0ce93",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records/000001.json": {
+          "bytes": 981,
+          "mode": 384,
+          "sha256": "3672d5d12b19419868b608fdcdf62bfce7fbb943e708eaebc064d2c16c10ae05",
+          "type": "file"
+        },
+        "native-attempt": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "native-attempt/ci.json": {
+          "bytes": 2491,
+          "mode": 384,
+          "sha256": "ce033151434d5868bb6c7e1bd303ffe1fb445f575d13a93067190a480723c9da",
+          "type": "file"
+        },
+        "native-attempt/cli_config": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "native-attempt/control.jsonl": {
+          "bytes": 3951,
+          "mode": 420,
+          "sha256": "76e12687a2c3cfd2154714047d7abe1b7eeaa6f6eef9c2bd9fc011cd6674761c",
+          "type": "file"
+        },
+        "native-attempt/keep-awake.json": {
+          "bytes": 224,
+          "mode": 384,
+          "sha256": "80643af0969f07308f199f82e413f3a7a849d6f178e42898e2d4b7586a0e8b00",
+          "type": "file"
+        },
+        "native-attempt/launch_word.json": {
+          "bytes": 687,
+          "mode": 384,
+          "sha256": "8c5986285d2ab7e2c2c7c87a5a81a7522286b34b5eb42d8ed31b2974453e56f7",
+          "type": "file"
+        },
+        "native-attempt/registration.json": {
+          "bytes": 359113,
+          "mode": 384,
+          "sha256": "b19f807de883e2bb0b2d1e9bce1a5dec0c74dbefaa84ac38721ae48ae08cdea9",
+          "type": "file"
+        },
+        "native-attempt/review.json": {
+          "bytes": 531,
+          "mode": 384,
+          "sha256": "ba7d8e3b59a0e8ab6aa8dd8bb32d382823b7288034409e3d4ac9248a3ce29a04",
+          "type": "file"
+        },
+        "native-attempt/runtime-observation.json": {
+          "bytes": 722,
+          "mode": 384,
+          "sha256": "4788ec7e20c49ba64cd7d5548ff8d2a853c0772cb50c2ea64e0b001fc5308af1",
+          "type": "file"
+        },
+        "native-attempt/started.json": {
+          "bytes": 1316,
+          "mode": 384,
+          "sha256": "6db06aed8ab0d6b397e308eb25e372822a0b0758917c1dd10ccb39d83aca02f8",
+          "type": "file"
+        },
+        "native-attempt/stderr.txt": {
+          "bytes": 0,
+          "mode": 420,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": "file"
+        },
+        "native-attempt/transcript.jsonl": {
+          "bytes": 10099,
+          "mode": 420,
+          "sha256": "ca567cf3012c5a0867037a62db83ed50f67ab88ca1ca316763dce35ef71607af",
+          "type": "file"
+        },
+        "native-evidence": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "native-evidence/captured": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "native-evidence/captured/0": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/0/composition-execution.json": {
+          "bytes": 147116,
+          "mode": 256,
+          "sha256": "fb540938e8341c498d4102b851e2fdf221a6139b41e068d3a90e6e6f1aaed3c6",
+          "type": "file"
+        },
+        "native-evidence/captured/1": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/1/control.jsonl": {
+          "bytes": 3951,
+          "mode": 256,
+          "sha256": "76e12687a2c3cfd2154714047d7abe1b7eeaa6f6eef9c2bd9fc011cd6674761c",
+          "type": "file"
+        },
+        "native-evidence/captured/2": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/2/runtime-observation.json": {
+          "bytes": 722,
+          "mode": 256,
+          "sha256": "4788ec7e20c49ba64cd7d5548ff8d2a853c0772cb50c2ea64e0b001fc5308af1",
+          "type": "file"
+        },
+        "native-evidence/captured/3": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/3/stderr.txt": {
+          "bytes": 0,
+          "mode": 256,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": "file"
+        },
+        "native-evidence/captured/4": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/4/transcript.jsonl": {
+          "bytes": 10099,
+          "mode": 256,
+          "sha256": "ca567cf3012c5a0867037a62db83ed50f67ab88ca1ca316763dce35ef71607af",
+          "type": "file"
+        },
+        "native-evidence/final.json": {
+          "bytes": 15011,
+          "mode": 384,
+          "sha256": "2e19eb73caa5e6807392989ced234af2efe636440e662eae7dad233789037f27",
+          "type": "file"
+        },
+        "native-evidence/published.json": {
+          "bytes": 270,
+          "mode": 384,
+          "sha256": "9e12d83f321e64fa9566805dd96420f78c0dbd20390e9d930c332fdf9ad8a051",
+          "type": "file"
+        },
+        "ordinary-python-test-peer": {
+          "bytes": 9509,
+          "mode": 448,
+          "sha256": "cb8a11ae42cd81451e0a8f9395d680ef8acadbd5bd22238474fd34b3dc489b5c",
+          "type": "file"
+        },
+        "sources.yaml": {
+          "bytes": 477,
+          "mode": 420,
+          "sha256": "6fccdb10fa55e4bf75da71f90534cbfc22a806f1a866bf016db6f40587360e2e",
+          "type": "file"
+        }
+      },
+      "archive_pin_matches": true,
+      "availability": {
+        "actual-result.json": "file",
+        "authority/composition-execution.json": "file",
+        "authority/runtime-execution.json": "file",
+        "authority/runtime.json": "file",
+        "authority/selection.json": "file",
+        "fresh-attempt/stages/journal.json": "file",
+        "native-attempt/control.jsonl": "file",
+        "native-attempt/registration.json": "file",
+        "native-attempt/started.json": "file",
+        "native-attempt/stderr.txt": "file",
+        "native-attempt/transcript.jsonl": "file"
+      },
+      "before_archived_after_equal": true,
+      "capture_status": "retained",
+      "case_completeness": "not_assessed",
+      "diagnostic": {
+        "child_exit_code": null,
+        "first_stop": "native shared observation failed: ValueError: live native stream changed without appending bytes",
+        "native_completion": "not_inferred",
+        "phase_history": {
+          "assembly_complete": false,
+          "checked": true,
+          "checks": [],
+          "complete": true,
+          "core_sealed": false,
+          "current_checks": [],
+          "native_terminal": false,
+          "passed": false,
+          "pending_tool_ids": [
+            "shared-test-4"
+          ],
+          "phase1_sealed": false,
+          "problems": [
+            "unsettled native tool calls",
+            "no settled phase1 receipt boundary",
+            "no checked deterministic original core",
+            "no observed checked stage assembly",
+            "missing current final obligations",
+            "missing native terminal"
+          ],
+          "scope": "Ordered settled helper obligations; capture, callback authority, file bytes and scientific support are separate checks.",
+          "terminal_failures": []
+        },
+        "result_available": true,
+        "result_pin": {
+          "bytes": 12235,
+          "sha256": "96287c2ca7222d3feb70427e6fe21513197f4344e38081c405fb5c33d25bfb85"
+        },
+        "runtime_gates_passed": false,
+        "saved_capture_bindings": [
+          {
+            "matches_saved_capture": true,
+            "relative": "authority/composition-execution.json"
+          },
+          {
+            "matches_saved_capture": true,
+            "relative": "native-attempt/control.jsonl"
+          },
+          {
+            "matches_saved_capture": true,
+            "relative": "native-attempt/runtime-observation.json"
+          },
+          {
+            "matches_saved_capture": true,
+            "relative": "native-attempt/stderr.txt"
+          },
+          {
+            "matches_saved_capture": true,
+            "relative": "native-attempt/transcript.jsonl"
+          }
+        ],
+        "scope": "Saved result and literal transcript inspection only; no replay, timing attribution or authenticated-execution claim.",
+        "shutdown": {
+          "control_initialized": true,
+          "control_shutdown_complete": true,
+          "unfinished_control_workers": 0
+        },
+        "state": "failed",
+        "transcript": {
+          "ends_in_newline": true,
+          "events": 16,
+          "parse_errors": [],
+          "pending_tool_observations": [
+            {
+              "event_type": "assistant",
+              "line": 12,
+              "pending_tool": {
+                "id": "shared-test-4",
+                "input": {
+                  "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli bundle chunk --bundle /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/authority/bundle.txt --chunk-manifest /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/authority/chunks.json --manifest /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/sources.yaml --check --strict"
+                },
+                "name": "Bash",
+                "type": "tool_use"
+              }
+            }
+          ]
+        },
+        "transcript_available": true
+      },
+      "manifest_pin": {
+        "bytes": 35087,
+        "sha256": "1583b827a8e44cd98135b0788a2b1cca096eef5215cc91df3e0982057bb922c8"
+      },
+      "matches_archived_inventory": true,
+      "node_id": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+      "test_outcome": {
+        "call": {
+          "duration_seconds": 253.85863506700002,
+          "outcome": "failed"
+        },
+        "setup": {
+          "duration_seconds": 0.0009493530000099781,
+          "outcome": "passed"
+        },
+        "teardown": {
+          "duration_seconds": 0.00033177900002101524,
+          "outcome": "passed"
+        }
+      },
+      "worker": "gw3"
+    }
+  ],
+  "nodes_with_manifests": [
+    "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion"
+  ],
+  "nodes_without_manifests_in_this_shard": [
+    "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+  ],
+  "pr_head": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+  "run_id": 37759818157,
+  "source": {
+    "files_checked": 8,
+    "head": "cfe68ee650e3de0f775bd476f055f25c29eb7a72",
+    "tree": "8bdb68b58a410756871bf5b99cba90fbc8d6581b"
+  },
+  "verification_scope": "Content consistency and declared GitHub/source bindings; not authenticated execution.",
+  "worker_outcomes": {
+    "controller": {
+      "events": [],
+      "pytest_exitstatus": 1,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw0": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw1": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw2": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw3": {
+      "events": [
+        {
+          "capture_status": "retained",
+          "directory": "953c0abb6902046a535af38b4f1bb4a42368993dc8e0b56199dfba39b330c2fc",
+          "node_id": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+          "test_outcome": {
+            "call": {
+              "duration_seconds": 253.85863506700002,
+              "outcome": "failed"
+            },
+            "setup": {
+              "duration_seconds": 0.0009493530000099781,
+              "outcome": "passed"
+            },
+            "teardown": {
+              "duration_seconds": 0.00033177900002101524,
+              "outcome": "passed"
+            }
+          }
+        }
+      ],
+      "pytest_exitstatus": 1,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    }
+  }
+}

@@ -65,12 +65,30 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
 
 ```bash
 python -m data_sheets_schema.attainability check                 # validate every file here
+python -m data_sheets_schema.attainability check --gate          # also certify deterministic absences
+python -m data_sheets_schema.attainability check --gate FILE.yaml ...  # only the selected files
 python -m data_sheets_schema.attainability derive --bundle PATH --md5 MD5 --write
 python -m data_sheets_schema.attainability credited EVALUATION.json ...   # credited though not stated
 ```
 
 `check` reports a file it cannot read, or that is not UTF-8, as `INVALID`
-and goes on to the next. `credited` names, per evaluation, the absences it
+and goes on to the next. With `--gate`, each valid file also receives the
+same bounded line-split certification as `derive --write`, using its pinned
+bundle hashes and recorded chunk rule. A refused certification prints
+`REFUSED`, the item and matching source lines, and exits 1 after checking
+the remaining files. Failure to resolve the pinned bytes for the gate also
+refuses certification. Successful rows state how many deterministic
+absence entries were checked; zero means there were none to certify.
+Omitting file arguments checks every `*.yaml` directly under this directory;
+explicit file arguments check only those paths. No files are rewritten.
+
+The option does not widen the deterministic detector, change a status or
+score, approve curator/judge interpretations, or prove exhaustive source
+coverage. Its search bounds and exclusions are the writer's bounds above.
+Ordinary `check`, `load` and `validate_text` retain their validation contract:
+a file can validate while `check --gate` refuses to certify its absences.
+
+`credited` names, per evaluation, the absences it
 was checked against, and reports a row whose file can yield no finding as
 `unchecked` with the reason — no file for the bundle version, a file that
 pins no text of the evaluation's rubric (the CHORUS file and every rubric20

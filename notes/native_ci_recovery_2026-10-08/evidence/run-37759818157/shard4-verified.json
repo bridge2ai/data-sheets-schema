@@ -1,0 +1,69 @@
+{
+  "archive": {
+    "bytes": 4744,
+    "sha256": "78fe512e34c0317f03522e34c10b4893fc03508d8a49e109773adf952ceeafb4"
+  },
+  "artifact_id": 11542920446,
+  "artifact_name": "native-synthetic-cases-cfe68ee650e3de0f775bd476f055f25c29eb7a72-37759818157-1-shard4",
+  "cases": [],
+  "nodes_with_manifests": [],
+  "nodes_without_manifests_in_this_shard": [
+    "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+    "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+  ],
+  "pr_head": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+  "run_id": 37759818157,
+  "source": {
+    "files_checked": 8,
+    "head": "cfe68ee650e3de0f775bd476f055f25c29eb7a72",
+    "tree": "8bdb68b58a410756871bf5b99cba90fbc8d6581b"
+  },
+  "verification_scope": "Content consistency and declared GitHub/source bindings; not authenticated execution.",
+  "worker_outcomes": {
+    "controller": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw0": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw1": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw2": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw3": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    }
+  }
+}

@@ -1,5 +1,7 @@
 """Run-tracking commands for the D4D CLI."""
 
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -365,11 +367,10 @@ def archive(labels, unattested, project, reason, execute):
             if run.is_core or run.deterministic:
                 continue
             for proj in run.projects:
-                # PARTIAL only — never NO_RECORD. A run with no provenance at
-                # all is a different problem, and archiving is not its answer:
-                # the merged records have none because provenance.py cannot yet
-                # express a derived record, which is tracked work rather than an
-                # unattestable run.
+                # PARTIAL only — never NO_RECORD. This option targets partial
+                # attestations, not every record lacking provenance. Derived
+                # provenance is supported; the mode and shipping policy do not
+                # change this archival selection rule.
                 if attestation(run.method, run.label, proj) == PARTIAL:
                     targets.add(run.label)
                     unplaceable.add(proj)
@@ -613,6 +614,8 @@ def check_cmd(method, label, project, strict):
     header_mismatches = []
     pack_pin_drift = []                                        # a record's review pins a pack no longer on disk (#1095)
     profile_disagreements: list[str] = []
+    profile_identity_unknown: list[str] = []
+    historical_digest_text: list[str] = []
     malformed_records: list[str] = []
     for run in discover():
         if run.is_core or run.deterministic:
@@ -641,9 +644,16 @@ def check_cmd(method, label, project, strict):
             # A record whose profile and digest, or whose stored spec and
             # schema, name different instruments is two records in one:
             # the gate and the readers would disagree (#1581, #1678, #1699).
-            from data_sheets_schema.provenance import profile_problems
-            for problem in profile_problems(prov_data):
+            from data_sheets_schema.provenance import profile_assessment
+            problems, profile_context = profile_assessment(prov_data)
+            for problem in problems:
                 profile_disagreements.append(f"{run.label}/{proj}: {problem}")
+            if profile_context['status'] == 'unknown':
+                profile_identity_unknown.append(f"{run.label}/{proj}: {profile_context['reason']}")
+            reconstruction = profile_context.get('historical_digest_text')
+            if reconstruction is not None:
+                historical_digest_text.append(
+                    f"{run.label}/{proj}: {reconstruction['status']}: {reconstruction['reason']}")
             # The record's review block pins the pack by sha256; a pack rewritten
             # underneath it (a forced `d4d review pack`) leaves `review.adverse`
             # ranking canonicals on a review of a pack that no longer exists
@@ -1131,6 +1141,20 @@ def check_cmd(method, label, project, strict):
                    "the header from the record; a run resumed past its record write "
                    "keeps the header it had.")
 
+    if profile_identity_unknown:
+        click.echo(f"\nⓘ  {len(profile_identity_unknown)} record(s) whose historical profile identity "
+                   "is not established — reported, not fatal under --strict:")
+        for line in profile_identity_unknown[:40]:
+            click.echo(f"   {line}")
+        if len(profile_identity_unknown) > 40:
+            click.echo(f"   … {len(profile_identity_unknown) - 40} more")
+    if historical_digest_text:
+        click.echo(f"\nⓘ  {len(historical_digest_text)} historical digest-text reconstruction(s). "
+                   "Candidate agreement does not attest the consumed implementation or profile:")
+        for line in historical_digest_text[:40]:
+            click.echo(f"   {line}")
+        if len(historical_digest_text) > 40:
+            click.echo(f"   … {len(historical_digest_text) - 40} more")
     if profile_disagreements:
         click.echo(f"\n❌ {len(profile_disagreements)} record(s) name two instruments (profile vs digest, or "
                    "stored spec vs schema; #1699) — fatal under --strict:")
@@ -1408,6 +1432,51 @@ def validate_cmd(method, project, label, recheck, dry_run):
                    "one with `d4d provenance backfill` first.")
 
 
+def _merge_fitness_scorer(context_path, cache_path, *, project, method, labels, root):
+    """Offline opt-in using the existing fitness context and cache loader."""
+    import json
+    import yaml
+    from data_sheets_schema import profiles
+    from data_sheets_schema.evidence_score import JudgementContext, LLMSlotFitnessScorer
+    from data_sheets_schema.provenance import record_path_for
+
+    def unique_fields(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate fitness context field: {key}")
+            result[key] = value
+        return result
+
+    document = json.loads(context_path.read_text(encoding="utf-8"), object_pairs_hook=unique_fields)
+    if type(document) is not dict or set(document) != {
+            "axis", "model", "rubric", "corpus", "schema", "specification"}:
+        raise ValueError("fitness context must contain all six JudgementContext fields")
+    context = JudgementContext(**document)
+    selected = []
+    for label in labels:
+        source = yaml.safe_load(record_path_for(project, method, label, root).read_bytes())
+        if not isinstance(source, dict):
+            raise ValueError("source provenance is not a record")
+        schema = source.get("schema") or {}
+        if type(schema) is not dict:
+            raise ValueError("source provenance schema is not a mapping")
+        declared = schema.get("profile")
+        # None/omitted is historical absence. Other false-like values are still
+        # explicit declarations, not permission to select the study profile.
+        if declared is not None and (type(declared) is not str or not declared.strip()):
+            raise ValueError(f"source provenance {label!r}: schema.profile must be "
+                             "a nonempty profile name or null")
+        # Keep exact registered-name lookup, without stringifying malformed
+        # values or silently falling back for unknown names.
+        selected.append(profiles.profile_named(declared) if declared is not None
+                        else profiles.for_record(source))
+    if len({profile.name for profile in selected}) != 1:
+        raise ValueError("saved fitness merge requires one source profile")
+    return LLMSlotFitnessScorer(model=context.model, profile=selected[0],
+                                cache_path=cache_path, expected_context=context, cache_only=True)
+
+
 @runs.command("merge")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
 @click.option("--project", required=True)
@@ -1417,6 +1486,9 @@ def validate_cmd(method, project, label, recheck, dry_run):
 @click.option("--config", default=None,
               help="Merge every replicate sharing this config prefix, e.g. "
                    "2026-07-31_claude-opus-5-generic-v2.")
+@click.option("--out-method", default=None,
+              help="Distinct destination method (default: <source method>_merged). "
+                   "--method continues to select the contributing runs.")
 @click.option("--out-label", default=None,
               help="Label to write the merged record under "
                    "(default: <config>_merged).")
@@ -1427,27 +1499,37 @@ def validate_cmd(method, project, label, recheck, dry_run):
                    "something no replicate said.")
 @click.option("--execute", is_flag=True,
               help="Write the record. Without this, report and write nothing.")
-def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
-    """Combine replicates into one record that maximises coverage.
+@click.option("--fitness-context", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Opt in to saved fitness scores with this complete JudgementContext JSON; requires --fitness-cache.")
+@click.option("--fitness-cache", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Saved fitness JSONL; misses refuse, and no provider is called. Requires --fitness-context.")
+def merge_cmd(method, project, labels, config, out_method, out_label, unguarded, execute,
+              fitness_context, fitness_cache):
+    """Combine generated replicates into one derived record.
 
-    Replicates differ in *coverage* more than in quality — each populates slots
-    the others miss — so a union covers more of the schema than any single
-    replicate, without preferring one on a score that could not discriminate
-    them (#176).
+    The historical 2026-07-31 generic-v2 agreement matrix measured
+    disagreement on 47-63% of shared slots across projects (outward bounds).
 
-    The merged record is `record_mode: derived`, never `live`: it is not
-    something a model produced, and provenance names every contributor by hash
-    and states the rule that combined them.
+    By default, contested slots use the base replicate's value, or the first
+    holder's where the base lacks the slot. Referent-bearing fields stay with
+    the base unless --unguarded is requested. Optional --fitness-context and
+    --fitness-cache use saved judgments under a checked, pinned instrument;
+    a cache miss refuses rather than calling a provider.
 
-    **`d4d runs select` is the recommended way to get a shippable record, and
-    it argues against this command.** Replicates state different facts on
-    47-63% of the slots they share, so a union splices across referents — one
-    replicate's participant count beside another's DOI — to gain 1-5 slots.
-    That objection is about coherence and this command's case is about
-    coverage; both are true, and the two commands existing without naming each
-    other is how a reader ends up believing whichever help text they opened.
-    Use this when a union is what you want and you can defend the splice.
+    Provenance records the source contributions and selection rule. --method
+    selects contributing runs; --out-method selects a distinct destination
+    (default: <source method>_merged). Destination preflight does not make the
+    record and provenance writes an atomic transaction.
+
+    `d4d runs select` chooses one existing replicate; this command combines
+    values. Neither command alone grants shipping approval. #4765 tracks the
+    unresolved choice of whether merged records are a supported shipping
+    alternative, its conditions, and current-arm verification. Coverage and
+    saved-score selection do not replace coherence, current-schema validation,
+    derived-core and pair checks.
     """
+    if (fitness_context is None) != (fitness_cache is None):
+        raise click.ClickException("--fitness-context and --fitness-cache must be supplied together")
     from data_sheets_schema.cli.method import resolve_method
     if method is None:
         found = {resolve_method(lab, project) for lab in (labels or [config])}
@@ -1455,7 +1537,7 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
             raise click.ClickException(f'labels live under {sorted(found)}; pass --method')
         method = found.pop()
     import yaml as _yaml
-    from data_sheets_schema.merge import union_merge, write_merge
+    from data_sheets_schema.merge import check_merge_destination, union_merge, write_merge
 
     from data_sheets_schema.runs import CONCAT_DIR
     base_dir = _corpus_path(CONCAT_DIR) / method
@@ -1479,10 +1561,19 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
             raise click.ClickException(f"{path} is not a record")
         records[lab], sources[lab] = loaded, path
 
+    out = (out_label if out_label is not None else
+           f"{(config or labels[0].rsplit('_rep', 1)[0])}_merged")
+    destination_method = out_method if out_method is not None else f"{method}_merged"
+    target = _corpus_path(CONCAT_DIR) / destination_method / out / f"{project}_d4d.yaml"
     try:
+        check_merge_destination(target, sources=sources, project=project,
+                                method=destination_method, label=out)
+        scorer = (_merge_fitness_scorer(
+            fitness_context, fitness_cache, project=project, method=method,
+            labels=labels, root=_corpus_path(CONCAT_DIR)) if fitness_context else None)
         result = union_merge(records, project=project, source_paths=sources,
-                             guarded=not unguarded)
-    except ValueError as exc:
+                             guarded=not unguarded, scorer=scorer)
+    except (ValueError, OSError) as exc:
         # `check_sources` refuses to combine runs whose conditions cannot be
         # established — a derived record inherits its contributors' standing,
         # so merging an unattested run would launder it. That is a refusal to
@@ -1498,24 +1589,30 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     best = max(len(r) for r in records.values())
     click.echo(f"   {'merged':52s} {union:3d} slots "
                f"(+{union - best} over the best single replicate)")
-    if result.contested:
+    if result.scorer_instrument is not None:
+        import json
+        click.echo("Pinned fitness context: " + json.dumps(result.scorer_instrument, sort_keys=True))
+        click.echo("Saved scores used for contested slots; no provider calls."
+                   if result.contested else "No contested slots; saved scorer was not invoked.")
+    elif result.contested:
         click.echo(f"\n{result.contested} slot(s) are held by more than one "
                    f"replicate. Without a scorer the base's value is used for "
-                   f"each, so the merge is the base record plus the slots only "
-                   f"the others had — it does not adjudicate between differing "
-                   f"values.")
+                   f"each slot it holds; otherwise the first holder in sorted "
+                   f"label order is used. This rule does not adjudicate between "
+                   f"differing values.")
     if result.guarded:
         click.echo("Referent-bearing fields taken from the base replicate only "
                    f"({result.base}); --unguarded to merge them too.")
 
-    out = out_label or f"{(config or labels[0].rsplit('_rep', 1)[0])}_merged"
-    target = base_dir / out / f"{project}_d4d.yaml"
     if not execute:
         click.echo(f"\nDry run. Would write {target}")
         click.echo("Re-run with --execute to write it.")
         return
-    write_merge(result, target, sources=sources, project=project,
-                method=method, label=out)
+    try:
+        write_merge(result, target, sources=sources, project=project,
+                    method=destination_method, label=out)
+    except (ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
     click.echo(f"\nWrote {target}")
     click.echo("record_mode: derived — not a generated record. `d4d runs "
                "compare` excludes it from agreement figures and says so, "

@@ -1,5 +1,7 @@
 """API generation commands — D4D runs over the Anthropic API (four model phases; the core is derived, #694)."""
 
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
@@ -1036,6 +1038,10 @@ def verdict_cmd(method, label, project, canary_baseline, baseline_method, execut
     for row in v["rows"]:
         mark = "❌" if row.get("regressed") else "  "
         click.echo(f"   {mark} {row['metric']:24} {row['run']} vs baseline worst {row['baseline_worst']}")
+    from data_sheets_schema.receipt_origin_record import line as origin_line
+    origin = origin_line(data.get("receipts"))            # reported beside the floors, never a row (#2933)
+    if origin:
+        click.echo(f"   · {origin}")
     for line in v["regressions"] or v["blind"] or v["unbaselined"]:
         click.echo(f"   {line}", err=True)
     if not execute:

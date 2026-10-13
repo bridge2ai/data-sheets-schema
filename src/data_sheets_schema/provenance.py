@@ -1125,36 +1125,9 @@ def record_schema_path() -> Path:
 
 
 def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
-    """A record whose effective profile names one instrument while its
-    `schema.digest_md5` is the *other* profile's current digest states an
-    instrument it did not consume (#1581). Only the current digests are
-    known here; an older digest of the same profile is not a finding."""
-    schema = data.get("schema") if isinstance(data, dict) else None
-    if not isinstance(schema, dict) or not schema.get("digest_md5"):
-        return None
-    stated = schema.get("profile")
-    from data_sheets_schema.profiles import for_record
-    effective = for_record(data).name if stated is None else stated
-    if not isinstance(effective, str) or not isinstance(schema["digest_md5"], str):
-        return None                        # a malformed value is the structural validator's finding (#1655)
-    try:
-        from data_sheets_schema import schema_digest
-        from data_sheets_schema.profiles import PROFILES
-        current = {name: schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=prof))
-                   for name, prof in PROFILES.items()}
-    except Exception as exc:                                   # noqa: BLE001 — no schema here: nothing to compare
-        from data_sheets_schema.profiles import MissingVocabulary
-        if isinstance(exc, MissingVocabulary):
-            return (f"the record's profile cannot be checked here: {exc}")   # a finding, not silence (#1729)
-        return None
-    if current.get(effective) == schema["digest_md5"]:
-        return None                        # its own current digest, whatever else renders the same bytes (#1609)
-    for name, md5 in current.items():
-        if name != effective and md5 == schema["digest_md5"]:
-            basis = f" (read as {effective!r})" if stated is None else ""
-            return (f"schema.profile is {stated!r}{basis} but schema.digest_md5 {md5[:12]}… is the "
-                    f"{name} profile's current digest")
-    return None
+    """A reproducible profile/digest conflict; unavailable history is unknown."""
+    from data_sheets_schema.profile_identity import capture
+    return capture(data)['finding']
 
 
 def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
@@ -1220,7 +1193,20 @@ def profile_problems(data: dict[str, Any]) -> list[str]:
     """The profile findings `check_record` appends (#1581, #1678), on their
     own so a gate that does not run the structural validator can still
     fail on them (#1699)."""
-    return [p for p in (_profile_digest_disagreement(data), _spec_profile_disagreement(data)) if p]
+    return profile_assessment(data)[0]
+
+
+def profile_assessment(data: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
+    """Findings and identity context from one record/schema/vocabulary capture.
+
+    Reporting callers reuse this context to disclose unknown history without
+    reading mutable schema or vocabulary files a second time (#4061).
+    """
+    from copy import deepcopy
+    from data_sheets_schema.profile_identity import capture
+    snapshot = deepcopy(data)
+    context = capture(snapshot)
+    return [p for p in (context['finding'], _spec_profile_disagreement(snapshot)) if p], context
 
 
 def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:

@@ -842,7 +842,7 @@ def accept_canary(manifest: dict) -> None:
             "basis": "exact-file, arithmetic, identity and check-echo checks passed; operator reviewed the canary"})
 
 
-def report_results(manifest: dict) -> dict:
+def report_results(manifest: dict, *, attainability_selection=None, report_output=None) -> dict:
     from data_sheets_schema.semantic_comparison import excluded_items, score_bases
     from report_semantic_comparison import report
 
@@ -882,12 +882,22 @@ def report_results(manifest: dict) -> dict:
                     "adjusted_percentages": [b.adjusted_percentage for b in bases],
                     "fixed_percentages": [b.fixed_percentage for b in bases]})
     paths = [ROOT / j["output"] for j, _, _ in complete]
+    attainment = None
+    if attainability_selection is not None:
+        if report_output is None:
+            raise ValueError("attainability report requires a new report output directory")
+        from data_sheets_schema import attainability_aggregation as aa
+        attainment = aa.prepare_report(attainability_selection, [(p, p.read_bytes()) for p in paths])
+        results["attainability"] = attainment["report"]
+    elif report_output is not None:
+        raise ValueError("report output directory requires explicit attainability selection")
     text = f"# Reference rescore status — {DATE}\n\nCompleted {len(complete)} of {len(manifest['jobs'])} planned evaluations.\n\n"
     if paths:
         # The discrimination block (#2927) reads one rating per record: the
         # primaries, not the repeatability ratings of the same v7 rep1 records.
+        report_kwargs = {} if attainment is None else {"attainability": attainment}
         text += report(paths, [ROOT / j["output"] for j, _, _ in complete
-                               if j["purpose"] == "primary"]) + "\n"
+                               if j["purpose"] == "primary"], **report_kwargs) + "\n"
     text += ("Rubric10 repeatability uses three independent ratings of one v7 record per project. "
              "Percentages and spread are computed from point totals and their denominators, "
              "so serialized percentage precision does not create apparent rating variation. "
@@ -907,8 +917,18 @@ def report_results(manifest: dict) -> dict:
     for row in results["generation_replicates"]:
         text += (f"| {row['project']} | {row['cohort']} | {row['rubric']} | {row['records']}/3 | "
                  f"{row['fixed_percentages']} | {row['adjusted_percentages']} |\n")
-    write_json(PLAN / "results.json", results)
-    (PLAN / "results.md").write_text(text)
+    if attainment is None:
+        write_json(PLAN / "results.json", results)
+        (PLAN / "results.md").write_text(text)
+    else:
+        destination = Path(report_output)
+        if destination.exists() or destination.is_symlink():
+            raise ValueError("attainability report directory must be new")
+        destination.mkdir()
+        protected = aa.protected_paths(attainment)
+        aa.save_sidecar(destination / "results.md", attainment)
+        aa.write_new(destination / "results.json", aa.canonical(results) + b"\n", protected)
+        aa.write_new(destination / "results.md", text.encode("utf-8"), protected)
     return results
 
 
@@ -917,14 +937,23 @@ def main() -> int:
     parser.add_argument("action", choices=("freeze", "canary", "recover-canary", "recover-rating", "accept-canary", "remaining", "report"))
     parser.add_argument("--attempt", type=Path, help="original CLI attempt directory for offline recovery")
     parser.add_argument("--claude", default=shutil.which("claude"))
+    parser.add_argument("--attainability-selection", type=Path)
+    parser.add_argument("--report-output", type=Path)
     args = parser.parse_args()
+    if args.attainability_selection is not None or args.report_output is not None:
+        if args.action != "report" or args.attainability_selection is None or args.report_output is None:
+            parser.error("attainability flags require report with both explicit selection and new output")
     if args.action == "freeze":
         manifest = freeze()
         print(f"Registered {len(manifest['jobs'])} ratings over 24 records; no calls made.")
         return 0
     manifest = json.loads((PLAN / "manifest.json").read_bytes())
     if args.action == "report":
-        report_results(manifest)
+        if args.attainability_selection is None:
+            report_results(manifest)
+        else:
+            report_results(manifest, attainability_selection=args.attainability_selection,
+                           report_output=args.report_output)
         return 0
     if args.action == "accept-canary":
         accept_canary(manifest)

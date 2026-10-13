@@ -38,7 +38,16 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
               help="selected chunk manifest, including before provenance exists; recorded hashes still apply")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="pinned completion registration before provenance exists; must match an existing run declaration")
-def check(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration):
+@click.option("--transcript", "transcripts", multiple=True, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the run's stream-json transcript, to record under `receipts.origin` which snippets were in the "
+                   "receipt when the full record was first written and which were added after it (#2933); "
+                   "repeat, first invocation first, for a killed-and-resumed run")
+@click.option("--receipt-at-run", type=click.Path(dir_okay=False, path_type=Path),
+              help="with --transcript: the receipt's path as the transcript spelled it, where the file has moved since the run")
+@click.option("--full-at-run", type=click.Path(dir_okay=False, path_type=Path),
+              help="with --transcript: the full record's path as the transcript spelled it, where it has moved since the run")
+def check(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration,
+          transcripts, receipt_at_run, full_at_run):
     """Validate `{PROJECT}_coverage_receipt.yaml` against the chunk manifest,
     the bundle and the full record, with affirmative counts.
 
@@ -47,7 +56,18 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     unchecked, never as clean; whether that is a defect depends on whether
     the run's procedure was to write one, which the provenance record says
     (`inputs.receipt_expected`).
+
+    The block carries `origin` (#2933): with `--transcript`, which snippets
+    were in the receipt when the full record was first written and which a
+    Phase 1 correction or a Phase 3 back-port added after it, read as `d4d
+    receipts origin` reads them, and printed beside the counts. Without it,
+    an origin the record carries is kept while the receipt still has the
+    sha256 it was measured on, and otherwise the origin is `unknown`, never
+    `contemporaneous`. Reported, never gated: `--strict` does not read it.
     """
+    if (receipt_at_run or full_at_run) and not transcripts:
+        raise click.UsageError("--receipt-at-run and --full-at-run name the files as a --transcript spelled them; "
+                               "pass the transcript")
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d receipts check")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
@@ -112,11 +132,26 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             raise click.ClickException(f"receipt completion registration refused: {exc}") from exc
         recovery["receipt_render_spec"] = declaration
     block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected, **recovery)
+    from data_sheets_schema import receipt_origin_record as ror
+    prior = record["receipts"].get("origin") if isinstance(record, dict) and isinstance(record.get("receipts"), dict) else None
+    block["origin"] = ror.for_record(prior, rc.receipt_path(p["core_dir"], project), p["full"],
+                                     transcripts=transcripts, receipt_at_run=receipt_at_run, full_at_run=full_at_run,
+                                     api_path=bool(isinstance(record, dict) and record.get("api_usage")),
+                                     recorded_by="d4d receipts check")
+    # Printed only where a transcript was read, now or before (a measurement
+    # the receipt has since moved away from says so): the playbook runs this
+    # command mid-run with none, and what it prints there is unchanged (#2933).
+    origin_lines = ([ror.line(block)] + [f"· {r}" for r in (block["origin"].get("reasons") or [])[1:]]
+                    if ror.ever_measured(block["origin"]) else [])
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"
                    + ("" if block["expected"] else " (this run's procedure wrote none)"))
+        for text in origin_lines:
+            click.echo(f"   {text}")
     else:
         click.echo(f"   {block['summary']}")
+        for text in origin_lines:
+            click.echo(f"   {text}")
         if "coverage_floor" in block:
             floor = block["coverage_floor"]
             click.echo(f"   · registered receipt coverage: {floor['state']} "
@@ -128,8 +163,16 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             click.echo(f"   · not checked here: {nc}")
     if write:
         block["recorded_by"] = "d4d receipts check"
-        bc.apply(p["provenance"], {"receipts": block}, overwrite=True)
-        click.echo(f"   ✓ receipts block written to {p['provenance']}")
+        withheld: list[str] = []
+        bc.apply(p["provenance"], {"receipts": block}, overwrite=True, withheld=withheld)
+        if withheld:
+            # `apply` keeps a checked block over an unchecked recomputation
+            # (#907); the tick said it was written, origin included (#2933).
+            click.echo(f"   · not written: {p['provenance']} keeps its checked receipts block, which this "
+                       "unchecked recomputation does not replace (#907)"
+                       + ("; the receipt origin read from --transcript is not written either" if transcripts else ""))
+        else:
+            click.echo(f"   ✓ receipts block written to {p['provenance']}")
         if block.get("checked"):
             receipt = rc.load_receipt(rc.receipt_path(p["core_dir"], project))
             full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}
@@ -514,3 +557,37 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     else:
         for line in ro.summary(block):
             click.echo(f"   {line}")
+
+
+@receipts.command("readdress")
+@click.option("--receipt", "receipt_file", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--full", "full_file", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--map", "map_file", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Version 1 hash-bound moves map; only slot addresses may change")
+@click.option("--out", "out_file", type=click.Path(dir_okay=False, path_type=Path),
+              help="New receipt file, required with --map; existing files are refused")
+def readdress(receipt_file, full_file, map_file, out_file):
+    """List unresolved receipt entries and structurally possible target paths.
+
+    With --map and --out, apply the complete path-only map to a NEW receipt.
+    The JSON report binds exact input hashes. No provenance, transcript, source
+    receipt or full record is written, and resolution does not establish support.
+    """
+    if (map_file is None) != (out_file is None):
+        raise click.UsageError("--map and --out must be supplied together")
+    from data_sheets_schema import receipt_readdress as rr
+    try:
+        receipt_raw, full_raw = rr.read_file(receipt_file), rr.read_file(full_file)
+        if map_file is None:
+            text = rr.report_text(rr.inventory(receipt_raw, full_raw))
+        else:
+            map_raw = rr.read_file(map_file)
+            output, report = rr.prepare(receipt_raw, full_raw, map_raw)
+            text = rr.report_text(report)
+            rr.write_new(out_file, output, inputs=((receipt_file, receipt_raw),
+                                                  (full_file, full_raw), (map_file, map_raw)))
+    except (OSError, ValueError, TypeError, RecursionError) as exc:
+        raise click.ClickException(f"receipt readdress refused: {exc}") from exc
+    click.echo(text, nl=False)

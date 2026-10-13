@@ -8,8 +8,19 @@ the built-in constants.py mappings by allowing external mapping files.
 """
 
 import csv
+import io
 from pathlib import Path
 from typing import Dict, List, Optional, Set
+
+from data_sheets_schema.legacy_root_identity import MARKER, validate_rows
+from data_sheets_schema.legacy_update_plan import validate_rows as validate_update_rows
+from data_sheets_schema.legacy_creators import validate_rows as validate_creator_rows
+from data_sheets_schema.legacy_description_lists import validate_rows as validate_description_rows
+from data_sheets_schema.legacy_sensitive_elements import validate_rows as validate_sensitive_rows
+from data_sheets_schema.legacy_documentary import validate_rows as validate_documentary_rows
+from data_sheets_schema.legacy_route_dispositions import (
+    capture_mapping, validate_rows as validate_disposition_rows,
+)
 
 
 class MappingLoader:
@@ -38,10 +49,19 @@ class MappingLoader:
 
     def _load_mappings(self):
         """Load and parse the TSV mapping file."""
-        with open(self.tsv_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f, delimiter='\t')
+        raw = self.tsv_path.read_bytes()
+        with io.StringIO(raw.decode('utf-8'), newline=None) as f:
+            rows = list(csv.DictReader(f, delimiter='\t'))
+            validate_rows(rows)
+            validate_update_rows(rows)
+            validate_creator_rows(rows)
+            validate_description_rows(rows)
+            validate_sensitive_rows(rows)
+            validate_documentary_rows(rows)
+            validate_disposition_rows(rows)
+            capture_mapping(self, raw, rows)
 
-            for row in reader:
+            for row in rows:
                 # Skip header rows and empty rows
                 if not row.get('D4D Property') or row['D4D Property'].startswith('D4D:'):
                     continue
@@ -64,7 +84,10 @@ class MappingLoader:
                         for rc_prop in rocrate_field.split(','):
                             rc_prop = rc_prop.strip()
                             if rc_prop:
-                                self.rocrate_to_d4d[rc_prop] = d4d_field
+                                if row.get('Func', '').strip() == MARKER:
+                                    self.rocrate_to_d4d.setdefault(rc_prop, d4d_field)
+                                else:
+                                    self.rocrate_to_d4d[rc_prop] = d4d_field
 
                         # Track direct mappings (1:1 relationships)
                         direct = row.get('Direct mapping? Yes =1; No = 0', '0').strip()

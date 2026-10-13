@@ -1,0 +1,71 @@
+{
+  "old_source_sha256": "768f928bd17d19d2f50a27afa1420fe892621f0db33a8abeb9721154533bfab9",
+  "new_source_sha256": "4067468b6df915d62e370a53989c39b7bfcd2c92c26a14453a5d43f4a1e8574b",
+  "method": "Extract exact function AST only, alternating old/new/new/old serially; no whole conftest import",
+  "results": {
+    "primary": {
+      "runs": [
+        {
+          "mode": "old",
+          "seconds": 3.1284367500338703,
+          "paths": 109552,
+          "paths_digest": "eaa787fbb80297b05c7ad6a46881d5423a5ee908bbbc652f2116a8539f73375d"
+        },
+        {
+          "mode": "new",
+          "seconds": 1.1117760830093175,
+          "paths": 109552,
+          "paths_digest": "eaa787fbb80297b05c7ad6a46881d5423a5ee908bbbc652f2116a8539f73375d"
+        },
+        {
+          "mode": "new",
+          "seconds": 1.0720217080088332,
+          "paths": 109552,
+          "paths_digest": "eaa787fbb80297b05c7ad6a46881d5423a5ee908bbbc652f2116a8539f73375d"
+        },
+        {
+          "mode": "old",
+          "seconds": 1.5832516250084154,
+          "paths": 109552,
+          "paths_digest": "eaa787fbb80297b05c7ad6a46881d5423a5ee908bbbc652f2116a8539f73375d"
+        }
+      ],
+      "all_equal": true,
+      "scope": "os.walk default behavior; ignored and hidden entries included, directory links listed but not traversed; metadata only"
+    },
+    "clean_worktree": {
+      "runs": [
+        {
+          "mode": "old",
+          "seconds": 0.044682249950710684,
+          "paths": 3268,
+          "paths_digest": "c09d462bf8dba6fd694999b4a626a3bcf0cee9fe1a37b0bec74ccb96ee08c46c"
+        },
+        {
+          "mode": "new",
+          "seconds": 0.02352308400440961,
+          "paths": 3268,
+          "paths_digest": "c09d462bf8dba6fd694999b4a626a3bcf0cee9fe1a37b0bec74ccb96ee08c46c"
+        },
+        {
+          "mode": "new",
+          "seconds": 0.025068999966606498,
+          "paths": 3268,
+          "paths_digest": "c09d462bf8dba6fd694999b4a626a3bcf0cee9fe1a37b0bec74ccb96ee08c46c"
+        },
+        {
+          "mode": "old",
+          "seconds": 0.03817779099335894,
+          "paths": 3268,
+          "paths_digest": "c09d462bf8dba6fd694999b4a626a3bcf0cee9fe1a37b0bec74ccb96ee08c46c"
+        }
+      ],
+      "all_equal": true,
+      "scope": "os.walk default behavior; ignored and hidden entries included, directory links listed but not traversed; metadata only"
+    }
+  },
+  "limits": [
+    "Primary tree may have concurrent writers; compare path digests before attributing differences.",
+    "Filesystem warm-cache effects and host load can affect elapsed times; no CI speedup inference."
+  ]
+}

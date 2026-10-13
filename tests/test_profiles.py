@@ -1069,11 +1069,13 @@ class TestRoundSeven(_Clean):
         self.assertEqual(rec["schema"]["profile"], "neutral")
         self.assertTrue(rec["schema"]["profile_basis"].startswith("rendered instruction (this process would select bridge2ai"))
         self.assertEqual(rec["schema"]["digest_md5"], CURRENT_NEUTRAL)
-        # A profile whose digest is the other profile's current digest is a finding.
+        # The recorded full-schema hashes select the comparison instrument.
+        # A digest reproduced only under the other profile is still a finding.
         bad = dict(rec); bad["schema"] = dict(rec["schema"], digest_md5=CURRENT_STUDY)
         violations, why = check_record(bad)
         self.assertIsNone(why)
-        self.assertTrue(any("bridge2ai profile's current digest" in v for v in violations), violations)
+        self.assertTrue(any("bridge2ai profile's digest rendered from the recorded schema" in v
+                            for v in violations), violations)
 
     def test_an_unknown_stated_profile_fails_at_construction(self):
         """#1585"""
@@ -1596,10 +1598,18 @@ class TestRoundTwelve(_Clean):
         """#1703"""
         import subprocess, sys
         with tempfile.TemporaryDirectory() as d:
-            r = subprocess.run([sys.executable, "-m", "data_sheets_schema.form_defects", "--offline", "--cache", str(Path(d) / "fresh.jsonl"), "--limit", "1"],
+            judgements = Path(d) / "judgements"
+            judgements.mkdir()
+            # An absolute, absent label isolates the attribution roster from
+            # the checkout's recorded profiles (#1541); this tests ambient fallback.
+            r = subprocess.run([sys.executable, "-m", "data_sheets_schema.form_defects", "--offline",
+                                "--cache", str(Path(d) / "fresh.jsonl"), "--limit", "1",
+                                "--judgement-cache", str(judgements),
+                                "--config", f"empty={Path(d) / 'no-records'}"],
                                capture_output=True, text=True, cwd=ROOT,
                                env={**os.environ, "PYTHONPATH": str(ROOT / "src"), "D4D_PROFILE": "typo"})
         self.assertEqual(r.returncode, 2, r.stderr[-500:]); self.assertIn("unknown profile", r.stderr)
+        self.assertIn("source profile selection: ambient", r.stderr)
         self.assertNotIn("Traceback", r.stderr)
 
     def test_the_playbooks_send_the_model_to_no_prior_output(self):

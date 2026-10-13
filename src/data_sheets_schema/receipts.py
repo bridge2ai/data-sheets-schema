@@ -411,8 +411,23 @@ def resolve(record: Any, path: str) -> bool:
     cur = record
     for part in parts:
         if part.startswith("["):
-            i = int(part[1:-1])
-            if not isinstance(cur, list) or i >= len(cur):
+            if not isinstance(cur, list):
+                return False
+            size = len(cur)
+            if size == 0:
+                return False
+            # A path can spell an index with arbitrarily many decimal digits.
+            # Bound conversion by this list, retaining Unicode Nd and leading
+            # zeros accepted by the existing grammar/int semantics (#4767).
+            digits = part[1:-1]
+            first = 0
+            while first < len(digits) and unicodedata.decimal(digits[first]) == 0:
+                first += 1
+            significant = digits[first:]
+            if len(significant) > len(str(size - 1)):
+                return False
+            i = int(significant or "0")
+            if i >= size:
                 return False
             cur = cur[i]
         else:

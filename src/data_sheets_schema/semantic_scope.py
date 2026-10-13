@@ -22,7 +22,7 @@ _CLASSIFICATION_ONLY = object()
 
 
 def validate_scope(result: dict, *, document: dict | None = None, input_sha256: str | None = None,
-                   expected_context: dict | None | object = _CLASSIFICATION_ONLY):
+                   expected_context: dict | None | object = _CLASSIFICATION_ONLY, resource_reader=None):
     if result.get("version") not in {"2.0", "3.0", "4.0"}:
         return
     rubric_name = result.get("rubric", "").removesuffix("-semantic")
@@ -58,7 +58,7 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
     metadata = result.get("metadata") or {}
     if instrument.evidence_authority_path is not None:
         from data_sheets_schema.semantic_evidence_authority import verify_authority
-        verify_authority(metadata)
+        verify_authority(metadata, resource_reader=resource_reader)
     if metadata.get("context_sha256") != context_digest(context):
         raise ValueError("evaluation context does not match its recorded digest")
     if input_sha256 is not None and metadata.get("input_sha256") != input_sha256:
@@ -67,8 +67,8 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
     # Version-2 rules are the source rubric's declared predicate assignments.
     # The instrument boundary records these bytes; future rule revisions need
     # another version instead of reinterpreting previously accepted scores.
-    rubric_path = resource_path(instrument.rubric_path)
-    raw = rubric_path.read_bytes()
+    raw = (resource_path(instrument.rubric_path).read_bytes() if resource_reader is None
+           else resource_reader(instrument.rubric_path))
     specification = yaml.safe_load(raw)
     if metadata.get("rubric_sha256") != hashlib.sha256(raw).hexdigest():
         raise ValueError("semantic assessment uses another rubric; validate with its pinned instrument")
@@ -153,7 +153,7 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
         raise ValueError("zero applicable maximum requires null normalized_percentage")
     if instrument.evidence_authority_path is not None and document is not None:
         from data_sheets_schema.semantic_evidence import check_evidence, EvidenceValidationError
-        report = check_evidence(result, document, rubric_name)
+        report = check_evidence(result, document, rubric_name, resource_reader=resource_reader)
         if not report.passed:
             raise EvidenceValidationError(report)
         return report

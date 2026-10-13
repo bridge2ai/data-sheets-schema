@@ -439,6 +439,16 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
     path = (Path(schema_path) if (content is not None or snapshot is not None) and schema_path is not None
             else _schema_path(class_name, schema_path))
     sv = shared_view(path, content=content, snapshot=snapshot)
+    return _build_from_view(class_name, path, sv, complete=complete)
+
+
+def _build_from_view(class_name: str, path: Path, sv: SchemaView, *,
+                     complete: bool = False) -> ClassDigest:
+    """Same inventory from a caller-owned view; never acquire schema files.
+
+    Captured fitness evidence uses its independent releasable view. The
+    ordinary builder still chooses the same path/shared view and cache above.
+    """
     # The digest names the schema it came from, and that name is rendered into
     # the digest text — so an identical schema read from a different location
     # produced a different fingerprint. Verifying a digest by rebuilding the

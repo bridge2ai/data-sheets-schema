@@ -73,6 +73,37 @@ from src.fairscape_integration.fairscape_to_d4d import (
     root_data_entity,
 )
 
+
+def parent_refusals(dropped):
+    """The converter's full new refusal channel, without parsing its prose."""
+    return [json.loads(reason.split("; parent_evidence=", 1)[1])
+            for _, reason in dropped if "; parent_evidence=" in reason]
+
+
+def assert_untyped_parent_refusals(case, graph, root, dropped):
+    """Join the complete #4047 refusal to these retained, unresolved refs."""
+    index = next(i for i, entity in enumerate(graph) if entity is root)
+    expected = []
+    for position, raw in enumerate(root["isPartOf"]):
+        case.assertEqual(list(raw), ["@id"])
+        case.assertEqual([entity for entity in graph if entity.get("@id") == raw["@id"]], [])
+        pointer = f"/@graph/{index}/isPartOf/{position}"
+        expected.append({"root_id": root["@id"], "root_graph_index": index,
+            "source_pointer": pointer, "occurrence": position, "raw": raw,
+            "matches": [], "supplied_types": [{"pointer": pointer, "present": False, "value": None}],
+            "ancestry": [], "decision": "refused",
+            "reason": "parent has no explicit Dataset type in inline or unique graph evidence",
+            "reference_id": raw["@id"], "output_id": None})
+    actual = [(source, text) for source, text in dropped if "; parent_evidence=" in text]
+    case.assertEqual([source for source, _ in actual],
+                     [f"isPartOf[{i}]" for i in range(len(expected))])
+    case.assertEqual(parent_refusals(dropped), expected)
+    for (_, text), decision in zip(actual, expected):
+        case.assertEqual(text.split("; parent_evidence=", 1)[0],
+                         "not placed in `parent_datasets`: " + decision["reason"])
+    return expected
+
+
 SCHEMA = repo_root / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
 
 #: The four crates #3969 names, all under data/ro-crate/, which
@@ -410,11 +441,16 @@ class TestDroppedValuesAreRecorded(unittest.TestCase):
     }
     #: What else each bundled crate carries that its slot cannot hold, with
     #: the reason given (#4073, #4074): the full crate's size with a unit,
-    #: its four hasPart members the `@graph` does not describe, and the
-    #: ambiguous start date `9/1/2022` both crates write.
+    #: its four hasPart members the `@graph` does not describe, its two
+    #: untyped parent references (#4047), and the ambiguous start date
+    #: `9/1/2022` both crates write.
     CANNOT_HOLD = {
         BUNDLED[0]: {"contentSize": "a size with a unit, not a byte count",
+                     "additionalProperty[Human Subject]": "superseded by humanSubjectResearch",
+                     "rai:annotationsPerItem": "unsupported assertion unit",
                      "hasPart": "does not describe it",
+                     "isPartOf[0]": "no explicit Dataset type",
+                     "isPartOf[1]": "no explicit Dataset type",
                      "collection_timeframes[0].start_date": "ambiguous date '9/1/2022'"},
         BUNDLED[1]: {"collection_timeframes[0].start_date": "ambiguous date '9/1/2022'"},
         BUNDLED[2]: {},
@@ -432,6 +468,11 @@ class TestDroppedValuesAreRecorded(unittest.TestCase):
                 for source, reason in converter.dropped:
                     self.assertIn(cannot_hold.get(source, self.NO_SLOT_REASON),
                                   reason)
+                graph = json.loads((repo_root / path).read_text(encoding="utf-8"))["@graph"]
+                root = root_data_entity(graph)
+                expected = assert_untyped_parent_refusals(self, graph, root, converter.dropped)
+                self.assertEqual(len(expected), 2 if path == BUNDLED[0] else 0)
+                self.assertEqual(converter.parent_evidence, expected)
 
     def test_values_without_a_slot_are_named_not_written(self):
         converter = FairscapeToD4DConverter()
@@ -666,7 +707,7 @@ class TestSharedSlots(unittest.TestCase):
         # a reference's `description` is not the record's
         record, dropped = converted(crate({
             "description": "The root.",
-            "isPartOf": [{"@id": "ark:59852/p", "description": {"@id": "#d"}}]}))
+            "isPartOf": [{"@id": "ark:59852/p", "@type": "Dataset", "description": {"@id": "#d"}}]}))
         self.assertEqual(record["description"], "The root.")
         self.assertEqual(dropped, [("parent_datasets[0].description", (
             "not placed in `description`: a crate reference or object, which "
@@ -872,15 +913,17 @@ class TestIdentifiers(unittest.TestCase):
             with self.subTest(value=value):
                 self.assertEqual(resolvable_id(value), expected)
 
-    def test_bundled_references_are_resolver_urls(self):
-        """The full crate's isPartOf references, written as ARKs. Its hasPart
-        members are not written (`TestDatasetParts`)."""
+    def test_bundled_references_require_explicit_dataset_types(self):
+        """Real unresolved parents are retained as evidence, not typed by URI."""
         root = next(e for e in json.loads(FULL.read_text(encoding="utf-8"))["@graph"]
                     if "Dataset" in e.get("@type", []))
-        record = quietly(FairscapeToD4DConverter().convert, FULL)
-        self.assertEqual(
-            [item["id"] for item in record["parent_datasets"]],
-            ["https://n2t.net/" + item["@id"] for item in root["isPartOf"]])
+        converter = FairscapeToD4DConverter()
+        record = quietly(converter.convert, FULL)
+        self.assertNotIn("parent_datasets", record)
+        self.assertEqual([row["raw"] for row in parent_refusals(converter.dropped)], root["isPartOf"])
+        self.assertTrue(all("no explicit Dataset" in row["reason"]
+                            for row in converter.parent_evidence))
+
 
     def test_the_record_id_is_the_roots_identifier_else_its_id(self):
         """On one-entity graphs; which entity is the root is
@@ -990,7 +1033,7 @@ def release_crate():
          "identifier": "https://doi.org/10.5555/RELEASE",
          "hasPart": [{"@id": "ark:59853/rocrate-sub-a"},
                      {"@id": "ark:59853/rocrate-sub-b"}],
-         "isPartOf": [{"@id": "ark:59852/project-x"}]},
+         "isPartOf": [{"@id": "ark:59852/project-x", "@type": "Dataset"}]},
         sub_crate("sub-b", last=True),
         {"@id": "ark:59853/dataset-file", "@type": "Dataset",
          "name": "A file set of a sub-crate"},
@@ -998,10 +1041,9 @@ def release_crate():
 
 
 class TestRootDataEntity(unittest.TestCase):
-    """#4072: the record describes the crate's root data entity, by the
-    RO-Crate rule: the descriptor's `about`, else `./`, else the first
-    ROCrate-typed entity. The last ROCrate-typed entity, which the converter
-    took, is a sub-crate in a FAIRSCAPE release crate."""
+    """#4072, #4586: explicit root identity precedes conventional and
+    unique-root fallback; an ambiguous or broken reference is refused.
+    Graph order cannot select a member as the release."""
 
     def test_the_root_is_the_entity_the_descriptor_is_about(self):
         record, dropped = converted(release_crate())
@@ -1032,29 +1074,166 @@ class TestRootDataEntity(unittest.TestCase):
         record, _ = converted(crate_json)
         self.assertEqual(record["title"], "The release")
 
-    def test_without_a_descriptor_the_root_is_dot_slash_then_the_first_rocrate(self):
+    def test_without_a_descriptor_a_conventional_or_unique_root_is_selected(self):
         from data_sheets_schema.rocrate_map import crate_root
-        dot_slash = [{"@id": "ark:59853/rocrate-a", "@type": ROCRATE,
-                      "name": "A sub-crate"},
-                     {"@id": "./", "@type": "Dataset", "name": "The root"},
-                     {"@id": "ark:59853/rocrate-b", "@type": ROCRATE,
-                      "name": "Another sub-crate"}]
-        first = [{"@id": "ark:59853/rocrate-a", "@type": ROCRATE, "name": "First"},
-                 {"@id": "ark:59853/rocrate-b", "@type": ROCRATE, "name": "Second"}]
-        for graph, title in ((dot_slash, "The root"), (first, "First")):
-            with self.subTest(title=title):
-                record, _ = converted({"@graph": graph})
-                self.assertEqual(record["title"], title)
-        # The third rule is the one `rocrate_map.crate_root` and FAIRSCAPE apply
-        self.assertIs(root_data_entity(first), crate_root(first))
+        for identifier in ("./", "."):
+            root = {"@id": identifier, "@type": "Dataset", "name": "The root"}
+            entities = [{"@id": "ark:59853/rocrate-a", "@type": ROCRATE,
+                         "name": "A sub-crate"}, root,
+                        {"@id": "ark:59853/rocrate-b", "@type": ROCRATE,
+                         "name": "Another sub-crate"}]
+            for graph in (entities, list(reversed(entities))):
+                with self.subTest(identifier=identifier, graph=graph):
+                    self.assertIs(root_data_entity(graph), root)
+                    self.assertIs(crate_root(graph), root)
+                    record, _ = converted({"@graph": graph})
+                    self.assertEqual(record["title"], "The root")
+                    self.assertEqual(record["id"], identifier)
+                    self.assertEqual(problems(record), [])
+        for kind in (ROCRATE, "Dataset", "https://w3id.org/EVI#Dataset"):
+            root = {"@id": "https://example.org/root", "@type": kind,
+                    "name": "Unique root"}
+            other = {"@id": "https://example.org/person", "@type": "Person"}
+            for graph in ([root, other], [other, root]):
+                with self.subTest(kind=kind, graph=graph):
+                    self.assertIs(root_data_entity(graph), root)
+                    self.assertIs(crate_root(graph), root)
+                    record, _ = converted({"@graph": graph})
+                    self.assertEqual(record["title"], "Unique root")
+                    self.assertEqual(problems(record), [])
 
-    def test_a_descriptor_naming_no_entity_falls_back(self):
-        graph = [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
-                  "about": {"@id": "ark:59853/not-in-the-graph"}},
-                 {"@id": "./", "@type": ROCRATE, "name": "The root"},
-                 {"@id": "ark:59853/rocrate-a", "@type": ROCRATE, "name": "Later"}]
-        record, _ = converted({"@graph": graph})
-        self.assertEqual(record["title"], "The root")
+    def test_a_unique_anonymous_root_with_a_doi_still_converts(self):
+        root = {"@type": ROCRATE, "name": "Anonymous crate node",
+                "identifier": "https://doi.org/10.5555/ANONYMOUS"}
+        other = {"@type": "Person", "name": "An unrelated anonymous person"}
+        for graph in ([other, root], [root, other]):
+            with self.subTest(graph=graph):
+                self.assertIs(root_data_entity(graph), root)
+                record, dropped = converted({"@graph": graph})
+                self.assertEqual(record["id"], "doi:10.5555/ANONYMOUS")
+                self.assertEqual(record["doi"], "10.5555/ANONYMOUS")
+                self.assertEqual(record["title"], "Anonymous crate node")
+                self.assertEqual(dropped, [])
+                self.assertEqual(problems(record), [])
+
+    def test_malformed_unrelated_member_ids_do_not_break_the_selected_root(self):
+        expected, expected_dropped = converted(crate({"identifier": "doi:10.5555/ROOT"}))
+        for identifier in ([], {}, ["./"], {"@id": "./"}, None, False, 0):
+            for kind in ("File", "Dataset"):
+                data = crate({"identifier": "doi:10.5555/ROOT"},
+                             {"@id": identifier, "@type": kind, "name": "Unrelated"})
+                for graph in (data["@graph"], list(reversed(data["@graph"]))):
+                    with self.subTest(identifier=identifier, kind=kind, graph=graph):
+                        before = json.dumps(graph)
+                        record, dropped = converted({"@graph": graph})
+                        self.assertEqual(record, expected)
+                        self.assertEqual(dropped, expected_dropped)
+                        self.assertEqual(json.dumps(graph), before)
+
+    def test_an_explicit_root_wins_over_a_conventional_decoy_in_either_order(self):
+        graph = crate({"@id": "https://example.org/root", "name": "Explicit root"},
+                      {"@id": "./", "@type": ROCRATE, "name": "Decoy"})["@graph"]
+        graph[0]["about"] = {"@id": "https://example.org/root"}
+        for name in ("ro-crate-metadata.json", "ro-crate-metadata.jsonld"):
+            graph[0]["@id"] = name
+            for ordered in (graph, list(reversed(graph))):
+                with self.subTest(descriptor=name, graph=ordered):
+                    self.assertIs(root_data_entity(ordered), graph[1])
+                    record, _ = converted({"@graph": ordered})
+                    self.assertEqual(record["title"], "Explicit root")
+                    self.assertEqual(record["id"], "https://example.org/root")
+
+    @staticmethod
+    def refused_graphs():
+        root = {"@id": "./", "@type": ROCRATE, "name": "Conventional decoy"}
+        descriptor = {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+                      "about": {"@id": "./"}}
+        return (
+            ("unresolved", [{**descriptor, "about": {"@id": "missing"}}, root]),
+            ("empty", [{**descriptor, "about": []}, root]),
+            ("invalid", [{**descriptor, "about": None}, root]),
+            ("duplicate", [descriptor, root, {"@id": "./", "name": "Same ID"}]),
+            ("disagree", [descriptor, root,
+                          {"@id": "ro-crate-metadata.jsonld", "about": {"@id": "other"}},
+                          {"@id": "other", "@type": ROCRATE}]),
+            ("itself", [{**descriptor, "@type": ROCRATE,
+                         "about": {"@id": "ro-crate-metadata.json"}}, root]),
+            ("not typed", [{**descriptor, "about": {"@id": "person"}}, root,
+                           {"@id": "person", "@type": "Person"}]),
+            ("multiple", [{"@id": "a", "@type": ROCRATE},
+                          {"@id": "b", "@type": ROCRATE}]),
+            ("multiple", [{"@id": "a", "@type": "Dataset"},
+                          {"@id": "b", "@type": "Dataset"}]),
+        )
+
+    def test_broken_or_ambiguous_root_references_are_refused_in_either_order(self):
+        from data_sheets_schema.rocrate_map import crate_root
+        for reason, entities in self.refused_graphs():
+            messages = []
+            for graph in (entities, list(reversed(entities))):
+                with self.subTest(reason=reason, graph=graph):
+                    self.assertIsNone(root_data_entity(graph))
+                    self.assertIsNone(crate_root(graph))
+                    converter = FairscapeToD4DConverter()
+                    with self.assertRaises(ValueError) as cm:
+                        quietly(converter.convert, {"@graph": graph})
+                    message = str(cm.exception)
+                    self.assertTrue(message.startswith(
+                        "No unambiguous root data entity in the RO-Crate `@graph`: "))
+                    self.assertIn(reason, message)
+                    self.assertEqual(converter.dropped, [])
+                    messages.append(message)
+            self.assertEqual(len(messages), 2)
+            self.assertEqual(messages[0], messages[1])
+
+    def test_root_refusal_preserves_cli_destinations_and_cannot_skip_validation(self):
+        from src.fairscape_integration.cli import cli
+
+        sentinel = b"existing record must survive\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path = directory / "ambiguous.json"
+            path.write_text(json.dumps({"@graph": [
+                {"@id": "a", "@type": ROCRATE},
+                {"@id": "b", "@type": ROCRATE}]}), encoding="utf-8")
+            for exists in (False, True):
+                for no_validate in (False, True):
+                    output = directory / f"script-{exists}-{no_validate}.yaml"
+                    if exists:
+                        output.write_bytes(sentinel)
+                    argv = ["fairscape_to_d4d.py", "--input", str(path),
+                            "--output", str(output)]
+                    if no_validate:
+                        argv.append("--no-validate")
+                    with self.subTest(command="script", exists=exists,
+                                      no_validate=no_validate):
+                        printed = io.StringIO()
+                        with mock.patch.object(sys, "argv", argv), \
+                                contextlib.redirect_stdout(printed), \
+                                contextlib.redirect_stderr(io.StringIO()):
+                            self.assertEqual(main(), 1)
+                        self.assertIn("No unambiguous root data entity", printed.getvalue())
+                        self.assertIn("multiple ROCrate", printed.getvalue())
+                        if exists:
+                            self.assertEqual(output.read_bytes(), sentinel)
+                        else:
+                            self.assertFalse(output.exists())
+                output = directory / f"click-{exists}.yaml"
+                if exists:
+                    output.write_bytes(sentinel)
+                with self.subTest(command="fairscape-cli", exists=exists):
+                    result = cli_runner().invoke(
+                        cli, ["rocrate-to-d4d", str(path), "-o", str(output)])
+                    self.assertEqual(result.exit_code, 1)
+                    self.assertIsInstance(result.exception, SystemExit)
+                    self.assertIn("✗ Error: No unambiguous root data entity", result.stderr)
+                    self.assertIn("multiple ROCrate", result.stderr)
+                    self.assertNotIn("Traceback", result.stderr)
+                    self.assertNotIn("D4D YAML written", result.stdout)
+                    if exists:
+                        self.assertEqual(output.read_bytes(), sentinel)
+                    else:
+                        self.assertFalse(output.exists())
 
     def test_the_tracked_cm4ai_release_crate_is_its_june_2026_release(self):
         """The reduced crate keeps every entity; its hasPart lists are
@@ -1102,7 +1281,10 @@ class TestRootDataEntity(unittest.TestCase):
                                     [part["@id"] for part in root["hasPart"]])
                 self.assertEqual(
                     {source for source, _ in dropped},
-                    {"contentSize", *(f"{e['@id']}.contentSize" for e in subcrates)})
+                    {"contentSize", "isPartOf[0]", *(f"{e['@id']}.contentSize" for e in subcrates)})
+                expected = assert_untyped_parent_refusals(self, entities, root, dropped)
+                self.assertEqual(len(expected), 1)
+                self.assertNotIn("parent_datasets", record)
                 self.assertEqual(problems(record), [])
 
     def test_the_cm4ai_release_zip_converts_as_its_june_2026_release(self):
@@ -1119,8 +1301,8 @@ class TestRootDataEntity(unittest.TestCase):
                      if "ROCrate" in str(e.get("@type")) and e is not root]
         self.assertEqual(len(subcrates), 9)
         self.assertEqual([fc["id"] for fc in record["file_collections"]], subcrates)
-        self.assertEqual([p["id"] for p in record["parent_datasets"]],
-                         [p["@id"] for p in root["isPartOf"]])
+        self.assertNotIn("parent_datasets", record)
+        self.assertEqual([row["raw"] for row in parent_refusals(dropped)], root["isPartOf"])
         # Its other hasPart members are people and terms, not datasets
         self.assertNotIn("resources", record)
         typed = {e["@id"]: e["@type"] for e in graph}
@@ -1247,37 +1429,30 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
 
     def test_an_is_part_of_entry_with_no_id_is_recorded(self):
         record, dropped = converted(crate({"isPartOf": [
-            {"name": "Project X"}, {"@id": "ark:59852/project-y"}]}))
+            {"name": "Project X"}, {"@id": "ark:59852/project-y", "@type": "Dataset"}]}))
         self.assertEqual(record["parent_datasets"],
                          [{"id": "https://n2t.net/ark:59852/project-y"}])
-        self.assertEqual(dropped, [("isPartOf", (
-            'an entry with no `@id`: {"name": "Project X"}'))])
+        self.assertEqual([row["raw"] for row in parent_refusals(dropped)], [{"name": "Project X"}])
+        self.assertEqual([source for source, _ in dropped], ["isPartOf[0]"])
+
 
     def test_text_in_is_part_of_is_not_a_reference(self):
-        """JSON-LD reads a string under `isPartOf` as text, as it reads
-        `{"@value": …}`: it names no dataset, and is recorded, not written
-        as a parent's `id` (#4125)."""
-        def said(text):
-            return ("isPartOf", (
-                f"text, not a reference: {text} (under RO-Crate's context "
-                "JSON-LD reads text under `isPartOf` as a literal, which names "
-                "no dataset the record can point at; a reference is written "
-                '`{"@id": …}`)'))
+        """Literal refusals retain complete values and occurrence indexes."""
         names = ["Cell Maps for AI project", "University of California San Diego"]
         for value in (names[0], names):
             with self.subTest(value=value):
                 record, dropped = converted(crate({"isPartOf": value}))
                 self.assertNotIn("parent_datasets", record)
-                self.assertEqual(dropped, [said(name) for name in
-                                           ([value] if isinstance(value, str)
-                                            else value)])
+                wanted = value if isinstance(value, list) else [value]
+                self.assertEqual([row["raw"] for row in parent_refusals(dropped)], wanted)
+                self.assertEqual([row["occurrence"] for row in parent_refusals(dropped)], list(range(len(wanted))))
         record, dropped = converted(crate({"isPartOf": [
-            names[0], {"@value": names[1]}, {"@id": "ark:59852/project-y"}]}))
+            names[0], {"@value": names[1]}, {"@id": "ark:59852/project-y", "@type": "Dataset"}]}))
         self.assertEqual(record["parent_datasets"],
                          [{"id": "https://n2t.net/ark:59852/project-y"}])
-        self.assertEqual(dropped, [said(names[0]), ("isPartOf", (
-            f'an entry with no `@id`: {{"@value": "{names[1]}"}}'))])
+        self.assertEqual([row["raw"] for row in parent_refusals(dropped)], [names[0], {"@value": names[1]}])
         self.assertEqual(problems(record), [])
+
 
     def test_a_single_valued_identifier_slot_keeps_one_identifier(self):
         record, dropped = converted(crate(
@@ -1318,7 +1493,7 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
 
         for root, parents in (
                 ({"additionalProperty": [entry]}, None),
-                ({"isPartOf": [{"@id": "ark:59852/p"}],
+                ({"isPartOf": [{"@id": "ark:59852/p", "@type": "Dataset"}],
                   "additionalProperty": [entry]},
                  [{"id": "https://n2t.net/ark:59852/p"}])):
             with self.subTest(is_part_of="isPartOf" in root):
@@ -1346,7 +1521,7 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
             return crate_json
         before, before_dropped = converted(full_crate())
         after, after_dropped = converted(full_crate(entry))
-        self.assertEqual(len(after["parent_datasets"]), 2)
+        self.assertNotIn("parent_datasets", after)
         self.assertEqual(after, before)
         self.assertEqual(
             [each for each in after_dropped if each not in before_dropped],
@@ -1372,11 +1547,11 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
 
         parent = {"id": "https://n2t.net/ark:59852/p"}
         for root, slot, kept, source, key, shown in (
-                ({"isPartOf": [{"@id": "ark:59852/p",
+                ({"isPartOf": [{"@id": "ark:59852/p", "@type": "Dataset",
                                 "parent_datasets": "Project Z"}]},
                  "parent_datasets", [parent], "parent_datasets[0]",
                  "parent_datasets", "Project Z"),
-                ({"isPartOf": [{"@id": "ark:59852/p",
+                ({"isPartOf": [{"@id": "ark:59852/p", "@type": "Dataset",
                                 "resources": ["Supplement A", "Supplement B"]}]},
                  "parent_datasets", [parent], "parent_datasets[0]",
                  "resources", '["Supplement A", "Supplement B"]'),
@@ -1397,7 +1572,7 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
                 self.assertEqual(problems(record), [])
         # An empty value states nothing, and is not recorded, as elsewhere
         record, dropped = converted(crate({"isPartOf": [
-            {"@id": "ark:59852/p", "parent_datasets": [], "resources": ""}]}))
+            {"@id": "ark:59852/p", "@type": "Dataset", "parent_datasets": [], "resources": ""}]}))
         self.assertEqual((record["parent_datasets"], dropped), ([parent], []))
         files = [{"@id": "#f", "name": "a file"}]
         record, dropped = converted(crate({"additionalProperty": [
@@ -1405,13 +1580,12 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
         self.assertEqual(record["file_collections"], [
             {"id": "#fc", "resources": [{"id": "#f", "name": "a file"}]}])
         self.assertEqual((dropped, problems(record)), ([], []))
-        # The tracked full crate with the key in its first `isPartOf`
-        # reference: the record is the one the crate gives without it, and
-        # the key is the one entry more in `dropped`
-        crate_json, _ = tracked_full_crate()
-        before, before_dropped = converted(crate_json)
-        crate_json, root = tracked_full_crate()
+        # A genuinely typed synthetic parent retains this nested-slot
+        # control. Real unresolved source references are tested separately.
+        root = {"isPartOf": [{"@id": "ark:59852/p", "@type": "Dataset"}]}
+        before, before_dropped = converted(crate(root))
         root["isPartOf"][0]["parent_datasets"] = "Bridge2AI program"
+        crate_json = crate(root)
         after, after_dropped = converted(crate_json)
         self.assertEqual(after, before)
         self.assertEqual(
@@ -1805,15 +1979,24 @@ class TestDatasetParts(unittest.TestCase):
     def test_the_arms_differ_only_where_the_converter_says_they_do(self):
         """Every slot this converter and the static-map arm both write holds
         the same value, apart from a split author string, a start and end
-        date, and `prohibited_uses`, which this converter fills from two
-        crate properties."""
+        date, `prohibited_uses`, which this converter fills from two crate
+        properties. #4046 now shares the approved human-subject construction,
+        but explicitly places grantor, cleaning_details and the four #4046
+        canonical fields instead of the static arm's generic name/description
+        objects. Annotation platform/count assertions are separate inputs.
+        This is a declared
+        representation difference, not a new semantic-fidelity claim."""
         from data_sheets_schema.rocrate_map import (
             MAPPING_TSV, load_mapping, map_crate)
         rows = load_mapping(repo_root / MAPPING_TSV)
         view = FairscapeToD4DConverter()._schema_view()
         expected = {BUNDLED[0]: {"creators", "collection_timeframes",
-                                 "prohibited_uses"},
-                    BUNDLED[1]: {"creators", "collection_timeframes"},
+                                 "prohibited_uses", "funders", "cleaning_strategies",
+                                 "collection_mechanisms", "future_use_impacts",
+                                 "sensitive_elements", "labeling_strategies"},
+                    BUNDLED[1]: {"creators", "collection_timeframes",
+                                 "collection_mechanisms", "future_use_impacts",
+                                 "sensitive_elements", "labeling_strategies"},
                     BUNDLED[2]: {"creators"},
                     BUNDLED[3]: {"creators"}}
         for path, differ in expected.items():
@@ -1823,6 +2006,35 @@ class TestDatasetParts(unittest.TestCase):
                 theirs = map_crate(crate_json["@graph"], rows, view).record
                 self.assertEqual({slot for slot in set(ours) & set(theirs)
                                   if ours[slot] != theirs[slot]}, differ)
+                if path in BUNDLED[:2]:
+                    root = root_data_entity(crate_json["@graph"])
+                    self.assertEqual(ours["collection_mechanisms"], [
+                        {"mechanism_details": root["rai:dataCollection"]}])
+                    self.assertEqual(ours["future_use_impacts"], [
+                        {"impact_details": root["rai:dataSocialImpact"]}])
+                    self.assertEqual(ours["sensitive_elements"], [
+                        {"sensitivity_details": value} for value in root["rai:personalSensitiveInformation"]])
+                    self.assertEqual(ours["labeling_strategies"][0],
+                                     {"data_annotation_protocol": root["rai:dataAnnotationProtocol"]})
+                    self.assertTrue(all(key not in ours for key in (
+                        "acquisition_methods", "confidential_elements", "data_protection_impacts")))
+                if path == BUNDLED[0]:
+                    root = root_data_entity(crate_json["@graph"])
+                    human = theirs["human_subject_research"]
+                    self.assertEqual(set(human), {"description"})
+                    for key in ("humanSubjectResearch", "humanSubjects",
+                                "humanSubjectExemption", "irb", "irbProtocolId"):
+                        self.assertIn(f"Source {key}: {root[key]}",
+                                      human["description"])
+                    self.assertEqual(ours["human_subject_research"], human)
+                    self.assertEqual(ours["funders"], [{"grantor": root["funder"]}])
+                    self.assertEqual(ours["cleaning_strategies"], [
+                        {"cleaning_details": root["rai:dataManipulationProtocol"]}])
+                elif path == BUNDLED[1]:
+                    # The shared-slot comparison alone would conceal this
+                    # legacy-only input, outside the approved root builder.
+                    self.assertIn("human_subject_research", ours)
+                    self.assertNotIn("human_subject_research", theirs)
 
 
 class TestTheRecordValidates(unittest.TestCase):
@@ -1853,7 +2065,17 @@ class TestTheRecordValidates(unittest.TestCase):
             "not placed in `issued`: 11/17/25 (the schema rejects it: "
             "'11/17/25' is not a 'date-time')")
         self.assertEqual({source for source, _ in dropped},
-                         {"contentSize", "datePublished"})
+                         {"contentSize", "datePublished", "humanSubjectExemption"})
+        root = root_data_entity(crate_json["@graph"])
+        self.assertEqual(root["humanSubjectExemption"], "")
+        self.assertEqual(reasons(dropped, "humanSubjectExemption"),
+                         "no supported projection; exact value retained in route_evidence")
+        converter = FairscapeToD4DConverter()
+        quietly(converter.convert, crate_json)
+        row = next(row for row in converter.route_evidence["assertions"]
+                   if row["source"] == "humanSubjectExemption")
+        self.assertEqual((row["presence"], row["raw"], row["retention"]),
+                         ("present", "", "not_constructed"))
 
     def test_a_date_time_the_date_rule_does_not_read_is_left_out(self):
         for key, slot, value in (("datePublished", "issued", "June 2026"),
@@ -2017,7 +2239,7 @@ class TestTheRecordValidates(unittest.TestCase):
             with self.subTest(key=key):
                 self.assertTrue(
                     slot in record or key in named
-                    or any(source.startswith(slot) for source in named),
+                    or any(source.startswith((slot, key + "[")) for source in named),
                     f"{key} is neither in `{slot}` nor named in `dropped`")
         # The end date's month is 13. The static-map arm's date rule refuses
         # it as no calendar date, so it never reaches the validator (#4168);
@@ -2036,7 +2258,7 @@ class TestTheRecordValidates(unittest.TestCase):
         (#4125). The whole reference used to go, under a reason that named
         no key."""
         record, dropped = converted(crate({
-            "isPartOf": [{"@id": "ark:59852/project-x", "name": "Project X",
+            "isPartOf": [{"@id": "ark:59852/project-x", "@type": "Dataset", "name": "Project X",
                           "version": 2, "keywords": ["a", 7]}],
             "hasPart": [{"@id": "ark:59853/rocrate-y", "@type": "Dataset",
                          "name": "Y", "license": 5}]}))
@@ -2193,7 +2415,7 @@ class TestDroppedPaths(unittest.TestCase):
         record, dropped = converted(crate({
             "author": [{"@type": "Person"},
                        {"@id": "#b", "name": 5, "email": "b@example.org"}],
-            "isPartOf": ["Project X", {"@id": "ark:59852/project-y",
+            "isPartOf": ["Project X", {"@id": "ark:59852/project-y", "@type": "Dataset",
                                        "version": 2}],
             "hasPart": [{"@id": "#tool"},
                         {"@id": "ark:59853/rocrate-y", "@type": "Dataset",

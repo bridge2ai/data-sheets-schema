@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-I",
+    "-B",
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/worker.py",
+    "CM4AI_reduced"
+  ],
+  "closure": {
+    "owned_group_absent": true,
+    "signals": []
+  },
+  "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+  "elapsed_seconds": 2.453558625013102,
+  "environment_removals": [
+    "PYTHONHOME",
+    "PYTHONPATH",
+    "PYTHONPYCACHEPREFIX",
+    "PYTEST_ADDOPTS",
+    "PYTEST_PLUGINS"
+  ],
+  "environment_updates": {
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "error": null,
+  "exit_code": 0,
+  "form": "CM4AI_reduced",
+  "pid": 61408
+}

@@ -1,0 +1,67 @@
+[
+  {
+    "form": "CHORUS",
+    "original": {
+      "bytes": 20635,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/CHORUS.json",
+      "sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774"
+    },
+    "staged": {
+      "bytes": 20635,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CHORUS.json",
+      "sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774"
+    }
+  },
+  {
+    "form": "VOICE",
+    "original": {
+      "bytes": 726461,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/VOICE.json",
+      "sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4"
+    },
+    "staged": {
+      "bytes": 726461,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE.json",
+      "sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4"
+    }
+  },
+  {
+    "form": "CM4AI_reduced",
+    "original": {
+      "bytes": 107388,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/CM4AI_reduced.json",
+      "sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610"
+    },
+    "staged": {
+      "bytes": 107388,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_reduced.json",
+      "sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610"
+    }
+  },
+  {
+    "form": "VOICE_provenance",
+    "original": {
+      "bytes": 1232,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/VOICE_provenance.json",
+      "sha256": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608"
+    },
+    "staged": {
+      "bytes": 1232,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE_provenance.json",
+      "sha256": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608"
+    }
+  },
+  {
+    "form": "CM4AI_original",
+    "original": {
+      "bytes": 12242926,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/CM4AI_original.json",
+      "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+    },
+    "staged": {
+      "bytes": 12242926,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_original.json",
+      "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+    }
+  }
+]

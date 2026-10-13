@@ -1,0 +1,61 @@
+{
+  "actual_plugin_review_accepted": true,
+  "ci_evidence": [
+    {
+      "bytes": 13619,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/ci-run.json",
+      "sha256": "422b28e43c18e3783d8705beb09951a1dae60a2aa8ac048b0342024c07e8d3ad"
+    },
+    {
+      "bytes": 27252,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/ci-jobs.json",
+      "sha256": "388729f9d0fb783a45e6faf7ba0d8b105da852c39dfcb4893b76b800f03f4a33"
+    },
+    {
+      "bytes": 57948,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/head-checks.json",
+      "sha256": "8b707d313ebbe1ee4bfda063f5f01e1a0b9680e39216f3d1218468de589252d3"
+    },
+    {
+      "bytes": 447,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/premerge-verification.json",
+      "sha256": "64152bab03bce7b1bc340845bb96824582c24f745b8674971154436c6281bb21"
+    }
+  ],
+  "diagnostic_validation_evidence": {
+    "candidate313": {
+      "bytes": 6489,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/execution.json",
+      "sha256": "4f34c4755fba72795e42bef90ed0607d4d8af372d162d3da48a76b8804a5e27f"
+    },
+    "candidate39": {
+      "bytes": 6804,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate39/execution.json",
+      "sha256": "206fb021218e1cbc5a06cfb93a7b4d71158ee6b60ca7dc2c411bf270afdf7f1e"
+    }
+  },
+  "format": "legacy4594_root_readiness_v1",
+  "merged_head": "ffc4ca922723caa620af2e32a31ad538bc5a5ac9",
+  "merged_tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe",
+  "plugin_review_evidence": [
+    {
+      "bytes": 2046,
+      "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/execution.json",
+      "sha256": "457ae27cc0e87f3c57b33214cc0ef78d84bc6e27410948f3ac77b233e7e18d87"
+    },
+    {
+      "bytes": 887,
+      "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/stdout.txt",
+      "sha256": "76fa0908971580d1b119c0efeb9c104be8ee10cf48e0dd0a711c9308b4031ac6"
+    },
+    {
+      "bytes": 17402,
+      "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/stderr.txt",
+      "sha256": "6c5cc1ef80527d9bc5d33f957ddfd2841eb973371870caf08119b0952dd7ea00"
+    }
+  ],
+  "publication_package_approved": true,
+  "required_ci_accepted": true,
+  "reviewed_pr_head": "00b80002371fe119bc089445234d6b2f5bd5e24d",
+  "reviewed_pr_tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe"
+}

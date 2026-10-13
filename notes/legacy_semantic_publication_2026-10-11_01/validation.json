@@ -1,0 +1,79 @@
+{
+  "artifacts_checked": 89,
+  "external_paths_dereferenced": false,
+  "forms": [
+    {
+      "dataset": {
+        "bytes": 7791,
+        "sha256": "97bec858efba1da5372ffbbb5894fbbb6d797dc38f7995c6615816f0d7bae13b"
+      },
+      "form": "CHORUS",
+      "full_source_bytes": 20635,
+      "sidecar": {
+        "bytes": 30422,
+        "sha256": "201569d165267c878a77de7905c714636f0e43068768285c7f26c139d7253de1"
+      }
+    },
+    {
+      "dataset": {
+        "bytes": 21274,
+        "sha256": "4e102b473be6d493cad5aa5c2cb670912fe24f5927588ef147cee1539a02af23"
+      },
+      "form": "VOICE",
+      "full_source_bytes": 726461,
+      "sidecar": {
+        "bytes": 829227,
+        "sha256": "0ea926301865df14abfe10484bd1d3315c1b3daf450aee79b454dbfd579f2345"
+      }
+    },
+    {
+      "dataset": {
+        "bytes": 11022,
+        "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+      },
+      "form": "CM4AI_reduced",
+      "full_source_bytes": 107388,
+      "sidecar": {
+        "bytes": 130220,
+        "sha256": "4ebdb36ff6d5553f609421798a0ab1c10d38186061fb56a4f314aa06335e5016"
+      }
+    },
+    {
+      "dataset": {
+        "bytes": 739,
+        "sha256": "79623548f0ba57b8501ab427e6e41fbc99f20c1aa0a6087837356412dabb4827"
+      },
+      "form": "VOICE_provenance",
+      "full_source_bytes": 1232,
+      "sidecar": {
+        "bytes": 7814,
+        "sha256": "b5702fc79bdcd3337f2e0c533086c8a07508abcc4b5f15972c7ed3058b17d4ae"
+      }
+    },
+    {
+      "dataset": {
+        "bytes": 11022,
+        "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+      },
+      "form": "CM4AI_original",
+      "full_source_bytes": 12242926,
+      "sidecar": {
+        "bytes": 13033881,
+        "sha256": "50f39f4c7d362d96cca866de939f82d3f3b02791760bb35419be72a661d3de62"
+      }
+    }
+  ],
+  "passed": true,
+  "publication_completed": {
+    "bytes": 32527,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/completed.json",
+    "sha256": "5473f9008794d190cb8bc4c6733ba2dbcc9199dac7bbe17a693c27dfbec38623"
+  },
+  "publication_independent_audit": {
+    "bytes": 16516,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05-completed-independent-audit.json",
+    "sha256": "0750c9bfe45e7ed54a873a337a144a9f1d3cb556bedaf5d2d1230f500e554938"
+  },
+  "relocation_entries": 88,
+  "scope": "Metadata check of the complete copied artifacts before final manifest; product publication and schema acceptance remain the bound historical actual05 results."
+}

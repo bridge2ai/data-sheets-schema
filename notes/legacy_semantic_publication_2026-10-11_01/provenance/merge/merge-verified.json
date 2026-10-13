@@ -1,0 +1,13 @@
+{
+  "merged": true,
+  "merge": "ffc4ca922723caa620af2e32a31ad538bc5a5ac9",
+  "parents": [
+    "ab13b8e1d3e216ad11359de3c66047a6af32c05b",
+    "00b80002371fe119bc089445234d6b2f5bd5e24d"
+  ],
+  "tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe",
+  "same_tested_tree": true,
+  "owned_local_branch_deleted": true,
+  "checkout_retained": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+  "object_stores_retained": true
+}

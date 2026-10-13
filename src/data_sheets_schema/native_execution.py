@@ -19,9 +19,11 @@ import threading
 from data_sheets_schema import native_attribution_controller as composition
 from data_sheets_schema import native_attribution_registration as draft
 from data_sheets_schema import native_attribution_results as replay
+from data_sheets_schema import native_attempt_supervisor as supervisor
 from data_sheets_schema import native_execution_authority as authority
 from data_sheets_schema import native_execution_registration as registration
 from data_sheets_schema import native_execution_gates as gates
+from data_sheets_schema import native_receipt_origin as receipt_origin
 from data_sheets_schema import native_supervisor_gates as shared
 from data_sheets_schema.native_attempt_supervisor import _file, durable_new, _sync_directory
 
@@ -351,6 +353,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     lifecycle_raw['keep-awake.json'], awake, value['runtime']['keep_awake'])
             else:
                 results['keep_awake'] = {'checked': False, 'passed': False, 'reason': 'cleanup evidence unavailable'}
+            if receipt_origin.version(value):
+                results = receipt_origin.attach_prepared(value, results, prepared)
             completed = (set(results) == set(gates.GATES)
                 and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
             final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
@@ -370,6 +374,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     if additional_path.exists() else None,
                 'scope': 'Controller/runtime completion only. Saved authority is not authenticated; native permission observations do not prove production helpers, future permissions, billing or scientific support.'}
             final_raw = draft._encoded(final)
+            receipt_origin.check_final_bytes(value, final_raw, max_bytes=supervisor.MAX_BYTES)
             durable_new(evidence/'final.json', final_raw)
             durable_new(evidence/'published.json', draft._encoded({'final_sha256': draft._sha(final_raw),
                 'started_sha256': draft._sha(started_raw), 'registration_sha256': draft._sha(registration_raw)}))
@@ -416,9 +421,14 @@ def read_final(registration_raw):
     files, aliases, metadata = result.get('captured_files'), result.get('captured_aliases'), result.get('captured_metadata')
     if not all(type(v) is dict for v in (files, aliases, metadata)) or not set(files) <= set(metadata) or not set(aliases.values()) <= set(metadata):
         raise ValueError('final evidence lacks complete captured metadata')
+    origin_raw = {}
+    origin_paths = receipt_origin.required_paths(value, checks['receipts'], aliases)
     for path, pin in files.items():
-        if draft._sha(Path(path).read_bytes()) != pin['sha256']:
+        body = Path(path).read_bytes()
+        if draft._sha(body) != pin['sha256']:
             raise ValueError('saved evidence differs from the captured basis')
+        if path in origin_paths:
+            origin_raw[path] = body
     for alias, target in aliases.items():
         if (str(Path(alias).resolve()) != target
                 or result.get('captured_alias_metadata', {}).get(alias) != {'symlink': Path(alias).is_symlink()}):
@@ -432,6 +442,8 @@ def read_final(registration_raw):
             actual = {'exists': False, 'regular': False}
         if actual != expected_meta:
             raise ValueError('saved evidence file metadata changed')
+    receipt_origin.check_saved(value, checks['receipts'], raw=origin_raw,
+        aliases=aliases, metadata=metadata)
     lifecycle = result.get('lifecycle_artifacts')
     if (type(lifecycle) is not dict or not set(lifecycle) <= {'runtime-observation.json', 'keep-awake.json'}
             or completion and set(lifecycle) != {'runtime-observation.json', 'keep-awake.json'}):
@@ -482,6 +494,7 @@ def main(argv=None):
     prepare = commands.add_parser('prepare', help='offline explicit registration; no runtime or auth calls')
     for name in ('composition', 'system', 'permission-probe', 'runtime', 'attempt-id', 'attempt-directory', 'evidence-directory', 'output'):
         prepare.add_argument('--' + name, required=True)
+    prepare.add_argument('--receipt-origin-version', type=int, choices=(0, 1), default=0)
     execute = commands.add_parser('launch', help='separately authorized single native attempt; can invoke runtime/auth')
     for name in ('registration', 'review', 'ci', 'launch-word'):
         execute.add_argument('--' + name, required=True)
@@ -493,7 +506,8 @@ def main(argv=None):
             result = registration.write_registration(args.output, composition_path=args.composition,
                 system_path=args.system, permission_probe_path=args.permission_probe,
                 runtime=draft._json(_file(args.runtime, 'runtime declaration')), attempt_id=args.attempt_id,
-                attempt_directory=args.attempt_directory, evidence_directory=args.evidence_directory)
+                attempt_directory=args.attempt_directory, evidence_directory=args.evidence_directory,
+                receipt_origin_version=args.receipt_origin_version)
         elif args.command == 'launch':
             result = launch(_file(args.registration, 'native registration'), review_path=args.review,
                             ci_path=args.ci, launch_word_path=args.launch_word)

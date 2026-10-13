@@ -101,7 +101,9 @@ notes/attainability_line_splits_2026-09-29.md rest on, the historical gate
 refused nothing. The contextual measurement is recorded separately in
 notes/attainability_join_context_2026-10-02.md. The
 validator does not run it: a valid file's deterministic entries are what
-their check writes, which the gate does not change.
+their check writes, which the gate does not change. `check --gate` opts in
+to the same certification gate for existing files after ordinary
+validation, without rewriting them or changing any entry's status.
 
 `credited_despite_absence` is the generator-side check the issue asks
 for: items an evaluation credited although the bundle it scored was
@@ -728,7 +730,7 @@ def write_document(document: dict[str, Any], directory: Path = ATTAINABILITY_DIR
 
 
 def _certification_problems(document: dict[str, Any], entries: list[dict[str, Any]]) -> list[str]:
-    """Why `write_document` must not certify the deterministic
+    """Why `write_document` or `check --gate` must not certify the deterministic
     `not_stated_in_source` entries among `entries` (#3408): the reading
     `matching_lines` leaves out — a break with no hyphen read as nothing, up
     to `GATE_JOINS_PER_WINDOW` at once, or hyphens read each on its own over
@@ -788,7 +790,48 @@ class Attainability:
         return [e for e in self.document["entries"] if status is None or e["status"] == status]
 
 
+@dataclass(frozen=True)
+class _CapturedAttainabilityBytes:
+    """Fixed immutable bytes for the captured validator; no resolver callback."""
+    artifacts: tuple[tuple[str, bytes], ...]
+
+    def __post_init__(self):
+        if type(self.artifacts) is not tuple or any(
+                type(row) is not tuple or len(row) != 2 or type(row[0]) is not str
+                or not row[0] or type(row[1]) is not bytes for row in self.artifacts):
+            raise ValueError("captured attainability sources require immutable path/bytes pairs")
+        if len({path for path, _ in self.artifacts}) != len(self.artifacts):
+            raise ValueError("duplicate captured attainability path")
+
+
+def _validation_bytes(path, *, md5=None, sha256=None, captured=None):
+    if captured is None:
+        return resolve_bytes(path, md5=md5, sha256=sha256)
+    if type(captured) is not _CapturedAttainabilityBytes:
+        raise TypeError("expected fixed captured attainability bytes")
+    if "\0" in path:
+        raise AttainabilityError(path.replace("\0", "\\0"), ["the path carries a NUL byte"])
+    for declared, raw in captured.artifacts:
+        if declared == path and _hashes_match(raw, md5, sha256):
+            return raw, {"source": "captured bytes", "path": path,
+                         "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)}
+    raise AttainabilityError(path, ["captured bytes do not contain this path with every requested digest"])
+
+
 def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attainability | None]:
+    """Validate v1 through its original live resolution and ordered checks."""
+    return _validate_text(text, name, captured=None)
+
+
+def _validate_captured_text(text: str, name: str | None = None, *,
+                            captured: _CapturedAttainabilityBytes) -> tuple[list[str], Attainability | None]:
+    """The same v1 validator, using only the supplied fixed captured bytes."""
+    if type(captured) is not _CapturedAttainabilityBytes:
+        raise TypeError("expected fixed captured attainability bytes")
+    return _validate_text(text, name, captured=captured)
+
+
+def _validate_text(text: str, name: str | None = None, *, captured: _CapturedAttainabilityBytes | None) -> tuple[list[str], Attainability | None]:
     """Every problem with an attainability file's text (empty when it is
     valid) and, when valid, the loaded file. `name` is its file name, which
     must be the one its bundle identity gives."""
@@ -813,7 +856,7 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
     if name is not None and name != file_name(doc):
         problems.append(f"file name {name} is not {file_name(doc)}, the name its bundle identity gives")
     try:
-        raw, basis = resolve_bytes(bundle["path"], md5=bundle["md5"], sha256=bundle["sha256"])
+        raw, basis = _validation_bytes(bundle["path"], md5=bundle["md5"], sha256=bundle["sha256"], captured=captured)
     except AttainabilityError as exc:
         return problems + [f"bundle: {p}" for p in exc.problems], None
     if not identical(bundle.get("bytes"), len(raw)):
@@ -848,7 +891,7 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
             problems.append(f"rubric {rubric}: must name {RUBRIC_PATHS.get(rubric, 'a known rubric')} and its sha256")
             continue
         try:
-            rubric_raw, _ = resolve_bytes(identity["path"], sha256=identity["sha256"])
+            rubric_raw, _ = _validation_bytes(identity["path"], sha256=identity["sha256"], captured=captured)
             items[rubric] = rubric_items(rubric_raw, rubric)
         except (AttainabilityError, ValueError, KeyError, TypeError, yaml.YAMLError) as exc:
             problems.append(f"rubric {rubric}: {exc}")
@@ -1281,6 +1324,9 @@ def main(argv: list[str] | None = None) -> int:
     derive.add_argument("--write", action="store_true", help=f"write under {ATTAINABILITY_DIR}/")
     check = sub.add_parser("check", help="validate attainability files against their pinned bytes")
     check.add_argument("files", nargs="*", type=Path)
+    check.add_argument("--gate", action="store_true",
+                       help="also run the writer's bounded line-split certification gate on "
+                            "deterministic absences, without writing files")
     credited = sub.add_parser("credited", help="items credited although marked not_stated_in_source; "
                                                "exits 1 when an evaluation cannot be read")
     credited.add_argument("evaluations", nargs="+", type=Path)
@@ -1315,9 +1361,24 @@ def main(argv: list[str] | None = None) -> int:
                 for problem in exc.problems:
                     print(f"  - {problem}")
                 continue
+            gate_summary = ""
+            if args.gate:
+                try:
+                    problems = _certification_problems(got.document, got.document["entries"])
+                except (AttainabilityError, OSError) as exc:
+                    problems = [f"line-split gate cannot read the pinned bundle: {exc}"]
+                if problems:
+                    failed += 1
+                    print(f"REFUSED {path}")
+                    for problem in problems:
+                        print(f"  - {problem}")
+                    continue
+                gated = sum(e["method"].startswith("deterministic:")
+                            for e in got.entries("not_stated_in_source"))
+                gate_summary = f"; line-split gate: {gated} deterministic absence(s) checked"
             counts = {s: len(got.entries(s)) for s in STATUSES if got.entries(s)}
             print(f"ok {path} ({got.bundle_basis['source']}): "
-                  + ", ".join(f"{n} {s}" for s, n in counts.items()))
+                  + ", ".join(f"{n} {s}" for s, n in counts.items()) + gate_summary)
         if not files:
             print(f"no attainability files under {ATTAINABILITY_DIR}")
         return 1 if failed else 0

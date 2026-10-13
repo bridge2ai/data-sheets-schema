@@ -36,7 +36,11 @@ import sys
 #:
 #: Raising it is allowed. Raise it in the same commit as the file that needs it
 #: and say why, the way `test_the_tracked_vector_cache_stays_small` asks.
-MAX_BYTES = 10 * 1024 * 1024
+#: #4585 retains the complete CM4AI root/member assertion sidecar (14,236,365
+#: bytes / 13.58 MiB), including original membership lists. The working and
+#: published copies are the same Git blob. Keep this evidence lossless and
+#: readable; 16 MiB admits it while preserving a bounded, reviewed ceiling.
+MAX_BYTES = 16 * 1024 * 1024
 
 
 def _git(*args: str) -> str:

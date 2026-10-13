@@ -9,6 +9,14 @@ to contribute useful information to a D4D datasheet.
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import sys
+
+_source = Path(__file__).resolve().parents[3] / 'src'
+if (_source / 'data_sheets_schema/legacy_root_identity.py').is_file() and str(_source) not in sys.path:
+    sys.path.insert(0, str(_source))
+
+from data_sheets_schema.legacy_root_identity import scoring_fields
+
 
 class InformativenessScorer:
     """Score and rank RO-Crate sources by D4D informativeness."""
@@ -45,10 +53,13 @@ class InformativenessScorer:
             - technical_completeness: float (0-1)
             - total_score: float (weighted combination)
         """
+        # Invalid comparison sources would also distort uniqueness scores.
+        for parser in [rocrate_parser, *(other_parsers or [])]:
+            parser.require_root_dataset()
         scores = {}
 
         # 1. D4D Coverage - how many fields can this RO-Crate populate?
-        covered_fields = mapping_loader.get_covered_fields()
+        covered_fields = scoring_fields(mapping_loader)
         populated_count = 0
 
         for d4d_field in covered_fields:
@@ -115,6 +126,9 @@ class InformativenessScorer:
             List of (parser, scores, rank) tuples sorted by score descending
             rank is 1-indexed (1 = most informative)
         """
+        # Preflight every source before producing a partial ranking.
+        for parser in rocrate_parsers:
+            parser.require_root_dataset()
         scored = []
 
         for parser in rocrate_parsers:
@@ -138,7 +152,7 @@ class InformativenessScorer:
         other_parsers: List
     ) -> int:
         """Count fields unique to this RO-Crate vs others."""
-        covered_fields = mapping_loader.get_covered_fields()
+        covered_fields = scoring_fields(mapping_loader)
         unique_count = 0
 
         for d4d_field in covered_fields:

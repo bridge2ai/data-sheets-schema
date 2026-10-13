@@ -28,11 +28,13 @@ Usage:
 """
 
 import argparse
+import json
 import sys
 import yaml
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
+from io import StringIO
 
 # Import our modules
 from mapping_loader import MappingLoader
@@ -41,55 +43,79 @@ from d4d_builder import D4DBuilder
 from validator import D4DValidator
 from rocrate_merger import ROCrateMerger
 from informativeness_scorer import InformativenessScorer
+from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
+from data_sheets_schema.legacy_route_dispositions import (
+    routes as disposition_routes, prepare_sidecar, protected_sources, validate_evidence, supplemental_report,
+)
+from data_sheets_schema.legacy_root_identity import root_identity_route, scoring_fields
+from data_sheets_schema.legacy_creator_references import reference_evidence, reference_lines
+from data_sheets_schema.legacy_creators import (
+    author_source_presence, source_presence_lines, KEY_BASIS_LABEL, MEASUREMENT_LIMIT,
+)
 
 
-def generate_transformation_report(
+def render_transformation_report(
     rocrate_parser: ROCrateParser,
     d4d_builder: D4DBuilder,
     mapping_loader: MappingLoader,
-    output_dir: Path
-) -> Path:
+) -> str:
     """Generate report of unmapped fields and transformation summary."""
-    report_path = output_dir / "transformation_report.txt"
+    f = StringIO()
+    f.write("="*80 + "\n")
+    f.write("RO-Crate to D4D Transformation Report\n")
+    f.write(f"Generated: {datetime.now().isoformat()}\n")
+    f.write("="*80 + "\n\n")
 
-    with open(report_path, 'w', encoding='utf-8') as f:
-        f.write("="*80 + "\n")
-        f.write("RO-Crate to D4D Transformation Report\n")
-        f.write(f"Generated: {datetime.now().isoformat()}\n")
-        f.write("="*80 + "\n\n")
+    # Transformation summary
+    covered_fields = scoring_fields(mapping_loader)
+    dataset = d4d_builder.get_dataset()
+    identity_construction = root_identity_route(mapping_loader)
+    populated_count = len(dataset) - int(identity_construction and 'id' in dataset)
+    percentage = populated_count / len(covered_fields) * 100 if covered_fields else 0
 
-        # Transformation summary
-        covered_fields = mapping_loader.get_covered_fields()
-        dataset = d4d_builder.get_dataset()
+    f.write("TRANSFORMATION SUMMARY\n")
+    f.write("-"*80 + "\n")
+    f.write(f"Eligible mapped fields: {len(covered_fields)}\n")
+    f.write(f"Constructed output keys: {populated_count}\n")
+    f.write(f"{KEY_BASIS_LABEL}: {populated_count}/{len(covered_fields)} ")
+    f.write(f"({percentage:.1f}%)\n\n")
+    f.write(MEASUREMENT_LIMIT + "\n")
+    presence = author_source_presence(
+        mapping_loader, [rocrate_parser], [str(rocrate_parser.rocrate_path)])
+    f.write("\n".join(source_presence_lines(presence)) + "\n")
+    references = reference_evidence(
+        presence, [d4d_builder.get_creator_reference_construction()])
+    if references is not None:
+        f.write("\n".join(reference_lines(references)) + "\n")
+    if identity_construction:
+        f.write("Required Dataset.id construction is excluded from this count.\n\n")
 
-        f.write("TRANSFORMATION SUMMARY\n")
-        f.write("-"*80 + "\n")
-        f.write(f"Total D4D fields in mapping: {len(covered_fields)}\n")
-        f.write(f"Fields populated from RO-Crate: {len(dataset)}\n")
-        f.write(f"Coverage: {len(dataset)}/{len(covered_fields)} ")
-        f.write(f"({len(dataset)/len(covered_fields)*100:.1f}%)\n\n")
+    # Unmapped RO-Crate properties
+    mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
+    evidence = d4d_builder.get_route_dispositions() if disposition_routes(mapping_loader) else None
+    accounted, supplemental_lines = supplemental_report(evidence)
+    if supplemental_lines:
+        f.write("\n".join(supplemental_lines) + "\n")
+    unmapped = rocrate_parser.get_unmapped_properties(mapped_props | accounted)
 
-        # Unmapped RO-Crate properties
-        mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
-        unmapped = rocrate_parser.get_unmapped_properties(mapped_props)
+    f.write("UNMAPPED RO-CRATE PROPERTIES\n")
+    f.write("-"*80 + "\n")
+    f.write(f"Found {len(unmapped)} properties in RO-Crate with no D4D mapping:\n\n")
 
-        f.write("UNMAPPED RO-CRATE PROPERTIES\n")
-        f.write("-"*80 + "\n")
-        f.write(f"Found {len(unmapped)} properties in RO-Crate with no D4D mapping:\n\n")
+    for prop_path, sample_value in sorted(unmapped.items()):
+        if disposition_routes(mapping_loader):
+            prop_path = json.dumps(prop_path, ensure_ascii=True, allow_nan=False)
+            sample_value = json.dumps(sample_value, ensure_ascii=True, allow_nan=False)
+        f.write(f"  • {prop_path}\n")
+        f.write(f"    Sample value: {sample_value}\n\n")
 
-        for prop_path, sample_value in sorted(unmapped.items()):
-            f.write(f"  • {prop_path}\n")
-            f.write(f"    Sample value: {sample_value}\n\n")
+    if unmapped:
+        f.write("\nThese properties could be added to the mapping TSV for future ")
+        f.write("iterations to add mapping routes; this alone adds no source evidence.\n")
 
-        if unmapped:
-            f.write("\nThese properties could be added to the mapping TSV for future ")
-            f.write("iterations to improve D4D coverage.\n")
+    return f.getvalue()
 
-    print(f"\n✓ Transformation report saved: {report_path}")
-    return report_path
-
-
-def save_d4d_yaml(
+def prepare_d4d_yaml(
     dataset: Dict[str, Any],
     output_path: Path,
     mapping_path: Path,
@@ -97,47 +123,92 @@ def save_d4d_yaml(
     rocrate_paths: List[Path] = None,
     provenance: Dict[str, List[str]] = None
 ):
-    """Save D4D dataset to YAML file with metadata header."""
-    with open(output_path, 'w', encoding='utf-8') as f:
-        # Write metadata header
-        f.write("# D4D Datasheet Generated from RO-Crate\n")
+    """Render and validate bytes, including the existing provenance header."""
+    f = StringIO()
+    # Write metadata header
+    f.write("# D4D Datasheet Generated from RO-Crate\n")
 
-        if rocrate_paths:
-            # Multi-file merge mode
-            f.write(f"# Primary source: {rocrate_paths[0].name}\n")
-            if len(rocrate_paths) > 1:
-                f.write("# Additional sources:\n")
-                for path in rocrate_paths[1:]:
-                    f.write(f"#   - {path.name}\n")
-            f.write(f"# Merged: {datetime.now().isoformat()}\n")
-        elif rocrate_path:
-            # Single file mode
-            f.write(f"# Source: {rocrate_path.name}\n")
-            f.write(f"# Generated: {datetime.now().isoformat()}\n")
+    if rocrate_paths:
+        # Multi-file merge mode
+        f.write(f"# Primary source: {rocrate_paths[0].name}\n")
+        if len(rocrate_paths) > 1:
+            f.write("# Additional sources:\n")
+            for path in rocrate_paths[1:]:
+                f.write(f"#   - {path.name}\n")
+        f.write(f"# Merged: {datetime.now().isoformat()}\n")
+    elif rocrate_path:
+        # Single file mode
+        f.write(f"# Source: {rocrate_path.name}\n")
+        f.write(f"# Generated: {datetime.now().isoformat()}\n")
 
-        f.write(f"# Mapping: {mapping_path.name}\n")
-        f.write(f"# Generator: d4d-rocrate skill\n")
+    f.write(f"# Mapping: {mapping_path.name}\n")
+    f.write(f"# Generator: d4d-rocrate skill\n")
 
-        # Add provenance if available
-        if provenance:
-            f.write("\n# Field provenance (which sources contributed):\n")
-            for field, sources in sorted(provenance.items()):
-                sources_str = ", ".join(sources)
-                f.write(f"#   {field}: {sources_str}\n")
+    # Add provenance if available
+    if provenance:
+        f.write("\n# Field provenance (which sources contributed):\n")
+        for field, sources in sorted(provenance.items()):
+            sources_str = ", ".join(sources)
+            f.write(f"#   {field}: {sources_str}\n")
 
-        f.write("\n")
+    f.write("\n")
 
-        # Write YAML data (use safe_dump to handle special characters)
-        yaml.safe_dump(
-            dataset,
-            f,
-            default_flow_style=False,
-            allow_unicode=True,
-            sort_keys=False
-        )
+    # Write YAML data (use safe_dump to handle special characters)
+    yaml.safe_dump(
+        dataset,
+        f,
+        default_flow_style=False,
+        allow_unicode=True,
+        sort_keys=False
+    )
 
+    return prepare_dataset(dataset, text=f.getvalue(),
+                           context=f"Inputs {rocrate_paths or rocrate_path}; output {output_path}")
+
+
+
+def generate_transformation_report(rocrate_parser, d4d_builder, mapping_loader, output_dir, *, dataset_path=None):
+    """Publish a report only after its final Dataset passes the required gate."""
+    evidence = d4d_builder.get_route_dispositions()
+    if evidence is not None and dataset_path is None:
+        raise ValueError("Marked report publication requires its existing Dataset path")
+    acquired = Path(dataset_path).read_bytes() if evidence is not None else None
+    text = acquired.decode("utf-8") if acquired is not None else None
+    dataset_raw = prepare_dataset(d4d_builder.get_dataset(), text=text)
+    if acquired is not None and dataset_raw != acquired:
+        raise ValueError("Marked report must bind exact existing Dataset bytes")
+    path = Path(output_dir) / "transformation_report.txt"
+    raw = render_transformation_report(rocrate_parser, d4d_builder, mapping_loader).encode("utf-8")
+    sidecars = (prepare_sidecar(dataset_path, d4d_builder.get_dataset(), dataset_raw, evidence, mapping_loader)
+                if evidence is not None else [])
+    publish([(path, raw), *sidecars], protected=[rocrate_parser.rocrate_path, mapping_loader.tsv_path,
+                                               *([Path(dataset_path)] if evidence is not None else []),
+                                               *protected_sources(evidence)])
+    print(f"\n✓ Transformation report saved: {path}")
+    return path
+
+
+def save_d4d_yaml(dataset, output_path, mapping_path, rocrate_path=None,
+                  rocrate_paths=None, provenance=None, *, route_dispositions=None):
+    raw = prepare_d4d_yaml(dataset, output_path, mapping_path, rocrate_path,
+                           rocrate_paths, provenance)
+    # Marked low-level saves require the explicit builder/merger evidence.
+    # Unmarked callers retain the former bare-dict publication behavior.
+    import csv
+    rows = []
+    if Path(mapping_path).is_file():
+        with open(mapping_path, encoding="utf-8") as stream:
+            rows = list(csv.DictReader(stream, delimiter="\t"))
+    from data_sheets_schema.legacy_route_dispositions import validate_rows
+    selected = validate_rows(rows)
+    sidecars = []
+    if selected or route_dispositions is not None:
+        loader = MappingLoader(str(mapping_path))
+        sidecars = prepare_sidecar(output_path, dataset, raw, route_dispositions, loader)
+    publish([(Path(output_path), raw), *sidecars],
+            protected=[mapping_path, *(rocrate_paths or ([rocrate_path] if rocrate_path else [])),
+                       *protected_sources(route_dispositions)])
     print(f"\n✓ D4D YAML saved: {output_path}")
-
 
 def main():
     """Main transformation orchestrator."""
@@ -266,9 +337,6 @@ Examples:
         print(f"✗ Error: Mapping TSV not found: {mapping_path}", file=sys.stderr)
         return 1
 
-    # Create output directory if needed
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
     print("="*80)
     if args.merge:
         print("Multi-RO-Crate Merge to D4D")
@@ -301,9 +369,9 @@ Examples:
             for input_path in input_paths:
                 print(f"  - {input_path.name}")
                 parser = ROCrateParser(str(input_path))
-                if not parser.get_root_dataset():
-                    print(f"⚠ Warning: No root Dataset in {input_path.name}, skipping")
-                    continue
+                # Every requested source participates or the whole operation
+                # fails. Skipping one silently changes the published merge.
+                parser.require_root_dataset()
                 parsers.append(parser)
 
             if not parsers:
@@ -314,6 +382,7 @@ Examples:
             print(f"✗ Error parsing RO-Crates: {e}", file=sys.stderr)
             return 1
 
+        original_indices = {id(parser): i for i, parser in enumerate(parsers)}
         # Step 3: Optionally rank by informativeness
         primary_index = args.primary
         if args.auto_prioritize:
@@ -340,7 +409,10 @@ Examples:
         print("\n[4/5] Merging RO-Crates...")
         try:
             merger = ROCrateMerger(mapping)
-            dataset = merger.merge_rocrates(parsers, primary_index=primary_index)
+            dataset = merger.merge_rocrates(parsers, primary_index=primary_index, **(
+                {"source_indices": [original_indices[id(parser)] for parser in parsers]}
+                if disposition_routes(mapping) else {}))
+            route_evidence = merger.get_route_dispositions()
             provenance = merger.get_provenance()
             merge_stats = merger.get_merge_stats()
 
@@ -350,26 +422,20 @@ Examples:
             print(f"✗ Error merging RO-Crates: {e}", file=sys.stderr)
             return 1
 
-        # Save with provenance
-        print("\n[5/5] Saving merged D4D YAML...")
+        header_paths = [input_paths[primary_index]] + [
+            path for i, path in enumerate(input_paths) if i != primary_index
+        ]
         try:
-            save_d4d_yaml(
-                dataset,
-                output_path,
-                mapping_path,
-                rocrate_paths=input_paths,
-                provenance=provenance
-            )
-        except Exception as e:
-            print(f"✗ Error saving YAML: {e}", file=sys.stderr)
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
+                                   rocrate_paths=header_paths, provenance=provenance)
+            prepared = [(output_path, raw), *prepare_sidecar(
+                output_path, dataset, raw, route_evidence, mapping)]
+            if not args.no_report:
+                report_path = output_path.with_name(f"{output_path.stem}_merge_report.txt")
+                prepared.append((report_path, merger.generate_merge_report(parsers).encode("utf-8")))
+        except Exception as exc:
+            print(f"✗ Error preparing publication: {exc}", file=sys.stderr)
             return 1
-
-        # Generate merge report
-        if not args.no_report:
-            try:
-                merger.save_merge_report(output_path, parsers)
-            except Exception as e:
-                print(f"⚠ Warning: Could not generate merge report: {e}", file=sys.stderr)
 
     else:
         # ========== SINGLE-FILE MODE ==========
@@ -383,12 +449,9 @@ Examples:
         print("\n[2/5] Parsing RO-Crate...")
         try:
             rocrate = ROCrateParser(str(input_path))
+            rocrate.require_root_dataset()
         except Exception as e:
             print(f"✗ Error parsing RO-Crate: {e}", file=sys.stderr)
-            return 1
-
-        if not rocrate.get_root_dataset():
-            print("✗ Error: No root Dataset found in RO-Crate", file=sys.stderr)
             return 1
 
         # Step 3: Build D4D structure
@@ -396,25 +459,22 @@ Examples:
         try:
             builder = D4DBuilder(mapping)
             dataset = builder.build_dataset(rocrate)
+            route_evidence = builder.get_route_dispositions()
         except Exception as e:
             print(f"✗ Error building D4D: {e}", file=sys.stderr)
             return 1
 
-        # Step 4: Save D4D YAML
-        print("\n[4/5] Saving D4D YAML...")
         try:
-            save_d4d_yaml(dataset, output_path, mapping_path, rocrate_path=input_path)
-        except Exception as e:
-            print(f"✗ Error saving YAML: {e}", file=sys.stderr)
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path, rocrate_path=input_path)
+            prepared = [(output_path, raw), *prepare_sidecar(
+                output_path, dataset, raw, route_evidence, mapping)]
+            if not args.no_report:
+                report_path = output_path.parent / "transformation_report.txt"
+                report = render_transformation_report(rocrate, builder, mapping).encode("utf-8")
+                prepared.append((report_path, report))
+        except Exception as exc:
+            print(f"✗ Error preparing publication: {exc}", file=sys.stderr)
             return 1
-
-        # Step 5: Generate report
-        print("\n[5/5] Generating reports...")
-        if not args.no_report:
-            try:
-                generate_transformation_report(rocrate, builder, mapping, output_path.parent)
-            except Exception as e:
-                print(f"⚠ Warning: Could not generate report: {e}", file=sys.stderr)
 
     # Common validation step for both modes
     if args.strict:
@@ -427,32 +487,21 @@ Examples:
             print("Run without --strict flag or provide missing fields manually", file=sys.stderr)
             return 1
 
-    if args.validate:
-        if not schema_path.exists():
-            print(f"⚠ Warning: Schema not found, skipping validation: {schema_path}", file=sys.stderr)
-        else:
-            print("\n" + "="*80)
-            print("Validating D4D YAML...")
-            print("="*80 + "\n")
-
-            try:
-                validator = D4DValidator(str(schema_path))
-                is_valid, output = validator.validate_d4d_yaml(str(output_path))
-
-                print(validator.get_validation_summary(is_valid, output))
-
-                if not is_valid:
-                    # Save validation errors to file
-                    error_path = output_path.parent / f"{output_path.stem}_validation_errors.txt"
-                    with open(error_path, 'w') as f:
-                        f.write(output)
-                    print(f"\n⚠ Validation errors saved to: {error_path}")
-
-                    if args.strict:
-                        return 1
-
-            except Exception as e:
-                print(f"⚠ Warning: Validation failed: {e}", file=sys.stderr)
+    try:
+        if args.validate:
+            validator = D4DValidator(str(schema_path))
+            detail = diagnostic(raw, validator.validate_d4d_yaml)
+            print(validator.get_validation_summary(True, detail))
+        validate_evidence((merger if args.merge else builder).get_route_dispositions(), dataset, mapping)
+        publish(prepared, protected=[mapping_path, schema_path,
+                                    *(input_paths if args.merge else [input_path]),
+                                    *protected_sources(route_evidence)])
+    except Exception as exc:
+        print(f"✗ Error publishing Dataset: {exc}", file=sys.stderr)
+        return 1
+    print(f"\n✓ D4D YAML saved: {output_path}")
+    if not args.no_report:
+        print(f"✓ Report saved: {report_path}")
 
     # Final summary
     print("\n" + "="*80)
@@ -469,9 +518,23 @@ Examples:
         print(f"\nInput:  {Path(args.input).name}")
 
     print(f"Output: {output_path}")
-    print(f"\nFields populated: {len(dataset)}")
-    print(f"Coverage: {len(dataset)}/{len(mapping.get_covered_fields())} mapped fields")
-    print(f"Percentage: {len(dataset)/len(mapping.get_covered_fields())*100:.1f}%")
+    print(f"\nConstructed Dataset keys: {len(dataset)}")
+    covered_fields = scoring_fields(mapping)
+    identity_construction = root_identity_route(mapping)
+    populated_count = len(dataset) - int(identity_construction and 'id' in dataset)
+    percentage = populated_count / len(covered_fields) * 100 if covered_fields else 0
+    print(f"{KEY_BASIS_LABEL}: {populated_count}/{len(covered_fields)} mapped fields")
+    print(f"Construction percentage: {percentage:.1f}%")
+    print(MEASUREMENT_LIMIT)
+    presence = (merger.get_source_presence() if args.merge else
+                author_source_presence(mapping, [rocrate], [str(input_path)]))
+    print("\n".join(source_presence_lines(presence, raw=False)))
+    references = (merger.get_creator_reference_construction() if args.merge else
+                  reference_evidence(presence, [builder.get_creator_reference_construction()]))
+    if references is not None:
+        print("\n".join(reference_lines(references)))
+    if identity_construction:
+        print("Required Dataset.id construction is excluded from this count.")
 
     return 0
 

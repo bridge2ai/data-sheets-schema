@@ -1,0 +1,73 @@
+{
+  "format": "support_execution_index_validation_v1",
+  "tested_head": "af75e9f326dea67a0104411b954caa0be7d898b7",
+  "tested_tree": "fb9197a139cfca3675509716e4289838c1efd005",
+  "scope": "Offline support execution joins and existing fitness/support compatibility; no empirical calibration or scientific cohort run",
+  "addressed_issues": [4619],
+  "not_closed_by_this_slice": [2929, 3342, 3343],
+  "source_sha256": {
+    "src/data_sheets_schema/top_level_fitness_results.py": "33765098318eddcb26a9dceb7c5ba2c900b41f8df193e08049487bfe065883f2",
+    "src/data_sheets_schema/cli/fitness_results.py": "0eb296340786888f48b5662d261c7edd6af450615b13581e32bcb3568d7fd3ba",
+    "src/data_sheets_schema/nested_support_execution.py": "ddc673506e16d9612f5481eec91480c6148562d029dd1fa65d71dd6cb06a42a7",
+    "src/data_sheets_schema/nested_support_results.py": "5a7fec7624b73c026048c06e45be2fb46b265731d41c3d17edea1247662358ef",
+    "src/data_sheets_schema/support_plan.py": "da17006b1f45aa651287abc0ba1afddb13a06ab428023e8fad8f0b8290dc82df",
+    "src/data_sheets_schema/support_targets.py": "1b1293b7def82abf98b84f67f2a7200588e54fb55cd464e6211473ef9f9616bf"
+  },
+  "test_sha256": {
+    "tests/test_evaluation/test_support_execution_index.py": "2d4d2391bae3d00df4897a3a1c6e5f0f569c94972e0cab253ac8cadf395cd9c8",
+    "tests/test_evaluation/test_support_execution_index_adversarial.py": "02f11bd3c9cd7d262e1832e85e67e01b91c6914d0a0a4f7190a47aca79bf9771",
+    "tests/test_evaluation/test_fitness_execution.py": "7b1b0acf3b194fdd5599b2638a4f650e8d0aa1b3f39818eb25c66dd41c2b0faa",
+    "tests/test_evaluation/test_fitness_execution_index.py": "a8dabd5371542b41317ddc06e9847c180538987f3e85e3a245c8776e15a9842e",
+    "tests/test_evaluation/test_top_level_fitness_results.py": "c5a126a820e27ce7594a2956bba5710e7ef5801a8139cd713479d6703e32fa69",
+    "tests/test_evaluation/test_nested_support_execution.py": "05d0dcccf66af9f56e972fabe1563dd93ec15e5fef9c7ec4a674cbb2298ca321",
+    "tests/test_evaluation/test_nested_support_results.py": "a8e66c5f34fe7b87f94fed68ea97033fe962e8cd93c6efc6a8a8a2481b98ae1d",
+    "tests/test_evaluation/test_execution_ledger_suffix.py": "946237d472627f60588bc9c58f110175ff2a9aa29a147a64de5e6918f4a36ffb"
+  },
+  "tests": {
+    "passed": 221,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_duration_seconds": 254.734,
+    "junit_timestamp": "2026-10-07T21:25:36.157966",
+    "by_module": {
+      "tests.test_evaluation.test_execution_ledger_suffix": 4,
+      "tests.test_evaluation.test_fitness_execution": 9,
+      "tests.test_evaluation.test_fitness_execution_index": 15,
+      "tests.test_evaluation.test_nested_support_execution": 40,
+      "tests.test_evaluation.test_nested_support_results": 73,
+      "tests.test_evaluation.test_support_execution_index": 9,
+      "tests.test_evaluation.test_support_execution_index_adversarial": 19,
+      "tests.test_evaluation.test_top_level_fitness_results": 52
+    },
+    "junit": {
+      "artifact": "support-index-tests.xml",
+      "bytes": 37113,
+      "sha256": "771cb2f741ac50662105757e3f509f6ed0e10c3d38f6c9b4cd906bcd88eb82b8"
+    }
+  },
+  "independent_evidence_checks": {
+    "head_matches_tested_head": true,
+    "pinned_files_match_tested_commit": true,
+    "junit_has_221_testcases": true,
+    "junit_has_no_failure_error_or_skipped_nodes": true,
+    "module_counts_sum_to_221": true,
+    "production_and_test_files_unchanged_during_evidence_update": true
+  },
+  "review": {
+    "independent_adversarial_source_review": "no confirmed production defects",
+    "new_review_findings": []
+  },
+  "limitations": [
+    "All responses are invented software fixtures. Integration cases use real localhost HTTP; independent controls supply bytes in-process under a network-denying fixture.",
+    "The support denominator covers registered selections, not the entire planned cohort; missing and failed attempts remain visible.",
+    "Raw strict response acceptance cannot override failed dispatch. Captured replay is not authentication of provider execution or caller-declared approval.",
+    "Omitting support execution preserves v1 supplied-attempt semantics; optional support execution creates v2 without promoting fitness or nested support across axes.",
+    "No scientific scores, provider calibration, paid cohort, project canary or production acceptance were produced by these tests.",
+    "Human scientific review, original readiness blockers, paid-run authorization and audit28 holds remain unchanged.",
+    "Remaining instrument, context, calibration, cohort and rubric/receipt/figure obligations under #2929, #3342 and #3343 remain open."
+  ],
+  "scientific_scores_produced": 0,
+  "production_attempts_authorized": false,
+  "scientific_eligibility": false
+}

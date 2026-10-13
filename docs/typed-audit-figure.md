@@ -97,8 +97,31 @@ publication completed; exit 2 indicates a refused input or failed publication.
 
 This is the standalone software consumer in
 [#4340](https://github.com/bridge2ai/data-sheets-schema/issues/4340).
-It does not close #2930/#3336 or select their v9 versus v8 comparator: actual
-generation/reconciliation integration, the common condition decision, new
-prompt/renderer registration, pre-run predictions and independently reviewed
+It does not establish completion of #2930/#3336 or select their v9 versus v8
+comparator. The separately selected
+[shared-generation API protocol](shared-generation-api-v1.md) already connects
+typed auditing to reconciliation and generation completion; this figure remains
+an offline consumer. Native/direct acceptance, scientific condition adoption,
+registered comparator and pre-run predictions, and independently reviewed
 empirical canaries remain separate. Synthetic engineering proofs are not
 scientific labels or a paid execution authorization.
+
+Completion publication uses a shared helper whose exact source is captured in
+publication metadata. The hidden `.figure-completion.pending` entry is retained
+for diagnosis and is never a completion marker. Its data stream is closed and
+read back before an exclusive link creates the fixed completion name. That link
+remains provisional until source, artifact and directory checks finish. If an
+observed precommit failure occurs, the helper invalidates its owned inode through
+a held descriptor, even in a displaced directory; it does not unlink a pathname
+that another writer could replace. Other outputs and replacement winners are
+preserved. An empty final marker is a failed publication. Failed invalidation is
+reported explicitly as uncertified cleanup, chained to the original error.
+
+After commitment, an operating-system error closing a bookkeeping descriptor is
+reported separately on stderr and does not turn the completed publication into
+a failed return. Data-stream close errors remain publication failures. If writing and closing
+both fail, the first write error remains primary and the close error is its
+explicit cause. These
+bounded checks do not promise crash or power-loss recovery, atomic visibility to
+concurrent readers, or protection against future external mutation. Select a new
+fresh directory after a failed attempt; there is no automatic retry or cleanup.

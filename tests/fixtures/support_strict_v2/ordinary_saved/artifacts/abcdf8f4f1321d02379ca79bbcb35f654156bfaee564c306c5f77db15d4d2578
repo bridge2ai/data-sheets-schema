@@ -1,0 +1,1058 @@
+{
+  "format": "d4d-support-plan-v2",
+  "mode": "offline_dry_run",
+  "granularity": "nested_support_and_top_level_fitness",
+  "artifact_kind": "full",
+  "value_identity_encoding": "typed-yaml-v1",
+  "readiness": {
+    "ready_for_paid_run": false,
+    "blockers": [
+      "independent_empirical_calibration_3343",
+      "context_projection_review_3342",
+      "instrument_review_3342",
+      "scientific_control_acceptance",
+      "v3_response_and_execution_registration",
+      "provider_transport_registration",
+      "paid_run_authorization",
+      "missing_rubric_join_artifacts"
+    ],
+    "missing_rubric_join_artifacts": [
+      "rubric10.json",
+      "rubric20.json"
+    ],
+    "calibration": "not_performed; software fixtures are not empirical evidence",
+    "schema_validation": "not_performed; selected schema used for target resolution"
+  },
+  "roster": {
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/support4902-strict-baseline01/captured/ordinary/source/roster.json",
+    "sha256": "379ab54bbbdacbf05c6d17185ab04d548f3640124374cc59e8007d90662b9a90",
+    "bytes": 625
+  },
+  "planning_code": {
+    "commit": "f2c050c1833c9a5c54c4373a02f6230578a27fe4",
+    "source_worktree_dirty": false,
+    "files": {
+      "nested_support_plan.py": {
+        "sha256": "0edf4642734f7c27d9b41281214e2bd60d238ac39cb93fe75df05cee332561db",
+        "bytes": 18098
+      },
+      "support_targets.py": {
+        "sha256": "1b1293b7def82abf98b84f67f2a7200588e54fb55cd464e6211473ef9f9616bf",
+        "bytes": 25178
+      },
+      "support_plan.py": {
+        "sha256": "da17006b1f45aa651287abc0ba1afddb13a06ab428023e8fad8f0b8290dc82df",
+        "bytes": 29068
+      },
+      "support_judge.py": {
+        "sha256": "ed463973104b81c4dca8e693cb22b40189543683fdadacf849d50a6f79d8f63b",
+        "bytes": 25032
+      },
+      "evidence_score.py": {
+        "sha256": "6b7f4496fc3efdd0272610f76178cf750d7a82144a930f5334dc0b55c14b3b02",
+        "bytes": 53835
+      },
+      "schema_digest.py": {
+        "sha256": "2626779774de80349c127579d06b250a4566fc12d471b0fd3db8e2b7fd33e950",
+        "bytes": 41676
+      },
+      "schema_snapshot.py": {
+        "sha256": "33e2928f435d1f1ca9c6d13edb0ec0c3e393d4ee28c5e9e4957c60c089ef52b1",
+        "bytes": 6234
+      },
+      "schema_view.py": {
+        "sha256": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff",
+        "bytes": 12420
+      },
+      "profiles.py": {
+        "sha256": "36de6c72c773ca7583705ee24611ddab6ecad4803f63cbc9b541d1ce519600aa",
+        "bytes": 14105
+      },
+      "evaluation_model.py": {
+        "sha256": "b0821c5a33d549e895c2de6c1232d4cd9e1c7e167425ec53a0ccdcecb7cd3718",
+        "bytes": 7254
+      },
+      "duplicate_keys.py": {
+        "sha256": "22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2",
+        "bytes": 15690
+      },
+      "api_runner.py": {
+        "sha256": "554084e2e0bd3fd777a177905f27f741937b6b61026111b379578344747c1ef6",
+        "bytes": 431747
+      },
+      "resources.py": {
+        "sha256": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435",
+        "bytes": 15272
+      }
+    }
+  },
+  "environment": {
+    "python": "3.13.12",
+    "packages": {
+      "PyYAML": "6.0.3",
+      "linkml-runtime": "1.10.0"
+    }
+  },
+  "input_repository_commit": "7913d39ee3e373ecd93d20bac5fceb2740fd90d0",
+  "model": {
+    "name": "judge",
+    "basis": "explicit_override"
+  },
+  "schema": {
+    "class": "Dataset",
+    "profile": "neutral",
+    "profile_basis": "explicit",
+    "sources": [
+      {
+        "import_key": "plan",
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/support4902-strict-baseline01/captured/ordinary/source/schema.yaml",
+        "sha256": "051b632904acef28bd9d17d9271483cf9ef4ddf3de6a1d42e81c527a75fd074b",
+        "bytes": 541
+      },
+      {
+        "import_key": "linkml:types",
+        "path": "/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/site-packages/linkml_runtime/linkml_model/model/schema/types.yaml",
+        "sha256": "582c6dc9299038cd907c07a1cfdf288451fcda631b1fdd885438849d968ee817",
+        "bytes": 7298
+      }
+    ],
+    "nested_specification": {
+      "sha256": "c8d7c6bb80aa283ca222afec1e94fe2fd1298a52bb58444380955f0d764e5b20",
+      "bytes": 2220
+    },
+    "nested_specification_sha256": "c8d7c6bb80aa283ca222afec1e94fe2fd1298a52bb58444380955f0d764e5b20",
+    "fitness_specifications": {
+      "sha256": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d",
+      "bytes": 619
+    },
+    "generation_digest": "7dcc6406991952fab64f73c3cdacd31c",
+    "vocabulary": null,
+    "vocabulary_path": null,
+    "vocabulary_basis": "explicit_profile_without_vocabulary",
+    "vocabulary_names": []
+  },
+  "instruments": {
+    "grounding_v3": {
+      "name": "support_targets v3 draft (#3342)",
+      "policy": "relationship_edge_and_attribute_value_v2",
+      "system": {
+        "sha256": "90e59bcda7b864c1cc0dd68831c65bba597b8afd5788189c62cc7d7d9234f067",
+        "bytes": 1798
+      }
+    },
+    "fitness": {
+      "name": "LLMSlotFitnessScorer",
+      "granularity": "top_level_field",
+      "system": {
+        "sha256": "a03fef6da8f95f8743e3c03fb2d19b0ac0834bbae10b08f62c1e88f87eb7947a",
+        "bytes": 1353
+      }
+    }
+  },
+  "request_boundary": "pure renderer keyword arguments, before unregistered provider transport; canonical UTF-8 JSON, not wire bytes",
+  "records": [
+    {
+      "id": "2c4965e3abbbbf1343aec572",
+      "project": "Harbor",
+      "label": "condition_rep1",
+      "method": "api",
+      "cohort": "v7",
+      "generation_rep": 1,
+      "artifact_kind": "full",
+      "record": {
+        "path": "record.yaml",
+        "recorded_hashes": {
+          "sha256": "b1f69de695ef9653e687a9c5739c5d58f4c38df967dcbe850001358e2f79588a"
+        },
+        "basis": "current_matches_pin",
+        "recovery_commit": null,
+        "current_sha256": "b1f69de695ef9653e687a9c5739c5d58f4c38df967dcbe850001358e2f79588a",
+        "md5": "dad2fa269c53cdb3083f4c15634869a2",
+        "sha256": "b1f69de695ef9653e687a9c5739c5d58f4c38df967dcbe850001358e2f79588a",
+        "bytes": 87
+      },
+      "provenance": {
+        "path": "provenance.yaml",
+        "recorded_hashes": {},
+        "basis": "captured_current_unpinned_by_roster",
+        "recovery_commit": null,
+        "sha256": "21f28e5a22ab2901f0734fd1f2d7247a83210c56b60c9fb42ed6680b5056bba4",
+        "bytes": 172
+      },
+      "bundle": {
+        "path": "bundle.txt",
+        "recorded_hashes": {
+          "md5": "85d9b581837aa8ed5fd14a2a51b66691"
+        },
+        "basis": "current_matches_pin",
+        "recovery_commit": null,
+        "current_sha256": "3396dc2e792bd28ae6c6a8d81b165502a55e5522fcce4e77c96fc26df7118442",
+        "md5": "85d9b581837aa8ed5fd14a2a51b66691",
+        "sha256": "3396dc2e792bd28ae6c6a8d81b165502a55e5522fcce4e77c96fc26df7118442",
+        "bytes": 61
+      },
+      "generator": "claude-opus-5",
+      "same_family": "unknown",
+      "populated_top_level_fields": 5,
+      "support_targets_by_kind": {
+        "relationship_edge": 1,
+        "attribute_value": 5
+      },
+      "fitness_top_level_targets": 5,
+      "blocked_paths": [],
+      "blocked_count": 0,
+      "inventory": {
+        "sha256": "c75b855f0731c7235c64816c7c4dc9d627adefbd9f7c264fd7bc25a68c09468f",
+        "bytes": 14309
+      },
+      "rubric_join_jobs": [
+        {
+          "id": "harbor_rubric10",
+          "rubric": "rubric10",
+          "output": "rubric10.json",
+          "result_artifact": null,
+          "status": "unavailable_locally; materialize sparse paths if tracked"
+        },
+        {
+          "id": "harbor_rubric20",
+          "rubric": "rubric20",
+          "output": "rubric20.json",
+          "result_artifact": null,
+          "status": "unavailable_locally; materialize sparse paths if tracked"
+        }
+      ]
+    }
+  ],
+  "targets": [
+    {
+      "id": "2c4965e3abbbbf1343aec572:grounding_v3:attribute_value:/count",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "grounding_v3",
+      "kind": "attribute_value",
+      "pointer": "/count",
+      "value_sha256": "d8117918f245aedda9bf1236d1eb30e8958c763caca42418e6e969d561124f07",
+      "context_sha256": "1925a7008bb5f1208bdac48670d417470cfd51c1fb54436931af03db8cc1e6fb",
+      "specification_ref": "217ce39b657b96c3b4073d18b2502463d406300b5dba155d1525b374b963e90d",
+      "target_artifact": {
+        "sha256": "6428262e350b4b2b983ecfe3faf9b73fbdaac574494a6233847f4906ec34980d",
+        "bytes": 1672
+      },
+      "inventory_artifact": {
+        "sha256": "c75b855f0731c7235c64816c7c4dc9d627adefbd9f7c264fd7bc25a68c09468f",
+        "bytes": 14309
+      },
+      "fitness_mapping": {
+        "basis": "top_level_only",
+        "mapping": "many_to_one",
+        "pointer": "/count",
+        "target_id": "2c4965e3abbbbf1343aec572:fitness:/count",
+        "status": "planned_top_level_only"
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "90e59bcda7b864c1cc0dd68831c65bba597b8afd5788189c62cc7d7d9234f067",
+            "bytes": 1798
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "7751521758d525eaf10ac09b5b0ae1a0e152dfe685e9af2a5991fb8a876195a1",
+                    "bytes": 81
+                  }
+                },
+                "cache_control": {
+                  "type": "ephemeral"
+                }
+              },
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "02ad6c93f34bf8104d89ba607d36ebceedd79829aa9615bfeb14717b31926723",
+                    "bytes": 2140
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request_sha256": "64287217affe5cbcd0cb9edaacb639f094618379a6e1fd74cd6675bbce4f9fb3",
+      "request_bytes": 4480,
+      "estimated_input_tokens": 1120,
+      "estimated_cache_prefix_tokens": 470,
+      "output_token_ceiling": 417,
+      "result_contract": "unregistered_v3_no_cache_or_executor"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:grounding_v3:relationship_edge:/creators/0",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "grounding_v3",
+      "kind": "relationship_edge",
+      "pointer": "/creators/0",
+      "value_sha256": "790affdb4e22ce4e71bc5448dc9302afbd20e0424cf46f29742aafc567ba5764",
+      "context_sha256": "b20822ce2a0e60cb10454710979cc3cd5671bd7f417c972965e50d08a2291681",
+      "specification_ref": "3d5b69c6a456c10ef3b8ca53aa2a6ab46e26e2aeae8f2f310ad99b2970a14367",
+      "target_artifact": {
+        "sha256": "1d7150f8d5ae58035273b386a46439627c3ca041b808c08ca7d971a0bfc14c2a",
+        "bytes": 1565
+      },
+      "inventory_artifact": {
+        "sha256": "c75b855f0731c7235c64816c7c4dc9d627adefbd9f7c264fd7bc25a68c09468f",
+        "bytes": 14309
+      },
+      "fitness_mapping": {
+        "basis": "top_level_only",
+        "mapping": "many_to_one",
+        "pointer": "/creators",
+        "target_id": "2c4965e3abbbbf1343aec572:fitness:/creators",
+        "status": "planned_top_level_only"
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "90e59bcda7b864c1cc0dd68831c65bba597b8afd5788189c62cc7d7d9234f067",
+            "bytes": 1798
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "7751521758d525eaf10ac09b5b0ae1a0e152dfe685e9af2a5991fb8a876195a1",
+                    "bytes": 81
+                  }
+                },
+                "cache_control": {
+                  "type": "ephemeral"
+                }
+              },
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "b17b923f2505a81d286c7f28f89fad820cc37b5377174768acb181662841fc3e",
+                    "bytes": 2133
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request_sha256": "b088292bc7c0bbc8b6cceacd39f1f0895e6734876d2fd9b15998cc95a61da9d1",
+      "request_bytes": 4475,
+      "estimated_input_tokens": 1119,
+      "estimated_cache_prefix_tokens": 470,
+      "output_token_ceiling": 417,
+      "result_contract": "unregistered_v3_no_cache_or_executor"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:grounding_v3:attribute_value:/creators/0/name",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "grounding_v3",
+      "kind": "attribute_value",
+      "pointer": "/creators/0/name",
+      "value_sha256": "7c78f9db58f7957bf99266cffc0ad7f04afc0abd37dbbb0e54b4e2c402998d41",
+      "context_sha256": "e285f00c45c37d3a2ebc1f9a03dbaf6aab7d56d08591e2585940c249518ccf5f",
+      "specification_ref": "843cc58c4f885fce5c0d38bc6d8057fa6522553348ccc119706cfd84dc57ca88",
+      "target_artifact": {
+        "sha256": "ed908b3cccb02ba437de6fb72d9118a70af82952a391f3e1fbee1b39ee8e348e",
+        "bytes": 1507
+      },
+      "inventory_artifact": {
+        "sha256": "c75b855f0731c7235c64816c7c4dc9d627adefbd9f7c264fd7bc25a68c09468f",
+        "bytes": 14309
+      },
+      "fitness_mapping": {
+        "basis": "top_level_only",
+        "mapping": "many_to_one",
+        "pointer": "/creators",
+        "target_id": "2c4965e3abbbbf1343aec572:fitness:/creators",
+        "status": "planned_top_level_only"
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "90e59bcda7b864c1cc0dd68831c65bba597b8afd5788189c62cc7d7d9234f067",
+            "bytes": 1798
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "7751521758d525eaf10ac09b5b0ae1a0e152dfe685e9af2a5991fb8a876195a1",
+                    "bytes": 81
+                  }
+                },
+                "cache_control": {
+                  "type": "ephemeral"
+                }
+              },
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "2026770b6655e21f61dc93b73e1f425d97ad1478056c657e11e69dac1ab27557",
+                    "bytes": 2299
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request_sha256": "00c891187718a234622e4481e83348281d4b23bc1d0b7a87e6ff4dd11ee2e0fa",
+      "request_bytes": 4684,
+      "estimated_input_tokens": 1171,
+      "estimated_cache_prefix_tokens": 470,
+      "output_token_ceiling": 417,
+      "result_contract": "unregistered_v3_no_cache_or_executor"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:grounding_v3:attribute_value:/enabled",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "grounding_v3",
+      "kind": "attribute_value",
+      "pointer": "/enabled",
+      "value_sha256": "38d36ce273c7be1c4d771030a94ce9d9760ca762732855090017581928dacb85",
+      "context_sha256": "65f3fd0825f44c4e99452f69ed12ec5a3b0068f514b0bdc7ca789fd18788ffa3",
+      "specification_ref": "a49a87bacf9b256b3d643c102a872a31f0353d6ebd5041b367f28e6494b1b3d5",
+      "target_artifact": {
+        "sha256": "40dba6423e5d70e336c3d7e07abbf74e953ab4b5c68d0afeaac9033c05f5e641",
+        "bytes": 1675
+      },
+      "inventory_artifact": {
+        "sha256": "c75b855f0731c7235c64816c7c4dc9d627adefbd9f7c264fd7bc25a68c09468f",
+        "bytes": 14309
+      },
+      "fitness_mapping": {
+        "basis": "top_level_only",
+        "mapping": "many_to_one",
+        "pointer": "/enabled",
+        "target_id": "2c4965e3abbbbf1343aec572:fitness:/enabled",
+        "status": "planned_top_level_only"
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "90e59bcda7b864c1cc0dd68831c65bba597b8afd5788189c62cc7d7d9234f067",
+            "bytes": 1798
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "7751521758d525eaf10ac09b5b0ae1a0e152dfe685e9af2a5991fb8a876195a1",
+                    "bytes": 81
+                  }
+                },
+                "cache_control": {
+                  "type": "ephemeral"
+                }
+              },
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "1666878b1fc3a3a6327ee8baff7c93846501aa4940b8d19d91031693727e097d",
+                    "bytes": 2153
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request_sha256": "312b236e4d6f4663802fadee83ccbb10a113e485ebb73997dedb45a14b4624a4",
+      "request_bytes": 4493,
+      "estimated_input_tokens": 1124,
+      "estimated_cache_prefix_tokens": 470,
+      "output_token_ceiling": 417,
+      "result_contract": "unregistered_v3_no_cache_or_executor"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:grounding_v3:attribute_value:/id",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "grounding_v3",
+      "kind": "attribute_value",
+      "pointer": "/id",
+      "value_sha256": "0d2838a4c70d29b9e8958cfb805a2ccbd7ea1ca47be664bb1acbb0dd7a06edb5",
+      "context_sha256": "f041b22d9a9d07efd351136f28e2a3d4021aefd8a5630cd021f8382a0ea39a7f",
+      "specification_ref": "88510ee47315024090f904c719b0e85d3c8307e27fced96d00aceec008e31c33",
+      "target_artifact": {
+        "sha256": "c05e99410964e9f9acc00598a91f0f873c37655e98faeb14f54175cbe3cb486d",
+        "bytes": 1669
+      },
+      "inventory_artifact": {
+        "sha256": "c75b855f0731c7235c64816c7c4dc9d627adefbd9f7c264fd7bc25a68c09468f",
+        "bytes": 14309
+      },
+      "fitness_mapping": {
+        "basis": "top_level_only",
+        "mapping": "many_to_one",
+        "pointer": "/id",
+        "target_id": "2c4965e3abbbbf1343aec572:fitness:/id",
+        "status": "planned_top_level_only"
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "90e59bcda7b864c1cc0dd68831c65bba597b8afd5788189c62cc7d7d9234f067",
+            "bytes": 1798
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "7751521758d525eaf10ac09b5b0ae1a0e152dfe685e9af2a5991fb8a876195a1",
+                    "bytes": 81
+                  }
+                },
+                "cache_control": {
+                  "type": "ephemeral"
+                }
+              },
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "8395cb01d6add5cce19448d1feb49e2eaa62d4bf1ecd9dd94fbe7e66be8e8bdf",
+                    "bytes": 2164
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request_sha256": "81fd3b786c439130c1ca81cde16b848e59912071969db40eaea8188903983f02",
+      "request_bytes": 4508,
+      "estimated_input_tokens": 1127,
+      "estimated_cache_prefix_tokens": 470,
+      "output_token_ceiling": 417,
+      "result_contract": "unregistered_v3_no_cache_or_executor"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:grounding_v3:attribute_value:/title",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "grounding_v3",
+      "kind": "attribute_value",
+      "pointer": "/title",
+      "value_sha256": "27625a0bac0be87e014cd93ffc7a559aea117987b39955adf2861b005efd089f",
+      "context_sha256": "845e570eaa1a8ba12c6ce4c5f135e3e574208ce75bc4c45c96c65048c2b9716c",
+      "specification_ref": "a016695eda0c6d6ec15018942317174e47b40cb171c4366dd50aa31173a427e8",
+      "target_artifact": {
+        "sha256": "e8b155aaddcc37f88e123a384fb9b30da1760dc929fe33b24e425af14260d244",
+        "bytes": 1672
+      },
+      "inventory_artifact": {
+        "sha256": "c75b855f0731c7235c64816c7c4dc9d627adefbd9f7c264fd7bc25a68c09468f",
+        "bytes": 14309
+      },
+      "fitness_mapping": {
+        "basis": "top_level_only",
+        "mapping": "many_to_one",
+        "pointer": "/title",
+        "target_id": "2c4965e3abbbbf1343aec572:fitness:/title",
+        "status": "planned_top_level_only"
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "90e59bcda7b864c1cc0dd68831c65bba597b8afd5788189c62cc7d7d9234f067",
+            "bytes": 1798
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "7751521758d525eaf10ac09b5b0ae1a0e152dfe685e9af2a5991fb8a876195a1",
+                    "bytes": 81
+                  }
+                },
+                "cache_control": {
+                  "type": "ephemeral"
+                }
+              },
+              {
+                "type": "text",
+                "text": {
+                  "$text": {
+                    "sha256": "106cda91324d42346019ebbb88cc053c11afa1bb7e9a88439313a6fada5205e1",
+                    "bytes": 2138
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "request_sha256": "df76e94ed4fb96e4e0a787fa820eb7669fdb1a827f1e1a2f02290302cea407cb",
+      "request_bytes": 4478,
+      "estimated_input_tokens": 1120,
+      "estimated_cache_prefix_tokens": 470,
+      "output_token_ceiling": 417,
+      "result_contract": "unregistered_v3_no_cache_or_executor"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:fitness:/count",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "fitness",
+      "kind": "top_level_field",
+      "pointer": "/count",
+      "value_sha256": "d8117918f245aedda9bf1236d1eb30e8958c763caca42418e6e969d561124f07",
+      "judgement_context": {
+        "axis": "fitness",
+        "model": "judge",
+        "rubric": "6c5b10778ade",
+        "corpus": "",
+        "schema": "7dcc6406991952fab64f73c3cdacd31c",
+        "specification": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d"
+      },
+      "specification_artifact": {
+        "sha256": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d",
+        "bytes": 619
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "a03fef6da8f95f8743e3c03fb2d19b0ac0834bbae10b08f62c1e88f87eb7947a",
+            "bytes": 1353
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": {
+              "$text": {
+                "sha256": "6a6f87e002d9fd217597cf55bf1bcf5806a3e95ef7fae54a22bc215f10a25df3",
+                "bytes": 126
+              }
+            }
+          }
+        ]
+      },
+      "request_sha256": "eac1e31b9ce897a59f5fa59be570dabc0940cb6ae634c1f93196bf86f1c69a60",
+      "request_bytes": 1625,
+      "estimated_input_tokens": 407,
+      "estimated_cache_prefix_tokens": 0,
+      "output_token_ceiling": 417,
+      "result_contract": "legacy_top_level_fitness"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:fitness:/creators",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "fitness",
+      "kind": "top_level_field",
+      "pointer": "/creators",
+      "value_sha256": "14978c2d611c07d3b07e5ed1808e0e96705f0dae6101efa4561bc52ddaaa0cbd",
+      "judgement_context": {
+        "axis": "fitness",
+        "model": "judge",
+        "rubric": "6c5b10778ade",
+        "corpus": "",
+        "schema": "7dcc6406991952fab64f73c3cdacd31c",
+        "specification": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d"
+      },
+      "specification_artifact": {
+        "sha256": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d",
+        "bytes": 619
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "a03fef6da8f95f8743e3c03fb2d19b0ac0834bbae10b08f62c1e88f87eb7947a",
+            "bytes": 1353
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": {
+              "$text": {
+                "sha256": "bf1c64ff9d50ffda3fc50411953fa54d2b09e4a4263af31cbc16979623a5fd9d",
+                "bytes": 407
+              }
+            }
+          }
+        ]
+      },
+      "request_sha256": "a873b96dbd0991e8bb243615b701b75ca968c2ac00681e70b0c891735893be15",
+      "request_bytes": 1911,
+      "estimated_input_tokens": 478,
+      "estimated_cache_prefix_tokens": 0,
+      "output_token_ceiling": 417,
+      "result_contract": "legacy_top_level_fitness"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:fitness:/enabled",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "fitness",
+      "kind": "top_level_field",
+      "pointer": "/enabled",
+      "value_sha256": "38d36ce273c7be1c4d771030a94ce9d9760ca762732855090017581928dacb85",
+      "judgement_context": {
+        "axis": "fitness",
+        "model": "judge",
+        "rubric": "6c5b10778ade",
+        "corpus": "",
+        "schema": "7dcc6406991952fab64f73c3cdacd31c",
+        "specification": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d"
+      },
+      "specification_artifact": {
+        "sha256": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d",
+        "bytes": 619
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "a03fef6da8f95f8743e3c03fb2d19b0ac0834bbae10b08f62c1e88f87eb7947a",
+            "bytes": 1353
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": {
+              "$text": {
+                "sha256": "f68fcb49b74c37ba308306c3647091ca888f613018a70299754a2b63aa7f270f",
+                "bytes": 134
+              }
+            }
+          }
+        ]
+      },
+      "request_sha256": "9906c9c6b598a496e1dc9c67d7d390c5b79e5531370454ed81ffd94ab8e146b3",
+      "request_bytes": 1633,
+      "estimated_input_tokens": 409,
+      "estimated_cache_prefix_tokens": 0,
+      "output_token_ceiling": 417,
+      "result_contract": "legacy_top_level_fitness"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:fitness:/id",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "fitness",
+      "kind": "top_level_field",
+      "pointer": "/id",
+      "value_sha256": "0d2838a4c70d29b9e8958cfb805a2ccbd7ea1ca47be664bb1acbb0dd7a06edb5",
+      "judgement_context": {
+        "axis": "fitness",
+        "model": "judge",
+        "rubric": "6c5b10778ade",
+        "corpus": "",
+        "schema": "7dcc6406991952fab64f73c3cdacd31c",
+        "specification": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d"
+      },
+      "specification_artifact": {
+        "sha256": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d",
+        "bytes": 619
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "a03fef6da8f95f8743e3c03fb2d19b0ac0834bbae10b08f62c1e88f87eb7947a",
+            "bytes": 1353
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": {
+              "$text": {
+                "sha256": "c1b8a5f69a69ed1febf2a5665ea3983d6526cec9c053f191c1bca6a2f5c9ff67",
+                "bytes": 131
+              }
+            }
+          }
+        ]
+      },
+      "request_sha256": "4084609d72d468b35fe5804665fd4a7ad140490323e7368110b91b8005112a57",
+      "request_bytes": 1630,
+      "estimated_input_tokens": 408,
+      "estimated_cache_prefix_tokens": 0,
+      "output_token_ceiling": 417,
+      "result_contract": "legacy_top_level_fitness"
+    },
+    {
+      "id": "2c4965e3abbbbf1343aec572:fitness:/title",
+      "record_id": "2c4965e3abbbbf1343aec572",
+      "axis": "fitness",
+      "kind": "top_level_field",
+      "pointer": "/title",
+      "value_sha256": "27625a0bac0be87e014cd93ffc7a559aea117987b39955adf2861b005efd089f",
+      "judgement_context": {
+        "axis": "fitness",
+        "model": "judge",
+        "rubric": "6c5b10778ade",
+        "corpus": "",
+        "schema": "7dcc6406991952fab64f73c3cdacd31c",
+        "specification": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d"
+      },
+      "specification_artifact": {
+        "sha256": "9eb48b0ad57f63e8d0ca03aec54ada6500926823f1553311ab3a36f4aa220e0d",
+        "bytes": 619
+      },
+      "status": "planned_not_measured",
+      "propagated": false,
+      "request_recipe": {
+        "model": "judge",
+        "max_tokens": 417,
+        "temperature": null,
+        "system": {
+          "$text": {
+            "sha256": "a03fef6da8f95f8743e3c03fb2d19b0ac0834bbae10b08f62c1e88f87eb7947a",
+            "bytes": 1353
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": {
+              "$text": {
+                "sha256": "4ad3663905d176d7e61962ce1339bd1bdf26d9b8985675d25dd8fb2fdedbbea6",
+                "bytes": 130
+              }
+            }
+          }
+        ]
+      },
+      "request_sha256": "a041e942b317305b2404702d2634d7677a1ff32a42db76079bfc0b505f783e06",
+      "request_bytes": 1629,
+      "estimated_input_tokens": 408,
+      "estimated_cache_prefix_tokens": 0,
+      "output_token_ceiling": 417,
+      "result_contract": "legacy_top_level_fitness"
+    }
+  ],
+  "blocked_paths": [],
+  "counts": {
+    "records": 1,
+    "populated_top_level_fields": 5,
+    "axis_targets": 11,
+    "by_axis": {
+      "grounding_v3": 6,
+      "fitness": 5
+    },
+    "support_by_kind": {
+      "relationship_edge": 1,
+      "attribute_value": 5
+    },
+    "fitness_top_level": 5,
+    "blocked": 0,
+    "blocked_by_axis": {},
+    "blocked_by_cause": {}
+  },
+  "estimate": {
+    "method": "ceil(canonical request UTF-8 bytes / 4); heuristic, not token count or spend cap",
+    "assumptions": [
+      "one attempt per target; retries excluded",
+      "no judgement-cache reuse credited",
+      "warm support prefix written once per record across both support kinds, subsequent targets read it",
+      "prefix includes system plus source block; provider support, expiry and minimum size unverified",
+      "fitness has no cached source block; fitness does not become a nested verdict",
+      "output ceiling uses requested max_tokens; transport may cap it"
+    ],
+    "prices": null,
+    "scenarios": {
+      "uncached": {
+        "tokens": {
+          "input": 8891,
+          "cache_write": 0,
+          "cache_read": 0,
+          "output": 4587
+        },
+        "estimated_usd": null
+      },
+      "cache_miss_every_request": {
+        "tokens": {
+          "input": 6071,
+          "cache_write": 2820,
+          "cache_read": 0,
+          "output": 4587
+        },
+        "estimated_usd": null
+      },
+      "warm_within_record": {
+        "tokens": {
+          "input": 6071,
+          "cache_write": 470,
+          "cache_read": 2350,
+          "output": 4587
+        },
+        "estimated_usd": null
+      }
+    },
+    "by_stratum": {
+      "relationship_edge": {
+        "uncached": {
+          "tokens": {
+            "input": 1119,
+            "cache_write": 0,
+            "cache_read": 0,
+            "output": 417
+          },
+          "estimated_usd": null
+        },
+        "cache_miss_every_request": {
+          "tokens": {
+            "input": 649,
+            "cache_write": 470,
+            "cache_read": 0,
+            "output": 417
+          },
+          "estimated_usd": null
+        },
+        "warm_within_record": {
+          "tokens": {
+            "input": 649,
+            "cache_write": 0,
+            "cache_read": 470,
+            "output": 417
+          },
+          "estimated_usd": null
+        }
+      },
+      "attribute_value": {
+        "uncached": {
+          "tokens": {
+            "input": 5662,
+            "cache_write": 0,
+            "cache_read": 0,
+            "output": 2085
+          },
+          "estimated_usd": null
+        },
+        "cache_miss_every_request": {
+          "tokens": {
+            "input": 3312,
+            "cache_write": 2350,
+            "cache_read": 0,
+            "output": 2085
+          },
+          "estimated_usd": null
+        },
+        "warm_within_record": {
+          "tokens": {
+            "input": 3312,
+            "cache_write": 470,
+            "cache_read": 1880,
+            "output": 2085
+          },
+          "estimated_usd": null
+        }
+      },
+      "fitness_top_level": {
+        "uncached": {
+          "tokens": {
+            "input": 2110,
+            "cache_write": 0,
+            "cache_read": 0,
+            "output": 2085
+          },
+          "estimated_usd": null
+        },
+        "cache_miss_every_request": {
+          "tokens": {
+            "input": 2110,
+            "cache_write": 0,
+            "cache_read": 0,
+            "output": 2085
+          },
+          "estimated_usd": null
+        },
+        "warm_within_record": {
+          "tokens": {
+            "input": 2110,
+            "cache_write": 0,
+            "cache_read": 0,
+            "output": 2085
+          },
+          "estimated_usd": null
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "changed_entries": [],
+  "git_after": {
+    "head": "ffc4ca922723caa620af2e32a31ad538bc5a5ac9",
+    "tracked_changes": [],
+    "tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe",
+    "untracked": []
+  },
+  "git_before": {
+    "head": "ffc4ca922723caa620af2e32a31ad538bc5a5ac9",
+    "tracked_changes": [],
+    "tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe",
+    "untracked": []
+  },
+  "git_equal": true,
+  "late_cleanup": null,
+  "pin_changes": [],
+  "preservation_errors": [],
+  "source_entries": 10791,
+  "source_equal": true
+}

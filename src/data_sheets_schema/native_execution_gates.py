@@ -360,8 +360,7 @@ def check(prepared, projections, runtime, controls, *, exit_code, shutdown, live
     run('schema', schemas)
     run('pair', paired)
     run('receipts', lambda: shared.receipt_gate(prepared, prepared['record'], prepared['schema_paths'], prepared['phase1_original'], controls))
-    run('evidence', lambda: {'passed': prepared['final_result'].get('checked') is True
-        and prepared['final_result'].get('findings') == [], 'result': deepcopy(prepared['final_result'])})
+    run('evidence', lambda: shared.final_evidence_gate(prepared))
     run('observation', observed)
     run('accounting', accounting)
     run('runtime_authority', lambda: runtime_observation_result(

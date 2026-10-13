@@ -2,21 +2,23 @@
 
 Every pull request runs the complete collected suite, including corpus tests,
 on six Python 3.12 shards. Main and manual runs use four Python 3.12 shards
-and one separate schema/example build. Two additional Python 3.12 jobs run the
-complete offline audit/finalization and evaluation suites alongside the shards,
-so those suites no longer wait for core tests to finish. Budget and native
-transport controls still run once on shard 1. There are eight Python jobs on
-PRs and seven on main/manual runs, plus the aggregate `test` job. The aggregate
+and one separate schema/example build. Three additional Python 3.12 jobs run the
+complete offline canary, audit/finalization and evaluation suites alongside the
+shards. Budget and native transport controls run once in the canary job, with
+the same 45-minute job limit and existing test deadlines, rather than sharing
+the time left after a full suite shard (#4466). There are nine Python jobs on
+PRs and eight on main/manual runs, plus the aggregate `test` job. The aggregate
 requires every applicable job to succeed; failure, cancellation or an unexpected
-skip in either offline lane also fails it. Package metadata still permits Python
+skip in any offline lane also fails it. Package metadata still permits Python
 3.9 and newer; this CI configuration does not independently check compatibility
 on other interpreters.
 
 The offline jobs retain their existing pytest arguments and `PYTHONPATH`, full
 checkout history, FAIRSCAPE submodule initialization and cached project setup.
-They upload `audit-controls.xml` and `evaluation-controls.xml` under separate
-`tests-py3.12-offline-audit` and `tests-py3.12-offline-evaluation` artifacts, with
-the same 14-day retention. Core shard artifacts and the `pytest.xml` files used
+They upload `budget.xml` and `native.xml` as `tests-py3.12-offline-canary`, and
+`audit-controls.xml` and `evaluation-controls.xml` under separate
+`tests-py3.12-offline-audit` and `tests-py3.12-offline-evaluation` artifacts, all
+with the same 14-day retention. Core shard artifacts and the `pytest.xml` files used
 for scheduling estimates are unchanged. Extra jobs add setup and runner demand;
 compare complete PR/main timings and total runner time before claiming a speedup.
 
@@ -58,16 +60,23 @@ partition, compared with approximately 697.3 seconds per weighted shard.
 These are estimates of test work, not wall-clock predictions; fixture reuse,
 runner load and changed tests can affect the actual result.
 
-The current snapshot was refreshed from successful four-worker run
-[35061852492](https://github.com/bridge2ai/data-sheets-schema/actions/runs/35061852492)
-at `44836e190060fe07b262c948dead269d604c4014`: 5,209 cases in 281 files.
-After the cache optimization, the old four-shard assignment accumulated 1,219.9,
-1,064.8, 1,192.5 and 655.7 case seconds. The six-shard assignment estimates 688.8
-per shard. See the [dated review](../notes/ci_efficiency_review_2026-09-15.md).
+The current snapshot comes from successful run
+[38158491197](https://github.com/bridge2ai/data-sheets-schema/actions/runs/38158491197)
+at `df2aa6c663c8d5712e3bd51885a6806f00982d79`: 18,848 testcase occurrences in
+524 files, including 243 files absent from the previous snapshot. One legitimate
+parameter-label collision contributes both occurrences and both durations. The
+four core artifact hashes and source provenance are recorded in the
+[refresh evidence](../notes/agent_performance_2026-10-12/timing-refresh.json).
+Recorded case times sum to 22,354.104 seconds. The six-shard weighted assignment
+estimates about 3,726 case seconds per shard; these totals overlap across workers
+and are not wall-clock predictions. Tests added or changed after this run may
+have different costs. The prior 5,209-case/281-file snapshot and earlier optimization
+are documented in the [dated review](../notes/ci_efficiency_review_2026-09-15.md).
 
 To update after a successful run, download all of that run's shard artifacts for a
-single Python version into a fresh directory. Mixing interpreter versions or
-runs is rejected when their test identities duplicate. For example:
+single Python version into a fresh directory. Verify the completed run, commit,
+interpreter and complete artifact roster against GitHub's metadata, and retain
+the archive/XML hashes with the refresh evidence. For example:
 
 ```sh
 gh run download 35009501429 --repo bridge2ai/data-sheets-schema \
@@ -77,6 +86,17 @@ python utils/update_ci_shard_timings.py /tmp/d4d-ci-timing-snapshot \
 ```
 
 The updater maps JUnit class names to repository test files, retains artifact
-hashes and the source run identity, and refuses failed or unmappable cases.
-Review and commit the resulting timing snapshot. Refreshing it is optional
-for new tests; coverage never depends on a timing entry.
+hashes and the supplied source run identity, and refuses failed or unmappable
+cases. Parameterized cases can share a JUnit label within one artifact; each
+occurrence contributes its recorded time and counts toward `source.test_cases`
+(#5020). A label appearing in different artifacts, repeated resolved input paths,
+or copied XML bytes is rejected. Do not deduplicate or rename downloaded records.
+
+The run ID and commit arguments are caller-supplied labels, not authentication.
+Duplicate checks do not detect disjoint XML files mixed from different runs or
+interpreters, so the external provenance check above remains necessary. Offline
+lane XML is retained separately and is not included in this core refresh: the
+updater reads only files named `pytest.xml`.
+
+Review and commit the resulting timing snapshot. Refreshing it is optional for
+new tests; coverage never depends on a timing entry.

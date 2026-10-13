@@ -31,6 +31,8 @@ MAX_SCHEMA_BYTES = 16_000_000
 MAX_RESPONSE_BYTES = 8_000_000
 MAX_NODES = 200_000
 MAX_DEPTH = 64
+MAX_SCHEMA_EVENTS = 131_072
+MAX_SCHEMA_EVENT_CHARS = 8_000_000
 LIMITATIONS = [
     "Scientific support, applicability, novelty and exhaustive recall are unverified.",
     "Chunk coverage and matching quotations are declaration/identity checks only.",
@@ -54,14 +56,79 @@ def _asset(name: str) -> bytes:
     return raw
 
 
-def _read(raw: bytes, label: str, *, json_only: bool = False, limit: int = MAX_INPUT_BYTES):
+class _SchemaEventLoader(_UniqueLoader):
+    """Use the existing composer/constructors with a completed checked stream."""
+    def __init__(self, events):
+        super().__init__("")
+        self._events = iter(events)
+        self._event = next(self._events, None)
+
+    def check_event(self, *choices):
+        return self._event is not None and (not choices or isinstance(self._event, choices))
+
+    def peek_event(self):
+        return self._event
+
+    def get_event(self):
+        event = self._event
+        self._event = next(self._events, None)
+        return event
+
+
+def _schema_yaml(text):
+    """Retain one bounded depth-checked parse, or use the original second pass.
+
+    Composition starts only after the complete depth pass, so a later depth
+    violation still precedes an earlier duplicate anchor or undefined alias.
+    Parser errors and retention overflow fall back; neither changes admission.
+    """
+    retained, depth, characters = [], 0, 0
+    events = yaml.parse(text, Loader=yaml.SafeLoader)
+    try:
+        for event in events:
+            if isinstance(event, (yaml.MappingStartEvent, yaml.SequenceStartEvent)):
+                depth += 1
+                if depth > MAX_DEPTH:
+                    raise ValueError("depth bound exceeded")
+            elif isinstance(event, (yaml.MappingEndEvent, yaml.SequenceEndEvent)):
+                depth -= 1
+            if retained is not None:
+                characters += sum(len(value) for name in ("anchor", "tag", "value")
+                                  if isinstance(value := getattr(event, name, None), str))
+                tags = getattr(event, "tags", None)
+                if tags:
+                    characters += sum(len(key) + len(value) for key, value in tags.items())
+                if len(retained) >= MAX_SCHEMA_EVENTS or characters > MAX_SCHEMA_EVENT_CHARS:
+                    retained = None
+                else:
+                    retained.append(event)
+    except (yaml.YAMLError, UnicodeEncodeError):
+        # The old depth probe suppresses parser errors; the real loader then
+        # supplies its own composer/parser error with the original precedence.
+        retained = None
+    finally:
+        events.close()
+    if retained is None:
+        return yaml.load(text, Loader=_UniqueLoader)
+    loader = _SchemaEventLoader(retained)
+    try:
+        return loader.get_single_data()
+    finally:
+        loader.dispose()
+
+
+def _read(raw: bytes, label: str, *, json_only: bool = False, limit: int = MAX_INPUT_BYTES,
+          _schema_events: bool = False):
     if type(raw) is not bytes or not raw or len(raw) > limit:
         raise ValueError(f"{label} must be nonempty bytes within the {limit}-byte bound")
     try:
         text = raw.decode("utf-8")
-        if nesting_exceeds(text, yaml.SafeLoader, MAX_DEPTH):
-            raise ValueError("depth bound exceeded")
-        value = evidence.load_json(text) if json_only else yaml.load(text, Loader=_UniqueLoader)
+        if _schema_events and not json_only:
+            value = _schema_yaml(text)
+        else:
+            if nesting_exceeds(text, yaml.SafeLoader, MAX_DEPTH):
+                raise ValueError("depth bound exceeded")
+            value = evidence.load_json(text) if json_only else yaml.load(text, Loader=_UniqueLoader)
         _validate_json(value, max_nodes=MAX_NODES, max_depth=MAX_DEPTH)
         return value
     except (ValueError, TypeError, KeyError, AttributeError, RecursionError, yaml.YAMLError) as exc:
@@ -92,7 +159,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
         total += len(raw)
         if total > MAX_SCHEMA_BYTES:
             raise ValueError("schema closure exceeds byte bound")
-        _mapping(raw, "schema")
+        _mapping(raw, "schema", _schema_events=True)
         return raw
 
     if schema_snapshot is None:
@@ -114,7 +181,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
             total += len(raw)
             if total > MAX_SCHEMA_BYTES:
                 raise ValueError("schema closure exceeds byte bound")
-            _mapping(raw, "schema")
+            _mapping(raw, "schema", _schema_events=True)
             frozen[selected] = raw
         root = schema_snapshot.sources[0][1]
         if path.absolute() != root:
