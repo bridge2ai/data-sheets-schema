@@ -112,7 +112,7 @@ def _capture(path):
         total += len(raw)
         if total > omissions.MAX_SCHEMA_BYTES:
             raise ValueError("schema closure exceeds byte bound")
-        omissions._mapping(raw, "schema")
+        omissions._mapping(raw, "schema", _schema_events=True)
         return raw
 
     snapshot = capture_schema(path.absolute(), read_bytes=read, strict=True)
