@@ -1,0 +1,51 @@
+{
+  "kind": "retrospective_metadata_verification_not_original_generator",
+  "passed": true,
+  "checks": 130,
+  "failed_checks": [],
+  "helper": {
+    "path": "scripts/adhoc/2026-10-12_trace_verify_performance_evidence.py",
+    "sha256": "42451dea4263faca16224ad7ff953225a9fd9884ad1c7233d2f241cd64a19fca"
+  },
+  "detailed_verification_sha256": "ee9b089c33731856c86f6eefec0e1c48e82739351f6ae3c93024e28933e9bcdf",
+  "published_inputs": {
+    "published/evidence.json": {
+      "bytes": 40272,
+      "sha256": "5b9df340a9e4e622650f2319c50ad76b2edd53d4ca70a32541feea6d6677d978"
+    },
+    "published/timing-refresh.json": {
+      "bytes": 6335,
+      "sha256": "6cc2bd5d00ba61afe009482b603d889782bf8c0cc520a46724c31bf108556494"
+    },
+    "published/replay-baseline.json": {
+      "bytes": 6004,
+      "sha256": "e993c458a297d1a9c493de5a6ba5fdf0e3d9cce2593fa3684db4683492c6a9df"
+    },
+    "published/ci_test_durations.json": {
+      "bytes": 30122,
+      "sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22"
+    }
+  },
+  "verified_totals": {
+    "main_run_sample": 50,
+    "docs_run_sample": 20,
+    "successful_PR_feedback_median_seconds": 1926.0,
+    "artifact_archives": 7,
+    "artifact_XML_files": 8,
+    "core_timing_records": 18848,
+    "core_unique_labels": 18847,
+    "core_weighted_files": 524,
+    "all_file_weights_match": true,
+    "profile_functions": 14,
+    "profile_API_execute_entries": 19
+  },
+  "limits": [
+    "Reconstructed after analysis; verifies retained bytes and principal arithmetic, not an original execution receipt.",
+    "No project imports, tests, profiler, collection, provider or network calls.",
+    "Archive hashes join saved GitHub metadata; no new remote freshness claim.",
+    "JUnit aggregate and profile inclusive times overlap and are not wall-time speedup measurements.",
+    "Historical host/workspace observations are hash-bound only; current state and narrative recommendations are not remeasured.",
+    "The profile verifies 19 execute entries; the 21 attempted-operation explanation remains source-derived, not inferred from missing events.",
+    "Existing focused-test pass claims and final CI acceptance are outside this arithmetic verification."
+  ]
+}
