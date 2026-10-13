@@ -13,3 +13,10 @@ The direct full pass took 25.97 seconds with a fresh bytecode cache; the followi
 Nested pytest remains a structural cost. Four existing partition controls launch 24 child controllers and 80 workers in total; concurrently running outer workers can multiply peak demand. Keep a shared worker budget. Their commands and exact-coverage proofs remain unchanged; source-derived counts are not peak-overlap measurements. Early shard selection would need its own authoritative discovery proof and overlaps active PR #4508 (#4517/#4519/#4520/#4522), so this change does not duplicate that work.
 
 The term hook previously validated an old merged schema after a source edit and could report that the schema passed. Source edits now report pending regeneration and explicit validation. Only the exact project generated schema triggers its validator; a mixed source/generated batch remains pending. Successful output names the generated file and does not attest source/generated synchronization. Warning-only exits, timeouts and skip diagnostics remain; no stale-result cache is added. Configured references do not establish actual runtime frequency or latency, so no hook speedup is claimed.
+
+The actual collection-comparison helper is preserved under `scripts/adhoc/` as
+`2026-10-12_5018_make_collection_comparison.py`, with a SHA-256 provenance sidecar.
+Its historical body is intact after the descriptive header. It was preserved
+after the original measurement and was not rerun; paths are session-specific and
+outputs are relative to the script location. Inspect/adapt before future use.
+`2026-10-12_preserve_performance_helper.py` records the preservation procedure.

@@ -1,0 +1,11 @@
+{
+  "issue": "#5018 / PR #5026",
+  "original_helper": "/private/tmp/d4d-agent-performance-20261012-vq8rgbu9/implementation/iteration-5018-fix01/collect.py",
+  "original_sha256": "98721554768972cfb0e7fff8e0917ba23067a1e3d7d7cca5d4b7d79b5add41fc",
+  "preserved_sha256": "f1e852f46404bf934327aa014aa08bb6ad327a1b46c4cdd085bf4c8ca14bae68",
+  "original_body_retained_verbatim": true,
+  "preserved_after_original_run": true,
+  "executed_during_preservation": false,
+  "original_output_location": "/private/tmp/d4d-agent-performance-20261012-vq8rgbu9/implementation/iteration-5018-fix01",
+  "limitation": "Historical absolute paths and __file__-relative outputs remain; inspect before reuse."
+}
