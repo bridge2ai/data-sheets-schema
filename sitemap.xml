@@ -2535,4 +2535,19 @@
          <lastmod>2026-10-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/agent-instructions-history/</loc>
+         <lastmod>2026-10-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/agent-instructions-history/operating-guide-2026-10-12-v1/</loc>
+         <lastmod>2026-10-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/agent-instructions-history/workflow-readme-2026-10-12-v1/</loc>
+         <lastmod>2026-10-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
 </urlset>

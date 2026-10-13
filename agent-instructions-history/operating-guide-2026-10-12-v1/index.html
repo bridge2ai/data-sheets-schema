@@ -1,0 +1,2403 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/agent-instructions-history/operating-guide-2026-10-12-v1/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>CLAUDE.md - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#claudemd" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLAUDE.md
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../home/" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../d4d_core/" class="md-nav__link">
+        D4D-Core
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../semantic_exchange/" class="md-nav__link">
+        Semantic Exchange
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Schema Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        CLI Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#project-overview" class="md-nav__link">
+    Project Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development-commands" class="md-nav__link">
+    Development Commands
+  </a>
+  
+    <nav class="md-nav" aria-label="Development Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setup-and-testing" class="md-nav__link">
+    Setup and Testing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building" class="md-nav__link">
+    Building
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unified-cli-d4d-command" class="md-nav__link">
+    Unified CLI (d4d command)
+  </a>
+  
+    <nav class="md-nav" aria-label="Unified CLI (d4d command)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utility-commands" class="md-nav__link">
+    Utility Commands
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#download-preprocessing" class="md-nav__link">
+    Download &amp; Preprocessing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluation" class="md-nav__link">
+    Evaluation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ro-crate-integration" class="md-nav__link">
+    RO-Crate Integration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema-operations" class="md-nav__link">
+    Schema Operations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rendering" class="md-nav__link">
+    Rendering
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benefits" class="md-nav__link">
+    Benefits
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complete-command-reference" class="md-nav__link">
+    Complete Command Reference
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backward-compatibility" class="md-nav__link">
+    Backward Compatibility
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    Architecture
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-schema-files" class="md-nav__link">
+    Core Schema Files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-artifacts-do-not-edit" class="md-nav__link">
+    Generated Artifacts (DO NOT EDIT)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#centralized-constants" class="md-nav__link">
+    Centralized Constants
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-configuration" class="md-nav__link">
+    Key Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema-development-workflow" class="md-nav__link">
+    Schema Development Workflow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    Testing
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-structure" class="md-nav__link">
+    Test Structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-tests" class="md-nav__link">
+    Running Tests
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keeping-schema-files-in-sync" class="md-nav__link">
+    Keeping Schema Files in Sync
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-modules" class="md-nav__link">
+    Working with Modules
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-strategy" class="md-nav__link">
+    Testing Strategy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#d4d-pipeline-and-data-organization" class="md-nav__link">
+    D4D Pipeline and Data Organization
+  </a>
+  
+    <nav class="md-nav" aria-label="D4D Pipeline and Data Organization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-structure" class="md-nav__link">
+    Data Structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-naming" class="md-nav__link">
+    File Naming
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-workflow" class="md-nav__link">
+    Pipeline Workflow
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d4d-generation-methods" class="md-nav__link">
+    D4D Generation Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-commands-reference" class="md-nav__link">
+    Pipeline Commands Reference
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#d4d-assistant-instructions-github-actions" class="md-nav__link">
+    D4D Assistant Instructions (GitHub Actions)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#document-concatenation" class="md-nav__link">
+    Document Concatenation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-makefile-targets" class="md-nav__link">
+    Custom Makefile Targets
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dataset-scope-what-a-record-is-about" class="md-nav__link">
+    Dataset Scope (what a record is about)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chunk-manifests-receipts-substrate-707" class="md-nav__link">
+    Chunk Manifests (receipts substrate, #707)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coverage-receipts-708" class="md-nav__link">
+    Coverage Receipts (#708)
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/agent-instructions-history/operating-guide-2026-10-12-v1.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="claudemd">CLAUDE.md</h1>
+<p>This file provides guidance to Claude Code when working with code in this repository.</p>
+<h2 id="project-overview">Project Overview</h2>
+<p>LinkML schema project for "Datasheets for Datasets" (D4D) - standardized dataset documentation inspired by the Gebru et al. paper. Creates structured schemas for 50+ D4D questions.</p>
+<p><strong>Related work</strong>: <a href="https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext">Original paper</a>, <a href="https://arxiv.org/abs/2105.03020">CheXpert example</a>, <a href="https://arxiv.org/abs/2204.01075">Data Cards</a></p>
+<h2 id="development-commands">Development Commands</h2>
+<h3 id="setup-and-testing">Setup and Testing</h3>
+<pre><code class="language-bash">make setup              # Initial setup
+make install            # Install dependencies
+make test               # All tests
+make test-schema        # Validate full merged schema
+make test-modules       # Validate individual modules
+make lint-modules       # Lint D4D modules
+</code></pre>
+<h3 id="building">Building</h3>
+<pre><code class="language-bash">make gen-project        # Generate Python/JSON/OWL artifacts
+make gendoc             # Generate documentation
+make site               # Build complete site
+make deploy             # Deploy to GitHub Pages
+</code></pre>
+<h2 id="unified-cli-d4d-command">Unified CLI (d4d command)</h2>
+<p>The project provides a unified CLI via the <code>d4d</code> command for common operations:</p>
+<h3 id="installation">Installation</h3>
+<pre><code class="language-bash">poetry install          # Installs d4d command
+d4d --help              # Show all commands
+</code></pre>
+<h3 id="utility-commands">Utility Commands</h3>
+<pre><code class="language-bash">d4d utils status        # Show detailed pipeline status
+d4d utils status --quick                      # Compact overview
+d4d utils validate-preprocessing              # Check preprocessing quality
+</code></pre>
+<h3 id="download-preprocessing">Download &amp; Preprocessing</h3>
+<pre><code class="language-bash">d4d download sources --project AI_READI       # Download from Google Sheet
+d4d download preprocess --project AI_READI    # Preprocess to text
+d4d download preprocess                       # Preprocess all projects
+d4d download concatenate --project AI_READI   # Concatenate files
+d4d download release-inventory --project CHORUS  # Read-only release evidence inventory
+</code></pre>
+<h3 id="evaluation">Evaluation</h3>
+<pre><code class="language-bash">d4d evaluate presence --project AI_READI --method gpt5  # Presence-based
+d4d evaluate presence --method claudecode_agent         # All projects
+d4d evaluate llm --file path/to/file.yaml --project X --method Y  # LLM quality
+</code></pre>
+<h3 id="ro-crate-integration">RO-Crate Integration</h3>
+<pre><code class="language-bash">d4d rocrate parse input.json                          # Parse RO-Crate
+d4d rocrate transform input.json -o output.yaml       # Convert to D4D
+d4d rocrate merge --help                             # Retired: raw merge is unsupported (#4593)
+</code></pre>
+<h3 id="schema-operations">Schema Operations</h3>
+<pre><code class="language-bash">d4d schema stats --level 2 --format json              # Schema statistics
+d4d schema validate file.yaml                         # Validate D4D YAML
+</code></pre>
+<h3 id="rendering">Rendering</h3>
+<pre><code class="language-bash">d4d render html input.yaml -o output.html             # Render to HTML
+</code></pre>
+<h3 id="benefits">Benefits</h3>
+<ul>
+<li><strong>Registry validation</strong>: a <code>--project</code> is checked against the source manifest the
+  command selects (<code>--manifest</code>, default <code>data/preprocessed/source_manifest.yaml</code>),
+  not against a hardcoded list (#623); method names via click.Choice</li>
+<li><strong>Consistent interface</strong>: All commands use same patterns</li>
+<li><strong>Help everywhere</strong>: <code>--help</code> on any command/group</li>
+<li><strong>Constants</strong>: Uses centralized constants from <code>data_sheets_schema.constants</code></li>
+</ul>
+<h3 id="complete-command-reference">Complete Command Reference</h3>
+<ul>
+<li><strong>d4d utils</strong>: status, validate-preprocessing</li>
+<li><strong>d4d download</strong>: sources, preprocess, concatenate, release-inventory</li>
+<li><strong>d4d evaluate</strong>: presence, llm</li>
+<li><strong>d4d rocrate</strong>: parse, transform; <code>merge</code> is retained only to explain its retirement (#4593)</li>
+<li><strong>d4d schema</strong>: stats, validate</li>
+<li><strong>d4d render</strong>: html, generate-all</li>
+</ul>
+<h3 id="backward-compatibility">Backward Compatibility</h3>
+<p>All existing Makefile targets and standalone scripts continue to work. The CLI is an additive enhancement.</p>
+<h2 id="architecture">Architecture</h2>
+<h3 id="core-schema-files">Core Schema Files</h3>
+<ul>
+<li><code>src/data_sheets_schema/schema/data_sheets_schema.yaml</code> - Main schema (imports all modules)</li>
+<li><code>src/data_sheets_schema/schema/D4D_Base_import.yaml</code> - Base classes/slots/enums</li>
+<li>D4D modules (in schema/ directory): <code>D4D_Motivation.yaml</code>, <code>D4D_Composition.yaml</code>, <code>D4D_Collection.yaml</code>, <code>D4D_Preprocessing.yaml</code>, <code>D4D_Uses.yaml</code>, <code>D4D_Distribution.yaml</code>, <code>D4D_Maintenance.yaml</code>, <code>D4D_Human.yaml</code>, <code>D4D_Ethics.yaml</code>, <code>D4D_Data_Governance.yaml</code>, <code>D4D_Metadata.yaml</code>, <code>D4D_Minimal.yaml</code></li>
+</ul>
+<h3 id="generated-artifacts-do-not-edit">Generated Artifacts (DO NOT EDIT)</h3>
+<ul>
+<li><code>src/data_sheets_schema/datamodel/</code> - Python classes</li>
+<li><code>project/</code> - JSON Schema, OWL, SHACL, JSON-LD, GraphQL</li>
+<li><code>src/data_sheets_schema/schema/data_sheets_schema_all.yaml</code> - Merged schema</li>
+</ul>
+<h3 id="centralized-constants">Centralized Constants</h3>
+<ul>
+<li><code>src/data_sheets_schema/constants/</code> - Project names, methods, paths, modules</li>
+<li><code>projects.py</code> - PROJECTS list, path helpers</li>
+<li><code>methods.py</code> - METHODS list (generation methods)</li>
+<li><code>schemas.py</code> - MODULE_MAP, schema paths</li>
+<li><code>evaluation.py</code> - Rubric paths, scoring constants</li>
+</ul>
+<p>Usage: <code>from data_sheets_schema.constants import PROJECTS, METHODS</code></p>
+<h3 id="key-configuration">Key Configuration</h3>
+<ul>
+<li><code>about.yaml</code>, <code>pyproject.toml</code>, <code>Makefile</code>, <code>config.env</code></li>
+</ul>
+<h2 id="schema-development-workflow">Schema Development Workflow</h2>
+<ol>
+<li>Edit schemas in <code>src/data_sheets_schema/schema/</code></li>
+<li><code>make lint-modules &amp;&amp; make test-modules</code> (fast module validation)</li>
+<li><code>make test-schema</code> (full validation)</li>
+<li><code>make gen-project</code> (regenerate artifacts)</li>
+<li><code>make test</code> (complete validation)</li>
+</ol>
+<h2 id="testing">Testing</h2>
+<h3 id="test-structure">Test Structure</h3>
+<pre><code>tests/
+├── test_d4d_full_schema.py     # Schema generation tests
+├── test_data.py                # Data validation tests
+├── test_renderer.py            # Rendering tests
+├── test_schema/                # Schema utility tests
+│   └── test_schema_stats.py    # Schema statistics tests (8 tests)
+├── test_download/              # Download pipeline tests
+├── test_rocrate/               # RO-Crate integration tests
+└── test_evaluation/            # Evaluation framework tests
+</code></pre>
+<h3 id="running-tests">Running Tests</h3>
+<pre><code class="language-bash">make test                       # All tests
+make test-python                # Python unit tests only
+python -m unittest tests.test_schema.test_schema_stats  # Specific test
+</code></pre>
+<h2 id="keeping-schema-files-in-sync">Keeping Schema Files in Sync</h2>
+<p>Three representations must stay synchronized:
+1. <code>data_sheets_schema.yaml</code> (source)
+2. <code>data_sheets_schema_all.yaml</code> (merged)
+3. <code>data_sheets_schema.py</code> (Python model)</p>
+<pre><code class="language-bash">make check-sync    # Check synchronization
+make regen-all     # Force regenerate the full merged schema and project artifacts
+rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml &amp;&amp; make gen-core-schema
+                   # the core merged schema, which regen-all does not rebuild (#2775)
+</code></pre>
+<h2 id="working-with-modules">Working with Modules</h2>
+<ul>
+<li>Each module imports <code>D4D_Base_import.yaml</code></li>
+<li>Classes inherit from base classes (especially <code>DatasetProperty</code>)</li>
+<li>Main schema imports all modules</li>
+<li><code>make full-schema</code> generates merged <code>data_sheets_schema_all.yaml</code></li>
+</ul>
+<h2 id="testing-strategy">Testing Strategy</h2>
+<ol>
+<li><strong>Schema Validation</strong> (<code>make test-schema</code>): LinkML syntax/structure</li>
+<li><strong>Python Tests</strong> (<code>make test-python</code>): Datamodel classes (<code>tests/</code>)</li>
+<li><strong>Example Validation</strong> (<code>make test-examples</code>): Validate example data</li>
+</ol>
+<h2 id="d4d-pipeline-and-data-organization">D4D Pipeline and Data Organization</h2>
+<p>AI-powered extraction of D4D metadata from dataset documentation.</p>
+<h3 id="data-structure">Data Structure</h3>
+<pre><code>data/
+  raw/{PROJECT}/                     # Raw downloads: {source}_row{N}.{pdf,html,txt,json}
+  preprocessed/
+    individual/{PROJECT}/            # Standardized: {source}_row{N}.{txt,json}
+    concatenated/                    # {PROJECT}_{preprocessed|concatenated|raw}.txt
+  d4d_individual/{METHOD}/{PROJECT}/ # {source}_row{N}_d4d.yaml
+  d4d_concatenated/{METHOD}/         # {PROJECT}_d4d.yaml
+  d4d_html/{individual|concatenated}/{METHOD}/  # HTML renderings
+  ATTIC/                            # Archived legacy data
+</code></pre>
+<p><strong>Projects</strong>: AI_READI, CHORUS, CM4AI, VOICE</p>
+<h3 id="file-naming">File Naming</h3>
+<ul>
+<li>Raw/preprocessed: <code>{source}_row{N}.{ext}</code> (e.g., <code>e097449.full_row2.pdf</code>)</li>
+<li>D4D individual: <code>{source}_row{N}_d4d.yaml</code></li>
+<li>D4D concatenated: <code>{PROJECT}_d4d.yaml</code></li>
+<li>HTML: <code>{PROJECT}_d4d_human_readable.html</code>, <code>{PROJECT}_evaluation.html</code></li>
+</ul>
+<h3 id="pipeline-workflow">Pipeline Workflow</h3>
+<pre><code class="language-bash"># 1. Download from Google Sheet
+make download-sources  # → data/raw/{PROJECT}/
+
+# 2. Preprocess (PDF→TXT, HTML→TXT)
+make preprocess-sources  # → data/preprocessed/individual/{PROJECT}/
+
+# 2.5. Validate quality ⚠️ CRITICAL
+make validate-preprocessing  # Check for empty/stub files
+
+# 3. Concatenate by project
+make concat-preprocessed  # → {PROJECT}_preprocessed.txt
+
+# 4. Extract D4D (recommended method)
+make d4d-agent PROJECT=AI_READI  # → data/d4d_concatenated/claudecode_agent/
+
+# 5. Generate HTML
+make gen-d4d-html
+</code></pre>
+<h3 id="d4d-generation-methods">D4D Generation Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Status</th>
+<th>Best For</th>
+<th>Quality</th>
+<th>Speed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>claudecode_agent</strong></td>
+<td>✅ Current (v5+)</td>
+<td>Production datasheets (agentic runtime; both runtimes through v7)</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>Fast (parallel)</td>
+</tr>
+<tr>
+<td><strong>claudecode_api</strong></td>
+<td>✅ From generic_v8 (#690)</td>
+<td>Production datasheets, API runtime baseline</td>
+<td>—</td>
+<td>Fast (batch)</td>
+</tr>
+<tr>
+<td>claudecode_assistant</td>
+<td>Alternative</td>
+<td>Interactive refinement</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>claudecode</td>
+<td>Legacy</td>
+<td>API automation</td>
+<td>⭐⭐⭐</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>gpt5</td>
+<td>Comparison</td>
+<td>Benchmarking</td>
+<td>⭐⭐</td>
+<td>Slow</td>
+</tr>
+<tr>
+<td>curated</td>
+<td>Comparison</td>
+<td>ChatGPT chat arm — <strong>not</strong> a gold standard</td>
+<td>⭐⭐</td>
+<td>Manual paste</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key finding</strong>: claudecode_agent outperforms GPT-5 by 3.26× on multi-document synthesis.</p>
+<p>⚠️ <strong><code>curated</code> is a misnomer.</strong> Those records were generated through a ChatGPT
+chat interface by pasting in the prompt, schema and input docs — they were not
+hand-curated and are not a reference. They also document superseded releases
+(AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output
+against them penalises correct facts as errors. There is no CHORUS record.
+<strong>The repository has no gold standard.</strong> See issue #177.</p>
+<p><strong>Use claudecode_agent for new datasheets</strong>:</p>
+<pre><code class="language-bash">make d4d-agent PROJECT=AI_READI
+make gen-d4d-html
+make version-html VERSION=6
+</code></pre>
+<h3 id="pipeline-commands-reference">Pipeline Commands Reference</h3>
+<p><strong>Extraction:</strong></p>
+<pre><code class="language-bash">make extract-d4d-individual-all-gpt5      # Extract all individual files
+make extract-d4d-concat-all-gpt5          # Extract from concatenated
+make d4d-pipeline-full-gpt5               # Complete pipeline
+</code></pre>
+<p><strong>Concatenation:</strong></p>
+<pre><code class="language-bash">make concat-extracted        # Individual D4D YAMLs
+make concat-preprocessed     # Preprocessed source files
+make concat-raw             # Raw downloads
+</code></pre>
+<p><strong>Validation:</strong></p>
+<pre><code class="language-bash">make validate-d4d FILE=path/to/file.yaml
+make validate-d4d-project PROJECT=AI_READI GENERATOR=gpt5
+make validate-d4d-all GENERATOR=gpt5
+</code></pre>
+<p><strong>Monitoring:</strong></p>
+<pre><code class="language-bash">make data-status            # Full status report
+make data-status-quick      # Compact overview
+make data-d4d-sizes        # D4D YAML sizes
+</code></pre>
+<h2 id="d4d-assistant-instructions-github-actions">D4D Assistant Instructions (GitHub Actions)</h2>
+<p><strong>For GitHub Actions D4D Assistant only</strong>: Read instruction files FIRST:
+- <code>.github/workflows/d4d_assistant_create.md</code> - Creating new datasheets
+- <code>.github/workflows/d4d_assistant_edit.md</code> - Editing existing datasheets
+- Both include "Modifying an Existing PR" sections</p>
+<p>Critical requirements:
+- Scope: D4D tasks only (redirect others)
+- Tools: GitHub MCP, ARTL, WebSearch, WebFetch
+- Validation: MUST validate YAML before PRs
+- Comments: Update both PR and issue</p>
+<h2 id="document-concatenation">Document Concatenation</h2>
+<p>Concatenates multiple documents into single file with reproducible ordering.</p>
+<pre><code class="language-bash">make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=output.txt
+python src/download/concatenate_documents.py -i input -o output.txt [--extensions .txt .md] [--recursive]
+</code></pre>
+<p>Features: Alphabetical sorting, file headers, table of contents, multiple format support.</p>
+<h2 id="custom-makefile-targets">Custom Makefile Targets</h2>
+<p><strong>Status/Monitoring:</strong></p>
+<pre><code class="language-bash">make data-status[-quick]    # Data pipeline status
+make data-d4d-sizes         # D4D YAML sizes
+</code></pre>
+<p><strong>Concatenation:</strong></p>
+<pre><code class="language-bash">make concat-{extracted|preprocessed|raw}
+</code></pre>
+<p><strong>D4D Extraction:</strong></p>
+<pre><code class="language-bash">make extract-d4d-{individual|concat}-{all-}gpt5
+make extract-d4d-{individual|concat}-{all-}claude
+</code></pre>
+<p><strong>Validation:</strong></p>
+<pre><code class="language-bash">make validate-d4d[-project|-all]
+</code></pre>
+<p><strong>HTML:</strong></p>
+<pre><code class="language-bash">make gen-d4d-html
+</code></pre>
+<p><strong>Pipelines:</strong></p>
+<pre><code class="language-bash">make d4d-pipeline-{individual|concatenated|full}-gpt5
+</code></pre>
+<h2 id="dataset-scope-what-a-record-is-about">Dataset Scope (what a record is about)</h2>
+<p>Declared per project in the <code>scope:</code> block of
+<code>data/preprocessed/source_manifest.yaml</code>, not in any prompt or launch message.</p>
+<pre><code class="language-bash">d4d download scope --project VOICE        # show the declaration
+d4d download scope --check --strict       # check every record against it
+d4d download release-inventory           # declared release evidence, all projects
+d4d download release-inventory --project AI_READI --json
+d4d download audit-bundles --strict       # are the derived bundles current?
+</code></pre>
+<p><code>release-inventory</code> is read-only: it reports tier-1 sources, licence/DUA/IRB
+sources, release records, crate presence and the crate manifest's
+<code>document_corpus</code> policy (#2914, #3284). These are manifest declarations,
+not a check of what a document says. Sources declared as belonging to a
+related-but-distinct dataset are listed separately and excluded from this
+dataset's evidence counts. <code>--manifest M</code> selects other source-manifest
+bytes; a custom manifest does not inherit the study's crate policy. Use
+<code>--crate-manifest C</code> to select that policy explicitly, or <code>--crate-manifest
+none</code> to omit it. <code>--json</code> includes the selected input hashes.</p>
+<p>In the study manifests committed at <code>15d053d1a</code>, AI_READI's document corpus
+carries its RO-Crate and licence; CHORUS has 0 tier-1 sources, no
+licence/DUA/IRB source or release record, and crate policy <code>exclude</code>.
+Cross-project differences on <code>doi</code>, <code>license</code>, <code>version</code> and <code>issued</code> must
+therefore be interpreted against the corpus, not as generation quality.
+See the <a href="notes/arm_comparison.md#release-level-corpus-inventory-2914-3282">arm comparison's release inventory</a>
+for its input hashes and historical cohort/evaluator breakdown. Rerun the
+read-only inventory when manifests change; that does not rescore records.</p>
+<p><code>audit-bundles</code> rebuilds each derived bundle into a temp file and compares
+(#446). Not mtime: <code>crate_only</code> and <code>healthsheet_only</code> are legitimately older
+than the document bundles because they do not derive from them. The crate
+bundles embed the document bundle verbatim, and after #421 stripped curator
+prose they were not rebuilt — so the de novo arm read 9 curation notes the
+baseline arm no longer saw, for a day, with nothing to detect it.</p>
+<p><strong>One layer up, <code>d4d runs check</code> reports bundle drift</strong> (#452): does the file at
+a record's <code>inputs.bundle_path</code> still hash to the <code>bundle_md5</code> that record
+pinned? As of 2026-09-09: <strong>191 records drifted, 86 current, 0 with no hash
+recorded in the live corpus</strong> (64/12/82 when #452 was filed; 136/41/82 on
+2026-09-03; 19 archived records under <code>data/ATTIC/</code> record <code>bundle_md5:
+null</code> with no <code>bundle_sha256</code>, so this proof cannot reach them — outside
+<code>CONCAT_DIR</code>, not visited, not a backlog; the
+mojibake repair #874 rewrote the AI_READI and CM4AI bundles and the
+docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones;
+CHORUS has not changed since #421). The 82 records that predated md5
+recording carried <code>inputs.bundle_sha256</code> of the bytes they read, and
+<code>d4d provenance backfill-bundle-md5</code> (#1121) recovered each md5 from the
+committed bundle version whose sha256 equals it — all 82 the 2026-07-28
+version — writing <code>inputs.bundle_md5_basis</code> to say so. Not from
+<code>repo.commit</code>: those runs read bundles regenerated in a dirty tree, and
+the bytes at the recorded commit are an older version the run never
+read. The search refuses a shallow clone (<code>git rev-parse
+--is-shallow-repository</code>): CI checks out one commit, and a one-commit
+history would report every earlier version's record as unrecoverable. The test
+that guards this no longer pins the count (#910): every drifted record must
+pin a hash some <code>bundle_hash_history</code> event in the source manifest names as
+its <code>before</code>, and every bundle the history names must still hash to its last
+event's <code>after</code> — a rewrite nobody recorded there is what fails.</p>
+<p>The two checks are mirror images. <code>audit-bundles</code> asks whether a <em>bundle</em> still
+matches what its inputs produce; this asks whether a <em>record's declared input</em>
+still matches what that record consumed. A drifted record is not wrong — it
+correctly states the bytes it read — but the path it names no longer resolves
+to them, so anyone re-reading its declared input reads something else.</p>
+<p>Reported and never fatal, for the same reason as the unobserved-values counter
+(#447): these records stay usable, they just cannot be re-derived from the path
+they name. #421 caused most of the drift by stripping curator notes and #445
+added to it by stripping <code>verification_url</code>; <strong>both strips were correct</strong>. The
+defect was that the corpus absorbed a corpus-wide input change with no report.</p>
+<p>Derived records (<code>record_mode: derived</code>) are out of scope by construction: they
+consume replicates rather than a bundle and declare <code>bundle_md5</code> not-applicable.</p>
+<p>Each entry names the <code>referent_id</code> and any <code>related_but_distinct</code> dataset, with
+the slot that carries the relation (<code>express_as: related_datasets</code>) and, where
+the related dataset's documentation is legitimately in the bundle, the source id
+that carries it (<code>in_bundle</code>).</p>
+<p><strong>A scope constraint belongs in the manifest, never in the launch text</strong> (#422).
+The VOICE run of 2026-08-07 was sent a paragraph naming the project, the
+companion pediatric dataset and a file not to read; it worked, and it was per-GC
+adaptation that no future dataset inherits and no prompt test can see. The
+manifest declaration is checkable (<code>check_record</code> catches a record that
+identifies itself as a dataset its project declares distinct) and inherited by
+any project that declares one.</p>
+<p><code>--check</code> reports two things. The <strong>verdict</strong> is on the record's <code>id</code>:
+<code>out_of_scope</code> when a record identifies itself as a dataset its project declares
+distinct. Separately and never fatally, it lists values where a related-but-
+distinct dataset's identifiers appear <strong>outside</strong> the declared slot (#441) — 32
+records place the pediatric release inside VOICE's own <code>resources</code>,
+<code>distribution_formats[].access_urls</code> and <code>file_collections[].download_url</code>.
+Citing the related dataset's page is legitimate; absorbing it into this
+dataset's distribution is not, and the line between them is a judgement the
+check surfaces rather than settles.</p>
+<h2 id="chunk-manifests-receipts-substrate-707">Chunk Manifests (receipts substrate, #707)</h2>
+<p><code>data/preprocessed/chunks/{PROJECT}_chunks.yaml</code> (document bundle) and
+<code>{bundle stem}_chunks.yaml</code> for every other kind — <code>_crate_only</code>,
+<code>_preprocessed_with_crate</code>, <code>_healthsheet_only</code> (#725; a bundle with no
+<code>FILE:</code> headers is one <code>&lt;unsegmented&gt;</code> document) — is a pure function of the
+bundle's bytes and a recorded rule (<code>unit: source-document</code>, windows
+bounded in both lines and bytes, the summary/TOC preamble as its own chunk):
+same bytes + same rule = same file, and the chunks' texts concatenate back to
+the bundle. A coverage receipt (#708) names these chunk ids; the manifest is
+what anchors them to bytes. The manifest names the bundle by basename, so the file — and the sha256
+provenance records — is the same wherever the bundle was read from (#713).
+<code>d4d provenance record</code> writes <code>inputs.chunks: {path, sha256, rule,
+chunk_count}</code> only when a readable manifest exists for exactly the md5 the
+record hashed, and <code>null</code> otherwise. <code>--check</code> reports <code>off_rule</code> for a
+manifest that reproduces under a non-default rule (#714) — reproducible, but
+not the instrument the other manifests use.</p>
+<pre><code class="language-bash">d4d bundle chunk                     # (re)write every project's manifest
+d4d bundle chunk --check --strict    # rebuild under the recorded rule and compare
+d4d download audit-bundles           # also reports a stale or missing manifest
+</code></pre>
+<p>The byte bound (48,000) is what keeps a chunk readable in one file-tool call
+(~25k-token cap, #700); a line count alone does not, since AI_READI has
+13k-character lines. A single line above the bound becomes its own chunk
+marked <code>oversize</code>, and a test fails if a committed manifest has one.</p>
+<h2 id="coverage-receipts-708">Coverage Receipts (#708)</h2>
+<p><code>{PROJECT}_coverage_receipt.yaml</code> beside the core record: one entry per
+manifest chunk with a closed status — <code>extracted</code> (verbatim <code>{slot,
+snippet}</code> pairs from <em>that</em> chunk), <code>redundant_with</code> (relevant, already
+receipted from named chunks), <code>nothing_relevant</code> (with a reason),
+<code>duplicate_of</code>. Inverted by slot it is the claim receipt
+(<code>{PROJECT}_receipts.yaml</code>, each claim naming its derived-core path).</p>
+<pre><code class="language-bash">d4d receipts check --label L --project P [--write] [--strict]
+d4d receipts check --label L --project P --transcript run.jsonl
+# Moved files: name their original spellings in the transcript.
+d4d receipts check --label L --project P --transcript run.jsonl \
+  --receipt-at-run original/coverage_receipt.yaml --full-at-run original/full.yaml
+d4d receipts invert --receipt R --full F
+</code></pre>
+<p>Run <code>receipts check</code> from the repository root. <code>--transcript</code> reads the run's
+stream-json tool history to measure <code>receipts.origin</code> (#2933, #4447):
+<code>contemporaneous</code> snippets were present when the full record was first
+written; <code>phase1_correction</code> and <code>phase3_backport</code> snippets were added after
+that draft. Repeat <code>--transcript</code> for a resumed run, first invocation first.
+The optional <code>--receipt-at-run</code> and <code>--full-at-run</code> require a transcript and
+name its path spellings; they do not select different current files.
+Without <code>--write</code>, this check reports without rewriting provenance. With
+<code>--write</code>, it updates the provenance receipt block and the claim-receipt
+sidecar, subject to the existing write checks.</p>
+<p>Without a supplied transcript, an existing origin measurement is kept only
+while the current receipt has the SHA-256 it was measured on. If those bytes
+change or cannot be read, origin becomes <code>unknown</code> and the old measurement
+is retained under <code>prior</code>, not shown as the new receipt's split. With no
+measurement to retain, origin is <code>unknown</code>: no snippet is classified merely
+because no transcript was read. Supplying transcripts requests a new
+measurement; an unreadable or unreplayable history can also be <code>unknown</code>.</p>
+<p>The canary rows <code>snippets contemporaneous</code> and <code>snippets post-draft</code> are
+reported only; the latter sums the correction and back-port counts. They
+are unavailable, not zero, without a checked origin for the same receipt.
+Neither row changes a gate or the <code>--strict</code> verdict. Receipt timing does
+not establish semantic support; post-draft snippets remain unaccepted for
+that purpose until independent review (#2067).</p>
+<p>The validator is deterministic and offline and reports <strong>affirmative
+counts</strong> — <code>chunks N/N reviewed · snippets M/M verified · slots S/T with a
+receipt</code> — written as the <code>receipts</code> block of the provenance record (also
+by <code>backfill-checks</code> and inline at <code>d4d provenance record</code>). Snippet outcomes
+are verified / mismatched / unchecked; no "relaxed", no editorial <code>[...]</code>
+stripping (the chunk is the source bytes), and a snippet part shorter than
+8 normalised characters attests nothing (#720). A receipt on an <em>entry</em>
+(<code>funders[0]</code>) covers its leaves — that is how a boolean or enum gets one —
+but a receipt on a <em>list</em> (<code>funders</code>) covers only itself (#721). The slot
+denominator excludes <code>conforms_to_schema</code>/<code>conforms_to_class</code>, <code>notes</code> and
+<code>source_caveats</code> at any depth, and ids minted on the record's own id (#722)
+or — receipts instrument <strong>v2</strong>, #1123 — on any identifier the record
+carries for the dataset at its top level: its <code>id</code> in CURIE or resolver
+form, its bare <code>doi</code>, its landing <code>page</code> (trailing slash and DOI case
+aside). The v5 rule licenses a label "on an identifier the evidence <em>does</em>
+supply", and a record taking the landing-page option must not lose
+coverage for it. A fragment on any other base — a component dataset's DOI
+under <code>resources</code>, a project homepage the record does not carry as its
+page — is a claim about that identifier and stays receiptable. The block
+names its <code>instrument</code>, and <code>slots.exempt_on_carried_identifier</code> counts
+what v2 exempts that v1's byte-for-byte own-id test did not: 4 leaves in
+the corpus, all CHORUS API v7 records, and every one of them the record's
+own top-level <code>id</code> (<code>https://chorus4ai.org/#chorus-dataset</code> on <code>page:
+https://chorus4ai.org/</code>) — so the exemption reaches the record's own
+identity slot, and a bare site root declared as <code>page</code> exempts every
+fragment on that root under the same scheme. One of the four had a receipt
+(coverage 59/170 → 58/169); three had none (never-receipted fell by one,
+coverage rose). The file-collections case the issue names exists only in
+the AI_READI 2026-09-01 rep1 record, whose bundle has drifted. A drifted
+bundle is not the text a receipt was written against, and the #907 guard
+withholds a recompute that cannot read the right bytes; since #1140 the
+recompute reads them, from the first of three sources that is the
+record's: the manifest on disk where it chunked the bytes the record
+hashed; the bundle on disk where its bytes hash to the record's md5 (or
+sha256, where that is all it carries) but the manifest is missing, stale
+or unreadable — chunked in memory under the record's own
+<code>inputs.chunks.rule</code>, git not asked; else the committed version of the
+declared path whose every recorded hash matches
+(<code>provenance.bundle_bytes_for</code>, recording which it <code>matched_on</code>),
+chunked the same way (the on-disk manifest's rule only for a record that
+carries none, and a version whose chunk count is not the one the record
+cites refused). The block carries <code>bundle_basis</code> (<code>bundle on disk</code> or
+<code>git blob</code> with the commit and hashes, and <code>manifest: chunked in memory
+…</code> where no file was read) beside the record's own <code>bundle_md5</code>; where
+the manifest was chunked in memory <code>artifacts.manifest.path</code> is <code>None</code>
+and the rule and hashes stand in its place. Nothing on disk gates the
+recovery: a record that declares a path, a hash and a rule is checkable
+whatever the checkout holds. <code>backfill-checks</code>, <code>provenance record</code> and
+the runner pass all three. All 47 receipted records are under v3: the 18 formerly
+withheld (nine 2026-08-28 agentic v6, the 2026-08-28b/c/d API v7
+AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records)
+recomputed on the bytes they read with chunk, snippet and finding counts
+identical to the blocks written at run time (the twelve blocks that
+predate <code>findings_gated</code> gain that key), and AI_READI 2026-09-01
+rep1's ten landing-page labels now exempt (161/508 → 160/498). <code>d4d runs
+check</code> reports receipts blocks by instrument and names those behind the
+current one. v9 R8 told the model a
+landing-page label "needs a receipt like any other value" — the cost v2
+removes; #1147 rotated that sentence (the own-id preference now rests on
+the id naming this dataset alone where it is an identifier form and not
+itself a shared root, while a landing page is often one; a forced id
+takes the identifier the evidence states before any mint; every base and
+every stated identifier must be an identifier form — a declared CURIE,
+an absolute URL, an ARK or a URN, named rather than "a registered
+scheme", which would admit the <code>mailto:</code> and <code>file:</code> ids the person rule
+and <code>identifiers.py</code> treat as defects — so a bare-token own id labels
+its parts on the DOI or page, and with neither on a resolvable URL the
+evidence supplies; and a part of an id that already carries a fragment,
+a person's included, keeps that fragment).
+<strong>Coverage degree is a property of the arm</strong> (#902), and the denominator
+is what makes it readable: receiptable populated leaves, which run from
+142 to 508 in one arm, so a bare without-a-receipt count compares
+nothing. Pooled per arm — the table
+<code>scripts/arm_comparison.py</code> writes into <code>notes/arm_comparison.md</code>, never a
+mean of per-record rates — the v6 agentic arm receipts 2,820 of 5,846
+leaves (48.2%), the v7 API canaries 607 of 1,762 (34.4%), the v7
+production arm 1,385 of 3,905 (35.5%) and the v8 production arm 2,310 of
+4,094 (56.4%): the v7 degree limit that eight of twelve production
+reviewers read as a rule-15 violation is real, and v8 recovers past v6.
+Zero <code>not_in_bundle</code> verdicts were returned anywhere on that arm, so what
+this measures is how far the receipt reaches, not whether the values are
+supported. The #807 split says which half of the gap the protocol could
+have closed: never-receipted dominates (56.8% of receiptable leaves on
+v7 production, 42.4% on v8) over leaves reconciliation or repair added
+after the receipt was written, which have no receipt route at all
+(7.8% and 1.2%, #742). It needs the phase-1 snapshot, so an agentic arm
+reports no split rather than a zero.
+Named non-checks: that <code>nothing_relevant</code> was true, and that a real snippet
+supports its value. <code>backfill-checks</code> writes a <code>receipts</code> block only where a
+receipt exists or the record claims one (#726). Every bundle kind a run may declare has a manifest (#725), so
+receipts are checkable on any arm.</p>
+<p><strong>The agentic protocol</strong> (#709, <code>.claude/commands/d4d-full-core.md</code> Phase 1):
+read the manifest, then per chunk read it with the file tool (never a
+shell — the transcript cross-check counts <code>Read</code> windows only) and write
+its receipt entry before the next chunk. <code>scripts/agentic_observed.py
+--receipt R --manifest M</code> reports <code>receipt_chunks_unopened</code>: chunks marked
+reviewed that no read window covers — recorded under <code>run_observed</code>.</p>
+<p><strong>The API condition</strong> (#710, <code>generic_v7</code>): under <code>RECEIPT_CONDITIONS</code> the
+cached bundle carries <code>[cNNN]</code> marker lines at each manifest chunk's start
+(refused if the manifest is absent or stale) and the <code>full</code> phase must end
+with <code>--- COVERAGE RECEIPT ---</code> and the receipt document; a response without
+it is retried as unusable. The receipt is written beside the core record
+and checked into the provenance record in-process; <code>receipt_expected</code> is
+true for those conditions. Both the prompt pin and the assembly digest move.
+The receipt describes the record the <code>full</code> phase wrote: <code>reconcile_full</code>
+and repair rewrite it afterwards with no receipt route on this path, so
+their slots are reported under <code>slots.without_receipt</code>, never gated (#742).
+A full record with no receipt beside it does not resume past <code>full</code>.
+<strong>Re-addressing (#952, API path only — the agentic protocol has no
+equivalent)</strong>: before the receipt is accepted, an entry whose
+<code>slot</code> is not a path in the record just written (the <code>slot_not_in_record</code>
+class <code>receipts.check</code> gates on) gets one follow-up turn asking where the
+value went; an answer moves the entry only to a path that resolves, <code>drop</code>
+removes it, anything else is left as written for the gate to count. The
+receipt as the model wrote it is kept as <code>intermediate/{P}_coverage_receipt_as_written.yaml</code>,
+and the <code>full_readdress</code> entry in <code>api_usage</code> records what was unresolved
+before and after. The v8 CM4AI canary stopped on exactly one such entry.
+<strong>Report gate (#929, v8 step E, API path only)</strong>: the report phase ends
+with a <code>## Dispositions</code> table (<code>| slot | disposition | record | reason |</code>),
+the claim form <code>report_claims</code> reads — <code>removed</code> rows must be absent,
+<code>retained</code>/<code>changed</code>/<code>added</code> rows present (<code>retention_not_shown</code>,
+<code>change_not_shown</code>). The runner checks the report before the run completes
+and regenerates it once with the contradictions named (<code>report_regate</code>;
+the first report is kept as <code>intermediate/{P}_report_before_regate.md</code>);
+<code>report_gate</code> in the record says what was found before and after. <strong>Gate
+reading (#684)</strong>: a report with no finding and no readable claim is
+vacuous (<code>canary.report_vacuous</code>), never a held floor of 0. A run whose
+report block says <code>dispositions_expected</code> (every run this runner writes)
+and is still vacuous is blind — UNMEASURABLE, the receipt precedent; an
+earlier record's vacuous row is shown as unmeasured and not gated, so the
+arm that defined the gate still satisfies it. The baseline skips vacuous
+replicates; a baseline arm whose replicates ran the check and read no
+claim, none measuring one (<code>canary.report_basis</code>: under report_claims v4 the v7 production arm for
+CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a
+prose retention claim is a claim, so the v7 arm measures 0 on some
+replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 also measures a
+retention claim: its basis is 1 measured, 2 vacuous), is a floor of 0 with
+<code>baseline_basis</code> on the row, while a baseline whose checker never ran stays
+a missing baseline (#599). A report without the table is regenerated once
+like a contradiction; a rewrite that is truncated, drops the table or
+carries more contradictions is rolled back to the report as written (#967). The expectation is
+recorded on <code>inputs.dispositions_expected</code> too, so a backfill cannot drop
+it (#961). A <code>both</code> row on a slot the core class does not declare
+(<code>citation</code>, <code>consent_revocations</code>, …) is read as written — the
+instruction defines <code>both</code> as present in both — and the finding names
+the cause so the regate can fix the row (<code>claims_core_cannot_hold</code> counts
+those the full record does carry, apart from substantive contradictions;</p>
+<h1 id="990992-a-nested-path-is-judged-step-by-step-against-the-core">990/#992). <strong>A nested path is judged step by step</strong> against the core</h1>
+<p>class's declared ranges rather than at its root alone (#994, instrument
+<strong>v6</strong>): <code>resources[*].keywords</code> walks into <code>CoreDataset</code>, <code>creators[0].name</code>
+into <code>Creator</code>. Indexed, wildcard and implicit list paths use the same
+schema walk. A path that descends through a scalar, such as
+<code>keywords[0].anything</code>, violates the core schema's declared range and
+carries its own cause. It remains a finding, excluded from
+<code>claims_core_cannot_hold</code>; telling a schema-valid record to name <code>full</code>
+would not repair that path. Missing classes in a caller-supplied range
+map retain the root-only answer instead of being mistaken for scalars.
+The current 277 checked blocks use <strong>v7</strong> (#1089/#1194/#1196): 83 findings
+(41 removal, 23 false-schema, 6 change, 10 retention, 3 unrecorded-removal),
+1,033 claims, 164 prose retention claims, and 41 unrecorded removals listed.
+The checker distinguishes an assertion quoted from a record from the report's
+own assertion; preserves every segment of a named path; honors prose record
+scope; reads unbordered dispositions tables and embedded record qualifiers;
+and excludes table rows by position. Mixed list/scalar matches count entries.
+Each snapshot-backed block pins the exact phase-1 bytes it parsed: 86 usable
+snapshot pins and 191 absent snapshots. The dated plan amendment and
+<code>notes/report_claims_v7_audit.json</code> preserve the prior aggregate and every
+changed measurement; <code>scripts/report_claims_removal_diff.py</code> also measures
+latent removal suppression against a supplied earlier checker.
+The block carries
+<code>instrument</code> from v2 (#996), from v4 (#1122) <code>rows_by_record</code> — the
+dispositions rows tallied by their record column (<code>full</code>, <code>core</code>, <code>both</code>,
+<code>either</code> for an empty cell, <code>no_record_column</code> for a table that has none —
+a report format that names no record, "not measurable" rather than "no
+<code>both</code> rows"; two v2 reports do name one — <code>invalid</code> for anything else),
+because a <code>both</code> row wrongly flipped to
+<code>full</code> resolves against the full record only and raises nothing, so the
+count, or the rate over the row total, is what a reader compares. Over the
+18 v8-labelled API records — the 12-record fill plus six canaries — it is
+617 <code>both</code> of 682 (90.5%); the fill alone is 419 of 461 (90.9%); the five
+rows on slots the core cannot hold are all on the VOICE 2026-09-04d canary.
+The recorded tally is the post-regate reading, and the regate is the step
+that flips rows — <code>report_gate</code> carries <code>rows_by_record_before</code>/<code>_after</code> on
+runs made since #1122. From v5 (#1054) the checker reads two more things: with the phase-1
+snapshot (<code>intermediate/{P}_full.yaml</code>) a populated top-level slot the
+final full record lacks is <code>removal_not_recorded</code> unless the report
+records the removal — an exact top-level name in a <code>removed</code> row or
+removal claim against the full record or no named record, or, for
+suppression only, the bare name in a sentence carrying a removal word —
+listed under <code>removals_unrecorded</code> and, where the run asked for the table
+(<code>inputs.dispositions_expected</code>, #961; a parsed table is not the test), a
+finding (three of nine v8 reviews had found one: CHORUS 04f rep2
+<code>regulatory_restrictions</code>, AI_READI 04g rep3 <code>content_warnings</code>, VOICE
+04f rep2 <code>data_governance</code>); on a run never asked for a table the
+removals are listed, not findings (<code>snapshot_basis</code>); and a paragraph
+saying a value "remains in" / "stays in" / "is kept in" a backticked slot
+path is a retention claim (not when negated, not on a class name),
+satisfied at the complete path with a dotted step over a list read as
+<code>[*]</code>. A declared root slot must exist at the root; only a bare non-root leaf
+such as <code>review_details</code> can abbreviate a nested field. An explicit core or
+full scope chooses that record, and a claim about both requires both. A prose claim is a claim checked, so 70 reports that read no claim
+under v4 read one under v5, and the eleven canary blocks that quote a
+<code>report_basis</code> were re-derived with <code>d4d api verdict</code> where theirs had
+moved — ten blocks in all, each keeping its prior under <code>prior_verdict</code>;
+no status, no bar and no row moved, and five lost a <code>baseline_basis</code>
+line their baseline no longer earns. Run <code>d4d provenance
+recheck-validation</code> first where a record's <code>validation</code> block predates
+the duplicate-key instrument: a re-verdict computes from the record, so
+an unmeasured metric drops its row, and a gated floor then stops being
+reported. A re-verdict keeps the keys a person put in the block —
+<code>disposition</code>, <code>prior_disposition</code>, <code>readings</code> — at the top level
+rather than only inside <code>prior_verdict</code>. The v7 production arm reads 0 findings on
+all twelve either way. Since #998 the report phase carries the core
+class's top-level slot inventory (<code>core_inventory_block</code>) before its
+instruction, so the model can see which slots the core declares rather
+than infer it from the carried core record, where an empty slot and an
+undeclared one look the same; the gate is unchanged — it judges presence
+in the two records, and the declaration decides only whether a finding
+carries the "core class declares no such slot" cause (every report
+finding on the v8 fill was of that class). <code>ASSEMBLY_LAYOUT</code> names it, so
+the assembly digest moves; no v9 record predates it, and the v8 labels
+already carry three assembly digests (2026-09-04 rep1; b/c/d; e/f/g), so
+a v8 run was not comparable with the fill before this either. Residual: a run whose report phase completed under the pre-E
+runner and is resumed under this one gets no table and is blind by
+construction; no such run exists. <code>companions</code> is hashed after the last
+phase (#652).</p>
+<p><strong>The gate</strong> (<code>canary.verdict</code>): when <code>inputs.receipt_expected</code> is true — set
+by <code>d4d provenance record --receipt-expected</code>, which the receipt-writing
+playbook passes, or implied by a registered <code>--render-spec-json</code>
+specification that binds a receipt (<code>RunSpec.writes_receipt</code>, #2350) — an
+unchecked receipt is UNMEASURABLE and any unreviewed
+chunk, unverified snippet, finding, or vacuous receipt (zero snippets over a
+non-empty bundle) is a regression against a floor of 0. A snippet that is
+verbatim in the bundle but in a chunk other than the one cited is
+<code>adjacent</code>/<code>elsewhere</code> — reported as "snippets in another chunk", never
+gated (#763): support holds, attribution precision is its own number.
+Pooled over an arm it is 3.8% on the five v7 API canaries (33 of 859
+snippets), 7.6% on the v7 production arm (132 of 1,733) and 6.0% on v8
+(153 of 2,556) — against 0 of 3,400 on the v6 agentic arm, which names
+chunk ids from the manifest it read instead of inferring them from the
+<code>[cNNN]</code> marker lines the API path inserts. The marker side was checked
+byte-for-byte on the CM4AI canary and sits correctly (#873), so the rate
+is a property of that protocol and of the model reading it, usually one
+chunk early, not of the receipt (#831). When false, the
+block is not a metric for that run: earlier arms and the API arm before v7
+(#710) wrote none, and "no receipt" from them is not a measurement.
+<strong>Duplicate mapping keys</strong> (#1029) are a validation failure read off the
+record's text — <code>safe_load</code> keeps the last value and validates that, so
+the AI_READI 2026-09-04f record's three top-level <code>source_caveats</code>
+passed as one — recorded under <code>validation.duplicate_keys</code> per artifact
+and gated against a floor of 0 as a count of distinct duplicated keys
+(none of the 270 full records of the model-written arms, nor their
+cores, had one); the repair round is told what to merge like any other
+validation failure, <code>d4d provenance recheck-validation</code> brings an earlier
+record under the instrument — <code>--all</code> (#1033) walks every record once
+(the base directory and its <code>_core</code> twin are one record, keyed on the
+path) and writes only where the recorded verdict, the artifacts' recorded hashes
+and each problem's artifact, class and JSON-pointer paths reproduce, so
+the write adds <code>duplicate_keys</code>, this checkout's schema digest (saying so
+where it moved) and its own <code>recorded_by</code>, and re-records the validator's
+message where the schema reworded it — nothing else. An artifact is
+compared against the hash the block itself recorded, by whichever
+algorithm it used, and <strong>rewritten under that same algorithm</strong>: 82 corpus
+records pin <code>sha256</code> only and 196 <code>md5</code> only — every record carrying a
+validation block — and the recompute
+(<code>api_runner.validation_block</code>) emits md5, which #204 deprecated, so
+taking it as written would move a record back to the deprecated
+algorithm and lose the sha256 it attested. A record already carrying the field is skipped unless its schema
+pin has moved, which the write repairs: without that a pass taken before
+a schema change leaves its records reading STALE and unrepairable. Over
+the 282 records: 79 written across five method directories, 12 of which
+already carried the field and were rewritten only to restamp the pin;
+198 held — 196 whose <code>passed</code> flips to false under today's schema and 2
+whose problems name other JSON pointers; 4 with no validation block; one
+whose full record is gone. One written record
+records a duplicate key, the AI_READI 2026-09-04f rep1 record whose own
+canary already reads <code>duplicate keys run 1, baseline_worst 0</code>; every
+other reads 0, so no verdict moves. A held record is rerun by label as a
+deliberate act, and stays gated as unmeasured until it is — <code>d4d api
+verdict</code> re-verdicts it
+offline with the gate's own functions, keeping the prior block under
+<code>prior_verdict</code>, and <code>d4d runs check</code> reports such records without
+failing <code>--strict</code>, which gates attestation, not validity (#1035). Since</p>
+<h1 id="1020-the-batch-writes-the-verdict-it-acts-on-to-the-record-at-the-gate">1020 the batch writes the verdict it acts on to the record at the gate</h1>
+<p>(<code>canary</code>, <code>recorded_by: d4d api batch</code>), the same block shape the offline
+command writes; a dropped stream leaves a bounded snapshot under
+<code>intermediate/{P}_{phase}_incomplete_attempt{N}_{n}.txt</code> and an <code>api_usage</code>
+row with <code>outcome: stream ended without message_stop</code> (#1017); the
+<code>outputs.*.bytes</code> are re-read at record write, after repair and the regate
+(#1021); <code>repo.dirty_paths</code> names the paths a dirty tree differed in
+(#1023). The
+AI_READI 2026-09-04f record is the one such record in the corpus:
+declared invalid by its own block, kept as evidence, not retained.</p>
+<h2 id="receipt-paths-after-reconciliation-899">Receipt paths after reconciliation (#899)</h2>
+<p>A receipt is written against the <code>full</code>-phase record; reconciliation then
+inserts, splits, reorders and rewrites (#742). With the phase-1 snapshot
+(<code>intermediate/{P}_full.yaml</code>) the validator, the claims sidecar and the
+review pack follow each receipt path to its entry <strong>by identity</strong>
+(<code>receipts.remap_path</code>: <code>id</code>/<code>name</code>/… keys, else the unique best overlap of
+scalar pairs, else the same index for a keyless entry of the same shape) —
+reported as <code>slots.remapped_by_identity</code>, with coverage credited at the new
+address. A value rewritten <em>at the same path</em> after the receipt is
+<code>slots.value_changed_after_receipt</code> — reported, never gated, coverage left
+as it stands; normalisation (<code>str</code> → <code>[str]</code>) and extension (a dict that
+gained keys, a list that gained items) are not rewrites. On the 2026-09-01
+arm's 1,412 unique receipt paths: 1,146 unchanged · 184 rewritten in place
+(13.0%) · 48 leaves and 17 entries removed · 5 moved · 6 the snapshot never
+had · 3 whose index another entry now occupies · 1 ambiguous · 2 unresolved. The pack
+shows the reviewer both <code>value_at_receipt</code> and the current <code>value</code>; items
+carry <code>resolved_path</code>/<code>resolution</code> from <code>pack_version</code> 4, and
+<code>pack.receipt_join.basis</code> is <code>index</code> on the agentic path, which writes no
+snapshot. <strong>With a snapshot, identity decides</strong>: a path whose entry is gone
+(<code>entry_dropped</code>, <code>leaf_dropped</code>, <code>ambiguous</code>) or that the snapshot never
+had (<code>not_in_snapshot</code> — the model mis-addressed it at phase 1) is never
+resolved as written even when another entry now sits at that index; those
+are reported as <code>index_reused_by_another_entry</code> / <code>path_not_in_snapshot</code>
+and carry no coverage credit; the gone-entry classes also count under
+<code>reshaped_by_reconcile</code> (they resolved in the snapshot), a never-present
+path does not. An entry whose identity key the final list no longer
+carries <em>anywhere</em> is not gone: reconciliation stripped the key (a minted
+<code>id</code> under rule 11/14, the usual case), which says nothing about which
+entry it is, so it is located as a keyless entry — by overlap, else by
+position for the same shape when the list kept its length, basis
+<code>same_key_stripped</code>, listed under <code>slots.located_after_key_stripped</code>
+(receipts instrument <strong>v3</strong>, #1053); a keyed entry whose key other final
+entries still carry is gone as before, and so is a stripped entry in a
+list that shrank — position is no evidence there, and the first v3
+credited CHORUS 2026-09-01 rep3's Bihorac receipt to the Consortium
+entry a 7 → 2 reconcile left at its index (#1162 review). Before v3 the
+CHORUS 2026-09-04f rep1 record read two such entries as dropped and lost
+the receipt credit on values sitting at the receipted path.
+Keyless entries whose only leaves are lists still join by position (#908).</p>
+<h2 id="method-directories-and-runtime-scoped-canonicals-690-v8-d6">Method directories and runtime-scoped canonicals (#690, v8 D6)</h2>
+<p>Through generic_v7 the API and agentic runtimes both wrote under
+<code>claudecode_agent/</code> and were told apart only by the label (<code>-api-</code> /
+<code>-claudecode-</code>) and <code>model.agent_runtime</code> (104 API-runtime and 90 agentic
+records there). From generic_v8 the API path's baseline arm writes under
+<strong><code>claudecode_api/</code></strong> (+ <code>_core</code>); the crate/healthsheet arms keep their
+directories; nothing historical moves (a migration of the old labels is a
+filed follow-up). A canonical mark is <strong>scoped to a runtime</strong>: <code>d4d runs
+select</code> supersedes only prior marks of the winner's runtime (read from
+<code>model.agent_runtime</code>; <code>--supersede-all-runtimes</code> restores the old
+behaviour), the <code>canonical</code> block records <code>runtime</code>, and <code>canonical_runs</code>
+/ <code>d4d runs canonical --runtime api|agentic</code> pick one — a project marked
+under both runtimes without a runtime filter is ambiguous and refused, as
+two configurations are. The v6 agentic canonicals (2026-08-28 rep1/rep3)
+were re-marked beside the v7 API ones.</p>
+<p><strong>The <code>--method</code> of every review, receipt, telemetry, evaluate and runs
+command defaults to the directory the label lives in</strong> (#934,
+<code>runs.method_for_label</code>): <code>claudecode_agent</code> through v7, <code>claudecode_api</code>
+for the v8 API baseline. An exact directory wins over prefix matches; with
+a project, the directory holding its record is preferred and the one that
+exists is the fallback (the receipt check runs before the record, #730). A
+label under both families, or under neither, or one also present under a
+crate/healthsheet arm, is a click error naming the directories — pass
+<code>--method</code>. <code>canary.baseline_for</code> and <code>report_basis</code>
+search both directories when given no method and refuse a prefix that
+spans them. Not resolved: <code>agreement.DEFAULT_METHOD</code> (a script argument)
+and <code>form_defects.attribute</code> (its callers name the method). <code>d4d receipts
+check --strict</code> fails on exactly the gate's receipt floors (#881) plus an
+expected-but-unchecked receipt, not on wrong-chunk attributions, which are
+reported and never gated. A reviewer's <code>pair_consistency.semantic_review</code>
+and a reviewer's <code>review.reliability</code> survive every recomputation of
+their block — backfill, the runner's record write, <code>provenance record</code>
+re-recording and <code>review check --write</code> (#856/#973,
+<code>backfill_checks.carry_attestations</code>) — marked <code>stale</code> with the artifacts
+they attested when the pair or the pack has since changed (#969). A <code>reviewed_at</code> that is a date with no time, one at exactly midnight
+(indistinguishable from a date, reported as that), one that does not
+parse, or none at all is <strong>reported, never failed</strong> by <code>d4d review check</code>
+and <code>d4d review agree</code> (#1057): the judgements are attested by hash, and
+only when they were made is unrecoverable. 15 of the 47 reviews on disk
+carry one (14 a datetime at exactly midnight, one no value) — on the v6
+and v7 reviews and their second ratings (7 of 17 and 6 of 18) and two of
+the twelve v8 ones; every review is made by the same agentic subagent
+whichever runtime generated the record.</p>
+<p><strong>A review never writes its pack</strong> (#1095). A <code>d4d-review-record</code> run
+regenerated the pack it was reviewing — <code>pack_version</code> 3 → 4 on the
+committed CHORUS 2026-09-01 rep1 pack — underneath the sha256 its own
+record attests, which is the pairing <code>d4d review agree</code> depends on. The
+agent reads an existing pack and runs <code>d4d review pack</code> only when none
+exists; the command refuses to rewrite a pack that the record's
+<code>review.artifacts.pack.sha256</code> or any <code>{P}_review*.yaml</code> beside it pins
+(<code>review_pack.pack_pins</code>) unless <code>--force</code> — a guard on the bytes, not
+the act: the pack is deterministic, so a regeneration that reproduces
+the pinned bytes is not refused; a pin whose pack is gone, or a pin file
+that cannot be read, is treated as live — and then says which review
+must be redone. A pin that names a hash the file already stopped being
+is stale: reported, not blocking. <code>d4d review check</code> reports
+<code>review_of_another_pack</code> and <code>d4d runs check</code> reports a record whose
+review pins a pack not on disk, both after the fact. The Codex CLI
+review of #1124 (round 9) closed what eight reviewer rounds had not: a
+pack that is not a pack — empty bytes, a list, a mapping without items
+— is never checked or attested (<code>review_pack.pack_shape_problem</code>); under
+<code>--strict</code> a failing review is not written, and a written block with
+any finding or unanswered item is not evidence for <code>d4d runs select</code>
+(<code>review_evidence</code>) however many adverse verdicts it counts; <code>runs
+check</code> reads the same pins the write guard enforces, so a sidecar
+review's stale pin and a pin file that cannot be read (<code>unreadable</code>)
+are reported, not silently <code>None</code>; an unreadable sidecar no longer
+refuses a regeneration that reproduces the bytes on disk; the pack and
+its instruction are written whole or not at all (a temp file renamed
+over the target, instruction first and the pinned pack last) and an
+unchanged pack is not reopened; and a phase-1 snapshot that is present
+but not usable — a parse error, bytes that are not UTF-8, an empty
+document, a list — leaves the receipts block <code>checked: false</code> naming
+it, rather than running the index join the pack itself reports as a
+gap. Every way a read fails names the file. The scan-build-write window
+and a nested <code>reliability.attested_artifacts</code> pin are #1189.</p>
+<h2 id="canonical-selection-and-review-calibration-660-835">Canonical selection and review calibration (#660, #835)</h2>
+<p><code>d4d runs select</code> ranks validity → coverage → label. Review counts are
+<strong>reported only</strong> (#835): the recorded calibration did not meet its
+preregistered reliability criterion, and adjudication did not establish a
+new selection threshold. <code>--review-margin</code> is retired and rejected;
+<code>--ignore-reviews</code> remains a compatibility flag. New canonical blocks record
+<code>reviews_applied: false</code>, the available review evidence, and the policy
+<code>reported_only_pending_calibration_v1 (#835)</code>. See
+<code>notes/review_selection_policy_2026-09-11.md</code> for the evidence and the
+requirements before review counts may influence selection again.</p>
+<h2 id="id-slots-in-the-review-pack-803-901">Id slots in the review pack (#803, #901)</h2>
+<p>The pack's <code>id_slots</code> block lists every populated <code>…id</code> leaf with <code>forced</code>
+(the schema declares that class's id an identifier or required — <code>File</code>,
+<code>FileCollection</code>, <code>DataSubset</code>, <code>Person</code>, <code>Software</code>) and, from
+<code>pack_version</code> 5, <code>origin</code>: <code>minted</code> (a urn, or a fragment on the record's
+own id in any form), <code>stated</code> (a reference used as written — DOI, ROR,
+URL), or <code>constructed</code> — a fragment on a base the record did not mint,
+with <code>base</code> and <code>base_in_bundle</code> (the base in the bytes the record read,
+as itself and in written or alias form; null on a drift or a missing
+md5, with <code>bundle_state</code> naming why); the block also carries the
+record's own <code>record_id</code>. The <code>d4d-review-record</code> agent judges the
+fragment rule on mints and constructed ids, a forced one never violates
+it, and <code>stated</code> entries are the evidence rules' business. The two-way flag filed the AI_READI 2026-09-01 rep1
+<code>file_collections[*].id</code> (<code>https://fairhub.io/datasets/3#cardiac_ecg</code>, the
+attested fairhub page plus a label) with the DOIs. Corpus-wide the
+classifier finds 953 constructed ids in 57 of 281 records — 800 of them
+schema-forced (<code>File</code>, <code>FileCollection</code>, <code>DataSubset</code>, <code>Person</code>, <code>Software</code>), most on
+the dataset's own DOI or landing page — so the reading matters: the rule
+licenses a fragment on an identifier the evidence supplies, and a
+constructed id on the dataset's own attested identifier is judged exactly
+as a mint (forced never violates; unforced must be pointed at), one on
+another entity's identifier is the false claim the identifier rule names,
+one whose base is not in the bundle is an unsupported reference.
+<code>base_in_bundle</code> is attested only against the bytes the record read: the
+pack checks the on-disk bundle's md5 against <code>inputs.bundle_md5</code> and on a
+drift — 35 of those 57 records, the AI_READI rep1 record among them —
+reports <code>null</code> with <code>bundle_state</code> naming it. The match is the base as
+itself, not as the prefix of a longer URL, in written or alias form.</p>
+<h2 id="review-dispositions-903">Review dispositions (#903)</h2>
+<p><code>d4d review disposition --item slot-008 --disposition retain|amend --note …
+[--path P --replace OLD --with NEW] --execute</code> records a curator's answer to
+a review finding under <code>dispositions</code> in the provenance record. <code>retain</code>
+documents and leaves the record as generated. <code>amend</code> edits the raw record
+text (the records are the model's own YAML and no dumper round-trips them),
+matching <code>--replace</code> across line wrapping, and is proven by the parse:
+exactly one leaf changes, at <code>--path</code>, by exactly the replacement — then the
+check blocks are recomputed and the validation verdict refreshed, all
+naming this command. Evaluations that predate an amendment are listed as
+predating it, never re-attributed. A generated record edited without an
+entry here is indistinguishable from one the generator wrote.</p>
+<p><code>d4d provenance backfill-checks --blocks form,receipts</code> restricts a backfill
+to the named blocks and computes only those — an instrument revision to one
+block must not overwrite a grounding block the run attested on bytes that
+have since drifted. British spellings are instrument <strong>v4</strong> (#1006; v3</p>
+<h1 id="836859-the-form-blocks-of-all-282-records-were-recomputed-under-it-in">836/#859): the form blocks of all 282 records were recomputed under it in</h1>
+<p>the same change and now carry <code>british_instrument</code>; v2 numbers in earlier
+notes are not comparable (see #906 for the canary consequence). v4 admits
+labourers, honourably, millilitres, micrometres, paediatricians,
+haematopoietic, sulphide and grey — forms the Codex review of #1003 found
+the v3 patterns could not see. None of the eight occurs in any record; the
+patterns they widened do (<code>haematocrit</code> 19, <code>microlitre</code> 15, <code>micrometres</code>
+12, <code>nanometres</code> 6 — 52 occurrences), and 18 records moved on those, none
+of them a gate baseline or a record carrying a canary block (the v7
+production arm stays 139 and 2026-08-22c 88); the v6 agentic arm reads 49
+(47 under v3). A surname Grey is counted like the Temerty Centre is — the
+count is a fact about the text — and the normaliser leaves it as written
+only inside a title-case run ("Jane Grey", "Grey Institute"); a bare
+<code>family_name: Grey</code> or "led by Grey" is rewritten and logged under
+<code>british_rewrites</code>, and <code>d4d review disposition --amend</code> restores it.</p>
+<h2 id="canary-measurement-and-curator-bases-12011202">Canary measurement and curator bases (#1201/#1202)</h2>
+<p>A carried <code>canary.disposition</code>, <code>prior_disposition</code>, or <code>readings</code> keeps a
+matching <code>&lt;key&gt;_basis</code>: the original verdict's status, rows, blind checks,
+missing baselines, regressions and recording date, plus a hash of the
+annotation. A status or measurement change marks it <code>stale</code> and names the
+changed fields. A timestamp refresh alone does not. Repeated re-verdicts keep
+the original basis; a changed curator annotation starts a new basis at the
+verdict it answers. Legacy history is followed back through identical carried
+annotations. The whole previous verdict is still retained under <code>prior_verdict</code>.</p>
+<p>A duplicate-key count is measured only when both full and core artifact lists
+are present and readable. Null, malformed or missing lists produce an
+<code>unmeasured</code> row and an <code>unmeasurable</code> canary that stops the sweep. A historical
+validation block without the <code>duplicate_keys</code> field still predates this
+metric; it adds no duplicate-key row. A measured zero remains a zero floor.</p>
+<h2 id="proving-which-agent-definition-a-subagent-read-1077">Proving which agent definition a subagent read (#1077)</h2>
+<p>An edit to <code>.claude/agents/*.md</code> does not always reach a subagent spawned
+afterwards. On 2026-09-08 the #1059 threshold was written and verified on
+disk and the next evaluator reported the pre-edit criteria verbatim, while an
+earlier batch the same session did pick up its edit — intermittent, which is
+worse than consistent: a rescore can silently measure the old instrument and
+nothing in the output says so.</p>
+<p><code>instrument_sha256</code> (#1099) does not detect this. The agent computes it by
+reading the file from disk, which is current, while the definition it was
+handed may be stale; the two agree even when the run is wrong.</p>
+<pre><code class="language-bash">d4d agents preamble --agent d4d-rubric10-semantic   # prepend to the spawn prompt
+d4d agents check-echo --agent d4d-rubric10-semantic --reply -   # exit 1 if stale
+d4d agents digest                                   # the pin each output records
+</code></pre>
+<p>The preamble names a <strong>section</strong> of the definition and the <strong>opening
+words</strong> of one sentence in it, and asks the agent to quote that sentence in
+full. The sentence itself is withheld: the first version printed it, so
+<code>preamble | check-echo</code> returned a tick and a stale agent that copied the
+prompt passed the check it exists to fail (#1102). The expected text lives
+only in the verifier. The second version asked for the section's <em>longest</em>
+sentence while the verifier held the longest fresh <em>line</em>; on the
+review-record definition the sentence carrying that line ranked 2nd of 38,
+so an agent that answered exactly as asked was told to stop (#1145). The
+question and the answer are now the same unit, and a fenced block is never
+prose.</p>
+<p>That text is chosen by being <strong>verifiably absent from the previous version</strong>
+of the file — not by being long (replayed against the real incident,
+<code>8813c8e6</code> against <code>119e3171</code>, the longest line is a paragraph both versions
+share) and not by appearing in a diff (a reformat "changes" a shared line).
+<code>tests/test_agent_pin.py</code> pins both the replay and the reformat case.</p>
+<p>Where a definition carries nothing its predecessor lacked — or nothing that
+can be named by its opening words without handing over more than half the
+sentence (#1145) — <code>preamble</code> and <code>check-echo</code> <strong>exit non-zero</strong> rather than
+issue a question that cannot fail; <code>digest</code> marks those definitions. A check that cannot fail is worse than no
+check, because it is reported as a pass.</p>
+<p><strong>What a pass does and does not prove.</strong> A refusal is strong evidence: the
+agent could not produce text that is in the definition on disk. A pass is
+weaker — it shows the reply contains that text, which an agent with the
+current definition can do and a stale one cannot, but it does not
+independently establish which file the runtime loaded. Do not describe a pass
+as having verified the subagent's definition; describe it as the subagent
+having quoted the current text.</p>
+<h2 id="canonical-prompt-registry">Canonical Prompt Registry</h2>
+<p>Each condition's prompt files are pinned by hash in
+<code>src/download/prompts/canonical_hashes.yaml</code>.</p>
+<h3 id="stopping-a-sweep">Stopping a sweep</h3>
+<p>A running <code>d4d api batch</code> <strong>cannot be found by name</strong> — a console-script entry
+point runs as <code>python -c import sys; …</code> and carries none of its own name, so
+<code>pgrep -f "d4d api"</code> returns nothing while the sweep is still spending. On
+2026-08-11 that cost roughly two hours of unobserved generation after the batch
+was reported stopped (#513).</p>
+<pre><code class="language-bash">d4d api status                          # which sweeps are running, and their pids
+d4d api stop --label-prefix &lt;prefix&gt;    # stop one; --force for SIGKILL
+</code></pre>
+<p><strong>Never switch branches while a sweep or an agentic run is live</strong> (#795).
+Run data is untracked until its data PR merges; committing it on a branch
+and checking out <code>main</code> removes it from the working tree, and on 2026-08-30
+(UTC) a live sweep then regenerated a run under the same label. <code>d4d api
+batch</code> refuses a run whose core directory (<code>{method}_core/{label}</code>) is
+tracked on any local or remote-tracking ref but is neither on disk nor
+archived under <code>data/ATTIC/</code> — once before it spends and again before each
+run (<code>run_guard</code>); a run removed on purpose looks the same and takes
+<code>--no-branch-guard</code>. Open data PRs from the branch and merge them before
+checking out <code>main</code>, or commit data from a separate worktree.</p>
+<p>A sweep writes a lock under <code>data/.run_locks/</code> naming its pid, label and
+projects, and <strong>refuses to start while a live lock holds the same prefix</strong> —
+two batches writing one label directory produce a record that is a mixture of
+both runs with provenance describing neither. Stopping is safe: each run
+resumes from its progress file, so the cost is the unfinished phases of the
+current run. <code>status</code> reports a stale lock rather than deleting it, because a
+lock outliving its process is evidence a sweep died without cleaning up.</p>
+<pre><code class="language-bash">d4d api prompts check --strict          # working tree vs the pins (CI gate)
+d4d api prompts pin --file &lt;path&gt; --reason '&lt;why this is the text&gt;'
+</code></pre>
+<p><strong>Editing a prompt file without rotating its pin fails
+<code>tests/test_prompt_registry.py</code> and blocks <code>d4d api run</code>.</strong> That is deliberate:
+the edit and the declaration that it is now the condition's canonical text are
+two acts, and the second is small enough for a reviewer to read. Commit the
+prompt edit before pinning it — a pin records the commit it was taken at and
+offers <code>git show &lt;commit&gt;:&lt;path&gt;</code> as the audit route, so pinning uncommitted
+bytes is refused.</p>
+<p>Why it exists (#432): the render gate re-renders a record's spec and compares it
+to the recorded instruction, which catches text edited <em>after</em> rendering. Text
+edited into the prompt file <em>before</em> rendering re-renders to itself and reports
+<code>match</code>. The pin is the only value the file can be checked against. <code>d4d runs
+check</code> is fatal under <code>--strict</code> on <code>uncanonical</code> (a prompt that was never
+pinned, or a labelled condition whose record hashes no condition prompt at all —
+the <code>cp</code>-to-another-path bypass, #436) and on <code>missing</code> (a pinned path the
+record hashed nothing for). <code>superseded</code> (pinned once, since rotated),
+<code>unpinned</code>, and <code>pre_registry</code> are reported and not failed.</p>
+<p><code>pre_registry</code> is a prompt recovered from git at the run's own commit
+(<code>d4d provenance backfill-prompts</code>, #399). Those bytes are attested by a
+different instrument than the registry and predate it, so calling them
+<code>uncanonical</code> would put honest recovered evidence in the same bucket as the
+<code>cp</code>-to-another-path bypass, where the bytes are attested by nothing. Every
+recovered hash is reproducible with <code>git show &lt;commit&gt;:&lt;path&gt;</code>, and a test
+asserts it. <strong>The hash is of the bytes at that commit, never today's</strong> —
+<code>d4d_generic_arm_prompt.md</code> was edited the day after the 15 runs that name it,
+16 lines apart, so today's hash would assert they used a prompt that did not
+yet exist.</p>
+<p>This is not tamper-proofing. Whoever can edit a prompt can rotate its pin.</p>
+<p><strong>A record states its condition</strong> (#1094): <code>run.condition</code> is what the run
+claims, from the strongest source available and <code>run.condition_basis</code>
+says which — stated by the runner (<code>d4d api run --condition</code>, <code>d4d
+provenance record --condition</code>; a <code>d4d api</code> run given no <code>--condition</code>
+uses <code>generic</code> and does <em>not</em> call that a statement), else the prompt
+file the record hashes (the bytes the run consumed — 15 #420 records are
+labelled v3 and hashed v1), else the label (an assertion by whoever typed
+it). <code>d4d runs check</code> fails under <code>--strict</code> on a record whose stated
+condition the hashed prompt, the label, or the registry contradicts, and
+reports one that nothing can check. <code>d4d api run|batch</code> refuse before
+any spend when the label names a condition the run would not use
+(<code>--allow-condition-mismatch</code> records the mismatch as declared — the label
+is the weakest source, so <code>runs check</code> reports a declared label
+disagreement and does not fail it; a hashed-prompt or registry
+disagreement always fails). A label names a condition only as a
+delimited registered token: <code>generic-v99</code> before v99 is registered, or a
+label naming two conditions, names none. Before this
+the field <code>arm_confounds</code> compared was a top-level key no record had, so
+it compared "None" with "None" and never reported a condition difference;
+<code>arm_facts</code> now reads <code>run.condition</code>, else the hashed prompt, else the
+label, and <code>compare-arms</code> reads the same field. Labels that name no
+registered condition (the 2026-07-27 series — the one <code>runs.py</code> calls the
+tuned arm, whose records hash no prompt and so cannot attest it — and the
+crate/healthsheet arms) still read <code>None</code> unless their records hash a
+condition prompt. The <code>full</code> phase's output cap is a procedure field too
+(<code>full max_tokens</code>, #771): three of the five v7 canaries ran at 96k and
+two at 128k with nothing reading it, so <code>compare-arms</code> now reports a cap
+that is not constant within an arm and <code>arm_confounds</code> one that differs
+between arms — read from the <code>full</code> rows of <code>api_usage</code> (every distinct
+cap they carry: the rows are what each call sent, and a resumed run keeps
+its earlier rows), else from <code>model.max_tokens_by_phase</code>, which is
+recomputed at record write; an agentic record carries no per-phase cap
+(54 carry <code>shared_config.max_tokens: 16000</code>, a config assertion like the
+<code>temperature</code> beside it, not the runtime's cap) and is skipped like an
+absent reviewer.</p>
+<h2 id="model-reasoning-capture">Model Reasoning Capture</h2>
+<p><strong>Reasoning effort</strong> is established by the provenance recorder, not by the
+prompt header (#397). No generic prompt names it, so records made before this
+simply lacked it — 12 of the 2026-08 API runs. Three sources, in order:</p>
+<ol>
+<li>the model route, where the provider expresses effort as a name suffix
+   (<code>google/claude-opus-5-high</code>) — recorded as observed. <code>d4d provenance
+   backfill-effort</code> applies this retroactively; it reports by default and
+   writes only under <code>--execute</code>, and has already populated the 49 records
+   whose route named an effort they did not carry (#448);</li>
+<li><code>d4d provenance record --reasoning-effort &lt;x&gt;</code> — recorded as asserted by the
+   launcher, and still listed under <code>unverified</code>;</li>
+<li>nothing — the field is left absent and the gap is named.</li>
+</ol>
+<p>Never write "default", "unspecified" or a guess — <code>d4d provenance
+backfill-effort-basis</code> removes such a value and names the gap it leaves, rather
+than relabelling it (#470). A run that did not choose an
+effort is a different claim from a run whose effort is unknown, and neither is
+a run at high. The fix lives in the recorder because adding a header line to a
+generic prompt would re-baseline that condition for every project and require a
+pin rotation.</p>
+<p>Each API generation phase and each evidence-scoring judgement writes a
+structured reasoning record beside the run's provenance:</p>
+<pre><code>data/d4d_concatenated/{METHOD}_core/{LABEL}/{PROJECT}_reasoning.jsonl
+</code></pre>
+<p>One JSON line per phase (<code>full</code>, <code>core</code>, <code>audit</code>, …) recording whether a
+thinking block was returned, whether its text was available, an estimate of the
+tokens spent reasoning, and the <code>stop_reason</code>.</p>
+<pre><code class="language-bash">d4d provenance reasoning --method claudecode_agent --label 2026-07-29_...
+d4d provenance reasoning --path some/log.jsonl
+</code></pre>
+<p>⚠️ <strong>The agentic path writes no reasoning log of its own</strong> (#400): a Claude
+Code subagent has no access to its own token accounting, and a log carrying
+only the effort level would look comparable with the API path's and is not.
+<strong>Its transcript does carry a measure</strong> (#1000, 2026-09-04): usage per turn
+(<code>output_tokens</code>), signed thinking blocks (empty in the sampled generation
+transcripts, text in some others — the observer records
+<code>thinking_text_chars</code> either way; a native run registered with the thinking
+display, #2464, is expected to carry summarized text on its adaptive
+requests, as the #2463 probe did, though none has run yet, so compare
+<code>thinking_text_chars</code> only within one display condition), and — in
+transcripts written by recent
+Claude Code versions — <code>usage.output_tokens_details.thinking_tokens</code>. <code>scripts/agentic_observed.py</code>
+now emits <code>assistant_turns</code>, <code>output_tokens</code>, <code>thinking_blocks</code>,
+<code>thinking_text_chars</code>, <code>visible_text_chars</code>, <code>tool_input_chars</code>,
+<code>reasoning_tokens_estimate</code> (output tokens minus a 4-chars-per-token
+estimate of the text <em>and the tool-call payloads</em>, which in an agentic
+transcript are most of the visible output — the datasheet itself is a
+Write; #1011) and, where any turn carries it, <code>thinking_tokens</code> /
+<code>turns_with_thinking_tokens</code>; <code>d4d provenance annotate-observed</code> records
+them under <code>phase_log.run_observed</code>, and <code>d4d provenance reasoning</code> reports
+such a run as <code>recovered_from_transcript</code>. Cache-inclusive orchestrator
+accounting, one number per run: the same subtraction as the API log's
+estimate, on a runtime whose output is mostly tool payloads, so an upper
+bound rather than a like-for-like figure; never averaged with <code>api_usage</code>. <strong>Accounted per invocation, one transcript each</strong> (#1931/#1935/#1972): where a transcript ends in the runtime's own terminal <code>result</code> inside the observed interval and no measurement event before that result falls outside it, the file's messages take that finalized <code>total_tokens</code> and <code>output_tokens</code>, the estimate is the same subtraction pooled over them, because the per-message snapshots in stream-json are not final, (<code>usage_from_terminal_result</code> counts the invocations so finalized); where such a result also carries a thinking count, <code>thinking_tokens</code> includes that session total, no turn coverage is claimed, and <code>thinking_from_terminal_results</code> counts those invocations separately (two finalized invocations of which one reports thinking read 2 and 1); otherwise the per-message snapshot maximum stands and the estimate is per message, as the API log's is. A result the cut excluded, or preceded by an excluded measurement event, is set aside and counted under <code>terminal_results_excluded_by_cut</code> while the file's messages rest on snapshots; trailing events after a completed result do not set it aside. Evidence that does not fit one invocation per file — a message id carried by two transcripts, a usage-bearing message after a transcript's result, a second or repeated result — is counted under <code>overlapping_evidence</code> and refused, not reconciled: name one file per invocation. An observation counting <code>malformed_message_events</code> — an assistant or user event whose <code>message</code> is not a mapping, or is missing, or a result whose usage is present but not complete non-negative accounting — or <code>overlapping_evidence</code> is refused by every writer; a result with no usage at all finalizes nothing and is counted under <code>terminal_results_without_usage</code>: the observation stays valid and is reported as recovered with that counter shown, while the native controller's completion gate refuses it. A refused observation is reported by <code>d4d provenance reasoning</code> as <code>transcript_observation_invalid</code>, never as recovered (#1934/#1948). The 24 agentic records (v5 2026-08-24, v6
+2026-08-28) carry the measure since #1010: <code>d4d provenance
+extend-observed --label L [--execute]</code> finds the run's transcript by
+name in both config directories, recovers the bundle version the record
+hashed (#1140; 18 of the 24 from a git blob), chunks it under the
+record's rule, re-runs the observer under the record's own
+<code>run_observed_until</code> cut where it declares one (one of the 24; the other
+23 are observed over the whole transcript and their entries say so), and
+extends <code>run_observed</code> only when exactly one candidate — a file, or a
+set of the files a killed-and-resumed run left under one name (three v5
+rep3 runs; every subset of such a group is tried, since three files
+under one name include a resumed pair the group itself is not) —
+reproduces every key the record already carried. That is 4–5
+discriminating integers per record, on which the closest non-matching
+candidate reproduces none on 17 of the 24, one on four and two on
+three; each entry of <code>run_observed_extended</code> (a list, so a second
+extension keeps the first's trace) names the keys, the transcripts and
+their sha256 — a basename is the same under both config roots and
+identifies no bytes — how the winner was identified, the bundle basis
+and the observer's sha256, the text the extension appended to the
+account so the next one removes that and not a sentence that merely
+reads like it, and <code>run_observed_basis</code> gains a sentence per
+group of keys the record carries and none for keys it does not: the
+estimate keys present, <code>reasoning_tokens_estimate</code>'s subtraction, the
+runtime's own count and what its turn coverage means (or, on a run
+carrying none, that the observation carries none), and which of them an
+extension added. Only the reasoning keys are added under this
+instrument — a receipt-coverage key is #709's — and <code>annotate-observed
+--extend</code>, the hand-entered route, keeps the record's cut and says its
+numbers came from the command line. <strong><code>thinking_tokens</code> is a partial
+count on every record that carries it</strong>: the observer counts a turn
+only where that transcript line carries an integer <code>thinking_tokens</code>
+inside <code>usage.output_tokens_details</code>, and <code>turns_with_thinking_tokens</code> is
+short of <code>assistant_turns</code> on all fifteen — by 1 to 6 turns on the
+twelve v6 records, by 36 to 62 on the three resumed v5 rep3 runs, whose
+first transcript predates the detail entirely. The nine v5 rep1/rep2
+records and CHORUS rep3 carry no <code>thinking_tokens</code> at all. So
+<code>reasoning_tokens_estimate</code> is the figure that spans both arms, and a
+<code>thinking_tokens</code> comparison must carry its turn coverage.</p>
+<p>So the command distinguishes four empty cases rather than printing one message
+for all of them:</p>
+<table>
+<thead>
+<tr>
+<th>status</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recovered_from_transcript</code></td>
+<td>agentic run whose <code>run_observed</code> carries the transcript's measure</td>
+</tr>
+<tr>
+<td><code>runtime_cannot_capture</code></td>
+<td>agentic run with no such measure recorded</td>
+</tr>
+<tr>
+<td><code>capture_postdates_run</code></td>
+<td>API run before capture; unrecoverable</td>
+</tr>
+<tr>
+<td><code>missing</code></td>
+<td>API run after capture with no log — a <strong>defect</strong>, not a limit</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Any comparison of reasoning spend between the arms is one-sided.</strong> A run with
+no log has not spent zero reasoning; it has no measurement. Do not average the
+two, and do not read an absent figure for the agentic arm as a low one.</p>
+<p>⚠️ <strong>What a thinking block carries depends on the effective display — the one
+the request names, else the model's default — not on the endpoint</strong> (#2542,</p>
+<h1 id="2608-2623-on-the-claude-opus-5-family-every-committed-log-uses-the">2608, #2623). On the Claude Opus 5 family every committed log uses, the</h1>
+<p>default is omitted: a request that names no display receives the block with a
+valid <code>signature</code> and <code>thinking: ''</code>, streaming and non-streaming. That covers
+every API-arm request — no <code>thinking</code> parameter before #1047 (2026-09-08),
+<code>{"type":"adaptive"}</code> since, and none still from the judging paths such as
+<code>evidence_score</code> (#2624) — and every native run not registered with a display
+(verified through CBORG 2026-07-29 on <code>google/claude-opus-5-high</code> and again
+2026-09-04, both before #1047; Anthropic documents the same default for a
+direct <code>ANTHROPIC_API_KEY</code> run). The Opus 5 logs therefore record
+<code>reasoning_present: true, reasoning_available: false</code> — a deliberately
+different claim from "no reasoning happened". Opus 4.6 and Sonnet 4.6, which
+the runner also accepts, default to summarized on an adaptive request instead;
+with no <code>thinking</code> parameter they do not think at all (#2668, #2694). A
+request with <code>"display":"summarized"</code> receives <strong>summarized</strong> thinking text:
+the #2463 probe (2026-09-26) streamed 54,291 characters in 4,536 thinking
+deltas through CBORG's unprefixed <code>claude-opus-5</code> route (the counts are
+recorded on #2463), and Anthropic documents the same for a direct run. The
+<code>google/</code> routes that older logs used have not been sent a display (#2691). No display
+setting returns the raw chain of thought (#2668). Native audits registered with the thinking display
+(#2464) send it on their adaptive requests; <code>{"type":"disabled"}</code> side calls
+are forwarded unchanged and carry no thinking. Phase 4 and evaluation select
+it from #2541. <code>thinking_text_chars</code> is comparable within one display
+condition, whichever endpoint served it. The earlier reading that the proxy
+strips the plaintext is superseded: the blocks were empty because no display
+was requested.</p>
+<p><strong>The count is available since 2026-09-04</strong> (#999): CBORG returns
+<code>usage.output_tokens_details.thinking_tokens</code> in the non-streaming body and
+on the stream's <code>message_delta</code> usage. The SDK's <code>get_final_message()</code> drops
+it, so the runner reads it off the delta event and each log entry and
+<code>api_usage</code> entry carries <code>reasoning_tokens_observed</code> / <code>thinking_tokens</code>
+beside <code>reasoning_tokens_estimate</code> (output tokens minus a 4-chars-per-token
+estimate of the visible text), with <code>estimate_error</code> where both exist. The
+estimate stays for the records that predate the count and for comparison
+across them; it is sound for comparison, not for cost attribution.</p>
+<p>This is also why <code>max_tokens</code> must be sized for the reasoning rather than the
+answer — a call can spend its entire budget thinking and return empty text. See
+<code>src/data_sheets_schema/reasoning.py</code>.</p>
+<h2 id="write-time-normalisation-api-runner">Write-time normalisation (API runner)</h2>
+<p>Every record the API runner writes passes through <code>normalise_record_text</code>:
+temporal values quoted to their range, declared enum aliases rewritten,
+scalars in multivalued slots listed, and — since #974 — a resolver URL in a
+<code>uriorcurie</code> slot rewritten to the CURIE it names (<code>https://doi.org/10.1/x</code>
+→ <code>doi:10.1/x</code>, fragments kept), for the prefixes the schema declares and
+the slots whose induced range is <code>uriorcurie</code>; a <code>uri</code>-ranged slot such as
+<code>download_url</code> keeps its URL. Each is a mechanism behind a rule the prompt
+already states, added when a run broke the rule (#974: the v8 CM4AI
+re-canary wrote its own DOI as a URL under <code>id</code>, 16 resolver URLs against 0
+on every 12-record fill since v5 — five arms, 60 records; two exploratory
+canaries were not 0). Text-level, so the <code>#</code> provenance header survives;
+block scalars are skipped whole and trailing comments kept. Because the
+record as written is then clean by construction, the canary's resolver-URL
+row is an invariant for forms the normaliser does not cover, and what the
+model actually wrote is in the record's <code>normalisation.identifier_form</code>
+block (occurrences and distinct values by phase and slot). Since #981 a
+<code>mailto:</code> written as an identifier becomes a fragment on the record's own
+id (<code>doi:10.1/x#person-jane-parker</code> from the mapping's <code>name</code>, else from the
+address) with the address kept in <code>email</code>, for <code>id</code>s inside Person-ranged
+slots only; every <code>mailto:</code> id it leaves is logged as skipped, under
+<code>normalisation.mailto_ids</code> — the v8 prompt's R5 says the same, and a person
+whose ORCID the documents list is a review matter (rule-03), not the
+normaliser's. Since #1002 (v8 step J) British
+forms in prose are rewritten to American, one rule per pattern of the
+form block's instrument (v4 since #1006), double-quoted spans and identifier-shaped
+tokens (<code>://</code>, <code>/</code>, <code>@</code>, <code>:x</code>, <code>.x</code> inside a token) left as written, keys
+and the <code>#</code> header untouched; each rewrite is logged under
+<code>normalisation.british_spellings</code> by phase and slot, so the model's own
+count is on record while the canary's British row becomes, on the API
+path only (the agentic runtime writes no normaliser), an invariant for
+what the normaliser does not cover. The form count sums full + core and
+counts a skip; <code>british_occurrences</code> logs each rewrite once — the VOICE
+canary's 8 is <code>british_occurrences</code> 4. A Capitalised match in a
+title-case run ("Temerty Centre for …", a real institution the VOICE
+bundle names) or a genus name is left as written and logged under
+<code>british_skipped</code>; a lower-case proper noun is rewritten, and <code>d4d
+review disposition --amend</code> restores it (#1004). The undeclared-prefix counter is
+instrument <strong>v3</strong> (#982): <code>ark:</code> excluded, <code>mailto:</code> excluded on a Person's id
+only and counted anywhere else, <code>urn:</code> by NID; the form block records
+<code>prefix_instrument</code>.</p>
+<h2 id="nullempty-value-handling">Null/Empty Value Handling</h2>
+<ul>
+<li><strong>Schema/Python</strong>: Use <code>null</code>/<code>None</code> for missing values (default for optional fields)</li>
+<li><strong>HTML rendering</strong>: Converts <code>None</code>/<code>null</code> → empty strings <code>""</code> for cleaner display</li>
+<li>Files: <code>src/html/human_readable_renderer.py</code>, <code>src/renderer/yaml_renderer.py</code></li>
+</ul>
+<h2 id="d4d-evaluation-framework">D4D Evaluation Framework</h2>
+<p>Evaluates D4D generation quality using two rubrics:</p>
+<p><strong>Rubric10</strong> (50 points): 10 hierarchical elements × 5 sub-elements, binary scoring
+<strong>Rubric20</strong> (84 points): 20 questions across 4 categories, 0-5 scale</p>
+<pre><code class="language-bash"># Evaluate concatenated files
+make evaluate-d4d [PROJECT=VOICE]
+
+# Evaluate individual files
+make evaluate-d4d-individual
+
+# View results
+make eval-summary[-individual]
+make eval-details PROJECT=VOICE METHOD=claudecode
+</code></pre>
+<p><strong>Output</strong>: <code>data/evaluation/</code> - summary reports, detailed analyses, scores (CSV/JSON)</p>
+<p><strong>Key findings</strong> (concatenated synthesis):
+- Claude Code: 37.5% (R10), 52.4% (R20) - Best
+- Curated: 21.3% (R10), 41.7% (R20)
+- GPT-5: 11.5% (R10), 17.3% (R20)</p>
+<p>Individual files (single-source): Claude Code and GPT-5 identical at 18.8% (R10), 26.3% (R20).</p>
+<h2 id="evaluation-model-selection-3325">Evaluation model selection (#3325)</h2>
+<p><code>src/data_sheets_schema/evaluation_config.yaml</code> selects the default for support,
+fitness, referent, equivalence and form-subtype judges. The shipped <code>model: null</code>
+preserves the generation-model default. To select a different evaluator, set
+<code>model</code> to its exact provider model identifier; keep <code>version: 1</code>. The file ships
+with the package and is read beside the imported implementation, from any working
+directory. Unknown settings, duplicate keys and invalid identifiers are refused.
+Caller-supplied models take precedence. Form-subtype reproduction still prefers
+the single model recorded in its cache, refusing pooled instruments.</p>
+<p>New judgement caches/reasoning logs, semantic referent findings and agreement matrices record
+<code>evaluation_model</code> with the selected name and basis (configuration, generation
+default, explicit override, or recorded cache model). Config-derived selections
+include the config's SHA256. This describes selection for the new output;
+replaying an old cache does not establish the original selection basis. Existing
+cache identities, prompts and historical outputs are unchanged. A deliberate
+model switch requires a newly registered/calibrated measurement; this setting
+alone supplies no evidence of independence or agreement. The separate API rubric
+evaluator deliberately retains <code>claude-sonnet-4-5-20250929</code> (#3326): it is an
+already registered instrument with its own request identity. Changing the shared
+support/fitness setting must not silently change that rubric baseline. A new API
+rubric registration can explicitly supply <code>LLMEvaluationConfig(model=...)</code>.
+Offline support plans copy the config bytes that selected their default model
+and refuse a config change during selection. Saved requests remain inspectable
+after the original config changes or disappears. Explicit model overrides do
+not require the default config.</p>
+<h2 id="d4d-llm-based-evaluation-quality-assessment">D4D LLM-based Evaluation (Quality Assessment)</h2>
+<p>LLM-as-judge agents provide quality assessment complementing field-presence detection.</p>
+<h3 id="conversational-evaluation-agents">Conversational Evaluation Agents</h3>
+<p><strong>d4d-rubric10</strong> (<code>.claude/agents/d4d-rubric10.md</code>): 10-element hierarchical rubric
+<strong>d4d-rubric20</strong> (<code>.claude/agents/d4d-rubric20.md</code>): 20-question detailed rubric</p>
+<p><strong>Usage</strong> (no API key required in Claude Code):</p>
+<pre><code>User: Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with d4d-rubric10
+</code></pre>
+<p>Agent provides: Overall score, strengths, weaknesses, recommendations with evidence quotes.</p>
+<h3 id="external-automation-optional-requires-anthropic_api_key">External Automation (Optional - Requires ANTHROPIC_API_KEY)</h3>
+<pre><code class="language-bash"># Batch evaluation
+make evaluate-d4d-llm-batch-concatenated  # ~25min, ~$6
+make evaluate-d4d-llm-batch-individual    # ~2hrs, ~$34
+make evaluate-d4d-llm-batch-all           # Complete
+
+# Single file (legacy)
+make evaluate-d4d-llm-{rubric10|rubric20|both}
+make evaluate-d4d-llm FILE=path PROJECT=X METHOD=Y RUBRIC=both
+
+# Compare with presence detection
+make compare-evaluations
+</code></pre>
+<p><strong>Settings</strong>: Temperature 0.0, model claude-sonnet-4-5-20250929 (fully deterministic)</p>
+<p><strong>Output</strong>: <code>data/evaluation_llm/</code> - rubric10/rubric20 summaries, scores.csv, scores.json</p>
+<p><strong>Comparison</strong>:
+| Metric | Presence | LLM Quality |
+|--------|----------|-------------|
+| Speed | ~1s | ~30-60s |
+| Cost | Free | ~$0.10-0.30 |
+| Insight | Field exists? | Quality/completeness |
+| Evidence | None | Quotes, reasoning |</p>
+<p>See <code>notes/LLM_EVALUATION.md</code> and <code>notes/RUBRIC_AGENT_USAGE.md</code> for details.</p>
+<h3 id="validating-the-evaluation-artifacts-833">Validating the evaluation artifacts (#833)</h3>
+<pre><code class="language-bash">poetry run python scripts/validate_evaluation_schema.py
+# Before completing a new evaluation: check only that file, strictly.
+poetry run python scripts/validate_evaluation_schema.py --file OUTPUT_PATH --rubric rubric10-semantic
+</code></pre>
+<p>Walks <strong>every</strong> <code>*_evaluation.json</code> under <code>data/evaluation_llm/</code> at any
+depth and judges each against the schema its own <code>rubric</code> field names. It
+used to read <code>{rubric}_semantic/concatenated/*.json</code> only — 28 of the 204
+semantic artifacts, and never <code>label_aware/</code>, which is where every
+evaluation since 2026-08 lives and which <code>scripts/arm_comparison.py</code>
+reads; one schema-invalid artifact sat there unreported. Both semantic rubric
+agents now require the exact-file command before completion (#833), which
+checks only their own output and rejects invalid or superseded output even
+inside a dated/archive directory. The whole-corpus command is a historical
+inventory; it is not the completion check for a newly written file.</p>
+<p>Results are partitioned into <strong>live</strong> and <strong>kept</strong>: a directory whose name
+starts <code>_archive</code>, <code>superseded</code>, or a date is evidence of what an older
+instrument produced, and an invalid record there is reported and never
+rewritten to satisfy today's schema. A <strong>superseded shape</strong> — the
+pre-2026 <code>summary_scores</code>/<code>element_scores</code> contract — is likewise
+reported, not failed. Only a live invalid artifact makes the run exit
+non-zero. Today: 109 live valid, 12 live superseded, 1 live invalid, and
+40/8/32 kept; the presence-style <code>rubric10</code>/<code>rubric20</code> outputs (143 each)
+have no schema here and are counted as unjudged rather than skipped in
+silence.</p>
+<p>The remaining live invalid is the rubric10-semantic evaluation whose
+<code>semantic_analysis.issues_detected[].severity</code> says <code>info</code>, which the
+schema does not admit (the score beside it is intact, so the cross-arm
+table is unaffected). Its disposition and unchanged hash are recorded in
+<code>data/evaluation_llm/rubric10_semantic/label_aware/README.md</code>: preserve the
+historical score and explicitly report its structural invalidity. It remains
+invalid; no exception makes it pass. The eight obsolete rubric20 outputs with
+<code>max_points: 84</code> are preserved byte for byte in
+<code>rubric20_semantic/concatenated/_archive_pre_314/</code>, with their relocation and
+hashes recorded (#1200). The whole-corpus command therefore still exits 1 for
+the one annotated artifact. New evaluations use the strict exact-file check,
+whose exit status must be 0.</p>
+<h2 id="schema-release-identity-1874-and-the-neutral-generation-schema-1875">Schema release identity (#1874) and the neutral generation schema (#1875)</h2>
+<p>The full schema declares <code>version: 3.0.0</code> and the core entry point
+(<code>data_sheets_schema_core.yaml</code>) declares the same version: the core is a
+projection of the full schema's modules and moves with it, and the recorder
+writes <code>schema.core_declared_version</code> beside <code>schema.declared_version</code> with a
+<code>note</code> when they disagree. Bump both together on any class, slot or enum
+change. <code>3.0.0</code> (2026-09-16) names the definitions the <code>2.0.0</code> label had
+stopped describing — a record valid under the August <code>2.0.0</code> may fail under
+it (narrative lists, bare-name persons, URL-shaped DOIs); the migration
+implications and what moved are in <code>notes/schema_release_3.0.0_2026-09-16.md</code>.
+The modules the two generation roots import carry <strong>no study content</strong> in
+any model-facing field — no study name, platform URL, real IRB or award
+number, or example family modelled on one study — because the native arm
+reads the merged files whole and the playbook's "examples are not facts"
+rule is not a substitute for absence. <code>tests/test_neutral_generation_schema.py</code>
+scans the import closure, the resources the native toolchain selects under
+<code>neutral</code>, and both profiles' digests; add a study token there before
+adding one anywhere a model reads. Schema namespace URIs and the <code>B2AI_*</code>
+prefixes identify the schema and stay. The digest renders no docExample
+annotation, no <code>comments:</code> field and no nested attribute's description,
+and only the first 300 characters of a top-level slot description; the
+one top-level description this change edited moved text outside that
+window, so neither profile's digest md5 moved. Text inside that window
+would. The four entry-point and merged schema files and every edited module moved. Each release's four file hashes are registered in
+<code>src/data_sheets_schema/schema/release_history.yaml</code>: the checked report
+blocks attest the schema hashes they ran under and are never rewritten, so
+the corpus reproduction test accepts any registered release for a stored
+block and requires the newest for a recompute. A change that moves the
+merged-schema bytes adds its entry there in the same commit.
+The same commit regenerates the two comprehensive SSSOM tables
+(<code>make gen-sssom-comprehensive gen-sssom-uri-comprehensive</code>, one row per
+schema slot, #2935) wherever the change moves a slot, its owning classes,
+its description or its mappings: <code>tests/test_semantic_exchange/test_comprehensive_sssom.py</code>
+rebuilds both in memory under the date each file records and fails on any
+difference, and <code>make check-sssom-comprehensive</code> reports it without writing.</p>
+<h2 id="profiles-the-studys-text-and-vocabularies-628-1302">Profiles: the study's text and vocabularies (#628, #1302)</h2>
+<p>What is Bridge2AI's and not the pipeline's lives in <code>profiles.py</code>: the
+pinned registry vocabularies the schema digest renders for <code>data_topic</code>
+and <code>data_substrate</code>, the four-project default of the agreement matrix,
+the AI-READI healthsheet input, and the project lists of the comparison
+arms. The <strong><code>bridge2ai</code></strong> profile carries them; the <strong><code>neutral</code></strong> profile
+carries none. The source manifest selects the profile with a top-level
+<code>profile:</code> key (the study's declares <code>bridge2ai</code>); a manifest without one,
+or a run that selected no manifest, is neutral; <code>D4D_PROFILE</code> overrides
+for one process. A profile is never inferred from a project name.</p>
+<p>The digest now renders the term sources the schema's description declares
+for a slot (<code>schema_digest.TERM_SOURCES</code>: GO, MeSH, EFO, NCIT for
+<code>Instance.data_topic</code>; a <code>d4d:termSources</code> slot annotation wins when a
+schema carries one) before any pinned list, so a source-supported GO,
+MeSH, EFO or NCIT identifier is in range whether or not the registry lists
+it; the neutral profile renders only that scope. <strong>This changes the
+study's digest</strong> — its md5 moves for every run made after it — and is
+registered as a condition boundary in the plan note; the schema files and
+every record are untouched. The table, not a schema annotation, because a
+merged-schema edit moves the schema hashes every checked report block
+attests (#1362). Test: <code>tests/test_profiles.py</code> asserts on the assembled
+full-phase request under both profiles.</p>
+<p><strong>A run resolves its profile once and says so</strong> (#1438, #1443): <code>RunSpec</code>
+selects it from the manifest it selected — <code>profile:</code> key, else neutral;
+<code>D4D_PROFILE</code> overriding — and passes it to every digest it renders
+(<code>digest_text(…, profile=)</code>, the repair request, the pair-consistency
+ledger call) and to the record, whose <code>schema</code> block carries <code>profile</code> and
+<code>profile_basis</code> (<code>environment</code>; <code>no manifest</code>; <code>stated by the caller</code>;
+<code>manifest:&lt;repo-relative path&gt;@&lt;sha256[:12]&gt;</code> or <code>default manifest:…</code>, with
+<code>(undeclared)</code> when the manifest declares no profile, or <code>(missing)</code> when
+the path is not there; <code>rendered instruction</code>, with <code>(this process would
+select …)</code> when the recorder's own selection differs or <code>(this process
+could not select one: …)</code> when it could not; <code>re-rendered to the recorded
+hash by d4d provenance backfill-spec (#772)</code> on a reconstructed spec)
+beside <code>digest_md5</code>;
+<code>d4d api plan</code> prints them. The rendered <code>d4d provenance record</code> line
+carries <code>--profile &lt;name&gt;</code>, so the agentic recorder — another process,
+without the environment that selected it — records the instruction's
+profile and states what it would have selected itself (#1581); the basis
+is a record fact and not part of the resume identity (#1626). A generation
+pinned before profiles existed hashed an instruction that no longer
+renders and cannot be resumed (#1628). A caller
+that selected nothing gets the default manifest resolved <em>when asked</em>
+(#1439): the working directory's, else the checkout's — so a script run
+from <code>tests/</code> still sees the study's — else none. Both digests are in
+<code>digest_inventory.yaml</code> (<code>record_inventory(profile=)</code>, #1441), so
+<code>slot_existed_at</code> answers for a neutral run. The fitness judge's slot
+specification renders the same term-source scope the digest does (#1440;
+an evaluation-instrument change, dated in the plan note). It follows all
+inline object depths for vocabulary guidance (#1469), with class-scoped
+rules, cycle detection and no traversal through references. This changes
+the fitness and form-subtype specification identities while preserving
+generation prompt bytes; see <code>notes/fitness_nested_vocabulary_2026-09-13.md</code>.
+The arm table
+(<code>GENERATION_ARMS</code>) carries no project lists: <code>profiles.arm_projects_for</code>
+is the study's scope for its comparison arms, and <code>agreement.default_projects()</code>
+/ <code>healthsheet.default_record()</code> read the active profile when called —
+empty and <code>None</code> under <code>neutral</code>, where a caller must name them (#1444).</p>
+<h2 id="the-manifest-is-the-project-registry-621-623-624-637-1299">The manifest is the project registry (#621, #623, #624, #637, #1299)</h2>
+<p>A dataset is whatever the selected source manifest declares under
+<code>projects:</code>. Every command that names a dataset takes <code>--manifest</code>
+(default <code>data/preprocessed/source_manifest.yaml</code>) and validates
+<code>--project</code> against it — <code>registry.project_choice</code>, not
+<code>click.Choice(PROJECTS)</code>. <code>d4d download list-projects [--manifest M]
+[--plain]</code> prints that registry, and <code>project.Makefile</code> asks it for
+<code>PROJECTS</code> rather than keeping its own list. A project record is a list of
+sources or a mapping carrying <code>sources:</code>, optionally <code>raw_dir:</code> (where its
+raw documents are, when not <code>&lt;input-dir&gt;/&lt;project&gt;</code>), <code>source_dir:</code> (where
+its preprocessed files are — the VOICE_PEDIATRIC override, formerly the
+sibling key <code>&lt;P&gt;_source_dir</code>, which is still read and is never a project,</p>
+<h1 id="626-and-bundle-its-document-bundle-when-not">626) and <code>bundle:</code> (its document bundle, when not</h1>
+<p><code>data/preprocessed/concatenated/&lt;P&gt;_preprocessed.txt</code>).
+<code>constants.PROJECTS</code> remains the study's corpus for the analysis scripts.</p>
+<p><strong>A run consults one manifest, or none, and its record says which.</strong>
+<code>d4d api run|plan|render-prompt|batch</code> take <code>--manifest</code>; without it the
+study's manifest is selected only when the bundle is the one it declares
+for that project — <code>--project VOICE --bundle /elsewhere/x.txt</code> selects
+none, so the study's naming, scope and source ranking are not sent for a
+bundle they do not describe, and <code>inputs.source_manifest</code> records
+<code>path: null</code> with a <code>basis</code> rather than the study's path and hash (#621).
+<code>batch</code> runs every project the manifest declares, or the ones given with
+<code>--project-bundle NAME=PATH</code>; a tuned component that was never written
+and never pinned is "no component", while one that exists unpinned, or is
+pinned and gone, is still refused (#624). <code>d4d provenance record
+--manifest none</code> is the agentic path's equivalent. The study's own
+DECLARED NAMING sentence is unchanged: its affiliation phrase moved from a
+code literal into the manifest's <code>naming.&lt;P&gt;.programme</code>.</p>
+<p><strong>Chunk manifests follow the bundle.</strong> A study bundle keeps
+<code>data/preprocessed/chunks/&lt;stem&gt;_chunks.yaml</code>; <code>d4d bundle chunk --bundle
+PATH</code> writes <code>&lt;stem&gt;_chunks.yaml</code> beside any other bundle, so two bundles
+with one basename in different directories never share a manifest, and
+<code>--chunk-manifest</code> names one explicitly (#1299). The receipt-condition
+gate still refuses a missing or stale manifest before any spend. The
+acceptance test is <code>tests/test_external_dataset_onboarding.py</code>: a dataset
+that exists only in a temporary manifest goes through preprocessing,
+concatenation, chunking, an offline plan and status with no Python edit.</p>
+<h2 id="resources-resolve-from-anywhere-and-the-wheel-ships-them-1301-673">Resources resolve from anywhere, and the wheel ships them (#1301, #673)</h2>
+<p>The constants keep their repository-relative spelling — <code>Path("src/download/
+prompts/…")</code>, <code>.claude/commands/…</code>, <code>src/data_sheets_schema/schema/…</code> — because
+that is the form every record stores and every pin is keyed on, and the
+<strong>readers resolve them when they read</strong> (<code>data_sheets_schema.resources.
+resource_path</code>, the shape <code>schema_digest.resolve_schema</code> and
+<code>record_schema_path</code> already had): the working directory's copy when it is
+there or when the working directory carries that resource <em>directory</em> (a
+staged fixture that omits a prompt reads it as <code>missing</code>, never the
+checkout's copy; the test is any ancestor below the top-level component, so a
+user's own <code>src/</code> or <code>.claude/</code> does not count: authority is the nearest
+existing ancestor at depth three or deeper under <code>src/</code> — <code>src/download/prompts</code>,
+<code>src/data_sheets_schema/schema</code> — the same answer for a directory and its
+files, #1535; a project's own <code>.claude/commands/</code> cannot hide the playbooks an
+install ships, #1500); else the checkout's when the
+package is imported from one (<code>pyproject.toml</code> two levels up); else the
+installed copy — the wheel places the condition prompts and their pin
+registry, the playbooks and agent definitions the record hashes, and the
+rubric sources at the same relative paths under the installation root, and
+the schema files as package data — so <code>src</code>, <code>data</code>, <code>.claude</code> and <code>.github</code> are
+top-level entries of <code>site-packages</code> and <code>import src</code> resolves as a
+namespace package there, a stated cost of keeping one spelling in both
+places (#1504). Only <code>src/</code>, <code>.claude/</code>, <code>.github/</code>, <code>data/rubric/</code> and
+<code>project/</code> are resources; the corpus under <code>data/</code> is the caller's tree and a
+missing record never resolves to the checkout's. Not at import time: a
+constant resolved once takes the value of whichever directory the first
+importer was in, and a fixture test that ran later then wrote the real
+registry (the first form of this change did exactly that).</p>
+<p>The wrapped readers: <code>schema_cache.load_yaml</code>/<code>sha256_of</code>,
+<code>schema_snapshot.capture_schema</code> (so every <code>shared_view</code>),
+<code>schema_digest.resolve_schema</code> and the digest ledger (no by-name fallback
+after an authoritative absence, #1483), the prompt registry (<code>load</code>,
+<code>sha256_of</code>, <code>body_sha256_of</code>, <code>prompt_files</code>, <code>pin</code> — which refuses a
+registry that is not in the working tree, #1484 — and <code>normalise</code>),
+<code>provenance._md5/_sha256</code>, <code>prompt_facts</code>, the playbook and companion
+hashes and <code>referenced_playbooks</code>, <code>runs.playbook_drift</code>, <code>prompt_body</code>,
+the tuned component, <code>schema_sync.check_one</code> (which keeps the logical
+<code>source_file:</code> spelling in the rebuilt schema, #1478), <code>verifiable</code>, the
+<code>rocrate</code> and <code>derive</code> commands, and every <code>linkml-validate</code> subprocess,
+which runs <code>resources.linkml_validate()</code> — the console script beside the
+interpreter, else the module entry point through the interpreter, never a
+<code>PATH</code> search (#1486) — because <code>poetry run</code> needs a <code>pyproject.toml</code> in
+the working directory and failed from anywhere else. A spelling with <code>..</code> is never a resource and is never
+collapsed lexically — <code>.venv/../x</code> through a symlinked <code>.venv</code> is the file
+the filesystem says it is, in every reader (#1481, #1482, #1528, #1570) — and
+a resource directory classifies like its files (#1488). <code>repo_relative</code> anchors
+an absolute path to the checkout, the package data, then — for a resource
+only — the install root; the registry's key also falls back to the working
+directory as it always did, the record's never does (#398). <code>d4d provenance
+record</code> no longer requires the repository root: it refuses only a working
+directory <em>inside</em> the checkout but not at its root, where the record would
+land under <code>&lt;subdir&gt;/data/</code> unread (#672's case); from an installed package
+the record goes into the caller's tree. <code>linkml</code> is a runtime dependency
+(unconditionally — it was also listed in the <code>docs</code> extra, which made
+poetry emit it extra-only, #1476): the record contract is compiled with its
+generators and every record is validated with its validator. Commands that
+import checkout-only code through <code>setup_repo_imports</code> (<code>download</code>,
+<code>evaluate</code>, <code>render</code>, <code>rocrate</code>, <code>schema</code>, <code>utils</code>) still require a checkout
+and say so. <code>D4D_INSTALL_TESTS=1 pytest tests/test_installed_wheel.py</code>
+(marker <code>install</code>) builds the wheel, installs it into a fresh virtual
+environment and, from a directory with no checkout and no study tree,
+checks the metadata, runs the schema preflight, a fake-client generation
+through every phase, the derived core, the record write, its deterministic
+checks and <code>linkml-validate</code>, and <code>check_record</code> — the release canary, run
+(the deterministic model config under <code>.github/workflows/</code> ships too, and a
+record made where it is absent says the defaults applied rather than naming
+a file it did not read, #1529; on an install the digest ledger under
+<code>site-packages</code> is mutable package data, a stated design cost, #1537;
+the record's <code>repo</code> block names <code>resource_root</code> and <code>resource_kind</code> —
+the checkout git runs at, or the install root and package version — so
+a record made from a user's own repository no longer attests that
+repository's commit beside the checkout's hashes, #1550; that root is
+decided once (<code>resources.resource_root</code>): the working directory when it
+is a checkout of this project — a worktree or a second clone, whose files
+the readers take first — else the checkout the code is imported from, so
+a run from a worktree with the primary's code names the worktree's
+commit and keeps its files repository-relative, and the root guard
+refuses a subdirectory of any checkout, #1588; that checkout is
+authoritative for its absences too — a playbook or prompt it lacks is
+<code>exists: false</code>, never another checkout's — a file under another
+checkout keeps its absolute identity, an unreadable <code>pyproject.toml</code> is
+refused rather than read as no checkout, and the corpus (<code>chunking.anchored</code>,
+the default manifest, the healthsheet's Source line) anchors on the same
+root, #1617/#1618/#1619/#1640; git must answer for that root itself, not
+an enclosing repository, and a failed status query is unknown, not
+clean, #1621/#1635; an install compares its files with the wheel's
+RECORD, #1641; where git cannot answer
+there the commit and the dirty state are recorded unknown, not clean,</p>
+<h1 id="1591-agent_pin">1591; <code>agent_pin</code></h1>
+<p>reads the shipped definitions and <code>chunking.anchored</code> follows the resource
+root (#1640), while <code>verifiable</code>'s record lookup and the <code>git show</code> bundle-bytes
+lookup still anchor on the code checkout and are checkout-only until the
+corpus root follows the manifest, #1523/#1553),
+by the publish workflow before <code>poetry build</code>, not a pull-request test; it
+fails, never skips, when the wheel does not install.</p>
+<h2 id="one-parse-per-file-per-process-1203">One parse per file per process (#1203)</h2>
+<p><code>data_sheets_schema.schema_cache.load_yaml(path)</code> parses a YAML file once
+per process, keyed on its resolved path, mtime and size, and returns a
+deep copy. Read schemas and provenance records through it rather than
+with a bare <code>yaml.safe_load(path.read_text())</code> — with one deliberate
+exception: a writer that reads a file back immediately after replacing it
+(<code>backfill_checks.apply</code>, the amend command) reads raw on purpose, and a
+reader inside the same function as the write should too. Why: the merged schema is 1.4 MB
+and was parsed from disk by three production paths on every call — seven
+times per record write — and <code>d4d runs check</code> parsed each provenance
+record about twenty times, once per status function. Measured on
+2026-09-11: the runner test file 472 s → 146 s, the profiled runner test
+39 s → 18 s, <code>d4d runs check --strict</code> over 282 records 93 s → 24 s.
+<code>schema_sync._regenerate</code> keeps the rebuilt merged schema's bytes on a
+fingerprint of the whole schema source directory, so the sync gate no
+longer spawns <code>gen-linkml</code> on every record write. The key cannot see a
+rewrite of the same size inside one mtime tick, so <code>ProvenanceRecord.write</code>
+calls <code>schema_cache.forget</code>; a test that rewrites a file by hand and
+re-reads it in the same instant calls <code>schema_cache.clear()</code>. The residue
+in a runner test is <code>linkml-validate</code> on the records it just wrote, which
+is not cacheable. The remaining CI levers — one interpreter per pull
+request, <code>pytest-xdist</code>, the corpus-walk tests in their own lane — are
+listed on #1203.</p>
+<h2 id="two-ci-lanes-and-running-the-suite-yourself-1203">Two CI lanes, and running the suite yourself (#1203)</h2>
+<p>A pull request runs the suite <strong>once</strong>, on 3.12, in parallel, without the
+tests that walk the committed corpus. Merging to <code>main</code> — and
+<code>workflow_dispatch</code> — runs everything on 3.10, 3.11 and 3.12, the corpus
+tests and <code>test-schema</code> and <code>test-examples</code> included. The split is by
+what a test is evidence about: a corpus walk checks the data, not the
+change, and a pull request that touches neither gains nothing from
+running it three times.</p>
+<pre><code class="language-bash">poetry run pytest tests -n auto -m &quot;not corpus&quot;   # the pull-request lane
+poetry run pytest tests -m corpus                 # what merging will also run
+poetry run pytest tests -n auto                   # everything
+</code></pre>
+<p>The corpus-walking tests carry the registered <code>corpus</code> marker: the
+playbook-drift, URI-scheme, duplicate-key and scope walks, the schema
+straddle check, the hash-unification and end-of-run gates, and the
+instrument-manifest reproduction. <strong>Mark a new test <code>corpus</code> when it
+iterates <code>data/d4d_concatenated</code> or spawns a whole-corpus CLI check</strong>, so
+the fast lane stays fast; leave it unmarked when it builds its own
+fixture. In a class that mixes both kinds, mark only the individual
+corpus-walking methods so its fixture tests still run on pull requests.</p>
+<p>Measured on a 4-core machine, whole suite, 3,094 tests: 26 to 32 minutes
+before #1203, 15 minutes 19 seconds with the caches, <strong>5 minutes 52
+seconds</strong> with the caches and <code>-n auto</code>. The pull-request lane is 2
+minutes 26 seconds of that; the corpus lane is 3 minutes 21 seconds and
+runs on merge. CI was 40 to 54 minutes per pull request, its wall time
+the slowest of three interpreters.</p>
+<h2 id="running-single-tests">Running Single Tests</h2>
+<pre><code class="language-bash">poetry run python -m unittest tests.test_d4d_full_schema[.TestClass[.test_method]]
+</code></pre>
+<h2 id="important-notes">Important Notes</h2>
+<ul>
+<li><strong>DO NOT EDIT</strong> <code>project/</code>, <code>src/data_sheets_schema/datamodel/</code>, <code>data_sheets_schema_all.yaml</code> (auto-generated)</li>
+<li>Run <code>make gen-project</code> after schema changes</li>
+<li>Module files in <code>src/data_sheets_schema/schema/</code> (NOT in modules/ subdirectory)</li>
+<li>Prefer inheriting from base classes in <code>D4D_Base_import.yaml</code></li>
+<li><code>aurelian/</code> is git submodule: <code>git submodule update --init --recursive</code></li>
+<li>Legacy data in <code>data/ATTIC/</code> (see ATTIC/README.md)</li>
+<li>Always run <code>make regen-all</code> after editing schemas to stay in sync, and rebuild the core
+  merged schema too (<code>rm -f src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  &amp;&amp; make gen-core-schema</code>): it imports most modules, and regen-all does not rebuild it;
+  <code>make check-digest</code> names the command for each stale schema (#2775, #2790)</li>
+</ul>
+<h2 id="linkml-specific-commands">LinkML-Specific Commands</h2>
+<pre><code class="language-bash">linkml-lint &lt;schema.yaml&gt;
+linkml-convert -s &lt;schema&gt; -C &lt;Class&gt; &lt;input&gt; -o &lt;output&gt;
+gen-linkml -o &lt;output&gt; -f yaml &lt;input&gt;
+gen-doc -d docs &lt;schema&gt;
+</code></pre>
+<h2 id="common-workflows">Common Workflows</h2>
+<p><strong>Add Module</strong>: Create <code>D4D_NewModule.yaml</code>, import <code>D4D_Base_import</code>, add to main schema, add to <code>Dataset</code> class, run <code>make gen-project &amp;&amp; make test</code></p>
+<p><strong>Modify Schema</strong>: Edit file → <code>make lint-modules</code> → <code>make test-modules</code> → <code>make test-schema</code> → <code>make gen-project</code> → <code>make test</code></p>
+<p><strong>Example Data</strong>: Add to <code>src/data/examples/valid/</code> or <code>invalid/</code> → <code>make test-examples</code> → check <code>examples/output/</code></p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.tabs.link"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>
