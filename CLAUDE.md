@@ -73,6 +73,9 @@ Deployment and provider-running commands require the task's actual authorization
 - An absence claim requires ignored and hidden files: use `rg --hidden --no-ignore`
   in the stated relevant scope. Say what was searched; ordinary `rg` is not enough
   before declaring a file/reference absent or proposing deletion/deduplication.
+- Save result-producing helper scripts in `scripts/adhoc/`, with purpose, inputs,
+  outputs, issue/PR and date. Commit them with their results; keep intermediate
+  data outside protected trees. Do not leave helper provenance only in `/tmp`.
 - Run affected tests during iteration, then the required complete acceptance
   checks. Use explicit test paths: bare pytest can discover dated tests in `notes/`.
   Preserve notes/ and input files, including ignored paths; use external temporary

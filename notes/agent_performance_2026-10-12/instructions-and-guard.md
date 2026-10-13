@@ -17,3 +17,12 @@ Normal iteration should scope searches to affected code and tests, keep scratch 
 Full-collection setup review found #5023: Poetry installation does not initialize the pinned FAIRSCAPE submodule. The guide now explicitly includes `git submodule update --init fairscape_models`. The initial partial collection failed with three import errors and is retained as unsuccessful setup evidence. The task worktree then initialized the pinned submodule at `8c80311d7d8b0fadac07dca9567d632103691f48`; complete collection verification follows. The root guide is now 179 lines.
 
 After that setup correction, complete collection passed twice with 18,858 occurrences (18,857 distinct node IDs); both Counters were identical and retained the parameter-ID collision. Explicit-file collection matched exactly its 24 occurrences in the complete roster. Warm full collection took 6.41/5.33 seconds versus 0.46/0.36 seconds for the explicit file. The original failed run included first-import cache effects and missing submodule setup; its 30.33-second result is not a valid full-suite baseline. These are collection/session times, not test-body execution.
+
+The subsequent user provenance rule is now included in the operating guide.
+Historical measurement helpers are retained under `scripts/adhoc/` as
+`2026-10-12_5019_notes_listing_benchmark.py` and
+`2026-10-12_5018_pytest_collection_measurement.py`, with SHA-256 sidecars.
+Their original bodies remain byte-for-byte after descriptive headers; they were
+preserved after measurement, not rerun. They retain session-specific paths and
+write outputs beside themselves, so inspect/adapt them before future use.
+`2026-10-12_preserve_performance_helper.py` records this preservation procedure.
