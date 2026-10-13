@@ -15,12 +15,12 @@ criteria; unrelated new behavior is a separate scope decision.
 
 | Priority | Issue | Scope | Current evidence/status |
 | --- | --- | --- | --- |
-| 1 | [#5015](https://github.com/bridge2ai/data-sheets-schema/issues/5015) | Long shared-generation replay test | Baseline passed in799.95 s;19 execute calls; catalog reuse prioritized |
-| 1 | [#5016](https://github.com/bridge2ai/data-sheets-schema/issues/5016) | Current shard weights | Refreshed18,848 occurrences/524 files; focused regressions passed; PR pending |
+| 1 | [#5015](https://github.com/bridge2ai/data-sheets-schema/issues/5015) | Long shared-generation replay test | Baseline passed in799.95 s;19 execute calls. Catalog cache withdrawn after no convincing gain. Checked-event parsing passed126 tests; real-schema old4.24–4.27s/new2.71–2.77s; full unchanged replay running |
+| 1 | [#5016](https://github.com/bridge2ai/data-sheets-schema/issues/5016) | Current shard weights | PR #5022; refreshed18,848 occurrences/524 files; reproduced and fixed order-dependent test leak #5027; final CI pending |
 | 1 prerequisite | [#5020](https://github.com/bridge2ai/data-sheets-schema/issues/5020) | Legitimate repeated JUnit labels | Independent review clear;13 updater and 24 partition/workflow tests passed |
-| 2 | [#5017](https://github.com/bridge2ai/data-sheets-schema/issues/5017) | Agent instructions and workflow routes | 178-line guide drafted; independent review underway; incorporates #3863 |
-| 2 | [#5018](https://github.com/bridge2ai/data-sheets-schema/issues/5018) | Collection and nested concurrency | Planned measurement and coverage-preserving implementation |
-| 2 | [#5019](https://github.com/bridge2ai/data-sheets-schema/issues/5019) | Workspace/search/guard costs | Guard traversal improvement reviewed; runtime comparison pending; existing work preserved |
+| 2 | [#5017](https://github.com/bridge2ai/data-sheets-schema/issues/5017) | Agent instructions and workflow routes | PR #5025;181 focused tests passed; archived old guides; prior head green and provenance follow-up CI running; incorporates #3863/#5021/#5023 |
+| 2 | [#5018](https://github.com/bridge2ai/data-sheets-schema/issues/5018) | Collection and nested concurrency | PR #5026;29 Make/hook tests passed; default full collection Counter unchanged; final CI running |
+| 2 | [#5019](https://github.com/bridge2ai/data-sheets-schema/issues/5019) | Workspace/search/guard costs | PR #5025; equivalent guard path sets measured faster; ignored paths/protection retained. Hook defect #5024 corrected separately in #5026 |
 
 Existing related work: [#3863](https://github.com/bridge2ai/data-sheets-schema/issues/3863)
 and [#4517](https://github.com/bridge2ai/data-sheets-schema/issues/4517), including
@@ -84,4 +84,20 @@ The profile attributes 290.390 inclusive seconds to 50 schema catalog calls,471.
 
 The corrected updater retained all 18,848 testcase occurrences and 524 file totals from the four verified core artifacts. All four recorded XML hashes match the downloaded evidence. The 13 new updater cases and 24 existing partition/workflow tests passed in 89.73 s; the refreshed-weight balance test passed again in 0.06 s. [Refresh evidence](timing-refresh.json) records provenance and scheduling estimates. Full PR CI remains pending.
 
-The instruction compaction exposed [#5021](https://github.com/bridge2ai/data-sheets-schema/issues/5021): an existing smoke test required actual project leakage in the root guide. The bounded correction preserves nonvacuous root discovery, classification and gates while retaining the separate planted-leak regression. Independent static review of the guide and guard changes is clear; their runtime checks are underway.
+The instruction compaction exposed [#5021](https://github.com/bridge2ai/data-sheets-schema/issues/5021): an existing smoke test required actual project leakage in the root guide. The bounded correction preserves nonvacuous root discovery, classification and gates while retaining the separate planted-leak regression. Independent static review and181 focused tests passed in PR #5025. Full collection required the pinned FAIRSCAPE submodule (#5023), now included in bootstrap guidance.
+
+The refreshed order exposed [#5027](https://github.com/bridge2ai/data-sheets-schema/issues/5027), a truncation fixture leaking rendered digest cache entries. The standalone target passed; the ordered pair reproduced the CI failure. Test-only cache isolation passed the fixed ordered pair plus the complete affected file (21 occurrences). See [causal evidence and environment correction](ci-cache-isolation.md). The updater, scheduling weights and production admission checks were not weakened.
+
+### Dispositions for remaining recommendations
+
+- Broad search, repeated full-file reviews and host contention: the concise guide specifies explicit paths, separate evidence searches, ignored-inclusive absence checks, one acceptance ledger and a shared worker budget. Existing files/processes/worktrees remain intact.
+- Earlier collection/shard selection and nested worker redesign: measured costs are recorded, but coverage-sensitive lane changes already belong to active PR #4508 and issues #4517/#4519/#4520/#4522. This set supplies explicit-path iteration and preserves complete CI coverage without competing edits.
+- Conservative CI change classification: deferred. Markdown, prompts, data and notes can be executable or scientific inputs here; no complete dependency proof justifies skipping existing gates. This work reduces their measured costs instead.
+- Git cleanup, cache/environment deletion, dependency trimming and documentation-workflow redesign: deferred because observed Git/setup/docs costs are small relative to the replay path. No measured benefit justifies disrupting preserved evidence or publication duties.
+- Hooks: configured references were inspected without inventing activation frequency or latency. The real stale-success defect is fixed in #5026; timeouts/advisory behavior remain.
+- Speculative catalog caching: archived and withdrawn after the unchanged replay did not show convincing improvement. The later checked-event parser candidate is conditional on unchanged integration validation and required CI.
+
+Historical helpers now live in `scripts/adhoc/` with their result branches.
+[Reconstructed metadata verification](metadata-procedure.md) passed130 checks;
+it is explicitly distinct from original measurements. The GitHub tracker is the
+current acceptance ledger while PR checks and merge receipts are still changing.
