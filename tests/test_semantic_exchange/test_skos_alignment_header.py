@@ -5,10 +5,12 @@ holds a class #3942, #3974 or #3976 changed carries that class's targets
 only as the class now carries them, whether a triple's subject is the slot
 (``d4d:<slot>``) or the slot in a class (``d4d:<Class>_<slot>``) (#3971,
 #3995, #4002, #3974, #4052, #4078), a slot that holds any class with a
-class-level triple carries each of that class's targets with the class's
-predicate unless a listed exception gives a reason (#4036), no triple names
-an RAI term Croissant RAI 1.0 does not define, and every EVI term a triple
-names is recorded with the outcome of a check against EVI.
+class-level triple carries, on each target both carry, the class's
+predicates unless a listed exception gives a reason (#4036), the strengths
+settled for 32 slots and their classes are what a pinned record says
+(#4031, #4036, #5032), no triple names an RAI term Croissant RAI 1.0 does
+not define, and every EVI term a triple names is recorded with the outcome
+of a check against EVI.
 
 Before #3942 the header said 189 triples (exact 112, close 59, related 10,
 narrow 7, broad 1) while the file held 184 (111/58/9/6/0), and the per-section
@@ -632,9 +634,11 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
     holds a changed class in either merged schema, under its own name and
     under every class-scoped name, ``d4d:<Class>_<slot>``, the form the
     /d4d-add-mapping playbook writes for a class's slots (#4078). #4036
-    removed the list: TestASlotAgreesWithTheClassItHolds holds every slot
-    that holds a class with a class-level triple, changed or not, to the
-    class's strength on each target the class carries.
+    replaced the list with a rule: TestASlotAgreesWithTheClassItHolds holds
+    every slot that holds a class with a class-level triple, changed or not,
+    to the class's predicates on each target both carry. The settled pairs
+    themselves are pinned again in SETTLED_STRENGTHS (#5032), since the rule
+    alone passes a slot and its class that change together.
     """
 
     @classmethod
@@ -783,6 +787,76 @@ STRENGTH_EXCEPTIONS = {
         "evi:formats, this slot's and its class's among them."),
 }
 
+#: The strengths settled for 32 slots and the classes they hold, as a pinned
+#: record: the class the slot holds (its range), and the pairs the slot,
+#: slot-level and class-scoped together (pairs_on_slot), and that class both
+#: carry. The rule below compares a slot with its class, so a slot and its
+#: class that change together pass it; this record is what each settled
+#: strength is held to (#5032). A change to one is a new decision: make it
+#: in the TTL and here in the same commit.
+#:
+#: The first 21 are the twins #4031 settled (#3971, #3995, #4002, #3974,
+#: #4052); they were SETTLED_TWINS until #4036. An empty set is a removed
+#: triple: its target is not a term its vocabulary defines
+#: (rai:prohibitedUses, rai:ethicalReview, rai:confidentialityLevel,
+#: evi:samplingPlan), names another notion (schema:license for an extension
+#: mechanism), or is a D4D term, which is not an alignment to an external
+#: vocabulary (#3054; the last seven of the 21, whose class triples #3942
+#: removed for that reason). The next nine are #4036's settlements, which
+#: the owner approved on 2026-10-13. The last two are the exact matches
+#: three of them rest on (#5037): tasks and other_tasks are close because
+#: intended_uses keeps rai:dataUseCases' exact match, and
+#: acquisition_methods because collection_mechanisms keeps rai:dataCollection's.
+SETTLED_STRENGTHS = {
+    "discouraged_uses": ("DiscouragedUse", set()),
+    "prohibited_uses": ("ProhibitedUse", set()),
+    "ethical_reviews": ("EthicalReview", set()),
+    "is_deidentified": ("Deidentification", set()),
+    "extension_mechanism": ("ExtensionMechanism", set()),
+    "sampling_strategies": ("SamplingStrategy", set()),
+    "distribution_dates": ("DistributionDate",
+                           {("closeMatch", "schema:datePublished")}),
+    "retention_limit": ("RetentionLimits",
+                        {("relatedMatch", "schema:conditionsOfAccess")}),
+    "confidential_elements": ("Confidentiality",
+                              {("relatedMatch", "rai:personalSensitiveInformation")}),
+    "sensitive_elements": ("SensitiveElement",
+                           {("exactMatch", "rai:personalSensitiveInformation")}),
+    "existing_uses": ("ExistingUse", {("closeMatch", "rai:dataUseCases")}),
+    "data_protection_impacts": ("DataProtectionImpact",
+                                {("broadMatch", "rai:dataSocialImpact")}),
+    "labeling_strategies": ("LabelingStrategy",
+                            {("narrowMatch", "rai:dataAnnotationProtocol")}),
+    "raw_sources": ("RawData", {("closeMatch", "rai:dataCollectionRawData")}),
+    "addressing_gaps": ("AddressingGap", set()),
+    "anomalies": ("DataAnomaly", set()),
+    "content_warnings": ("ContentWarning", set()),
+    "informed_consent": ("InformedConsent", set()),
+    "human_subject_research": ("HumanSubjectResearch", set()),
+    "at_risk_populations": ("AtRiskPopulations", set()),
+    "participant_compensation": ("HumanSubjectCompensation", set()),
+    # #4036, approved 2026-10-13.
+    "annotation_analyses": ("AnnotationAnalysis",
+                            {("exactMatch", "rai:dataAnnotationAnalysis")}),
+    "machine_annotation_tools": ("MachineAnnotationTools",
+                                 {("exactMatch", "rai:machineAnnotationTools")}),
+    "preprocessing_strategies": ("PreprocessingStrategy",
+                                 {("exactMatch", "rai:dataPreprocessingProtocol")}),
+    "cleaning_strategies": ("CleaningStrategy",
+                            {("exactMatch", "rai:dataManipulationProtocol")}),
+    "acquisition_methods": ("InstanceAcquisition",
+                            {("closeMatch", "rai:dataCollection")}),
+    "errata": ("Erratum", {("closeMatch", "schema:correction")}),
+    "related_datasets": ("DatasetRelationship",
+                         {("closeMatch", "schema:isRelatedTo")}),
+    "tasks": ("Task", {("closeMatch", "rai:dataUseCases")}),
+    "other_tasks": ("OtherTask", {("closeMatch", "rai:dataUseCases")}),
+    # The exact matches those settlements rest on (#5037).
+    "intended_uses": ("IntendedUse", {("exactMatch", "rai:dataUseCases")}),
+    "collection_mechanisms": ("CollectionMechanism",
+                              {("exactMatch", "rai:dataCollection")}),
+}
+
 
 def strength_disagreements(pairs, holders, classes):
     """{(slot, class, target): (slot predicates, class predicates)}: for each
@@ -837,14 +911,34 @@ def strength_problems(found, exceptions, slot_names):
     return problems
 
 
+def settled_strength_problems(pairs, classes, record=None):
+    """[(subject, carried, settled)]: each slot in ``record``
+    (SETTLED_STRENGTHS unless given) whose pairs, slot-level and
+    class-scoped together (pairs_on_slot), are not the settled ones, then
+    the class it holds if its pairs are not. Empty when every settled
+    strength holds."""
+    found = []
+    for slot, (cls, settled) in sorted(
+            (SETTLED_STRENGTHS if record is None else record).items()):
+        carried = pairs_on_slot(pairs, slot, classes)
+        if carried != settled:
+            found.append((slot, carried, settled))
+        if pairs.get(cls, set()) != settled:
+            found.append((cls, pairs.get(cls, set()), settled))
+    return found
+
+
 class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
-    """#4036: a slot whose range is a class with a class-level triple carries
-    each target that class carries with the class's predicate, whether its
-    subject is the slot (``d4d:<slot>``) or the slot in a class
-    (``d4d:<Class>_<slot>``), unless STRENGTH_EXCEPTIONS lists the
-    disagreement with a reason. The slot holds the class's objects, so a
-    slot and its class that align one target at different strengths say
-    two things about one value.
+    """#4036: on each target that both a slot and the class it holds (its
+    range, a class with a class-level triple) carry, the slot carries the
+    class's predicates, whether its subject is the slot (``d4d:<slot>``) or
+    the slot in a class (``d4d:<Class>_<slot>``), unless STRENGTH_EXCEPTIONS
+    lists the disagreement with a reason. The slot holds the class's
+    objects, so a slot and its class that align one target at different
+    strengths say two things about one value. A slot that carries another
+    target than its class, or none, is not compared on that target
+    (strength_disagreements); whether a slot must carry its class's targets
+    at all is not decided here.
 
     Until #4036 ten slots disagreed with their classes and every test
     passed. The checks were a list of the 21 twins #4031 settled
@@ -852,6 +946,11 @@ class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
     classes #3942, #3974 and #3976 changed; none of the ten classes is one
     of those. Nine slots follow their classes now. The tenth,
     distribution_formats, is listed until #4037 decides evi:formats.
+
+    The rule compares a slot with its class, so a slot and its class that
+    change strength together pass it. The 21 twins, #4036's nine
+    settlements and the two exact matches three of them rest on are
+    therefore pinned as well, in SETTLED_STRENGTHS (#5032, #5037).
     """
 
     @classmethod
@@ -892,6 +991,65 @@ class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
                          {"CoreDatasetCollection", "DatasetCollection",
                           "Grantor"})
 
+    def test_every_settled_strength_holds(self):
+        """#5032: what the TTL says for each slot in SETTLED_STRENGTHS,
+        slot-level and class-scoped together (pairs_on_slot), and for the
+        class it holds, is what the record says."""
+        problems = settled_strength_problems(self.pairs, self.classes)
+        self.assertEqual(problems, [], "\n" + "\n".join(
+            f"{subject}: {sorted(carried)}, settled {sorted(settled)}"
+            for subject, carried, settled in problems))
+
+    def test_each_settled_slot_is_the_slot_that_holds_its_class(self):
+        """Read from the full schema: every declaration of the slot name that
+        sets a range (top-level, attribute or slot_usage) ranges over the
+        class, so the slot's value is that class's object. A slot the record
+        settles on a pair is one the rule reads; if its class loses its
+        triple, this fails beside test_every_settled_strength_holds."""
+        schema = raw_schema(SCHEMAS[0])
+        for slot, (cls, settled) in SETTLED_STRENGTHS.items():
+            definitions = [(schema.get("slots") or {}).get(slot)]
+            for cdef in (schema.get("classes") or {}).values():
+                for group in ("attributes", "slot_usage"):
+                    definitions.append(((cdef or {}).get(group) or {}).get(slot))
+            ranges = {d["range"] for d in definitions if d and d.get("range")}
+            with self.subTest(slot=slot):
+                self.assertEqual(ranges, {cls})
+                if settled:
+                    self.assertIn(slot, self.holders.get(cls, ()))
+
+    def test_a_slot_and_its_class_that_change_together_fail_the_record(self):
+        """In a world of its own, as the listing tests below are, so a
+        problem in the TTL fails the tests that read the TTL and not this
+        one: slot s holds class C, and the record settles both on closeMatch
+        x:t; slot e holds class E, and the record settles both on no pair.
+        Moved together to relatedMatch, s and C still agree, so the rule
+        finds nothing; the record reports both. The record is held to
+        equality, for the slot in either subject form and for the class on
+        its own pairs (#5037): a pair both gain, a class-scoped triple on s,
+        a target the class alone gains, and a triple on e are each reported."""
+        close, related = ("closeMatch", "x:t"), ("relatedMatch", "x:t")
+        other = ("closeMatch", "x:u")
+        record = {"s": ("C", {close}), "e": ("E", set())}
+        agree = {"s": {close}, "C": {close}}
+        moved = {"s": {related}, "C": {related}}
+        self.assertEqual(strength_disagreements(moved, {"C": {"s"}}, {"C"}),
+                         {})
+        for pairs, found in (
+                (agree, []),
+                (moved, [("s", {related}, {close}), ("C", {related}, {close})]),
+                ({"s": {close, related}, "C": {close, related}},
+                 [("s", {close, related}, {close}),
+                  ("C", {close, related}, {close})]),
+                ({**agree, "D_s": {other}}, [("s", {close, other}, {close})]),
+                ({"s": {close}, "C": {close, other}},
+                 [("C", {close, other}, {close})]),
+                ({**agree, "e": {other}}, [("e", {other}, set())])):
+            with self.subTest(pairs=pairs):
+                self.assertEqual(
+                    settled_strength_problems(pairs, {"C", "D", "E"}, record),
+                    found)
+
     def test_a_planted_disagreement_fails_in_either_form(self):
         """known_biases holds DatasetBias, and both say exactMatch
         rai:dataBiases. A closeMatch on the slot is reported whether its
@@ -900,7 +1058,8 @@ class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
         is the class changing strength without its slot. Each is all it adds
         to what the TTL alone reports, as in
         test_the_check_reads_a_triple_in_either_form, so a problem in the
-        TTL fails the test above and not this one."""
+        TTL fails test_every_slot_agrees_with_the_class_it_holds_or_is_listed
+        and not this one."""
         exact = ("exactMatch", "rai:dataBiases")
         close = ("closeMatch", "rai:dataBiases")
         self.assertEqual(self.pairs["known_biases"], {exact})
