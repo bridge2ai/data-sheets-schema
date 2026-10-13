@@ -59,6 +59,25 @@ make check-sssom-comprehensive                           # drift check (writes n
 poetry run pytest tests/test_semantic_exchange tests/test_fairscape_integration -v
 ```
 
+## Local test iteration
+
+`make test-python` runs the full `tests` directory. For a focused change,
+give explicit files or nodes in `PYTEST_PATHS`; use `PYTEST_ARGS` for flags:
+
+```bash
+make test-python PYTEST_PATHS=tests/test_ci_sharding.py
+make test-python PYTEST_PATHS='tests/test_ci_sharding.py::test_one_long_case_starts_before_a_file_with_many_short_cases' PYTEST_ARGS='-q -x'
+make test-python PYTEST_PATHS='tests/test_resources.py tests/test_profiles.py'
+```
+
+An explicit selection replaces `tests`; an empty selection is rejected.
+Putting a path in `PYTEST_ARGS`, or using `-k`/`-m` with the default paths,
+still collects the full directory. Focused runs shorten feedback during edits;
+they do not replace full CI, corpus checks or the separate offline suites.
+Keep concurrent test workers within one shared budget, including workers
+started by tests themselves. `make test` also generates schema products and
+validates examples; use it when those checks are required.
+
 ## Repository Structure
 
 Browse the source code repository:

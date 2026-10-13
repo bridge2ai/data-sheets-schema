@@ -267,8 +267,12 @@ test-modules:
 # a runner dies — -q's dots and --durations' end-of-run table both say
 # nothing about a test that never finished (#935 review).
 PYTEST_ARGS ?= -q
+# Explicit paths/nodes replace full discovery for local iteration. Keep flags
+# in PYTEST_ARGS; the default still runs the complete tests directory.
+PYTEST_PATHS ?= tests
 test-python:
-	$(RUN) pytest tests $(PYTEST_ARGS) -p no:cacheprovider --durations=25
+	$(if $(strip $(PYTEST_PATHS)),,$(error PYTEST_PATHS must name at least one test path or node))
+	$(RUN) pytest $(PYTEST_PATHS) $(PYTEST_ARGS) -p no:cacheprovider --durations=25
 
 lint:
 	$(RUN) linkml-lint $(SOURCE_SCHEMA_PATH)
