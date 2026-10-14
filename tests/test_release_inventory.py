@@ -60,13 +60,27 @@ def test_chorus_has_no_release_level_source_and_its_crate_is_excluded():
     assert inv["crate_policy"]["document_corpus"] == "exclude"
 
 
-def test_ai_readi_carries_its_crate_and_licence_in_the_document_corpus():
+def test_ai_readi_keeps_its_licence_but_not_its_crate_in_the_document_corpus():
+    """#5042: the crate #540 added (`ro_crate_metadata`) is no longer an
+    AI_READI source; its licence, IRB and FAIRhub release records stay. The
+    crate policy stays `allow`, because `exclude` would register the FAIRhub
+    dataset's own DOI and page as exclusions (`document_corpus_exclusions`)."""
     inv = committed("AI_READI")
-    assert inv["crate_in_document_corpus"] is True
+    assert inv["crate_in_document_corpus"] is False
     assert [e["source_id"] for e in inv["governance"]["license"]] == ["dataset_license"]
     assert [e["source_id"] for e in inv["governance"]["IRB"]] == ["irb_protocol"]
-    assert "ro_crate_metadata" in [e["source_id"] for e in inv["tier1"]]
+    assert "ro_crate_metadata" not in [e["source_id"] for e in inv["tier1"]]
+    assert [e["source_id"] for e in inv["release_records"]] == [
+        "fairhub_dataset", "fairhub_dataset_v3", "fairhub_dataset_v3_api"]
     assert inv["crate_policy"]["document_corpus"] == "allow"
+
+
+@pytest.mark.parametrize("project", ["AI_READI", "CHORUS", "CM4AI", "VOICE", "VOICE_PEDIATRIC"])
+def test_no_document_corpus_carries_an_rocrate(project):
+    """The owner's rule (2026-10-14, #5042): generation runs read no RO-Crate
+    content. Crates are the input of the separate with-crate and crate-only
+    arms only, built from data/ro-crate_packages/."""
+    assert committed(project)["crate_in_document_corpus"] is False
 
 
 @pytest.mark.parametrize("project, current", [("CM4AI", "june_2026_dataverse_release"),

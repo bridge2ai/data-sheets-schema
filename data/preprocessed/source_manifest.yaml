@@ -170,6 +170,22 @@ bundle_hash_history:
           before: ebca872f3275e7bd0e685c0486ee4881
           after: 8e8263f5f92ad197073e6169d2a4c68f
 
+    # #5042 (2026-10-14): the release-3.0.0 RO-Crate (`ro_crate_metadata`,
+    # added by #540) removed from AI_READI's document corpus, because
+    # generation runs read no RO-Crate content (the owner, 2026-10-14). The
+    # other ten documents are byte-identical and in their original order; only
+    # the crate's block and the header's file count and table of contents
+    # changed. Every AI_READI bundle version from 0f3abb51 (#540) to d22b61a9
+    # contained the crate. AI_READI only.
+    - changed_on: '2026-10-14'
+      issue: 5042
+      change: removed the RO-Crate source (ro_crate_metadata) from the AI_READI document corpus
+      bundles: 'AI_READI_preprocessed.txt'
+      projects:
+        AI_READI:
+          before: d22b61a9f8443545c9ae14ee941c3e88
+          after: 1a58ad7be37d4b08ebd9d94e6ad173a3
+
 scope:
   # What each project's record is *about* (#422). The bundle is the evidence;
   # this is the referent, and it is declared here because scope is a property
@@ -465,30 +481,19 @@ projects:
         artifact, so material drawn from it is closer to transcription than
         extraction; see notes/D4D_GENERATION_ARMS.md.
       minimum_characters: 50000
-    - id: ro_crate_metadata
-      source_type: RO-Crate
-      # Release 3.0.0 crate, shared 2026-08-12. The bundle previously contained
-      # no crate content at all for AI_READI — `grep ark:59853|ro-crate|
-      # fairscape` returned 0 — so this is new evidence rather than a refresh.
-      # It carries facts no other source states: contentSize 3.82 TB,
-      # deidentified, fdaRegulated, humanSubjectResearch, confidentialityLevel,
-      # dataGovernanceCommittee, and nine component crates.
-      #
-      # ⚠️ Not UTF-8 as published: cp1252, with `©` as a single 0xA9 byte, so
-      # strict JSON parsers reject it (#539). `preprocess_sources._decode`
-      # falls back to cp1252 and re-emits UTF-8; the raw file is kept exactly
-      # as retrieved.
-      #
-      # ⚠️ No stable public URL exists. fairhub returns 404 for
-      # /api/datasets/3/ro-crate-metadata.json and the two obvious variants, so
-      # the URL below is a Google Drive direct-download link and is the weakest
-      # provenance in this manifest. Replace it when the crate is published at
-      # a citable location.
-      url: https://drive.google.com/uc?export=download&id=1appdz89WfHXkkXvJIv2Q_ziegNxdnhAF
-      raw_file: aireadi_ro_crate_metadata_2026-08-12.json
-      processed_file: aireadi_ro_crate_metadata_2026-08-12.txt
-      retrieved: '2026-08-12'
-      md5: 38c221dbdab605145d617481524a4b25
+    # ro_crate_metadata (the release-3.0.0 RO-Crate, added 2026-08-12 by #540)
+    # was removed from AI_READI's document corpus on 2026-10-14 (#5042). The
+    # owner's rule: generation runs read no RO-Crate content; crates are the
+    # input of the separate with-crate and crate-only arms only
+    # (data/ro-crate_packages/crate_manifest.yaml). The crate itself stays in
+    # data/ro-crate_packages/AI_READI/, and its raw and preprocessed copies stay
+    # in data/raw/AI_READI/ and data/preprocessed/individual/AI_READI/
+    # (aireadi_ro_crate_metadata_2026-08-12.*, md5 of the raw file
+    # 38c221dbdab605145d617481524a4b25), where tests use them as fixtures.
+    # Every AI_READI record generated from 2026-08-13 to 2026-09-07 read a bundle
+    # that included it; the bundle_hash_history event for #5042 names the
+    # before and after hashes, and data/d4d_concatenated_wcrate/ holds copies
+    # of those records' results.
     - id: irb_protocol
       source_type: IRB
       url: https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit

@@ -647,7 +647,7 @@ Chunk text: bundle on disk, bundle sha256 7c4f71ab2e85…. 3 chunk(s) marked not
 
 ### `claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml`
 
-Chunk text: bundle on disk, bundle sha256 613f5bd62c51…. 4 chunk(s) marked nothing_relevant/redundant_with; 3 with a cue.
+Chunk text: committed version (git), bundle sha256 613f5bd62c51…. 4 chunk(s) marked nothing_relevant/redundant_with; 3 with a cue.
 
 | chunk | status | cues |
 |---|---|---|
@@ -673,7 +673,7 @@ Chunk text: bundle on disk, bundle sha256 5f81bb53f43f…. 16 chunk(s) marked no
 
 ### `claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml`
 
-Chunk text: bundle on disk, bundle sha256 613f5bd62c51…. 3 chunk(s) marked nothing_relevant/redundant_with; 2 with a cue.
+Chunk text: committed version (git), bundle sha256 613f5bd62c51…. 3 chunk(s) marked nothing_relevant/redundant_with; 2 with a cue.
 
 | chunk | status | cues |
 |---|---|---|
@@ -694,7 +694,7 @@ Chunk text: bundle on disk, bundle sha256 5f81bb53f43f…. 10 chunk(s) marked no
 
 ### `claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml`
 
-Chunk text: bundle on disk, bundle sha256 613f5bd62c51…. 2 chunk(s) marked nothing_relevant/redundant_with; 0 with a cue.
+Chunk text: committed version (git), bundle sha256 613f5bd62c51…. 2 chunk(s) marked nothing_relevant/redundant_with; 0 with a cue.
 
 ### `claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml`
 

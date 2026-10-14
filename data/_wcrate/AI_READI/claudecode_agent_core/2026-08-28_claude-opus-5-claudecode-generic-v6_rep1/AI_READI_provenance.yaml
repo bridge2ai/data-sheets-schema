@@ -1,0 +1,703 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-08-29T04:42:59+00:00'
+run:
+  label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+  project: AI_READI
+  method: claudecode_agent
+  arm: baseline
+  replicate: 1
+model:
+  generation_method: schema-grounded agentic, phase 1
+  agent_runtime: Claude Code
+  provider: Anthropic
+  model: claude-opus-5
+  mode: four-phase project agent, generic-v6 prompt
+  temperature: '0.0'
+  temperature_basis: asserted by the generating agent, not observed
+  shared_config:
+    path: .github/workflows/d4d_assistant_deterministic.config
+    name: claude-opus-5
+    temperature: 0.0
+    max_tokens: 16000
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: src/download/prompts/d4d_generic_arm_prompt_v6.md
+    sha256: 57ac203090ee6bab7ad89f4e1cecfe78dcf3fe6d29c44687d843c5e0215e9160
+    bytes: 13827
+    exists: true
+  request:
+    sha256: 6fe97d89104b5fb9c537f9409a8fe7c95f2cf195772c5ecb15e531e844ae9a02
+    bytes: 11219
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      condition: generic_v6
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: data/preprocessed/source_manifest.yaml'
+      run_date: '2026-08-29'
+      runtime: Claude Code
+      provider: Anthropic
+      bundle: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+    spec_basis: 'backfilled by d4d provenance backfill-spec: verified by re-rendering
+      to the recorded hash (#772)'
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: 9552cd7e5fca3576d647e467820849aa3b35f73664e2e065c2970db43f9d8313
+    bytes: 46172
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: a9a56cd791a6a4876e4dd756011460d6c7a24f634c928af8b0e2fc3057d6bc0d
+    bytes: 12138
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: 2b8889f4f698847294eb1c017f4bf095da3f0d919dc5903b984270df8f1c8278
+    bytes: 6910
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 34b47643a3de8b41a2cf4074219f04cdb8b817b4c80fac7932bcfb163570aec7
+    bytes: 8330
+    exists: true
+phase_log:
+  phases:
+  - phase: generate_full
+    ordinal: 1
+    completed: true
+    artifacts:
+    - AI_READI_d4d.yaml
+    - AI_READI_coverage_receipt.yaml
+  - phase: derive_core
+    ordinal: 2
+    completed: true
+    artifacts:
+    - AI_READI_d4d_core.yaml
+  - phase: source_audit
+    ordinal: 3
+    completed: true
+  - phase: reconcile
+    ordinal: 4
+    completed: true
+    iterations: 2
+  - phase: report
+    ordinal: 5
+    completed: true
+    artifacts:
+    - AI_READI_reconciliation.md
+  - phase: repair
+    ordinal: 6
+    completed: true
+    iterations: 1
+  - phase: report_after_repair
+    ordinal: 7
+    completed: true
+    artifacts:
+    - AI_READI_reconciliation.md
+  recorded_by: the run itself, as the playbook directs
+  unavailable:
+  - seconds
+  - input_tokens
+  - output_tokens
+  - stop_reason
+  unavailable_basis: this runtime has no access to its own token accounting or per-call
+    timing (#400); these are named rather than omitted so the gap reads as a limit
+    and not an oversight
+  run_observed:
+    total_tokens: 41179018
+    tool_uses: 125
+    duration_ms: 2448997
+    bundle_lines_read: 7030
+    bundle_lines_total: 7376
+    receipt_chunks_total: 28
+    receipt_chunks_unopened: 2
+    assistant_turns: 120
+    output_tokens: 184376
+    reasoning_tokens_estimate: 106315
+    thinking_blocks: 70
+    thinking_text_chars: 0
+    thinking_tokens: 57022
+    tool_input_chars: 306752
+    turns_with_thinking_tokens: 117
+    visible_text_chars: 6249
+  run_observed_basis: 'aggregate totals for the whole run, observed by the orchestrator
+    from the subagent runner''s transcript. One number per run, not per phase: four-phase
+    project-agent mode runs every phase in one context, so the run is the only observable
+    boundary. Not the runtime''s own accounting, no input/output split, not billing-grade;
+    deliberately not shaped like api_usage (#681/#682). total_tokens counts each API
+    message once (a response spans several transcript lines); duration_ms sums each
+    invocation''s own span, so a resumed run excludes the gap. bundle_lines_read is
+    the union of the run''s successful file-reading windows over the declared bundle
+    (#700): lines the run never opened, or opened only in a read that errored, may
+    have been reached by search, but nothing attests that. Of the transcript''s reasoning
+    measure (#1000/#1011) the observation carries assistant_turns, output_tokens,
+    thinking_blocks, thinking_text_chars, visible_text_chars, tool_input_chars, reasoning_tokens_estimate;
+    comparable in kind with the API path''s reasoning log, never to be averaged with
+    it. reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate
+    of the text and tool-call payloads: a subtraction, an upper bound, not a measurement.
+    thinking_tokens and turns_with_thinking_tokens are the runtime''s own count on
+    the turns whose transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens
+    is fewer than the run''s turns the rest of the run''s thinking is unmeasured,
+    so the count is partial. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
+    thinking_blocks, thinking_text_chars, thinking_tokens, tool_input_chars, turns_with_thinking_tokens,
+    visible_text_chars were added after the run, under run_observed_extended, which
+    names the source.'
+  run_observed_extended:
+  - keys_added:
+    - assistant_turns
+    - output_tokens
+    - reasoning_tokens_estimate
+    - thinking_blocks
+    - thinking_text_chars
+    - thinking_tokens
+    - tool_input_chars
+    - turns_with_thinking_tokens
+    - visible_text_chars
+    instrument: 'the transcript''s reasoning measure (#1000/#1011), recomputed by
+      scripts/agentic_observed.py from the transcripts named on the bytes the record
+      hashed, over the whole transcript: the record records no cut; every prior key
+      reproduced exactly'
+    identification:
+      sets_tried: 12
+      prior_keys: 7
+      discriminating_keys:
+      - bundle_lines_read
+      - duration_ms
+      - receipt_chunks_unopened
+      - tool_uses
+      - total_tokens
+      best_other_reproduces: 2
+      best_other_reproduces_discriminating: 0
+    transcripts:
+    - agent-av6-AI_READI-rep1-341aabe9b7a61d48.jsonl
+    transcript_sha256:
+      agent-av6-AI_READI-rep1-341aabe9b7a61d48.jsonl: c020a75ba73a5293238b75e58cef1c93e00b084a372f38d6a4ea11b8a568a4ee
+    observer_sha256: 1bdeb4fde0bc28a63d9615acba9e53f70db027668086be35ceae8d12c369c0a8
+    bundle_basis:
+      source: git blob
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+      md5: 0f3abb51a333555456bedd63891fcd99
+      matched_on:
+      - md5
+    recorded_by: d4d provenance extend-observed (#1010)
+    recorded_at: '2026-09-10T08:36:10+00:00'
+    basis_added: ' Of the transcript''s reasoning measure (#1000/#1011) the observation
+      carries assistant_turns, output_tokens, thinking_blocks, thinking_text_chars,
+      visible_text_chars, tool_input_chars, reasoning_tokens_estimate; comparable
+      in kind with the API path''s reasoning log, never to be averaged with it. reasoning_tokens_estimate
+      is output tokens minus a 4-chars-per-token estimate of the text and tool-call
+      payloads: a subtraction, an upper bound, not a measurement. thinking_tokens
+      and turns_with_thinking_tokens are the runtime''s own count on the turns whose
+      transcript line carries usage.output_tokens_details; where turns_with_thinking_tokens
+      is fewer than the run''s turns the rest of the run''s thinking is unmeasured,
+      so the count is partial. Of these, assistant_turns, output_tokens, reasoning_tokens_estimate,
+      thinking_blocks, thinking_text_chars, thinking_tokens, tool_input_chars, turns_with_thinking_tokens,
+      visible_text_chars were added after the run, under run_observed_extended, which
+      names the source.'
+schema:
+  declared_version: 2.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  merged_schema_carries_version: true
+  digest_md5: 580992ed7037762157c110fc9e671c81
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: 92283efd3343d80b307c2a18391651d8fee055ce
+  commit_short: 92283efd
+  branch: receipt-full-cap
+  dirty: true
+  dirty_file_count: 13
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: Apple M1 Max
+  memory_bytes: 68719476736
+inputs:
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  chunks:
+    path: data/preprocessed/chunks/AI_READI_chunks.yaml
+    sha256: 631788768d84a9ae689f722a37f2244be4f67393de390c2055585b81f27f33cf
+    rule:
+      version: 2
+      unit: source-document
+      boundary: 'FILE: line followed by PATH: or ROLE:'
+      preamble: own-chunk
+      split: line-window
+      max_lines: 400
+      max_bytes: 48000
+    chunk_count: 28
+  receipt_expected: true
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  bundle_bytes: 535189
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: data/preprocessed/source_manifest.yaml
+    md5: 6c71e8d26497a5808e09e2edd19c1ba4
+outputs:
+  full:
+    path: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml
+    bytes: 98700
+    slots: 82
+  core:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d_core.yaml
+    bytes: 87515
+    slots: 69
+  report:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_reconciliation.md
+    bytes: 16721
+    slots: null
+companions:
+  reasoning_log:
+    path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_reasoning.jsonl
+    present: false
+    md5: null
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/2026-08-28_claude-opus-5-claudecode-generic-v6.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: dd0cd5fd0dee6e95a2d2104cad22ac0d
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: 25da69bd7533b1f1b950d15a9589b7e3
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable: null
+unverified:
+- field: model.temperature
+  value: '0.0'
+  reason: the Claude Code runtime does not expose a temperature setting to the agent
+    or to this recorder; the header value restates the prompt template rather than
+    a measured parameter. A direct API run can observe it.
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''claude-opus-5''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+notes: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml
+      md5: bb0833cd6a648708b90893c3a20aedca
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d_core.yaml
+      md5: 5824870f4fd4c91c642b58756cd20865
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: d4d runs validate
+pair_consistency:
+  ran: true
+  consistent: true
+  errors: 0
+  warnings: 1
+  identity_slots: 79
+  schema_moved: false
+  findings: []
+  findings_truncated: null
+  artifacts:
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml
+      md5: bb0833cd6a648708b90893c3a20aedca
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d_core.yaml
+      md5: 5824870f4fd4c91c642b58756cd20865
+  schema:
+    full_sha256: e3099fdce1b56140f2776f8c2db183e884cc961f05d94db7892614df80fc8efd
+    core_sha256: c35cb89caa003ce418c6b79f1ec9ccc9eabacc5bde62cc6e8b39218266c76177
+  recorded_by: d4d provenance record
+  semantic_review:
+    warning: semantic-review-required
+    verdict: consistent
+    reviewed_by: supplemental pair review, Claude agent (d4d-review-record protocol;
+      read-only pass over full and core records)
+    method: id-matched field diff, whitespace-normalized, plus reading of every non-identical
+      block
+    evidence: '10 file_collections <-> 10 distributions matched by id; names/descriptions
+      byte-identical; all 9 byte totals equal full total_bytes (e.g. retinal_oct 1317625293027);
+      no core-only distributions. Full''s 9 ark: subcrate resources have no core counterpart
+      - granularity, not contradiction.'
+    recorded_by: '#691 supplemental attestation (PR pair-warning-attestation)'
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 0
+  claims_unnamed: 0
+  disposition_rows: 0
+  rows_by_record:
+    full: 0
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
+  claims_core_cannot_hold: 0
+  snapshot_checked: false
+  snapshot_basis: null
+  prose_retention_claims: 0
+  removals_unrecorded: []
+  removals_unrecorded_count: null
+  instrument: 'v7 (#1089, #1194, #1196): attributed schema claims, exact nested paths
+    and record scopes, table positions, mixed list counts and removal suppression
+    are distinguished; phase-1 snapshot bytes are pinned; v6 (#994): a `both` row''s
+    path is judged step by step against the core class''s declared ranges rather than
+    at its root alone, a `[*]` wildcard is a step''s subscript rather than a step
+    of its own, and `claims_core_cannot_hold` counts only a path the core cannot hold:
+    one that descends through a scalar violates the core schema''s declared range,
+    carries its own cause and is excluded from that count; v5 (#1054): with the phase-1
+    snapshot on disk, a top-level slot the snapshot carried that the final full record
+    does not, with no `removed` row or removal sentence naming it, is `removal_not_recorded`;
+    a prose retention claim (`remains in`, `stays in`, `is kept in`, `is retained
+    in` a backticked path) is read like a retained row; v4 (#1122): `rows_by_record`
+    tallies the dispositions rows by their record column — `full`, `core`, `both`,
+    `either` for an empty cell, `no_record_column` for a table with no such column,
+    `invalid` for anything else — so a `both` row wrongly flipped to `full`, which
+    the gate cannot see (a `full` row resolves against the full record only), is countable
+    from the block; v3 (#1022, #1046): a schema claim that names its own scope — the
+    core schema, the full schema, a class — is resolved against that scope only, not
+    against every class; v2 (#990): a finding on a `both` row names when the core
+    class declares no such slot; `claims_core_cannot_hold` counts them'
+  artifacts:
+    report:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_reconciliation.md
+      md5: c2919d6a99dd697db30c899b2bdc7a41
+    full:
+      path: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml
+      md5: bb0833cd6a648708b90893c3a20aedca
+    core:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d_core.yaml
+      md5: 5824870f4fd4c91c642b58756cd20865
+    phase1_snapshot: null
+  schema:
+    full_sha256: ea595c4bd45c54c1b9b7f273ca6e4011b7e65bf69e42d92c9962158c45c195da
+    core_sha256: 7fcd7ddda719236185169f26c53ce9dc1c5afe11f0f8839120a01a82a9460449
+  recorded_by: backfill_checks
+grounding:
+  checked: true
+  counts:
+    grounded: 66
+    minted_fragment: 20
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 22
+    minted_fragment: 10
+    absent: 0
+  artifacts:
+    bundle:
+      path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+      md5: 0f3abb51a333555456bedd63891fcd99
+  recorded_by: d4d provenance record
+form:
+  checked: true
+  records:
+  - data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml
+  - data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d_core.yaml
+  undeclared_prefixes: {}
+  undeclared_prefix_occurrences: 0
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
+  british_spellings: 0
+  organisational_fragments: 0
+  gc_label_variants:
+    AI READI: 2
+  gc_label_variant_occurrences: 2
+  recorded_by: backfill_checks
+  instrument_note: 'form recomputed 2026-09-02 under british instrument v3 (#836/#859);
+    previous british=0 | form recomputed 2026-09-09 by backfill-checks --overwrite,
+    british instrument v4 (#1006; v3 #836/#859), prefix instrument v3 (#982): ark
+    excluded, mailto excluded on Person ids only, urn by NID; previous british=0,
+    previous undeclared_prefixes=0'
+receipts:
+  expected: true
+  non_checks:
+  - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+    sample by chunk id in review
+  - that a verified snippet supports the value it is attached to — a snippet can be
+    real and irrelevant; sample by slot path in review
+  checked: true
+  instrument: 'v3 (#1053): an entry whose identity key the final list no longer carries
+    anywhere (a minted id reconciliation stripped) is located as a keyless entry —
+    by overlap, else by position for the same shape when the list kept its length
+    (`same_key_stripped`, counted under `slots.located_after_key_stripped`) — instead
+    of declared dropped; v2 (#1123): a fragment minted on an identifier the record
+    carries for the dataset at its top level — its id in CURIE or resolver form, its
+    doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
+  chunks:
+    total: 28
+    reviewed: 28
+    unreviewed: []
+    by_status:
+      extracted: 25
+      redundant_with: 0
+      nothing_relevant: 3
+      duplicate_of: 0
+  snippets:
+    total: 580
+    verified: 580
+    linewrap_joined: 0
+    adjacent: 0
+    elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
+    mismatched: 0
+    unchecked: 0
+    no_value_overlap: 63
+    no_value_overlap_sample:
+    - chunk: c002
+      slot: creators[12].affiliations[0].name
+      snippet: Ophthalmology and Visual
+    - chunk: c002
+      slot: acquisition_methods[0].acquisition_details
+      snippet: identified by screening elec- tronic health records for ICD-
+    - chunk: c002
+      slot: subpopulations[0].distribution
+      snippet: Pregnancy  and  type  1 diabetes are exclusionary for partic
+    - chunk: c003
+      slot: instances[0].label_description
+      snippet: Asks about social determinants of health and access to healt
+    - chunk: c004
+      slot: conforms_to_standard[1]
+      snippet: the DICOM format for retinal  imaging
+    - chunk: c005
+      slot: variables[1].measurement_technique
+      snippet: Number of steps Heart rate Sleep duration (circadian and diu
+    - chunk: c005
+      slot: data_governance.committee_name
+      snippet: The requirements for controlled access data sets are being c
+    - chunk: c005
+      slot: related_datasets[0].target_dataset
+      snippet: 'AI- READI Consortium. AI- READI: rethinking AI data collecti'
+    - chunk: c006
+      slot: collection_mechanisms[14].description
+      snippet: Shaffer J, Gim N, Wei R, et al. Portable environmental senso
+    - chunk: c007
+      slot: instances[0].instance_type
+      snippet: which includes pre-visit questionnaires, on-site data collec
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
+  slots:
+    populated: 667
+    exempt: 28
+    exempt_on_carried_identifier: 0
+    receiptable: 639
+    with_receipt: 348
+    without_receipt:
+    - conforms_to_standard
+    - creators[1].affiliations[0].name
+    - creators[2].affiliations[0].id
+    - creators[2].affiliations[0].name
+    - creators[2].description
+    - creators[3].affiliations[0].name
+    - creators[5].description
+    - creators[6].affiliations[0].name
+    - creators[6].description
+    - creators[7].affiliations[0].name
+    - creators[7].description
+    - creators[8].affiliations[0].id
+    - creators[8].affiliations[0].name
+    - creators[8].description
+    - creators[9].affiliations[0].id
+    - creators[9].affiliations[0].name
+    - creators[10].description
+    - creators[11].affiliations[0].name
+    - creators[12].affiliations[0].id
+    - creators[14].affiliations[0].id
+    - creators[14].affiliations[0].name
+    - creators[15].affiliations[0].id
+    - creators[15].affiliations[0].name
+    - creators[15].description
+    - creators[16].affiliations[0].name
+    - funders[0].grants[1].description
+    - funders[0].grants[2].grant_number
+    - funders[0].grants[2].description
+    - funders[1].description
+    - funders[2].grantor
+    - funders[2].description
+    - funders[3].grantor
+    - funders[3].description
+    - funders[4].grantor
+    - funders[4].description
+    - funders[5].grantor
+    - funders[5].description
+    - funders[6].grantor
+    - funders[6].description
+    - funders[7].grantor
+    - funders[7].description
+    - funders[8].grantor
+    - funders[8].description
+    - funders[9].grantor
+    - purposes[3].response
+    - instances[0].label
+    - subpopulations[1].identification
+    - subpopulations[3].identification
+    - sensitive_elements[0].sensitive_elements_present
+    - sensitive_elements[1].sensitive_elements_present
+    without_receipt_truncated: 241
+    never_receipted: null
+    added_after_receipt: null
+    receipt_paths: 380
+    unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: null
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: null
+    located_after_key_stripped: []
+    located_after_key_stripped_count: null
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: null
+    reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
+  findings: []
+  findings_truncated: null
+  findings_gated: 0
+  summary: chunks 28/28 reviewed · snippets 580/580 verified (63 bearing on no token
+    of their value) · slots 348/639 with a receipt (28 exempt)
+  artifacts:
+    receipt:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_coverage_receipt.yaml
+      sha256: 40614b6d8174a7fbb6fc1662813e6b5ee46ee519e8caf4e50087e3e3919651f0
+    manifest:
+      path: null
+      rule:
+        version: 2
+        unit: source-document
+        boundary: 'FILE: line followed by PATH: or ROLE:'
+        preamble: own-chunk
+        split: line-window
+        max_lines: 400
+        max_bytes: 48000
+      chunk_count: 28
+      bundle_md5: 0f3abb51a333555456bedd63891fcd99
+      bundle_sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+  bundle_basis:
+    source: git blob
+    path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+    commit: 9049904493393a6ce1db69b9fe0a855ce0db4435
+    committed_on: '2026-08-12'
+    md5: 0f3abb51a333555456bedd63891fcd99
+    sha256: a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca
+    matched_on:
+    - md5
+    manifest: chunked in memory under the record's own inputs.chunks.rule (#1140)
+  recorded_by: backfill_checks
+review:
+  checked: true
+  items_total: 68
+  items_answered: 68
+  unanswered: []
+  unanswered_truncated: null
+  by_kind:
+    chunk_nothing_relevant:
+      confirmed: 3
+    slot_receipted:
+      weak: 2
+      supported: 23
+    slot_receiptless:
+      bundle_supports: 24
+      exempt_by_nature: 1
+    rule:
+      followed: 13
+      violated: 2
+  adverse: 4
+  cannot_tell: 0
+  findings: []
+  summary: items 68/68 answered · 4 adverse · 0 cannot_tell
+  reviewer:
+    reviewer: d4d-review-record
+    model: claude-fable-5
+    reviewed_at: '2026-08-30T08:12:15Z'
+  artifacts:
+    pack:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_review_pack.yaml
+      sha256: 2c50bdd41ebb5b450a6d2b62f886cb6e9f42c0030242730c8336c719810be6a4
+    review:
+      path: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_review.yaml
+      sha256: a3bd94c00a11f3ef96c163b9d857a7eb981f4ad19376ade05dafb684507f29d5
+  recorded_by: d4d review check
+canonical_history:
+- criterion: full and core both validate against the current schema, then most slots,
+    then lowest label
+  selected_from:
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep2
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+    slots: 80
+    validation: valid
+    validation_recorded_at_run_time: valid
+  margin_over_runner_up: 2
+  selected_by: d4d runs select
+  supersedes:
+  - 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  - 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  superseded_by:
+    label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+    at: '2026-09-03T00:10:38+00:00'
+    by: d4d runs select
+canonical:
+  criterion: full and core both validate against the current schema, then fewest review
+    adverse verdicts (differences of at most 2 a tie), then most slots, then lowest
+    label
+  selected_from:
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+    slots: 82
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 4
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep2
+    slots: 79
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 4
+  - label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+    slots: 80
+    validation: valid
+    validation_recorded_at_run_time: valid
+    review_adverse: 13
+  margin_over_runner_up: 3
+  runtime: agentic
+  supersedes_runtimes: agentic
+  reviews_applied: true
+  review_margin: 2
+  selected_by: d4d runs select
