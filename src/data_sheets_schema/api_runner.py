@@ -822,7 +822,7 @@ class RunSpec:
         if self._api_header_values is None:
             if self._replay_only:
                 raise ValueError("renderer v8 requires recorded API header values")
-            self._api_header_values = request_header_values(_model_settings())
+            self._api_header_values = request_header_values(_model_settings(self.condition))
         return dict(self._api_header_values)
 
     def bind_api_header_values(self, settings: dict[str, Any]) -> None:
@@ -1291,7 +1291,7 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
         body = adapt_template(body, version=spec.api_playbook_version)
     ident = provider_identity()
     api_values = spec.api_header_values if spec.render_version >= 8 and not spec.is_agentic else None
-    settings = _model_settings() if api_values is None else None
+    settings = _model_settings(spec.condition) if api_values is None else None
     subs = {
         "{PROJECT}": spec.project,
         "{ARM}": spec.arm,
@@ -1579,7 +1579,9 @@ def native_evidence_instructions(spec: RunSpec) -> str:
     )
 
 
-def _model_settings() -> dict[str, Any]:
+def _model_settings(condition: str | Any | None = None) -> dict[str, Any]:
+    if hasattr(condition, "condition"):
+        condition = condition.condition
     cfg = load_generation_config()
     found = bool(cfg)
     m = (cfg.get("model") or {}) if isinstance(cfg, dict) else {}
@@ -1611,7 +1613,10 @@ def _model_settings() -> dict[str, Any]:
         settings["config_note"] = (f"{DETERMINISTIC_CONFIG} was not found (from the working directory, the "
                                    "checkout or the installed package); the built-in defaults above apply")
     if accepts_adaptive_thinking(name):
-        settings["thinking"] = {"type": "adaptive"}
+        if condition == "generic_v10":
+            settings["thinking"] = {"type": "adaptive", "display": "summarized"}
+        else:
+            settings["thinking"] = {"type": "adaptive"}
     else:
         settings["thinking_note"] = (
             f"not requested: {name} is not on the list of families known to "
@@ -2899,7 +2904,7 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     Lets the whole assembly — prompt resolution, caching layout, token cost — be
     inspected and tested without a key or a charge.
     """
-    settings = _model_settings()
+    settings = _model_settings(spec.condition)
     spec.bind_api_header_values(settings)
     if spec.shared_generation_version:
         from .shared_generation import plan as shared_plan
@@ -6712,7 +6717,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
 
     from data_sheets_schema.provenance import build_record, record_path_for
 
-    settings = _model_settings()
+    settings = _model_settings(spec.condition)
     spec.bind_api_header_values(settings)
     if spec.shared_generation_version:
         from .shared_generation import preflight as shared_preflight

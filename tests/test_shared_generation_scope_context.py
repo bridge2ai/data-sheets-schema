@@ -91,7 +91,7 @@ def test_real_regate_helper_preserves_scope_and_selected_report_instruction(sele
         sg.require_generation_context(spec, kwargs['messages'])
         raise RuntimeError('stop after capturing actual helper request')
     monkeypatch.setattr(api, '_call_with_usage', capture)
-    settings = api._model_settings()
+    settings = api._model_settings(selected.condition)
     assert api._regenerate_report(selected, object(), settings, [], CARRY,
         phase='report_regate', contradictions=[{'kind': 'synthetic', 'detail': 'check'}]) is False
     assert len(calls) == 1 and calls[0][0] == 'report_regate'
@@ -114,7 +114,7 @@ def test_selected_shape_repair_adds_only_scope_metadata(selected, monkeypatch):
         runtime.require_request(spec, phase, kwargs)
         raise RuntimeError('stop after actual selected repair construction')
     monkeypatch.setattr(api, '_call_with_usage', capture)
-    result = api._repair_invalid(selected, object(), api._model_settings(), [])
+    result = api._repair_invalid(selected, object(), api._model_settings(selected.condition), [])
     assert len(calls) == 1 and calls[0][0] == 'repair_full'
     messages = deepcopy(calls[0][1]['messages'])
     block = messages[0]['content'].pop(-2)
@@ -200,7 +200,7 @@ def test_unique_future_owner_is_deferred_until_record_exists(external):
     reg = _context_registration(external, lambda context: context['scopes'].append(
         dict(context['scopes'][0], owner='/creators/0')))
     spec = selected_spec(external, reg)
-    captured = sg.preflight(spec, api._model_settings())
+    captured = sg.preflight(spec, api._model_settings(spec.condition))
     assert api.build_phase(spec, 'full', carry={}).messages
     assert not spec.full_path.exists()
     receipt = yaml.safe_dump({'bundle_md5': hashlib.md5(spec.bundle.read_bytes()).hexdigest(), 'chunks': []}).encode()
