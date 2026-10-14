@@ -339,6 +339,14 @@ ACCEPTED_DISAGREEMENTS: Dict[str, Listed] = {
         ('skos:exactMatch schema:contentUrl',),
         _STRENGTH_ONLY.format(schema='slot_uri schema:contentUrl',
                               ttl='narrowMatch')),
+    # #4036: the TTL's slot-level triple follows the DatasetRelationship
+    # class the slot holds. schema:isRelatedTo points to a related product;
+    # the slot holds typed relationships to other datasets.
+    'related_datasets': Listed(
+        ('skos:closeMatch schema:isRelatedTo',),
+        ('skos:exactMatch schema:isRelatedTo',),
+        _STRENGTH_ONLY.format(schema='slot_uri schema:isRelatedTo',
+                              ttl='closeMatch')),
 }
 
 #: Disagreements where one side is probably wrong. The TTL still wins the row
