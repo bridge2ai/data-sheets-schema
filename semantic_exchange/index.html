@@ -645,16 +645,22 @@ make check-sssom-comprehensive
 <td><code>https://w3id.org/bridge2ai/data-sheets-schema/</code></td>
 <td>D4D-specific terms with no external equivalent</td>
 </tr>
+<tr>
+<td><code>rdf</code></td>
+<td><code>http://www.w3.org/1999/02/22-rdf-syntax-ns#</code></td>
+<td>One slot-level triple, <code>id</code> to <code>rdf:ID</code>, an open disagreement in <code>generate_comprehensive_sssom.py</code></td>
+</tr>
 </tbody>
 </table>
 <h2 id="coverage-at-a-glance">Coverage at a glance</h2>
 <ul>
-<li><strong>108</strong> rows in the semantic SSSOM</li>
-<li><strong>156</strong> rows in the structural SSSOM</li>
-<li><strong>112</strong> SKOS mapping triples</li>
-<li><strong>6</strong> SKOS predicates in use (<code>exactMatch</code>, <code>closeMatch</code>, <code>relatedMatch</code>, <code>narrowMatch</code>, <code>broadMatch</code>, plus class-level alignments)</li>
-<li><strong>5</strong> target namespaces (schema.org, DCAT, EVI, RAI, d4d-internal)</li>
+<li><strong>301</strong> rows in each comprehensive SSSOM table, one per schema slot name</li>
+<li><strong>165</strong> rows in the structural SSSOM</li>
+<li><strong>150</strong> SKOS mapping triples in the alignment TTL, whose <code>Alignment Statistics</code> block breaks them down by predicate and by target namespace</li>
+<li><strong>5</strong> SKOS predicates in use: <code>exactMatch</code>, <code>closeMatch</code>, <code>relatedMatch</code>, <code>narrowMatch</code>, <code>broadMatch</code></li>
+<li><strong>6</strong> target namespaces: schema.org, RAI, EVI, DCAT, d4d-internal, rdf</li>
 </ul>
+<p><code>tests/test_semantic_exchange/test_semantic_exchange_docs_counts.py</code> derives each number in this list from the file it counts, so a change that moves one fails until the list follows it (#4032).</p>
 
 
 
