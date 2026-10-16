@@ -42,6 +42,7 @@ def test_url_attribute_is_escaped():
     verify_values(value, output)
 
 
+@pytest.mark.corpus
 def test_published_bundle_matches_historical_sources_and_all_scalar_values():
     root = Path(__file__).resolve().parents[1]
     manifest = json.loads((root / "src/html/output/v8-publication.json").read_text())
@@ -70,6 +71,7 @@ def test_published_bundle_matches_historical_sources_and_all_scalar_values():
     assert css.decode() == CSS
 
 
+@pytest.mark.corpus
 def test_voice_placeholders_and_aireadi_grants_survive_publication():
     output = Path(__file__).resolve().parents[1] / "src/html/output"
     voice = (output / "D4D_-_VOICE_v8_human_readable.html").read_text()
