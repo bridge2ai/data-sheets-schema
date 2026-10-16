@@ -1,102 +1,109 @@
-"""
-d4d_to_synapse_table.py
+"""Publish the complete historical v8 HTML selection to Standards Explorer.
 
+#5055, 2026-10-16. Reads the four declared HTML files and dedicated stylesheet;
+updates the existing D4D_content table, preserving its schema and older snapshots.
 """
-import os
+
+from collections import Counter
 import csv
-import pandas as pd
-import synapseclient
-from synapseclient import Column, Schema, Table
+from pathlib import Path
 import sys
 
-def add_css(css_name: str, source_folder: str, d4d_dict: dict[str, list[str]]) -> dict[str, list[str]]:
-	"""Add CSS content to the D4D dictionary."""
-
-	css_path = os.path.join(source_folder, css_name)
-	
-	if os.path.exists(css_path):
-		with open(css_path, 'r') as css_file:
-			css_text = css_file.read()
-		d4d_dict["content_type"].append("css")
-		d4d_dict["content_id"].append("")
-		d4d_dict["content_text"].append(css_text)
-
-	return d4d_dict
+import pandas as pd
+import synapseclient
+from synapseclient import Table
 
 
-def add_html(file_org_map: dict[str, str], source_folder: str, html_name_parts: str, d4d_dict: dict[str, list[str]]) -> dict[str, list[str]]:
-	"""Add HTML content to the D4D dictionary."""
-
-	for org, id in file_org_map.items():
-		html_path = os.path.join(source_folder, "".join([html_name_parts[0], org, html_name_parts[1]]))
-		if os.path.exists(html_path):
-			with open(html_path, 'r') as html_file:
-				d4d_text = html_file.read()
-			d4d_dict["content_type"].append("html")
-			d4d_dict["content_id"].append(id)
-			d4d_dict["content_text"].append(d4d_text)
-
-	return d4d_dict
-
-
-def create_d4d_df(d4d_dict: dict[str, list[str]]) -> pd.DataFrame:
-	"""Create a DataFrame from the D4D dictionary."""
-	return pd.DataFrame.from_dict(d4d_dict)
+TABLE_ID = "syn68885644"
+SOURCE_FOLDER = Path("src/html/output")
+CSS_NAME = "datasheet-v8.css"
+HTML_TEMPLATE = "D4D_-_{project}_v8_human_readable.html"
+ORG_ID_MAP = {
+    "AI-READI": "B2AI_ORG:114",
+    "CHORUS": "B2AI_ORG:115",
+    "CM4AI": "B2AI_ORG:116",
+    "VOICE": "B2AI_ORG:117",
+}
+COLUMNS = ["content_type", "content_id", "content_text"]
+# Synapse documents LARGETEXT as less than 524,288 characters:
+# https://python-docs.synapse.org/en/v4.13.0/reference/experimental/sync/table/
+LARGETEXT_CHARACTER_LIMIT = 524_288
 
 
-def generate_table(syn, table_name: str, table_id: str|None, project_id: str, d4d_df: pd.DataFrame) -> Table:
-	"""Generate a Synapse table from the D4D DataFrame."""
+def _read_content(path: Path) -> str:
+    """Read exact UTF-8 text, refusing absent, blank or oversized inputs."""
+    text = path.read_bytes().decode("utf-8")
+    if not text.strip():
+        raise ValueError(f"Publication input is empty: {path}")
+    # Count UTF-16 units conservatively, including non-BMP characters supported
+    # by the Java-backed service, instead of assuming every character is ASCII.
+    if len(text.encode("utf-16-le")) // 2 >= LARGETEXT_CHARACTER_LIMIT:
+        raise ValueError(f"Publication input exceeds the Synapse LARGETEXT limit: {path}")
+    return text
 
-	table_cols = [  # Define table columns
-			Column(name="content_type", columnType="STRING"),
-			Column(name="content_id", columnType="STRING", maximumSize=30),
-			Column(name="content_text", columnType="LARGETEXT")
-		]
-	
-	# Generate table schema
-	table_schema = Schema(name=table_name, columns=table_cols, parent=project_id)
 
-	if table_id is not None:
-		csv.field_size_limit(sys.maxsize)
-		existing_rows = syn.tableQuery(f"select * from {table_id}")
-		syn.delete(existing_rows)
+def load_publication(source_folder: Path = SOURCE_FOLDER) -> pd.DataFrame:
+    """Load every required asset before authentication or any remote mutation."""
+    source_folder = Path(source_folder)
+    rows = [("css", "", _read_content(source_folder / CSS_NAME))]
+    for project, organization in ORG_ID_MAP.items():
+        path = source_folder / HTML_TEMPLATE.format(project=project)
+        rows.append(("html", organization, _read_content(path)))
+    return pd.DataFrame(rows, columns=COLUMNS)
 
-	d4d_table = Table(schema=table_schema, values=d4d_df)
-	syn.store(d4d_table)
-	syn.create_snapshot_version(table_id)
 
-	return d4d_table
+def _content_rows(frame: pd.DataFrame) -> Counter:
+    """Compare complete text and multiplicity independently of query row order."""
+    if not set(COLUMNS).issubset(frame.columns):
+        raise ValueError("Synapse query did not return the D4D content columns")
+    return Counter(frame[COLUMNS].fillna("").itertuples(index=False, name=None))
+
+
+def generate_table(syn, d4d_df: pd.DataFrame):
+    """Append and verify replacements before deleting the captured old rows.
+
+    Synapse's legacy client does not make this sequence atomic. A failed append
+    leaves the old rows intact; a later failure can leave extra current rows,
+    but no new snapshot is published until the complete final content verifies.
+    The portal continues to use its previously selected immutable snapshot.
+    A retry captures all current rows and safely replaces them with one set.
+    """
+    expected = _content_rows(d4d_df)
+    required = Counter({("css", ""): 1})
+    required.update(("html", org) for org in ORG_ID_MAP.values())
+    if Counter(d4d_df[COLUMNS[:2]].itertuples(index=False, name=None)) != required:
+        raise ValueError("Publication must contain one stylesheet and all four organizations")
+    if any(not isinstance(text, str) or not text.strip() for text in d4d_df.content_text):
+        raise ValueError("Publication content must be nonempty text")
+
+    # The HTML contains large CSV fields; this is local parsing configuration.
+    csv.field_size_limit(sys.maxsize)
+    query = f"SELECT content_type, content_id, content_text FROM {TABLE_ID}"
+    existing_rows = syn.tableQuery(query)
+    existing = _content_rows(existing_rows.asDataFrame())
+
+    # Passing the immutable table ID retains the existing schema. Do not create
+    # a same-named Schema and rely on name matching to find the published table.
+    uploaded = syn.store(Table(TABLE_ID, values=d4d_df))
+    staged = _content_rows(syn.tableQuery(query).asDataFrame())
+    if staged != existing + expected:
+        raise RuntimeError("Synapse upload verification failed; prior rows were not deleted")
+
+    if existing:
+        syn.delete(existing_rows)
+    actual = _content_rows(syn.tableQuery(query).asDataFrame())
+    if actual != expected:
+        raise RuntimeError("Synapse replacement verification failed; no snapshot was created")
+    version = syn.create_snapshot_version(TABLE_ID)
+    print(f"Published {len(d4d_df)} v8 content rows to {TABLE_ID}.{version}")
+    return uploaded
 
 
 def main():
-	"""Main function to extract D4D info and upload to Synapse"""
+    publication = load_publication()
+    syn = synapseclient.login()
+    generate_table(syn, publication)
 
-	syn = synapseclient.login()
-	
-	project_id = "syn63096806"  # standards-data Synapse project ID
-	table_id = "syn68885644"  # if provided, the table associated with this ID will be cleared before being updated with new entries
-	table_name = "D4D_content"  # if table_id was provided, table_name should match the name of the table associated with table_id
-	source_folder = "src/html/output"  # folder containing HTML and CSS files
-	html_name_parts = ["D4D_-_", "_v4_human_readable.html"]  # joined with org name in in org_id_map to create HTML paths
-	css_name = "datasheet-common.css"  # since a single CSS is in use, no need to select multiple or build distinct paths
 
-	d4d_dict = {  # initialize dict to store D4D info
-		"content_type": [],
-		"content_id": [],
-		"content_text": []
-		}
-    
-	org_id_map = {  # define relationships between GC labels and ORG_IDs
-		"AI-READI": "B2AI_ORG:114",
-		"CM4AI": "B2AI_ORG:116",
-		"VOICE": "B2AI_ORG:117",
-		"CHORUS": "B2AI_ORG:115"
-	}
-
-	updated_d4d_dict = add_css(css_name, source_folder, d4d_dict)
-	final_d4d_dict = add_html(org_id_map, source_folder, html_name_parts, updated_d4d_dict)
-	d4d_df = create_d4d_df(final_d4d_dict)
-	generate_table(syn, table_name, table_id, project_id, d4d_df)
-	
 if __name__ == "__main__":
-    main() 
+    main()
