@@ -87,7 +87,8 @@ class _GateFixture(unittest.TestCase):
 
     def _fixture(self, directory, *, event="pull_request", actor="trusted-user", body=None,
                  missing=None, base=BASE, default=DEFAULT, changes=None, controllers=None, content_author=None,
-                 event_data=None, comments=None, page_error=None, page_overrides=None, parser_text=None):
+                 event_data=None, comments=None, page_error=None, page_overrides=None, parser_text=None,
+                 base_branch="main"):
         tmp = Path(directory)
         candidate = tmp / "candidate"
         candidate.mkdir()
@@ -107,7 +108,7 @@ class _GateFixture(unittest.TestCase):
         python_bin = self._python(runtime)
         body = body if body is not None else f"{HANDLE} BranchOnly"
         author = actor if content_author is None else content_author
-        payload = {"pull_request": {"base": {"sha": base}, "head": {"sha": HEAD},
+        payload = {"pull_request": {"base": {"sha": base, "ref": base_branch}, "head": {"sha": HEAD},
                                     "body": body, "user": {"login": author}, "number": 7},
                    "issue": {"body": body, "user": {"login": author}, "number": 7},
                    "comment": {"body": body, "user": {"login": author}},
@@ -166,6 +167,20 @@ class _GateFixture(unittest.TestCase):
 
 
 class TestTrustedAssistantGate(_GateFixture):
+    def test_publication_target_follows_trusted_nondefault_base(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result, _, _ = self._fixture(directory, base_branch="release/candidate")
+            self.assertIsNone(result["error"])
+            self.assertEqual(result["outputs"]["gate-base-branch"], "release/candidate")
+            self.assertEqual(result["outputs"]["gate-base-sha"], BASE)
+
+    def test_missing_publication_base_refuses_before_authority_fetch(self):
+        for value in (None, "", "branch\nother"):
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as directory:
+                result, _, _ = self._fixture(directory, base_branch=value)
+                self.assertIsNotNone(result["error"])
+                self.assertEqual(result["calls"], [])
+
     def test_pr_base_gate_accepts_branch_only_input_despite_candidate_poison(self):
         with tempfile.TemporaryDirectory() as directory:
             result, candidate, runtime = self._fixture(directory)

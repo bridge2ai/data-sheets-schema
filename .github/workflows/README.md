@@ -17,8 +17,17 @@ implements that contract using the repository input-bundle/API path:
 2. `src/github/assistant_bundle.py` prepares every supported regular input file
    before generation, retaining source/conversion/bundle hashes in a manifest.
    Unsupported or unreadable input refuses; links and scripts are not fetched or run.
-3. The workflow calls `d4d api run` with that bundle, then validates the generated
-   full YAML before opening a PR and posting the workflow's status comment.
+3. `src/github/assistant_generation.py` registers the actual bundle and chunks,
+   neutral external-source scope, current schema closures and shared-generation
+   prompt assets. The workflow explicitly selects `generic_v10`, renderer 25,
+   API playbook 2 and receipt completion 2 through that registration.
+4. Trusted code runs `d4d api run` through CBORG without publication credentials.
+   Both full and core YAML must validate before a separate job publishes the
+   complete attempt in a unique output directory and posts the result.
+5. Evidence upload is attempted on success and failure; replies report whether
+   the artifact was retained. Failed attempts cannot
+   open a generated datasheet PR. See the assistant guide for credential setup,
+   admission ceilings and the live synthetic acceptance check.
 
 Only the selected input directory supplies source documentation. Additional issue
 prose and URLs are not generation inputs. Ordinary feedback does not instruct the

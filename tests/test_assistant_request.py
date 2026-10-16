@@ -498,9 +498,9 @@ class TestTheWorkflow(unittest.TestCase):
         self.assertEqual(self.check["outputs"]["dataset"], "${{ steps.request.outputs.dataset }}")
         self.assertEqual(self.step["request"]["if"], "steps.detect.outputs.allowed == 'true'")
         self.assertEqual(self.respond["if"], "needs.check-mention.outputs.qualified-mention == 'true'")
-        self.assertEqual(self.respond_step["resolve"]["env"], {"DATASET": "${{ needs.check-mention.outputs.dataset }}"})
-        self.assertIn('--project "${{ steps.resolve.outputs.dataset }}"',
-                      self.respond_step["Generate datasheet"]["run"])
+        self.assertEqual(self.respond_step["resolve"]["env"]["DATASET"], "${{ needs.check-mention.outputs.dataset }}")
+        self.assertEqual(self.respond_step["generate"]["env"]["DATASET"], "${{ needs.check-mention.outputs.dataset }}")
+        self.assertIn('--project "$DATASET"', self.respond_step["generate"]["run"])
         # nothing reads a dataset out of the request's free text any more
         self.assertNotIn("outputs.prompt", self.text)
         self.assertNotIn("mentionRegex", self.text)

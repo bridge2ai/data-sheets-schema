@@ -1,27 +1,21 @@
-"""Complete-directory preparation and actual workflow shell wiring (#4450).
+"""Complete-directory preparation (#4450).
 
 The three PDFs are synthetic PDF1.4 documents, never captured research data.
 encrypted.pdf is Standard Security R2 with an empty user password: accepting
 that password must still not admit an encrypted document. These tests run the
-real locked pdfminer converter. Only billed/remote workflow commands are faked.
+real locked pdfminer converter. Workflow wiring is in test_assistant_workflow.py.
 """
 import hashlib
 import importlib.util
 import json
 import os
 from pathlib import Path
-import re
-import shutil
-import subprocess
-import sys
 
 import pytest
-import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src/github/assistant_bundle.py"
-WORKFLOW = ROOT / ".github/workflows/d4d-agent.yml"
 FIXTURES = ROOT / "tests/fixtures/assistant_bundle"
 SPEC = importlib.util.spec_from_file_location("assistant_bundle", SCRIPT)
 bundle = importlib.util.module_from_spec(SPEC)
@@ -228,167 +222,3 @@ def test_publication_io_failure_returns_failure(workspace, monkeypatch, failed_n
                         "--output-dir", str(output), "--source-commit", HEAD,
                         "--github-output", str(output.parent / "github-output")]) == 1
     assert not (output.parent / "github-output").exists()
-
-
-SHIM = r'''import json, os, pathlib, sys
-name = pathlib.Path(sys.argv[0]).name
-args = sys.argv[1:]
-event = {'command': name, 'args': args}
-if name == 'poetry' and args[:2] == ['run', 'python']:
-    os.execv(sys.executable, [sys.executable, '-B'] + args[2:])
-if name == 'poetry' and args[:4] == ['run', 'd4d', 'api', 'run']:
-    source = pathlib.Path(args[args.index('--bundle') + 1])
-    event['bundle'] = source.read_bytes().hex()
-    target = pathlib.Path(args[args.index('--out-dir') + 1]); target.mkdir(parents=True, exist_ok=True)
-    project = args[args.index('--project') + 1]
-    for suffix in ['_d4d.yaml', '_d4d_core.yaml', '_reconciliation.md', '_provenance.yaml']:
-        (target / (project + suffix)).write_text('synthetic generated artifact\n')
-elif name == 'poetry' and args[:2] != ['run', 'linkml-validate']:
-    raise SystemExit('unexpected poetry invocation')
-if name == 'git' and args == ['rev-parse', 'HEAD']:
-    state = pathlib.Path(os.environ['GIT_STATE'])
-    event['resolved_head'] = state.read_text() if state.exists() else 'a' * 40
-    print(event['resolved_head'])
-elif name == 'git' and args[0] not in ['config', 'checkout', 'add', 'commit', 'push']:
-    raise SystemExit('unexpected git invocation')
-if name == 'git' and args[0] == 'add':
-    event['staged'] = {p: pathlib.Path(p).read_bytes().hex() for p in args[1:]}
-if name == 'git' and args[0] == 'commit':
-    pathlib.Path(os.environ['GIT_STATE']).write_text('b' * 40)
-if name == 'gh' and args[:2] == ['pr', 'create']:
-    print('https://example.invalid/synthetic-pr')
-elif name == 'gh' and args[:2] != ['issue', 'comment']:
-    raise SystemExit('unexpected gh invocation')
-with open(os.environ['EVENTS'], 'a') as stream:
-    stream.write(json.dumps(event) + '\n')
-'''
-
-
-def workflow_workspace(tmp_path):
-    work = tmp_path / "checkout"
-    work.mkdir()
-    script = work / "src/github/assistant_bundle.py"
-    script.parent.mkdir(parents=True)
-    shutil.copyfile(SCRIPT, script)
-    inputs = work / "data/sheets_d4dassistant/inputs/Unit"
-    inputs.mkdir(parents=True)
-    bindir = tmp_path / "bin"
-    bindir.mkdir()
-    for name in ["poetry", "git", "gh"]:
-        path = bindir / name
-        path.write_text("#!" + sys.executable + "\n" + SHIM)
-        path.chmod(0o700)
-    runtime = tmp_path / "runtime"
-    runtime.mkdir()
-    env = {"PATH": str(bindir) + os.pathsep + os.defpath,
-           "PYTHONDONTWRITEBYTECODE": "1", "RUNNER_TEMP": str(runtime),
-           "GITHUB_OUTPUT": str(tmp_path / "github-output"), "DATASET": "Unit",
-           "GIT_STATE": str(tmp_path / "generated-commit"),
-           "EVENTS": str(tmp_path / "events.jsonl")}
-    return work, inputs, env
-
-
-def run_step(step, work, env, values):
-    def replace(match):
-        key = match.group(1).strip()
-        assert key in values, key
-        return values[key]
-
-    text = re.sub(r"\$\{\{(.*?)\}\}", replace, step["run"])
-    return subprocess.run(["/bin/bash", "-e"], input=text, text=True, cwd=work,
-                          env=env, capture_output=True, timeout=30)
-
-
-def steps():
-    workflow = yaml.safe_load(WORKFLOW.read_text())
-    respond = workflow["jobs"]["respond-to-mention"]
-    return workflow, {s.get("id") or s["name"]: s for s in respond["steps"]}
-
-
-def test_actual_workflow_shell_hands_complete_bundle_and_stages_manifest(tmp_path):
-    work, inputs, env = workflow_workspace(tmp_path)
-    docs = mixed(inputs)
-    _, selected = steps()
-    result = run_step(selected["resolve"], work, env, {})
-    assert result.returncode == 0, result.stderr
-    outputs = dict(line.split("=", 1) for line in Path(env["GITHUB_OUTPUT"]).read_text().splitlines())
-    values = {"steps.resolve.outputs." + k: v for k, v in outputs.items()}
-    values["needs.check-mention.outputs.item-number"] = "123"
-    values["github.server_url"] = "https://example.invalid"
-    values["github.repository"] = "owner/repository"
-    for name in ["Generate datasheet", "Validate against the schema", "pr"]:
-        result = run_step(selected[name], work, env, values)
-        assert result.returncode == 0, (name, result.stderr)
-    events = [json.loads(line) for line in Path(env["EVENTS"]).read_text().splitlines()]
-    generation = [e for e in events if e["command"] == "poetry" and e["args"][:4] == ["run", "d4d", "api", "run"]]
-    assert len(generation) == 1
-    assert generation[0]["args"] == ["run", "d4d", "api", "run", "--project", "Unit",
-        "--bundle", outputs["bundle"], "--out-dir", "data/sheets_d4dassistant",
-        "--label", outputs["label"], "--yes"]
-    raw = bytes.fromhex(generation[0]["bundle"])
-    manifest_path = work / "data/sheets_d4dassistant/Unit_input_manifest.json"
-    manifest = json.loads(manifest_path.read_bytes())
-    assert manifest_path.read_bytes() == Path(outputs["input-manifest"]).read_bytes()
-    assert [row["path"] for row in manifest["members"]] == sorted(docs)
-    assert manifest["bundle"]["sha256"] == hashlib.sha256(raw).hexdigest()
-    added = next(e for e in events if e["command"] == "git" and e["args"][0] == "add")
-    assert len(added["staged"]) == 5
-    assert bytes.fromhex(added["staged"]["data/sheets_d4dassistant/Unit_input_manifest.json"]) == manifest_path.read_bytes()
-    pr = next(e for e in events if e["command"] == "gh")
-    body = pr["args"][pr["args"].index("--body") + 1]
-    expected_url = ("https://example.invalid/owner/repository/blob/" + "b" * 40
-                    + "/data/sheets_d4dassistant/Unit_input_manifest.json")
-    assert f"[Input manifest]({expected_url})" in body
-    assert manifest["bundle"]["sha256"] in body
-    assert manifest["source_commit"] == "a" * 40
-    heads = [(i, event["resolved_head"]) for i, event in enumerate(events)
-             if "resolved_head" in event]
-    commit_index = next(i for i, event in enumerate(events)
-                        if event["command"] == "git" and event["args"][0] == "commit")
-    push_index = next(i for i, event in enumerate(events)
-                      if event["command"] == "git" and event["args"][0] == "push")
-    assert [head for _, head in heads] == ["a" * 40, "b" * 40]
-    assert heads[0][0] < commit_index < heads[1][0] < push_index
-    assert f"All {len(docs)} input documents" in body
-
-
-@pytest.mark.parametrize("kind", ["invalid-utf8", "unknown", "empty", "encrypted", "symlink"])
-def test_preparation_failure_blocks_workflow_generation_and_reports(tmp_path, kind):
-    work, inputs, env = workflow_workspace(tmp_path)
-    if kind == "invalid-utf8":
-        (inputs / "bad.txt").write_bytes(b"\xff")
-    elif kind == "unknown":
-        (inputs / "bad.zip").write_bytes(b"zip")
-    elif kind == "encrypted":
-        (inputs / "bad.pdf").write_bytes((FIXTURES / "encrypted.pdf").read_bytes())
-    elif kind == "symlink":
-        (inputs / "bad.txt").symlink_to(tmp_path / "absent")
-    _, selected = steps()
-    result = run_step(selected["resolve"], work, env, {})
-    assert result.returncode != 0
-    assert not Path(env["GITHUB_OUTPUT"]).exists()
-    for name in ["Generate datasheet", "Validate against the schema", "pr"]:
-        assert "if" not in selected[name]  # Actions' default success prerequisite.
-    values = {"job.status": "failure", "steps.resolve.outcome": "failure",
-              "steps.resolve.outputs.dataset": "", "steps.pr.outputs.url": "",
-              "needs.check-mention.outputs.item-number": "123",
-              "github.server_url": "https://example.invalid", "github.repository": "a/b",
-              "github.run_id": "99"}
-    result = run_step(selected["Report back on the issue"], work, env, values)
-    assert result.returncode == 0, result.stderr
-    events = [json.loads(line) for line in Path(env["EVENTS"]).read_text().splitlines()]
-    assert all(e["command"] != "poetry" for e in events)
-    assert not any(e["command"] == "git" and e["args"][0] != "rev-parse" for e in events)
-    assert "before generation" in events[-1]["args"][-1]
-
-
-def test_no_request_is_not_eligible_and_generation_keeps_exact_options():
-    workflow, selected = steps()
-    jobs = workflow["jobs"]
-    assert jobs["respond-to-mention"]["if"] == "needs.check-mention.outputs.qualified-mention == 'true'"
-    assert jobs["check-mention"]["outputs"]["qualified-mention"] == "${{ steps.request.outputs.request }}"
-    assert selected["resolve"]["env"] == {"DATASET": "${{ needs.check-mention.outputs.dataset }}"}
-    assert "outputs.prompt" not in WORKFLOW.read_text()
-    assert "find " not in selected["resolve"]["run"] and "head -1" not in selected["resolve"]["run"]
-    assert "--condition" not in selected["Generate datasheet"]["run"]
-    assert "--yes" in selected["Generate datasheet"]["run"]

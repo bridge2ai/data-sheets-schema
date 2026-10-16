@@ -1,0 +1,50 @@
+{
+  "added": [],
+  "baseline": {
+    "bytes": 1056435,
+    "commit": "146ffadd6d8dfbd64ea6c6d571a73407292c6631",
+    "path": "/private/tmp/d4d-assistant-audit-20261016/baseline/report.json",
+    "root": "d4d-assistant-baseline-20261016",
+    "sha256": "6abb5c339802ecc63cafae96cbec455d08c2dfa869d6d455777f0bbc3b171704"
+  },
+  "baseline_by_approach": {
+    "api": 0,
+    "deterministic": 1,
+    "github_assistant": 0,
+    "interactive_session": 2,
+    "legacy_monolithic": 78,
+    "native_agentic": 7,
+    "offline_draft": 0,
+    "other_model_client": 0,
+    "run_controllers": 11,
+    "shared_input": 0,
+    "shared_schema": 0
+  },
+  "baseline_violations": 97,
+  "candidate": {
+    "bytes": 1075880,
+    "commit": "ce105b4d72739e6a11e768e3cc7e4b90f003b629",
+    "path": "/private/tmp/d4d-assistant-audit-20261016/final/report.json",
+    "root": "d4d-assistant-2088-20261016",
+    "sha256": "523cd71a64e336cbcf110f93d428ad631cc8ff8bcacffd0d3bd99823ddd11755"
+  },
+  "candidate_by_approach": {
+    "api": 0,
+    "deterministic": 1,
+    "github_assistant": 0,
+    "interactive_session": 2,
+    "legacy_monolithic": 78,
+    "native_agentic": 7,
+    "offline_draft": 0,
+    "other_model_client": 0,
+    "run_controllers": 11,
+    "shared_input": 0,
+    "shared_schema": 0
+  },
+  "candidate_violations": 97,
+  "format": "assistant_specificity_comparison_v1",
+  "identical_violations": 97,
+  "issue": 2088,
+  "meaning": "Unchanged findings remain unresolved; equality does not establish a globally clean scan.",
+  "removed": []
+}
