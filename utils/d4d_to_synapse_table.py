@@ -5,13 +5,12 @@ updates the existing D4D_content table, preserving its schema and older snapshot
 """
 
 from collections import Counter
-import csv
 from pathlib import Path
-import sys
 
 import pandas as pd
 import synapseclient
-from synapseclient import Table
+from synapseclient import Row, RowSet
+from synapseclient.table import SelectColumn
 
 
 TABLE_ID = "syn68885644"
@@ -59,6 +58,29 @@ def _content_rows(frame: pd.DataFrame) -> Counter:
     return Counter(frame[COLUMNS].fillna("").itertuples(index=False, name=None))
 
 
+def _capture_rows(syn, query: str) -> RowSet:
+    """Materialize every JSON query page before inspecting or deleting rows."""
+    result = syn.tableQuery(query, resultsAs="rowset")
+    if not result.headers:
+        # An empty query can omit headers; retain the existing table's columns.
+        columns = {column.name: column for column in syn.getTableColumns(TABLE_ID)}
+        result.headers = [SelectColumn.from_column(columns[name]) for name in COLUMNS]
+    # TableQueryResult is a consumable iterator: asDataFrame() advances its
+    # internal rowset to the final page. Capture the whole set first so deletion
+    # cannot accidentally omit the earlier pages after verification.
+    captured = result.asRowSet()
+    if [header.name for header in captured.headers] != COLUMNS:
+        raise ValueError("Synapse query did not return the declared D4D columns in order")
+    return captured
+
+
+def _rowset_frame(rows: RowSet) -> pd.DataFrame:
+    return pd.DataFrame(
+        [row["values"] for row in rows.rows],
+        columns=[header.name for header in rows.headers],
+    )
+
+
 def generate_table(syn, d4d_df: pd.DataFrame):
     """Append and verify replacements before deleting the captured old rows.
 
@@ -76,22 +98,25 @@ def generate_table(syn, d4d_df: pd.DataFrame):
     if any(not isinstance(text, str) or not text.strip() for text in d4d_df.content_text):
         raise ValueError("Publication content must be nonempty text")
 
-    # The HTML contains large CSV fields; this is local parsing configuration.
-    csv.field_size_limit(sys.maxsize)
     query = f"SELECT content_type, content_id, content_text FROM {TABLE_ID}"
-    existing_rows = syn.tableQuery(query)
-    existing = _content_rows(existing_rows.asDataFrame())
+    existing_rows = _capture_rows(syn, query)
+    existing = _content_rows(_rowset_frame(existing_rows))
 
-    # Passing the immutable table ID retains the existing schema. Do not create
-    # a same-named Schema and rely on name matching to find the published table.
-    uploaded = syn.store(Table(TABLE_ID, values=d4d_df))
-    staged = _content_rows(syn.tableQuery(query).asDataFrame())
+    # The server's CSV reader discards empty physical lines inside multiline
+    # cells (#5055 live round-trip evidence). Send exact strings as JSON RowSet
+    # values, retaining the existing table ID and column IDs. No normalization.
+    replacement = RowSet(
+        tableId=TABLE_ID, headers=existing_rows.headers,
+        rows=[Row(values=list(values)) for values in d4d_df[COLUMNS].itertuples(index=False, name=None)],
+    )
+    uploaded = syn.store(replacement)
+    staged = _content_rows(_rowset_frame(_capture_rows(syn, query)))
     if staged != existing + expected:
         raise RuntimeError("Synapse upload verification failed; prior rows were not deleted")
 
     if existing:
         syn.delete(existing_rows)
-    actual = _content_rows(syn.tableQuery(query).asDataFrame())
+    actual = _content_rows(_rowset_frame(_capture_rows(syn, query)))
     if actual != expected:
         raise RuntimeError("Synapse replacement verification failed; no snapshot was created")
     version = syn.create_snapshot_version(TABLE_ID)

@@ -46,7 +46,7 @@ def test_url_attribute_is_escaped():
 def test_published_bundle_matches_historical_sources_and_all_scalar_values():
     root = Path(__file__).resolve().parents[1]
     manifest = json.loads((root / "src/html/output/v8-publication.json").read_text())
-    expected = {"AI_READI": "04g", "CM4AI": "04g", "CHORUS": "04f", "VOICE": "04f"}
+    expected = {"AI_READI": ("04g", 2), "CM4AI": ("04g", 3), "CHORUS": ("04f", 2), "VOICE": ("04f", 1)}
     assert len(manifest["records"]) == 4
     assert {r["project"] for r in manifest["records"]} == set(expected)
     for record in manifest["records"]:
@@ -56,11 +56,14 @@ def test_published_bundle_matches_historical_sources_and_all_scalar_values():
         assert hashlib.sha256(source).hexdigest() == record["source_sha256"]
         assert hashlib.sha256(provenance).hexdigest() == record["provenance_sha256"]
         assert hashlib.sha256(output).hexdigest() == record["html_sha256"]
-        assert record["run_label"] == f'2026-09-{expected[record["project"]]}_claude-opus-5-api-generic-v8_rep1'
-        assert record["replicate"] == 1
+        date_suffix, replicate = expected[record["project"]]
+        assert record["run_label"] == f'2026-09-{date_suffix}_claude-opus-5-api-generic-v8_rep{replicate}'
+        assert record["replicate"] == replicate
+        assert record["recorded_canonical_decision"] == yaml.safe_load(provenance)["canonical"]
         html = output.decode("utf-8")
         assert verify_values(yaml.safe_load(source), html) == record["source_scalar_count"]
-        assert "Historical v8 datasheet · Replicate 1 · Generation schema 2.0.0" in html
+        assert f"Historical v8 datasheet · Replicate {replicate} · Generation schema 2.0.0" in html
+        assert "previously selected v8 canonical" in html
         assert "HTML rendered on 2026-10-16" in html
         assert "<style>\n" + CSS + "</style>" in html
         assert '<div class="d4d-v8">' in html
