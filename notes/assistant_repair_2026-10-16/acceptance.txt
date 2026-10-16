@@ -4,8 +4,8 @@ Baseline: published main 146ffadd6d8dfbd64ea6c6d571a73407292c6631.
 Branch: fix/2088-assistant-shared-generation.
 Scope: #2088, #5051, #5052, #5053. Live acceptance remains #5050.
 
-The assistant now consumes shared_generation_v1 (generic_v10, renderer25,
-API playbook2, receipt completion2), current captured full/core schemas, and
+The assistant now consumes shared_generation_v1 (generic_v10, renderer 25,
+API playbook 2, receipt completion 2), current captured full/core schemas, and
 the shared model configuration through CBORG. External documents use a neutral
 profile and no study source manifest; undeclared release/scope facts are not
 invented. A pending diagnostic receipt floor does not approve study scoring.
@@ -33,7 +33,7 @@ workflow Git blob ac8f79e8b48553fa8017eca9c37ac38740e5c7ab;
 adapter Git blob 42c906d9d0e70acae81dbda0be810707b2202cff;
 workflow tests Git blob 5edd192d72c40271b0724694277984f99892ab72.
 
-Validation used Python3.13.12 in the existing project environment, with this
+Validation used Python 3.13.12 in the existing project environment, with this
 worktree's src on PYTHONPATH, no paid generation and bounded serial processes:
 - 18 adapter tests passed (23.04s).
 - Actual adapter -> registered CLI -> full -> receipt completion -> typed audit
@@ -42,16 +42,16 @@ worktree's src on PYTHONPATH, no paid generation and bounded serial processes:
   The actual first request matched the prepared payload; repeated CLI execution
   refused the existing attempt before another model call. These synthetic
   declarations test engineering, not scientific support or evaluator quality.
-- Complete focused assistant suite passed108 tests before the final recovery
-  changes; 47 unaffected workflow/gate cases and all4 final recovery cases
+- Complete focused assistant suite passed 108 tests before the final recovery
+  changes; 47 unaffected workflow/gate cases and all 4 final recovery cases
   passed after those changes. No combined or unique-test total is inferred.
-- Required specificity/neutrality/profile/external-onboarding suite passed284
+- Required specificity/neutrality/profile/external-onboarding suite passed 284
   tests (286.42s); no scanner, shared prompt or neutral-schema test was edited.
 - Specificity scanner self-test passed. Both the candidate and a separate clean
-  published-main checkout reported97 project-specific findings: every full
-  finding row matched, with0 added and0 removed. Assistant/API/shared-schema
-  surfaces had0 violations. Existing other-surface findings remain unresolved;
-  scanner exit1 is retained and is not described as a globally clean scan.
+  published-main checkout reported 97 project-specific findings: every full
+  finding row matched, with 0 added and 0 removed. Assistant/API/shared-schema
+  surfaces had 0 violations. Existing other-surface findings remain unresolved;
+  scanner exit 1 is retained and is not described as a globally clean scan.
 - git diff --check passed.
 
 Reproduce the focused checks with the project's environment:
