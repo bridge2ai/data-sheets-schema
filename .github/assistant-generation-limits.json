@@ -1,0 +1,25 @@
+{
+  "format": "d4d_assistant_limits_v1",
+  "max_bundle_bytes": 2000000,
+  "audit_limits": {
+    "max_paths": 64,
+    "max_inventory_bytes": 32768,
+    "max_workers": 16,
+    "max_request_bytes": 8000000,
+    "max_input_tokens_per_call": 180000,
+    "worker_output_tokens": 16000,
+    "omission_output_tokens": 16000,
+    "integration_output_tokens": 16000,
+    "aggregate_input_tokens": 2000000,
+    "aggregate_output_tokens": 288000,
+    "max_calls": 18,
+    "context_limit_tokens": 200000,
+    "context_limit_basis": "Assistant admission ceiling; not a provider capacity measurement"
+  },
+  "receipt_limits": {
+    "max_output_tokens": 16000,
+    "max_request_bytes": 8000000,
+    "context_limit_tokens": 200000,
+    "context_limit_basis": "Assistant admission ceiling; not a provider capacity measurement"
+  }
+}

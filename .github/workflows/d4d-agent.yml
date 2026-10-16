@@ -1,5 +1,13 @@
 name: D4D AI Assistant GitHub Mentions
 
+permissions:
+  contents: read
+
+# Queue repeats for one item without cancelling an attempt that may have spent.
+concurrency:
+  group: d4d-assistant-${{ github.event.issue.number || github.event.pull_request.number || inputs.item-number || github.run_id }}
+  cancel-in-progress: false
+
 on:
   issues:
     types: [opened, edited]
@@ -36,6 +44,10 @@ jobs:
       (github.event_name == 'pull_request' && contains(github.event.pull_request.body, '@d4dassistant')) ||
       ((github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') && contains(github.event.comment.body, '@d4dassistant'))
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
     outputs:
       # 'true' only when "Read the request" ran (an allowed author) and found one
       qualified-mention: ${{ steps.request.outputs.request }}
@@ -44,15 +56,20 @@ jobs:
       item-type: ${{ steps.detect.outputs.item-type }}
       item-number: ${{ steps.detect.outputs.item-number }}
       controllers: ${{ steps.detect.outputs.controllers }}
+      trusted-sha: ${{ steps.detect.outputs.gate-base-sha }}
+      target-branch: ${{ steps.detect.outputs.gate-base-branch }}
+      source-sha: ${{ github.sha }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Detect AI mention
         id: detect
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.PAT_FOR_PR }}
+          github-token: ${{ github.token }}
           script: |
             // The checkout supplies dataset directories, never gate authority (#4392).
             // Resolve once, then read both gate files from that immutable commit.
@@ -60,10 +77,13 @@ jobs:
             const path = require('path');
             const crypto = require('crypto');
             let gateSha;
+            let gateBranch;
             if (context.eventName === 'pull_request' || context.eventName === 'pull_request_review_comment') {
               gateSha = context.payload.pull_request?.base?.sha;
+              gateBranch = context.payload.pull_request?.base?.ref;
             } else {
               const repository = await github.rest.repos.get(context.repo);
+              gateBranch = repository.data.default_branch;
               const branch = await github.rest.repos.getBranch({
                 ...context.repo, branch: repository.data.default_branch
               });
@@ -71,6 +91,9 @@ jobs:
             }
             if (typeof gateSha !== 'string' || !/^[0-9a-f]{40}$/.test(gateSha)) {
               throw new Error('No immutable trusted base commit for the request gate');
+            }
+            if (typeof gateBranch !== 'string' || !gateBranch || /[\r\n]/.test(gateBranch)) {
+              throw new Error('No trusted base branch for publication');
             }
             async function gateFile(filePath) {
               const response = await github.rest.repos.getContent({
@@ -101,6 +124,7 @@ jobs:
             fs.writeFileSync(gateParser, parser, {flag: 'wx', mode: 0o600});
             core.setOutput('gate-parser', gateParser);
             core.setOutput('gate-base-sha', gateSha);
+            core.setOutput('gate-base-branch', gateBranch);
             console.log('Request gate base commit: ' + gateSha);
             // Missing base files intentionally fail closed, including while a
             // PR is introducing this parser. Never fall back to candidate code.
@@ -263,134 +287,297 @@ jobs:
     needs: check-mention
     if: needs.check-mention.outputs.qualified-mention == 'true'
     permissions:
-      contents: write
-      pull-requests: write
-      issues: write
+      contents: read
     runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: trusted
+    outputs:
+      label: ${{ steps.resolve.outputs.label }}
+      preparation: ${{ steps.resolve.outcome }}
+      generation: ${{ steps.generate.outcome }}
+      validation: ${{ steps.validate.outcome }}
+      archive: ${{ steps.archive.outcome }}
+      attempt-id: ${{ steps.identity.outputs.attempt-id }}
+      artifact-name: ${{ steps.identity.outputs.artifact-name }}
     steps:
-      - name: Checkout repository
+      - name: Freeze generation attempt identity
+        id: identity
+        working-directory: ${{ runner.temp }}
+        env:
+          ATTEMPT_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          printf '%s\n' "attempt-id=$ATTEMPT_ID" "artifact-name=d4d-assistant-$ATTEMPT_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout trusted generation implementation
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.PAT_FOR_PR }}
+          ref: ${{ needs.check-mention.outputs.trusted-sha }}
+          path: trusted
+          persist-credentials: false
 
-      # Replaced dragon-ai-agent/run-claude-obo@v1.0.2, whose repository and
-      # organisation now return 404 (issue #172). That action ran an open-ended
-      # agent; this runs the same deterministic four-phase generation the batch
-      # pipeline uses, so the assistant and the study can no longer diverge.
-      #
-      # Narrower on purpose: this generates a datasheet from a declared input
-      # bundle. It does not handle open-ended edit requests. See #172.
+      # This checkout contributes documents only. Never install its package or
+      # execute its scripts, even when a PR adds the requested input directory.
+      - name: Checkout source documents
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check-mention.outputs.source-sha }}
+          path: source
+          sparse-checkout: data/sheets_d4dassistant/inputs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Check explicit provider configuration
+        id: provider
+        env:
+          CBORG_API_KEY: ${{ secrets.CBORG_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$CBORG_API_KEY" || { echo '::error::Configure CBORG_API_KEY for the registered CBORG route'; exit 1; }
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install project
+        id: install
         run: |
-          pipx install poetry
+          pipx install poetry==2.4.3
           poetry install --no-interaction
 
       - name: Resolve dataset from the request
         id: resolve
         env:
           DATASET: ${{ needs.check-mention.outputs.dataset }}
+          PROVIDER: cborg
+          SOURCE_SHA: ${{ needs.check-mention.outputs.source-sha }}
+          TRUSTED_SHA: ${{ needs.check-mention.outputs.trusted-sha }}
+          ATTEMPT_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
-          # The dataset is the inputs/ directory the request line names exactly,
-          # as "Read the request" in check-mention found it (#4108); never a
-          # name matched in free text. Re-checked against this checkout.
-          if [ -z "$DATASET" ] || [ ! -d "data/sheets_d4dassistant/inputs/$DATASET" ]; then
-            echo "::error::the request names no input directory in this checkout: '$DATASET'"
-            exit 1
-          fi
-          # Prepare every member before any billed generation (#4450).
-          # Outputs stay outside the input tree; failures stop this job.
-          BUNDLE_DIR=$(mktemp -d "$RUNNER_TEMP/d4d-assistant-input.XXXXXXXX")
-          poetry run python src/github/assistant_bundle.py \
-            --inputs-root data/sheets_d4dassistant/inputs \
-            --dataset "$DATASET" --output-dir "$BUNDLE_DIR" \
-            --source-commit "$(git rev-parse HEAD)" \
+          poetry run python src/github/assistant_generation.py \
+            --inputs-root "$GITHUB_WORKSPACE/source/data/sheets_d4dassistant/inputs" \
+            --source-checkout "$GITHUB_WORKSPACE/source" \
+            --dataset "$DATASET" --source-commit "$SOURCE_SHA" \
+            --trusted-commit "$TRUSTED_SHA" --attempt-id "$ATTEMPT_ID" \
+            --attempt-dir "$RUNNER_TEMP/assistant-attempt-$ATTEMPT_ID" \
+            --provider "$PROVIDER" --limits .github/assistant-generation-limits.json \
             --github-output "$GITHUB_OUTPUT"
-          echo "dataset=$DATASET" >> "$GITHUB_OUTPUT"
-          echo "label=$(date -u +%Y-%m-%d)_claude-opus-5-assistant" >> "$GITHUB_OUTPUT"
 
       - name: Generate datasheet
+        id: generate
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Only the user-selected CBORG route may be used. The legacy direct
+          # Anthropic credential cannot win the shared client's precedence.
+          ANTHROPIC_API_KEY: ''
+          ANTHROPIC_BASE_URL: ''
+          CBORG_API_KEY: ${{ secrets.CBORG_API_KEY }}
+          DATASET: ${{ needs.check-mention.outputs.dataset }}
+          LABEL: ${{ steps.resolve.outputs.label }}
+          OUTPUT_DIR: ${{ steps.resolve.outputs.output-dir }}
+          REGISTRATION: ${{ steps.resolve.outputs.registration }}
         run: |
           set -euo pipefail
           poetry run d4d api run \
-            --project "${{ steps.resolve.outputs.dataset }}" \
-            --bundle  "${{ steps.resolve.outputs.bundle }}" \
-            --out-dir data/sheets_d4dassistant \
-            --label   "${{ steps.resolve.outputs.label }}" \
+            --project "$DATASET" --label "$LABEL" --out-dir "$OUTPUT_DIR" \
+            --condition generic_v10 --shared-generation-version 1 \
+            --shared-generation-registration "$REGISTRATION" \
             --yes
 
       - name: Validate against the schema
+        id: validate
+        env:
+          DATASET: ${{ needs.check-mention.outputs.dataset }}
+          OUTPUT_DIR: ${{ steps.resolve.outputs.output-dir }}
+          ATTEMPT_DIR: ${{ steps.resolve.outputs.attempt-dir }}
         run: |
           set -euo pipefail
-          D=${{ steps.resolve.outputs.dataset }}
           poetry run linkml-validate \
             -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
-            -C Dataset "data/sheets_d4dassistant/${D}_d4d.yaml"
+            -C Dataset "$OUTPUT_DIR/${DATASET}_d4d.yaml"
+          poetry run linkml-validate \
+            -s src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml \
+            -C CoreDataset "$OUTPUT_DIR/${DATASET}_d4d_core.yaml"
+          printf '%s\n' 'Full and core passed the pinned trusted schema validation.' > "$ATTEMPT_DIR/validation.txt"
+
+      - name: Record attempt outcome
+        if: always()
+        working-directory: ${{ runner.temp }}
+        env:
+          ATTEMPT_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          DATASET: ${{ needs.check-mention.outputs.dataset }}
+          TRUSTED_SHA: ${{ needs.check-mention.outputs.trusted-sha }}
+          SOURCE_SHA: ${{ needs.check-mention.outputs.source-sha }}
+          PROVIDER_RESULT: ${{ steps.provider.outcome }}
+          INSTALL_RESULT: ${{ steps.install.outcome }}
+          PREPARATION_RESULT: ${{ steps.resolve.outcome }}
+          GENERATION_RESULT: ${{ steps.generate.outcome }}
+          VALIDATION_RESULT: ${{ steps.validate.outcome }}
+        run: |
+          set -euo pipefail
+          ATTEMPT_DIR="$RUNNER_TEMP/assistant-attempt-$ATTEMPT_ID"
+          mkdir -p "$ATTEMPT_DIR"
+          printf '%s\n' "attempt=$ATTEMPT_ID" "dataset=$DATASET" \
+            "trusted_commit=$TRUSTED_SHA" "source_commit=$SOURCE_SHA" \
+            "provider=cborg" "provider_configuration=$PROVIDER_RESULT" \
+            "install=$INSTALL_RESULT" "preparation=$PREPARATION_RESULT" \
+            "generation=$GENERATION_RESULT" "validation=$VALIDATION_RESULT" \
+            > "$ATTEMPT_DIR/workflow_outcome.txt"
+
+      - name: Preserve complete attempt evidence
+        id: archive
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.identity.outputs.artifact-name }}
+          path: ${{ runner.temp }}/assistant-attempt-${{ steps.identity.outputs.attempt-id }}/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+  publish:
+    needs: [check-mention, respond-to-mention]
+    if: needs.respond-to-mention.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      url: ${{ steps.pr.outputs.url }}
+    steps:
+      # Publication gets a separate runner and credential. It never installs or
+      # runs the input checkout, generated YAML, or any downloaded artifact.
+      - name: Checkout trusted publication base
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check-mention.outputs.trusted-sha }}
+          token: ${{ secrets.PAT_FOR_PR }}
+
+      - name: Download checked attempt
+        uses: actions/download-artifact@v4
+        with:
+          # Rerun-failed-jobs increments run_attempt without rerunning a
+          # successful generation job. Consume that producer's frozen identity.
+          name: ${{ needs.respond-to-mention.outputs.artifact-name }}
+          path: ${{ runner.temp }}/assistant-evidence
 
       - name: Open a pull request
         id: pr
         env:
           GH_TOKEN: ${{ secrets.PAT_FOR_PR }}
+          DATASET: ${{ needs.check-mention.outputs.dataset }}
+          LABEL: ${{ needs.respond-to-mention.outputs.label }}
+          ITEM_NUMBER: ${{ needs.check-mention.outputs.item-number }}
+          ATTEMPT_ID: ${{ needs.respond-to-mention.outputs.attempt-id }}
+          TARGET_BRANCH: ${{ needs.check-mention.outputs.target-branch }}
+          TRUSTED_SHA: ${{ needs.check-mention.outputs.trusted-sha }}
+          SOURCE_SHA: ${{ needs.check-mention.outputs.source-sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          D=${{ steps.resolve.outputs.dataset }}
-          BRANCH="d4dassistant/${D}-$(date -u +%Y%m%d-%H%M%S)"
+          # Only parsed safe names and the adapter's run-unique label may form paths.
+          if ! [[ "$DATASET" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]] || \
+             ! [[ "$LABEL" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]]; then
+            echo '::error::Unsafe dataset or attempt label'
+            exit 1
+          fi
+          EVIDENCE="$RUNNER_TEMP/assistant-evidence"
+          test -f "$EVIDENCE/validation.txt"
+          test -f "$EVIDENCE/authority/registration.json"
+          test -f "$EVIDENCE/outputs/${DATASET}_d4d.yaml"
+          test -f "$EVIDENCE/outputs/${DATASET}_d4d_core.yaml"
+          # Evidence is data. Refuse links or special files before copying it
+          # into a checkout that holds the publication credential.
+          if find "$EVIDENCE" ! -type d ! -type f -print -quit | grep -q .; then
+            echo '::error::Attempt artifact contains a nonregular member'
+            exit 1
+          fi
+          DEST="data/sheets_d4dassistant/attempts/${DATASET}/${LABEL}"
+          test ! -e "$DEST"
+          mkdir -p "$(dirname "$DEST")"
+          cp -R "$EVIDENCE" "$DEST"
+          BRANCH="d4dassistant/${DATASET}-${ATTEMPT_ID}"
           git config user.name  "d4dassistant"
           git config user.email "d4dassistant@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          MANIFEST="data/sheets_d4dassistant/${D}_input_manifest.json"
-          if [ -L "$MANIFEST" ] || { [ -e "$MANIFEST" ] && [ ! -f "$MANIFEST" ]; }; then
-            echo "::error::input manifest destination is not a regular file"
-            exit 1
+          # Runtime logs/progress can match repository-wide ignore patterns.
+          # Force only this already checked attempt, never the wider checkout.
+          git add --force -- "$DEST"
+          git commit -m "Add ${DATASET} assistant attempt ${ATTEMPT_ID}"
+          EXPECTED_TREE=$(git rev-parse 'HEAD^{tree}')
+          # A publication-only retry must not regenerate or overwrite evidence.
+          # Reuse a prior push only when both its base and complete tree match.
+          REMOTE=$(git ls-remote --heads origin "refs/heads/$BRANCH")
+          if [ -n "$REMOTE" ]; then
+            git fetch --no-tags origin "refs/heads/$BRANCH"
+            PUBLISHED_SHA=$(git rev-parse FETCH_HEAD)
+            test "$(git rev-parse 'FETCH_HEAD^{tree}')" = "$EXPECTED_TREE" || { echo '::error::Existing attempt branch has different evidence'; exit 1; }
+            test "$(git show -s --format=%P FETCH_HEAD)" = "$TRUSTED_SHA" || { echo '::error::Existing attempt branch has a different base'; exit 1; }
+          else
+            git push -u origin "$BRANCH"
+            PUBLISHED_SHA=$(git rev-parse HEAD)
           fi
-          cp -- "${{ steps.resolve.outputs.input-manifest }}" "$MANIFEST"
-          git add "data/sheets_d4dassistant/${D}_d4d.yaml" \
-                  "data/sheets_d4dassistant/${D}_d4d_core.yaml" \
-                  "data/sheets_d4dassistant/${D}_reconciliation.md" \
-                  "data/sheets_d4dassistant/${D}_provenance.yaml" \
-                  "$MANIFEST"
-          git commit -m "Add ${D} datasheet generated by the D4D assistant
+          BODY="$RUNNER_TEMP/assistant-pr-body.md"
+          cat > "$BODY" <<EOF
+          Generated ${DATASET} from repository documentation in response to #${ITEM_NUMBER}.
 
-          Four-phase generation from data/sheets_d4dassistant/inputs/${D}/,
-          all ${{ steps.resolve.outputs.member-count }} documents; bundle SHA256
-          ${{ steps.resolve.outputs.bundle-sha256 }}; sources in ${D}_input_manifest.json,
-          via the same deterministic path the batch pipeline uses. Requested in
-          #${{ needs.check-mention.outputs.item-number }}."
-          GENERATED_SHA=$(git rev-parse HEAD)
-          MANIFEST_URL="${{ github.server_url }}/${{ github.repository }}/blob/${GENERATED_SHA}/${MANIFEST}"
-          git push -u origin "$BRANCH"
-          URL=$(gh pr create \
-            --title "Add ${D} datasheet (D4D assistant)" \
-            --body "Generated from \`data/sheets_d4dassistant/inputs/${D}/\` in response to #${{ needs.check-mention.outputs.item-number }}.
+          This attempt explicitly selects shared_generation_v1 (generic_v10, renderer 25, API playbook 2 and receipt completion 2), using the canonical API renderer. Trusted implementation/schema commit: ${TRUSTED_SHA}; source-document commit: ${SOURCE_SHA}.
 
-          Four-phase generation (full, core, audit, reconcile) on the model pinned in \`.github/workflows/d4d_assistant_deterministic.config\`. \`${D}_provenance.yaml\` records the input, prompt and schema-digest hashes, the git commit, and per-phase token usage.
+          Full and core YAML passed Dataset and CoreDataset validation. The complete attempt is retained at ${DEST}, including pinned input/schema/selection authority, ingestion and chunk manifests, receipts, audit records, usage and provenance. Original absolute registration paths are preserved as evidence; an archived registration is not a new run authorization.
 
-          All ${{ steps.resolve.outputs.member-count }} input documents were prepared. [Input manifest](${MANIFEST_URL}) records source paths, raw hashes, conversion policy and bundle SHA256 \`${{ steps.resolve.outputs.bundle-sha256 }}\`. PDF inputs contribute extracted text only; images/OCR and layout completeness are not claimed.
-
-          Validated against \`Dataset\` before this PR was opened." \
-            --head "$BRANCH")
+          Schema and protocol checks do not establish scientific correctness. Review source support before merging. [Run and artifact](${RUN_URL}).
+          EOF
+          URL=$(gh pr list --state all --head "$BRANCH" --base "$TARGET_BRANCH" \
+            --json url,headRefOid --jq "[.[] | select(.headRefOid == \"$PUBLISHED_SHA\")][0].url // empty")
+          if [ -z "$URL" ]; then
+            URL=$(gh pr create \
+              --title "Add ${DATASET} datasheet (assistant ${ATTEMPT_ID})" \
+              --body-file "$BODY" --base "$TARGET_BRANCH" --head "$BRANCH")
+          fi
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
+  report:
+    needs: [check-mention, respond-to-mention, publish]
+    if: always() && needs.check-mention.outputs.qualified-mention == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
       - name: Report back on the issue
-        if: always()
+        uses: actions/github-script@v7
         env:
-          GH_TOKEN: ${{ secrets.PAT_FOR_PR }}
-        run: |
-          if [ "${{ job.status }}" = "success" ]; then
-            gh issue comment "${{ needs.check-mention.outputs.item-number }}" \
-              --body "Generated the **${{ steps.resolve.outputs.dataset }}** datasheet: ${{ steps.pr.outputs.url }}"
-          elif [ "${{ steps.resolve.outcome }}" = "failure" ]; then
-            gh issue comment "${{ needs.check-mention.outputs.item-number }}" \
-              --body "Complete-input preparation failed before generation. Every file must be supported and readable: strict UTF-8 TXT/MD/JSON/HTML or an unencrypted PDF with extractable text. [Run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
-          else
-            gh issue comment "${{ needs.check-mention.outputs.item-number }}" \
-              --body "Generation failed. [Run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
-          fi
+          DATASET: ${{ needs.check-mention.outputs.dataset }}
+          ITEM_NUMBER: ${{ needs.check-mention.outputs.item-number }}
+          PREPARATION: ${{ needs.respond-to-mention.outputs.preparation }}
+          GENERATION: ${{ needs.respond-to-mention.outputs.generation }}
+          VALIDATION: ${{ needs.respond-to-mention.outputs.validation }}
+          ARCHIVE_RESULT: ${{ needs.respond-to-mention.outputs.archive }}
+          PUBLISH_RESULT: ${{ needs.publish.result }}
+          PR_URL: ${{ needs.publish.outputs.url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const e = process.env;
+            let body;
+            if (e.PUBLISH_RESULT === 'success' && e.PR_URL) {
+              body = `Generated the **${e.DATASET}** datasheet: ${e.PR_URL}`;
+            } else if (e.PREPARATION !== 'success') {
+              body = 'Assistant setup or complete-input registration failed before generation. Check the explicit provider/credential, supported input documents and registered limits.';
+            } else if (e.GENERATION !== 'success') {
+              body = 'Registered generation failed. Inspect the failing phase before requesting another billed attempt.';
+            } else if (e.VALIDATION !== 'success') {
+              body = 'Generated outputs failed full/core schema validation; no generated PR was published.';
+            } else {
+              body = 'Generation and validation passed, but evidence upload or PR publication failed. Preserve the existing attempt before retrying publication.';
+            }
+            body += e.ARCHIVE_RESULT === 'success'
+              ? '\n\nAttempt evidence is attached to the run as an artifact.'
+              : '\n\nAttempt evidence upload did not complete; inspect the run log before another attempt.';
+            body += `\n\n[Run log](${e.RUN_URL}).`;
+            await github.rest.issues.createComment({
+              ...context.repo, issue_number: Number(e.ITEM_NUMBER), body
+            });

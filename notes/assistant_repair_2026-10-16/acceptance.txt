@@ -1,0 +1,84 @@
+D4D GitHub assistant repair: engineering acceptance, 2026-10-16
+
+Baseline: published main 146ffadd6d8dfbd64ea6c6d571a73407292c6631.
+Branch: fix/2088-assistant-shared-generation.
+Scope: #2088, #5051, #5052, #5053. Live acceptance remains #5050.
+
+The assistant now consumes shared_generation_v1 (generic_v10, renderer25,
+API playbook2, receipt completion2), current captured full/core schemas, and
+the shared model configuration through CBORG. External documents use a neutral
+profile and no study source manifest; undeclared release/scope facts are not
+invented. A pending diagnostic receipt floor does not approve study scoring.
+
+The implementation does not edit shared prompts, schema, native runtime,
+evaluation instruments, study registration builder or any protected worktree.
+The ownership notice remains in the primary checkout at
+notes/coordination/2026-10-16-assistant-repair.txt. No acknowledgement from the
+parallel Codex session is claimed.
+
+Independent adversarial review filed and addressed:
+- #5051: embedded source headers could misattribute a following input member.
+  V2 outer framing and physical-member chunk origins preserve original bytes.
+- #5052: Git ignore rules could omit evidence; failed upload replies could
+  falsely claim retention. Narrow force-staging and explicit archive outcomes
+  now preserve complete successful attempts and report failures accurately.
+- #5053: publication-only retries selected the wrong attempt artifact, partial
+  publication was not recoverable, and non-default PR targets could publish
+  unrelated topic commits. Frozen producer identity, exact existing tree/parent/
+  PR-head checks and explicit base selection address these failures without
+  forcing updates or repeating paid generation.
+
+Final independent review reported no remaining code blocker for these files:
+workflow Git blob ac8f79e8b48553fa8017eca9c37ac38740e5c7ab;
+adapter Git blob 42c906d9d0e70acae81dbda0be810707b2202cff;
+workflow tests Git blob 5edd192d72c40271b0724694277984f99892ab72.
+
+Validation used Python3.13.12 in the existing project environment, with this
+worktree's src on PYTHONPATH, no paid generation and bounded serial processes:
+- 18 adapter tests passed (23.04s).
+- Actual adapter -> registered CLI -> full -> receipt completion -> typed audit
+  worker/omission/integration -> reconciliation -> report -> real schema and
+  provenance checks passed (129.01s). Only model transport was scripted.
+  The actual first request matched the prepared payload; repeated CLI execution
+  refused the existing attempt before another model call. These synthetic
+  declarations test engineering, not scientific support or evaluator quality.
+- Complete focused assistant suite passed108 tests before the final recovery
+  changes; 47 unaffected workflow/gate cases and all4 final recovery cases
+  passed after those changes. No combined or unique-test total is inferred.
+- Required specificity/neutrality/profile/external-onboarding suite passed284
+  tests (286.42s); no scanner, shared prompt or neutral-schema test was edited.
+- Specificity scanner self-test passed. Both the candidate and a separate clean
+  published-main checkout reported97 project-specific findings: every full
+  finding row matched, with0 added and0 removed. Assistant/API/shared-schema
+  surfaces had0 violations. Existing other-surface findings remain unresolved;
+  scanner exit1 is retained and is not described as a globally clean scan.
+- git diff --check passed.
+
+Reproduce the focused checks with the project's environment:
+  python -m pytest tests/test_github_assistant_generation.py \
+    tests/test_assistant_generation_integration.py tests/test_assistant_bundle.py \
+    tests/test_assistant_request.py tests/test_assistant_trusted_gate.py \
+    tests/test_assistant_workflow.py -q -p no:cacheprovider
+  python -m pytest tests/test_generation_specificity_skill.py \
+    tests/test_neutral_generation_schema.py tests/test_profiles.py \
+    tests/test_external_dataset_onboarding.py -q -p no:cacheprovider
+  python .claude/skills/d4d-generation-specificity-audit/scan.py \
+    --root CHECKOUT --report OUT/report.md --json OUT/report.json
+  python scripts/adhoc/compare_assistant_specificity_20261016.py \
+    --baseline BASELINE_JSON --candidate CANDIDATE_JSON --output NEW_COMPARISON_JSON
+The committed compact comparison identifies the completed scanner reports;
+full reports are reproducible from their code baseline and selected checkout.
+
+Operational state:
+- User selected CBORG. The existing session credential succeeded on a synthetic
+  count_tokens request to the configured claude-opus-5 route (24 input tokens).
+  scripts/adhoc/probe_assistant_cborg_20261016.py records that probe's procedure.
+  This proves authentication/counting only, not generation or PR permissions.
+- Automatic approval review rejected installing that key in GitHub Actions
+  because provider selection did not explicitly authorize transmitting/storing
+  the credential in this repository. No secret was changed. Explicit approval
+  or owner installation of the encrypted CBORG_API_KEY secret remains necessary.
+- Keep #5050 open until a reviewed deployed workflow performs one synthetic
+  generation, both schema validations, evidence upload, PR publication and reply.
+  No final campaign, native canary, human scientific review or scoring is approved
+  or completed by this assistant implementation.

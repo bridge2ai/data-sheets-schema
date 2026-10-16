@@ -18,12 +18,16 @@ Nothing else is a request (#4108): not the handle in a sentence, in a code span 
 
 Supported filename extensions are case-insensitive:
 
-- `.txt`, `.md`, `.json` and `.html` must be strict UTF-8. Their bundle sections preserve lexical contents, including BOM, whitespace, JSON formatting and HTML markup. JSON is not reserialized; HTML is not rendered or stripped. Links and scripts are not fetched or executed. Before provider submission, the existing API reader converts CRLF and lone CR to LF and adds its existing prompt headers; the bundle's raw section hashes remain available.
+- `.txt`, `.md`, `.json` and `.html` must be strict UTF-8. Their bundle sections preserve lexical contents, including BOM, whitespace, JSON formatting and HTML markup. JSON is not reserialized; HTML is not rendered or stripped. Links and scripts are not fetched or executed. The shared renderer uses the captured bundle bytes and adds canonical chunk markers; source-section hashes remain available.
 - `.pdf` contributes offline text extraction from all pages, using the reviewed pdfminer.six version (currently `20221105`). The actual installed converter version is checked and recorded. Encrypted PDFs, extraction failures and PDFs with no extractable text refuse. Images, OCR and complete layout reconstruction are outside this text-only contract.
 
-Other formats, symlinks and nonregular members refuse. There is no Latin-1 fallback, automatic format preference, hidden-file omission or silent truncation. An empty directory, or one with no non-whitespace document text, refuses. The workflow has no aggregate input-size admission cap in this generic route; including all documents can increase billed input, and preparation success does not establish provider context fit or generation success.
+Other formats, symlinks and nonregular members refuse. There is no Latin-1 fallback, automatic format preference, hidden-file omission or silent truncation. An empty directory, or one with no non-whitespace document text, refuses. The prepared bundle must fit the byte ceiling in [assistant-generation-limits.json](assistant-generation-limits.json). Oversized bundles refuse as a whole. Preparation success does not establish provider context fit or generation success.
 
-**Source provenance.** The generated PR includes `{dataset}_input_manifest.json` alongside the datasheet: the checked-out source commit, every relative source path and raw SHA256/size, text/converter policy, exact section byte ranges and hashes, and final bundle SHA256/size. This is an ingestion manifest, not a scientific coverage judgment or the runner's source/chunk manifest. Original input files remain unchanged. The PR body links the manifest and identifies the complete member count and bundle hash.
+**Source provenance.** Each attempt retains an input manifest: the source commit, every relative source path and raw SHA256/size, text/converter policy, exact section byte ranges and hashes, and final bundle SHA256/size. This ingestion manifest is distinct from the chunk manifest used by the generation protocol. The adapter builds that chunk manifest from the actual prepared bundle and pins both in the attempt evidence. Original input files remain unchanged.
+
+The assistant's version 2 framing marks every physical member with a canonical source boundary. Embedded `FILE:/PATH:` text can subdivide that member but cannot absorb the next file. The captured scope maps chunks back to physical input members; an embedded label is not independent proof of a file's origin.
+
+**External-source policy.** All assistant inputs use the explicit `neutral` profile and no study source manifest. A directory's name does not grant it study-specific vocabulary, source rankings or dataset facts. The generation scope names the supplied input directory; unspecified release information stays unknown, and document ordering does not assert a scientific authority ranking. These attempts use a pending diagnostic receipt floor. They are candidate datasheets, not calibrated study results or authorization for a final generation campaign.
 
 **Where the directory must be.** The workflow looks for it in the version of the repository it checks out for the event:
 
@@ -39,15 +43,15 @@ Editing unrelated prose, moving a request line, or changing only its handle case
 
 A manual dispatch authorizes the person who starts it. It first uses the issue or PR body if that body holds a valid parsed request. Otherwise it reads every page of conversation comments and selects the newest valid request in API creation order. Quoted, fenced, hidden or otherwise invalid mentions do not hide an older valid request, and handle case follows the same rules as on events. Editing an old comment does not move it ahead of a newer comment. PR review-thread comments are not part of this manual conversation search.
 
-This check suppresses unrelated body edits; it is not a persistent history of every past run. Separate new comments and explicit manual dispatches may request generation again. The existing run-label and output checks still apply, so a repeat is not a promise that a new run will be accepted.
+This check suppresses unrelated body edits; it is not a persistent history of every past run. Separate new comments and explicit manual dispatches may request generation again. Every accepted attempt has a unique GitHub run ID and attempt number. A rerun creates new evidence rather than overwriting an earlier run.
 
 ### What the Assistant Does
 
 1. **Prepares** every supported document in the requested repository input directory
 2. **Records** the source files, conversions and bundle hashes; it does not fetch linked resources
-3. **Generates** a candidate datasheet through the configured `d4d api run` phases
-4. **Validates** the YAML against the schema
-5. **Creates** a pull request with generated files and the input manifest in `data/sheets_d4dassistant/`
+3. **Registers** the exact shared prompt, schema, bundle, scope, provider and execution limits before generation
+4. **Generates** through the existing shared API pipeline, including receipts, derived core, typed audit and reconciliation
+5. **Validates** full and core YAML against the captured schema and creates a pull request with the complete attempt evidence in `data/sheets_d4dassistant/`
 6. **Comments** on your issue with a link to the PR
 
 ## What Information to Provide
@@ -70,7 +74,11 @@ The assistant creates a YAML file following the D4D schema with sections like:
 
 ## File Location
 
-Generated D4D files use the existing flat layout in `data/sheets_d4dassistant/`: `{dataset}_d4d.yaml`, `{dataset}_d4d_core.yaml`, `{dataset}_reconciliation.md` and `{dataset}_provenance.yaml`. Complete-input preparation adds `{dataset}_input_manifest.json`; the run label remains timestamped by the workflow.
+New attempts use `data/sheets_d4dassistant/attempts/{dataset}/{label}/`; historical flat outputs remain unchanged. The attempt contains the registered input authority and an `outputs/` directory with `{dataset}_d4d.yaml`, `{dataset}_d4d_core.yaml`, `{dataset}_reconciliation.md`, `{dataset}_provenance.yaml` and the runner's receipts, audit, usage and phase evidence. The PR body identifies the attempt and original workflow run. Evidence paths in registrations retain their original execution identities; copying an artifact does not make it a new executable registration.
+
+The workflow attempts to upload the complete available attempt on success or failure, including hidden runner state. Its reply distinguishes a successful upload from missing artifact evidence. Runner loss or a failed upload can prevent retention. Failed or incomplete attempts do not create a datasheet PR. GitHub artifact retention is finite; successful PRs also preserve the evidence in Git. Download failed-attempt evidence before its artifact expires if it must be retained longer.
+
+If generation and validation passed but publication failed, use GitHub's **Re-run failed jobs** to retry publication with the original generation artifact. The publisher reuses a pushed branch only when its complete tree and parent match the captured attempt, and reuses an existing PR with the same head commit. Conflicting branches refuse without force-pushing. Generated PRs explicitly target the original request's trusted base branch; a request on a topic-targeted PR does not publish that topic branch's commits into the default branch.
 
 ## Reviewing the Generated D4D
 
@@ -93,14 +101,26 @@ To add users who can invoke the assistant, edit `.github/ai-controllers.json`:
 
 Only authorized users can trigger the assistant by mentioning `@d4dassistant`.
 
-The allow-list and request parser come from one immutable trusted commit: the PR's base SHA for pull-request descriptions and review comments, or the resolved default-branch SHA for other events and manual dispatch. Input directories still come from the event-selected checkout described above, so a PR can add a dataset without changing its authorization rules. The trusted parser runs in Python isolated mode without site initialization. Missing or invalid trusted gate files stop the gate; a PR introducing the parser cannot use its own copy before the base branch has it.
+The allow-list, request parser and generation code come from one immutable trusted commit: the PR's base SHA for pull-request descriptions and review comments, or the resolved default-branch SHA for other events and manual dispatch. Input directories come from a separate event-selected checkout, so a PR can add documents without supplying executable generation code. The trusted parser runs in Python isolated mode without site initialization. Missing or invalid trusted gate files stop the gate; a PR introducing the parser cannot use its own copy before the base branch has it. Generation receives the provider key but no publication token. A separate job publishes the validated artifacts.
 
 ## Technical Details
 
-- **Agent**: Four-phase generation via `d4d api run` (`src/data_sheets_schema/api_runner.py`), run directly in the workflow. Previously used the `dragon-ai-agent/run-claude-obo` action, which no longer exists — see issue #172.
-- **Schema**: Uses LinkML schema from `src/data_sheets_schema/schema/`
-- **Validation**: Runs `linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset` on the generated full YAML before opening the PR
+- **Protocol**: [Registered shared generation v1](../docs/shared-generation-api-v1.md): `generic_v10`, renderer 25, API playbook 2 and receipt completion 2. The workflow explicitly selects this protocol; it does not inherit the legacy CLI default.
+- **Prompt agreement**: The assistant uses the ordinary API renderer and registration contract. Equivalent registered inputs produce the same scientific prompt. Native generation shares the selected scientific assets but has a separate runtime adapter and acceptance requirements; this assistant repair does not establish native readiness.
+- **Schema**: Uses the full/core LinkML schemas and complete import closures from the same trusted code commit, captured and hashed for the attempt. The existing schema synchronization preflight refuses stale merged products. A moving branch cannot change the schema midway through a run.
+- **Provider**: CBORG, explicitly selected, with the existing API model configuration. The shared contract's runtime label `Claude API (direct)` describes the API execution mode; the registration separately records the CBORG provider and endpoint. No fallback to Anthropic occurs.
+- **Validation**: Runs `linkml-validate` for both `Dataset` and `CoreDataset` before publication, in addition to the runner's existing completion checks.
 - **Workflow**: `.github/workflows/d4d-agent.yml` defines input preparation, generation, validation, PR creation and the final status comment
+
+The old [create](workflows/d4d_assistant_create.md) and [edit](workflows/d4d_assistant_edit.md) instructions are separate legacy interactive instruments. The GitHub workflow loads neither. Their web-fetch/MCP/edit capabilities and old defaults do not describe this workflow. They remain intact for the interactive playbooks that explicitly select them; use the registered protocol above when prompt comparability is required.
+
+## Maintainer configuration and recovery
+
+Provide the repository Actions secret `CBORG_API_KEY` for the selected CBORG route, and `PAT_FOR_PR` for publication. The final status reply uses the workflow's scoped GitHub token. Never put key values in issues, registrations, run evidence or committed configuration. The publication token needs access to create branches and pull requests in this repository. The existing controller allow-list still applies.
+
+[assistant-generation-limits.json](assistant-generation-limits.json) specifies assistant admission ceilings: a 2,000,000-byte bundle, 200,000-token receipt/audit context ceilings, and bounded request, worker, output and aggregate audit allowances. These are operational limits, not measured provider capacity, a scientific coverage target or a total dollar budget. The shared runner retains its existing full/reconciliation/report caps and retry accounting. Larger inputs can refuse; do not truncate them to fit or silently relax limits after a failed paid attempt.
+
+After deploying reviewed code and configuring the key, manually dispatch the workflow against an existing authorized synthetic request, such as issue [#5050](https://github.com/bridge2ai/data-sheets-schema/issues/5050). Confirm generation, both validations, evidence upload, the resulting PR and the final reply. A green skipped run or offline fixture test does not establish live authentication or generation success. The earlier run [38945203508](https://github.com/bridge2ai/data-sheets-schema/actions/runs/38945203508) reached the legacy Anthropic client and failed with `401 invalid x-api-key`; it is retained as historical failure evidence.
 
 ## Troubleshooting
 
