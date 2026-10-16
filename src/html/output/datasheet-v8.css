@@ -1,0 +1,31 @@
+/* v8 publication styles: scoped for Standards Explorer's embedded HTML. */
+.d4d-v8 { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #253044; background: #fff; max-width: 1200px; margin: 0 auto; padding: 1rem; overflow-wrap: anywhere; }
+.d4d-v8 .header { background: #314b76; color: #fff; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
+.d4d-v8 .header h1 { color: inherit; font-size: 1.75rem; margin: 0 0 .5rem; }
+.d4d-v8 .subtitle { color: inherit; margin: 0; }
+.d4d-v8 .section { background: #fff; border: 1px solid #dce2eb; border-radius: 8px; margin-bottom: 1.5rem; overflow: hidden; }
+.d4d-v8 .section-header { background: #f3f6fa; border-bottom: 1px solid #dce2eb; padding: 1rem; display: flex; gap: .75rem; align-items: center; }
+.d4d-v8 .section-title { color: #253044; font-size: 1.25rem; margin: 0; }
+.d4d-v8 .section-description { color: #475569; font-size: .95rem; margin: .25rem 0 0; }
+.d4d-v8 .section-content { padding: 1rem; }
+.d4d-v8 .data-item { border-bottom: 1px solid #dce2eb; padding-bottom: 1rem; margin-bottom: 1rem; }
+.d4d-v8 .data-item:last-child { border-bottom: 0; margin-bottom: 0; }
+.d4d-v8 .item-label { display: block; color: #253044; font-weight: 600; margin-bottom: .5rem; }
+.d4d-v8 .item-value { color: #253044; }
+.d4d-v8 .item-context { color: #475569; font-size: .9rem; }
+.d4d-v8 .nested-dict { background: #f3f6fa; border-radius: 4px; padding: .75rem; margin: .5rem 0; }
+.d4d-v8 .nested-dict dt { color: #253044; font-weight: 600; margin-top: .5rem; }
+.d4d-v8 .nested-dict dd { color: #253044; margin: .25rem 0 .5rem 1rem; }
+.d4d-v8 .formatted-list { padding-left: 1.5rem; margin: .5rem 0; }
+.d4d-v8 .formatted-list li { margin-bottom: .5rem; }
+.d4d-v8 .source-value { white-space: pre-wrap; overflow-wrap: anywhere; }
+.d4d-v8 .provenance { width: 100%; table-layout: fixed; }
+.d4d-v8 .provenance th, .d4d-v8 .provenance td { text-align: left; vertical-align: top; overflow-wrap: anywhere; padding: .4rem; }
+.d4d-v8 a { color: #145bad; text-decoration: underline; }
+.d4d-v8 a:focus { outline: 2px solid #145bad; outline-offset: 2px; }
+.d4d-v8 .timestamp { color: #475569; font-size: .9rem; margin-top: 1.5rem; }
+@media (max-width: 600px) {
+    .d4d-v8 { padding: .5rem; }
+    .d4d-v8 .header h1 { font-size: 1.4rem; }
+    .d4d-v8 .section-content { padding: .75rem; }
+}

@@ -1,0 +1,80 @@
+{
+  "issue": 5055,
+  "source_commit": "fd031a8517c1dbe0e8b2365c8e784909330e6d02",
+  "rendered_on": "2026-10-16",
+  "selection": "Retained baseline API v8 full records, replicate 1 for each project; no score-based selection.",
+  "historical_generation_schema": "2.0.0",
+  "rendering": "Current section layout with lossless recursive values; historical records are neither regenerated nor revalidated against today's schema.",
+  "cohort_manifest": "notes/reference_rescore_2026-09-12_cborg_runtime/manifest.json",
+  "cohort_manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
+  "rendering_inputs": {
+    "scripts/adhoc/render_v8_standards_explorer.py": "e9bab1b0b8795653912cb1c585b23a1772a049f55d4d9bf28f7ebb20a7ea5ef5",
+    "src/data_sheets_schema/rendering/human_readable_renderer.py": "bffcb27e14995723abf8ca34ff59f6c01d5bfc811ca15907465acf426d0caa31",
+    "src/data_sheets_schema/schema/D4D_Motivation.yaml": "70cce39165cc02fd44ba1b1be2ce1642cdb145ef8ebdb2b7ec2efd89bc7a9041",
+    "src/data_sheets_schema/schema/D4D_Composition.yaml": "7726d351e0a7eece16dc6ed02d8c8874b5ca3103dee495bc5d851bb3765a3ecd",
+    "src/data_sheets_schema/schema/D4D_Collection.yaml": "43eec7bca825e7f2f9f450901e60a30ddb72a6261774bccd936bc0a4411f2531",
+    "src/data_sheets_schema/schema/D4D_Preprocessing.yaml": "2c05d069fca9ea954a8ae8f93c2317b6fe9c738d946c7994276568b7e8a80012",
+    "src/data_sheets_schema/schema/D4D_Uses.yaml": "d4043885feaf579c9d580e717248f042159fe83ba3c93ebf09fe53e5476d72cb",
+    "src/data_sheets_schema/schema/D4D_Distribution.yaml": "fc86e1e5a4d800f95fe6b1e800a9fb86ada04153659be2c3ef6dcbf8ff42aab7",
+    "src/data_sheets_schema/schema/D4D_Maintenance.yaml": "c43ac80e6df8d8ff1fd8d26caf20b52e1c1b24ddf9cecd5902e96f875a1f6ad0",
+    "src/data_sheets_schema/schema/D4D_Human.yaml": "9ddc7536f5d263e8865dff191e4e76342f4c8e64a5365fa5cf0ab746b744255d"
+  },
+  "records": [
+    {
+      "project": "AI_READI",
+      "replicate": 1,
+      "run_label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+      "source": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml",
+      "source_sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f",
+      "provenance": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml",
+      "provenance_sha256": "25b431b81c48245d6766ef5c48abbca8a4979661f067e23b8f1ae95372ff5ac7",
+      "generation_recorded_at": "2026-09-07T00:45:33+00:00",
+      "html": "src/html/output/D4D_-_AI-READI_v8_human_readable.html",
+      "html_sha256": "ef23b11c089906150813c169aae8867de3c60e4b194cd73919789fd40902dcae",
+      "source_scalar_count": 546
+    },
+    {
+      "project": "CHORUS",
+      "replicate": 1,
+      "run_label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+      "source": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml",
+      "source_sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7",
+      "provenance": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_provenance.yaml",
+      "provenance_sha256": "49e29d0b9882e27a11d0cf3a7d16990b6405df585eb2659f6ed635ae3fabc85d",
+      "generation_recorded_at": "2026-09-07T00:37:55+00:00",
+      "html": "src/html/output/D4D_-_CHORUS_v8_human_readable.html",
+      "html_sha256": "a2a72f71827022e012744ca9889a96e033c96dd49b26cfa31795f729ddf34fba",
+      "source_scalar_count": 254
+    },
+    {
+      "project": "CM4AI",
+      "replicate": 1,
+      "run_label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1",
+      "source": "data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml",
+      "source_sha256": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41",
+      "provenance": "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_provenance.yaml",
+      "provenance_sha256": "ac9f6dedd874e6ff0fdcef663efd004c52f063298acd5e480ba97258270fc2eb",
+      "generation_recorded_at": "2026-09-07T02:22:47+00:00",
+      "html": "src/html/output/D4D_-_CM4AI_v8_human_readable.html",
+      "html_sha256": "4e15f60502d8a9748b0583f8c40b7c349c133aba39137c2fba53221f16dbef10",
+      "source_scalar_count": 457
+    },
+    {
+      "project": "VOICE",
+      "replicate": 1,
+      "run_label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1",
+      "source": "data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml",
+      "source_sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f",
+      "provenance": "data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_provenance.yaml",
+      "provenance_sha256": "c8536ee18cdbef989165c7b1dcc62616358d5717fe8b19a4f1aa5514ce58b924",
+      "generation_recorded_at": "2026-09-05T21:18:46+00:00",
+      "html": "src/html/output/D4D_-_VOICE_v8_human_readable.html",
+      "html_sha256": "99273f52ae946a3f697018df52a2429b8321e45ef41209f30cc0893a7da5aecb",
+      "source_scalar_count": 418
+    }
+  ],
+  "css": {
+    "path": "src/html/output/datasheet-v8.css",
+    "sha256": "71c22382a36e4a8339c02df106144fba365808afe749d1387f5f9d58db8f4ccf"
+  }
+}
