@@ -220,6 +220,8 @@ def build_publication():
         rendered, count = re.subn(r"Generated on [0-9 :\-]+ using Datasheets for Datasets", f"HTML rendered on {RENDERED_ON}; original generation date is recorded in the provenance above.", rendered)
         if count != 1:
             raise ValueError("Renderer timestamp template changed")
+        # Remove template whitespace, then prove source text was not affected.
+        rendered = "\n".join(line.rstrip(" \t") for line in rendered.split("\n"))
         scalar_count = verify_values(data, rendered)
         destination = OUTPUT / f"D4D_-_{display_project}_v8_human_readable.html"
         outputs[destination] = rendered.encode("utf-8")

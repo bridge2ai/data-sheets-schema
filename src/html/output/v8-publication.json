@@ -8,7 +8,7 @@
   "cohort_manifest": "notes/reference_rescore_2026-09-12_cborg_runtime/manifest.json",
   "cohort_manifest_sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2",
   "rendering_inputs": {
-    "scripts/adhoc/render_v8_standards_explorer.py": "ef66936f65a79f6ec790f0a32a79a8cdcf23048dae078ff49dc5d99a3843cbdd",
+    "scripts/adhoc/render_v8_standards_explorer.py": "e9bab1b0b8795653912cb1c585b23a1772a049f55d4d9bf28f7ebb20a7ea5ef5",
     "src/data_sheets_schema/rendering/human_readable_renderer.py": "bffcb27e14995723abf8ca34ff59f6c01d5bfc811ca15907465acf426d0caa31",
     "src/data_sheets_schema/schema/D4D_Motivation.yaml": "70cce39165cc02fd44ba1b1be2ce1642cdb145ef8ebdb2b7ec2efd89bc7a9041",
     "src/data_sheets_schema/schema/D4D_Composition.yaml": "7726d351e0a7eece16dc6ed02d8c8874b5ca3103dee495bc5d851bb3765a3ecd",
@@ -30,7 +30,7 @@
       "provenance_sha256": "25b431b81c48245d6766ef5c48abbca8a4979661f067e23b8f1ae95372ff5ac7",
       "generation_recorded_at": "2026-09-07T00:45:33+00:00",
       "html": "src/html/output/D4D_-_AI-READI_v8_human_readable.html",
-      "html_sha256": "bcf8a2763f5e203f6080b86b0d0b869f37722fade40e593217a8547e20ecb3ea",
+      "html_sha256": "ef23b11c089906150813c169aae8867de3c60e4b194cd73919789fd40902dcae",
       "source_scalar_count": 546
     },
     {
@@ -43,7 +43,7 @@
       "provenance_sha256": "49e29d0b9882e27a11d0cf3a7d16990b6405df585eb2659f6ed635ae3fabc85d",
       "generation_recorded_at": "2026-09-07T00:37:55+00:00",
       "html": "src/html/output/D4D_-_CHORUS_v8_human_readable.html",
-      "html_sha256": "032993c9b0f2bd82fc26c1b2e6a56ba9096616f3afac14b84d457015a83e7902",
+      "html_sha256": "a2a72f71827022e012744ca9889a96e033c96dd49b26cfa31795f729ddf34fba",
       "source_scalar_count": 254
     },
     {
@@ -56,7 +56,7 @@
       "provenance_sha256": "ac9f6dedd874e6ff0fdcef663efd004c52f063298acd5e480ba97258270fc2eb",
       "generation_recorded_at": "2026-09-07T02:22:47+00:00",
       "html": "src/html/output/D4D_-_CM4AI_v8_human_readable.html",
-      "html_sha256": "30294435e011063a209920149b2ca5a6f24132097af4cea60f9edd43c158b509",
+      "html_sha256": "4e15f60502d8a9748b0583f8c40b7c349c133aba39137c2fba53221f16dbef10",
       "source_scalar_count": 457
     },
     {
@@ -69,7 +69,7 @@
       "provenance_sha256": "c8536ee18cdbef989165c7b1dcc62616358d5717fe8b19a4f1aa5514ce58b924",
       "generation_recorded_at": "2026-09-05T21:18:46+00:00",
       "html": "src/html/output/D4D_-_VOICE_v8_human_readable.html",
-      "html_sha256": "e09eacf29e0810e1cca2cfe6e603e847770a49fe8ac8e49d38e46a8bcb2edbab",
+      "html_sha256": "99273f52ae946a3f697018df52a2429b8321e45ef41209f30cc0893a7da5aecb",
       "source_scalar_count": 418
     }
   ],
