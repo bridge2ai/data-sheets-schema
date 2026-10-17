@@ -328,11 +328,50 @@
 
 
 <h1 id="standards-explorer-datasheets">Standards Explorer datasheets</h1>
-<p>The publication directory is <code>src/html/output/</code>. The v8 display selection is
-the <strong>retained baseline API full record, replicate 1, for each of the four
-projects</strong>. AI-READI and CM4AI use <code>2026-09-04g_..._rep1</code>; CHORUS and VOICE use
-<code>2026-09-04f_..._rep1</code>. This is a uniform display selection, not a ranking by
-evaluation score. Other replicates and rejected attempts remain in the repository.</p>
+<p>The publication directory is <code>src/html/output/</code>. The v8 display selection uses
+the <strong>previously selected canonical baseline API full record for each project</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Canonical replicate</th>
+<th>Run prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI-READI</td>
+<td>2</td>
+<td><code>2026-09-04g</code></td>
+</tr>
+<tr>
+<td>CHORUS</td>
+<td>2</td>
+<td><code>2026-09-04f</code></td>
+</tr>
+<tr>
+<td>CM4AI</td>
+<td>3</td>
+<td><code>2026-09-04g</code></td>
+</tr>
+<tr>
+<td>VOICE</td>
+<td>1</td>
+<td><code>2026-09-04f</code></td>
+</tr>
+</tbody>
+</table>
+<p>The existing <code>d4d runs canonical --runtime api --config 2026-09-04</code> resolver
+identifies these choices from the original provenance. They were selected on
+2026-09-08 using validity, review adverse counts (difference ≤2 treated as a tie),
+coverage and label order, as documented in <code>notes/generic_v8_analysis_plan.md</code>.
+The later <code>notes/review_selection_policy_2026-09-11.md</code> makes review counts
+report-only for future selections and explicitly preserves existing canonical
+decisions. Publishing these recorded choices does not rerank the replicates or
+establish semantic-quality winners. Other replicates and rejected attempts remain
+in the repository. The initial uniform-replicate-1 publication preparation is
+retained in commit <code>289863340cf864bf0ed6ec2197ca8cb637eec5f1</code>; its attempted upload
+did not publish a Synapse snapshot.</p>
 <p>The exact paths, source hashes, original provenance hashes, render date and HTML
 hashes are recorded in <code>src/html/output/v8-publication.json</code>. These are historical
 v8 records generated with schema 2.0.0. Rendering does not regenerate them, migrate
@@ -351,12 +390,28 @@ the HTML into its own page and does not load the publication's relative styleshe
 <code>datasheet-v8.css</code> is also supplied for the existing Synapse table contract.</p>
 <p>On a main-branch publication change, <code>.github/workflows/d4d_to_synapse_table.yml</code>
 uploads four HTML rows and one CSS row to <code>D4D_content</code> (<code>syn68885644</code>) and creates
-a snapshot. The uploader requires the complete bundle before login, verifies new
+a snapshot. JSON RowSets preserve multiline HTML exactly; the Synapse CSV import
+path skips empty physical lines, including inside quoted HTML cells. The uploader
+requires the complete bundle before login, verifies new
 rows before deleting the captured old rows, and snapshots only after verifying
 the final contents. This is not a transactional replacement: a failed cleanup
 can leave both old and new rows in the live table; the previous snapshot remains
 the published version until a successful retry. No direct Synapse operation is
 needed when merging the publication PR.</p>
+<p>The first upload (<a href="https://github.com/bridge2ai/data-sheets-schema/actions/runs/38981856572">run 38981856572</a>)
+authenticated and appended the five initial replicate-1 rows, then stopped on
+exact read-back verification. It deleted no prior rows and created no snapshot.
+Anonymous JSON queries confirmed all five previous rows remained identical to
+snapshot 13. The new CSS was exact, while the four HTML cells lost only empty
+lines: AI-READI 214, CHORUS 156, CM4AI 174 and VOICE 216. No nonempty lines changed.
+The <a href="../standards-explorer-roundtrip-2026-10-16.json">diagnostic summary</a> records
+hashes and differences. The <a href="../standards-explorer-roundtrip-2026-10-16.tar.gz">captured public JSON responses</a>
+are retained as a compressed archive. <code>scripts/adhoc/inspect_v8_synapse_roundtrip.py</code>
+reproduces the comparison with <code>--raw-dir</code> pointing to the extracted archive and
+<code>--output-dir</code> pointing to a fresh external directory, with the failed upload pinned
+to commit <code>289863340cf864bf0ed6ec2197ca8cb637eec5f1</code>. The corrected uploader uses
+JSON for both append and verification; it retains exact comparisons and safely
+replaces all captured old/staged rows only after the chosen canonical set verifies.</p>
 <p>The registry's <a href="https://github.com/bridge2ai/b2ai-standards-registry/blob/main/.github/workflows/project_data_change.yml">publication workflow</a>
 then advances <code>mv_D4D_content</code> (<code>syn77626807</code>) and dependent views. It is scheduled
 daily at 06:17 UTC; GitHub may delay it. Standards Explorer reads this materialized

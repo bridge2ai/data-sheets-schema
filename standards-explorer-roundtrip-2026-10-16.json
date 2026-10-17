@@ -1,0 +1,496 @@
+{
+  "table": "syn68885644",
+  "baseline_snapshot": 13,
+  "expected_commit": "289863340cf864bf0ed6ec2197ca8cb637eec5f1",
+  "current_count": 10,
+  "baseline_count": 5,
+  "baseline_rows_missing_or_changed": 0,
+  "new_row_count": 5,
+  "comparisons": [
+    {
+      "filename": "datasheet-v8.css",
+      "row_id": 72,
+      "version": 33,
+      "expected_characters": 2373,
+      "actual_characters": 2373,
+      "expected_sha256": "71c22382a36e4a8339c02df106144fba365808afe749d1387f5f9d58db8f4ccf",
+      "actual_sha256": "71c22382a36e4a8339c02df106144fba365808afe749d1387f5f9d58db8f4ccf",
+      "exact_match": true,
+      "common_prefix_characters": 2373,
+      "common_suffix_characters": 0,
+      "expected_first_difference": "",
+      "actual_first_difference": "",
+      "expected_tail": "  .d4d-v8 .section-content { padding: .75rem; }\n}\n",
+      "actual_tail": "  .d4d-v8 .section-content { padding: .75rem; }\n}\n",
+      "matches_expected_rstrip": false,
+      "matches_expected_strip": false,
+      "matches_expected_without_final_newlines": false,
+      "matches_expected_crlf_normalization": true,
+      "matches_expected_without_empty_lines": false,
+      "matches_expected_without_blank_lines": false,
+      "line_change_kinds": {},
+      "changed_line_examples": [],
+      "deleted_line_count": 0,
+      "inserted_line_count": 0,
+      "deleted_nonempty_line_count": 0,
+      "deleted_nonblank_line_count": 0,
+      "inserted_nonblank_line_count": 0
+    },
+    {
+      "filename": "D4D_-_AI-READI_v8_human_readable.html",
+      "row_id": 73,
+      "version": 33,
+      "expected_characters": 138802,
+      "actual_characters": 138588,
+      "expected_sha256": "ef23b11c089906150813c169aae8867de3c60e4b194cd73919789fd40902dcae",
+      "actual_sha256": "b95ff34d51762c99076a7f4915f8c64d395c3be7ce6de1b3d2493c04f1222f45",
+      "exact_match": false,
+      "common_prefix_characters": 3655,
+      "common_suffix_characters": 161,
+      "expected_first_difference": "\n\n\n\n            <div class=\"section\">\n                <div class=\"section-header",
+      "actual_first_difference": "            <div class=\"section\">\n                <div class=\"section-header\">\n ",
+      "expected_tail": "rovenance above.\n    </div>\n</div>\n</body>\n</html>",
+      "actual_tail": "rovenance above.\n    </div>\n</div>\n</body>\n</html>",
+      "matches_expected_rstrip": false,
+      "matches_expected_strip": false,
+      "matches_expected_without_final_newlines": false,
+      "matches_expected_crlf_normalization": false,
+      "matches_expected_without_empty_lines": false,
+      "matches_expected_without_blank_lines": false,
+      "line_change_kinds": {
+        "delete": 194
+      },
+      "changed_line_examples": [
+        {
+          "kind": "delete",
+          "expected_line_start": 49,
+          "expected_lines": 4,
+          "actual_lines": 0,
+          "expected_preview": [
+            "",
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 62,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 64,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 70,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 72,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 78,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 81,
+          "expected_lines": 3,
+          "actual_lines": 0,
+          "expected_preview": [
+            "",
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 93,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        }
+      ],
+      "deleted_line_count": 214,
+      "inserted_line_count": 0,
+      "deleted_nonempty_line_count": 0,
+      "deleted_nonblank_line_count": 0,
+      "inserted_nonblank_line_count": 0
+    },
+    {
+      "filename": "D4D_-_CHORUS_v8_human_readable.html",
+      "row_id": 74,
+      "version": 33,
+      "expected_characters": 74097,
+      "actual_characters": 73941,
+      "expected_sha256": "a2a72f71827022e012744ca9889a96e033c96dd49b26cfa31795f729ddf34fba",
+      "actual_sha256": "0dc35b9fa6c8a8c04ba6e69140d0256964a3364ea29258aaf2f0fd5c5bb58bdb",
+      "exact_match": false,
+      "common_prefix_characters": 3555,
+      "common_suffix_characters": 161,
+      "expected_first_difference": "\n\n\n\n            <div class=\"section\">\n                <div class=\"section-header",
+      "actual_first_difference": "            <div class=\"section\">\n                <div class=\"section-header\">\n ",
+      "expected_tail": "rovenance above.\n    </div>\n</div>\n</body>\n</html>",
+      "actual_tail": "rovenance above.\n    </div>\n</div>\n</body>\n</html>",
+      "matches_expected_rstrip": false,
+      "matches_expected_strip": false,
+      "matches_expected_without_final_newlines": false,
+      "matches_expected_crlf_normalization": false,
+      "matches_expected_without_empty_lines": false,
+      "matches_expected_without_blank_lines": false,
+      "line_change_kinds": {
+        "delete": 138
+      },
+      "changed_line_examples": [
+        {
+          "kind": "delete",
+          "expected_line_start": 49,
+          "expected_lines": 4,
+          "actual_lines": 0,
+          "expected_preview": [
+            "",
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 62,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 64,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 70,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 72,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 78,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 81,
+          "expected_lines": 3,
+          "actual_lines": 0,
+          "expected_preview": [
+            "",
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 93,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        }
+      ],
+      "deleted_line_count": 156,
+      "inserted_line_count": 0,
+      "deleted_nonempty_line_count": 0,
+      "deleted_nonblank_line_count": 0,
+      "inserted_nonblank_line_count": 0
+    },
+    {
+      "filename": "D4D_-_CM4AI_v8_human_readable.html",
+      "row_id": 75,
+      "version": 33,
+      "expected_characters": 98299,
+      "actual_characters": 98125,
+      "expected_sha256": "4e15f60502d8a9748b0583f8c40b7c349c133aba39137c2fba53221f16dbef10",
+      "actual_sha256": "34dd720cb6263dc14645c470a6bbaa5f701b4e220f0a67a98d6ceb4bf0cac860",
+      "exact_match": false,
+      "common_prefix_characters": 3662,
+      "common_suffix_characters": 161,
+      "expected_first_difference": "\n\n\n\n            <div class=\"section\">\n                <div class=\"section-header",
+      "actual_first_difference": "            <div class=\"section\">\n                <div class=\"section-header\">\n ",
+      "expected_tail": "rovenance above.\n    </div>\n</div>\n</body>\n</html>",
+      "actual_tail": "rovenance above.\n    </div>\n</div>\n</body>\n</html>",
+      "matches_expected_rstrip": false,
+      "matches_expected_strip": false,
+      "matches_expected_without_final_newlines": false,
+      "matches_expected_crlf_normalization": false,
+      "matches_expected_without_empty_lines": false,
+      "matches_expected_without_blank_lines": false,
+      "line_change_kinds": {
+        "delete": 154
+      },
+      "changed_line_examples": [
+        {
+          "kind": "delete",
+          "expected_line_start": 49,
+          "expected_lines": 4,
+          "actual_lines": 0,
+          "expected_preview": [
+            "",
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 62,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 64,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 70,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 72,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 78,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 81,
+          "expected_lines": 3,
+          "actual_lines": 0,
+          "expected_preview": [
+            "",
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 93,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        }
+      ],
+      "deleted_line_count": 174,
+      "inserted_line_count": 0,
+      "deleted_nonempty_line_count": 0,
+      "deleted_nonblank_line_count": 0,
+      "inserted_nonblank_line_count": 0
+    },
+    {
+      "filename": "D4D_-_VOICE_v8_human_readable.html",
+      "row_id": 76,
+      "version": 33,
+      "expected_characters": 121392,
+      "actual_characters": 121176,
+      "expected_sha256": "99273f52ae946a3f697018df52a2429b8321e45ef41209f30cc0893a7da5aecb",
+      "actual_sha256": "f9e3a2b7c8355640f0994468523729ab74c72fed26f6c048de477312c1cd3930",
+      "exact_match": false,
+      "common_prefix_characters": 3702,
+      "common_suffix_characters": 161,
+      "expected_first_difference": "\n\n\n\n            <div class=\"section\">\n                <div class=\"section-header",
+      "actual_first_difference": "            <div class=\"section\">\n                <div class=\"section-header\">\n ",
+      "expected_tail": "rovenance above.\n    </div>\n</div>\n</body>\n</html>",
+      "actual_tail": "rovenance above.\n    </div>\n</div>\n</body>\n</html>",
+      "matches_expected_rstrip": false,
+      "matches_expected_strip": false,
+      "matches_expected_without_final_newlines": false,
+      "matches_expected_crlf_normalization": false,
+      "matches_expected_without_empty_lines": false,
+      "matches_expected_without_blank_lines": false,
+      "line_change_kinds": {
+        "delete": 196
+      },
+      "changed_line_examples": [
+        {
+          "kind": "delete",
+          "expected_line_start": 49,
+          "expected_lines": 4,
+          "actual_lines": 0,
+          "expected_preview": [
+            "",
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 62,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 64,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 70,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 72,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 78,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 81,
+          "expected_lines": 3,
+          "actual_lines": 0,
+          "expected_preview": [
+            "",
+            ""
+          ],
+          "actual_preview": []
+        },
+        {
+          "kind": "delete",
+          "expected_line_start": 93,
+          "expected_lines": 1,
+          "actual_lines": 0,
+          "expected_preview": [
+            ""
+          ],
+          "actual_preview": []
+        }
+      ],
+      "deleted_line_count": 216,
+      "inserted_line_count": 0,
+      "deleted_nonempty_line_count": 0,
+      "deleted_nonblank_line_count": 0,
+      "inserted_nonblank_line_count": 0
+    }
+  ]
+}
