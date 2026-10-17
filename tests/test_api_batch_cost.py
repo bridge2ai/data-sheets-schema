@@ -56,6 +56,22 @@ class ApiBatchCostValidationTest(unittest.TestCase):
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn("--max-cost-dollars must be non-negative", result.output)
 
+    def test_non_finite_max_cost_dollars_is_rejected(self):
+        runner = CliRunner()
+        for bad in ("nan", "inf", "-inf"):
+            with self.subTest(bad=bad):
+                result = runner.invoke(
+                    cli,
+                    [
+                        "api",
+                        "batch",
+                        "--label-prefix", "2026-10-11_claude-opus-5-api-generic-test",
+                        "--max-cost-dollars", bad,
+                    ],
+                )
+                self.assertNotEqual(result.exit_code, 0)
+                self.assertIn("--max-cost-dollars must be non-negative", result.output)
+
 
 class ApiBatchCostStopTest(unittest.TestCase):
     """Stopping behavior between runs when the cumulative cap is met."""

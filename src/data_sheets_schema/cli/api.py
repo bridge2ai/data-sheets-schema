@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -732,8 +733,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api batch")          # the record and the outputs land under the cwd (#1643)
-    if max_cost_dollars is not None and max_cost_dollars < 0:
-        raise click.ClickException("--max-cost-dollars must be non-negative")
+    if max_cost_dollars is not None and (not math.isfinite(max_cost_dollars) or max_cost_dollars < 0):
+        raise click.ClickException("--max-cost-dollars must be non-negative and finite")
     from data_sheets_schema.api_runner import execute, plan
 
     requested = (AUTO if manifest is None
