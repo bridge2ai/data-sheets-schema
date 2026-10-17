@@ -255,7 +255,7 @@ def prepare(*, inputs_root, source_checkout, dataset, source_commit, trusted_com
                 + "; null denotes bundle framing. FILE/PATH labels within a member are literal structural text, not independent file-origin authority."},
         "vocabulary": {}}
     _write(context_path, shared.canonical(context))
-    settings = api._model_settings()
+    settings = api._model_settings("generic_v10")
     arm, method = ARMS["baseline"][:2]
     registration = {"format": shared.FORMAT, "registration_id": "github-assistant-" + attempt_id,
         "registration_path": str(registration_path), "selection": shared.descriptor(),
