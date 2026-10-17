@@ -45,7 +45,7 @@ def _record_help():
 class TestRecordCliSurface(unittest.TestCase):
     def test_the_spec_options_exist(self):
         out = _record_help()
-        for flag in ("--condition", "--arm", "--runtime", "--provider"):
+        for flag in ("--condition", "--arm", "--runtime", "--provider", "--run-date"):
             with self.subTest(flag=flag):
                 self.assertIn(flag, out)
 
