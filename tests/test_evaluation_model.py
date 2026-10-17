@@ -109,7 +109,7 @@ def test_every_judge_resolves_through_the_evaluation_setting(path, monkeypatch, 
                         lambda: {"name": "evaluator-x", "basis": "test",
                                  "generation_model": "unused"})
     monkeypatch.setattr(api_runner, "_model_settings",
-                        lambda: {"name": "a-different-generator"})
+                        lambda condition=None: {"name": "a-different-generator"})
     assert PATHS[path](monkeypatch, tmp) == "evaluator-x"
 
 
@@ -117,7 +117,7 @@ def test_every_judge_resolves_through_the_evaluation_setting(path, monkeypatch, 
 def test_the_default_follows_the_generation_model_at_call_time(path, monkeypatch, tmp):
     """The default is read when the judge resolves, as the old fallback was."""
     monkeypatch.setattr(api_runner, "_model_settings",
-                        lambda: {"name": "generator-y"})
+                        lambda condition=None: {"name": "generator-y"})
     assert PATHS[path](monkeypatch, tmp) == "generator-y"
 
 

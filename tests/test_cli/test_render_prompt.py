@@ -140,8 +140,8 @@ class TestTheInstructionIsResolvedOnce(unittest.TestCase):
         s = _spec(runtime="Claude Code")
         first = s.instruction
         original = ar._model_settings
-        ar._model_settings = lambda: {"name": "SOME-OTHER-MODEL",
-                                      "temperature": 0.0}
+        ar._model_settings = lambda condition=None: {"name": "SOME-OTHER-MODEL",
+                                                     "temperature": 0.0}
         try:
             self.assertEqual(first, s.instruction)
             self.assertNotIn("SOME-OTHER-MODEL", s.instruction)

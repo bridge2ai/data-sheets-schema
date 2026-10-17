@@ -86,8 +86,8 @@ def test_preparation_uses_current_api_prompt_schema_and_complete_input(prepared_
     manifest = json.loads(Path(outputs["input-manifest"]).read_bytes())
     assert [member["path"] for member in manifest["members"]] == [".hidden.md", "protocol.txt"]
     spec = selected(outputs)
-    spec.bind_api_header_values(api._model_settings())
-    shared.preflight(spec, api._model_settings())
+    spec.bind_api_header_values(api._model_settings(spec.condition))
+    shared.preflight(spec, api._model_settings(spec.condition))
     actual = api.build_phase(spec, "full", carry={})
     assert json.loads((attempt / "prepared_full_request.json").read_bytes()) == asdict(actual)
     assert (attempt / "rendered_instruction.txt").read_text() == spec.instruction

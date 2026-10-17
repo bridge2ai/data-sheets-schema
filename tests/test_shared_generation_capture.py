@@ -36,7 +36,7 @@ def test_pure_memo_bound_evicts_and_rebuilds(monkeypatch):
 
 
 def test_captured_wire_does_not_use_legacy_live_readers(selected, monkeypatch):
-    selected.bind_api_header_values(api._model_settings())
+    selected.bind_api_header_values(api._model_settings(selected.condition))
     expected = api.build_phase(selected, 'full', carry={})
     def absent(*args, **kwargs):
         pytest.fail('new request read a legacy live authority reader')

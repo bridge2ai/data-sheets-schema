@@ -13,7 +13,7 @@ from tests.test_generation_manifest_identity import external
 def test_phase_instructions_and_carried_headers_agree(external, monkeypatch, applies, temperature):
     settings = {"name": "synthetic-model", "temperature": temperature,
                 "temperature_applies": applies, "effort": "high"}
-    monkeypatch.setattr(api, "_model_settings", lambda: settings)
+    monkeypatch.setattr(api, "_model_settings", lambda condition=None: settings)
     spec = replace(external, condition="generic_v9", render_version=api.AUTO)
     assert spec.render_version == 8
     instruction = spec.instruction
@@ -35,7 +35,7 @@ def test_phase_instructions_and_carried_headers_agree(external, monkeypatch, app
 
 
 def test_renderer5_replays_the_original_api_bytes(monkeypatch):
-    monkeypatch.setattr(api, "_model_settings", lambda: {
+    monkeypatch.setattr(api, "_model_settings", lambda condition=None: {
         "name": "synthetic-model", "temperature": 0.0, "temperature_applies": False})
     recorded = {"condition": "generic_v9", "arm": "baseline", "bundle": "/input/demo.txt",
         "manifest": None, "manifest_line": "# Source manifest: not used", "chunk_manifest": None,
@@ -59,19 +59,19 @@ def test_all_request_header_fields_use_the_writer_rules():
 def test_replay_does_not_read_changed_live_request_settings(external, monkeypatch):
     settings = {"name": "synthetic-model", "temperature": 0.65,
                 "temperature_applies": True, "effort": "high"}
-    monkeypatch.setattr(api, "_model_settings", lambda: settings)
+    monkeypatch.setattr(api, "_model_settings", lambda condition=None: settings)
     spec = replace(external, condition="generic_v9", render_version=api.AUTO)
     original = spec.instruction
     recorded = spec.render_spec()
     assert recorded["api_header_values"]["Temperature"] == "0.65"
     assert recorded["api_header_values"]["Reasoning effort"] == "high"
-    monkeypatch.setattr(api, "_model_settings", lambda: {
+    monkeypatch.setattr(api, "_model_settings", lambda condition=None: {
         "name": "another-model", "temperature": 0.2, "temperature_applies": True, "effort": "low"})
     replay = api.RunSpec.from_render_spec(recorded, project=spec.project,
         method=spec.method, label=spec.label)
     assert replay.instruction == original
     # Reading the replay never needs even a working live configuration.
-    def unavailable():
+    def unavailable(condition=None):
         raise AssertionError("historical replay consulted live model settings")
     monkeypatch.setattr(api, "_model_settings", unavailable)
     assert api.resolve_prompt(replay) == original
@@ -93,7 +93,7 @@ def test_changed_request_settings_stop_before_any_model_call(external, monkeypat
     from tests.test_download.test_api_runner import FakeClient
     original = external.instruction
     current = api._model_settings()
-    monkeypatch.setattr(api, "_model_settings", lambda: {**current, "effort": "new-effort"})
+    monkeypatch.setattr(api, "_model_settings", lambda condition=None: {**current, "effort": "new-effort"})
     client = FakeClient()
     with pytest.raises(ValueError, match="request settings differ"):
         api.execute(external, client=client, resume=False)
@@ -111,7 +111,7 @@ def test_backfill_recovers_v8_headers_from_recorded_execution(external, monkeypa
     from data_sheets_schema.runs import verify_request
     settings = {"name": "recorded-model", "temperature": temperature,
                 "temperature_applies": temperature is not None, "effort": effort}
-    monkeypatch.setattr(api, "_model_settings", lambda: settings)
+    monkeypatch.setattr(api, "_model_settings", lambda condition=None: settings)
     body = external.instruction
     data = {"run": {"project": external.project, "method": external.method, "label": external.label},
             "model": {"provider": external.render_spec()["provider"], "model": "recorded-model",
@@ -126,7 +126,7 @@ def test_backfill_recovers_v8_headers_from_recorded_execution(external, monkeypa
     path = pv.record_path_for(external.project, external.method, external.label, external.out_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(data))
-    monkeypatch.setattr(api, "_model_settings", lambda: {
+    monkeypatch.setattr(api, "_model_settings", lambda condition=None: {
         "name": "different-model", "temperature": 0.2, "temperature_applies": True, "effort": "low"})
     result = CliRunner().invoke(cli, ["provenance", "backfill-spec", "--project", external.project,
         "--method", external.method, "--label", external.label, "--condition", external.condition,

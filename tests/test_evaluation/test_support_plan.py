@@ -386,7 +386,7 @@ def test_shallow_recovery_and_outside_repository_paths_fail_closed(fixture):
 
 
 def test_default_model_resolver_has_no_provider_access(fixture, monkeypatch):
-    monkeypatch.setattr(api_runner, "_model_settings", lambda: {"name": "claude-opus-5"})
+    monkeypatch.setattr(api_runner, "_model_settings", lambda condition=None: {"name": "claude-opus-5"})
     manifest = build(fixture)
     assert manifest["model"]["basis"] == "defaults_to_generation_model"
     assert manifest["model"]["generation_model"] == "claude-opus-5"

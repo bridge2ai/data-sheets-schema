@@ -53,6 +53,8 @@ def test_assistant_preparation_runs_actual_shared_cli_to_checked_outputs(prepare
     assert Path(outputs["full-path"]).is_file()
     assert Path(outputs["core-path"]).is_file()
     record = yaml.safe_load(spec.provenance_path.read_bytes())
+    assert record["model"]["thinking_requested"] == {"type": "adaptive", "display": "summarized"}
+    assert all(call.get("thinking") == {"type": "adaptive", "display": "summarized"} for call in client.messages.calls)
     assert record["shared_generation"]["scientific_support"] == "unverified evaluator declarations"
     assert record["receipt_completion"]["counts"]["unsupported"] > 0
     assert typed_audit_runtime._state(spec)["state"] == "accepted"

@@ -23,7 +23,7 @@ def config(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("name", sorted(PATHS))
 def test_config_moves_every_judge_without_moving_generator(config, name, tmp_path, monkeypatch):
-    monkeypatch.setattr(api_runner, "_model_settings", lambda: {"name": "generator-only"})
+    monkeypatch.setattr(api_runner, "_model_settings", lambda condition=None: {"name": "generator-only"})
     assert PATHS[name](monkeypatch, tmp_path) == "independent-judge"
     selected = em.evaluation_model_settings()
     assert selected["basis"] == "evaluation_config"
@@ -135,7 +135,7 @@ def test_form_subtype_cache_precedence_and_new_entries_disclose_basis(config, tm
 
 def test_api_rubric_retains_its_separate_registered_default(config, monkeypatch):
     from data_sheets_schema.evaluation.evaluate_d4d_llm import LLMEvaluationConfig
-    monkeypatch.setattr(api_runner, "_model_settings", lambda: {"name": "new-generator"})
+    monkeypatch.setattr(api_runner, "_model_settings", lambda condition=None: {"name": "new-generator"})
     assert em.evaluation_model_name() == "independent-judge"
     assert LLMEvaluationConfig().model == "claude-sonnet-4-5-20250929"
     assert LLMEvaluationConfig(model="registered-other").model == "registered-other"
