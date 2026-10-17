@@ -42,6 +42,19 @@ ARMS = {
 # launched.
 _CONDITIONS = sorted(CONDITION_PROMPTS)
 
+# Every non-core, non-deterministic method directory and the arm key it belongs
+# to (#5046). `baseline` spans three runtime directories (`claudecode_api`,
+# `claudecode_agent`, `claudecode_direct`); the other arms each have one.
+_ARM_FOR_METHOD = {
+    "claudecode_agent": "baseline",
+    "claudecode_api": "baseline",
+    "claudecode_direct": "baseline",
+    "claudecode_agent_crate": "de_novo",
+    "claudecode_agent_crate_only": "crate_only",
+    "claudecode_agent_healthsheet": "healthsheet",
+}
+_METHODS = sorted(_ARM_FOR_METHOD)
+
 
 def _explicit(name, value, default=None):
     """Distinguish a historical Click default from a caller's selection."""
@@ -84,17 +97,19 @@ def _capture_shared_registration(path):
 
 def _shared_spec(project, arm, label, condition, bundle, out_dir, runtime, provider,
                  manifest, chunk_manifest, api_playbook_version, removal_repair_version,
-                 receipt_completion_version, receipt_completion_registration, captured):
+                 receipt_completion_version, receipt_completion_registration, captured,
+                 method=None):
     from data_sheets_schema import api_runner as api, shared_generation as shared
     reg, raw = captured['document'], captured['raw']
     run, inputs = reg['run'], reg['inputs']
     matches = [key for key, row in ARMS.items() if row[:2] == (run['arm'], run['method'])]
     if len(matches) != 1 or run['project'] != project or run['label'] != label:
         raise click.ClickException('shared registration belongs to another project, arm, method or label')
-    expected = {'arm': matches[0], 'condition': 'generic_v10', 'runtime': api.RUNTIME,
-                'provider': reg['runtime']['provider'], 'api_playbook_version': 2,
-                'receipt_completion_version': 2, 'removal_repair_version': 0}
-    supplied = dict(arm=arm, condition=condition, runtime=runtime, provider=provider,
+    expected = {'arm': matches[0], 'method': run['method'], 'condition': 'generic_v10',
+                'runtime': api.RUNTIME, 'provider': reg['runtime']['provider'],
+                'api_playbook_version': 2, 'receipt_completion_version': 2,
+                'removal_repair_version': 0}
+    supplied = dict(arm=arm, method=method, condition=condition, runtime=runtime, provider=provider,
                     api_playbook_version=api_playbook_version,
                     receipt_completion_version=receipt_completion_version,
                     removal_repair_version=removal_repair_version)
@@ -223,7 +238,7 @@ def _shared_plan_line(plan):
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
-          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None, _shared_capture=None):
+          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None, _shared_capture=None, method=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -245,10 +260,21 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         return _shared_spec(project, arm, label, condition, bundle, out_dir,
                             runtime, provider, manifest, chunk_manifest,
                             api_playbook_version, removal_repair_version,
-                            receipt_completion_version, receipt_completion_registration, captured)
+                            receipt_completion_version, receipt_completion_registration, captured,
+                            method=method)
     from data_sheets_schema.api_runner import RunSpec
     from data_sheets_schema.chunking import CONCAT_DIR as BUNDLE_DIR
-    display, method, pattern, manifest_line = ARMS[arm]
+    if method is not None:
+        method_arm = _ARM_FOR_METHOD.get(method)
+        if method_arm is None:
+            raise click.ClickException(f"unknown --method {method!r}; expected one of {', '.join(_METHODS)}")
+        if _explicit("arm", arm, "baseline") and arm != method_arm:
+            raise click.ClickException(
+                f"--method {method!r} conflicts with --arm {arm!r} (expected --arm {method_arm})"
+            )
+        arm = method_arm
+    display, default_method, pattern, manifest_line = ARMS[arm]
+    method = method or default_method
     selected = select_manifest(project, bundle, manifest)      # one rule, everywhere (#1367 review)
     reg = load_registry(selected)
     resolved = (Path(bundle) if bundle else
@@ -436,6 +462,8 @@ def api():
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
+@click.option("--method", type=click.Choice(_METHODS), default=None,
+              help="output method directory (e.g. claudecode_agent for an agentic baseline run, #5046); default: the arm's method")
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
@@ -455,7 +483,7 @@ def api():
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="render even though the label names a different condition (#1094)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
-                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
+                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, method=None):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -480,7 +508,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     spec = _spec(project, arm, label, condition, bundle,
                  runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
                  shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration,
-                 **_manifest_kw(manifest, chunk_manifest))
+                 method=method, **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
 
@@ -513,6 +541,8 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     if spec.shared_generation_version:
         condition, runtime = spec.condition, spec.runtime
         arm = next(key for key, row in ARMS.items() if row[:2] == (spec.arm, spec.method))
+    else:
+        arm = _ARM_FOR_METHOD.get(spec.method, arm)
     click.echo(f"# rendered {condition} for {project} / {arm} / runtime={runtime}",
                err=True)
     click.echo(f"# sha256 {digest}  ({len(text.encode('utf-8'))} bytes)", err=True)
