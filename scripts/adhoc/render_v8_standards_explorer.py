@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish retained v8 replicate 1 for Standards Explorer (#5055), 2026-10-16.
+"""Publish recorded v8 canonicals for Standards Explorer (#5055), 2026-10-16.
 
 Inputs: four immutable full YAMLs and original provenance at SOURCE_COMMIT.
 Outputs: four HTMLs, dedicated CSS and a hashed manifest in src/html/output/.
@@ -23,12 +23,15 @@ from data_sheets_schema.rendering.human_readable_renderer import (
     HumanReadableRenderer,
     provenance_for,
 )
+from data_sheets_schema.runs import canonical_runs
 
 SOURCE_COMMIT = "fd031a8517c1dbe0e8b2365c8e784909330e6d02"
 RENDERED_ON = "2026-10-16"
 OUTPUT = Path("src/html/output")
 COHORT = Path("notes/reference_rescore_2026-09-12_cborg_runtime/manifest.json")
-PROJECTS = {"AI_READI": "04g", "CHORUS": "04f", "CM4AI": "04g", "VOICE": "04f"}
+PROJECTS = {"AI_READI": ("04g", 2), "CHORUS": ("04f", 2), "CM4AI": ("04g", 3), "VOICE": ("04f", 1)}
+SELECTION_NOTE = Path("notes/generic_v8_analysis_plan.md")
+SELECTION_POLICY = Path("notes/review_selection_policy_2026-09-11.md")
 REPOSITORY = "https://github.com/bridge2ai/data-sheets-schema"
 CSS = """/* v8 publication styles: scoped for Standards Explorer's embedded HTML. */
 .d4d-v8 { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #253044; background: #fff; max-width: 1200px; margin: 0 auto; padding: 1rem; overflow-wrap: anywhere; }
@@ -164,13 +167,19 @@ def replace_once(text, old, new):
 
 def build_publication():
     retained = {job["input"] for job in json.loads(pinned_bytes(COHORT))["jobs"] if job["cohort"] == "v8"}
+    selected = canonical_runs(runtime="api", config="2026-09-04")
+    if set(selected) != set(PROJECTS):
+        raise ValueError("Expected exactly four previously selected v8 canonicals")
     renderer = PublicationRenderer()
     outputs = {}
     manifest = {
         "issue": 5055,
         "source_commit": SOURCE_COMMIT,
         "rendered_on": RENDERED_ON,
-        "selection": "Retained baseline API v8 full records, replicate 1 for each project; no score-based selection.",
+        "selection": "Previously selected baseline API v8 canonical full records, resolved with canonical_runs(runtime='api', config='2026-09-04'); no new selection or scoring.",
+        "selection_recorded_on": "2026-09-08",
+        "selection_evidence": {str(path): sha256(pinned_bytes(path)) for path in (SELECTION_NOTE, SELECTION_POLICY)},
+        "selection_policy_note": "The historical criterion used review adverse counts. The 2026-09-11 policy makes reviews report-only for future selections and explicitly preserves existing canonical decisions. These are recorded choices, not newly established semantic-quality winners.",
         "historical_generation_schema": "2.0.0",
         "rendering": "Current section layout with lossless recursive values; historical records are neither regenerated nor revalidated against today's schema.",
         "cohort_manifest": str(COHORT),
@@ -179,21 +188,28 @@ def build_publication():
             str(path): sha256(path.read_bytes()) for path in (
                 Path("scripts/adhoc/render_v8_standards_explorer.py"),
                 Path("src/data_sheets_schema/rendering/human_readable_renderer.py"),
+                Path("src/data_sheets_schema/runs.py"),
                 *(Path("src/data_sheets_schema/schema") / f"{meta['module']}.yaml" for meta in renderer.d4d_sections.values()),
             )
         },
         "records": [],
     }
-    for project, date_suffix in PROJECTS.items():
-        label = f"2026-09-{date_suffix}_claude-opus-5-api-generic-v8_rep1"
+    for project, (date_suffix, replicate) in PROJECTS.items():
+        label = f"2026-09-{date_suffix}_claude-opus-5-api-generic-v8_rep{replicate}"
         source = Path("data/d4d_concatenated/claudecode_api") / label / f"{project}_d4d.yaml"
         provenance = Path("data/d4d_concatenated/claudecode_api_core") / label / f"{project}_provenance.yaml"
+        canonical = selected[project]
+        if (canonical["label"] != label or Path(canonical["full"]).resolve() != source.resolve()
+                or Path(canonical["provenance"]).resolve() != provenance.resolve()):
+            raise ValueError(f"Recorded canonical selection changed: {project}")
         if str(source) not in retained:
             raise ValueError(f"Source is not in the retained v8 cohort: {source}")
         source_bytes, provenance_bytes = pinned_bytes(source), pinned_bytes(provenance)
         data, prov = yaml.safe_load(source_bytes), yaml.safe_load(provenance_bytes)
-        if prov["run"]["label"] != label or prov["run"]["project"] != project or prov["run"]["replicate"] != 1 or prov["schema"]["declared_version"] != "2.0.0":
+        if prov["run"]["label"] != label or prov["run"]["project"] != project or prov["run"]["replicate"] != replicate or prov["schema"]["declared_version"] != "2.0.0":
             raise ValueError(f"Unexpected original provenance: {provenance}")
+        if prov.get("canonical", {}).get("selected_by") != "d4d runs select":
+            raise ValueError(f"Missing recorded canonical decision: {provenance}")
         rows, unverified = provenance_for(source)
         if not rows:
             raise ValueError(f"Missing renderable provenance: {provenance}")
@@ -206,14 +222,17 @@ def build_publication():
         rendered = replace_once(rendered, '<link rel="stylesheet" href="datasheet-v8.css">', f'<style>\n{CSS}</style>')
         rendered = replace_once(rendered, "<body>", '<body>\n<div class="d4d-v8">')
         rendered = replace_once(rendered, "</body>", '</div>\n</body>')
-        rendered = replace_once(rendered, "Datasheet for Dataset - Human Readable Format", f"{display_project} · Historical v8 datasheet · Replicate 1 · Generation schema 2.0.0")
+        rendered = replace_once(rendered, "Datasheet for Dataset - Human Readable Format", f"{display_project} · Historical v8 datasheet · Replicate {replicate} · Generation schema 2.0.0")
         note = (
             '<div class="section"><div class="section-content">'
-            '<p>This page renders the retained v8 baseline API record, replicate 1. '
+            f'<p>This page renders the previously selected v8 canonical baseline API record, replicate {replicate}. '
             'The original generation used schema 2.0.0. This is a historical record, '
             'not a new generation or validation against the current schema.</p>'
             f'<p><a href="{REPOSITORY}/blob/{SOURCE_COMMIT}/{source}">Original YAML</a> · '
             f'<a href="{REPOSITORY}/blob/{SOURCE_COMMIT}/{provenance}">Original generation provenance</a></p>'
+            '<p>The original canonical selection is retained. '
+            f'<a href="{REPOSITORY}/blob/{SOURCE_COMMIT}/{SELECTION_NOTE}#canonical-selection-2026-09-08">Selection history</a> · '
+            f'<a href="{REPOSITORY}/blob/{SOURCE_COMMIT}/{SELECTION_POLICY}">Later selection policy and its limits</a></p>'
             '</div></div>'
         )
         rendered = replace_once(rendered, '    <div class="header">', note + '\n    <div class="header">')
@@ -226,7 +245,8 @@ def build_publication():
         destination = OUTPUT / f"D4D_-_{display_project}_v8_human_readable.html"
         outputs[destination] = rendered.encode("utf-8")
         manifest["records"].append({
-            "project": project, "replicate": 1, "run_label": label,
+            "project": project, "replicate": replicate, "run_label": label,
+            "recorded_canonical_decision": prov["canonical"],
             "source": str(source), "source_sha256": sha256(source_bytes),
             "provenance": str(provenance), "provenance_sha256": sha256(provenance_bytes),
             "generation_recorded_at": prov["record_generated_at"],
