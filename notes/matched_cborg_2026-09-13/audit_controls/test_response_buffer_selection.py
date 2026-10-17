@@ -33,9 +33,11 @@ PREPARE_OPTIONS = {'native_api_timeout_ms': 3600000, 'native_api_force_idle_time
 
 
 def manifest(**changes):
+    # A documented endpoint, so a transport refusal can only come from the
+    # selection under test, never from a missing endpoint (#2938).
     return {'kind': 'd4d_native_audit_continuation', KEY: dict(BUFFER),
             'native_stall_policy': deepcopy(POLICY), 'native_runtime': dict(RUNTIME),
-            'native_upstream_read_timeout_seconds': 1200,
+            'native_upstream_read_timeout_seconds': 1200, 'provider_base_url': 'https://api.cborg.lbl.gov',
             'job': {'deadline_seconds': 10800}, **changes}
 
 
@@ -66,7 +68,7 @@ def test_absence_keeps_legacy_and_selection_returns_an_independent_value():
 BAD_SELECTIONS = [None, True, False, [], 'on', {}, {**BUFFER, 'extra': 1},
     {**BUFFER, 'kind': 'other'}, {k: v for k, v in BUFFER.items() if k != 'total_seconds'},
     *[{**BUFFER, 'max_bytes': v} for v in (None, True, False, 0, -1, 1.5, '16', 67108865)],
-    *[{**BUFFER, 'total_seconds': v} for v in (None, True, False, 0, -1, 1.5, '1200', 1201)]]
+    *[{**BUFFER, 'total_seconds': v} for v in (None, True, False, 0, -1, 1.5, '1200', 1201, 1, 59)]]
 
 
 @pytest.mark.parametrize('value', BAD_SELECTIONS)
@@ -83,10 +85,42 @@ def test_malformed_selection_stops_before_runtime_or_client(value, tmp_path, mon
 
 
 @pytest.mark.parametrize('max_bytes', [1, 67108864])
-@pytest.mark.parametrize('seconds', [1, 1200])
+@pytest.mark.parametrize('seconds', [registration.MIN_RESPONSE_BUFFER_SECONDS, 1200])
 def test_inclusive_byte_and_time_bounds(max_bytes, seconds):
     value = {**BUFFER, 'max_bytes': max_bytes, 'total_seconds': seconds}
     assert registration.native_response_buffer(manifest(**{KEY: value})) == value
+
+
+@pytest.mark.parametrize('seconds', [1, 59])
+def test_a_deadline_below_the_floor_is_refused_by_name(seconds, monkeypatch):
+    """A few-second deadline is a mistake: shorter than a complete provider response, so
+    buffered requests would be debited as stalls after the send (#2605, #2952).
+    The provider transport refuses it by the same name before any client exists (#2938)."""
+    assert registration.MIN_RESPONSE_BUFFER_SECONDS == 60
+    m = manifest(**{KEY: {**BUFFER, 'total_seconds': seconds}})
+    monkeypatch.setattr(transport, 'Client', forbidden)
+    with pytest.raises(BudgetStop, match='deadline must be at least 60 seconds'):
+        registration.native_response_buffer(m)
+    with pytest.raises(BudgetStop, match='deadline must be at least 60 seconds'):
+        transport.provider_clients(m, 'synthetic-key')
+
+
+@pytest.mark.parametrize('read_bound, seconds', [(60, 60), (61, 60), (61, 61), (600, 60), (600, 600)])
+def test_a_read_bound_at_or_above_the_floor_admits_a_deadline_within_both_bounds(read_bound, seconds):
+    """The accepting side of the read-bound floor, inclusive at 60 s: any read bound from 60
+    admits every deadline from 60 up to it (#2949)."""
+    value = {**BUFFER, 'total_seconds': seconds}
+    m = manifest(native_upstream_read_timeout_seconds=read_bound, **{KEY: value})
+    assert registration.native_response_buffer(m) == value
+
+
+@pytest.mark.parametrize('seconds', [45, 59, 60])
+def test_a_read_bound_below_the_floor_names_the_read_bound(seconds):
+    """With a read bound under 60 s no deadline satisfies both bounds, so the refusal
+    names the read bound rather than pointing at the deadline both ways (#2940)."""
+    m = manifest(native_upstream_read_timeout_seconds=45, **{KEY: {**BUFFER, 'total_seconds': seconds}})
+    with pytest.raises(BudgetStop, match='needs an upstream read bound of at least 60 seconds'):
+        registration.native_response_buffer(m)
 
 
 @pytest.mark.parametrize('change', ['no_policy', 'null_policy', 'no_sdk', 'short_sdk',

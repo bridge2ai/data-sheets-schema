@@ -35,7 +35,7 @@ def test_registered_instruction_owns_its_project_bundle_and_receipt(external, pr
     external.manifest.write_text(yaml.safe_dump(manifest))
     base = replace(external, project=project, bundle=bundle, chunk_manifest=chunks)
     spec = selected_spec(base, registration_for(base))
-    spec.bind_api_header_values(api._model_settings())
+    spec.bind_api_header_values(api._model_settings(spec.condition))
     instruction = spec.instruction
     assert "Shared generation rules v1" in instruction
     assert "Role relationship review v1" in instruction

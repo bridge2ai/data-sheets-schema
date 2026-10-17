@@ -411,8 +411,23 @@ def resolve(record: Any, path: str) -> bool:
     cur = record
     for part in parts:
         if part.startswith("["):
-            i = int(part[1:-1])
-            if not isinstance(cur, list) or i >= len(cur):
+            if not isinstance(cur, list):
+                return False
+            size = len(cur)
+            if size == 0:
+                return False
+            # A path can spell an index with arbitrarily many decimal digits.
+            # Bound conversion by this list, retaining Unicode Nd and leading
+            # zeros accepted by the existing grammar/int semantics (#4767).
+            digits = part[1:-1]
+            first = 0
+            while first < len(digits) and unicodedata.decimal(digits[first]) == 0:
+                first += 1
+            significant = digits[first:]
+            if len(significant) > len(str(size - 1)):
+                return False
+            i = int(significant or "0")
+            if i >= size:
                 return False
             cur = cur[i]
         else:
@@ -724,6 +739,77 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any],
     for p in out:
         new += p if p.startswith("[") or not new else "." + p
     return {"path": new, "basis": basis}
+
+
+def reconcile_receipt(receipt: dict[str, Any], original: dict[str, Any] | None,
+                      final: dict[str, Any], *,
+                      identifier_bases: IdentifierBases | None = None) -> tuple[dict[str, Any], dict[str, int]]:
+    """Synchronize a coverage receipt against the reconciled/final record (#4858).
+
+    In Phase 1, `full` writes a coverage receipt against the initial record.
+    Subsequent reconciliation and repair passes drop unsupported/absent statements,
+    flatten structures, or reorder list entries. Joined without reconciliation,
+    the coverage receipt retains orphan claims for dropped leaves (manifesting as
+    unpopulated roots in the final record) or misaddressed entries.
+
+    This function:
+    1. Tests whether each extracted slot path resolves in `final`.
+    2. If not, attempts to remap the path using `remap_path(slot, original, final)`.
+    3. If remapped to a valid path in `final`, updates the slot path.
+    4. If the leaf was dropped or cannot resolve in `final`, prunes the entry from
+       the chunk's `extracted` list.
+    5. If all extracted entries in a chunk were dropped, sets the chunk's status to
+       `nothing_relevant` with an explanatory reason (matching `apply_readdress`).
+
+    Returns `(reconciled_receipt, stats)` where `stats` contains:
+    `{"retained": int, "remapped": int, "dropped": int, "emptied": int}`.
+    """
+    identifier_bases = _validated_identifier_bases(identifier_bases)
+    out = copy.deepcopy(receipt)
+    retained_count = 0
+    remapped_count = 0
+    dropped_count = 0
+    emptied_count = 0
+    for ch in out.get("chunks", []) or []:
+        if not isinstance(ch, dict) or ch.get("status") != "extracted":
+            continue
+        pairs = ch.get("extracted") or []
+        new_pairs = []
+        for pair in pairs:
+            if not isinstance(pair, dict):
+                continue
+            slot = str(pair.get("slot") or "")
+            if not slot:
+                dropped_count += 1
+                continue
+            rm = remap_path(slot, original, final, identifier_bases=identifier_bases)
+            resolved_path = None if rm["basis"] == "not_in_snapshot" else rm.get("path")
+            ok, val = _resolve_value(final, resolved_path) if resolved_path else (False, None)
+            if ok and _populated(val):
+                if resolved_path != slot:
+                    new_entry = dict(pair)
+                    new_entry["slot"] = resolved_path
+                    new_pairs.append(new_entry)
+                    remapped_count += 1
+                else:
+                    new_pairs.append(pair)
+                    retained_count += 1
+            else:
+                dropped_count += 1
+        if new_pairs:
+            ch["extracted"] = new_pairs
+        else:
+            ch.pop("extracted", None)
+            ch["status"] = "nothing_relevant"
+            ch["reason"] = "every extracted entry was dropped during reconciliation"
+            emptied_count += 1
+    stats = {
+        "retained": retained_count,
+        "remapped": remapped_count,
+        "dropped": dropped_count,
+        "emptied": emptied_count,
+    }
+    return out, stats
 
 
 def _rewritten(before: Any, after: Any) -> bool:

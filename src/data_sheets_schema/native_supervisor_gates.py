@@ -282,6 +282,20 @@ def recipe_history(prepared):
     return {'passed': True, 'steps_completed': position, 'steps_sha256': draft._sha(draft._encoded(steps))}
 
 
+def final_evidence_gate(prepared):
+    """Keep an explicitly incomplete capture distinct from malformed evidence."""
+    result = prepared['final_result']
+    if result is None and prepared.get('replay_complete') is False:
+        problems = prepared['capture_problems']
+        if type(problems) is not list or any(type(problem) is not str for problem in problems):
+            raise ValueError('incomplete capture problems must be a list of text')
+        return {'checked': False, 'passed': False,
+                'reason': 'final evidence unavailable: capture is explicitly incomplete',
+                'result': None, 'capture_problems': deepcopy(problems)}
+    return {'passed': result.get('checked') is True and result.get('findings') == [],
+            'result': deepcopy(result)}
+
+
 def check(prepared, projections, declaration, controls, *, exit_code, shutdown, live, first_stop):
     """Every required gate reports a result, including independent failures."""
     from data_sheets_schema import api_runner as api, agentic_observed, d4d_pair_consistency as pair
@@ -397,8 +411,7 @@ def check(prepared, projections, declaration, controls, *, exit_code, shutdown, 
     run('schema', schemas)
     run('pair', paired)
     run('receipts', lambda: receipt_gate(prepared, prepared['record'], prepared['schema_paths'], prepared['phase1_original'], controls))
-    run('evidence', lambda: {'passed': prepared['final_result'].get('checked') is True
-        and prepared['final_result'].get('findings') == [], 'result': deepcopy(prepared['final_result'])})
+    run('evidence', lambda: final_evidence_gate(prepared))
     run('observation', observed)
     run('accounting', accounting)
     return gates

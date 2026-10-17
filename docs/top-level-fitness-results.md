@@ -55,13 +55,14 @@ The index separates `dispatch_state` from raw `assessment`:
 | --- | --- | --- |
 | `accepted` | true | `accepted`, only with strict accepted response |
 | `failed` | true | `rejected`, even if the failed HTTP body contains valid score text |
-| `spent_unknown` | true | `missing`; an admitted call has no complete retained response |
+| `spent_unknown` | true | `missing`; an admitted call has no captured HTTP outcome artifact |
 | `not_started` | false | `missing`; no admitted call exists |
 
-Without a ledger, dispatch remains `unknown` and spent remains null, even for
-a mechanically accepted caller-supplied result. A last complete raw response
-can be reconstructed after a missing settlement; a later admission without its
-preceding settlement refuses. No replacement call is purchased.
+Here `spent` records admission, not verified billing. Without a ledger, dispatch
+remains `unknown` and spent remains null, even for a mechanically accepted
+caller-supplied result. A retained HTTP outcome and body can be rechecked after
+a missing terminal settlement; a later admission without its preceding
+settlement refuses. No replacement call is purchased.
 
 HTTP/transport failure and incomplete accounting remain authoritative. Reported
 usage and a strict score from a failed body are retained as evidence, never
@@ -76,3 +77,100 @@ attribute-value and top-level fitness counts remain separate. Links identify
 corresponding targets without propagating a top-level fitness score to nested
 support targets. These engineering checks do not complete empirical calibration,
 human control review, or the parent evaluation campaign in #2929.
+
+## Registered support selections (index v2)
+
+```sh
+d4d evaluate fitness-results index --descriptor fitness-descriptor \
+  --support-execution /absolute/captured-support-run --output support-fitness-index
+d4d evaluate fitness-results recheck-index --index support-fitness-index
+```
+
+`--support-execution` captures and rechecks an existing
+`nested_support_execution_v1` run and selects `top_level_fitness_index_v2`.
+`--execution` separately supplies a top-level fitness run; either option can be
+used without the other. With neither `--support-execution` nor
+`--rubric-associations`, the existing v1 format remains unchanged.
+
+Every registered support selection remains a row, including failed, admitted
+but incomplete, and unstarted attempts. The denominator is all support selections
+in that registration, not the entire planned cohort or only supplied result
+directories. The support descriptor must bind the same captured plan as the
+fitness descriptor, and every support selection's exact record must be among
+the fitness descriptor's selected records. Foreign plans or records refuse.
+
+Relationship-edge and attribute-value strata each retain selected, missing,
+rejected and accepted counts. `support_dispatch_counts` separately retains
+`accepted`, `failed`, `spent_unknown` and `not_started`. As with fitness above,
+a valid verdict inside a failed HTTP body remains rejected. An admitted call
+with no captured HTTP outcome artifact is missing with `spent: true`. A retained
+timeout, interrupted partial-body or overflow outcome is failed/rejected, even
+when `body_complete` is false. An unstarted call is missing with `spent: false`.
+Raw assessments do not override dispatch.
+Optional `--support-result` inputs must exactly match their ledger-derived
+results and cannot add attempts outside the registration.
+
+Recheck uses the portable index's captured artifacts after relocation. Support
+mode, decision references and original readiness remain explicit and separate
+from fitness metadata. The index does not dispatch, retry, approve labels or
+propagate fitness scores. Combining `--rubric-associations` selects index v3
+while retaining this support execution accounting.
+
+## Captured rubric identity declarations (index v3)
+
+```sh
+d4d evaluate fitness-results index --descriptor fitness-descriptor \
+  --rubric-associations --rubric-plan captured-plan-dir --output associated-index
+d4d evaluate fitness-results recheck-index --index associated-index
+```
+
+`--rubric-associations` explicitly selects `top_level_fitness_index_v3`.
+Without this option the original v1/v2 behavior and format remain unchanged.
+`--rubric-plan` supplies an already captured plan whose exact manifest bytes
+must match the descriptor's plan pin. Normal fitness descriptors omit rubric
+result blobs; this separate input supplies those blobs through captured hashes.
+The option may be omitted when all referenced blobs are already captured with
+the descriptor, or when every selected job declares an absent result. Indexing
+never follows the roster's historical result paths. Recheck uses only the
+portable index and its captured artifacts.
+
+One rubric row is retained for every primary roster job belonging to a record
+selected by the fitness descriptor. The denominator is these declared jobs,
+including distinct primary job IDs for the same record/rubric; it is not the
+entire planned cohort or an inferred set of repeated ratings. At most 10,000
+roster jobs are supported. Duplicate job IDs or changed join membership refuse.
+
+| State | Meaning |
+| --- | --- |
+| `associated` | Captured identity declarations agree. |
+| `missing` | The captured plan explicitly declares no result artifact. |
+| `mismatched` | A declared record, job, instrument, context or scope identity conflicts. |
+| `unsupported` | Historical identity fields are absent, the semantic contract is unsupported, or captured result bytes are not a strict bounded JSON mapping. |
+
+A declared artifact with missing or changed captured bytes refuses rather than
+becoming `missing`. Known conflicts remain `mismatched` even when other fields
+are absent. Every state remains in `rubric_counts.selected`.
+
+If the roster also declares `pinned_files[job.output]`, the captured result
+bytes must agree with that SHA-256 declaration. A valid conflicting hash makes
+the row `mismatched`; a malformed declared hash makes it `unsupported` unless
+another known conflict already makes it `mismatched`. Both diagnostics remain
+visible. An absent result remains `missing`, with its original declaration
+retained and no inferred byte conflict. Each row exposes `roster_output_pin`
+and distinguishes `captured_plan_only` from
+`captured_plan_with_roster_output_declaration` in `result_pin_basis`. Neither
+basis authenticates evaluator execution.
+
+The check supports explicitly declared semantic v3 and rubric20 v4 identities.
+It reconciles input hashes and label aliases, declared instrument resource pins,
+the v4 predecessor declaration, explicit applicability context and its digest,
+and every dataset scope unit. Missing historical context is not silently
+converted to an empty context; false and missing remain distinct.
+
+`associated` means agreement of captured declarations only. Instrument hashes
+are roster declarations, not proof of canonical released bytes. This index does
+not validate rubric schemas, scores, arithmetic, scientific labels, evaluator
+execution or calibration. `rubric_rating_acceptance`, per-row `rating_accepted`
+and `scientific_scoring_eligible` remain false. Existing readiness blockers and
+all fitness/support axis counts are preserved; no score is propagated between
+targets, records or repeated ratings.

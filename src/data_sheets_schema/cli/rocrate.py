@@ -10,7 +10,9 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
+from data_sheets_schema.cli._repo_utils import (
+    get_repo_root, setup_repo_imports, require_repo_context,
+)
 
 
 def _outcome_line(refused: int, invalid: int, failed: int = 0) -> str:
@@ -77,6 +79,12 @@ def parse(input_file, output):
         # error (#4186).
         read_crate_json(Path(input_file), hint=TRANSCODE_HINT)
         parser = ROCrateParser(input_file)
+        # Inspection may show a rootless graph, but must not imply a child
+        # dataset was selected as its root.
+        try:
+            parser.require_root_dataset()
+        except ValueError as exc:
+            click.echo(f"⚠️  {exc}", err=True)
         entities = parser.get_all_entities()
 
         if output:
@@ -105,7 +113,10 @@ def parse(input_file, output):
               help='Multiple input RO-Crate files for merging')
 @click.option('--primary', type=click.Path(exists=True),
               help='Primary RO-Crate file (for merging)')
-def transform(input_file, output, merge, inputs, primary):
+@click.option('--mapping', 'mapping_file',
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help='Explicit legacy mapping TSV; omitted uses d4d_rocrate_mapping_v2_semantic.tsv')
+def transform(input_file, output, merge, inputs, primary, mapping_file=None):
     """Transform RO-Crate to D4D YAML format."""
     require_repo_context("d4d rocrate transform")
 
@@ -115,6 +126,16 @@ def transform(input_file, output, merge, inputs, primary):
                 "--merge requires at least one --inputs PATH.",
                 ctx=click.get_current_context(),
             )
+        primary_index = 0
+        if primary:
+            matches = [i for i, path in enumerate(inputs)
+                       if Path(path).resolve() == Path(primary).resolve()]
+            if not matches:
+                raise click.UsageError(
+                    "--primary must name one of the --inputs files.",
+                    ctx=click.get_current_context(),
+                )
+            primary_index = matches[0]
         click.echo(f"🔄 Transforming {len(inputs)} RO-Crates to D4D (merge mode)...")
     else:
         if not input_file:
@@ -127,24 +148,28 @@ def transform(input_file, output, merge, inputs, primary):
     # Import and call the transform script
     setup_repo_imports()
 
+    old_argv = sys.argv
     try:
         from rocrate_to_d4d import main as transform_main
 
         # Set up args for the transform script
-        old_argv = sys.argv
+        mapping = (mapping_file if mapping_file is not None else
+                   get_repo_root() / "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv")
         if merge:
             sys.argv = ['rocrate_to_d4d.py',
                         '--merge',
                         '--inputs'] + list(inputs) + [
-                        '-o', output]
+                        '-o', output, '--mapping', str(mapping)]
             if primary:
-                sys.argv.extend(['--primary', primary])
+                sys.argv.extend(['--primary', str(primary_index)])
         else:
             sys.argv = ['rocrate_to_d4d.py',
                         '-i', input_file,
-                        '-o', output]
+                        '-o', output, '--mapping', str(mapping)]
 
-        transform_main()
+        status = transform_main()
+        if status:
+            raise SystemExit(status)
         click.echo(f"✓ D4D YAML saved to {output}")
 
     except Exception as e:
@@ -158,41 +183,22 @@ def transform(input_file, output, merge, inputs, primary):
 @rocrate.command()
 @click.argument('input_files', nargs=-1, type=click.Path(exists=True), required=True)
 @click.option('--output', '-o', type=click.Path(), required=True,
-              help='Output merged RO-Crate file')
+              help='Retained option; this retired command never writes an output.')
 @click.option('--primary', type=click.Path(exists=True),
-              help='Primary RO-Crate file (takes precedence in conflicts)')
+              help='Retained option; no raw merge or conflict precedence is applied.')
 def merge(input_files, output, primary):
-    """Merge multiple RO-Crate files into one."""
-    require_repo_context("d4d rocrate merge")
+    """Retired: raw RO-Crate merging is unsupported (#4593).
 
-    click.echo(f"🔀 Merging {len(input_files)} RO-Crate files...")
-
-    # Import and call the merger script
-    setup_repo_imports()
-
-    try:
-        from rocrate_merger import ROCrateMerger
-
-        merger = ROCrateMerger()
-
-        # Load all input files
-        for input_file in input_files:
-            is_primary = (primary and Path(input_file) == Path(primary))
-            merger.add_rocrate(input_file, is_primary=is_primary)
-            click.echo(f"  + {input_file}{' (primary)' if is_primary else ''}")
-
-        # Merge and save
-        merged = merger.merge()
-
-        import json
-        with open(output, 'w') as f:
-            json.dump(merged, f, indent=2)
-
-        click.echo(f"✓ Merged RO-Crate saved to {output}")
-
-    except Exception as e:
-        click.echo(f"❌ Error: {e}", err=True)
-        sys.exit(1)
+    The command and options remain recognizable so callers receive an explicit
+    refusal. Dataset transformation and graph concatenation are different
+    operations and cannot supply this command's missing identity/root contract.
+    """
+    raise click.ClickException(
+        "Raw RO-Crate merging is retired (#4593): no supported identity, root "
+        "and conflict policy is defined. This command cannot produce merged "
+        "RO-Crate JSON. Keep source crates separate; see "
+        "https://github.com/bridge2ai/data-sheets-schema/issues/4593."
+    )
 
 
 @rocrate.command()

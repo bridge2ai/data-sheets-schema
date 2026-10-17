@@ -1,0 +1,2659 @@
+{
+  "format_version": 1,
+  "root": {
+    "id": "ark:59853/rocrate-chorus-ro-crate-package/",
+    "graph_index": 1,
+    "selection_note": "metadata descriptor about reference",
+    "properties": {
+      "@id": "ark:59853/rocrate-chorus-ro-crate-package/",
+      "@type": [
+        "https://w3id.org/EVI#Dataset",
+        "https://w3id.org/EVI#ROCrate"
+      ],
+      "name": "CHoRUS RO-Crate Package",
+      "identifier": "https://doi.org/10.18130/V3/XNBOPG",
+      "description": "The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is a clinical data network developing a flagship multi-hospital, multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes electronic health record (EHR) data, imaging, high-resolution physiologic signals (including telemetry data and EEG where available), and tokenized note and report text (via OHNLP toolkit) with raw text retained locally across participating institutions using standardized data models and governance frameworks.\nThe repository is designed to enable secure, auditable, and reproducible artificial intelligence (AI) research to improve recovery from acute illness. Data are curated within a NIST 800-53–aligned secure enclave architecture with role-based access controls, audit logging, and controlled-access governance review. CHoRUS supports AI model development, validation, benchmarking, and translational research while maintaining compliance with HIPAA and NIH data-sharing policies.\n",
+      "keywords": [
+        "Bridge2AI",
+        "CHoRUS",
+        "Electronic health records",
+        "physiological data",
+        "medical images"
+      ],
+      "version": "1.0 Beta",
+      "datePublished": "2026-04-03",
+      "isPartOf": [
+        {
+          "@id": "ark:59852/organization-bridge2ai-s6VouUf8Gkm"
+        }
+      ],
+      "hasPart": [
+        {
+          "@id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "@type": [
+            "https://w3id.org/EVI#Dataset",
+            "https://w3id.org/EVI#ROCrate"
+          ],
+          "name": "CHoRUS RO-Crate EHR SubRoCrate"
+        },
+        {
+          "@id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "@type": [
+            "https://w3id.org/EVI#Dataset",
+            "https://w3id.org/EVI#ROCrate"
+          ],
+          "name": "CHoRUS RO-Crate Waveforms SubRoCrate"
+        }
+      ],
+      "author": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA",
+      "publisher": "B2AI CHoRUS",
+      "principalInvestigator": "Eric Rosenthal, EROSENTHAL@mgh.harvard.edu",
+      "funder": "NIH Common Fund OT2OD032701",
+      "contactEmail": "Ciera McCrary, cmccrary@mgh.harvard.edu",
+      "citation": "The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026.",
+      "license": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'",
+      "conditionsOfAccess": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx",
+      "copyrightNotice": "© 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved",
+      "contentSize": "1.2 tb",
+      "ethicalReview": "Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes, and Barbara J. Evans in collaboration with the Mass General Brigham IRB with local context review by IRBs, HIPAA Privacy Officers, and institutional counsels at contributing medical centers.",
+      "confidentialityLevel": "HL7:2V (very restricted)",
+      "irb": {
+        "@type": "Organization",
+        "name": "Mass General Brigham Institutional Review Board (MGB IRB)",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "IRB Reliance and Compliance",
+          "email": "irbreliance@mgb.org",
+          "telephone": "+1-857-282-1900"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "399 Revolution Drive, Suite 710",
+          "addressLocality": "Somerville",
+          "addressRegion": "MA",
+          "postalCode": "02145",
+          "addressCountry": "US"
+        }
+      },
+      "irbProtocolId": "#2022P000707",
+      "humanSubjectExemption": "HIPAA exemption 4 ((45 CFR 46.104(d)(4))",
+      "fdaRegulated": true,
+      "deidentified": true,
+      "humanSubjectResearch": "Yes",
+      "dataGovernanceCommittee": "Eric Rosenthal, EROSENTHAL@mgh.harvard.edu",
+      "rai:dataLimitations": "•\tObservational data; and not randomized; collected as real-world clinical data, not through prospective research interactions with patient.\n•\tDocumentation quality dependent on routine clinical workflows and data elements being collected in clinical practice.\n•\tVariable sampling rates across real-world data from hospital waveform systems and middleware\n•\tInstitutional heterogeneity in coding and clinical data collection practices\n•\tLimited generalizability beyond participating hospitals\n•\tNot appropriate for re-identification, contact tracing, or patient-level intervention\n•\tHold-out splits are available for testing; training and validation in development splits require internal mechanisms to avoid overfitting\n",
+      "rai:dataBiases": "•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeconomic and demographic distribution reflective of participating institutions\n•\tDocumentation bias in clinical notes\n•\tMissingness not at random (MNAR) in laboratory, waveform, and imaging acquisition\n•\tDifferential care pathways affecting label assignment (e.g., ICU vs non-ICU populations)\n•\tTemporal trends related to evolving clinical practice\nBias assessment is ongoing and documented in dataset release notes\n",
+      "rai:dataReleaseMaintenancePlan": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes documenting schema changes, harmonization updates, and known issues\n•\tGovernance committee oversight for structural modifications\n•\tData upload\n•\tDeprecation policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility window where feasible\no\tArchive of prior versions within enclave where possible or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.\n",
+      "rai:dataCollection": "Data are derived from routine clinical care at participating hospitals under IRB oversight. Collection includes:\n•\tElectronic health record extraction and transformation to OMOP common data model\n•\tImaging metadata de-identification using RSNA Clinical Trial Processor and pixel-level de-identification using IbisWorks EICON. \n•\tHigh-resolution physiologic waveform capture extraction and transformation to the WFDB standard, \n•\tStandardized harmonization to common data model\nEthical safeguards include:\n•\tIRB approval or waiver as appropriate\n•\tCompliance with CHoRUS governance\n•\tLayered privacy protection including de-identification, data use agreement, controlled access data repository with adherence to NIST 800-53 principles, audit-level protection, registration, role-based access controls, protection against data exfiltration.\nData are not collected solely for research but repurposed from clinical workflows under ethical oversight.\n",
+      "rai:dataCollectionMissingData": "Variable sampling rates across real-world data from hospital waveform systems and middleware",
+      "rai:personalSensitiveInformation": [
+        "CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls.",
+        "De-identification consistent with HIPAA Safe Harbor",
+        "Removal or tokenization of direct identifiers",
+        "Date shifting or limited date fields when required",
+        "Role-based access control (RBAC)",
+        "Multi-factor authentication",
+        "Full audit logging of data access and queries",
+        "Prohibition of re-identification attempts",
+        "Data export restrictions and output review procedures to reduce risk of re-identification",
+        "Re-identification risk is periodically assessed and mitigation strategies updated as needed."
+      ],
+      "completeness": "Interim release with partial data. Not all patients in the CHoRUS full cohort are included. No DICOM images are included.",
+      "contentUrl": "http://chorus4ai.org/dataset",
+      "project_name": "CHoRUS",
+      "rai:conditionsOfAccess": "Access to CHoRUS data is governed through a controlled-access framework and requires:\n•\tProviding institutional affiliation and credentials\n•\tApproved research proposal reviewed by CHoRUS governance committee\n•\tData Use Agreement (DUA) executed between requestor institution and CHoRUS\n•\tIRB approval or exemption documentation, as applicable\n•\tCompliance with NIH Bridge2AI OT terms and applicable federal regulations\n•\tAccess restricted to secure enclave environment; no raw data export permitted unless explicitly approved\nData use may not be used for commercial purposes unless specifically authorized through a separate agreement consistent with governing award and consortium terms.\n",
+      "rai:potentialBiases": "•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeconomic and demographic distribution reflective of participating institutions\n•\tDocumentation bias in clinical notes\n•\tMissingness not at random (MNAR) in laboratory, waveform, and imaging acquisition\n•\tDifferential care pathways affecting label assignment (e.g., ICU vs non-ICU populations)\n•\tTemporal trends related to evolving clinical practice\nBias assessment is ongoing and documented in dataset release notes\n",
+      "rai:intendedUseCases": "\n•\tAI model training within enclave\n•\tModel validation and benchmarking\n•\tAlgorithm development and feature engineering\n•\tRetrospective hypothesis testing\n•\tFine-tuning of multimodal models\n•\tComparative effectiveness research\n•\tReinforcement learning and development of expert AI\n•\tMethodological research in trustworthy AI\n•\tTrial emulation or powering\nNot recommended\n•\tDirect translation of trained algorithms to real-time clinical deployment without validation or regulatory clearance\n•\tUse as sole evidence for clinical decision-making\n•\tPopulation inference beyond participating institutions\nUsage must align with approved research scope and governance policies.\n",
+      "rai:maintenancePlan": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes documenting schema changes, harmonization updates, and known issues\n•\tGovernance committee oversight for structural modifications\n•\tData upload\n•\tDeprecation policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility window where feasible\no\tArchive of prior versions within enclave where possible or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.\n",
+      "releaseDate": "03/04/2026",
+      "ro-crate-metadata": "ro-crate-metadata.json"
+    }
+  },
+  "rows": [
+    {
+      "rule_id": "49c24423:legacy-line-2",
+      "execution": "active",
+      "d4d_path": "Dataset.title",
+      "destination_slot": "title",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['name']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/name",
+          "property": "name",
+          "value": "CHoRUS RO-Crate Package"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/name",
+          "property": "name",
+          "value": "CHoRUS RO-Crate Waveforms SubRoCrate"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/name",
+          "property": "name",
+          "value": "CHoRUS RO-Crate EHR SubRoCrate"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-3",
+      "execution": "active",
+      "d4d_path": "Dataset.description",
+      "destination_slot": "description",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['description']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/description",
+          "property": "description",
+          "value": "The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is a clinical data network developing a flagship multi-hospital, multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes electronic health record (EHR) data, imaging, high-resolution physiologic signals (including telemetry data and EEG where available), and tokenized note and report text (via OHNLP toolkit) with raw text retained locally across participating institutions using standardized data models and governance frameworks.\nThe repository is designed to enable secure, auditable, and reproducible artificial intelligence (AI) research to improve recovery from acute illness. Data are curated within a NIST 800-53–aligned secure enclave architecture with role-based access controls, audit logging, and controlled-access governance review. CHoRUS supports AI model development, validation, benchmarking, and translational research while maintaining compliance with HIPAA and NIH data-sharing policies.\n"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/description",
+          "property": "description",
+          "value": "Waveforms sub ro-crate for Bridge2AI CHoRUS RO-Crate Package"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/description",
+          "property": "description",
+          "value": "Electronic Health Records sub ro-crate for Bridge2AI CHoRUS RO-Crate Package"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-4",
+      "execution": "active",
+      "d4d_path": "Dataset.keywords",
+      "destination_slot": "keywords",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['keywords']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/keywords",
+          "property": "keywords",
+          "value": [
+            "Bridge2AI",
+            "CHoRUS",
+            "Electronic health records",
+            "physiological data",
+            "medical images"
+          ]
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/keywords",
+          "property": "keywords",
+          "value": [
+            "Bridge2AI",
+            "CHoRUS",
+            "Electronic health records",
+            "physiological data",
+            "medical images"
+          ]
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/keywords",
+          "property": "keywords",
+          "value": [
+            "Bridge2AI",
+            "CHoRUS",
+            "Electronic health records",
+            "physiological data",
+            "medical images"
+          ]
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-5",
+      "execution": "active",
+      "d4d_path": "Dataset.language",
+      "destination_slot": "language",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['inLanguage']",
+      "status": "empty",
+      "resolution_note": "crate root 'inLanguage' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-6",
+      "execution": "active",
+      "d4d_path": "Dataset.page",
+      "destination_slot": "page",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['url']",
+      "status": "empty",
+      "resolution_note": "crate root 'url' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-7",
+      "execution": "active",
+      "d4d_path": "Dataset.publisher",
+      "destination_slot": "publisher",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['publisher']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/publisher",
+          "property": "publisher",
+          "value": "B2AI CHoRUS"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-8",
+      "execution": "active",
+      "d4d_path": "Dataset.version",
+      "destination_slot": "version",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['version']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/version",
+          "property": "version",
+          "value": "1.0 Beta"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/version",
+          "property": "version",
+          "value": "1.0 Beta"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/version",
+          "property": "version",
+          "value": "1.0 Beta"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-9",
+      "execution": "active",
+      "d4d_path": "Dataset.license",
+      "destination_slot": "license",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['license']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/license",
+          "property": "license",
+          "value": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/license",
+          "property": "license",
+          "value": "See Data Use Agreement"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/license",
+          "property": "license",
+          "value": "See Data Use Agreement"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-10",
+      "execution": "active",
+      "d4d_path": "Dataset.status",
+      "destination_slot": "status",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['creativeWorkStatus']",
+      "status": "empty",
+      "resolution_note": "crate root 'creativeWorkStatus' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-11",
+      "execution": "active",
+      "d4d_path": "Dataset.conforms_to",
+      "destination_slot": "conforms_to",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['conformsTo']",
+      "status": "empty",
+      "resolution_note": "crate root 'conformsTo' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-12",
+      "execution": "active",
+      "d4d_path": "Dataset.download_url",
+      "destination_slot": "download_url",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['contentUrl']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/contentUrl",
+          "property": "contentUrl",
+          "value": "http://chorus4ai.org/dataset"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/contentUrl",
+          "property": "contentUrl",
+          "value": "https://chorus4ai.org/dataset/"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/contentUrl",
+          "property": "contentUrl",
+          "value": "https://chorus4ai.org/dataset/"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-13",
+      "execution": "deferred",
+      "d4d_path": "Dataset.bytes",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['contentSize']",
+      "status": "deferred",
+      "resolution_note": "Retain current-arm limitation; preserve rounded size text. Do not manufacture an exact integer byte count from rounded/ambiguous-unit strings. Use exact evi:totalContentSizeBytes where explicitly supplied. Dependency: Future approximate quantity needs explicit precision/unit contract.",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/contentSize",
+          "property": "contentSize",
+          "value": "1.2 tb"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/contentSize",
+          "property": "contentSize",
+          "value": "1.201567472832 tb"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/contentSize",
+          "property": "contentSize",
+          "value": "18.136671 mb"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-14",
+      "execution": "deferred",
+      "d4d_path": "Dataset.encoding",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:formats']",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-15",
+      "execution": "deferred",
+      "d4d_path": "Dataset.path",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['contentUrl']",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/contentUrl",
+          "property": "contentUrl",
+          "value": "http://chorus4ai.org/dataset"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/contentUrl",
+          "property": "contentUrl",
+          "value": "https://chorus4ai.org/dataset/"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/contentUrl",
+          "property": "contentUrl",
+          "value": "https://chorus4ai.org/dataset/"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-16",
+      "execution": "active",
+      "d4d_path": "Dataset.created_on",
+      "destination_slot": "created_on",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['dateCreated']",
+      "status": "empty",
+      "resolution_note": "crate root 'dateCreated' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-17",
+      "execution": "active",
+      "d4d_path": "Dataset.issued",
+      "destination_slot": "issued",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['datePublished']",
+      "status": "filled",
+      "resolution_note": "date -> date-time",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/datePublished",
+          "property": "datePublished",
+          "value": "2026-04-03"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/datePublished",
+          "property": "datePublished",
+          "value": "2026-04-03"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/datePublished",
+          "property": "datePublished",
+          "value": "03/04/2026"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-18",
+      "execution": "active",
+      "d4d_path": "Dataset.last_updated_on",
+      "destination_slot": "last_updated_on",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['dateModified']",
+      "status": "empty",
+      "resolution_note": "crate root 'dateModified' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-19",
+      "execution": "active",
+      "d4d_path": "Dataset.distribution_dates",
+      "destination_slot": "distribution_dates",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['dateCreated']",
+      "status": "empty",
+      "resolution_note": "crate root 'dateCreated' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-20",
+      "execution": "active",
+      "d4d_path": "Dataset.doi",
+      "destination_slot": "doi",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['identifier']",
+      "status": "filled",
+      "resolution_note": "resolver or `doi:` prefix removed, case kept",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/identifier",
+          "property": "identifier",
+          "value": "https://doi.org/10.18130/V3/XNBOPG"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-21",
+      "execution": "deferred",
+      "d4d_path": "Dataset.md5",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:md5']",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-22",
+      "execution": "deferred",
+      "d4d_path": "Dataset.sha256",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:sha256']",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-23",
+      "execution": "deferred",
+      "d4d_path": "Dataset.hash",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:md5']",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-24",
+      "execution": "active",
+      "d4d_path": "Dataset.was_derived_from",
+      "destination_slot": "was_derived_from",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['isBasedOn']",
+      "status": "empty",
+      "resolution_note": "crate root 'isBasedOn' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-25",
+      "execution": "active",
+      "d4d_path": "Dataset.resources",
+      "destination_slot": "resources",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['hasPart']",
+      "status": "filled",
+      "resolution_note": "crate reference -> Dataset",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/hasPart",
+          "property": "hasPart",
+          "value": [
+            {
+              "@id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+              "@type": [
+                "https://w3id.org/EVI#Dataset",
+                "https://w3id.org/EVI#ROCrate"
+              ],
+              "name": "CHoRUS RO-Crate EHR SubRoCrate"
+            },
+            {
+              "@id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+              "@type": [
+                "https://w3id.org/EVI#Dataset",
+                "https://w3id.org/EVI#ROCrate"
+              ],
+              "name": "CHoRUS RO-Crate Waveforms SubRoCrate"
+            }
+          ]
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/hasPart",
+          "property": "hasPart",
+          "value": []
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/hasPart",
+          "property": "hasPart",
+          "value": []
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-26",
+      "execution": "active",
+      "d4d_path": "Dataset.parent_datasets",
+      "destination_slot": "parent_datasets",
+      "mapping_rule": "typed_parents",
+      "source_expression": "@graph[?@type='Dataset']['isPartOf']",
+      "status": "empty",
+      "resolution_note": "isPartOf[0] refused: parent has no unique explicitly typed Dataset",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/isPartOf",
+          "property": "isPartOf",
+          "value": [
+            {
+              "@id": "ark:59852/organization-bridge2ai-s6VouUf8Gkm"
+            }
+          ]
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/isPartOf",
+          "property": "isPartOf",
+          "value": [
+            {
+              "@id": "ark:59853/rocrate-chorus-ro-crate-package"
+            }
+          ]
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/isPartOf",
+          "property": "isPartOf",
+          "value": [
+            {
+              "@id": "ark:59853/rocrate-chorus-ro-crate-package"
+            }
+          ]
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-27",
+      "execution": "retired",
+      "d4d_path": "DatasetCollection.related_datasets",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['relatedLink']",
+      "status": "retired",
+      "resolution_note": "Keep generic relatedLink as external_resources; retire unsupported typed relation. A generic link does not supply DatasetRelationship.target_dataset type and relationship_type. Preserve the link without inventing a dataset relationship. Dependency: Explicit relationship typing only for future supported sources.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-28",
+      "execution": "active",
+      "d4d_path": "Dataset.external_resources",
+      "destination_slot": "external_resources",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['relatedLink']",
+      "status": "empty",
+      "resolution_note": "crate root 'relatedLink' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-29",
+      "execution": "active",
+      "d4d_path": "Dataset.use_repository",
+      "destination_slot": "use_repository",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['relatedLink']",
+      "status": "empty",
+      "resolution_note": "crate root 'relatedLink' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-30",
+      "execution": "active",
+      "d4d_path": "Dataset.creators",
+      "destination_slot": "creators",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['author']",
+      "status": "filled",
+      "resolution_note": "string -> Creator.description; wrapped scalar into a list",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/author",
+          "property": "author",
+          "value": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/author",
+          "property": "author",
+          "value": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/author",
+          "property": "author",
+          "value": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-31",
+      "execution": "active",
+      "d4d_path": "Dataset.created_by",
+      "destination_slot": "created_by",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['author']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/author",
+          "property": "author",
+          "value": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/author",
+          "property": "author",
+          "value": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/author",
+          "property": "author",
+          "value": "Eric S. Rosenthal(1), Rishikesan Kamaleswaran(2), Yulia Levites Strekalova(3), Andrew E. Williams(4), Ashley Cordes(5), Ishan C. Williams(6), Parisa Rashidi(3), Barbara J. Evans(3), J. Randall Moorman(6), Soojin Park(7), Edilberto Amorim(8), Paul M. Vespa(9), Xiaoqian Jiang(10), Hongfang Liu(10), Mihai V. Podgoreanu(2), Vitaly Herasevich(11), Mark Wainwright(12), Andrew J. Barros(6), Brynne A. Sullivan(6), Michael J. Young(1), Marta Alvarez(4), Polina Talapova(4), Jennifer A. Muszynski(13), Alasdair Gent(2), Delgersuren Bold(14), Manlik Kwong(4), Dileep Gunda(14), Jackie Le(1), India Loar(6), Brian J. Gow(15), Heidi Schmidt(1), Jared Houghtaling(4), Robert T. Miller(4), Timothy Clark (6), William B. Ashe(6), Tony C. Pan(14), Tom J. Pollard(15), Ciera McCrary(1), Azra Bihorac(3), Xiao Hu(14), Gilles Clermont(6) on behalf of the CHoRUS Investigators\n\n(1) Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA\n(2) Duke University, Durham, North Carolina, USA\n(3) University of Florida, Gainesville, Florida, USA\n(4) Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA\n(5) University of Oregon, Eugene, Oregon, USA\n(6) University of Virginia, Charlottesville, Virginia, USA\n(7) Columbia University Irving Medical Center, New York, New York, USA\n(8) University of California, San Francisco, San Francisco, California, USA\n(9) David Geffen School of Medicine at UCLA, Los Angeles, California, USA\n(10) McWilliams School of Biomedical Informatics, UTHealth Houston, Houston, Texas, USA; Mayo Clinic, Rochester, Minnesota, USA\n(11) Mayo Clinic, Rochester, Minnesota, USA\n(12) Seattle Children’s Hospital, Seattle, Washington, USA\n(13) Nationwide Children’s Hospital / The Ohio State University, Columbus, Ohio, USA\n(14) Emory University, Atlanta, Georgia, USA\n(15) Massachusetts Institute of Technology, Cambridge, Massachusetts, USA"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-32",
+      "execution": "active",
+      "d4d_path": "Dataset.funders",
+      "destination_slot": "funders",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['funder']",
+      "status": "filled",
+      "resolution_note": "string -> FundingMechanism.name; wrapped scalar into a list",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/funder",
+          "property": "funder",
+          "value": "NIH Common Fund OT2OD032701"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/funder",
+          "property": "funder",
+          "value": "NIH Common Fund OT2OD032701"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/funder",
+          "property": "funder",
+          "value": "NIH Common Fund OT2OD032701"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-33",
+      "execution": "active",
+      "d4d_path": "Dataset.purposes",
+      "destination_slot": "purposes",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataUseCases']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataUseCases' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-34",
+      "execution": "active",
+      "d4d_path": "Dataset.tasks",
+      "destination_slot": "tasks",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataUseCases']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataUseCases' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-35",
+      "execution": "active",
+      "d4d_path": "Dataset.intended_uses",
+      "destination_slot": "intended_uses",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataUseCases']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataUseCases' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-36",
+      "execution": "active",
+      "d4d_path": "Dataset.existing_uses",
+      "destination_slot": "existing_uses",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataUseCases']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataUseCases' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-37",
+      "execution": "active",
+      "d4d_path": "Dataset.other_tasks",
+      "destination_slot": "other_tasks",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataUseCases']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataUseCases' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-38",
+      "execution": "active",
+      "d4d_path": "Dataset.discouraged_uses",
+      "destination_slot": "discouraged_uses",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['prohibitedUses']",
+      "status": "empty",
+      "resolution_note": "crate root 'prohibitedUses' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-39",
+      "execution": "active",
+      "d4d_path": "Dataset.prohibited_uses",
+      "destination_slot": "prohibited_uses",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['prohibitedUses']",
+      "status": "empty",
+      "resolution_note": "crate root 'prohibitedUses' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-40",
+      "execution": "active",
+      "d4d_path": "Dataset.future_use_impacts",
+      "destination_slot": "future_use_impacts",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataSocialImpact']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataSocialImpact' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-41",
+      "execution": "active",
+      "d4d_path": "Dataset.addressing_gaps",
+      "destination_slot": "addressing_gaps",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['d4d:addressingGaps']",
+      "status": "empty",
+      "resolution_note": "crate root 'd4d:addressingGaps' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-42",
+      "execution": "active",
+      "d4d_path": "Dataset.known_biases",
+      "destination_slot": "known_biases",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataBiases']",
+      "status": "filled",
+      "resolution_note": "string -> DatasetBias.description; wrapped scalar into a list",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:dataBiases",
+          "property": "rai:dataBiases",
+          "value": "•\tReferral bias from tertiary/quaternary academic centers\n•\tSocioeconomic and demographic distribution reflective of participating institutions\n•\tDocumentation bias in clinical notes\n•\tMissingness not at random (MNAR) in laboratory, waveform, and imaging acquisition\n•\tDifferential care pathways affecting label assignment (e.g., ICU vs non-ICU populations)\n•\tTemporal trends related to evolving clinical practice\nBias assessment is ongoing and documented in dataset release notes\n"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-43",
+      "execution": "active",
+      "d4d_path": "Dataset.known_limitations",
+      "destination_slot": "known_limitations",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataLimitations']",
+      "status": "filled",
+      "resolution_note": "string -> DatasetLimitation.description; wrapped scalar into a list",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:dataLimitations",
+          "property": "rai:dataLimitations",
+          "value": "•\tObservational data; and not randomized; collected as real-world clinical data, not through prospective research interactions with patient.\n•\tDocumentation quality dependent on routine clinical workflows and data elements being collected in clinical practice.\n•\tVariable sampling rates across real-world data from hospital waveform systems and middleware\n•\tInstitutional heterogeneity in coding and clinical data collection practices\n•\tLimited generalizability beyond participating hospitals\n•\tNot appropriate for re-identification, contact tracing, or patient-level intervention\n•\tHold-out splits are available for testing; training and validation in development splits require internal mechanisms to avoid overfitting\n"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-44",
+      "execution": "active",
+      "d4d_path": "Dataset.anomalies",
+      "destination_slot": "anomalies",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['d4d:anomalies']",
+      "status": "empty",
+      "resolution_note": "crate root 'd4d:anomalies' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-45",
+      "execution": "active",
+      "d4d_path": "Dataset.content_warnings",
+      "destination_slot": "content_warnings",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['d4d:contentWarnings']",
+      "status": "empty",
+      "resolution_note": "crate root 'd4d:contentWarnings' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-46",
+      "execution": "active",
+      "d4d_path": "Dataset.errata",
+      "destination_slot": "errata",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['correction']",
+      "status": "empty",
+      "resolution_note": "crate root 'correction' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-47",
+      "execution": "active",
+      "d4d_path": "Dataset.updates",
+      "destination_slot": "updates",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataReleaseMaintenancePlan']",
+      "status": "filled",
+      "resolution_note": "string -> UpdatePlan.description",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:dataReleaseMaintenancePlan",
+          "property": "rai:dataReleaseMaintenancePlan",
+          "value": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes documenting schema changes, harmonization updates, and known issues\n•\tGovernance committee oversight for structural modifications\n•\tData upload\n•\tDeprecation policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility window where feasible\no\tArchive of prior versions within enclave where possible or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.\n"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-48",
+      "execution": "active",
+      "d4d_path": "Dataset.sensitive_elements",
+      "destination_slot": "sensitive_elements",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:personalSensitiveInformation']",
+      "status": "filled",
+      "resolution_note": "string -> SensitiveElement.name",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:personalSensitiveInformation",
+          "property": "rai:personalSensitiveInformation",
+          "value": [
+            "CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls.",
+            "De-identification consistent with HIPAA Safe Harbor",
+            "Removal or tokenization of direct identifiers",
+            "Date shifting or limited date fields when required",
+            "Role-based access control (RBAC)",
+            "Multi-factor authentication",
+            "Full audit logging of data access and queries",
+            "Prohibition of re-identification attempts",
+            "Data export restrictions and output review procedures to reduce risk of re-identification",
+            "Re-identification risk is periodically assessed and mitigation strategies updated as needed."
+          ]
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-49",
+      "execution": "active",
+      "d4d_path": "Dataset.confidential_elements",
+      "destination_slot": "confidential_elements",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:personalSensitiveInformation']",
+      "status": "filled",
+      "resolution_note": "string -> Confidentiality.name",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:personalSensitiveInformation",
+          "property": "rai:personalSensitiveInformation",
+          "value": [
+            "CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls.",
+            "De-identification consistent with HIPAA Safe Harbor",
+            "Removal or tokenization of direct identifiers",
+            "Date shifting or limited date fields when required",
+            "Role-based access control (RBAC)",
+            "Multi-factor authentication",
+            "Full audit logging of data access and queries",
+            "Prohibition of re-identification attempts",
+            "Data export restrictions and output review procedures to reduce risk of re-identification",
+            "Re-identification risk is periodically assessed and mitigation strategies updated as needed."
+          ]
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-50",
+      "execution": "active",
+      "d4d_path": "Dataset.is_deidentified",
+      "destination_slot": "is_deidentified",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:confidentialityLevel']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:confidentialityLevel' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-51",
+      "execution": "active",
+      "d4d_path": "Dataset.data_protection_impacts",
+      "destination_slot": "data_protection_impacts",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataSocialImpact']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataSocialImpact' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-52",
+      "execution": "active",
+      "d4d_path": "Dataset.regulatory_restrictions",
+      "destination_slot": "regulatory_restrictions",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['conditionsOfAccess']",
+      "status": "filled",
+      "resolution_note": "string -> ExportControlRegulatoryRestrictions.name",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-53",
+      "execution": "active",
+      "d4d_path": "Dataset.acquisition_methods",
+      "destination_slot": "acquisition_methods",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataCollection']",
+      "status": "filled",
+      "resolution_note": "string -> InstanceAcquisition.description; wrapped scalar into a list",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:dataCollection",
+          "property": "rai:dataCollection",
+          "value": "Data are derived from routine clinical care at participating hospitals under IRB oversight. Collection includes:\n•\tElectronic health record extraction and transformation to OMOP common data model\n•\tImaging metadata de-identification using RSNA Clinical Trial Processor and pixel-level de-identification using IbisWorks EICON. \n•\tHigh-resolution physiologic waveform capture extraction and transformation to the WFDB standard, \n•\tStandardized harmonization to common data model\nEthical safeguards include:\n•\tIRB approval or waiver as appropriate\n•\tCompliance with CHoRUS governance\n•\tLayered privacy protection including de-identification, data use agreement, controlled access data repository with adherence to NIST 800-53 principles, audit-level protection, registration, role-based access controls, protection against data exfiltration.\nData are not collected solely for research but repurposed from clinical workflows under ethical oversight.\n"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-54",
+      "execution": "active",
+      "d4d_path": "Dataset.collection_mechanisms",
+      "destination_slot": "collection_mechanisms",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataCollection']",
+      "status": "filled",
+      "resolution_note": "string -> CollectionMechanism.description; wrapped scalar into a list",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:dataCollection",
+          "property": "rai:dataCollection",
+          "value": "Data are derived from routine clinical care at participating hospitals under IRB oversight. Collection includes:\n•\tElectronic health record extraction and transformation to OMOP common data model\n•\tImaging metadata de-identification using RSNA Clinical Trial Processor and pixel-level de-identification using IbisWorks EICON. \n•\tHigh-resolution physiologic waveform capture extraction and transformation to the WFDB standard, \n•\tStandardized harmonization to common data model\nEthical safeguards include:\n•\tIRB approval or waiver as appropriate\n•\tCompliance with CHoRUS governance\n•\tLayered privacy protection including de-identification, data use agreement, controlled access data repository with adherence to NIST 800-53 principles, audit-level protection, registration, role-based access controls, protection against data exfiltration.\nData are not collected solely for research but repurposed from clinical workflows under ethical oversight.\n"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-55",
+      "execution": "active",
+      "d4d_path": "Dataset.collection_timeframes",
+      "destination_slot": "collection_timeframes",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataCollectionTimeframe']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataCollectionTimeframe' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-56",
+      "execution": "active",
+      "d4d_path": "Dataset.data_collectors",
+      "destination_slot": "data_collectors",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['contributor']",
+      "status": "empty",
+      "resolution_note": "crate root 'contributor' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-57",
+      "execution": "active",
+      "d4d_path": "Dataset.raw_data_sources",
+      "destination_slot": "raw_data_sources",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataCollectionRawData']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataCollectionRawData' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-58",
+      "execution": "active",
+      "d4d_path": "Dataset.missing_data_documentation",
+      "destination_slot": "missing_data_documentation",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataCollectionMissingData']",
+      "status": "filled",
+      "resolution_note": "string -> MissingDataDocumentation.name; wrapped scalar into a list",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:dataCollectionMissingData",
+          "property": "rai:dataCollectionMissingData",
+          "value": "Variable sampling rates across real-world data from hospital waveform systems and middleware"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-59",
+      "execution": "active",
+      "d4d_path": "Dataset.cleaning_strategies",
+      "destination_slot": "cleaning_strategies",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataManipulationProtocol']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataManipulationProtocol' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-60",
+      "execution": "active",
+      "d4d_path": "CleaningStrategy.description",
+      "destination_slot": "cleaning_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataManipulationProtocol",
+      "status": "empty",
+      "resolution_note": "'rai:dataManipulationProtocol' not present on crate root",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-61",
+      "execution": "retired",
+      "d4d_path": "CleaningStrategy.step_type",
+      "destination_slot": "cleaning_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataManipulationProtocol",
+      "status": "retired",
+      "resolution_note": "Retire unsupported protocol subfield rule; retain complete existing protocol text. Narrative does not assert step type/order, annotator category or ECO evidence code. Preserve prior crosswalk proposal and the existing whole-text mapping. Dependency: No new schema fields solely to rescue these rows.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-62",
+      "execution": "retired",
+      "d4d_path": "CleaningStrategy.pipeline_step",
+      "destination_slot": "cleaning_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataManipulationProtocol",
+      "status": "retired",
+      "resolution_note": "Retire unsupported protocol subfield rule; retain complete existing protocol text. Narrative does not assert step type/order, annotator category or ECO evidence code. Preserve prior crosswalk proposal and the existing whole-text mapping. Dependency: No new schema fields solely to rescue these rows.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-63",
+      "execution": "active",
+      "d4d_path": "Dataset.preprocessing_strategies",
+      "destination_slot": "preprocessing_strategies",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataPreprocessingProtocol']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataPreprocessingProtocol' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-64",
+      "execution": "active",
+      "d4d_path": "PreprocessingStrategy.description",
+      "destination_slot": "preprocessing_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataPreprocessingProtocol",
+      "status": "empty",
+      "resolution_note": "'rai:dataPreprocessingProtocol' not present on crate root",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-65",
+      "execution": "retired",
+      "d4d_path": "PreprocessingStrategy.step_type",
+      "destination_slot": "preprocessing_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataPreprocessingProtocol",
+      "status": "retired",
+      "resolution_note": "Retire unsupported protocol subfield rule; retain complete existing protocol text. Narrative does not assert step type/order, annotator category or ECO evidence code. Preserve prior crosswalk proposal and the existing whole-text mapping. Dependency: No new schema fields solely to rescue these rows.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-66",
+      "execution": "retired",
+      "d4d_path": "PreprocessingStrategy.pipeline_step",
+      "destination_slot": "preprocessing_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataPreprocessingProtocol",
+      "status": "retired",
+      "resolution_note": "Retire unsupported protocol subfield rule; retain complete existing protocol text. Narrative does not assert step type/order, annotator category or ECO evidence code. Preserve prior crosswalk proposal and the existing whole-text mapping. Dependency: No new schema fields solely to rescue these rows.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-67",
+      "execution": "active",
+      "d4d_path": "Dataset.imputation_protocols",
+      "destination_slot": "imputation_protocols",
+      "mapping_rule": "imputation",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataImputationProtocol']",
+      "status": "empty",
+      "resolution_note": "selected root has neither imputation source key",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-68",
+      "execution": "active",
+      "d4d_path": "Dataset.raw_sources",
+      "destination_slot": "raw_sources",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataCollectionRawData']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataCollectionRawData' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-69",
+      "execution": "active",
+      "d4d_path": "Dataset.compression",
+      "destination_slot": "compression",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:formats']",
+      "status": "empty",
+      "resolution_note": "crate root 'evi:formats' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-70",
+      "execution": "active",
+      "d4d_path": "Dataset.distribution_formats",
+      "destination_slot": "distribution_formats",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:formats']",
+      "status": "empty",
+      "resolution_note": "crate root 'evi:formats' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-71",
+      "execution": "active",
+      "d4d_path": "Dataset.labeling_strategies",
+      "destination_slot": "labeling_strategies",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataAnnotationProtocol']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataAnnotationProtocol' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-72",
+      "execution": "active",
+      "d4d_path": "LabelingStrategy.description",
+      "destination_slot": "labeling_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataAnnotationProtocol",
+      "status": "empty",
+      "resolution_note": "'rai:dataAnnotationProtocol' not present on crate root",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-73",
+      "execution": "retired",
+      "d4d_path": "LabelingStrategy.annotator_type",
+      "destination_slot": "labeling_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataAnnotationProtocol",
+      "status": "retired",
+      "resolution_note": "Retire unsupported protocol subfield rule; retain complete existing protocol text. Narrative does not assert step type/order, annotator category or ECO evidence code. Preserve prior crosswalk proposal and the existing whole-text mapping. Dependency: No new schema fields solely to rescue these rows.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-74",
+      "execution": "retired",
+      "d4d_path": "LabelingStrategy.evidence_type",
+      "destination_slot": "labeling_strategies",
+      "mapping_rule": "",
+      "source_expression": "rai:dataAnnotationProtocol",
+      "status": "retired",
+      "resolution_note": "Retire unsupported protocol subfield rule; retain complete existing protocol text. Narrative does not assert step type/order, annotator category or ECO evidence code. Preserve prior crosswalk proposal and the existing whole-text mapping. Dependency: No new schema fields solely to rescue these rows.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-75",
+      "execution": "active",
+      "d4d_path": "Dataset.annotation_analyses",
+      "destination_slot": "annotation_analyses",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:dataAnnotationAnalysis']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:dataAnnotationAnalysis' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-76",
+      "execution": "active",
+      "d4d_path": "AnnotationAnalysis.description",
+      "destination_slot": "annotation_analyses",
+      "mapping_rule": "",
+      "source_expression": "rai:dataAnnotationAnalysis",
+      "status": "empty",
+      "resolution_note": "'rai:dataAnnotationAnalysis' not present on crate root",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-77",
+      "execution": "active",
+      "d4d_path": "Dataset.machine_annotation_tools",
+      "destination_slot": "machine_annotation_tools",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['rai:machineAnnotationTools']",
+      "status": "empty",
+      "resolution_note": "crate root 'rai:machineAnnotationTools' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-78",
+      "execution": "active",
+      "d4d_path": "MachineAnnotationTools.tools",
+      "destination_slot": "machine_annotation_tools",
+      "mapping_rule": "",
+      "source_expression": "rai:machineAnnotationTools",
+      "status": "empty",
+      "resolution_note": "'rai:machineAnnotationTools' not present on crate root",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-79",
+      "execution": "active",
+      "d4d_path": "Dataset.ethical_reviews",
+      "destination_slot": "ethical_reviews",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['ethicalReview']",
+      "status": "filled",
+      "resolution_note": "string -> EthicalReview.description; wrapped scalar into a list",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/ethicalReview",
+          "property": "ethicalReview",
+          "value": "Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes, and Barbara J. Evans in collaboration with the Mass General Brigham IRB with local context review by IRBs, HIPAA Privacy Officers, and institutional counsels at contributing medical centers."
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-80",
+      "execution": "active",
+      "d4d_path": "Dataset.human_subject_research",
+      "destination_slot": "human_subject_research",
+      "mapping_rule": "human_subjects",
+      "source_expression": "@graph[?@type='Dataset']['humanSubjectResearch']",
+      "status": "filled",
+      "resolution_note": "preserved root assertions: humanSubjectResearch, humanSubjectExemption, irb, irbProtocolId; humanSubjectResearch explicit Yes/No or boolean normalized; inline Organization; review and protocol assertions do not establish approval",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/humanSubjectResearch",
+          "property": "humanSubjectResearch",
+          "value": "Yes"
+        },
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/humanSubjectExemption",
+          "property": "humanSubjectExemption",
+          "value": "HIPAA exemption 4 ((45 CFR 46.104(d)(4))"
+        },
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/irb",
+          "property": "irb",
+          "value": {
+            "@type": "Organization",
+            "name": "Mass General Brigham Institutional Review Board (MGB IRB)",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "IRB Reliance and Compliance",
+              "email": "irbreliance@mgb.org",
+              "telephone": "+1-857-282-1900"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "399 Revolution Drive, Suite 710",
+              "addressLocality": "Somerville",
+              "addressRegion": "MA",
+              "postalCode": "02145",
+              "addressCountry": "US"
+            }
+          }
+        },
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/irbProtocolId",
+          "property": "irbProtocolId",
+          "value": "#2022P000707"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-81",
+      "execution": "active",
+      "d4d_path": "Dataset.at_risk_populations",
+      "destination_slot": "at_risk_populations",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['d4d:atRiskPopulations']",
+      "status": "empty",
+      "resolution_note": "crate root 'd4d:atRiskPopulations' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-82",
+      "execution": "active",
+      "d4d_path": "Dataset.informed_consent",
+      "destination_slot": "informed_consent",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['d4d:informedConsent']",
+      "status": "empty",
+      "resolution_note": "crate root 'd4d:informedConsent' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-83",
+      "execution": "active",
+      "d4d_path": "Dataset.license_and_use_terms",
+      "destination_slot": "license_and_use_terms",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['license']",
+      "status": "filled",
+      "resolution_note": "string -> LicenseAndUseTerms.name",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/license",
+          "property": "license",
+          "value": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/license",
+          "property": "license",
+          "value": "See Data Use Agreement"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/license",
+          "property": "license",
+          "value": "See Data Use Agreement"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-84",
+      "execution": "active",
+      "d4d_path": "Dataset.ip_restrictions",
+      "destination_slot": "ip_restrictions",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['conditionsOfAccess']",
+      "status": "filled",
+      "resolution_note": "string -> IPRestrictions.name",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-85",
+      "execution": "active",
+      "d4d_path": "Dataset.extension_mechanism",
+      "destination_slot": "extension_mechanism",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['license']",
+      "status": "filled",
+      "resolution_note": "string -> ExtensionMechanism.name",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/license",
+          "property": "license",
+          "value": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/license",
+          "property": "license",
+          "value": "See Data Use Agreement"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/license",
+          "property": "license",
+          "value": "See Data Use Agreement"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-86",
+      "execution": "active",
+      "d4d_path": "Dataset.retention_limit",
+      "destination_slot": "retention_limit",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['conditionsOfAccess']",
+      "status": "filled",
+      "resolution_note": "string -> RetentionLimits.name",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/conditionsOfAccess",
+          "property": "conditionsOfAccess",
+          "value": "https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-87",
+      "execution": "retired",
+      "d4d_path": "EthicalReview.irb_id",
+      "destination_slot": "ethical_reviews",
+      "mapping_rule": "",
+      "source_expression": "rai:ethicalReview",
+      "status": "retired",
+      "resolution_note": "Retire ethicalReview-to-IRB-ID inference; preserve explicit review assertions. Keep ethicalReview narrative in EthicalReview.review_details. Read explicit irb/irbProtocolId as separately labeled assertions; an identifier or board name does not assert approval. Dependency: #4043; root-scoped field-specific ethics construction.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-88",
+      "execution": "retired",
+      "d4d_path": "HumanSubjectResearch.exemption",
+      "destination_slot": "human_subject_research",
+      "mapping_rule": "",
+      "source_expression": "d4d:humanSubject",
+      "status": "retired",
+      "resolution_note": "Retired as a separate target; superseded by 49c24423:legacy-line-80 (human_subjects), which preserves root humanSubjectExemption verbatim as a labelled assertion. No exemption/compliance/approval is inferred and no second human-subject object is merged (#4383).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-89",
+      "execution": "active",
+      "d4d_path": "DataGovernance.description",
+      "destination_slot": "data_governance",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['dataGovernanceCommittee']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/dataGovernanceCommittee",
+          "property": "dataGovernanceCommittee",
+          "value": "Eric Rosenthal, EROSENTHAL@mgh.harvard.edu"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-90",
+      "execution": "deferred",
+      "d4d_path": "DatasetCollection.principal_investigator",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['principalInvestigator']",
+      "status": "deferred",
+      "resolution_note": "Preserve PI literal now; defer typed placement; add a separate dataset role assertion only if queryable roles are required. Preserve source role and literal, optional explicitly sourced identity; no author inference, cross-person merge or name-based entity matching. Dependency: #4449; role schema is an explicit follow-up, not a prerequisite to retaining source evidence.",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/principalInvestigator",
+          "property": "principalInvestigator",
+          "value": "Eric Rosenthal, EROSENTHAL@mgh.harvard.edu"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/principalInvestigator",
+          "property": "principalInvestigator",
+          "value": "PI Eric Rosenthal  EROSENTHAL@mgh.harvard.edu"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/principalInvestigator",
+          "property": "principalInvestigator",
+          "value": "PI Eric Rosenthal  EROSENTHAL@mgh.harvard.edu"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-91",
+      "execution": "active",
+      "d4d_path": "Dataset.modified_by",
+      "destination_slot": "modified_by",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['contributor']",
+      "status": "empty",
+      "resolution_note": "crate root 'contributor' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-92",
+      "execution": "active",
+      "d4d_path": "Dataset.maintainers",
+      "destination_slot": "maintainers",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['maintainer']",
+      "status": "empty",
+      "resolution_note": "crate root 'maintainer' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-93",
+      "execution": "deferred",
+      "d4d_path": "DatasetCollection.contact_email",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['contactEmail']",
+      "status": "deferred",
+      "resolution_note": "Preserve generic dataset contact literal now; defer unsupported typed role placement. contactEmail may contain combined name/address text. Preserve the whole source value; do not assign governance/maintainer role or normalize ambiguous addresses. Dependency: Dataset contact/role schema only for an explicit queryable requirement; no inferred governance or maintainer role.",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/contactEmail",
+          "property": "contactEmail",
+          "value": "Ciera McCrary, cmccrary@mgh.harvard.edu"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/contactEmail",
+          "property": "contactEmail",
+          "value": "Ciera McCrary, cmccrary@mgh.harvard.edu"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/contactEmail",
+          "property": "contactEmail",
+          "value": "Ciera McCrary, cmccrary@mgh.harvard.edu"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-94",
+      "execution": "retired",
+      "d4d_path": "DatasetCollection.data_sharing_agreement",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['dataSharingAgreement']",
+      "status": "retired",
+      "resolution_note": "Retire unsupported active DSA target; defer fixture-backed rule. No dataSharingAgreement key in the three inspected complete graphs. Keep the design proposal; absence is not a claim that no agreement is required. Future explicit terms need a source-aware merge rule. Dependency: Concrete fixture and terms semantics; not automatic IP restriction.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-95",
+      "execution": "active",
+      "d4d_path": "Dataset.version_access",
+      "destination_slot": "version_access",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['version']",
+      "status": "filled",
+      "resolution_note": "string -> VersionAccess.name",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/version",
+          "property": "version",
+          "value": "1.0 Beta"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/version",
+          "property": "version",
+          "value": "1.0 Beta"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/version",
+          "property": "version",
+          "value": "1.0 Beta"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-96",
+      "execution": "active",
+      "d4d_path": "UpdatePlan.frequency",
+      "destination_slot": "updates",
+      "mapping_rule": "",
+      "source_expression": "rai:dataReleaseMaintenancePlan",
+      "status": "subsumed",
+      "resolution_note": "Dataset.updates already carries this crate value (rai:dataReleaseMaintenancePlan); not placed a second time (#2915)",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:dataReleaseMaintenancePlan",
+          "property": "rai:dataReleaseMaintenancePlan",
+          "value": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes documenting schema changes, harmonization updates, and known issues\n•\tGovernance committee oversight for structural modifications\n•\tData upload\n•\tDeprecation policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility window where feasible\no\tArchive of prior versions within enclave where possible or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.\n"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-97",
+      "execution": "retired",
+      "d4d_path": "Maintenance.versioning_strategy",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "rai:dataReleaseMaintenancePlan",
+      "status": "retired",
+      "resolution_note": "Retire inferred versioning extraction; retain complete maintenance plan. Dataset.updates already retains the plan. Do not infer a versioning strategy or equate update plans with prior-version support. Dependency: Historical crosswalk retention.",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/rai:dataReleaseMaintenancePlan",
+          "property": "rai:dataReleaseMaintenancePlan",
+          "value": "\n•\tVersioned dataset releases e.g., CHoRUS vX.Y)\n•\tRelease notes documenting schema changes, harmonization updates, and known issues\n•\tGovernance committee oversight for structural modifications\n•\tData upload\n•\tDeprecation policy includes:\no\tAdvance notice of schema changes\no\tBackward compatibility window where feasible\no\tArchive of prior versions within enclave where possible or incremental change records\nPrimary maintainers: CHoRUS Data Pillar in collaboration with institutional data stewards.\n"
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-98",
+      "execution": "deferred",
+      "d4d_path": "EvidenceMetadata.dataset_count",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:datasetCount']",
+      "status": "deferred",
+      "resolution_note": "Preserve as upstream-declared crate/release metrics in provenance. Do not reinterpret EVI graph aggregates as participants/files/instances or as counts recomputed from the downloaded graph. Retain zero, units/scope, source entity and release hash. Dependency: Source-metric provenance representation; no seven placeholder Dataset slots.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-99",
+      "execution": "deferred",
+      "d4d_path": "EvidenceMetadata.computation_count",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:computationCount']",
+      "status": "deferred",
+      "resolution_note": "Preserve as upstream-declared crate/release metrics in provenance. Do not reinterpret EVI graph aggregates as participants/files/instances or as counts recomputed from the downloaded graph. Retain zero, units/scope, source entity and release hash. Dependency: Source-metric provenance representation; no seven placeholder Dataset slots.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-100",
+      "execution": "deferred",
+      "d4d_path": "EvidenceMetadata.software_count",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:softwareCount']",
+      "status": "deferred",
+      "resolution_note": "Preserve as upstream-declared crate/release metrics in provenance. Do not reinterpret EVI graph aggregates as participants/files/instances or as counts recomputed from the downloaded graph. Retain zero, units/scope, source entity and release hash. Dependency: Source-metric provenance representation; no seven placeholder Dataset slots.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-101",
+      "execution": "deferred",
+      "d4d_path": "EvidenceMetadata.schema_count",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:schemaCount']",
+      "status": "deferred",
+      "resolution_note": "Preserve as upstream-declared crate/release metrics in provenance. Do not reinterpret EVI graph aggregates as participants/files/instances or as counts recomputed from the downloaded graph. Retain zero, units/scope, source entity and release hash. Dependency: Source-metric provenance representation; no seven placeholder Dataset slots.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-102",
+      "execution": "deferred",
+      "d4d_path": "EvidenceMetadata.total_entities",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:totalEntities']",
+      "status": "deferred",
+      "resolution_note": "Preserve as upstream-declared crate/release metrics in provenance. Do not reinterpret EVI graph aggregates as participants/files/instances or as counts recomputed from the downloaded graph. Retain zero, units/scope, source entity and release hash. Dependency: Source-metric provenance representation; no seven placeholder Dataset slots.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-103",
+      "execution": "deferred",
+      "d4d_path": "EvidenceMetadata.entities_with_summary_stats",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:entitiesWithSummaryStats']",
+      "status": "deferred",
+      "resolution_note": "Preserve as upstream-declared crate/release metrics in provenance. Do not reinterpret EVI graph aggregates as participants/files/instances or as counts recomputed from the downloaded graph. Retain zero, units/scope, source entity and release hash. Dependency: Source-metric provenance representation; no seven placeholder Dataset slots.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-104",
+      "execution": "deferred",
+      "d4d_path": "EvidenceMetadata.entities_with_checksums",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:entitiesWithChecksums']",
+      "status": "deferred",
+      "resolution_note": "Preserve as upstream-declared crate/release metrics in provenance. Do not reinterpret EVI graph aggregates as participants/files/instances or as counts recomputed from the downloaded graph. Retain zero, units/scope, source entity and release hash. Dependency: Source-metric provenance representation; no seven placeholder Dataset slots.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-105",
+      "execution": "retired",
+      "d4d_path": "EvidenceMetadata.total_content_size_bytes",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:totalContentSizeBytes']",
+      "status": "retired",
+      "resolution_note": "Retire duplicate executable row; retain versioned successor record. Existing Dataset.total_size_bytes, distribution_formats and funders rules already preserve the corresponding source properties. Reconcile row counts separately from distinct slots. Dependency: #4384; migration ledger.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-106",
+      "execution": "retired",
+      "d4d_path": "EvidenceMetadata.formats",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:formats']",
+      "status": "retired",
+      "resolution_note": "Retire duplicate executable row; retain versioned successor record. Existing Dataset.total_size_bytes, distribution_formats and funders rules already preserve the corresponding source properties. Reconcile row counts separately from distinct slots. Dependency: #4384; migration ledger.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-107",
+      "execution": "deferred",
+      "d4d_path": "DatasetCollection.completeness",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['additionalProperty'][?name='Completeness']['value']",
+      "status": "deferred",
+      "resolution_note": "Preserve root completeness narrative; defer structured quality metric. Root completeness prose differs from member additionalProperty values. Preserve entity scope and qualifiers; do not invent percentages, denominators or quality scores. Dependency: Root-scoped source read; any typed quality extension separately defined.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-108",
+      "execution": "retired",
+      "d4d_path": "DatasetCollection.summary_statistics",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['hasSummaryStatistics']",
+      "status": "retired",
+      "resolution_note": "Retire unobserved active placeholder; retain deferred schema proposal. No matching properties/additionalProperty names occur in the three inspected complete graphs. Future metrics need explicit subject, method, units/denominator and evidence; model accuracy is not dataset quality. Dependency: Concrete source fixtures before schema or extraction changes.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-109",
+      "execution": "retired",
+      "d4d_path": "DatasetCollection.quality_control",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['additionalProperty'][?name='Quality Control']['value']",
+      "status": "retired",
+      "resolution_note": "Retire unobserved active placeholder; retain deferred schema proposal. No matching properties/additionalProperty names occur in the three inspected complete graphs. Future metrics need explicit subject, method, units/denominator and evidence; model accuracy is not dataset quality. Dependency: Concrete source fixtures before schema or extraction changes.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-110",
+      "execution": "retired",
+      "d4d_path": "DatasetCollection.funding_and_acknowledgements",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['funder']",
+      "status": "retired",
+      "resolution_note": "Retire duplicate executable row; retain versioned successor record. Existing Dataset.total_size_bytes, distribution_formats and funders rules already preserve the corresponding source properties. Reconcile row counts separately from distinct slots. Dependency: #4384; migration ledger.",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/funder",
+          "property": "funder",
+          "value": "NIH Common Fund OT2OD032701"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/funder",
+          "property": "funder",
+          "value": "NIH Common Fund OT2OD032701"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/funder",
+          "property": "funder",
+          "value": "NIH Common Fund OT2OD032701"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-111",
+      "execution": "deferred",
+      "d4d_path": "DatasetCollection.provenance_and_lineage",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['generatedBy']",
+      "status": "deferred",
+      "resolution_note": "Preserve generatedBy as entity-scoped computation provenance. VOICE values describe member datasets rather than the root. Do not map computation identity to was_derived_from or elevate first child value to project-level lineage. Dependency: Typed provenance relation; preserve subject-predicate-object identity.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-112",
+      "execution": "retired",
+      "d4d_path": "ValidationMetrics.validation_method",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['additionalProperty'][?name='Validation Method']['value']",
+      "status": "retired",
+      "resolution_note": "Retire unobserved active placeholder; retain deferred schema proposal. No matching properties/additionalProperty names occur in the three inspected complete graphs. Future metrics need explicit subject, method, units/denominator and evidence; model accuracy is not dataset quality. Dependency: Concrete source fixtures before schema or extraction changes.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-113",
+      "execution": "retired",
+      "d4d_path": "QualityControl.accuracy",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['additionalProperty'][?name='Accuracy']['value']",
+      "status": "retired",
+      "resolution_note": "Retire unobserved active placeholder; retain deferred schema proposal. No matching properties/additionalProperty names occur in the three inspected complete graphs. Future metrics need explicit subject, method, units/denominator and evidence; model accuracy is not dataset quality. Dependency: Concrete source fixtures before schema or extraction changes.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-114",
+      "execution": "retired",
+      "d4d_path": "QualityControl.data_quality_report",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['additionalProperty'][?name='Data Quality Report']['value']",
+      "status": "retired",
+      "resolution_note": "Retire unobserved active placeholder; retain deferred schema proposal. No matching properties/additionalProperty names occur in the three inspected complete graphs. Future metrics need explicit subject, method, units/denominator and evidence; model accuracy is not dataset quality. Dependency: Concrete source fixtures before schema or extraction changes.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-115",
+      "execution": "deferred",
+      "d4d_path": "QualityControl.fda_compliant",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['fdaRegulated']",
+      "status": "deferred",
+      "resolution_note": "Reject regulated-to-compliant mapping; preserve regulated assertion separately. true and false are both source assertions, missing/null remains unknown. Keep original key/value; propose explicitly named optional fda_regulated rather than any compliance claim. Dependency: Explicit schema proposal; preserve provenance meanwhile.",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/fdaRegulated",
+          "property": "fdaRegulated",
+          "value": true
+        }
+      ],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-116",
+      "execution": "deferred",
+      "d4d_path": "Dataset.dialect",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['encodingFormat']",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-117",
+      "execution": "deferred",
+      "d4d_path": "Dataset.media_type",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['encodingFormat']",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-118",
+      "execution": "active",
+      "d4d_path": "Dataset.is_tabular",
+      "destination_slot": "is_tabular",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['encodingFormat']",
+      "status": "empty",
+      "resolution_note": "crate root 'encodingFormat' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-119",
+      "execution": "deferred",
+      "d4d_path": "FormatDialect.delimiter",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "encodingFormat MIME parameter",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-120",
+      "execution": "deferred",
+      "d4d_path": "FormatDialect.header",
+      "destination_slot": null,
+      "mapping_rule": "",
+      "source_expression": "encodingFormat MIME parameter",
+      "status": "deferred",
+      "resolution_note": "Keep current-arm File/dialect limitation; preserve source evidence and deferred entity-specific mapping. Require actual file identity, collection membership and per-file properties. Root contentUrl is already download_url; format is not encoding. Do not copy root checksums/dialect to every member or infer MIME parameters from prose. Dependency: Dedicated File adapter; resolve FormatDialect.header string versus historical TSV bool.",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-121",
+      "execution": "deferred",
+      "d4d_path": "Dataset.variables",
+      "destination_slot": "variables",
+      "mapping_rule": "",
+      "source_expression": "N/A",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'N/A'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-122",
+      "execution": "active",
+      "d4d_path": "Dataset.sampling_strategies",
+      "destination_slot": "sampling_strategies",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['d4d:samplingStrategy']",
+      "status": "empty",
+      "resolution_note": "crate root 'd4d:samplingStrategy' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-123",
+      "execution": "active",
+      "d4d_path": "Dataset.subsets",
+      "destination_slot": "subsets",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['hasPart']",
+      "status": "filled",
+      "resolution_note": "crate reference -> DataSubset",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/hasPart",
+          "property": "hasPart",
+          "value": [
+            {
+              "@id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+              "@type": [
+                "https://w3id.org/EVI#Dataset",
+                "https://w3id.org/EVI#ROCrate"
+              ],
+              "name": "CHoRUS RO-Crate EHR SubRoCrate"
+            },
+            {
+              "@id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+              "@type": [
+                "https://w3id.org/EVI#Dataset",
+                "https://w3id.org/EVI#ROCrate"
+              ],
+              "name": "CHoRUS RO-Crate Waveforms SubRoCrate"
+            }
+          ]
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/hasPart",
+          "property": "hasPart",
+          "value": []
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/hasPart",
+          "property": "hasPart",
+          "value": []
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-124",
+      "execution": "active",
+      "d4d_path": "Dataset.instances",
+      "destination_slot": "instances",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['variableMeasured']",
+      "status": "empty",
+      "resolution_note": "crate root 'variableMeasured' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-125",
+      "execution": "active",
+      "d4d_path": "Dataset.subpopulations",
+      "destination_slot": "subpopulations",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['variableMeasured']",
+      "status": "empty",
+      "resolution_note": "crate root 'variableMeasured' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-126",
+      "execution": "deferred",
+      "d4d_path": "Instance.data_topic",
+      "destination_slot": "instances",
+      "mapping_rule": "",
+      "source_expression": "N/A",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'N/A'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-127",
+      "execution": "deferred",
+      "d4d_path": "Instance.instance_type",
+      "destination_slot": "instances",
+      "mapping_rule": "",
+      "source_expression": "N/A",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'N/A'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-128",
+      "execution": "deferred",
+      "d4d_path": "Instance.counts",
+      "destination_slot": "instances",
+      "mapping_rule": "",
+      "source_expression": "N/A",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'N/A'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-129",
+      "execution": "deferred",
+      "d4d_path": "DataSubset.is_data_split",
+      "destination_slot": "subsets",
+      "mapping_rule": "",
+      "source_expression": "N/A",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'N/A'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-130",
+      "execution": "deferred",
+      "d4d_path": "DataSubset.is_subpopulation",
+      "destination_slot": "subsets",
+      "mapping_rule": "",
+      "source_expression": "N/A",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'N/A'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-131",
+      "execution": "deferred",
+      "d4d_path": "VariableMetadata.variable_name",
+      "destination_slot": "variables",
+      "mapping_rule": "",
+      "source_expression": "N/A",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'N/A'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-132",
+      "execution": "deferred",
+      "d4d_path": "VariableMetadata.data_type",
+      "destination_slot": "variables",
+      "mapping_rule": "",
+      "source_expression": "N/A",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'N/A'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-133",
+      "execution": "deferred",
+      "d4d_path": "SamplingStrategy.strategies",
+      "destination_slot": "sampling_strategies",
+      "mapping_rule": "",
+      "source_expression": "d4d:samplingStrategy",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'd4d:samplingStrategy'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-134",
+      "execution": "deferred",
+      "d4d_path": "SamplingStrategy.description",
+      "destination_slot": "sampling_strategies",
+      "mapping_rule": "",
+      "source_expression": "d4d:samplingStrategy",
+      "status": "deferred",
+      "resolution_note": "No executable crate source expression is declared: 'd4d:samplingStrategy'. Preserve the original proposal; a reachable D4D path alone does not supply source evidence. Add a source-backed rule and fixture before activation (#2915).",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-135",
+      "execution": "active",
+      "d4d_path": "Dataset.name",
+      "destination_slot": "name",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['name']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/name",
+          "property": "name",
+          "value": "CHoRUS RO-Crate Package"
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/name",
+          "property": "name",
+          "value": "CHoRUS RO-Crate Waveforms SubRoCrate"
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/name",
+          "property": "name",
+          "value": "CHoRUS RO-Crate EHR SubRoCrate"
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-136",
+      "execution": "active",
+      "d4d_path": "Dataset.citation",
+      "destination_slot": "citation",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['citation']",
+      "status": "filled",
+      "resolution_note": "",
+      "root_assertions": [
+        {
+          "entity_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "json_pointer": "/@graph/1/citation",
+          "property": "citation",
+          "value": "The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026."
+        }
+      ],
+      "member_assertions": [
+        {
+          "entity_id": "b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+          "json_pointer": "/@graph/2/citation",
+          "property": "citation",
+          "value": "The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026."
+        },
+        {
+          "entity_id": "08cf7419-b94d-4508-8f64-c99c557351d7",
+          "json_pointer": "/@graph/3/citation",
+          "property": "citation",
+          "value": "The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026."
+        }
+      ],
+      "linked_assertions": []
+    },
+    {
+      "rule_id": "49c24423:legacy-line-137",
+      "execution": "active",
+      "d4d_path": "Dataset.total_size_bytes",
+      "destination_slot": "total_size_bytes",
+      "mapping_rule": "",
+      "source_expression": "@graph[?@type='Dataset']['evi:totalContentSizeBytes']",
+      "status": "empty",
+      "resolution_note": "crate root 'evi:totalContentSizeBytes' empty or absent; member values are not used",
+      "root_assertions": [],
+      "member_assertions": [],
+      "linked_assertions": []
+    }
+  ],
+  "project": "CHORUS",
+  "source": {
+    "path": "data/ro-crate_packages_static_replay_2026-10-10_01/CHORUS/raw/ro-crate-metadata.json",
+    "sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774"
+  },
+  "mapping_table": {
+    "path": "data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv",
+    "sha256": "4992fb8bd7aacd1356b3ed628906aedb9e951ae54b14c1f9f97a2d9e4fc456d3",
+    "rules_sha256": "7f71d505de6f1d4a59ce39f9e7ffa68a98942ad5ffc437827e7e183406e293f9"
+  },
+  "schema": {
+    "path": "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+    "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+  },
+  "producer": {
+    "files_sha256": {
+      "src/data_sheets_schema/rocrate_map.py": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592",
+      "src/data_sheets_schema/rocrate_sources.py": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75",
+      "src/data_sheets_schema/rocrate_assertions.py": "db29413b43226201e2c6686d2d66beb18bfef12b37176a7a0c3180e94bba533f",
+      "src/data_sheets_schema/scope.py": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199",
+      "src/data_sheets_schema/schema_view.py": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff"
+    }
+  },
+  "record_sha256": "aea38a02bf342d0d91a9bb8710fe0785c9b0b07102229a5d5b3a4030dd597ace"
+}

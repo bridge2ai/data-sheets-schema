@@ -1,0 +1,270 @@
+{
+  "format": "legacy4932_saved_comparison03_completed_independent_audit_v1",
+  "verdict": "PASS_COMPLETED_SAVED_COMPARISON_AND_RANKING; no publication claim",
+  "created_utc": "2026-10-11T08:14:04.091164+00:00",
+  "audit_scope": "Independently read saved JSON and exact admitted file bytes with stdlib only; no project/replay imports, tests, builders, gates or ranking re-execution. Root-only actual session79361 terminal0 is joined through completed/output receipts.",
+  "references": [
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/freeze.json",
+      "bytes": 2717,
+      "sha256": "f83502e366aca3aa49aa5d55a85805a06d11a1e57c7e1f59bc5b64fe8026a1ed"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/configuration.enabled.json",
+      "bytes": 146349,
+      "sha256": "5a961b0181692d0e9e0afe112a2444745a62ee1f5db8c765d8698ee2066f0418"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/completed.json",
+      "bytes": 11594,
+      "sha256": "3b97660e04168301634d296cbcf4162ff6de60916d8cff9b6e5bcd446d012709"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/controls.json",
+      "bytes": 17398,
+      "sha256": "054f53c6e1bf069591f1d4f72400e64d59e4db445cfb888b11f9e53265be5b61"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/schema-controls.json",
+      "bytes": 3979,
+      "sha256": "bfa4b34f65534c01e2a607f6f727dc5d222f0013f1578b0035299b8f84ff043a"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/dataset-schema.json",
+      "bytes": 359427,
+      "sha256": "0432b9ffecb951cb79fa6777c080739eb932e280c52b550ca45b7778c0722430"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/comparison.json",
+      "bytes": 317474,
+      "sha256": "a6807f4f851bae400abae0f75aee7fe7de05d32d5900c27f9a7d5066defd536e"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/ranking.json",
+      "bytes": 15982,
+      "sha256": "dc64e83cac1d5dd0adc26bcc7f4b7c4a50e330543753a2acd4ba02a0daa4d7cd"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/ranking.log",
+      "bytes": 1048,
+      "sha256": "4918616b2a6c1d22e5601b8149918c3555006cfee074855dbb0ba23c294dadea"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/preservation-before.json",
+      "bytes": 2509181,
+      "sha256": "2fef72f492587225055e50cc97a9480104e3e779fc5ff3d4d368b221ca9b2f6e"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/preservation-after.json",
+      "bytes": 2509181,
+      "sha256": "2fef72f492587225055e50cc97a9480104e3e779fc5ff3d4d368b221ca9b2f6e"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03/preservation.json",
+      "bytes": 175,
+      "sha256": "03a63d38356db0c3e9ef84b453b230551dcc79bb4093138cb4c2f65588b77ae0"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/export.json",
+      "bytes": 115198872,
+      "sha256": "6b432f165636db2059b3fdf8cc284f74677662563e428a96d5e5b589db433052"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/failure.json",
+      "bytes": 81,
+      "sha256": "57ddff6c123e50a3dd7f3c64834b73a8a0906749ca19269a215a0dce77651eb7"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison02/failure.json",
+      "bytes": 116,
+      "sha256": "74e4efcaff868bbf0dea7ead1df7b5854af3039914776a09e3b653e48254eac4"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison02/preservation.json",
+      "bytes": 175,
+      "sha256": "03a63d38356db0c3e9ef84b453b230551dcc79bb4093138cb4c2f65588b77ae0"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-validation02-completed-independent-audit.json",
+      "bytes": 25139,
+      "sha256": "60241bf3d8447bef03a4c6bb39484cb464a88ff96544e1285f6d815940b7a293"
+    },
+    {
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01-completed-failure-audit.json",
+      "bytes": 7927,
+      "sha256": "6b9076545c0f69c8277b725edb74602119c8e1a3c0f7c796128a312b5debda74"
+    }
+  ],
+  "pins": {
+    "unique_absolute_file_pins_recomputed": 615,
+    "selected_source_file_digests_recomputed": 18,
+    "mismatches": []
+  },
+  "source": {
+    "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+    "head": "eef1d6b4eb8337f8b0230ce53890401956f87334",
+    "tree": "c85591ca6099dbfa458019541504b3eaceba244a",
+    "dirty_postimages": 20,
+    "inventory_entries": 10789,
+    "before_after_exact": true,
+    "git_and_pin_receipt_preserved": true,
+    "loaded_project_modules_owned": 28,
+    "baseline_execution_identity_relabelled": false
+  },
+  "controls": {
+    "classifier": 56,
+    "schema_contract": 30,
+    "total_actual_passed": 86,
+    "schema_type": "linkml.generators.jsonschemagen.JsonSchema",
+    "properties": 98,
+    "schema_capture_bytes_exact": true,
+    "classifier_bytes_unchanged_from02": true
+  },
+  "reused_evidence": {
+    "new_builds_in_original_replay01": 20,
+    "saved_prepare_dataset_gates_in_original_export": 40,
+    "successor_new_builds": 0,
+    "successor_new_gates": 0,
+    "publication_calls": 0,
+    "records": 40,
+    "inputs": 5,
+    "builders": 2,
+    "graph_orders": 2,
+    "baseline_gates": {
+      "refused": 16,
+      "prepared": 4
+    },
+    "candidate_gates": {
+      "refused": 0,
+      "prepared": 20
+    },
+    "counts_per_record": {
+      "CHORUS": {
+        "baseline": 14,
+        "candidate": 0
+      },
+      "VOICE": {
+        "baseline": 13,
+        "candidate": 0
+      },
+      "CM4AI_reduced": {
+        "baseline": 8,
+        "candidate": 0
+      },
+      "VOICE_provenance": {
+        "baseline": 0,
+        "candidate": 0
+      },
+      "CM4AI_original": {
+        "baseline": 8,
+        "candidate": 0
+      }
+    }
+  },
+  "independent_reconstruction": {
+    "all_record_json_and_saved_yaml_hashes_match": true,
+    "all_result_metadata_joins_match": true,
+    "all_actual_preparation_errors_or_prepared_bytes_match": true,
+    "all20physical_source_snapshots_and_raw_root_assertions_match": true,
+    "all20typed_target_values_and_declined_units_reconstructed": true,
+    "all20prepared_sidecars_bind_exact_Dataset_schema_evidence": true,
+    "evidence_totals": {
+      "assertions": 340,
+      "present_assertions": 188,
+      "declined_units": 108,
+      "constructed_units": 100
+    },
+    "non_target_values_recursively_type_exact": true,
+    "prior16named_constructor_fields_unchanged": true,
+    "builder_and_graph_order_values_equal": true,
+    "ordered_non_target_errors_equal": true,
+    "aggregate_root_errors_reclassified_only_exact_complete_target_sets": 16,
+    "full_raw_validator_errors_retained": true
+  },
+  "ranking": {
+    "fresh_actual_variants": 4,
+    "old_new_scores_and_order_type_exact": true,
+    "all_variants_equal": true,
+    "historical_tuple_count": 81,
+    "order": [
+      "VOICE",
+      "CM4AI_reduced",
+      "CM4AI_original",
+      "CHORUS",
+      "VOICE_provenance"
+    ],
+    "score_rows": [
+      {
+        "input": "VOICE",
+        "score": {
+          "d4d_coverage": 34,
+          "unique_fields": 9,
+          "metadata_richness": 0.25,
+          "technical_completeness": 0.25,
+          "total_score": 0.3223129992737836
+        },
+        "rank": 1
+      },
+      {
+        "input": "CM4AI_reduced",
+        "score": {
+          "d4d_coverage": 27,
+          "unique_fields": 0,
+          "metadata_richness": 0.5,
+          "technical_completeness": 0.25,
+          "total_score": 0.25833333333333336
+        },
+        "rank": 2
+      },
+      {
+        "input": "CM4AI_original",
+        "score": {
+          "d4d_coverage": 27,
+          "unique_fields": 0,
+          "metadata_richness": 0.5,
+          "technical_completeness": 0.25,
+          "total_score": 0.25833333333333336
+        },
+        "rank": 3
+      },
+      {
+        "input": "CHORUS",
+        "score": {
+          "d4d_coverage": 21,
+          "unique_fields": 1,
+          "metadata_richness": 0.25,
+          "technical_completeness": 0.5,
+          "total_score": 0.21798941798941796
+        },
+        "rank": 4
+      },
+      {
+        "input": "VOICE_provenance",
+        "score": {
+          "d4d_coverage": 3,
+          "unique_fields": 1,
+          "metadata_richness": 0.25,
+          "technical_completeness": 0.0,
+          "total_score": 0.1648148148148148
+        },
+        "rank": 5
+      }
+    ],
+    "no_retirement_or_declined_assertion_coverage_credit": true
+  },
+  "prior_failures": {
+    "replay01": "FAILED_AND_RETAINED: Ordered non-target errors changed",
+    "comparison02": "FAILED_AND_RETAINED: exactdict rejected natural JsonSchema",
+    "missing_prior_completion_files_checked_exact_paths": true,
+    "old_build_gate_identities_retained": true
+  },
+  "functional_validation": "Previously independently audited2194PASS on each3.13/3.9,31modules344new; all actual validation pins joined again. No tests rerun in this audit.",
+  "limits": [
+    "Candidate20savedrecords passed actual mandatory Dataset preparation gates in original export; comparison03 reused that evidence rather than creating20new passes.",
+    "Prepared evidence sidecars and ranking comparisons are not publication. No publisher was called.",
+    "Shape validation and conserved ranking do not establish scientific fidelity, empirical coverage gain, optional FAIRSCAPE-model validation or completion of parent2915/4594 obligations.",
+    "Whole-source preservation is supported by actual before/finally inventories including ignored files and symlinks, excluding.git; this audit compares those saved inventories and current admitted file pins, not a fresh whole-tree traversal.",
+    "No native/provider/private-control evidence is involved."
+  ],
+  "readers_released": true
+}

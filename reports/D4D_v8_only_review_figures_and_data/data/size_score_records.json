@@ -1,0 +1,1346 @@
+[
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 1,
+    "loss_percent": 9.090909090909092
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 1,
+    "loss_percent": 9.090909090909092
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 1,
+    "loss_percent": 9.090909090909092
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 3,
+    "loss_percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 1,
+    "loss_percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 1,
+    "loss_percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 2,
+    "loss_percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 4,
+    "loss_percent": 44.44444444444444
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 3,
+    "loss_percent": 27.272727272727273
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 2,
+    "loss_percent": 22.22222222222222
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 1,
+    "loss_percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 2,
+    "loss_percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 4,
+    "loss_percent": 44.44444444444444
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 4,
+    "loss_percent": 36.36363636363637
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 3,
+    "loss_percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 1,
+    "loss_percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 2,
+    "loss_percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 2,
+    "loss_percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 4,
+    "loss_percent": 44.44444444444444
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 3,
+    "loss_percent": 27.272727272727273
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 1,
+    "loss_percent": 11.11111111111111
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Human",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 1,
+    "loss_percent": 33.333333333333336
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 4,
+    "loss_percent": 36.36363636363637
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 1,
+    "loss_percent": 11.11111111111111
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Human",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 3,
+    "loss_percent": 27.272727272727273
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 2,
+    "loss_percent": 22.22222222222222
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Human",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 1,
+    "loss_percent": 33.333333333333336
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 1,
+    "loss_percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 2,
+    "loss_percent": 18.181818181818183
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 1,
+    "loss_percent": 11.11111111111111
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 2,
+    "loss_percent": 22.22222222222222
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Collection",
+    "applicable_points": 2,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Composition",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Data Governance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Distribution",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Ethics",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "FileCollection",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Human",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Maintenance",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Metadata",
+    "applicable_points": 9,
+    "lost_points": 2,
+    "loss_percent": 22.22222222222222
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Motivation",
+    "applicable_points": 5,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Preprocessing",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Uses",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Variables",
+    "applicable_points": 1,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Unmapped items",
+    "applicable_points": 11,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  }
+]

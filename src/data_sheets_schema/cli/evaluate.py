@@ -709,8 +709,14 @@ def audit_recall_cmd(audits, originals, ground_truth, arm, replicates, output, a
               help="Required for plan version 2; must agree with the selected root class and roster.")
 @click.option("--vocabulary", "vocabulary_path", type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="Version 2 only: explicit vocabulary snapshot overriding the selected profile's pin.")
+@click.option("--relationship-policy", type=click.Choice(["strict", "inline-class-strings"]),
+              default="strict", show_default=True,
+              help="Version 2 opt-in: retain invalid inline strings as relationship claims, without schema repair.")
+@click.option("--context-policy", type=click.Choice(["nearest-owner", "ancestor-qualifiers"]),
+              default="nearest-owner", show_default=True,
+              help="Version 2 opt-in: retain origin-scoped ancestor scalar fields and qualifiers as untrusted context.")
 def support_plan_cmd(roster, output, profile, model, class_name, schema_path, max_tokens, prices,
-                     plan_version, artifact_kind, vocabulary_path):
+                     plan_version, artifact_kind, vocabulary_path, relationship_policy, context_policy):
     """Freeze an OFFLINE typed-support/fitness plan; makes no model calls.
 
     Version 1 preserves the current top-level instrument; version 2 opts into
@@ -718,11 +724,16 @@ def support_plan_cmd(roster, output, profile, model, class_name, schema_path, ma
     transport registration and paid authorization remain separate blockers.
     """
     from data_sheets_schema.support_plan import build_plan
+    from data_sheets_schema import support_targets
     try:
         manifest = build_plan(roster, output, profile=profile, model=model,
                               class_name=class_name, schema_path=schema_path,
                               max_tokens=max_tokens, prices=prices, plan_version=int(plan_version),
-                              artifact_kind=artifact_kind, vocabulary_path=vocabulary_path)
+                              artifact_kind=artifact_kind, vocabulary_path=vocabulary_path,
+                              relationship_policy=(support_targets.POLICY if relationship_policy == "strict"
+                                                   else support_targets.SCALAR_POLICY),
+                              context_policy=(support_targets.CONTEXT_POLICY if context_policy == "nearest-owner"
+                                              else support_targets.ANCESTOR_CONTEXT_POLICY))
     except (OSError, ValueError, KeyError) as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"Saved {manifest['counts']['records']} records / "
@@ -753,5 +764,14 @@ evaluate.add_command(support_results)
 from data_sheets_schema.cli.support_execution import support_execution
 evaluate.add_command(support_execution)
 
+from data_sheets_schema.cli.support_calibration import support_calibration
+evaluate.add_command(support_calibration)
+
 from data_sheets_schema.cli.fitness_results import fitness_results
 evaluate.add_command(fitness_results)
+
+from data_sheets_schema.cli.cross_family_panel import cross_family_panel
+evaluate.add_command(cross_family_panel)
+
+from data_sheets_schema.cli.cross_family_judges import cross_family_judges
+evaluate.add_command(cross_family_judges)

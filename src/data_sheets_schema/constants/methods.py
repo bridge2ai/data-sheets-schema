@@ -88,8 +88,8 @@ GENERATION_ARMS = {
         "input": "data/ro-crate_packages/{project}/processed/{project}_crate_d4d.yaml",
         "model_involved": False,
         "requires": "an upstream ro-crate-linkml.yaml (absent for VOICE)",
-        "measures": "fidelity of UPSTREAM's crate-to-D4D mapping, repaired only "
-                    "as far as schema validity requires",
+        "measures": "output of upstream's crate-to-D4D rendering after reported "
+                    "schema repairs; mapping fidelity is unmeasured",
     },
     "deterministic_ours": {
         "method": "rocrate_static_map",
@@ -97,8 +97,9 @@ GENERATION_ARMS = {
         "input": "data/ro-crate_packages/{project}/processed/{project}_crate_mapped_d4d.yaml",
         "model_involved": False,
         "requires": "ro-crate-metadata.json only, which every crate has",
-        "measures": "fidelity of OUR mapping table; every filled field carries "
-                    "its declared SKOS mapping type and information loss",
+        "measures": "output of this repository's mapping table with per-field "
+                    "source paths and declared relation/loss labels; mapping "
+                    "fidelity is unmeasured",
     },
     # Which datasets this arm may run on is the study profile's fact
     # (`profiles.BRIDGE2AI.arm_projects`, #628, #1444), not the arm's: one

@@ -15,14 +15,14 @@ We are also tracking related developments, such as augmented Datasheets for Data
 
 ## Bridge2AI Generating Center Datasheets
 
-Curated comprehensive datasheets for each Bridge2AI data generating project:
+ChatGPT-chat comparison arm datasheets for Bridge2AI data generating projects (note: these records were generated via a ChatGPT chat interface rather than hand-curated, document superseded data releases, and there is no CHORUS record; see CLAUDE.md and issue #177):
 
-* **[AI-READI](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/AI_READI_human_readable.html)** - Retinal imaging and diabetes dataset
-* **[CM4AI](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/CM4AI_human_readable.html)** - Cell maps for AI dataset
-* **[VOICE](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/VOICE_human_readable.html)** - Voice biomarker dataset
-* **[CHORUS](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/CHORUS_human_readable.html)** - Health data for underrepresented populations
+* **[AI-READI](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/AI_READI_human_readable.html)** - Retinal imaging and diabetes dataset (ChatGPT-chat arm, superseded v2.0.0 release)
+* **[CM4AI](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/CM4AI_human_readable.html)** - Cell maps for AI dataset (ChatGPT-chat arm, superseded B35XWX v1.4 release)
+* **[VOICE](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/VOICE_human_readable.html)** - Voice biomarker dataset (ChatGPT-chat arm, superseded v2.0 release)
+* **[CHORUS](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/CHORUS_human_readable.html)** - Health data for underrepresented populations (d4d-core rendering; no CHORUS ChatGPT-chat record exists)
 
-[View all D4D examples →](https://bridge2ai.github.io/data-sheets-schema/d4d_examples.html)
+[View all D4D examples →](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)
 
 ## D4D-Core Schema (Recommended Entry Point)
 
@@ -33,7 +33,7 @@ The **D4D-Core schema** is the curated, interop-focused subset of D4D — the re
 | Source schema | [`src/data_sheets_schema/schema/data_sheets_schema_core.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/data_sheets_schema_core.yaml) | Core schema entry point (imports `D4D_Core.yaml`) |
 | Module | [`src/data_sheets_schema/schema/D4D_Core.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/D4D_Core.yaml) | `CoreDataset`, `CoreDatasetCollection`, `CoreDistribution` definitions |
 | Merged form | [`src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml) | Single-file merged schema (auto-generated) |
-| HTML examples | [Bridge2AI generating-center datasheets](#bridge2ai-generating-center-datasheets) (above) | Curated d4d-core renderings |
+| HTML examples | [Bridge2AI generating-center datasheets](#bridge2ai-generating-center-datasheets) (above) | ChatGPT-chat arm HTML renderings (AI_READI, CM4AI, VOICE) and d4d-core rendering (CHORUS) |
 | Validate / build | `make validate-core`, `make gen-core-schema`, `make lint-core` | Core-schema-only Make targets |
 
 **Scope:** ~95 fields across `CoreDataset`, `CoreDatasetCollection`, `CoreDistribution` and supporting classes (`Person`, `Organization`, `Creator`, `Grant`, `FundingMechanism`). The full schema (`data_sheets_schema.yaml`, ~284 attributes) remains the extended reservoir.
@@ -58,6 +58,25 @@ make gen-sssom-comprehensive gen-sssom-uri-comprehensive  # regenerate the compr
 make check-sssom-comprehensive                           # drift check (writes nothing)
 poetry run pytest tests/test_semantic_exchange tests/test_fairscape_integration -v
 ```
+
+## Local test iteration
+
+`make test-python` runs the full `tests` directory. For a focused change,
+give explicit files or nodes in `PYTEST_PATHS`; use `PYTEST_ARGS` for flags:
+
+```bash
+make test-python PYTEST_PATHS=tests/test_ci_sharding.py
+make test-python PYTEST_PATHS='tests/test_ci_sharding.py::test_one_long_case_starts_before_a_file_with_many_short_cases' PYTEST_ARGS='-q -x'
+make test-python PYTEST_PATHS='tests/test_resources.py tests/test_profiles.py'
+```
+
+An explicit selection replaces `tests`; an empty selection is rejected.
+Putting a path in `PYTEST_ARGS`, or using `-k`/`-m` with the default paths,
+still collects the full directory. Focused runs shorten feedback during edits;
+they do not replace full CI, corpus checks or the separate offline suites.
+Keep concurrent test workers within one shared budget, including workers
+started by tests themselves. `make test` also generates schema products and
+validates examples; use it when those checks are required.
 
 ## Repository Structure
 

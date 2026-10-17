@@ -1,0 +1,7 @@
+Assistant publication: preserve ignored evidence and valid input directory names
+
+Adversarial review of fix/2088-assistant-shared-generation found that ordinary `git add` can omit complete attempt evidence because repository ignore rules also apply beneath the new publication directory. Valid dataset names such as `target` or `build` can match recursive ignore rules; hidden or otherwise ignored runner evidence can be missed even when YAML files are staged.
+
+Acceptance: stage the narrowly named, validated attempt directory including ignored evidence, refuse unrelated/nonregular content, and add a publication-shell regression proving the full intended directory is committed while existing outputs are preserved. Do not use broad force-add commands over the repository.
+
+Parent: #2088. Complete evidence is required for review of the generated PR, not only for temporary Actions artifacts.

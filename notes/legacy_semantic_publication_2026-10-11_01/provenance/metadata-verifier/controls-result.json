@@ -1,0 +1,96 @@
+{
+  "cases": [
+    {
+      "expected_refusal": null,
+      "name": "complete",
+      "passed": true
+    },
+    {
+      "expected_refusal": null,
+      "name": "relocated_without_acquisition",
+      "passed": true
+    },
+    {
+      "expected_refusal": "missing repository artifact",
+      "name": "missing_artifact",
+      "passed": true
+    },
+    {
+      "expected_refusal": "artifact hash mismatch",
+      "name": "changed_dataset_bytes",
+      "passed": true
+    },
+    {
+      "expected_refusal": "sidecar Dataset binding mismatch",
+      "name": "changed_sidecar_dataset_digest",
+      "passed": true
+    },
+    {
+      "expected_refusal": "missing full raw source text",
+      "name": "missing_full_raw_source",
+      "passed": true
+    },
+    {
+      "expected_refusal": "source parsed-value digest mismatch",
+      "name": "false_to_zero_source",
+      "passed": true
+    },
+    {
+      "expected_refusal": "escaping repository locator",
+      "name": "repository_path_escape",
+      "passed": true
+    },
+    {
+      "expected_refusal": "required artifact omitted",
+      "name": "omitted_required_artifact",
+      "passed": true
+    },
+    {
+      "expected_refusal": "required historical locator mismatch",
+      "name": "changed_historical_locator",
+      "passed": true
+    },
+    {
+      "expected_refusal": "required acquisition alias mismatch",
+      "name": "changed_acquisition_alias",
+      "passed": true
+    },
+    {
+      "expected_refusal": "publication producer binding",
+      "name": "changed_producer",
+      "passed": true
+    },
+    {
+      "expected_refusal": "publication label/method/policy binding",
+      "name": "changed_label",
+      "passed": true
+    },
+    {
+      "expected_refusal": "source snapshot raw bytes mismatch",
+      "name": "changed_source_order",
+      "passed": true
+    }
+  ],
+  "changed": [],
+  "error": null,
+  "passed": true,
+  "preserved": true,
+  "scope": "Synthetic metadata corruption and relocation only; no project/schema/application acceptance.",
+  "watched_pins": [
+    {
+      "bytes": 9521,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-repository-package01/verify.py",
+      "sha256": "83272f51d91f0e3e36788e288a035a9eac67346b764cc83f4fbfd385c2a8f018"
+    },
+    {
+      "bytes": 13542,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-repository-package01/controls.py",
+      "sha256": "aafe98d80bbb03692bd622b1a32b4ead8d56f4326a09f1a0d2e050ca9a9ca59f"
+    },
+    {
+      "bytes": 71166,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-repository-package01/configuration.disabled.json",
+      "sha256": "6213ac61c050200ed4291a309b745ecf06746bedcb4f58640767378f6938b4c2"
+    }
+  ]
+}

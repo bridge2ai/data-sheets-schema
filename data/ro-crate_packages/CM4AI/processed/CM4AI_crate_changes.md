@@ -6,10 +6,8 @@ apart from the date beside a validation verdict.
 
 ## Inputs
 
-- `linkml`: `data/ro-crate_packages/CM4AI/crate/ro-crate-linkml.yaml`
-- `metadata`: `data/ro-crate_packages/CM4AI/crate/ro-crate-metadata.json`
-- `datasheet`: `data/ro-crate_packages/CM4AI/crate/ro-crate-datasheet.html`
-- `score`: `data/ro-crate_packages/CM4AI/crate/ai_ready_score.json`
+- `linkml`: `data/ro-crate_packages/CM4AI/raw/ro-crate-linkml.yaml`
+- `metadata`: `data/ro-crate_packages/CM4AI/raw/ro-crate-metadata.json`
 
 ## Outputs
 
@@ -18,7 +16,7 @@ apart from the date beside a validation verdict.
 
 ## Validation
 
-- `CM4AI_crate_d4d.yaml`: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-09-29 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
+- `CM4AI_crate_d4d.yaml`: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-10-07 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
 
 ## Changes (26)
 

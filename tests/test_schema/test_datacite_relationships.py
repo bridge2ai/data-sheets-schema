@@ -18,6 +18,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from linkml_runtime import SchemaView
 
@@ -221,15 +222,30 @@ class TestTheDigestShowsNestedVocabularies(unittest.TestCase):
         """Belt and braces: if a future enum outgrows the cap, the digest must
         say so rather than present a short list as complete."""
         from data_sheets_schema import schema_digest as sd
-        original = sd.MAX_ENUM_VALUES
-        try:
-            sd.MAX_ENUM_VALUES = 5
-            sd._BUILD_CACHE.clear()
-            text = sd.digest_text("Dataset")
-            self.assertIn("more)", text)
-        finally:
-            sd.MAX_ENUM_VALUES = original
-            sd._BUILD_CACHE.clear()
+        # The cap is a module constant, not a runtime cache-key input. Keep
+        # this synthetic configuration out of later schema-sync checks (#5027).
+        with patch.object(sd, "_BUILD_CACHE", {}), patch.object(sd, "_TEXT_CACHE", {}):
+            normal_text = sd.digest_text("Dataset")  # Deliberately prewarm.
+            normal = next(n for n in sd.build("Dataset").nested
+                          if n.name == "DatasetRelationship")
+            values = normal.enums["relationship_type"]
+            self.assertGreater(len(values), 5)
+            with patch.object(sd, "MAX_ENUM_VALUES", 5), \
+                    patch.object(sd, "_BUILD_CACHE", {}), \
+                    patch.object(sd, "_TEXT_CACHE", {}):
+                text = sd.digest_text("Dataset")
+                clipped = next(n for n in sd.build("Dataset").nested
+                               if n.name == "DatasetRelationship")
+                self.assertEqual(clipped.enums["relationship_type"], values[:5])
+                omitted = len(values) - 5
+                self.assertEqual(clipped.enums_truncated["relationship_type"], omitted)
+                shown = ", ".join(f"`{value}`" for value in values[:5])
+                self.assertIn(
+                    f"`relationship_type` accepts only: {shown} (+{omitted} more)",
+                    text,
+                )
+                self.assertNotEqual(text, normal_text)
+            self.assertEqual(sd.digest_text("Dataset"), normal_text)
 
 
 if __name__ == "__main__":

@@ -739,7 +739,7 @@ def emit_deterministic_arm(
     header = (
         f"# D4D Datasheet for {project} Dataset\n"
         f"# Generation Method: {method} (no model)\n"
-        "# Arm: deterministic — measures mapping fidelity, not extraction\n"
+        "# Arm: deterministic — mapping output; fidelity not measured\n"
         f"# Source crate: {packages_dir / project}\n"
         f"# Normalized from: {source}\n"
         f"# Crate manifest: {packages_dir / 'crate_manifest.yaml'}\n"

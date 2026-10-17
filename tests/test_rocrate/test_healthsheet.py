@@ -1,11 +1,17 @@
 """Tests for the healthsheet-only generation input."""
 
+import hashlib
 import json
+import os
+import re
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from data_sheets_schema.healthsheet import build_bundle, load_healthsheet, render
+
+ROOT = Path(__file__).resolve().parents[2]
 
 _SAVED_PROFILE = None
 
@@ -95,6 +101,160 @@ class TestRender(unittest.TestCase):
         bad.write_text(json.dumps({"metadata": {}}))
         with self.assertRaises(KeyError):
             load_healthsheet(bad)
+
+
+#: A record that is no profile's and names no platform anywhere, so a
+#: platform in its bundle could only come from the renderer (#4009).
+FOREIGN = {
+    "title": "Independent Clinic Cohort",
+    "doi": "10.1234/clinic",
+    "metadata": {"healthsheet": {"cohort": [{"id": 1, "question": "Who took part?", "response": "Adults."}]}},
+}
+
+
+class TestOrigin(unittest.TestCase):
+    """The `Origin:` line says where a record came from, which only its
+    profile knows: the study's text for the study's own record under
+    `bridge2ai`, and no line for any other record or under `neutral` (#4009)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.out = Path(self.tmp.name)
+        self.foreign = self.out / "clinic_record.json"
+        self.foreign.write_text(json.dumps(FOREIGN), encoding="utf-8")
+        self._cwd = os.getcwd()
+        os.chdir(ROOT)                     # `Source:` is shown relative to the checkout in use
+        self._env = mock.patch.dict(os.environ, {"D4D_PROFILE": "bridge2ai"})
+        self._env.start()
+
+    def tearDown(self):
+        self._env.stop()
+        os.chdir(self._cwd)
+        self.tmp.cleanup()
+
+    def _study(self):
+        from data_sheets_schema.profiles import BRIDGE2AI
+        record = ROOT / BRIDGE2AI.healthsheet_record
+        tracked = ROOT / "data/preprocessed/concatenated" / BRIDGE2AI.healthsheet_bundle
+        if not (record.exists() and tracked.exists()):
+            self.skipTest("the study's healthsheet record or bundle is not in this checkout")
+        return record, tracked
+
+    @staticmethod
+    def _origin_lines(text):
+        return [line for line in text.splitlines() if line.startswith("Origin:")]
+
+    def test_the_study_bundle_keeps_its_bytes(self):
+        """The profile now states the line; the tracked bundle, which its
+        chunk manifest and the arm's records pin, does not move a byte."""
+        from data_sheets_schema.profiles import BRIDGE2AI
+        record, tracked = self._study()
+        target, _ = build_bundle(record, self.out)
+        self.assertEqual(target.name, BRIDGE2AI.healthsheet_bundle)
+        self.assertEqual(hashlib.sha256(target.read_bytes()).hexdigest(),
+                         hashlib.sha256(tracked.read_bytes()).hexdigest())
+        self.assertEqual(self._origin_lines(target.read_text(encoding="utf-8")),
+                         [f"Origin: {BRIDGE2AI.healthsheet_origin}"])
+
+    def test_the_origin_follows_the_record_not_the_project(self):
+        """The study's record filed under another project is still that record."""
+        from data_sheets_schema.profiles import BRIDGE2AI
+        record, _ = self._study()
+        target, _ = build_bundle(record, self.out, project="CLINIC")
+        self.assertEqual(target.name, "CLINIC_healthsheet_only.txt")
+        self.assertEqual(self._origin_lines(target.read_text(encoding="utf-8")),
+                         [f"Origin: {BRIDGE2AI.healthsheet_origin}"])
+
+    def test_another_record_states_no_origin(self):
+        """Under `bridge2ai`, a record passed with --project, with --name, or
+        claiming the study's project gets no `Origin:` line, least of all
+        the study's."""
+        for kw in ({"project": "CLINIC"}, {"project": "CLINIC", "name": "clinic.txt"},
+                   {"project": "AI_READI", "name": "other.txt"}):
+            with self.subTest(**kw):
+                target, _ = build_bundle(self.foreign, self.out, **kw)
+                text = target.read_text(encoding="utf-8")
+                self.assertIn(f"Project: {kw['project']}", text)
+                self.assertEqual(self._origin_lines(text), [])
+                self.assertNotIn("fairhub", text.lower())
+
+    def test_neutral_states_no_origin_for_any_record(self):
+        """`neutral` states no origin, so no record gets one: the study's
+        capture included, which is no profile's record there."""
+        from data_sheets_schema.profiles import NEUTRAL
+        self.assertIsNone(NEUTRAL.healthsheet_origin)
+        os.environ["D4D_PROFILE"] = "neutral"
+        target, _ = build_bundle(self.foreign, self.out, project="CLINIC")
+        text = target.read_text(encoding="utf-8")
+        self.assertEqual(self._origin_lines(text), [])
+        self.assertNotIn("fairhub", text.lower())
+        record, _ = self._study()
+        target, _ = build_bundle(record, self.out, project="AI_READI", name="study_under_neutral.txt")
+        self.assertEqual(self._origin_lines(target.read_text(encoding="utf-8")), [])
+
+    def test_render_writes_the_origin_it_is_given_after_the_source(self):
+        """Only a given origin is written, directly after `Source:`, where
+        the tracked bundle has it."""
+        healthsheet = FOREIGN["metadata"]["healthsheet"]
+        text, _ = render(healthsheet, FOREIGN, self.foreign, project="CLINIC")
+        self.assertEqual(self._origin_lines(text), [])
+        text, _ = render(healthsheet, FOREIGN, self.foreign, project="CLINIC", origin="Clinic portal export")
+        lines = text.splitlines()
+        source = next(i for i, line in enumerate(lines) if line.startswith("Source: "))
+        self.assertEqual(lines[source + 1:source + 3], ["Origin: Clinic portal export", ""])
+
+
+class TestDefaultName(unittest.TestCase):
+    """Every place that states the default file name states the one the
+    code writes: a record that is not the profile's is named after the
+    project it is filed under, not after the record's file (#1493), and a
+    default that is a profile's bundle name is refused with that profile
+    named (#1565). Both #4420."""
+
+    @staticmethod
+    def _stated_names(text, project):
+        """Each `…_healthsheet_only.txt` a text names, with its project
+        placeholder filled in."""
+        return {re.sub(r"\{project\}", project, found, flags=re.IGNORECASE)
+                for found in re.findall(r"[^\s`(]*_healthsheet_only\.txt", text or "")}
+
+    def test_the_stated_default_name_is_the_name_written(self):
+        import click.testing
+        from data_sheets_schema.cli.healthsheet import healthsheet as cli
+        command = cli.commands["bundle"]
+        stated = {"the --name help": next(p.help for p in command.params if p.name == "name"),
+                  "the command's help": command.help,
+                  "build_bundle's docstring": build_bundle.__doc__}
+        for profile in ("bridge2ai", "neutral"):
+            with self.subTest(profile=profile), tempfile.TemporaryDirectory() as d, \
+                    mock.patch.dict(os.environ, {"D4D_PROFILE": profile}):
+                record = Path(d) / "clinic_record.json"
+                record.write_text(json.dumps(FOREIGN), encoding="utf-8")
+                out = Path(d) / "out"
+                r = click.testing.CliRunner().invoke(
+                    cli, ["bundle", "--record", str(record), "--project", "CLINIC", "--output-dir", str(out)])
+                self.assertEqual(r.exit_code, 0, r.output)
+                written = sorted(p.name for p in out.iterdir())
+                self.assertEqual(written, ["CLINIC_healthsheet_only.txt"])
+                for where, text in stated.items():
+                    self.assertEqual(self._stated_names(text, "CLINIC"), set(written), where)
+
+    def test_a_reserved_default_is_refused_naming_the_profile_it_belongs_to(self):
+        """The name is reserved under every active profile, so the refusal
+        names its owner, not the active profile, which under `neutral` has
+        no bundle name at all."""
+        from data_sheets_schema.profiles import BRIDGE2AI
+        for profile in ("bridge2ai", "neutral"):
+            with self.subTest(profile=profile), tempfile.TemporaryDirectory() as d, \
+                    mock.patch.dict(os.environ, {"D4D_PROFILE": profile}):
+                record = Path(d) / "clinic_record.json"
+                record.write_text(json.dumps(FOREIGN), encoding="utf-8")
+                out = Path(d) / "out"
+                with self.assertRaises(ValueError) as caught:
+                    build_bundle(record, out, project=BRIDGE2AI.healthsheet_project)
+                self.assertIn(f"{BRIDGE2AI.healthsheet_bundle} is the {BRIDGE2AI.name} profile's bundle name; "
+                              "pass --name", str(caught.exception))
+                self.assertFalse((out / BRIDGE2AI.healthsheet_bundle).exists())
 
 
 class TestArmRegistration(unittest.TestCase):

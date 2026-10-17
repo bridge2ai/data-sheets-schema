@@ -152,7 +152,7 @@ def test_every_break_joins_means_every_break_not_only_letter_letter_ones(m):
     assert bare["moved_if_every_break_joins"] == {"version_string": "status"}
     # Digit/digit and punctuation breaks count; a blank line and a hyphenated
     # break (read already) do not.
-    assert m.joinable_breaks(["10.", "1234/x", "", "y", "con-", "sent", "z"]) == [1, 4, 6]
+    assert m.measure("10.\n1234/x\n\ny\ncon-\nsent\nz")["joinable_breaks"] == 3
 
 
 def test_a_letter_outside_ascii_is_a_letter(m):
@@ -191,15 +191,12 @@ def test_a_match_that_only_touches_the_break_does_not_cross_it(m):
     `ethics_review` on the CHORUS document versions and five checks on the
     CM4AI, AI_READI, VOICE and VOICE_PEDIATRIC ones."""
     for text in ("We obtained consent\nfrom all.", "We obtained nothing\nconsent later."):
-        lines = text.split("\n")
-        assert m.crossing_checks(lines, 1) == set(), text
         assert m.measure(text)["moved_if_every_break_joins"] == {}, text
     # A crossing on a check both lines already match adds no line.
-    assert m.crossing_checks(["consent was con", "sent twice, consent"], 1) == {"consent_text"}
     assert m.measure("consent was con\nsent twice, consent")["moved_if_every_break_joins"] == {}
     # One character past the break on each side is a crossing.
-    assert m.crossing_checks(["We obtained consen", "t from all."], 1) == {"consent_text"}
-    assert m.crossing_checks(["We obtained c", "onsent from all."], 1) == {"consent_text"}
+    for text in ("We obtained consen\nt from all.", "We obtained c\nonsent from all."):
+        assert m.measure(text)["moved_if_every_break_joins"] == {"consent_text": "status"}
 
 
 def test_every_break_joins_is_searched_one_break_at_a_time(m):
@@ -243,12 +240,52 @@ def test_joins_per_window_searches_up_to_k_breaks_at_once(m):
                                   "This documentation is for v\n2 of the data.", "We obtained consent\nfrom all.",
                                   "consent was con\nsent twice, consent", "We obtained c\nonsent from all."])
 def test_one_join_per_window_is_the_every_break_column(m, text):
-    """K=1 is the every-break column read by the module's search
-    (`attainability.join_matching_lines`) rather than the script's own, so
-    the two must agree; K=2 reads every single join too."""
+    """The optional K=1 column and the default one-break column keep the
+    same scope; K=2 reads every single join too on these two-line controls."""
     got = m.measure(text, joins_per_window=1)
     assert got["moved_if_up_to_k_breaks_join"] == got["moved_if_every_break_joins"], text
     assert m.measure(text, joins_per_window=2)["moved_if_up_to_k_breaks_join"] == got["moved_if_every_break_joins"]
+
+
+def test_selected_split_pairs_preserve_original_hit_lines_and_exclude_neighbors(m, monkeypatch):
+    """A late pair does not become new lines 1/2 or acquire nearby context."""
+    lines = {39: ("chunk-a", "a data"), 40: ("chunk-a", "protection im"),
+             41: ("chunk-b", "pact assessment was done"),
+             73: ("chunk-c", "Participants gave con"), 74: ("chunk-c", "sent to take part.")}
+    hits = {check.name: set() for check in at.CHECKS}
+    original, calls = at.join_matching_lines, []
+
+    def observed(pattern, selected, joins=1, *, context_lines=None):
+        calls.append((tuple(selected), joins, context_lines))
+        return original(pattern, selected, joins, context_lines=context_lines)
+
+    monkeypatch.setattr(at, "join_matching_lines", observed)
+    assert m.moved_checks(lines, [40], hits) == {}  # The earlier 'data' is outside this pair.
+    assert calls and set(calls) == {((40, 41), 1, None)}
+    calls.clear()
+    assert m.moved_checks(lines, [73], hits) == {"consent_text": "status"}
+    assert calls and set(calls) == {((73, 74), 1, None)}
+    hits["consent_text"] = {73, 74}
+    assert m.moved_checks(lines, [73], hits) == {}  # Both actual lines already match.
+    hits["consent_text"] = {74}
+    assert m.moved_checks(lines, [73], hits) == {"consent_text": "lines"}
+
+
+def test_dictionary_selected_pairs_do_not_expand_to_all_joinable_breaks(m):
+    text = "An unrelated opening.\nParticipants gave con\nsent to take part.\nWe kept over\nsight nearby."
+    value = m.measure(text, {"consent", "over", "sight", "oversight"})
+    assert value["split_words"] == [{"line": 2, "tail": "con", "head": "sent", "word": "consent"}]
+    assert value["wraps_that_join"] == 1
+    assert value["moved"] == {"consent_text": "status"}
+    assert value["moved_if_every_break_joins"] == {"consent_text": "status", "ethics_review": "status"}
+
+
+def test_adjacent_selected_splits_remain_separate_pairs(m):
+    lines = {20: ("chunk", "Participants gave con"), 21: ("chunk", "sen"),
+             22: ("chunk", "t to take part.")}
+    hits = {check.name: set() for check in at.CHECKS}
+    assert m.moved_checks(lines, [20, 21], hits) == {}
+    assert m.joined_moves(lines, 2, hits) == {"consent_text": "status"}
 
 
 def test_joins_per_window_adds_a_column_and_refuses_zero(m, tmp_path, capsys):

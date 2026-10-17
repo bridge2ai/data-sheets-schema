@@ -43,8 +43,11 @@ def notes_listing(root):
     """Every file, directory and link under *root*, relative to it."""
     found = set()
     for directory, dirnames, filenames in os.walk(root):
+        relative = os.path.relpath(directory, root)
+        if relative in (os.curdir, os.fsencode(os.curdir)):
+            relative = relative[:0]
         for name in dirnames + filenames:
-            found.add(os.path.relpath(os.path.join(directory, name), root))
+            found.add(os.path.join(relative, name))
     return frozenset(found)
 
 

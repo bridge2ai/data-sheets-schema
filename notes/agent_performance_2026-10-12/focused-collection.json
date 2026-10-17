@@ -1,0 +1,51 @@
+{
+  "runs": [
+    {
+      "scope": "direct-full",
+      "exit": 0,
+      "seconds": 25.967009374988265,
+      "occurrences": 18877,
+      "distinct_node_ids": 18876
+    },
+    {
+      "scope": "make-full",
+      "exit": 0,
+      "seconds": 7.253582875011489,
+      "occurrences": 18877,
+      "distinct_node_ids": 18876
+    },
+    {
+      "scope": "make-explicit",
+      "exit": 0,
+      "seconds": 1.0008789999992587,
+      "occurrences": 24,
+      "distinct_node_ids": 24
+    }
+  ],
+  "default_make_equals_direct_full_counter": true,
+  "explicit_make_equals_full_subset_counter": true,
+  "unchanged_file_counters_equal_prior_collection": true,
+  "intentional_comparison_exclusions": [
+    "tests/test_notes_write_guard.py::",
+    "tests/test_focused_test_command.py::",
+    "tests/test_term_validator_hook.py::"
+  ],
+  "runner": "locked Python3.12 via explicit RUN override; normal Poetry command construction separately tested",
+  "tests_executed": 0,
+  "exact_cross_worktree_join": {
+    "prior_occurrences": 18858,
+    "current_occurrences": 18877,
+    "prior_new_guard_occurrences": 10,
+    "current_new_make_hook_occurrences": 29,
+    "all_other_occurrences_equal": true,
+    "removed_guard_prefixes": [
+      "tests/test_notes_write_guard.py::test_listing_matches_original_for_all_entries",
+      "tests/test_notes_write_guard.py::test_listing_empty_or_non_directory_roots_matches_original",
+      "tests/test_notes_write_guard.py::test_listing_includes_links_without_following_directory_links"
+    ],
+    "added_module_prefixes": [
+      "tests/test_focused_test_command.py::",
+      "tests/test_term_validator_hook.py::"
+    ]
+  }
+}

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Generate comprehensive D4D to RO-Crate interface mapping file.
+Historical D4D to RO-Crate interface mapping template (execution retired).
+
+The executable table is now maintained with its versioned decision ledger.
+Calling this old generator fails before writing any output (#2915, #4043).
 
 Creates SSSOM-inspired mapping with 124+ field mappings across 19 categories:
 1. Basic Metadata (14 fields)
@@ -27,7 +30,6 @@ Output format inspired by SSSOM (Simple Standard for Sharing Ontological Mapping
 with additional columns for information loss assessment and transformation details.
 """
 
-import csv
 from pathlib import Path
 from typing import List, Tuple
 
@@ -260,45 +262,14 @@ MAPPINGS: List[Tuple[str, ...]] = [
 
 
 def generate_interface_mapping(output_path: Path):
-    """Generate comprehensive interface mapping TSV file."""
-
-    with open(output_path, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.writer(f, delimiter='\t')
-        writer.writerow(HEADERS)
-
-        for row in MAPPINGS:
-            writer.writerow(row)
-
-    print(f"✓ Interface mapping created: {output_path}")
-    print(f"  Total mappings: {len(MAPPINGS)}")
-
-    # Calculate statistics
-    categories = {}
-    mapping_types = {}
-    loss_levels = {}
-
-    for row in MAPPINGS:
-        category = row[0]
-        mapping_type = row[5]
-        loss = row[6]
-
-        categories[category] = categories.get(category, 0) + 1
-        mapping_types[mapping_type] = mapping_types.get(mapping_type, 0) + 1
-        loss_levels[loss] = loss_levels.get(loss, 0) + 1
-
-    print("\n  Categories:")
-    for cat, count in sorted(categories.items()):
-        print(f"    {cat}: {count} fields")
-
-    print("\n  Mapping types:")
-    for mtype, count in sorted(mapping_types.items()):
-        pct = (count / len(MAPPINGS)) * 100
-        print(f"    {mtype}: {count} ({pct:.1f}%)")
-
-    print("\n  Information loss:")
-    for loss, count in sorted(loss_levels.items()):
-        pct = (count / len(MAPPINGS)) * 100
-        print(f"    {loss}: {count} ({pct:.1f}%)")
+    """Refuse the historical template: it predates reviewed rule decisions."""
+    raise RuntimeError(
+        "The historical interface-mapping generator is retired (#2915, #4043). "
+        "Its embedded rows would erase reviewed routes and execution decisions. "
+        "Edit data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv and "
+        "d4d_rocrate_interface_rules_v1.json together; preserve every Rule_ID "
+        "and the original 136-row ledger. No output was written."
+    )
 
 
 if __name__ == '__main__':

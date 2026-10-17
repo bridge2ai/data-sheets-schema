@@ -1,0 +1,9 @@
+Assistant shared-generation adapter: prevent embedded source headers crossing input-member boundaries
+
+Adversarial review of fix/2088-assistant-shared-generation found a source-attribution failure before merge.
+
+The original assistant ingestion bundle marks members with `# Source N:`. The canonical runner chunker recognizes `FILE:` followed by `PATH:` or `ROLE:`. If input member A is a preprocessed bundle containing these headers and member B is a separate plain-text/JSON document, B inherits A's last embedded source label until another recognized header appears. Complete byte coverage alone does not prevent incorrect document attribution.
+
+Acceptance: add an assistant-only, versioned framing policy that resets canonical chunk boundaries at every actual member; retain original content bytes and rebased ingestion ranges; map each chunk to its actual committed input member; test embedded FILE/PATH sections followed by another member. Do not modify historical bundles or the global chunking rule.
+
+Parent: #2088. This is an engineering/source-identity defect, not a new scientific source-priority decision.

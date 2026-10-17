@@ -2,10 +2,11 @@
 """
 Ontology Term Validation Hook
 
-PostToolUse hook that validates ontology term references in D4D schema files.
-Runs linkml-term-validator and reports errors as warnings (does not block).
+PostToolUse hook for ontology term validation of the generated D4D schema.
+Source edits report pending regeneration and validation. Generated-file edits
+run linkml-term-validator and report errors as warnings (does not block).
 
-Triggers on files matching: D4D_*.yaml (schema files)
+Only the project's schema directory is eligible; no schemas are regenerated.
 """
 
 import json
@@ -26,29 +27,51 @@ def get_tool_info():
         return None
 
 
-def is_d4d_schema_file(file_path: str) -> bool:
-    """Check if the file is a D4D schema module file."""
+SCHEMA_DIRECTORY = Path("src/data_sheets_schema/schema")
+GENERATED_SCHEMA = "data_sheets_schema_all.yaml"
+PENDING_MESSAGE = (
+    "Schema source changed: ontology term validation is pending regeneration. "
+    "Run `make regen-all`, then `poetry run linkml-term-validator validate-schema "
+    "src/data_sheets_schema/schema/data_sheets_schema_all.yaml`. "
+    "This hook has not validated the edited source."
+)
+
+
+def schema_file_kind(file_path: str):
+    """Classify the actual target within this project's schema directory."""
+    project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", ".")).resolve()
     path = Path(file_path)
-    # Match D4D_*.yaml files in the schema directory
+    path = (path if path.is_absolute() else project_dir / path).resolve()
+    if path.parent != project_dir / SCHEMA_DIRECTORY:
+        return None
+    if path.name == GENERATED_SCHEMA:
+        return "generated"
     if path.name.startswith("D4D_") and path.suffix == ".yaml":
-        return True
-    # Also match the main schema file
+        return "source"
     if path.name == "data_sheets_schema.yaml":
-        return True
-    return False
+        return "source"
+    return None
+
+
+def is_d4d_schema_file(file_path: str) -> bool:
+    """Check if the file is a source module in the project's schema directory."""
+    return schema_file_kind(file_path) == "source"
 
 
 def validate_ontology_terms(file_path: str) -> tuple[bool, str]:
     """
-    Validate ontology terms in a schema file.
+    Validate only an explicitly selected generated schema file.
 
     Returns:
         Tuple of (success, output_message)
     """
-    project_dir = os.environ.get("CLAUDE_PROJECT_DIR", ".")
-
-    # For schema files, validate the full schema to check all term references
-    schema_path = Path(project_dir) / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    project_dir = Path(os.environ.get("CLAUDE_PROJECT_DIR", ".")).resolve()
+    kind = schema_file_kind(file_path)
+    if kind == "source":
+        return True, PENDING_MESSAGE
+    if kind != "generated":
+        return True, "Not the project's generated schema (skipping term validation)"
+    schema_path = project_dir / SCHEMA_DIRECTORY / GENERATED_SCHEMA
 
     if not schema_path.exists():
         return True, f"Full schema file not found: {schema_path} (skipping term validation)"
@@ -81,7 +104,8 @@ def validate_ontology_terms(file_path: str) -> tuple[bool, str]:
         filtered_output = "\n".join(filtered_lines)
 
         if result.returncode == 0:
-            return True, f"Ontology term validation passed for schema"
+            return True, (f"Ontology term validation passed for generated schema: {schema_path}. "
+                          "This validates that file only; source/generated synchronization is not established.")
         else:
             return False, f"Ontology term validation warnings:\n{filtered_output}"
 
@@ -119,20 +143,22 @@ def main():
             if file_path:
                 file_paths.append(file_path)
 
-    # Check each file path
-    validated = False
-    for file_path in file_paths:
-        if is_d4d_schema_file(file_path):
-            if not validated:
-                # Only validate once per batch of edits
-                success, message = validate_ontology_terms(file_path)
-                validated = True
-
+    try:
+        selected = [(file_path, schema_file_kind(file_path)) for file_path in file_paths]
+        if any(kind == "source" for _path, kind in selected):
+            # A batch containing source edits provides no regeneration boundary,
+            # even when it also names the generated file. Never attest stale output.
+            print(PENDING_MESSAGE)
+        else:
+            generated = next((path for path, kind in selected if kind == "generated"), None)
+            if generated is not None:
+                success, message = validate_ontology_terms(generated)
                 if success:
                     print(message)
                 else:
-                    # Print warning but don't block (exit 0)
                     print(f"Warning: {message}", file=sys.stderr)
+    except (OSError, RuntimeError, ValueError) as error:
+        print(f"Term validation error: {error} (skipping)")
 
     # Always exit 0 (warn only, don't block)
     sys.exit(0)

@@ -9,17 +9,23 @@ Provides clean programmatic interface for:
 - Provenance tracking
 
 Usage:
+    from pathlib import Path
     from src.transformation.transform_api import SemanticTransformer, TransformationConfig
 
-    # Basic transformation
-    transformer = SemanticTransformer()
-    d4d_dict = transformer.rocrate_to_d4d("input.json", validate=True)
+    # Explicit Dataset publication; provenance stays on the result object.
+    transformer = SemanticTransformer(TransformationConfig(
+        mapping_file=Path("path/to/reviewed-mapping.tsv"), result_contract="dataset_v1"))
+    result = transformer.rocrate_to_d4d("input.json", output_path="output.yaml")
+    dataset = result.data
+    metadata = result.transformation_metadata
 
     # With custom config
     config = TransformationConfig(
+        mapping_file=Path("path/to/reviewed-mapping.tsv"),
         profile_level="complete",
         preserve_provenance=True,
-        merge_strategy="merge"
+        merge_strategy="merge",
+        result_contract="dataset_v1"
     )
     transformer = SemanticTransformer(config)
     d4d_dict = transformer.rocrate_to_d4d("input.json")
@@ -37,8 +43,11 @@ Usage:
 import json
 import yaml
 import sys
-from dataclasses import dataclass, field
+from contextlib import redirect_stdout
+from copy import deepcopy
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
+from hashlib import sha256
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
 
@@ -61,6 +70,37 @@ except ImportError as e:
     print(f"Warning: Could not import transformation scripts from {scripts_dir}: {e}")
     print("Ensure transformation scripts exist in .claude/agents/scripts/")
     SCRIPTS_AVAILABLE = False
+
+from data_sheets_schema.legacy_publication import PublicationError, prepare_dataset, publish
+from data_sheets_schema.legacy_root_identity import scoring_fields
+from data_sheets_schema.legacy_route_dispositions import (
+    routes as disposition_routes, source_snapshot, prepare_sidecar, protected_sources, validate_evidence,
+)
+from data_sheets_schema.legacy_creators import (
+    creator_route, author_source_presence, construction_basis, source_presence_lines,
+    VALUE_BASIS_LABEL, MEASUREMENT_LIMIT,
+)
+
+from data_sheets_schema.legacy_creator_references import reference_evidence, reference_lines
+
+RESULT_CONTRACTS = frozenset({"legacy", "dataset_v1"})
+RESULT_FORMAT = "d4d_transformation_result_v1"
+
+
+def _result_contract(value):
+    if type(value) is not str or value not in RESULT_CONTRACTS:
+        raise ValueError("result_contract must be 'legacy' or 'dataset_v1'")
+    return value
+
+
+def _publication_binding(path, raw, encoding):
+    """Name the exact accepted serialization after the publisher has written it."""
+    path = Path(path)
+    if path.read_bytes() != raw:
+        raise PublicationError(f"Published Dataset bytes changed before provenance binding: {path}")
+    return {"format": "d4d_dataset_publication_v1", "path": str(path.resolve()),
+            "sha256": sha256(raw).hexdigest(), "bytes": len(raw),
+            "encoding": encoding, "root_class": "Dataset"}
 
 # Import validation framework
 # Only add to sys.path if not already present to avoid pollution
@@ -119,6 +159,10 @@ class TransformationConfig:
     output_indent: int = 2
     output_encoding: str = "utf-8"
 
+    # Explicit compatibility choice for Dataset/metadata placement. Outer
+    # diagnostics qualify compatible construction counts in both contracts.
+    result_contract: str = "legacy"
+
 
 @dataclass
 class TransformationResult:
@@ -133,7 +177,7 @@ class TransformationResult:
     timestamp: str
     mapping_version: str
 
-    # Coverage statistics
+    # Legacy-named construction statistics; see coverage_basis, not source coverage.
     coverage_percentage: Optional[float] = None
     unmapped_fields: Optional[List[str]] = None
 
@@ -143,6 +187,32 @@ class TransformationResult:
 
     # Provenance
     transformation_metadata: Optional[Dict[str, Any]] = None
+
+    # Additive diagnostics: construction counts and original route evidence.
+    # These remain available when optional provenance is disabled.
+    coverage_basis: Optional[Dict[str, Any]] = None
+    source_presence: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class CreatorReferenceTransformationResult(TransformationResult):
+    """Only the explicit reference policy adds source-member evidence."""
+
+    creator_reference_construction: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class RouteDispositionTransformationResult(TransformationResult):
+    """Only marked routes add mandatory evidence outside Dataset."""
+
+    route_dispositions: Optional[Dict[str, Any]] = None
+
+
+@dataclass
+class RouteCreatorReferenceTransformationResult(CreatorReferenceTransformationResult):
+    """Both independent explicit policies retain their evidence."""
+
+    route_dispositions: Optional[Dict[str, Any]] = None
 
 
 class SemanticTransformer:
@@ -161,6 +231,8 @@ class SemanticTransformer:
             config: Transformation configuration (uses defaults if None)
         """
         self.config = config or TransformationConfig()
+        _result_contract(self.config.result_contract)
+        self._mapping_capture = None
 
         # Initialize components
         if SCRIPTS_AVAILABLE:
@@ -177,13 +249,42 @@ class SemanticTransformer:
         """Initialize mapping loader with configuration."""
         try:
             if self.config.mapping_file.exists():
-                return MappingLoader(str(self.config.mapping_file))
+                path = self.config.mapping_file.resolve()
+                # Capture alongside the existing loader. A capture failure must
+                # not change legacy draft admission; dataset_v1 requires it.
+                try:
+                    before = path.read_bytes()
+                except OSError:
+                    before = None
+                loader = MappingLoader(str(self.config.mapping_file))
+                try:
+                    if before is not None and path.read_bytes() == before:
+                        self._mapping_capture = (path, before)
+                except OSError:
+                    pass
+                return loader
             else:
                 print(f"Warning: Mapping file not found: {self.config.mapping_file}")
                 return None
         except Exception as e:
             print(f"Warning: Could not initialize mapping loader: {e}")
             return None
+
+    def _mapping_identity(self):
+        """Bind the loaded TSV bytes; this does not authenticate an algorithm version."""
+        if self._mapping_capture is None:
+            raise PublicationError("dataset_v1 requires a captured mapping file")
+        path, raw = self._mapping_capture
+        try:
+            unchanged = self.config.mapping_file.resolve() == path and path.read_bytes() == raw
+        except OSError:
+            unchanged = False
+        if not unchanged:
+            raise PublicationError("Mapping bytes changed after loader initialization; create a new transformer")
+        return {"path": str(path), "sha256": sha256(raw).hexdigest(), "bytes": len(raw)}
+
+    def _contract(self, override):
+        return _result_contract(self.config.result_contract if override is None else override)
 
     # =========================================================================
     # RO-Crate → D4D Transformation
@@ -193,7 +294,9 @@ class SemanticTransformer:
         self,
         rocrate_input: Union[Path, str, Dict],
         output_path: Optional[Path] = None,
-        validate: Optional[bool] = None
+        validate: Optional[bool] = None,
+        *,
+        result_contract: Optional[str] = None
     ) -> TransformationResult:
         """
         Transform RO-Crate JSON-LD to D4D YAML.
@@ -202,10 +305,14 @@ class SemanticTransformer:
             rocrate_input: Path to RO-Crate file or dict (URLs not supported)
             output_path: Optional path to save D4D YAML
             validate: Override config.validate_output (default: use config)
+            result_contract: Explicit dataset_v1 keeps provenance outside data;
+                legacy (the default) preserves the existing draft shape.
 
         Returns:
             TransformationResult with D4D data and metadata
         """
+        contract = self._contract(result_contract)
+        mapping = self._mapping_identity() if contract == "dataset_v1" else None
         if not SCRIPTS_AVAILABLE:
             raise RuntimeError("Transformation scripts not available. Check imports.")
 
@@ -252,31 +359,67 @@ class SemanticTransformer:
 
             # Build D4D structure
             builder = D4DBuilder(self.mapping_loader)
-            d4d_dict = builder.build_dataset(parser)
+            marked_routes = disposition_routes(self.mapping_loader)
+            snapshot = (source_snapshot(parser, raw=rocrate_path.read_bytes(), kind="generated_dict", input_value=rocrate_input)
+                        if cleanup_temp and marked_routes else None)
+            d4d_dict = builder.build_dataset(parser, **(
+                {"source_snapshot": snapshot} if snapshot is not None else {}))
+            route_evidence = builder.get_route_dispositions()
 
             # Track coverage statistics
-            covered_fields = self.mapping_loader.get_covered_fields()
-            mapped_count = len([f for f in covered_fields if d4d_dict.get(f) is not None])
+            # Required root identity is construction, not additional source
+            # coverage. Unmarked custom ID mappings keep their prior meaning.
+            covered_fields = scoring_fields(self.mapping_loader)
+            # Count each covered route's constructed value, retaining its TSV
+            # identity in diagnostics even when the output slot is renamed.
+            # Deferred assertions and supplemental evidence alone are not
+            # constructed values or measurements of scientific source coverage.
+            unmapped_fields = []
+            for field in covered_fields:
+                if field in marked_routes:
+                    target = marked_routes[field][1]
+                    value = (route_evidence['constructed_values'].get(target)
+                             if target is not None else None)
+                else:
+                    value = d4d_dict.get(field)
+                if value is None:
+                    unmapped_fields.append(field)
+            mapped_count = len(covered_fields) - len(unmapped_fields)
             coverage_percentage = (mapped_count / len(covered_fields) * 100) if covered_fields else 0.0
-            unmapped_fields = [f for f in covered_fields if d4d_dict.get(f) is None]
+            basis = construction_basis(mapped_count, len(covered_fields))
+            source_presence = author_source_presence(
+                self.mapping_loader, [parser], [source_path])
+            marked_creators = creator_route(self.mapping_loader)
+            references = reference_evidence(
+                source_presence, [builder.get_creator_reference_construction()])
 
         finally:
             # Clean up temp file if created
             if cleanup_temp and rocrate_path.exists():
                 rocrate_path.unlink()
 
-        # Add transformation metadata
+        # Legacy drafts retain embedded metadata. The opt-in contract never
+        # adds it to, or strips any mapped field from, the Dataset candidate.
+        timestamp = datetime.now().isoformat()
+        mapping_version = 'v2_semantic' if mapping is None else 'sha256:' + mapping['sha256']
+        metadata = None
         if self.config.preserve_provenance:
-            d4d_dict['transformation_metadata'] = {
+            metadata = {
                 'source': source_path,
                 'source_type': 'rocrate',
-                'transformation_date': datetime.now().isoformat(),
-                'mapping_version': 'v2_semantic',
+                'transformation_date': timestamp,
+                'mapping_version': mapping_version,
                 'profile_level': self.config.profile_level,
                 'coverage_percentage': coverage_percentage,
-                'unmapped_fields': unmapped_fields,
+                'unmapped_fields': deepcopy(unmapped_fields) if mapping is not None else unmapped_fields,
                 'transformer_version': 'semantic_transformer_1.0'
             }
+            if marked_creators or marked_routes:
+                metadata['coverage_basis'] = deepcopy(basis)
+            if mapping is None:
+                d4d_dict['transformation_metadata'] = metadata
+            else:
+                metadata.update(result_contract=contract, mapping=mapping, publication=None)
 
         # Validate output if requested
         validation_passed = None
@@ -294,6 +437,7 @@ class SemanticTransformer:
                     tmp_path,
                     format="yaml",
                     schema="d4d",
+                    target_class="Dataset",
                     skip_levels=[ValidationLevel.PROFILE, ValidationLevel.ROUNDTRIP]
                 )
 
@@ -306,21 +450,46 @@ class SemanticTransformer:
 
         # Save to output file if requested
         if output_path:
-            with open(output_path, 'w', encoding=self.config.output_encoding) as f:
-                yaml.safe_dump(d4d_dict, f, indent=self.config.output_indent, sort_keys=False)
+            if validation_passed is False:
+                raise PublicationError(
+                    f"Input {source_path}; output {output_path}: requested Dataset "
+                    f"validation failed: {validation_errors}")
+            raw = prepare_dataset(d4d_dict, context=f"Input {source_path}; output {output_path}",
+                                  encoding=self.config.output_encoding,
+                                  indent=self.config.output_indent, sort_keys=False)
+            if mapping is not None:
+                self._mapping_identity()
+            builder.get_route_dispositions()  # Recheck any parser changes during requested diagnostics.
+            sidecars = prepare_sidecar(output_path, d4d_dict, raw, route_evidence, self.mapping_loader)
+            publish([(Path(output_path), raw), *sidecars],
+                    protected=[self.config.mapping_file, rocrate_path, *protected_sources(route_evidence)])
+            if mapping is not None and metadata is not None:
+                metadata['publication'] = _publication_binding(output_path, raw, self.config.output_encoding)
+
+        if mapping is not None:
+            self._mapping_identity()
 
         # Return result
-        return TransformationResult(
+        result_type = ((RouteCreatorReferenceTransformationResult if references is not None
+                        else RouteDispositionTransformationResult) if route_evidence is not None else
+                       (CreatorReferenceTransformationResult if references is not None else TransformationResult))
+        reference_fields = ({'creator_reference_construction': references}
+                            if references is not None else {})
+        if route_evidence is not None:
+            validate_evidence(route_evidence, d4d_dict, self.mapping_loader)
+            reference_fields['route_dispositions'] = deepcopy(route_evidence)
+        return result_type(
             data=d4d_dict,
             source=source_path,
             target="d4d",
-            timestamp=datetime.now().isoformat(),
-            mapping_version='v2_semantic',
+            timestamp=datetime.now().isoformat() if mapping is None else timestamp,
+            mapping_version=mapping_version,
             coverage_percentage=coverage_percentage,
             unmapped_fields=unmapped_fields,
             validation_passed=validation_passed,
             validation_errors=validation_errors,
-            transformation_metadata=d4d_dict.get('transformation_metadata')
+            transformation_metadata=d4d_dict.get('transformation_metadata') if mapping is None else metadata,
+            coverage_basis=basis, source_presence=source_presence, **reference_fields
         )
 
     # =========================================================================
@@ -361,7 +530,9 @@ class SemanticTransformer:
         rocrate_inputs: List[Union[Path, str]],
         output_path: Optional[Path] = None,
         auto_prioritize: bool = True,
-        validate: Optional[bool] = None
+        validate: Optional[bool] = None,
+        *,
+        result_contract: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Merge multiple RO-Crates into comprehensive D4D.
@@ -374,10 +545,17 @@ class SemanticTransformer:
             output_path: Optional path to save merged D4D YAML
             auto_prioritize: Use informativeness scoring to rank sources
             validate: Override config.validate_output
+            result_contract: dataset_v1 returns a versioned data/metadata envelope;
+                legacy preserves Dataset/metadata placement. Both envelopes expose
+                a separate source_presence diagnostic.
 
         Returns:
-            Dict with 'd4d' and 'merge_report' keys
+            Legacy: 'd4d', 'merge_report', 'source_presence'. dataset_v1:
+            'format', 'data', 'transformation_metadata', 'merge_report',
+            'source_presence'. No merged coverage percentage is measured.
         """
+        contract = self._contract(result_contract)
+        mapping = self._mapping_identity() if contract == "dataset_v1" else None
         if not SCRIPTS_AVAILABLE:
             raise RuntimeError("Transformation scripts not available. Check imports.")
 
@@ -394,6 +572,9 @@ class SemanticTransformer:
             parsers.append(parser)
             source_names.append(Path(rocrate_path).stem)
 
+        # Preserve supplied occurrence identity before ranking changes processing order.
+        original_indices = {id(parser): i for i, parser in enumerate(parsers)}
+
         # Rank by informativeness if requested
         primary_index = 0
         if auto_prioritize:
@@ -406,14 +587,25 @@ class SemanticTransformer:
 
         # Merge using field prioritization
         merger = ROCrateMerger(self.mapping_loader)
-        merged_d4d = merger.merge_rocrates(parsers, primary_index=primary_index, source_names=source_names)
+        marked_routes = disposition_routes(self.mapping_loader)
+        merged_d4d = merger.merge_rocrates(parsers, primary_index=primary_index, source_names=source_names,
+            **({"source_indices": [original_indices[id(parser)] for parser in parsers]} if marked_routes else {}))
+        route_evidence = merger.get_route_dispositions()
 
         # Get merge report
         merge_report = merger.generate_merge_report(parsers, source_names=source_names)
+        source_presence = merger.get_source_presence()
+        references = merger.get_creator_reference_construction()
+        reference_fields = ({'creator_reference_construction': references}
+                            if references is not None else {})
 
-        # Add transformation metadata
+        if route_evidence is not None:
+            reference_fields["route_dispositions"] = deepcopy(route_evidence)
+
+        # Metadata is separate only in the explicitly selected contract.
+        metadata = None
         if self.config.preserve_provenance:
-            merged_d4d['transformation_metadata'] = {
+            metadata = {
                 'sources': [str(p) for p in rocrate_inputs],
                 'source_type': 'rocrate_merge',
                 'merge_strategy': self.config.merge_strategy,
@@ -422,8 +614,20 @@ class SemanticTransformer:
                 'profile_level': self.config.profile_level,
                 'transformer_version': 'semantic_transformer_1.0'
             }
+            if mapping is None:
+                merged_d4d['transformation_metadata'] = metadata
+            else:
+                # merge_strategy is a legacy configuration declaration, not
+                # a switch passed to the per-field merger.
+                metadata['configured_merge_strategy'] = metadata.pop('merge_strategy')
+                metadata.update(result_contract=contract, mapping=mapping,
+                                mapping_version='sha256:' + mapping['sha256'],
+                                source_order=[str(parser.rocrate_path) for parser in parsers],
+                                publication=None)
 
         # Validate merged result if requested
+        validation_passed = None
+        validation_errors = []
         if validate and self.validator:
             # Save to temp file for validation
             import tempfile
@@ -436,25 +640,50 @@ class SemanticTransformer:
                     tmp_path,
                     format="yaml",
                     schema="d4d",
+                    target_class="Dataset",
                     skip_levels=[ValidationLevel.PROFILE, ValidationLevel.ROUNDTRIP]
                 )
 
-                if not all(r.passed for r in validation_reports.values()):
+                validation_passed = all(r.passed for r in validation_reports.values())
+                if not validation_passed:
                     print("Warning: Merged D4D validation failed")
                     for report in validation_reports.values():
                         if not report.passed:
+                            validation_errors.extend(report.errors)
                             print(f"  {report.level.value}: {', '.join(report.errors)}")
             finally:
                 tmp_path.unlink()
 
         # Save to output file if requested
         if output_path:
-            with open(output_path, 'w', encoding=self.config.output_encoding) as f:
-                yaml.safe_dump(merged_d4d, f, indent=self.config.output_indent, sort_keys=False)
+            if validation_passed is False:
+                raise PublicationError(
+                    f"Inputs {rocrate_inputs}; output {output_path}: requested Dataset "
+                    f"validation failed: {validation_errors}")
+            raw = prepare_dataset(merged_d4d, context=f"Inputs {rocrate_inputs}; output {output_path}",
+                                  encoding=self.config.output_encoding,
+                                  indent=self.config.output_indent, sort_keys=False)
+            if mapping is not None:
+                self._mapping_identity()
+            merger.get_route_dispositions()
+            sidecars = prepare_sidecar(output_path, merged_d4d, raw, route_evidence, self.mapping_loader)
+            publish([(Path(output_path), raw), *sidecars],
+                    protected=[self.config.mapping_file, *rocrate_inputs, *protected_sources(route_evidence)])
+            if mapping is not None and metadata is not None:
+                metadata['publication'] = _publication_binding(output_path, raw, self.config.output_encoding)
+
+        if route_evidence is not None:
+            validate_evidence(route_evidence, merged_d4d, self.mapping_loader)
+        if mapping is not None:
+            self._mapping_identity()
+            return {'format': RESULT_FORMAT, 'data': merged_d4d,
+                    'transformation_metadata': metadata, 'merge_report': merge_report,
+                    'source_presence': source_presence, **reference_fields}
 
         return {
             'd4d': merged_d4d,
-            'merge_report': merge_report
+            'merge_report': merge_report,
+            'source_presence': source_presence, **reference_fields
         }
 
     # =========================================================================
@@ -512,7 +741,10 @@ def transform_rocrate_file(
     input_path: Union[Path, str],
     output_path: Union[Path, str],
     validate: bool = True,
-    profile_level: str = "basic"
+    profile_level: str = "basic",
+    *,
+    result_contract: str = "legacy",
+    mapping_file: Optional[Union[Path, str]] = None
 ) -> TransformationResult:
     """
     Convenience function to transform a single RO-Crate file to D4D YAML.
@@ -522,18 +754,25 @@ def transform_rocrate_file(
         output_path: Path to save D4D YAML
         validate: Run validation on output
         profile_level: RO-Crate profile level
+        result_contract: legacy or the explicit dataset_v1 metadata separation
+        mapping_file: Explicit TSV path; None retains the existing default table
 
     Returns:
         TransformationResult
     """
+    _result_contract(result_contract)
+    mapping_options = {} if mapping_file is None else {'mapping_file': Path(mapping_file)}
     config = TransformationConfig(
         validate_output=validate,
-        profile_level=profile_level
+        profile_level=profile_level,
+        result_contract=result_contract,
+        **mapping_options
     )
     transformer = SemanticTransformer(config)
     return transformer.rocrate_to_d4d(
         Path(input_path),
-        output_path=Path(output_path)
+        output_path=Path(output_path),
+        result_contract=result_contract
     )
 
 
@@ -541,7 +780,10 @@ def batch_transform_rocrates(
     input_dir: Union[Path, str],
     output_dir: Union[Path, str],
     pattern: str = "*.json",
-    validate: bool = True
+    validate: bool = True,
+    *,
+    result_contract: str = "legacy",
+    mapping_file: Optional[Union[Path, str]] = None
 ) -> List[TransformationResult]:
     """
     Batch transform all RO-Crate files in a directory.
@@ -551,22 +793,59 @@ def batch_transform_rocrates(
         output_dir: Directory to save D4D YAML files
         pattern: File pattern to match (default: "*.json")
         validate: Run validation on outputs
+        result_contract: legacy or the explicit dataset_v1 metadata separation
+        mapping_file: Explicit TSV path; None retains the existing default table
 
     Returns:
         List of TransformationResults
     """
+    contract = _result_contract(result_contract)
     input_path = Path(input_dir)
     output_path = Path(output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
 
-    config = TransformationConfig(validate_output=validate)
+    # Refuse an invalid later source before an earlier source can overwrite
+    # its destination. Keep inspect-only parsers permissive; this is a
+    # Dataset-producing batch (#4588, #4591).
+    rocrate_files = sorted(input_path.glob(pattern))
+    for rocrate_file in rocrate_files:
+        _parse_rocrate(rocrate_file).require_root_dataset()
+
+    mapping_options = {} if mapping_file is None else {'mapping_file': Path(mapping_file)}
+    config = TransformationConfig(validate_output=validate, result_contract=contract, **mapping_options)
     transformer = SemanticTransformer(config)
-
+    prepared = []
+    dataset_outputs = []
     results = []
-    for rocrate_file in input_path.glob(pattern):
+    for rocrate_file in rocrate_files:
         out_file = output_path / f"{rocrate_file.stem}_d4d.yaml"
-        result = transformer.rocrate_to_d4d(rocrate_file, output_path=out_file)
+        result = transformer.rocrate_to_d4d(rocrate_file, result_contract=contract)
+        if result.validation_passed is False:
+            raise PublicationError(
+                f"Input {rocrate_file}; output {out_file}: requested Dataset "
+                f"validation failed: {result.validation_errors}")
+        raw = prepare_dataset(
+            result.data, context=f"Input {rocrate_file}; output {out_file}",
+            encoding=config.output_encoding, indent=config.output_indent, sort_keys=False)
+        dataset_outputs.append((out_file, raw))
+        prepared.append((out_file, raw))
+        prepared.extend(prepare_sidecar(out_file, result.data, raw,
+            getattr(result, "route_dispositions", None), transformer.mapping_loader))
         results.append(result)
+    if contract == "dataset_v1":
+        transformer._mapping_identity()
+    evidence_paths = []
+    for result in results:
+        evidence = getattr(result, "route_dispositions", None)
+        validate_evidence(evidence, result.data, transformer.mapping_loader)
+        evidence_paths.extend(protected_sources(evidence))
+    publish(prepared, protected=[config.mapping_file, *rocrate_files, *evidence_paths])
+    if contract == "dataset_v1":
+        transformer._mapping_identity()
+        for result, (out_file, raw) in zip(results, dataset_outputs):
+            if result.transformation_metadata is not None:
+                result.transformation_metadata['publication'] = _publication_binding(
+                    out_file, raw, config.output_encoding)
+    for rocrate_file, (out_file, _) in zip(rocrate_files, dataset_outputs):
         print(f"✓ Transformed: {rocrate_file.name} → {out_file.name}")
 
     return results
@@ -576,62 +855,97 @@ def batch_transform_rocrates(
 # CLI Interface
 # ==============================================================================
 
-def main():
-    """CLI entry point for transformation API."""
-    if len(sys.argv) < 3:
-        print("Usage: python transform_api.py <command> <args...>")
-        print("\nCommands:")
-        print("  transform <rocrate.json> <output.yaml>  - Transform single RO-Crate to D4D")
-        print("  batch <input_dir> <output_dir>          - Batch transform directory")
-        print("  merge <out.yaml> <in1.json> <in2.json>  - Merge multiple RO-Crates")
-        print("  stats                                    - Show mapping statistics")
-        sys.exit(1)
+def main(argv=None):
+    """Keep Dataset YAML on disk; emit a JSON result only on explicit opt-in."""
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest='command', required=True)
+    for name in ('transform', 'batch', 'merge'):
+        command = commands.add_parser(name)
+        command.add_argument('--result-contract', choices=sorted(RESULT_CONTRACTS), default='legacy')
+        command.add_argument('--mapping', type=Path,
+                             help='Explicit mapping TSV (default table remains unchanged)')
+        if name == 'merge':
+            command.add_argument('output')
+            command.add_argument('inputs', nargs='+')
+        else:
+            command.add_argument('input')
+            command.add_argument('output')
+    commands.add_parser('stats')
+    args = parser.parse_args(argv)
+    if args.command == 'merge' and len(args.inputs) < 2:
+        parser.error('merge requires at least two input paths')
+    contract = getattr(args, 'result_contract', 'legacy')
 
-    command = sys.argv[1]
+    def perform():
+        if args.command == 'transform':
+            return transform_rocrate_file(args.input, args.output, result_contract=contract,
+                                          mapping_file=args.mapping)
+        if args.command == 'batch':
+            return batch_transform_rocrates(args.input, args.output, result_contract=contract,
+                                           mapping_file=args.mapping)
+        mapping = getattr(args, 'mapping', None)
+        mapping_options = {} if mapping is None else {'mapping_file': mapping}
+        transformer = SemanticTransformer(TransformationConfig(result_contract=contract, **mapping_options))
+        if args.command == 'merge':
+            return transformer.merge_rocrates(
+                [Path(item) for item in args.inputs], output_path=Path(args.output),
+                result_contract=contract)
+        return transformer.get_mapping_stats()
 
-    if command == "transform":
-        if len(sys.argv) < 4:
-            print("Usage: transform <rocrate.json> <output.yaml>")
-            sys.exit(1)
+    if contract == 'dataset_v1':
+        # Imported legacy components print progress. Keep the opted-in stdout
+        # parseable, including construction, validation and batch publication.
+        with redirect_stdout(sys.stderr):
+            result = perform()
+        if args.command == 'transform':
+            document = {'format': RESULT_FORMAT, **asdict(result)}
+            reference_output = (isinstance(result, CreatorReferenceTransformationResult)
+                                or isinstance(result, RouteDispositionTransformationResult))
+        elif args.command == 'batch':
+            document = {'format': RESULT_FORMAT, 'results': [asdict(item) for item in result]}
+            reference_output = any(isinstance(item, (CreatorReferenceTransformationResult,
+                                                     RouteDispositionTransformationResult))
+                                   for item in result)
+        else:
+            document = result
+            reference_output = ('creator_reference_construction' in result or 'route_dispositions' in result)
+        # The explicit reference and route policies carry arbitrary source JSON.
+        # ASCII escaping preserves those parsed values, including lone surrogate
+        # escapes, without changing the older result policies' wire spelling.
+        print(json.dumps(document, ensure_ascii=reference_output, indent=2,
+                         **({"allow_nan": False} if reference_output else {})))
+        return
 
-        result = transform_rocrate_file(sys.argv[2], sys.argv[3])
+    result = perform()
+    if args.command == "transform":
         print(f"✓ Transformation complete")
-        print(f"  Coverage: {result.coverage_percentage:.1f}%")
+        print(f"  {VALUE_BASIS_LABEL}: {result.coverage_percentage:.1f}%")
+        print(f"  {MEASUREMENT_LIMIT}")
+        print('\n'.join(source_presence_lines(result.source_presence, raw=False)))
+        if getattr(result, 'creator_reference_construction', None) is not None:
+            print('\n'.join(reference_lines(getattr(result, 'creator_reference_construction', None))))
         if result.validation_passed is not None:
             print(f"  Validation: {'PASS' if result.validation_passed else 'FAIL'}")
 
-    elif command == "batch":
-        if len(sys.argv) < 4:
-            print("Usage: batch <input_dir> <output_dir>")
-            sys.exit(1)
-
-        results = batch_transform_rocrates(sys.argv[2], sys.argv[3])
-        print(f"\n✓ Batch transformation complete: {len(results)} files")
-
-    elif command == "merge":
-        if len(sys.argv) < 5:
-            print("Usage: merge <output.yaml> <input1.json> <input2.json> [input3.json...]")
-            sys.exit(1)
-
-        output = Path(sys.argv[2])
-        inputs = [Path(f) for f in sys.argv[3:]]
-
-        transformer = SemanticTransformer()
-        result = transformer.merge_rocrates(inputs, output_path=output)
-        print(f"✓ Merged {len(inputs)} RO-Crates → {output}")
-
-    elif command == "stats":
-        transformer = SemanticTransformer()
-        stats = transformer.get_mapping_stats()
-
+    elif args.command == "batch":
+        print(f"\n✓ Batch transformation complete: {len(result)} files")
+        for item in result:
+            print(f"  {item.source}: {VALUE_BASIS_LABEL}: {item.coverage_percentage:.1f}%")
+            print('\n'.join(source_presence_lines(item.source_presence, raw=False)))
+            if getattr(item, 'creator_reference_construction', None) is not None:
+                print('\n'.join(reference_lines(getattr(item, 'creator_reference_construction', None))))
+        print(MEASUREMENT_LIMIT)
+    elif args.command == "merge":
+        print(f"✓ Merged {len(args.inputs)} RO-Crates → {args.output}")
+        print('\n'.join(source_presence_lines(result['source_presence'], raw=False)))
+        if 'creator_reference_construction' in result:
+            print('\n'.join(reference_lines(result.get('creator_reference_construction'))))
+    elif args.command == "stats":
         print("\nMapping Statistics:")
         print("=" * 50)
-        for key, value in stats.items():
+        for key, value in result.items():
             print(f"  {key}: {value}")
-
-    else:
-        print(f"Unknown command: {command}")
-        sys.exit(1)
 
 
 if __name__ == '__main__':

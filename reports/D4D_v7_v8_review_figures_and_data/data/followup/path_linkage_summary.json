@@ -1,0 +1,114 @@
+[
+  {
+    "source_type": "DUA",
+    "n": 29,
+    "Root-only comment": 4,
+    "Same nested path": 15,
+    "Ancestor relation": 0,
+    "Other path in root": 10
+  },
+  {
+    "source_type": "IRB",
+    "n": 118,
+    "Root-only comment": 49,
+    "Same nested path": 12,
+    "Ancestor relation": 0,
+    "Other path in root": 57
+  },
+  {
+    "source_type": "NIH project page",
+    "n": 179,
+    "Root-only comment": 108,
+    "Same nested path": 18,
+    "Ancestor relation": 3,
+    "Other path in root": 50
+  },
+  {
+    "source_type": "RO-Crate",
+    "n": 172,
+    "Root-only comment": 36,
+    "Same nested path": 33,
+    "Ancestor relation": 1,
+    "Other path in root": 102
+  },
+  {
+    "source_type": "data resource",
+    "n": 442,
+    "Root-only comment": 268,
+    "Same nested path": 74,
+    "Ancestor relation": 24,
+    "Other path in root": 76
+  },
+  {
+    "source_type": "documentation",
+    "n": 428,
+    "Root-only comment": 237,
+    "Same nested path": 79,
+    "Ancestor relation": 1,
+    "Other path in root": 111
+  },
+  {
+    "source_type": "historical data release",
+    "n": 90,
+    "Root-only comment": 66,
+    "Same nested path": 6,
+    "Ancestor relation": 2,
+    "Other path in root": 16
+  },
+  {
+    "source_type": "historical documentation",
+    "n": 120,
+    "Root-only comment": 81,
+    "Same nested path": 18,
+    "Ancestor relation": 0,
+    "Other path in root": 21
+  },
+  {
+    "source_type": "license",
+    "n": 63,
+    "Root-only comment": 15,
+    "Same nested path": 15,
+    "Ancestor relation": 2,
+    "Other path in root": 31
+  },
+  {
+    "source_type": "preprint",
+    "n": 95,
+    "Root-only comment": 77,
+    "Same nested path": 7,
+    "Ancestor relation": 1,
+    "Other path in root": 10
+  },
+  {
+    "source_type": "publication",
+    "n": 216,
+    "Root-only comment": 95,
+    "Same nested path": 39,
+    "Ancestor relation": 1,
+    "Other path in root": 81
+  },
+  {
+    "source_type": "structured metadata",
+    "n": 312,
+    "Root-only comment": 113,
+    "Same nested path": 87,
+    "Ancestor relation": 12,
+    "Other path in root": 100
+  },
+  {
+    "source_type": "tutorial",
+    "n": 117,
+    "Root-only comment": 69,
+    "Same nested path": 15,
+    "Ancestor relation": 0,
+    "Other path in root": 33
+  },
+  {
+    "source_type": "white paper",
+    "n": 13,
+    "Root-only comment": 13,
+    "Same nested path": 0,
+    "Ancestor relation": 0,
+    "Other path in root": 0
+  }
+]

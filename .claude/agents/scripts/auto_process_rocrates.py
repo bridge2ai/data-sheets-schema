@@ -27,14 +27,21 @@ Usage:
 import argparse
 import json
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import List, Tuple
+from tempfile import TemporaryDirectory
 
 from informativeness_scorer import InformativenessScorer
 from mapping_loader import MappingLoader
 from rocrate_parser import ROCrateParser
 from rocrate_merger import ROCrateMerger
 from d4d_builder import D4DBuilder
+from data_sheets_schema.rocrate_sources import select_root
+from data_sheets_schema.legacy_publication import publish, diagnostic
+from data_sheets_schema.legacy_route_dispositions import (
+    routes as disposition_routes, source_snapshot, prepare_sidecar, protected_sources, validate_evidence,
+)
 
 
 def discover_rocrates(input_dir: Path) -> List[Path]:
@@ -65,7 +72,7 @@ def discover_rocrates(input_dir: Path) -> List[Path]:
 
 def rank_rocrates(
     rocrate_paths: List[Path],
-    mapping_loader: MappingLoader
+    mapping_loader: MappingLoader, *, include_occurrences=False
 ) -> List[Tuple[Path, float, int]]:
     """
     Rank RO-Crates by informativeness.
@@ -82,19 +89,14 @@ def rank_rocrates(
     # Parse all RO-Crates
     parsers = []
     for path in rocrate_paths:
-        try:
-            parser = ROCrateParser(str(path))
-            if parser.get_root_dataset():
-                parsers.append(parser)
-            else:
-                print(f"⚠ Warning: No root Dataset in {path.name}, skipping")
-        except Exception as e:
-            print(f"⚠ Warning: Could not parse {path.name}: {e}")
-            continue
+        parser = ROCrateParser(str(path))
+        parser.require_root_dataset()
+        parsers.append(parser)
 
     if not parsers:
         raise ValueError("No valid RO-Crate files found")
 
+    original_indices = {id(parser): i for i, parser in enumerate(parsers)}
     # Score and rank
     scorer = InformativenessScorer()
     ranked_parsers = scorer.rank_rocrates(parsers, mapping_loader)
@@ -104,55 +106,55 @@ def rank_rocrates(
     for parser, scores, rank in ranked_parsers:
         path = Path(parser.rocrate_path)
         score = scores['total_score']
-        ranked_paths.append((path, score, rank))
+        item = (path, score, rank)
+        ranked_paths.append(item + (original_indices[id(parser)],) if include_occurrences else item)
 
     return ranked_paths
+
+
+def _combined_crate(parsers: List[ROCrateParser]) -> dict:
+    """Prepare a combined graph only if it still has one authoritative root.
+
+    Concatenation does not reconcile separate crates' relative identifiers.
+    Refuse colliding roots/descriptors before publishing this intermediate
+    artifact; assigning new identities would change the sources' meaning.
+    """
+    concatenated = {
+        "@context": "https://w3id.org/ro/crate/1.2/context",
+        "@graph": []
+    }
+    for parser in parsers:
+        parser.require_root_dataset()
+        graph = deepcopy(parser.graph)
+        for entity in graph:
+            if isinstance(entity, dict) and '@id' in entity:
+                entity['_source'] = parser.rocrate_path.name
+        concatenated['@graph'].extend(graph)
+
+    root, reason = select_root(concatenated['@graph'])
+    if root is None:
+        raise ValueError(f"No unambiguous root Dataset in concatenated RO-Crates: {reason}")
+    return concatenated
+
+
+def _save_concatenated_crate(concatenated: dict, output_path: Path, *, protected=()) -> Path:
+    """Publish a combined graph after root preflight has succeeded."""
+    concat_path = output_path.parent / f"{output_path.stem}_concatenated.json"
+    publish([(concat_path, json.dumps(concatenated, indent=2).encode("utf-8"))],
+            protected=protected)
+
+    print(f"\n✓ Concatenated RO-Crate saved: {concat_path}")
+    return concat_path
 
 
 def concatenate_rocrates(
     rocrate_paths: List[Path],
     output_path: Path
 ) -> Path:
-    """
-    Concatenate multiple RO-Crate files into single JSON.
-
-    Args:
-        rocrate_paths: List of RO-Crate file paths
-        output_path: Output path for concatenated file
-
-    Returns:
-        Path to concatenated file
-    """
-    print(f"\nConcatenating {len(rocrate_paths)} RO-Crate files...")
-
-    concatenated = {
-        "@context": "https://w3id.org/ro/crate/1.2/context",
-        "@graph": []
-    }
-
-    for i, path in enumerate(rocrate_paths):
-        print(f"  [{i+1}/{len(rocrate_paths)}] {path.name}")
-
-        with open(path, 'r', encoding='utf-8') as f:
-            rocrate_data = json.load(f)
-
-        # Add source marker
-        graph = rocrate_data.get('@graph', [])
-        for entity in graph:
-            # Tag each entity with its source file
-            if '@id' not in entity:
-                continue
-            entity['_source'] = path.name
-
-        concatenated['@graph'].extend(graph)
-
-    # Save concatenated file
-    concat_path = output_path.parent / f"{output_path.stem}_concatenated.json"
-    with open(concat_path, 'w', encoding='utf-8') as f:
-        json.dump(concatenated, f, indent=2)
-
-    print(f"\n✓ Concatenated RO-Crate saved: {concat_path}")
-    return concat_path
+    """Concatenate sources only when their combined graph has a valid root."""
+    parsers = [ROCrateParser(str(path)) for path in rocrate_paths]
+    return _save_concatenated_crate(_combined_crate(parsers), output_path,
+                                    protected=rocrate_paths)
 
 
 def main():
@@ -226,9 +228,6 @@ def main():
         print(f"✗ Error: Mapping TSV not found: {mapping_path}", file=sys.stderr)
         return 1
 
-    # Create output directory
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
     print("="*80)
     print("Automated RO-Crate Processing")
     print("="*80)
@@ -260,7 +259,12 @@ def main():
     # Step 3: Rank by informativeness
     print("\n[3/5] Ranking by informativeness...")
     try:
-        ranked = rank_rocrates(rocrate_paths, mapping)
+        marked_routes = disposition_routes(mapping)
+        if marked_routes:
+            ranked_details = rank_rocrates(rocrate_paths, mapping, include_occurrences=True)
+            ranked = [row[:3] for row in ranked_details]
+        else:
+            ranked = rank_rocrates(rocrate_paths, mapping)
     except Exception as e:
         print(f"✗ Error ranking RO-Crates: {e}", file=sys.stderr)
         return 1
@@ -284,112 +288,108 @@ def main():
         ]
         print(f"\n✓ Selected {len(selected_paths)} RO-Crates above score threshold {args.min_score}")
 
-    # Step 5: Process based on strategy
-    print(f"\n[4/5] Processing with '{args.strategy}' strategy...")
+    selected_indices = None
+    if marked_routes:
+        selected_details = ranked_details[:args.top_n] if args.top_n else ranked_details
+        if args.min_score:
+            selected_details = [row for row in ranked_details if row[1] >= args.min_score]
+        selected_indices = [row[3] for row in selected_details]
 
-    if args.strategy == 'merge':
-        # Direct field-by-field merge
-        from rocrate_to_d4d import save_d4d_yaml
+    # Validate the selected inputs and any combined intermediate graph before
+    # creating the output directory or replacing an existing artifact.
+    try:
+        if not selected_paths:
+            raise ValueError("No RO-Crate sources meet the selection criteria")
+        parsers = [ROCrateParser(str(path)) for path in selected_paths]
+        for parser in parsers:
+            parser.require_root_dataset()
+        snapshots = ([source_snapshot(parser) for parser in parsers] if marked_routes else None)
+        combined = None
+        if args.strategy == 'concatenate':
+            combined = _combined_crate(parsers)
+        elif args.strategy == 'hybrid' and len(parsers) > 1:
+            combined = _combined_crate(parsers[1:])
+    except Exception as exc:
+        print(f"✗ Error preparing RO-Crates: {exc}", file=sys.stderr)
+        return 1
 
-        parsers = [ROCrateParser(str(p)) for p in selected_paths]
-        merger = ROCrateMerger(mapping)
-        dataset = merger.merge_rocrates(parsers, primary_index=0)
-        provenance = merger.get_provenance()
+    # Construct the whole operation privately. A combined crate is an input
+    # to construction, not permission to publish an unchecked intermediate.
+    from rocrate_to_d4d import prepare_d4d_yaml
+    try:
+        prepared = []
+        concat_path = output_path.with_name(f"{output_path.stem}_concatenated.json")
+        if combined is not None:
+            combined_raw = json.dumps(combined, indent=2).encode("utf-8")
+            with TemporaryDirectory(prefix="d4d-combined-crate-") as directory:
+                private_path = Path(directory) / concat_path.name
+                private_path.write_bytes(combined_raw)
+                combined_parser = ROCrateParser(str(private_path))
+                combined_snapshot = None
+                if marked_routes:
+                    start = 1 if args.strategy == "hybrid" else 0
+                    parents = []
+                    for index in range(start, len(parsers)):
+                        parent = deepcopy(snapshots[index])
+                        parent.update(occurrence_id="input:" + str(selected_indices[index]),
+                                      original_index=selected_indices[index], processed_index=index,
+                                      combined_source_label=Path(parsers[index].rocrate_path).name)
+                        parents.append(parent)
+                    combined_snapshot = source_snapshot(combined_parser, raw=combined_raw,
+                        kind="generated_combined", parents=parents)
+            # The intended source label is retained in headers and provenance.
+            combined_parser.rocrate_path = concat_path
+            prepared.append((concat_path, combined_raw))
 
-        save_d4d_yaml(
-            dataset,
-            output_path,
-            mapping_path,
-            rocrate_paths=selected_paths,
-            provenance=provenance
-        )
-
-        merger.save_merge_report(output_path, parsers)
-
-    elif args.strategy == 'concatenate':
-        # Concatenate then transform
-        from rocrate_to_d4d import save_d4d_yaml
-
-        concat_path = concatenate_rocrates(selected_paths, output_path)
-
-        # Transform concatenated file
-        parser = ROCrateParser(str(concat_path))
-        builder = D4DBuilder(mapping)
-        dataset = builder.build_dataset(parser)
-
-        save_d4d_yaml(
-            dataset,
-            output_path,
-            mapping_path,
-            rocrate_path=concat_path
-        )
-
-    elif args.strategy == 'hybrid':
-        # Merge primary, concatenate secondaries
-        print("\n  Hybrid approach:")
-        print(f"    - Primary (merge): {selected_paths[0].name}")
-
-        if len(selected_paths) > 1:
-            print(f"    - Secondaries (concatenate): {len(selected_paths)-1} files")
-
-            # Concatenate secondaries
-            concat_path = concatenate_rocrates(selected_paths[1:], output_path)
-
-            # Merge primary with concatenated secondaries
-            from rocrate_to_d4d import save_d4d_yaml
-
-            parsers = [
-                ROCrateParser(str(selected_paths[0])),
-                ROCrateParser(str(concat_path))
-            ]
-            merger = ROCrateMerger(mapping)
-            dataset = merger.merge_rocrates(parsers, primary_index=0)
-            provenance = merger.get_provenance()
-
-            save_d4d_yaml(
-                dataset,
-                output_path,
-                mapping_path,
-                rocrate_paths=[selected_paths[0], concat_path],
-                provenance=provenance
-            )
-
-            merger.save_merge_report(output_path, parsers)
-
-        else:
-            # Only one file, treat as single-file mode
-            parser = ROCrateParser(str(selected_paths[0]))
+        if args.strategy == 'concatenate':
             builder = D4DBuilder(mapping)
-            dataset = builder.build_dataset(parser)
-
-            from rocrate_to_d4d import save_d4d_yaml
-            save_d4d_yaml(
-                dataset,
-                output_path,
-                mapping_path,
-                rocrate_path=selected_paths[0]
-            )
-
-    # Step 6: Validate if requested
-    if args.validate:
-        print("\n[5/5] Validating D4D YAML...")
-        schema_path = Path(args.schema)
-
-        if not schema_path.exists():
-            print(f"⚠ Warning: Schema not found: {schema_path}")
+            dataset = builder.build_dataset(combined_parser, **(
+                {"source_snapshot": combined_snapshot, "source_index": None} if marked_routes else {}))
+            producer = builder
+            route_evidence = builder.get_route_dispositions()
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
+                                   rocrate_path=concat_path)
+        elif args.strategy == 'hybrid' and len(parsers) == 1:
+            builder = D4DBuilder(mapping)
+            dataset = builder.build_dataset(parsers[0], **(
+                {"source_snapshot": snapshots[0], "source_index": selected_indices[0]} if marked_routes else {}))
+            producer = builder
+            route_evidence = builder.get_route_dispositions()
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
+                                   rocrate_path=selected_paths[0])
         else:
+            if args.strategy == 'hybrid':
+                if marked_routes:
+                    snapshots = [snapshots[0], combined_snapshot]
+                    selected_indices = [selected_indices[0], None]
+                parsers = [parsers[0], combined_parser]
+                header_paths = [selected_paths[0], concat_path]
+            else:
+                header_paths = selected_paths
+            merger = ROCrateMerger(mapping)
+            dataset = merger.merge_rocrates(parsers, primary_index=0, **(
+                {"source_snapshots": snapshots, "source_indices": selected_indices} if marked_routes else {}))
+            producer = merger
+            route_evidence = merger.get_route_dispositions()
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
+                                   rocrate_paths=header_paths,
+                                   provenance=merger.get_provenance())
+            report_path = output_path.with_name(f"{output_path.stem}_merge_report.txt")
+            prepared.append((report_path, merger.generate_merge_report(parsers).encode("utf-8")))
+        prepared.append((output_path, raw))
+        prepared.extend(prepare_sidecar(output_path, dataset, raw, route_evidence, mapping))
+        if args.validate:
             from validator import D4DValidator
-
-            validator = D4DValidator(str(schema_path))
-            is_valid, output = validator.validate_d4d_yaml(str(output_path))
-
-            print(validator.get_validation_summary(is_valid, output))
-
-            if not is_valid:
-                error_path = output_path.parent / f"{output_path.stem}_validation_errors.txt"
-                with open(error_path, 'w') as f:
-                    f.write(output)
-                print(f"\n⚠ Validation errors saved to: {error_path}")
+            validator = D4DValidator(str(Path(args.schema)))
+            detail = diagnostic(raw, validator.validate_d4d_yaml)
+            print(validator.get_validation_summary(True, detail))
+        validate_evidence(producer.get_route_dispositions(), dataset, mapping)
+        publish(prepared, protected=[mapping_path, Path(args.schema), *rocrate_paths,
+                                    *protected_sources(route_evidence)])
+    except Exception as exc:
+        print(f"✗ Error preparing or publishing Dataset: {exc}", file=sys.stderr)
+        return 1
+    print(f"\n✓ D4D YAML saved: {output_path}")
 
     # Final summary
     print("\n" + "="*80)

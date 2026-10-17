@@ -2,9 +2,10 @@
 
 A dataset whose upstream record carries a Healthsheet (in the study, one
 does: 84 questions across 14 sections, served by its repository's API —
-the record, bundle name and project are the profile's facts, #628) keeps
-it in its standard corpus, because the corpus is meant to reflect what
-upstream actually publishes rather than an artificially levelled set.
+the record, its origin, bundle name and project are the profile's facts,
+#628, #4009) keeps it in its standard corpus, because the corpus is meant
+to reflect what upstream actually publishes rather than an artificially
+levelled set.
 
 This module additionally extracts it as a **standalone** generation input, so
 one further question can be asked: what does a D4D record look like when built
@@ -94,9 +95,12 @@ def _shown(source: Path) -> str:
 
 def render(healthsheet: dict, record: dict, source: Path, *,
            project: str | None = None,
-           display: str | None = None) -> tuple[str, HealthsheetStats]:
+           display: str | None = None,
+           origin: str | None = None) -> tuple[str, HealthsheetStats]:
     """`display` is the dataset's name in prose (the profile's for its own
-    record — the tracked bundle's bytes depend on it, #1542); the key otherwise."""
+    record — the tracked bundle's bytes depend on it, #1542); the key otherwise.
+    `origin` is the `Origin:` line's text, which only a profile states, for
+    its own record; without it there is no such line (#4009)."""
     project = _project(project)
     display = display or project
     stats = HealthsheetStats()
@@ -128,7 +132,7 @@ def render(healthsheet: dict, record: dict, source: Path, *,
         f"Dataset: {record.get('title', '')}",
         f"DOI: {record.get('doi', '')}",
         f"Source: {_shown(source)}",
-        "Origin: FAIRhub API record, metadata.healthsheet",
+        *([f"Origin: {origin}"] if origin else []),
         "",
         "This bundle contains the Healthsheet and nothing else — no publications,",
         "no documentation, no license, no IRB protocol. It exists to measure what",
@@ -151,10 +155,15 @@ def build_bundle(record_path: Path | None = None,
                  output_dir: Path = OUTPUT_DIR, *,
                  name: str | None = None,
                  project: str | None = None) -> tuple[Path, HealthsheetStats]:
-    """`name` is the bundle's file name: the caller's, else the active
-    profile's, else derived from the record's stem. `project` is the
-    dataset the bundle identifies itself as: the caller's, else the
-    active profile's (#1464)."""
+    """`name` is the bundle's file name: the caller's; else, for the active
+    profile's own record filed under the profile's project, the profile's
+    bundle name; else `{project}_healthsheet_only.txt` (not the record's
+    stem, #1493), refused when that is any profile's bundle name (#1543,
+    #1565). `project` is the dataset the bundle identifies itself as: the
+    caller's, else the active profile's for its own record only (#1464,
+    #1493). The `Origin:` line is the profile's for its own record,
+    whatever project the caller names, and absent for any other record
+    (#4009)."""
     record_path = _record(record_path)
     # The profile's name and project describe the profile's *own* record;
     # any other record names its project and gets its own file (#1493).
@@ -168,16 +177,24 @@ def build_bundle(record_path: Path | None = None,
         raise ValueError(f"no project for {record_path}: it is not the active profile's record; pass one")
     own_name = own and project == prof.healthsheet_project        # the study's bundle is the study's dataset (#1516)
     healthsheet, record = load_healthsheet(record_path)
+    # The origin describes the record, so it follows `own`, not the project.
+    # Of any other record this module knows only what the caller passed,
+    # which `Source:` and `Project:` already state; an origin read off the
+    # record's content would guess at a platform. So that record has no
+    # `Origin:` line rather than the profile's (#4009).
     text, stats = render(healthsheet, record, record_path, project=project,
-                         display=prof.healthsheet_display if own_name else None)
+                         display=prof.healthsheet_display if own_name else None,
+                         origin=prof.healthsheet_origin if own else None)
     output_dir.mkdir(parents=True, exist_ok=True)
     target = output_dir / (name or (bundle_name() if own_name else None) or f"{project}_healthsheet_only.txt")
     from data_sheets_schema.profiles import PROFILES
-    reserved = {p.healthsheet_bundle for p in PROFILES.values() if p.healthsheet_bundle}
+    reserved = {p.healthsheet_bundle: p.name for p in PROFILES.values() if p.healthsheet_bundle}
     if not own_name and name is None and target.name in reserved:
         # A record that is not the profile's may not take a profile's
         # tracked bundle name by claiming its project — under any active
-        # profile (#1543, #1565).
-        raise ValueError(f"{target.name} is the active profile's bundle name; pass --name for {record_path}")
+        # profile (#1543, #1565), so the refusal names the profile the name
+        # belongs to, which need not be the active one (#4420).
+        raise ValueError(f"{target.name} is the {reserved[target.name]} profile's bundle name; "
+                         f"pass --name for {record_path}")
     target.write_text(text, encoding="utf-8")
     return target, stats

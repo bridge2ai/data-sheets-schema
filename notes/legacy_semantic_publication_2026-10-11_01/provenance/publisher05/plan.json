@@ -1,0 +1,102 @@
+{
+  "activation": "Unchanged exact bound-disabled template + enabled-only admission. Same actual merged binding may be transferred only after root accepts this successor and controls. Runner additionally requires exact successful controls/config/runtime/source-only/no-project/preservation/ordered20 joins and YAML dependency pins.",
+  "cause": "Actual03 CHORUS CLI exited0 and wrote three files; worker2/coordinator1 refused historical replay YAML bytes. Historical replay enabled Unicode, while merged CLI omits allow_unicode. Parsed type-exact graph and canonical SHA agree. The failure remains a failure, with one attempted CLI and no five-input acceptance.",
+  "checks": "Actual full typed Dataset comparison, exact CLI byte comparison, canonical SHA and original prepare_dataset(record,text=actualraw) all remain. No schema/duplicate/type/error gate is relaxed. Sidecar raw JSON bytes remain exact after explicitly allowed derived Dataset bytes/hash plus five paths.",
+  "commands": {
+    "controls": "ACTUAL_BOUND_PYTHON -I -B /private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/controls.py --run",
+    "publication": "ROOT_METADATA_PYTHON -I -S -B /private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/run.py --run"
+  },
+  "controls": {
+    "count": 22,
+    "names": [
+      "writer_contract",
+      "natural_exit_accepted",
+      "forced_cleanup_refused",
+      "unicode_positive",
+      "historical_unicode_bytes_refused",
+      "changed_text_refused",
+      "boolean_to_zero_refused",
+      "list_order_refused",
+      "list_duplicate_removal_refused",
+      "mapping_order_bytes_refused",
+      "unicode_codepoint_change_refused",
+      "sidecar_positive",
+      "sidecar_digest_refused",
+      "sidecar_size_refused",
+      "sidecar_raw_text_refused",
+      "sidecar_raw_text_removal_refused",
+      "historical_sidecar_binding_refused",
+      "saved_CHORUS",
+      "saved_VOICE",
+      "saved_CM4AI_reduced",
+      "saved_VOICE_provenance",
+      "saved_CM4AI_original"
+    ],
+    "output": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-controls05-results/result.json",
+    "project_imports": false,
+    "purpose": "Meaningful historicalUnicode/changedUnicode/value/type/listorder/multiplicity/keyorder/sidecarbinding/raw-evidence rejection plus positive synthetic and five real saved-record oracles. No product/schema/application acceptance credit. Actual coordinator natural-exit acceptance and forced-cleanup rejection controls.",
+    "root_only": true
+  },
+  "diagnosis": {
+    "bytes": 451,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-publication03-yaml-oracle-diagnosis01.json",
+    "sha256": "09ee3113ed26b5459af9a53b52f789a26563aa344300011d51f53a6499193df1"
+  },
+  "format": "legacy4594_actual_cli_execution_plan_v5",
+  "historical_oracle_retention": "Old YAML pins and old sidecar Dataset pin remain exact inputs. Controls check old YAML parsed type-exact equality with the saved full export record and its canonical SHA. These are historical semantics/producer bytes, not the new CLI byte oracle.",
+  "issue": 4943,
+  "new_expected_bytes": "Before each CLI call, serialize the historical saved export record (with its retained insertion order) via the exact natural CLI yaml.safe_dump options default_flow_style=False,sort_keys=False and UTF-8. No observed current output is used. Root-only saved controls independently derive all five length/hash pairs before any successor CLI invocation; worker recomputation must match them.",
+  "no_source_edits_no_apps_by_author": true,
+  "output": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05",
+  "predecessor": {
+    "bytes": 3770,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution04/freeze.json",
+    "sha256": "b6cd2270df808725e6a812b78f1e8da8e034eb6508f901e7c666b98ad9e429ba"
+  },
+  "prior_failed_run": {
+    "bytes": 22856,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results03/failure.json",
+    "sha256": "6f72a93e1e15729388f92d98c1ae32da3ed334452fbfc5f358ab0aa2975171b1"
+  },
+  "readers_writers_released": true,
+  "remaining_audit": "All five actual CLI/worker/coordinator successes plus complete artifacts/preservation. The executable predicate now refuses any closure.signals; completed independent audit still joins empty signals and group absence. No application-drain inference from parent exit.",
+  "review_correction": {
+    "change": "Actual coordinator now calls require_natural_success, which requires empty signals as well as the prior error/exit/group gates; control exercises that exact predicate for normal exit and exit0 with eitherSIGTERM orSIGKILL.",
+    "finding": "Independent04 review found that child exit0 plus successful forced cleanup could still produce coordinator PASS. The plan-only completed audit obligation was insufficient as an executable gate.",
+    "issue": 4943,
+    "prior04_retained_unexecuted": true
+  },
+  "scope": "Correct only the external serialization oracle; unchanged merged production, five inputs, real CLI argv, schema validation, evidence/raw-source/report preservation and actual merged/CI/plugin/dual2273 gates.",
+  "sidecar_change": "Require old sidecar.dataset equal exact historical Dataset pin. Deep-copy complete sidecar; set dataset.bytes/sha256 solely from independently expected CLI bytes. Retain the existing five actual file-locator rebindings. Schema/mapping hashes and every other evidence/raw-text field remain exact.",
+  "status": "DISABLED_UNEXECUTED",
+  "writer_contract": [
+    {
+      "function": "transform",
+      "lines": [
+        525,
+        526
+      ],
+      "literal": "prepare_dataset(dataset, default_flow_style=False, sort_keys=False, context=...)",
+      "reference": {
+        "bytes": 23795,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution04/references/cli.py",
+        "sha256": "5d8020f0764e35af99f72e5d6e61e83d90455302dd28b075f75121d770b97a1d"
+      },
+      "source_relative": "src/fairscape_integration/cli.py"
+    },
+    {
+      "function": "prepare_dataset",
+      "lines": [
+        61,
+        68
+      ],
+      "literal": "yaml.safe_dump(dataset, **dump_options), then text.encode(encoding); default encoding=utf-8",
+      "reference": {
+        "bytes": 6374,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution04/references/legacy_publication.py",
+        "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9"
+      },
+      "source_relative": "src/data_sheets_schema/legacy_publication.py"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+description: a datafile description
+title: ppgs.parquet
+was_derived_from: '{''@id'': ''ark:59853/computation-b2ai-voice-features-processing'',
+  ''@type'': [''prov:Activity'', ''https://w3id.org/EVI#Computation''], ''name'':
+  ''VOICE Features Processing'', ''description'': ''Processing step for taking raw
+  data and converting it into spectrograms and features using the b2ai-prep'', ''usedDataset'':
+  [], ''usedSoftware'': [{''@id'': ''ark:59853/b2ai-voice-software-b2aiprep'', ''@type'':
+  [''prov:Entity'', ''https://w3id.org/EVI#Software''], ''name'': ''B2AIPrep Library'',
+  ''description'': ''A simple Python package to prepare acoustic data for the Bridge2AI
+  voice project.''}]}'
+id: ark:59853/b2ai-voice-dataset-feature-ppgs

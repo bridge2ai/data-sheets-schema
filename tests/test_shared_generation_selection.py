@@ -28,7 +28,9 @@ def registration_for(spec):
         'scopes': [{'owner': '', 'referent': 'External Cohort', 'release': 'synthetic',
                     'scope': 'Only the supplied fictional source.'}],
         'source_policy': {'priority': ['protocol'], 'basis': 'Synthetic fixture only.'}, 'vocabulary': {}}))
-    settings = api._model_settings()
+    # The registration declares what generic_v10 resolves to (#5043:
+    # the summarized thinking display is part of that condition's request).
+    settings = api._model_settings('generic_v10')
     path = directory / 'shared-registration.json'
     reg = {'format': sg.FORMAT, 'registration_id': 'invented-local-test', 'registration_path': str(path),
         'run': {key: getattr(spec, key) for key in ('project', 'arm', 'method', 'label')},
@@ -80,7 +82,7 @@ def selected(external):
 
 def test_selected_instruction_receipt_and_replay(selected):
     spec = selected
-    spec.bind_api_header_values(api._model_settings())
+    spec.bind_api_header_values(api._model_settings(spec.condition))
     text = spec.instruction
     assert 'Shared generation rules v1' in text and 'Role relationship review v1' in text
     for common in (api.ANONYMOUS_REMOVAL_CONTRACT_V15, api.SOURCE_METADATA_CONTRACT_V16, api.CLAIM_CLARIFICATION_CONTRACT_V17):

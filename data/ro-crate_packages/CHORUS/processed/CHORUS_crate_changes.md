@@ -18,7 +18,7 @@ apart from the date beside a validation verdict.
 
 ## Validation
 
-- `CHORUS_crate_d4d.yaml`: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-09-29 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
+- `CHORUS_crate_d4d.yaml`: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-10-07 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
 
 ## Changes (3)
 

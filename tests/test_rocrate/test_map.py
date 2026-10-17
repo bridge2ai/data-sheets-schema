@@ -2,6 +2,8 @@
 
 import contextlib
 import copy
+import csv
+import hashlib
 import io
 import json
 import re
@@ -9,6 +11,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from collections import Counter
 
 import yaml
 from linkml_runtime import SchemaView
@@ -16,6 +19,7 @@ from linkml_runtime import SchemaView
 from data_sheets_schema.rocrate_map import (
     FULL_SCHEMA,
     GRAPH_RE,
+    UNPLACED_KINDS,
     CrateEncodingError,
     MapResult,
     _normalize_datetime,
@@ -35,7 +39,8 @@ from data_sheets_schema.rocrate_map import (
 from data_sheets_schema.schema_cache import sha256_of
 
 GRAPH = [
-    {"@id": "ro-crate-metadata.json", "@type": "CreativeWork"},
+    {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+     "about": {"@id": "ark:59853/thing"}},
     {"@id": "ark:59853/thing", "@type": ["https://w3id.org/EVI#Dataset",
                                          "https://w3id.org/EVI#ROCrate"],
      "name": "Test Crate", "description": "A crate for tests",
@@ -51,7 +56,7 @@ class TestPathResolution(unittest.TestCase):
     def setUp(self):
         self.root = crate_root(GRAPH)
 
-    def test_crate_root_prefers_the_rocrate_entity(self):
+    def test_crate_root_is_the_entity_named_by_the_descriptor(self):
         self.assertEqual(self.root["@id"], "ark:59853/thing")
 
     def test_type_match_tolerates_evi_prefixed_types(self):
@@ -237,7 +242,7 @@ class TestMapping(unittest.TestCase):
         self.assertGreaterEqual(len(res.fields), len(self.rows))
         self.assertTrue(all(f.status in
                             ("filled", "subsumed", "empty", "unresolvable",
-                             "unplaceable")
+                             "unplaceable", "retired", "deferred")
                             for f in res.fields))
         # One report row per table row, in table order, and the id apart.
         table = [f for f in res.fields if f.from_table]
@@ -266,10 +271,239 @@ class TestMapping(unittest.TestCase):
         self.assertEqual(res.record, {})
 
     def test_unplaceable_rows_state_a_reason(self):
+        """Every row placed nowhere says why, the table's own reason with
+        the schema's. None has to be unplaceable: a table whose every row
+        places passes too (#2915)."""
         res = map_crate(GRAPH, self.rows, self.sv, "TEST")
-        unplaceable = [f for f in res.fields if f.status == "unplaceable"]
-        self.assertTrue(unplaceable)
-        self.assertTrue(all(f.detail for f in unplaceable))
+        declared = {row["D4D_Full_Path"].strip(): row for row in self.rows}
+        for f in res.fields:
+            if f.status != "unplaceable":
+                continue
+            with self.subTest(row=f.d4d_path):
+                self.assertTrue(f.detail)
+                row = declared[f.d4d_path]
+                self.assertEqual(f.unplaced, row["Unplaced"].strip())
+                self.assertIn(row["Unplaced_Reason"].strip(), f.detail)
+
+
+def unplaced_problems(rows, sv):
+    """`(d4d path, problem)` for each table row the schema contradicts.
+
+    A row's D4D path is judged by the placement `map_crate` applies, run on
+    a crate with nothing in it, where a row is `unplaceable` only because
+    its path places nowhere in a `Dataset` record. Such a row must say why
+    in the table's `Unplaced` column (an `UNPLACED_KINDS` key) and
+    `Unplaced_Reason` (#2915). A row that places must say neither:
+    `map_crate` reads a declaration only where placement fails, so one left
+    on a row that places is ignored, and the table would say the row maps
+    nowhere while the record carries its value and the report never shows
+    the declaration (#4417). Retired/deferred rows are not executable: their
+    historical paths remain in the ledger, and their current disposition and
+    reason must be reported instead of trying placement."""
+    fields = [f for f in map_crate([], rows, sv, "TABLE").fields if f.from_table]
+    problems = []
+    assert len(rows) == len(fields), "mapping rows and table results must pair exactly"
+    for row, field in zip(rows, fields):
+        execution = (row.get("Execution") or "active").strip()
+        if execution in ("retired", "deferred"):
+            if (field.status != execution
+                    or not (row.get("Execution_Reason") or "").strip()):
+                problems.append((field.d4d_path, "inactive rule lacks its disposition"))
+            continue
+        kind = (row.get("Unplaced") or "").strip()
+        reason = (row.get("Unplaced_Reason") or "").strip()
+        if field.status != "unplaceable":
+            if kind or reason:
+                problems.append((field.d4d_path, "places, but the table "
+                                 "declares it unplaced"))
+        elif not kind:
+            problems.append((field.d4d_path, "places nowhere, and the table "
+                             f"does not say why: {field.detail}"))
+        elif kind not in UNPLACED_KINDS:
+            problems.append((field.d4d_path, f"declares {kind!r}, which is "
+                             f"not one of {sorted(UNPLACED_KINDS)}"))
+        elif not reason:
+            problems.append((field.d4d_path, f"declares {kind!r} with no reason"))
+    return problems
+
+
+class TestTableAgainstSchema(unittest.TestCase):
+    """#2915. 54 of the table's 136 rows placed nowhere in a `Dataset`
+    record: 52 named a slot or class the schema does not have, and two named
+    `FormatDialect`, a class no `Dataset` slot ranges over. `map_crate`
+    dropped every value they read, `exactMatch` rows included. Each report
+    row gave the schema's reason, but no test failed on a table row the
+    schema contradicts (#4418). Every row's D4D path is now judged against
+    the merged schema: it places in a `Dataset` record, or the table says
+    why it does not. Inactive rules preserve the original denominator without
+    claiming their old paths are executable."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = load_mapping()
+
+    def row(self, path):
+        return next(r for r in self.rows if r["D4D_Full_Path"].strip() == path)
+
+    def test_every_row_places_or_the_table_says_why(self):
+        self.assertEqual([], unplaced_problems(self.rows, self.sv))
+
+    def test_the_guard_fails_a_stale_name_restored(self):
+        """The pre-#2915 form of one row: the slot the schema renamed."""
+        rows = copy.deepcopy(self.rows)
+        stale = next(r for r in rows
+                     if r["D4D_Full_Path"].strip() == "Dataset.at_risk_populations")
+        stale["D4D_Full_Path"] = "Dataset.vulnerable_populations"
+        self.assertEqual(unplaced_problems(rows, self.sv), [(
+            "Dataset.vulnerable_populations", "places nowhere, and the table "
+            "does not say why: 'vulnerable_populations' is not a slot on Dataset")])
+
+    def test_the_guard_fails_a_declaration_on_a_row_that_places(self):
+        """A retargeted row that kept its declaration places as before: the
+        mapper ignores the declaration, so the record carries the value of a
+        row the table says maps nowhere, and the report shows the row filled
+        and the declaration nowhere. Only the guard sees it (#4417)."""
+        for kind, reason in (("out_of_scope", "a stale reason"), ("", "a stale reason"),
+                             ("owner_question", "")):
+            rows = copy.deepcopy(self.rows)
+            title = next(r for r in rows if r["D4D_Full_Path"].strip() == "Dataset.title")
+            title["Unplaced"], title["Unplaced_Reason"] = kind, reason
+            with self.subTest(kind=kind, reason=reason):
+                self.assertEqual(unplaced_problems(rows, self.sv), [(
+                    "Dataset.title", "places, but the table declares it unplaced")])
+                res = map_crate(GRAPH, rows, self.sv, "TEST")
+                field = next(f for f in res.fields if f.d4d_path == "Dataset.title")
+                self.assertEqual((field.status, field.unplaced), ("filled", ""))
+                self.assertNotIn("stale", field.detail)
+                self.assertEqual(res.record["title"], "Test Crate")
+
+    def test_the_guard_fails_a_declaration_with_no_kind_it_knows_or_no_reason(self):
+        for kind, reason, problem in (
+                ("wontfix", "a reason", "declares 'wontfix', which is not one of "
+                 f"{sorted(UNPLACED_KINDS)}"),
+                ("out_of_scope", " ", "declares 'out_of_scope' with no reason"),
+                ("", "a reason", "places nowhere, and the table does not say why: "
+                 "'bytes' is not a slot on Dataset")):
+            rows = copy.deepcopy(self.rows)
+            row = next(r for r in rows if r["D4D_Full_Path"].strip() == "Dataset.bytes")
+            row["Execution"] = "active"  # probe legacy placement, not deferred execution
+            row["Unplaced"], row["Unplaced_Reason"] = kind, reason
+            with self.subTest(kind=kind, reason=reason):
+                self.assertEqual(unplaced_problems(rows, self.sv),
+                                 [("Dataset.bytes", problem)])
+
+    def test_the_retargeted_rows_place_the_crate_values_they_read(self):
+        """A crate holding each property a retargeted row reads fills the
+        slot the schema now has for it, and the record validates. The two
+        nested rows read the property a `Dataset` row already placed, so
+        they are subsumed, not placed twice. Governance is preserved as raw
+        narrative, with no inferred committee, contact or membership."""
+        graph = copy.deepcopy(GRAPH)
+        graph[1].update({
+            "d4d:atRiskPopulations": "No minors enrolled.",
+            "relatedLink": "https://example.org/related",
+            "rai:machineAnnotationTools": ["OpenSMILE 3.0", "Praat 6.4"],
+            "dataGovernanceCommittee": "Jane Doe",
+            "rai:dataReleaseMaintenancePlan": "Released annually.",
+        })
+        res = map_crate(graph, self.rows, self.sv, "TEST")
+        record = res.record
+        self.assertEqual(record["at_risk_populations"], {"name": "No minors enrolled."})
+        self.assertEqual(record["external_resources"],
+                         [{"name": "https://example.org/related"}])
+        self.assertEqual(record["machine_annotation_tools"],
+                         [{"name": "OpenSMILE 3.0"}, {"name": "Praat 6.4"}])
+        self.assertEqual(record["data_governance"], {"description": "Jane Doe"})
+        governance = next(f for f in res.fields if f.d4d_path == "DataGovernance.description")
+        self.assertEqual((governance.mapping_type, governance.information_loss), ("", ""))
+        status = {f.d4d_path: f.status for f in res.fields}
+        self.assertEqual(status["MachineAnnotationTools.tools"], "subsumed")
+        self.assertEqual(status["UpdatePlan.frequency"], "subsumed")
+        self.assertEqual(status["DataGovernance.description"], "filled")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapped_d4d.yaml"
+            path.write_text(yaml.safe_dump(record, sort_keys=False,
+                                           allow_unicode=True), encoding="utf-8")
+            self.assertEqual(validate(path), "PASS")
+
+    def test_the_report_reconciles_execution_without_promoting_a_member(self):
+        """The 136-rule denominator survives retirement, and a child cannot
+        create a root value or an artificial nested-merge conflict."""
+        graph = copy.deepcopy(GRAPH)
+        graph[1]["rai:dataPreprocessingProtocol"] = ["Root step."]
+        graph.insert(1, {"@id": "other", "@type": "Dataset",
+                         "rai:dataPreprocessingProtocol": ["Another step."]})
+        res = map_crate(graph, self.rows, self.sv, "TEST")
+        res.validation = "PASS"
+        self.assertEqual([], [f.d4d_path for f in res.fields if f.merge_undecided])
+        self.assertEqual(res.record["preprocessing_strategies"], [{"name": "Root step."}])
+        table_fields = [f for f in res.fields if f.from_table]
+        self.assertEqual(len(table_fields), 136)
+        self.assertEqual(Counter(f.execution for f in table_fields),
+                         {"active": 85, "retired": 19, "deferred": 32})
+        self.assertEqual(len(self.rows), len(table_fields))
+        for row, field in zip(self.rows, table_fields):
+            self.assertEqual(field.rule_id, row["Rule_ID"])
+            if row["Execution"] != "active":
+                self.assertEqual(field.status, row["Execution"])
+                self.assertEqual(field.detail, row["Execution_Reason"])
+                self.assertEqual(field.value_preview, "")
+                self.assertEqual(field.unplaced, "")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapping_provenance.md"
+            write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
+            text = path.read_text(encoding="utf-8")
+        self.assertIn("136 table rows declared", text)
+        self.assertIn("Executable table rules: 85; retired: 19; deferred: 32; "
+                      "original table rows: 136", text)
+        self.assertIn("| deferred | 32 |", text)
+        self.assertIn("| retired | 19 |", text)
+        self.assertIn("| unplaceable | 0 |", text)
+        self.assertRegex(text, r"\| Dataset\.bytes \| deferred \|")
+        self.assertRegex(text, r"\| EthicalReview\.irb_id \| retired \|")
+
+    def test_the_versioned_ledger_preserves_the_original_rows_and_claims(self):
+        """A retired row remains traceable to the immutable pre-decision
+        table; changing its ID or original claim must not shrink coverage."""
+        table_path = Path("data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv")
+        ledger = json.loads(table_path.with_name("d4d_rocrate_interface_rules_v1.json")
+                            .read_text(encoding="utf-8"))
+        self.assertEqual(ledger["version"], 1)
+        self.assertEqual(ledger["baseline_row_count"], 136)
+        self.assertEqual(ledger["baseline_commit"],
+                         "49c24423cb86b50599862990fd094a904d437c4d")
+        self.assertEqual(len(ledger["rows"]), 136)
+        self.assertEqual(ledger["table_sha256"], hashlib.sha256(table_path.read_bytes()).hexdigest())
+        archived = io.StringIO(newline="")
+        writer = csv.DictWriter(archived, fieldnames=ledger["baseline_columns"],
+                                delimiter="\t", lineterminator="\r\n")
+        writer.writeheader()
+        writer.writerows(entry["original"] for entry in ledger["rows"])
+        baseline_sha = "40ad8b94b7085369469b6104aeccc325a6395993a1128986d110c2284a29c3ac"
+        self.assertEqual(ledger["baseline_table_sha256"], baseline_sha)
+        self.assertEqual(hashlib.sha256(archived.getvalue().encode()).hexdigest(), baseline_sha)
+        expected_ids = {f"49c24423:legacy-line-{line}" for line in range(2, 138)}
+        self.assertEqual({r["Rule_ID"] for r in self.rows}, expected_ids)
+        self.assertEqual({e["rule_id"] for e in ledger["rows"]}, expected_ids)
+        by_id = {r["Rule_ID"]: r for r in self.rows}
+        for line in (26, 67, 80, 89):
+            row = by_id[f"49c24423:legacy-line-{line}"]
+            with self.subTest(unassessed_rule=row["Rule_ID"]):
+                self.assertEqual(row["Mapping_Type"], "")
+                self.assertEqual(row["Information_Loss"], "")
+        for entry in ledger["rows"]:
+            with self.subTest(rule=entry["rule_id"]):
+                self.assertEqual(entry["current"], by_id[entry["rule_id"]])
+                self.assertEqual(entry["execution"], entry["current"]["Execution"])
+                self.assertEqual(entry["rule_id"],
+                                 f"49c24423:legacy-line-{entry['original_tsv_line']}")
+                self.assertTrue(entry["reason"])
+                self.assertTrue(entry["decision_links"])
+                self.assertLessEqual(set(entry["successor_rule_ids"]), expected_ids)
+        self.assertEqual(ledger["execution_counts"],
+                         dict(Counter(r["Execution"] for r in self.rows)))
+        self.assertEqual(sum("accepted_policy" in e for e in ledger["rows"]), 43)
 
 
 PROTOCOL = "rai:dataPreprocessingProtocol"
@@ -371,19 +605,29 @@ class TestNestedRowsNeverOverwrite(unittest.TestCase):
         self.assertEqual(self.status(res, "PreprocessingStrategy.description").status,
                          "unplaceable")
 
-    def test_the_same_property_on_another_entity_is_not_subsumed(self):
-        """Same property name, different value: the Dataset row read a
-        Dataset entity that is not the crate root, so the values differ and
-        the nested row is not reported as already carried."""
-        graph = _with_protocol(["Root step."])
-        graph.insert(1, {"@id": "other", "@type": "Dataset", PROTOCOL: STEPS})
+    def test_a_members_same_property_neither_overwrites_nor_conflicts_with_root(self):
+        """Both table spellings read the root, independent of graph order;
+        the child's distinct value remains outside the mapped root object."""
+        for member_first in (True, False):
+            graph = _with_protocol(["Root step."])
+            member = {"@id": "other", "@type": "Dataset", PROTOCOL: STEPS}
+            graph.insert(1 if member_first else len(graph), member)
+            with self.subTest(member_first=member_first):
+                res = map_crate(graph, [DATASET_ROW, NESTED_ROW], self.sv, "TEST")
+                self.assertEqual(res.record["preprocessing_strategies"],
+                                 [{"name": "Root step."}])
+                nested = self.status(res, NESTED_ROW["D4D_Full_Path"])
+                self.assertEqual(nested.status, "subsumed")
+                self.assertFalse(nested.merge_undecided)
+                self.assertIn("already carries this crate value", nested.detail)
+
+    def test_a_member_cannot_supply_a_missing_root_protocol(self):
+        graph = copy.deepcopy(GRAPH)
+        graph.insert(1, {"@id": "child", "@type": "Dataset", PROTOCOL: STEPS})
         res = map_crate(graph, [DATASET_ROW, NESTED_ROW], self.sv, "TEST")
-        self.assert_one_object_per_item(res)
-        self.assertEqual(self.status(res, NESTED_ROW["D4D_Full_Path"]).status,
-                         "unplaceable")
-        detail = self.status(res, NESTED_ROW["D4D_Full_Path"]).detail
-        self.assertIn("the same crate property with a different value", detail)  # #3270
-        self.assertNotIn("another crate property", detail)
+        self.assertNotIn("preprocessing_strategies", res.record)
+        self.assertEqual([f.status for f in res.fields if f.from_table], ["empty", "empty"])
+        self.assertFalse(any(f.merge_undecided for f in res.fields))
 
     def test_crate_property_reads_both_spellings_as_one(self):
         self.assertEqual(crate_property(DATASET_ROW["RO_Crate_JSON_Path"]), PROTOCOL)
@@ -401,7 +645,7 @@ class TestNestedRowsNeverOverwrite(unittest.TestCase):
             write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
             text = path.read_text(encoding="utf-8")
         filled = res.counts()["filled"]
-        self.assertIn(f"({len(self.rows)} table rows applied, plus the record's "
+        self.assertIn(f"({len(self.rows)} table rows declared, plus the record's "
                       "`id`, taken from the crate root)", text)
         self.assertIn(f"- Distinct top-level `Dataset` slots filled: {len(res.record)} "
                       f"(from {filled} filled rows, the `id` among them)", text)
@@ -454,6 +698,17 @@ class TestNestedRowsNeverOverwrite(unittest.TestCase):
         res = map_crate(_with_protocol(), [DATASET_ROW, unrouted], self.sv, "TEST")
         self.assertIn("| unplaceable | 1 | no route into a `Dataset` record |",
                       self._report(res))
+        # A declared row beside the undecided one: the table explains one of
+        # the two, not both (#4419).
+        declared = dict(unrouted, Unplaced="owner_question", Unplaced_Reason="A reason.")
+        res = map_crate(_with_protocol(), [DATASET_ROW, other, declared],
+                        self.sv, "TEST")
+        self.assertIn("| unplaceable | 2 | no route into a `Dataset` record; 1 of "
+                      "them do resolve, but a `Dataset` row already filled the "
+                      "host slot, from another crate property or from the same "
+                      "property with a different value, and merging the two is "
+                      "not decided; the mapping table says why for 1 of them: 1 "
+                      "awaiting an owner's decision |", self._report(res))
 
 
 def _with_identifier(identifier):
@@ -732,7 +987,8 @@ def _crate_holding(source, value):
         root[m.group("prop")] = [{"name": m.group("name"), m.group("prop2"): value}]
     else:
         root[m.group("prop") if m else source] = value
-    return [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork"}, root]
+    return [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+             "about": {"@id": root["@id"]}}, root]
 
 
 class TestNullAndNestedListItems(unittest.TestCase):
@@ -758,6 +1014,8 @@ class TestNullAndNestedListItems(unittest.TestCase):
         table row supplies."""
         out = []
         for row in self.rows:
+            if row.get("Execution", "active") != "active" or row.get("Mapping_Rule"):
+                continue  # adapters have their own source/shape contracts
             graph = _crate_holding((row.get("RO_Crate_JSON_Path") or "").strip(), value)
             res = map_crate(graph, [row], self.sv, "TEST")
             field = res.fields[0]
@@ -902,7 +1160,8 @@ class TestEnumNonTextItems(unittest.TestCase):
 
 
 class TestRecordIdListItems(unittest.TestCase):
-    """#4174: the required id uses the same null/nested-list refusals."""
+    """#4174: identifier lists are shaped only after an unambiguous root
+    is selected; #4587 refuses a malformed root identity before shaping."""
 
     @classmethod
     def setUpClass(cls):
@@ -936,17 +1195,16 @@ class TestRecordIdListItems(unittest.TestCase):
                 self.assertIn("null; dropped", field.detail)
                 self.assertNotIn("fell back", field.detail)
 
-    def test_root_id_is_filtered_too_and_refusals_are_reported_if_both_are_empty(self):
-        res, field = self.mapped([None], [None, "ark:59853/fallback"])
-        self.assertEqual(res.record, {"id": "ark:59853/fallback"})
-        self.assertIn("@id: 1 of 2 list items is null; dropped", field.detail)
-        for root_id in ([None], [["x"]], None):
-            with self.subTest(root_id=root_id):
-                res, field = self.mapped([["identifier"]], root_id)
-                self.assertEqual(res.record, {})
-                self.assertEqual(field.status, "empty")
-                self.assertFalse(field.from_table)
-                self.assertIn("dropped rather than flattened", field.detail)
+    def test_malformed_root_id_refuses_selection_and_retains_the_reason(self):
+        for root_id in ([None, "ark:59853/fallback"], [None], [["x"]], None):
+            for identifier in ([["identifier"]], ["https://doi.org/10.5555/x"]):
+                with self.subTest(root_id=root_id, identifier=identifier):
+                    root = {**BARE_ROOT, "@id": root_id, "identifier": identifier}
+                    res = map_crate([root], [], self.sv, "TEST")
+                    self.assertEqual(res.record, {})
+                    self.assertEqual(res.fields, [])
+                    self.assertIsNone(res.sources["root"]["properties"])
+                    self.assertIn("invalid @id", res.sources["root"]["selection_note"])
 
 
 class TestNestedListsAcrossTheArms(unittest.TestCase):
@@ -1018,20 +1276,53 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
                     probe._map_evi_properties, probe._map_rai_properties,
                     probe._map_d4d_properties)
         shared = set()
+        table_pairs = set()
         for row in self.table:
+            if row.get("Execution", "active") != "active" or row.get("Mapping_Rule"):
+                continue
             path = row["D4D_Full_Path"].strip()
             match = GRAPH_RE.fullmatch(row.get("RO_Crate_JSON_Path", "").strip())
             if not (path.startswith("Dataset.") and match
                     and match["type"] == "Dataset" and not match["name"]):
                 continue
             prop, slot = match["prop"], path.partition(".")[2]
+            table_pairs.add((prop, slot))
             # A number is accepted by exact_bytes, so that mapping is not
             # lost merely because a text sentinel would be refused.
             mapped = {(p, s) for mapping in mappings
                       for p, s, _ in mapping({prop: 1})}
             if (prop, slot) in mapped:
                 shared.add((prop, slot))
-        self.assertGreaterEqual(len(shared), 37)
+        # The original table shared 39 ordinary pairs. md5 and sha256 are
+        # deferred; human subjects and imputation now have explicit adapters.
+        # These four are outside this generic-coercion agreement sweep.
+        removed = {("evi:md5", "md5"), ("evi:sha256", "sha256"),
+                   ("d4d:humanSubject", "human_subject_research"),
+                   ("rai:imputationProtocol", "imputation_protocols")}
+        self.assertFalse(shared & removed)
+        # #4046 moves exactly four more converter pairs to explicit canonical
+        # constructors. The static table is unchanged, and these adapters no
+        # longer promise generic-coercion agreement with its historical rows.
+        adapters = {
+            ("rai:dataCollection", "acquisition_methods"):
+                ("collection_mechanisms", "mechanism_details", "x"),
+            ("rai:personalSensitiveInformation", "confidential_elements"):
+                ("sensitive_elements", "sensitivity_details", ["x"]),
+            ("rai:dataSocialImpact", "data_protection_impacts"):
+                ("future_use_impacts", "impact_details", "x"),
+            ("rai:dataAnnotationProtocol", "labeling_strategies"):
+                ("labeling_strategies", "data_annotation_protocol", "x"),
+        }
+        self.assertLessEqual(set(adapters), table_pairs)
+        self.assertFalse(shared & set(adapters))
+        # Retain the old coverage floor, accounting for each moved pair rather
+        # than silently weakening the test if another generic mapping vanishes.
+        self.assertGreaterEqual(len(shared | set(adapters)), 35)
+        for (prop, old_slot), (slot, detail, value) in adapters.items():
+            with self.subTest(explicit_adapter=prop):
+                self.assertEqual(self.converter(prop, slot, value), [{detail: "x"}])
+                if old_slot != slot:
+                    self.assertIsNone(self.converter(prop, old_slot, value))
         self.assertLessEqual({(p, s) for p, (s, _) in self.PAIRS.items()}, shared)
         kinds = {
             "text": "x", "iso_date": "2022-09-01",
@@ -1052,8 +1343,10 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
                         if theirs_mixed != theirs_alone:
                             changed.add((slot, kind))
                             self.assertEqual(ours_alone, theirs_alone)
+        # The single-valued class-range slots; #2915 made
+        # `at_risk_populations` one the arms share.
         expected = {(slot, kind)
-                    for slot in ("updates", "human_subject_research")
+                    for slot in ("updates", "at_risk_populations")
                     for kind in kinds if kind != "boolean"}
         expected.update(("collection_timeframes", kind) for kind in (
             "iso_date", "slash_date", "ambiguous_date", "digits"))

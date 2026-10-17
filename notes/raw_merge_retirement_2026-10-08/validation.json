@@ -1,0 +1,129 @@
+{
+  "format": "raw_merge_retirement_validation_v1",
+  "tested_head": "9eefd41b8e0bdb731a3ab86d0f5c55d2ced4cc7c",
+  "tested_tree": "bc845b160dce1a7a87134d4eb318a02595e40638",
+  "base_commit": "c77b234357904522b8fb9ddb73a19e9c99dc4b97",
+  "addressed_issues": [
+    4593
+  ],
+  "not_closed": [
+    4594,
+    2915
+  ],
+  "test_run": {
+    "passed": 66,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "by_module": {
+      "tests.test_cli.test_rocrate_cli": 27,
+      "tests.test_cli.test_rocrate_raw_merge_retirement": 12,
+      "tests.test_cli.test_rocrate_transform_mapping": 17,
+      "tests.test_cli.test_rocrate_transform_mapping_adversarial": 10
+    },
+    "new_module_cases": 12,
+    "other_module_cases": 54,
+    "junit": {
+      "artifact": "raw-merge-retirement-tests-01.xml",
+      "bytes": 11084,
+      "sha256": "5d1fd129724c5c29c4ca7e3fcba66be35d6928a5234961371240d0880ffa4c77",
+      "seconds": 13.56,
+      "timestamp_as_recorded": "2026-10-08T00:14:27.747987"
+    },
+    "console_summary": {
+      "passed": 66,
+      "seconds": 13.59,
+      "dependency_deprecation_warnings": 14,
+      "basis": "Coordinator terminal summary; warning count is not encoded in JUnit."
+    },
+    "invocation": {
+      "working_directory": "<tested-checkout>",
+      "interpreter": "<primary-checkout>/.venv/bin/python",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTHONPATH": "<tested-checkout>/src:<tested-checkout>"
+      },
+      "arguments": [
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_cli/test_rocrate_cli.py",
+        "tests/test_cli/test_rocrate_raw_merge_retirement.py",
+        "tests/test_cli/test_rocrate_transform_mapping.py",
+        "tests/test_cli/test_rocrate_transform_mapping_adversarial.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "<external-evidence>/raw-merge-retirement-pytest-01",
+        "--junitxml",
+        "<external-evidence>/raw-merge-retirement-tests-01.xml"
+      ],
+      "path_disclosure": "Private local prefixes replaced by role placeholders."
+    }
+  },
+  "pins": {
+    "production": {
+      "src/data_sheets_schema/cli/rocrate.py": {
+        "sha256": "371a32df2dd466e9bbc74ac35ebaaa175a06b2c8f7685a37157f07350b083e80",
+        "bytes": 19375
+      }
+    },
+    "tests": {
+      "tests/test_cli/test_rocrate_cli.py": {
+        "sha256": "d2ce6af3c84554b17a2a33c2bc0a7a0865f91ce77c2956597f4eb47077f50ded",
+        "bytes": 42178
+      },
+      "tests/test_cli/test_rocrate_raw_merge_retirement.py": {
+        "sha256": "370eacf93408382c529e3a16acd030b658c34b09595295edb722b7210fe30392",
+        "bytes": 5620
+      },
+      "tests/test_cli/test_rocrate_transform_mapping.py": {
+        "sha256": "149b9a7b75aa35bd414418134671075424b58145ceb7347f9c1ac4ec335085b6",
+        "bytes": 8103
+      },
+      "tests/test_cli/test_rocrate_transform_mapping_adversarial.py": {
+        "sha256": "b619461ada2b2ce8431d7f10f318c061659dd2f10656dc03e038affeb4102224",
+        "bytes": 4708
+      }
+    },
+    "active_documentation": {
+      "docs/cli.md": {
+        "sha256": "b0932f2b7dce69294ab6d0340a82ee9fe3c43844a1de0f8911afdc49a00cca75",
+        "bytes": 11722
+      },
+      "CLAUDE.md": {
+        "sha256": "ed2b30c72f686b3d1e019ccb8a443b29e808ac67e3f07d543d45de4abe2185c9",
+        "bytes": 105945
+      }
+    },
+    "dependency_declarations": {
+      "pyproject.toml": {
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+        "bytes": 4446
+      },
+      "poetry.lock": {
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "bytes": 592155
+      }
+    }
+  },
+  "pin_verification": {
+    "count": 9,
+    "basis": "Every listed file matched the tested Git blob and current working bytes after the run.",
+    "scope": "Changed production source, four tested modules, active command documentation and declared dependency files; not a full imported-code, interpreter or installed-dependency attestation."
+  },
+  "limitations": [
+    "Raw merging is explicitly retired; no working raw-graph merge, identity reconciliation or source-provenance policy is implemented.",
+    "Legacy arguments/options remain recognizable. Valid invocations refuse before helper setup/import or crate/output content access; Click still validates arguments and supports help.",
+    "Real CLI controls preserve existing outputs and sources, including aliases; malformed content is not parsed by the retired command.",
+    "The old fake-merger success test is replaced with real refusal/preservation coverage.",
+    "No automatic rerouting to Dataset transformation or graph concatenation occurs. The separate transform mapping-selection controls pass.",
+    "Default legacy Dataset mapping defects and five-input replay obligations remain under #4594; #2915 retains its linked scientific and publication obligations.",
+    "No source coverage, scientific fidelity, provider execution or historical-output regeneration is established by retirement."
+  ],
+  "provider_calls": 0,
+  "scientific_eligibility": false,
+  "historical_outputs_regenerated": false
+}

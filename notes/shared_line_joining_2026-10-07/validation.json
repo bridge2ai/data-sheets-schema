@@ -1,0 +1,296 @@
+{
+  "artifacts": [
+    {
+      "artifact": "line-join-baseline-results-01/report.json",
+      "bytes": 36407,
+      "retained_external": true,
+      "role": "baseline",
+      "sha256": "dd7c2cb5c2761464899e24e9bc699bde05ddf3c5a5f5af97d8dd030926d340ce"
+    },
+    {
+      "artifact": "line-join-candidate-results-01/report.json",
+      "bytes": 36407,
+      "retained_external": true,
+      "role": "candidate",
+      "sha256": "05dc8ba6994c050af9b426c67127e32e03b2ccd69af1e1c5e0d6015c6075459d"
+    },
+    {
+      "artifact": "line-join-comparison-01/report.json",
+      "bytes": 9144,
+      "retained_external": true,
+      "role": "comparison",
+      "sha256": "93b3cb1db6213a4628638d5ca2e3d07ce9447c1436a860ddcb23ebcafedb818c"
+    },
+    {
+      "artifact": "line-join-tests-01.xml",
+      "bytes": 46854,
+      "retained_external": true,
+      "role": "pytest_junit",
+      "sha256": "f676673ddc9fe65e4c1c0e7fa53d36e93e0c9530cfe60c742808389a024257d8"
+    }
+  ],
+  "comparison": {
+    "all_fields_equal_between_roles": true,
+    "all_fields_equal_to_historical_manifest": true,
+    "all_versions_measured": true,
+    "baseline_commit": "8730ba98335392aba539b5c99e0b61918be917ab",
+    "candidate_commit": "fe5b0c800cf29439f069da500d43783fb888335c",
+    "coordinator_reported_exit_codes": {
+      "baseline": 0,
+      "candidate": 0,
+      "comparison": 0
+    },
+    "current_bundle_paths_preserved_per_role": 12,
+    "focused_sources_preserved_per_role": 6,
+    "historical_provenance_memberships": 279,
+    "inputs_preserved_in_both_reports": true,
+    "markdown_equal": true,
+    "markdown_sha256": "74da8dba44d6cdf66aae71cc12f5297f9cf21f70977214c49d16bef884b6b5b2",
+    "measurement_fields": [
+      "lines",
+      "letter_breaks",
+      "joinable_breaks",
+      "split_words",
+      "wraps_that_join",
+      "moved",
+      "moved_if_every_break_joins",
+      "hyphenated_breaks",
+      "mixed_windows",
+      "most_in_one_window",
+      "window_moves",
+      "compare_mixed_windows",
+      "compare_most_in_one_window",
+      "moved_if_up_to_k_breaks_join"
+    ],
+    "resolution_counts_per_role": {
+      "baseline": {
+        "file on disk": 8,
+        "git blob": 14
+      },
+      "candidate": {
+        "file on disk": 8,
+        "git blob": 14
+      }
+    },
+    "settings": {
+      "compare_window": 10,
+      "join_context_lines": null,
+      "joins_per_window": 2
+    },
+    "versions": 22,
+    "word_list": {
+      "bytes": 2493885,
+      "reported_entries": 234456,
+      "sha256": "be41ad97963bf8dabedd5871d5d691596175269d540956b0f9965a885c2bbab9",
+      "source": "system dictionary words"
+    }
+  },
+  "date": "2026-10-07",
+  "evidence_verification": {
+    "method": "Independent saved JSON/JUnit inspection and Git-object/working-byte hashing; no measurement or tests rerun while writing this note.",
+    "private_paths_and_raw_bundle_text_included": false,
+    "report_hash_links_rechecked": true,
+    "source_pins_recompared_to_declared_commits": true,
+    "typed_measurements_recompared_to_historical_manifest": true
+  },
+  "format": "d4d_shared_line_join_validation_v1",
+  "issue": 3644,
+  "review_issue": 4650,
+  "scope": {
+    "dependency_pins_mean": "Committed dependency declarations only; not a complete installed environment, imported-code or runtime snapshot.",
+    "held_open": [
+      4397,
+      4398,
+      2912,
+      2921
+    ],
+    "historical_memberships_mean": "Fixed panel provenance memberships, not independent samples or a current-corpus inventory.",
+    "limitations": [
+      "Saved local results establish behavior preservation for the fixed 22-version panel and focused tests; they do not prove exhaustive absence.",
+      "No receipt coverage or nested-list matching policy changed.",
+      "No provider invocation, scientific rating, calibration, source-coverage improvement or native acceptance claim.",
+      "Original reports, historical notes and bundle bytes are retained; full report and JUnit artifacts remain external."
+    ],
+    "performance_comparison": false,
+    "scientific_scoring_eligible": false
+  },
+  "tested_source": {
+    "baseline_commit": "8730ba98335392aba539b5c99e0b61918be917ab",
+    "commit": "fe5b0c800cf29439f069da500d43783fb888335c",
+    "pins": [
+      {
+        "bytes": 21585,
+        "git_blob": "318a629862a95f491e06ba396358f40e7c45d6e4",
+        "path": "scripts/measure_unhyphenated_line_splits.py",
+        "role": "focused_source",
+        "sha256": "bd2d3f23c97c6e03eeba1cf32a02e53027710f7794ccfd734ed66061ae42770c",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 78690,
+        "git_blob": "02b7fe1c520f064dc510834b9ad33bb56967c154",
+        "path": "src/data_sheets_schema/attainability.py",
+        "role": "focused_source",
+        "sha256": "b8f9afc15fe6b5a51f36a5c39a85296b25537396651122b335bcd7242012e264",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 20633,
+        "git_blob": "db398b0a0a5a3cd001aa47883c57cca85366f445",
+        "path": "src/data_sheets_schema/chunking.py",
+        "role": "focused_source",
+        "sha256": "8d10582971cd4139dbca50a4ab465488ca4604ab7d692dcf31e5963a8b11b9fc",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 122178,
+        "git_blob": "fca5f51a6861d8d4af48ff212fd1bb373821d362",
+        "path": "src/data_sheets_schema/provenance.py",
+        "role": "focused_source",
+        "sha256": "538ddf552a3f55d89182b8569621b197774c51eb9c2d64ae6f2da0a952085a1b",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 3469,
+        "git_blob": "be87bf8f85a88a65559ec09c36ef58c9e7f05454",
+        "path": "src/data_sheets_schema/corpus.py",
+        "role": "focused_source",
+        "sha256": "16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 15272,
+        "git_blob": "71129d2674918033532fdd07bd2b9c1b81acb9a4",
+        "path": "src/data_sheets_schema/resources.py",
+        "role": "focused_source",
+        "sha256": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 18329,
+        "git_blob": "bd6625467f65c2daac72defdd779767f6a549a1b",
+        "path": "tests/test_measure_unhyphenated_line_splits.py",
+        "role": "test_module",
+        "sha256": "84d1586d366489bc81372ab7cb4966e6d617281876342c84f1bb496cee326279",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 72767,
+        "git_blob": "9be16bd4f80aeb3b279118a2e0b4e42270706018",
+        "path": "tests/test_attainability.py",
+        "role": "test_module",
+        "sha256": "828515aa1c19188208b635c272db14273cdd8303b3f68785b476bca887045460",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 9919,
+        "git_blob": "3c9fb43e038443f80de0ab81afb6cfde4e055716",
+        "path": "tests/test_attainability_join_context.py",
+        "role": "test_module",
+        "sha256": "e04943108f7b3cd21ec7efd2f62765736d7a6424a2bbf249333dc28528265fbc",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 10577,
+        "git_blob": "dbac20cb1342cf52bfa11dcca607e2dc19d1fa69",
+        "path": "tests/test_attainability_check_gate.py",
+        "role": "test_module",
+        "sha256": "95ff5bd5efcd1eaa98f8c817190a731fa6df0f7bb2672ae3b319515d8e4756da",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 6596,
+        "git_blob": "69dc8f94775c27113242590a339953f4e67afbf8",
+        "path": "tests/test_shared_line_join_replay.py",
+        "role": "test_module",
+        "sha256": "115ace347bb76fa0234e157a4e2f9583fd8f1d8e07df869ab5e440fd496d4f81",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 11541,
+        "git_blob": "0263cd5c829becebc37acf9b4b720a72f09a0848",
+        "path": "notes/shared_line_joining_2026-10-07/replay.py",
+        "role": "replay_driver",
+        "sha256": "c2bf336a0a9fd4d049630dff8ae60514764cff4712c377ba81bfe9746862bb67",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 198350,
+        "git_blob": "b734fb11f9309fcbb6763378121aaaad425e77fc",
+        "path": "notes/attainability_join_context_2026-10-02.json",
+        "role": "historical_manifest",
+        "sha256": "1b4be55e6acf998c05349c0fb034f15ece68edcdca0a102e1664c4590e9aea09",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 6256,
+        "git_blob": "24645318829fcbe5265ba28e79bca4274123788f",
+        "path": "notes/shared_line_joining_2026-10-07/panel.json",
+        "role": "panel_inventory",
+        "sha256": "40b49f5b6adc06af2fe46bcd53b430b19f1582a6e7ffd661c8c530a29138604a",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 4446,
+        "git_blob": "87a84c564d243c134fead266600e96561562a75e",
+        "path": "pyproject.toml",
+        "role": "dependency_declaration",
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+        "working_bytes_equal_tested_commit": true
+      },
+      {
+        "bytes": 592155,
+        "git_blob": "cfe519359b0be36a52544377584f0217c6763fed",
+        "path": "poetry.lock",
+        "role": "dependency_declaration",
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "working_bytes_equal_tested_commit": true
+      }
+    ],
+    "tree": "689c8a2fef653562ea890bcca712a825ea733a27"
+  },
+  "tests": {
+    "argv": [
+      "{primary_venv_python}",
+      "-B",
+      "-m",
+      "pytest",
+      "tests/test_measure_unhyphenated_line_splits.py",
+      "tests/test_attainability.py",
+      "tests/test_attainability_join_context.py",
+      "tests/test_attainability_check_gate.py",
+      "tests/test_shared_line_join_replay.py",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp={external_workspace}/line-join-pytest-01",
+      "--junitxml={external_workspace}/line-join-tests-01.xml"
+    ],
+    "command_provenance": "Coordinator-supplied command; workspace and interpreter paths normalized below. XML independently confirms module membership, counts, outcomes and elapsed time.",
+    "coordinator_reported_console_seconds": 64.58,
+    "coordinator_reported_exit_code": 0,
+    "environment": {
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONPATH": "{candidate_checkout}/src:{candidate_checkout}"
+    },
+    "errors": 0,
+    "failures": 0,
+    "junit_seconds": 64.458,
+    "module_cases": {
+      "tests.test_attainability": 239,
+      "tests.test_attainability_check_gate": 15,
+      "tests.test_attainability_join_context": 16,
+      "tests.test_measure_unhyphenated_line_splits": 30,
+      "tests.test_shared_line_join_replay": 12
+    },
+    "passed": 312,
+    "runtime": {
+      "basis": "coordinator declaration",
+      "installed_environment_snapshot": false,
+      "python_version": "3.13.12"
+    },
+    "skipped": 0,
+    "working_directory": "{candidate_checkout}"
+  }
+}

@@ -176,7 +176,7 @@ class EvidenceValidationError(ValueError):
         super().__init__("\n".join(f"{finding.code}: {finding.message}" for finding in report.errors))
 
 
-def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceReport:
+def check_evidence(result: dict, document: dict, rubric_name: str, *, resource_reader=None) -> EvidenceReport:
     """Report where a rating's evidence or issue links contradict its input.
 
     Raises ValueError, as `validate_scope` does, when the rubric is not a
@@ -186,13 +186,13 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
     raised, and so is a quote YAML cannot read, such as an impossible date; the
     rating's item structure is `validate_scope`'s to refuse.
     """
-    rubric_name, instrument, specification, rules = _issue_contract(result, rubric_name)
+    rubric_name, instrument, specification, rules = _issue_contract(result, rubric_name, resource_reader=resource_reader)
     fields = _declared_fields(rubric_name, specification)
     units = dict(dataset_units(document))
     absence_names = None
     if instrument is not None and instrument.evidence_authority_path is not None:
         from data_sheets_schema.semantic_evidence_authority import verify_authority
-        absence_names = verify_authority(result.get("metadata") or {})
+        absence_names = verify_authority(result.get("metadata") or {}, resource_reader=resource_reader)
     findings: list[EvidenceFinding] = []
     for key, item in _items(result, rubric_name):
         rule = rules.get(key)
@@ -223,7 +223,7 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
     return EvidenceReport(tuple(findings))
 
 
-def _issue_contract(result: dict, rubric_name: str):
+def _issue_contract(result: dict, rubric_name: str, *, resource_reader=None):
     rubric_name = rubric_name.removesuffix("-semantic")
     if rubric_name not in {"rubric10", "rubric20"}:
         raise ValueError(f"unknown general-context semantic rubric: {rubric_name}")
@@ -235,7 +235,9 @@ def _issue_contract(result: dict, rubric_name: str):
     instrument = (select_semantic_instrument(rubric_name, version)
                   if version in ("2.0", "3.0", "4.0") else None)
     rubric_path = instrument.rubric_path if instrument else f"data/rubric/{rubric_name}.txt"
-    specification = yaml.safe_load(resource_path(rubric_path).read_bytes())
+    raw = (resource_path(rubric_path).read_bytes() if resource_reader is None
+           else resource_reader(rubric_path))
+    specification = yaml.safe_load(raw)
     rules = evaluation_contract(rubric_name, specification, result.get("applicability_context"),
                                 {"id": "evidence-contract"})["items"]
     return rubric_name, instrument, specification, rules
@@ -248,7 +250,7 @@ def _issue_report(result: dict, rubric_name: str, rules: dict) -> EvidenceReport
     return EvidenceReport(tuple(_issue_findings(result, rules, below)))
 
 
-def check_issue_links(result: dict, rubric_name: str) -> EvidenceReport:
+def check_issue_links(result: dict, rubric_name: str, *, resource_reader=None) -> EvidenceReport:
     """Check issue-to-item links without claiming input evidence was checked.
 
     Call after schema/scope validation. This uses the same applicability and
@@ -256,7 +258,7 @@ def check_issue_links(result: dict, rubric_name: str) -> EvidenceReport:
     Absence, quotation, count and field-coverage checks require the actual input
     and remain the responsibility of ``check_evidence``.
     """
-    rubric_name, _, _, rules = _issue_contract(result, rubric_name)
+    rubric_name, _, _, rules = _issue_contract(result, rubric_name, resource_reader=resource_reader)
     return _issue_report(result, rubric_name, rules)
 
 

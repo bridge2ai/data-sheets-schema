@@ -228,3 +228,116 @@ class TestTheRequestIsRecordedNotJustTheFile(unittest.TestCase):
         pr = self._prompts()
         self.assertIsNone(pr["paths"])
         self.assertIn("request", pr)
+
+
+class TestMidnightCrossingRunDate(unittest.TestCase):
+    """#5049: An agentic run rendered before UTC midnight (`# Generated: 2026-10-14`)
+    and recorded after midnight (`2026-10-15`) must record the launch `run_date`
+    rather than the recorder process's `date.today()`, so the render gate verifies
+    `match` instead of failing with a 1-day `mismatch`."""
+
+    def test_prompt_text_header_and_window_recover_midnight_run_date(self):
+        from unittest import mock
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli import provenance as prov_cli
+        from data_sheets_schema.cli.api import ARMS
+
+        repo_root = Path(__file__).resolve().parents[2]
+        bundle = repo_root / "data/preprocessed/concatenated/VOICE_preprocessed.txt"
+        if not bundle.exists():
+            self.skipTest("VOICE bundle absent")
+
+        label = "2026-10-14_claude-opus-5-generic-v8_rep1"
+        spec_prev_day = RunSpec(
+            project="VOICE",
+            arm=ARMS["baseline"][0],
+            method="claudecode_agent",
+            bundle=bundle,
+            label=label,
+            condition="generic_v8",
+            runtime="Claude Code",
+            provider="Anthropic",
+            run_date="2026-10-14",
+            manifest_line=ARMS["baseline"][3],
+        )
+        sent = resolve_prompt(spec_prev_day)
+        self.assertIn("# Generated: 2026-10-14", sent)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            prompt_file = Path(tmp) / "rendered_prompt.txt"
+            prompt_file.write_text(sent, encoding="utf-8")
+            fake_rec = mock.MagicMock(validation_carried=None)
+            fake_rec.write.return_value = repo_root / "VOICE_provenance.yaml"
+
+            with mock.patch("data_sheets_schema.provenance.build_record", return_value=fake_rec) as build, \
+                 mock.patch.object(prov_cli, "_recorded_receipt_origin", return_value=None), \
+                 mock.patch.object(prov_cli, "_inline_checks"):
+                r = CliRunner().invoke(
+                    prov_cli.provenance,
+                    [
+                        "record",
+                        "--project", "VOICE",
+                        "--method", "claudecode_agent",
+                        "--label", label,
+                        "--input-bundle", str(bundle),
+                        "--condition", "generic_v8",
+                        "--runtime", "Claude Code",
+                        "--provider", "Anthropic",
+                        "--prompt-text", str(prompt_file),
+                    ],
+                )
+            self.assertEqual(r.exit_code, 0, r.output)
+            saved_spec = build.call_args.kwargs["prompt_request_spec"]
+            self.assertEqual(saved_spec["run_date"], "2026-10-14")
+            reconstructed = RunSpec.from_render_spec(
+                saved_spec, project="VOICE", method="claudecode_agent", label=label
+            )
+            self.assertEqual(resolve_prompt(reconstructed), sent)
+
+    def test_explicit_run_date_flag_sets_spec_run_date_and_rejects_bad_dates(self):
+        from unittest import mock
+        from data_sheets_schema.cli import provenance as prov_cli
+
+        repo_root = Path(__file__).resolve().parents[2]
+        bundle = repo_root / "data/preprocessed/concatenated/VOICE_preprocessed.txt"
+        if not bundle.exists():
+            self.skipTest("VOICE bundle absent")
+
+        label = "2026-10-14_claude-opus-5-generic-v8_rep1"
+        fake_rec = mock.MagicMock(validation_carried=None)
+        fake_rec.write.return_value = repo_root / "VOICE_provenance.yaml"
+        with mock.patch("data_sheets_schema.provenance.build_record", return_value=fake_rec) as build, \
+             mock.patch.object(prov_cli, "_recorded_receipt_origin", return_value=None), \
+             mock.patch.object(prov_cli, "_inline_checks"):
+            r = CliRunner().invoke(
+                prov_cli.provenance,
+                [
+                    "record",
+                    "--project", "VOICE",
+                    "--method", "claudecode_agent",
+                    "--label", label,
+                    "--input-bundle", str(bundle),
+                    "--condition", "generic_v8",
+                    "--runtime", "Claude Code",
+                    "--provider", "Anthropic",
+                    "--run-date", "2026-10-14",
+                ],
+            )
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertEqual(build.call_args.kwargs["prompt_request_spec"]["run_date"], "2026-10-14")
+
+        bad = CliRunner().invoke(
+            prov_cli.provenance,
+            [
+                "record",
+                "--project", "VOICE",
+                "--method", "claudecode_agent",
+                "--label", label,
+                "--input-bundle", str(bundle),
+                "--condition", "generic_v8",
+                "--run-date", "not-a-date",
+            ],
+        )
+        self.assertNotEqual(bad.exit_code, 0)
+        self.assertIn("--run-date", bad.output)
+

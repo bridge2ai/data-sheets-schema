@@ -1,0 +1,122 @@
+{
+  "application_test_acceptance": true,
+  "argv": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-I",
+    "-B",
+    "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02/pytest_worker.py",
+    "candidate313"
+  ],
+  "baseline_confirmation": {
+    "bytes": 6028,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/baseline-confirmation.json",
+    "sha256": "3d0bd80f54d9bc665b16c0254dd3724e8994c62cf803aaa4dae2dcc082cee912"
+  },
+  "candidate_pins": [
+    {
+      "bytes": 28634,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_route_dispositions.py",
+      "sha256": "1bf8af7c24d2a27f22995f9a84c7b141d168763d617d06358be31c13fdd9daf1"
+    },
+    {
+      "bytes": 23795,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/cli.py",
+      "sha256": "5d8020f0764e35af99f72e5d6e61e83d90455302dd28b075f75121d770b97a1d"
+    },
+    {
+      "bytes": 21320,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/.claude/agents/scripts/rocrate_to_d4d.py",
+      "sha256": "5cb0a7a976f2547fabeae0302d9d7e4bc9a57d0333831edd7e386a71a41734bb"
+    },
+    {
+      "bytes": 8626,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_supplemental_report.py",
+      "sha256": "fe4af1e6290dc215a2a6c9770f34b6b1ab2320ccb9d27691e581774d551b7ad2"
+    },
+    {
+      "bytes": 42087,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/transformation/transform_api.py",
+      "sha256": "7057be40996b553c20105e324705656a0e1cc96ed9c41867f585822534c787e3"
+    },
+    {
+      "bytes": 14115,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_route_disposition_api_counts.py",
+      "sha256": "cc514fc77b7c66d17e8ee49ca9d02f79f1a7b028b54b44dc613fbc450f314392"
+    }
+  ],
+  "changed_entries": [],
+  "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+  "dirty_paths_after": [
+    ".claude/agents/scripts/rocrate_to_d4d.py",
+    "src/data_sheets_schema/legacy_route_dispositions.py",
+    "src/fairscape_integration/cli.py",
+    "src/transformation/transform_api.py",
+    "tests/test_rocrate/test_legacy_route_disposition_api_counts.py",
+    "tests/test_rocrate/test_legacy_supplemental_report.py"
+  ],
+  "elapsed_seconds": 114.34887099999469,
+  "error": null,
+  "exit_code": 0,
+  "expected_failure_confirmed": false,
+  "expected_nodeids": {
+    "bytes": 339114,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01/candidate-nodeids.json",
+    "sha256": "5a7b1813ff1bc218566129d4638b11a20119919dbe4ff42da79cb11a43f9666e"
+  },
+  "git_state_preserved": true,
+  "head": "d9005cca0ce54e8764ca9fdd740b51444c8a08ab",
+  "head_after": "d9005cca0ce54e8764ca9fdd740b51444c8a08ab",
+  "junit": {
+    "cases": 2273,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "mode": "all_pass",
+  "origin_scope": "Normal collection and final module metadata only; deliberate per-test import controls are not instrumented.",
+  "outputs": [
+    {
+      "bytes": 2387953,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/after.json",
+      "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+    },
+    {
+      "bytes": 2387953,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/before.json",
+      "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+    },
+    {
+      "bytes": 418690,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/junit.xml",
+      "sha256": "5ecc25e4ea769341b96d791b2d50b70a8c3e29c7671579413e80e74563f33039"
+    },
+    {
+      "bytes": 0,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 4853,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/stdout.log",
+      "sha256": "aca8033d75a4d77c88e136bf6568c1beeda15d9b4bce0b5dbc9b0f5c8e13682d"
+    },
+    {
+      "bytes": 393854,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/worker.json",
+      "sha256": "5fcb9bad901019cd985c4acc3df504f83c1d42859f3a062f8f0062cc6b667587"
+    }
+  ],
+  "passed": true,
+  "path": "/Users/marcin/.codex/packages/app-server-daemon/releases/0.162.1-aarch64-apple-darwin/codex-path:/Users/marcin/.codex/tmp/arg0/codex-arg0KVPOCW:/Users/marcin/.codex/tmp/arg0/codex-arg0u8L2To:/Users/marcin/.codex/packages/app-server-daemon/releases/0.162.0-aarch64-apple-darwin/codex-path:/Users/marcin/.codex/tmp/arg0/codex-arg0atgPcQ:/Users/marcin/.codex/packages/app-server-daemon/releases/0.161.0-aarch64-apple-darwin/codex-path:/Users/marcin/.codex/tmp/arg0/codex-arg05uRdYH:/Users/marcin/.nvm/versions/node/v22.16.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-path:/Users/marcin/.local/bin:/Users/marcin/.local/bin:/opt/homebrew/Caskroom/miniforge/base/bin:/opt/homebrew/Caskroom/miniforge/base/condabin:/Users/marcin/bin:/Users/marcin/Documents/VIMSS/ontology/KG-Hub/KG-Microbe/kg-microbe/bin:/Users/marcin/Documents/VIMSS/ontology/KG-Hub/KG-Microbe/kg-microbe/relation-graph/cli/target/universal/stage/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/opt/local/bin:/opt/local/sbin:/Users/marcin/.npm-global/bin:/Users/marcin/.local/bin:/Users/marcin/.cargo/bin:/Users/marcin/.bun/bin:/Users/marcin/.nvm/versions/node/v22.16.0/bin:/Users/marcin/.pyenv/plugins/pyenv-virtualenv/shims:/Users/marcin/.pyenv/shims:/Users/marcin/.poetry/bin:/Users/marcin/.pyenv/bin:/Users/marcin/.pyenv/shims/poetry:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/mysql/bin:/Library/Frameworks/R.framework/Resources",
+  "phase": "candidate313",
+  "pin_changes": [],
+  "preserved": true,
+  "same_ordered_nodes_as313": null,
+  "selected_linkml_launcher": null,
+  "source_inventory_entries": 10791,
+  "tree_after": "859078630d3ef8ac5bb3c8f4096a8ec0af21e4a6",
+  "version_expected": [
+    3,
+    13
+  ]
+}

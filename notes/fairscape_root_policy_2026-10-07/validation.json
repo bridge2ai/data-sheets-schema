@@ -1,0 +1,203 @@
+{
+  "base_commit": "fb057076923d8616030bf239cc5505395eedb384",
+  "candidate_source_sha256": {
+    "src/data_sheets_schema/rocrate_sources.py": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75",
+    "src/fairscape_integration/fairscape_to_d4d.py": "7d5f91de8c6af1712899ddfc76f5b87fa5bb6c35c7ba079e586cc6522700f6fd",
+    "src/data_sheets_schema/rocrate_map.py": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592",
+    "src/data_sheets_schema/rocrate_assertions.py": "db29413b43226201e2c6686d2d66beb18bfef12b37176a7a0c3180e94bba533f",
+    "src/data_sheets_schema/schema_view.py": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff",
+    "src/data_sheets_schema/scope.py": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199",
+    "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f",
+    "notes/fairscape_root_policy_2026-10-07/replay.py": "833b7b781cd771bed3975bbfdc991f89aa74aa3739b07a96a6ee2fca227c4242"
+  },
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "checks": {
+    "replay-baseline-check": {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-B",
+        "/private/tmp/d4d-4586-root-policy-5TUUIl3B/replay.py",
+        "baseline"
+      ],
+      "exit_code": 0,
+      "code_unchanged": true,
+      "started": "2026-10-08T01:01:16.394453+00:00",
+      "finished": "2026-10-08T01:01:22.596617+00:00"
+    },
+    "tests-integration-02": {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_fairscape_integration",
+        "tests/test_rocrate",
+        "tests/test_rocrate_file_collection.py",
+        "tests/test_cli/test_rocrate_cli.py",
+        "tests/test_crate_generation_comparison.py",
+        "tests/test_deterministic_publication.py",
+        "tests/test_figure_publication.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/private/tmp/d4d-4586-root-policy-5TUUIl3B/tests-integration-02/tmp",
+        "--junitxml=/private/tmp/d4d-4586-root-policy-5TUUIl3B/tests-integration-02/junit.xml"
+      ],
+      "exit_code": 0,
+      "code_unchanged": true,
+      "started": "2026-10-08T01:08:40.328242+00:00",
+      "finished": "2026-10-08T01:11:45.611629+00:00"
+    },
+    "replay-candidate-check": {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-B",
+        "/private/tmp/d4d-4586-root-policy-5TUUIl3B/replay.py",
+        "candidate"
+      ],
+      "exit_code": 0,
+      "code_unchanged": true,
+      "started": "2026-10-08T01:12:13.253506+00:00",
+      "finished": "2026-10-08T01:12:24.222648+00:00"
+    },
+    "replay-portable-check": {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-B",
+        "notes/fairscape_root_policy_2026-10-07/replay.py",
+        "--repo",
+        ".",
+        "--output",
+        "/private/tmp/d4d-4586-root-policy-5TUUIl3B/reproduced"
+      ],
+      "exit_code": 0,
+      "code_unchanged": true,
+      "started": "2026-10-08T01:13:04.040987+00:00",
+      "finished": "2026-10-08T01:13:14.288864+00:00"
+    }
+  },
+  "tests": {
+    "passed": 779,
+    "skipped": [
+      {
+        "test": "tests.test_fairscape_integration.test_linkml_map_integration.TestLinkMLMapIntegration.test_initialization_with_schemas",
+        "reason": "linkml-map not available"
+      },
+      {
+        "test": "tests.test_rocrate_file_collection.TestFileCollectionROCrateTransformation.test_a_listed_collection_type_comes_back_with_the_rest_reported",
+        "reason": "FAIRSCAPE integration not available"
+      },
+      {
+        "test": "tests.test_rocrate_file_collection.TestFileCollectionROCrateTransformation.test_backward_compatibility_no_filecollections",
+        "reason": "FAIRSCAPE integration not available"
+      },
+      {
+        "test": "tests.test_rocrate_file_collection.TestFileCollectionROCrateTransformation.test_d4d_to_rocrate_with_filecollections",
+        "reason": "FAIRSCAPE integration not available"
+      },
+      {
+        "test": "tests.test_rocrate_file_collection.TestFileCollectionROCrateTransformation.test_rocrate_to_d4d_with_nested_datasets",
+        "reason": "FAIRSCAPE integration not available"
+      },
+      {
+        "test": "tests.test_rocrate_file_collection.TestFileCollectionROCrateTransformation.test_roundtrip_preservation",
+        "reason": "FAIRSCAPE integration not available"
+      }
+    ]
+  },
+  "comparison": {
+    "converter_inputs": 8,
+    "static_records": 3,
+    "output_bytes_unchanged": true,
+    "record_values_unchanged": true,
+    "dropped_diagnostics_unchanged": true,
+    "historical_publications_rewritten": false
+  },
+  "cases": {
+    "profile": {
+      "path": "data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json",
+      "input_sha256": "0e485ec208f013ab9f4009d395b5eae9a217520fc81d8cabfb44190d6728d5a4",
+      "root_id": "ark:59853/rocrate-cell-maps-for-artificial-intelligence-January-2026-data-release",
+      "output_sha256": "64feb8393a6b895384ad36d94dd2763c374e71d21aec4b6a35b435a56f3dee2a",
+      "record_sha256": "9c06b319fb04c8516bbfaca6b79466b22af17069df2fdc65eabce1f807831768",
+      "dropped_sha256": "f95104998cfa1798c52044a8b0ca9d3ee8a59ea65db281aed21318ff98ce5cff",
+      "validation": "PASS",
+      "reversal": "same root and contents; file_collections compared as a multiset"
+    },
+    "cm4ai_roundtrip": {
+      "path": "data/ro-crate/examples/CM4AI_roundtrip.json",
+      "input_sha256": "fe3fc82d572b059376da194274f81c0122fe1c8de21d33c0c71cc3653f76049c",
+      "root_id": "./",
+      "output_sha256": "924dfbb0666bfb84f7590184bffbfd5e5d29cce35f53edcc0f008586f66f6c6f",
+      "record_sha256": "db8b7e7dc19b3e196a1c5c419704df13b51408dc1c54e54c9f607668ba1bb22c",
+      "dropped_sha256": "4e78c82fd24a1284239ef8916ea622ada1f4d36f14d9518aa5f8f60ac41a075c",
+      "validation": "PASS",
+      "reversal": "same root and contents; file_collections compared as a multiset"
+    },
+    "voice_roundtrip": {
+      "path": "data/ro-crate/examples/voice_d4d_to_fairscape.json",
+      "input_sha256": "56a94d9d4f1077f31bfb322bcf5704681df0f84ec892c693a71fce9cc8623194",
+      "root_id": "./",
+      "output_sha256": "af0bac89ff037302561f8cf761eb8cbbc002cfc0d53580ca5e779d7c7a254905",
+      "record_sha256": "511df62edec7726b928178ea67ccda7e6654e21b0c03f687ca5ce50f6094fd75",
+      "dropped_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "validation": "PASS",
+      "reversal": "same root and contents; file_collections compared as a multiset"
+    },
+    "voice_example": {
+      "path": "data/ro-crate/examples/voice_fairscape_test.json",
+      "input_sha256": "56a94d9d4f1077f31bfb322bcf5704681df0f84ec892c693a71fce9cc8623194",
+      "root_id": "./",
+      "output_sha256": "af0bac89ff037302561f8cf761eb8cbbc002cfc0d53580ca5e779d7c7a254905",
+      "record_sha256": "511df62edec7726b928178ea67ccda7e6654e21b0c03f687ca5ce50f6094fd75",
+      "dropped_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "validation": "PASS",
+      "reversal": "same root and contents; file_collections compared as a multiset"
+    },
+    "CHORUS": {
+      "path": "data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json",
+      "input_sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774",
+      "root_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+      "output_sha256": "8aab52c16039142c93d7635ec215ca7b21ed5934a47e6131cd17aaacd8aca3f0",
+      "record_sha256": "77a2c22ace040053e553d44b0f6354c77e8780f927f2c2ff000d2653a03e0d75",
+      "dropped_sha256": "2d8c8bb3a5cf800a3dbd5deef9216af379e3fe7fb3c895357488dd8871ec39e1",
+      "validation": "PASS",
+      "reversal": "same root and contents; file_collections compared as a multiset",
+      "static_record_sha256": "0888af609d3a1e1e6b5786bf42b9921679f18e1711f9e04cce1959d10d186c3b"
+    },
+    "VOICE": {
+      "path": "data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json",
+      "input_sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4",
+      "root_id": "ark:59853/rocrate-b2ai-voice-3.0.0",
+      "output_sha256": "845f9cfd43edbbb1787c8e1832acea205ad77c3fb0107a605839b6b95c45c63b",
+      "record_sha256": "63b4d2c65074f0aac63c1f6a232a9f7deb09ee36122cddb3104124925e5c47d9",
+      "dropped_sha256": "6ef88ebce90ba80d86fcc0a27255eb95e391333317cd9ba08a31aaf746b91bda",
+      "validation": "PASS",
+      "reversal": "same root and contents; file_collections compared as a multiset",
+      "static_record_sha256": "db267db7b61249e3517985602589a126096472e1b4f253a8bc32dbf685210ffc"
+    },
+    "CM4AI_reduced": {
+      "path": "data/ro-crate_packages/CM4AI/processed/CM4AI_crate_metadata_reduced.json",
+      "input_sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610",
+      "root_id": "https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release",
+      "output_sha256": "b12c71d12f7a8ab26e6906b4729ba86ad92c96f789a34860e1b3ac0d736d3746",
+      "record_sha256": "9d1aca7cecacddef570fcc489289569de1f4f82b7fea3a843d96f38db427ba7c",
+      "dropped_sha256": "6e95a91c83b6166b617553652ae4bd309a35526dfe97bc89f35e78aafd8f21a4",
+      "validation": "PASS",
+      "reversal": "same root and contents; file_collections compared as a multiset"
+    },
+    "CM4AI": {
+      "path": "data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip",
+      "archive_sha256": "a8a4fea0aa4cfb9797fe1871de064bf29563516c5de4aa834aa177fb7c6b1d4c",
+      "member": "cm4ai_release_metadata/ro-crate-metadata.json",
+      "input_sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e",
+      "root_id": "https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release",
+      "output_sha256": "512264050aa262664d3499c01a1a0f29d1864e97768bfdfbe7ead94cf18b1774",
+      "record_sha256": "abce2f9e60be145cf1e8f125453bb7ded8c4099c7c8fb10dafec032d8d9e1318",
+      "dropped_sha256": "40d425740ac653aaecc565364deeb80b82b720a331b6a89d5baf7cc232cbfbcb",
+      "validation": "PASS",
+      "reversal": "same root and contents; file_collections compared as a multiset",
+      "static_record_sha256": "d2478a0e5d9a9ddbbc193e16cf9cd43b9e598f775ed8319ac95d60a98a8715c6"
+    }
+  }
+}

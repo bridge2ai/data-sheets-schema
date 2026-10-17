@@ -162,13 +162,19 @@ projects:
     archive: false
     document_corpus: allow
     document_corpus_reason: >-
-      No exclusion is possible or needed: this crate was supplied as a Drive
-      folder, so it has no upstream record the sheet could cite. Its
-      `describes_dataset` (fairhub.io/datasets/3) is a genuine document corpus
-      source in its own right -- source_manifest.yaml `fairhub_dataset_v3` and
-      `fairhub_dataset_v3_api` -- and must stay: the crate describes that
-      release, it is not published by it. This resolves the `undecided` that
-      `document_corpus_exclusions()` was reporting.
+      Not part of AI_READI's document corpus since 2026-10-14 (#5042): the
+      owner's rule is that generation runs read no RO-Crate content, so the
+      source_manifest.yaml entry `ro_crate_metadata` (added by #540 on
+      2026-08-12) was removed and the bundle rebuilt without it. The policy
+      stays `allow` on purpose. `exclude` would register this entry's `doi`
+      (10.60775/fairhub.3) and `describes_dataset` (fairhub.io/datasets/3) as
+      exclusions (`rocrate_normalize.document_corpus_exclusions()`), and those
+      name the FAIRhub dataset itself, whose records `fairhub_dataset_v3` and
+      `fairhub_dataset_v3_api` are genuine document-corpus sources that must
+      stay. The crate was supplied as a Drive folder, so no input-sheet citation
+      can pull it into the corpus; leaving it out of source_manifest.yaml is
+      what keeps it out. AI_READI records generated from 2026-08-13 to
+      2026-09-07 read a bundle that included it (bundle_hash_history, #5042).
     curation_note: >-
       The crate describes AI-READI dataset v3.0.0, which is the release the
       document corpus already prefers (source_manifest.yaml

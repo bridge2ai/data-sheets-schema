@@ -1,0 +1,92 @@
+{
+  "format": "legacy_publication_validation_v1",
+  "tested_head": "f4b1fb670b86fce73036eab39d173bc2b9736b1d",
+  "tested_tree": "9cdd71aafb2650262d855afc9ebc72e6eb969676",
+  "scope": "Required legacy Dataset publication validation and source/destination preservation; synthetic fixtures and existing software regressions only",
+  "addressed_issues": [
+    4629,
+    4631,
+    4632
+  ],
+  "not_closed_by_this_slice": [
+    4630,
+    4594,
+    2915
+  ],
+  "source_sha256": {
+    "src/data_sheets_schema/legacy_publication.py": "d2f3bf4d3ca5a2c0c296eb9ae9496f4d1bf02987f34b8e9f10f3d65d9c147e97",
+    "src/fairscape_integration/cli.py": "463a3e9a574ab8133c31bbc5a44895b02640842b76e754f844e927657ad418ad",
+    "src/fairscape_integration/utils/rocrate_merger.py": "7b7e98d48ecc1043de077c2db7342e08b216d05d9c10778a986c1b922a836b56",
+    ".claude/agents/scripts/rocrate_to_d4d.py": "8c6cd41fb0e32fbc8c457208d863460ac462c76cd4c20f4215d2f90c6a9dce5e",
+    ".claude/agents/scripts/rocrate_merger.py": "f39b4aa31164dc477cb58067de002e6b19c182b61985b447eb6917da1153d68c",
+    ".claude/agents/scripts/auto_process_rocrates.py": "f7d8cf5765e100f5d7012e8f4c9a66a27e5ea385003b44c031174bae10a5b9e7",
+    "src/transformation/transform_api.py": "61792d63685694d2cb26537ec3f25b25301be4b4de008de34635c4fdbdec8f3b",
+    "src/data_sheets_schema/cli/rocrate.py": "185131e862f39fcdfb75614dbcc0adc5cb3915559e92859b21f1faadb144d845",
+    "src/data_sheets_schema/resources.py": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435"
+  },
+  "resource_sha256": {
+    "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f",
+    "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv": "28af70ed814690645ecf58b6bfd0a716d5300866c0018eaf07704387a410614e"
+  },
+  "test_sha256": {
+    "tests/test_rocrate/test_legacy_publication.py": "b61058a2e214370d2f93eaaff49296bcfe410280be7b30873202713be35fa537",
+    "tests/test_rocrate/test_legacy_publication_adversarial.py": "b1a132a5d8ca1aa8d7a06c9c5baf6b986dc385165dc70bc2669e35aa1a5744f2",
+    "tests/test_rocrate/test_legacy_root_gates.py": "148a779603259842cd3e231c62d4561715641bbe6089959b1e61df1d512500cf",
+    "tests/test_rocrate/test_production_root_gates.py": "a932de723170585e18a1ef6d757701af1a197672194c5c66774ba560284ac8d8",
+    "tests/test_rocrate/test_transform_api.py": "56b01376c2ef60759fe514f7fec863fe3752e9342d38e3e740b0a27f1fee63ae",
+    "tests/test_cli/test_rocrate_cli.py": "81770d073b0cc2dc01ab66416df96f075bfd62d773df820f8539075e27adcefa",
+    "tests/test_fairscape_integration/test_rocrate_merger.py": "d83b2c814847f24f54dec22dd19e1247662d2a48391a3d431ef414bc6f1b5bfa"
+  },
+  "tests": {
+    "passed": 272,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_duration_seconds": 20.212,
+    "junit_timestamp": "2026-10-07T22:03:43.799670",
+    "by_module": {
+      "tests.test_cli.test_rocrate_cli": 27,
+      "tests.test_fairscape_integration.test_rocrate_merger": 18,
+      "tests.test_rocrate.test_legacy_publication": 51,
+      "tests.test_rocrate.test_legacy_publication_adversarial": 39,
+      "tests.test_rocrate.test_legacy_root_gates": 30,
+      "tests.test_rocrate.test_production_root_gates": 104,
+      "tests.test_rocrate.test_transform_api": 3
+    },
+    "junit": {
+      "artifact": "legacy-publication-tests-01.xml",
+      "bytes": 44506,
+      "sha256": "a39cce112e47ee8ead0491c8d24cb0d2eb20733994348e7daf36fd345175c1b3"
+    },
+    "coordinator_console_summary": {
+      "passed": 272,
+      "duration_seconds": 20.25,
+      "warnings": 14,
+      "warning_kind": "dependency deprecations",
+      "basis": "coordinator terminal session 63462; warning count is not encoded in this JUnit file"
+    }
+  },
+  "evidence_checks": {
+    "head_matches_tested_head": true,
+    "pinned_files_match_tested_commit": true,
+    "junit_has_272_testcases": true,
+    "junit_has_no_failure_error_or_skipped_nodes": true,
+    "module_counts_sum_to_272": true,
+    "production_and_test_files_unchanged_during_evidence_update": true
+  },
+  "limitations": [
+    "This run verifies publication software behavior, not repaired mapping semantics, scientific source support or improved coverage.",
+    "The current default legacy TSV omits required Dataset.id and can now refuse previously written records; no IDs are invented and no automatic rerouting occurs.",
+    "The default API metadata envelope is schema-invalid; file publication refuses transformation_metadata pending #4630, while no-output drafts preserve it.",
+    "Successful integration controls supply genuine IDs through an explicit TSV; acceptance uses the actual packaged closed Dataset schema.",
+    "Optional diagnostic and I/O failures are deliberately injected in negative controls; they are not production failure measurements.",
+    "Each file is replaced atomically after all staging succeeds; there is no rollback guarantee across files once replacements begin.",
+    "Canonical input/destination checks are not a filesystem sandbox or protection against concurrent path mutation.",
+    "No current-cohort regeneration, real-crate comparison publication, provider evaluation, paid run or scientific score was produced by this validation.",
+    "#4594 and #2915 remain open for producer decisions, replay and fresh-label comparison/publication; #4630 remains open for the API envelope.",
+    "Human scientific review, paid-run authorization and audit28 holds remain unchanged; retirement is not improved source coverage."
+  ],
+  "scientific_scores_produced": 0,
+  "production_attempts_authorized": false,
+  "scientific_eligibility": false
+}

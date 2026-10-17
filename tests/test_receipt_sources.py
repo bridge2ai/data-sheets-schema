@@ -853,10 +853,18 @@ _FIG19_RUNS: list[tuple] = []
 
 
 def _fig19_reports(**floors) -> list[tuple[str, dict]]:
-    source_manifest = (ROOT / "data/preprocessed/source_manifest.yaml").read_bytes()
-    return [(project, rs.source_dependence(receipt, run["manifest"], source_manifest, project, full,
-                                           run["texts"], **floors))
-            for project, _core, receipt, run, full in _fig19_runs()]
+    """Each of the 24 records ranked by the source manifest it recorded
+    (`--at-run-commit`): the figures the module states are about those runs,
+    and #5042 changed today's manifest after them."""
+    out = []
+    for project, core, receipt, run, full in _fig19_runs():
+        try:
+            raw, _basis = rs.run_source_manifest(run["record"], core / f"{project}_provenance.yaml")
+        except pv.GitUnavailable as exc:
+            pytest.skip(f"the recorded manifests need git history: {exc}")
+        out.append((project, rs.source_dependence(receipt, run["manifest"], raw, project, full,
+                                                  run["texts"], **floors)))
+    return out
 
 
 @pytest.mark.corpus
@@ -926,11 +934,17 @@ def test_the_supersession_figures_the_module_states_on_the_24_fig19_records():
 @pytest.mark.corpus
 def test_the_24_fig19_records_rank_the_same_at_their_run_commit():
     """`--at-run-commit` (#3050) on the 24 fig19 records: every one reads its
-    manifest from a git blob (12 md5 41408d…, 12 6c71e8…), and those bytes
-    rank every cited document as today's manifest does, so fig19 and both
-    screens are unchanged by the choice."""
+    manifest from a git blob (12 md5 41408d…, 12 6c71e8…). Those bytes rank
+    every cited document as today's manifest does, with one exception: #5042
+    removed AI_READI's RO-Crate (`ro_crate_metadata`) from today's manifest,
+    so in the AI_READI records that cite it today's manifest leaves it
+    undeclared, with the same chunks and citing paths. Every other document
+    of those records ranks as it did; the tier screens of those records are
+    the only figures that move, which is why `_fig19_reports` ranks at the
+    run commit."""
     today = (ROOT / "data/preprocessed/source_manifest.yaml").read_bytes()
-    seen = Counter()
+    crate, undeclared = "ro_crate_metadata", "undeclared:aireadi_ro_crate_metadata_2026-08-12.txt"
+    seen, crate_records = Counter(), 0
     for project, core, receipt, run, full in _fig19_runs():
         try:
             raw, basis = rs.run_source_manifest(run["record"], core / f"{project}_provenance.yaml")
@@ -939,10 +953,21 @@ def test_the_24_fig19_records_rank_the_same_at_their_run_commit():
         seen[(basis["source"], hashlib.md5(raw).hexdigest()[:6])] += 1
         a = rs.source_dependence(receipt, run["manifest"], today, project, full, run["texts"])
         b = rs.source_dependence(receipt, run["manifest"], raw, project, full, run["texts"])
+        da = {d["document"]: d for d in a["documents"]}
+        db = {d["document"]: d for d in b["documents"]}
+        if project == "AI_READI" and crate in db:
+            crate_records += 1
+            now, then = da.pop(undeclared), db.pop(crate)
+            assert (now["tier"], now["priority_basis"]) == (rs.UNRANKED, "undeclared"), core.name
+            for key in ("chunks", "paths_citing", "paths_sole", "sole_share"):
+                assert now[key] == then[key], (core.name, key)
+            assert da == db, core.name
+            continue
         for key in ("by_tier", "documents", "lower_tier_with_higher_tier_token_match",
                     "superseded_with_replacement_token_match"):
             assert a[key] == b[key], (project, core.name, key)
     assert seen == {("git blob", "41408d"): 12, ("git blob", "6c71e8"): 12}
+    assert crate_records > 0                    # not vacuous: the exception is exercised
 
 
 @pytest.mark.corpus

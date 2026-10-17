@@ -1,0 +1,22 @@
+# Focused iteration and truthful hook feedback
+
+Implements #5018 and related hook finding #5024 under #5014. Base: `df2aa6c663c8d5712e3bd51885a6806f00982d79`.
+
+`make test-python PYTEST_PATHS=tests/path.py` now replaces the default full `tests` selection. Files, nodes and multiple paths are supported; empty or whitespace-only selection fails before launching a runner. The default command, test dependencies, CI partition and offline suites remain unchanged. Focused commands are iteration feedback, not substitutes for complete acceptance.
+
+Nine tests exercise actual Make expansion and forwarded shell arguments, including empty-input refusal and preservation of runner failures. Twenty hook cases exercise real source/generated classification and messages with the subprocess boundary stubbed. All 29 cases passed in 5.56 seconds. Independent adversarial source reviews were clear. No ontology/provider call was needed for these contract tests.
+
+Actual complete collection through direct pytest and Make both returned 18,877 occurrences (18,876 distinct IDs), with identical Counters. The explicit Make selection returned exactly the 24 matching occurrences from that full roster. The initialized FAIRSCAPE submodule was pinned at `8c80311d7d8b0fadac07dca9567d632103691f48`. Comparison to the instruction branch preserves every unchanged occurrence: its 10 added guard cases are replaced by this branch’s 29 new Make/hook cases. See [collection evidence](focused-collection.json).
+
+The direct full pass took 25.97 seconds with a fresh bytecode cache; the following Make full pass took 7.25 seconds and explicit-file Make pass 1.00 second. These ordered runs do not isolate a cold/warm causal speedup. An earlier warm paired comparison found full discovery 5.3–6.4 seconds versus 0.36–0.46 seconds for the same explicit file. Avoiding unintended full discovery is the bounded benefit; CI still collects and executes its full roster.
+
+Nested pytest remains a structural cost. Four existing partition controls launch 24 child controllers and 80 workers in total; concurrently running outer workers can multiply peak demand. Keep a shared worker budget. Their commands and exact-coverage proofs remain unchanged; source-derived counts are not peak-overlap measurements. Early shard selection would need its own authoritative discovery proof and overlaps active PR #4508 (#4517/#4519/#4520/#4522), so this change does not duplicate that work.
+
+The term hook previously validated an old merged schema after a source edit and could report that the schema passed. Source edits now report pending regeneration and explicit validation. Only the exact project generated schema triggers its validator; a mixed source/generated batch remains pending. Successful output names the generated file and does not attest source/generated synchronization. Warning-only exits, timeouts and skip diagnostics remain; no stale-result cache is added. Configured references do not establish actual runtime frequency or latency, so no hook speedup is claimed.
+
+The actual collection-comparison helper is preserved under `scripts/adhoc/` as
+`2026-10-12_5018_make_collection_comparison.py`, with a SHA-256 provenance sidecar.
+Its historical body is intact after the descriptive header. It was preserved
+after the original measurement and was not rerun; paths are session-specific and
+outputs are relative to the script location. Inspect/adapt before future use.
+`2026-10-12_preserve_performance_helper.py` records the preservation procedure.

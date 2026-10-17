@@ -1,161 +1,74 @@
-# D4D Assistant Setup
+# GitHub Actions workflows
 
-This directory contains instruction files for the D4D Assistant, which helps create and edit Datasheets for Datasets (D4D) via GitHub Actions.
+Current workflow routing, 2026-10-12 (#5017, #3863). Executable YAML is the
+authority for triggers, permissions, commands and required jobs. This index does
+not authorize a provider run, deployment, or changes to an existing registration.
 
-## Instruction Files
+## D4D assistant
 
-- **`d4d_assistant_create.md`** - Instructions for creating new D4D datasheets
-- **`d4d_assistant_edit.md`** - Instructions for editing existing D4D datasheets
+Read the [current assistant guide](../D4D_ASSISTANT_README.md) for the complete
+request, authorization, input and output contract. [d4d-agent.yml](d4d-agent.yml)
+implements that contract using the repository input-bundle/API path:
 
-These files guide the D4D Assistant through workflows for metadata extraction, YAML generation, validation, and pull request creation.
+1. The trusted request parser and controller allow-list admit an explicit request
+   for one directory under `data/sheets_d4dassistant/inputs/`. Event-specific checkout
+   rules decide which input files exist; untrusted request prose cannot supply new
+   authorization rules.
+2. `src/github/assistant_bundle.py` prepares every supported regular input file
+   before generation, retaining source/conversion/bundle hashes in a manifest.
+   Unsupported or unreadable input refuses; links and scripts are not fetched or run.
+3. `src/github/assistant_generation.py` registers the actual bundle and chunks,
+   neutral external-source scope, current schema closures and shared-generation
+   prompt assets. The workflow explicitly selects `generic_v10`, renderer 25,
+   API playbook 2 and receipt completion 2 through that registration.
+4. Trusted code runs `d4d api run` through CBORG without publication credentials.
+   Both full and core YAML must validate before a separate job publishes the
+   complete attempt in a unique output directory and posts the result.
+5. Evidence upload is attempted on success and failure; replies report whether
+   the artifact was retained. Failed attempts cannot
+   open a generated datasheet PR. See the assistant guide for credential setup,
+   admission ceilings and the live synthetic acceptance check.
 
-## MCP Server Configuration
+Only the selected input directory supplies source documentation. Additional issue
+prose and URLs are not generation inputs. Ordinary feedback does not instruct the
+workflow to edit an existing datasheet; another explicit request is subject to the
+documented request, run-label and output checks.
 
-The D4D Assistant requires Model Context Protocol (MCP) servers to be configured. These are already set up in the repository:
+The old open-ended agent action was replaced. This workflow does **not** load
+`d4d_assistant_create.md` or `d4d_assistant_edit.md`, and does not require enabling
+project MCP servers or changing local Claude permissions to operate. Do not follow
+the former setup/reset/authentication instructions for this API workflow.
 
-### Configured MCP Servers
+Those create/edit files remain intact because separately selected interactive
+playbooks or historical instruments can name them. Consult the
+[interactive command index](../../.claude/commands/README.md) for that separate
+route; do not silently substitute it for the GitHub workflow. The previous workflow
+README is [preserved with its historical context](../../docs/agent-instructions-history/README.md).
 
-**`.mcp.json`** (at repository root):
-```json
-{
-  "mcpServers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/"
-    },
-    "artl": {
-      "command": "uvx",
-      "args": ["artl-mcp"]
-    }
-  }
-}
-```
+## Build and test
 
-**`.claude/settings.json`**:
-- Enables project MCP servers with `enableAllProjectMcpServers: true`
-- Allows MCP tool usage with permissions for `mcp__github__*` and `mcp__artl__*`
-- Includes permissions for `WebSearch` and `WebFetch` tools
+[main.yaml](main.yaml) runs the complete collected `tests/` suite, including corpus
+checks, on Python 3.12: six shards for PRs, four for main/manual runs, with at most
+four xdist workers per shard. Separate canary, audit/finalization and evaluation
+jobs run their complete offline commands for all these events. Main/manual runs
+also build schema products and examples in a separate checkout. The aggregate
+`test` check fails when an applicable required job fails, is cancelled or is skipped.
 
-### What Each MCP Server Does
+See [CI partitioning](../../utils/ci_sharding.md) for coverage, timing weights,
+worker configuration, artifact retention and the refresh procedure. Timing data
+does not select which tests exist. Package support for Python 3.9+ is broader than
+this CI matrix; do not describe the workflow as testing three interpreter versions.
 
-1. **GitHub MCP** (`mcp__github__*`)
-   - Create branches, commits, and pull requests
-   - Comment on issues and PRs
-   - Read repository files and structure
-   - Manage labels and milestones
+Use `poetry install` for dependency setup in an existing checkout. `make setup`
+is repository scaffolding: it generates, stages and commits files. `make test`
+already includes its schema check; a separate early `make test-schema` is optional
+feedback, not an additional mandatory final gate.
 
-2. **ARTL MCP** (`mcp__artl__*`)
-   - Search and retrieve academic literature about datasets
-   - Find papers by DOI, PMID, or PMCID
-   - Extract metadata from academic publications
-   - Useful for finding dataset documentation in scholarly articles
+## Before changing a workflow
 
-3. **WebSearch** (built-in)
-   - Search the web for dataset documentation
-   - Find official dataset pages and documentation
-   - Discover related resources
-
-4. **WebFetch** (built-in)
-   - Fetch content from URLs
-   - Download and extract text from PDFs
-   - Access API documentation
-
-## First-Time Setup
-
-When running the D4D Assistant for the first time:
-
-1. **Approve Project MCP Servers**
-   - Claude Code will prompt to approve MCP servers from `.mcp.json`
-   - Accept the project MCP servers (GitHub and ARTL)
-
-2. **Authenticate GitHub MCP (if needed)**
-   - If GitHub MCP requires OAuth, use `/mcp` command
-   - Follow browser prompts to authenticate
-   - Authentication is stored securely and refreshed automatically
-
-3. **Install ARTL MCP**
-   - The ARTL MCP server uses `uvx artl-mcp`
-   - Ensure `uvx` (uv tool runner) is available on your system
-   - Install with: `pip install uv` or follow [uv installation guide](https://docs.astral.sh/uv/)
-
-## Troubleshooting
-
-### MCP Server Not Starting
-
-If you see errors like "Connection closed" or "MCP server failed to start":
-
-1. **Check uvx availability**:
-   ```bash
-   which uvx
-   uvx --version
-   ```
-
-2. **Test ARTL MCP manually**:
-   ```bash
-   uvx artl-mcp
-   ```
-
-3. **Reset MCP configuration**:
-   ```bash
-   claude mcp reset-project-choices
-   ```
-
-### Authentication Issues
-
-If GitHub MCP fails to authenticate:
-
-1. Use `/mcp` command in Claude Code
-2. Select "Authenticate" for GitHub
-3. Complete OAuth flow in browser
-4. Use "Clear authentication" if you need to re-authenticate
-
-### Permission Denied
-
-If you see permission errors:
-
-1. Check `.claude/settings.json` has MCP permissions enabled
-2. Ensure `enableAllProjectMcpServers: true` is set
-3. Restart Claude Code to apply configuration changes
-
-## Manual MCP Management
-
-You can also manage MCP servers via CLI:
-
-```bash
-# List configured servers
-claude mcp list
-
-# Get details for a specific server
-claude mcp get github
-
-# Add a new server (example)
-claude mcp add --transport http notion https://mcp.notion.com/mcp
-
-# Remove a server
-claude mcp remove server-name
-```
-
-For more information, see the [Claude Code MCP documentation](https://code.claude.com/docs/en/mcp).
-
-## D4D Assistant Capabilities
-
-With these MCP servers configured, the D4D Assistant can:
-
-- ✅ Create new D4D datasheets from URLs and documentation
-- ✅ Edit existing D4D YAML files based on user requests
-- ✅ Search academic literature for dataset papers
-- ✅ Fetch content from web pages and PDFs
-- ✅ Create pull requests with changes
-- ✅ Comment on GitHub issues with status updates
-- ✅ Validate YAML against the D4D schema
-- ✅ Generate HTML previews of datasheets
-
-## Security Note
-
-MCP servers execute code and access external services. The configured servers are:
-
-- **GitHub MCP**: Official Anthropic-maintained server for GitHub operations
-- **ARTL MCP**: Academic literature search tool (`uvx artl-mcp`)
-- **WebSearch/WebFetch**: Built-in Claude Code tools
-
-These are trusted sources, but always review MCP server configurations before approving them.
+Read its actual YAML and directly referenced helpers/tests. Preserve complete
+coverage, trusted input boundaries, provider authorization, generated-file checks,
+historical evidence and published-output obligations. Use focused checks while
+iterating, then complete the required final CI/review gates. Do not infer that a
+Markdown/data-only change is harmless: this repository stores executable policy,
+model-facing instructions and scientific inputs in those formats.

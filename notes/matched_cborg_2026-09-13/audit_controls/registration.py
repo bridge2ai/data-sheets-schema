@@ -837,6 +837,15 @@ def native_history_control(manifest):
     return dict(value)
 
 
+#: The smallest registrable complete-response deadline (#2605). A deadline of a
+#: few seconds, entered by mistake, is shorter than a complete provider response,
+#: so buffered requests would be debited as stalls after the send. The bounded
+#: worker's start-up is charged to the same deadline (#2159) and shortens it
+#: further; a start-up that uses it all up stops the attempt before the send
+#: (ConnectTimeout, never debited) (#2952).
+MIN_RESPONSE_BUFFER_SECONDS = 60
+
+
 def native_response_buffer(manifest):
     """Opt-in complete-response delivery; never expose an incomplete turn (#2304)."""
     key = 'native_response_buffer'
@@ -853,8 +862,14 @@ def native_response_buffer(manifest):
     if policy is None:
         raise BudgetStop('native response buffering requires the registered stall policy')
     read_bound = native_upstream_read_timeout(manifest) or LEGACY_UPSTREAM_READ_SECONDS
+    if read_bound < MIN_RESPONSE_BUFFER_SECONDS:
+        # No deadline could satisfy both bounds; say which one to raise (#2940).
+        raise BudgetStop(f'native response buffering needs an upstream read bound of at least '
+                         f'{MIN_RESPONSE_BUFFER_SECONDS} seconds (#2605)')
     if value['total_seconds'] > read_bound:
         raise BudgetStop('complete-response deadline must not exceed the registered upstream read bound')
+    if value['total_seconds'] < MIN_RESPONSE_BUFFER_SECONDS:
+        raise BudgetStop(f'complete-response deadline must be at least {MIN_RESPONSE_BUFFER_SECONDS} seconds (#2605)')
     outer = native_api_timeout(manifest)
     if (outer is None or outer < stall_policy_minimum_api_timeout_ms(manifest, policy['count_attempts']) or
             native_api_force_idle_timeout(manifest) is not False):

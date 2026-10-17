@@ -832,6 +832,17 @@ def fitness_request_arguments(*, model: str, max_tokens: int, slot: str,
             "messages": [{"role": "user", "content": prompt}]}
 
 
+def validate_fitness_context(context: JudgementContext) -> None:
+    """Require the complete fitness context rather than a caller's label."""
+    if (type(context) is not JudgementContext or context.axis != "fitness"
+            or context.corpus != "" or any(type(value) is not str for value in (
+                context.axis, context.model, context.rubric, context.corpus,
+                context.schema, context.specification))
+            or not all(value.strip() for value in (
+                context.model, context.rubric, context.schema, context.specification))):
+        raise ValueError("expected_context must be a complete fitness JudgementContext")
+
+
 class LLMSlotFitnessScorer:
     """Judge slot values against the schema specification, not the bundle.
 
@@ -845,7 +856,20 @@ class LLMSlotFitnessScorer:
                  class_name: str = "Dataset", max_tokens: int = 8000,
                  log_path: Path | None = None, cache_path: Path | None = None,
                  schema_path: Path | None = None, profile=None,
-                 schema_guidance: str | None = None, schema_snapshot=None):
+                 schema_guidance: str | None = None, schema_snapshot=None,
+                 expected_context: JudgementContext | None = None,
+                 cache_only: bool = False):
+        if type(cache_only) is not bool:
+            raise ValueError("cache_only must be a bool")
+        if expected_context is not None:
+            validate_fitness_context(expected_context)
+        if cache_only and (expected_context is None or model != expected_context.model
+                           or cache_path is None):
+            raise ValueError("cache_only requires a cache, explicit model and expected_context")
+        self.expected_context = expected_context
+        self.cache_only = cache_only
+        # Consume one immutable saved input; provenance pins these exact bytes.
+        self._cache_bytes = Path(cache_path).read_bytes() if cache_only else None
         self.schema_guidance = schema_guidance
         self.schema_snapshot = schema_snapshot
         from data_sheets_schema.fitness_schema import validate_selection
@@ -917,10 +941,14 @@ class LLMSlotFitnessScorer:
         if fp in self._loaded or not self.cache_path:
             return
         self._loaded.add(fp)
-        if not self.cache_path.exists():
-            return
+        if self.cache_only:
+            raw = self._cache_bytes.decode("utf-8")
+        else:
+            if not self.cache_path.exists():
+                return
+            raw = self.cache_path.read_text(encoding="utf-8")
         skipped: dict[str, int] = {}
-        for line in self.cache_path.read_text(encoding="utf-8").splitlines():
+        for line in raw.splitlines():
             if not line.strip():
                 continue
             e = json.loads(line)
@@ -937,6 +965,32 @@ class LLMSlotFitnessScorer:
                 reason=e.get("reason", ""))
         self.cache_loaded = len(self._memo)
         self.cache_skipped = skipped
+
+    def pinned_instrument(self) -> dict[str, Any] | None:
+        """The explicitly requested context, checked against the current instrument.
+
+        This describes a scoring context, not calibration or provider authenticity.
+        Cache-only merges also pin the exact saved judgement bytes consumed.
+        """
+        if self.expected_context is None:
+            return None
+        validate_fitness_context(self.expected_context)
+        model = self._model or self.expected_context.model
+        self._require_context(self._context(model))
+        return {
+            "context": self.expected_context.as_entry(),
+            "class_name": self.class_name,
+            "profile": self.profile.name if self.profile is not None else None,
+            "schema_guidance": self.schema_guidance,
+            "mode": "cache_only" if self.cache_only else "live_or_cache",
+            "cache_sha256": (hashlib.sha256(self._cache_bytes).hexdigest()
+                             if self.cache_only else None),
+            "cache_bytes": len(self._cache_bytes) if self.cache_only else None,
+        }
+
+    def _require_context(self, actual: JudgementContext) -> None:
+        if self.expected_context is not None and actual != self.expected_context:
+            raise ValueError("fitness instrument does not match expected_context")
 
     def as_slot_scorer(self) -> "SlotScorer":
         """Adapt to the SlotScorer protocol, so `run_plan` and
@@ -981,10 +1035,14 @@ class LLMSlotFitnessScorer:
         snapshot = self._snapshot() if self.schema_guidance is not None else None
         if snapshot is not None:
             snapshot[1].spec(slot)  # Unknown declared slots also fail before a client.
-        client, model = self._resolve()
+        if self.cache_only:
+            client, model = None, self._model
+        else:
+            client, model = self._resolve()
         if snapshot is None:
             snapshot = self._snapshot()
         ctx = self._context(model, schema=snapshot[0], specification=snapshot[3])
+        self._require_context(ctx)
         self._load_cache(ctx)
 
         key = (ctx.fingerprint(), slot,
@@ -992,6 +1050,9 @@ class LLMSlotFitnessScorer:
         if key in self._memo:
             self.memo_hits += 1
             return self._memo[key]
+
+        if self.cache_only:
+            raise ValueError(f"no saved fitness judgement for slot {slot!r} under expected_context")
 
         from data_sheets_schema.api_runner import _call_with_retry
 

@@ -1,0 +1,11 @@
+{
+  "issue": "#5019 / PR #5025",
+  "original_helper": "/private/tmp/d4d-agent-performance-20261012-vq8rgbu9/implementation/notes-listing-5019/benchmark.py",
+  "original_sha256": "35e9eab52d1f21ff8dbdea058c22ca4c95c69e8cdd170f870343684e31b476bd",
+  "preserved_sha256": "f1478ea3d5af97fdc4ca723e5896088476106b63140947fd550a231da9e8d795",
+  "original_body_retained_verbatim": true,
+  "preserved_after_original_run": true,
+  "executed_during_preservation": false,
+  "original_output_location": "/private/tmp/d4d-agent-performance-20261012-vq8rgbu9/implementation/notes-listing-5019",
+  "limitation": "Historical absolute paths and __file__-relative outputs remain; inspect before reuse."
+}

@@ -101,7 +101,9 @@ notes/attainability_line_splits_2026-09-29.md rest on, the historical gate
 refused nothing. The contextual measurement is recorded separately in
 notes/attainability_join_context_2026-10-02.md. The
 validator does not run it: a valid file's deterministic entries are what
-their check writes, which the gate does not change.
+their check writes, which the gate does not change. `check --gate` opts in
+to the same certification gate for existing files after ordinary
+validation, without rewriting them or changing any entry's status.
 
 `credited_despite_absence` is the generator-side check the issue asks
 for: items an evaluation credited although the bundle it scored was
@@ -728,7 +730,7 @@ def write_document(document: dict[str, Any], directory: Path = ATTAINABILITY_DIR
 
 
 def _certification_problems(document: dict[str, Any], entries: list[dict[str, Any]]) -> list[str]:
-    """Why `write_document` must not certify the deterministic
+    """Why `write_document` or `check --gate` must not certify the deterministic
     `not_stated_in_source` entries among `entries` (#3408): the reading
     `matching_lines` leaves out — a break with no hyphen read as nothing, up
     to `GATE_JOINS_PER_WINDOW` at once, or hyphens read each on its own over
@@ -1322,6 +1324,9 @@ def main(argv: list[str] | None = None) -> int:
     derive.add_argument("--write", action="store_true", help=f"write under {ATTAINABILITY_DIR}/")
     check = sub.add_parser("check", help="validate attainability files against their pinned bytes")
     check.add_argument("files", nargs="*", type=Path)
+    check.add_argument("--gate", action="store_true",
+                       help="also run the writer's bounded line-split certification gate on "
+                            "deterministic absences, without writing files")
     credited = sub.add_parser("credited", help="items credited although marked not_stated_in_source; "
                                                "exits 1 when an evaluation cannot be read")
     credited.add_argument("evaluations", nargs="+", type=Path)
@@ -1356,9 +1361,24 @@ def main(argv: list[str] | None = None) -> int:
                 for problem in exc.problems:
                     print(f"  - {problem}")
                 continue
+            gate_summary = ""
+            if args.gate:
+                try:
+                    problems = _certification_problems(got.document, got.document["entries"])
+                except (AttainabilityError, OSError) as exc:
+                    problems = [f"line-split gate cannot read the pinned bundle: {exc}"]
+                if problems:
+                    failed += 1
+                    print(f"REFUSED {path}")
+                    for problem in problems:
+                        print(f"  - {problem}")
+                    continue
+                gated = sum(e["method"].startswith("deterministic:")
+                            for e in got.entries("not_stated_in_source"))
+                gate_summary = f"; line-split gate: {gated} deterministic absence(s) checked"
             counts = {s: len(got.entries(s)) for s in STATUSES if got.entries(s)}
             print(f"ok {path} ({got.bundle_basis['source']}): "
-                  + ", ".join(f"{n} {s}" for s, n in counts.items()))
+                  + ", ".join(f"{n} {s}" for s, n in counts.items()) + gate_summary)
         if not files:
             print(f"no attainability files under {ATTAINABILITY_DIR}")
         return 1 if failed else 0

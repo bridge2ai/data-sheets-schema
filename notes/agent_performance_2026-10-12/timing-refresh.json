@@ -1,0 +1,192 @@
+{
+  "purpose": "Verified successful-run input evidence and completed timing refresh for #5016/#5020",
+  "run_url": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/38158491197",
+  "run_id": 38158491197,
+  "commit": "df2aa6c663c8d5712e3bd51885a6806f00982d79",
+  "run_attempt": 1,
+  "event": "push",
+  "branch": "main",
+  "conclusion": "success",
+  "created_at": "2026-10-11T17:09:54Z",
+  "updated_at": "2026-10-11T17:52:56Z",
+  "interpreter": "3.12",
+  "core": {
+    "artifacts": [
+      "tests-py3.12-shard1/pytest.xml",
+      "tests-py3.12-shard2/pytest.xml",
+      "tests-py3.12-shard3/pytest.xml",
+      "tests-py3.12-shard4/pytest.xml"
+    ],
+    "case_records": 18848,
+    "unique_classname_name_pairs": 18847,
+    "mapped_files": 524,
+    "duplicate_id_groups": 1,
+    "cross_artifact_duplicate_id_groups": 0,
+    "unmapped_cases": 0,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 35,
+    "total_case_seconds": "22354.104",
+    "new_weighted_files": 243,
+    "old_weighted_files_missing_from_current": []
+  },
+  "core_artifacts": [
+    {
+      "name": "tests-py3.12-shard1",
+      "id": 11710096883,
+      "archive_sha256": "b2c4e2d834409930d10eae3117d058cf8cb1a0ecd5e5c4b48007bc8e0f90f26d",
+      "archive_size": 88683,
+      "expires_at": "2026-10-25T17:52:46Z",
+      "xml": [
+        {
+          "path": "artifacts/tests-py3.12-shard1/pytest.xml",
+          "bytes": 1427618,
+          "sha256": "fc66ff24bfa44513867864265f21d30ed3d1c99bf77cdf55fdbb6f23f3afd7d2"
+        }
+      ]
+    },
+    {
+      "name": "tests-py3.12-shard2",
+      "id": 11709872245,
+      "archive_sha256": "60f38aebaa3193dc9f4369a2be59ec5faeefd1ccb6a4261ab6a389d3903615ee",
+      "archive_size": 83588,
+      "expires_at": "2026-10-25T17:34:57Z",
+      "xml": [
+        {
+          "path": "artifacts/tests-py3.12-shard2/pytest.xml",
+          "bytes": 731000,
+          "sha256": "ddb0761cf92eb6676e13113b121d744c139687bf40b05a5bfbe7b0be9aca54a5"
+        }
+      ]
+    },
+    {
+      "name": "tests-py3.12-shard3",
+      "id": 11709684316,
+      "archive_sha256": "cade2b21f607f22f13faa82422d5b62f0bd417479726109e9bcd40e59a4a2281",
+      "archive_size": 84652,
+      "expires_at": "2026-10-25T17:27:37Z",
+      "xml": [
+        {
+          "path": "artifacts/tests-py3.12-shard3/pytest.xml",
+          "bytes": 750723,
+          "sha256": "60bc03d0e35aa32f7aeaf5e744d6f20b13a6e7f12f05d96527edb05ea91206d2"
+        }
+      ]
+    },
+    {
+      "name": "tests-py3.12-shard4",
+      "id": 11709163611,
+      "archive_sha256": "17f8f5906c0888477badda2795c92d6ffb36ef9efc0e18ef89415ec15c52cce1",
+      "archive_size": 92006,
+      "expires_at": "2026-10-25T17:28:22Z",
+      "xml": [
+        {
+          "path": "artifacts/tests-py3.12-shard4/pytest.xml",
+          "bytes": 804648,
+          "sha256": "97a2d9b8625e8964bcb1ad0cbfc18b3bfdecad0f3bf2bdb502258154273e4f09"
+        }
+      ]
+    }
+  ],
+  "duplicate_occurrences": [
+    {
+      "classname": "tests.test_native_execution_permissions",
+      "name": "test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]",
+      "occurrences": [
+        {
+          "file": "tests/test_native_execution_permissions.py",
+          "classname": "tests.test_native_execution_permissions",
+          "name": "test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]",
+          "seconds": "0.014",
+          "skipped": false,
+          "shard": "tests-py3.12-shard4",
+          "case_element_index": 3670
+        },
+        {
+          "file": "tests/test_native_execution_permissions.py",
+          "classname": "tests.test_native_execution_permissions",
+          "name": "test_noncanonical_or_numeric_budget_never_becomes_a_native_argument[00]",
+          "seconds": "0.015",
+          "skipped": false,
+          "shard": "tests-py3.12-shard4",
+          "case_element_index": 3676
+        }
+      ]
+    }
+  ],
+  "largest_files": [
+    {
+      "file": "tests/test_shared_generation_runtime.py",
+      "seconds": "3225.361",
+      "old_seconds": null
+    },
+    {
+      "file": "tests/test_native_execution.py",
+      "seconds": "1287.605",
+      "old_seconds": null
+    },
+    {
+      "file": "tests/test_receipt_completion_runtime.py",
+      "seconds": "1008.941",
+      "old_seconds": null
+    },
+    {
+      "file": "tests/test_native_receipt_origin_reporting.py",
+      "seconds": "996.853",
+      "old_seconds": null
+    },
+    {
+      "file": "tests/test_native_attempt_supervisor.py",
+      "seconds": "982.919",
+      "old_seconds": null
+    },
+    {
+      "file": "tests/test_evaluation/test_cross_family_judge_analysis.py",
+      "seconds": "882.453",
+      "old_seconds": null
+    },
+    {
+      "file": "tests/test_generation_specificity_skill.py",
+      "seconds": "793.568",
+      "old_seconds": null
+    }
+  ],
+  "largest_case": {
+    "file": "tests/test_shared_generation_runtime.py",
+    "classname": "tests.test_shared_generation_runtime",
+    "name": "test_real_complete_api_pipeline_and_completed_recheck",
+    "seconds": "1893.171",
+    "skipped": false,
+    "shard": "tests-py3.12-shard1",
+    "case_element_index": 729
+  },
+  "limits": [
+    "JUnit case times include fixture phases where pytest assigns them; they are not call-only log durations or wall-time speedup predictions.",
+    "All expected successful-run artifacts are present and core identities map to tracked tests; no independent pytest collection was executed.",
+    "Offline XML retained for evidence but updater selects only basename pytest.xml, so offline cases do not contaminate core scheduling hints.",
+    "Raw artifacts remain unchanged; no occurrence was removed or renamed."
+  ],
+  "validation": {
+    "focused_regressions": "37 passed (13 updater,24 partition/workflow),89.73s",
+    "refreshed_weight_partition_regression": "1 passed,0.06s",
+    "output_sha256": "af1d4526d16ef2fb01c65e5377d4491af710faedebdaed093d89d8a53093cc22",
+    "exact_core_hashes_verified": true,
+    "estimated_case_seconds_per_shard": {
+      "4": [
+        5588.526000000001,
+        5588.5260000000035,
+        5588.526999999996,
+        5588.526000000002
+      ],
+      "6": [
+        3725.685,
+        3725.6859999999992,
+        3725.683999999999,
+        3725.6829999999995,
+        3725.6829999999986,
+        3725.684
+      ]
+    },
+    "ci_speedup": "not yet measured"
+  }
+}

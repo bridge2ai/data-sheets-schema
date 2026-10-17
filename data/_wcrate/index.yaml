@@ -1,0 +1,668 @@
+description: 'Copies of the results of every AI_READI record whose input bundle contained the release-3.0.0
+  RO-Crate (ro_crate_metadata, added by #540 on 2026-08-12, removed by #5042 on 2026-10-14). The originals
+  under data/d4d_concatenated/ are unchanged and remain the evidence; these copies only keep the with-crate
+  results together under one name.'
+issue: 5042
+record_count: 30
+file_count: 120
+records:
+- method: claudecode_agent
+  label: 2026-08-13_claude-opus-5-api-generic-v4_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_d4d.yaml
+    sha256: 592930ceb5aa7538c9c92c8c36e9ad4bf1ab49cdc5de3769f1e12cc668790085
+    bytes: 132499
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_d4d_core.yaml
+    sha256: 3cde262a1262e1fe28ea7d42b3ef5d1b870fd52532f300d9d94e7beb8ab97126
+    bytes: 119755
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_provenance.yaml
+    sha256: 31eddf0f09dd06473ef2e905755fc1164bff648e9624a3d2d661c3e8cd317c7b
+    bytes: 19649
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_reconciliation.md
+    sha256: def564c4a4c7892f18865f3d9e0257316de801783833327b216650ff56e5978d
+    bytes: 20772
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 86259692ac4718105f604d87e799295a
+- method: claudecode_agent
+  label: 2026-08-13_claude-opus-5-api-generic-v4_rep2
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_d4d.yaml
+    sha256: 1bfa78e351aea2db3e7d2b63f04c328d2974462578bf2ccb5aabd105a573517f
+    bytes: 113097
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_d4d_core.yaml
+    sha256: bf15074ecbd2af52882344204e212699be8044203d1a4e4ee15069a5a2875d2e
+    bytes: 97217
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_provenance.yaml
+    sha256: 529b6a551e433ec6ef86db4ad34cccb37143c9df42f3a18658600fd493ff2fbd
+    bytes: 19719
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_reconciliation.md
+    sha256: d3206eaeb09ad57ce42a835645449681dce4ba98be6735c1ad38f616fcca557b
+    bytes: 15061
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 86259692ac4718105f604d87e799295a
+- method: claudecode_agent
+  label: 2026-08-13_claude-opus-5-api-generic-v4_rep3
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_d4d.yaml
+    sha256: df4ac95d787f9952f0c15fa1edf705c6bf35015fdf0dc7c514d4449cb7d8523f
+    bytes: 111828
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_d4d_core.yaml
+    sha256: 2ace6b39aac5e551fbd1dcc0ab7204a301add10abc8a2d231020eb2d59e26e7e
+    bytes: 97071
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_provenance.yaml
+    sha256: d1af54719717b71f6b6772657091047fd197a2c88ea2e0ba10661aa03a23624d
+    bytes: 19870
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_reconciliation.md
+    sha256: c30a27a3b3408fbf8e5af685a973f5536b213024aebfebcc52f4b5092365e5db
+    bytes: 15949
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 86259692ac4718105f604d87e799295a
+- method: claudecode_agent
+  label: 2026-08-16_claude-opus-5-api-generic-v5_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: 0b311b4dca4e2ff7917d243331bb23ec5915a72777918f1bc17e8c7261084fb3
+    bytes: 93516
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 9a5f357747af257658e49977be85f43361a87cce596c57521c07b7370bae085c
+    bytes: 76163
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    sha256: b4b3ad0a1c7228c3325f1bd25794b8e372ec272e1ca6def1a98748fa603e1a9e
+    bytes: 16693
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: c6ee83d20a80001e983df67a7ed135079957b6092afe1d845f819a329824a035
+    bytes: 14185
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 86259692ac4718105f604d87e799295a
+- method: claudecode_agent
+  label: 2026-08-19_claude-opus-5-api-generic-v5_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: 669def853e573ff6fa9d31b5584409587cf602687d23621fdae10ff4c5166b02
+    bytes: 107868
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 681bc3d4f2dc79113950b49d21ade60934c9f32603d835d43dee42b7ee68f0a7
+    bytes: 91539
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    sha256: aa09067c431b31300f92270cc9649bda03f9819c18984d438dca45bf9bd5ddd4
+    bytes: 28372
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: ac6fc2c11fde7320b76c8d35fe14f8dfa63e4d43c17753d2e34d00c0c65a3cd8
+    bytes: 21885
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: c0028d716155a185d7000ec6ad60352f
+- method: claudecode_agent
+  label: 2026-08-20_claude-opus-5-api-generic-v5_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: acbb3ed5126a2a94e673c48eecc53c7d18e3cfa20b169f70cc4652d602a80667
+    bytes: 108550
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 875f1623742b6f3e1001631c3850f53e1e64ba3d005ced6078563c2b89ccd996
+    bytes: 102431
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    sha256: a21c286b6727cecbbf43555ad655182a3b9fe673f16d5db6719cabf747125d93
+    bytes: 19510
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: eb525559781c4a862d15a212c37bdaa377332c92a6bd1c52782c304876e51e10
+    bytes: 21927
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: c0028d716155a185d7000ec6ad60352f
+- method: claudecode_agent
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: d055cd62374d1fa285224b2e72f43948b4bffc30f15b8f0a5c14e9356fb1f580
+    bytes: 93707
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 153103b319ef2f2f51b5a99f15a5c82d43a0cfe653d02dc7156d88e233287aa8
+    bytes: 84548
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    sha256: 1e49361c2a3222491798a834dbe8d7ecd0265cebfecd2876c34e97b64727ba09
+    bytes: 20284
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: 06a83f1ec55709397665d832c6912ef628a5d9ef0d99ac47c112817ecd09591e
+    bytes: 17416
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: c0028d716155a185d7000ec6ad60352f
+- method: claudecode_agent
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    sha256: 4f8ef711641ea7567991ae22d0da01891f7c388c16bc9ddbc93fbe0c7cde9f7a
+    bytes: 123479
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+    sha256: 3730611f1558e9b886ebc8146e3272eed3665f60c66603ce78f3272b691d3ff1
+    bytes: 105313
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_provenance.yaml
+    sha256: 165eb24098440eb7bee51b7c890b6a3a639a64c0c2fcfb5e6ad3888b45f4188f
+    bytes: 19020
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_reconciliation.md
+    sha256: dee47124d9d64ca722691f9264c3b2b873589cc4cd6cab2bb6599da2da12bfcf
+    bytes: 21524
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: c0028d716155a185d7000ec6ad60352f
+- method: claudecode_agent
+  label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    sha256: 7aa10eb134b73792d7e189dc0fcd0f1fea94c83c8f4b24f0b37e48241382127e
+    bytes: 84671
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d_core.yaml
+    sha256: 0aace03af0c7193d088f5ab1c1f496f75843293a0b46267812d0a1eb6936ab69
+    bytes: 73222
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_provenance.yaml
+    sha256: 94ef1989d4eb322678977e8fbe6ad2acbac2dc71bda19e9749630b69c6b0c00b
+    bytes: 18102
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_reconciliation.md
+    sha256: c8e7c7703fda3b74be1e63f421f67a805ad98961ea79bd0dd8a802b6f68c4111
+    bytes: 18192
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: c0028d716155a185d7000ec6ad60352f
+- method: claudecode_agent
+  label: 2026-08-22_claude-opus-5-api-generic-v5_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: 42b1ed084e285eaa08a0c27a0d6d9a6c18625c050a3d4944bd05096d720df460
+    bytes: 144443
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 8d863e9fb7b5c467344147e6bc6bddf4c7493e2c7f4eccb1f0a2db0406ec38db
+    bytes: 107341
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    sha256: 8c42b151f3cdec768086fa87c1df7954606d2c40788d8dcc155084b820213170
+    bytes: 19794
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: a243319c1f2ed6cc23f3db782cc53f8b829c6641208d26c0abd7378649460991
+    bytes: 21829
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: c0028d716155a185d7000ec6ad60352f
+- method: claudecode_agent
+  label: 2026-08-22b_claude-opus-5-api-generic-v5_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: 60ab0ad6cf657fa1bbf87e28e2d8a06fd6525b8494e032bcbb6a9a676baac7ba
+    bytes: 116301
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 898df43076cdf761fc5b9f6e63e4edfaea86034a3071e81f6db4cbd84ffb03c6
+    bytes: 99079
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    sha256: 03e001fefdf64ba1cb0ec9bf34a074068e51af217d0b24e08786bc4cab55606e
+    bytes: 18701
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: ef954c50fdb272e5db180e9a01523148fd735d19019a13806253a035a6edfe59
+    bytes: 23781
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: c0028d716155a185d7000ec6ad60352f
+- method: claudecode_agent
+  label: 2026-08-22c_claude-opus-5-api-generic-v5_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: 6bc5f7ae4b94ff8cf5830a0301903932547687efb3bfa998c982814b6263f6b4
+    bytes: 122314
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 5b46ab4d4a1db4b2f1f530e5b88911b542fea0806a510f7068b5878b243ed04b
+    bytes: 102756
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_provenance.yaml
+    sha256: 5abc452fd857be4c089933740ec6084dd61ee48690c5476bea50e90ae575946f
+    bytes: 17421
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: 74855c6c57cc7db7f9e72a9a31111f18b9d24ac2bb57d272fdcab423b2af34a6
+    bytes: 17137
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-22c_claude-opus-5-api-generic-v5_rep2
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    sha256: f9cc6d589aa4ae8851e93e123f3c52f38eb63888e998c893fd3b3bae4ce3e566
+    bytes: 115690
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d_core.yaml
+    sha256: f71c70e1edaa7a88be36e7e81d62f70e004e8fa052a73e3ddb8b928a79f190c3
+    bytes: 99092
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_provenance.yaml
+    sha256: addf99d7cd9537d892e3d75a4aa704fa7f5e51b1bc1b2cbba4d1210ce94fd426
+    bytes: 21748
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_reconciliation.md
+    sha256: 0be12909daa8ec8a6ca7499f71c4cb09c9e00b82d25ab259c0e2ab19d030a5bc
+    bytes: 14913
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    sha256: b5bba0f9f054ca108d4262a5f87c847acd53a42d5a538c9280c19d9a51d8c0bd
+    bytes: 97729
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d_core.yaml
+    sha256: 3d2843b273e74a4e24cb8450770b0d7f60b9ced78a10046f33a2bfc08f4ee158
+    bytes: 82357
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_provenance.yaml
+    sha256: 4870bb663533802fe63ad34d863d3b89c7a2ef1331d031a8e9fe43fa1dbcf1db
+    bytes: 18008
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_reconciliation.md
+    sha256: fb7b625b2a246eb5bc80529a0b3f4f71301e981c76d849eb8f2c2d0a784077a9
+    bytes: 11096
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-24_claude-opus-5-claudecode-generic-v5_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d.yaml
+    sha256: b66a96db24b41775b51bc3b24d1c1c4f3a63025502a8846e662245966d19708f
+    bytes: 112988
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d_core.yaml
+    sha256: 1a1c8d0a9a72d5890570f889853e0f6517201941c27c470af8dc061eaac21731
+    bytes: 95032
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_provenance.yaml
+    sha256: b9eba256d19c6fc0231a72f7a4064b6ab78e57099c5409ce6c3c5f43cd712e02
+    bytes: 16343
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_reconciliation.md
+    sha256: 201900c7746e51b1f6ffd10bf304dd8c19d9ec8b5ec0c778532ad87e857c607f
+    bytes: 15658
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-24_claude-opus-5-claudecode-generic-v5_rep2
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    sha256: 671f2b6e9752a61eb3c47d6dc365eabc9002072df5d3b6bb1069f946f482e9cb
+    bytes: 121433
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d_core.yaml
+    sha256: 80e72e492c4da19546a8bc92e0b7c7322c1376e040e19c40d0277e5726a17681
+    bytes: 96354
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_provenance.yaml
+    sha256: 8cbe5517d72391c2d08468e2295028b32f2f3be72376227e96f507ad26739d4c
+    bytes: 16196
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_reconciliation.md
+    sha256: 81a8c97646dbd7fa03baa68d6681bd465b47612a1598914f47ab8d4309c8817d
+    bytes: 25884
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-24_claude-opus-5-claudecode-generic-v5_rep3
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_d4d.yaml
+    sha256: 7310bb31cf1da8a5e225912bbb88411944e62180e6fc753d81c929e62126944a
+    bytes: 99170
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_d4d_core.yaml
+    sha256: b8eeb976643ce856a6bf795786c727bad04b39326cae966486ca6166b72cd239
+    bytes: 84630
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_provenance.yaml
+    sha256: ab51a15b89ac43b6ed85f4a454711811ed94e6eb9ff4f46ebcd583d6d935c859
+    bytes: 16947
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_reconciliation.md
+    sha256: d5af51f9d090ee2e30daceb680076bf1f3d59ea9a066fb7823983eba301615f8
+    bytes: 18718
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml
+    sha256: 6c652885f6b9181d1d0f6c16292d5ae9af841c9fa060211734e780d26c58c432
+    bytes: 98700
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d_core.yaml
+    sha256: 402b1c89a32a7d5fb94cbc9b5450967a4ee3461dc00bf968ab64941ba1a5e72a
+    bytes: 87515
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_provenance.yaml
+    sha256: c2d4eff5f3637dd10e8a9db3ac935386afc7b89ccb397e04f1b38b7f8f678ac4
+    bytes: 27818
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_reconciliation.md
+    sha256: 571c58a1b6d56bf879a6c671617ee1249116717ceedfe6f20b4d8167c2224812
+    bytes: 16721
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep2
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    sha256: 1891651e3288f8ebbd085e90c52532fefc9e67ef643241700c2c4e3544f0e182
+    bytes: 96415
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d_core.yaml
+    sha256: 610e5ae018a7121fb151b26986fa191d06be95d829bb298aa627d1fba7629627
+    bytes: 84513
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_provenance.yaml
+    sha256: a76d45d315afc1356b9f244d22b9ca7ef38fc95ec826fc213082ee02c3b0bc65
+    bytes: 29548
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_reconciliation.md
+    sha256: dc36f12b31e216e9e5217c27c87297b1d010e5447e80aaf6b5ae0d1cc2148252
+    bytes: 23708
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml
+    sha256: 15ff936ecc4d6b3ba8e4644368b6169925d52935ce85adf90fa9af24818ead07
+    bytes: 100761
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d_core.yaml
+    sha256: 101607b866866df4ca636023ca27b9ecb09d98c26370e4762f5049c9c66f0a1d
+    bytes: 86482
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_provenance.yaml
+    sha256: 831d4849de9c763e9cff65a0af072ce1467b58ea1cc22aa312419bf5a9883b2b
+    bytes: 30152
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_reconciliation.md
+    sha256: da9ac770e0d7bf40b4f3c2059485788f2567e11e8180f43bf2674d832bf383bc
+    bytes: 18541
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-28b_claude-opus-5-api-generic-v7_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    sha256: f223439e02a3921b6e4bcbf850880a9151fd5ade3de3ed7803bf45b54e0fa0a7
+    bytes: 81230
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
+    sha256: c1c63769b1e1657bf8d06c91005bd5822aba1ea10f150652edf91e88f04b5ad4
+    bytes: 67619
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml
+    sha256: 34ac38a7d4d7d1893680f76f9ed4a2e53f61dd77d2d0bda84f0bcaef948d5ed5
+    bytes: 29208
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_reconciliation.md
+    sha256: 6c3de3cb2c54daf4f29b26c28c131f40d23ac976aa2b7401b011c01d6a9829c5
+    bytes: 11886
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-28c_claude-opus-5-api-generic-v7_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    sha256: d4d29f75a12b8c14a653dc1001d142de03543c9389d25c18e93381f76a0386d0
+    bytes: 88141
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
+    sha256: 601135ed66c5667baca1768c6da7b15b8d3857deda23eab009f88944642adca7
+    bytes: 73597
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml
+    sha256: 49249244fab3e2ad0d27d804915a66d936a6b9894fef275568198cd5524dd044
+    bytes: 29394
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_reconciliation.md
+    sha256: 76a801bc058aef945ba32e10c4227b7ed6c9fcd9afb51e2261d9bd5579ba679c
+    bytes: 19357
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-08-28d_claude-opus-5-api-generic-v7_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    sha256: 1ef0bce6b18328f6855c64da39a2aac442b5fc25285aec9dd26b044cee68c8d9
+    bytes: 102100
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
+    sha256: 2aad5830abdfd0058f28661c9796de97b068b8df23e7354e6d9de1c41d65a539
+    bytes: 75119
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml
+    sha256: 7ff5935426858fdc8bbd6e5d8c027aac23aff62146503b09e4f7a6a17d4c9d03
+    bytes: 29324
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_reconciliation.md
+    sha256: 6e24b73d2956568105a059905948e853235896c160f300f8bfb3f5230bdbc334
+    bytes: 14513
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 0f3abb51a333555456bedd63891fcd99
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    sha256: dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5
+    bytes: 89058
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d_core.yaml
+    sha256: 7ba1434ee03d59cf083bf5e356ff9c908bf3110fef38901c1b5a2a704e30a3bf
+    bytes: 69417
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_provenance.yaml
+    sha256: adfe760952f09dc54f696a6df11721d6940aa91108ad9a11e29287cc333a90c1
+    bytes: 41280
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_reconciliation.md
+    sha256: a6d55b7200b08fb7582fa78accb8203168188b253921f9eba082a7cf6e1f9f40
+    bytes: 11196
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 8abd7bf5389b562b95794d656af19392
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d.yaml
+    sha256: c56d8261656557a68a8d94045593dd5c6b1b408d84f6aa98af5745955ef67f61
+    bytes: 89351
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d_core.yaml
+    sha256: 8b72b3233956c2547a67e2032a5d82b2be062f9a9a54d27843b7cc3ee05f5f1a
+    bytes: 71735
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_provenance.yaml
+    sha256: 48dd5ce3485df54e5fe60178c1a0cf02a5132a9a32aedc5ea0863ec8c794932a
+    bytes: 29563
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_reconciliation.md
+    sha256: 796edfbd90e13d623a05158886232f877131d289bcfe14cbf245e4ff74c2972f
+    bytes: 13605
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 8abd7bf5389b562b95794d656af19392
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_agent
+  label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+    sha256: d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409
+    bytes: 97400
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d_core.yaml
+    sha256: 58d6b3a594ba339761c0f81b7b40f4a91326ff48d872c933a004703dab5b18df
+    bytes: 79267
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_provenance.yaml
+    sha256: f5986482f2ab60833a02df946c3a4b8f0860120b64984c6d7ea96005d9ebc3f1
+    bytes: 31725
+  - copy: data/_wcrate/AI_READI/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_reconciliation.md
+    sha256: ad674fced61514c347cb6ea586a86bb48a1fcc4c618fb0dca0162779b3d50a49
+    bytes: 20788
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: 8abd7bf5389b562b95794d656af19392
+  source_manifest_md5: 6c71e8d26497a5808e09e2edd19c1ba4
+- method: claudecode_api
+  label: 2026-09-04f_claude-opus-5-api-generic-v8_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    sha256: ca383dc0a57b9ccf3c2ab615a82c57963d1672a014c9cbd152742c077ad7533d
+    bytes: 92989
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d_core.yaml
+    sha256: 04ec45d2dffad15db81a6091c7130cfde2affebb0e3a99728e077ce28db91406
+    bytes: 77513
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml
+    sha256: e7cc750f15430bdbb5926fc309dfa401eb6dc775d79a6200bb099ccd82c89fe7
+    bytes: 37013
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_reconciliation.md
+    sha256: 71277743cd9d5afcf79d768b4b14c050841ef34c118446db5bf21a49f6adeb9d
+    bytes: 19799
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: d22b61a9f8443545c9ae14ee941c3e88
+  source_manifest_md5: 41408d33c174b55434ac2fc14e6ab411
+- method: claudecode_api
+  label: 2026-09-04g_claude-opus-5-api-generic-v8_rep1
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    sha256: 4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f
+    bytes: 76611
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d_core.yaml
+    sha256: a5d80f898c56a8df46c1c5c3b73626468a458a6f7b43ae917cbdfd7d08d3af18
+    bytes: 63699
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_provenance.yaml
+    sha256: 25b431b81c48245d6766ef5c48abbca8a4979661f067e23b8f1ae95372ff5ac7
+    bytes: 37633
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_reconciliation.md
+    sha256: 6e3de4acb841dc7a0b790f99a6352343e2f2400a7393b36b044b321dcb342a11
+    bytes: 16982
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: d22b61a9f8443545c9ae14ee941c3e88
+  source_manifest_md5: 41408d33c174b55434ac2fc14e6ab411
+- method: claudecode_api
+  label: 2026-09-04g_claude-opus-5-api-generic-v8_rep2
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    sha256: 225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8
+    bytes: 100638
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d_core.yaml
+    sha256: 2f67a66b6ba0afb3bcc5e736cee652868cebe91452868616d6294476c470ac4f
+    bytes: 85218
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_provenance.yaml
+    sha256: 9debb857c95777dea107954bf2d51e77e7b829cf2084b495b43d5628b0773a61
+    bytes: 40989
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_reconciliation.md
+    sha256: 595cab41deeec3a1216d81a605e4676a3f6f9f95503f8f107bc116be4f7abdc1
+    bytes: 19224
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: d22b61a9f8443545c9ae14ee941c3e88
+  source_manifest_md5: 41408d33c174b55434ac2fc14e6ab411
+- method: claudecode_api
+  label: 2026-09-04g_claude-opus-5-api-generic-v8_rep3
+  files:
+  - copy: data/_wcrate/AI_READI/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    original: data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    sha256: 01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936
+    bytes: 80877
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d_core.yaml
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d_core.yaml
+    sha256: 8243704192050cf3e66cfee3c0e49eaf01d1b723a1749c1fca5f9863b1861487
+    bytes: 66507
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_provenance.yaml
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_provenance.yaml
+    sha256: a3b311e5f7cd59f370a1b30a0e098f323b85336e2d81f48511768d8337c5962a
+    bytes: 37740
+  - copy: data/_wcrate/AI_READI/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_reconciliation.md
+    original: data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_reconciliation.md
+    sha256: 7a521dcd6892ec208279a61c881bacdfa2d60d3d239b6d07fb8d4ae502767de2
+    bytes: 13361
+  bundle_path: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+  bundle_md5: d22b61a9f8443545c9ae14ee941c3e88
+  source_manifest_md5: 41408d33c174b55434ac2fc14e6ab411

@@ -1,6 +1,9 @@
 """API generation commands — D4D runs over the Anthropic API (four model phases; the core is derived, #694)."""
 
+from __future__ import annotations
+
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -40,6 +43,19 @@ ARMS = {
 _CONDITIONS = sorted(CONDITION_PROMPTS)
 _CONDITION_SCOPE = (" API generic_v10 requires registered API25; source-heading conditions require "
                     "registered API27/shared2/playbook3/receipt3. Source-heading selections do not support native/direct launchers.")
+
+# Every non-core, non-deterministic method directory and the arm key it belongs
+# to (#5046). `baseline` spans three runtime directories (`claudecode_api`,
+# `claudecode_agent`, `claudecode_direct`); the other arms each have one.
+_ARM_FOR_METHOD = {
+    "claudecode_agent": "baseline",
+    "claudecode_api": "baseline",
+    "claudecode_direct": "baseline",
+    "claudecode_agent_crate": "de_novo",
+    "claudecode_agent_crate_only": "crate_only",
+    "claudecode_agent_healthsheet": "healthsheet",
+}
+_METHODS = sorted(_ARM_FOR_METHOD)
 
 
 def _explicit(name, value, default=None):
@@ -83,17 +99,20 @@ def _capture_shared_registration(path):
 
 def _shared_spec(project, arm, label, condition, bundle, out_dir, runtime, provider,
                  manifest, chunk_manifest, api_playbook_version, removal_repair_version,
-                 receipt_completion_version, receipt_completion_registration, captured):
+                 receipt_completion_version, receipt_completion_registration, captured,
+                 method=None):
     from data_sheets_schema import api_runner as api, shared_generation as shared
     reg, raw = captured['document'], captured['raw']
     run, inputs = reg['run'], reg['inputs']
     matches = [key for key, row in ARMS.items() if row[:2] == (run['arm'], run['method'])]
     if len(matches) != 1 or run['project'] != project or run['label'] != label:
         raise click.ClickException('shared registration belongs to another project, arm, method or label')
-    expected = {'arm': matches[0], 'condition': reg['selection']['condition'], 'runtime': api.RUNTIME,
-                'provider': reg['runtime']['provider'], 'api_playbook_version': reg['selection']['api_playbook_version'],
-                'receipt_completion_version': reg['selection']['receipt_completion_version'], 'removal_repair_version': 0}
-    supplied = dict(arm=arm, condition=condition, runtime=runtime, provider=provider,
+    expected = {'arm': matches[0], 'method': run['method'], 'condition': reg['selection']['condition'],
+                'runtime': api.RUNTIME, 'provider': reg['runtime']['provider'],
+                'api_playbook_version': reg['selection']['api_playbook_version'],
+                'receipt_completion_version': reg['selection']['receipt_completion_version'],
+                'removal_repair_version': 0}
+    supplied = dict(arm=arm, method=method, condition=condition, runtime=runtime, provider=provider,
                     api_playbook_version=api_playbook_version,
                     receipt_completion_version=receipt_completion_version,
                     removal_repair_version=removal_repair_version)
@@ -222,7 +241,7 @@ def _shared_plan_line(plan):
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
-          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None, _shared_capture=None):
+          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None, _shared_capture=None, method=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -246,10 +265,21 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
         return _shared_spec(project, arm, label, condition, bundle, out_dir,
                             runtime, provider, manifest, chunk_manifest,
                             api_playbook_version, removal_repair_version,
-                            receipt_completion_version, receipt_completion_registration, captured)
+                            receipt_completion_version, receipt_completion_registration, captured,
+                            method=method)
     from data_sheets_schema.api_runner import RunSpec
     from data_sheets_schema.chunking import CONCAT_DIR as BUNDLE_DIR
-    display, method, pattern, manifest_line = ARMS[arm]
+    if method is not None:
+        method_arm = _ARM_FOR_METHOD.get(method)
+        if method_arm is None:
+            raise click.ClickException(f"unknown --method {method!r}; expected one of {', '.join(_METHODS)}")
+        if _explicit("arm", arm, "baseline") and arm != method_arm:
+            raise click.ClickException(
+                f"--method {method!r} conflicts with --arm {arm!r} (expected --arm {method_arm})"
+            )
+        arm = method_arm
+    display, default_method, pattern, manifest_line = ARMS[arm]
+    method = method or default_method
     selected = select_manifest(project, bundle, manifest)      # one rule, everywhere (#1367 review)
     reg = load_registry(selected)
     resolved = (Path(bundle) if bundle else
@@ -437,6 +467,8 @@ def api():
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
+@click.option("--method", type=click.Choice(_METHODS), default=None,
+              help="output method directory (e.g. claudecode_agent for an agentic baseline run, #5046); default: the arm's method")
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies without being called a choice (#1094)" + _CONDITION_SCOPE)
@@ -456,7 +488,7 @@ def api():
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="render even though the label names a different condition (#1094)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
-                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
+                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, method=None):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -481,7 +513,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     spec = _spec(project, arm, label, condition, bundle,
                  runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
                  shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration,
-                 **_manifest_kw(manifest, chunk_manifest))
+                 method=method, **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
 
@@ -514,6 +546,8 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     if spec.shared_generation_version:
         condition, runtime = spec.condition, spec.runtime
         arm = next(key for key, row in ARMS.items() if row[:2] == (spec.arm, spec.method))
+    else:
+        arm = _ARM_FOR_METHOD.get(spec.method, arm)
     click.echo(f"# rendered {condition} for {project} / {arm} / runtime={runtime}",
                err=True)
     click.echo(f"# sha256 {digest}  ({len(text.encode('utf-8'))} bytes)", err=True)
@@ -721,10 +755,12 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 @click.option("--no-canary-gate", is_flag=True,
               help="fan out even if the first run regresses against the "
                    "baseline; the comparison is still printed")
+@click.option("--max-cost-dollars", type=float, default=None,
+              help="stop batch before starting subsequent runs if cumulative cost meets or exceeds this amount")
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, max_cost_dollars=None):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -732,6 +768,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api batch")          # the record and the outputs land under the cwd (#1643)
+    if max_cost_dollars is not None and (not math.isfinite(max_cost_dollars) or max_cost_dollars < 0):
+        raise click.ClickException("--max-cost-dollars must be non-negative and finite")
     from data_sheets_schema.api_runner import execute, plan
 
     requested = (AUTO if manifest is None
@@ -833,6 +871,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         raise click.ClickException(str(exc)) from exc
 
     ok, failed, spent_in, spent_out = [], [], 0, 0
+    spent_dollars = 0.0
+    cost_stop: str | None = None
     canary_stop: str | None = None
     #: Whether the fan-out is gated on the first run at all. Read in three
     #: places, so it is computed once rather than restated (#619).
@@ -859,16 +899,29 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             if roster:
                 _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
             res = execute(s)
-            spent_in += sum(u.get("input_tokens") or 0 for u in res["usage"])
-            spent_out += sum(u.get("output_tokens") or 0 for u in res["usage"])
-            cached = sum(u.get("cache_read") or 0 for u in res["usage"])
+            usage_rows = res.get("usage") or []
+            spent_in += sum(u.get("input_tokens") or 0 for u in usage_rows)
+            spent_out += sum(u.get("output_tokens") or 0 for u in usage_rows)
+            cached = sum(u.get("cache_read") or 0 for u in usage_rows)
+            from data_sheets_schema.run_telemetry import (
+                RATE_CACHE_READ,
+                RATE_CACHE_WRITE,
+                RATE_INPUT,
+                RATE_OUTPUT,
+            )
+            run_cost = sum((u.get("input_tokens") or 0) * RATE_INPUT
+                           + (u.get("cache_write") or 0) * RATE_CACHE_WRITE
+                           + (u.get("cache_read") or 0) * RATE_CACHE_READ
+                           + (u.get("output_tokens") or 0) * RATE_OUTPUT
+                           for u in usage_rows)
+            spent_dollars += run_cost
             note = f"  (resumed, skipped {len(res['skipped'])})" if res["skipped"] else ""
             vp = res.get("validation_problems") or []
             if vp:
                 # A sweep must not count an invalid record as a success, or the
                 # summary line reports work that cannot be used.
                 click.echo(f"   ❌ invalid output ({len(vp)} failure(s)) "
-                           f"in={spent_in:,} out={spent_out:,}", err=True)
+                           f"in={spent_in:,} out={spent_out:,} cost=${spent_dollars:,.2f}", err=True)
                 for p in vp:
                     click.echo(f"      {p.get('artifact')}: {p.get('error')}",
                                err=True)
@@ -883,8 +936,14 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                     break
                 if canary_stop:
                     break
+                if max_cost_dollars is not None and spent_dollars >= max_cost_dollars and i < len(specs):
+                    cost_stop = (
+                        f"cumulative cost stop: spent ${spent_dollars:,.2f} >= "
+                        f"${max_cost_dollars:,.2f} cap. Remaining runs were stopped."
+                    )
+                    break
                 continue
-            click.echo(f"   ✓ in={spent_in:,} out={spent_out:,} cache_read={cached:,}{note}")
+            click.echo(f"   ✓ in={spent_in:,} out={spent_out:,} cache_read={cached:,} cost=${spent_dollars:,.2f}{note}")
 
             # The three post-generation checks, printed for every run so a
             # sweep cannot look clean while they fail (#579) — and, on the
@@ -983,6 +1042,12 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 break
         if canary_stop:
             break
+        if max_cost_dollars is not None and spent_dollars >= max_cost_dollars and i < len(specs):
+            cost_stop = (
+                f"cumulative cost stop: spent ${spent_dollars:,.2f} >= "
+                f"${max_cost_dollars:,.2f} cap. Remaining runs were stopped."
+            )
+            break
 
     # Released even when the sweep failed or was interrupted mid-loop: a lock
     # outliving its process would make the next attempt refuse to start, which
@@ -990,11 +1055,18 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     # lock left by a hard kill is recognised as stale rather than believed.
     run_lock.release(lock_path)
 
+    if cost_stop:
+        click.echo(f"\n{len(ok)} succeeded, {len(failed)} failed")
+        click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out (cost: ${spent_dollars:,.2f})")
+        for p, lbl, err in failed:
+            click.echo(f"   {p} {lbl}: {err[:90]}")
+        canary_stop = cost_stop
+
     if canary_stop:
         raise click.ClickException(canary_stop)
 
     click.echo(f"\n{len(ok)} succeeded, {len(failed)} failed")
-    click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out")
+    click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out (cost: ${spent_dollars:,.2f})")
     for p, lbl, err in failed:
         click.echo(f"   {p} {lbl}: {err[:90]}")
     if failed:

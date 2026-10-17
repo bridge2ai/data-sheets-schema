@@ -8,6 +8,8 @@ here to each bundle's md5, and the reading that decides which awards fund
 *this* dataset is registered in the note beside the count.
 """
 import hashlib
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -21,6 +23,10 @@ BUNDLES = ROOT / "data" / "preprocessed" / "concatenated"
 #: Per-bundle mechanical counts as registered, keyed by the bytes they were
 #: counted on. A bundle rewrite that changes the count must re-register.
 REGISTERED = {
+    # The v8 registration, on the bytes the v8 records read. #5042 then removed
+    # the RO-Crate from the bundle on disk (1a58ad7be37d; the crate carried 10
+    # of these 18 OT2OD032644 mentions, and the same four awards remain), so
+    # these counts are checked on the registered bytes recovered from git.
     "AI_READI": ("d22b61a9f844", {"OT2OD032644": 18, "P30DK035816": 2, "UL1TR003096": 1, "UL1TR001442": 1}),
     "CHORUS": ("9b2ef4b65d67", {"OT2OD032701": 3}),
     "CM4AI": ("50037fc631ea", {"OT2OD032742": 10, "U54CA274502": 1, "U24HG012107": 1, "U24CA269436": 1,
@@ -82,17 +88,39 @@ class TestTheRecordSide(unittest.TestCase):
 
 class TestTheCorpus(unittest.TestCase):
     def _bundle(self, project):
-        path = BUNDLES / f"{project}_preprocessed.txt"
+        """The registered bytes: the bundle on disk while it still hashes to
+        the registration, else the committed version that does, but only
+        where `bundle_hash_history` records the move away from it (#5042).
+        A moved bundle with no recorded move fails, it does not skip (#1161
+        review, S1): the registered count is pinned to bytes, and a rewrite
+        nobody re-registered would otherwise leave this test green with no
+        coverage — the `bundle_hash_history` guard's discipline."""
+        rel = f"data/preprocessed/concatenated/{project}_preprocessed.txt"
+        path = ROOT / rel
         if not path.exists():
             self.skipTest(f"{path} not in this checkout")
         md5 = hashlib.md5(path.read_bytes()).hexdigest()
-        # A moved bundle fails, it does not skip (#1161 review, S1): the
-        # registered count is pinned to bytes, and a rewrite nobody
-        # re-registered would otherwise leave this test green with no
-        # coverage — the `bundle_hash_history` guard's discipline.
-        self.assertTrue(md5.startswith(REGISTERED[project][0]),
-                        f"{project} bundle has moved ({md5[:12]}); re-register the count in REGISTERED and the plan note")
-        return path
+        registered = REGISTERED[project][0]
+        if md5.startswith(registered):
+            return path
+        history = yaml.safe_load((ROOT / "data/preprocessed/source_manifest.yaml").read_text(encoding="utf-8"))
+        befores = [str(ev["projects"][project]["before"])
+                   for ev in ((history.get("bundle_hash_history") or {}).get("events") or [])
+                   if project in (ev.get("projects") or {})
+                   and str(ev["projects"][project].get("before", "")).startswith(registered)]
+        self.assertTrue(befores, f"{project} bundle has moved ({md5[:12]}) and no bundle_hash_history event records "
+                                 f"the move away from {registered}; re-register the count in REGISTERED and the plan note")
+        from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
+        try:
+            found = bundle_bytes_for(rel, md5=befores[-1])
+        except GitUnavailable as exc:
+            self.skipTest(f"the registered bytes need git history: {exc}")
+        self.assertIsNotNone(found, f"no committed version of {rel} has md5 {befores[-1]}")
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        out = tmp / f"{project}_preprocessed.txt"
+        out.write_bytes(found[0])
+        return out
 
     def test_the_plan_note_registers_the_same_counts(self):
         """Two places record the mapping; if they disagree, the one a reader

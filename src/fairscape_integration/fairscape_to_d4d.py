@@ -41,6 +41,8 @@ Features:
 """
 
 import re
+import hashlib
+from copy import deepcopy
 import sys
 import yaml
 from functools import lru_cache
@@ -60,9 +62,15 @@ from data_sheets_schema.rocrate_map import (
     _type_matches,
     doi_for_slot,
     read_crate_json,
+    _crate_json_from_bytes,
 )
 from data_sheets_schema.schema_view import shared_view
+from data_sheets_schema.rocrate_sources import select_root
+from data_sheets_schema.rocrate_parent_admission import ParentAdmission, snapshot, refusal_text
 from data_sheets_schema.scope import _norm, bare_doi
+from data_sheets_schema.fairscape_route_assertions import (
+    DeclaredAssertions, evidence_state, failed,
+)
 
 # Add fairscape_models to path
 fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
@@ -123,10 +131,6 @@ FILE_COLLECTION_SLOTS = {
     'd4d:collectionType': 'collection_type',
     'd4d:fileCount': 'file_count',
 }
-
-#: The `@id` RO-Crate gives the metadata descriptor: `ro-crate-metadata.json`
-#: from 1.1, `ro-crate-metadata.jsonld` in 1.0.
-DESCRIPTOR_IDS = ("ro-crate-metadata.json", "ro-crate-metadata.jsonld")
 
 #: What JSON calls each value `json.loads` returns other than an object,
 #: by its Python type, for `convert` to say what a file holds instead of
@@ -289,7 +293,7 @@ def _distinct(values: List[Any]) -> List[Any]:
 
 
 def is_rocrate(entity: Dict[str, Any]) -> bool:
-    """ROCrate-typed, by the test `rocrate_map.crate_root` applies."""
+    """ROCrate-typed under this converter's historical type matching."""
     return any('ROCrate' in t for t in _types(entity))
 
 
@@ -304,35 +308,13 @@ def is_dataset(entity: Dict[str, Any]) -> bool:
 
 
 def root_data_entity(graph: List[Any]) -> Optional[Dict[str, Any]]:
-    """The crate's root data entity, by the RO-Crate rule (#4072).
+    """The shared, unambiguous crate root, or None (#4586).
 
-    1. The entity the metadata descriptor (`ro-crate-metadata.json`) names
-       in `about`. That is how RO-Crate defines the root.
-    2. Otherwise the entity whose `@id` is `./`.
-    3. Otherwise the first ROCrate-typed entity, which is the one
-       `rocrate_map.crate_root` and FAIRSCAPE's
-       `ROCrateV1_2.getCrateMetadata` return.
-
-    A FAIRSCAPE release crate lists its sub-crates in the same `@graph`,
-    each typed ROCrate like the release itself. Taking the last such
-    entity, as this converter did, described a sub-crate as the release.
+    Crate-level descriptor references are authoritative. A missing or
+    ambiguous root is never supplied by an arbitrary child Dataset.
+    ``convert`` reports the selector's reason when selection is refused.
     """
-    entities = [entity for entity in graph if isinstance(entity, dict)]
-    by_id: Dict[str, Dict[str, Any]] = {}
-    for entity in entities:
-        if isinstance(entity.get('@id'), str):
-            by_id.setdefault(entity['@id'], entity)
-    # The `@id` itself, not its last path segment: a release crate can list
-    # a sub-crate's `<dir>/ro-crate-metadata.json` as a file of its own.
-    descriptor = next((by_id[name] for name in DESCRIPTOR_IDS if name in by_id),
-                      None)
-    if descriptor is not None:
-        root = by_id.get(_ref_id(descriptor.get('about')))
-        if root is not None and root is not descriptor:
-            return root
-    if './' in by_id:
-        return by_id['./']
-    return next((entity for entity in entities if is_rocrate(entity)), None)
+    return select_root(graph)[0]
 
 
 def exact_bytes(value: Any) -> Tuple[Optional[int], str]:
@@ -590,6 +572,26 @@ class FairscapeToD4DConverter:
         #: not take, by index, with the slot: once the record is valid,
         #: `_settle` says which value the slot holds instead (#4125).
         self._instead: List[Tuple[int, str]] = []
+        self._parent_evidence = []
+        self._route_evidence = evidence_state("fairscape_to_d4d")
+        self._declared_assertions = None
+        self._parent_admitted = {}
+        self._parent_admission = None
+        self._parent_root_output_id = None
+
+    @property
+    def parent_evidence(self):
+        """Detached parent admission decisions; not proof of final retention."""
+        return snapshot(self._parent_evidence)
+
+    @property
+    def route_evidence(self):
+        """Detached consulted assertions and their final Dataset retention."""
+        return snapshot(self._route_evidence)
+
+    def _refuse_parent(self, decision, reason):
+        decision.update(decision="refused", reason=reason)
+        self.dropped.append((f"isPartOf[{decision['occurrence']}]", refusal_text(decision)))
 
     def convert(self, rocrate_input: Any) -> Dict[str, Any]:
         """
@@ -628,67 +630,92 @@ class FairscapeToD4DConverter:
                 integer; its JSON is not one object, as an RO-Crate's
                 metadata is, but an array, a string, a number, a boolean
                 or null, which the message names (#4192); the crate has no
-                root data entity; or the record has an error no value left
+                unambiguous root data entity (the selection reason is
+                included); or the record has an error no value left
                 out can fix, such as a missing `id` (`_settle`). A byte
                 count written as text, however long, is recorded in
                 `dropped` instead (#4159).
         """
         self.dropped = []
+        self._parent_evidence = []
+        self._parent_admitted = {}
+        self._parent_admission = None
+        self._parent_root_output_id = None
         self._minted = {}
         self._read_at = {}
         self._instead = []
 
-        # Load RO-Crate data
-        if isinstance(rocrate_input, dict):
-            rocrate_data = rocrate_input
-        elif isinstance(rocrate_input, (str, Path)):
-            # As the static-map arm reads a crate: UTF-8, or refused (#4089).
-            # The refusal says to transcode the file and does not point to
-            # crate_manifest.yaml's `encoding_note`: a path here can name any
-            # crate, which the manifest need not declare (#4192).
-            path = Path(rocrate_input)
-            rocrate_data = read_crate_json(path, hint=TRANSCODE_HINT)
-            if not isinstance(rocrate_data, dict):
-                # Read as a mapping, an array, a string, a number, a boolean
-                # or null ended in an AttributeError naming a method it
-                # lacks (#4192).
-                kind = JSON_KINDS.get(type(rocrate_data),
-                                      type(rocrate_data).__name__)
-                raise ValueError(
-                    f"{path} is not an RO-Crate's metadata: its JSON is "
-                    f"{kind}, not an object. An RO-Crate's metadata is one "
-                    "JSON object, whose `@graph` lists the crate's entities")
-        elif FAIRSCAPE_AVAILABLE and isinstance(rocrate_input, ROCrateV1_2):
-            rocrate_data = rocrate_input.model_dump(by_alias=True, exclude_none=True)
-        else:
-            raise ValueError(f"Unsupported input type: {type(rocrate_input)}")
+        self._route_evidence = evidence_state("fairscape_to_d4d")
+        self._declared_assertions = None
+        try:
+            # Load RO-Crate data
+            if isinstance(rocrate_input, dict):
+                # Existing mappings do not mutate the input; the optional
+                # model validator below receives its own defensive copy.
+                rocrate_data = rocrate_input
+                evidence_data = rocrate_data
+                self._route_evidence["input"]["kind"] = "dict"
+            elif isinstance(rocrate_input, (str, Path)):
+                # As the static-map arm reads a crate: UTF-8, or refused (#4089).
+                # The refusal says to transcode the file and does not point to
+                # crate_manifest.yaml's `encoding_note`: a path here can name any
+                # crate, which the manifest need not declare (#4192).
+                path = Path(rocrate_input)
+                raw = path.read_bytes()
+                self._route_evidence["input"].update(
+                    kind="path", source_path=str(path), source_bytes=len(raw),
+                    source_sha256=hashlib.sha256(raw).hexdigest())
+                rocrate_data = _crate_json_from_bytes(raw, path, hint=TRANSCODE_HINT)
+                evidence_data = rocrate_data
+                if not isinstance(rocrate_data, dict):
+                    # Read as a mapping, an array, a string, a number, a boolean
+                    # or null ended in an AttributeError naming a method it
+                    # lacks (#4192).
+                    kind = JSON_KINDS.get(type(rocrate_data),
+                                          type(rocrate_data).__name__)
+                    raise ValueError(
+                        f"{path} is not an RO-Crate's metadata: its JSON is "
+                        f"{kind}, not an object. An RO-Crate's metadata is one "
+                        "JSON object, whose `@graph` lists the crate's entities")
+            elif FAIRSCAPE_AVAILABLE and isinstance(rocrate_input, ROCrateV1_2):
+                rocrate_data = rocrate_input.model_dump(by_alias=True, exclude_none=True)
+                evidence_data = rocrate_input.model_dump(
+                    by_alias=True, exclude_unset=True, exclude_none=False)
+                self._route_evidence["input"].update(
+                    kind="model", model_projection="by_alias_exclude_unset")
+            else:
+                raise ValueError(f"Unsupported input type: {type(rocrate_input)}")
 
-        # Validate with Pydantic if available
-        if FAIRSCAPE_AVAILABLE and isinstance(rocrate_data, dict):
-            try:
-                rocrate_model = ROCrateV1_2(**rocrate_data)
-                print("✓ Input RO-Crate validated with FAIRSCAPE Pydantic models")
-            except Exception as e:
-                print(f"⚠ Warning: RO-Crate validation failed: {e}")
+            # Validate with Pydantic if available
+            if FAIRSCAPE_AVAILABLE and isinstance(rocrate_data, dict):
+                try:
+                    rocrate_model = ROCrateV1_2(**deepcopy(rocrate_data))
+                    print("✓ Input RO-Crate validated with FAIRSCAPE Pydantic models")
+                except Exception as e:
+                    print(f"⚠ Warning: RO-Crate validation failed: {e}")
 
-        # The crate's root data entity, and the datasets its hasPart names
-        dataset, nested_datasets = self._extract_datasets(rocrate_data)
+            # The crate's root data entity, and the datasets its hasPart names
+            dataset, nested_datasets = self._extract_datasets(rocrate_data)
 
-        if not dataset:
-            raise ValueError(
-                "No root data entity in the RO-Crate `@graph`: the metadata "
-                "descriptor's `about` names no entity in it, no entity has "
-                "`@id` './', and none is typed ROCrate")
+            graph = rocrate_data.get("@graph", [])
+            root_index = next(i for i, node in enumerate(graph) if node is dataset)
+            evidence_graph = evidence_data.get("@graph", [])
+            evidence_root = evidence_graph[root_index]
+            self._declared_assertions = DeclaredAssertions(
+                self._route_evidence, evidence_root, evidence_graph, root_index)
 
-        # Convert to D4D
-        d4d_dict = self._build_d4d(dataset, nested_datasets, rocrate_data)
+            # Convert to D4D
+            d4d_dict = self._build_d4d(dataset, nested_datasets, rocrate_data)
 
-        return d4d_dict
+            return d4d_dict
+        except BaseException as exc:
+            failed(self._route_evidence, exc)
+            raise
 
-    def _extract_datasets(self, rocrate_data: Dict) -> Tuple[Optional[Dict], List[Dict]]:
+    def _extract_datasets(self, rocrate_data: Dict) -> Tuple[Dict, List[Dict]]:
         """The crate's root data entity and the datasets its `hasPart` names.
 
-        The root is the one the RO-Crate rule picks (`root_data_entity`),
+        The root is the one the shared selector picks (`root_data_entity`),
         and every value in the record is read from it (#4072). It used to
         be the last entity typed `Dataset` whose `@id` was `./` or that was
         typed EVI#ROCrate. In a FAIRSCAPE release crate, which lists its
@@ -708,18 +735,18 @@ class FairscapeToD4DConverter:
         Returns:
             Tuple of (root, nested_datasets_list)
         """
-        graph = [entity for entity in rocrate_data.get('@graph', [])
-                 if isinstance(entity, dict)]
-        root = root_data_entity(graph)
+        graph = rocrate_data.get('@graph', [])
+        root, reason = select_root(graph)
         if root is None:
-            return None, []
+            raise ValueError(f"No unambiguous root data entity in the RO-Crate `@graph`: {reason}")
+        graph = [entity for entity in graph if isinstance(entity, dict)]
 
         part_ids = {_ref_id(part) for part in _as_list(root.get('hasPart'))}
         part_ids.discard(None)
         nested_datasets, seen = [], set()
         for entity in graph:
             entity_id = entity.get('@id')
-            if (entity is not root and entity_id in part_ids
+            if (entity is not root and isinstance(entity_id, str) and entity_id in part_ids
                     and entity_id != root.get('@id') and entity_id not in seen
                     and is_dataset(entity)):
                 nested_datasets.append(entity)
@@ -769,6 +796,10 @@ class FairscapeToD4DConverter:
                            for entity in nested_datasets}
 
         record_id, id_source = self._record_id(dataset)
+        self._parent_root_output_id = record_id
+        if 'isPartOf' in dataset:
+            self._parent_admission = ParentAdmission(
+                dataset, full_rocrate.get("@graph", []), resolvable_id)
         if record_id:
             d4d['id'] = record_id
             origin['id'] = id_source
@@ -808,10 +839,36 @@ class FairscapeToD4DConverter:
                 # records `isPartOf` text for the same reason (#4125).
                 self._not_a_dataset_slot_value(prop, slot, value)
                 continue
+            before = (self._declared_assertions.before_place(slot, d4d, origin, rivals)
+                      if self._declared_assertions is not None else None)
             self._place(d4d, origin, rivals, slot, value, prop)
+            if self._declared_assertions is not None:
+                self._declared_assertions.after_place(
+                    prop, slot, value, before, d4d, origin, rivals)
 
         fitted = self._fit(d4d, TARGET_CLASS, origin, rivals=rivals)
-        return self._settle(fitted, origin, rivals)
+        if self._declared_assertions is not None:
+            self._declared_assertions.apply(
+                fitted, origin, rivals, self.dropped, self._prepare_declared_carrier)
+        settled = self._settle(fitted, origin, rivals)
+        if self._declared_assertions is not None:
+            self._declared_assertions.finish(settled, origin)
+        return settled
+
+    def _prepare_declared_carrier(self, values):
+        """Index detached D4D objects for the unchanged final validator.
+
+        Generic prose fitting would discard valid empty strings and normalize
+        explicit types. These four carriers already assert structured D4D
+        objects; _settle still removes and reports every invalid field/value.
+        """
+        objects, indices = [], []
+        for index, obj in enumerate(values):
+            if obj is not None:
+                self._read_at[id(obj)] = (obj, index)
+                objects.append(obj)
+                indices.append(index)
+        return objects, indices
 
     def _not_a_dataset_slot_value(self, source: str, slot: str,
                                   value: Any) -> None:
@@ -1010,7 +1067,11 @@ class FairscapeToD4DConverter:
             source, value = candidates.pop(0)
             if value in (None, '', [], {}):
                 continue
+            drops_before = len(self.dropped)
             shaped, why, left = self._shape(value, slot, f"{where}{key}")
+            if not where and self._declared_assertions is not None:
+                self._declared_assertions.scalar_shaped(
+                    key, source, value, shaped, left or len(self.dropped) != drops_before)
             for part, reason in left:
                 self.dropped.append((source, (
                     f"part of the value not placed in `{key}`: "
@@ -1333,7 +1394,20 @@ class FairscapeToD4DConverter:
             if item is None:
                 continue
             path = f"{where}[{n}]." if slot.multivalued else f"{where}."
+            drops_before = len(self.dropped)
             obj = self._object(item, cls, slot, path)
+            if self._declared_assertions is not None:
+                self._declared_assertions.object_shaped(
+                    where, value, n, obj, len(self.dropped) != drops_before)
+            parent = self._parent_admitted.get(id(item)) if where == 'parent_datasets' else None
+            if parent is not None and parent[0] is item:
+                decision = parent[1]
+                decision['output_id'] = snapshot(obj.get('id')) if obj else None
+                # Compare the identifiers actually produced, without repeating
+                # _record_id or fitting and its diagnostics (#4946).
+                if obj and obj.get('id') == self._parent_root_output_id:
+                    self._refuse_parent(decision, 'produced parent id equals the produced root id')
+                    continue
             if obj:
                 built.append(obj)
                 if slot.multivalued:
@@ -1514,16 +1588,17 @@ class FairscapeToD4DConverter:
             found.append(('hasPart', 'resources',
                           self._parts(dataset['hasPart'], dataset.get('@id'))))
 
-        # isPartOf → parent_datasets, the Dataset slot whose slot_uri is
-        # schema:isPartOf; there is no `is_part_of` slot (#3969). What the
-        # crate names there is not checked to be a dataset (#4047). Each
-        # reference's keys are fitted to Dataset or recorded (#4098), and
-        # text, which is not a reference, is recorded (#4125). The slot
-        # takes nothing from any other property (`DATASET_SLOTS`, #4138).
+        # Only explicit, unambiguous Dataset parents enter the unchanged
+        # fitter. Keep occurrence placeholders and complete refusals (#4047).
         if 'isPartOf' in dataset:
+            references, self._parent_evidence = self._parent_admission.prepare(dataset['isPartOf'])
+            for reference, decision in zip(references, self._parent_evidence):
+                if reference is None:
+                    self._refuse_parent(decision, decision['reason'])
+                else:
+                    self._parent_admitted[id(reference)] = (reference, decision)
             found.append(('isPartOf', 'parent_datasets',
-                          self._references('isPartOf',
-                                           _as_list(dataset['isPartOf']))))
+                          references if any(ref is not None for ref in references) else None))
 
         # additionalProperty → custom metadata
         if 'additionalProperty' in dataset:
@@ -1746,7 +1821,9 @@ class FairscapeToD4DConverter:
             'rai:dataUseCases': 'intended_uses',
             'rai:dataBiases': 'known_biases',
             'rai:dataLimitations': 'known_limitations',
-            'rai:dataCollection': 'acquisition_methods',
+            # The finite declared-assertion helper constructs dataCollection,
+            # sensitivity, future impact and annotation summaries after generic
+            # fitting. They must not also populate the historical wrong homes.
             'rai:dataCollectionMissingData': 'missing_data_documentation',
             'rai:dataCollectionRawData': 'raw_data_sources',
             'rai:dataCollectionTimeframe': 'collection_timeframes',
@@ -1761,11 +1838,8 @@ class FairscapeToD4DConverter:
             'prohibitedUses': 'prohibited_uses',
             'rai:ethicalReview': 'ethical_reviews',
             'ethicalReview': 'ethical_reviews',
-            'rai:personalSensitiveInformation': 'confidential_elements',
-            'rai:dataSocialImpact': 'data_protection_impacts',
             'rai:dataReleaseMaintenancePlan': 'updates',
             'rai:dataPreprocessingProtocol': 'preprocessing_strategies',
-            'rai:dataAnnotationProtocol': 'labeling_strategies',
             'rai:dataAnnotationAnalysis': 'annotation_analyses',
             # MachineAnnotationTools is the class the schema maps to
             # rai:machineAnnotationTools; there is no

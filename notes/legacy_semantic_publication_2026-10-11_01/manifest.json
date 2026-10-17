@@ -1,0 +1,902 @@
+{
+  "artifacts": [
+    {
+      "bytes": 20635,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/inputs/CHORUS.json",
+      "path_base": "repository_root",
+      "role": "raw_input",
+      "sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774"
+    },
+    {
+      "bytes": 7791,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d.yaml",
+      "path_base": "repository_root",
+      "role": "dataset",
+      "sha256": "97bec858efba1da5372ffbbb5894fbbb6d797dc38f7995c6615816f0d7bae13b"
+    },
+    {
+      "bytes": 30422,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d_route_dispositions.json",
+      "path_base": "repository_root",
+      "role": "sidecar",
+      "sha256": "201569d165267c878a77de7905c714636f0e43068768285c7f26c139d7253de1"
+    },
+    {
+      "bytes": 12116,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d_report.txt",
+      "path_base": "repository_root",
+      "role": "report",
+      "sha256": "f935a526cb804ef64c73f8e02d036ab2f2e3ee82a7e1a35ede7274e40f913ddd"
+    },
+    {
+      "bytes": 726461,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/inputs/VOICE.json",
+      "path_base": "repository_root",
+      "role": "raw_input",
+      "sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4"
+    },
+    {
+      "bytes": 21274,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d.yaml",
+      "path_base": "repository_root",
+      "role": "dataset",
+      "sha256": "4e102b473be6d493cad5aa5c2cb670912fe24f5927588ef147cee1539a02af23"
+    },
+    {
+      "bytes": 829227,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d_route_dispositions.json",
+      "path_base": "repository_root",
+      "role": "sidecar",
+      "sha256": "0ea926301865df14abfe10484bd1d3315c1b3daf450aee79b454dbfd579f2345"
+    },
+    {
+      "bytes": 38733,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d_report.txt",
+      "path_base": "repository_root",
+      "role": "report",
+      "sha256": "99a827f0f9090b32cb1e67e15180bc0eeaa1380570564f797edda9d3256458fe"
+    },
+    {
+      "bytes": 107388,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/inputs/CM4AI_reduced.json",
+      "path_base": "repository_root",
+      "role": "raw_input",
+      "sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610"
+    },
+    {
+      "bytes": 11022,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d.yaml",
+      "path_base": "repository_root",
+      "role": "dataset",
+      "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+    },
+    {
+      "bytes": 130220,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d_route_dispositions.json",
+      "path_base": "repository_root",
+      "role": "sidecar",
+      "sha256": "4ebdb36ff6d5553f609421798a0ab1c10d38186061fb56a4f314aa06335e5016"
+    },
+    {
+      "bytes": 41982,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d_report.txt",
+      "path_base": "repository_root",
+      "role": "report",
+      "sha256": "a4d715a8814d22311a6d8803df1b07a1a919ea224746b97a0e9cdf68236f0f25"
+    },
+    {
+      "bytes": 1232,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/inputs/VOICE_provenance.json",
+      "path_base": "repository_root",
+      "role": "raw_input",
+      "sha256": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608"
+    },
+    {
+      "bytes": 739,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d.yaml",
+      "path_base": "repository_root",
+      "role": "dataset",
+      "sha256": "79623548f0ba57b8501ab427e6e41fbc99f20c1aa0a6087837356412dabb4827"
+    },
+    {
+      "bytes": 7814,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d_route_dispositions.json",
+      "path_base": "repository_root",
+      "role": "sidecar",
+      "sha256": "b5702fc79bdcd3337f2e0c533086c8a07508abcc4b5f15972c7ed3058b17d4ae"
+    },
+    {
+      "bytes": 2620,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d_report.txt",
+      "path_base": "repository_root",
+      "role": "report",
+      "sha256": "e27360b27f5db71c13312878abeb5e7242ef82fa8c2bf639bdba923e2a95ec93"
+    },
+    {
+      "bytes": 12242926,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/inputs/CM4AI_original.json",
+      "path_base": "repository_root",
+      "role": "raw_input",
+      "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+    },
+    {
+      "bytes": 11022,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d.yaml",
+      "path_base": "repository_root",
+      "role": "dataset",
+      "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+    },
+    {
+      "bytes": 13033881,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d_route_dispositions.json",
+      "path_base": "repository_root",
+      "role": "sidecar",
+      "sha256": "50f39f4c7d362d96cca866de939f82d3f3b02791760bb35419be72a661d3de62"
+    },
+    {
+      "bytes": 40904,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d_report.txt",
+      "path_base": "repository_root",
+      "role": "report",
+      "sha256": "c7725cf8d5fd3e03503ea382a2c5f49f127470cc1baebd2dc09f0a7090460299"
+    },
+    {
+      "bytes": 2753,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/input-acquisition.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "94e6c694d719d6b04a40a9a172f9c9f926f4590e46c3a1b8b7cfeae9a6d2c465"
+    },
+    {
+      "bytes": 537,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/preservation.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "abdbd749903f27a7bff0d4dc6d03f33ef5dc62858dab7d80945e4d1d1acfc40c"
+    },
+    {
+      "bytes": 693,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CHORUS.execution.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "c04cab9ca22d9a7efd48219778cf4b0843411337323fe972f75502cfa86b3dc7"
+    },
+    {
+      "bytes": 0,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CHORUS.stderr.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6268,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CHORUS.stdout.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "bbcc94691c75d999d740d79bcc430e0225b0a0c18f6126a80d96125fc382b881"
+    },
+    {
+      "bytes": 12069,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CHORUS.worker.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "7b90a10700c11e1c9fe4faed8054862c7c86da70a2767cd18fb8a312894f6a7b"
+    },
+    {
+      "bytes": 709,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_original.execution.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "1b61c0824ba304051fea90806b7f2e20900fac4271db505e8f4cb5d8f3dca6f3"
+    },
+    {
+      "bytes": 0,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_original.stderr.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 35401,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_original.stdout.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "0a9536508c116b627b677d2fa16a2f189e40b9f54d9edee5b0fd159d1ac53921"
+    },
+    {
+      "bytes": 12460,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_original.worker.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "e50879fbbcce488c3bfe3aa29afcd2c0cf37df3e42c5ec5b4be4eb87820877cd"
+    },
+    {
+      "bytes": 707,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_reduced.execution.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "0658e918ae5bd4e0ad410cc08b6fcc93b3e35947899e598986452b11aa4a3174"
+    },
+    {
+      "bytes": 0,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_reduced.stderr.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 35395,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_reduced.stdout.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "9945b2678bc91914369ed85887a8e97dcca47b3a1dc38fea05cee8b2075a613b"
+    },
+    {
+      "bytes": 12449,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_reduced.worker.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "4659a50d5e3c3d81601a5014ff48f1d2d9ffc3fd4e7f41d38860c959747867a4"
+    },
+    {
+      "bytes": 691,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE.execution.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "f47605ba99b7e2790017b800d19d7c44a7671693fa742b563eca6686aa2aaefc"
+    },
+    {
+      "bytes": 0,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE.stderr.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 32818,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE.stdout.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "3f1e485a305e41a31718a2830be692c01f0f44107aa1f4065607d03cce098787"
+    },
+    {
+      "bytes": 12062,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE.worker.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "2b17a57f6bd17015dec5a9ad3cdd61c3b4dc8a288a0ddc2d8494bb6f7121a58b"
+    },
+    {
+      "bytes": 713,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE_provenance.execution.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "8d4f58c16e629465ab28480b231ea357f842668292f4ffaa4481d4ec2b0fcb8b"
+    },
+    {
+      "bytes": 0,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE_provenance.stderr.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2301,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE_provenance.stdout.txt",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "fff734c65ecf13a0cfc813678c7ee3f03b7feb36f591af39560ba35c5a7b856d"
+    },
+    {
+      "bytes": 12165,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE_provenance.worker.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "170713ba8dadebd1b442acb18bd65053e8b08a398ffffbb8d4c3320e0fc5e1af"
+    },
+    {
+      "bytes": 2387953,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/source-after.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+    },
+    {
+      "bytes": 2387953,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/source-before.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+    },
+    {
+      "bytes": 32527,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/completed.json",
+      "path_base": "repository_root",
+      "role": "publication_evidence",
+      "sha256": "5473f9008794d190cb8bc4c6733ba2dbcc9199dac7bbe17a693c27dfbec38623"
+    },
+    {
+      "bytes": 11432,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/validation/dual2273-audit.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "24100ba41e209ddbec8de5a5d7c66f8c70ca15dbe9bfe9d338844e2913ce5adc"
+    },
+    {
+      "bytes": 6028,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/validation/baseline-confirmation.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "3d0bd80f54d9bc665b16c0254dd3724e8994c62cf803aaa4dae2dcc082cee912"
+    },
+    {
+      "bytes": 6489,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/validation/candidate313-execution.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "4f34c4755fba72795e42bef90ed0607d4d8af372d162d3da48a76b8804a5e27f"
+    },
+    {
+      "bytes": 6804,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/validation/candidate39-execution.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "206fb021218e1cbc5a06cfb93a7b4d71158ee6b60ca7dc2c411bf270afdf7f1e"
+    },
+    {
+      "bytes": 2046,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/plugin03-execution.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "457ae27cc0e87f3c57b33214cc0ef78d84bc6e27410948f3ac77b233e7e18d87"
+    },
+    {
+      "bytes": 887,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/plugin03-stdout.txt",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "76fa0908971580d1b119c0efeb9c104be8ee10cf48e0dd0a711c9308b4031ac6"
+    },
+    {
+      "bytes": 4049,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/publisher05-static-review.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "df6f84e970b59ebc542fdd4097c198c72bf0e86fbfe138da889efdc86fe1e0db"
+    },
+    {
+      "bytes": 10518,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/comparison03-completed-audit.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "a876b97782330c3d0cca7588949469cd343f2de90d32fa7ff0959ec37004571a"
+    },
+    {
+      "bytes": 22856,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/publication03/failure.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "6f72a93e1e15729388f92d98c1ae32da3ed334452fbfc5f358ab0aa2975171b1"
+    },
+    {
+      "bytes": 694,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/publication03/CHORUS.execution.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "4cf634a6a1131729532da7e48ab95db68f2d078034790f01b22eec235c431e3e"
+    },
+    {
+      "bytes": 10258,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/publication03/CHORUS.worker.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "0d98fbb4d9e7ea15b0c1b097379341b30fedfc804508549215fdca2d4cb39ce4"
+    },
+    {
+      "bytes": 451,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/publication03/yaml-oracle-diagnosis01.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "09ee3113ed26b5459af9a53b52f789a26563aa344300011d51f53a6499193df1"
+    },
+    {
+      "bytes": 41429,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/controls05/result.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "f453b05a2171c336bc9f3c5ff33efb980a8d6f267e0ee4e4dbf9f4091e3ca3fd"
+    },
+    {
+      "bytes": 52996,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/runtime-configuration/bound-disabled.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "6e26e8c68071a42fd8e948548de215b761c3a7865d244c16f451c498a427382e"
+    },
+    {
+      "bytes": 52995,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/runtime-configuration/enabled-receipt.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "bc0256fbff7fe66300e6f8896af09c60ba855e9028a6354f758b9c204bbfc1ee"
+    },
+    {
+      "bytes": 20921,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/pr-merged.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "1f21a31bcab2ad770d12c8f9bdc3f3a4f016c7496ee625d996858d4af93fe4c3"
+    },
+    {
+      "bytes": 2843,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/merge-commit.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "cff594435ecea3f54f20de68caf3ea21efba391bb845399d843ce2b98bc26d7f"
+    },
+    {
+      "bytes": 422,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/merge-verified.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "94d527c5e6d52004a161230144db97262fe7b5e09091acc45fb1e1b5b31a431c"
+    },
+    {
+      "bytes": 13619,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/ci-run.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "422b28e43c18e3783d8705beb09951a1dae60a2aa8ac048b0342024c07e8d3ad"
+    },
+    {
+      "bytes": 27252,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/ci-jobs.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "388729f9d0fb783a45e6faf7ba0d8b105da852c39dfcb4893b76b800f03f4a33"
+    },
+    {
+      "bytes": 57948,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/head-checks.json",
+      "path_base": "repository_root",
+      "role": "prior_evidence",
+      "sha256": "8b707d313ebbe1ee4bfda063f5f01e1a0b9680e39216f3d1218468de589252d3"
+    },
+    {
+      "bytes": 16045,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/run.py",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "c20f1aa06372ec645041b29a8392d59e9160cf7430c276c6316b5e4cc29caf4e"
+    },
+    {
+      "bytes": 12080,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/worker.py",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "c2301c8e25c5726fad3540c9580ddb13dc5ff0e7880a107ceb53f889446314bd"
+    },
+    {
+      "bytes": 1962,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/serialization_oracle.py",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "0bdd791741598c72f543b5c843acb614ce3848da0bd407c7d5e0166da7916943"
+    },
+    {
+      "bytes": 12563,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/controls.py",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "058251b0ea2fb0c89084061aa2664c930b0d8bfc70f5da2ea16ccf448576f628"
+    },
+    {
+      "bytes": 49525,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/configuration.disabled.json",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "e52f02898f59410a8a34f72db445f9f6803bdf70f8d70164349af2283431561f"
+    },
+    {
+      "bytes": 6696,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/plan.json",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "ee3235b573b52b3f8f4aae8b533bd50d5708542230e6297fd39679300bfee700"
+    },
+    {
+      "bytes": 3826,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/freeze.json",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "490dd679063a3363edfb344817cd82412db597571fe115f16f146746d540c771"
+    },
+    {
+      "bytes": 23795,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/references/cli.py",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "5d8020f0764e35af99f72e5d6e61e83d90455302dd28b075f75121d770b97a1d"
+    },
+    {
+      "bytes": 6374,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/references/legacy_publication.py",
+      "path_base": "repository_root",
+      "role": "historical_disabled_publisher",
+      "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9"
+    },
+    {
+      "bytes": 16516,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/publisher05-completed-audit.json",
+      "path_base": "repository_root",
+      "role": "completed_independent_audit",
+      "sha256": "0750c9bfe45e7ed54a873a337a144a9f1d3cb556bedaf5d2d1230f500e554938"
+    },
+    {
+      "bytes": 17402,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/plugin03-stderr.txt",
+      "path_base": "repository_root",
+      "role": "plugin_review_stream",
+      "sha256": "6c5cc1ef80527d9bc5d33f957ddfd2841eb973371870caf08119b0952dd7ea00"
+    },
+    {
+      "bytes": 447,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/premerge-verification.json",
+      "path_base": "repository_root",
+      "role": "merge_evidence",
+      "sha256": "64152bab03bce7b1bc340845bb96824582c24f745b8674971154436c6281bb21"
+    },
+    {
+      "bytes": 2486,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/runtime-configuration/root-readiness.json",
+      "path_base": "repository_root",
+      "role": "actual_readiness",
+      "sha256": "dba27e16ccb4387a7db2ecf89f6111655cba958c7190d983fe467f6014511ed8"
+    },
+    {
+      "bytes": 4630,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/README.md",
+      "path_base": "repository_root",
+      "role": "release_documentation",
+      "sha256": "f615e28d82a753c1fe66f84aeea808cfebb3b870f59481fc21ea9ed4595f5320"
+    },
+    {
+      "bytes": 9521,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/verify.py",
+      "path_base": "repository_root",
+      "role": "portable_metadata_verifier",
+      "sha256": "83272f51d91f0e3e36788e288a035a9eac67346b764cc83f4fbfd385c2a8f018"
+    },
+    {
+      "bytes": 9521,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/verify.py",
+      "path_base": "repository_root",
+      "role": "metadata_verifier_source",
+      "sha256": "83272f51d91f0e3e36788e288a035a9eac67346b764cc83f4fbfd385c2a8f018"
+    },
+    {
+      "bytes": 13542,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/controls.py",
+      "path_base": "repository_root",
+      "role": "metadata_verifier_source",
+      "sha256": "aafe98d80bbb03692bd622b1a32b4ead8d56f4326a09f1a0d2e050ca9a9ca59f"
+    },
+    {
+      "bytes": 10396,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/build.py",
+      "path_base": "repository_root",
+      "role": "metadata_verifier_source",
+      "sha256": "328c16833bf64a455e4a3b42669698c779cccb73187ef1593361940e86cdbb0e"
+    },
+    {
+      "bytes": 1442513,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/snapshots/schema/data_sheets_schema_all.yaml",
+      "path_base": "repository_root",
+      "role": "schema_snapshot",
+      "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+    },
+    {
+      "bytes": 31899,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/snapshots/mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+      "path_base": "repository_root",
+      "role": "mapping_snapshot",
+      "sha256": "7937c6298293710f94edca909fbd9d25ea05ae353616e3a1163682f1abd30b80"
+    },
+    {
+      "bytes": 2762,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/controls-result.json",
+      "path_base": "repository_root",
+      "role": "actual_metadata_control",
+      "sha256": "3b049d221ad30f5827cd59b7b668f2f66ca9b34cc453ac238d1a6be1bb971ba4"
+    },
+    {
+      "bytes": 71166,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/configuration.disabled.json",
+      "path_base": "repository_root",
+      "role": "disabled_package_builder_configuration",
+      "sha256": "6213ac61c050200ed4291a309b745ecf06746bedcb4f58640767378f6938b4c2"
+    },
+    {
+      "bytes": 46334,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/relocation-index.json",
+      "path_base": "repository_root",
+      "role": "relocation_index",
+      "sha256": "6bd25c82752c71da18ca6d1fb059e24af2f96b931fd2480df1750b115586d271"
+    },
+    {
+      "bytes": 2571,
+      "path": "notes/legacy_semantic_publication_2026-10-11_01/validation.json",
+      "path_base": "repository_root",
+      "role": "metadata_validation",
+      "sha256": "b5cc6908c377a5cc2de4ae585560821f27a35cbfb4c4ca1ba4bde11682b9a965"
+    }
+  ],
+  "format": "legacy_semantic_evidence_release_v1",
+  "forms": [
+    {
+      "dataset": "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d.yaml",
+      "form": "CHORUS",
+      "historical": {
+        "dataset": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d.yaml",
+        "input": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CHORUS.json",
+        "mapping": "/private/tmp/d4d-legacy-dispositions-4932-20261011/data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+        "report": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d_report.txt",
+        "schema": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "sidecar": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d_route_dispositions.json"
+      },
+      "input": "notes/legacy_semantic_publication_2026-10-11_01/inputs/CHORUS.json",
+      "report": "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d_report.txt",
+      "role": "project_input_form",
+      "sidecar": "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d_route_dispositions.json"
+    },
+    {
+      "dataset": "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d.yaml",
+      "form": "VOICE",
+      "historical": {
+        "dataset": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d.yaml",
+        "input": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE.json",
+        "mapping": "/private/tmp/d4d-legacy-dispositions-4932-20261011/data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+        "report": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d_report.txt",
+        "schema": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "sidecar": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d_route_dispositions.json"
+      },
+      "input": "notes/legacy_semantic_publication_2026-10-11_01/inputs/VOICE.json",
+      "report": "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d_report.txt",
+      "role": "project_input_form",
+      "sidecar": "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d_route_dispositions.json"
+    },
+    {
+      "dataset": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d.yaml",
+      "form": "CM4AI_reduced",
+      "historical": {
+        "dataset": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d.yaml",
+        "input": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_reduced.json",
+        "mapping": "/private/tmp/d4d-legacy-dispositions-4932-20261011/data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+        "report": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d_report.txt",
+        "schema": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "sidecar": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d_route_dispositions.json"
+      },
+      "input": "notes/legacy_semantic_publication_2026-10-11_01/inputs/CM4AI_reduced.json",
+      "report": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d_report.txt",
+      "role": "software_control",
+      "sidecar": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d_route_dispositions.json"
+    },
+    {
+      "dataset": "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d.yaml",
+      "form": "VOICE_provenance",
+      "historical": {
+        "dataset": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d.yaml",
+        "input": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE_provenance.json",
+        "mapping": "/private/tmp/d4d-legacy-dispositions-4932-20261011/data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+        "report": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d_report.txt",
+        "schema": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "sidecar": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d_route_dispositions.json"
+      },
+      "input": "notes/legacy_semantic_publication_2026-10-11_01/inputs/VOICE_provenance.json",
+      "report": "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d_report.txt",
+      "role": "software_control",
+      "sidecar": "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d_route_dispositions.json"
+    },
+    {
+      "dataset": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d.yaml",
+      "form": "CM4AI_original",
+      "historical": {
+        "dataset": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d.yaml",
+        "input": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_original.json",
+        "mapping": "/private/tmp/d4d-legacy-dispositions-4932-20261011/data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+        "report": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d_report.txt",
+        "schema": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "sidecar": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d_route_dispositions.json"
+      },
+      "input": "notes/legacy_semantic_publication_2026-10-11_01/inputs/CM4AI_original.json",
+      "report": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d_report.txt",
+      "role": "project_input_form",
+      "sidecar": "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d_route_dispositions.json"
+    }
+  ],
+  "label": "2026-10-11_legacy-semantic-default-4932-v1",
+  "limitations": [
+    "Metadata integrity and relocation only; no product regeneration/schema/scientific acceptance.",
+    "Producer identity remains the actual merged software; artifact commit is separate.",
+    "Five input forms are not five independent datasets.",
+    "No method registration, static-map or figure change. Whole text is not exactMatch/no-loss; retirement is not coverage.",
+    "Parents4594/2915/4385 and held scientific/adoption obligations remain open.",
+    "Historical absolute paths are retained; every required current source/schema/mapping/artifact join has a local snapshot. Other old referenced bundles remain historical external evidence."
+  ],
+  "mapping_snapshot": "notes/legacy_semantic_publication_2026-10-11_01/provenance/snapshots/mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+  "method": "legacy_semantic_tsv",
+  "policy": "root_default_route_dispositions_v1",
+  "producer": {
+    "ci_evidence": [
+      {
+        "bytes": 13619,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/ci-run.json",
+        "sha256": "422b28e43c18e3783d8705beb09951a1dae60a2aa8ac048b0342024c07e8d3ad"
+      },
+      {
+        "bytes": 27252,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/ci-jobs.json",
+        "sha256": "388729f9d0fb783a45e6faf7ba0d8b105da852c39dfcb4893b76b800f03f4a33"
+      },
+      {
+        "bytes": 57948,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/head-checks.json",
+        "sha256": "8b707d313ebbe1ee4bfda063f5f01e1a0b9680e39216f3d1218468de589252d3"
+      },
+      {
+        "bytes": 447,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/premerge-verification.json",
+        "sha256": "64152bab03bce7b1bc340845bb96824582c24f745b8674971154436c6281bb21"
+      }
+    ],
+    "diagnostic_validation_evidence": {
+      "candidate313": {
+        "bytes": 6489,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/execution.json",
+        "sha256": "4f34c4755fba72795e42bef90ed0607d4d8af372d162d3da48a76b8804a5e27f"
+      },
+      "candidate39": {
+        "bytes": 6804,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate39/execution.json",
+        "sha256": "206fb021218e1cbc5a06cfb93a7b4d71158ee6b60ca7dc2c411bf270afdf7f1e"
+      }
+    },
+    "head": "ffc4ca922723caa620af2e32a31ad538bc5a5ac9",
+    "merged_pr_snapshot": {
+      "bytes": 20921,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/pr-merged.json",
+      "sha256": "1f21a31bcab2ad770d12c8f9bdc3f3a4f016c7496ee625d996858d4af93fe4c3"
+    },
+    "plugin_review_evidence": [
+      {
+        "bytes": 2046,
+        "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/execution.json",
+        "sha256": "457ae27cc0e87f3c57b33214cc0ef78d84bc6e27410948f3ac77b233e7e18d87"
+      },
+      {
+        "bytes": 887,
+        "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/stdout.txt",
+        "sha256": "76fa0908971580d1b119c0efeb9c104be8ee10cf48e0dd0a711c9308b4031ac6"
+      },
+      {
+        "bytes": 17402,
+        "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/stderr.txt",
+        "sha256": "6c5cc1ef80527d9bc5d33f957ddfd2841eb973371870caf08119b0952dd7ea00"
+      }
+    ],
+    "python": {
+      "bytes": 5777152,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "sha256": "e425798f1fd82ff2450b84a24b58150996345c0f8fb7f07aae68a5033ba8df19"
+    },
+    "reviewed_pr_head": "00b80002371fe119bc089445234d6b2f5bd5e24d",
+    "reviewed_pr_tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe",
+    "root_readiness": {
+      "bytes": 2486,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/root-readiness.json",
+      "sha256": "dba27e16ccb4387a7db2ecf89f6111655cba958c7190d983fe467f6014511ed8"
+    },
+    "source": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+    "source_inventory": {
+      "bytes": 2387953,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-binding-proposal01/source-inventory.json",
+      "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+    },
+    "tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe"
+  },
+  "publication_receipt": "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/completed.json",
+  "release_root": "notes/legacy_semantic_publication_2026-10-11_01",
+  "relocated_artifacts": [
+    "notes/legacy_semantic_publication_2026-10-11_01/inputs/CHORUS.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d.yaml",
+    "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d_route_dispositions.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/CHORUS/CHORUS_d4d_report.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/inputs/VOICE.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d.yaml",
+    "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d_route_dispositions.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/VOICE/VOICE_d4d_report.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/inputs/CM4AI_reduced.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d.yaml",
+    "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d_route_dispositions.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_reduced/CM4AI_reduced_d4d_report.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/inputs/VOICE_provenance.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d.yaml",
+    "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d_route_dispositions.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/VOICE_provenance/VOICE_provenance_d4d_report.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/inputs/CM4AI_original.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d.yaml",
+    "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d_route_dispositions.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/CM4AI_original/CM4AI_original_d4d_report.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/input-acquisition.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/preservation.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CHORUS.execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CHORUS.stderr.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CHORUS.stdout.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CHORUS.worker.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_original.execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_original.stderr.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_original.stdout.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_original.worker.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_reduced.execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_reduced.stderr.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_reduced.stdout.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/CM4AI_reduced.worker.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE.execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE.stderr.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE.stdout.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE.worker.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE_provenance.execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE_provenance.stderr.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE_provenance.stdout.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/receipts/VOICE_provenance.worker.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/source-after.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/source-before.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publication/completed.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/validation/dual2273-audit.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/validation/baseline-confirmation.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/validation/candidate313-execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/validation/candidate39-execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/plugin03-execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/plugin03-stdout.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/publisher05-static-review.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/comparison03-completed-audit.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/publication03/failure.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/publication03/CHORUS.execution.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/publication03/CHORUS.worker.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/history/publication03/yaml-oracle-diagnosis01.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/controls05/result.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/runtime-configuration/bound-disabled.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/runtime-configuration/enabled-receipt.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/pr-merged.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/merge-commit.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/merge-verified.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/ci-run.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/ci-jobs.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/head-checks.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/run.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/worker.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/serialization_oracle.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/controls.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/configuration.disabled.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/plan.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/freeze.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/references/cli.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/publisher05/references/legacy_publication.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/publisher05-completed-audit.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/review/plugin03-stderr.txt",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/merge/premerge-verification.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/runtime-configuration/root-readiness.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/README.md",
+    "notes/legacy_semantic_publication_2026-10-11_01/verify.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/verify.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/controls.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/build.py",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/snapshots/schema/data_sheets_schema_all.yaml",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/snapshots/mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/controls-result.json",
+    "notes/legacy_semantic_publication_2026-10-11_01/provenance/metadata-verifier/configuration.disabled.json"
+  ],
+  "relocation_index": "notes/legacy_semantic_publication_2026-10-11_01/relocation-index.json",
+  "schema_snapshot": "notes/legacy_semantic_publication_2026-10-11_01/provenance/snapshots/schema/data_sheets_schema_all.yaml",
+  "state": "complete"
+}

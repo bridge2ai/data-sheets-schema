@@ -1,0 +1,578 @@
+{
+  "format": "legacy_creator_comparison_v1",
+  "verified": true,
+  "artifacts": {
+    "baseline": {
+      "supplement": {
+        "bytes": 2473455,
+        "sha256": "7e464fb1021b48621782b4a1ba3623acde36437a91ce6cc2cb9ad8679498d9a6"
+      },
+      "replay": {
+        "bytes": 236569,
+        "sha256": "da409165cba55955c1cbadfacae77c6123e3453c2b06fc52f416569a74446b20"
+      }
+    },
+    "candidate": {
+      "supplement": {
+        "bytes": 2590122,
+        "sha256": "2f08642612d3938785b689583d116bfe860fd2719a8e6a705f9e8011d9c3c39d"
+      },
+      "replay": {
+        "bytes": 188957,
+        "sha256": "e2d888e6c9517f2152ddff92192a53008fe06c92700168a615361d24f146407b"
+      }
+    }
+  },
+  "commits": {
+    "baseline": "bd64f1cd3e5646206da43453e862d8aa0a68f93a",
+    "candidate": "89a9856283c1e5e6ff81758fb423804fdd0a9494"
+  },
+  "denominators": {
+    "record_pairs": 20,
+    "ranking_pairs": 4,
+    "merge_pairs": 8,
+    "gates_per_arm": 28
+  },
+  "records": [
+    {
+      "input": "CHORUS",
+      "implementation": "packaged",
+      "order": "original",
+      "literal_units_constructed": 1,
+      "baseline_errors": 30,
+      "candidate_errors": 29,
+      "reference_errors_retained": 0,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "66866b8f63e74a3442f75943dba005d89c1562b3b4eca93d27d2c0c45fd02625"
+    },
+    {
+      "input": "VOICE",
+      "implementation": "packaged",
+      "order": "original",
+      "literal_units_constructed": 117,
+      "baseline_errors": 150,
+      "candidate_errors": 33,
+      "reference_errors_retained": 0,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "3eec5eb4c3e4a28e2a0fc2334dff0818b4dd9f85f791f822c3c916bd1671e39b"
+    },
+    {
+      "input": "CM4AI_reduced",
+      "implementation": "packaged",
+      "order": "original",
+      "literal_units_constructed": 9,
+      "baseline_errors": 75,
+      "candidate_errors": 66,
+      "reference_errors_retained": 38,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "e7319e083fa0b97eb0f0c2cdd30f2f61b5d604843d7278612690d4b184813347"
+    },
+    {
+      "input": "VOICE_provenance",
+      "implementation": "packaged",
+      "order": "original",
+      "literal_units_constructed": 0,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "reference_errors_retained": 0,
+      "gate": "accepted",
+      "raw_author_evidence_sha256": "c9a3a8e5da93945dff6328a76bd0a11e0b22b9c90b4f4ddefc31c826411d830d"
+    },
+    {
+      "input": "CM4AI_original",
+      "implementation": "packaged",
+      "order": "original",
+      "literal_units_constructed": 9,
+      "baseline_errors": 75,
+      "candidate_errors": 66,
+      "reference_errors_retained": 38,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "e7319e083fa0b97eb0f0c2cdd30f2f61b5d604843d7278612690d4b184813347"
+    },
+    {
+      "input": "CHORUS",
+      "implementation": "packaged",
+      "order": "reversed",
+      "literal_units_constructed": 1,
+      "baseline_errors": 30,
+      "candidate_errors": 29,
+      "reference_errors_retained": 0,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "66866b8f63e74a3442f75943dba005d89c1562b3b4eca93d27d2c0c45fd02625"
+    },
+    {
+      "input": "VOICE",
+      "implementation": "packaged",
+      "order": "reversed",
+      "literal_units_constructed": 117,
+      "baseline_errors": 150,
+      "candidate_errors": 33,
+      "reference_errors_retained": 0,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "3eec5eb4c3e4a28e2a0fc2334dff0818b4dd9f85f791f822c3c916bd1671e39b"
+    },
+    {
+      "input": "CM4AI_reduced",
+      "implementation": "packaged",
+      "order": "reversed",
+      "literal_units_constructed": 9,
+      "baseline_errors": 75,
+      "candidate_errors": 66,
+      "reference_errors_retained": 38,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "e7319e083fa0b97eb0f0c2cdd30f2f61b5d604843d7278612690d4b184813347"
+    },
+    {
+      "input": "VOICE_provenance",
+      "implementation": "packaged",
+      "order": "reversed",
+      "literal_units_constructed": 0,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "reference_errors_retained": 0,
+      "gate": "accepted",
+      "raw_author_evidence_sha256": "c9a3a8e5da93945dff6328a76bd0a11e0b22b9c90b4f4ddefc31c826411d830d"
+    },
+    {
+      "input": "CM4AI_original",
+      "implementation": "packaged",
+      "order": "reversed",
+      "literal_units_constructed": 9,
+      "baseline_errors": 75,
+      "candidate_errors": 66,
+      "reference_errors_retained": 38,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "e7319e083fa0b97eb0f0c2cdd30f2f61b5d604843d7278612690d4b184813347"
+    },
+    {
+      "input": "CHORUS",
+      "implementation": "hidden",
+      "order": "original",
+      "literal_units_constructed": 1,
+      "baseline_errors": 30,
+      "candidate_errors": 29,
+      "reference_errors_retained": 0,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "66866b8f63e74a3442f75943dba005d89c1562b3b4eca93d27d2c0c45fd02625"
+    },
+    {
+      "input": "VOICE",
+      "implementation": "hidden",
+      "order": "original",
+      "literal_units_constructed": 117,
+      "baseline_errors": 150,
+      "candidate_errors": 33,
+      "reference_errors_retained": 0,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "3eec5eb4c3e4a28e2a0fc2334dff0818b4dd9f85f791f822c3c916bd1671e39b"
+    },
+    {
+      "input": "CM4AI_reduced",
+      "implementation": "hidden",
+      "order": "original",
+      "literal_units_constructed": 9,
+      "baseline_errors": 75,
+      "candidate_errors": 66,
+      "reference_errors_retained": 38,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "e7319e083fa0b97eb0f0c2cdd30f2f61b5d604843d7278612690d4b184813347"
+    },
+    {
+      "input": "VOICE_provenance",
+      "implementation": "hidden",
+      "order": "original",
+      "literal_units_constructed": 0,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "reference_errors_retained": 0,
+      "gate": "accepted",
+      "raw_author_evidence_sha256": "c9a3a8e5da93945dff6328a76bd0a11e0b22b9c90b4f4ddefc31c826411d830d"
+    },
+    {
+      "input": "CM4AI_original",
+      "implementation": "hidden",
+      "order": "original",
+      "literal_units_constructed": 9,
+      "baseline_errors": 75,
+      "candidate_errors": 66,
+      "reference_errors_retained": 38,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "e7319e083fa0b97eb0f0c2cdd30f2f61b5d604843d7278612690d4b184813347"
+    },
+    {
+      "input": "CHORUS",
+      "implementation": "hidden",
+      "order": "reversed",
+      "literal_units_constructed": 1,
+      "baseline_errors": 30,
+      "candidate_errors": 29,
+      "reference_errors_retained": 0,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "66866b8f63e74a3442f75943dba005d89c1562b3b4eca93d27d2c0c45fd02625"
+    },
+    {
+      "input": "VOICE",
+      "implementation": "hidden",
+      "order": "reversed",
+      "literal_units_constructed": 117,
+      "baseline_errors": 150,
+      "candidate_errors": 33,
+      "reference_errors_retained": 0,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "3eec5eb4c3e4a28e2a0fc2334dff0818b4dd9f85f791f822c3c916bd1671e39b"
+    },
+    {
+      "input": "CM4AI_reduced",
+      "implementation": "hidden",
+      "order": "reversed",
+      "literal_units_constructed": 9,
+      "baseline_errors": 75,
+      "candidate_errors": 66,
+      "reference_errors_retained": 38,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "e7319e083fa0b97eb0f0c2cdd30f2f61b5d604843d7278612690d4b184813347"
+    },
+    {
+      "input": "VOICE_provenance",
+      "implementation": "hidden",
+      "order": "reversed",
+      "literal_units_constructed": 0,
+      "baseline_errors": 0,
+      "candidate_errors": 0,
+      "reference_errors_retained": 0,
+      "gate": "accepted",
+      "raw_author_evidence_sha256": "c9a3a8e5da93945dff6328a76bd0a11e0b22b9c90b4f4ddefc31c826411d830d"
+    },
+    {
+      "input": "CM4AI_original",
+      "implementation": "hidden",
+      "order": "reversed",
+      "literal_units_constructed": 9,
+      "baseline_errors": 75,
+      "candidate_errors": 66,
+      "reference_errors_retained": 38,
+      "gate": "refused",
+      "raw_author_evidence_sha256": "e7319e083fa0b97eb0f0c2cdd30f2f61b5d604843d7278612690d4b184813347"
+    }
+  ],
+  "ranking": [
+    {
+      "source": "VOICE",
+      "index": 1,
+      "scores": {
+        "d4d_coverage": 34,
+        "unique_fields": 9,
+        "metadata_richness": 0.25,
+        "technical_completeness": 0.25,
+        "total_score": 0.3223129992737836
+      },
+      "rank": 1
+    },
+    {
+      "source": "CM4AI_reduced",
+      "index": 2,
+      "scores": {
+        "d4d_coverage": 27,
+        "unique_fields": 0,
+        "metadata_richness": 0.5,
+        "technical_completeness": 0.25,
+        "total_score": 0.25833333333333336
+      },
+      "rank": 2
+    },
+    {
+      "source": "CM4AI_original",
+      "index": 4,
+      "scores": {
+        "d4d_coverage": 27,
+        "unique_fields": 0,
+        "metadata_richness": 0.5,
+        "technical_completeness": 0.25,
+        "total_score": 0.25833333333333336
+      },
+      "rank": 3
+    },
+    {
+      "source": "CHORUS",
+      "index": 0,
+      "scores": {
+        "d4d_coverage": 21,
+        "unique_fields": 1,
+        "metadata_richness": 0.25,
+        "technical_completeness": 0.5,
+        "total_score": 0.21798941798941796
+      },
+      "rank": 4
+    },
+    {
+      "source": "VOICE_provenance",
+      "index": 3,
+      "scores": {
+        "d4d_coverage": 3,
+        "unique_fields": 1,
+        "metadata_richness": 0.25,
+        "technical_completeness": 0.0,
+        "total_score": 0.1648148148148148
+      },
+      "rank": 5
+    }
+  ],
+  "merges": [
+    {
+      "implementation": "packaged",
+      "order": "original",
+      "mode": "ranked_primary",
+      "primary": "VOICE",
+      "baseline_assertion_units": 165,
+      "candidate_assertion_units": 212,
+      "reference_errors_retained": 76,
+      "statistics": {
+        "total_sources": 5,
+        "fields_from_primary": 26,
+        "fields_from_secondary": 3,
+        "fields_combined": 2,
+        "fields_merged_as_arrays": 6,
+        "total_unique_fields": 40
+      },
+      "baseline_report": {
+        "path": "packaged_original_ranked_primary.txt",
+        "bytes": 5634,
+        "sha256": "d6dc5e8c2b6a86db276417de858bc48167728f6670b46a8097e416f3ba287dfa"
+      },
+      "candidate_report": {
+        "path": "packaged_original_ranked_primary.txt",
+        "bytes": 25127,
+        "sha256": "5c6b9bbc08d9de13e0205b054033c6aa8df0743583b35fa8f93199ed771dfa99"
+      },
+      "gate": "refused",
+      "candidate_gate_sha256": "634befe3ce0f4c180635752bd14f745ba63fd462575fedc88b4db2a40239e947"
+    },
+    {
+      "implementation": "packaged",
+      "order": "original",
+      "mode": "voice_provenance_primary",
+      "primary": "VOICE_provenance",
+      "baseline_assertion_units": 165,
+      "candidate_assertion_units": 212,
+      "reference_errors_retained": 76,
+      "statistics": {
+        "total_sources": 5,
+        "fields_from_primary": 3,
+        "fields_from_secondary": 3,
+        "fields_combined": 2,
+        "fields_merged_as_arrays": 6,
+        "total_unique_fields": 40
+      },
+      "baseline_report": {
+        "path": "packaged_original_voice_provenance_primary.txt",
+        "bytes": 5671,
+        "sha256": "0a7710ec462af43589ea43ce0feea471fa4bab15deb04343154a0c27ba8964a0"
+      },
+      "candidate_report": {
+        "path": "packaged_original_voice_provenance_primary.txt",
+        "bytes": 25156,
+        "sha256": "4f16502fa9f4c4962badbe53fb2975d94187f189622a91087a6576bf326a82c6"
+      },
+      "gate": "refused",
+      "candidate_gate_sha256": "18362e0c459dfab7f593fc9d36dc2e075bfa3512a0bde430b0c470cf97286dca"
+    },
+    {
+      "implementation": "packaged",
+      "order": "reversed",
+      "mode": "ranked_primary",
+      "primary": "VOICE",
+      "baseline_assertion_units": 165,
+      "candidate_assertion_units": 212,
+      "reference_errors_retained": 76,
+      "statistics": {
+        "total_sources": 5,
+        "fields_from_primary": 26,
+        "fields_from_secondary": 3,
+        "fields_combined": 2,
+        "fields_merged_as_arrays": 6,
+        "total_unique_fields": 40
+      },
+      "baseline_report": {
+        "path": "packaged_reversed_ranked_primary.txt",
+        "bytes": 5679,
+        "sha256": "6de8fdb1a93cf09b43b35e7067588840500901477d2d699463119bf6ec0a9a01"
+      },
+      "candidate_report": {
+        "path": "packaged_reversed_ranked_primary.txt",
+        "bytes": 25172,
+        "sha256": "e417d40414eec4dcca5b743c586fd5ff908ae8fc475dcad45369e778799966ba"
+      },
+      "gate": "refused",
+      "candidate_gate_sha256": "634befe3ce0f4c180635752bd14f745ba63fd462575fedc88b4db2a40239e947"
+    },
+    {
+      "implementation": "packaged",
+      "order": "reversed",
+      "mode": "voice_provenance_primary",
+      "primary": "VOICE_provenance",
+      "baseline_assertion_units": 165,
+      "candidate_assertion_units": 212,
+      "reference_errors_retained": 76,
+      "statistics": {
+        "total_sources": 5,
+        "fields_from_primary": 3,
+        "fields_from_secondary": 3,
+        "fields_combined": 2,
+        "fields_merged_as_arrays": 6,
+        "total_unique_fields": 40
+      },
+      "baseline_report": {
+        "path": "packaged_reversed_voice_provenance_primary.txt",
+        "bytes": 5716,
+        "sha256": "4d083b7eaab5a5be003c443d61244c1f2eb9f2963b166048b005ef96f31d0cef"
+      },
+      "candidate_report": {
+        "path": "packaged_reversed_voice_provenance_primary.txt",
+        "bytes": 25201,
+        "sha256": "1be9a1a1c82a8d0ec18d807e029f1ba4877ca82343b065ca965523f8383b86ba"
+      },
+      "gate": "refused",
+      "candidate_gate_sha256": "18362e0c459dfab7f593fc9d36dc2e075bfa3512a0bde430b0c470cf97286dca"
+    },
+    {
+      "implementation": "hidden",
+      "order": "original",
+      "mode": "ranked_primary",
+      "primary": "VOICE",
+      "baseline_assertion_units": 165,
+      "candidate_assertion_units": 212,
+      "reference_errors_retained": 76,
+      "statistics": {
+        "total_sources": 5,
+        "fields_from_primary": 26,
+        "fields_from_secondary": 3,
+        "fields_combined": 2,
+        "fields_merged_as_arrays": 6,
+        "total_unique_fields": 40
+      },
+      "baseline_report": {
+        "path": "hidden_original_ranked_primary.txt",
+        "bytes": 5634,
+        "sha256": "ecadac2ac677d586dc4a21542f07afc7ffd2348313b65850cfbfb3b8baaac2a1"
+      },
+      "candidate_report": {
+        "path": "hidden_original_ranked_primary.txt",
+        "bytes": 25127,
+        "sha256": "c59f51bed6ec92ae4584d53176147573fc709daef704fd1a7dbe43ad7c0de37e"
+      },
+      "gate": "refused",
+      "candidate_gate_sha256": "634befe3ce0f4c180635752bd14f745ba63fd462575fedc88b4db2a40239e947"
+    },
+    {
+      "implementation": "hidden",
+      "order": "original",
+      "mode": "voice_provenance_primary",
+      "primary": "VOICE_provenance",
+      "baseline_assertion_units": 165,
+      "candidate_assertion_units": 212,
+      "reference_errors_retained": 76,
+      "statistics": {
+        "total_sources": 5,
+        "fields_from_primary": 3,
+        "fields_from_secondary": 3,
+        "fields_combined": 2,
+        "fields_merged_as_arrays": 6,
+        "total_unique_fields": 40
+      },
+      "baseline_report": {
+        "path": "hidden_original_voice_provenance_primary.txt",
+        "bytes": 5671,
+        "sha256": "92ff34be425de780ec643a246433e018c7af24836e53de7fd04499f8d6fb6685"
+      },
+      "candidate_report": {
+        "path": "hidden_original_voice_provenance_primary.txt",
+        "bytes": 25156,
+        "sha256": "cb7af973a6ba70a298d735165946d7ced61b59574338a1f89f7c3f2a68c1f282"
+      },
+      "gate": "refused",
+      "candidate_gate_sha256": "18362e0c459dfab7f593fc9d36dc2e075bfa3512a0bde430b0c470cf97286dca"
+    },
+    {
+      "implementation": "hidden",
+      "order": "reversed",
+      "mode": "ranked_primary",
+      "primary": "VOICE",
+      "baseline_assertion_units": 165,
+      "candidate_assertion_units": 212,
+      "reference_errors_retained": 76,
+      "statistics": {
+        "total_sources": 5,
+        "fields_from_primary": 26,
+        "fields_from_secondary": 3,
+        "fields_combined": 2,
+        "fields_merged_as_arrays": 6,
+        "total_unique_fields": 40
+      },
+      "baseline_report": {
+        "path": "hidden_reversed_ranked_primary.txt",
+        "bytes": 5679,
+        "sha256": "29a3995ed48887660af513ab3f8ce07d6ab9b3211be3d42b0975745a3acb974b"
+      },
+      "candidate_report": {
+        "path": "hidden_reversed_ranked_primary.txt",
+        "bytes": 25172,
+        "sha256": "11e05c98d736483522e869cffaf589163c3c0c90da98f531b6086a0f168c1869"
+      },
+      "gate": "refused",
+      "candidate_gate_sha256": "634befe3ce0f4c180635752bd14f745ba63fd462575fedc88b4db2a40239e947"
+    },
+    {
+      "implementation": "hidden",
+      "order": "reversed",
+      "mode": "voice_provenance_primary",
+      "primary": "VOICE_provenance",
+      "baseline_assertion_units": 165,
+      "candidate_assertion_units": 212,
+      "reference_errors_retained": 76,
+      "statistics": {
+        "total_sources": 5,
+        "fields_from_primary": 3,
+        "fields_from_secondary": 3,
+        "fields_combined": 2,
+        "fields_merged_as_arrays": 6,
+        "total_unique_fields": 40
+      },
+      "baseline_report": {
+        "path": "hidden_reversed_voice_provenance_primary.txt",
+        "bytes": 5716,
+        "sha256": "98c0d4c8755f4b1fcae202adc38365bc8d6019eaef32434611e28ce89f9b8f66"
+      },
+      "candidate_report": {
+        "path": "hidden_reversed_voice_provenance_primary.txt",
+        "bytes": 25201,
+        "sha256": "27a1b066e161a6f2893680d93771f092bff6d6df8f57034b026597b6f24648a4"
+      },
+      "gate": "refused",
+      "candidate_gate_sha256": "18362e0c459dfab7f593fc9d36dc2e075bfa3512a0bde430b0c470cf97286dca"
+    }
+  ],
+  "selected_replay_source_changes": [
+    ".claude/agents/scripts/d4d_builder.py",
+    ".claude/agents/scripts/mapping_loader.py",
+    ".claude/agents/scripts/rocrate_merger.py",
+    ".claude/agents/scripts/rocrate_to_d4d.py",
+    "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+    "src/fairscape_integration/cli.py",
+    "src/fairscape_integration/utils/d4d_builder.py",
+    "src/fairscape_integration/utils/mapping_loader.py",
+    "src/fairscape_integration/utils/rocrate_merger.py",
+    "src/transformation/transform_api.py"
+  ],
+  "new_source_declarations": [
+    "src/data_sheets_schema/legacy_creators.py"
+  ],
+  "scientific_eligibility": false,
+  "source_coverage_gain": false,
+  "general_legacy_validity": false,
+  "limits": [
+    "Saved-evidence comparison only; no producer, validator, scorer or merger executes here.",
+    "Source/runtime pins are compared; they are not authenticated execution receipts.",
+    "Assertion units and retained duplicate references are not counts of distinct people.",
+    "Constructed field preservation does not establish exactMatch, none, scientific correctness or publication validity."
+  ]
+}

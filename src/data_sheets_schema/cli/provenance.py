@@ -1,5 +1,7 @@
 """Provenance commands for the D4D CLI."""
 
+from __future__ import annotations
+
 import functools
 
 import os
@@ -399,10 +401,13 @@ def _parse_phases(specs) -> list[dict]:
                    'canary gate then treats a missing or failing one as a stop '
                    'rather than as not-applicable. Implied by a --render-spec-json '
                    'specification that binds a receipt (#2350)')
+@click.option('--run-date', 'run_date', default=None,
+              help='the # Generated: YYYY-MM-DD date the instruction was rendered under (#5049); '
+                   'default: extracted from --prompt-text or verified across ±2 days')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
            reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected,
-           stated_profile=None, render_spec_json=None, prompt_text_env=None):
+           stated_profile=None, render_spec_json=None, prompt_text_env=None, run_date=None):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -420,8 +425,16 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     so a record that cannot identify its own prompt cannot be placed in it.
     """
     _require_repo_root_cwd("d4d provenance record")
+    from datetime import date, timedelta
+    import hashlib
+    import re
     from data_sheets_schema import schema_digest
     from data_sheets_schema.provenance import build_record, record_path_for
+    if run_date is not None:
+        try:
+            date.fromisoformat(run_date)
+        except ValueError as exc:
+            raise click.BadParameter(f"{run_date!r} is not an ISO date (YYYY-MM-DD)", param_hint="'--run-date'") from exc
     registered = None
     if prompt_text_env is not None:
         # The path comes from the named variable, not from the shell (#2282).
@@ -468,7 +481,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             # refused rather than recorded.
             for name, explicit in (("condition", condition), ("runtime", runtime),
                                    ("provider", provider), ("profile", stated_profile),
-                                   ("reasoning_effort", reasoning_effort)):
+                                   ("reasoning_effort", reasoning_effort), ("run_date", run_date)):
                 if name == "reasoning_effort" and registered.reasoning_effort is None:
                     # A specification that asserts no effort binds none: a
                     # launcher may still state one, recorded as its own
@@ -592,24 +605,71 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         selected = selected_manifest if registered.manifest_used else None
         manifest_basis = None if registered.manifest_used else "the registered instruction declares manifest context unused"
     elif condition:
-        from data_sheets_schema.api_runner import RunSpec
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
         bundle = bundle_for_spec or resolved_bundle
-        # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
-        # token. Storing the token here produced a spec that could never
-        # re-render to what was sent, and the gate blamed an unchanged prompt
-        # file for it (#500). Expanded through the same table, so the two
-        # commands cannot drift apart.
-        run_spec = RunSpec(
-            project=project, arm=_ARMS[arm][0], method=method,
-            bundle=Path(bundle) if bundle else None, label=label,
-            condition=condition, runtime=runtime, provider=provider,
-            manifest_line=_ARMS[arm][3],
-            manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
-            chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
-            # The spec the gate re-renders carries the profile the record
-            # states, not a second selection of this process's own (#1606).
-            profile=profile_selection.name, profile_basis=profile_selection.basis,
-        )
+
+        def _make_run_spec(candidate_date: str | None) -> RunSpec:
+            # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
+            # token. Storing the token here produced a spec that could never
+            # re-render to what was sent, and the gate blamed an unchanged prompt
+            # file for it (#500). Expanded through the same table, so the two
+            # commands cannot drift apart.
+            return RunSpec(
+                project=project, arm=_ARMS[arm][0], method=method,
+                bundle=Path(bundle) if bundle else None, label=label,
+                condition=condition, runtime=runtime, provider=provider,
+                manifest_line=_ARMS[arm][3],
+                manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
+                chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
+                # The spec the gate re-renders carries the profile the record
+                # states, not a second selection of this process's own (#1606).
+                profile=profile_selection.name, profile_basis=profile_selection.basis,
+                **({"run_date": candidate_date} if candidate_date else {}),
+            )
+
+        if run_date is not None or supplied_text is None:
+            run_spec = _make_run_spec(run_date)
+        else:
+            # An agentic run that renders before UTC midnight and records after
+            # midnight carries the launch date in its `# Generated: YYYY-MM-DD`
+            # header and in its label (#5049). Extract that header date and
+            # verify candidate dates across ±2 days against the supplied
+            # instruction digest so midnight-crossing runs record the date they
+            # were actually rendered under.
+            extracted_date: str | None = None
+            m_gen = re.search(r"^#\s*Generated:\s*(\d{4}-\d{2}-\d{2})\b", supplied_text, re.MULTILINE)
+            if m_gen:
+                try:
+                    date.fromisoformat(m_gen.group(1))
+                    extracted_date = m_gen.group(1)
+                except ValueError:
+                    extracted_date = None
+            base_dates = [date.today()]
+            try:
+                base_dates.append(date.fromisoformat(label[:10]))
+            except ValueError:
+                pass
+            candidate_dates: list[str] = []
+            if extracted_date is not None:
+                candidate_dates.append(extracted_date)
+            for base in base_dates:
+                for delta in (0, -1, 1, -2, 2):
+                    iso = (base + timedelta(days=delta)).isoformat()
+                    if iso not in candidate_dates:
+                        candidate_dates.append(iso)
+            target_sha = hashlib.sha256(supplied_text.encode("utf-8")).hexdigest()
+            matched_spec: RunSpec | None = None
+            for cand_date in candidate_dates:
+                cand_spec = _make_run_spec(cand_date)
+                try:
+                    rendered = resolve_prompt(cand_spec)
+                except Exception:
+                    break
+                if hashlib.sha256(rendered.encode("utf-8")).hexdigest() == target_sha:
+                    matched_spec = cand_spec
+                    break
+            run_spec = matched_spec if matched_spec is not None else _make_run_spec(extracted_date)
+
         spec = run_spec.render_spec()
         if not run_spec.manifest_used:
             selected = None
@@ -2127,6 +2187,11 @@ def reasoning_cmd(method, project, label, path):
 
     logs = [p for p in logs if p.exists()]
     if recovered:
+        from data_sheets_schema.agentic_observed import (
+            is_truncated_streaming_snapshot,
+            payload_tokens_floor,
+        )
+
         # The agentic arm's measure, read from the orchestrator's transcript
         # observation (#1000): output tokens per run, the runtime's own
         # thinking count where the transcript carries it, the estimate
@@ -2156,6 +2221,13 @@ def reasoning_cmd(method, project, label, path):
                     "no turn coverage recorded") + ")")
             elif obs.get("reasoning_tokens_estimate") is not None:
                 parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")
+            if is_truncated_streaming_snapshot(obs):
+                parts.append(
+                    f"⚠️  lower_bound: output_tokens ({obs['output_tokens']}) < "
+                    f"payload floor ({payload_tokens_floor(obs)}); output_tokens, "
+                    "reasoning_tokens_estimate, and thinking_tokens are truncated "
+                    "streaming snapshots (#5047)"
+                )
             click.echo(f"   {proj:<9} {run_label}  " + "  ".join(parts))
     if not logs:
         if not recovered:

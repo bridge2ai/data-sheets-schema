@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.8.1
+  version: 1.9.0
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -34,8 +34,15 @@ python .claude/skills/d4d-generation-specificity-audit/scan.py \
   and code it parses can need a newer Python (an f-string expression with a
   backslash parses only from 3.12). A Python file that does not parse stops
   the scan with exit 2 and is named with the interpreter; it is never read
-  as a file with nothing that gates. The report names the interpreter. The
-  scanner never imports or executes the generation code: the runner's
+  as a file with nothing that gates. The report names the interpreter.
+  Both the full scan and `--self-test-only` first require the AST classes
+  `Match`, `MatchAs`, `MatchStar`, `MatchMapping` and `match_case`. If one is
+  unavailable, the scanner names the actual interpreter and missing
+  capability, exits 2 without a traceback or report, and does not classify
+  surfaces (#4996). `--help` remains available. These capabilities alone do
+  not establish that the interpreter can parse every file in the checkout;
+  the named-file refusal above still applies (#4092).
+  The scanner never imports or executes the generation code: the runner's
   tables are read with `ast`.
 - Without `--report`, the report and JSON go to a fresh temp directory and the
   paths are printed.
@@ -47,7 +54,7 @@ python .claude/skills/d4d-generation-specificity-audit/scan.py \
 
 Exit status: `0` no violation; `1` at least one gc_project violation; `2` the
 scan did not happen. A `2` comes from PyYAML not being importable, a failed
-self-test, a malformed configuration (a missing token list, a malformed regex
+self-test, a missing scanner AST capability, a malformed configuration (a missing token list, a malformed regex
 in `tokens.yaml` or `exceptions.yaml`, a malformed exception), a discovered
 surface that cannot be read, a Python file under `src/`, `notes/` or
 `scripts/`, or any Python surface, that does not parse, a derivation that
@@ -102,6 +109,16 @@ generation surface. The skill's tests check that:
   the classifier reasons that feed it, are model text, whether the
   controller sets the field as a dict entry, by item assignment, `+=`,
   `.setdefault()` or `.update()`, or from a local;
+- which top-level `data_sheets_schema` modules write model-facing text is
+  derived by data flow from the runner's requests, the model-input writes
+  and the controllers' sinks (`rereceipt`, whose instruction the renderer-24
+  turn sends, among them), and the hand-kept `MODEL_FACING_MODULES` is
+  checked against it in both directions; a sentence in a new module whose
+  constant `build_phase` sends, or in one the healthsheet bundle is built
+  from, gates, and stops gating when the derivation is off; a file's path,
+  a lookup index, an identifier and a report for a person are not model-facing
+  text; the request type is read directly or through a local, or not
+  derived (#4085);
 - the "api" section agrees with the runtime: the CLI default condition, the
   condition the GitHub assistant runs (a non-literal `--condition` is "not
   derived"), the default renderers, the audit floor, the renderers
@@ -124,10 +141,25 @@ None of them walks the record corpus, so none is marked `corpus`.
 Surfaces are derived from the code: imports, calls, the files a text names,
 and the names a file uses. What is left by hand, and why:
 
-- `MODEL_FACING_MODULES` in `scan.py`: which top-level `data_sheets_schema`
-  modules write text a model reads. An import graph does not say that. A
-  test fails when a name on it is in none of the api, native or
-  deterministic closures.
+- `MODEL_FACING_MODULES` in `scan.py`, a cross-check (#4085). Which
+  top-level `data_sheets_schema` modules write text a model reads is
+  derived by data flow (Roles, below): a module is model-facing where the
+  flow carries one of its own sentences into a request, a model input or a
+  controller's model text. The report lists every module the derivation
+  finds that the list lacks, and every one the list names that the
+  derivation does not reach. A module either names is model-facing, so a
+  module whose text reaches a model through a channel the flow does not
+  read (Limits) still gates while the list names it. A test fails when a
+  name on the list is in none of the api, native or deterministic closures,
+  and when this checkout's derivation and the list disagree.
+- What the derivation rests on: `REQUEST_TEXT_FIELDS`, the fields of the
+  runner's request that are sent (`system`, `messages`, and the
+  `cached_blocks` at their head); `INPUT_TREE` (`data/preprocessed/`), the
+  tree a run reads its bundle, chunk mapping and manifest from;
+  `TEXT_CARRYING_CALLS`, the copies, conversions and serializations whose
+  result carries their arguments' text (`list`, `str`, `json.dumps`,
+  `yaml.safe_dump`); `FILE_READ_METHODS`, whose result is a file's content
+  rather than the path they are called on.
 - The `shared_schema` files `profiles.py`, `registry.py`, the vocabulary pin
   and the study manifest, each with the reason it reaches a model.
 - The pre-runner helpers in `src/download` that write prompts without calling
@@ -157,7 +189,7 @@ and the names a file uses. What is left by hand, and why:
 | `deterministic` | yes | the arm commands: every CLI group outside the generation closures that names the bundle of an arm in `cli/api.py` `ARMS` other than the default one (today `cli/healthsheet.py` and `cli/rocrate.py`), and their import closure, followed through `data_sheets_schema`, `src.*` and the directories the code puts on `sys.path` (`setup_repo_imports` adds `.claude/agents/scripts`) |
 | `run_controllers` | yes | under `notes/`: every module (not a probe, not on an evaluation path) that uses a generation builder as code (`RunSpec`, `build_phase`, `phase_instruction`, `prompt_body`, `resolve_prompt`, `playbook_text`, `digest_text`, `assembly_digest`); under `scripts/` or `src/`, outside the generation closures: a module that uses one and launches a run (calls the runner's `execute`, or hands a native runtime `--system-prompt`); every `notes/` or `scripts/` module they import or pin by file name; every module that runs one, to a fixed point; the Markdown a controller names beside itself (`system.md`, model-facing); every file a controller names in its literals; and every interactive_session surface a registered native launch is not shown to switch off. A controller module runs as a script (its `__main__` block counts) only where something runs it: an argv (`[python, '-m', 'audit_controls.contract']`, a worker relaunching itself through `__file__`), a document beside it or a module docstring (`python -m audit_controls.native`), no module importing it (an entry point), or its own `__main__` block calling a module function that launches a run (an argv with a system prompt or a system-prompt file, the runner's `execute`: `run_native_canary.py`, `run_api_canary.py`) or a command-line interface (argparse, click) that nothing else calls (`prepare_registration.py`) |
 | `legacy_monolithic` | yes | every module under `src/` or `scripts/`, outside the generation closures, that calls a model client and names D4D or a datasheet (not an evaluator); the pre-runner helpers in `src/download` (the name glob); `d4d_concatenated_*.txt`; every prompt set beside the conditions (`src/download/prompts/*/` other than the tuned components) |
-| `shared_input` | no | the `src.download` modules the `d4d download` group imports (download, preprocess, concatenate) and the `src/download` modules they import: upstream of every approach, and where a closure stops |
+| `shared_input` | no | the `src.download` modules the `d4d download` group imports (download, preprocess, concatenate) and the `src/download` modules they import: upstream of every approach, and where a closure stops. What a step writes is model input, so the text the data flow carries into it (the concatenation's headers, preprocessing's source-metadata block) is model text here (#4085) |
 | `other_model_client` | no | a model client outside generation and outside every generation closure: under `notes/`, one outside the controller set (diagnostic probes, transports); the `notes/` evaluation modules a controller imports or that import one, and their imports; under `src/` or `scripts/`, an evaluator or a client that names no D4D record. An evaluator a generation closure reaches is that approach's surface and gates there: `evaluation/evaluate_d4d_llm.py`, which the controller `prepare_registration.py` imports from the package, is in the native closure |
 
 A module is a model client when it imports `anthropic`, `openai`,
@@ -198,14 +230,40 @@ judges a hit by its own role:
   (`permissionDecisionReason`, the reason a PreToolUse hook gives for a
   denial, and `additionalContext`) under a literal key, as a dict entry, a
   keyword argument (`dict(...)`, `.update(...)`), an item assignment (plain,
-  annotated or `+=`) or `.setdefault()`, and from those functions' return
-  values, the flow follows local assignments, marks a literal that becomes
-  part of the text, a function whose result does (and follows its returns in
-  turn, across imports) and a module constant the text is built from
-  (`SYSTEM`, which `render_system` returns). A constant so marked is
-  followed in turn: every write of it at the top of its module is model
-  text, and so is what that write puts in it, recursively and each
-  constant once. A write is a top-level assignment to it (plain, annotated
+  annotated or `+=`) or `.setdefault()`, from a function of another module
+  a controller calls whose name says it renders model text
+  (`audit_batch_context.render_worker_context`, whose result the batch
+  controller writes for its native child), from what every request the
+  runner builds carries (each construction, in any module, of the class
+  `build_phase` returns, directly or through a local; not found is "not
+  derived", exit 2; with the values each construction is given for `system`,
+  `cached_blocks` and `messages`: `build_phase`'s cached blocks and parts,
+  the re-address, re-receipt and repair requests, the receipt-completion,
+  removal-repair and typed-audit requests), from what a package function
+  writes to a model input (an arm's bundle in `cli/api.py` ARMS, or a
+  templated file a playbook has the model read from `data/preprocessed/`,
+  `{PROJECT}_chunks.yaml`; recognised by the text the write's target path
+  ends with, through locals, constants and the results of the functions
+  that build it: `chunking.write_manifest_for` writes to `manifest_for(...)`)
+  and from what the upstream input steps write (the documents a bundle is
+  concatenated from, and the concatenation), and from those functions'
+  results (returned or yielded), the flow follows a function's locals
+  (every assignment, a `for` loop's iterable, the arguments of a method call
+  on a local and a value assigned to an item or attribute of one:
+  `parts.append(x)`), marks a literal that becomes part of the text, a
+  function whose result does (and follows its results in turn, across
+  imports) and a module constant the text is built from (`SYSTEM`, which
+  `render_system` returns; `source_review.INVENTORY_HEADER`, read through
+  its module). A call's arguments are text where its result carries them:
+  the positional arguments of a string method that joins or rewrites them
+  and of a copy, conversion or serialization the scan cannot resolve
+  (`list(cached)`, `json.dumps(inventory)`), and the arguments for the
+  parameters a function's result is built from (`dump_manifest(manifest)`);
+  a subscript index that selects a value, and the path a file read is called
+  on, are not text (#4085, #4990). A constant so marked is followed in turn:
+  every write of it at the top of its module is model text, and so is what
+  that write puts in it, recursively and each constant once. A write is a
+  top-level assignment to it (plain, annotated
   or augmented, or to an item or attribute of it), with its value, and any
   method call whose receiver holds it, wherever a top-level statement makes
   one on import (alone, in an assignment's value such as `D =
@@ -226,6 +284,14 @@ judges a hit by its own role:
   `command_guidance` and `lookup_guidance`, the deny-reason text in
   `hook_output` and the reasons of the command, file and audit-validator
   classifiers;
+- a top-level `data_sheets_schema` module is model-facing as a whole, in
+  every approach whose closure reaches it, where that data flow carries
+  one of its own sentences (a literal with whitespace and a letter or a
+  digit) into model text, or where `MODEL_FACING_MODULES` names it (#4085).
+  A module that only passes on what it is given, or whose literals in the
+  text are keys, identifiers or separators, is not derived: a bare token
+  gates as code in any role. Elsewhere (a controller, an upstream input
+  step) the text the flow finds counts span by span, as above;
 - a code branch or table counts unless the role is exposed, in Python and in
   a YAML, config, JSON or shell file that no approach hands to a model
   (below);
@@ -314,7 +380,13 @@ Every hit is classified by context:
    memory and the hooks), and the session surfaces it is not shown to switch
    off count in `run_controllers` too.
    The controller table says how each controller runs as a script, or that
-   it is imported only.
+   it is imported only. The line on which package modules write
+   model-facing text names the requests, the model-input writes and the
+   modules the derivation found, and the cross-check with
+   `MODEL_FACING_MODULES`: a module derived and not listed belongs on the
+   list (it gates already); one listed and not derived reaches a model, if
+   at all, through a channel the flow does not read, and the list is all
+   that keeps it gating.
 3. **gc_project violations.** These are the findings that fail the run. A
    violation is a Grand Challenge name, site or identifier in model-facing
    text, or in a code branch or table, that a gating approach counts, with no
@@ -506,10 +578,11 @@ owner's approval before anything is billed.
   a form the code reading did not know). A clean scan means that no listed
   token was found on a channel the scanner reads, not that no project text
   reaches a model. Channels known not to be read: what a process prints or
-  writes for a model to read outside the hook fields below (a tool's output,
-  a file a run writes and a later phase reads, a hook's stderr), environment
-  variables a launcher sets in code, files a run reads that no text names,
-  network responses, and the model's own earlier turns.
+  writes for a model to read outside the hook fields and the model inputs
+  below (a tool's output, a file a run writes and a later phase reads, a
+  hook's stderr), environment variables a launcher sets in code, files a
+  run reads that no text names, network responses, and the model's own
+  earlier turns.
 - A token list finds what it names. A project fact phrased without any listed
   token, such as a participant count or a site name, is invisible. Add
   tokens when a review finds one.
@@ -594,23 +667,171 @@ owner's approval before anything is billed.
   nothing outside the block calls (tests are not read). A module whose
   `__main__` block does something else, with nothing else saying it runs,
   is judged as imported.
-- Data flow is followed inside a function through assignments and across
-  imported functions and constants; a call's arguments are followed for the
-  constants they pass, not for the functions that compute them or the
-  literals they pass, and a method on an object (`self.render()`) is not
-  resolved. A module constant marked as model text is followed through its
-  writes at the top of its module, recursively (#4156): its top-level
-  assignments, and every method call whose receiver holds it wherever a
-  top-level statement makes one on import, with the call's arguments
-  (#4166). Not followed: an assignment to it inside a block there (`if`,
-  `try`) or in a function (`global`), a method call on it in the body of a
-  function or lambda, a function it is handed to (`register(C, v)`), a
-  write through another name bound to it or to part of it (`X = C`, then
-  `X.append(v)`), a constant reached as a module or class attribute (`m.C`,
-  `Cls.C`) or re-exported through another module, and one bound only by
-  unpacking. A model-facing module outside `MODEL_FACING_MODULES` whose
-  text reaches a model only through another module's variable is classed
-  by its role, not traced.
+- Data flow is followed inside a function through its locals (assignments,
+  `for` loops, method calls on a local and item writes to it) and across
+  imported functions and constants, a module's constant read through the
+  module included (#4085); a call's arguments are followed as text only
+  where its result carries them (a string method that joins or rewrites
+  them, a copy, conversion or serialization, a function whose result is
+  built from the parameter they fill), otherwise for the constants they
+  pass. An explicit file-read receiver or subscript index is a selector
+  instead: its constants and aliases are not promoted to text (#4990).
+  A later genuine text use of the same constant still counts. Dictionary
+  keys retain conservative constant coverage (#4991). Inline keys also
+  contribute when an explicit serialization/conversion or consumed `keys()`
+  / `items()` view emits them (#4999). A separate mapping projection follows
+  local aliases and resolved results: a lookup or `values()` consumes one
+  mapping level; dictionary unpacking retains that level. These visits are
+  distinct from ordinary values-only visits, so use order cannot consume a
+  later emission. This remains an overapproximation of selected values, not
+  field-sensitive interpretation. Values-only projections share one state;
+  emitted keys use a depth threshold. A previously followed shallower
+  threshold covers a deeper one, while values-only never suppresses later
+  emission. This monotone memoization terminates cyclic dependencies without
+  truncating them at an arbitrary depth (#5002).
+  Direct, unambiguous imports of `json.dumps`, `yaml.safe_dump` and
+  `textwrap.dedent` also retain their text-carrying meaning under aliases
+  (#4998), including a direct import in the current function before its use.
+  These three identities use the current function's bindings or the visible
+  module binding: disjoint function/class locals do not conflict. A proven
+  local import overrides a same-spelled module function. Competing bindings
+  in the relevant scope, `global`/`nonlocal` interference, closure imports,
+  nested/conditional imports and represented local source modules do not
+  acquire that external-library identity. Signature/default/decorator stores
+  retain their enclosing evaluation scope; comprehension/lambda bindings may
+  conservatively decline an identity. The older selector/constructor binding
+  authority, suffix fallbacks and keyword-argument handling remain unchanged.
+  For a reached locally bound container, resolved helper calls that may
+  mutate it are also followed before request construction (#4997): ordinary positional
+  and named arguments bind to formals; a single visible builtin list or
+  mapping origin is required (literal/comprehension or unshadowed constructor).
+  Direct Name aliases carry values appended, extended or inserted into list
+  formals; mapping mutations and other unsupported updates refuse. Destructive
+  list `pop`/`clear`/`remove` and dict `pop`/`clear` on helper formals refuse
+  until deletion is modeled (#5007); they are not read-only observations. An
+  independently proven builtin list copy may contribute text through its
+  direct `append`/`extend`/`insert` receiver (#5001); this conservatively follows
+  added text without claiming the copy mutates the original outer list.
+  Nested receivers, unknown/shadowed origins and other copied receiver
+  methods still refuse. Each call retains its
+  caller argument context. `extend` follows iterable keys where applicable;
+  omitted defaults are read in the direct helper's module definition scope,
+  not its local scope. Conditions and assignments to otherwise-unused
+  locals count as discarded results too. The exact consumer of a discovered
+  request field or model-file value is terminal (#5000); other surrounding
+  calls are not exempted by spelling alone or ancestry. A computed actual
+  argument is not an escaping container merely because its syntax mentions
+  one (#5003): formatted strings, `not`, and identity/membership predicates
+  produce scalar values. Assigning such a result does not create a reference
+  alias to its inputs; unknown call results and identity-returning helpers
+  retain the conservative alias relation. Explicit nested calls are still
+  checked separately. Consuming a helper result does not suppress receiving
+  effects (#5005); unproven projected receivers still refuse. The exact
+  certified sink and a consumed unshadowed builtin `list` copying a proven
+  builtin list or a no-argument `keys()`/`items()`/`values()` view of a proven
+  builtin dict are bounded exceptions. A literal string may `join` a proven
+  builtin list; custom receivers and iterables retain receiving checks. A
+  proven list formal may use `+=` with an unstarred literal list, whose values
+  and nested calls remain followed. One direct empty list/dict assignment
+  before every use may establish a fresh local in place of an incoming formal;
+  an earlier alias/capture or any other rebinding prevents that proof. Direct
+  receiver writes and other formal effects remain checked.
+  Builtin `str` may represent a closed local list/dict only when every value
+  and write is a proven primitive scalar and every alias/use is accounted for.
+  Literal caller facts are carried in separate function-visit contexts, so a
+  safe caller cannot authorize a later unknown caller. Custom elements,
+  helper escapes and rebinding decline this additional contract.
+  Comprehension targets are resolved in their lexical iterable context, so a
+  nested helper receiving a shared element remains a projected escape.
+  Attribute/item stores through a reached object in a comprehension target
+  refuse independently of the yielded value. Target checks conservatively
+  combine the contexts before and after direct Name bindings, including tuple
+  targets; later generators cannot overwrite that target's lexical context. Only
+  an unshadowed builtin `any`/`all` may consume a generator whose yielded value
+  cannot carry the tracked reference; unknown consumers and reference-yielding
+  generators remain conservative. An unambiguous external `pathlib.Path`
+  import retains the existing address-conversion boundary, including real
+  `Path(p).exists()` predicates. A unique resolved address adapter may share
+  that boundary only when its closed source body has no incoming-reference
+  receiving effects and returns authenticated Path values. Unknown callbacks,
+  projected writes, recursive bodies and arbitrary returned factories do not
+  gain this authority. A sole direct same-formal address conversion before
+  any other observation may replace the uncertain incoming origin; earlier
+  aliases, nested argument callbacks and later rebinding prevent this proof.
+  The ordinary Path conversion contract remains bounded;
+  it does not prove arbitrary runtime conversion hooks pure. Literal scalar/format-string
+  locals and their direct aliases retain ordinary text flow without container
+  effects only when all their syntactic bindings establish that origin.
+  Incoming formals/globals and bindings outside the direct assignment model
+  (including named expressions, loops, imports, exception/pattern captures
+  and nested-scope collisions) invalidate that proof. Unknown carriers still
+  need a builtin-origin proof on a receiving helper edge. Recursive/ambiguous receiving
+  helpers, projected or copied aliases, and unmodeled formal updates/escapes
+  refuse with `ConfigError`. This is a finite syntactic effect check, not
+  arbitrary heap interpretation. It does not extend marked module-constant
+  mutation tracking (#4170) or discover post-construction request mutations
+  (#4409).
+  A method on an object (`self.render()`) is not resolved. Result-parameter
+  summaries distinguish selector-only uses through resolved helpers and
+  wrappers (#4992). They reach a fixed point before narrowing any caller;
+  a text or unknown use prevents selector-only classification. A formal's
+  incoming value and local writes both contribute, including named
+  expressions. Name augmentation also contributes through finite possible
+  aliases (#4994). Calls to helpers containing Name augmentation decline
+  strict narrowing for the enclosing helper: return-role summaries alone
+  cannot account for updates to caller aliases, even when a call's return
+  is consumed as a locator (#4995). Direct scalar augmentation remains in
+  place, and container write methods (`append`, `extend`, `insert`, `update`,
+  `setdefault`) or slice/subscript/attribute writes on a formal still
+  contribute to that formal's summary (#4992, #4994). Unresolved calls on
+  a formal or its aliases remain conservative (`unknown`), preventing
+  selector-only narrowing when an opaque helper may mutate or read text
+  from the parameter.
+- **Cross-module helper and constructor resolution**: Module-level helper
+  functions, class definitions, and `NamedTuple` or `@dataclass` carriers
+  imported via static `import` or `from ... import` within the repository
+  are resolved across module boundaries (#4991, #4993). Dynamic imports
+  (`importlib`), wildcard imports (`from ... import *`), and external
+  third-party packages remain unresolved and are treated conservatively.
+- **Field-insensitive flow outside carrier constructors**: Apart from
+  resolved positional/keyword carrier construction and attribute access on
+  known carrier instances, the
+  scanner's intra-procedural
+  flow does not tell the fields of a value apart: where a request
+  serializes part of a function's result
+  (`outcome['unsupported_audit_candidates']`), all of it is followed, which
+  is how `receipts` and `removals` are derived, through the
+  receipt-completion outcome and the removal classification those requests
+  are built from. A module constant marked as model text is followed
+  through its writes at the top of its module, recursively (#4156): its
+  top-level assignments, and every method call whose receiver holds it
+  wherever a top-level statement makes one on import, with the call's
+  arguments (#4166). Not followed: an assignment to it inside a block there
+  (`if`, `try`) or in a function (`global`), a method call on it in the
+  body of a function or lambda, a function it is handed to (`register(C,
+  v)`), a write through another name bound to it or to part of it (`X = C`,
+  then `X.append(v)`), a write reaching it as a module or class attribute
+  (`m.C.append(v)` in another module, `Cls.C`) or through a re-export, and
+  one bound only by unpacking.
+- The derivation of the model-facing modules (#4085) reads the requests
+  where the runner builds them, the model-input writes and the controllers'
+  sinks. It does not read: text added to a request after it is built,
+  through the object holding it (the report regate's
+  `req.messages[0]['content'].extend(...)` after `build_phase`); a request
+  of another type than the one `build_phase` returns (an evaluator's judge
+  request); what a tool prints for a native model to read (`d4d download
+  scope --project`, which the native playbook runs, the findings a check
+  prints); a file a controller writes for its native child other than
+  through a function named for model text, and a file a run writes that a
+  later phase reads (the derived core record, a batch plan or index); a
+  write whose target path is read off an object or passed in
+  (`spec.full_path`, a parameter), outside the upstream input steps, and a
+  write other than `write_text` or a `with`-bound handle's `write` or
+  `dump` (an `open()` held in a name, `shutil.copy`); and model input a
+  module supplies only as data, with no sentence of its own (manifest
+  values, JSON keys). The modules `MODEL_FACING_MODULES` names that the
+  derivation does not reach are listed in the report, and stay
+  model-facing because the list names them.
 - Hook output is read in run controllers from the two fields Claude Code
   shows the model, `permissionDecisionReason` and `additionalContext`; a
   hook's stderr when it exits 2, the `reason` of a `decision: block` and
@@ -661,3 +882,57 @@ Its declared source file must exist and parse. Source/evidence payloads supplied
 to a draft remain data, and rendered-supplement tests separately check that their
 project identities and quotations do not enter the neutral instructions. The
 live `api_runner.sent_text_surfaces()` inventory remains unchanged.
+
+
+### Discarded primitive builtin observations (#5006)
+
+Within model-text flow only, discarded `count`/`index` on a local literal list
+and `get` on a local literal dictionary do not make their primitive operands
+emitted text. This precision requires a single direct local binding, literal
+primitive contents, proven primitive arguments, and no alias, mutation, capture
+or uncertain receiver use. Literal list/tuple elements and dictionary values
+may package the reference into the exact already-certified request/model-file
+consumer; calls, dictionary keys, operators and projections do not acquire this
+permission. A used return/default and actual writes retain their
+ordinary dependencies. Unknown/custom receivers, nonprimitive comparison/hash
+callbacks and ambiguous bindings retain conservative coverage or explicit
+refusal. The shared local-write authority and its other consumers are unchanged;
+this is not a general method-purity or heap analysis.
+
+
+A consumed call to authenticated external `json.dumps` with one direct proved builtin-dict local and no spread arguments retains the established serialization text-return summary. Direct module and name-import aliases use the scoped import ledger; represented local modules, rebinding, explicit `default`/`cls` callbacks and unknown receiving calls do not gain this authority. Only the literal formatting options documented below are admitted. The summary skips only that exact receiving edge: key/value return flow and separately indexed nested/helper/receiver effects still run. It is not a purity proof. Implicit user-defined serialization protocols of unknown nested runtime values are not interpreted, as implicit conversion protocols are not generally interpreted by the existing Path and formatted-scalar boundaries. This does not extend function-result field sensitivity or arbitrary heap analysis (#4997).
+
+External JSON identity accounts for explicit `.dumps` replacement or deletion through same-source module imports and direct name aliases. Those module names share attribute state. A module-level `from json import dumps` captures a function object before later source statements or later-defined function bodies can replace that attribute. The captured name remains valid unless rebound itself. A function-local import has no such all-invocation guarantee: if relevant module writes exist, it declines the summary even when its own write follows that import. One syntactic call site does not establish lifetime freshness. The finite alias closure and source-order proof do not interpret arbitrary heap relationships or implicit serialization protocols; explicit receiving effects and those separately documented limitations remain unchanged.
+
+Resolved helper calls now retain a separate, completed per-formal mapping-projection summary for each requested result projection. Serialization and keys/items can demand key emission from a caller's mapping; values and subscripts retain the consumed outer level. Caller argument eligibility, selector exclusion, historical data-mode constant promotion and receiving-effect analysis retain their existing rules. Different result projections do not share a provisional answer, and recursive helper groups complete from empty demands before publication. Identity and reset-projection recursion converge. Closed recursive result graphs use exact per-formal depth transformers: lookups add a level, literal dictionary values consume one, and finite cycle closure combines them without a depth cap. Pure lookup graphs retain the offset solver. Each caller keeps its requested depth, values-only stays a distinct state, and authenticated calls require unchanged nonvariadic actual/formal binding. Other recursive expression forms can still raise ConfigError when their result-projection queries grow without bound; this remains an unresolved compatibility limitation, not permission to apply an arbitrary depth cap or reuse another caller's demand. This is a result-dependency summary, not a heap, mutation, or general function-result field-sensitivity proof.
+
+Projection refinement also requires the existing strict unique/undecorated callable and scope-binding proof at both the caller and every recursive summary edge. Ambiguous/rebound/decorated calls retain their old conservative actual projection; the nominal historical callee table alone grants no narrowing authority.
+
+Authenticated JSON identity uses finite same-source import, alias, write and escape evidence. Direct module aliases and immediate ordinary JSON member calls remain supported; module arguments, wrapped/projected references, unknown exports such as `__dict__`, and unmodeled member uses decline identity. Imported JSON functions have separate alias tracking: direct calls are supported, while attribute mutations or unmodeled escapes of those mutable function objects decline. Known `JSONDecodeError` references remain supported as exception-handler types, including direct imports and tuple catch lists; they are not confused with module-object escapes. Every target of a chained assignment must account for an alias use. Module-level capture-before-modeled-write retains its original function identity; local recapture and unmodeled escapes do not gain freshness from source order. This remains an explicit-source contract, not an interpreter for arbitrary dynamic imports, heap introspection or implicit protocols.
+
+The authenticated external JSON receiving summary also admits literal boolean sort_keys/ensure_ascii and a literal two-string tuple of separators. Separator text remains part of emitted content. Dynamic options, callbacks, spreads and unknown options retain explicit refusal; serializer identity and the proven direct dict input remain required. This finite operation contract does not authenticate arbitrary nested implicit serialization protocols.
+
+JSON identity also checks the statically resolved local import closure and existing package initializers. Writes or escapes in another represented source file, or a resolved source missing from the parsed evidence, decline authentication. Cross-file captures do not borrow the same-file source-order proof. Cycles terminate and unrelated, unimported files do not invalidate identity. This does not interpret arbitrary external-library import effects.
+
+The receiving-effect index includes calls executed while defining nested objects: function/lambda defaults, decorators, eager function annotations, class bases/keywords and class bodies. It skips dormant function/method/lambda bodies, honors `from __future__ import annotations`, and does not execute function-local variable annotations. Model-input file-write discovery uses the same traversal. Explicit nested calls still require their own receiving-effect proof (#5011).
+
+
+Authenticated option-free `json.loads` has a separate shared deep-builtin JSON origin fact. A finite source proof retains it through exact helper arguments, tuple return/unpack slots, dictionary `get`, and local iteration over JSON descendants. Every explicit receiving use must remain within the read-only operation summary; unknown calls, mutation, global/nonlocal exports, unsupported target bindings, and recursive helper revisits decline the proof. Named literal fallbacks do not gain deep-JSON authority from their initial syntax. Facts stay in the particular call context and do not turn shared subtrees into detached copies. Completed return slots that carry no shared JSON origin grant no builtin type or purity authority. Ordinary model-text dependency traversal still follows the rendering expressions. Decoder hooks/options, arbitrary heap interpretation, implicit protocol execution, and general function-result field sensitivity remain outside this proof.
+
+Implicit definition-time receivers are also checked before certifying a local
+container's effects. Decorators receive function defaults and closures; custom
+class construction can receive the class namespace. A finite may-use graph
+follows source-visible local bindings, holder writes and receiving arguments.
+When an implicit application may receive a tracked mutable value, unsupported
+effects refuse explicitly. Defining an unexecuted nested body alone is not an
+application; independent definitions without a shared carrier remain supported.
+This adds no general interpreter for dynamic Python protocols.
+
+Request sink authority requires a uniquely resolved lexical import or the runner's own request class. Shadowed or competing constructor or module bindings do not create request sinks. Exact literal positional spreads (tuples, lists) and literal keyword spreads (dictionaries) are mapped to derived request fields, where only text fields seed derivation. Unresolved spreads or field mappings remain discoverable metadata but refuse active text analysis with ConfigError. The terminal exemption applies strictly to that authenticated constructor call; nested calls and independent receiving effects retain their normal checks.
+
+Direct imports of the request runner share namespace-write evidence. A module-level class import proven to precede a later namespace replacement retains its captured identity; local function recaptures and explicit class-object writes do not. Definite module-level requests executing before a namespace write are preserved. An unconditional prior module replacement by a uniquely bound plain function identifies later calls as non-requests. Mixed timing, repeated local captures, class-object writes, and unknown replacement values remain discoverable as possible requests, but active text analysis explicitly refuses uncertain constructor identity.
+
+Local dataclass records with structurally proved freshness admit exact field appends and counter mutations without treating the record as an untracked escape. The record class must be a finite, undecorated single-dataclass definition in the same source module, with no bases, keywords, post-init, custom methods, or dynamic factory overrides, and its class and factory references must remain unexposed. Fields are limited to explicit scalar defaults and fresh list factories (`field(default_factory=list)`).
+
+Returned-instance tracking follows the allocation through exact tuple slots, plain bindings, and authentic single-callee functions across the module call graph. Any exposure of the instance to unknown calls, attribute calls, reflection (`type()`, `__class__`), containers, global/nonlocal assignments, iterations, context managers, or recursive call cycles refuses the proof. Only exact append calls to the proved fresh list fields and direct integer augmentations to proved counter fields are cleared as non-escaping local operations; the record, its borrowed aliases, and nested values retain all ordinary effect and dependency checks.
+

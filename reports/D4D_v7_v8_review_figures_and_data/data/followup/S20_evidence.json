@@ -1,0 +1,437 @@
+{
+  "sample_id": "S20",
+  "record": "CM4AI_v7_rep2",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml",
+  "d4d_sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+  "d4d_fields": {
+    "acquisition_methods": [
+      {
+        "acquisition_details": "Protein-protein interactions mapped by affinity purification-mass spectrometry (AP-MS) on endogenously tagged cell lines. Seventeen genes were endogenously tagged in MDA-MB-468 and AP-MS data acquired under three conditions (untreated, paclitaxel treated, vorinostat treated), with 34 additional genes in the tagging process at the time of the preprint.",
+        "was_directly_observed": true,
+        "was_inferred_derived": false
+      },
+      {
+        "acquisition_details": "Proteome-wide complex and interaction mapping by size-exclusion chromatography coupled to mass spectrometry (SEC-MS), used as an orthogonal mass spectrometry-based approach to AP-MS. SEC-MS on MDA-MB-468 cells under three conditions identified 72 of 100 chromatin modifiers, 52 of them integral components of protein complexes, and detected PPI profiles of over a thousand complexes. SEC-MS in KOLF2 iPSCs and derivatives uncovered more than 700 protein complexes in both parental iPSCs and differentiated neurons.",
+        "was_directly_observed": true
+      },
+      {
+        "acquisition_details": "Spatial subcellular organization mapped by immunofluorescence staining and high-resolution confocal microscopy using the Human Protein Atlas resource of antibodies, with automated fixation and permeabilization protocols established on a pipetting robot for the MDA-MB-468 and KOLF2 cell lines.",
+        "was_directly_observed": true
+      },
+      {
+        "acquisition_details": "Genetic perturbation mapping by single-cell CRISPR screens. A CRISPR lentiviral library targeting 100 chromatin factors with 6 guide RNAs per gene was designed; MDA-MB-468 and KOLF2 CRISPR lines expressing inducible dCas9 were generated and characterized; single-cell CRISPR screens were performed using the 10x Genomics 3'HT kit.",
+        "was_directly_observed": true
+      }
+    ],
+    "description": "The June 2026 Data Release of Cell Maps for Artificial Intelligence (CM4AI), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. CM4AI generates multi-modal data including protein-protein interaction (PPI), spatial localization, and genetic perturbation data in MDA-MB-468 breast cancer cells (with and without paclitaxel or vorinostat treatment) and KOLF2.1J induced pluripotent stem cells (with and without differentiation). This Beta release includes: Perturb-seq data for MDA-MB-468 breast cancer cells with and without treatment and undifferentiated (parental) KOLF2.1J iPSCs; SEC-MS data for MDA-MB-468 breast cancer cells with and without treatment, undifferentiated KOLF2.1J iPSCs, and iPSC-derived neuron progenitor cells (NPCs), neurons, and cardiomyocytes; AP-MS data for MDA-MB-468 breast cancer cells with treatment; and immunofluorescence (IF) images in MDA-MB-468 breast cancer cells with and without treatment. CM4AI's overarching mission is to produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data collected for human cell lines, to enable transformative biomedical AI research. CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin, UA Birmingham, Simon Fraser University, and the Hastings Center.",
+    "file_collections": [
+      {
+        "id": "doi:10.18130/V3/HIGT4C#ifimages-untreated",
+        "name": "cm4ai_ifimages_MDA-MB-468_untreated.zip",
+        "collection_type": "raw_data",
+        "path": "cm4ai_ifimages_MDA-MB-468_untreated.zip",
+        "compression": "zip",
+        "issued": "2026-07-15T00:00:00Z",
+        "description": "Spatial localization of proteins of interest in untreated cells of the breast cancer cell line MDA-MB-468, imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University.",
+        "notes": "MD5 6d066e6b9d762284c6aa5d0b44565568. Size reported by the repository as 4.6 GB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#ifimages-vorinostat",
+        "name": "cm4ai_ifimages_MDA-MB-468_vorinostat.zip",
+        "collection_type": "raw_data",
+        "path": "cm4ai_ifimages_MDA-MB-468_vorinostat.zip",
+        "compression": "zip",
+        "issued": "2026-07-15T00:00:00Z",
+        "description": "Spatial localization of proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated with vorinostat, imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University.",
+        "notes": "MD5 df79632753989ef23b0a3df6604d4af1. Size reported by the repository as 4.2 GB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#ifimages-paclitaxel",
+        "name": "cm4ai_ifimages_MDA-MB-468_paclitaxel.zip",
+        "collection_type": "raw_data",
+        "path": "cm4ai_ifimages_MDA-MB-468_paclitaxel.zip",
+        "compression": "zip",
+        "issued": "2026-07-15T00:00:00Z",
+        "description": "Spatial localization of proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel, imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University.",
+        "notes": "MD5 6c1a86520eec2696ec19444eb8a8b428. Size reported by the repository as 3.8 GB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#apms-paclitaxel",
+        "name": "cm4ai_apms_MDA-MB-468_paclitaxel.zip",
+        "collection_type": "processed_data",
+        "path": "cm4ai_apms_MDA-MB-468_paclitaxel.zip",
+        "compression": "zip",
+        "issued": "2026-06-17T00:00:00Z",
+        "description": "Affinity purification-mass spectrometry data for MDA-MB-468 breast cancer cells treated with paclitaxel.",
+        "notes": "MD5 8642317c321126213240af4837030a53. Size reported by the repository as 113.3 KB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#apms-vorinostat",
+        "name": "cm4ai_apms_MDA-MB-468_vorinostat.zip",
+        "collection_type": "processed_data",
+        "path": "cm4ai_apms_MDA-MB-468_vorinostat.zip",
+        "compression": "zip",
+        "issued": "2026-06-17T00:00:00Z",
+        "description": "Affinity purification-mass spectrometry data for MDA-MB-468 breast cancer cells treated with vorinostat.",
+        "notes": "MD5 b941f28d6f19c563d1222f7aff0c57b6. Size reported by the repository as 135.8 KB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#massspec-kolf2",
+        "name": "cm4ai_mass-spec_KOLF2.zip",
+        "collection_type": "processed_data",
+        "path": "cm4ai_mass-spec_KOLF2.zip",
+        "compression": "zip",
+        "issued": "2026-06-17T00:00:00Z",
+        "description": "Size exclusion chromatography-mass spectrometry (SEC-MS) data generated on KOLF2.1J human induced pluripotent stem cells and derivatives in the Nevan Krogan laboratory at the University of California San Francisco.",
+        "notes": "MD5 f250bf0b04f516f7462d30432441fc0e. Size reported by the repository as 171.8 KB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#massspec-mdamb468",
+        "name": "cm4ai_mass-spec_MDA-MB-468.zip",
+        "collection_type": "processed_data",
+        "path": "cm4ai_mass-spec_MDA-MB-468.zip",
+        "compression": "zip",
+        "issued": "2026-06-17T00:00:00Z",
+        "description": "Size exclusion chromatography-mass spectrometry (SEC-MS) data generated following treatment with vorinostat or paclitaxel on MDA-MB-468 human breast cancer cells, in the Nevan Krogan laboratory at the University of California San Francisco.",
+        "notes": "MD5 9aed30b6e8a91b151155316aae657ea5. Size reported by the repository as 93.9 KB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#perturbseq-kolf2-atlas",
+        "name": "cm4ai_perturb-seq_KOLF2_cell_atlas.zip",
+        "collection_type": "processed_data",
+        "path": "cm4ai_perturb-seq_KOLF2_cell_atlas.zip",
+        "compression": "zip",
+        "issued": "2026-06-17T00:00:00Z",
+        "description": "Expressed genome-scale CRISPRi Perturbation Cell Atlas in KOLF2.1J human induced pluripotent stem cells (hiPSCs), mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes.",
+        "notes": "MD5 291a362842a176a4fcccaf2cdc1dedde. Size reported by the repository as 30.2 KB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#perturbseq-kolf2-raw",
+        "name": "cm4ai_perturb-seq_KOLF2_raw_sra.zip",
+        "collection_type": "raw_data",
+        "path": "cm4ai_perturb-seq_KOLF2_raw_sra.zip",
+        "compression": "zip",
+        "issued": "2026-06-17T00:00:00Z",
+        "description": "Raw sequence data from the expressed genome-scale CRISPRi Perturbation Cell Atlas in KOLF2.1J human induced pluripotent stem cells (hiPSCs), mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes.",
+        "notes": "MD5 8bb3f365f01fb8bbbd2ac6a535059305. Size reported by the repository as 73.3 KB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      },
+      {
+        "id": "doi:10.18130/V3/HIGT4C#release-metadata",
+        "name": "cm4ai_release_metadata.zip",
+        "collection_type": "metadata",
+        "path": "cm4ai_release_metadata.zip",
+        "compression": "zip",
+        "issued": "2026-06-17T00:00:00Z",
+        "conforms_to": "RO-Crate",
+        "conforms_to_standard": [
+          "RO_CRATE"
+        ],
+        "description": "Release metadata package for the June 2026 Data Release, comprising RO-Crate metadata and provenance graphs for the constituent datasets.",
+        "notes": "MD5 318deb7c5edab0d2fa55e26fcb67b440. Size reported by the repository as 1.1 MB.",
+        "source_caveats": "The repository states file sizes only in rounded human-readable units, so no exact byte count is available and total_bytes is omitted rather than approximated."
+      }
+    ]
+  },
+  "receipt_links": [
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c010",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "description",
+      "root": "description",
+      "section": "Metadata",
+      "snippet": "Its overarching mission is to produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data collected for human cell lines, to enable transformative biomedical AI research.",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c010",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "acquisition_methods[0].acquisition_details",
+      "root": "acquisition_methods",
+      "section": "Collection",
+      "snippet": "affinity purification mass spectroscopy (AP-MS)",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c011",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "acquisition_methods[1].acquisition_details",
+      "root": "acquisition_methods",
+      "section": "Collection",
+      "snippet": "we have performed SEC-MS on MDA-MB-468 cells under three conditions (untreated, paclitaxel and vorinostat treated), which enabled us to identify 72/100 chromatin modifiers, with 52 of them being integral components of protein complexes",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c011",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "acquisition_methods[2].acquisition_details",
+      "root": "acquisition_methods",
+      "section": "Collection",
+      "snippet": "We established automated fixation and permeabilization protocols for the pipetting robot for MDA-MB-468 and KOLF2 cell lines",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c011",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "acquisition_methods[3].acquisition_details",
+      "root": "acquisition_methods",
+      "section": "Collection",
+      "snippet": "We have designed a CRISPR lentiviral library targeting 100 chromatin factors with 6 guide RNAs per gene.",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c016",
+      "source": "cm4ai_org_data-releases_row11.txt",
+      "source_type": "documentation",
+      "slot": "description",
+      "root": "description",
+      "section": "Metadata",
+      "snippet": "CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UT Austin, UA Birmingham, Simon Fraser University, and the Hastings Center, as part of the NIH Bridge2AI program.",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c023",
+      "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[5].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "This dataset was generated by size exclusion chromatography-mass spectroscopy (SEC-MS) on undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs)",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c023",
+      "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[6].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "following the treatment of vorinostat or paclitaxel on MDA-MB468 human breast cancer cells",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "description",
+      "root": "description",
+      "section": "Metadata",
+      "snippet": "CM4AI is generating multi-modal data including protein-protein interaction (PPI), spatial localization, and genetic perturbation data in MDA-MB-468 breast cancer cells (+/- paclitaxel or vorinostat) and iPSCs (+/- differentiation)",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "description",
+      "root": "description",
+      "section": "Metadata",
+      "snippet": "AP-MS data for MDA-MB-468 breast cancer cells + treatment",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[3]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_apms_MDA-MB-468_paclitaxel.zip\nZIP Archive\n- 113.3 KB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[4]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_apms_MDA-MB-468_vorinostat.zip\nZIP Archive\n- 135.8 KB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[2]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_ifimages_MDA-MB-468_paclitaxel.zip\nZIP Archive\n- 3.8 GB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[0]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_ifimages_MDA-MB-468_untreated.zip\nZIP Archive\n- 4.6 GB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[1]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_ifimages_MDA-MB-468_vorinostat.zip\nZIP Archive\n- 4.2 GB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[5]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_mass-spec_KOLF2.zip\nZIP Archive\n- 171.8 KB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[6]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_mass-spec_MDA-MB-468.zip\nZIP Archive\n- 93.9 KB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[7]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_perturb-seq_KOLF2_cell_atlas.zip\nZIP Archive\n- 30.2 KB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[8]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_perturb-seq_KOLF2_raw_sra.zip\nZIP Archive\n- 73.3 KB",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v7_rep2",
+      "project": "CM4AI",
+      "version": "v7",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "file_collections[9]",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "cm4ai_release_metadata.zip\nZIP Archive\n- 1.1 MB",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "untreated, paclitaxel",
+    "AP-MS data.*treated"
+  ],
+  "source_excerpts": [
+    {
+      "query": "untreated, paclitaxel",
+      "chunk": "c010",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "chunk_sha256": "0ec9e9009f76d400fe041a0726f62b5a4c905c8790994c1a0d823601e09ad45c",
+      "excerpt": "mplex/interaction mapping as two orthogonal mass spectrometry-\nbased approaches. We have endogenously tagged 17 genes in MDA-MB-468 and\nacquired AP-MS data under three conditions (untreated, paclitaxel and vorinostat\ntreated) . We are currently in the process of tagging 34 additional genes inMDA-MB-468\ncells . In addition, we have performed SEC-MS on MDA-MB-468 cells under three\nconditions (untreated, paclitaxel and vorinostat treated), which enabled us to identify\n72/100 chromatin modifiers, wit"
+    },
+    {
+      "query": "AP-MS data.*treated",
+      "chunk": "c010",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "chunk_sha256": "0ec9e9009f76d400fe041a0726f62b5a4c905c8790994c1a0d823601e09ad45c",
+      "excerpt": "metry (SEC-MS) for\nproteome-wide complex/interaction mapping as two orthogonal mass spectrometry-\nbased approaches. We have endogenously tagged 17 genes in MDA-MB-468 and\nacquired AP-MS data under three conditions (untreated, paclitaxel and vorinostat\ntreated) . We are currently in the process of tagging 34 additional genes inMDA-MB-468\ncells . In addition, we have performed SEC-MS on MDA-MB-468 cells under three\nconditions (untreated, paclitaxel and vorinostat treated), which enabled us to identify\n72/100 chromatin mo"
+    },
+    {
+      "query": "AP-MS data.*treated",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
+      "excerpt": "-MS data in KOLF2.1J iPSCs (undifferentiated, NPC, neuron, and cardiomyocyte):\nMassIVE Repository\nSEC-MS data in MDA-MB-468 breast cancer cells (+/- treatment):\nMassIVE Repository\nAP-MS data in MDA-MB-468 breast cancer cells (treated with paclitaxel):\nMassIVE Repository\nAP-MS data in MDA-MB-468 breast cancer cells (treated with vorinostat):\nMassIVE Repository\nData Governance & Ethics\nHuman Subjects:\nNo\nDe-identified Samples:\nYes\nFDA Regulated:\nNo\nData Governance Committee:\nJillian Parker (jillianparker@health.ucsd.edu)\nEthical "
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "sample_id": "S31",
+  "record": "VOICE_v7_rep2",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml",
+  "d4d_sha256": "9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459",
+  "d4d_fields": {
+    "at_risk_populations": {
+      "at_risk_groups_included": true,
+      "special_protections": [
+        "Adult enrollment is restricted to participants aged 18 to 120 who can provide informed consent in English, and all participants were consented under an IRB-approved process and may withdraw at any time. Cohorts include participants with mild cognitive impairment, Alzheimer's disease and other dementias and with psychiatric diagnoses; the protocol notes that questions asked of the mood and psychiatric cohorts can cause discomfort or trigger negative emotions. No pediatric data collection was performed at the coordinating site, and the adult release contains only participants aged 18 and over."
+      ]
+    },
+    "data_protection_impacts": [
+      {
+        "impact_details": "No analysis of the potential impact of the dataset and its use on data subjects has been conducted. A team of ethicists identified the sensitive fields removed before release, and the consortium published a memorandum setting out the ethical justification for restricting raw voice samples to controlled access."
+      }
+    ],
+    "is_deidentified": {
+      "identifiable_elements_present": false,
+      "method": "HIPAA Safe Harbor de-identification, removal of selected indirect identifiers and highly sensitive non-identifying elements, and withholding of all raw audio.",
+      "identifiers_removed": "Names, civic addresses and social security numbers; geographic locators, including state and province, with only country of collection retained; date information at any resolution finer than years; phone and fax numbers, email addresses, IP addresses, medical record numbers, health plan beneficiary numbers, device identifiers, license numbers, account numbers, vehicle identifiers, website URLs, full-face photographs, biometric identifiers and other unique identifiers; narrative free-text fields and transcripts of free speech; selected demographic identifiers and information about household composition or cultural identity; and all raw voice recordings.",
+      "deidentification_details": "Direct identifiers were removed; indirect identifiers were removed where they created a significant risk of re-identification through combination with public data. Dates were rebased or replaced by integers, geographic information was generalized, and narrative text fields were removed. Spectrograms, mel spectrograms, MFCCs, phonetic posteriorgrams and articulatory estimates were excluded where the audio contained free speech, and features for sensitive records and audio checks were removed; static features that do not encode sensitive content were retained. Raw audio transcripts were reviewed and recordings containing potentially identifying information or external voices were removed from the release. K-anonymization with k greater than or equal to two is not achieved, and voice itself can never be fully de-identified, which is why the waveforms are released only under controlled access."
+    },
+    "participant_privacy": [
+      {
+        "anonymization_method": "Removal of HIPAA Safe Harbor identifiers, removal of selected indirect identifiers and of highly sensitive non-identifying elements, removal of state and province with only country retained, rebasing of dates, removal of narrative text, and withholding of all raw voice recordings.",
+        "privacy_techniques": "Two levels of privacy were built into the program: a combined de-identified database hosted through a HIPAA-compliant NIH STRIDES partner, and federated learning, in which algorithms are run on data held at each institution and only model updates are shared to a central node, so that multi-institutional analysis is possible without the data leaving the institution. Identifiable protected health information is held only in institution-local, password-protected REDCap databases.",
+        "reidentification_risk": "Voice is inherently identifying: even with all HIPAA-protected information removed, a participant's voice cannot be fully de-identified and could in principle be recognized. K-anonymization with k greater than or equal to two is not achieved. Raw audio is therefore withheld from the open release and distributed only under controlled access, and users agree not to attempt re-identification.",
+        "data_linkage": "Participants who consent permit investigators to access medical information through electronic health record platforms in order to perform gold-standard validation of diagnoses and symptoms. Datasheets linking participant numbers to participant information are kept only at the collecting institution."
+      }
+    ]
+  },
+  "receipt_links": [
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c006",
+      "source": "reporter_nih_gov_project-details-11376382_row7.txt",
+      "source_type": "NIH project page",
+      "slot": "participant_privacy[0].privacy_techniques",
+      "root": "participant_privacy",
+      "section": "Human",
+      "snippet": "supported by federated learning technology to protect data privacy",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c008",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "source_type": "documentation",
+      "slot": "is_deidentified.deidentification_details",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "Does this dataset achieve K-anonymization (k>=2)?",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c008",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "source_type": "documentation",
+      "slot": "is_deidentified.identifiers_removed",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "All direct identifiers were removed, as these would reveal the identity of the research participant",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c009",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "source_type": "documentation",
+      "slot": "data_protection_impacts[0].impact_details",
+      "root": "data_protection_impacts",
+      "section": "Ethics",
+      "snippet": "Has an analysis of the potential impact of the dataset and its use on data subjects been conducted?",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c011",
+      "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
+      "source_type": "IRB",
+      "slot": "participant_privacy[0].privacy_techniques",
+      "root": "participant_privacy",
+      "section": "Human",
+      "snippet": "Algorithms are run on data at each institution and model updates are shared to a central node.",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c012",
+      "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
+      "source_type": "IRB",
+      "slot": "at_risk_populations.assent_procedures",
+      "root": "at_risk_populations",
+      "section": "Human",
+      "snippet": "children will provide verbal assent where appropriate",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c012",
+      "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
+      "source_type": "IRB",
+      "slot": "at_risk_populations.guardian_consent",
+      "root": "at_risk_populations",
+      "section": "Human",
+      "snippet": "this research is minimal risk and does not require permission from both parents or legal guardians",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c015",
+      "source": "physionet_b2ai-voice_1.1_row17.txt",
+      "source_type": "data resource",
+      "slot": "is_deidentified.identifiers_removed",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "State and province were removed. Country of data collection was retained.",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v7_rep2",
+      "project": "VOICE",
+      "version": "v7",
+      "chunk": "c017",
+      "source": "physionet_b2ai-voice_3.0.0_row18.txt",
+      "source_type": "data resource",
+      "slot": "is_deidentified.deidentification_details",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "Spectrograms and similar features were excluded if the audio contained free speech.",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "git blob",
+    "path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+    "commit": "4fc4d6b22d5522389692e746a4bc715a93163871"
+  },
+  "source_search_queries": [
+    "potential impact.*data subjects",
+    "impact analysis"
+  ],
+  "source_excerpts": [
+    {
+      "query": "potential impact.*data subjects",
+      "chunk": "c009",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "chunk_sha256": "7ce385094acb63c7c5a04d241f757c89d862b7728f291726d7a2a1367a12f919",
+      "excerpt": "cordings) cannot be removed from the database once the voice data collection process is completed.\nIn which countries was the data collected?\nUSA and Canada\nHas an analysis of the potential impact of the dataset and its use on data subjects been conducted?\nNo\nInclusion Criteria-Accessibility in data collection\nIs there any language-based communication with patients (e.g.: English, French)? If yes, describe the choices of language(s) for communication. (for example, if there is an app used for communication, what are the language optio"
+    }
+  ]
+}

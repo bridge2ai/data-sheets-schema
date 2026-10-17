@@ -557,3 +557,37 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     else:
         for line in ro.summary(block):
             click.echo(f"   {line}")
+
+
+@receipts.command("readdress")
+@click.option("--receipt", "receipt_file", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--full", "full_file", required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--map", "map_file", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Version 1 hash-bound moves map; only slot addresses may change")
+@click.option("--out", "out_file", type=click.Path(dir_okay=False, path_type=Path),
+              help="New receipt file, required with --map; existing files are refused")
+def readdress(receipt_file, full_file, map_file, out_file):
+    """List unresolved receipt entries and structurally possible target paths.
+
+    With --map and --out, apply the complete path-only map to a NEW receipt.
+    The JSON report binds exact input hashes. No provenance, transcript, source
+    receipt or full record is written, and resolution does not establish support.
+    """
+    if (map_file is None) != (out_file is None):
+        raise click.UsageError("--map and --out must be supplied together")
+    from data_sheets_schema import receipt_readdress as rr
+    try:
+        receipt_raw, full_raw = rr.read_file(receipt_file), rr.read_file(full_file)
+        if map_file is None:
+            text = rr.report_text(rr.inventory(receipt_raw, full_raw))
+        else:
+            map_raw = rr.read_file(map_file)
+            output, report = rr.prepare(receipt_raw, full_raw, map_raw)
+            text = rr.report_text(report)
+            rr.write_new(out_file, output, inputs=((receipt_file, receipt_raw),
+                                                  (full_file, full_raw), (map_file, map_raw)))
+    except (OSError, ValueError, TypeError, RecursionError) as exc:
+        raise click.ClickException(f"receipt readdress refused: {exc}") from exc
+    click.echo(text, nl=False)

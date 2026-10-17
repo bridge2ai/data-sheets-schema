@@ -1598,10 +1598,18 @@ class TestRoundTwelve(_Clean):
         """#1703"""
         import subprocess, sys
         with tempfile.TemporaryDirectory() as d:
-            r = subprocess.run([sys.executable, "-m", "data_sheets_schema.form_defects", "--offline", "--cache", str(Path(d) / "fresh.jsonl"), "--limit", "1"],
+            judgements = Path(d) / "judgements"
+            judgements.mkdir()
+            # An absolute, absent label isolates the attribution roster from
+            # the checkout's recorded profiles (#1541); this tests ambient fallback.
+            r = subprocess.run([sys.executable, "-m", "data_sheets_schema.form_defects", "--offline",
+                                "--cache", str(Path(d) / "fresh.jsonl"), "--limit", "1",
+                                "--judgement-cache", str(judgements),
+                                "--config", f"empty={Path(d) / 'no-records'}"],
                                capture_output=True, text=True, cwd=ROOT,
                                env={**os.environ, "PYTHONPATH": str(ROOT / "src"), "D4D_PROFILE": "typo"})
         self.assertEqual(r.returncode, 2, r.stderr[-500:]); self.assertIn("unknown profile", r.stderr)
+        self.assertIn("source profile selection: ambient", r.stderr)
         self.assertNotIn("Traceback", r.stderr)
 
     def test_the_playbooks_send_the_model_to_no_prior_output(self):

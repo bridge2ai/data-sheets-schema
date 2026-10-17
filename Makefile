@@ -267,8 +267,12 @@ test-modules:
 # a runner dies — -q's dots and --durations' end-of-run table both say
 # nothing about a test that never finished (#935 review).
 PYTEST_ARGS ?= -q
+# Explicit paths/nodes replace full discovery for local iteration. Keep flags
+# in PYTEST_ARGS; the default still runs the complete tests directory.
+PYTEST_PATHS ?= tests
 test-python:
-	$(RUN) pytest tests $(PYTEST_ARGS) -p no:cacheprovider --durations=25
+	$(if $(strip $(PYTEST_PATHS)),,$(error PYTEST_PATHS must name at least one test path or node))
+	$(RUN) pytest $(PYTEST_PATHS) $(PYTEST_ARGS) -p no:cacheprovider --durations=25
 
 lint:
 	$(RUN) linkml-lint $(SOURCE_SCHEMA_PATH)
@@ -517,7 +521,7 @@ test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
 		import yaml, json; \
 		d4d = yaml.safe_load(open('data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml')); \
 		rocrate, (valid, errors) = convert_d4d_to_fairscape(d4d); \
-		print('✓ D4D → FAIRSCAPE: PASSED' if valid else '✗ D4D → FAIRSCAPE: FAILED'); \
+		print('✓ D4D → FAIRSCAPE model validation: PASSED (not source preservation)' if valid else '✗ D4D → FAIRSCAPE model validation: FAILED'); \
 		json.dump(rocrate.model_dump(exclude_none=True, by_alias=True), \
 		          open('data/ro-crate/examples/voice_d4d_to_fairscape.json', 'w'), indent=2)"
 
