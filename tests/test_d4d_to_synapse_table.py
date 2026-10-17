@@ -110,10 +110,13 @@ class RemoteTable:
         assert table.tableId == publisher.TABLE_ID
         if self.fail == "store":
             raise RuntimeError("synthetic upload failure")
-        # Exercise the actual pinned SDK CsvFileTable CSV-writing/reading code.
-        return asyncio.run(table._synapse_store_async(self))
+        # Exercise the actual pinned SDK CsvFileTable CSV-writing/reading code
+        # across both synapseclient 4.9.0 (_synapse_store) and 4.10+ (_synapse_store_async).
+        if hasattr(table, "_synapse_store_async"):
+            return asyncio.run(table._synapse_store_async(self))
+        return table._synapse_store(self)
 
-    async def _uploadCsv_async(self, filepath, schema, **kwargs):
+    def _upload_content_csv(self, filepath, schema, **kwargs):
         assert schema == publisher.TABLE_ID
         frame = pd.read_csv(
             filepath, dtype=str, keep_default_na=False,
@@ -138,6 +141,9 @@ class RemoteTable:
             "concreteType": "org.sagebionetworks.repo.model.table.UploadToTableResult",
         }]}
 
+    async def _uploadCsv_async(self, filepath, schema, **kwargs):
+        return self._upload_content_csv(filepath, schema, **kwargs)
+
     def delete(self, rowset):
         self.events.append("delete")
         if self.fail == "delete":
@@ -147,9 +153,10 @@ class RemoteTable:
         if self.fail == "corrupt_replacement":
             self.rows.iloc[-1, 2] = "changed after deletion"
 
-    def _uploadCsv(self, filepath, schema):
-        # The legacy SDK uses a CSV for deletion metadata only. Reject any
-        # attempt to send the actual HTML/CSS through this lossy server parser.
+    def _uploadCsv(self, filepath, schema, **kwargs):
+        if kwargs:
+            return self._upload_content_csv(filepath, schema, **kwargs)
+        # Deletion uses a ROW_ID/ROW_VERSION metadata CSV without CsvFileTable kwargs.
         assert schema == publisher.TABLE_ID
         with open(filepath, newline="") as stream:
             reader = csv.DictReader(stream)
