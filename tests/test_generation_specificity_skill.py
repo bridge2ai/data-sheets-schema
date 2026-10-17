@@ -1500,7 +1500,7 @@ class TestModelFacingDerivation(unittest.TestCase):
         a new module it imports. The bundle it writes ends in the healthsheet
         arm's `_healthsheet_only.txt`, so what it writes is model input, and
         the new module is model-facing: the FAIRhub name there gates."""
-        origin = '"Origin: FAIRhub API record, metadata.healthsheet",'
+        origin = '*([f"Origin: {origin}"] if origin else []),'
         text = (ROOT / "src/data_sheets_schema/healthsheet.py").read_text(encoding="utf-8")
         self.assertEqual(text.count(origin), 1)
         moved = text.replace(origin, "ORIGIN,").replace(
@@ -1509,7 +1509,7 @@ class TestModelFacingDerivation(unittest.TestCase):
         rel = "src/data_sheets_schema/healthsheet_text.py"
         with tempfile.TemporaryDirectory() as d:
             root = self._root(d, DERIVATION_RUNNER, {
-                "healthsheet": moved, "healthsheet_text": f"ORIGIN = {origin.rstrip(',')}\n"})
+                "healthsheet": moved, "healthsheet_text": 'ORIGIN = "Origin: FAIRhub API record, metadata.healthsheet"\n'})
             derived, spans, facts = self._derive(root)
             self.assertEqual([w.rsplit(":", 1)[0] for w in facts["writers"]], ["src/data_sheets_schema/healthsheet.py"])
             self.assertIn("healthsheet_text", derived)

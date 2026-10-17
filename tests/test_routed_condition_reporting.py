@@ -28,7 +28,7 @@ def routed(request, tmp_path_factory, draft_files):
     with pytest.MonkeyPatch.context() as patch:
         patch.setattr(api, 'provider_identity', lambda: {'provider': None, 'base_url': None, 'key_env': None})
         spec = selected_spec(tmp_path_factory.mktemp(request.param), draft_files, mode=request.param)
-        spec.bind_api_header_values(api._model_settings())
+        spec.bind_api_header_values(api._model_settings(spec.condition))
         render = spec.render_spec()
         record = {'run': {key: getattr(spec, key) for key in ('project', 'arm', 'method', 'label', 'condition')},
                   'prompts': provenance.prompt_facts(spec.prompt_files, spec.instruction, render)}

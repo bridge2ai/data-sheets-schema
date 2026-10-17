@@ -879,8 +879,9 @@ def routing_context(spec):
     # The raw closure was genuinely reconstructed at capture. Memoization here
     # concerns only that pure immutable derivation, after fresh authority reads.
     from .source_heading_runtime import check_condition
-    return memo(spec, 'routing_context', [captured.routing],
-                lambda: check_condition(captured.routing))['wire']
+    def build_routing():
+        return check_condition(captured.routing)
+    return memo(spec, 'routing_context', [captured.routing], build_routing)['wire']
 
 
 def require_routing_context(spec, messages):

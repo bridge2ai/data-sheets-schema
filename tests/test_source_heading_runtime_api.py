@@ -71,8 +71,8 @@ def selected_spec(tmp_path, draft_files, mode='declared_heading_spans_v1', *, cl
             {'id': 'protocol', 'processed_file': 'protocol.txt', 'source_type': 'documentation', 'priority': 1}],
             'naming': source_naming}}}))
         base = replace(base, manifest=source, manifest_line=type(base).__dataclass_fields__['manifest_line'].default)
-    reg = registration_for(base)
     condition = routing.MODES[mode]
+    reg = registration_for(base, condition=condition)
     reg.update(format=sg.ROUTING_FORMAT, selection=sg.descriptor(version=2, condition=condition),
         routing={'mode': mode, 'artifact': sg.file_pin(path), 'generation_limits': {
             'max_request_bytes': 32_000_000, 'max_input_tokens_per_call': 850_000,

@@ -14,7 +14,7 @@ from data_sheets_schema.resources import resource_path
 from tests.test_generation_manifest_identity import external  # noqa: F401
 
 
-def registration_for(spec):
+def registration_for(spec, *, condition='generic_v10'):
     """An explicit synthetic registration; not a recommended experiment/cap."""
     import yaml
     if spec.manifest is not None:
@@ -28,9 +28,9 @@ def registration_for(spec):
         'scopes': [{'owner': '', 'referent': 'External Cohort', 'release': 'synthetic',
                     'scope': 'Only the supplied fictional source.'}],
         'source_policy': {'priority': ['protocol'], 'basis': 'Synthetic fixture only.'}, 'vocabulary': {}}))
-    # The registration declares what generic_v10 resolves to (#5043:
-    # the summarized thinking display is part of that condition's request).
-    settings = api._model_settings('generic_v10')
+    # The registration declares what the selected condition resolves to (#5043:
+    # the summarized thinking display is part of generic_v10's request).
+    settings = api._model_settings(condition)
     path = directory / 'shared-registration.json'
     reg = {'format': sg.FORMAT, 'registration_id': 'invented-local-test', 'registration_path': str(path),
         'run': {key: getattr(spec, key) for key in ('project', 'arm', 'method', 'label')},

@@ -112,7 +112,6 @@ MODEL_FACING_MODULES = frozenset({
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
     "shared_generation", "typed_audit_runtime", "typed_audit", "audit_omissions", "audit_batches",
-    "native_shared_render", "native_shared_stage", "native_shared_receipts", "native_shared_contract",
     "source_heading_runtime",
     # found by the derivation (#4085): the opt-in renderer-24 receipt turn,
     # the API playbook adaptation, the native attribution instructions, the
@@ -3501,7 +3500,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         "release_inventory.py", "report_claims.py", "review_pack.py", "rocrate_map.py",
         "run_guard.py", "run_lock.py", "run_pair_schema.py", "run_schema.py",
         "run_telemetry.py", "runs.py", "schema_cache.py", "schema_sync.py",
-        "status_context.py", "stream_evidence.py", "source_heading_routing.py",
+        "status_context.py", "stream_evidence.py", "source_heading_routing.py", "source_heading_runtime.py",
         "d4d_builder.py", "field_prioritizer.py", "informativeness_scorer.py",
         "mapping_loader.py", "rocrate_merger.py", "rocrate_parser.py",
         "rocrate_to_d4d.py", "validator.py", "check_mapping_coverage.py",
