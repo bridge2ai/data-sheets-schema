@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -719,10 +720,12 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 @click.option("--no-canary-gate", is_flag=True,
               help="fan out even if the first run regresses against the "
                    "baseline; the comparison is still printed")
+@click.option("--max-cost-dollars", type=float, default=None,
+              help="stop batch before starting subsequent runs if cumulative cost meets or exceeds this amount")
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, max_cost_dollars=None):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -730,6 +733,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api batch")          # the record and the outputs land under the cwd (#1643)
+    if max_cost_dollars is not None and (not math.isfinite(max_cost_dollars) or max_cost_dollars < 0):
+        raise click.ClickException("--max-cost-dollars must be non-negative and finite")
     from data_sheets_schema.api_runner import execute, plan
 
     requested = (AUTO if manifest is None
@@ -831,6 +836,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         raise click.ClickException(str(exc)) from exc
 
     ok, failed, spent_in, spent_out = [], [], 0, 0
+    spent_dollars = 0.0
+    cost_stop: str | None = None
     canary_stop: str | None = None
     #: Whether the fan-out is gated on the first run at all. Read in three
     #: places, so it is computed once rather than restated (#619).
@@ -857,16 +864,29 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             if roster:
                 _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
             res = execute(s)
-            spent_in += sum(u.get("input_tokens") or 0 for u in res["usage"])
-            spent_out += sum(u.get("output_tokens") or 0 for u in res["usage"])
-            cached = sum(u.get("cache_read") or 0 for u in res["usage"])
+            usage_rows = res.get("usage") or []
+            spent_in += sum(u.get("input_tokens") or 0 for u in usage_rows)
+            spent_out += sum(u.get("output_tokens") or 0 for u in usage_rows)
+            cached = sum(u.get("cache_read") or 0 for u in usage_rows)
+            from data_sheets_schema.run_telemetry import (
+                RATE_CACHE_READ,
+                RATE_CACHE_WRITE,
+                RATE_INPUT,
+                RATE_OUTPUT,
+            )
+            run_cost = sum((u.get("input_tokens") or 0) * RATE_INPUT
+                           + (u.get("cache_write") or 0) * RATE_CACHE_WRITE
+                           + (u.get("cache_read") or 0) * RATE_CACHE_READ
+                           + (u.get("output_tokens") or 0) * RATE_OUTPUT
+                           for u in usage_rows)
+            spent_dollars += run_cost
             note = f"  (resumed, skipped {len(res['skipped'])})" if res["skipped"] else ""
             vp = res.get("validation_problems") or []
             if vp:
                 # A sweep must not count an invalid record as a success, or the
                 # summary line reports work that cannot be used.
                 click.echo(f"   ❌ invalid output ({len(vp)} failure(s)) "
-                           f"in={spent_in:,} out={spent_out:,}", err=True)
+                           f"in={spent_in:,} out={spent_out:,} cost=${spent_dollars:,.2f}", err=True)
                 for p in vp:
                     click.echo(f"      {p.get('artifact')}: {p.get('error')}",
                                err=True)
@@ -881,8 +901,14 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                     break
                 if canary_stop:
                     break
+                if max_cost_dollars is not None and spent_dollars >= max_cost_dollars and i < len(specs):
+                    cost_stop = (
+                        f"cumulative cost stop: spent ${spent_dollars:,.2f} >= "
+                        f"${max_cost_dollars:,.2f} cap. Remaining runs were stopped."
+                    )
+                    break
                 continue
-            click.echo(f"   ✓ in={spent_in:,} out={spent_out:,} cache_read={cached:,}{note}")
+            click.echo(f"   ✓ in={spent_in:,} out={spent_out:,} cache_read={cached:,} cost=${spent_dollars:,.2f}{note}")
 
             # The three post-generation checks, printed for every run so a
             # sweep cannot look clean while they fail (#579) — and, on the
@@ -981,6 +1007,12 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 break
         if canary_stop:
             break
+        if max_cost_dollars is not None and spent_dollars >= max_cost_dollars and i < len(specs):
+            cost_stop = (
+                f"cumulative cost stop: spent ${spent_dollars:,.2f} >= "
+                f"${max_cost_dollars:,.2f} cap. Remaining runs were stopped."
+            )
+            break
 
     # Released even when the sweep failed or was interrupted mid-loop: a lock
     # outliving its process would make the next attempt refuse to start, which
@@ -988,11 +1020,18 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     # lock left by a hard kill is recognised as stale rather than believed.
     run_lock.release(lock_path)
 
+    if cost_stop:
+        click.echo(f"\n{len(ok)} succeeded, {len(failed)} failed")
+        click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out (cost: ${spent_dollars:,.2f})")
+        for p, lbl, err in failed:
+            click.echo(f"   {p} {lbl}: {err[:90]}")
+        canary_stop = cost_stop
+
     if canary_stop:
         raise click.ClickException(canary_stop)
 
     click.echo(f"\n{len(ok)} succeeded, {len(failed)} failed")
-    click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out")
+    click.echo(f"tokens: {spent_in:,} in, {spent_out:,} out (cost: ${spent_dollars:,.2f})")
     for p, lbl, err in failed:
         click.echo(f"   {p} {lbl}: {err[:90]}")
     if failed:
