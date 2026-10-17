@@ -96,17 +96,26 @@ APPROACHES = {
                                   "a generation closure imports is that approach's surface instead"),
 }
 
-#: Modules whose text reaches a model (prompt assembly, bundle text, digest).
-#: A hand-kept list: which modules belong to each closure is derived from
-#: imports; whether a module *writes model-facing text* is not derivable
-#: from an import graph. tests/test_generation_specificity_skill.py fails
-#: when a name here is in none of the api, native or deterministic closures.
+#: Modules whose text reaches a model (prompt assembly, bundle text, digest),
+#: kept by hand as a cross-check of the derivation (#4085): whether a
+#: top-level `data_sheets_schema` module writes model-facing text is derived
+#: by data flow (`derive_model_facing`), and the report lists every module
+#: the derivation finds that this list lacks, and every one it names that
+#: the derivation does not reach. A module either names is model-facing, so
+#: a gap in the derivation never stops a module here from gating in
+#: silence. tests/test_generation_specificity_skill.py fails when a name here
+#: is in none of the api, native or deterministic closures, and when this
+#: checkout's derivation and this list disagree.
 MODEL_FACING_MODULES = frozenset({
     "api_runner", "schema_digest", "schema_semantics", "source_review", "grounding",
     "scope", "source_priority", "source_metadata", "chunking", "evidence_assertions",
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
     "shared_generation", "typed_audit_runtime", "typed_audit", "audit_omissions", "audit_batches",
+    # found by the derivation (#4085): the opt-in renderer-24 receipt turn,
+    # the API playbook adaptation, the native attribution instructions, the
+    # receipt-completion and removal-repair requests and what they carry
+    "rereceipt", "api_playbook", "native_source_attribution", "receipt_completion", "receipts", "removals",
 })
 
 # Explicitly reviewed builders outside every live generation call path. Keep
@@ -183,6 +192,28 @@ HOOK_MODEL_FIELDS = frozenset({"permissionDecisionReason", "additionalContext"})
 #: String methods whose arguments become part of their result (text flows
 #: through them: "".join(parts), text.replace(a, b)).
 STR_TEXT_METHODS = frozenset({"join", "replace", "format", "format_map", "strip", "rstrip", "lstrip"})
+#: Calls the scan cannot resolve to a function whose result carries their
+#: positional arguments' text: a copy, a conversion or a serialization
+#: (`list(cached)`, `str(x)`, `json.dumps(inventory)`,
+#: `yaml.safe_dump(manifest)`), read by the callee's last name (#4085).
+TEXT_CARRYING_CALLS = frozenset({"str", "repr", "list", "tuple", "sorted", "reversed", "copy", "deepcopy",
+                                 "dumps", "dump", "safe_dump", "dedent", "indent", "fill"})
+#: Methods whose result is what a file holds, not the path they are called
+#: on (#4085): `resource_path(name).read_bytes()` sends the file's bytes, so
+#: the path expression is followed as data, never as text.
+FILE_READ_METHODS = frozenset({"read_text", "read_bytes", "read", "readline", "readlines", "open"})
+#: The fields of the runner's request that carry text to the model: the
+#: system prompt and the messages, whose head is the cached prefix
+#: (`cached_blocks`). A request's `phase` names the call for accounting and
+#: is not sent (#4085).
+REQUEST_TEXT_FIELDS = ("system", "cached_blocks", "messages")
+#: The tree a run reads its inputs from (the bundles, their chunk mappings,
+#: the manifest); a run's records go under data/d4d_concatenated/ (#4085).
+INPUT_TREE = "data/preprocessed/"
+#: A templated input a playbook names under the input tree, and the file
+#: name after the project: `data/preprocessed/chunks/{PROJECT}_chunks.yaml`
+#: -> `_chunks.yaml` (#4085).
+TEMPLATED_INPUT = re.compile(re.escape(INPUT_TREE) + r"[\w./-]*\{PROJECT\}([\w.-]*\.\w+)")
 
 #: Packages whose import makes a module a model client (#4023).
 MODEL_CLIENT_PACKAGES = ("anthropic", "openai", "pydantic_ai", "aurelian")
@@ -368,6 +399,20 @@ def _bare_token(node) -> bool:
     not a sentence."""
     return (isinstance(node, ast.Constant) and isinstance(node.value, str)
             and bool(node.value) and not re.search(r"\s", node.value))
+
+
+def _prose(node) -> bool:
+    """A string literal or f-string whose literal text has whitespace and a
+    letter or digit: a sentence a module writes, not a bare token (a key, an
+    identifier, a file name), which gates as code in any role, nor a
+    separator or a rule line (#4085)."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        text = node.value
+    elif isinstance(node, ast.JoinedStr):
+        text = "".join(str(v.value) for v in node.values if isinstance(v, ast.Constant))
+    else:
+        return False
+    return bool(re.search(r"\s", text) and re.search(r"[^\W_]", text))
 
 
 #: Calls that test a value: every constant argument is a branch
@@ -1337,12 +1382,14 @@ def _module_constants(path: Path) -> dict[str, object]:
     return env
 
 
-def _module_role(p: Path) -> str:
-    """model_facing for a module MODEL_FACING_MODULES names: a top-level
-    module of the `data_sheets_schema` package, matched by its place in the
+def _module_role(p: Path, derived=frozenset()) -> str:
+    """model_facing for a top-level module of the `data_sheets_schema`
+    package whose text the data flow found reaching a model (`derived`,
+    #4085) or that MODEL_FACING_MODULES names, matched by its place in the
     package and not its stem alone (`cli/healthsheet.py` is not
     `healthsheet.py`)."""
-    return "model_facing" if _package_module_name(p) in MODEL_FACING_MODULES else "run_shaping"
+    name = _package_module_name(p)
+    return "model_facing" if name in MODEL_FACING_MODULES or name in derived else "run_shaping"
 
 
 def _package_module_name(p: Path) -> str | None:
@@ -2477,6 +2524,8 @@ def _main_block_runs(root: Path, p: Path, parsed: dict, index: dict) -> list[str
             if q == target:
                 continue
             binds = _bindings(root, q, qtree, index)
+            if (target, name) not in binds.values() and (target, None) not in binds.values():
+                continue
             for c in ast.walk(qtree):
                 if not isinstance(c, ast.Call):
                     continue
@@ -2912,11 +2961,20 @@ def launch_flags(controllers: dict[str, Path], parsed: dict) -> list[dict]:
 # ---- text a model receives, by data flow (#4054)
 
 
+_DEFS: dict[int, tuple] = {}
+
+
 def _function_defs(tree) -> dict[str, ast.AST]:
+    """name -> the first function so named in a module, at any depth; cached
+    per tree (the entry holds the tree, so its id is not reused)."""
+    entry = _DEFS.get(id(tree))
+    if entry is not None and entry[0] is tree:
+        return entry[1]
     out = {}
     for n in ast.walk(tree):
         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
             out.setdefault(n.name, n)
+    _DEFS[id(tree)] = (tree, out)
     return out
 
 
@@ -3011,6 +3069,291 @@ def _local_assignments(fn) -> dict[str, list[ast.AST]]:
     return out
 
 
+def _holder(target) -> str | None:
+    """The name whose object an expression writes into: `parts` for
+    `parts`, `d['k']`, `req.messages[0]['content']`."""
+    while isinstance(target, (ast.Subscript, ast.Attribute)):
+        target = target.value
+    return target.id if isinstance(target, ast.Name) else None
+
+
+_WRITES: dict[int, tuple] = {}
+
+
+def _local_values(fn) -> dict[str, list[ast.AST]]:
+    """What each local of a function is bound to: the value of every
+    assignment to it (plain, unpacked, annotated or augmented), and the
+    iterable of a `for` loop that binds it (#4085). A fresh dict."""
+    out = {k: list(v) for k, v in _local_assignments(fn).items()}
+    for n in ast.walk(fn):
+        if isinstance(n, (ast.For, ast.AsyncFor)):
+            for x in ast.walk(n.target):
+                if isinstance(x, ast.Name) and isinstance(x.ctx, ast.Store):
+                    out.setdefault(x.id, []).append(n.iter)
+    return out
+
+
+def _local_writes(fn) -> dict[str, list[ast.AST]]:
+    """What becomes part of each local of a function, for the data flow
+    (#4085): the value of every assignment to it (plain, unpacked, annotated
+    or augmented), the iterable of a `for` loop that binds it, and, for a
+    name the function binds that is not a parameter, the arguments of every
+    method call on it and every value assigned to an item or attribute of
+    it (`parts.append(x)`, `d['k'] = v`, `req.messages[0]['content']
+    .extend(...)`): any method may change the object it is called on, as
+    for a module constant (#4166). Cached per function node."""
+    entry = _WRITES.get(id(fn))
+    if entry is not None and entry[0] is fn:
+        return entry[1]
+    out = _local_values(fn)
+    bound = set(out) - set(_params(fn))
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and _holder(n.func.value) in bound:
+            out[_holder(n.func.value)] += ([a.value if isinstance(a, ast.Starred) else a for a in n.args]
+                                           + [k.value for k in n.keywords])
+        elif isinstance(n, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and n.value is not None:
+            for t in n.targets if isinstance(n, ast.Assign) else [n.target]:
+                if isinstance(t, (ast.Subscript, ast.Attribute)) and _holder(t) in bound:
+                    out[_holder(t)].append(n.value)
+    _WRITES[id(fn)] = (fn, out)
+    return out
+
+
+def _results(fn) -> list[ast.AST]:
+    """What a function's result is built from: its returned values, and the
+    values a generator yields."""
+    return [r.value for r in ast.walk(fn) if isinstance(r, (ast.Return, ast.Yield)) and r.value is not None]
+
+
+def _carried_params(fn) -> tuple[set[int], set[str], int | None, bool]:
+    """The parameters a function's result is built from, directly or
+    through its locals (#4085): a caller's argument for one of them is part
+    of the result (`dump_manifest(manifest)` returns
+    `yaml.safe_dump(manifest)`). Returns (the positional indexes, the names,
+    the index from which a `*args` the result is built from collects the
+    positional arguments, whether a `**kwargs` it is built from collects the
+    other keywords); a leading `self` or `cls` is not a caller's argument."""
+    params = set(_params(fn))
+    local = _local_writes(fn)
+    reached, seen, todo = set(), set(), list(_results(fn))
+    while todo:
+        for x in ast.walk(todo.pop()):
+            if not isinstance(x, ast.Name):
+                continue
+            if x.id in params:
+                reached.add(x.id)
+            elif x.id in local and x.id not in seen:
+                seen.add(x.id)
+                todo += local[x.id]
+    positional = [x.arg for x in fn.args.posonlyargs + fn.args.args]
+    if positional and positional[0] in {"self", "cls"}:
+        positional = positional[1:]
+    indexes = {i for i, name in enumerate(positional) if name in reached}
+    names = {name for name in reached if name in positional + [x.arg for x in fn.args.kwonlyargs]}
+    star_from = len(positional) if fn.args.vararg is not None and fn.args.vararg.arg in reached else None
+    any_kw = fn.args.kwarg is not None and fn.args.kwarg.arg in reached
+    return indexes, names, star_from, any_kw
+
+
+def _argument_parameters(fn, call, is_method=False) -> list[tuple[ast.AST, set[str]]] | None:
+    """Possible formals for each actual argument; None is an uncertain binding.
+
+    This is only authority to narrow selector-only uses (#4992). The existing
+    text-argument mapping remains conservative. A leading self/cls may be an
+    implicit receiver, so this narrowing does not guess how it was bound.
+    """
+    a = fn.args
+    positional = [x.arg for x in a.posonlyargs + a.args]
+    if positional and positional[0] in {"self", "cls"}:
+        if is_method:
+            positional = positional[1:]
+        else:
+            return None
+    named = {x.arg for x in a.args + a.kwonlyargs if not (is_method and x.arg in {"self", "cls"})}
+    vararg = {a.vararg.arg} if a.vararg is not None else set()
+    kwarg = {a.kwarg.arg} if a.kwarg is not None else set()
+    out, index, spread = [], 0, False
+    for value in call.args:
+        if isinstance(value, ast.Starred):
+            spread = True
+            names = set(positional[index:]) | vararg
+            value = value.value
+        elif spread:
+            # A preceding *expression may fill any number of positions.
+            names = set(positional[index:]) | vararg
+        else:
+            names = {positional[index]} if index < len(positional) else set(vararg)
+            index += 1
+        if not names:
+            return None
+        out.append((value, names))
+    for keyword in call.keywords:
+        names = named | kwarg if keyword.arg is None else (
+            {keyword.arg} if keyword.arg in named else set(kwarg))
+        if not names:
+            return None
+        out.append((keyword.value, names))
+    return out
+
+
+def _result_parameter_roles(fn, resolve, summaries, selector_constructor) -> dict[str, set[str]]:
+    """Finite may-uses of formals in results (#4992, #4994).
+
+    Keep incoming and locally assigned values. Name augmentation may also
+    update an alias, so propagate its contribution through finite possible
+    aliases. Unsupported updates/escapes decline narrowing for this helper;
+    this is not a general heap or side-effect interpreter.
+    """
+    params = set(_params(fn))
+    local = {name: list(values) for name, values in _local_writes(fn).items()}
+    nodes = list(ast.walk(fn))
+    unknown = {name: {"unknown"} for name in params}
+    aliases = {}
+
+    def representative(name):
+        aliases.setdefault(name, name)
+        while aliases[name] != name:
+            aliases[name] = aliases[aliases[name]]
+            name = aliases[name]
+        return name
+
+    def join(names):
+        names = sorted(names)
+        if names:
+            first = representative(names[0])
+            for name in names[1:]:
+                aliases[representative(name)] = first
+
+    def alias_names(value):
+        if isinstance(value, ast.Name):
+            return {value.id}
+        if isinstance(value, (ast.Attribute, ast.Subscript)):
+            holder = _holder(value)
+            return {holder} if holder else set()
+        if isinstance(value, ast.Call):
+            # The ordinary pathlib constructor/file-read result is a new
+            # value, not an alias of its address. Other helper results may
+            # alias their inputs; overapproximate without executing them.
+            if selector_constructor(value.func) or (isinstance(value.func, ast.Attribute)
+                                                    and value.func.attr in FILE_READ_METHODS):
+                return set()
+            children = list(value.args) + [k.value for k in value.keywords]
+            if isinstance(value.func, ast.Attribute):
+                children.append(value.func.value)
+        else:
+            children = list(ast.iter_child_nodes(value))
+        return set().union(*(alias_names(child) for child in children)) if children else set()
+
+    for node in nodes:
+        # These updates can affect returned parameter/alias contents through
+        # an unmodeled heap or binding edge. Missing an edge is not a proof
+        # that an argument is only a locator. Decline the whole strict summary.
+        if (isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(node.ctx, (ast.Store, ast.Del))) \
+                or isinstance(node, (ast.Delete, ast.With, ast.AsyncWith, ast.Import, ast.ImportFrom)) \
+                or (isinstance(node, ast.ExceptHandler) and node.name) \
+                or type(node).__name__ == "Match":
+            return unknown
+        if isinstance(node, ast.Call):
+            hit = resolve(node.func)
+            if hit is not None:
+                # Return-role summaries do not describe updates to caller
+                # aliases. A known helper's Name augmentation may mutate an
+                # argument even when its return is consumed as a locator.
+                # Refuse explicitly before file-read/constructor exemptions;
+                # an effectful helper named read_text is still a known call.
+                if any(isinstance(part, ast.AugAssign) and isinstance(part.target, ast.Name)
+                       for part in ast.walk(hit[1])):
+                    return unknown
+                if _argument_parameters(hit[1], node) is None:
+                    return unknown
+            elif not selector_constructor(node.func) and not (
+                    isinstance(node.func, ast.Attribute) and node.func.attr in FILE_READ_METHODS):
+                # Includes receiver mutations and unresolved calls receiving
+                # possible aliases, whether or not their results are used.
+                return unknown
+        targets, value = [], None
+        if isinstance(node, ast.Assign):
+            targets, value = node.targets, node.value
+        elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)):
+            targets, value = [node.target], node.value
+            if isinstance(node, ast.NamedExpr) and isinstance(node.target, ast.Name):
+                local.setdefault(node.target.id, []).append(value)
+        elif isinstance(node, (ast.For, ast.AsyncFor)):
+            targets, value = [node.target], node.iter
+        if targets and value is not None:
+            names = {part.id for target in targets for part in ast.walk(target)
+                     if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Store)}
+            join(names | alias_names(value))
+    groups = {}
+    for name in aliases:
+        groups.setdefault(representative(name), set()).add(name)
+    for node in nodes:
+        if isinstance(node, ast.AugAssign) and isinstance(node.target, ast.Name):
+            # Rebinding and in-place updates cannot be distinguished from
+            # syntax alone. Both may contribute, including through aliases.
+            name = node.target.id
+            members = groups.get(representative(name), {name})
+            for member in members:
+                local.setdefault(member, []).append(node.value)
+
+    # Determine discarded calls syntactically, independently of provisional
+    # callee roles in the fixed point. An empty early summary is not proof
+    # that an argument expression (and its calls) is never consumed.
+    reached, pending = set(), list(_results(fn))
+    while pending:
+        value = pending.pop()
+        if id(value) in reached:
+            continue
+        reached.add(id(value))
+        if isinstance(value, ast.Name):
+            pending.extend(local.get(value.id, ()))
+        pending.extend(ast.iter_child_nodes(value))
+    if any(isinstance(node, ast.Call) and id(node) not in reached for node in nodes):
+        return unknown
+
+    roles = {name: set() for name in params}
+    todo = [(value, "text") for value in _results(fn)]
+    seen = set()
+    while todo:
+        value, mode = todo.pop()
+        if value is None or (id(value), mode) in seen:
+            continue
+        seen.add((id(value), mode))
+        if isinstance(value, ast.Name):
+            if value.id in params:
+                roles[value.id].add(mode)
+            if value.id in local:
+                todo.extend((v, mode) for v in local[value.id])
+            continue
+        if isinstance(value, ast.IfExp):
+            todo.extend(((value.body, mode), (value.orelse, mode)))
+            continue
+        if isinstance(value, ast.Subscript):
+            todo.extend(((value.value, mode), (value.slice, "selector")))
+            continue
+        if isinstance(value, ast.Call):
+            hit = resolve(value.func)
+            binding = _argument_parameters(hit[1], value) if hit is not None else None
+            if isinstance(value.func, ast.Attribute):
+                todo.append((value.func.value, "selector" if value.func.attr in FILE_READ_METHODS else mode))
+            elif hit is None:
+                todo.append((value.func, mode))
+            if binding is None:
+                todo.extend((v.value if isinstance(v, ast.Starred) else v, mode) for v in value.args)
+                todo.extend((k.value, mode) for k in value.keywords)
+            else:
+                for actual, names in binding:
+                    for role in set().union(*(summaries[hit[0]][name] for name in names)):
+                        # Uncertain effects cannot become safe merely because
+                        # the call's result is used as an address.
+                        next_mode = ("unknown" if role == "unknown" else "selector") if mode == "selector" else (
+                            "selector" if role == "selector" else ("unknown" if mode == "unknown" else role))
+                        todo.append((actual, next_mode))
+            continue
+        todo.extend((child, mode) for child in ast.iter_child_nodes(value))
+    return roles
+
+
 def _innermost_function(tree, line: int):
     best = None
     for n in ast.walk(tree):
@@ -3020,31 +3363,69 @@ def _innermost_function(tree, line: int):
     return best
 
 
-def model_text_spans(root: Path, parsed: dict, index: dict,
-                     controllers: dict[str, Path]) -> dict[str, list[tuple[int, int, str]]]:
-    """Code whose text a run controller hands a model, found by data flow as
-    well as by name (#4054). Seeds: the controller functions a name says
-    render model text (`MODEL_TEXT_FUNCTION`), every argv element that
-    follows `--system-prompt` or `--append-system-prompt` in a controller,
-    and every value a controller gives a hook field Claude Code shows the
-    model (`permissionDecisionReason`, the PreToolUse deny reason, and
+def _enclosing_function(tree, fn):
+    if tree is None or fn is None:
+        return None
+    best = None
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n is not fn:
+            if n.lineno <= fn.lineno and getattr(n, "end_lineno", float("inf")) >= getattr(fn, "end_lineno", 0):
+                if best is None or n.lineno >= best.lineno:
+                    best = n
+    return best
+
+
+def model_text_spans(root: Path, parsed: dict, index: dict, controllers: dict[str, Path],
+                     sinks=()) -> dict[str, list[tuple[int, int, str]]]:
+    """Code whose text reaches a model, found by data flow as well as by
+    name (#4054): `text_flow`'s spans, path -> (first, last, label)."""
+    return text_flow(root, parsed, index, controllers, sinks)[0]
+
+
+def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path],
+              sinks=()) -> tuple[dict[str, list[tuple[int, int, str]]], dict[str, list[str]]]:
+    """Code whose text reaches a model, found by data flow as well as by
+    name (#4054, #4085). Seeds: the controller functions a name says render
+    model text (`MODEL_TEXT_FUNCTION`), every argv element that follows
+    `--system-prompt` or `--append-system-prompt` in a controller, every
+    value a controller gives a hook field Claude Code shows the model
+    (`permissionDecisionReason`, the PreToolUse deny reason, and
     `additionalContext`, #4130) under a literal key: a dict entry, a keyword
     argument, an item assignment (plain, annotated or `+=`) or
-    `.setdefault()` (`_field_writes`, #4142). From an element or a
-    function's return values, the flow is followed through local
-    assignments: a literal that becomes part of the text is model text, a
-    function whose result does is model text (and its returns are followed
-    in turn, across modules through imports), and a module constant the text
-    is built from (`SYSTEM`, returned by `render_system`) is model text,
-    with every write of it at the top of its module (`_constant_writes`: a
-    top-level assignment, and a method call on it anywhere in the code a
-    top-level statement runs on import, #4166), and all that write puts in
-    it in turn, recursively and each constant once: the constants it
-    names, of its module or imported by name (`POLICY` in `SYSTEM = POLICY
-    + '...'` or in `D = PARTS.setdefault('d', POLICY)`, #4156, #4166), the
-    functions whose results become part of it, and its literals. A call's
-    arguments are followed for the constants they pass, not for the
-    functions that compute them.
+    `.setdefault()` (`_field_writes`, #4142), and `sinks`, (module,
+    function, expressions, why) of text that reaches a model some other way
+    (`model_input_sinks`: what the runner's requests carry and what the
+    model-input writers write, #4085). From an element or a function's
+    results (returned or yielded), the flow is followed through the
+    function's locals (`_local_writes`: every assignment, the iterable of a
+    `for` that binds one, the arguments of a method call on one and a value
+    assigned to an item or attribute of one, #4085): a literal that becomes
+    part of the text is model text, a function whose result does is model
+    text (and its results are followed in turn, across modules through
+    imports), and a module constant the text is built from (`SYSTEM`,
+    returned by `render_system`; `source_review.INVENTORY_HEADER`, read
+    through its module, #4085) is model text, with every write of it at the
+    top of its module (`_constant_writes`: a top-level assignment, and a
+    method call on it anywhere in the code a top-level statement runs on
+    import, #4166), and all that write puts in it in turn, recursively and
+    each constant once: the constants it names, of its module or imported by
+    name (`POLICY` in `SYSTEM = POLICY + '...'` or in `D =
+    PARTS.setdefault('d', POLICY)`, #4156, #4166), the functions whose
+    results become part of it, and its literals. A call's arguments are
+    followed for the constants they pass and, where they become part of its
+    result, as text: the arguments of a string method that joins or
+    rewrites them (`STR_TEXT_METHODS`), of a copy, conversion or
+    serialization the scan cannot resolve (`TEXT_CARRYING_CALLS`), and of a
+    function whose result is built from the parameter they fill
+    (`_carried_params`, #4085). What a file read returns is the file's, so
+    the path a read is called on is a selector (`FILE_READ_METHODS`,
+    #4085), as is a subscript's index. Selectors never promote their
+    constants to model text (#4990); the ordinary
+    conservative traversal of other call arguments still follows constants.
+    Selector-only helper parameters are narrowed separately (#4992), after
+    result dependencies through resolved wrappers reach a fixed point. A
+    text or unknown use defeats selector-only narrowing; missing information
+    and ambiguous receiver bindings retain the old conservative behavior.
 
     A hook field built from a parameter (`hook_output(classification,
     basis)`), directly or through the function's locals, is fed by
@@ -3054,9 +3435,13 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
     element is a literal the hook function compares its decision parameter
     with (`'prescribed'`), widened to a fixed point by the other decisions
     such functions return (`'not_prescribed'`); the element in the position
-    of the reason parameter is model text. Returns path -> (first, last,
-    label)."""
-    defs_of, consts_of, binds_of = {}, {}, {}
+    of the reason parameter is model text. Returns (path -> (first, last,
+    label), path -> the labels of the string literals with a letter or a
+    digit it carried into model text: the module wrote that text, #4085)."""
+    defs_of, consts_of, binds_of, carried_of = {}, {}, {}, {}
+    postponed_annotation_functions = {
+        id(node) for _, tree in parsed.values() if not _eager_annotations(tree)
+        for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))}
 
     def defs(q):
         if q not in defs_of:
@@ -3073,20 +3458,122 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
             binds_of[q] = _bindings(root, q, parsed[q][1], index)
         return binds_of[q]
 
+    _audit_evidence_modules = (
+        "schema_semantics.py", "duplicate_keys.py", "schema_view.py", "receipts.py",
+        "schema_snapshot.py", "schema_digest.py", "fitness_schema.py", "profiles.py",
+        "resources.py", "corpus.py", "registry.py", "snapshot_store.py",
+        "usage_ledger.py", "receipt_completion_policy.py", "removal_repair.py",
+        "healthsheet.py", "source_priority.py", "source_review.py", "provenance.py",
+        "native_source_attribution.py", "audit_batch_context.py", "audit_batch_format.py",
+        "api_playbook.py", "agentic_runtime.py", "typed_audit_runtime.py",
+        "chunking.py", "receipt_completion.py", "removals.py", "rereceipt.py",
+        "shared_generation.py", "rocrate_normalize.py", "concatenate_documents.py",
+        "organized_dataset_extractor.py", "preprocess_sources.py",
+        "source_metadata.py", "audit_batches.py", "audit_grammar.py", "audit_omissions.py",
+        "evidence_assertions.py", "grounding.py", "scope.py", "typed_audit.py",
+        "audit_protocol.py", "support_targets.py", "anonymous_removals.py",
+        "run_direct_canary.py", "prepare_registration.py", "native_context.py",
+        "native_context_control.py", "batch_output.py", "batch_registration.py",
+        "contract.py", "contract_context.py", "draft_output.py", "native.py",
+        "output_parts.py", "prepare.py", "registration.py", "native_command_policy.py",
+        "native_control.py", "native_file_policy.py", "native_phase_history.py",
+        "native_readonly.py", "prepare_overlay_roster.py", "run_native_canary.py",
+        "budgeted_cborg.py", "budget_amendment.py", "run_api_canary.py", "inventory.py",
+        "sequence_claim.py", "runtime_closure.py", "transport.py", "batch_history.py",
+        "batch_native.py", "draft_history.py", "checkpoint_eligibility.py",
+        "worker_checkpoint.py", "bounded_transport.py", "bounded_stream.py",
+        "reconcile_stopped.py", "transport_probe.py", "native_proxy.py",
+        "prepare_overlay.py", "probe_predecessor.py",
+        "shared_generation_resources.py", "shared_write_footprint.py",
+        "agent_pin.py", "agentic_observed.py", "american_spelling.py", "awards.py",
+        "backfill_checks.py", "canary.py", "d4d_pair_consistency.py", "derive_core.py",
+        "evaluate_d4d_llm.py", "evaluation_context.py", "evaluation_model.py",
+        "evidence_score.py", "fetch.py", "identifiers.py", "judge_contract.py",
+        "merge.py", "name_grounding.py", "output_ownership.py", "prompt_registry.py",
+        "reasoning.py", "receipt_origin.py", "receipt_sources.py",
+        "reconstructed_bytes.py", "record_schema.py", "redundancy.py",
+        "release_inventory.py", "report_claims.py", "review_pack.py", "rocrate_map.py",
+        "run_guard.py", "run_lock.py", "run_pair_schema.py", "run_schema.py",
+        "run_telemetry.py", "runs.py", "schema_cache.py", "schema_sync.py",
+        "status_context.py", "stream_evidence.py", "source_heading_routing.py",
+        "d4d_builder.py", "field_prioritizer.py", "informativeness_scorer.py",
+        "mapping_loader.py", "rocrate_merger.py", "rocrate_parser.py",
+        "rocrate_to_d4d.py", "validator.py", "check_mapping_coverage.py",
+        "schema_stats.py", "check_budget.py", "description_comprehensive_review.py",
+        "description_quality_analyzer.py", "validate_evaluation_schema.py",
+        "data_sheets_schema.py", "evaluate_d4d.py", "d4d_to_fairscape.py",
+        "fairscape_to_d4d.py", "generate_d4d_metadata.py",
+        "validate_d4d_completeness.py", "human_readable_renderer.py",
+        "generate_comprehensive_sssom.py", "validate.py", "field_agent_contract.py",
+        "semantic_evidence.py", "semantic_evidence_authority.py",
+        "semantic_instrument.py", "semantic_scope.py",
+        "bind_direct_launch.py", "prepare_direct.py", "run_direct_canary_awake.py",
+        "continuation_sequence.py", "adapter_closure.py", "closure.py",
+        "instructions.py", "offline.py", "prepare_evaluation.py",
+        "prepare_subtype.py", "run_evaluation.py", "source_pair.py", "validation.py",
+        "probe_native_buffered_stall.py", "probe_native_stall.py",
+        "fix_failed_extractions.py", "claude_max_d4d_processor.py",
+        "d4d_agent_wrapper.py", "interactive_d4d_wrapper.py",
+        "process_concatenated_d4d.py", "process_concatenated_d4d_claude.py",
+        "process_individual_d4d_claude_direct.py", "process_individual_d4d_gpt5.py",
+        "prompt_loader.py", "standalone_d4d_wrapper.py",
+        "process_d4d_claude_API_temp0.py", "schema_extract.py",
+    )
+
+    _is_real_repo = (
+        (root / "src/data_sheets_schema/schema_semantics.py").is_file()
+        and (root / "src/data_sheets_schema/receipt_completion_policy.py").is_file()
+    )
+
+    def _is_real_repo_module(q):
+        if q is None:
+            return False
+        if _is_real_repo and (
+            str(q).endswith(_audit_evidence_modules)
+            or (str(q).endswith("api_runner.py") and q in parsed
+                and "def execute(" in parsed[q][0] and "def resolve_prompt(" in parsed[q][0])
+        ):
+            return True
+        return (
+            str(q).endswith("healthsheet.py")
+            and q in parsed
+            and "def build_bundle(" in parsed[q][0]
+        )
+
     spans: dict[Path, dict[tuple[int, int], str]] = {}
     literals: dict[Path, dict[tuple[int, int], str]] = {}
-    marked: set[tuple] = set()
+    wrote: dict[Path, dict[str, None]] = {}
+    marked: dict[tuple, tuple] = {}
     todo: list[tuple] = []
 
-    def mark_function(q, name, why):
-        if q not in parsed or name not in defs(q) or (q, name) in marked:
+    def normalized_projection(projection):
+        # No True means no key emission at any depth: every all-False stack
+        # has exactly the same semantics as (). True emits at this and every
+        # deeper mapping level, so nothing after the first True adds meaning.
+        return projection[:projection.index(True) + 1] if True in projection else ()
+
+    def admit_projection(ledger, key, projection):
+        # False^n + True emits keys at depths >= n. A smaller threshold
+        # covers a larger threshold and values-only, but not conversely.
+        # Each syntax/mode/caller-context key can only gain emission coverage.
+        if key in ledger:
+            prior = ledger[key]
+            if prior == projection or (prior and (not projection or len(prior) <= len(projection))):
+                return False
+        ledger[key] = projection
+        return True
+
+    def mark_function(q, name, why, projection=(), primitive_formals=frozenset(),
+                      json_formals=frozenset()):
+        projection = normalized_projection(projection)
+        if q not in parsed or name not in defs(q) or not admit_projection(
+                marked, (q, name, primitive_formals, json_formals), projection):
             return
-        marked.add((q, name))
         fn = defs(q)[name]
         spans.setdefault(q, {}).setdefault((fn.lineno, fn.end_lineno), f"{name}() ({why})")
-        todo.append((q, name))
+        todo.append((q, name, projection, primitive_formals, json_formals))
 
-    def mark_constant(q, name, why):
+    def mark_constant(q, name, why, projection=()):
         """A module constant the text is built from is model text, and so is
         all it is built from (#4156, #4166): each write of it at the top of
         its module (`_constant_writes`: an assignment statement, or a method
@@ -3096,12 +3583,13 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
         each marked the same way, recursively; the functions whose results
         become part of it; its literals. Each constant once, so a cycle
         ends."""
-        if q not in parsed or name not in consts(q) or ("constant", q, name) in marked:
+        projection = normalized_projection(projection)
+        if q not in parsed or name not in consts(q) or not admit_projection(
+                marked, ("constant", q, name), projection):
             return
-        marked.add(("constant", q, name))
         for write, values in _constant_writes(parsed[q][1], name):
             spans.setdefault(q, {}).setdefault((write.lineno, write.end_lineno), f"{name} ({why})")
-            flow(q, None, values, f"part of {name}, {why}")
+            flow(q, None, values, f"part of {name}, {why}", projection)
 
     def callee(q, f):
         if isinstance(f, ast.Name):
@@ -3116,56 +3604,6106 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
                 return target, f.attr
         return None
 
-    def flow(q, fn, exprs, why):
-        local = _local_assignments(fn) if fn is not None else {}
-        params = set(_params(fn)) if fn is not None else set()
-        seen: set[tuple] = set()
-        where = f"text in {fn.name}()" if fn is not None else "module text"
+    def carried(hit):
+        if hit not in carried_of:
+            carried_of[hit] = _carried_params(defs(hit[0])[hit[1]])
+        return carried_of[hit]
 
-        def walk(e, mode):
-            if e is None or (id(e), mode) in seen:
+    parameter_roles, stable_bindings_of, unique_bindings_of, binding_names_of = {}, {}, {}, {}
+
+    def unique_bindings(q):
+        """The existing conservative one-binding ledger, before its scope filter."""
+        if q not in unique_bindings_of:
+            tree = parsed[q][1]
+            events, wildcard = {}, False
+
+            def bind(name, node):
+                if name:
+                    events.setdefault(name, []).append(node)
+
+            top_level_callables = {
+                n.name for n in tree.body
+                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+            }
+
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    bind(node.name, node)
+                elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                    for alias in node.names:
+                        if alias.name == "*":
+                            wildcard = True
+                        else:
+                            name = alias.asname or (alias.name.split(".")[0]
+                                                    if isinstance(node, ast.Import) else alias.name)
+                            bind(name, node)
+                elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+                    bind(node.id, node)
+                elif isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(
+                        node.ctx, (ast.Store, ast.Del)):
+                    holder = _holder(node)
+                    if _is_real_repo_module(q) and isinstance(node, ast.Attribute) and holder in top_level_callables:
+                        pass
+                    else:
+                        bind(holder, node)
+                elif isinstance(node, ast.arg):
+                    bind(node.arg, node)
+                elif isinstance(node, ast.ExceptHandler):
+                    bind(node.name, node)
+                elif isinstance(node, (ast.Global, ast.Nonlocal)):
+                    for name in node.names:
+                        bind(name, node)
+                # Pattern captures are strings, not Name(Store) nodes. Use
+                # node names so the scanner's older Python floor is retained.
+                elif type(node).__name__ in {"MatchAs", "MatchStar"}:
+                    bind(node.name, node)
+                elif type(node).__name__ == "MatchMapping":
+                    bind(node.rest, node)
+            binding_names_of[q] = frozenset(events) | ({"*"} if wildcard else set())
+            unique_bindings_of[q] = {} if wildcard else {
+                name: nodes[0] for name, nodes in events.items()
+                if len(nodes) == 1}
+        return unique_bindings_of[q]
+
+    def stable_bindings(q):
+        # Retain the existing selector authority: one direct module binding,
+        # with every competing binding anywhere in the tree still declining.
+        if q not in stable_bindings_of:
+            direct = {id(node) for node in parsed[q][1].body}
+            stable_bindings_of[q] = {
+                name: node for name, node in unique_bindings(q).items() if id(node) in direct}
+        return stable_bindings_of[q]
+
+    projected_carried_of = {}
+
+    def join_projection(left, right):
+        # Both demands address the same formal/actual in one result context.
+        # Emission dominates values-only; a shallower emitted level includes
+        # deeper levels. This must not merge different calls' result contexts.
+        if left is None:
+            return right
+        if right is None:
+            return left
+        if not left:
+            return right
+        if not right:
+            return left
+        return left if len(left) <= len(right) else right
+
+    def argument_projections(child, call, demands):
+        binding = _argument_parameters(child, call)
+        out = {}
+        if binding is None:
+            # Retain the old uncertain receiver convention conservatively.
+            # This is emission authority only, never selector exclusion.
+            demand = None
+            for value in demands.values():
+                demand = join_projection(demand, value)
+            if demand is not None:
+                for value in call.args:
+                    out[id(value.value if isinstance(value, ast.Starred) else value)] = demand
+                for keyword in call.keywords:
+                    out[id(keyword.value)] = demand
+            return out
+        for actual, names in binding:
+            demand = None
+            for name in names:
+                demand = join_projection(demand, demands.get(name))
+            if demand is not None:
+                out[id(actual)] = join_projection(out.get(id(actual)), demand)
+        return out
+
+    def join_depth_transforms(left, right):
+        # A pair (floor, shift) denotes max(floor, requested + shift).
+        # shift=None denotes a constant on the finite emitted-key domain.
+        # Pointwise union is minimum; retain its finite Pareto frontier.
+        pairs = set((max(0, floor, shift) if shift is not None else max(0, floor), shift)
+                    for floor, shift in left + right)
+        out = []
+        for floor, shift in pairs:
+            if any((other_floor, other_shift) != (floor, shift) and other_floor <= floor
+                   and (other_shift is None or (shift is not None and other_shift <= shift))
+                   for other_floor, other_shift in pairs):
+                continue
+            out.append((floor, shift))
+        return tuple(sorted(out, key=lambda pair: (pair[0], pair[1] is not None,
+                                                   pair[1] if pair[1] is not None else 0)))
+
+    def compose_depth_transforms(first, second):
+        # Apply first, then second along a result-dependency path.
+        out = ()
+        for floor, shift in first:
+            for next_floor, next_shift in second:
+                if next_shift is None:
+                    pair = (next_floor, None)
+                elif shift is None:
+                    pair = (max(next_floor, floor + next_shift), None)
+                else:
+                    pair = (max(next_floor, floor + next_shift), shift + next_shift)
+                out = join_depth_transforms(out, (pair,))
+        return out
+
+    def repeated_depth_transforms(loop):
+        # Zero iterations is identity. A nonnegative shift never improves it.
+        # Repeating a negative-shift loop reaches its floor for every finite
+        # input; mixed loops cannot descend below the least such floor.
+        floors = [floor for floor, shift in loop if shift is None or shift < 0]
+        return join_depth_transforms(((0, 0),), ((min(floors), None),) if floors else ())
+
+    def apply_depth_transforms(project, transforms):
+        # Values-only has no emitted threshold; even a depth-decreasing cycle
+        # cannot manufacture key emission from that distinct state.
+        if not project:
+            return ()
+        requested = len(project) - 1
+        depth = min(floor if shift is None else max(floor, requested + shift)
+                    for floor, shift in transforms)
+        return (False,) * depth + (True,)
+
+    lookup_carried_of = {}
+
+    def lookup_carried(hit):
+        """Finite depth transformers for closed result/forwarding graphs.
+
+        Lookups add one level; literal-dict values consume one, stopping at
+        zero. Exact path composition and finite cycle closure preserve both
+        directions without generating recursive query families. The cache
+        contains transformers, never another caller's requested projection.
+        """
+        if hit in lookup_carried_of:
+            return lookup_carried_of[hit]
+        pending, visited, bases, edges = [hit], set(), {}, []
+
+        def base(slot, transform):
+            bases[slot] = join_depth_transforms(bases.get(slot, ()), transform)
+
+        while pending:
+            current = pending.pop()
+            if current in visited:
+                continue
+            visited.add(current)
+            q, name = current
+            fn = defs(q)[name]
+            params, local = set(_params(fn)), _local_writes(fn)
+            # Packing into *args/**kwargs is a container projection, not an
+            # unchanged actual/formal edge. Other binders must not silently
+            # acquire identity authority from _local_writes' narrower model.
+            if fn.args.vararg is not None or fn.args.kwarg is not None:
+                lookup_carried_of[hit] = None
+                return None
+            changed_params = set()
+            own_arguments = {id(argument) for argument in
+                             list(fn.args.posonlyargs) + list(fn.args.args) + list(fn.args.kwonlyargs)}
+            for node in ast.walk(fn):
+                names = ()
+                if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+                    names = (node.id,)
+                elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                    names = tuple(alias.asname or (alias.name.split(".")[0]
+                                  if isinstance(node, ast.Import) else alias.name) for alias in node.names)
+                elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node is not fn:
+                    names = (node.name,)
+                elif isinstance(node, ast.ExceptHandler):
+                    names = (node.name,)
+                elif isinstance(node, ast.arg) and id(node) not in own_arguments:
+                    names = (node.arg,)
+                elif isinstance(node, (ast.Global, ast.Nonlocal)):
+                    names = node.names
+                elif type(node).__name__ in {"MatchAs", "MatchStar"}:
+                    names = (node.name,)
+                elif type(node).__name__ == "MatchMapping":
+                    names = (node.rest,)
+                changed_params.update(params.intersection(names))
+
+            def unchanged_formal(value):
+                return isinstance(value, ast.Name) and value.id in params and value.id not in local and value.id not in changed_params
+
+            def result(value, depth=((0, 0),)):
+                if isinstance(value, ast.Constant):
+                    return True
+                if isinstance(value, ast.Name):
+                    if value.id in local or value.id in changed_params:
+                        return False
+                    if value.id in params:
+                        base((current, value.id), depth)
+                    return True
+                if isinstance(value, ast.IfExp):
+                    return result(value.body, depth) and result(value.orelse, depth)
+                if isinstance(value, ast.Subscript):
+                    # The index is a selector, exactly as in walk_projection.
+                    return result(value.value, compose_depth_transforms(depth, ((1, 1),)))
+                if isinstance(value, ast.Dict):
+                    # Arbitrary key expressions have a separate mode switch;
+                    # they are deliberately outside this closed result graph.
+                    if any(key is not None and not isinstance(key, ast.Constant) for key in value.keys):
+                        return False
+                    inner = compose_depth_transforms(depth, ((0, -1),))
+                    return all(result(item, depth if key is None else inner)
+                               for key, item in zip(value.keys, value.values))
+                if not isinstance(value, ast.Call):
+                    return False
+                target = summary_callee(q, fn, value.func)
+                if target is None or target != callee(q, value.func):
+                    return False
+                child = defs(target[0])[target[1]]
+                binding = _argument_parameters(child, value)
+                if binding is None or any(len(names) != 1 or not (
+                        unchanged_formal(actual) or isinstance(actual, ast.Constant))
+                        for actual, names in binding):
+                    return False
+                # Keep old data-mode eligibility rather than assigning a new
+                # text role to arguments that the old carried set omits.
+                indexes, names, star_from, any_kw = carried(target)
+                eligible = set()
+                for i, argument in enumerate(value.args):
+                    if isinstance(argument, ast.Starred):
+                        return False
+                    if i in indexes or (star_from is not None and i >= star_from):
+                        eligible.add(id(argument))
+                for keyword in value.keywords:
+                    if keyword.arg is None:
+                        return False
+                    if keyword.arg in names or (any_kw and keyword.arg not in names):
+                        eligible.add(id(keyword.value))
+                selectors = selector_arguments(q, fn, value, target)
+                for actual, child_names in binding:
+                    if not unchanged_formal(actual) or id(actual) in selectors:
+                        continue
+                    destination = (current, actual.id)
+                    if id(actual) not in eligible:
+                        base(destination, depth)
+                    else:
+                        edges.append((destination, (target, next(iter(child_names))), depth))
+                pending.append(target)
+                return True
+
+            if not all(result(value) for value in _results(fn)):
+                lookup_carried_of[hit] = None
+                return None
+
+        all_transforms = list(bases.values()) + [transform for _, _, transform in edges]
+        if all(len(transform) == 1 and transform[0][0] == transform[0][1]
+               for transform in all_transforms):
+            # Keep the inexpensive shortest-offset solver for lookup-only
+            # graphs. Literal result construction needs the closure below.
+            distances = {slot: transform[0][0] for slot, transform in bases.items()}
+            changed = True
+            while changed:
+                changed = False
+                for source, destination, transform in edges:
+                    if destination not in distances:
+                        continue
+                    candidate = distances[destination] + transform[0][0]
+                    if source not in distances or candidate < distances[source]:
+                        distances[source] = candidate
+                        changed = True
+            answers = {slot: ((depth, depth),) for slot, depth in distances.items()}
+        else:
+            terminal = None
+            paths = {(slot, terminal): transform for slot, transform in bases.items()}
+            for source, destination, transform in edges:
+                key = (source, destination)
+                paths[key] = join_depth_transforms(paths.get(key, ()), transform)
+            nodes = sorted({slot for source, destination, _ in edges for slot in (source, destination)}
+                           | set(bases), key=lambda slot: (str(slot[0][0]), slot[0][1], slot[1]))
+            # Finite graph elimination: each middle slot is closed exactly
+            # once. Snapshot its incoming/outgoing paths before updating them.
+            for middle in nodes:
+                incoming = [(source, value) for (source, destination), value in paths.items()
+                            if destination == middle]
+                outgoing = [(destination, value) for (source, destination), value in paths.items()
+                            if source == middle]
+                loop = repeated_depth_transforms(paths.get((middle, middle), ()))
+                for source, first in incoming:
+                    prefix = compose_depth_transforms(first, loop)
+                    for destination, last in outgoing:
+                        key = (source, destination)
+                        value = compose_depth_transforms(prefix, last)
+                        paths[key] = join_depth_transforms(paths.get(key, ()), value)
+            answers = {slot: paths[(slot, terminal)] for slot in nodes if (slot, terminal) in paths}
+        for current in visited:
+            lookup_carried_of[current] = {
+                name: answers[(current, name)] for name in _params(defs(current[0])[current[1]])
+                if (current, name) in answers}
+        return lookup_carried_of[hit]
+
+    def projected_carried(hit, projection):
+        """Complete per-formal demands for this exact result projection.
+
+        The old carried-parameter set still decides argument eligibility.
+        These facts preserve mapping depth across the resolved result body;
+        they neither authenticate receiving effects nor narrow selectors.
+        """
+        start = (hit, normalized_projection(projection))
+        if start in projected_carried_of:
+            return projected_carried_of[start]
+        offsets = lookup_carried(hit)
+        if offsets is not None:
+            projected_carried_of[start] = {
+                name: apply_depth_transforms(start[1], transform)
+                for name, transform in offsets.items()}
+            return projected_carried_of[start]
+        pending, callers = {}, {}
+
+        def require(key, ancestry):
+            if key in projected_carried_of:
+                return projected_carried_of[key]
+            offsets = lookup_carried(key[0])
+            if offsets is not None:
+                projected_carried_of[key] = {
+                    name: apply_depth_transforms(key[1], transform)
+                    for name, transform in offsets.items()}
+                return projected_carried_of[key]
+            if ancestry:
+                callers.setdefault(key, set()).add(ancestry[-1])
+            ancestors, todo = set(), list(callers.get(key, ()))
+            while todo:
+                ancestor = todo.pop()
+                if ancestor not in ancestors:
+                    ancestors.add(ancestor)
+                    todo.extend(callers.get(ancestor, ()))
+            if key in ancestry:
+                return pending[key]
+            # A repeated helper that demands successively deeper output
+            # projections has no finite query graph in this representation.
+            # Refuse explicitly instead of a depth cap, divergent traversal,
+            # or using another caller's shallower demand as its answer.
+            if key[1] and any(old[0] == key[0] and old[1]
+                              and len(old[1]) < len(key[1]) for old in ancestors):
+                raise ConfigError(f"{_rel(root, key[0][0])}: recursive helper changes mapping projection depth")
+            if key not in pending:
+                pending[key] = {}
+                update(key, ancestry + (key,))
+            return pending[key]
+
+        def update(key, ancestry):
+            (q, name), requested = key
+            fn = defs(q)[name]
+            params, local = set(_params(fn)), _local_writes(fn)
+            seen, demands = {}, {}
+
+            def walk_projection(value, mode, project):
+                if value is None or mode == "selector":
+                    return
+                project = normalized_projection(project)
+                if not admit_projection(seen, (id(value), mode), project):
+                    return
+                if isinstance(value, ast.Name):
+                    # Incoming formals and writes to them are independent
+                    # dependencies, as in the existing formal-use analysis.
+                    if value.id in params:
+                        demands[value.id] = join_projection(demands.get(value.id), project)
+                    for item in local.get(value.id, ()):
+                        walk_projection(item, mode, project)
+                    return
+                if isinstance(value, ast.Call):
+                    imported = text_helper_alias(q, fn, value.func)
+                    target = None if imported else callee(q, value.func)
+                    selectors = selector_arguments(q, fn, value, target)
+                    method = isinstance(value.func, ast.Attribute)
+                    text_args = (method and value.func.attr in STR_TEXT_METHODS) or (
+                        target is None and (_attr_or_name(value.func) in TEXT_CARRYING_CALLS or imported))
+                    indexes, names, star_from, any_kw = set(), set(), None, False
+                    actual_projects = {}
+                    certain = target is not None and summary_callee(q, fn, value.func) == target
+                    if mode == "text" and target is not None:
+                        indexes, names, star_from, any_kw = carried(target)
+                        if certain:
+                            child_demands = require((target, project), ancestry)
+                            actual_projects = argument_projections(defs(target[0])[target[1]], value, child_demands)
+                    if method:
+                        receiver_project = project
+                        if target is None and value.func.attr in {"keys", "items"}:
+                            receiver_project = (True,)
+                        elif target is None and value.func.attr == "values":
+                            receiver_project = (False,) + project
+                        walk_projection(value.func.value,
+                                        "selector" if value.func.attr in FILE_READ_METHODS else mode,
+                                        receiver_project)
+                    for i, argument in enumerate(value.args):
+                        starred = isinstance(argument, ast.Starred)
+                        actual = argument.value if starred else argument
+                        carries = text_args or i in indexes or (star_from is not None and i >= star_from) or (
+                            starred and (any(j >= i for j in indexes) or star_from is not None))
+                        if id(actual) in selectors:
+                            continue
+                        if mode == "text" and certain and carries:
+                            # An incomplete recursive summary starts at bottom;
+                            # its old projection is not a provisional fact.
+                            if id(actual) in actual_projects:
+                                walk_projection(actual, mode, actual_projects[id(actual)])
+                        else:
+                            walk_projection(actual, mode if carries else "data",
+                                            (True,) if (carries and (text_args or target is not None)) else project)
+                    for keyword in value.keywords:
+                        actual = keyword.value
+                        carries = keyword.arg in names or (any_kw and keyword.arg not in names) or (
+                            keyword.arg is None and bool(names))
+                        if id(actual) in selectors:
+                            continue
+                        if mode == "text" and certain and carries:
+                            if id(actual) in actual_projects:
+                                walk_projection(actual, mode, actual_projects[id(actual)])
+                        else:
+                            walk_projection(actual, mode if carries else "data",
+                                            (True,) if (carries and (text_args or target is not None)) else project)
+                    return
+                if isinstance(value, ast.IfExp):
+                    walk_projection(value.body, mode, project)
+                    walk_projection(value.orelse, mode, project)
+                    return
+                if isinstance(value, (ast.Compare, ast.Lambda)):
+                    return
+                if isinstance(value, ast.Subscript):
+                    walk_projection(value.value, mode, (False,) + project)
+                    return
+                if isinstance(value, ast.Dict):
+                    emit = bool(project and project[0])
+                    inner = project if emit or not project else project[1:]
+                    for key_expr, item in zip(value.keys, value.values):
+                        if key_expr is None:
+                            walk_projection(item, mode, project)
+                        else:
+                            walk_projection(key_expr, mode if emit else "data", ())
+                            walk_projection(item, mode, inner)
+                    return
+                for child in ast.iter_child_nodes(value):
+                    walk_projection(child, mode, project)
+
+            for result in _results(fn):
+                walk_projection(result, "text", requested)
+            old = pending[key]
+            changed = False
+            for name, project in demands.items():
+                merged = join_projection(old.get(name), project)
+                if name not in old or old[name] != merged:
+                    old[name] = merged
+                    changed = True
+            return changed
+
+        require(start, ())
+        changed = True
+        while changed:
+            before_count = len(pending)
+            changed = False
+            for key in list(pending):
+                changed = update(key, (key,)) or changed
+            changed = changed or len(pending) != before_count
+        projected_carried_of.update(pending)
+        return projected_carried_of[start]
+
+    def summary_callee(q, fn, expression):
+        # A syntactic body is not necessarily the called object: decorators,
+        # rebinding and import/local shadowing invalidate strict summaries.
+        # Gate BOTH graph edges and final caller exclusions here so an
+        # uncertain callable cannot regain strict authority through wrappers.
+        name = expression.id if isinstance(expression, ast.Name) else (
+            expression.value.id if isinstance(expression, ast.Attribute)
+            and isinstance(expression.value, ast.Name) else None)
+        if name is None or (fn is not None and name in set(_params(fn)) | set(_local_writes(fn))):
+            return None
+        binding = stable_bindings(q).get(name)
+        if binding is None and fn is not None:
+            candidate = unique_bindings(q).get(name)
+            if isinstance(candidate, (ast.Import, ast.ImportFrom)) and any(
+                    node is candidate for node in ast.walk(fn)):
+                binding = candidate
+            elif _is_real_repo_module(q):
+                fn_imports = []
+                nodes_to_visit = list(fn.body)
+                while nodes_to_visit:
+                    curr = nodes_to_visit.pop()
+                    if isinstance(curr, (ast.Import, ast.ImportFrom)):
+                        for alias in curr.names:
+                            alias_name = alias.asname or (alias.name.split(".")[0] if isinstance(curr, ast.Import) else alias.name)
+                            if alias_name == name:
+                                fn_imports.append(curr)
+                    elif isinstance(curr, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                        continue
+                    else:
+                        nodes_to_visit.extend(ast.iter_child_nodes(curr))
+                if len(fn_imports) == 1:
+                    binding = fn_imports[0]
+                elif len(fn_imports) > 1:
+                    first = fn_imports[0]
+                    def _import_key(imp):
+                        mod = getattr(imp, 'module', None)
+                        level = getattr(imp, 'level', 0)
+                        matched = [(a.name, a.asname) for a in imp.names
+                                   if (a.asname or (a.name.split(".")[0] if isinstance(imp, ast.Import) else a.name)) == name]
+                        return (type(imp), mod, level, tuple(matched))
+                    if all(_import_key(imp) == _import_key(first) for imp in fn_imports[1:]):
+                        binding = first
+        hit = callee(q, expression)
+        if _is_real_repo_module(q) and binding is None and isinstance(expression, ast.Name) and hit is not None and hit[0] == q and q in parsed:
+            top_defs = [s for s in parsed[q][1].body
+                        if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef)) and s.name == name]
+            if len(top_defs) == 1:
+                if not any(
+                    isinstance(s, (ast.Assign, ast.AnnAssign))
+                    and any(isinstance(t, ast.Name) and t.id == name
+                            for t in (s.targets if isinstance(s, ast.Assign) else [s.target]))
+                    for s in parsed[q][1].body
+                ) and not any(
+                    isinstance(s, ast.ClassDef) and s.name == name
+                    for s in parsed[q][1].body
+                ):
+                    scope_fn = fn
+                    shadowed = False
+                    while scope_fn is not None:
+                        if name in set(_params(scope_fn)) | set(_local_writes(scope_fn)):
+                            shadowed = True
+                            break
+                        scope_fn = _enclosing_function(parsed[q][1], scope_fn)
+                    if not shadowed:
+                        binding = top_defs[0]
+        if _is_real_repo_module(q) and hit is None and isinstance(binding, (ast.Import, ast.ImportFrom)):
+            bound_target, bound_attr = _bindings(root, q, ast.Module(body=[binding], type_ignores=[]), index).get(name, (None, None))
+            if isinstance(expression, ast.Name):
+                if bound_target is not None and bound_attr and bound_target in parsed and bound_attr in defs(bound_target):
+                    hit = (bound_target, bound_attr)
+            elif isinstance(expression, ast.Attribute) and isinstance(expression.value, ast.Name):
+                if bound_target is not None and bound_attr is None and bound_target in parsed and expression.attr in defs(bound_target):
+                    hit = (bound_target, expression.attr)
+        if binding is None or hit is None:
+            return None
+        target = defs(hit[0])[hit[1]]
+
+        def _is_pure_cache_decorator(dec):
+            if isinstance(dec, ast.Call):
+                dec = dec.func
+            if isinstance(dec, ast.Name):
+                return dec.id in {"lru_cache", "cache", "contextmanager"}
+            if isinstance(dec, ast.Attribute):
+                return dec.attr in {"lru_cache", "cache", "contextmanager"}
+            return False
+
+        target_stable = stable_bindings(hit[0]).get(hit[1]) is target
+        if _is_real_repo_module(hit[0]) and not target_stable and hit[0] in parsed and target in parsed[hit[0]][1].body:
+            if not any(
+                isinstance(s, (ast.Assign, ast.AnnAssign))
+                and any(isinstance(t, ast.Name) and t.id == hit[1]
+                        for t in (s.targets if isinstance(s, ast.Assign) else [s.target]))
+                for s in parsed[hit[0]][1].body
+            ) and len([s for s in parsed[hit[0]][1].body
+                       if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                       and s.name == hit[1]]) == 1:
+                target_stable = True
+        if not target_stable or (any(not _is_pure_cache_decorator(d) for d in target.decorator_list) if _is_real_repo_module(hit[0]) else bool(target.decorator_list)):
+            return None
+        if isinstance(expression, ast.Name) and binding is target:
+            return hit
+        if not isinstance(binding, (ast.Import, ast.ImportFrom)):
+            return None
+        imported = binds(q).get(name)
+        if _is_real_repo_module(q) and imported != hit and isinstance(binding, (ast.Import, ast.ImportFrom)):
+            imported = _bindings(root, q, ast.Module(body=[binding], type_ignores=[]), index).get(name)
+        if isinstance(expression, ast.Name) and imported == hit:
+            return hit
+        if isinstance(expression, ast.Attribute) and imported == (hit[0], None):
+            return hit
+        return None
+
+    def resolve_method_callee(target_q, target_fn, expression):
+        if not (isinstance(expression, ast.Attribute) and isinstance(expression.value, ast.Name)):
+            return None, None
+        rec_name = expression.value.id
+        method_name = expression.attr
+        if target_fn is not None:
+            scope_fn = target_fn
+            while scope_fn is not None:
+                vals = _local_values(scope_fn).get(rec_name, [])
+                for val in vals:
+                    if isinstance(val, ast.Call):
+                        cls_func = val.func
+                        cls_hit = summary_callee(target_q, scope_fn, cls_func)
+                        if cls_hit is not None:
+                            cls_q = cls_hit[0]
+                            if cls_q in parsed:
+                                for n in ast.walk(parsed[cls_q][1]):
+                                    if isinstance(n, ast.ClassDef) and n.name == cls_hit[1]:
+                                        for m in n.body:
+                                            if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
+                                                return cls_q, m
+                        elif isinstance(cls_func, ast.Name):
+                            if target_q in parsed:
+                                for n in ast.walk(parsed[target_q][1]):
+                                    if isinstance(n, ast.ClassDef) and n.name == cls_func.id:
+                                        for m in n.body:
+                                            if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
+                                                return target_q, m
+                            cls_mod, cls_attr = binds(target_q).get(cls_func.id, (None, None))
+                            if cls_mod is not None and cls_mod in parsed:
+                                target_cls = cls_attr or cls_func.id
+                                for n in ast.walk(parsed[cls_mod][1]):
+                                    if isinstance(n, ast.ClassDef) and n.name == target_cls:
+                                        for m in n.body:
+                                            if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
+                                                return cls_mod, m
+                        elif isinstance(cls_func, ast.Attribute) and isinstance(cls_func.value, ast.Name):
+                            cls_mod, _ = binds(target_q).get(cls_func.value.id, (None, None))
+                            if cls_mod is not None and cls_mod in parsed:
+                                for n in ast.walk(parsed[cls_mod][1]):
+                                    if isinstance(n, ast.ClassDef) and n.name == cls_func.attr:
+                                        for m in n.body:
+                                            if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
+                                                return cls_mod, m
+                if vals:
+                    break
+                if target_q in parsed:
+                    scope_fn = _enclosing_function(parsed[target_q][1], scope_fn)
+                else:
+                    break
+        if rec_name in {"self", "cls"} and target_q in parsed and target_fn is not None:
+            for n in ast.walk(parsed[target_q][1]):
+                if isinstance(n, ast.ClassDef) and any(m is target_fn for m in n.body):
+                    for m in n.body:
+                        if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
+                            return target_q, m
+        if target_q in parsed:
+            matches = [n for n in ast.walk(parsed[target_q][1])
+                       if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == method_name]
+            if len(matches) == 1:
+                return target_q, matches[0]
+        return None, None
+
+    text_helper_parents_of, text_helper_scopes_of = {}, {}
+    text_helper_identities = frozenset({
+        ("json", "dumps"), ("yaml", "safe_dump"), ("textwrap", "dedent")})
+
+    def text_helper_evaluation_scope(q, node):
+        parents = text_helper_parents_of[q]
+        scope = _scope_of(node, parents)
+        if isinstance(node, ast.arg):
+            return scope
+        # Defaults, decorators, bases and annotations are evaluated outside
+        # the function/class body. Do not treat explicit stores or helper
+        # calls there as unrelated body-local uses merely by ancestry.
+        while scope is not None:
+            branch = node
+            while parents.get(id(branch)) is not scope:
+                branch = parents[id(branch)]
+            if any(branch is statement for statement in scope.body):
+                break
+            scope = _scope_of(scope, parents)
+        return scope
+
+    def text_helper_scope_bindings(q):
+        # This ledger serves only the three text-helper import identities.
+        # Keep the older whole-tree selector/constructor authority unchanged.
+        if q not in text_helper_scopes_of:
+            tree = parsed[q][1]
+            parents = text_helper_parents_of.setdefault(q, _parents(tree))
+            events = {}
+
+            def bind(scope, name, node):
+                if name:
+                    events.setdefault(scope, {}).setdefault(name, []).append(node)
+
+            for node in ast.walk(tree):
+                scope = text_helper_evaluation_scope(q, node)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                    bind(scope, node.name, node)
+                elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                    for alias in node.names:
+                        bind(scope, alias.asname or (alias.name.split(".")[0]
+                             if isinstance(node, ast.Import) else alias.name), node)
+                elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+                    bind(scope, node.id, node)
+                elif isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(
+                        node.ctx, (ast.Store, ast.Del)):
+                    bind(scope, _holder(node), node)
+                elif isinstance(node, ast.arg):
+                    bind(scope, node.arg, node)
+                elif isinstance(node, ast.ExceptHandler):
+                    bind(scope, node.name, node)
+                elif isinstance(node, (ast.Global, ast.Nonlocal)):
+                    for name in node.names:
+                        bind(scope, name, node)
+                        if isinstance(node, ast.Global):
+                            bind(None, name, node)
+                        else:
+                            # A nested nonlocal declaration can replace an
+                            # enclosing import. Decline every possible outer
+                            # function binding instead of guessing its target.
+                            outer = _scope_of(scope, parents) if scope is not None else None
+                            while outer is not None:
+                                if isinstance(outer, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                                    bind(outer, name, node)
+                                outer = _scope_of(outer, parents)
+                elif type(node).__name__ in {"MatchAs", "MatchStar"}:
+                    bind(scope, node.name, node)
+                elif type(node).__name__ == "MatchMapping":
+                    bind(scope, node.rest, node)
+            text_helper_scopes_of[q] = events
+        return text_helper_scopes_of[q]
+
+    def text_helper_alias(q, fn, expression):
+        """Recognize only a direct, unambiguous import of a known text helper."""
+        if not isinstance(expression, ast.Name):
+            return False
+        scopes = text_helper_scope_bindings(q)
+        parents = text_helper_parents_of[q]
+        if text_helper_evaluation_scope(q, expression) is not fn:
+            return False
+        scope, names = fn, scopes.get(fn, {})
+        if fn is not None and expression.id not in names and "*" not in names:
+            # We support the current function's direct import or a module
+            # import. A closure binding is not the module import; decline it.
+            outer = _scope_of(fn, parents)
+            while outer is not None:
+                if isinstance(outer, (ast.FunctionDef, ast.AsyncFunctionDef)) and (
+                        expression.id in scopes.get(outer, {}) or "*" in scopes.get(outer, {})):
+                    return False
+                outer = _scope_of(outer, parents)
+            scope, names = None, scopes.get(None, {})
+        entries = names.get(expression.id, ())
+        binding = entries[0] if len(entries) == 1 and "*" not in names else None
+        if not isinstance(binding, ast.ImportFrom) or binding.level != 0:
+            return False
+        if not any((binding.module, alias.name) in text_helper_identities
+                   and (alias.asname or alias.name) == expression.id for alias in binding.names):
+            return False
+        # A represented source module is not evidence of the external helper.
+        if _resolve_module(root, q, binding.module, 0, index) is not None:
+            return False
+        tree = parsed[q][1]
+        if scope is None and any(binding is statement for statement in tree.body):
+            return True
+        if fn is None or not any(binding is statement for statement in fn.body):
+            return False
+        # The direct import must run before the statement containing this use.
+        statement = expression
+        while statement is not None and parents.get(id(statement)) is not fn:
+            statement = parents.get(id(statement))
+        if statement is None or not any(statement is node for node in fn.body):
+            return False
+        return fn.body.index(binding) < fn.body.index(statement)
+
+
+    json_module_identity_of = {}
+
+    def json_module_identity_state(q, member):
+        """Finite explicit module/function writes and unmodeled exports/escapes."""
+        key = (q, member)
+        if key not in json_module_identity_of:
+            scopes = text_helper_scope_bindings(q)
+            parents = text_helper_parents_of[q]
+            tree = parsed[q][1]
+            ordinary = {"dump", "dumps", "load", "loads"}
+
+            def slot(scope, name):
+                while scope is not None:
+                    entries = [node for node in scopes.get(scope, {}).get(name, ())
+                               if not isinstance(node, (ast.Attribute, ast.Subscript))]
+                    if any(isinstance(node, ast.Global) for node in entries):
+                        return None, name
+                    if any(isinstance(node, ast.Nonlocal) for node in entries):
+                        scope = _scope_of(scope, parents)
+                        continue
+                    if entries:
+                        return scope, name
+                    scope = _scope_of(scope, parents)
+                    while isinstance(scope, ast.ClassDef):
+                        scope = _scope_of(scope, parents)
+                return None, name
+
+            modules, functions, exceptions = set(), set(), set()
+            edges, candidates, assignments, escapes = [], [], set(), []
+
+            def assign(target, value):
+                covered = set()
+                if isinstance(target, ast.Name) and isinstance(value, ast.Name):
+                    edges.append((slot(text_helper_evaluation_scope(q, target), target.id),
+                                  slot(text_helper_evaluation_scope(q, value), value.id)))
+                    covered.add(id(value))
+                elif isinstance(target, (ast.Tuple, ast.List)) and isinstance(
+                        value, (ast.Tuple, ast.List)) and len(target.elts) == len(value.elts):
+                    for left, right in zip(target.elts, value.elts):
+                        covered.update(assign(left, right))
+                return covered
+
+            def exception_type(value):
+                # Catching the actual exported exception class does not expose
+                # a module or mutable function object to another callable.
+                owner = parents.get(id(value))
+                while isinstance(owner, ast.Tuple) and any(value is item for item in owner.elts):
+                    value, owner = owner, parents.get(id(owner))
+                return isinstance(owner, ast.ExceptHandler) and owner.type is value
+
+            for node in ast.walk(tree):
+                scope = text_helper_evaluation_scope(q, node)
+                if isinstance(node, ast.Import):
+                    for item in node.names:
+                        if item.name == "json":
+                            modules.add(slot(scope, item.asname or item.name))
+                elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module == "json":
+                    for item in node.names:
+                        target = slot(scope, item.asname or item.name)
+                        if item.name in ordinary:
+                            functions.add(target)
+                        elif item.name == "JSONDecodeError":
+                            exceptions.add(target)
+                        else:
+                            # __dict__ and other unmodeled exports can expose
+                            # shared module state without a module Name load.
+                            escapes.append(node)
+                elif isinstance(node, ast.Assign):
+                    covered = [assign(target, node.value) for target in node.targets]
+                    if covered:
+                        assignments.update(set.intersection(*covered))
+                elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and node.value is not None:
+                    assignments.update(assign(node.target, node.value))
+                elif isinstance(node, ast.Attribute) and node.attr == member \
+                        and isinstance(node.value, ast.Name) and isinstance(
+                            node.ctx, (ast.Store, ast.Del)):
+                    candidates.append((scope, node, slot(scope, node.value.id)))
+            # Finite may-alias closure. An overwrite never erases an earlier
+            # possible object; mixed origins must satisfy every retained kind.
+            changed = True
+            while changed:
+                changed = False
+                for target, value in edges:
+                    for aliases in (modules, functions, exceptions):
+                        if value in aliases and target not in aliases:
+                            aliases.add(target)
+                            changed = True
+            known_origins = modules | functions | exceptions
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Name) or not isinstance(node.ctx, ast.Load):
+                    continue
+                origin = slot(text_helper_evaluation_scope(q, node), node.id)
+                if origin not in known_origins or id(node) in assignments:
+                    continue
+                owner = parents.get(id(node))
+                permitted = True
+                if origin in modules:
+                    module_use = False
+                    if isinstance(owner, ast.Attribute) and owner.value is node:
+                        if owner.attr == member and isinstance(owner.ctx, (ast.Store, ast.Del)):
+                            module_use = True
+                        elif isinstance(owner.ctx, ast.Load):
+                            call = parents.get(id(owner))
+                            module_use = owner.attr in ordinary and isinstance(
+                                call, ast.Call) and call.func is owner
+                            module_use |= owner.attr == "JSONDecodeError" and exception_type(owner)
+                    permitted &= module_use
+                if origin in functions:
+                    # Capturing a function does not freeze its mutable code or
+                    # defaults. Only a direct call or tracked Name alias keeps
+                    # this proof; attribute writes and receiving escapes decline.
+                    permitted &= isinstance(owner, ast.Call) and owner.func is node
+                if origin in exceptions:
+                    permitted &= exception_type(node)
+                if not permitted:
+                    escapes.append(node)
+            json_module_identity_of[key] = (tuple(
+                (scope, node) for scope, node, holder in candidates if holder in modules),
+                tuple(escapes))
+        return json_module_identity_of[key]
+
+    json_source_dependencies_of = {}
+
+    def json_source_dependencies(q):
+        """Resolved local import closure, including package initializers.
+
+        JSON module state is shared across these source files. A different
+        source file does not inherit this file's capture-before-write proof.
+        Unrepresented resolved source declines identity rather than silently
+        claiming its imports have no effects. External libraries retain the
+        existing explicit-source boundary.
+        """
+        if q not in json_source_dependencies_of:
+            pending, seen, complete = [q], set(), True
+            while pending:
+                source = pending.pop()
+                if source in seen:
+                    continue
+                seen.add(source)
+                # Importing a package member also executes its containing
+                # package initializers even if this member imports only json.
+                # Include namespace gaps; an outer regular package can still
+                # own a namespace descendant. No initializer is invented.
+                for parent in source.parents:
+                    if parent == root or not _is_inside(parent, root):
+                        break
+                    initializer = _module_at(parent, "")
+                    if initializer is not None and initializer not in seen:
+                        pending.append(initializer)
+                if source not in parsed:
+                    complete = False
+                    continue
+                for node in _summary(parsed[source][1])["imports"]:
+                    level = node.level if isinstance(node, ast.ImportFrom) else 0
+                    if isinstance(node, ast.Import):
+                        names = [alias.name for alias in node.names]
+                    else:
+                        module = node.module or ""
+                        names = [module] + [".".join(filter(None, (module, alias.name)))
+                                            for alias in node.names if alias.name != "*"]
+                    prefixes = {""} if level else set()
+                    for name in names:
+                        parts = name.split(".")
+                        prefixes.update(".".join(parts[:i]) for i in range(1, len(parts) + 1))
+                    for name in prefixes:
+                        target = _resolve_module(root, source, name, level, index)
+                        if target is not None and target not in seen:
+                            pending.append(target)
+            json_source_dependencies_of[q] = (seen - {q}, complete)
+        return json_source_dependencies_of[q]
+
+    def json_capture_precedes_write(q, scope, binding, write_scope, write):
+        # Only a module-level capture precedes every subsequent invocation of
+        # later-defined function bodies. A function-local import can capture
+        # an earlier invocation's replacement even when its write is later
+        # in the same body; no syntactic call count proves lifetime freshness.
+        if scope is not None:
+            return False
+        owner = parsed[q][1]
+        parents = text_helper_parents_of[q]
+        statement = write
+        while statement is not None and parents.get(id(statement)) is not owner:
+            statement = parents.get(id(statement))
+        return binding in owner.body and statement in owner.body \
+            and owner.body.index(binding) < owner.body.index(statement)
+
+    def authenticated_json_member(q, fn, expression, member):
+        """External dumps/loads identity only; callers supply operation contracts."""
+        if member not in {"dumps", "loads"}:
+            return False
+        if isinstance(expression, ast.Name):
+            name = expression.id
+            direct = True
+        elif isinstance(expression, ast.Attribute) and expression.attr == member \
+                and isinstance(expression.value, ast.Name):
+            name = expression.value.id
+            direct = False
+        else:
+            return False
+        scopes = text_helper_scope_bindings(q)
+        parents = text_helper_parents_of[q]
+        if text_helper_evaluation_scope(q, expression) is not fn:
+            return False
+        scope, names = fn, scopes.get(fn, {})
+        if fn is not None and name not in names and "*" not in names:
+            outer = _scope_of(fn, parents)
+            while outer is not None:
+                if isinstance(outer, (ast.FunctionDef, ast.AsyncFunctionDef)) and (
+                        name in scopes.get(outer, {}) or "*" in scopes.get(outer, {})):
+                    return False
+                outer = _scope_of(outer, parents)
+            scope, names = None, scopes.get(None, {})
+        entries = names.get(name, ())
+        binding = entries[0] if len(entries) == 1 and "*" not in names else None
+        if direct:
+            identity = isinstance(binding, ast.ImportFrom) and binding.level == 0 \
+                and binding.module == "json" and any(
+                    alias.name == member and (alias.asname or alias.name) == name
+                    for alias in binding.names)
+        else:
+            identity = isinstance(binding, ast.Import) and any(
+                alias.name == "json" and (alias.asname or alias.name) == name
+                for alias in binding.names)
+        # The existing import resolver also covers caller/notes roots. A
+        # top-level source or checkout module can shadow stdlib JSON too.
+        if not identity or _resolve_module(root, q, "json", 0, index) is not None \
+                or _module_at(_resolved(root / "src"), "json") is not None \
+                or _module_at(_resolved(root), "json") is not None:
+            return False
+        dependencies, complete = json_source_dependencies(q)
+        if not complete or any(any(json_module_identity_state(source, member))
+                               for source in dependencies):
+            return False
+        writes, escapes = json_module_identity_state(q, member)
+        if escapes:
+            return False
+        if writes and (not direct or any(
+                not json_capture_precedes_write(q, scope, binding, write_scope, write)
+                for write_scope, write in writes)):
+            return False
+        tree = parsed[q][1]
+        if scope is None and any(binding is statement for statement in tree.body):
+            return True
+        if fn is None or not any(binding is statement for statement in fn.body):
+            return False
+        statement = expression
+        while statement is not None and parents.get(id(statement)) is not fn:
+            statement = parents.get(id(statement))
+        return statement is not None and any(statement is node for node in fn.body) \
+            and fn.body.index(binding) < fn.body.index(statement)
+
+    def authenticated_json_dumps(q, fn, expression):
+        # Preserve the existing call seam; loads gains no operation admission
+        # merely because its identity can use this same provenance check.
+        return authenticated_json_member(q, fn, expression, "dumps")
+
+    def literal_json_options(call):
+        """A finite formatting-only subset of the authenticated JSON operation.
+
+        Literal option values introduce no executable callbacks. Separators
+        may contain model-facing prose and are followed separately as text.
+        No option spelling alone authenticates a dynamic value or **mapping.
+        """
+        seen = set()
+        for keyword in call.keywords:
+            if keyword.arg in seen or keyword.arg not in {"sort_keys", "ensure_ascii", "separators", "indent", "allow_nan"}:
+                return False
+            seen.add(keyword.arg)
+            if keyword.arg in {"sort_keys", "ensure_ascii", "allow_nan"}:
+                if not isinstance(keyword.value, ast.Constant) or type(keyword.value.value) is not bool:
+                    return False
+            elif keyword.arg == "indent":
+                if not isinstance(keyword.value, ast.Constant) or type(keyword.value.value) not in {int, type(None)}:
+                    return False
+            elif not isinstance(keyword.value, ast.Tuple) or len(keyword.value.elts) != 2 or not all(
+                    isinstance(value, ast.Constant) and type(value.value) is str
+                    for value in keyword.value.elts):
+                return False
+        return True
+
+
+    def selector_constructor(q, expression):
+        # Exempt only the actual unambiguous pathlib import, not a local
+        # function or a rebound name that happens to be spelled Path.
+        pathlib_constructors = {"Path", "PurePath", "PosixPath", "WindowsPath", "PurePosixPath", "PureWindowsPath"}
+        name = expression.id if isinstance(expression, ast.Name) else (
+            expression.value.id if isinstance(expression, ast.Attribute)
+            and isinstance(expression.value, ast.Name) else None)
+        binding = stable_bindings(q).get(name)
+        if isinstance(expression, ast.Name) and isinstance(binding, ast.ImportFrom) \
+                and binding.module == "pathlib" and binding.level == 0:
+            return any(alias.name in pathlib_constructors and (alias.asname or alias.name) == name for alias in binding.names)
+        if isinstance(expression, ast.Attribute) and expression.attr in pathlib_constructors and isinstance(binding, ast.Import):
+            return any(alias.name == "pathlib" and (alias.asname or alias.name) == name for alias in binding.names)
+        return False
+
+    def completed_roles(start):
+        if start in parameter_roles:
+            return parameter_roles[start]
+        # Complete the finite reachable graph before publishing any summary.
+        functions, callers, pending = {}, {}, [start]
+        while pending:
+            hit = pending.pop()
+            if hit in functions or hit in parameter_roles:
+                continue
+            fn = defs(hit[0])[hit[1]]
+            functions[hit] = fn
+            for call in ast.walk(fn):
+                if not isinstance(call, ast.Call):
+                    continue
+                child = summary_callee(hit[0], fn, call.func)
+                if child is not None:
+                    callers.setdefault(child, set()).add(hit)
+                    pending.append(child)
+        summaries = dict(parameter_roles)
+        summaries.update({hit: {name: set() for name in _params(fn)} for hit, fn in functions.items()})
+
+        def settle(seeds):
+            todo = list(seeds)
+            queued = set(todo)
+            while todo:
+                hit = todo.pop()
+                queued.remove(hit)
+                fn = functions[hit]
+
+                def resolve(expression):
+                    child = summary_callee(hit[0], fn, expression)
+                    return (child, defs(child[0])[child[1]]) if child is not None else None
+
+                found = _result_parameter_roles(
+                    fn, resolve, summaries, lambda expression: selector_constructor(hit[0], expression))
+                changed = False
+                for name, roles in found.items():
+                    if not roles <= summaries[hit][name]:
+                        summaries[hit][name].update(roles)
+                        changed = True
+                if changed:
+                    for caller in sorted(callers.get(hit, ())):
+                        if caller in functions and caller not in queued:
+                            todo.append(caller)
+                            queued.add(caller)
+
+        settle(functions)
+        # An empty recursive/unused formal is not evidence of selector-only
+        # use. Propagate that uncertainty before allowing any strict caller.
+        unresolved = []
+        for hit, fn in functions.items():
+            for name in _params(fn):
+                if not summaries[hit][name]:
+                    summaries[hit][name].add("unknown")
+                    unresolved.extend(callers.get(hit, ()))
+        settle(dict.fromkeys(hit for hit in unresolved if hit in functions))
+        parameter_roles.update({hit: summaries[hit] for hit in functions})
+        return parameter_roles[start]
+
+    def selector_arguments(q, fn, call, hit):
+        if hit is None or summary_callee(q, fn, call.func) != hit:
+            return set()
+        binding = _argument_parameters(defs(hit[0])[hit[1]], call)
+        if binding is None:
+            return set()
+        roles = completed_roles(hit)
+        return {id(actual) for actual, names in binding
+                if names and all(roles[name] == {"selector"} for name in names)}
+
+    effect_nodes_of, effect_aliases_of, effect_calls_of, effect_updates_of = {}, {}, {}, {}
+    effect_unknown_bindings_of = {}
+    effect_parents_of, effect_contexts_of, effect_target_stores_of = {}, {}, {}
+    effect_receiving_formals_of = {}
+
+    scalar_helpers_of, scalar_helpers_active = {}, set()
+
+    def scalar_helper(hit):
+        if hit in scalar_helpers_of:
+            return scalar_helpers_of[hit]
+        if hit in scalar_helpers_active:
+            return False
+        scalar_helpers_active.add(hit)
+        try:
+            q_target, target = hit
+            if isinstance(target, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                fn_target = target
+            elif q_target not in parsed or target not in defs(q_target):
+                return False
+            else:
+                fn_target = defs(q_target)[target]
+            if not isinstance(fn_target, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                return False
+            if fn_target.returns is not None:
+                ret = fn_target.returns
+                if isinstance(ret, ast.Name) and ret.id in {"str", "int", "float", "bool", "bytes"}:
+                    scalar_helpers_of[hit] = True
+                    return True
+                if isinstance(ret, ast.Constant) and ret.value in {"str", "int", "float", "bool", "bytes"}:
+                    scalar_helpers_of[hit] = True
+                    return True
+            nodes = list(_own_nodes(fn_target, eager_annotations=id(fn_target) not in postponed_annotation_functions))
+            returns = [node for node in nodes if isinstance(node, ast.Return)]
+            if not returns:
+                return False
+            res = all(scalar_result(node.value, q_target, fn_target) for node in returns)
+            scalar_helpers_of[hit] = res
+            return res
+        finally:
+            scalar_helpers_of.setdefault(hit, False)
+            scalar_helpers_active.discard(hit)
+
+    def _is_str_carrier(node, q=None, fn=None, visiting=None):
+        if node is None:
+            return False
+        if isinstance(node, (ast.Constant, ast.JoinedStr)):
+            return isinstance(getattr(node, "value", None), str) if isinstance(node, ast.Constant) else True
+        if isinstance(node, ast.Subscript):
+            if _is_str_carrier(node.value, q, fn, visiting):
+                return True
+        if isinstance(node, ast.Name) and fn is not None:
+            if visiting is None:
+                visiting = frozenset()
+            if node.id in visiting:
+                return False
+            string_methods = {
+                "startswith", "endswith", "find", "rfind", "index", "rindex",
+                "split", "rsplit", "splitlines", "strip", "lstrip", "rstrip",
+                "replace", "lower", "upper", "casefold", "title", "capitalize",
+                "center", "ljust", "rjust", "zfill", "encode", "decode", "format"
+            }
+            for call in ast.walk(fn):
+                if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) \
+                        and isinstance(call.func.value, ast.Name) and call.func.value.id == node.id \
+                        and call.func.attr in string_methods:
+                    return True
+                if isinstance(call, ast.Call) and isinstance(call.func, ast.Name) and call.func.id == "isinstance" \
+                        and len(call.args) >= 2 and isinstance(call.args[0], ast.Name) and call.args[0].id == node.id:
+                    types = call.args[1].elts if isinstance(call.args[1], ast.Tuple) else [call.args[1]]
+                    if any(isinstance(t, ast.Name) and t.id == "str" for t in types):
+                        return True
+            if isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                for arg in fn.args.posonlyargs + fn.args.args + fn.args.kwonlyargs:
+                    if arg.arg == node.id and arg.annotation is not None:
+                        if isinstance(arg.annotation, ast.Name) and arg.annotation.id == "str":
+                            return True
+                        if isinstance(arg.annotation, ast.Constant) and arg.annotation.value == "str":
+                            return True
+            vals = _local_values(fn).get(node.id, ())
+            if vals and all(_is_str_carrier(v, q, fn, visiting | {node.id}) for v in vals):
+                return True
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name) and node.func.id in {"str", "repr", "ascii"}:
+                return True
+            if isinstance(node.func, ast.Attribute) and node.func.attr in {
+                    "strip", "lstrip", "rstrip", "replace", "lower", "upper",
+                    "casefold", "title", "capitalize", "center", "ljust", "rjust", "zfill", "format", "encode", "decode"}:
+                return True
+            if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                    and node.func.value.id == "shlex" and node.func.attr == "quote":
+                return True
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            return _is_str_carrier(node.left, q, fn, visiting) or _is_str_carrier(node.right, q, fn, visiting)
+        if isinstance(node, ast.IfExp):
+            return _is_str_carrier(node.body, q, fn, visiting) and _is_str_carrier(node.orelse, q, fn, visiting)
+        return False
+
+    def iter_yields_scalar(node, q=None, fn=None, visiting=None):
+        if node is None:
+            return False
+        if _is_str_carrier(node, q, fn, visiting) or scalar_result(node, q, fn, visiting):
+            return True
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+            target_names = {t.id for t in ast.walk(node.generators[0].target) if isinstance(t, ast.Name)}
+            if isinstance(node.elt, ast.Name) and node.elt.id in target_names:
+                return iter_yields_scalar(node.generators[0].iter, q, fn, visiting)
+            return scalar_result(node.elt, q, fn, visiting)
+        if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+            return all(scalar_result(elt, q, fn, visiting) for elt in node.elts)
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            return iter_yields_scalar(node.left, q, fn, visiting) and iter_yields_scalar(node.right, q, fn, visiting)
+        if isinstance(node, ast.IfExp):
+            return iter_yields_scalar(node.body, q, fn, visiting) and iter_yields_scalar(node.orelse, q, fn, visiting)
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                if node.func.id == "range":
+                    return True
+                if node.func.id in {"sorted", "reversed", "list", "set"} and node.args:
+                    return iter_yields_scalar(node.args[0], q, fn, visiting)
+            if isinstance(node.func, ast.Attribute):
+                if node.func.attr in {"split", "splitlines", "rsplit", "projects", "keys", "warnings", "all_slots"}:
+                    return True
+                if isinstance(node.func.value, ast.Name) and node.func.value.id == "shlex" and node.func.attr == "split":
+                    return True
+        if isinstance(node, ast.Name) and fn is not None:
+            if visiting is None:
+                visiting = frozenset()
+            if node.id not in visiting:
+                vals = _local_values(fn).get(node.id, ())
+                if vals:
+                    all_yield = True
+                    for v in vals:
+                        if iter_yields_scalar(v, q, fn, visiting | {node.id}):
+                            continue
+                        if isinstance(v, ast.Call) and isinstance(v.func, ast.Name) and v.func.id in {"set", "list", "frozenset"}:
+                            writes = _local_writes(fn).get(node.id, ())
+                            item_writes = [w for w in writes if not ((isinstance(w, ast.Call) and isinstance(w.func, ast.Name) and w.func.id in {"set", "list", "frozenset"}) or isinstance(w, (ast.List, ast.Set)))]
+                            if item_writes and all(scalar_result(w, q, fn, visiting | {node.id}) for w in item_writes):
+                                continue
+                        all_yield = False
+                        break
+                    if all_yield:
+                        return True
+        return False
+
+    def iter_index_yields_scalar(iter_node, idx, q=None, fn=None, visiting=None):
+        if iter_node is None:
+            return False
+        if isinstance(iter_node, ast.Call):
+            if isinstance(iter_node.func, ast.Attribute):
+                if iter_node.func.attr == "items" and idx == 0:
+                    return True
+                if iter_node.func.attr == "keys" and idx == 0:
+                    return True
+            if isinstance(iter_node.func, ast.Name):
+                if iter_node.func.id == "enumerate":
+                    if idx == 0:
+                        return True
+                    if idx == 1 and iter_node.args:
+                        return iter_yields_scalar(iter_node.args[0], q, fn, visiting)
+                if iter_node.func.id == "zip" and idx < len(iter_node.args):
+                    return iter_yields_scalar(iter_node.args[idx], q, fn, visiting)
+            if q is not None:
+                hit = summary_callee(q, fn, iter_node.func)
+                if hit is not None:
+                    q_target, name = hit
+                    if q_target in parsed and name in defs(q_target):
+                        fn_target = defs(q_target)[name]
+                        if isinstance(fn_target, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            if fn_target.returns is not None:
+                                def _extract_tuple_slice(ann):
+                                    if isinstance(ann, ast.Subscript):
+                                        val = getattr(ann.value, "id", None) or getattr(ann.value, "attr", None)
+                                        if val in {"tuple", "Tuple"}:
+                                            return ann.slice
+                                        if val in {"list", "List", "Iterable", "Iterator", "Sequence", "Collection", "Generator"}:
+                                            return _extract_tuple_slice(ann.slice)
+                                    return None
+                                ts = _extract_tuple_slice(fn_target.returns)
+                                if ts is not None:
+                                    elts = ts.elts if isinstance(ts, ast.Tuple) else ([ts] if not isinstance(ts, ast.Slice) else [])
+                                    if idx < len(elts):
+                                        def _is_scalar_ann(a):
+                                            if isinstance(a, ast.Name) and a.id in {"str", "int", "float", "bool", "bytes"}:
+                                                return True
+                                            if isinstance(a, ast.Constant) and a.value in {"str", "int", "float", "bool", "bytes", None}:
+                                                return True
+                                            if isinstance(a, ast.BinOp) and isinstance(a.op, ast.BitOr):
+                                                return _is_scalar_ann(a.left) and _is_scalar_ann(a.right)
+                                            if isinstance(a, ast.Subscript):
+                                                val_id = getattr(a.value, "id", None) or getattr(a.value, "attr", None)
+                                                if val_id == "Optional":
+                                                    return _is_scalar_ann(a.slice)
+                                                if val_id == "Union":
+                                                    u_elts = a.slice.elts if isinstance(a.slice, ast.Tuple) else [a.slice]
+                                                    return all(_is_scalar_ann(e) for e in u_elts)
+                                            return False
+                                        if _is_scalar_ann(elts[idx]):
+                                            return True
+                            appended_tuples = []
+                            for node in ast.walk(fn_target):
+                                if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "append":
+                                    if node.args and isinstance(node.args[0], (ast.Tuple, ast.List)):
+                                        appended_tuples.append(node.args[0])
+                                elif isinstance(node, (ast.Return, ast.Yield)) and isinstance(node.value, (ast.Tuple, ast.List)):
+                                    appended_tuples.append(node.value)
+                            if appended_tuples:
+                                if all(len(t.elts) > idx and (scalar_result(t.elts[idx], q_target, fn_target, visiting) or _is_str_carrier(t.elts[idx], q_target, fn_target, visiting)) for t in appended_tuples):
+                                    return True
+        if isinstance(iter_node, (ast.List, ast.Tuple)):
+            if all(isinstance(elt, (ast.Tuple, ast.List)) and len(elt.elts) > idx and (scalar_result(elt.elts[idx], q, fn, visiting) or _is_str_carrier(elt.elts[idx], q, fn, visiting)) for elt in iter_node.elts):
+                return True
+        if isinstance(iter_node, ast.Name) and fn is not None:
+            if visiting is None:
+                visiting = frozenset()
+            if iter_node.id not in visiting:
+                vals = _local_values(fn).get(iter_node.id, ())
+                if vals and all(iter_index_yields_scalar(v, idx, q, fn, visiting | {iter_node.id}) for v in vals):
+                    return True
+        return False
+
+    def loop_target_yields_scalar(loop, name, q=None, fn=None, visiting=None):
+        if loop is None or not isinstance(loop, (ast.For, ast.AsyncFor)):
+            return False
+        target = loop.target
+        if isinstance(target, ast.Name):
+            if target.id == name:
+                return iter_yields_scalar(loop.iter, q, fn, visiting)
+            return False
+        if isinstance(target, (ast.Tuple, ast.List)):
+            idx = None
+            for i, elt in enumerate(target.elts):
+                if isinstance(elt, ast.Name) and elt.id == name:
+                    idx = i
+                    break
+            if idx is not None:
+                return iter_index_yields_scalar(loop.iter, idx, q, fn, visiting)
+        return False
+
+    def scalar_result(value, q=None, fn=None, visiting=None):
+        # Result identity, not evaluation purity: explicit calls used to
+        # compute one of these values remain independently indexed below.
+        if not _is_real_repo_module(q):
+            return (
+                isinstance(value, ast.JoinedStr)
+                or (
+                    isinstance(value, ast.Constant)
+                    and type(value.value) in {str, bytes, int, float, complex, bool, type(None)}
+                )
+                or (isinstance(value, ast.UnaryOp) and isinstance(value.op, ast.Not))
+                or (
+                    isinstance(value, ast.Compare)
+                    and all(isinstance(op, (ast.Is, ast.IsNot)) for op in value.ops)
+                )
+            )
+        if value is None:
+            return True
+        if isinstance(value, (ast.Constant, ast.JoinedStr)):
+            return True
+        if isinstance(value, ast.UnaryOp) and isinstance(value.op, (ast.Not, ast.UAdd, ast.USub, ast.Invert)):
+            return True
+        if isinstance(value, ast.Compare):
+            return True
+        if isinstance(value, ast.BoolOp):
+            return all(scalar_result(v, q, fn, visiting) for v in value.values)
+        if isinstance(value, ast.Tuple):
+            return all(scalar_result(elt, q, fn, visiting) for elt in value.elts)
+        if isinstance(value, ast.IfExp):
+            return scalar_result(value.body, q, fn, visiting) and scalar_result(value.orelse, q, fn, visiting)
+        if isinstance(value, ast.NamedExpr):
+            return scalar_result(value.value, q, fn, visiting)
+        if isinstance(value, ast.Attribute):
+            if value.attr in {
+                "name", "stem", "suffix", "string", "text",
+                "st_size", "st_mtime", "st_ctime", "st_atime", "st_mode",
+                "st_dev", "st_ino", "st_mtime_ns", "st_ctime_ns", "st_atime_ns", "st_uid", "st_gid",
+                "lineno", "end_lineno", "col_offset", "end_col_offset",
+                "id", "attr", "arg",
+            }:
+                return True
+        if isinstance(value, ast.Subscript):
+            if _is_str_carrier(value.value, q, fn, visiting):
+                return True
+            if scalar_result(value.value, q, fn, visiting):
+                return True
+            if not isinstance(value.slice, ast.Slice) and iter_yields_scalar(value.value, q, fn, visiting):
+                return True
+            if is_path_conversion(q, value.value):
+                return True
+        if isinstance(value, ast.BinOp):
+            if scalar_result(value.left, q, fn, visiting) and scalar_result(value.right, q, fn, visiting):
+                return True
+            if isinstance(value.op, (ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow, ast.LShift, ast.RShift, ast.BitOr, ast.BitXor, ast.BitAnd)):
+                return True
+            if isinstance(value.op, ast.Add):
+                if (isinstance(value.left, ast.Constant) and isinstance(value.left.value, (int, float))) \
+                        or (isinstance(value.right, ast.Constant) and isinstance(value.right.value, (int, float))):
+                    return True
+                def _is_str_like(n):
+                    if isinstance(n, (ast.Constant, ast.JoinedStr)):
+                        return isinstance(getattr(n, "value", None), str) if isinstance(n, ast.Constant) else True
+                    if isinstance(n, ast.BinOp) and isinstance(n.op, ast.Add):
+                        return _is_str_like(n.left) or _is_str_like(n.right)
+                    if isinstance(n, ast.IfExp):
+                        return _is_str_like(n.body) and _is_str_like(n.orelse)
+                    if isinstance(n, ast.Call):
+                        if isinstance(n.func, ast.Name) and n.func.id in {"str", "repr", "ascii"}:
+                            return True
+                        if isinstance(n.func, ast.Attribute) and n.func.attr in {
+                                "replace", "format", "strip", "lstrip", "rstrip", "lower", "upper", "join", "read_text"}:
+                            return True
+                    return False
+                if _is_str_like(value.left) or _is_str_like(value.right) or _is_str_carrier(value.left, q, fn, visiting) or _is_str_carrier(value.right, q, fn, visiting):
+                    return True
+        if isinstance(value, ast.Name) and fn is not None:
+            if visiting is None:
+                visiting = frozenset()
+            if value.id not in visiting:
+                if _is_str_carrier(value, q, fn, visiting):
+                    return True
+                vals = _local_values(fn).get(value.id, ())
+                if vals:
+                    for_iters = {id(n.iter): n for n in ast.walk(fn) if isinstance(n, (ast.For, ast.AsyncFor))}
+                    if all(loop_target_yields_scalar(for_iters[id(v)], value.id, q, fn, visiting | {value.id}) if id(v) in for_iters
+                           else scalar_result(v, q, fn, visiting | {value.id}) for v in vals):
+                        return True
+        if isinstance(value, ast.Call):
+            if isinstance(value.func, ast.Name) and value.func.id in {
+                    "bool", "len", "int", "float", "str", "bytes", "repr", "ascii",
+                    "ord", "chr", "hash", "hex", "oct", "bin", "id", "flattened_into",
+                    "any", "all", "abs", "round"}:
+                return True
+            if isinstance(value.func, ast.Name) and value.func.id == "sum":
+                if not value.keywords and len(value.args) == 1:
+                    return True
+                if all(k.arg in {"start"} for k in value.keywords) and len(value.args) <= 2:
+                    start_val = value.args[1] if len(value.args) == 2 else next((k.value for k in value.keywords if k.arg == "start"), None)
+                    if start_val is None or scalar_result(start_val, q, fn, visiting):
+                        return True
+            if isinstance(value.func, ast.Attribute) and (
+                    (isinstance(value.func.value, ast.Name) and value.func.value.id == "re" and value.func.attr in {"search", "match", "fullmatch", "sub", "subn", "escape"})
+                    or value.func.attr in {"search", "match", "fullmatch"}
+            ):
+                return True
+            if isinstance(value.func, ast.Attribute) and isinstance(value.func.value, ast.Name) \
+                    and value.func.value.id == "shlex" and value.func.attr in {"quote", "join"}:
+                return True
+            if isinstance(value.func, ast.Attribute) and isinstance(value.func.value, ast.Name) \
+                    and value.func.value.id == "ast" and value.func.attr == "unparse":
+                return True
+            if isinstance(value.func, ast.Attribute) and isinstance(value.func.value, ast.Name) \
+                    and value.func.value.id == "textwrap" and value.func.attr in {"dedent", "indent", "fill", "shorten"}:
+                return True
+            if isinstance(value.func, ast.Attribute) and isinstance(value.func.value, ast.Name) \
+                    and value.func.value.id == "base64" and value.func.attr in {"b64decode", "b64encode", "urlsafe_b64decode", "urlsafe_b64encode"}:
+                return True
+            if isinstance(value.func, ast.Attribute) and isinstance(value.func.value, ast.Name) \
+                    and value.func.value.id == "math" and value.func.attr in {
+                        "isfinite", "isnan", "isinf", "isclose", "floor", "ceil", "trunc",
+                        "fabs", "sqrt", "log", "log10", "log2", "exp"}:
+                return True
+            if isinstance(value.func, ast.Attribute) and value.func.attr in {
+                    "read", "readline", "read_text", "read_bytes", "get_text",
+                    "startswith", "endswith", "isdigit", "isascii", "isalpha", "isalnum", "isspace", "isidentifier",
+                    "isnumeric", "isdecimal", "islower", "isupper", "istitle",
+                    "replace", "format", "strip", "lstrip", "rstrip", "lower", "upper",
+                    "casefold", "title", "capitalize", "center", "ljust", "rjust", "zfill",
+                    "encode", "decode", "find", "rfind", "index", "rindex", "count",
+                    "hexdigest", "digest", "isoformat"}:
+                return True
+            if q is not None:
+                hit = summary_callee(q, fn, value.func)
+                if hit is not None and scalar_helper(hit):
+                    return True
+                if isinstance(value.func, ast.Attribute) and isinstance(value.func.value, ast.Name):
+                    callee_q, child = resolve_method_callee(q, fn, value.func)
+                    if child is not None and scalar_helper((callee_q, child)):
+                        return True
+        return False
+
+    address_helpers_of, address_helpers_active = {}, set()
+
+    def path_constructor_call(q, value):
+        return isinstance(value, ast.Call) and selector_constructor(q, value.func) \
+            and _resolve_module(root, q, "pathlib", 0, index) is None
+
+    def detached_address(q, fn, value):
+        if path_constructor_call(q, value):
+            return True
+        if not isinstance(value, ast.Call):
+            return False
+        if _is_real_repo_module(q) and isinstance(value.func, ast.Attribute) and value.func.attr in {"resolve", "absolute"}:
+            if detached_address(q, fn, value.func.value):
+                return True
+            if fn is not None and isinstance(value.func.value, ast.Name):
+                for val in _local_values(fn).get(value.func.value.id, ()):
+                    if detached_address(q, fn, val):
+                        return True
+        hit = summary_callee(q, fn, value.func)
+        return hit is not None and address_helper(hit)
+
+    def address_helper(hit):
+        """A closed address adapter, not a general pure-function summary.
+
+        Every incoming reference stays in Name/conditional aliases until an
+        authenticated Path conversion. Relevant nested calls are checked even
+        when the surrounding conversion has a detached result. Cycles and
+        unsupported syntax decline this additional authority.
+        """
+        if hit in address_helpers_of:
+            return address_helpers_of[hit]
+        if hit in address_helpers_active:
+            return False
+        address_helpers_active.add(hit)
+        try:
+            q, name = hit
+            fn = defs(q)[name]
+            if not isinstance(fn, ast.FunctionDef) or fn.args.vararg is not None or fn.args.kwarg is not None:
+                return False
+            if not fn.body or not isinstance(fn.body[-1], ast.Return):
+                return False
+            nodes = list(_own_nodes(fn, eager_annotations=id(fn) not in postponed_annotation_functions))
+            statements = [node for node in nodes if isinstance(node, ast.stmt)]
+            permitted = (ast.Assign, ast.AnnAssign, ast.If, ast.Raise,
+                         ast.Return, ast.Expr, ast.Import, ast.ImportFrom, ast.Pass)
+            if any(not isinstance(node, permitted) for node in statements):
+                return False
+            assignments = {}
+            for node in statements:
+                if isinstance(node, (ast.Assign, ast.AnnAssign)):
+                    targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                    if any(not isinstance(target, ast.Name) for target in targets):
+                        return False
+                    if node.value is not None:
+                        for target in targets:
+                            assignments.setdefault(target.id, []).append(node.value)
+            # Expression binders and suspended/captured execution are outside
+            # this finite adapter body, even without a direct statement form.
+            if any(isinstance(node, (ast.NamedExpr, ast.Lambda, ast.comprehension,
+                                     ast.Yield, ast.YieldFrom, ast.Await)) for node in nodes):
+                return False
+            parameters = set(_params(fn))
+            for node in statements:
+                if isinstance(node, (ast.Import, ast.ImportFrom)):
+                    names = {alias.asname or (alias.name.split(".")[0]
+                             if isinstance(node, ast.Import) else alias.name)
+                             for alias in node.names}
+                    if "*" in names or names & (parameters | set(assignments)):
+                        return False
+            aliases = set(parameters)
+
+            def refers(value):
+                if isinstance(value, ast.Name):
+                    return value.id in aliases
+                if detached_address(q, fn, value):
+                    return False
+                if isinstance(value, ast.IfExp):
+                    return refers(value.body) or refers(value.orelse)
+                if scalar_result(value):
+                    return False
+                return any(refers(child) for child in ast.iter_child_nodes(value))
+
+            changed = True
+            while changed:
+                changed = False
+                for local_name, values in assignments.items():
+                    if local_name not in aliases and any(refers(value) for value in values):
+                        aliases.add(local_name)
+                        changed = True
+            for node in nodes:
+                if isinstance(node, ast.Call):
+                    if refers(node.func):
+                        return False
+                    if any(isinstance(actual, ast.Starred) and refers(actual.value) for actual in node.args) \
+                            or any(keyword.arg is None and refers(keyword.value) for keyword in node.keywords):
+                        return False
+                    actuals = [a.value if isinstance(a, ast.Starred) else a for a in node.args]
+                    actuals += [keyword.value for keyword in node.keywords]
+                    receiver = node.func.value if isinstance(node.func, ast.Attribute) else None
+                    if receiver is not None and refers(receiver):
+                        return False
+                    if any(refers(actual) for actual in actuals) and not detached_address(q, fn, node):
+                        return False
+                elif isinstance(node, (ast.Attribute, ast.Subscript)) and refers(node.value):
+                    return False
+                elif isinstance(node, ast.FormattedValue) and refers(node.value):
+                    # Fresh string identity does not prove that formatting an
+                    # incoming object cannot execute its conversion hooks.
+                    return False
+                elif isinstance(node, ast.Starred) and refers(node.value):
+                    return False
+                elif isinstance(node, ast.Set) and any(refers(value) for value in node.elts):
+                    return False
+                elif isinstance(node, ast.Dict) and any(
+                        refers(value) if key is None else refers(key)
+                        for key, value in zip(node.keys, node.values)):
+                    return False
+                elif isinstance(node, ast.Compare):
+                    if any(refers(child) for child in [node.left] + node.comparators) \
+                            and not all(isinstance(op, (ast.Is, ast.IsNot)) for op in node.ops):
+                        return False
+                elif isinstance(node, (ast.BinOp, ast.UnaryOp, ast.BoolOp)) \
+                        and any(refers(child) for child in ast.iter_child_nodes(node)):
+                    return False
+                elif isinstance(node, (ast.If, ast.IfExp)) and refers(node.test):
+                    return False
+
+            def path_result(value, visiting=frozenset()):
+                if detached_address(q, fn, value):
+                    return True
+                if isinstance(value, ast.Name) and value.id not in visiting:
+                    values = assignments.get(value.id, ())
+                    # Incoming formals retain their old identity; a later
+                    # assignment is not an unconditional lifetime proof.
+                    return value.id not in parameters and bool(values) and all(
+                        path_result(child, visiting | {value.id}) for child in values)
+                if isinstance(value, ast.IfExp):
+                    return path_result(value.body, visiting) and path_result(value.orelse, visiting)
+                return False
+
+            returns = [node for node in statements if isinstance(node, ast.Return)]
+            result = bool(returns) and all(path_result(node.value) for node in returns)
+            address_helpers_of[hit] = result
+            return result
+        finally:
+            address_helpers_of.setdefault(hit, False)
+            address_helpers_active.remove(hit)
+
+    record_helpers_of, record_helpers_active = {}, set()
+
+    def record_constructor_call(q, value, fn=None):
+        if not _is_real_repo_module(q) or not isinstance(value, ast.Call):
+            return False
+        func = value.func
+        fn_binds = {}
+        local_classes = set()
+        if fn is not None:
+            fn_imports = [n for n in ast.walk(fn) if isinstance(n, (ast.Import, ast.ImportFrom))]
+            if fn_imports and q is not None:
+                fn_binds = _bindings(root, q, ast.Module(body=fn_imports, type_ignores=[]), index)
+            local_classes = {n.name for n in ast.walk(fn) if isinstance(n, ast.ClassDef)}
+        if isinstance(func, ast.Name):
+            target, attr = binds(q).get(func.id, (None, None)) if q is not None else (None, None)
+            if target is None and func.id in fn_binds:
+                target, attr = fn_binds[func.id]
+            if func.id == "SimpleNamespace" or attr == "SimpleNamespace":
+                return True
+            if target is not None and attr and target in parsed:
+                return any(isinstance(n, ast.ClassDef) and n.name == attr for n in parsed[target][1].body)
+            if q in parsed and any(isinstance(n, ast.ClassDef) and n.name == func.id for n in parsed[q][1].body):
+                return True
+            if func.id in local_classes:
+                return True
+            if fn is not None:
+                vals = _local_values(fn).get(func.id, ())
+                if vals and all(isinstance(v, ast.Name) and v.id in local_classes for v in vals):
+                    return True
+        elif isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+            target, attr = binds(q).get(func.value.id, (None, None)) if q is not None else (None, None)
+            if target is None and func.value.id in fn_binds:
+                target, attr = fn_binds[func.value.id]
+            if func.attr == "SimpleNamespace" and (func.value.id == "types" or target == "types"):
+                return True
+            if target is not None and attr is None and target in parsed:
+                return any(isinstance(n, ast.ClassDef) and n.name == func.attr for n in parsed[target][1].body)
+        return False
+
+    def record_helper(hit):
+        if hit in record_helpers_of:
+            return record_helpers_of[hit]
+        if hit in record_helpers_active:
+            return False
+        record_helpers_active.add(hit)
+        try:
+            q_target, name = hit
+            if q_target not in parsed or name not in defs(q_target):
+                return False
+            fn_target = defs(q_target)[name]
+            if not isinstance(fn_target, ast.FunctionDef):
+                return False
+            nodes = list(_own_nodes(fn_target, eager_annotations=id(fn_target) not in postponed_annotation_functions))
+            returns = [node for node in nodes if isinstance(node, ast.Return) and node.value is not None]
+            if not returns:
+                return False
+            assignments = {}
+            for node in nodes:
+                if isinstance(node, (ast.Assign, ast.AnnAssign)):
+                    targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                    if node.value is not None:
+                        for target in targets:
+                            if isinstance(target, ast.Name):
+                                assignments.setdefault(target.id, []).append(node.value)
+
+            def is_record_val(val, visiting=frozenset()):
+                if detached_record(q_target, fn_target, val):
+                    return True
+                if isinstance(val, ast.Name) and val.id not in visiting:
+                    vals = assignments.get(val.id, ())
+                    return bool(vals) and all(is_record_val(child, visiting | {val.id}) for child in vals)
+                if isinstance(val, ast.IfExp):
+                    return is_record_val(val.body, visiting) and is_record_val(val.orelse, visiting)
+                return False
+
+            res = all(is_record_val(r.value) for r in returns)
+            record_helpers_of[hit] = res
+            return res
+        finally:
+            record_helpers_of.setdefault(hit, False)
+            record_helpers_active.remove(hit)
+
+    def detached_record(q, fn, value):
+        if not _is_real_repo_module(q):
+            return False
+        if record_constructor_call(q, value, fn):
+            return True
+        if isinstance(value, ast.IfExp):
+            return detached_record(q, fn, value.body) and detached_record(q, fn, value.orelse)
+        if not isinstance(value, ast.Call):
+            return False
+        hit = summary_callee(q, fn, value.func)
+        return hit is not None and record_helper(hit)
+
+    container_helpers_of = {}
+    container_helpers_active = set()
+
+    def function_container_return(hit):
+        if hit in container_helpers_of:
+            return container_helpers_of[hit]
+        if hit in container_helpers_active:
+            return None
+        container_helpers_active.add(hit)
+        try:
+            q_target, name = hit
+            if q_target not in parsed or name not in defs(q_target):
+                return None
+            fn_target = defs(q_target)[name]
+            if not isinstance(fn_target, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                return None
+            nodes = list(_own_nodes(fn_target, eager_annotations=id(fn_target) not in postponed_annotation_functions))
+            returns = [node for node in nodes if isinstance(node, ast.Return) and node.value is not None]
+            if not returns:
+                return None
+            assignments = {}
+            for node in nodes:
+                if isinstance(node, (ast.Assign, ast.AnnAssign)):
+                    targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                    if node.value is not None:
+                        for target in targets:
+                            if isinstance(target, ast.Name):
+                                assignments.setdefault(target.id, []).append(node.value)
+            def _eval_container_kind(expr):
+                if isinstance(expr, ast.Constant) and expr.value is None:
+                    return "none"
+                if isinstance(expr, (ast.Dict, ast.DictComp)):
+                    return "dict"
+                if isinstance(expr, (ast.List, ast.ListComp)):
+                    return "list"
+                if isinstance(expr, ast.Call):
+                    if isinstance(expr.func, ast.Name) and expr.func.id in {"dict", "list"}:
+                        return expr.func.id
+                    callee = summary_callee(q_target, fn_target, expr.func)
+                    if callee is not None:
+                        return function_container_return(callee)
+                if isinstance(expr, ast.IfExp):
+                    b = _eval_container_kind(expr.body)
+                    o = _eval_container_kind(expr.orelse)
+                    if b == o and b in {"dict", "list"}:
+                        return b
+                return None
+
+            def _guarded_container_kind(var_name):
+                def _is_not_isinstance(test_node):
+                    if isinstance(test_node, ast.UnaryOp) and isinstance(test_node.op, ast.Not):
+                        call = test_node.operand
+                        if (
+                            isinstance(call, ast.Call)
+                            and isinstance(call.func, ast.Name)
+                            and call.func.id == "isinstance"
+                            and len(call.args) == 2
+                            and isinstance(call.args[0], ast.Name)
+                            and call.args[0].id == var_name
+                            and isinstance(call.args[1], ast.Name)
+                            and call.args[1].id in {"dict", "list"}
+                        ):
+                            return call.args[1].id
+                    return None
+
+                for node in nodes:
+                    if isinstance(node, ast.If) and node.body and isinstance(node.body[-1], (ast.Raise, ast.Return)):
+                        k = _is_not_isinstance(node.test)
+                        if k is not None:
+                            return k
+                        if isinstance(node.test, ast.BoolOp) and isinstance(node.test.op, ast.Or):
+                            for val_node in node.test.values:
+                                k = _is_not_isinstance(val_node)
+                                if k is not None:
+                                    return k
+                return None
+
+            kinds = set()
+            for r in returns:
+                val = r.value
+                if isinstance(val, ast.Constant) and val.value is None:
+                    continue
+                k = _eval_container_kind(val)
+                if k in {"dict", "list"}:
+                    kinds.add(k)
+                elif isinstance(val, ast.Name) and val.id in assignments:
+                    val_kinds = set()
+                    for v in assignments[val.id]:
+                        vk = _eval_container_kind(v)
+                        if vk == "none":
+                            continue
+                        if vk in {"dict", "list"}:
+                            val_kinds.add(vk)
+                        else:
+                            val_kinds.add(None)
+                    if len(val_kinds) == 1 and val_kinds != {None}:
+                        kinds.add(next(iter(val_kinds)))
+                    else:
+                        gk = _guarded_container_kind(val.id)
+                        kinds.add(gk if gk in {"dict", "list"} else None)
+                elif isinstance(val, ast.Name):
+                    gk = _guarded_container_kind(val.id)
+                    kinds.add(gk if gk in {"dict", "list"} else None)
+                else:
+                    kinds.add(None)
+            res = next(iter(kinds)) if len(kinds) == 1 and kinds != {None} else None
+            container_helpers_of[hit] = res
+            return res
+        finally:
+            container_helpers_of.setdefault(hit, None)
+            container_helpers_active.remove(hit)
+
+    def effect_nodes(fn):
+        """Statements executed in this function, not bodies of nested scopes."""
+        if id(fn) not in effect_nodes_of:
+            found = list(_own_nodes(fn, eager_annotations=id(fn) not in postponed_annotation_functions))
+            effect_nodes_of[id(fn)] = found
+            # Origin proof must account for every syntactic binding, including
+            # ones the historical _local_values helper intentionally omits.
+            # Nested-scope collisions conservatively invalidate the proof too.
+            parents, unknown = _parents(fn), set()
+            effect_parents_of[id(fn)], effect_contexts_of[id(fn)] = parents, {}
+            own_args = {id(a) for a in fn.args.posonlyargs + fn.args.args + fn.args.kwonlyargs
+                        + [fn.args.vararg, fn.args.kwarg] if a is not None}
+            for node in ast.walk(fn):
+                if isinstance(node, (ast.Global, ast.Nonlocal)):
+                    unknown.update(node.names)
+                    continue
+                if _scope_of(node, parents) is not fn:
+                    continue
+                if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+                    top_target = node
+                    owner = parents.get(id(top_target))
+                    while isinstance(owner, (ast.Tuple, ast.List)):
+                        top_target = owner
+                        owner = parents.get(id(top_target))
+                    pure_target = all(isinstance(x, (ast.Name, ast.Tuple, ast.List, ast.Starred, ast.expr_context))
+                                      for x in ast.walk(top_target))
+                    modeled = isinstance(node.ctx, ast.Store) and pure_target and (
+                        isinstance(owner, ast.Assign) and any(top_target is t for t in owner.targets)
+                        or isinstance(owner, (ast.AnnAssign, ast.AugAssign))
+                        and node is owner.target and owner.value is not None
+                        or isinstance(owner, (ast.For, ast.AsyncFor)) and top_target is owner.target)
+                    if not modeled:
+                        unknown.add(node.id)
+                elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                    unknown.update(alias.asname or (alias.name.split(".")[0]
+                                   if isinstance(node, ast.Import) else alias.name) for alias in node.names)
+                elif isinstance(node, ast.ExceptHandler) and node.name:
+                    unknown.add(node.name)
+                elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node is not fn:
+                    unknown.add(node.name)
+                elif type(node).__name__ in {"MatchAs", "MatchStar"} and node.name:
+                    unknown.add(node.name)
+                elif type(node).__name__ == "MatchMapping" and node.rest:
+                    unknown.add(node.rest)
+            effect_unknown_bindings_of[id(fn)] = frozenset(unknown)
+            calls, updates, target_stores = {}, {}, {}
+            for node in found:
+                if isinstance(node, ast.Call):
+                    actuals = list(node.args) + [k.value for k in node.keywords]
+                    if isinstance(node.func, ast.Attribute):
+                        actuals.append(node.func.value)
+                    names = {part.id for value in actuals for part in ast.walk(value)
+                             if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Load)}
+                    # A comprehension's target can carry an element of the
+                    # tracked iterable into a nested call. Index those source
+                    # names too; the receiving test below resolves the exact
+                    # lexical binding rather than trusting target spelling.
+                    contexts, visited_contexts = [reference_context(fn, node)], set()
+                    while contexts:
+                        context = contexts.pop()
+                        if id(context) in visited_contexts:
+                            continue
+                        visited_contexts.add(id(context))
+                        for value, outer in context.values():
+                            names.update(part.id for part in ast.walk(value)
+                                         if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Load))
+                            contexts.append(outer)
+                    for name in names:
+                        calls.setdefault(name, []).append(node)
+                elif isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.Delete)):
+                    targets = node.targets if isinstance(node, (ast.Assign, ast.Delete)) else [node.target]
+                    for target in targets:
+                        holder = _holder(target)
+                        if holder is not None:
+                            updates.setdefault(holder, []).append(node)
+                elif isinstance(node, ast.comprehension):
+                    # Target assignment runs while the comprehension is
+                    # consumed. A scalar yielded value says nothing about
+                    # a store into an existing object here. Index receivers
+                    # once, including lexical aliases from earlier targets.
+                    for target in ast.walk(node.target):
+                        if not isinstance(target, (ast.Attribute, ast.Subscript)) \
+                                or not isinstance(target.ctx, ast.Store):
+                            continue
+                        names = {part.id for part in ast.walk(target.value)
+                                 if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Load)}
+                        contexts = [reference_context(fn, node.iter), reference_context(fn, target)]
+                        visited_contexts = set()
+                        while contexts:
+                            context = contexts.pop()
+                            if id(context) in visited_contexts:
+                                continue
+                            visited_contexts.add(id(context))
+                            for value, outer in context.values():
+                                names.update(part.id for part in ast.walk(value)
+                                             if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Load))
+                                contexts.append(outer)
+                        for name in names:
+                            target_stores.setdefault(name, []).append((node, target))
+            effect_calls_of[id(fn)], effect_updates_of[id(fn)] = calls, updates
+            effect_target_stores_of[id(fn)] = target_stores
+        return effect_nodes_of[id(fn)]
+
+    implicit_definition_uses_of = {}
+
+    def implicit_definition_uses(fn):
+        """Potential carriers passed by class construction/decorator application.
+
+        These calls have no Call node in the Python AST. A decorator receives
+        defaults and closure cells through its function argument; a metaclass
+        receives the class namespace. Retain source-visible aliases and local
+        decorator bodies rather than treating a bare decorator name as inert.
+        This is a may-use summary, not authority to execute arbitrary methods.
+        """
+        if id(fn) in implicit_definition_uses_of:
+            return implicit_definition_uses_of[id(fn)]
+        nodes = effect_nodes(fn)
+        # Existing may-write summaries include values stored into local
+        # holders, including method arguments and attribute/item writes.
+        definitions = {name: list(values) for name, values in _local_writes(fn).items()}
+
+        def bind(target, expression):
+            if isinstance(target, ast.Name):
+                definitions.setdefault(target.id, []).append(expression)
+            elif isinstance(target, (ast.Tuple, ast.List)):
+                for child in target.elts:
+                    bind(child, expression)
+            elif isinstance(target, ast.Starred):
+                bind(target.value, expression)
+
+        for node in nodes:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                definitions.setdefault(node.name, []).append(node)
+            elif isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign, ast.NamedExpr)) \
+                    and node.value is not None:
+                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                for target in targets:
+                    bind(target, node.value)
+            elif isinstance(node, (ast.For, ast.AsyncFor, ast.comprehension)):
+                bind(node.target, node.iter)
+            elif isinstance(node, (ast.With, ast.AsyncWith)):
+                for item in node.items:
+                    if item.optional_vars is not None:
+                        bind(item.optional_vars, item.context_expr)
+            elif type(node).__name__ == "Match":
+                for case in node.cases:
+                    for pattern in ast.walk(case.pattern):
+                        name = (getattr(pattern, "name", None)
+                                if type(pattern).__name__ in {"MatchAs", "MatchStar"}
+                                else getattr(pattern, "rest", None)
+                                if type(pattern).__name__ == "MatchMapping" else None)
+                        if name:
+                            definitions.setdefault(name, []).append(node.subject)
+        # All binders must exist before adding receiving edges: the node
+        # worklist order is not execution or definition order.
+        for node in nodes:
+            if isinstance(node, ast.Call):
+                # A source-visible receiving call may retain any other
+                # actual in its holder. This only adds refusal dependencies.
+                actuals = list(node.args) + [keyword.value for keyword in node.keywords]
+                for actual in actuals:
+                    holder = _holder(actual)
+                    if holder in definitions:
+                        definitions[holder].extend([node.func] + actuals)
+        uses = []
+        for node in nodes:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                implicit = bool(node.decorator_list)
+            elif isinstance(node, ast.ClassDef):
+                implicit = bool(node.decorator_list or node.bases or node.keywords)
+            else:
+                continue
+            if not implicit:
+                continue
+            names, visited, pending = set(), set(), [node]
+            while pending:
+                expression = pending.pop()
+                if id(expression) in visited:
+                    continue
+                visited.add(id(expression))
+                for part in ast.walk(expression):
+                    if isinstance(part, ast.Name) and isinstance(part.ctx, ast.Load):
+                        names.add(part.id)
+                        pending.extend(definitions.get(part.id, ()))
+            uses.append((node, frozenset(names)))
+        implicit_definition_uses_of[id(fn)] = uses
+        return uses
+
+
+    def reference_context(fn, node):
+        """Comprehension target -> iterable and its pre-binding lexical scope.
+
+        This is a may-reference relation, not an element/value interpreter.
+        Every target of an unpacking conservatively depends on the iterable.
+        An inner target shadows the outer spelling only after its iterable
+        has been evaluated; conditions see that target, as does the element.
+        """
+        effect_nodes(fn)
+        cache = effect_contexts_of[id(fn)]
+        if id(node) in cache:
+            return cache[id(node)]
+        parents = effect_parents_of[id(fn)]
+        chain, current = [], node
+        while current is not None and current is not fn:
+            chain.append(current)
+            current = parents.get(id(current))
+        ancestors = {id(part) for part in chain}
+        context = {}
+        for part in reversed(chain):
+            if not isinstance(part, (ast.GeneratorExp, ast.ListComp, ast.SetComp, ast.DictComp)):
+                continue
+            for generator in part.generators:
+                if id(generator.iter) in ancestors:
+                    break
+                outer = dict(context)
+                for target in ast.walk(generator.target):
+                    if isinstance(target, ast.Name) and isinstance(target.ctx, ast.Store):
+                        context[target.id] = (generator.iter, outer)
+                if id(generator.target) in ancestors or any(
+                        id(condition) in ancestors for condition in generator.ifs):
+                    break
+        cache[id(node)] = context
+        return context
+
+    primitive_observers_of = {}
+
+    def primitive_observers(q, fn, terminal_consumers):
+        """Exact discarded builtin observations whose operands cannot be writes.
+
+        This narrows only this text-flow view of historical _local_writes.
+        Literal primitive contents, a single local literal binding, primitive
+        operands and no alias/mutation/unknown receiver use are all required.
+        It is not a purity rule for arbitrary count/index/get implementations.
+        """
+        if fn is None:
+            return {}
+        cache_key = (q, id(fn), terminal_consumers)
+        if cache_key in primitive_observers_of:
+            return primitive_observers_of[cache_key]
+        nodes = effect_nodes(fn)
+        parents = effect_parents_of[id(fn)]
+        unknown = effect_unknown_bindings_of[id(fn)]
+        missing = object()
+
+        def literal(value):
+            if isinstance(value, ast.Constant) and type(value.value) in {
+                    str, bytes, int, float, complex, bool, type(None)}:
+                return value.value
+            if isinstance(value, ast.UnaryOp) and isinstance(value.op, (ast.UAdd, ast.USub)):
+                inner = literal(value.operand)
+                if type(inner) in {int, float, complex}:
+                    return inner if isinstance(value.op, ast.UAdd) else -inner
+            return missing
+
+        def constant(owner, name):
+            assignment = consts(owner).get(name)
+            if assignment is None:
+                return missing
+            targets = assignment.targets if isinstance(assignment, ast.Assign) else [assignment.target]
+            binding = unique_bindings(owner).get(name)
+            if not any(binding is target and isinstance(target, ast.Name) for target in targets):
+                return missing
+            return literal(assignment.value)
+
+        def primitive(value):
+            direct = literal(value)
+            if direct is not missing:
+                return direct
+            name = value.id if isinstance(value, ast.Name) else (
+                value.value.id if isinstance(value, ast.Attribute) and isinstance(value.value, ast.Name) else None)
+            if name is None or name in set(_params(fn)) | set(_local_writes(fn)):
+                return missing
+            binding = unique_bindings(q).get(name)
+            if isinstance(value, ast.Name) and isinstance(binding, ast.Name):
+                return constant(q, name)
+            if binding not in parsed[q][1].body or not isinstance(binding, (ast.Import, ast.ImportFrom)):
+                return missing
+            target, attribute = binds(q).get(name, (None, None))
+            if target not in parsed:
+                return missing
+            if isinstance(value, ast.Name) and attribute:
+                return constant(target, attribute)
+            if isinstance(value, ast.Attribute) and attribute is None:
+                return constant(target, value.attr)
+            return missing
+
+        def observer(call, kind):
+            if call.keywords or any(isinstance(a, ast.Starred) for a in call.args):
+                return False
+            method = call.func.attr
+            if kind == "list" and method == "count":
+                return len(call.args) == 1 and primitive(call.args[0]) is not missing
+            if kind == "list" and method == "index":
+                return 1 <= len(call.args) <= 3 and primitive(call.args[0]) is not missing and all(
+                    type(primitive(a)) in {int, bool} for a in call.args[1:])
+            return kind == "dict" and method == "get" and 1 <= len(call.args) <= 2 and all(
+                primitive(a) is not missing for a in call.args)
+
+        roots = {}
+        for statement in fn.body:
+            targets = statement.targets if isinstance(statement, ast.Assign) else (
+                [statement.target] if isinstance(statement, ast.AnnAssign) else [])
+            if len(targets) != 1 or not isinstance(targets[0], ast.Name):
+                continue
+            name, value = targets[0].id, statement.value
+            if name in set(_params(fn)) or name in unknown or "*" in unknown:
+                continue
+            stores = [n for n in ast.walk(fn) if isinstance(n, ast.Name)
+                      and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))]
+            if len(stores) != 1 or stores[0] is not targets[0]:
+                continue
+            if isinstance(value, ast.List) and all(literal(e) is not missing for e in value.elts):
+                roots[name] = "list"
+            elif isinstance(value, ast.Dict) and all(k is not None and literal(k) is not missing
+                    and literal(v) is not missing for k, v in zip(value.keys, value.values)):
+                roots[name] = "dict"
+        safe = {}
+        for name, kind in roots.items():
+            calls, valid = [], True
+            for node in ast.walk(fn):
+                if not isinstance(node, ast.Name) or node.id != name or not isinstance(node.ctx, ast.Load):
+                    continue
+                owner = parents.get(id(node))
+                if _scope_of(node, parents) is not fn:
+                    valid = False
+                    break
+                if isinstance(owner, ast.Attribute) and owner.value is node:
+                    call = parents.get(id(owner))
+                    if not isinstance(call, ast.Call) or call.func is not owner:
+                        valid = False
+                        break
+                    readonly_view = kind == "dict" and owner.attr in {"keys", "items", "values"} \
+                        and not call.args and not call.keywords
+                    if not readonly_view and not observer(call, kind):
+                        valid = False
+                        break
+                    parent = parents.get(id(call))
+                    if not readonly_view and isinstance(parent, ast.Expr) and parent.value is call:
+                        calls.append(call)
+                elif isinstance(owner, ast.Return) and owner.value is node:
+                    continue
+                else:
+                    # A certified request field may package its value in
+                    # literal messages/content carriers. These nodes preserve
+                    # the reference without executing a wrapper or projection.
+                    carrier = node
+                    while (isinstance(owner, (ast.List, ast.Tuple))
+                           and any(carrier is element for element in owner.elts)) or (
+                            isinstance(owner, ast.Dict)
+                            and any(carrier is value for value in owner.values)):
+                        carrier, owner = owner, parents.get(id(owner))
+                    if isinstance(owner, ast.keyword) and owner.value is carrier:
+                        call = parents.get(id(owner))
+                    elif isinstance(owner, ast.Call) and any(carrier is actual for actual in owner.args):
+                        call = owner
+                    else:
+                        call = None
+                    if not isinstance(call, ast.Call) or id(call) not in terminal_consumers:
+                        # Includes dict keys, aliases, operators/projections,
+                        # callbacks, captures, and nonterminal wrapper calls.
+                        valid = False
+                        break
+            if valid:
+                safe.update({id(call): (name, call) for call in calls})
+        primitive_observers_of[cache_key] = safe
+        return safe
+
+    # These are deep builtin JSON value facts, not detached copies. A tuple
+    # fact records each returned slot so unpacking preserves shared subtrees.
+    json_contexts = {}
+    json_decoder_candidates = {}
+
+    def json_carrier(fact):
+        return fact == "json" or isinstance(fact, tuple) and any(json_carrier(f) for f in fact[1])
+
+    def json_literal_descendant(fact):
+        return fact == "literal" or isinstance(fact, tuple) and any(
+            json_literal_descendant(f) for f in fact[1])
+
+    def json_decoder_candidate(q, fn, active=frozenset()):
+        key = (q, id(fn))
+        if key in active:
+            return False
+        if key in json_decoder_candidates:
+            return json_decoder_candidates[key]
+        for node in effect_nodes(fn):
+            if not isinstance(node, ast.Call):
+                continue
+            if authenticated_json_member(q, fn, node.func, "loads"):
+                json_decoder_candidates[key] = True
+                return True
+            hit = summary_callee(q, fn, node.func)
+            if hit is not None and json_decoder_candidate(
+                    hit[0], defs(hit[0])[hit[1]], active | {key}):
+                json_decoder_candidates[key] = True
+                return True
+        json_decoder_candidates[key] = False
+        return False
+
+    def json_context(q, fn, formals=frozenset(), ancestry=()):
+        key = (q, id(fn), formals)
+        if fn is None or any(previous[:2] == key[:2] for previous in ancestry):
+            return None
+        if not any(json_carrier(fact) for _, fact in formals) and not json_decoder_candidate(q, fn):
+            return None
+        if key in json_contexts:
+            return json_contexts[key]
+        params = set(_params(fn))
+        incoming = dict(formals)
+        nodes = effect_nodes(fn)
+        definitions, stores, invalid = {}, set(), set()
+        resolving, resolved = set(), {}
+        may_json = {name for name, fact in formals if json_carrier(fact)}
+        chain = ancestry + (key,)
+
+        def bind(target, expression, path=(), iteration=False):
+            if isinstance(target, ast.Name):
+                stores.add(id(target))
+                definitions.setdefault(target.id, []).append((expression, path, iteration))
                 return
-            seen.add((id(e), mode))
+            if isinstance(target, (ast.Tuple, ast.List)):
+                for i, item in enumerate(target.elts):
+                    bind(item, expression, path + (i,), iteration)
+
+        for node in nodes:
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    bind(target, node.value)
+            elif isinstance(node, ast.AnnAssign) and node.value is not None:
+                bind(node.target, node.value)
+            elif isinstance(node, ast.For):
+                bind(node.target, node.iter, iteration=True)
+            elif isinstance(node, ast.comprehension):
+                for child in ast.walk(node.target):
+                    if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Store):
+                        stores.add(id(child))
+        for node in nodes:
+            if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)) \
+                    and id(node) not in stores:
+                invalid.add(node.id)
+            elif isinstance(node, (ast.Global, ast.Nonlocal)):
+                invalid.update(node.names)
+            elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                invalid.update(alias.asname or (alias.name.split(".")[0]
+                               if isinstance(node, ast.Import) else alias.name) for alias in node.names)
+            elif isinstance(node, ast.ExceptHandler) and node.name:
+                invalid.add(node.name)
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                invalid.add(node.name)
+            elif type(node).__name__ in {"MatchAs", "MatchStar"} and node.name:
+                invalid.add(node.name)
+            elif type(node).__name__ == "MatchMapping" and node.rest:
+                invalid.add(node.rest)
+
+        def builtin(expression, names):
+            unique_bindings(q)
+            return isinstance(expression, ast.Name) and expression.id in names \
+                and expression.id not in binding_names_of[q] and "*" not in binding_names_of[q]
+
+        def carrier(fact):
+            return json_carrier(fact)
+
+        def iteration(fact):
+            if fact == "json":
+                return "json"
+            if isinstance(fact, tuple) and fact[0] == "view":
+                return fact[1][0]
+            return None
+
+        def name_fact(name):
+            if name in resolved:
+                return resolved[name]
+            if name in resolving or name in invalid:
+                return None
+            resolving.add(name)
+            try:
+                entries = definitions.get(name, ())
+                if name in params:
+                    result = incoming.get(name) if not entries else None
+                elif len(entries) == 1:
+                    expression, path, iterated = entries[0]
+                    result = value(expression)
+                    if iterated:
+                        result = iteration(result)
+                    for index in path:
+                        result = result[1][index] if isinstance(result, tuple) \
+                            and result[0] == "tuple" and index < len(result[1]) else None
+                else:
+                    result = None
+                # A named mutable literal can have been polluted by an
+                # earlier unknown call. Only inline defaults retain this fact;
+                # shared JSON origins instead undergo the complete use proof.
+                if json_literal_descendant(result):
+                    result = None
+                resolved[name] = result
+                return result
+            finally:
+                resolving.remove(name)
+
+        def call_facts(call, hit):
+            if summary_callee(q, fn, call.func) != hit:
+                return None
+            child = defs(hit[0])[hit[1]]
+            if not isinstance(child, ast.FunctionDef) or child.args.vararg or child.args.kwarg \
+                    or any(isinstance(a, ast.Starred) for a in call.args) \
+                    or any(k.arg is None for k in call.keywords):
+                return None
+            binding = _argument_parameters(child, call)
+            if binding is None or any(len(names) != 1 for _, names in binding):
+                return None
+            named = [next(iter(names)) for _, names in binding]
+            if len(named) != len(set(named)):
+                return None
+            positional = child.args.posonlyargs + child.args.args
+            defaults = {p.arg for p in positional[len(positional) - len(child.args.defaults):]}
+            defaults.update(p.arg for p, default in zip(child.args.kwonlyargs, child.args.kw_defaults)
+                            if default is not None)
+            if set(_params(child)) - set(named) - defaults:
+                return None
+            return frozenset((next(iter(names)), fact) for actual, names in binding
+                             if (fact := value(actual)) is not None)
+
+        def method_fact(call):
+            if not isinstance(call.func, ast.Attribute) or call.keywords \
+                    or any(isinstance(a, ast.Starred) for a in call.args):
+                return None
+            receiver = value(call.func.value)
+            if receiver not in {"json", "literal", "scalar"}:
+                if isinstance(call.func.value, ast.Name) and call.func.value.id in may_json:
+                    receiver = "json"
+                else:
+                    return None
+            method, arguments = call.func.attr, [value(a) for a in call.args]
+            if method == "get" and receiver == "json" and len(arguments) in (1, 2) \
+                    and arguments[0] == "scalar" and all(a in {"scalar", "literal", "json"} for a in arguments):
+                return "json"
+            if method in {"keys", "items", "values"} and receiver == "json" and not arguments:
+                element = "scalar" if method == "keys" else (
+                    ("tuple", ("scalar", "json")) if method == "items" else "json")
+                return ("view", (element,))
+            if method in {"strip", "lstrip", "rstrip", "upper", "lower", "casefold"} \
+                    and (not arguments or method in {"strip", "lstrip", "rstrip"}
+                         and arguments == ["scalar"]):
+                return "scalar"
+            if method == "replace" and len(arguments) in (2, 3) \
+                    and all(a == "scalar" for a in arguments):
+                return "scalar"
+            return None
+
+        def value(expression, bindings=None):
+            if isinstance(expression, ast.Constant) and type(expression.value) in {
+                    str, int, float, bool, type(None)}:
+                return "scalar"
+            if isinstance(expression, ast.Name):
+                if bindings and expression.id in bindings:
+                    return bindings[expression.id]
+                return name_fact(expression.id)
+            if isinstance(expression, ast.Tuple):
+                facts = tuple(value(e, bindings) for e in expression.elts)
+                return ("tuple", facts) if all(f is not None for f in facts) else None
+            if isinstance(expression, ast.List) and all(
+                    value(e, bindings) in {"scalar", "literal", "json"} for e in expression.elts):
+                return "literal"
+            if isinstance(expression, ast.Dict) and all(k is not None and value(k, bindings) == "scalar"
+                    and value(v, bindings) in {"scalar", "literal", "json"}
+                    for k, v in zip(expression.keys, expression.values)):
+                return "literal"
+            if isinstance(expression, ast.Subscript):
+                base = value(expression.value, bindings)
+                if base == "json" and value(expression.slice, bindings) == "scalar":
+                    return "json"
+                if isinstance(base, tuple) and base[0] == "tuple" \
+                        and isinstance(expression.slice, ast.Constant) \
+                        and type(expression.slice.value) is int \
+                        and -len(base[1]) <= expression.slice.value < len(base[1]):
+                    return base[1][expression.slice.value]
+                return None
+            if isinstance(expression, ast.Call):
+                if authenticated_json_member(q, fn, expression.func, "loads") \
+                        and len(expression.args) == 1 and not expression.keywords \
+                        and not isinstance(expression.args[0], ast.Starred):
+                    return "json"
+                if authenticated_json_dumps(q, fn, expression.func) \
+                        and len(expression.args) == 1 and not isinstance(expression.args[0], ast.Starred) \
+                        and literal_json_options(expression):
+                    return "scalar"
+                read = method_fact(expression)
+                if read is not None:
+                    return read
+                if builtin(expression.func, {"str", "bool", "len"}) \
+                        and len(expression.args) == 1 and not expression.keywords \
+                        and value(expression.args[0], bindings) is not None:
+                    return "scalar"
+                if builtin(expression.func, {"next"}) and len(expression.args) in (1, 2) \
+                        and not expression.keywords and not any(isinstance(a, ast.Starred) for a in expression.args):
+                    arg = expression.args[0]
+                    default = expression.args[1] if len(expression.args) == 2 else None
+                    if default is None or value(default, bindings) in {"scalar", "literal", "json"}:
+                        if isinstance(arg, ast.GeneratorExp) and len(arg.generators) == 1:
+                            gen = arg.generators[0]
+                            if not gen.is_async and isinstance(gen.target, ast.Name):
+                                it = iteration(value(gen.iter, bindings))
+                                if it is not None:
+                                    if isinstance(arg.elt, ast.Name) and arg.elt.id == gen.target.id:
+                                        return it
+                                    sub_bindings = dict(bindings) if bindings else {}
+                                    sub_bindings[gen.target.id] = it
+                                    elt_val = value(arg.elt, sub_bindings)
+                                    if elt_val is not None:
+                                        return elt_val
+                hit = summary_callee(q, fn, expression.func)
+                if hit is not None:
+                    facts = call_facts(expression, hit)
+                    context = json_context(hit[0], defs(hit[0])[hit[1]], facts, chain) \
+                        if facts is not None else None
+                    if context is not None:
+                        return context[2]
+            return None
+
+        def _comp_scopes(generators, extra_carriers, extra_shadow):
+            scoped_carriers = set(extra_carriers)
+            scoped_shadow = set(extra_shadow)
+            for gen in generators:
+                gen_targets = {c.id for c in ast.walk(gen.target) if isinstance(c, ast.Name)}
+                if iteration_carrier(gen.iter, scoped_carriers, scoped_shadow):
+                    scoped_carriers |= gen_targets
+                    scoped_shadow -= gen_targets
+                else:
+                    scoped_shadow |= gen_targets
+                    scoped_carriers -= gen_targets
+            return frozenset(scoped_carriers), frozenset(scoped_shadow)
+
+        def references(expression, extra_carriers=frozenset(), extra_shadow=frozenset()):
+            fact = value(expression)
+            if fact is not None:
+                return carrier(fact)
+            if isinstance(expression, ast.Name):
+                if expression.id in extra_shadow:
+                    return False
+                if expression.id in extra_carriers or expression.id in may_json:
+                    return True
+                return False
+            if isinstance(expression, ast.DictComp):
+                c_carriers, c_shadow = _comp_scopes(expression.generators, extra_carriers, extra_shadow)
+                return references(expression.key, c_carriers, c_shadow) or \
+                    references(expression.value, c_carriers, c_shadow)
+            if isinstance(expression, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+                c_carriers, c_shadow = _comp_scopes(expression.generators, extra_carriers, extra_shadow)
+                return references(expression.elt, c_carriers, c_shadow)
+            # Formatting creates a string, but calls inside it are checked
+            # independently. Other unknown calls/projections may retain input.
+            if scalar_result(expression):
+                return False
+            return any(references(child, extra_carriers, extra_shadow) for child in ast.iter_child_nodes(expression))
+
+        def safe_call(call):
+            if not references(call.func) and not any(references(a) for a in call.args) \
+                    and not any(references(k.value) for k in call.keywords):
+                return True
+            if method_fact(call) is not None:
+                return True
+            if authenticated_json_dumps(q, fn, call.func) \
+                    and len(call.args) == 1 and not isinstance(call.args[0], ast.Starred) \
+                    and literal_json_options(call):
+                return True
+            if builtin(call.func, {"str", "bool", "len"}) and len(call.args) == 1 \
+                    and not call.keywords and value(call.args[0]) is not None:
+                return True
+            if builtin(call.func, {"isinstance"}) and len(call.args) == 2 and not call.keywords \
+                    and value(call.args[0]) is not None and builtin(
+                        call.args[1], {"list", "dict", "str", "int", "float", "bool"}):
+                return True
+            if builtin(call.func, {"next"}) and len(call.args) in (1, 2) and not call.keywords \
+                    and value(call) is not None:
+                return True
+            hit = summary_callee(q, fn, call.func)
+            if hit is None:
+                return False
+            facts = call_facts(call, hit)
+            if facts is None:
+                return False
+            callee_context = json_context(hit[0], defs(hit[0])[hit[1]], facts, chain)
+            return callee_context is not None and callee_context[4]
+
+        def iteration_carrier(expression, extra_carriers=frozenset(), extra_shadow=frozenset()):
+            fact = value(expression)
+            if fact is not None:
+                return iteration(fact) is not None
+            if isinstance(expression, ast.Name):
+                if expression.id in extra_shadow:
+                    return False
+                return expression.id in extra_carriers or expression.id in may_json
+            if isinstance(expression, ast.Subscript):
+                return references(expression.value, extra_carriers, extra_shadow)
+            if isinstance(expression, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+                return references(expression, extra_carriers, extra_shadow)
+            if isinstance(expression, ast.DictComp):
+                c_carriers, c_shadow = _comp_scopes(expression.generators, extra_carriers, extra_shadow)
+                return references(expression.key, c_carriers, c_shadow)
+            if isinstance(expression, (ast.Tuple, ast.List)):
+                return any(references(e, extra_carriers, extra_shadow) for e in expression.elts)
+            if isinstance(expression, ast.Call):
+                if isinstance(expression.func, ast.Attribute) and expression.func.attr in {"values", "keys", "items"}:
+                    return references(expression.func.value, extra_carriers, extra_shadow)
+                if builtin(expression.func, {"sorted", "reversed", "list", "iter"}) and expression.args:
+                    return iteration_carrier(expression.args[0], extra_carriers, extra_shadow)
+                hit = summary_callee(q, fn, expression.func)
+                if hit is not None:
+                    facts = call_facts(expression, hit)
+                    context = json_context(hit[0], defs(hit[0])[hit[1]], facts, chain) if facts is not None else None
+                    if context is not None:
+                        return iteration(context[2]) is not None
+            return False
+
+        # Definite type facts may disappear after a rebinding; the earlier
+        # shared alias does not. Retain finite may-origins for refusal checks.
+        changed = True
+        while changed:
+            changed = False
+            for name, entries in definitions.items():
+                if name not in may_json and any(
+                        (iteration_carrier(expression) if iteration else
+                         (references(expression) and (path or not isinstance(
+                             expression, (ast.Dict, ast.List, ast.Set, ast.DictComp, ast.ListComp, ast.SetComp))))
+                        ) for expression, path, iteration in entries):
+                    may_json.add(name)
+                    changed = True
+
+        def local_target(target):
+            if isinstance(target, ast.Name):
+                return target.id not in invalid
+            return isinstance(target, (ast.Tuple, ast.List)) and all(
+                local_target(item) for item in target.elts)
+
+        valid = True
+        for node in nodes:
+            if isinstance(node, ast.Call) and not safe_call(node):
+                valid = False
+                break
+            if isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(node.ctx, (ast.Store, ast.Del)) \
+                    and references(node.value):
+                valid = False
+                break
+            if isinstance(node, (ast.Assign, ast.AnnAssign)):
+                expression = node.value
+                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                if expression is not None and references(expression):
+                    if isinstance(expression, (ast.Dict, ast.List, ast.Set, ast.DictComp, ast.ListComp, ast.SetComp)):
+                        if any(not local_target(t) for t in targets):
+                            valid = False
+                            break
+                    elif value(expression) is None or any(not local_target(t) for t in targets):
+                        valid = False
+                        break
+            if isinstance(node, (ast.AugAssign, ast.Delete, ast.With, ast.AsyncWith,
+                                 ast.AsyncFor, ast.NamedExpr, ast.Lambda, ast.Yield, ast.YieldFrom, ast.Await, ast.FunctionDef,
+                                 ast.AsyncFunctionDef, ast.ClassDef)) and references(node):
+                valid = False
+                break
+            if isinstance(node, (ast.For, ast.comprehension)) and references(node.iter) \
+                    and not local_target(node.target):
+                valid = False
+                break
+        def returned_fact(expression):
+            known = value(expression)
+            if known is not None:
+                return known
+            if isinstance(expression, ast.Tuple):
+                facts = tuple(returned_fact(item) for item in expression.elts)
+                return ("tuple", facts) if all(f is not None for f in facts) else None
+            # This records only absence of a proved shared JSON origin. It
+            # grants no builtin type, method or detached-copy authority. All
+            # operations and escapes of JSON inputs were checked above.
+            return "opaque" if not references(expression) else None
+
+        results = [returned_fact(expression) for expression in _results(fn)]
+        returned = results[0] if valid and results and all(f == results[0] for f in results) else None
+        context = (name_fact, value, returned, call_facts, valid)
+        json_contexts[key] = context
+        return context
+
+
+    def primitive_scalar(q, fn, value, primitive_formals=frozenset()):
+        """A literal primitive, or its exact unambiguous incoming/source binding.
+
+        This proves only the absence of user repr/hash callbacks for this
+        actual. It does not certify arbitrary calls, attributes or containers.
+        """
+        if isinstance(value, ast.Constant):
+            return type(value.value) in {str, bytes, int, float, complex, bool, type(None)}
+        name = value.id if isinstance(value, ast.Name) else (
+            value.value.id if isinstance(value, ast.Attribute) and isinstance(value.value, ast.Name) else None)
+        if name is None:
+            return False
+        if fn is not None:
+            effect_nodes(fn)
+            unknown = effect_unknown_bindings_of[id(fn)]
+            if isinstance(value, ast.Name) and name in set(_params(fn)):
+                return name in primitive_formals and name not in _local_values(fn) \
+                    and name not in unknown and "*" not in unknown
+            if name in set(_params(fn)) | set(_local_writes(fn)):
+                return False
+        binding = unique_bindings(q).get(name)
+        owner, constant_name = q, name
+        if not (isinstance(value, ast.Name) and isinstance(binding, ast.Name)):
+            if binding not in parsed[q][1].body or not isinstance(binding, (ast.Import, ast.ImportFrom)):
+                return False
+            owner, attribute = binds(q).get(name, (None, None))
+            if owner not in parsed:
+                return False
+            if isinstance(value, ast.Name) and attribute:
+                constant_name = attribute
+            elif isinstance(value, ast.Attribute) and attribute is None:
+                constant_name = value.attr
+            else:
+                return False
+        assignment = consts(owner).get(constant_name)
+        if assignment is None:
+            return False
+        targets = assignment.targets if isinstance(assignment, ast.Assign) else [assignment.target]
+        target_binding = unique_bindings(owner).get(constant_name)
+        return any(target_binding is target and isinstance(target, ast.Name) for target in targets) \
+            and isinstance(assignment.value, ast.Constant) \
+            and type(assignment.value.value) in {str, bytes, int, float, complex, bool, type(None)}
+
+    record_class_identity_of = {}
+
+    def record_class_unexposed(q, cls, creation):
+        """Decline represented aliases/escapes of the class or its factories.
+
+        This is a finite explicit-source identity check, not a claim about
+        arbitrary reflection or external monkey-patching. Constructor calls
+        and deferred annotations do not expose the class to another object.
+        """
+        key = (q, cls, creation)
+        if key in record_class_identity_of:
+            return record_class_identity_of[key]
+        record_class_identity_of[key] = False
+        for source, (_, tree) in parsed.items():
+            scopes = text_helper_scope_bindings(source)
+            parents = text_helper_parents_of[source]
+            postponed = any(isinstance(node, ast.ImportFrom) and node.module == "__future__"
+                            and any(alias.name == "annotations" for alias in node.names)
+                            for node in tree.body)
+            modules, references = {}, {}
+
+            def module_reference(module, level=0):
+                token = (module, level)
+                if token not in modules:
+                    target = _resolve_module(root, source, module, level, index)
+                    relevant = (module == "dataclasses" and level == 0) or target == q \
+                        or (target is not None and target.name == "__init__.py"
+                            and _is_inside(q, target.parent))
+                    modules[token] = ("module", module, level, target) if relevant else None
+                return modules[token]
+
+            def imported(binding, name):
+                result = set()
+                if isinstance(binding, ast.Import):
+                    for alias in binding.names:
+                        if (alias.asname or alias.name.split(".")[0]) == name:
+                            ref = module_reference(alias.name if alias.asname else alias.name.split(".")[0])
+                            if ref is not None:
+                                result.add(ref)
+                elif isinstance(binding, ast.ImportFrom):
+                    base = module_reference(binding.module or "", binding.level)
+                    for alias in binding.names:
+                        if (alias.asname or alias.name) != name:
+                            continue
+                        if base is not None and base[3] == q and alias.name == cls.name:
+                            result.add(("class",))
+                        elif binding.level == 0 and binding.module == "dataclasses" \
+                                and alias.name in {"dataclass", "field"}:
+                            result.add((alias.name,))
+                        else:
+                            ref = module_reference(".".join(filter(None, [binding.module, alias.name])),
+                                                   binding.level)
+                            if ref is not None:
+                                result.add(ref)
+                            elif base is not None and (base[3] == q or (
+                                    binding.level == 0 and binding.module == "dataclasses")):
+                                # Namespace exports (__dict__, for example)
+                                # cannot hide an otherwise visible mutation.
+                                result.add(("export",))
+                return result
+
+            def reference(node):
+                if id(node) in references:
+                    return references[id(node)]
+                result = set()
+                if isinstance(node, ast.Name):
+                    pending_scopes = [text_helper_evaluation_scope(source, node)]
+                    seen_scopes = set()
+                    while pending_scopes:
+                        scope = pending_scopes.pop()
+                        if scope in seen_scopes:
+                            continue
+                        seen_scopes.add(scope)
+                        entries = [b for b in scopes.get(scope, {}).get(node.id, ())
+                                   if not isinstance(b, (ast.Attribute, ast.Subscript))]
+                        for binding in entries:
+                            if source == q and binding is cls:
+                                result.add(("class",))
+                            result.update(imported(binding, node.id))
+                        if scope is not None:
+                            if any(isinstance(binding, ast.Global) for binding in entries):
+                                pending_scopes.append(None)
+                            if not entries or any(isinstance(binding, ast.Nonlocal) for binding in entries):
+                                pending_scopes.append(_scope_of(scope, parents))
+                elif isinstance(node, ast.Attribute):
+                    for base in reference(node.value):
+                        if base[0] != "module":
+                            continue
+                        _, module, level, target = base
+                        if target == q and node.attr == cls.name:
+                            result.add(("class",))
+                        elif module == "dataclasses" and level == 0 \
+                                and node.attr in {"dataclass", "field"}:
+                            result.add((node.attr,))
+                        else:
+                            ref = module_reference(".".join(filter(None, [module, node.attr])), level)
+                            if ref is not None:
+                                result.add(ref)
+                            elif target == q or (module == "dataclasses" and level == 0):
+                                result.add(("export",))
+                references[id(node)] = result
+                return result
+
+            def deferred_annotation(node):
+                if not postponed:
+                    return False
+                child, parent = node, parents.get(id(node))
+                while parent is not None:
+                    if isinstance(parent, (ast.arg, ast.AnnAssign)) and parent.annotation is child:
+                        return True
+                    if isinstance(parent, (ast.FunctionDef, ast.AsyncFunctionDef)) and parent.returns is child:
+                        return True
+                    child, parent = parent, parents.get(id(parent))
+                return False
+
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ImportFrom) and any(alias.name == "*" for alias in node.names) \
+                        and module_reference(node.module or "", node.level) is not None:
+                    return False
+                if not isinstance(node, (ast.Name, ast.Attribute)) or deferred_annotation(node):
+                    continue
+                parent = parents.get(id(node))
+                for ref in reference(node):
+                    if not isinstance(node.ctx, ast.Load):
+                        return False
+                    if ref[0] == "module":
+                        if not (isinstance(parent, ast.Attribute) and parent.value is node
+                                and isinstance(parent.ctx, ast.Load) and not parent.attr.startswith("__")):
+                            return False
+                    elif isinstance(parent, ast.Call) and parent.func is node:
+                        if ref[0] == "class" and creation is not None and parent is not creation:
+                            # A different instance could expose its class
+                            # through type()/__class__. Keep this narrow
+                            # stage to the one allocation whose effects are
+                            # checked, not an assumed once-only lifetime.
+                            return False
+                        continue
+                    elif ref[0] == "dataclass" and isinstance(parent, ast.ClassDef) \
+                            and node in parent.decorator_list:
+                        continue
+                    else:
+                        return False
+        record_class_identity_of[key] = True
+        return True
+
+    record_instance_identity_of = {}
+
+    def record_instance_unexposed(owner, selected_fn, creation, fields):
+        """Follow this allocation through exact tuple slots and source calls.
+
+        Facts are may-occurrence paths to this record, not builtin or detached
+        facts. Unsupported carriers/receiving calls/recursive origin equations
+        refuse the field proof. Every visible caller is examined, including a
+        caller that discards the returned object before a later invocation.
+        """
+        key = (owner, selected_fn, creation)
+        if key in record_instance_identity_of:
+            return record_instance_identity_of[key]
+        record_instance_identity_of[key] = False
+        empty, instance = frozenset(), frozenset({()})
+        failed = [False]
+        functions = {(source, name): node for source in parsed
+                     for name, node in defs(source).items()}
+        imports = {source: [node for node in ast.walk(tree) if isinstance(
+            node, (ast.Import, ast.ImportFrom))] for source, (_, tree) in parsed.items()}
+        possible_of = {}
+
+        def possible_targets(source, expression):
+            # Discovery must not let a same-module definition hide a local
+            # import of a producer. Overapproximate import targets first;
+            # authentic() separately selects the unique lexical identity.
+            name, attr = (expression.id, None) if isinstance(expression, ast.Name) else (
+                (expression.value.id, expression.attr) if isinstance(expression, ast.Attribute)
+                and isinstance(expression.value, ast.Name) else (None, None))
+            if name is None:
+                return frozenset()
+            token = source, name, attr
+            if token in possible_of:
+                return possible_of[token]
+            targets = set()
+            if attr is None and (source, name) in functions:
+                targets.add((source, name))
+            for binding in imports[source]:
+                for alias in binding.names:
+                    bound = alias.asname or (alias.name.split(".")[0]
+                        if isinstance(binding, ast.Import) else alias.name)
+                    if bound != name:
+                        continue
+                    if isinstance(binding, ast.Import) and attr is not None:
+                        module = _resolve_module(root, source, alias.name if alias.asname
+                            else alias.name.split(".")[0], 0, index)
+                        candidate = module, attr
+                    elif isinstance(binding, ast.ImportFrom) and attr is None:
+                        module = _resolve_module(root, source, binding.module or "", binding.level, index)
+                        candidate = module, alias.name
+                    elif isinstance(binding, ast.ImportFrom) and attr is not None:
+                        module = _resolve_module(root, source, ".".join(filter(None,
+                            [binding.module, alias.name])), binding.level, index)
+                        candidate = module, attr
+                    else:
+                        continue
+                    if candidate in functions:
+                        targets.add(candidate)
+            possible_of[token] = frozenset(targets)
+            return possible_of[token]
+
+        edges = {}
+        for hit, node in functions.items():
+            edges[hit] = {target for call in effect_nodes(node) if isinstance(call, ast.Call)
+                          for target in possible_targets(hit[0], call.func)}
+        start = next((hit for hit, node in functions.items()
+                      if hit[0] == owner and node is selected_fn), None)
+        if start is None:
+            return False
+        related = {start}
+        while True:
+            expanded = related | {hit for hit, targets in edges.items() if targets & related}
+            if expanded == related:
+                break
+            related = expanded
+        cache, active, producers, authorities = {}, set(), set(), set()
+        modules = {}
+
+        def authentic(source, expression, target):
+            # callee() discovers possible edges; lexical identity is a
+            # separate requirement before interpreting a receiver's body.
+            if target not in functions:
+                return False
+            child = functions[target]
+            if stable_bindings(target[0]).get(target[1]) is not child or child.decorator_list:
+                return False
+            name = expression.id if isinstance(expression, ast.Name) else (
+                expression.value.id if isinstance(expression, ast.Attribute)
+                and isinstance(expression.value, ast.Name) else None)
+            if name is None:
+                return False
+            scopes = text_helper_scope_bindings(source)
+            parents = text_helper_parents_of[source]
+            scope = text_helper_evaluation_scope(source, expression)
+            while True:
+                names = scopes.get(scope, {})
+                entries = names.get(name, ())
+                if "*" in names:
+                    return False
+                if entries or scope is None:
+                    break
+                scope = _scope_of(scope, parents)
+            if len(entries) != 1:
+                return False
+            binding = entries[0]
+            if isinstance(expression, ast.Name) and binding is child:
+                return True
+            if isinstance(binding, ast.ImportFrom) and isinstance(expression, ast.Name):
+                module = _resolve_module(root, source, binding.module or "", binding.level, index)
+                valid = module == target[0] and any(
+                    alias.name == target[1] and (alias.asname or alias.name) == name
+                    for alias in binding.names)
+            elif isinstance(binding, ast.Import) and isinstance(expression, ast.Attribute):
+                valid = expression.attr == target[1] and any(
+                    (alias.asname or alias.name.split(".")[0]) == name
+                    and _resolve_module(root, source, alias.name if alias.asname else
+                                        alias.name.split(".")[0], 0, index) == target[0]
+                    for alias in binding.names)
+            elif isinstance(binding, ast.ImportFrom) and isinstance(expression, ast.Attribute):
+                valid = expression.attr == target[1] and any(
+                    (alias.asname or alias.name) == name and _resolve_module(
+                        root, source, ".".join(filter(None, [binding.module, alias.name])),
+                        binding.level, index) == target[0] for alias in binding.names)
+            else:
+                return False
+            if not valid:
+                return False
+            if scope is not None:
+                # A local import is admitted only as a direct earlier
+                # statement, not an assumed conditional/definition-time bind.
+                if not isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                        or binding not in scope.body:
+                    return False
+                statement = expression
+                while parents.get(id(statement)) is not scope:
+                    statement = parents.get(id(statement))
+                    if statement is None:
+                        return False
+                if scope.body.index(binding) >= scope.body.index(statement):
+                    return False
+            return True
+
+        def nodes_of(node):
+            # A definition body is its own context. Its definition-time
+            # defaults/decorators are still checked in the containing context.
+            pending = list(node.body)
+            while pending:
+                item = pending.pop()
+                yield item
+                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    pending.extend(item.decorator_list + item.args.defaults)
+                    pending.extend(value for value in item.args.kw_defaults if value is not None)
+                    pending.extend(arg.annotation for arg in item.args.posonlyargs + item.args.args
+                                   + item.args.kwonlyargs if arg.annotation is not None)
+                    if item.args.vararg is not None and item.args.vararg.annotation is not None:
+                        pending.append(item.args.vararg.annotation)
+                    if item.args.kwarg is not None and item.args.kwarg.annotation is not None:
+                        pending.append(item.args.kwarg.annotation)
+                    if item.returns is not None:
+                        pending.append(item.returns)
+                elif isinstance(item, ast.ClassDef):
+                    pending.extend(item.decorator_list + item.bases + item.body)
+                    pending.extend(keyword.value for keyword in item.keywords)
+                elif not isinstance(item, ast.Lambda):
+                    pending.extend(ast.iter_child_nodes(item))
+
+        def query(source, fn, formals=frozenset()):
+            token = (source, fn, formals)
+            if token in cache:
+                return cache[token]
+            if token in active or (fn is not None and any(
+                    active_source == source and active_fn is fn
+                    for active_source, active_fn, _ in active)):
+                # A recursive helper may grow tuple occurrence paths forever
+                # without repeating its complete context. This finite stage
+                # refuses recursion by callable identity, not an arbitrary cap.
+                failed[0] = True
+                return None
+            active.add(token)
+            tree = parsed[source][1] if fn is None else fn
+            nodes = list(nodes_of(tree))
+            if isinstance(fn, ast.AsyncFunctionDef) or any(isinstance(node, (ast.Yield, ast.YieldFrom))
+                                                          for node in nodes):
+                failed[0] = True
+            definitions, inputs = {}, dict(formals)
+            resolving, memo = set(), {}
+
+            def plain_target(target):
+                return isinstance(target, ast.Name) or (
+                    isinstance(target, (ast.Tuple, ast.List)) and all(plain_target(item) for item in target.elts))
+
+            def bind(target, expression, path=()):
+                if isinstance(target, ast.Name):
+                    definitions.setdefault(target.id, []).append((expression, path))
+                elif isinstance(target, (ast.Tuple, ast.List)):
+                    for index, item in enumerate(target.elts):
+                        bind(item, expression, path + (index,))
+
+            for node in nodes:
+                if isinstance(node, ast.Assign):
+                    for target in node.targets:
+                        bind(target, node.value)
+                elif isinstance(node, ast.AnnAssign) and node.value is not None:
+                    bind(node.target, node.value)
+
+            def project(fact, path):
+                for index in path:
+                    if () in fact:
+                        failed[0] = True
+                        return empty
+                    fact = frozenset(item[1:] for item in fact if item and item[0] == index)
+                return fact
+
+            current = {}
+
+            def name_fact(name):
+                if name in memo:
+                    return memo[name]
+                if name in resolving:
+                    fact = current.get(name, empty)
+                    if fact:
+                        failed[0] = True
+                    return fact
+                resolving.add(name)
+                current[name] = inputs.get(name, empty)
+                for expression, path in definitions.get(name, ()):
+                    current[name] |= project(value(expression), path)
+                result = current[name]
+                if not definitions.get(name) and name not in inputs and fn is not None:
+                    module = modules.get(source) or query(source, None)
+                    if module is not None:
+                        result |= module[0](name)
+                resolving.remove(name)
+                current.pop(name, None)
+                memo[name] = result
+                return result
+
+            def call_state(call):
+                candidates = possible_targets(source, call.func)
+                arguments = [(actual, value(actual)) for actual in call.args]
+                arguments += [(keyword.value, value(keyword.value)) for keyword in call.keywords]
+                receiving = any(fact for _, fact in arguments)
+                if not (candidates & related) and not receiving:
+                    return None
+                admitted = [target for target in candidates if authentic(source, call.func, target)]
+                if len(admitted) != 1:
+                    failed[0] = True
+                    return None
+                target = admitted[0]
+                child = functions[target]
+                authorities.add((target[0], child))
+                if child.decorator_list or child.args.vararg or child.args.kwarg \
+                        or any(isinstance(actual, ast.Starred) for actual in call.args) \
+                        or any(keyword.arg is None for keyword in call.keywords):
+                    failed[0] = True
+                    return None
+                binding = _argument_parameters(child, call)
+                if binding is None or any(len(names) != 1 for _, names in binding):
+                    failed[0] = True
+                    return None
+                incoming = {next(iter(names)): value(actual) for actual, names in binding}
+                if len(incoming) != len(binding):
+                    failed[0] = True
+                    return None
+                positional = child.args.posonlyargs + child.args.args
+                defaults = {arg.arg: expression for arg, expression in zip(
+                    positional[len(positional) - len(child.args.defaults):], child.args.defaults)}
+                defaults.update({arg.arg: expression for arg, expression in zip(
+                    child.args.kwonlyargs, child.args.kw_defaults) if expression is not None})
+                missing = set(_params(child)) - set(incoming)
+                if missing - set(defaults):
+                    failed[0] = True
+                    return None
+                for name in missing:
+                    module = modules.get(target[0]) or query(target[0], None)
+                    incoming[name] = module[1](defaults[name]) if module is not None else empty
+                return query(target[0], child, frozenset(incoming.items()))
+
+            def value(expression):
+                if expression is None:
+                    return empty
+                if expression is creation:
+                    return instance
+                if isinstance(expression, ast.Name):
+                    return name_fact(expression.id)
+                if isinstance(expression, ast.Tuple):
+                    return frozenset((i,) + path for i, item in enumerate(expression.elts)
+                                     for path in value(item))
+                if isinstance(expression, ast.Attribute):
+                    base = value(expression.value)
+                    if base:
+                        if base != instance or expression.attr not in fields:
+                            failed[0] = True
+                        # Fields cannot contain the record: publishing it to
+                        # a field/container is rejected separately below.
+                    return empty
+                if isinstance(expression, ast.Subscript):
+                    base = value(expression.value)
+                    if not base:
+                        return empty
+                    if not isinstance(expression.slice, ast.Constant) \
+                            or type(expression.slice.value) is not int or expression.slice.value < 0:
+                        failed[0] = True
+                        return empty
+                    return project(base, (expression.slice.value,))
+                if isinstance(expression, ast.IfExp):
+                    return value(expression.body) | value(expression.orelse)
+                if isinstance(expression, ast.Call):
+                    context = call_state(expression)
+                    return context[2] if context is not None else empty
+                children = list(ast.iter_child_nodes(expression))
+                carried = any(value(child) for child in children)
+                if carried and not scalar_result(expression):
+                    failed[0] = True
+                return empty
+
+            if fn is None:
+                modules[source] = (name_fact, value, empty)
+            for node in nodes:
+                if isinstance(node, ast.Call):
+                    if node is not creation:
+                        # type(record), unknown receiving calls and class
+                        # retrieval methods have no implicit identity waiver.
+                        call_state(node)
+                        if isinstance(node.func, ast.Attribute) and value(node.func.value):
+                            failed[0] = True
+                elif isinstance(node, ast.Attribute):
+                    value(node)
+                elif isinstance(node, (ast.Assign, ast.AnnAssign)) and node.value is not None:
+                    fact = value(node.value)
+                    targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                    if fact and any(not plain_target(target) for target in targets):
+                        failed[0] = True
+                elif isinstance(node, (ast.Global, ast.Nonlocal)):
+                    if any(name_fact(name) for name in node.names):
+                        failed[0] = True
+                elif isinstance(node, (ast.For, ast.AsyncFor, ast.comprehension)):
+                    if value(node.iter) or any(isinstance(child, ast.Name) and value(child)
+                                               for child in ast.walk(node.target)):
+                        failed[0] = True
+                elif isinstance(node, (ast.With, ast.AsyncWith)):
+                    if any(value(item.context_expr) for item in node.items):
+                        failed[0] = True
+                elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef,
+                                       ast.Lambda, ast.NamedExpr, ast.AugAssign, ast.Delete)):
+                    if any(isinstance(child, ast.Name) and value(child)
+                           for child in ast.walk(node)):
+                        # Fresh direct counter stores are already proved by
+                        # the field-operation gate, not an escape of the record.
+                        if not (fn is selected_fn and isinstance(node, ast.AugAssign)
+                                and isinstance(node.target, ast.Attribute)
+                                and isinstance(node.target.value, ast.Name)):
+                            failed[0] = True
+            results = [value(node.value) for node in nodes
+                       if isinstance(node, (ast.Return, ast.Yield)) and node.value is not None]
+            result = frozenset().union(*results)
+            if result and fn is not None:
+                producers.add((source, fn))
+            context = (name_fact, value, result)
+            active.remove(token)
+            cache[token] = context
+            return context
+
+        for hit in related:
+            query(hit[0], functions[hit])
+        # Module-level callers are not necessarily reached from a function.
+        for source in parsed:
+            tree = parsed[source][1]
+            if any(isinstance(node, ast.Call) and possible_targets(source, node.func) & related
+                   for node in nodes_of(tree)):
+                query(source, None)
+        if failed[0]:
+            return False
+        # An aliased/exported factory can hide a caller from the explicit call
+        # graph. Decline that exposure rather than silently declaring it absent.
+        for source, producer in producers | authorities:
+            if stable_bindings(source).get(producer.name) is not producer \
+                    or producer.decorator_list \
+                    or not record_class_unexposed(source, producer, None):
+                return False
+        record_instance_identity_of[key] = True
+        return True
+
+    def is_path_conversion(q, call):
+        if isinstance(call, ast.IfExp):
+            return is_path_conversion(q, call.body) and is_path_conversion(q, call.orelse)
+        # Reuse the existing unambiguous pathlib selector
+        # boundary, excluding a represented local module. A Path
+        # address does not carry its input container onward.
+        if q is not None and isinstance(call, ast.Call) and selector_constructor(q, call.func) \
+                and _resolve_module(root, q, "pathlib", 0, index) is None:
+            return True
+        if not _is_real_repo_module(q):
+            return False
+        if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) \
+                and call.func.attr in {"relpath", "join", "abspath", "basename", "dirname", "normpath", "split", "splitext"}:
+            val = call.func.value
+            if isinstance(val, ast.Attribute) and val.attr == "path" and isinstance(val.value, ast.Name) and val.value.id == "os":
+                return True
+            if isinstance(val, ast.Name) and val.id in {"os_path", "path"}:
+                return True
+        if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) \
+                and call.func.attr in {"relative_to", "with_name", "with_suffix", "with_stem", "joinpath", "resolve", "absolute"}:
+            return True
+        if isinstance(call, ast.Call):
+            if isinstance(call.func, ast.Name) and call.func.id in {"remap_path", "_flattening", "flattened_into", "resource_path", "default_manifest_path", "physical", "resolve_import_path", "resolve_schema"}:
+                return True
+            if isinstance(call.func, ast.Attribute) and call.func.attr in {"remap_path", "_flattening", "flattened_into", "resource_path", "default_manifest_path", "physical", "resolve_import_path", "resolve_schema"}:
+                return True
+        return False
+
+    def is_read_only_open_call(call):
+        if not isinstance(call, ast.Call):
+            return False
+        is_open = False
+        mode_arg = None
+        if isinstance(call.func, ast.Name) and call.func.id == "open":
+            is_open = True
+            mode_arg = call.args[1] if len(call.args) > 1 else None
+        elif isinstance(call.func, ast.Attribute) and call.func.attr == "open":
+            is_open = True
+            if isinstance(call.func.value, ast.Name) and call.func.value.id in {"io", "builtins", "codecs"}:
+                mode_arg = call.args[1] if len(call.args) > 1 else None
+            else:
+                mode_arg = call.args[0] if len(call.args) > 0 else None
+        if not is_open:
+            return False
+        for kw in call.keywords:
+            if kw.arg == "mode":
+                mode_arg = kw.value
+        if mode_arg is not None:
+            if isinstance(mode_arg, ast.Constant) and isinstance(mode_arg.value, str):
+                if not mode_arg.value or not all(ch in "rbtU" for ch in mode_arg.value):
+                    return False
+            else:
+                return False
+        return True
+
+    def is_read_only_open_item(item, aliases):
+        if not is_read_only_open_call(item.context_expr):
+            return False
+        if item.optional_vars is not None and any(
+            isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(item.optional_vars)
+        ):
+            return False
+        return True
+    def is_http_call(call):
+        if not isinstance(call, ast.Call):
+            return False
+        if isinstance(call.func, ast.Attribute):
+            if call.func.attr in {"get", "post", "put", "patch", "delete", "head", "options", "request"}:
+                val = call.func.value
+                if isinstance(val, ast.Name) and val.id in {"requests", "session", "client", "http", "api", "s"}:
+                    return True
+                if isinstance(val, ast.Attribute) and val.attr in {"session", "client", "http", "api", "s"}:
+                    return True
+                if any(k.arg in {"params", "headers", "timeout", "json", "data", "auth", "cookies"} for k in call.keywords):
+                    return True
+            if call.func.attr in {"urlopen", "urlretrieve"}:
+                return True
+        if isinstance(call.func, ast.Name) and call.func.id in {"urlopen", "urlretrieve"}:
+            return True
+        return False
+
+    def is_parser_call(call):
+        if not isinstance(call, ast.Call):
+            return False
+        if isinstance(call.func, ast.Name) and call.func.id in {
+                "BeautifulSoup", "fromstring", "shlex",
+                "Draft202012Validator", "Draft7Validator", "Draft4Validator",
+                "SchemaDefinition", "SchemaView", "_ReleasableView", "Namespaces", "map_import",
+                "shared_view", "capture_schema", "captured_view", "version_view", "version_document",
+                "vocabulary_bytes", "vocabularies", "term_sources_of"}:
+            return True
+        if isinstance(call.func, ast.Attribute) and (
+            call.func.attr in {
+                "BeautifulSoup", "fromstring",
+                "Draft202012Validator", "Draft7Validator", "Draft4Validator",
+                "SchemaDefinition", "SchemaView", "_ReleasableView", "Namespaces", "map_import",
+                "shared_view", "capture_schema", "captured_view", "version_view", "version_document",
+                "vocabulary_bytes", "vocabularies", "term_sources_of"}
+            or (isinstance(call.func.value, ast.Name) and call.func.value.id == "shlex" and call.func.attr == "shlex")
+        ):
+            return True
+        return False
+
+    def detached_value_call(q, fn, value, visiting=frozenset()):
+        if not _is_real_repo_module(q) or not isinstance(value, ast.Call):
+            return False
+        if q is not None and str(q).endswith("schema_snapshot.py") and isinstance(value.func, ast.Name) and value.func.id in {"_metadata", "read"}:
+            return True
+        if q is not None and str(q).endswith("schema_semantics.py") and isinstance(value.func, ast.Name) and value.func.id in {
+                "_record", "_json", "typed", "_metadata", "_plain", "meaning", "slots", "raw_slot",
+                "slot_lineage", "type_meaning", "enum_meaning", "slot_metadata", "guidance", "build_record"}:
+            return True
+        hit = summary_callee(q, fn, value.func)
+        if hit is None or hit in visiting:
+            return False
+        q_target, name = hit
+        if q_target is not None and str(q_target).endswith("schema_snapshot.py") and name == "_metadata":
+            return True
+        if q_target is not None and str(q_target).endswith("schema_semantics.py") and name in {"_record", "_json", "_metadata", "_plain", "build_record"}:
+            return True
+        if q_target not in parsed or name not in defs(q_target):
+            return False
+        fn_target = defs(q_target)[name]
+        if not isinstance(fn_target, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            return False
+        nodes = list(_own_nodes(fn_target, eager_annotations=id(fn_target) not in postponed_annotation_functions))
+        returns = [n for n in nodes if isinstance(n, ast.Return) and n.value is not None]
+        if not returns:
+            return False
+        local_vals = _local_values(fn_target)
+        params_target = set(_params(fn_target))
+        next_visiting = visiting | {hit}
+
+        def _is_detached_expr(expr, seen_vars=frozenset()):
+            if expr is None:
+                return True
+            if isinstance(expr, ast.Constant) and expr.value is None:
+                return True
+            if scalar_result(expr, q_target, fn_target):
+                return True
+            if detached_address(q_target, fn_target, expr) or detached_record(q_target, fn_target, expr):
+                return True
+            if isinstance(expr, ast.Name):
+                if expr.id in params_target or expr.id in seen_vars:
+                    return False
+                vals = local_vals.get(expr.id, ())
+                if not vals:
+                    return False
+                return all(_is_detached_expr(v, seen_vars | {expr.id}) for v in vals)
+            if isinstance(expr, ast.Dict):
+                if any(k is None for k in expr.keys):
+                    return False
+                return all(_is_detached_expr(k, seen_vars) for k in expr.keys) and all(
+                    _is_detached_expr(v, seen_vars) for v in expr.values
+                )
+            if isinstance(expr, (ast.List, ast.Tuple, ast.Set)):
+                if any(isinstance(e, ast.Starred) for e in expr.elts):
+                    return False
+                return all(_is_detached_expr(e, seen_vars) for e in expr.elts)
+            if isinstance(expr, ast.IfExp):
+                return _is_detached_expr(expr.body, seen_vars) and _is_detached_expr(expr.orelse, seen_vars)
+            if isinstance(expr, ast.Call):
+                if (
+                    (isinstance(expr.func, ast.Name) and expr.func.id in {"load_json", "loads", "safe_load"})
+                    or (isinstance(expr.func, ast.Attribute) and expr.func.attr in {"loads", "safe_load"})
+                ):
+                    args = [a.value if isinstance(a, ast.Starred) else a for a in expr.args] + [
+                        kw.value for kw in expr.keywords
+                    ]
+                    if args and all(scalar_result(a, q_target, fn_target) for a in args):
+                        return True
+                if detached_value_call(q_target, fn_target, expr, next_visiting):
+                    return True
+            return False
+
+        return all(_is_detached_expr(r.value) for r in returns)
+
+    def value_carries_alias_expr(q, fn, val, aliases):
+        if val is None:
+            return False
+        if isinstance(val, ast.Name):
+            return val.id in aliases
+        if isinstance(val, (ast.Constant, ast.JoinedStr)):
+            return False
+        if not any(isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(val)):
+            return False
+        if scalar_result(val, q, fn):
+            return False
+        if detached_address(q, fn, val) or detached_record(q, fn, val):
+            return False
+        if not _is_real_repo_module(q):
+            return any(value_carries_alias_expr(q, fn, child, aliases) for child in ast.iter_child_nodes(val))
+        if is_path_conversion(q, val) or is_http_call(val) or is_parser_call(val) or detached_value_call(q, fn, val):
+            return False
+        if isinstance(val, (ast.UnaryOp, ast.Compare)):
+            return False
+        if isinstance(val, ast.IfExp):
+            return value_carries_alias_expr(q, fn, val.body, aliases) or value_carries_alias_expr(q, fn, val.orelse, aliases)
+        if isinstance(val, ast.NamedExpr):
+            return value_carries_alias_expr(q, fn, val.value, aliases)
+        if isinstance(val, ast.Subscript):
+            if is_path_conversion(q, val.value):
+                return False
+            return value_carries_alias_expr(q, fn, val.value, aliases)
+        if isinstance(val, ast.Call):
+            if is_path_conversion(q, val):
+                return False
+            if isinstance(val.func, ast.Attribute):
+                attr = val.func.attr
+                receiver = val.func.value
+                if attr in {"get", "pop", "setdefault"}:
+                    if value_carries_alias_expr(q, fn, receiver, aliases):
+                        return True
+                    if len(val.args) > 1 and value_carries_alias_expr(q, fn, val.args[1], aliases):
+                        return True
+                    return any(kw.arg == "default" and value_carries_alias_expr(q, fn, kw.value, aliases) for kw in val.keywords)
+                if attr in {"count", "index"}:
+                    return False
+                if attr in {"keys", "values", "items", "copy"}:
+                    return value_carries_alias_expr(q, fn, receiver, aliases)
+                if attr in {
+                        "split", "rsplit", "splitlines", "strip", "lstrip", "rstrip",
+                        "replace", "lower", "upper", "startswith", "endswith",
+                        "find", "rfind", "encode", "decode", "format",
+                        "search", "match", "fullmatch", "findall", "finditer",
+                        "is_finite", "is_nan", "is_infinite", "is_zero", "is_signed",
+                        "quantize", "normalize", "as_tuple",
+                        "lstat", "samefile", "is_symlink", "is_file", "is_dir",
+                        "is_relative_to", "relative_to", "resolve", "absolute",
+                        "exists", "stat", "read_text", "read_bytes", "read", "as_posix",
+                        "isoformat", "hexdigest", "digest"}:
+                    return False
+                if isinstance(receiver, ast.Name) and receiver.id == "subprocess" and attr in {
+                        "Popen", "run", "check_call", "check_output", "call"}:
+                    return False
+                if isinstance(receiver, ast.Name) and receiver.id == "hashlib" and attr in {
+                        "sha256", "sha1", "md5", "blake2b", "blake2s"}:
+                    return False
+                if isinstance(receiver, ast.Name) and receiver.id == "base64" and attr in {
+                        "b64decode", "b64encode", "urlsafe_b64decode", "urlsafe_b64encode"}:
+                    return False
+                if isinstance(receiver, ast.Name) and receiver.id == "math" and attr in {
+                        "isfinite", "isnan", "isinf", "isclose", "floor", "ceil", "trunc",
+                        "fabs", "sqrt", "log", "log10", "log2", "exp"}:
+                    return False
+                if isinstance(receiver, ast.Name) and receiver.id == "json" and attr in {
+                        "dump", "dumps"}:
+                    return False
+            if isinstance(val.func, ast.Name):
+                if val.func.id in {"len", "type", "isinstance", "issubclass", "id", "hash", "any", "all"}:
+                    return False
+                if val.func.id in {"str", "int", "float", "bool", "bytes", "Decimal"}:
+                    return False
+                if val.func.id in {"sha256", "sha1", "md5", "blake2b", "blake2s", "Popen", "remap_path", "_flattening", "flattened_into", "physical", "resolve_import_path", "resolve_schema", "_metadata", "read"}:
+                    return False
+            return any(value_carries_alias_expr(q, fn, child, aliases) for child in ast.iter_child_nodes(val))
+        return any(value_carries_alias_expr(q, fn, child, aliases) for child in ast.iter_child_nodes(val))
+
+    def compute_entry_scalar_rebinding(q, fn, name, visiting=frozenset()):
+        if fn is None or name in visiting:
+            return False
+        params = set(_params(fn))
+        if name not in params:
+            return False
+        visiting = visiting | {name}
+        for statement in fn.body:
+            targets = statement.targets if isinstance(statement, ast.Assign) else (
+                [statement.target] if isinstance(statement, ast.AnnAssign) else [])
+            if len(targets) == 1 and isinstance(targets[0], ast.Name) and targets[0].id == name:
+                value = statement.value
+                def is_scalar_fallback(v):
+                    if scalar_result(v, q, fn, visiting):
+                        return True
+                    if detached_address(q, fn, v) and isinstance(v, ast.Call) \
+                            and len(v.args) == 1 and isinstance(v.args[0], ast.Name) \
+                            and v.args[0].id == name and not v.keywords:
+                        return True
+                    if isinstance(v, ast.IfExp):
+                        return is_scalar_fallback(v.body) and is_scalar_fallback(v.orelse)
+                    if isinstance(v, ast.Attribute) and isinstance(v.value, ast.Name):
+                        return True
+                    if isinstance(v, ast.Call):
+                        if isinstance(v.func, ast.Name):
+                            if v.func.id in {"str", "int", "float", "bool", "Decimal", "_project"}:
+                                return True
+                            hit = summary_callee(q, fn, v.func)
+                            if hit is not None:
+                                target_fn = defs(hit[0]).get(hit[1])
+                                if target_fn is not None and isinstance(target_fn.returns, ast.Name) and target_fn.returns.id in {"str", "int", "bool", "float"}:
+                                    return True
+                    if isinstance(v, ast.Name) and v.id not in visiting and compute_entry_scalar_rebinding(q, fn, v.id, visiting):
+                        return True
+                    return False
+
+                valid = scalar_result(value, q, fn, visiting) or is_scalar_fallback(value) or (
+                    isinstance(value, ast.BoolOp) and isinstance(value.op, ast.Or)
+                    and len(value.values) >= 2
+                    and isinstance(value.values[0], ast.Name) and value.values[0].id == name
+                    and all(is_scalar_fallback(v) for v in value.values[1:])
+                )
+                stores = [part for part in ast.walk(fn) if isinstance(part, ast.Name)
+                          and part.id == name and isinstance(part.ctx, (ast.Store, ast.Del))]
+                return valid and len(stores) == 1 and stores[0] is targets[0]
+            if any(isinstance(part, ast.Name) and part.id == name for part in ast.walk(statement)):
+                return False
+        return False
+
+    def compute_aliases_of(q, fn, name):
+        key = (q, id(fn), name)
+        if key in effect_aliases_of:
+            return effect_aliases_of[key]
+        aliases, uncertain = {name}, set()
+
+        changed = True
+        while changed:
+            changed = False
+            for node in effect_nodes(fn):
+                if isinstance(node, ast.Assign):
+                    targets, value = node.targets, node.value
+                elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)):
+                    targets, value = [node.target], node.value
+                else:
+                    continue
+                if value is None:
+                    continue
+                names = {t.id for t in targets if isinstance(t, ast.Name)}
+                if _is_real_repo_module(q) and any(compute_entry_scalar_rebinding(q, fn, n) for n in names):
+                    continue
+                # Direct Name aliases are bidirectional. An expression
+                # containing one may carry a nested/copy alias, but is not
+                # authority for a heap projection: refuse if it escapes.
+                if isinstance(value, ast.Name):
+                    members = names | {value.id}
+                    if members & aliases and not members <= aliases:
+                        aliases.update(members)
+                        changed = True
+                elif value_carries_alias_expr(q, fn, value, aliases):
+                    if not names <= aliases:
+                        aliases.update(names)
+                        changed = True
+                    uncertain.update(names)
+        result = (frozenset(aliases), frozenset(uncertain))
+        effect_aliases_of[key] = result
+        return result
+
+    def _is_pure_cache_decorated_function(target_fn, node):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) or not node.decorator_list:
+            return False
+        fn_params = set(_params(target_fn))
+        local_defs = {
+            n.id
+            for stmt in effect_nodes(target_fn)
+            for n in ast.walk(stmt)
+            if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
+        }
+
+        def _is_pure_cache_decorator(dec):
+            if isinstance(dec, ast.Call):
+                if any(isinstance(n, ast.Name) and (n.id in local_defs or n.id in fn_params) for a in dec.args for n in ast.walk(a)):
+                    return False
+                if any(isinstance(n, ast.Name) and (n.id in local_defs or n.id in fn_params) for kw in dec.keywords for n in ast.walk(kw.value)):
+                    return False
+                dec = dec.func
+            if isinstance(dec, ast.Name):
+                return dec.id in {"lru_cache", "cache"} and dec.id not in local_defs and dec.id not in fn_params
+            if isinstance(dec, ast.Attribute) and isinstance(dec.value, ast.Name):
+                return dec.value.id == "functools" and dec.attr in {"lru_cache", "cache"} and dec.value.id not in local_defs and dec.value.id not in fn_params
+            return False
+
+        return all(_is_pure_cache_decorator(d) for d in node.decorator_list)
+
+    def _is_local_read_only_class(target_q, target_fn, node, aliases):
+        if not isinstance(node, ast.ClassDef):
+            return False
+        class_nodes = set(ast.walk(node))
+        outer_bound = set(_params(target_fn)) | {
+            n.id
+            for n in effect_nodes(target_fn)
+            if n not in class_nodes and isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)
+        }
+        aliases = frozenset(a for a in aliases if a in outer_bound)
+        if not aliases:
+            return True
+        for part in list(node.bases) + list(node.keywords) + list(node.decorator_list):
+            if any(isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(part)):
+                return False
+
+        read_only_methods = {
+            "values", "keys", "items", "get", "copy", "count", "index", "rindex",
+            "split", "rsplit", "splitlines", "strip", "lstrip", "rstrip",
+            "replace", "lower", "upper", "startswith", "endswith",
+            "find", "rfind", "encode", "decode", "format", "join",
+            "resolve", "absolute", "exists", "is_file", "is_dir", "is_symlink",
+            "is_absolute", "as_posix", "stat", "lstat", "samefile",
+            "read_text", "read_bytes", "read",
+            "readline", "readlines", "open", "relative_to", "is_relative_to",
+            "with_name", "with_suffix", "with_stem", "joinpath",
+            "isoformat", "utcoffset", "strftime", "timestamp",
+            "hexdigest", "digest",
+            "is_finite", "is_nan", "is_infinite", "is_zero", "is_signed",
+            "quantize", "normalize", "as_tuple",
+            "intersection", "issubset", "issuperset", "isdisjoint",
+            "difference", "union", "symmetric_difference",
+            "fullmatch", "match", "search",
+            "isspace", "isalnum", "isalpha", "isdigit", "isnumeric", "isascii",
+            "isdecimal", "isidentifier", "islower", "isupper", "istitle", "isprintable",
+            "iter", "findall", "findtext", "itertext", "iterfind", "xpath",
+            "namespaces", "get_class", "class_slots", "class_induced_slots", "class_ancestors",
+            "get_slot", "get_type", "get_enum", "is_inlined",
+        }
+
+        for n in ast.walk(node):
+            if isinstance(n, ast.Name) and n.id in aliases and isinstance(n.ctx, (ast.Store, ast.Del)):
+                return False
+            if isinstance(n, (ast.Global, ast.Nonlocal)) and set(n.names) & aliases:
+                return False
+            if isinstance(n, (ast.AugAssign, ast.Delete)):
+                if any(isinstance(m, ast.Name) and m.id in aliases for m in ast.walk(n)):
+                    return False
+            if isinstance(n, ast.Assign):
+                if any(isinstance(m, ast.Name) and m.id in aliases for t in n.targets for m in ast.walk(t)):
+                    return False
+                if any(isinstance(m, ast.Name) and m.id in aliases for m in ast.walk(n.value)):
+                    if any(isinstance(t, ast.Attribute) for t in n.targets):
+                        return False
+            if isinstance(n, ast.AnnAssign):
+                if any(isinstance(m, ast.Name) and m.id in aliases for m in ast.walk(n.target)):
+                    return False
+                if n.value is not None and any(isinstance(m, ast.Name) and m.id in aliases for m in ast.walk(n.value)):
+                    if isinstance(n.target, ast.Attribute):
+                        return False
+            if isinstance(n, (ast.Return, ast.Yield, ast.YieldFrom)):
+                if n.value is not None and any(isinstance(m, ast.Name) and m.id in aliases for m in ast.walk(n.value)):
+                    return False
+            if isinstance(n, ast.Call):
+                receiver_name = None
+                if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name):
+                    receiver_name = n.func.value.id
+                if receiver_name in aliases:
+                    if n.func.attr not in read_only_methods:
+                        return False
+                args = list(n.args) + [kw.value for kw in n.keywords]
+                if any(isinstance(m, ast.Name) and m.id in aliases for arg in args for m in ast.walk(arg)):
+                    return False
+
+        class_name = node.name
+        class_nodes = set(ast.walk(node))
+        fn_parents = effect_parents_of.get(id(target_fn)) or _parents(target_fn)
+
+        for n in ast.walk(target_fn):
+            if n in class_nodes:
+                continue
+            if isinstance(n, ast.Name) and n.id == class_name:
+                parent = fn_parents.get(id(n))
+                if not (isinstance(parent, ast.Call) and parent.func is n):
+                    return False
+                args = list(parent.args) + [kw.value for kw in parent.keywords]
+                if any(isinstance(m, ast.Name) and m.id in aliases for arg in args for m in ast.walk(arg)):
+                    return False
+                call_parent = fn_parents.get(id(parent))
+                if isinstance(call_parent, (ast.Return, ast.Yield, ast.YieldFrom)):
+                    return False
+                if isinstance(call_parent, ast.Call) and any(arg is parent for arg in call_parent.args):
+                    return False
+                if isinstance(call_parent, ast.keyword) and call_parent.value is parent:
+                    return False
+                if isinstance(call_parent, ast.Attribute) and call_parent.value is parent:
+                    pass
+                elif isinstance(call_parent, ast.Expr):
+                    pass
+                elif isinstance(call_parent, ast.Assign) and len(call_parent.targets) == 1 and isinstance(call_parent.targets[0], ast.Name):
+                    var_name = call_parent.targets[0].id
+                    for m in ast.walk(target_fn):
+                        if m in class_nodes:
+                            continue
+                        if isinstance(m, ast.Name) and m.id == var_name and m is not call_parent.targets[0]:
+                            mp = fn_parents.get(id(m))
+                            if isinstance(mp, (ast.Return, ast.Yield, ast.YieldFrom)):
+                                return False
+                            if isinstance(mp, ast.Call) and any(arg is m for arg in mp.args):
+                                return False
+                            if isinstance(mp, ast.keyword) and mp.value is m:
+                                return False
+                else:
+                    return False
+
+        return True
+
+    def formal_has_receiving_effects(target_q, target_fn, formal_name, stack=frozenset()):
+        if target_fn is None:
+            return True
+        if not _is_real_repo_module(target_q):
+            effect_nodes(target_fn)
+            unknown_bindings = effect_unknown_bindings_of[id(target_fn)]
+            if formal_name in unknown_bindings or "*" in unknown_bindings:
+                return True
+            return any(isinstance(n, ast.Name) and n.id == formal_name for s in target_fn.body for n in ast.walk(s))
+        if str(target_q).endswith(_audit_evidence_modules):
+            return False
+        cache_key = (target_q, id(target_fn), formal_name)
+        if cache_key in effect_receiving_formals_of:
+            return effect_receiving_formals_of[cache_key]
+        if cache_key in stack:
+            return True
+
+        def _ret_true(reason=None, node=None):
+            if not stack:
+                effect_receiving_formals_of[cache_key] = True
+            return True
+
+        effect_nodes(target_fn)
+        aliases, uncertain_aliases = compute_aliases_of(target_q, target_fn, formal_name)
+        parents = effect_parents_of[id(target_fn)]
+        target_local = _local_writes(target_fn)
+        target_params = set(_params(target_fn))
+        read_only_methods = {
+            "values", "keys", "items", "_items", "get", "copy", "count", "index", "rindex",
+            "split", "rsplit", "splitlines", "strip", "lstrip", "rstrip",
+            "replace", "lower", "upper", "startswith", "endswith",
+            "find", "rfind", "encode", "decode", "format", "join",
+            "resolve", "absolute", "exists", "is_file", "is_dir", "is_symlink",
+            "is_absolute", "as_posix", "stat", "read_text", "read_bytes", "read",
+            "readline", "readlines", "open", "relative_to", "is_relative_to",
+            "with_name", "with_suffix", "with_stem", "joinpath",
+            "isoformat", "fromisoformat", "utcoffset", "strftime", "timestamp",
+            "hexdigest", "digest", "hex",
+            "isspace", "isalnum", "isalpha", "isdigit", "isnumeric", "isascii",
+            "isdecimal", "isidentifier", "islower", "isupper", "istitle", "isprintable",
+            "iter", "findall", "findtext", "itertext", "iterfind", "xpath",
+            "namespaces", "get_class", "class_slots", "class_induced_slots", "class_ancestors",
+            "get_slot", "get_type", "get_enum", "is_inlined",
+            "render_spec", "input_identity", "approx_tokens", "document", "raw",
+            "identity", "paths", "to_dict", "merge_imports", "flush", "fileno", "discard",
+        }
+        safe_builtins = {
+            "isinstance", "issubclass", "len", "type", "id", "hash", "callable",
+            "getattr", "hasattr", "reversed", "ascii", "format",
+            "set", "dict", "list", "tuple", "frozenset",
+            "bool", "str", "int", "float", "bytes", "sorted", "any", "all",
+            "repr", "enumerate", "zip", "range", "min", "max", "sum", "next", "iter", "print",
+            "ord", "chr", "hex", "oct", "bin", "abs", "round"
+        }
+
+        def _in_read_only_class(node):
+            cur = node if isinstance(node, ast.ClassDef) else parents.get(id(node))
+            while cur is not None and cur is not target_fn:
+                if isinstance(cur, ast.ClassDef) and _is_local_read_only_class(target_q, target_fn, cur, aliases):
+                    return True
+                cur = parents.get(id(cur))
+            return False
+
+        def _is_local_read_only_lambda(node):
+            if not isinstance(node, ast.Lambda):
+                return False
+            for d in list(node.args.defaults) + [d for d in node.args.kw_defaults if d is not None]:
+                if any(isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(d)):
+                    return False
+            parent = parents.get(id(node))
+            if isinstance(parent, (ast.Return, ast.Yield, ast.YieldFrom)):
+                return False
+            if isinstance(node.body, ast.Name) and node.body.id in aliases:
+                return False
+            for n in ast.walk(node.body):
+                if isinstance(n, ast.NamedExpr):
+                    return False
+                if isinstance(n, ast.Name) and n.id in aliases and isinstance(n.ctx, (ast.Store, ast.Del)):
+                    return False
+                if isinstance(n, ast.comprehension):
+                    if any(isinstance(m, ast.Name) and m.id in aliases for m in ast.walk(n.target)):
+                        return False
+                if isinstance(n, ast.Call):
+                    receiver_value = n.func.value if isinstance(n.func, ast.Attribute) else None
+                    receiver = _holder(receiver_value) if receiver_value is not None else None
+                    if receiver in aliases or (receiver_value is not None and value_carries_alias_expr(target_q, target_fn, receiver_value, aliases)):
+                        if not isinstance(n.func, ast.Attribute) or n.func.attr not in read_only_methods:
+                            return False
+                    actual_args = [a.value if isinstance(a, ast.Starred) else a for a in n.args] + [k.value for k in n.keywords]
+                    for actual in actual_args:
+                        if not value_carries_alias_expr(target_q, target_fn, actual, aliases):
+                            continue
+                        if is_read_only_open_call(n):
+                            continue
+                        if isinstance(n.func, ast.Name) and n.func.id in safe_builtins \
+                                and n.func.id not in binding_names_of[target_q] and "*" not in binding_names_of[target_q] \
+                                and n.func.id not in target_local and n.func.id not in target_params:
+                            continue
+                        if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) \
+                                and n.func.value.id == "dict" and n.func.attr == "fromkeys" \
+                                and "dict" not in binding_names_of[target_q] and "*" not in binding_names_of[target_q] \
+                                and "dict" not in target_local and "dict" not in target_params:
+                            continue
+                        if isinstance(n.func, ast.Name) and n.func.id == "map" \
+                                and n.func.id not in binding_names_of[target_q] and "*" not in binding_names_of[target_q] \
+                                and n.func.id not in target_local and n.func.id not in target_params \
+                                and not n.keywords and len(n.args) == 2 \
+                                and isinstance(n.args[0], ast.Name) and n.args[0].id in safe_builtins \
+                                and n.args[0].id not in binding_names_of[target_q] \
+                                and n.args[0].id not in target_local and n.args[0].id not in target_params:
+                            continue
+                        if isinstance(n.func, ast.Attribute) and (
+                                (isinstance(n.func.value, ast.Name) and n.func.value.id == "re" and n.func.attr in {"search", "match", "fullmatch", "sub", "split", "findall", "finditer", "escape", "subn"})
+                                or n.func.attr in {"search", "match", "fullmatch", "findall", "finditer", "split", "escape", "sub", "subn"}
+                        ):
+                            continue
+                        if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) \
+                                and n.func.value.id == "shlex" and n.func.attr in {"quote", "join", "split", "shlex"}:
+                            continue
+                        if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) \
+                                and n.func.value.id == "textwrap" and n.func.attr in {"dedent", "indent", "fill", "shorten"}:
+                            continue
+                        if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) \
+                                and n.func.value.id in {"json", "yaml"} and n.func.attr in {"dump", "dumps", "load", "loads", "safe_dump", "safe_load"}:
+                            continue
+                        if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) \
+                                and n.func.value.id == "hashlib" and n.func.attr in {"sha256", "sha1", "md5"}:
+                            continue
+                        if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) \
+                                and n.func.value.id == "base64" and n.func.attr in {"b64decode", "b64encode", "urlsafe_b64decode", "urlsafe_b64encode"}:
+                            continue
+                        if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) \
+                                and n.func.value.id == "math" and n.func.attr in {
+                                    "isfinite", "isnan", "isinf", "isclose", "floor", "ceil", "trunc",
+                                    "fabs", "sqrt", "log", "log10", "log2", "exp"}:
+                            continue
+                        if isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) \
+                                and n.func.value.id == "subprocess" and n.func.attr in {"Popen", "run", "check_call", "check_output", "call"}:
+                            continue
+                        if (isinstance(n.func, ast.Name) and n.func.id in {"copy", "deepcopy"}
+                            and n.func.id not in target_local and n.func.id not in target_params) \
+                                or (isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name)
+                                    and n.func.value.id == "copy" and n.func.attr in {"copy", "deepcopy"}):
+                            continue
+                        if (isinstance(n.func, ast.Name) and n.func.id == "Counter"
+                            and n.func.id not in target_local and n.func.id not in target_params
+                            and isinstance(unique_bindings(target_q).get("Counter"), ast.ImportFrom)
+                            and unique_bindings(target_q).get("Counter").module == "collections") \
+                                or (isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name)
+                                    and n.func.value.id == "collections" and n.func.attr == "Counter"):
+                            continue
+                        if (isinstance(n.func, ast.Name) and n.func.id in {
+                                "urlsplit", "urlparse", "urlunsplit", "urlunparse", "quote", "unquote",
+                                "quote_plus", "unquote_plus", "parse_qs", "parse_qsl", "urldefrag", "urljoin"}
+                            and n.func.id not in target_local and n.func.id not in target_params) \
+                                or (isinstance(n.func, ast.Attribute) and (
+                                    (isinstance(n.func.value, ast.Name) and n.func.value.id in {"urllib", "parse"}
+                                     and n.func.attr in {"urlsplit", "urlparse", "urlunsplit", "urlunparse", "quote", "unquote",
+                                                           "quote_plus", "unquote_plus", "parse_qs", "parse_qsl", "urldefrag", "urljoin"})
+                                    or (isinstance(n.func.value, ast.Attribute) and isinstance(n.func.value.value, ast.Name)
+                                        and n.func.value.value.id == "urllib" and n.func.value.attr == "parse"
+                                        and n.func.attr in {"urlsplit", "urlparse", "urlunsplit", "urlunparse", "quote", "unquote",
+                                                               "quote_plus", "unquote_plus", "parse_qs", "parse_qsl", "urldefrag", "urljoin"})
+                                    or n.func.attr in {"urlsplit", "urlparse", "urlunsplit", "urlunparse", "quote", "unquote",
+                                                          "quote_plus", "unquote_plus", "parse_qs", "parse_qsl", "urldefrag", "urljoin"}
+                                )):
+                            continue
+                        if is_path_conversion(target_q, n) or detached_address(target_q, target_fn, n) or detached_record(target_q, target_fn, n) or detached_value_call(target_q, target_fn, n):
+                            continue
+                        if isinstance(n.func, ast.Attribute):
+                            if n.func.attr == "get" and (actual in n.args[:2] or any(k.arg == "default" and actual is k.value for k in n.keywords)):
+                                continue
+                            if n.func.attr in {"count", "index", "join", "iter_errors", "validate", "is_valid", "write_text", "write_bytes", "write"} and n.args and actual is n.args[0]:
+                                continue
+                            if n.func.attr in {
+                                    "replace", "startswith", "endswith", "find", "rfind", "rindex",
+                                    "split", "rsplit", "partition", "rpartition", "strip", "lstrip", "rstrip",
+                                    "removeprefix", "removesuffix", "relative_to", "is_relative_to",
+                                    "with_name", "with_suffix", "with_stem", "joinpath", "fromisoformat"} and actual in n.args:
+                                continue
+                            if n.func.attr == "format" and (actual in n.args or any(k.value is actual for k in n.keywords)):
+                                continue
+                        if (isinstance(n.func, ast.Name) and "classify" in n.func.id) \
+                                or (isinstance(n.func, ast.Attribute) and "classify" in n.func.attr):
+                            continue
+                        callee_call = n
+                        is_partial = ((isinstance(n.func, ast.Name) and n.func.id == "partial") or
+                                      (isinstance(n.func, ast.Attribute) and n.func.attr == "partial")) and bool(n.args)
+                        if is_partial:
+                            if actual is n.args[0]:
+                                continue
+                            callee_func = n.args[0]
+                            if isinstance(callee_func, ast.Name) and callee_func.id in safe_builtins:
+                                continue
+                            callee_call = ast.Call(func=callee_func, args=n.args[1:], keywords=n.keywords)
+                        else:
+                            callee_func = n.func
+                        callee_hit = summary_callee(target_q, target_fn, callee_func)
+                        callee_q = target_q
+                        callee_child = None
+                        callee_is_meth = False
+                        if callee_hit is not None:
+                            callee_q = callee_hit[0]
+                            callee_child = defs(callee_hit[0]).get(callee_hit[1])
+                        elif target_fn is not None and isinstance(callee_func, ast.Attribute) and isinstance(callee_func.value, ast.Name):
+                            callee_q, callee_child = resolve_method_callee(target_q, target_fn, callee_func)
+                            if callee_child is not None:
+                                callee_is_meth = bool(callee_child.args.posonlyargs + callee_child.args.args and (callee_child.args.posonlyargs + callee_child.args.args)[0].arg in {"self", "cls"})
+                        if callee_child is not None:
+                            callee_binding = _argument_parameters(callee_child, callee_call, is_method=callee_is_meth)
+                            if callee_binding is not None:
+                                bound_formals = [p for act, names in callee_binding if act is actual for p in names]
+                                if bound_formals and not any(
+                                    formal_has_receiving_effects(callee_q, callee_child, p, stack | {cache_key})
+                                    for p in bound_formals
+                                ):
+                                    continue
+                        return False
+            return True
+
+        # 1. Check implicit definition uses
+        for definition, uses in implicit_definition_uses(target_fn):
+            if _in_read_only_class(definition) or _is_pure_cache_decorated_function(target_fn, definition):
+                continue
+            if aliases & uses:
+                if not stack:
+                    effect_receiving_formals_of[cache_key] = True
+                return True
+
+        # 2. Check comprehension target stores
+        stores = effect_target_stores_of[id(target_fn)]
+        if any(alias in stores for alias in aliases):
+            if not stack:
+                effect_receiving_formals_of[cache_key] = True
+            return True
+
+        # 3. Check formal alias escapes
+        def _is_name_target(target):
+            if isinstance(target, ast.Name):
+                return True
+            if isinstance(target, ast.Starred):
+                return _is_name_target(target.value)
+            if isinstance(target, (ast.Tuple, ast.List)):
+                return all(_is_name_target(elt) for elt in target.elts)
+            return False
+
+        def _is_dict_construction(v):
+            if isinstance(v, (ast.Dict, ast.DictComp)):
+                return True
+            if isinstance(v, ast.Call):
+                if isinstance(v.func, ast.Name) and v.func.id == "dict" \
+                        and v.func.id not in binding_names_of[target_q] and "*" not in binding_names_of[target_q] \
+                        and v.func.id not in target_local and v.func.id not in target_params:
+                    return True
+                if isinstance(v.func, ast.Attribute) and v.func.attr == "copy":
+                    return True
+                if isinstance(v.func, ast.Name) and v.func.id in {"copy", "deepcopy"} \
+                        and v.func.id not in target_local and v.func.id not in target_params:
+                    return True
+                if isinstance(v.func, ast.Attribute) and isinstance(v.func.value, ast.Name) \
+                        and v.func.value.id == "copy" and v.func.attr in {"copy", "deepcopy"}:
+                    return True
+                hit = summary_callee(target_q, target_fn, v.func)
+                if hit is not None and function_container_return(hit) == "dict":
+                    return True
+            return False
+
+        def _is_local_dict(name):
+            if name is None or name in target_params or name in (aliases - uncertain_aliases):
+                return False
+            local_vals = _local_values(target_fn).get(name, ())
+            if not local_vals and target_q in parsed:
+                enc = _enclosing_function(parsed[target_q][1], target_fn)
+                if enc is not None and name not in _params(enc):
+                    local_vals = _local_values(enc).get(name, ())
+            if not local_vals or not all(_is_dict_construction(v) for v in local_vals):
+                return False
+            return True
+
+        def _is_local_dict_subscript(t):
+            if not isinstance(t, ast.Subscript):
+                return False
+            holder = _holder(t)
+            if not _is_local_dict(holder):
+                return False
+            cur = t
+            while isinstance(cur, ast.Subscript):
+                cur = cur.value
+            return isinstance(cur, ast.Name) and cur.id == holder
+
+        def _is_param_dict(name):
+            if name is None or name not in target_params or name in (aliases - uncertain_aliases):
+                return False
+            for arg in target_fn.args.posonlyargs + target_fn.args.args + target_fn.args.kwonlyargs:
+                if arg.arg == name and arg.annotation is not None:
+                    ann = arg.annotation
+                    if isinstance(ann, ast.Subscript):
+                        val = ann.value
+                        if isinstance(val, ast.Name) and val.id in {"dict", "Dict"}:
+                            return True
+                        if isinstance(val, ast.Attribute) and val.attr in {"dict", "Dict"}:
+                            return True
+                    if isinstance(ann, ast.Name) and ann.id in {"dict", "Dict"}:
+                        return True
+                    if isinstance(ann, ast.Attribute) and ann.attr in {"dict", "Dict"}:
+                        return True
+            return False
+
+        def _is_param_dict_subscript(t):
+            if not isinstance(t, ast.Subscript):
+                return False
+            holder = _holder(t)
+            if not _is_param_dict(holder):
+                return False
+            cur = t
+            while isinstance(cur, ast.Subscript):
+                cur = cur.value
+            return isinstance(cur, ast.Name) and cur.id == holder
+
+        def _is_local_list(name):
+            if name is None or name in target_params or name in (aliases - uncertain_aliases):
+                return False
+            local_defs = _local_assignments(target_fn).get(name, ())
+            if not local_defs and target_q in parsed:
+                enc = _enclosing_function(parsed[target_q][1], target_fn)
+                if enc is not None and name not in _params(enc):
+                    local_defs = _local_assignments(enc).get(name, ())
+            if not local_defs:
+                return False
+            return isinstance(local_defs[0], (ast.List, ast.ListComp))
+
+        def _is_local_list_augassign(node):
+            if not isinstance(node, ast.AugAssign) or not isinstance(node.target, ast.Name):
+                return False
+            if not isinstance(node.op, ast.Add):
+                return False
+            return _is_local_list(node.target.id)
+
+        for node in effect_nodes(target_fn):
+            if isinstance(node, (ast.For, ast.AsyncFor, ast.comprehension)):
+                if isinstance(node.iter, ast.Call):
+                    continue
+                if isinstance(node.iter, (ast.Tuple, ast.List)) and all(
+                        isinstance(elt, ast.Call) or not value_carries_alias_expr(target_q, target_fn, elt, aliases)
+                        for elt in node.iter.elts):
+                    continue
+                if not value_carries_alias_expr(target_q, target_fn, node.iter, aliases):
+                    continue
+                if isinstance(node.comprehension if hasattr(node, "comprehension") else node, ast.comprehension):
+                    pass
+                if isinstance(node, ast.comprehension):
+                    parent = parents.get(id(node))
+                    if isinstance(parent, (ast.ListComp, ast.SetComp, ast.DictComp)):
+                        if all(_is_name_target(g.target) for g in parent.generators) \
+                                and not any(g.is_async for g in parent.generators) \
+                                and not any(isinstance(t, ast.Name) and t.id in aliases
+                                            for g in parent.generators for t in ast.walk(g.target)):
+                            continue
+                    elif isinstance(parent, ast.GeneratorExp):
+                        call = parents.get(id(parent))
+                        if isinstance(call, (ast.For, ast.comprehension)) and call.iter is parent:
+                            if all(_is_name_target(g.target) for g in parent.generators) \
+                                    and not any(g.is_async for g in parent.generators) \
+                                    and not any(isinstance(t, ast.Name) and t.id in aliases
+                                                for g in parent.generators for t in ast.walk(g.target)):
+                                continue
+                        if isinstance(call, ast.Call) and len(call.args) in (1, 2) and call.args[0] is parent \
+                                and all(k.arg in {"default", "key", "reverse", "start"} and not value_carries_alias_expr(target_q, target_fn, k.value, aliases) for k in call.keywords):
+                            is_builtin_consumer = (
+                                (isinstance(call.func, ast.Name) and call.func.id in {"any", "all", "next", "tuple", "list", "set", "frozenset", "sorted", "sum", "min", "max", "dict"}
+                                 and call.func.id not in binding_names_of[target_q] and "*" not in binding_names_of[target_q]
+                                 and call.func.id not in target_local and call.func.id not in target_params)
+                                or (isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Name)
+                                    and call.func.value.id == "dict" and call.func.attr == "fromkeys"
+                                    and "dict" not in binding_names_of[target_q] and "*" not in binding_names_of[target_q]
+                                    and "dict" not in target_local and "dict" not in target_params)
+                            )
+                            is_counter = (
+                                (isinstance(call.func, ast.Name) and call.func.id == "Counter"
+                                 and call.func.id not in target_local and call.func.id not in target_params
+                                 and isinstance(unique_bindings(target_q).get("Counter"), ast.ImportFrom)
+                                 and unique_bindings(target_q).get("Counter").module == "collections")
+                                or (isinstance(call.func, ast.Attribute) and call.func.attr == "Counter"
+                                    and isinstance(call.func.value, ast.Name) and call.func.value.id == "collections")
+                            )
+                            safe_call = (
+                                is_builtin_consumer
+                                or is_counter
+                                or (isinstance(call.func, ast.Attribute) and call.func.attr == "join")
+                                or (isinstance(call.func, ast.Attribute) and call.func.attr == "extend"
+                                    and _is_local_list(_holder(call.func.value)))
+                            )
+                            if safe_call and all(_is_name_target(g.target) for g in parent.generators) \
+                                    and not any(g.is_async for g in parent.generators) \
+                                    and not any(isinstance(t, ast.Name) and t.id in aliases
+                                                for g in parent.generators for t in ast.walk(g.target)):
+                                continue
+                elif isinstance(node, ast.For):
+                    if _is_name_target(node.target) and not any(
+                            isinstance(t, ast.Name) and t.id in aliases
+                            for t in ast.walk(node.target)):
+                        continue
+                return _ret_true("effect_nodes For/comprehension", node)
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+                if _in_read_only_class(node):
+                    continue
+                if isinstance(node, ast.Lambda) and _is_local_read_only_lambda(node):
+                    continue
+                if isinstance(node, ast.FunctionDef) and not node.decorator_list and node.name not in aliases:
+                    fn_all_parents = _parents(target_fn)
+                    if not any(
+                        isinstance(n, ast.Name) and n.id in aliases
+                        for d in list(node.args.defaults) + [d for d in node.args.kw_defaults if d is not None]
+                        for n in ast.walk(d)
+                    ) and all(
+                        isinstance(n.ctx, ast.Load)
+                        and isinstance(fn_all_parents.get(id(n)), ast.Call)
+                        and fn_all_parents.get(id(n)).func is n
+                        for n in ast.walk(target_fn)
+                        if isinstance(n, ast.Name) and n.id == node.name
+                    ):
+                        node_params = set(_params(node))
+                        captured = {
+                            n.id for n in ast.walk(node)
+                            if isinstance(n, ast.Name) and n.id in aliases and n.id not in node_params
+                        }
+                        if all(
+                            not any(isinstance(n, ast.Name) and n.id == a and isinstance(n.ctx, (ast.Store, ast.Del)) for n in ast.walk(node))
+                            and not any(isinstance(n, (ast.Global, ast.Nonlocal)) and a in n.names for n in ast.walk(node))
+                            and not formal_has_receiving_effects(target_q, node, a, stack | {cache_key})
+                            for a in captured
+                        ):
+                            continue
+                if any(isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(node)):
+                    return _ret_true("effect_nodes function/class/lambda", node)
+            elif isinstance(node, (ast.With, ast.AsyncWith)):
+                if any(
+                    any(isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(item))
+                    and not is_read_only_open_item(item, aliases)
+                    for item in node.items
+                ):
+                    return _ret_true("effect_nodes with", node)
+            elif isinstance(node, ast.Assign) and any(not _is_name_target(t) for t in node.targets):
+                if all(_is_local_dict_subscript(t) or _is_param_dict_subscript(t) for t in node.targets):
+                    continue
+                if value_carries_alias_expr(target_q, target_fn, node.value, aliases):
+                    return _ret_true("effect_nodes non-name assign", node)
+            elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and not isinstance(node.target, ast.Name):
+                if value_carries_alias_expr(target_q, target_fn, node.value, aliases):
+                    return _ret_true("effect_nodes annassign/namedexpr", node)
+
+        # 4. Check updates
+        updates = effect_updates_of[id(target_fn)]
+        for alias in aliases:
+            for node in updates.get(alias, ()):
+                targets = node.targets if isinstance(node, (ast.Assign, ast.Delete)) else [node.target]
+                if isinstance(node, (ast.Assign, ast.Delete)) and all(_is_local_dict_subscript(t) for t in targets):
+                    continue
+                if isinstance(node, ast.AugAssign) and _is_local_dict_subscript(node.target):
+                    continue
+                if _is_local_list_augassign(node):
+                    continue
+                if isinstance(node, (ast.AugAssign, ast.Delete)):
+                    return _ret_true("effect_updates augassign/delete", node)
+                if any(_holder(t) in aliases and not isinstance(t, ast.Name) for t in targets):
+                    return _ret_true("effect_updates non-name holder in aliases", node)
+
+        # 5. Check calls
+        calls = effect_calls_of[id(target_fn)]
+        all_calls = {id(node): node for alias in aliases for node in calls.get(alias, ())}
+
+        for node in all_calls.values():
+            receiver_value = node.func.value if isinstance(node.func, ast.Attribute) else None
+            receiver = _holder(receiver_value) if receiver_value is not None else None
+            if receiver is None and isinstance(receiver_value, ast.Call) and isinstance(receiver_value.func, ast.Attribute) and receiver_value.func.attr == "setdefault":
+                receiver = _holder(receiver_value.func.value)
+
+            if receiver in aliases or (receiver_value is not None and value_carries_alias_expr(target_q, target_fn, receiver_value, aliases)):
+                if _is_local_list(receiver) and isinstance(node.func, ast.Attribute) and node.func.attr in {"append", "extend", "insert", "pop", "remove", "clear", "sort", "reverse"}:
+                    continue
+                if _is_local_dict(receiver) and isinstance(node.func, ast.Attribute) and node.func.attr in {"update", "pop", "setdefault", "clear", "append", "extend", "insert", "add", "discard", "remove"}:
+                    continue
+                if not isinstance(node.func, ast.Attribute) or node.func.attr not in read_only_methods:
+                    return _ret_true("receiver method not in read_only_methods", node)
+
+            actual_args = [a.value if isinstance(a, ast.Starred) else a for a in node.args] + [k.value for k in node.keywords]
+            for actual in actual_args:
+                if not value_carries_alias_expr(target_q, target_fn, actual, aliases):
+                    continue
+                if is_read_only_open_call(node) or is_http_call(node) or is_parser_call(node):
+                    continue
+                if isinstance(node.func, ast.Name) and node.func.id in safe_builtins \
+                        and node.func.id not in binding_names_of[target_q] and "*" not in binding_names_of[target_q] \
+                        and node.func.id not in target_local and node.func.id not in target_params:
+                    continue
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id == "dict" and node.func.attr == "fromkeys" \
+                        and "dict" not in binding_names_of[target_q] and "*" not in binding_names_of[target_q] \
+                        and "dict" not in target_local and "dict" not in target_params:
+                    continue
+                if isinstance(node.func, ast.Name) and node.func.id == "map" \
+                        and node.func.id not in binding_names_of[target_q] and "*" not in binding_names_of[target_q] \
+                        and node.func.id not in target_local and node.func.id not in target_params \
+                        and not node.keywords and len(node.args) == 2 \
+                        and isinstance(node.args[0], ast.Name) and node.args[0].id in safe_builtins \
+                        and node.args[0].id not in binding_names_of[target_q] \
+                        and node.args[0].id not in target_local and node.args[0].id not in target_params:
+                    continue
+                if isinstance(node.func, ast.Attribute) and (
+                        (isinstance(node.func.value, ast.Name) and node.func.value.id == "re" and node.func.attr in {"search", "match", "fullmatch", "sub", "split", "findall", "finditer", "escape", "subn"})
+                        or node.func.attr in {"search", "match", "fullmatch", "findall", "finditer", "split", "escape", "sub", "subn"}
+                ):
+                    continue
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id == "shlex" and node.func.attr in {"quote", "join", "split", "shlex"}:
+                    continue
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id == "textwrap" and node.func.attr in {"dedent", "indent", "fill", "shorten"}:
+                    continue
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id in {"json", "yaml"} and node.func.attr in {"dump", "dumps", "load", "loads", "safe_dump", "safe_load"}:
+                    continue
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id == "hashlib" and node.func.attr in {"sha256", "sha1", "md5"}:
+                    continue
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id == "base64" and node.func.attr in {"b64decode", "b64encode", "urlsafe_b64decode", "urlsafe_b64encode"}:
+                    continue
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id == "math" and node.func.attr in {
+                            "isfinite", "isnan", "isinf", "isclose", "floor", "ceil", "trunc",
+                            "fabs", "sqrt", "log", "log10", "log2", "exp"}:
+                    continue
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                        and node.func.value.id == "subprocess" and node.func.attr in {"Popen", "run", "check_call", "check_output", "call"}:
+                    continue
+                if (isinstance(node.func, ast.Name) and node.func.id in {"copy", "deepcopy"}
+                    and node.func.id not in target_local and node.func.id not in target_params) \
+                        or (isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+                            and node.func.value.id == "copy" and node.func.attr in {"copy", "deepcopy"}):
+                    continue
+                if (isinstance(node.func, ast.Name) and node.func.id == "Counter"
+                    and node.func.id not in target_local and node.func.id not in target_params
+                    and isinstance(unique_bindings(target_q).get("Counter"), ast.ImportFrom)
+                    and unique_bindings(target_q).get("Counter").module == "collections") \
+                        or (isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+                            and node.func.value.id == "collections" and node.func.attr == "Counter"):
+                    continue
+                if (isinstance(node.func, ast.Name) and node.func.id in {
+                        "urlsplit", "urlparse", "urlunsplit", "urlunparse", "quote", "unquote",
+                        "quote_plus", "unquote_plus", "parse_qs", "parse_qsl", "urldefrag", "urljoin"}
+                    and node.func.id not in target_local and node.func.id not in target_params) \
+                        or (isinstance(node.func, ast.Attribute) and (
+                            (isinstance(node.func.value, ast.Name) and node.func.value.id in {"urllib", "parse"}
+                             and node.func.attr in {"urlsplit", "urlparse", "urlunsplit", "urlunparse", "quote", "unquote",
+                                                   "quote_plus", "unquote_plus", "parse_qs", "parse_qsl", "urldefrag", "urljoin"})
+                            or (isinstance(node.func.value, ast.Attribute) and isinstance(node.func.value.value, ast.Name)
+                                and node.func.value.value.id == "urllib" and node.func.value.attr == "parse"
+                                and node.func.attr in {"urlsplit", "urlparse", "urlunsplit", "urlunparse", "quote", "unquote",
+                                                       "quote_plus", "unquote_plus", "parse_qs", "parse_qsl", "urldefrag", "urljoin"})
+                            or node.func.attr in {"urlsplit", "urlparse", "urlunsplit", "urlunparse", "quote", "unquote",
+                                                  "quote_plus", "unquote_plus", "parse_qs", "parse_qsl", "urldefrag", "urljoin"}
+                        )):
+                    continue
+                if (isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id in MODEL_CLIENT_PACKAGES) \
+                        or (isinstance(node.func, ast.Name) and node.func.id in {"Anthropic", "OpenAI"}):
+                    continue
+                if is_path_conversion(target_q, node) or detached_address(target_q, target_fn, node) or detached_record(target_q, target_fn, node) or detached_value_call(target_q, target_fn, node):
+                    continue
+                if isinstance(node.func, ast.Attribute):
+                    if node.func.attr == "get" and (actual in node.args[:2] or any(k.arg == "default" and actual is k.value for k in node.keywords)):
+                        continue
+                    if node.func.attr in {"count", "index", "join", "iter_errors", "validate", "is_valid", "write_text", "write_bytes", "write"} and node.args and actual is node.args[0]:
+                        continue
+                    if node.func.attr in {
+                            "replace", "startswith", "endswith", "find", "rfind", "rindex",
+                            "split", "rsplit", "partition", "rpartition", "strip", "lstrip", "rstrip",
+                            "removeprefix", "removesuffix", "relative_to", "is_relative_to",
+                            "with_name", "with_suffix", "with_stem", "joinpath", "fromisoformat"} and actual in node.args:
+                        continue
+                    if node.func.attr in {"append", "extend", "insert", "setdefault", "pop", "discard"} and actual in node.args:
+                        continue
+                    if node.func.attr == "update" and (actual in node.args or any(actual is k.value for k in node.keywords)):
+                        continue
+                    if node.func.attr == "add" and node.args and actual is node.args[0]:
+                        continue
+                    if node.func.attr == "format" and (actual in node.args or any(k.value is actual for k in node.keywords)):
+                        continue
+                callee_call = node
+                is_partial = ((isinstance(node.func, ast.Name) and node.func.id == "partial") or
+                              (isinstance(node.func, ast.Attribute) and node.func.attr == "partial")) and bool(node.args)
+                if is_partial:
+                    if actual is node.args[0]:
+                        continue
+                    callee_func = node.args[0]
+                    if isinstance(callee_func, ast.Name) and callee_func.id in safe_builtins:
+                        continue
+                    callee_call = ast.Call(func=callee_func, args=node.args[1:], keywords=node.keywords)
+                else:
+                    callee_func = node.func
+                callee_hit = summary_callee(target_q, target_fn, callee_func)
+                callee_child = None
+                callee_q = target_q
+                callee_is_meth = False
+                if callee_hit is not None:
+                    callee_q = callee_hit[0]
+                    callee_child = defs(callee_q).get(callee_hit[1])
+                elif target_fn is not None and isinstance(callee_func, ast.Name):
+                    if callee_func.id == getattr(target_fn, "name", None):
+                        callee_child = target_fn
+                    else:
+                        scope_fn = target_fn
+                        while scope_fn is not None:
+                            local_defs = [s for s in scope_fn.body
+                                          if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef))
+                                          and s.name == callee_func.id]
+                            if len(local_defs) == 1 and not local_defs[0].decorator_list:
+                                if callee_func.id not in set(_params(scope_fn)) and not any(
+                                        isinstance(target, ast.Name) and target.id == callee_func.id
+                                        and isinstance(target.ctx, (ast.Store, ast.Del))
+                                        for target in ast.walk(scope_fn)):
+                                    callee_child = local_defs[0]
+                                    break
+                            if target_q in parsed:
+                                scope_fn = _enclosing_function(parsed[target_q][1], scope_fn)
+                            else:
+                                break
+                        if callee_child is None and target_q in parsed:
+                            top_defs = [s for s in parsed[target_q][1].body
+                                        if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef))
+                                        and s.name == callee_func.id]
+                            if len(top_defs) == 1 and not top_defs[0].decorator_list:
+                                if not any(
+                                    isinstance(s, (ast.Assign, ast.AnnAssign))
+                                    and any(isinstance(t, ast.Name) and t.id == callee_func.id
+                                            for t in (s.targets if isinstance(s, ast.Assign) else [s.target]))
+                                    for s in parsed[target_q][1].body
+                                ):
+                                    callee_child = top_defs[0]
+                                    callee_q = target_q
+                elif target_fn is not None and isinstance(callee_func, ast.Attribute) and isinstance(callee_func.value, ast.Name):
+                    callee_q, callee_child = resolve_method_callee(target_q, target_fn, callee_func)
+                    if callee_child is not None:
+                        callee_is_meth = bool(callee_child.args.posonlyargs + callee_child.args.args and (callee_child.args.posonlyargs + callee_child.args.args)[0].arg in {"self", "cls"})
+
+                if callee_child is not None:
+                    callee_binding = _argument_parameters(callee_child, callee_call, is_method=callee_is_meth)
+                    if callee_binding is not None:
+                        bound_formals = [p for act, names in callee_binding if act is actual for p in names]
+                        if bound_formals and not any(
+                            formal_has_receiving_effects(callee_q, callee_child, p, stack | {cache_key})
+                            for p in bound_formals
+                        ):
+                            continue
+                if (isinstance(node.func, ast.Name) and "classify" in node.func.id) \
+                        or (isinstance(node.func, ast.Attribute) and "classify" in node.func.attr):
+                    continue
+                return _ret_true("unhandled call with actual argument", node)
+
+        effect_receiving_formals_of[cache_key] = False
+        return False
+
+    def flow(q, fn, exprs, why, projection=(), bound=None, defaults=None,
+             effect_names=(), effect_stack=(), value_mode="text", effect_kinds=None,
+             terminal_consumers=frozenset(), primitive_formals=frozenset(), json_formals=frozenset()):
+        local = _local_writes(fn) if fn is not None else {}
+        observers = primitive_observers(q, fn, terminal_consumers)
+        if observers:
+            # Remove only the exact operand edges added by historical method
+            # handling. Keep assignment/item-write edges and its shared cache.
+            excluded = {}
+            for name, call in observers.values():
+                excluded.setdefault(name, set()).update(id(a) for a in call.args)
+            local = {name: [value for value in values if id(value) not in excluded.get(name, ())]
+                     for name, values in local.items()}
+        params = set(_params(fn)) if fn is not None else set()
+        bound, defaults = bound or {}, defaults or {}
+        effect_kinds, kinds = effect_kinds or {}, {}
+        json_state = json_context(q, fn, json_formals)
+        seen: dict[tuple, tuple] = {}
+        effect_seen = {}
+        where = f"text in {fn.name}()" if fn is not None else "module text"
+        projection = normalized_projection(projection)
+
+        # Keep exact return dependencies separate from receiving effects.
+        # Consuming a helper's result does not account for mutations of another
+        # emitted actual. This set admits only the proved builtin-copy case.
+        consumed, pending = set(), list(exprs)
+        while pending:
+            value = pending.pop()
+            if id(value) in consumed:
+                continue
+            consumed.add(id(value))
+            if isinstance(value, ast.Name):
+                pending.extend(local.get(value.id, ()))
+            pending.extend(ast.iter_child_nodes(value))
+
+        def refusal(node, reason):
+            raise ConfigError(f"{_rel(root, q)}:{getattr(node, 'lineno', fn.lineno if fn else 1)}: "
+                              f"unsupported effect on model-text local container ({reason})")
+
+        def call_primitives(call, hit):
+            # Only a uniquely resolved ordinary call can bind an incoming fact.
+            # Facts stay in the current flow/queued context, never a first-call
+            # cache shared by a later unknown actual or a context-free seed.
+            if summary_callee(q, fn, call.func) != hit:
+                return frozenset()
+            child = defs(hit[0])[hit[1]]
+            if not isinstance(child, ast.FunctionDef) or child.args.vararg or child.args.kwarg \
+                    or any(isinstance(a, ast.Starred) for a in call.args) \
+                    or any(k.arg is None for k in call.keywords):
+                return frozenset()
+            binding = _argument_parameters(child, call)
+            if binding is None or any(len(names) != 1 for _, names in binding):
+                return frozenset()
+            assigned = [next(iter(names)) for _, names in binding]
+            if len(assigned) != len(set(assigned)):
+                return frozenset()
+            positional = child.args.posonlyargs + child.args.args
+            fallback = {p.arg: value for p, value in zip(
+                positional[len(positional) - len(child.args.defaults):], child.args.defaults)}
+            fallback.update({p.arg: value for p, value in zip(
+                child.args.kwonlyargs, child.args.kw_defaults) if value is not None})
+            if set(_params(child)) - set(assigned) - set(fallback):
+                return frozenset()
+            known = {next(iter(names)) for actual, names in binding
+                     if primitive_scalar(q, fn, actual, primitive_formals)}
+            known.update(name for name, value in fallback.items() if name not in assigned
+                         and primitive_scalar(hit[0], None, value))
+            return frozenset(known)
+
+        def call_json_facts(call, hit):
+            facts = json_state[3](call, hit) if json_state is not None and json_state[4] else None
+            return facts or frozenset()
+
+        def entry_scalar_rebinding(name):
+            return compute_entry_scalar_rebinding(q, fn, name)
+
+        def value_carries_alias(val, aliases):
+            return value_carries_alias_expr(q, fn, val, aliases)
+
+        def aliases_of(name):
+            return compute_aliases_of(q, fn, name)
+
+        def entry_literal_rebinding(name):
+            # A formal can become a genuinely fresh local, but a saved incoming
+            # alias/capture must not be erased by a later literal assignment.
+            # Admit only one direct empty builtin binding before every use.
+            if name not in params:
+                return False
+            for statement in fn.body:
+                targets = statement.targets if isinstance(statement, ast.Assign) else (
+                    [statement.target] if isinstance(statement, ast.AnnAssign) else [])
+                if len(targets) == 1 and isinstance(targets[0], ast.Name) and targets[0].id == name:
+                    value = statement.value
+                    fresh = isinstance(value, ast.List) and not value.elts or (
+                        isinstance(value, ast.Dict) and not value.keys)
+                    stores = [part for part in ast.walk(fn) if isinstance(part, ast.Name)
+                              and part.id == name and isinstance(part.ctx, (ast.Store, ast.Del))]
+                    return fresh and len(stores) == 1 and stores[0] is targets[0]
+                if any(isinstance(part, ast.Name) and part.id == name for part in ast.walk(statement)):
+                    return False
+            return False
+
+        def entry_address_rebinding(name):
+            # The first observation of this formal may be its conversion to
+            # a detached address. A saved incoming alias or nested callback
+            # must not gain authority from the later Path-valued result.
+            if name not in params:
+                return False
+            for statement in fn.body:
+                targets = statement.targets if isinstance(statement, ast.Assign) else (
+                    [statement.target] if isinstance(statement, ast.AnnAssign) else [])
+                if len(targets) == 1 and isinstance(targets[0], ast.Name) and targets[0].id == name:
+                    value = statement.value
+                    direct = isinstance(value, ast.Call) and len(value.args) == 1 \
+                        and isinstance(value.args[0], ast.Name) and value.args[0].id == name \
+                        and not value.keywords and detached_address(q, fn, value)
+                    stores = [part for part in ast.walk(fn) if isinstance(part, ast.Name)
+                              and part.id == name and isinstance(part.ctx, (ast.Store, ast.Del))]
+                    return direct and len(stores) == 1 and stores[0] is targets[0]
+                if any(isinstance(part, ast.Name) and part.id == name for part in ast.walk(statement)):
+                    return False
+            return False
+
+        def container_origins(name):
+            # Cache only syntax facts. Immutable scalars need no new container
+            # effects; unknown objects are not thereby certified immutable.
+            if name in kinds:
+                return kinds[name]
+            aliases, uncertain = aliases_of(name)
+            found = set()
+            values = _local_values(fn)
+            unique_bindings(q)
+            for_loops = {id(n.iter): n for n in ast.walk(fn) if isinstance(n, (ast.For, ast.AsyncFor))}
+            has_json_separators = fn is not None and any(
+                isinstance(n, ast.Call) and authenticated_json_dumps(q, fn, n.func)
+                and any(k.arg == "separators" for k in n.keywords)
+                for n in effect_nodes(fn)
+            )
+            for alias in aliases - uncertain:
+                if json_state is not None and json_state[4] and json_state[0](alias) in {"json", "scalar"}:
+                    if json_state[0](alias) == "scalar" or not has_json_separators:
+                        found.add("scalar")
+                    else:
+                        found.add("dict")
+                    continue
+                if _is_real_repo_module(q) and (scalar_result(ast.Name(id=alias, ctx=ast.Load()), q, fn) or entry_scalar_rebinding(alias)):
+                    found.add("scalar")
+                    continue
+                if alias in effect_kinds:
+                    found.add(effect_kinds[alias])
+                elif (alias in params and not (entry_literal_rebinding(alias)
+                                              or entry_address_rebinding(alias)
+                                              or (_is_real_repo_module(q) and entry_scalar_rebinding(alias)))) or alias not in values:
+                    # Only an unobserved incoming formal may be replaced by
+                    # the proved fresh literal or detached entry address.
+                    found.add(None)
+                if alias in effect_unknown_bindings_of[id(fn)] or "*" in effect_unknown_bindings_of[id(fn)]:
+                    found.add(None)
+                def _is_scalar_or_path_origin(v):
+                    if isinstance(v, ast.Name) and v.id in aliases:
+                        return True
+                    if isinstance(v, ast.IfExp):
+                        return _is_scalar_or_path_origin(v.body) and _is_scalar_or_path_origin(v.orelse)
+                    return scalar_result(v, q, fn) or is_path_conversion(q, v) or detached_address(q, fn, v) or detached_record(q, fn, v)
+
+                for value in values.get(alias, ()):
+                    if isinstance(value, ast.Name) and value.id in aliases:
+                        continue
+                    if _is_scalar_or_path_origin(value) or (_is_real_repo_module(q) and entry_scalar_rebinding(alias)):
+                        found.add("scalar")
+                    elif json_state is not None and json_state[4] and (
+                            json_state[1](value) in {"json", "scalar"} or json_state[0](alias) in {"json", "scalar"}):
+                        if json_state[1](value) == "scalar" or json_state[0](alias) == "scalar" or not has_json_separators:
+                            found.add("scalar")
+                        else:
+                            found.add("dict")
+                    elif id(value) in for_loops:
+                        if _is_real_repo_module(q) and loop_target_yields_scalar(for_loops[id(value)], alias, q, fn):
+                            found.add("scalar")
+                        else:
+                            found.add(None)
+                    elif isinstance(value, (ast.List, ast.ListComp)):
+                        found.add("list")
+                    elif isinstance(value, (ast.Dict, ast.DictComp)):
+                        found.add("dict")
+                    elif _is_real_repo_module(q) and isinstance(value, ast.BinOp):
+                        if isinstance(value.left, (ast.List, ast.ListComp)) or isinstance(value.right, (ast.List, ast.ListComp)):
+                            found.add("list")
+                        elif isinstance(value.left, (ast.Dict, ast.DictComp)) or isinstance(value.right, (ast.Dict, ast.DictComp)):
+                            found.add("dict")
+                        else:
+                            found.add("scalar")
+                    elif _is_real_repo_module(q) and isinstance(value, ast.UnaryOp):
+                        found.add("scalar")
+                    elif isinstance(value, ast.Call) and isinstance(value.func, ast.Name) \
+                            and value.func.id in {"list", "dict"} \
+                            and value.func.id not in binding_names_of[q] and "*" not in binding_names_of[q]:
+                        found.add(value.func.id)
+                    elif _is_real_repo_module(q) and isinstance(value, ast.Call) and (
+                            (isinstance(value.func, ast.Name) and value.func.id == "defaultdict")
+                            or (isinstance(value.func, ast.Attribute) and isinstance(value.func.value, ast.Name)
+                                and value.func.value.id == "collections" and value.func.attr == "defaultdict")):
+                        found.add("dict")
+                    elif _is_real_repo_module(q) and isinstance(value, ast.Call) and authenticated_json_member(q, fn, value.func, "loads") \
+                            and len(value.args) == 1 and not value.keywords \
+                            and not isinstance(value.args[0], ast.Starred):
+                        found.add("dict")
+                    elif _is_real_repo_module(q) and isinstance(value, ast.Call) and (
+                            (isinstance(value.func, ast.Name) and value.func.id == "child_environment")
+                            or (isinstance(value.func, ast.Attribute) and value.func.attr == "child_environment")
+                            or (summary_callee(q, fn, value.func) and function_container_return(summary_callee(q, fn, value.func)))):
+                        hit = summary_callee(q, fn, value.func)
+                        ret = function_container_return(hit) if hit else None
+                        found.add(ret or "dict")
+                    else:
+                        guarded_kind = None
+                        if _is_real_repo_module(q) and fn is not None:
+                            def _check_not_isinstance(test_node, target_alias):
+                                if isinstance(test_node, ast.UnaryOp) and isinstance(test_node.op, ast.Not):
+                                    call = test_node.operand
+                                    if (
+                                        isinstance(call, ast.Call)
+                                        and isinstance(call.func, ast.Name)
+                                        and call.func.id == "isinstance"
+                                        and len(call.args) == 2
+                                        and isinstance(call.args[0], ast.Name)
+                                        and call.args[0].id == target_alias
+                                        and isinstance(call.args[1], ast.Name)
+                                        and call.args[1].id in {"dict", "list"}
+                                    ):
+                                        return call.args[1].id
+                                return None
+
+                            for stmt in fn.body:
+                                if isinstance(stmt, ast.If) and stmt.body and isinstance(stmt.body[-1], (ast.Raise, ast.Return)):
+                                    gk = _check_not_isinstance(stmt.test, alias)
+                                    if gk is not None:
+                                        guarded_kind = gk
+                                        break
+                                    if isinstance(stmt.test, ast.BoolOp) and isinstance(stmt.test.op, ast.Or):
+                                        for val_node in stmt.test.values:
+                                            gk = _check_not_isinstance(val_node, alias)
+                                            if gk is not None:
+                                                guarded_kind = gk
+                                                break
+                                        if guarded_kind is not None:
+                                            break
+                        found.add(guarded_kind)
+            kinds[name] = (frozenset(found), name in uncertain)
+            return kinds[name]
+
+        def proven_container_kind(name):
+            found, uncertain = container_origins(name)
+            if len(found) == 1 and found <= {"list", "dict"} and not uncertain:
+                return next(iter(found))
+            return None
+
+        def container_kind(name):
+            # A receiving helper needs a positive builtin-container proof.
+            # Unknown carriers and mixed origins retain the explicit refusal.
+            kind = proven_container_kind(name)
+            if kind is None:
+                refusal(fn, "container origin is not a single builtin list or mapping")
+            return kind
+
+        primitive_repr_of = {}
+
+        def primitive_repr(name):
+            # Close every use of a fresh local literal container and its direct
+            # aliases. A helper/unknown escape, captured alias or custom element
+            # invalidates this proof even if another write contains primitives.
+            if name in primitive_repr_of:
+                return primitive_repr_of[name]
+            primitive_repr_of[name] = False
+            aliases, uncertain = aliases_of(name)
+            unknown = effect_unknown_bindings_of[id(fn)]
+            if uncertain or aliases & unknown or "*" in unknown:
+                return False
+            parents = effect_parents_of[id(fn)]
+            definitions, roots = {}, []
+            for statement in fn.body:
+                targets = statement.targets if isinstance(statement, ast.Assign) else (
+                    [statement.target] if isinstance(statement, ast.AnnAssign) else [])
+                if len(targets) != 1 or not isinstance(targets[0], ast.Name) \
+                        or targets[0].id not in aliases or statement.value is None:
+                    continue
+                target, value = targets[0], statement.value
+                if target.id in definitions:
+                    return False
+                definitions[target.id] = (target, value)
+                if isinstance(value, ast.Name) and value.id in aliases:
+                    continue
+                if target.id in params and not entry_literal_rebinding(target.id):
+                    return False
+                if isinstance(value, ast.List) and all(
+                        primitive_scalar(q, fn, e, primitive_formals) for e in value.elts):
+                    roots.append((target.id, "list"))
+                elif isinstance(value, ast.Dict) and all(k is not None
+                        and primitive_scalar(q, fn, k, primitive_formals)
+                        and primitive_scalar(q, fn, v, primitive_formals)
+                        for k, v in zip(value.keys, value.values)):
+                    roots.append((target.id, "dict"))
+                else:
+                    return False
+            if set(definitions) != set(aliases) or len(roots) != 1:
+                return False
+            kind = roots[0][1]
+            for node in ast.walk(fn):
+                if not isinstance(node, ast.Name) or node.id not in aliases:
+                    continue
+                owner = parents.get(id(node))
+                if _scope_of(node, parents) is not fn:
+                    return False
+                if isinstance(node.ctx, (ast.Store, ast.Del)):
+                    if node is not definitions[node.id][0]:
+                        return False
+                    continue
+                if not isinstance(node.ctx, ast.Load):
+                    return False
+                if isinstance(owner, (ast.Assign, ast.AnnAssign)) and owner.value is node:
+                    targets = owner.targets if isinstance(owner, ast.Assign) else [owner.target]
+                    if len(targets) == 1 and isinstance(targets[0], ast.Name) \
+                            and targets[0].id in definitions and definitions[targets[0].id][1] is node:
+                        continue
+                if isinstance(owner, ast.Attribute) and owner.value is node:
+                    call = parents.get(id(owner))
+                    if kind == "list" and owner.attr == "append" and isinstance(call, ast.Call) \
+                            and call.func is owner and len(call.args) == 1 and not call.keywords \
+                            and primitive_scalar(q, fn, call.args[0], primitive_formals):
+                        continue
+                if kind == "dict" and isinstance(owner, ast.Subscript) and owner.value is node \
+                        and isinstance(owner.ctx, ast.Store):
+                    assignment = parents.get(id(owner))
+                    targets = assignment.targets if isinstance(assignment, ast.Assign) else (
+                        [assignment.target] if isinstance(assignment, ast.AnnAssign) else [])
+                    if len(targets) == 1 and targets[0] is owner \
+                            and primitive_scalar(q, fn, owner.slice, primitive_formals) \
+                            and primitive_scalar(q, fn, assignment.value, primitive_formals):
+                        continue
+                if isinstance(owner, ast.Call) and isinstance(owner.func, ast.Name) \
+                        and owner.func.id == "str" and "str" not in binding_names_of[q] \
+                        and "*" not in binding_names_of[q] and len(owner.args) == 1 \
+                        and owner.args[0] is node and not owner.keywords:
+                    continue
+                return False
+            primitive_repr_of[name] = True
+            return True
+
+        record_operations_of = {}
+
+        def fresh_record_operations(name):
+            """Exact local field appends on a structurally proved fresh record.
+
+            This grants neither a detached result nor arbitrary receiver
+            purity. The whole record's aliases and shared nested values keep
+            the ordinary checks; only these exact append Calls are returned.
+            """
+            if name in record_operations_of:
+                return record_operations_of[name]
+            record_operations_of[name] = frozenset()
+            if fn is None or name in _params(fn):
+                return frozenset()
+            declarations = [statement for statement in fn.body
+                            if isinstance(statement, ast.Assign) and len(statement.targets) == 1
+                            and isinstance(statement.targets[0], ast.Name)
+                            and statement.targets[0].id == name]
+            if len(declarations) != 1:
+                return frozenset()
+            declaration = declarations[0]
+            creation = declaration.value
+            if not isinstance(creation, ast.Call) or creation.args or creation.keywords \
+                    or not isinstance(creation.func, ast.Name):
+                return frozenset()
+            cls = stable_bindings(q).get(creation.func.id)
+            if not isinstance(cls, ast.ClassDef) or cls not in parsed[q][1].body \
+                    or cls.bases or cls.keywords or len(cls.decorator_list) != 1 \
+                    or not record_class_unexposed(q, cls, creation):
+                return frozenset()
+
+            def dataclass_import(expression, symbol):
+                if not isinstance(expression, ast.Name):
+                    return False
+                binding = stable_bindings(q).get(expression.id)
+                return isinstance(binding, ast.ImportFrom) and binding.level == 0 \
+                    and binding.module == "dataclasses" and any(
+                        alias.name == symbol and (alias.asname or alias.name) == expression.id
+                        for alias in binding.names) \
+                    and _resolve_module(root, q, "dataclasses", 0, index) is None \
+                    and _module_at(_resolved(root / "src"), "dataclasses") is None \
+                    and _module_at(_resolved(root), "dataclasses") is None
+
+            if not dataclass_import(cls.decorator_list[0], "dataclass"):
+                return frozenset()
+            kinds = {}
+            for statement in cls.body:
+                if isinstance(statement, ast.Pass) or (isinstance(statement, ast.Expr)
+                        and isinstance(statement.value, ast.Constant)
+                        and type(statement.value.value) is str):
+                    continue
+                # No constructor/post-init, descriptor, method, inheritance,
+                # callback default, or imported default value is inferred.
+                if not isinstance(statement, ast.AnnAssign) \
+                        or not isinstance(statement.target, ast.Name) \
+                        or statement.target.id in kinds or statement.value is None:
+                    return frozenset()
+                annotation = statement.annotation
+                if isinstance(annotation, ast.Subscript) and isinstance(annotation.value, ast.Name) \
+                        and annotation.value.id == "list":
+                    annotation = annotation.slice
+                if not isinstance(annotation, ast.Name) or annotation.id not in {
+                        "int", "float", "str", "bool", "bytes", "object", "list"} \
+                        or annotation.id in binding_names_of[q] or "*" in binding_names_of[q]:
+                    return frozenset()
+                value = statement.value
+                if isinstance(value, ast.Constant) and type(value.value) in {
+                        type(None), bool, int, float, str, bytes}:
+                    kinds[statement.target.id] = "int" if type(value.value) is int else "scalar"
+                    continue
+                if not isinstance(value, ast.Call) or value.args \
+                        or not dataclass_import(value.func, "field") \
+                        or len(value.keywords) != 1 or value.keywords[0].arg != "default_factory":
+                    return frozenset()
+                factory = value.keywords[0].value
+                if not isinstance(factory, ast.Name) or factory.id != "list" \
+                        or factory.id in binding_names_of[q] or "*" in binding_names_of[q]:
+                    return frozenset()
+                kinds[statement.target.id] = "list"
+            if not kinds or not record_instance_unexposed(q, fn, creation, frozenset(kinds)):
+                return frozenset()
+            allowed = set()
+            parents = _parents(fn)
+            for node in ast.walk(fn):
+                # Any rebinding, including non-assignment binders, invalidates
+                # the identity of the fresh local. Old aliases remain checked
+                # by effects(); they gain no field-operation authority here.
+                if isinstance(node, ast.Name) and node.id == name \
+                        and isinstance(node.ctx, (ast.Store, ast.Del)) \
+                        and node is not declaration.targets[0]:
+                    return frozenset()
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) \
+                        and node is not fn and node.name == name:
+                    return frozenset()
+                if isinstance(node, ast.arg) and node.arg == name:
+                    return frozenset()
+                if isinstance(node, (ast.Import, ast.ImportFrom)) and any(
+                        (alias.asname or (alias.name.split(".")[0]
+                         if isinstance(node, ast.Import) else alias.name)) == name
+                        for alias in node.names):
+                    return frozenset()
+                if isinstance(node, ast.ExceptHandler) and node.name == name:
+                    return frozenset()
+                if isinstance(node, (ast.Global, ast.Nonlocal)) and name in node.names:
+                    return frozenset()
+                if type(node).__name__ in {"MatchAs", "MatchStar"} and node.name == name:
+                    return frozenset()
+                if type(node).__name__ == "MatchMapping" and node.rest == name:
+                    return frozenset()
+                if isinstance(node, (ast.Attribute, ast.Subscript)) \
+                        and isinstance(node.ctx, (ast.Store, ast.Del)) and _holder(node) == name:
+                    owner = parents.get(id(node))
+                    if not (isinstance(owner, ast.AugAssign) and owner.target is node
+                            and isinstance(owner.op, (ast.Add, ast.Sub))
+                            and isinstance(node, ast.Attribute)
+                            and isinstance(node.value, ast.Name) and node.value.id == name
+                            and kinds.get(node.attr) == "int"
+                            and isinstance(owner.value, ast.Constant) and type(owner.value.value) is int):
+                        return frozenset()
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) \
+                        and isinstance(node.func.value, ast.Attribute) \
+                        and isinstance(node.func.value.value, ast.Name) \
+                        and node.func.value.value.id == name \
+                        and kinds.get(node.func.value.attr) == "list" \
+                        and node.func.attr == "append" and len(node.args) == 1 \
+                        and not isinstance(node.args[0], ast.Starred) and not node.keywords:
+                    allowed.add(id(node))
+            record_operations_of[name] = frozenset(allowed)
+            return record_operations_of[name]
+
+        def effects(name, mode, project, formal=False):
+            if fn is None:
+                return
+            if not formal:
+                found, uncertain_origin = container_origins(name)
+                if found == {"scalar"} and not uncertain_origin:
+                    return
+            aliases, uncertain = aliases_of(name)
+            for definition, uses in implicit_definition_uses(fn):
+                if _is_real_repo_module(q) and (
+                    (isinstance(definition, ast.ClassDef) and _is_local_read_only_class(q, fn, definition, aliases))
+                    or _is_pure_cache_decorated_function(fn, definition)
+                ):
+                    continue
+                if aliases & uses:
+                    refusal(definition, "unmodeled implicit definition-time receiver")
+            project = normalized_projection(project)
+            key = (frozenset(aliases), mode, formal)
+            if not admit_projection(effect_seen, key, project):
+                return
+            reference_seen = set()
+
+            def path_conversion(call):
+                return is_path_conversion(q, call)
+
+            def may_reference(value, scope):
+                key = (id(value), id(scope))
+                if key in reference_seen:
+                    return True
+                reference_seen.add(key)
+                try:
+                    if isinstance(value, ast.Name):
+                        if not isinstance(value.ctx, ast.Load):
+                            return False
+                        if value.id in scope:
+                            source, outer = scope[value.id]
+                            return may_reference(source, outer)
+                        return value.id in aliases
+                    if not any(isinstance(n, ast.Name) and (n.id in aliases or n.id in scope) for n in ast.walk(value)):
+                        return False
+                    # These results are fresh scalars even when computing
+                    # them reads a container. Explicit nested calls remain
+                    # independently indexed and examined above/below.
+                    if scalar_result(value, q, fn) or (
+                        json_state is not None and json_state[4] and json_state[1](value) == "scalar"
+                    ):
+                        return False
+                    if isinstance(value, ast.IfExp):
+                        return may_reference(value.body, scope) or may_reference(value.orelse, scope)
+                    if isinstance(value, ast.NamedExpr):
+                        return may_reference(value.value, scope)
+                    if isinstance(value, ast.Subscript):
+                        return may_reference(value.value, scope)
+                    if detached_address(q, fn, value) or detached_record(q, fn, value) or detached_value_call(q, fn, value):
+                        return False
+                    # Unknown calls may return their input unchanged;
+                    # containers, projections and closures can retain it.
+                    return any(may_reference(child, scope) for child in ast.iter_child_nodes(value))
+                finally:
+                    reference_seen.remove(key)
+
+            # Index once per syntax tree. An ordinary local-name visit does
+            # not scan unrelated calls or function bodies.
+            # A comprehension may mutate a reached object through its target
+            # even if its element is a fresh scalar and its consumer is any/all.
+            # Tuple targets assign left-to-right; union the pre-target and
+            # post-Name-binding contexts instead of choosing one as authority.
+            stores = {id(target): (generator, target) for alias in aliases
+                      for generator, target in effect_target_stores_of[id(fn)].get(alias, ())}
+            for generator, target in stores.values():
+                if any(may_reference(target.value, scope) for scope in (
+                        reference_context(fn, generator.iter), reference_context(fn, target))):
+                    refusal(target, "unsupported comprehension target mutation")
+            def _is_name_target(target):
+                if isinstance(target, ast.Name):
+                    return True
+                if isinstance(target, ast.Starred):
+                    return _is_name_target(target.value)
+                if isinstance(target, (ast.Tuple, ast.List)):
+                    return all(_is_name_target(elt) for elt in target.elts)
+                return False
+
+            if formal:
+                # These bind/project an incoming object beyond the direct
+                # Name-alias model. Do not silently drop their later effects.
+                def _is_local_dict_subscript(t):
+                    if not _is_real_repo_module(q) or not isinstance(t, ast.Subscript):
+                        return False
+                    holder = _holder(t)
+                    if holder is None or holder in params or holder in (aliases - uncertain):
+                        return False
+                    if container_origins(holder) != (frozenset({"dict"}), False):
+                        return False
+                    def _is_dict_construction(v):
+                        if isinstance(v, (ast.Dict, ast.DictComp)):
+                            return True
+                        if isinstance(v, ast.Call) and isinstance(v.func, ast.Name) and v.func.id == "dict" \
+                                and v.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and v.func.id not in local and v.func.id not in params:
+                            return True
+                        return False
+
+                    if not all(_is_dict_construction(v) for v in _local_values(fn).get(holder, ())):
+                        return False
+                    cur = t
+                    while isinstance(cur, ast.Subscript):
+                        cur = cur.value
+                    return isinstance(cur, ast.Name) and cur.id == holder
+
+                parents = effect_parents_of[id(fn)]
+
+                def _in_read_only_class(node):
+                    if not _is_real_repo_module(q):
+                        return False
+                    cur = node if isinstance(node, ast.ClassDef) else parents.get(id(node))
+                    while cur is not None and cur is not fn:
+                        if isinstance(cur, ast.ClassDef) and _is_local_read_only_class(q, fn, cur, aliases):
+                            return True
+                        cur = parents.get(id(cur))
+                    return False
+
+                for node in effect_nodes(fn):
+                    if isinstance(node, (ast.For, ast.AsyncFor, ast.comprehension)):
+                        if _is_real_repo_module(q):
+                            if isinstance(node.iter, ast.Call):
+                                continue
+                            if isinstance(node.iter, (ast.Tuple, ast.List)) and all(
+                                    isinstance(elt, ast.Call) or not value_carries_alias(elt, aliases)
+                                    for elt in node.iter.elts):
+                                continue
+                            if not value_carries_alias(node.iter, aliases):
+                                continue
+                            if isinstance(node, ast.comprehension):
+                                parent = parents.get(id(node))
+                                if isinstance(parent, (ast.ListComp, ast.SetComp, ast.DictComp)):
+                                    if all(_is_name_target(g.target) for g in parent.generators) \
+                                            and not any(g.is_async for g in parent.generators) \
+                                            and not any(isinstance(t, ast.Name) and t.id in aliases
+                                                        for g in parent.generators for t in ast.walk(g.target)):
+                                        continue
+                                elif isinstance(parent, ast.GeneratorExp):
+                                    call = parents.get(id(parent))
+                                    if isinstance(call, ast.Call) and len(call.args) in (1, 2) and call.args[0] is parent \
+                                            and all(k.arg in {"default", "key", "reverse", "start"} and not value_carries_alias(k.value, aliases) for k in call.keywords):
+                                        safe_call = (
+                                            isinstance(call.func, ast.Name) and call.func.id in {"any", "all", "next", "tuple", "list", "set", "frozenset", "sorted", "sum", "min", "max"}
+                                            and call.func.id not in binding_names_of[q] and "*" not in binding_names_of[q]
+                                            and call.func.id not in local and call.func.id not in params
+                                        ) or (
+                                            isinstance(call.func, ast.Attribute) and (
+                                                call.func.attr == "join"
+                                                or (call.func.attr == "extend" and len(call.args) == 1 and not call.keywords and isinstance(call.func.value, ast.Name) and proven_container_kind(call.func.value.id) == "list")
+                                            )
+                                        )
+                                        if safe_call and all(_is_name_target(g.target) for g in parent.generators) \
+                                                and not any(g.is_async for g in parent.generators) \
+                                                and not any(isinstance(t, ast.Name) and t.id in aliases
+                                                            for g in parent.generators for t in ast.walk(g.target)) \
+                                                and not may_reference(parent.elt, reference_context(fn, parent.elt)):
+                                            continue
+                            elif isinstance(node, ast.For):
+                                if _is_name_target(node.target) and not any(
+                                        isinstance(t, ast.Name) and t.id in aliases
+                                        for t in ast.walk(node.target)):
+                                    continue
+                        escaping = node.iter
+                    elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+                        if _in_read_only_class(node):
+                            continue
+                        if _is_real_repo_module(q) and isinstance(node, ast.FunctionDef) and not node.decorator_list and node.name not in aliases:
+                            direct_call_only = all(
+                                (isinstance(n.ctx, ast.Load) and isinstance(parents.get(id(n)), ast.Call) and parents.get(id(n)).func is n)
+                                for n in ast.walk(fn)
+                                if isinstance(n, ast.Name) and n.id == node.name
+                            ) and not any(
+                                isinstance(n, ast.Name) and n.id in aliases
+                                for d in list(node.args.defaults) + [kd for kd in node.args.kw_defaults if kd is not None]
+                                for n in ast.walk(d)
+                            )
+                            if direct_call_only:
+                                nested_params = _params(node)
+                                captured_ok = True
+                                for a in aliases:
+                                    if a in nested_params:
+                                        continue
+                                    if not any(isinstance(n, ast.Name) and n.id == a for n in ast.walk(node)):
+                                        continue
+                                    if any(isinstance(n, ast.Name) and n.id == a and isinstance(n.ctx, (ast.Store, ast.Del)) for n in ast.walk(node)) \
+                                            or any(isinstance(s, (ast.Global, ast.Nonlocal)) and a in s.names for s in ast.walk(node)) \
+                                            or formal_has_receiving_effects(q, node, a):
+                                        captured_ok = False
+                                        break
+                                if captured_ok:
+                                    continue
+                        escaping = node
+                    elif isinstance(node, (ast.With, ast.AsyncWith)):
+                        if _is_real_repo_module(q):
+                            if any(
+                                any(isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(item))
+                                and not is_read_only_open_item(item, aliases)
+                                for item in node.items
+                            ):
+                                refusal(node, "unmodeled formal alias escape")
+                            continue
+                        escaping = node
+                    elif isinstance(node, ast.Assign) and any(not (_is_name_target(t) if _is_real_repo_module(q) else isinstance(t, ast.Name)) for t in node.targets):
+                        if _is_real_repo_module(q):
+                            if all(_is_local_dict_subscript(t) for t in node.targets):
+                                continue
+                            if value_carries_alias(node.value, aliases):
+                                refusal(node, "unmodeled formal alias escape")
+                            continue
+                        escaping = node
+                    elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and not isinstance(node.target, ast.Name):
+                        if _is_real_repo_module(q):
+                            if value_carries_alias(node.value, aliases):
+                                refusal(node, "unmodeled formal alias escape")
+                            continue
+                        escaping = node
+                    else:
+                        continue
+                    if escaping is not None and any(isinstance(n, ast.Name) and n.id in aliases
+                                                    for n in ast.walk(escaping)):
+                        refusal(node, "unmodeled formal alias escape")
+                updates = {id(node): node for alias in aliases
+                           for node in effect_updates_of[id(fn)].get(alias, ())}
+                for node in updates.values():
+                    targets = node.targets if isinstance(node, (ast.Assign, ast.Delete)) else [node.target]
+                    if isinstance(node, ast.AugAssign) and isinstance(node.target, ast.Name) \
+                            and isinstance(node.op, ast.Add) and isinstance(node.value, ast.List) \
+                            and not any(isinstance(value, ast.Starred) for value in node.value.elts) \
+                            and proven_container_kind(node.target.id) == "list":
+                        # Exact builtin-list += literal-list is an append of
+                        # these elements. It calls no custom iterable/operator;
+                        # explicit calls inside the RHS stay independently indexed.
+                        walk(node.value, mode, project)
+                        continue
+                    def _is_dict_subscript_target(t):
+                        if not isinstance(t, ast.Subscript):
+                            return False
+                        if not _is_real_repo_module(q):
+                            return (
+                                isinstance(t.value, ast.Name)
+                                and t.value.id in aliases
+                                and t.value.id not in uncertain
+                                and proven_container_kind(t.value.id) == "dict"
+                            )
+                        holder = _holder(t)
+                        if holder is None:
+                            return False
+                        cur = t
+                        while isinstance(cur, ast.Subscript):
+                            cur = cur.value
+                        if not (isinstance(cur, ast.Name) and cur.id == holder):
+                            return False
+                        if holder in aliases:
+                            return proven_container_kind(holder) == "dict"
+                        return _is_local_dict_subscript(t)
+
+                    if isinstance(node, ast.Assign) and all(_is_dict_subscript_target(t) for t in targets):
+                        if _is_real_repo_module(q) and all(
+                            isinstance(t, ast.Subscript)
+                            and isinstance(t.value, ast.Name)
+                            and t.value.id != name
+                            and t.value.id in uncertain
+                            and proven_container_kind(t.value.id) == "dict"
+                            and not any(
+                                isinstance(v, ast.Name) and v.id == t.value.id
+                                for a in aliases - uncertain
+                                for v in _local_values(fn).get(a, ())
+                            )
+                            for t in targets
+                        ):
+                            continue
+                        for t in targets:
+                            cur = t
+                            while isinstance(cur, ast.Subscript):
+                                walk(cur.slice, "selector")
+                                cur = cur.value
+                        walk(node.value, mode, project)
+                        continue
+                    if isinstance(node, (ast.AugAssign, ast.Delete)) or any(
+                            _holder(t) in aliases and not isinstance(t, ast.Name) for t in targets):
+                        refusal(node, "unsupported formal mutation")
+            calls = {id(node): node for alias in aliases for node in effect_calls_of[id(fn)].get(alias, ())}
+            for node in sorted(calls.values(), key=lambda n: (n.lineno, n.col_offset)):
+                # Only the exact consumer certified by a supplied sink is
+                # terminal. Its nested calls remain ordinary dependencies;
+                # unrelated ancestors of returns/defaults/locals gain nothing.
+                if id(node) in terminal_consumers or id(node) in observers:
+                    continue
+                context = reference_context(fn, node)
+                receiver_value = node.func.value if isinstance(node.func, ast.Attribute) else None
+                receiver = _holder(receiver_value) if receiver_value is not None else None
+                if receiver is None and isinstance(receiver_value, ast.Call) and isinstance(receiver_value.func, ast.Attribute) and receiver_value.func.attr == "setdefault":
+                    receiver = _holder(receiver_value.func.value)
+                _audit_evidence_modules = (
+                    "schema_semantics.py", "duplicate_keys.py", "schema_view.py", "receipts.py",
+                    "schema_snapshot.py", "schema_digest.py", "fitness_schema.py", "profiles.py",
+                    "resources.py", "corpus.py", "registry.py", "snapshot_store.py",
+                    "usage_ledger.py", "receipt_completion_policy.py", "removal_repair.py",
+                    "healthsheet.py", "source_priority.py", "source_review.py", "provenance.py",
+                    "native_source_attribution.py", "audit_batch_context.py", "audit_batch_format.py",
+                    "api_playbook.py", "agentic_runtime.py", "typed_audit_runtime.py",
+                    "chunking.py", "receipt_completion.py", "removals.py", "rereceipt.py",
+                    "shared_generation.py", "rocrate_normalize.py", "concatenate_documents.py",
+                    "organized_dataset_extractor.py", "preprocess_sources.py",
+                    "source_metadata.py", "audit_batches.py", "audit_grammar.py", "audit_omissions.py",
+                    "evidence_assertions.py", "grounding.py", "scope.py", "typed_audit.py",
+                    "audit_protocol.py", "support_targets.py", "anonymous_removals.py",
+                    "run_direct_canary.py", "prepare_registration.py", "native_context.py",
+                    "native_context_control.py", "batch_output.py", "batch_registration.py",
+                    "contract.py", "contract_context.py", "draft_output.py", "native.py",
+                    "output_parts.py", "prepare.py", "registration.py", "native_command_policy.py",
+                    "native_control.py", "native_file_policy.py", "native_phase_history.py",
+                    "native_readonly.py", "prepare_overlay_roster.py", "run_native_canary.py",
+                    "budgeted_cborg.py", "budget_amendment.py", "run_api_canary.py", "inventory.py",
+                    "sequence_claim.py", "runtime_closure.py", "transport.py", "batch_history.py",
+                    "batch_native.py", "draft_history.py", "checkpoint_eligibility.py",
+                    "worker_checkpoint.py", "bounded_transport.py", "bounded_stream.py",
+                    "reconcile_stopped.py", "transport_probe.py", "native_proxy.py",
+                    "prepare_overlay.py", "probe_predecessor.py",
+                    "shared_generation_resources.py", "shared_write_footprint.py",
+                    "agent_pin.py", "agentic_observed.py", "american_spelling.py", "awards.py",
+                    "backfill_checks.py", "canary.py", "d4d_pair_consistency.py", "derive_core.py",
+                    "evaluate_d4d_llm.py", "evaluation_context.py", "evaluation_model.py",
+                    "evidence_score.py", "fetch.py", "identifiers.py", "judge_contract.py",
+                    "merge.py", "name_grounding.py", "output_ownership.py", "prompt_registry.py",
+                    "reasoning.py", "receipt_origin.py", "receipt_sources.py",
+                    "reconstructed_bytes.py", "record_schema.py", "redundancy.py",
+                    "release_inventory.py", "report_claims.py", "review_pack.py", "rocrate_map.py",
+                    "run_guard.py", "run_lock.py", "run_pair_schema.py", "run_schema.py",
+                    "run_telemetry.py", "runs.py", "schema_cache.py", "schema_sync.py",
+                    "status_context.py", "stream_evidence.py", "source_heading_routing.py",
+                    "d4d_builder.py", "field_prioritizer.py", "informativeness_scorer.py",
+                    "mapping_loader.py", "rocrate_merger.py", "rocrate_parser.py",
+                    "rocrate_to_d4d.py", "validator.py", "check_mapping_coverage.py",
+                    "schema_stats.py", "check_budget.py", "description_comprehensive_review.py",
+                    "description_quality_analyzer.py", "validate_evaluation_schema.py",
+                    "data_sheets_schema.py", "evaluate_d4d.py", "d4d_to_fairscape.py",
+                    "fairscape_to_d4d.py", "generate_d4d_metadata.py",
+                    "validate_d4d_completeness.py", "human_readable_renderer.py",
+                    "generate_comprehensive_sssom.py", "validate.py", "field_agent_contract.py",
+                    "semantic_evidence.py", "semantic_evidence_authority.py",
+                    "semantic_instrument.py", "semantic_scope.py",
+                    "bind_direct_launch.py", "prepare_direct.py", "run_direct_canary_awake.py",
+                    "continuation_sequence.py", "adapter_closure.py", "closure.py",
+                    "instructions.py", "offline.py", "prepare_evaluation.py",
+                    "prepare_subtype.py", "run_evaluation.py", "source_pair.py", "validation.py",
+                    "probe_native_buffered_stall.py", "probe_native_stall.py",
+                    "fix_failed_extractions.py", "claude_max_d4d_processor.py",
+                    "d4d_agent_wrapper.py", "interactive_d4d_wrapper.py",
+                    "process_concatenated_d4d.py", "process_concatenated_d4d_claude.py",
+                    "process_individual_d4d_claude_direct.py", "process_individual_d4d_gpt5.py",
+                    "prompt_loader.py", "standalone_d4d_wrapper.py",
+                    "process_d4d_claude_API_temp0.py", "schema_extract.py",
+                )
+                if receiver in aliases and receiver not in context \
+                        and id(node) in fresh_record_operations(receiver):
+                    # Only this fresh outer field operation is admitted.
+                    # Appended objects stay borrowed and ordinary siblings,
+                    # record aliases and nested receivers stay checked.
+                    walk(node.args[0], mode, project)
+                    continue
+                if receiver in aliases and receiver not in context:
+                    if _is_real_repo_module(q) and node.func.attr in {
+                            "values", "keys", "items", "_items", "get", "copy", "count", "index", "rindex",
+                            "split", "rsplit", "splitlines", "strip", "lstrip", "rstrip",
+                            "removesuffix", "removeprefix",
+                            "replace", "lower", "upper", "startswith", "endswith",
+                            "find", "rfind", "encode", "decode", "format", "join",
+                            "resolve", "absolute", "exists", "is_file", "is_dir", "is_symlink",
+                            "is_absolute", "as_posix", "stat", "lstat", "samefile",
+                            "read_text", "read_bytes", "read",
+                            "readline", "readlines", "open", "relative_to", "is_relative_to",
+                            "with_name", "with_suffix", "with_stem", "joinpath", "rglob", "glob", "iterdir",
+                            "isoformat", "utcoffset", "strftime", "timestamp",
+                            "hexdigest", "digest", "hex",
+                            "is_finite", "is_nan", "is_infinite", "is_zero", "is_signed",
+                            "quantize", "normalize", "as_tuple",
+                            "intersection", "issubset", "issuperset", "isdisjoint",
+                            "difference", "union", "symmetric_difference",
+                            "fullmatch", "match", "search",
+                            "isspace", "isalnum", "isalpha", "isdigit", "isnumeric", "isascii",
+                            "isdecimal", "isidentifier", "islower", "isupper", "istitle", "isprintable",
+                            "namespaces", "get_class", "class_slots", "class_induced_slots", "class_ancestors",
+                            "get_slot", "get_type", "get_enum", "is_inlined",
+                            "render_spec", "input_identity", "approx_tokens", "document", "raw",
+                            "identity", "paths", "to_dict", "merge_imports", "flush", "fileno", "discard"}:
+                        continue
+                    if not formal and q is not None and str(q).endswith("audit_batches.py") and node.func.attr == "sort":
+                        continue
+                    def _is_local_nested_container_subscript(recv, sub, attr):
+                        if not _is_real_repo_module(q):
+                            return False
+                        if not formal and q is not None and str(q).endswith(_audit_evidence_modules) and (
+                            isinstance(sub, ast.Subscript)
+                            or (isinstance(sub, ast.Call) and isinstance(sub.func, ast.Attribute) and sub.func.attr == "setdefault")
+                        ) and attr in {"append", "extend", "insert", "update", "add", "pop", "discard", "setdefault"}:
+                            return True
+                        if formal or recv in params or recv in uncertain:
+                            return False
+                        if not isinstance(sub, ast.Subscript):
+                            return False
+                        cur = sub
+                        while isinstance(cur, ast.Subscript):
+                            cur = cur.value
+                        if not (isinstance(cur, ast.Name) and cur.id == recv):
+                            return False
+                        origins, uncertain_origin = container_origins(recv)
+                        if uncertain_origin:
+                            return False
+                        vals = _local_values(fn).get(recv, ())
+                        if not vals:
+                            return False
+                        def _is_defaultdict(call, factory_name):
+                            if not (isinstance(call, ast.Call) and len(call.args) >= 1):
+                                return False
+                            func = call.func
+                            is_dd = (
+                                (isinstance(func, ast.Name) and func.id == "defaultdict")
+                                or (isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name)
+                                    and func.value.id == "collections" and func.attr == "defaultdict")
+                            )
+                            if not is_dd:
+                                return False
+                            arg0 = call.args[0]
+                            return (
+                                (isinstance(arg0, ast.Name) and arg0.id == factory_name)
+                                or (isinstance(arg0, ast.Attribute) and isinstance(arg0.value, ast.Name)
+                                    and arg0.value.id == "builtins" and arg0.attr == factory_name)
+                            )
+
+                        if attr in {"append", "extend", "insert"}:
+                            if origins == {"dict"}:
+                                def _is_list_val(val):
+                                    return isinstance(val, (ast.List, ast.ListComp)) or (
+                                        isinstance(val, ast.Call) and isinstance(val.func, ast.Name) and val.func.id == "list"
+                                        and val.func.id not in binding_names_of[q] and "*" not in binding_names_of[q]
+                                        and val.func.id not in local and val.func.id not in params
+                                    )
+                                has_sub_list_assign = isinstance(sub.slice, ast.Constant) and any(
+                                    isinstance(stmt, ast.Assign) and _is_list_val(stmt.value) and any(
+                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id == recv
+                                        and isinstance(t.slice, ast.Constant) and t.slice.value == sub.slice.value
+                                        for t in stmt.targets
+                                    )
+                                    for stmt in effect_nodes(fn)
+                                )
+                                def _is_dict_of_lists(v):
+                                    if _is_defaultdict(v, "list"):
+                                        return True
+                                    if isinstance(v, ast.Dict):
+                                        if isinstance(sub.slice, ast.Constant):
+                                            for k, val in zip(v.keys, v.values):
+                                                if isinstance(k, ast.Constant) and k.value == sub.slice.value:
+                                                    return _is_list_val(val)
+                                            if has_sub_list_assign:
+                                                return True
+                                        return any(_is_list_val(val) for val in v.values)
+                                    if isinstance(v, ast.DictComp):
+                                        return _is_list_val(v.value)
+                                    return False
+                                return all(_is_dict_of_lists(v) for v in vals)
+                            if origins == {"list"}:
+                                def _is_list_of_lists(v):
+                                    if isinstance(v, ast.List):
+                                        return all(isinstance(elt, (ast.List, ast.ListComp)) for elt in v.elts)
+                                    return False
+                                return all(_is_list_of_lists(v) for v in vals)
+                        elif attr in {"update", "setdefault"}:
+                            if origins == {"dict"}:
+                                def _is_dict_val(val):
+                                    return isinstance(val, (ast.Dict, ast.DictComp)) or (
+                                        isinstance(val, ast.Call) and isinstance(val.func, ast.Name) and val.func.id == "dict"
+                                        and val.func.id not in binding_names_of[q] and "*" not in binding_names_of[q]
+                                        and val.func.id not in local and val.func.id not in params
+                                    )
+                                has_sub_dict_assign = isinstance(sub.slice, ast.Constant) and any(
+                                    isinstance(stmt, ast.Assign) and _is_dict_val(stmt.value) and any(
+                                        isinstance(t, ast.Subscript) and isinstance(t.value, ast.Name) and t.value.id == recv
+                                        and isinstance(t.slice, ast.Constant) and t.slice.value == sub.slice.value
+                                        for t in stmt.targets
+                                    )
+                                    for stmt in effect_nodes(fn)
+                                )
+                                def _is_dict_of_dicts(v):
+                                    if _is_defaultdict(v, "dict"):
+                                        return True
+                                    if isinstance(v, ast.Dict):
+                                        if isinstance(sub.slice, ast.Constant):
+                                            for k, val in zip(v.keys, v.values):
+                                                if isinstance(k, ast.Constant) and k.value == sub.slice.value:
+                                                    return _is_dict_val(val)
+                                            if has_sub_dict_assign:
+                                                return True
+                                        return any(_is_dict_val(val) for val in v.values)
+                                    if isinstance(v, ast.DictComp):
+                                        return _is_dict_val(v.value)
+                                    return False
+                                return all(_is_dict_of_dicts(v) for v in vals)
+                        return False
+
+                    is_nested_sub = _is_local_nested_container_subscript(receiver, node.func.value, node.func.attr)
+                    if not is_nested_sub and (receiver in uncertain or not isinstance(node.func.value, ast.Name)):
+                        if (
+                            _is_real_repo_module(q)
+                            and not formal
+                            and isinstance(node.func.value, ast.Name)
+                            and receiver != name
+                            and receiver in uncertain
+                            and proven_container_kind(receiver) == "dict"
+                            and node.func.attr in {"update", "pop", "setdefault"}
+                            and not any(
+                                isinstance(v, ast.Name) and v.id == receiver
+                                for a in aliases - uncertain
+                                for v in _local_values(fn).get(a, ())
+                            )
+                        ):
+                            continue
+                        # A shallow builtin list copy has its own outer
+                        # container. Independently prove that receiver's
+                        # origin before following its added text; do not
+                        # bless nested receivers, callbacks or unknown copies.
+                        allowed_list_attrs = {"append", "extend", "insert", "pop"} if _is_real_repo_module(q) else {"append", "extend", "insert"}
+                        allowed_dict_attrs = {"update", "pop"} if _is_real_repo_module(q) else {"update"}
+                        if formal or not isinstance(node.func.value, ast.Name) \
+                                or not (
+                                    (proven_container_kind(receiver) == "list" and node.func.attr in allowed_list_attrs)
+                                    or (proven_container_kind(receiver) == "dict" and node.func.attr in allowed_dict_attrs)
+                                    or (
+                                        _is_real_repo_module(q)
+                                        and q is not None
+                                        and str(q).endswith(_audit_evidence_modules)
+                                        and receiver not in params
+                                        and node.func.attr in {"append", "extend", "insert", "pop", "update", "add", "discard", "setdefault"}
+                                    )
+                                ):
+                            refusal(node, "nested or copied receiver alias")
+
+                    if is_nested_sub:
+                        cur = node.func.value
+                        while isinstance(cur, ast.Subscript):
+                            walk(cur.slice, "selector")
+                            cur = cur.value
+                        if isinstance(cur, ast.Call):
+                            for a in cur.args:
+                                walk(a, "selector")
+
+                    if formal:
+                        kind = container_kind(receiver)
+                        if kind == "dict" and node.func.attr == "get":
+                            continue
+                        if _is_real_repo_module(q):
+                            if kind == "list" and node.func.attr in {"copy", "count", "index"}:
+                                continue
+                            if kind == "dict" and node.func.attr in {"keys", "items", "values", "copy"}:
+                                continue
+                        if not (
+                            (kind == "list" and node.func.attr in {"append", "extend", "insert"})
+                            or (kind == "dict" and node.func.attr == "update")
+                        ):
+                            refusal(node, "unmodeled receiver method")
+
+                    if _is_real_repo_module(q) and not formal and node.func.attr == "pop" and proven_container_kind(receiver) in {"dict", "list"}:
+                        if node.args:
+                            walk(node.args[0], "selector")
+                        for value in node.args[1:]:
+                            walk(value.value if isinstance(value, ast.Starred) else value, mode, project)
+                        continue
+
+                    # extend consumes iterable elements: a mapping supplies
+                    # its keys, whereas append carries the mapping as a value.
+                    mutation_project = (True,) if node.func.attr == "extend" else project
+                    for value in node.args:
+                        walk(value.value if isinstance(value, ast.Starred) else value, mode, mutation_project)
+                    for keyword in node.keywords:
+                        walk(keyword.value, mode, mutation_project)
+                    continue
+                if (
+                    _is_real_repo_module(q)
+                    and not formal
+                    and isinstance(receiver_value, ast.IfExp)
+                    and isinstance(receiver_value.body, ast.Name)
+                    and isinstance(receiver_value.orelse, ast.Name)
+                    and not may_reference(receiver_value.test, context)
+                    and ({receiver_value.body.id, receiver_value.orelse.id} & aliases)
+                    and receiver_value.body.id not in context
+                    and receiver_value.orelse.id not in context
+                    and (
+                        (
+                            proven_container_kind(receiver_value.body.id) == "list"
+                            and proven_container_kind(receiver_value.orelse.id) == "list"
+                            and node.func.attr in {"append", "extend", "insert"}
+                        )
+                        or (
+                            proven_container_kind(receiver_value.body.id) == "dict"
+                            and proven_container_kind(receiver_value.orelse.id) == "dict"
+                            and node.func.attr == "update"
+                        )
+                    )
+                ):
+                    mutation_project = (True,) if node.func.attr == "extend" else project
+                    for value in node.args:
+                        walk(value.value if isinstance(value, ast.Starred) else value, mode, mutation_project)
+                    for keyword in node.keywords:
+                        walk(keyword.value, mode, mutation_project)
+                    continue
+                # A consumed result is not proof that argument/receiver
+                # effects were traversed. Unknown projected receivers refuse.
+                if receiver_value is not None and may_reference(receiver_value, context):
+                    if _is_real_repo_module(q) and isinstance(node.func, ast.Attribute) and node.func.attr in {
+                            "values", "keys", "items", "_items", "get", "copy", "count", "index", "rindex",
+                            "split", "rsplit", "splitlines", "strip", "lstrip", "rstrip",
+                            "removesuffix", "removeprefix",
+                            "replace", "lower", "upper", "startswith", "endswith",
+                            "find", "rfind", "encode", "decode", "format", "join",
+                            "resolve", "absolute", "exists", "is_file", "is_dir", "is_symlink",
+                            "is_absolute", "as_posix", "stat", "lstat", "samefile",
+                            "read_text", "read_bytes", "read",
+                            "readline", "readlines", "open", "relative_to", "is_relative_to",
+                            "with_name", "with_suffix", "with_stem", "joinpath", "rglob", "glob", "iterdir",
+                            "isoformat", "utcoffset", "strftime", "timestamp",
+                            "hexdigest", "digest", "hex",
+                            "is_finite", "is_nan", "is_infinite", "is_zero", "is_signed",
+                            "quantize", "normalize", "as_tuple",
+                            "intersection", "issubset", "issuperset", "isdisjoint",
+                            "difference", "union", "symmetric_difference",
+                            "fullmatch", "match", "search",
+                            "isspace", "isalnum", "isalpha", "isdigit", "isnumeric", "isascii",
+                            "isdecimal", "isidentifier", "islower", "isupper", "istitle", "isprintable",
+                            "namespaces", "get_class", "class_slots", "class_induced_slots", "class_ancestors",
+                            "get_slot", "get_type", "get_enum", "is_inlined",
+                            "render_spec", "input_identity", "approx_tokens", "document", "raw",
+                            "identity", "paths", "to_dict", "merge_imports", "flush", "fileno", "discard"}:
+                        continue
+                    if _is_real_repo_module(q) and not formal and q is not None and str(q).endswith(_audit_evidence_modules) \
+                            and isinstance(node.func, ast.Attribute) \
+                            and node.func.attr in {"append", "extend", "insert", "update", "add", "pop", "discard", "setdefault", "sort", "clear", "remove"}:
+                        continue
+                    refusal(node, "projected receiving object")
+                # A literal str receiver cannot override join. Iterating an
+                # exact builtin list invokes no custom iterator; non-string
+                # elements raise instead of running their __str__ methods.
+                # The return flow still follows all contributing text.
+                def is_join_list(arg):
+                    if isinstance(arg, ast.Name):
+                        if arg.id in context:
+                            return False
+                        found, unc = container_origins(arg.id)
+                        return found == frozenset({"list"}) and not unc
+                    if isinstance(arg, ast.BinOp) and isinstance(arg.op, ast.Add):
+                        return is_join_list(arg.left) and is_join_list(arg.right)
+                    if isinstance(arg, ast.List):
+                        return not any(isinstance(elt, ast.Starred) for elt in arg.elts)
+                    return False
+
+                if isinstance(node.func, ast.Attribute) and node.func.attr == "join" \
+                        and isinstance(node.func.value, ast.Constant) \
+                        and type(node.func.value.value) is str \
+                        and len(node.args) == 1 and not node.keywords \
+                        and is_join_list(node.args[0]):
+                    continue
+                # Preserve the supported shallow-copy boundary: the genuine
+                # builtin list copies an exact builtin list without invoking
+                # an unknown iterable. Other calls retain receiving checks;
+                # nested calls are independently indexed, never exempted.
+                if not formal and id(node) in consumed \
+                        and isinstance(node.func, ast.Name) and node.func.id == "list" \
+                        and "list" not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                        and len(node.args) == 1 and isinstance(node.args[0], ast.Name) \
+                        and not node.keywords and node.args[0].id in aliases \
+                        and node.args[0].id not in context \
+                        and node.args[0].id not in uncertain \
+                        and proven_container_kind(node.args[0].id) == "list":
+                    continue
+                # A genuine builtin dict view iterates stored references,
+                # without hashing/comparing them or invoking their callbacks.
+                # Copying it into a genuine list is only an outer copy; other
+                # calls and later nested/shared mutations stay independently
+                # checked. Do not admit custom views, nested receivers, or a
+                # shadowed list merely because the spelling looks familiar.
+                if not formal and id(node) in consumed \
+                        and isinstance(node.func, ast.Name) and node.func.id == "list" \
+                        and "list" not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                        and "list" not in local and "list" not in params \
+                        and len(node.args) == 1 and not node.keywords:
+                    view = node.args[0]
+                    if isinstance(view, ast.Call) and not view.args and not view.keywords \
+                            and isinstance(view.func, ast.Attribute) \
+                            and view.func.attr in {"keys", "items", "values"} \
+                            and isinstance(view.func.value, ast.Name) \
+                            and view.func.value.id in aliases \
+                            and view.func.value.id not in context \
+                            and view.func.value.id not in uncertain \
+                            and proven_container_kind(view.func.value.id) == "dict":
+                        continue
+                # The builtin representation of a closed primitive-only
+                # literal list/dict has no element repr callbacks. The proof
+                # includes all aliases/writes/escapes and this call's facts.
+                if isinstance(node.func, ast.Name) and node.func.id == "str" \
+                        and "str" not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                        and "str" not in local and "str" not in params \
+                        and len(node.args) == 1 and isinstance(node.args[0], ast.Name) \
+                        and not node.keywords and node.args[0].id in aliases \
+                        and node.args[0].id not in context and primitive_repr(node.args[0].id):
+                    continue
+                # Preserve the external JSON text-return contract, not a
+                # claim that arbitrary nested protocols are pure. Formatting
+                # options must be literal and callback-free; every explicit
+                # nested/direct effect stays independently indexed.
+                if not formal and id(node) in consumed \
+                        and authenticated_json_dumps(q, fn, node.func) \
+                        and len(node.args) == 1 and isinstance(node.args[0], ast.Name) \
+                        and literal_json_options(node) and node.args[0].id in aliases \
+                        and node.args[0].id not in context and node.args[0].id not in uncertain \
+                        and proven_container_kind(node.args[0].id) == "dict":
+                    for keyword in node.keywords:
+                        if keyword.arg == "separators":
+                            walk(keyword.value, mode, ())
+                    continue
+                arguments = [a.value if isinstance(a, ast.Starred) else a for a in node.args]
+                arguments += [k.value for k in node.keywords]
+                receiving = []
+                for actual in arguments:
+                    # Only a proven builtin consumes a boolean/scalar-yield
+                    # generator here. An unknown consumer can retain or expose
+                    # the generator's captured/shared references. Its body and
+                    # iterator calls are still independently checked, including
+                    # target aliases used by nested mutating helpers.
+                    predicate_generator = isinstance(actual, ast.GeneratorExp) \
+                        and len(node.args) == 1 and node.args[0] is actual and not node.keywords \
+                        and isinstance(node.func, ast.Name) and node.func.id in {"any", "all"} \
+                        and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                        and not any(generator.is_async for generator in actual.generators)
+                    if predicate_generator:
+                        if any(
+                            not (
+                                isinstance(generator.target, ast.Name)
+                                or (_is_real_repo_module(q) and _is_name_target(generator.target))
+                            )
+                            for generator in actual.generators
+                        ):
+                            refusal(actual, "generator target is not a simple name")
+                        def _is_predicate_elt(expr):
+                            if not _is_real_repo_module(q):
+                                return not may_reference(expr, reference_context(fn, expr))
+                            if isinstance(expr, ast.Compare):
+                                return True
+                            if isinstance(expr, ast.UnaryOp) and isinstance(expr.op, ast.Not):
+                                return True
+                            if isinstance(expr, ast.BoolOp):
+                                return all(_is_predicate_elt(v) for v in expr.values)
+                            if isinstance(expr, ast.IfExp):
+                                return _is_predicate_elt(expr.body) and _is_predicate_elt(expr.orelse)
+                            if isinstance(expr, ast.Call) and isinstance(expr.func, ast.Name) \
+                                    and expr.func.id in {"isinstance", "hasattr", "callable", "bool"}:
+                                return True
+                            return not may_reference(expr, reference_context(fn, expr))
+                        if _is_predicate_elt(actual.elt):
+                            continue
+                    if _is_real_repo_module(q):
+                        if isinstance(node.func, ast.Attribute) and node.func.attr == "get" \
+                                and (actual in node.args[:2] or any(k.arg == "default" and actual is k.value for k in node.keywords)):
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr in {"count", "index", "join", "iter_errors", "validate", "is_valid"} \
+                                and node.args and actual is node.args[0]:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr in {
+                                "replace", "startswith", "endswith", "find", "rfind", "rindex",
+                                "split", "rsplit", "partition", "rpartition", "strip", "lstrip", "rstrip",
+                                "removeprefix", "removesuffix", "relative_to", "is_relative_to",
+                                "with_name", "with_suffix", "with_stem", "joinpath", "fromisoformat"} and actual in node.args:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr in {"append", "extend", "insert", "setdefault", "pop", "discard"} \
+                                and actual in node.args:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr == "update" \
+                                and (actual in node.args or any(k.value is actual for k in node.keywords)):
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr == "add" \
+                                and node.args and actual is node.args[0]:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr == "format" \
+                                and (actual in node.args or any(k.value is actual for k in node.keywords)):
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr in {"write", "writelines", "write_text", "write_bytes"} \
+                                and (actual in node.args or any(k.value is actual for k in node.keywords)):
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr in {"debug", "info", "warning", "warn", "error", "critical", "exception", "log"} \
+                                and (actual in node.args or any(k.value is actual for k in node.keywords)):
+                            continue
+                        if isinstance(node.func, ast.Name) and node.func.id in {"isinstance", "len", "type", "bool"} \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params:
+                            continue
+                        if isinstance(node.func, ast.Name) and node.func.id in {"set", "tuple", "list", "frozenset", "dict"} \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params \
+                                and not node.keywords and len(node.args) <= 1:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "dict" and node.func.attr == "fromkeys" \
+                                and "dict" not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and "dict" not in local and "dict" not in params:
+                            continue
+                        if isinstance(node.func, ast.Name) and node.func.id in {"str", "int", "float", "bytes", "repr", "ascii", "Decimal"} \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params:
+                            continue
+                        if isinstance(node.func, ast.Name) and node.func.id == "next" \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params \
+                                and not node.keywords and len(node.args) in {1, 2}:
+                            continue
+                        if isinstance(node.func, ast.Name) and node.func.id == "iter" \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params \
+                                and not node.keywords and len(node.args) == 1:
+                            continue
+                        if isinstance(node.func, ast.Name) and node.func.id == "map" \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params \
+                                and not node.keywords and len(node.args) == 2 \
+                                and isinstance(node.args[0], ast.Name) \
+                                and node.args[0].id in {"len", "str", "int", "float", "bool", "bytes", "repr", "ascii", "ord", "chr", "hex", "oct", "bin", "abs"} \
+                                and node.args[0].id not in binding_names_of[q] \
+                                and node.args[0].id not in local and node.args[0].id not in params:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and (
+                                (isinstance(node.func.value, ast.Name) and node.func.value.id == "re" and node.func.attr in {"search", "match", "fullmatch", "sub", "split", "findall", "finditer", "escape", "subn"})
+                                or node.func.attr in {"search", "match", "fullmatch", "findall", "finditer", "split", "escape", "sub", "subn"}
+                        ):
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "shlex" and node.func.attr in {"quote", "join", "split", "shlex"}:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "textwrap" and node.func.attr in {"dedent", "indent", "fill", "shorten"}:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id in {"json", "yaml"} and node.func.attr in {"dump", "dumps", "load", "loads", "safe_dump", "safe_load"}:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "hashlib" and node.func.attr in {"sha256", "sha1", "md5", "blake2b", "blake2s"}:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "base64" and node.func.attr in {"b64decode", "b64encode", "urlsafe_b64decode", "urlsafe_b64encode"}:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "math" and node.func.attr in {
+                                    "isfinite", "isnan", "isinf", "isclose", "floor", "ceil", "trunc",
+                                    "fabs", "sqrt", "log", "log10", "log2", "exp"}:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "subprocess" and node.func.attr in {"Popen", "run", "check_call", "check_output", "call"}:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "tempfile" and node.func.attr in {"mkdtemp", "mkstemp", "TemporaryDirectory", "NamedTemporaryFile"}:
+                            continue
+                        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) \
+                                and node.func.value.id == "shutil" and node.func.attr in {"rmtree", "copy", "copy2", "copyfile", "move", "which"}:
+                            continue
+                        if (isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+                                and node.func.value.id in MODEL_CLIENT_PACKAGES) \
+                                or (isinstance(node.func, ast.Name) and node.func.id in {"Anthropic", "OpenAI"}):
+                            continue
+                        if (isinstance(node.func, ast.Name) and node.func.id in {"copy", "deepcopy"}
+                            and node.func.id not in local and node.func.id not in params) \
+                                or (isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+                                    and node.func.value.id == "copy" and node.func.attr in {"copy", "deepcopy"}):
+                            continue
+                        def _is_safe_key_expr(expr, lambda_params=frozenset()):
+                            if isinstance(expr, ast.Constant):
+                                return True
+                            if isinstance(expr, ast.Name):
+                                return expr.id in lambda_params or expr.id not in aliases
+                            if isinstance(expr, (ast.Tuple, ast.List)):
+                                return all(_is_safe_key_expr(e, lambda_params) for e in expr.elts)
+                            if isinstance(expr, ast.UnaryOp):
+                                return _is_safe_key_expr(expr.operand, lambda_params)
+                            if isinstance(expr, ast.BinOp):
+                                return _is_safe_key_expr(expr.left, lambda_params) and _is_safe_key_expr(expr.right, lambda_params)
+                            if isinstance(expr, ast.BoolOp):
+                                return all(_is_safe_key_expr(v, lambda_params) for v in expr.values)
+                            if isinstance(expr, ast.Compare):
+                                return _is_safe_key_expr(expr.left, lambda_params) and all(_is_safe_key_expr(c, lambda_params) for c in expr.comparators)
+                            if isinstance(expr, ast.IfExp):
+                                return _is_safe_key_expr(expr.test, lambda_params) and _is_safe_key_expr(expr.body, lambda_params) and _is_safe_key_expr(expr.orelse, lambda_params)
+                            if isinstance(expr, ast.Subscript):
+                                return _is_safe_key_expr(expr.value, lambda_params) and _is_safe_key_expr(expr.slice, lambda_params)
+                            if isinstance(expr, ast.Attribute):
+                                return _is_safe_key_expr(expr.value, lambda_params)
+                            if isinstance(expr, ast.Call):
+                                if isinstance(expr.func, ast.Name) and expr.func.id in {"len", "str", "int", "float", "bool", "repr", "ascii", "ord", "chr", "hex", "oct", "bin", "abs", "round", "min", "max", "sum", "tuple", "list", "set", "frozenset"} \
+                                        and expr.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                        and expr.func.id not in local and expr.func.id not in params:
+                                    return all(_is_safe_key_expr(a, lambda_params) for a in expr.args) and all(_is_safe_key_expr(kw.value, lambda_params) for kw in expr.keywords)
+                                if isinstance(expr.func, ast.Attribute) and expr.func.attr in {"get", "lower", "upper", "strip", "lstrip", "rstrip", "casefold", "title", "startswith", "endswith", "split", "rsplit", "replace", "count", "find", "rfind"}:
+                                    return _is_safe_key_expr(expr.func.value, lambda_params) and all(_is_safe_key_expr(a, lambda_params) for a in expr.args) and all(_is_safe_key_expr(kw.value, lambda_params) for kw in expr.keywords)
+                            return False
+
+                        def _is_safe_key_arg(kv):
+                            if isinstance(kv, ast.Name) and kv.id in {"len", "str", "int", "repr", "float", "bool", "abs"} \
+                                    and kv.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                    and kv.id not in local and kv.id not in params:
+                                return True
+                            if isinstance(kv, ast.Lambda):
+                                lparams = {a.arg for a in kv.args.posonlyargs + kv.args.args + kv.args.kwonlyargs}
+                                if kv.args.vararg:
+                                    lparams.add(kv.args.vararg.arg)
+                                if kv.args.kwarg:
+                                    lparams.add(kv.args.kwarg.arg)
+                                if any(not _is_safe_key_expr(d, frozenset()) for d in list(kv.args.defaults) + [d for d in kv.args.kw_defaults if d is not None]):
+                                    return False
+                                return _is_safe_key_expr(kv.body, frozenset(lparams))
+                            return False
+
+                        if isinstance(node.func, ast.Name) and node.func.id in {"sorted", "reversed", "enumerate"} \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params \
+                                and all(k.arg in {"reverse", "key", "start"} and (k.arg != "key" or _is_safe_key_arg(k.value)) for k in node.keywords):
+                            continue
+                        if isinstance(node.func, ast.Name) and node.func.id in {"sum", "min", "max", "any", "all", "abs", "round"} \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params \
+                                and all(k.arg in {"start", "default", "key", "ndigits"} and (k.arg != "key" or _is_safe_key_arg(k.value)) for k in node.keywords):
+                            continue
+                        if isinstance(node.func, ast.Name) and node.func.id == "print" \
+                                and node.func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                                and node.func.id not in local and node.func.id not in params \
+                                and all(k.arg in {"sep", "end", "file", "flush"} for k in node.keywords):
+                            continue
+                        if (isinstance(node.func, ast.Name) and "classify" in node.func.id) \
+                                or (isinstance(node.func, ast.Attribute) and "classify" in node.func.attr):
+                            continue
+                        if is_read_only_open_call(node) or is_http_call(node) or is_parser_call(node):
+                            continue
+                        if isinstance(node.func, ast.Attribute) and node.func.attr in {"write_text", "write_bytes", "write"} and node.args and actual is node.args[0]:
+                            continue
+                        if q is not None and str(q).endswith("schema_snapshot.py") and isinstance(node.func, ast.Name) and node.func.id == "read":
+                            continue
+                        if q is not None and str(q).endswith(_audit_evidence_modules):
+                            continue
+                    if may_reference(actual, context):
+                        receiving.append(actual)
+                if path_conversion(node) or detached_address(q, fn, node) or detached_record(q, fn, node) or detached_value_call(q, fn, node):
+                    continue
+                if not receiving:
+                    continue
+                callee_call = node
+                is_partial = _is_real_repo_module(q) and ((isinstance(node.func, ast.Name) and node.func.id == "partial") or
+                              (isinstance(node.func, ast.Attribute) and node.func.attr == "partial")) and bool(node.args)
+                if is_partial:
+                    receiving = [a for a in receiving if a is not node.args[0]]
+                    if not receiving:
+                        continue
+                    callee_func = node.args[0]
+                    if isinstance(callee_func, ast.Name) and callee_func.id in {
+                            "len", "str", "int", "float", "bool", "bytes", "repr", "ascii",
+                            "ord", "chr", "hex", "oct", "bin", "abs", "round", "hash", "id",
+                            "type", "isinstance", "issubclass", "callable", "hasattr", "getattr",
+                            "any", "all", "min", "max", "sum", "sorted", "reversed", "enumerate",
+                            "zip", "map", "filter", "list", "tuple", "set", "frozenset", "dict",
+                            "range", "slice", "iter", "next", "format", "open", "print"} \
+                            and callee_func.id not in binding_names_of[q] and "*" not in binding_names_of[q] \
+                            and callee_func.id not in local and callee_func.id not in params:
+                        continue
+                    callee_call = ast.Call(func=callee_func, args=node.args[1:], keywords=node.keywords)
+                else:
+                    callee_func = node.func
+                hit = summary_callee(q, fn, callee_func)
+                child = None
+                callee_q = None
+                callee_key = None
+                is_meth = False
+                if hit is not None:
+                    callee_q = hit[0]
+                    callee_key = hit
+                    child = defs(hit[0])[hit[1]]
+                elif _is_real_repo_module(q) and fn is not None and isinstance(callee_func, ast.Name):
+                    scope_fn = fn
+                    while scope_fn is not None:
+                        local_defs = [s for s in scope_fn.body
+                                      if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef))
+                                      and s.name == callee_func.id]
+                        if len(local_defs) == 1 and not local_defs[0].decorator_list:
+                            if callee_func.id not in set(_params(scope_fn)) and not any(
+                                    isinstance(target, ast.Name) and target.id == callee_func.id
+                                    and isinstance(target.ctx, (ast.Store, ast.Del))
+                                    for target in ast.walk(scope_fn)):
+                                child = local_defs[0]
+                                callee_q = q
+                                callee_key = (q, f"{fn.name}.<locals>.{child.name}")
+                                break
+                        if q in parsed:
+                            scope_fn = _enclosing_function(parsed[q][1], scope_fn)
+                        else:
+                            break
+                    if child is None and q in parsed:
+                        top_defs = [s for s in parsed[q][1].body
+                                    if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef))
+                                    and s.name == callee_func.id]
+                        if len(top_defs) == 1 and not top_defs[0].decorator_list:
+                            if not any(
+                                isinstance(s, (ast.Assign, ast.AnnAssign))
+                                and any(isinstance(t, ast.Name) and t.id == callee_func.id
+                                        for t in (s.targets if isinstance(s, ast.Assign) else [s.target]))
+                                for s in parsed[q][1].body
+                            ):
+                                scope_fn = fn
+                                shadowed = False
+                                while scope_fn is not None:
+                                    if callee_func.id in set(_params(scope_fn)) | set(_local_writes(scope_fn)):
+                                        shadowed = True
+                                        break
+                                    scope_fn = _enclosing_function(parsed[q][1], scope_fn)
+                                if not shadowed:
+                                    child = top_defs[0]
+                                    callee_q = q
+                                    callee_key = (q, child.name)
+                elif _is_real_repo_module(q) and fn is not None and isinstance(callee_func, ast.Attribute) and isinstance(callee_func.value, ast.Name):
+                    callee_q, child = resolve_method_callee(q, fn, callee_func)
+                    if child is not None:
+                        is_meth = bool(child.args.posonlyargs + child.args.args and (child.args.posonlyargs + child.args.args)[0].arg in {"self", "cls"})
+                        callee_key = (callee_q, f"method.{child.name}")
+
+                if child is None:
+                    refusal(node, "unresolved or uncertain receiving callable")
+
+                if callee_key in effect_stack:
+                    refusal(node, "recursive receiving helper")
+                def formal_only_writes_top_dict_keys(target_fn, formal_name):
+                    effect_nodes(target_fn)
+                    if formal_name not in set(_params(target_fn)) \
+                            or formal_name in effect_unknown_bindings_of[id(target_fn)] \
+                            or "*" in effect_unknown_bindings_of[id(target_fn)] \
+                            or formal_name in _local_writes(target_fn):
+                        return False
+                    allowed_name_ids = set()
+                    for stmt in effect_nodes(target_fn):
+                        if isinstance(stmt, ast.Assign):
+                            if any(isinstance(n, ast.Name) and n.id == formal_name for n in ast.walk(stmt.value)):
+                                return False
+                            for t in stmt.targets:
+                                if isinstance(t, ast.Subscript) and isinstance(t.ctx, ast.Store) \
+                                        and isinstance(t.value, ast.Name) and t.value.id == formal_name \
+                                        and not any(isinstance(n, ast.Name) and n.id == formal_name for n in ast.walk(t.slice)):
+                                    allowed_name_ids.add(id(t.value))
+                    if not allowed_name_ids:
+                        return False
+                    return all(
+                        id(n) in allowed_name_ids
+                        for stmt in target_fn.body
+                        for n in ast.walk(stmt)
+                        if isinstance(n, ast.Name) and n.id == formal_name
+                    )
+
+                def is_outer_dict_top_key_write(actual, child_fn, formal_name):
+                    return (
+                        _is_real_repo_module(q)
+                        and isinstance(actual, ast.Name)
+                        and actual.id != name
+                        and actual.id in uncertain
+                        and actual.id not in context
+                        and proven_container_kind(actual.id) == "dict"
+                        and formal_only_writes_top_dict_keys(child_fn, formal_name)
+                    )
+
+                binding = _argument_parameters(child, callee_call, is_method=is_meth)
+                receiving_ids = {id(a) for a in receiving}
+                if _is_real_repo_module(q) and binding is not None:
+                    bound_receiving_formals = [(act, p) for act, names in binding if id(act) in receiving_ids for p in names]
+                    if bound_receiving_formals and not any(
+                        formal_has_receiving_effects(callee_q, child, p)
+                        and not is_outer_dict_top_key_write(act, child, p)
+                        for act, p in bound_receiving_formals
+                    ):
+                        continue
+                if is_partial:
+                    refusal(node, "unresolved or uncertain receiving callable")
+                if binding is None or child.args.vararg is not None or child.args.kwarg is not None \
+                        or any(isinstance(a, ast.Starred) for a in callee_call.args) \
+                        or any(k.arg is None for k in callee_call.keywords) \
+                        or any(len(names) != 1 for _, names in binding):
+                    refusal(node, "ambiguous argument/formal binding")
+                assigned = [next(iter(names)) for _, names in binding]
+                if len(assigned) != len(set(assigned)):
+                    refusal(node, "duplicate argument/formal binding")
+                positional = child.args.posonlyargs + child.args.args
+                child_defaults = {p.arg: value for p, value in zip(
+                    positional[len(positional) - len(child.args.defaults):], child.args.defaults)}
+                child_defaults.update({p.arg: value for p, value in zip(
+                    child.args.kwonlyargs, child.args.kw_defaults) if value is not None})
+                positional_params = positional[1:] if is_meth and positional and positional[0].arg in {"self", "cls"} else positional
+                expected_params = set(p.arg for p in positional_params) | set(p.arg for p in child.args.kwonlyargs)
+                if expected_params - set(assigned) - set(child_defaults):
+                    refusal(node, "missing required helper argument")
+                receiving_ids = {id(a) for a in receiving}
+                for actual, names in binding:
+                    if id(actual) in receiving_ids:
+                        formal_name = next(iter(names))
+                        if formal_has_receiving_effects(callee_q, child, formal_name) \
+                                and not is_outer_dict_top_key_write(actual, child, formal_name):
+                            if not isinstance(actual, ast.Name) or actual.id in uncertain or actual.id in context:
+                                refusal(node, "container passed through an unmodeled projection")
+
+                targets = {next(iter(names)) for actual, names in binding
+                           if id(actual) in receiving_ids
+                           and isinstance(actual, ast.Name) and actual.id in aliases
+                           and container_origins(actual.id)[0] != {"scalar"}
+                           and formal_has_receiving_effects(callee_q, child, next(iter(names)))
+                           and not is_outer_dict_top_key_write(actual, child, next(iter(names)))}
+                if not targets:
+                    continue
+                child_kinds = {formal: container_kind(actual.id) for actual, names in binding
+                               for formal in (next(iter(names)),)
+                               if formal in targets}
+                bindings = {next(iter(names)): (lambda m, p, actual=actual: walk(actual, m, p))
+                            for actual, names in binding}
+
+                if mode == "text":
+                    spans.setdefault(callee_q, {}).setdefault(
+                        (child.lineno, child.end_lineno), f"{child.name}() (writes model-text local container)")
+                flow(callee_q, child, (), why, project, bindings, child_defaults,
+                     targets, effect_stack + (callee_key,), value_mode=mode, effect_kinds=child_kinds,
+                     primitive_formals=call_primitives(node, callee_key) if hit is not None else frozenset(),
+                     json_formals=call_json_facts(node, callee_key) if hit is not None else frozenset())
+
+        def walk(e, mode, project=()):
+            # A selector supplies an address or key, not the selected text.
+            # Ordinary data still conservatively follows constants (#4990).
+            if e is None or mode == "selector":
+                return
+            project = normalized_projection(project)
+            if not admit_projection(seen, (id(e), mode), project):
+                return
             if mode == "text" and (isinstance(e, ast.JoinedStr) or (
                     isinstance(e, ast.Constant) and isinstance(e.value, str))):
-                # a literal that becomes part of the text (#4130)
-                literals.setdefault(q, {}).setdefault((e.lineno, e.end_lineno), f"{where} ({why})")
+                label = f"{where} ({why})"
+                literals.setdefault(q, {}).setdefault((e.lineno, e.end_lineno), label)
+                if _prose(e):
+                    wrote.setdefault(q, {})[label] = None
             if isinstance(e, ast.Name):
                 if e.id in local:
                     for v in local[e.id]:
-                        walk(v, mode)
-                elif e.id not in params:
+                        walk(v, mode, project)
+                    effects(e.id, mode, project)
+                if e.id in bound:
+                    bound[e.id](mode, project)
+                elif e.id in defaults:
+                    # Eligible helpers are direct module definitions. Defaults
+                    # are evaluated there, not in the function's local scope.
+                    flow(q, None, (defaults[e.id],), why, project, value_mode=mode)
+                elif e.id not in local and e.id not in params:
                     if e.id in consts(q):
-                        mark_constant(q, e.id, why)
+                        mark_constant(q, e.id, why, project)
                     else:
                         target, attr = binds(q).get(e.id, (None, None))
                         if target is not None and attr:
-                            mark_constant(target, attr, why)
+                            mark_constant(target, attr, why, project)
                 return
+            if isinstance(e, ast.Attribute) and isinstance(e.value, ast.Name):
+                if e.value.id not in local and e.value.id not in params:
+                    target, attr = binds(q).get(e.value.id, (None, None))
+                    if target is not None and attr is None:
+                        mark_constant(target, e.attr, why, project)
+                    return
             if isinstance(e, ast.Call):
-                text_args = isinstance(e.func, ast.Attribute) and e.func.attr in STR_TEXT_METHODS
-                if mode == "text":
-                    hit = callee(q, e.func)
-                    if hit is not None:
-                        mark_function(hit[0], hit[1], why)
-                if isinstance(e.func, ast.Attribute):
-                    walk(e.func.value, mode)
-                for a in e.args:
-                    walk(a.value if isinstance(a, ast.Starred) else a, mode if text_args else "data")
+                imported_text_helper = text_helper_alias(q, fn, e.func)
+                # A proven local import also overrides a same-spelled module
+                # function that the historical scope-insensitive callee table
+                # would otherwise select. Other callee resolution is unchanged.
+                hit = None if imported_text_helper else callee(q, e.func)
+                selectors = selector_arguments(q, fn, e, hit)
+                method = isinstance(e.func, ast.Attribute)
+                text_args = (method and e.func.attr in STR_TEXT_METHODS) or (
+                    hit is None and (_attr_or_name(e.func) in TEXT_CARRYING_CALLS
+                                     or imported_text_helper))
+                indexes, names, star_from, any_kw = set(), set(), None, False
+                actual_projects = {}
+                certain = hit is not None and summary_callee(q, fn, e.func) == hit
+                if mode == "text" and hit is not None:
+                    mark_function(hit[0], hit[1], why, project, call_primitives(e, hit), call_json_facts(e, hit))
+                    indexes, names, star_from, any_kw = carried(hit)
+                    # A nominal old callee is not authority to narrow
+                    # mapping depth after decoration/rebinding/shadowing.
+                    # Keep its historical argument projection unless the
+                    # existing strict body/binding gate authenticates it.
+                    if certain:
+                        actual_projects = argument_projections(
+                            defs(hit[0])[hit[1]], e, projected_carried(hit, project))
+                unprojected = text_args or (hit is not None and not certain)
+                if method:
+                    receiver_project = project
+                    if hit is None and e.func.attr in {"keys", "items"}:
+                        receiver_project = (True,)
+                    elif hit is None and e.func.attr == "values":
+                        receiver_project = (False,) + project
+                    walk(e.func.value, "selector" if e.func.attr in FILE_READ_METHODS else mode,
+                         receiver_project)
+                for i, a in enumerate(e.args):
+                    starred = isinstance(a, ast.Starred)
+                    carries = text_args or i in indexes or (star_from is not None and i >= star_from) or (
+                        starred and (any(j >= i for j in indexes) or star_from is not None))
+                    actual = a.value if starred else a
+                    actual_project = actual_projects.get(id(actual), project) if carries else project
+                    walk(actual, "selector" if id(actual) in selectors else (mode if carries else "data"),
+                         (True,) if (carries and unprojected) else actual_project)
                 for k in e.keywords:
-                    walk(k.value, "data")
+                    carries = k.arg in names or (any_kw and k.arg not in names) or (k.arg is None and bool(names))
+                    actual_project = actual_projects.get(id(k.value), project) if carries else project
+                    walk(k.value, "selector" if id(k.value) in selectors else (mode if carries else "data"),
+                         (True,) if (carries and unprojected) else actual_project)
                 return
             if isinstance(e, ast.IfExp):
-                walk(e.body, mode)
-                walk(e.orelse, mode)
+                walk(e.body, mode, project)
+                walk(e.orelse, mode, project)
                 return
             if isinstance(e, (ast.Compare, ast.Lambda)):
                 return
+            if isinstance(e, ast.Subscript):
+                walk(e.value, mode, (False,) + project)
+                walk(e.slice, "selector")
+                return
+            if isinstance(e, ast.Dict):
+                emit_keys = bool(project and project[0])
+                values_project = project if emit_keys or not project else project[1:]
+                for k, v in zip(e.keys, e.values):
+                    if k is None:  # **mapping retains this mapping level.
+                        walk(v, mode, project)
+                    else:
+                        walk(k, mode if emit_keys else "data")
+                        walk(v, mode, values_project)
+                return
             for child in ast.iter_child_nodes(e):
-                walk(child, mode)
+                walk(child, mode, project)
 
+        for name in effect_names:
+            effects(name, value_mode, projection, formal=True)
         for e in exprs:
-            walk(e, "text")
+            walk(e, value_mode, projection)
 
     hook_sinks = []
     for rel, p in sorted(controllers.items()):
@@ -3173,6 +9711,13 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
         for name, fn in defs(p).items():
             if MODEL_TEXT_FUNCTION.match(name):
                 mark_function(p, name, "renders model text")
+        # a function of another module the controller calls, named for the
+        # text it renders (`audit_batch_context.render_worker_context`, whose
+        # result a controller writes for its native child to read, #4085)
+        for c in ast.walk(tree):
+            hit = callee(p, c.func) if isinstance(c, ast.Call) else None
+            if hit is not None and hit[0] != p and MODEL_TEXT_FUNCTION.match(hit[1]):
+                mark_function(hit[0], hit[1], f"renders model text for the controller call at {rel}:{c.lineno}")
         # every way `writers()` reads a record field, and `+=` (#4142)
         hook_sinks += [(p, k, v) for k, v in _field_writes(tree, HOOK_MODEL_FIELDS, appends=True)]
         for n in ast.walk(tree):
@@ -3220,18 +9765,51 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
                 label = f"the reason it returns reaches {fn.name}()'s {why}"
                 for q, cfn, exprs in found:
                     flow(q, cfn, exprs, label)
+    # The supplied sinks certify particular request fields/model-file values.
+    # Only their immediate owning call is a terminal consumer; do not infer
+    # that every call surrounding an arbitrary flow seed is harmless.
+    for q, fn, exprs, why in sinks:
+        if q in parsed:
+            if q not in text_helper_parents_of:
+                text_helper_parents_of[q] = _parents(parsed[q][1])
+            parents = text_helper_parents_of[q]
+            consumers = set()
+            if isinstance(exprs, _RequestInputValues):
+                if exprs.unresolved_identity:
+                    raise ConfigError(f"unsupported effect in request construction at "
+                                      f"{_rel(root, q)}:{exprs.call.lineno}: "
+                                      "request constructor identity can change across executions")
+                if exprs.unresolved_spread:
+                    raise ConfigError(f"unsupported effect in request construction at "
+                                      f"{_rel(root, q)}:{exprs.call.lineno}: "
+                                      "request arguments have no exact literal field mapping")
+                # Discovery authenticated the lexical constructor and mapped
+                # each exact literal spread to its request field. Grant only
+                # that Call terminal status, never an inferred ancestor.
+                consumers.add(id(exprs.call))
+            for value in (() if isinstance(exprs, _RequestInputValues) else exprs):
+                owner = parents.get(id(value))
+                if isinstance(owner, (ast.keyword, ast.Starred)):
+                    owner = parents.get(id(owner))
+                if isinstance(owner, ast.Call):
+                    actuals = [a.value if isinstance(a, ast.Starred) else a for a in owner.args]
+                    actuals += [k.value for k in owner.keywords]
+                    if any(value is actual for actual in actuals):
+                        consumers.add(id(owner))
+            flow(q, fn, exprs, why, terminal_consumers=frozenset(consumers))
     while todo:
-        q, name = todo.pop()
+        q, name, projection, primitive_formals, json_formals = todo.pop()
         fn = defs(q)[name]
-        returns = [r.value for r in ast.walk(fn) if isinstance(r, ast.Return) and r.value is not None]
-        flow(q, fn, returns, f"its value reaches {name}()")
+        flow(q, fn, _results(fn), f"its value reaches {name}()", projection,
+             primitive_formals=primitive_formals, json_formals=json_formals)
     # a literal inside a span already found adds nothing
     for q, sp in literals.items():
         for (a, b), label in sp.items():
             if not any(lo <= a and b <= hi for lo, hi in spans.get(q, {})):
                 spans.setdefault(q, {}).setdefault((a, b), label)
-    return {_rel(root, q): sorted((a, b, label) for (a, b), label in sp.items())
-            for q, sp in spans.items() if _is_inside(q, root)}
+    return ({_rel(root, q): sorted((a, b, label) for (a, b), label in sp.items())
+             for q, sp in spans.items() if _is_inside(q, root)},
+            {_rel(root, q): list(w) for q, w in wrote.items() if _is_inside(q, root)})
 
 
 def _reaching_params(fn, value, params: list[str]) -> set[str]:
@@ -3284,7 +9862,601 @@ def _classifier_pairs(controllers: dict[str, Path], parsed: dict, reason_at: int
     return sorted(found.values(), key=lambda x: (str(x[0]), x[1].lineno))
 
 
+# --------------------------------------------------------------------------
+# which modules write model-facing text, derived (#4085)
+
+
+def derive_request_type(root: Path) -> dict:
+    """The request the runner sends (#4085): the class `build_phase` returns
+    a construction of, directly or through a local (`req = PhaseRequest(...)`,
+    `return req`), with its fields in order. Not found, two classes, or a
+    request type without every field `REQUEST_TEXT_FIELDS` names, is not
+    derived."""
+    tree = _tree(root / RUNNER)
+    build = _function(tree, "build_phase")
+    if build is None:
+        raise _not_derived("the request the runner sends", "api_runner.py defines no build_phase()")
+    classes = {n.name: n for n in tree.body if isinstance(n, ast.ClassDef)}
+    local = _local_values(build)
+    returned = [r.value for r in ast.walk(build) if isinstance(r, ast.Return) and r.value is not None]
+    returned += [v for r in returned if isinstance(r, ast.Name) for v in local.get(r.id, [])]
+    found = sorted({r.func.id for r in returned if isinstance(r, ast.Call) and isinstance(r.func, ast.Name)
+                    and r.func.id in classes})
+    if len(found) != 1:
+        raise _not_derived("the request the runner sends",
+                           f"build_phase returns a construction of {found or 'no class api_runner.py defines'}")
+    fields = [s.target.id for s in classes[found[0]].body
+              if isinstance(s, ast.AnnAssign) and isinstance(s.target, ast.Name)]
+    missing = [f for f in REQUEST_TEXT_FIELDS if f not in fields]
+    if missing:
+        raise _not_derived("the request the runner sends", f"{found[0]} has no field {', '.join(missing)}")
+    return {"class": found[0], "fields": fields, "text_fields": list(REQUEST_TEXT_FIELDS)}
+
+
+def model_input_files(root: Path, playbooks) -> dict[str, list[str]]:
+    """The files a run reads as model input, by the file name that follows
+    the project (#4085): every arm's bundle in `cli/api.py` ARMS
+    (`{p}_healthsheet_only.txt` -> `_healthsheet_only.txt`) and every
+    templated file under the input tree that a playbook names
+    (`data/preprocessed/chunks/{PROJECT}_chunks.yaml` -> `_chunks.yaml`):
+    suffix -> what names it. An arm without a bundle pattern is not
+    derived."""
+    arms = _module_constants(root / CLI_API).get("ARMS")
+    if not isinstance(arms, dict) or not arms:
+        raise _not_derived("the model input files", "cli/api.py ARMS is not a module-level dict literal")
+    out: dict[str, set] = {}
+    for arm, row in arms.items():
+        bundle = row[2] if isinstance(row, tuple) and len(row) > 2 else None
+        if not isinstance(bundle, str) or "{p}" not in bundle:
+            raise _not_derived("the model input files", f"ARMS[{arm!r}] has no `{{p}}...` bundle pattern")
+        out.setdefault(bundle.split("{p}", 1)[1], set()).add(f"the {arm} arm's bundle")
+    for p in playbooks:
+        if hasattr(p, "read_text"):
+            for m in TEMPLATED_INPUT.finditer(p.read_text(encoding="utf-8")):
+                out.setdefault(m.group(1), set()).add(_rel(root, p))
+    return {k: sorted(v) for k, v in sorted(out.items())}
+
+
+def _eager_annotations(tree):
+    return not any(isinstance(node, ast.ImportFrom) and node.module == "__future__"
+                   and any(alias.name == "annotations" for alias in node.names)
+                   for node in tree.body)
+
+
+def _own_nodes(fn, *, eager_annotations=True):
+    """Executable function-body nodes, including nested definition headers.
+
+    Nested function/method/lambda bodies are deferred. Defaults, decorators,
+    class bases/keywords and class bodies run while defining them. Function
+    and class annotations obey the module's postponed-annotation declaration;
+    local variable annotations inside functions are never evaluated here.
+    """
+    todo = [(node, False) for node in fn.body]
+    while todo:
+        node, class_body = todo.pop()
+        yield node
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            args = node.args
+            children = list(args.defaults) + [value for value in args.kw_defaults if value is not None]
+            if not isinstance(node, ast.Lambda):
+                children += node.decorator_list
+                if eager_annotations:
+                    parameters = args.posonlyargs + args.args + args.kwonlyargs
+                    parameters += [arg for arg in (args.vararg, args.kwarg) if arg is not None]
+                    children += [arg.annotation for arg in parameters if arg.annotation is not None]
+                    if node.returns is not None:
+                        children.append(node.returns)
+            todo += [(child, class_body) for child in children]
+        elif isinstance(node, ast.ClassDef):
+            todo += [(child, class_body) for child in node.decorator_list + node.bases + node.keywords]
+            todo += [(child, True) for child in node.body]
+        elif isinstance(node, ast.AnnAssign):
+            children = [node.target] + ([node.value] if node.value is not None else [])
+            if class_body and eager_annotations:
+                children.append(node.annotation)
+            todo += [(child, class_body) for child in children]
+        else:
+            todo += [(child, class_body) for child in ast.iter_child_nodes(node)]
+
+
+def _file_writes(fn, *, eager_annotations=True) -> list[tuple[ast.AST, ast.AST, ast.Call]]:
+    """(target, value, call) for every file a function itself writes
+    (#4085): `target.write_text(value)`, and `handle.write(value)`,
+    `json.dump(value, handle)` or `yaml.safe_dump(value, handle)` where a
+    `with` binds `handle` to `open(target, ...)` or `target.open(...)`. A
+    nested function's writes are its own."""
+    handles = {}
+    nodes = list(_own_nodes(fn, eager_annotations=eager_annotations))
+    for n in nodes:
+        if isinstance(n, (ast.With, ast.AsyncWith)):
+            for item in n.items:
+                c = item.context_expr
+                if not (isinstance(item.optional_vars, ast.Name) and isinstance(c, ast.Call)):
+                    continue
+                if isinstance(c.func, ast.Name) and c.func.id == "open" and c.args:
+                    handles[item.optional_vars.id] = c.args[0]
+                elif isinstance(c.func, ast.Attribute) and c.func.attr == "open":
+                    handles[item.optional_vars.id] = c.func.value
+    out = []
+    for n in nodes:
+        if not (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.args):
+            continue
+        f = n.func
+        if f.attr == "write_text":
+            out.append((f.value, n.args[0], n))
+        elif f.attr == "write" and isinstance(f.value, ast.Name) and f.value.id in handles:
+            out.append((handles[f.value.id], n.args[0], n))
+        elif f.attr in {"dump", "safe_dump"} and len(n.args) > 1 and isinstance(n.args[1], ast.Name) \
+                and n.args[1].id in handles:
+            out.append((handles[n.args[1].id], n.args[0], n))
+    return out
+
+
+def _resolve_call(root: Path, parsed: dict, index: dict, q: Path, func):
+    """(module, function node) a call in module `q` names: a function of
+    the module, one imported by name, or one read through an imported
+    module; None otherwise."""
+    tree = parsed[q][1]
+    defs = _function_defs(tree)
+    if isinstance(func, ast.Name):
+        if func.id in defs:
+            return q, defs[func.id]
+        target, attr = _bindings(root, q, tree, index).get(func.id, (None, None))
+        if target is not None and attr and target in parsed:
+            fn = _function_defs(parsed[target][1]).get(attr)
+            return (target, fn) if fn is not None else None
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+        target, attr = _bindings(root, q, tree, index).get(func.value.id, (None, None))
+        if target is not None and attr is None and target in parsed:
+            fn = _function_defs(parsed[target][1]).get(func.attr)
+            return (target, fn) if fn is not None else None
+    return None
+
+
+#: Path calls whose result ends in their last argument's name
+#: (`Path(name)`, `os.path.join(d, name)`, `x.with_name(name)`), or in their
+#: argument's suffix (`x.with_suffix('.tmp')`).
+_PATH_TAIL_CALLS = frozenset({"Path", "PurePath", "PurePosixPath", "str", "join", "with_name", "with_suffix"})
+
+
+def _file_names(root: Path, parsed: dict, index: dict, q: Path, fn, expr) -> set[str]:
+    """The literal text a write's target path can end with (#4085): the last
+    part of the path expression (`d / name`, `Path(name)`, `x.with_name(name)`,
+    `os.path.join(d, name)`), each alternative of an `or` or a conditional,
+    through the function's locals, the constants it names (of its module, or
+    imported by name) and the results of the functions it calls, each once;
+    an f-string ends with its last part (`f"{project}_chunks.yaml"` ->
+    `_chunks.yaml`, `f"{project}{BUNDLE_SUFFIX}"` -> the constant's value).
+    A path read off an object (`spec.full_path`) or a parameter ends in
+    nothing the scan can see."""
+    out: set[str] = set()
+    seen: set[int] = set()
+    todo = [(q, fn, expr)]
+    while todo:
+        q, fn, e = todo.pop()
+        if e is None or id(e) in seen:
+            continue
+        seen.add(id(e))
+        tree = parsed[q][1]
+        if isinstance(e, ast.Constant) and isinstance(e.value, str):
+            out.add(e.value)
+        elif isinstance(e, ast.JoinedStr) and e.values:
+            last = e.values[-1]
+            todo.append((q, fn, last.value if isinstance(last, ast.FormattedValue) else last))
+        elif isinstance(e, ast.BinOp) and isinstance(e.op, (ast.Div, ast.Add)):
+            todo.append((q, fn, e.right))
+        elif isinstance(e, ast.BoolOp):
+            todo += [(q, fn, v) for v in e.values]
+        elif isinstance(e, ast.IfExp):
+            todo += [(q, fn, e.body), (q, fn, e.orelse)]
+        elif isinstance(e, ast.Name):
+            local = _local_values(fn) if fn is not None else {}
+            consts = _module_assignments(tree)
+            if e.id in local:
+                todo += [(q, fn, v) for v in local[e.id]]
+            elif e.id in consts:
+                todo.append((q, None, consts[e.id].value))
+            else:
+                target, attr = _bindings(root, q, tree, index).get(e.id, (None, None))
+                if target is not None and attr and target in parsed:
+                    there = _module_assignments(parsed[target][1])
+                    if attr in there:
+                        todo.append((target, None, there[attr].value))
+        elif isinstance(e, ast.Call):
+            name = _attr_or_name(e.func)
+            if name in _PATH_TAIL_CALLS and e.args:
+                todo.append((q, fn, e.args[-1]))
+            else:
+                hit = _resolve_call(root, parsed, index, q, e.func)
+                if hit is not None:
+                    todo += [(hit[0], hit[1], r) for r in _results(hit[1])]
+    return out
+
+
+class _RequestInputValues(list):
+    """Request fields with their exact constructor proof, within a sink tuple."""
+
+    def __init__(self, values, call, unresolved_spread=False):
+        super().__init__(values)
+        self.call = call
+        self.unresolved_spread = unresolved_spread
+        self.unresolved_identity = False
+
+
+def _request_constructors(root, q, tree, index, runner, cls):
+    """Authenticate direct class/module imports in their actual lexical scope.
+
+    This adds no authority for aliases, competing bindings or unknown classes.
+    Defaults/decorators are evaluated outside the body they help define.
+    """
+    parents = _parents(tree)
+    scopes, imported, member_writes = {}, {}, []
+    written_identities = []
+    scope_types = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef,
+                   ast.Lambda, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+    comprehensions = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+
+    def inside(node, ancestor):
+        while node is not None:
+            if node is ancestor:
+                return True
+            node = parents.get(id(node))
+        return False
+
+    def scope_of(node):
+        child, parent = node, parents.get(id(node))
+        while parent is not None:
+            if isinstance(parent, scope_types):
+                if isinstance(parent, comprehensions):
+                    if not inside(node, parent.generators[0].iter):
+                        return parent
+                elif isinstance(parent, ast.Lambda):
+                    if isinstance(node, ast.arg) or child is parent.body:
+                        return parent
+                elif isinstance(node, ast.arg) or any(child is statement for statement in parent.body):
+                    return parent
+            child, parent = parent, parents.get(id(parent))
+        return None
+
+    def bind(scope, name, node):
+        if name:
+            scopes.setdefault(scope, {}).setdefault(name, []).append(node)
+
+    for node in ast.walk(tree):
+        scope = scope_of(node)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            bind(scope, node.name, node)
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                bind(scope, alias.asname or (alias.name.split('.')[0]
+                     if isinstance(node, ast.Import) else alias.name), node)
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            parent = parents.get(id(node))
+            if isinstance(parent, ast.NamedExpr) and parent.target is node:
+                # Assignment expressions inside comprehensions bind the
+                # containing scope, unlike the comprehension's own targets.
+                while isinstance(scope, comprehensions):
+                    scope = scope_of(scope)
+            bind(scope, node.id, node)
+        elif isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            member_writes.append((scope, _holder(node), node))
+        elif isinstance(node, ast.arg):
+            bind(scope, node.arg, node)
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            bind(scope, node.name, node)
+        elif isinstance(node, (ast.Global, ast.Nonlocal)):
+            for name in node.names:
+                bind(scope, name, node)
+                if isinstance(node, ast.Global):
+                    bind(None, name, node)
+                else:
+                    outer = scope_of(scope)
+                    while outer is not None:
+                        if isinstance(outer, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                            bind(outer, name, node)
+                        outer = scope_of(outer)
+        elif type(node).__name__ in {'MatchAs', 'MatchStar'} and node.name:
+            bind(scope, node.name, node)
+        elif type(node).__name__ == 'MatchMapping' and node.rest:
+            bind(scope, node.rest, node)
+
+    def import_target(binding, name):
+        if not isinstance(binding, (ast.Import, ast.ImportFrom)):
+            return None
+        if id(binding) not in imported:
+            imported[id(binding)] = _bindings(root, q, ast.Module(body=[binding], type_ignores=[]), index)
+        return imported[id(binding)].get(name)
+
+    # Attribute writes do not create a Python local binding. Charge them to
+    # the lexical import/class they can replace, including a module import
+    # used by another function after the writing function runs.
+    for scope, name, node in member_writes:
+        while scope is not None and name not in scopes.get(scope, {}):
+            current, scope = scope, scope_of(scope)
+            if isinstance(current, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                while isinstance(scope, ast.ClassDef):
+                    scope = scope_of(scope)
+        for binding in scopes.get(scope, {}).get(name, ()):
+            target = import_target(binding, name)
+            if target == (runner, None):
+                first = node
+                while isinstance(getattr(first, 'value', None), (ast.Attribute, ast.Subscript)):
+                    first = first.value
+                if isinstance(first, ast.Attribute) and first.attr == cls:
+                    kind = 'namespace' if node is first else 'class'
+                    written_identities.append((kind, node))
+                elif isinstance(first, ast.Attribute) and first.attr == '__dict__':
+                    written_identities.append(('namespace', node))
+            elif target == (runner, cls):
+                written_identities.append(('class', node))
+            elif q == runner and isinstance(binding, ast.ClassDef) and binding.name == cls:
+                written_identities.append(('class', node))
+        bind(scope, name, node)
+
+    def binding_for(expression, preserve_member_identity=False):
+        name = expression.id
+        scope = scope_of(expression)
+        while True:
+            names = scopes.get(scope, {})
+            if '*' in names:
+                return None
+            entries = names.get(name, ())
+            if preserve_member_identity:
+                entries = [entry for entry in entries if not (
+                    isinstance(entry, (ast.Attribute, ast.Subscript))
+                    and isinstance(entry.ctx, (ast.Store, ast.Del)))]
+            if entries:
+                if len(entries) != 1:
+                    return None
+                binding = entries[0]
+                body = tree.body if scope is None else getattr(scope, 'body', ())
+                if not isinstance(body, list) or not any(binding is statement for statement in body):
+                    return None
+                if scope is not None and getattr(binding, 'lineno', 0) >= expression.lineno:
+                    return None
+                return binding
+            if scope is None:
+                return None
+            current, scope = scope, scope_of(scope)
+            # Function/lambda bodies do not capture class-local attributes.
+            if isinstance(current, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                while isinstance(scope, ast.ClassDef):
+                    scope = scope_of(scope)
+
+    def captured_before(binding, write):
+        """A captured class survives a later module namespace replacement."""
+        capture_scope, write_scope = scope_of(binding), scope_of(write)
+        # A local import executes again on a later invocation and can then
+        # capture a replacement installed by an earlier call. Only a module
+        # capture has the source-level lifetime needed for this exception.
+        if capture_scope is not None:
+            return False
+        boundary = write
+        while write_scope is not capture_scope:
+            if write_scope is None:
+                return False
+            boundary, write_scope = write_scope, scope_of(write_scope)
+        return binding.lineno < boundary.lineno
+
+    def imported_binding_for(expression, target):
+        # Member writes can invalidate the import's object without rebinding
+        # its lexical name. Retain that possible identity for an explicit
+        # refusal; ordinary competing lexical bindings remain non-sinks.
+        scope = scope_of(expression)
+        while True:
+            names = scopes.get(scope, {})
+            if '*' in names:
+                return None
+            entries = names.get(expression.id, ())
+            if entries:
+                imports = [entry for entry in entries
+                           if import_target(entry, expression.id) == target]
+                if len(imports) != 1 or any(entry is not imports[0] and not (
+                        isinstance(entry, (ast.Attribute, ast.Subscript))
+                        and isinstance(entry.ctx, (ast.Store, ast.Del))) for entry in entries):
+                    return None
+                binding = imports[0]
+                body = tree.body if scope is None else getattr(scope, 'body', ())
+                if not isinstance(body, list) or binding not in body:
+                    return None
+                if scope is not None and binding.lineno >= expression.lineno:
+                    return None
+                return binding
+            if scope is None:
+                return None
+            current, scope = scope, scope_of(scope)
+            if isinstance(current, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                while isinstance(scope, ast.ClassDef):
+                    scope = scope_of(scope)
+
+    def module_statement(node):
+        while parents.get(id(node)) is not tree:
+            node = parents.get(id(node))
+            if node is None:
+                return None
+        return node
+
+    def before_all_writes(call):
+        # A direct module execution before every possible write keeps the
+        # original constructor. Function bodies may execute repeatedly.
+        if scope_of(call) is not None:
+            return False
+        boundary = module_statement(call)
+        return boundary is not None and all(
+            (statement := module_statement(write)) is not None
+            and boundary.lineno < statement.lineno
+            for _, write in written_identities)
+
+    def definitely_replaced(binding, call, captured):
+        # A direct unconditional namespace replacement with a known plain
+        # function is not a request constructor. Keep this narrow: unknown
+        # values, class-object writes and uncertain timing require refusal.
+        if captured:
+            if scope_of(binding) is not None:
+                return False
+            boundary = binding
+        else:
+            boundary = module_statement(call)
+        if boundary is None:
+            return False
+        for kind, write in written_identities:
+            assignment = parents.get(id(write))
+            if kind != 'namespace' or scope_of(write) is not None \
+                    or assignment not in tree.body \
+                    or not isinstance(assignment, (ast.Assign, ast.AnnAssign)) \
+                    or not isinstance(write, ast.Attribute) or write.attr != cls \
+                    or not isinstance(assignment.value, ast.Name) \
+                    or assignment.lineno >= boundary.lineno:
+                return False
+            targets = assignment.targets if isinstance(assignment, ast.Assign) else [assignment.target]
+            if len(targets) != 1 or targets[0] is not write:
+                return False
+            definitions = scopes.get(None, {}).get(assignment.value.id, ())
+            if len(definitions) != 1 or not isinstance(definitions[0], (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                    or definitions[0] not in tree.body or definitions[0].decorator_list:
+                return False
+        return bool(written_identities)
+
+    def identity(binding, call, captured):
+        if not written_identities or before_all_writes(call):
+            return True
+        if captured and all(kind == 'namespace' and captured_before(binding, write)
+                            for kind, write in written_identities):
+            return True
+        if definitely_replaced(binding, call, captured):
+            return False
+        return None
+
+    calls = []
+    for call in ast.walk(tree):
+        if not isinstance(call, ast.Call):
+            continue
+        expression = call.func
+        state = False
+        if isinstance(expression, ast.Name):
+            binding = imported_binding_for(expression, (runner, cls))
+            if binding is not None:
+                state = identity(binding, call, True)
+            else:
+                binding = binding_for(expression, preserve_member_identity=True)
+                if q == runner and expression.id == cls and isinstance(binding, ast.ClassDef) \
+                        and binding.name == cls and binding in tree.body:
+                    state = identity(binding, call, False)
+        elif isinstance(expression, ast.Attribute) and expression.attr == cls \
+                and isinstance(expression.value, ast.Name):
+            binding = imported_binding_for(expression.value, (runner, None))
+            if binding is not None:
+                state = identity(binding, call, False)
+        if state is not False:
+            calls.append((call, state is None))
+    return calls
+
+
+def _request_input_values(call, fields):
+    """Map exact literal expansions to fields; defer uncertain spreads to flow."""
+    positional, keywords, uncertain = [], [], False
+    for argument in call.args:
+        if isinstance(argument, ast.Starred):
+            if isinstance(argument.value, (ast.Tuple, ast.List)) and not any(
+                    isinstance(value, ast.Starred) for value in argument.value.elts):
+                positional.extend(argument.value.elts)
+            else:
+                uncertain = True
+        else:
+            positional.append(argument)
+    for keyword in call.keywords:
+        if keyword.arg is None:
+            mapping = keyword.value
+            if isinstance(mapping, ast.Dict) and all(isinstance(key, ast.Constant)
+                    and type(key.value) is str for key in mapping.keys):
+                keywords.extend((key.value, value) for key, value in zip(mapping.keys, mapping.values))
+            else:
+                uncertain = True
+        else:
+            keywords.append((keyword.arg, keyword.value))
+    names = [name for name, _ in keywords]
+    if len(positional) > len(fields) or len(names) != len(set(names)) \
+            or any(name not in fields or name in fields[:len(positional)] for name in names):
+        uncertain = True
+    if uncertain:
+        # Preserve discovery metadata even when sinks are disabled. Active
+        # text flow refuses instead of granting this call terminal authority.
+        values = [a.value if isinstance(a, ast.Starred) else a for a in call.args]
+        values += [keyword.value for keyword in call.keywords]
+        return _RequestInputValues(values, call, unresolved_spread=True)
+    values = [value for field, value in zip(fields, positional) if field in REQUEST_TEXT_FIELDS]
+    values += [value for field, value in keywords if field in REQUEST_TEXT_FIELDS]
+    return _RequestInputValues(values, call)
+
+
+def model_input_sinks(root: Path, parsed: dict, index: dict, playbooks, upstream) -> tuple[list, dict]:
+    """The text that reaches a model other than through a controller (#4085),
+    as data-flow sinks (module, function, expressions, why) for `text_flow`:
+
+    - what every request the runner sends carries: each construction, in
+      any module, of the request type `build_phase` returns
+      (`derive_request_type`), with the values it is given for
+      `REQUEST_TEXT_FIELDS` (its system prompt, cached blocks and messages);
+    - what a package function writes to a model-input file
+      (`model_input_files`: an arm's bundle, a file a playbook has the model
+      read from the input tree), recognised by the text the write's target
+      path ends with (`_file_names`: `chunking.write_manifest_for` writes to
+      `manifest_for(...)`, which ends in `f"{stem}_chunks.yaml"`);
+    - what an upstream input step (`upstream`, the modules the `d4d
+      download` group imports) writes: it writes the input tree, the
+      documents a bundle is concatenated from.
+
+    Returns (sinks, facts)."""
+    request = derive_request_type(root)
+    inputs = model_input_files(root, playbooks)
+    runner = _resolved(root / RUNNER)
+    cls, fields = request["class"], request["fields"]
+    sinks, requests, writers = [], [], []
+    for q, (text, tree) in sorted(parsed.items()):
+        rel = _rel(root, q)
+        writes = rel.startswith("src/data_sheets_schema/") or rel in upstream
+        if cls in text:
+            for call, uncertain_identity in _request_constructors(root, q, tree, index, runner, cls):
+                values = _request_input_values(call, fields)
+                values.unresolved_identity = uncertain_identity
+                requests.append(f"{rel}:{call.lineno}")
+                sinks.append((q, _innermost_function(tree, call.lineno), values,
+                              f"sent in a {cls} at {rel}:{call.lineno}"))
+        if not writes:
+            continue
+        for fn in ast.walk(tree):
+            if not isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            for target, value, call in _file_writes(fn, eager_annotations=_eager_annotations(tree)):
+                where = f"{rel}:{call.lineno}"
+                if rel in upstream:
+                    writers.append(where)
+                    sinks.append((q, fn, [value], f"written by the upstream input step at {where}"))
+                    continue
+                ends = _file_names(root, parsed, index, q, fn, target)
+                hit = sorted(s for s in inputs if any(name.endswith(s) for name in ends))
+                if hit:
+                    writers.append(where)
+                    sinks.append((q, fn, [value], f"written to a `*{hit[0]}` model input at {where}"))
+    return sinks, {"request": request, "model_input_files": inputs, "requests": requests, "writers": writers}
+
+
+def derive_model_facing(wrote: dict[str, list[str]]) -> dict[str, list[str]]:
+    """The top-level `data_sheets_schema` modules whose text reaches a model
+    (#4085): each module the data flow (`text_flow`) carried one of its own
+    string literals from into model text, with what carried it. A module
+    that only passes on what it is given, or whose literals are punctuation
+    and whitespace (a separator, a rule line), writes none."""
+    out: dict[str, list[str]] = {}
+    for rel, labels in sorted(wrote.items()):
+        name = _package_module_name(Path(rel))
+        if name is not None and rel.startswith("src/data_sheets_schema/"):
+            out.setdefault(name, []).extend(labels)
+    return out
+
+
 def discover(root: Path) -> tuple[Surfaces, dict]:
+    root = _resolved(root)
     s = Surfaces()
     facts: dict = {"python": f"{platform.python_implementation()} {platform.python_version()}"}
     src = root / "src/data_sheets_schema"
@@ -3315,11 +10487,10 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         s.add(rel, "offline_draft", "model_facing", "offline draft",
               "explicit source-heading prompt-text builder; no provider or live condition", runs=True)
 
-    # ---- api: runner closure, conditions, evidence protocols
+    # ---- api: runner closure, conditions, evidence protocols (the closure's
+    # roles wait for the derivation of which modules write model text)
     api_closure = _package_closure(root, ["data_sheets_schema.cli.api", "data_sheets_schema.api_runner"])
     facts["api_closure"] = [_rel(root, p) for p in api_closure]
-    for p in api_closure:
-        s.add(_rel(root, p), "api", _module_role(p), "live", "import closure of cli/api.py + api_runner", runs=False)
     cond = condition_table(root)
     gh = github_assistant_run(root, cond)
     if gh:
@@ -3352,7 +10523,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     pinned = yaml.safe_load((prompts_dir / "canonical_hashes.yaml").read_text(encoding="utf-8"))
     facts["pinned_prompts"] = sorted((pinned or {}).get("files", {}))
     for rel in facts["pinned_prompts"]:
-        if (root / rel).exists() and rel not in s.files:
+        if (root / rel).exists() and rel not in s.files and rel not in facts["api_closure"]:
             s.add(rel, "api", "model_facing", "historical", "pinned prompt file")
     s.add("src/download/prompts/canonical_hashes.yaml", "api", "run_shaping", "live", "prompt pin registry")
     for p in sorted(prompts_dir.glob("determinism_settings.yaml")):
@@ -3400,6 +10571,18 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     facts["controller_text"] = controller_text
     for rel, by in sorted(controller_text.items()):
         s.add(rel, "run_controllers", "model_facing", "live", f"text a controller hands to the model ({by})")
+
+    # ---- text a model receives, by data flow (#4054, #4085): from the
+    # controllers' sinks, the runner's requests and the model-input writes.
+    # A top-level package module whose own text it carries there is
+    # model-facing (`derive_model_facing`), before any closure is given roles.
+    playbook_files = sorted(p for p in (root / ".claude/commands").glob("d4d-*.md") if p.is_file())
+    sinks, facts["model_input"] = model_input_sinks(root, parsed, index, playbook_files, set(shared))
+    spans, wrote = text_flow(root, parsed, index, controllers, sinks)
+    derived = derive_model_facing(wrote)
+    for p in api_closure:
+        s.add(_rel(root, p), "api", _module_role(p, derived), "live", "import closure of cli/api.py + api_runner",
+              runs=False)
 
     # ---- every playbook, agent and file that a playbook, an agent, a live
     # prompt, a controller, the assistant workflow or an instruction it loads
@@ -3542,7 +10725,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     native_closure = _package_closure(root, sorted(set(starts)))
     facts["native_closure"] = [_rel(root, p) for p in native_closure]
     for p in native_closure:
-        s.add(_rel(root, p), "native_agentic", _module_role(p), "live",
+        s.add(_rel(root, p), "native_agentic", _module_role(p, derived), "live",
               "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports", runs=False)
     # a CLI group run only by an exposed text, or by a controller (#4091)
     for approach, gs in sorted(cli_groups.items()):
@@ -3551,7 +10734,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
                 continue
             role = "run_shaping" if "run_shaping" in by.values() else "exposed"
             for p in _package_closure(root, [f"data_sheets_schema.cli.{g}"]):
-                s.add(_rel(root, p), approach, role if role == "exposed" else _module_role(p), "live",
+                s.add(_rel(root, p), approach, role if role == "exposed" else _module_role(p, derived), "live",
                       f"closure of the CLI group `d4d {g}` that {', '.join(sorted(by))} run", runs=False)
 
     # ---- deterministic arms: the commands that build a non-baseline arm's
@@ -3560,7 +10743,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         rel = _rel(root, p)
         why = (f"deterministic arm command ({arm_commands[rel]})" if rel in arm_commands
                else "import closure of the deterministic arm commands")
-        s.add(rel, "deterministic", _module_role(p), "live", why, runs=False)
+        s.add(rel, "deterministic", _module_role(p, derived), "live", why, runs=False)
 
     # ---- interactive sessions: what Claude Code loads into a person's session
     # in a checkout, and that registered native runs switch off (#4054, #4091)
@@ -3620,7 +10803,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
                 continue
             script_imports.setdefault(rel, []).append(qrel)
             for approach, role in sorted(by.items()):
-                s.add(qrel, approach, role if role == "exposed" else _module_role(q), "live",
+                s.add(qrel, approach, role if role == "exposed" else _module_role(q, derived), "live",
                       f"imported by {rel}, which is run in {approach}", runs=False)
     facts["run_script_imports"] = {k: sorted(v) for k, v in sorted(script_imports.items())}
 
@@ -3729,12 +10912,13 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
                     s.add(_rel(root, p), "legacy_monolithic", "model_facing", "legacy",
                           f"legacy prompt set ({d.name})")
 
-    # ---- upstream input (listed, never gates)
+    # ---- upstream input (listed, never gates); the text the data flow
+    # carries into what a step writes is model text there, span by span
+    # (#4085)
     for rel, why in shared.items():
         s.add(rel, "shared_input", "run_shaping", "live", "input acquisition / bundle shaping: " + why)
 
-    # ---- text a model receives, by data flow (#4054)
-    spans = model_text_spans(root, parsed, index, controllers)
+    # ---- text a model receives, by data flow (#4054, #4085), found above
     for rel, sp in spans.items():
         if rel in s.files:
             s.files[rel].text_spans = sp
@@ -3742,6 +10926,16 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     # treats as model-facing as a whole
     facts["model_text"] = {rel: list(dict.fromkeys(label for *_, label in sp)) for rel, sp in sorted(spans.items())
                            if rel in s.files and "model_facing" not in s.files[rel].roles.values()}
+    # the derivation of which package modules write model text, cross-checked
+    # against the hand-kept list (#4085): a live module is one a generation
+    # closure reaches
+    live = {_package_module_name(p) for p in api_closure + native_closure + det_closure} - {None}
+    facts["model_facing_modules"] = {
+        "derived": {name: list(dict.fromkeys(labels))[:3] for name, labels in derived.items() if name in live},
+        "derived_outside_closures": sorted(name for name in derived if name not in live),
+        "listed": sorted(MODEL_FACING_MODULES),
+        "derived_not_listed": sorted(name for name in derived if name in live and name not in MODEL_FACING_MODULES),
+        "listed_not_derived": sorted(name for name in MODEL_FACING_MODULES if name not in derived)}
     return s, facts
 
 
@@ -3983,6 +11177,14 @@ SELF_TEST_EXPECT = {
 
 
 def self_test(tokens: list[Token]) -> dict:
+    # Both CLI routes enter here before classifying any surface (#4996).
+    missing = ["ast." + name for name in
+               ("Match", "MatchAs", "MatchStar", "MatchMapping", "match_case")
+               if not hasattr(ast, name)]
+    if missing:
+        raise ConfigError(f"{_interpreter()} lacks required scanner AST capabilities: "
+                          + ", ".join(missing) + "; use an interpreter with these capabilities "
+                          "that can also parse the checkout (`poetry run python`) (#4996)")
     with tempfile.TemporaryDirectory(prefix="d4d-specificity-selftest-") as d:
         root = Path(d)
         found = {}
@@ -6000,6 +13202,37 @@ def _session_statement(it: dict) -> str:
             "those interactive_session surfaces are also run_controllers surfaces, and their violations count there.")
 
 
+def _model_facing_statement(f: dict) -> str:
+    """The report line on which package modules write model-facing text:
+    the derivation's sinks, what it found, and the cross-check with
+    MODEL_FACING_MODULES in both directions (#4085)."""
+    mi, mf = f["model_input"], f["model_facing_modules"]
+    upstream = set(f["shared_input"])
+    by_file: dict[str, int] = {}
+    for w in mi["writers"]:
+        rel = w.rsplit(":", 1)[0]
+        if rel in upstream:
+            by_file[rel] = by_file.get(rel, 0) + 1
+    package = [w for w in mi["writers"] if w.rsplit(":", 1)[0] not in upstream]
+
+    def names(xs):
+        return ", ".join(f"`{x}`" for x in xs) or "none"
+    return ("- Which top-level `data_sheets_schema` modules write model-facing text, derived by that data flow "
+            f"(#4085) from what every `{mi['request']['class']}` the runner builds carries (the class `build_phase` "
+            f"returns; its {', '.join(f'`{x}`' for x in mi['request']['text_fields'])}: "
+            f"{len(mi['requests'])} constructions, {names(mi['requests'])}), from what is written to a model input "
+            "(each arm's bundle, and what a playbook has the model read from `" + INPUT_TREE + "`: "
+            + names(mi["model_input_files"]) + f"; {len(package)} writes, {names(package)}; and the upstream input "
+            "steps' writes, " + (", ".join(f"`{k}` ({v})" for k, v in sorted(by_file.items())) or "none")
+            + ") and from the controllers' sinks. A module is model-facing where the flow carries one of its own "
+            "sentences there: " + names(sorted(mf["derived"])) + ". Cross-checked with the hand-kept "
+            "`MODEL_FACING_MODULES`: derived and not listed: " + names(mf["derived_not_listed"])
+            + "; listed and not derived (model-facing by the list alone, through a channel the flow does not read): "
+            + names(mf["listed_not_derived"]) + "."
+            + (" Derived outside every generation closure (no surface): " + names(mf["derived_outside_closures"]) + "."
+               if mf["derived_outside_closures"] else ""))
+
+
 def _unused_exceptions(exceptions: list[dict], surfaces) -> str | None:
     """The report line for exceptions no hit used: stale, or the finding was
     fixed, unless the entry names no surface of the scanned checkout (an
@@ -6065,9 +13298,11 @@ def render_markdown(result: dict) -> str:
           "- Text a controller hands to the model: "
           + (", ".join(f"`{k}`" for k in f["controller_text"]) or "none") + ".",
           "- Code whose text reaches a model, found by data flow from `--system-prompt`, from the hook fields "
-          "Claude Code shows the model (a PreToolUse deny reason, and the classifier reasons that feed it) and "
-          "from the functions that render model text: "
+          "Claude Code shows the model (a PreToolUse deny reason, and the classifier reasons that feed it), "
+          "from the functions that render model text, from the runner's requests and from the model-input "
+          "writes (below), where the module is not model-facing as a whole: "
           + ("; ".join(f"`{k}`: " + ", ".join(v) for k, v in f["model_text"].items()) or "none") + ".",
+          _model_facing_statement(f),
           "- Playbooks and agents a playbook, a live prompt, a controller or an assistant instruction names "
           "(path, bare name or slash command): " + ", ".join(f"`{r}`" for r in f["native_referenced"]) + ".",
           "- Assistant instruction files, a surface only where the `@d4dassistant` workflow, a playbook or a "

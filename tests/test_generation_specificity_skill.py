@@ -51,6 +51,12 @@ reports is derived from the code that decides it:
   write of it wherever a top-level statement makes it, in an assignment's
   value (Codex's `setdefault`, an assigned `append`), an argument or a
   condition, with its arguments followed (#4166);
+- which top-level package modules write model-facing text is derived by
+  data flow from the runner's requests, the model-input writes and the
+  controllers' sinks, and the hand-kept MODEL_FACING_MODULES is checked
+  against it in both directions: a project name in a new module whose
+  constant `build_phase` sends, or in one the healthsheet bundle is built
+  from, gates, and does not when the derivation is off (#4085);
 - the "api" section's derivations agree with what the runtime does, read
   their code in any spelling, and fail loudly rather than fall back (#4022,
   #4025, #4055, #4057, #4058);
@@ -75,6 +81,7 @@ import tokenize
 import unittest
 from functools import lru_cache
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -493,6 +500,64 @@ class TestTheExitStatus(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("no/such/surface_4027.md", err.getvalue())
         self.assertIn("could not be read", err.getvalue())
+
+
+class TestAstCapabilities(unittest.TestCase):
+    """The CLI refuses an unavailable scanner capability before any report."""
+
+    def test_missing_capabilities_are_configuration_errors_in_both_cli_modes(self):
+        capabilities = ("Match", "MatchAs", "MatchStar", "MatchMapping", "match_case")
+        for missing in [(name,) for name in capabilities] + [capabilities]:
+            for mode in ([], ["--self-test-only"]):
+                with self.subTest(missing=missing, mode=mode), tempfile.TemporaryDirectory() as d:
+                    # Simulate an older AST interface without replacing any
+                    # of its available parsing or traversal implementations.
+                    limited = SimpleNamespace(**{k: v for k, v in vars(ast).items() if k not in missing})
+                    report, summary = Path(d) / "report.md", Path(d) / "report.json"
+                    err, stdout = io.StringIO(), io.StringIO()
+                    with mock.patch.object(scan, "ast", limited), mock.patch("sys.stderr", err), \
+                            mock.patch("sys.stdout", stdout):
+                        code = scan.main(["--root", str(ROOT), "--report", str(report),
+                                          "--json", str(summary), *mode])
+                    self.assertEqual(code, 2, err.getvalue())
+                    self.assertIn("configuration error", err.getvalue())
+                    self.assertIn("AST capabilities", err.getvalue())
+                    self.assertIn(sys.executable, err.getvalue())
+                    self.assertIn(sys.version.split()[0], err.getvalue())
+                    for name in missing:
+                        self.assertIn("ast." + name, err.getvalue())
+                    self.assertNotIn("Traceback", err.getvalue())
+                    self.assertEqual(stdout.getvalue(), "")
+                    self.assertFalse(report.exists())
+                    self.assertFalse(summary.exists())
+
+    def test_help_remains_available_without_match_capabilities(self):
+        limited = SimpleNamespace(**{k: v for k, v in vars(ast).items()
+                                     if k not in {"Match", "MatchAs", "MatchStar", "MatchMapping", "match_case"}})
+        stdout, err = io.StringIO(), io.StringIO()
+        with mock.patch.object(scan, "ast", limited), mock.patch("sys.stdout", stdout), \
+                mock.patch("sys.stderr", err), self.assertRaises(SystemExit) as stopped:
+            scan.main(["--help"])
+        self.assertEqual(stopped.exception.code, 0)
+        self.assertIn("--self-test-only", stdout.getvalue())
+        self.assertEqual(err.getvalue(), "")
+
+    def test_supported_cli_self_test_still_reports_its_seeded_results(self):
+        with tempfile.TemporaryDirectory() as d:
+            report, summary = Path(d) / "report.md", Path(d) / "report.json"
+            stdout, err = io.StringIO(), io.StringIO()
+            with mock.patch("sys.stdout", stdout), mock.patch("sys.stderr", err):
+                code = scan.main(["--root", str(ROOT), "--self-test-only", "--report", str(report),
+                                  "--json", str(summary)])
+            self.assertEqual(code, 0, err.getvalue())
+            result = json.loads(stdout.getvalue())
+            self.assertTrue(result["passed"])
+            self.assertEqual(result["problems"], [])
+            self.assertGreater(result["imported_from_neutrality_test"], 0)
+            self.assertTrue(all(result["token_counts"].values()))
+            self.assertEqual(err.getvalue(), "")
+            self.assertFalse(report.exists())
+            self.assertFalse(summary.exists())
 
 
 class TestTheScannerSees(unittest.TestCase):
@@ -1211,6 +1276,3922 @@ class TestDiscovery(unittest.TestCase):
                    if f"src/data_sheets_schema/{name}.py" not in closures
                    and f"src/data_sheets_schema/{name}/__init__.py" not in closures}
         self.assertEqual(missing, set())
+
+
+#: A runner small enough to read (#4085): the request type, and a
+#: `build_phase` that sends what a module the runner imports holds: a
+#: constant read through the module, one a helper returns from a
+#: function-level import, a function's result a helper's result is built
+#: from, and one a serialization carries.
+DERIVATION_RUNNER = '''from dataclasses import dataclass, field
+
+from data_sheets_schema import phase_notes_4085
+
+
+@dataclass
+class PhaseRequest:
+    phase: str
+    system: str
+    cached_blocks: list = field(default_factory=list)
+    messages: list = field(default_factory=list)
+
+
+def phase_instruction(phase):
+    from data_sheets_schema.phase_notes_4085 import INSTRUCTION
+    return INSTRUCTION
+
+
+def framed(text):
+    return "## " + text
+
+
+def build_phase(spec, phase, *, carry):
+    cached = [{"type": "text", "text": spec.bundle.read_text(), "cache_control": {"type": "ephemeral"}}]
+    parts = list(cached)
+    parts.append({"type": "text", "text": phase_notes_4085.NOTE})
+    parts.append({"type": "text", "text": phase_instruction(phase)})
+    parts.append({"type": "text", "text": framed(phase_notes_4085.role())})
+    parts.append({"type": "text", "text": "".join(sorted(phase_notes_4085.details()))})
+    return PhaseRequest(phase=phase, system=spec.system, cached_blocks=cached,
+                        messages=[{"role": "user", "content": parts}])
+'''
+#: The new module: four sentences the runner sends and one it never does,
+#: which gates only because the module as a whole is model-facing.
+PHASE_NOTES = ('NOTE = "Describe the CHORUS cohort as its sites report it."\n'      # 1
+               'INSTRUCTION = "Return the record of the VOICE release."\n'          # 2
+               'ASIDE = "A CM4AI sentence this module never sends."\n'              # 3
+               '\n\n'
+               'def role():\n'                                                       # 6
+               '    return "You describe the AI-READI release."\n'                  # 7
+               '\n\n'
+               'def details():\n'                                                    # 10
+               '    return ["Cite the fairhub page."]\n')                           # 11
+#: What reaches a request as something other than a module's own sentence
+#: (#4085): a file's content (not the path a read is called on), a value
+#: picked by a key (not the key), an identifier (a bare token, which gates
+#: as code in any role), and a report written for a person (not a model
+#: input). `prompts_4085` is the control: its sentence is sent.
+PRECISION_RUNNER = '''from dataclasses import dataclass, field
+from pathlib import Path
+
+from data_sheets_schema import data_4085, ids_4085, paths_4085, prompts_4085, reports_4085
+
+
+@dataclass
+class PhaseRequest:
+    phase: str
+    system: str
+    cached_blocks: list = field(default_factory=list)
+    messages: list = field(default_factory=list)
+
+
+def build_phase(spec, phase, *, carry):
+    guide = paths_4085.locate(spec).read_text(encoding="utf-8")
+    value = data_4085.rows(spec)["cohort"]
+    reports_4085.write(spec.output)
+    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,
+                        messages=[{"role": "user", "content": [guide, value, ids_4085.label(spec)]}])
+'''
+PRECISION_MODULES = {
+    "paths_4085": 'from pathlib import Path\n\n\ndef locate(spec):\n    return Path("data") / "CHORUS guide.md"\n',
+    "data_4085": 'def rows(spec):\n    return {"CHORUS cohort": spec.value, "cohort": spec.other}\n',
+    "ids_4085": 'def label(spec):\n    return "dataset-" + spec.key\n',
+    "reports_4085": ('from pathlib import Path\n\nREPORT = "A CHORUS report written for a person."\n\n\n'
+                     'def write(directory):\n    (Path(directory) / "report_4085.md").write_text(REPORT)\n'),
+    "prompts_4085": 'SYSTEM = "You write records for one VOICE dataset."\n',
+}
+#: Listed in MODEL_FACING_MODULES, not reached by the derivation (#4085):
+#: what they hand a model goes through a channel the data flow does not
+#: read (SKILL.md, Limits) — a tool's output (`d4d download scope`), a file
+#: a controller or a run writes for a later reader (a batch plan or index),
+#: or data with no sentence of the module's own (manifest values, JSON
+#: keys). The list is what keeps them model-facing; a change here is a
+#: change to the cross-check, made on purpose.
+LISTED_NOT_DERIVED = ["audit_batches", "audit_grammar", "audit_omissions", "evidence_assertions", "grounding",
+                      "scope", "source_metadata", "typed_audit"]
+
+
+class TestModelFacingDerivation(unittest.TestCase):
+    """Which top-level `data_sheets_schema` modules write model-facing text
+    is derived by data flow from the requests the runner builds, the
+    model-input writes and the controllers' sinks; MODEL_FACING_MODULES is
+    a cross-check (#4085)."""
+
+    @staticmethod
+    def _root(d: str, runner: str, modules: dict[str, str]) -> Path:
+        root = Path(d).resolve()
+        _write(root / scan.CLI_API, (ROOT / scan.CLI_API).read_text(encoding="utf-8"))
+        _write(root / "src/data_sheets_schema/__init__.py", "")
+        _write(root / scan.RUNNER, runner)
+        for name, text in modules.items():
+            _write(root / f"src/data_sheets_schema/{name}.py", text)
+        return root
+
+    @staticmethod
+    def _derive(root: Path, *, sinks: bool = True):
+        """The derivation over a scratch root, with its sinks or (`sinks`
+        False) none: (derived modules, spans, the sinks' facts)."""
+        parsed = _parsed(root, "src")
+        index = scan._notes_index(root, parsed)
+        found, facts = scan.model_input_sinks(root, parsed, index, [], set())
+        spans, wrote = scan.text_flow(root, parsed, index, {}, found if sinks else [])
+        return scan.derive_model_facing(wrote), spans, facts
+
+    @staticmethod
+    def _violations(root: Path, rel: str, derived, spans) -> set:
+        """(token, line) of every violation in `rel` under the role and the
+        spans the derivation gives it."""
+        surface = scan.Surface(rel, ["api"], scan._module_role(root / rel, derived), "live", "t",
+                               text_spans=list(spans.get(rel, [])))
+        hits = scan.scan_file(root, surface, list(_tokens()))
+        for h in hits:
+            h["exception"] = None
+        return {(h["match"], h["line"]) for h in hits if scan.is_violation(h)}
+
+    def test_a_project_name_in_a_new_module_build_phase_sends_gates(self):
+        """The planted case: NOTE reaches the request through `parts.append`,
+        INSTRUCTION through a helper's function-level import, `role()`
+        through the parameter `framed()`'s result is built from, and
+        `details()` through `sorted`. The module is model-facing, so even
+        the sentence it never sends gates; with the derivation off nothing
+        in it does."""
+        rel = "src/data_sheets_schema/phase_notes_4085.py"
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, DERIVATION_RUNNER, {"phase_notes_4085": PHASE_NOTES})
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            line = DERIVATION_RUNNER.splitlines().index("    return PhaseRequest(phase=phase, system=spec.system, "
+                                                        "cached_blocks=cached,") + 1
+            self.assertEqual(facts["requests"], [f"{scan.RUNNER}:{line}"])
+            self.assertIn("phase_notes_4085", derived)
+            # each sent sentence is found on its own route, ASIDE on none
+            self.assertEqual({label.split(" ")[0] for *_, label in spans[rel]},
+                             {"NOTE", "INSTRUCTION", "role()", "details()"})
+            self.assertEqual(self._violations(root, rel, derived, spans),
+                             {("CHORUS", 1), ("VOICE", 2), ("CM4AI", 3), ("AI-READI", 7), ("fairhub", 11)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("phase_notes_4085", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_text_moved_out_of_the_healthsheet_bundle_builder_still_gates(self):
+        """The #4054 review scenario: healthsheet.py's Origin line moved into
+        a new module it imports. The bundle it writes ends in the healthsheet
+        arm's `_healthsheet_only.txt`, so what it writes is model input, and
+        the new module is model-facing: the FAIRhub name there gates."""
+        origin = '"Origin: FAIRhub API record, metadata.healthsheet",'
+        text = (ROOT / "src/data_sheets_schema/healthsheet.py").read_text(encoding="utf-8")
+        self.assertEqual(text.count(origin), 1)
+        moved = text.replace(origin, "ORIGIN,").replace(
+            "from __future__ import annotations\n",
+            "from __future__ import annotations\n\nfrom data_sheets_schema.healthsheet_text import ORIGIN\n", 1)
+        rel = "src/data_sheets_schema/healthsheet_text.py"
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, DERIVATION_RUNNER, {
+                "healthsheet": moved, "healthsheet_text": f"ORIGIN = {origin.rstrip(',')}\n"})
+            derived, spans, facts = self._derive(root)
+            self.assertEqual([w.rsplit(":", 1)[0] for w in facts["writers"]], ["src/data_sheets_schema/healthsheet.py"])
+            self.assertIn("healthsheet_text", derived)
+            self.assertIn("healthsheet", derived)
+            self.assertEqual(self._violations(root, rel, derived, spans), {("FAIRhub", 1)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("healthsheet_text", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_what_reaches_a_model_as_data_is_not_derived(self):
+        """A file's content is not the path read to get it, a key picks a
+        value without being one, an identifier is a bare token, and a report
+        written for a person is not model input: none of those modules
+        writes model-facing text. The module whose sentence is the system
+        prompt does."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, PRECISION_RUNNER, PRECISION_MODULES)
+            derived, spans, facts = self._derive(root)
+        self.assertEqual(facts["writers"], [])
+        self.assertIn("prompts_4085", derived)
+        self.assertIn("src/data_sheets_schema/ids_4085.py", spans)      # reached, with no sentence of its own
+        self.assertEqual({"paths_4085", "data_4085", "ids_4085", "reports_4085"} & set(derived), set())
+
+    def test_imported_locator_constants_remain_non_text(self):
+        """A locator's import spelling must not turn its bytes into model text."""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        for expression, extra_import in (
+            ("paths_4405.DOC_PATH", "from data_sheets_schema import paths_4405\n"),
+            ("DOC_PATH", "from data_sheets_schema.paths_4405 import DOC_PATH\n"),
+        ):
+            with self.subTest(expression=expression), tempfile.TemporaryDirectory() as d:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n", "from pathlib import Path\n" + extra_import)
+                runner = runner.replace("paths_4085.locate(spec)", f"Path({expression})")
+                modules = dict(PRECISION_MODULES)
+                modules["paths_4405"] = 'DOC_PATH = "Describe the VOICE cohort."\n'
+                root = self._root(d, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertNotIn("paths_4405", derived)
+                self.assertEqual(set(), self._violations(
+                    root, "src/data_sheets_schema/paths_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("paths_4405", off)
+
+    def test_imported_lookup_key_constants_remain_non_text(self):
+        for expression, extra_import in (
+            ("keys_4405.SECTION_KEY", "from data_sheets_schema import keys_4405\n"),
+            ("SECTION_KEY", "from data_sheets_schema.keys_4405 import SECTION_KEY\n"),
+        ):
+            with self.subTest(expression=expression), tempfile.TemporaryDirectory() as d:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n", "from pathlib import Path\n" + extra_import)
+                runner = runner.replace('"cohort"', expression)
+                modules = dict(PRECISION_MODULES)
+                modules["keys_4405"] = 'SECTION_KEY = "Describe the VOICE cohort."\n'
+                root = self._root(d, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertNotIn("keys_4405", derived)
+                self.assertEqual(set(), self._violations(
+                    root, "src/data_sheets_schema/keys_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("keys_4405", off)
+
+    def test_locator_and_key_constants_sent_as_text_still_derive(self):
+        for expression, extra_import in (
+            ("paths_4405.DOC_PATH", "from data_sheets_schema import paths_4405\n"),
+            ("DOC_PATH", "from data_sheets_schema.paths_4405 import DOC_PATH\n"),
+        ):
+            with self.subTest(expression=expression), tempfile.TemporaryDirectory() as d:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n", "from pathlib import Path\n" + extra_import)
+                runner = runner.replace("paths_4085.locate(spec)", f"Path({expression})")
+                runner = runner.replace(
+                    "[guide, value, ids_4085.label(spec)]",
+                    f"[guide, value, ids_4085.label(spec), {expression}]")
+                modules = dict(PRECISION_MODULES)
+                modules["paths_4405"] = 'DOC_PATH = "Describe the VOICE cohort."\n'
+                root = self._root(d, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("paths_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/paths_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("paths_4405", off)
+
+    def test_serialized_dictionary_keys_are_actual_model_text(self):
+        for expression, extra_import in (
+            ("keys_4405.KEY", "from data_sheets_schema import keys_4405\n"),
+            ("KEY", "from data_sheets_schema.keys_4405 import KEY\n"),
+        ):
+            with self.subTest(expression=expression), tempfile.TemporaryDirectory() as d:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n", "from pathlib import Path\nimport json\n" + extra_import)
+                runner = runner.replace(
+                    "[guide, value, ids_4085.label(spec)]", f'[json.dumps({{{expression}: "value"}})]')
+                modules = dict(PRECISION_MODULES)
+                modules["keys_4405"] = 'KEY = "Describe the VOICE cohort."\n'
+                root = self._root(d, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("keys_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/keys_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("keys_4405", off)
+
+    def test_joined_dictionary_keys_are_actual_model_text(self):
+        for expression, extra_import in (
+            ("keys_4405.KEY", "from data_sheets_schema import keys_4405\n"),
+            ("KEY", "from data_sheets_schema.keys_4405 import KEY\n"),
+        ):
+            with self.subTest(expression=expression), tempfile.TemporaryDirectory() as d:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n", "from pathlib import Path\n" + extra_import)
+                runner = runner.replace(
+                    "[guide, value, ids_4085.label(spec)]", f'[", ".join({{{expression}: "value"}}.keys())]')
+                modules = dict(PRECISION_MODULES)
+                modules["keys_4405"] = 'KEY = "Describe the VOICE cohort."\n'
+                root = self._root(d, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("keys_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/keys_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("keys_4405", off)
+
+    def test_unknown_call_constants_keep_existing_conservative_propagation(self):
+        for expression, extra_import in (
+            ("constants_4405.VALUE", "from data_sheets_schema import constants_4405\n"),
+            ("VALUE", "from data_sheets_schema.constants_4405 import VALUE\n"),
+        ):
+            with self.subTest(expression=expression), tempfile.TemporaryDirectory() as d:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n",
+                    "from pathlib import Path\nfrom external_pkg import transform\n" + extra_import)
+                runner = runner.replace(
+                    "[guide, value, ids_4085.label(spec)]", f"[transform({expression})]")
+                modules = dict(PRECISION_MODULES)
+                modules["constants_4405"] = 'VALUE = "Describe the VOICE cohort."\n'
+                root = self._root(d, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("constants_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/constants_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("constants_4405", off)
+
+    def test_unambiguous_pathlib_constructor_import_aliases_preserve_selector_precision(self):
+        for import_stmt, ctor in (
+            ("import pathlib as pl\n", "pl.Path"),
+            ("from pathlib import Path as LocalPath\n", "LocalPath"),
+            ("from pathlib import PurePath as LocalPurePath\n", "LocalPurePath"),
+        ):
+            with self.subTest(ctor=ctor), tempfile.TemporaryDirectory() as d:
+                runner = PRECISION_RUNNER.replace(
+                    "from pathlib import Path\n",
+                    "from pathlib import Path\n" + import_stmt + "from data_sheets_schema import paths_4405\n")
+                runner = runner.replace(
+                    'paths_4085.locate(spec).read_text(encoding="utf-8")',
+                    f'{ctor}(paths_4405.DOC_PATH).read_text(encoding="utf-8")')
+                modules = dict(PRECISION_MODULES)
+                modules["paths_4405"] = 'DOC_PATH = "Describe the VOICE cohort."\n'
+                root = self._root(d, runner, modules)
+                derived, spans, _ = self._derive(root)
+                self.assertNotIn("paths_4405", derived)
+
+    def _parameter_client_fixture(self, directory, helper_source, call_expr, extra_imports=""):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom data_sheets_schema import client_4405\n")
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "[client_4405.run()]")
+        modules = dict(PRECISION_MODULES)
+        modules["reader_4405"] = helper_source
+        modules["client_4405"] = (
+            'ASIDE = "A VOICE aside this module never sends."\n'
+            "from data_sheets_schema import reader_4405\n" + extra_imports +
+            "def run():\n    return " + call_expr + "\n")
+        root = self._root(directory, runner, modules)
+        return (root, *self._derive(root)[:2])
+
+    def _parameter_cycle_argument_fixture(self, directory, helper_source, call_expr, extra_imports=""):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom data_sheets_schema import client_4405\n")
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "[client_4405.run()]")
+        modules = dict(PRECISION_MODULES)
+        modules["arguments_4405"] = (
+            'ARG = "Describe the VOICE cohort."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        modules["reader_4405"] = helper_source
+        modules["client_4405"] = (
+            "from data_sheets_schema import reader_4405\n" + extra_imports +
+            "def run():\n    return " + call_expr + "\n")
+        root = self._root(directory, runner, modules)
+        return (root, *self._derive(root)[:2])
+
+    def test_resolved_file_reader_parameter_is_not_returned_text(self):
+        helper = "from pathlib import Path\n\ndef read_doc(path):\n    return Path(path).read_text()\n"
+        with tempfile.TemporaryDirectory() as d:
+            root, derived, spans = self._parameter_client_fixture(d, helper, 'reader_4405.read_doc("cohort.txt")')
+            self.assertNotIn("client_4405", derived)
+            self.assertEqual(set(), self._violations(root, "src/data_sheets_schema/client_4405.py", derived, spans))
+
+    def test_resolved_lookup_parameter_is_not_returned_text(self):
+        helper = 'TABLE = {"cohort": "value"}\n\ndef lookup(key):\n    return TABLE[key]\n'
+        with tempfile.TemporaryDirectory() as d:
+            root, derived, spans = self._parameter_client_fixture(d, helper, 'reader_4405.lookup("cohort")')
+            self.assertNotIn("client_4405", derived)
+            self.assertEqual(set(), self._violations(root, "src/data_sheets_schema/client_4405.py", derived, spans))
+
+    def test_resolved_wrapper_preserves_locator_only_parameter_use(self):
+        helper = (
+            "from pathlib import Path\n\n"
+            "def inner(path):\n    return Path(path).read_text()\n\n"
+            "def outer(doc):\n    return inner(doc)\n")
+        with tempfile.TemporaryDirectory() as d:
+            root, derived, spans = self._parameter_client_fixture(d, helper, 'reader_4405.outer("cohort.txt")')
+            self.assertNotIn("client_4405", derived)
+            self.assertEqual(set(), self._violations(root, "src/data_sheets_schema/client_4405.py", derived, spans))
+
+    def test_resolved_text_parameter_still_derives_its_literal_caller(self):
+        helper = 'def render(label):\n    return f"Section: {label}"\n'
+        with tempfile.TemporaryDirectory() as d:
+            root, derived, spans = self._parameter_client_fixture(
+                d, helper, 'reader_4405.render("Describe the VOICE cohort.")')
+            self.assertIn("client_4405", derived)
+            self.assertIn(("VOICE", 4), self._violations(root, "src/data_sheets_schema/client_4405.py", derived, spans))
+
+    def test_mixed_file_locator_and_emitted_parameter_remains_text(self):
+        helper = (
+            "from pathlib import Path\n\n"
+            "def read_with_header(path):\n    return f'{path}: {Path(path).read_text()}'\n")
+        with tempfile.TemporaryDirectory() as d:
+            root, derived, spans = self._parameter_client_fixture(
+                d, helper, 'reader_4405.read_with_header("Describe the VOICE cohort.")')
+            self.assertIn("client_4405", derived)
+            self.assertIn(("VOICE", 4), self._violations(root, "src/data_sheets_schema/client_4405.py", derived, spans))
+
+    def test_non_text_and_text_uses_do_not_poison_each_other_in_either_order(self):
+        helper = (
+            "from pathlib import Path\n\n"
+            "def locate_and_echo(loc, echoed):\n    return Path(loc).read_text() + echoed\n")
+        for expr in (
+            'reader_4405.locate_and_echo(arguments_4405.ARG, "Describe the CM4AI cohort.")',
+            'reader_4405.locate_and_echo(echoed="Describe the CM4AI cohort.", loc=arguments_4405.ARG)',
+        ):
+            with self.subTest(expr=expr), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, expr, "from data_sheets_schema import arguments_4405\n")
+                self.assertIn("client_4405", derived)
+                self.assertNotIn("arguments_4405", derived)
+                self.assertEqual({("CM4AI", 4)}, self._violations(root, "src/data_sheets_schema/client_4405.py", derived, spans))
+
+    def test_resolved_selector_parameters_do_not_promote_imported_arguments(self):
+        helper = "from pathlib import Path\n\ndef read_doc(path):\n    return Path(path).read_text()\n"
+        for argument, imports in (
+            ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+            ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+        ):
+            with self.subTest(argument=argument), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.read_doc(" + argument + ")", imports)
+                self.assertNotIn("arguments_4405", derived)
+
+    def test_mutual_wrapper_cycle_keeps_only_selector_arguments_in_both_definition_orders(self):
+        a = "def cycle_a(path):\n    return cycle_b(path)\n"
+        b = "def cycle_b(path):\n    return Path(path).read_text() if path else cycle_a(path)\n"
+        for helper in ("from pathlib import Path\n\n" + a + b, "from pathlib import Path\n\n" + b + a):
+            with self.subTest(helper=helper), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.cycle_a(arguments_4405.ARG)", "from data_sheets_schema import arguments_4405\n")
+                self.assertNotIn("arguments_4405", derived)
+
+    def test_text_in_mutual_wrapper_cycle_wins_over_selector_use_in_both_orders(self):
+        a = "def cycle_a(path):\n    return cycle_b(path)\n"
+        b = "def cycle_b(path):\n    return Path(path).read_text() + path if path else cycle_a(path)\n"
+        for helper in ("from pathlib import Path\n\n" + a + b, "from pathlib import Path\n\n" + b + a):
+            for argument, imports in (
+                ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+                ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+            ):
+                with self.subTest(helper=helper, argument=argument), tempfile.TemporaryDirectory() as d:
+                    root, derived, spans = self._parameter_cycle_argument_fixture(
+                        d, helper, "reader_4405.cycle_a(" + argument + ")", imports)
+                    self.assertIn("arguments_4405", derived)
+                    self.assertIn(("VOICE", 2), self._violations(
+                        root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                    off, _, _ = self._derive(root, sinks=False)
+                    self.assertNotIn("arguments_4405", off)
+
+    def test_explicit_named_keyword_selector_supports_keyword_only_and_kwargs_formals(self):
+        helpers = (
+            'from pathlib import Path\n\ndef read_doc(*, path):\n    return Path(path).read_text()\n',
+            'from pathlib import Path\n\ndef read_doc(**options):\n    return Path(options["path"]).read_text()\n',
+        )
+        for helper in helpers:
+            with self.subTest(helper=helper), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.read_doc(path=arguments_4405.ARG)",
+                    "from data_sheets_schema import arguments_4405\n")
+                self.assertNotIn("arguments_4405", derived)
+                self.assertNotIn("client_4405", derived)
+                self.assertNotIn(("VOICE", 2), self._violations(
+                    root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+
+    def test_variadic_text_arguments_remain_model_text_with_explicit_and_starred_actuals(self):
+        cases = (
+            ('def emit(*parts):\n    return " ".join(parts)\n',
+             'reader_4405.emit("CHORUS cohort")'),
+            ('def emit(*parts):\n    return " ".join(parts)\n',
+             'reader_4405.emit(*("CHORUS cohort",))'),
+            ('def emit(**parts):\n    return " ".join(parts.values())\n',
+             'reader_4405.emit(note="CHORUS cohort")'),
+            ('def emit(**parts):\n    return " ".join(parts.values())\n',
+             'reader_4405.emit(**{"note": "CHORUS cohort"})'),
+        )
+        for helper, expression in cases:
+            with self.subTest(expression=expression), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_client_fixture(d, helper, expression)
+                self.assertIn("client_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/client_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("client_4405", off)
+
+    def test_unresolved_parameter_call_stays_conservative_beside_a_selector_use(self):
+        helper = ('from pathlib import Path\nfrom external_formatter import format_value\n\n'
+                  'def read_doc(path):\n    return Path(path).read_text() + format_value(path)\n')
+        for argument, imports in (
+            ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+            ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+        ):
+            with self.subTest(argument=argument), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.read_doc(" + argument + ")", imports)
+                self.assertIn("arguments_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("arguments_4405", off)
+
+    def test_decorated_selector_body_does_not_suppress_actual_argument_text(self):
+        helper = ('from pathlib import Path\n\n'
+                  'def emit_argument(fn):\n'
+                  '    def wrapped(path):\n        return path\n'
+                  '    return wrapped\n\n'
+                  '@emit_argument\ndef read_doc(path):\n'
+                  '    return Path(path).read_text()\n')
+        for argument, imports in (
+            ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+            ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+        ):
+            with self.subTest(argument=argument), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.read_doc(" + argument + ")", imports)
+                self.assertIn("arguments_4405", derived)
+                self.assertIn(("VOICE", 2), self._violations(
+                    root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("arguments_4405", off)
+
+    def test_module_rebinding_does_not_suppress_actual_argument_text(self):
+        helper = ('from pathlib import Path\n\n'
+                  'def read_doc(path):\n    return Path(path).read_text()\n\n'
+                  'def emit_argument(fn):\n'
+                  '    def wrapped(path):\n        return path\n'
+                  '    return wrapped\n\n'
+                  'read_doc = emit_argument(read_doc)\n')
+        for argument, imports in (
+            ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+            ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+        ):
+            with self.subTest(argument=argument), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.read_doc(" + argument + ")", imports)
+                self.assertIn("arguments_4405", derived)
+                self.assertIn(("VOICE", 2), self._violations(
+                    root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("arguments_4405", off)
+
+    def test_later_unresolved_import_keeps_conservative_argument_coverage(self):
+        helper = ('from pathlib import Path\n\n'
+                  'def read_doc(path):\n    return Path(path).read_text()\n\n'
+                  'from external_formatter import emit as read_doc\n')
+        for argument, imports in (
+            ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+            ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+        ):
+            with self.subTest(argument=argument), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.read_doc(" + argument + ")", imports)
+                self.assertIn("arguments_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("arguments_4405", off)
+
+    def test_formal_writes_do_not_hide_selector_arguments_that_are_emitted(self):
+        cases = (
+            ("assignment", 'def read_doc(path, echoed=""):\n'
+             '    echoed = path\n'
+             '    return Path(path).read_text() + echoed\n', ''),
+            ("augmentation", 'def read_doc(path, echoed=""):\n'
+             '    echoed += path\n'
+             '    return Path(path).read_text() + echoed\n', ', "prefix "'),
+            ("named_expression", 'def read_doc(path, echoed=""):\n'
+             '    (echoed := path)\n'
+             '    return Path(path).read_text() + echoed\n', ''),
+            ("append", 'def read_doc(path, echoed=None):\n'
+             '    echoed = []\n    echoed.append(path)\n'
+             '    return Path(path).read_text() + str(echoed)\n', ''),
+            ("item", 'def read_doc(path, echoed=None):\n'
+             '    echoed = {}\n    echoed["key"] = path\n'
+             '    return Path(path).read_text() + str(echoed)\n', ''),
+            ("alias_append", 'def read_doc(path, echoed=None):\n'
+             '    echoed = []\n    alias = echoed\n    alias.append(path)\n'
+             '    return Path(path).read_text() + str(echoed)\n', ''),
+        )
+        for label, body, additional_actual in cases:
+            for argument, imports in (
+                ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+                ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+            ):
+                with self.subTest(write=label, argument=argument), tempfile.TemporaryDirectory() as d:
+                    root, derived, spans = self._parameter_cycle_argument_fixture(
+                        d, 'from pathlib import Path\n\n' + body,
+                        "reader_4405.read_doc(" + argument + additional_actual + ")", imports)
+                    self.assertIn("arguments_4405", derived)
+                    self.assertIn(("VOICE", 2), self._violations(
+                        root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                    off, _, _ = self._derive(root, sinks=False)
+                    self.assertNotIn("arguments_4405", off)
+
+    def test_formal_scalar_writes_used_only_as_locators_remain_selectors(self):
+        cases = (
+            ('def read_doc(path, selected=""):\n'
+             '    selected = path\n'
+             '    return Path(selected).read_text()\n'),
+            ('def read_doc(path, selected=""):\n'
+             '    selected += path\n'
+             '    return Path(selected).read_text()\n'),
+        )
+        for helper in cases:
+            for argument, imports in (
+                ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+                ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+            ):
+                with self.subTest(helper=helper, argument=argument), tempfile.TemporaryDirectory() as d:
+                    root, derived, spans = self._parameter_cycle_argument_fixture(
+                        d, "from pathlib import Path\n\n" + helper, "reader_4405.read_doc(" + argument + ")", imports)
+                    self.assertNotIn("arguments_4405", derived)
+                    self.assertEqual(set(), self._violations(
+                        root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                    off, _, _ = self._derive(root, sinks=False)
+                    self.assertNotIn("arguments_4405", off)
+
+    def test_name_augmentation_through_a_formal_alias_keeps_emitted_argument_text(self):
+        helper = ('def echo_doc(path):\n'
+                  '    alias = path\n'
+                  '    alias += ""\n'
+                  '    return alias\n')
+        for argument, imports in (
+            ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+            ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+        ):
+            with self.subTest(argument=argument), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.echo_doc(" + argument + ")", imports)
+                self.assertIn("arguments_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("arguments_4405", off)
+                self.assertNotIn("client_4405", off)
+
+    def test_uncertain_discarded_helper_effects_stay_conservative_through_a_locator_wrapper(self):
+        """Discarded calls with unknown effects inside a locator wrapper keep argument coverage."""
+        helper = (
+            "from pathlib import Path\n"
+            "from external_audit import record\n\n"
+            "def step(path):\n"
+            "    record(path)\n"
+            "    return path\n\n"
+            "def read_doc(path):\n"
+            "    step(path)\n"
+            "    return Path(path).read_text()\n"
+        )
+        for argument, imports in (
+            ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+            ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+        ):
+            with self.subTest(argument=argument), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.read_doc(" + argument + ")", imports)
+                self.assertIn("arguments_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("arguments_4405", off)
+                parsed = _parsed(root, "src")
+                index = scan._notes_index(root, parsed)
+                sinks, _ = scan.model_input_sinks(
+                    root,
+                    parsed,
+                    index,
+                    [{
+                            "context_limit_tokens": 1000000, "context_limit_basis": "synthetic scanner test",
+                            "model": "gpt-5",
+                    }],
+                    set(),
+                )
+                self.assertTrue(sinks)
+                self.assertIn("arguments_4405", derived)
+                self.assertNotIn("reader_4405", derived)
+                self.assertNotIn("client_4405", derived)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/client_4405.py", derived, spans),
+                    set(),
+                )
+
+    def test_consumed_resolved_helper_mutation_cannot_hide_argument_emitted_through_alias(self):
+        """The result is a locator, but the same call mutates emitted list contents."""
+        effect = ('def fill(items, path):\n'
+                  '    items += [path]\n    return path\n\n')
+        reader = ('def read_doc(path, echoed=None):\n'
+                  '    echoed = []\n    selected = fill(echoed, path)\n'
+                  '    return Path(selected).read_text() + f"{echoed}"\n\n')
+        for reverse_definitions in (False, True):
+            helper = 'from pathlib import Path\n\n' + (
+                reader + effect if reverse_definitions else effect + reader)
+            for argument, imports in (
+                ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+                ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+            ):
+                with self.subTest(reverse=reverse_definitions, argument=argument), tempfile.TemporaryDirectory() as d:
+                    root, derived, spans = self._parameter_cycle_argument_fixture(
+                        d, helper, "reader_4405.read_doc(" + argument + ")", imports)
+                    self.assertIn("arguments_4405", derived)
+                    self.assertIn(("VOICE", 2), self._violations(
+                        root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                    off, _, _ = self._derive(root, sinks=False)
+                    self.assertNotIn("arguments_4405", off)
+
+    def test_known_effectful_read_text_attribute_does_not_gain_file_reader_exemption(self):
+        """A helper named read_text mutates text that its caller actually emits."""
+        helper = ('from pathlib import Path\n'
+                  'from data_sheets_schema import reader_4405 as own_reader\n\n'
+                  'def read_text(items, path):\n'
+                  '    items += [path]\n    return path\n\n'
+                  'def read_doc(path, echoed=None):\n'
+                  '    echoed = []\n    selected = own_reader.read_text(echoed, path)\n'
+                  '    return Path(selected).read_text() + f"{echoed}"\n')
+        for argument, imports in (
+            ("arguments_4405.ARG", "from data_sheets_schema import arguments_4405\n"),
+            ("ARG", "from data_sheets_schema.arguments_4405 import ARG\n"),
+        ):
+            with self.subTest(argument=argument), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._parameter_cycle_argument_fixture(
+                    d, helper, "reader_4405.read_doc(" + argument + ")", imports)
+                self.assertIn("arguments_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/arguments_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("arguments_4405", off)
+
+    def _text_helper_alias_fixture_4733(self, directory, source):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom data_sheets_schema import aliased_text_4405\n",
+        )
+        runner = runner.replace(
+            "[guide, value, ids_4085.label(spec)]",
+            "[aliased_text_4405.content()]",
+        )
+        modules = dict(PRECISION_MODULES)
+        modules["aliased_text_4405"] = 'ASIDE = "A VOICE aside this function never sends."\n' + source
+        root = self._root(directory, runner, modules)
+        return (root, *self._derive(root)[:2])
+
+    def test_imported_text_helper_aliases_derive_inline_sentence_modules_4733(self):
+        """Aliased json/yaml/textwrap text helpers still promote inline prose."""
+        for library, function, alias in (
+            ("json", "dumps", "render_json"),
+            ("yaml", "safe_dump", "render_yaml"),
+            ("textwrap", "dedent", "trim_block"),
+        ):
+            for scope in ("module", "local"):
+                with self.subTest(library=library, scope=scope), tempfile.TemporaryDirectory() as d:
+                    imported = "from " + library + " import " + function + " as " + alias
+                    expression = alias + '("Neutral instruction sentence")'
+                    if scope == "module":
+                        source = imported + "\n\ndef content():\n    return " + expression + "\n"
+                    else:
+                        source = "def content():\n    " + imported + "\n    return " + expression + "\n"
+                    root, derived, spans = self._text_helper_alias_fixture_4733(d, source)
+                    self.assertIn("aliased_text_4405", derived)
+                    self.assertIn(("VOICE", 1), self._violations(
+                        root, "src/data_sheets_schema/aliased_text_4405.py", derived, spans))
+                    off, off_spans, _ = self._derive(root, sinks=False)
+                    self.assertNotIn("aliased_text_4405", off)
+                    self.assertEqual(set(), self._violations(
+                        root, "src/data_sheets_schema/aliased_text_4405.py", off, off_spans))
+
+    def test_module_aliased_text_helpers_keep_inline_sentence_derivation_4733(self):
+        """import json as formatter still promotes formatter.dumps prose."""
+        for library, function in (("json", "dumps"), ("yaml", "safe_dump"), ("textwrap", "dedent")):
+            with self.subTest(library=library), tempfile.TemporaryDirectory() as d:
+                source = ("import " + library + " as formatter\n\ndef content():\n"
+                          "    return formatter." + function + '("Neutral instruction sentence")\n')
+                root, derived, spans = self._text_helper_alias_fixture_4733(d, source)
+                self.assertIn("aliased_text_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/aliased_text_4405.py", derived, spans))
+
+    def test_shadowed_text_helper_imports_do_not_bless_selector_arguments_4733(self):
+        """A same-spelled function, assignment, or formal overrides the library import."""
+        cases = (
+            ("function", 'from pathlib import Path\nfrom json import dumps as render_json\n'
+             '\ndef render_json(path):\n    return Path("source.txt").read_text()\n'
+             '\ndef content():\n    return render_json("Neutral instruction sentence")\n'),
+            ("assignment", 'from pathlib import Path\nfrom json import dumps as render_json\n'
+             '\ndef read_document(path):\n    return Path(path).read_text()\n'
+             '\nrender_json = read_document\n'
+             '\ndef content():\n    return render_json("Neutral instruction sentence")\n'),
+            ("parameter", 'from pathlib import Path\nfrom json import dumps as render_json\n'
+             '\ndef read_document(path):\n    return Path(path).read_text()\n'
+             '\ndef content(render_json=read_document):\n'
+             '    return render_json("Neutral instruction sentence")\n'),
+        )
+        for binding, source in cases:
+            with self.subTest(binding=binding), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._text_helper_alias_fixture_4733(d, source)
+                self.assertNotIn("aliased_text_4405", derived)
+                self.assertNotIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/aliased_text_4405.py", derived, spans))
+
+    def test_a_rendering_function_a_controller_calls_writes_model_text(self):
+        """The native audit batch writes each child's instruction from
+        `audit_batch_context.render_worker_context` into a file its launch
+        hands the child: a function of another module that a controller
+        calls, named for the text it renders, is model text, and its module
+        is model-facing. A function named otherwise is not followed."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            _write(root / "notes/exp_4085/launch.py",
+                   "from data_sheets_schema.api_runner import RunSpec\n"
+                   "from data_sheets_schema import batch_text_4085\n\n\n"
+                   "def prepare(path):\n"
+                   "    path.write_text(batch_text_4085.render_child_context(RunSpec))\n"
+                   "    path.with_suffix('.json').write_text(batch_text_4085.summary())\n")
+            _write(root / "src/data_sheets_schema/batch_text_4085.py",
+                   'DUTIES = "Audit every CHORUS path you are assigned."\n\n\n'
+                   'def render_child_context(spec):\n    return DUTIES\n\n\n'
+                   'def summary():\n    return "A VOICE summary for a person."\n')
+            parsed = _parsed(root, "notes", "src")
+            index = scan._notes_index(root, parsed)
+            controllers, _, _ = scan.run_controllers(root, parsed, index)
+            spans, wrote = scan.text_flow(root, parsed, index, controllers)
+        self.assertEqual(set(controllers), {"notes/exp_4085/launch.py"})
+        self.assertEqual(list(scan.derive_model_facing(wrote)), ["batch_text_4085"])
+        self.assertEqual({label.split(" ")[0] for *_, label in spans["src/data_sheets_schema/batch_text_4085.py"]},
+                         {"DUTIES", "render_child_context()"})
+
+    def test_this_checkouts_derivation_and_the_hand_kept_list_agree(self):
+        """Every module the derivation finds is on the list, and the list
+        names no module the derivation misses beyond LISTED_NOT_DERIVED; every
+        derived module is in a generation closure."""
+        mf = _discovered()[1]["model_facing_modules"]
+        self.assertEqual(mf["listed"], sorted(scan.MODEL_FACING_MODULES))
+        self.assertEqual(mf["derived_not_listed"], [])
+        self.assertEqual(mf["derived_outside_closures"], [])
+        self.assertEqual(mf["listed_not_derived"], LISTED_NOT_DERIVED)
+        self.assertEqual(set(mf["derived"]) | set(LISTED_NOT_DERIVED), scan.MODEL_FACING_MODULES)
+
+    def test_the_requests_and_the_model_input_writes_are_derived(self):
+        """The request type is what `build_phase` returns, and every
+        construction of it is a sink; the bundle and chunk-manifest writers
+        and the upstream input steps' writes are sinks; the runner's own
+        writes (records, receipts) are not model input."""
+        mi = _discovered()[1]["model_input"]
+        self.assertEqual(mi["request"], {"class": "PhaseRequest", "fields": ["phase", "system", "cached_blocks",
+                                                                             "messages"],
+                                         "text_fields": list(scan.REQUEST_TEXT_FIELDS)})
+        self.assertLessEqual({scan.RUNNER, "src/data_sheets_schema/receipt_completion.py",
+                              "src/data_sheets_schema/removal_repair.py",
+                              "src/data_sheets_schema/typed_audit_runtime.py"},
+                             {r.rsplit(":", 1)[0] for r in mi["requests"]})
+        self.assertLessEqual({"_chunks.yaml", "_crate_only.txt", "_healthsheet_only.txt", "_preprocessed.txt",
+                              "_preprocessed_with_crate.txt"}, set(mi["model_input_files"]))
+        writers = {w.rsplit(":", 1)[0] for w in mi["writers"]}
+        self.assertLessEqual({"src/data_sheets_schema/chunking.py", "src/data_sheets_schema/healthsheet.py",
+                              "src/data_sheets_schema/rocrate_normalize.py", "src/download/concatenate_documents.py",
+                              "src/download/preprocess_sources.py"}, writers)
+        self.assertNotIn(scan.RUNNER, writers)
+
+    def test_rereceipt_gates_by_the_derivation_alone(self):
+        """The live case the hand list missed: the renderer-24 receipt turn
+        sends rereceipt's INSTRUCTION, HEADER and POLICY. Derived, it is
+        model-facing whether or not the list names it, so a project name in
+        any of its sentences gates; with neither, a sentence outside the
+        text the flow follows does not."""
+        surfaces, facts = _discovered()
+        derived = facts["model_facing_modules"]["derived"]
+        rel = "src/data_sheets_schema/rereceipt.py"
+        self.assertIn("rereceipt", derived)
+        self.assertEqual(surfaces.files[rel].roles["api"], "model_facing")
+        unlisted = scan.MODEL_FACING_MODULES - {"rereceipt"}
+        line = 'NOTE_4085 = "Describe the CHORUS cohort."'
+        with mock.patch.object(scan, "MODEL_FACING_MODULES", unlisted):
+            role = scan._module_role(ROOT / rel, derived)
+            off = scan._module_role(ROOT / rel, {})
+        self.assertEqual((role, off), ("model_facing", "run_shaping"))
+        planted, _ = _plant(rel, line, surface=scan.Surface(rel, ["api"], role, "live", "t"))
+        self.assertTrue(planted and all(h["violation"] and h["gates_in"] == ["api"] for h in planted), planted)
+        quiet, _ = _plant(rel, line, surface=scan.Surface(rel, ["api"], off, "live", "t"))
+        self.assertTrue(quiet and not any(h["violation"] for h in quiet), quiet)
+
+
+    def _discarded_container_effect_fixture(self, directory, mutation, helper, extra_import):
+        """A real request receives a list populated before its construction."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n", "from pathlib import Path\n" + extra_import)
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, "    parts = []\n" + mutation + "\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "parts")
+        modules = dict(PRECISION_MODULES)
+        modules["container_effect_4405"] = helper
+        modules["hidden_policy_4405"] = (
+            'SYSTEM = "Describe the CHORUS cohort from its source records."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        root = self._root(directory, runner, modules)
+        derived, spans, facts = self._derive(root)
+        self.assertEqual(facts["request"]["class"], "PhaseRequest")
+        self.assertEqual(len(facts["requests"]), 1)
+        self.assertIn("prompts_4085", derived)
+        return root, derived, spans
+
+    def test_discarded_resolved_helper_mutation_reaches_preconstruction_request_text(self):
+        """A discarded return does not discard mutations of the emitted container."""
+        cases = (
+            ("helper_constant",
+             "    effects.add_policy(parts)",
+             'from data_sheets_schema import hidden_policy_4405 as policy\n\n'
+             'def add_policy(items):\n    items.append(policy.SYSTEM)\n',
+             "from data_sheets_schema import container_effect_4405 as effects\n"),
+            ("caller_and_formal_alias",
+             "    destination = parts\n    put(destination=destination)",
+             'from data_sheets_schema.hidden_policy_4405 import SYSTEM as statement\n\n'
+             'def add_policy(*, destination):\n'
+             '    target = destination\n    target.append(statement)\n',
+             "from data_sheets_schema.container_effect_4405 import add_policy as put\n"),
+            ("actual_text_argument",
+             "    effects.add_policy(parts, text=policy.SYSTEM)",
+             'def add_policy(items, text):\n    items.append(text)\n',
+             "from data_sheets_schema import container_effect_4405 as effects\n"
+             "from data_sheets_schema import hidden_policy_4405 as policy\n"),
+        )
+        for label, mutation, helper, imports in cases:
+            with self.subTest(route=label), tempfile.TemporaryDirectory() as d:
+                root, derived, spans = self._discarded_container_effect_fixture(
+                    d, mutation, helper, imports)
+                self.assertIn("hidden_policy_4405", derived)
+                self.assertEqual(self._violations(
+                    root, "src/data_sheets_schema/hidden_policy_4405.py", derived, spans),
+                    {("CHORUS", 1), ("VOICE", 2)})
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("hidden_policy_4405", off)
+                self.assertEqual(self._violations(
+                    root, "src/data_sheets_schema/hidden_policy_4405.py", off, off_spans), set())
+
+    def test_direct_preconstruction_container_append_keeps_the_same_text_control(self):
+        """The same policy is already handled when append is in the request builder."""
+        with tempfile.TemporaryDirectory() as d:
+            root, derived, spans = self._discarded_container_effect_fixture(
+                d, "    parts.append(policy.SYSTEM)", "",
+                "from data_sheets_schema import hidden_policy_4405 as policy\n")
+            self.assertIn("hidden_policy_4405", derived)
+            self.assertEqual(self._violations(
+                root, "src/data_sheets_schema/hidden_policy_4405.py", derived, spans),
+                {("CHORUS", 1), ("VOICE", 2)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("hidden_policy_4405", off)
+            self.assertEqual(self._violations(
+                root, "src/data_sheets_schema/hidden_policy_4405.py", off, off_spans), set())
+
+    def test_inline_emitted_mapping_keys_derive_their_source_module(self):
+        """Serialization and key/item views emit inline keys, not only constants."""
+        for key in ('"Neutral instruction sentence"', 'f"Neutral instruction {spec.label}"'):
+            mapping = "{" + key + ": None}"
+            for expression in (
+                "json.dumps(" + mapping + ")",
+                '" ".join(' + mapping + ".keys())",
+                "json.dumps(list(" + mapping + ".items()))",
+            ):
+                with self.subTest(key=key, expression=expression), tempfile.TemporaryDirectory() as d:
+                    runner = PRECISION_RUNNER.replace(
+                        "from pathlib import Path\n",
+                        "from pathlib import Path\nfrom data_sheets_schema import inline_keys_trace\n")
+                    runner = runner.replace(
+                        "[guide, value, ids_4085.label(spec)]", "[inline_keys_trace.content(spec)]")
+                    modules = dict(PRECISION_MODULES)
+                    modules["inline_keys_trace"] = (
+                        'ASIDE = "A VOICE aside this function never sends."\n'
+                        'import json\n\n'
+                        'def content(spec):\n    return ' + expression + '\n')
+                    root = self._root(d, runner, modules)
+                    derived, spans, facts = self._derive(root)
+                    self.assertTrue(facts["requests"])
+                    self.assertIn("prompts_4085", derived)
+                    self.assertIn("inline_keys_trace", derived)
+                    rel = "src/data_sheets_schema/inline_keys_trace.py"
+                    self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 1)})
+                    off, off_spans, _ = self._derive(root, sinks=False)
+                    self.assertNotIn("inline_keys_trace", off)
+                    self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_inline_lookup_mapping_keys_remain_selectors(self):
+        """A lookup emits its selected value, not its inline key or mapping keys."""
+        for key in ('"Neutral instruction sentence"', 'f"Neutral instruction {spec.label}"'):
+            for expression in (
+                "spec.values[" + key + "]",
+                "{" + key + ": spec.value}[" + key + "]",
+            ):
+                with self.subTest(key=key, expression=expression), tempfile.TemporaryDirectory() as d:
+                    runner = PRECISION_RUNNER.replace(
+                        "from pathlib import Path\n",
+                        "from pathlib import Path\nfrom data_sheets_schema import inline_keys_trace\n")
+                    runner = runner.replace(
+                        "[guide, value, ids_4085.label(spec)]", "[inline_keys_trace.content(spec)]")
+                    modules = dict(PRECISION_MODULES)
+                    modules["inline_keys_trace"] = (
+                        'ASIDE = "A VOICE aside this function never sends."\n\n'
+                        'def content(spec):\n    return ' + expression + '\n')
+                    root = self._root(d, runner, modules)
+                    derived, spans, facts = self._derive(root)
+                    self.assertTrue(facts["requests"])
+                    self.assertIn("prompts_4085", derived)
+                    self.assertNotIn("inline_keys_trace", derived)
+                    self.assertEqual(self._violations(
+                        root, "src/data_sheets_schema/inline_keys_trace.py", derived, spans), set())
+
+
+    def _inline_key_context_fixture(self, directory, body, extra_modules=None):
+        """A real request consumes content built from mappings in one new module."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom data_sheets_schema import key_context_trace\n")
+        runner = runner.replace(
+            "[guide, value, ids_4085.label(spec)]", "[key_context_trace.content(spec)]")
+        modules = dict(PRECISION_MODULES)
+        modules["key_context_trace"] = (
+            'ASIDE = "A VOICE aside this function never sends."\n'
+            'import json\n'
+            'from data_sheets_schema import key_factory_trace\n\n'
+            'def content(spec):\n' + body + '\n')
+        modules["key_factory_trace"] = ""
+        modules.update(extra_modules or {})
+        return self._root(directory, runner, modules)
+
+    def test_inline_mapping_lookup_and_emission_are_order_independent(self):
+        """Looking up a local mapping cannot consume its later emitted-key visit."""
+        for key in ('"Neutral instruction sentence"', 'f"Neutral instruction {spec.label}"'):
+            for emission_first in (False, True):
+                with self.subTest(key=key, emission_first=emission_first), tempfile.TemporaryDirectory() as d:
+                    expressions = ["mapping[" + key + "]", "json.dumps(mapping)"]
+                    if emission_first:
+                        expressions.reverse()
+                    body = "    mapping = {" + key + ": spec.value}\n"
+                    body += "    return (" + ", ".join(expressions) + ")"
+                    root = self._inline_key_context_fixture(d, body)
+                    derived, spans, facts = self._derive(root)
+                    self.assertTrue(facts["requests"])
+                    self.assertIn("key_context_trace", derived)
+                    rel = "src/data_sheets_schema/key_context_trace.py"
+                    self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 1)})
+                    off, off_spans, _ = self._derive(root, sinks=False)
+                    self.assertNotIn("key_context_trace", off)
+                    self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_returned_mapping_projection_keeps_lookup_and_emission_distinct(self):
+        """The same resolved factory needs separate lookup and emission visits."""
+        factory = ('ASIDE = "A VOICE aside this function never sends."\n\n'
+                   'def build_map(spec):\n'
+                   '    return {"Neutral instruction sentence": spec.value}\n')
+        lookup = 'key_factory_trace.build_map(spec)["Neutral instruction sentence"]'
+        emission = 'json.dumps(key_factory_trace.build_map(spec))'
+        for label, expression, expected in (
+            ("lookup_only", lookup, False),
+            ("lookup_then_emission", "(" + lookup + ", " + emission + ")", True),
+            ("emission_then_lookup", "(" + emission + ", " + lookup + ")", True),
+        ):
+            with self.subTest(route=label), tempfile.TemporaryDirectory() as d:
+                root = self._inline_key_context_fixture(
+                    d, "    return " + expression, {"key_factory_trace": factory})
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertEqual("key_factory_trace" in derived, expected)
+                rel = "src/data_sheets_schema/key_factory_trace.py"
+                self.assertEqual(self._violations(root, rel, derived, spans),
+                                 {("VOICE", 1)} if expected else set())
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("key_factory_trace", off)
+                self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_selected_nested_mapping_emits_keys_but_values_view_does_not(self):
+        """A lookup removes one key layer, while values() removes its own keys."""
+        for label, expression, expected in (
+            ("selected_nested_map",
+             'json.dumps({"slot": {"Neutral instruction sentence": None}}["slot"])', True),
+            ("values_only",
+             'json.dumps(list({"Neutral instruction sentence": spec.value}.values()))', False),
+        ):
+            with self.subTest(route=label), tempfile.TemporaryDirectory() as d:
+                root = self._inline_key_context_fixture(d, "    return " + expression)
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertEqual("key_context_trace" in derived, expected)
+                rel = "src/data_sheets_schema/key_context_trace.py"
+                self.assertEqual(self._violations(root, rel, derived, spans),
+                                 {("VOICE", 1)} if expected else set())
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("key_context_trace", off)
+                self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def _effect_contract_root_4733(self, directory, mutation, helper):
+        """Build the actual preconstruction request with two independent text sources."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\n"
+            "from data_sheets_schema import effect_contract_4733 as effects\n"
+            "from data_sheets_schema import effect_source_one_4733 as one\n"
+            "from data_sheets_schema import effect_source_two_4733 as two\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, mutation + "\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "parts")
+        modules = dict(PRECISION_MODULES)
+        modules["effect_contract_4733"] = helper
+        modules["effect_source_one_4733"] = (
+            'TEXT = "First neutral instruction sentence."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        modules["effect_source_two_4733"] = (
+            'TEXT = "Second neutral instruction sentence."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        return self._root(directory, runner, modules)
+
+    def test_repeated_receiving_helper_keeps_distinct_text_actuals_4733(self):
+        """Two calls to the same helper/list must retain both source-module operands."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._effect_contract_root_4733(
+                d, "    parts = []\n    effects.fill(parts, one.TEXT)\n"
+                   "    effects.fill(parts, text=two.TEXT)",
+                "def fill(items, text):\n    items.append(text)\n")
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertEqual(len(facts["requests"]), 1)
+            for module in ("effect_source_one_4733", "effect_source_two_4733"):
+                self.assertIn(module, derived)
+                self.assertIn(("VOICE", 2), self._violations(
+                    root, "src/data_sheets_schema/" + module + ".py", derived, spans))
+            off, off_spans, _ = self._derive(root, sinks=False)
+            for module in ("effect_source_one_4733", "effect_source_two_4733"):
+                self.assertNotIn(module, off)
+                self.assertNotIn(("VOICE", 2), self._violations(
+                    root, "src/data_sheets_schema/" + module + ".py", off, off_spans))
+
+    def test_projected_receiving_actual_refuses_instead_of_losing_text_4733(self):
+        """The finite Name-actual effect contract cannot silently accept a projected list."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._effect_contract_root_4733(
+                d, "    parts = [[]]\n    effects.fill(parts[0], one.TEXT)",
+                "def fill(items, text):\n    items.append(text)\n")
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect.*container"):
+                self._derive(root)
+
+    def test_recursive_receiving_helper_refuses_a_silent_partial_derivation_4733(self):
+        """A recursive effect path must terminate analysis with an explicit refusal."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._effect_contract_root_4733(
+                d, "    parts = []\n    effects.fill(parts, one.TEXT)",
+                "def fill(items, text):\n    items.append(text)\n    fill(items, text)\n")
+            with self.assertRaisesRegex(scan.ConfigError, "recursive receiving helper"):
+                self._derive(root)
+
+    def test_discarded_helper_extend_mapping_emits_inline_keys(self):
+        """list.extend consumes mapping keys even without an explicit keys() call."""
+        helper = ('ASIDE = "A VOICE aside this function never sends."\n\n'
+                  'def add_policy(items):\n'
+                  '    items.extend({"Neutral instruction sentence": None})\n')
+        with tempfile.TemporaryDirectory() as d:
+            root, derived, spans = self._discarded_container_effect_fixture(
+                d, "    effects.add_policy(parts)", helper,
+                "from data_sheets_schema import container_effect_4405 as effects\n")
+            self.assertIn("container_effect_4405", derived)
+            rel = "src/data_sheets_schema/container_effect_4405.py"
+            self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 1)})
+            self.assertNotIn("hidden_policy_4405", derived)
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("container_effect_4405", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_discarded_helper_default_uses_definition_scope(self):
+        """A callee-local shadow cannot change its already evaluated default."""
+        helper = ('SYSTEM = "Describe the CHORUS cohort from its source records."\n'
+                  'ASIDE = "A VOICE aside this function never sends."\n\n'
+                  'def add_policy(items, text=SYSTEM):\n'
+                  '    SYSTEM = "x"\n'
+                  '    items.append(text)\n')
+        with tempfile.TemporaryDirectory() as d:
+            root, derived, spans = self._discarded_container_effect_fixture(
+                d, "    effects.add_policy(parts)", helper,
+                "from data_sheets_schema import container_effect_4405 as effects\n")
+            self.assertIn("container_effect_4405", derived)
+            rel = "src/data_sheets_schema/container_effect_4405.py"
+            self.assertEqual(self._violations(root, rel, derived, spans),
+                             {("CHORUS", 1), ("VOICE", 2)})
+            self.assertNotIn("hidden_policy_4405", derived)
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("container_effect_4405", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_model_file_writer_is_a_seed_consumer_not_an_unknown_escape(self):
+        """The real discovered model-file writer consumes the reached local text."""
+        writer = ('from pathlib import Path\n'
+                  'from data_sheets_schema import hidden_writer_policy_trace as policy\n\n'
+                  'def emit(directory):\n'
+                  '    parts = []\n'
+                  '    parts.append(policy.SYSTEM)\n'
+                  '    (Path(directory) / "neutral_healthsheet_only.txt").write_text("".join(parts))\n')
+        modules = dict(PRECISION_MODULES)
+        modules["model_writer_trace"] = writer
+        modules["hidden_writer_policy_trace"] = (
+            'SYSTEM = "Describe the CHORUS cohort from its source records."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, PRECISION_RUNNER, modules)
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["writers"], ["src/data_sheets_schema/model_writer_trace.py:7"])
+            self.assertIn("_healthsheet_only.txt", facts["model_input_files"])
+            self.assertIn("hidden_writer_policy_trace", derived)
+            rel = "src/data_sheets_schema/hidden_writer_policy_trace.py"
+            self.assertEqual(self._violations(root, rel, derived, spans),
+                             {("CHORUS", 1), ("VOICE", 2)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("hidden_writer_policy_trace", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_unresolved_helper_receiving_model_container_refuses(self):
+        """An actual unknown receiving call is not a terminal request consumer."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n", "from pathlib import Path\nfrom external_mutator import fill\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, "    parts = []\n    fill(parts)\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "parts")
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, runner, dict(PRECISION_MODULES))
+            parsed = _parsed(root, "src")
+            index = scan._notes_index(root, parsed)
+            sinks, facts = scan.model_input_sinks(root, parsed, index, [], set())
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertEqual(len(facts["requests"]), 1)
+            self.assertTrue(sinks)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("prompts_4085", off)
+
+    def test_known_scalar_discarded_observer_keeps_text_flow_4733(self):
+        """A literal string is not a mutable receiving container."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom data_sheets_schema import scalar_observer_4733\n")
+        runner = runner.replace("system=prompts_4085.SYSTEM", "system=scalar_observer_4733.render_scalar()")
+        modules = dict(PRECISION_MODULES)
+        modules["scalar_observer_4733"] = (
+            'from external_observer import observe\n'
+            'ASIDE = "A VOICE aside this module never sends."\n\n'
+            'def render_scalar():\n'
+            '    message = "Describe this neutral record from its source evidence."\n'
+            '    observe(message)\n'
+            '    return message\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, runner, modules)
+            derived, spans, _ = self._derive(root)
+            self.assertIn("scalar_observer_4733", derived)
+            rel = "src/data_sheets_schema/scalar_observer_4733.py"
+            self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 2)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("scalar_observer_4733", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_unknown_carrier_discarded_fill_does_not_gain_scalar_exemption_4733(self):
+        """An unknown object cannot borrow the literal-string exemption."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom external_carrier import make_parts, fill\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, "    parts = make_parts()\n    fill(parts)\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "[parts]")
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, runner, dict(PRECISION_MODULES))
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("prompts_4085", off)
+
+
+    def test_incoming_formal_alias_cannot_be_proved_scalar_by_later_assignment_4733(self):
+        """The alias still holds the caller's list after its formal is rebound."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom data_sheets_schema import formal_alias_4733\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, "    parts = []\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "formal_alias_4733.render_parts(parts)")
+        modules = dict(PRECISION_MODULES)
+        modules["formal_alias_4733"] = (
+            'from external_mutator import fill\n\n'
+            'def render_parts(items):\n'
+            '    alias = items\n'
+            '    items = "x"\n'
+            '    fill(alias)\n'
+            '    return alias\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, runner, modules)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("formal_alias_4733", off)
+
+    def test_named_expression_rebinding_invalidates_scalar_effect_exemption(self):
+        """A scalar name becomes the list passed to an unknown receiving call."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n", "from pathlib import Path\nfrom external_mutator import fill\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker,
+                                '    parts = ""\n    (parts := [])\n    fill(parts)\n' + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "parts")
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, runner, dict(PRECISION_MODULES))
+            parsed = _parsed(root, "src")
+            index = scan._notes_index(root, parsed)
+            sinks, facts = scan.model_input_sinks(root, parsed, index, [], set())
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertEqual(len(facts["requests"]), 1)
+            self.assertTrue(sinks)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("prompts_4085", off)
+
+    def test_with_target_rebinding_invalidates_scalar_effect_exemption(self):
+        """The actual with-as value is a mutable list despite the earlier scalar."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom contextlib import nullcontext\nfrom external_mutator import fill\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker,
+                                '    parts = ""\n    with nullcontext([]) as parts:\n        fill(parts)\n' + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "parts")
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, runner, dict(PRECISION_MODULES))
+            parsed = _parsed(root, "src")
+            index = scan._notes_index(root, parsed)
+            sinks, facts = scan.model_input_sinks(root, parsed, index, [], set())
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertEqual(len(facts["requests"]), 1)
+            self.assertTrue(sinks)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("prompts_4085", off)
+
+    def _mapping_cycle_root_4733(self, directory, expression, *, outer_key="outer", inner_key="Neutral nested instruction sentence"):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nimport json\nfrom data_sheets_schema import cyclic_mapping_4733\n")
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", expression)
+        modules = dict(PRECISION_MODULES)
+        modules["cyclic_mapping_4733"] = (
+            'ASIDE = "A VOICE aside this function never sends."\n\n'
+            'def mapping():\n'
+            f'    table = {{{outer_key!r}: {{"box": {{{inner_key!r}: None}}}}}}\n'
+            f'    selected = table[{outer_key!r}]\n'
+            '    table = selected\n'
+            '    return table\n')
+        return self._root(directory, runner, modules)
+
+    def test_lookup_only_mapping_cycle_terminates_without_key_emission_4733(self):
+        """A real finite reassignment creates a cycle in conservative local dataflow."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._mapping_cycle_root_4733(d, '[cyclic_mapping_4733.mapping()["box"]]')
+            derived, spans, _ = self._derive(root)
+            self.assertNotIn("cyclic_mapping_4733", derived)
+            self.assertEqual(self._violations(root, "src/data_sheets_schema/cyclic_mapping_4733.py", derived, spans), set())
+
+    def test_mapping_cycle_lookup_and_nested_key_emission_both_orders_4733(self):
+        lookup = 'cyclic_mapping_4733.mapping()["box"]'
+        emission = 'json.dumps(cyclic_mapping_4733.mapping()["box"])'
+        for first, second in ((lookup, emission), (emission, lookup)):
+            with self.subTest(first=first), tempfile.TemporaryDirectory() as d:
+                root = self._mapping_cycle_root_4733(d, '[' + first + ', ' + second + ']')
+                derived, spans, _ = self._derive(root)
+                self.assertIn("cyclic_mapping_4733", derived)
+                rel = "src/data_sheets_schema/cyclic_mapping_4733.py"
+                self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 1)})
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("cyclic_mapping_4733", off)
+                self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_mapping_cycle_selected_serialization_does_not_emit_outer_key_4733(self):
+        """Termination must not widen a selected inner mapping to every outer key."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._mapping_cycle_root_4733(
+                d, '[json.dumps(cyclic_mapping_4733.mapping()["box"])]',
+                outer_key="Neutral outer selector sentence", inner_key="id")
+            derived, spans, _ = self._derive(root)
+            self.assertNotIn("cyclic_mapping_4733", derived)
+            self.assertEqual(self._violations(root, "src/data_sheets_schema/cyclic_mapping_4733.py", derived, spans), set())
+
+    def _builtin_copy_root_4733(self, directory, statements, *, extra_import=""):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\n"
+            "from data_sheets_schema import copied_text_4733 as copied_text\n" + extra_import)
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, statements + "\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "[cached, parts]")
+        modules = dict(PRECISION_MODULES)
+        modules["copied_text_4733"] = (
+            'TEXT = "Describe this neutral record from the captured evidence."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        return self._root(directory, runner, modules)
+
+    def test_builtin_shallow_copy_outer_append_retains_emitted_text_4733(self):
+        """Both real request operands remain reached; only the copied outer list gains text."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._builtin_copy_root_4733(
+                d, "    cached = []\n    parts = list(cached)\n    parts.append(copied_text.TEXT)")
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertEqual(len(facts["requests"]), 1)
+            self.assertIn("copied_text_4733", derived)
+            rel = "src/data_sheets_schema/copied_text_4733.py"
+            self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 2)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("copied_text_4733", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_shadowed_or_custom_copy_does_not_gain_builtin_receiver_admission_4733(self):
+        """A constructor spelling alone does not prove a builtin shallow list copy."""
+        for imported, factory in (("from external_copies import list\n", "list"),
+                                  ("from external_copies import make_copy\n", "make_copy")):
+            with self.subTest(factory=factory), tempfile.TemporaryDirectory() as d:
+                root = self._builtin_copy_root_4733(
+                    d, "    cached = []\n    parts = " + factory + "(cached)\n"
+                       "    parts.append(copied_text.TEXT)", extra_import=imported)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("copied_text_4733", off)
+
+    def test_shallow_copy_shared_nested_mutation_remains_explicitly_unsupported_4733(self):
+        """The shallow copy shares its inner list; the outer-copy allowance cannot certify that edge."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._builtin_copy_root_4733(
+                d, "    cached = [[]]\n    parts = list(cached)\n"
+                   "    parts[0].append(copied_text.TEXT)")
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("copied_text_4733", off)
+
+    def _computed_argument_root_4733(self, directory, operation, *, initial="[computed_text.TEXT]"):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\n"
+            "from external_observer import observe, fill\n"
+            "from data_sheets_schema import computed_text_4733 as computed_text\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, "    parts = " + initial + "\n" + operation + "\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "parts")
+        modules = dict(PRECISION_MODULES)
+        modules["computed_text_4733"] = (
+            'TEXT = "Describe this neutral record using the captured evidence."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        return self._root(directory, runner, modules)
+
+    def test_computed_boolean_and_formatted_string_are_not_container_actuals_4733(self):
+        """The unknown observer gets a bool or string, not the list object used to form it."""
+        for operation in ("    observe(not parts)", "    observe(f'{parts}')"):
+            with self.subTest(operation=operation), tempfile.TemporaryDirectory() as d:
+                root = self._computed_argument_root_4733(d, operation)
+                derived, spans, facts = self._derive(root)
+                self.assertEqual(facts["request"]["class"], "PhaseRequest")
+                self.assertEqual(len(facts["requests"]), 1)
+                self.assertIn("computed_text_4733", derived)
+                rel = "src/data_sheets_schema/computed_text_4733.py"
+                self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 2)})
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("computed_text_4733", off)
+                self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_builtin_predicate_generator_does_not_escape_emitted_container_4733(self):
+        """An unshadowed builtin consumes a generator of identity-test booleans."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._computed_argument_root_4733(d, "    any(item is None for item in parts)")
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertIn("computed_text_4733", derived)
+            rel = "src/data_sheets_schema/computed_text_4733.py"
+            self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 2)})
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("computed_text_4733", off)
+
+    def test_computed_argument_fix_does_not_hide_nested_container_escape_4733(self):
+        """This projected argument can be the same inner mutable list sent in the request."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._computed_argument_root_4733(d, "    fill(parts[0])", initial="[[]]")
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_generator_yielding_shared_mutable_elements_remains_unsupported_4733(self):
+        """Unlike a builtin boolean predicate, an unknown consumer can mutate yielded elements."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._computed_argument_root_4733(
+                d, "    observe(item for item in parts)", initial="[[]]")
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def _predicate_boundary_root_4733(self, directory, statements, *, content="parts", extra_import="", prefix=""):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\n"
+            "from external_mutator import fill, observe\n"
+            "from data_sheets_schema import predicate_text_4733 as predicate_text\n" + extra_import)
+        if prefix:
+            runner = prefix + runner
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, statements + "\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", content)
+        modules = dict(PRECISION_MODULES)
+        modules["predicate_text_4733"] = (
+            'TEXT = "Describe this neutral record using captured evidence."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        return self._root(directory, runner, modules)
+
+    def test_real_path_exists_generator_preserves_model_text_discovery_4733(self):
+        """The real launcher shape constructs Paths from selected output strings."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._predicate_boundary_root_4733(
+                d, '    job = {"output_directories": [predicate_text.TEXT]}\n'
+                   '    if any(Path(p).exists() for p in job["output_directories"]):\n'
+                   '        raise ValueError("output already exists")', content="job")
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertIn("predicate_text_4733", derived)
+            rel = "src/data_sheets_schema/predicate_text_4733.py"
+            self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 2)})
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("predicate_text_4733", off)
+
+    def test_shadowed_predicate_consumers_do_not_gain_builtin_admission_4733(self):
+        """A same-spelled imported consumer may mutate each yielded inner list."""
+        for name in ("any", "all"):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as d:
+                root = self._predicate_boundary_root_4733(
+                    d, "    parts = [[]]\n    " + name + "(item for item in parts)",
+                    extra_import="from external_predicates import " + name + "\n")
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                self._derive(root, sinks=False)
+
+    def test_rebound_path_cannot_hide_generator_element_escape_4733(self):
+        """A replacement Path factory receives the same mutable element, even before .exists()."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._predicate_boundary_root_4733(
+                d, '    job = {"output_directories": [[]]}\n'
+                   '    any(Path(p).exists() for p in job["output_directories"])', content="job",
+                extra_import="from external_paths import make_path\nPath = make_path\n")
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_nested_mutation_is_not_hidden_by_scalar_actual_result_4733(self):
+        """Removing an outer scalar receiving edge must retain its nested unknown mutator."""
+        for expression in ("not fill(parts)", "f'{fill(parts)}'"):
+            with self.subTest(expression=expression), tempfile.TemporaryDirectory() as d:
+                root = self._predicate_boundary_root_4733(
+                    d, "    parts = []\n    observe(" + expression + ")")
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                self._derive(root, sinks=False)
+
+    def test_generator_bound_mutable_element_is_traced_into_nested_call_4733(self):
+        """The yielded result is bool, but fill still receives a shared inner list."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._predicate_boundary_root_4733(
+                d, "    parts = [[]]\n    any(fill(item) is None for item in parts)")
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_generator_target_shadow_does_not_alias_outer_emitted_list_4733(self):
+        """The generator's parts binding is local to that comprehension and yields bools."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._predicate_boundary_root_4733(
+                d, "    parts = [predicate_text.TEXT]\n    any(parts is None for parts in [None])")
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertIn("predicate_text_4733", derived)
+            rel = "src/data_sheets_schema/predicate_text_4733.py"
+            self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 2)})
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("predicate_text_4733", off)
+
+    def test_predicate_generator_target_mutation_cannot_silently_lose_emitted_text_4733(self):
+        """A scalar yielded value does not make the generator's target assignment harmless."""
+        cases = (
+            ("subscript", "    parts = [None]", "parts[0]", "parts[0]", ""),
+            ("attribute", "    parts = SimpleNamespace(text=None)", "parts.text", "parts.text",
+             "from types import SimpleNamespace\n"),
+        )
+        for label, initial, target, content, imported in cases:
+            with self.subTest(target=label), tempfile.TemporaryDirectory() as d:
+                root = self._predicate_boundary_root_4733(
+                    d, initial + "\n    any(False for " + target + " in [predicate_text.TEXT])",
+                    content=content, extra_import=imported)
+                # These stores are outside the finite direct-Name target model.
+                # The emitted TEXT must not disappear under a scalar-elt exemption.
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("predicate_text_4733", off)
+
+    def test_predicate_generator_target_store_either_refuses_or_retains_real_text_4733(self):
+        """A returned derivation must include the module whose string is stored and emitted."""
+        cases = (
+            ("subscript", "    parts = [None]", "parts[0]", "parts[0]", ""),
+            ("attribute", "    parts = SimpleNamespace(text=None)", "parts.text", "parts.text",
+             "from types import SimpleNamespace\n"),
+        )
+        for label, initial, target, content, imported in cases:
+            with self.subTest(target=label), tempfile.TemporaryDirectory() as d:
+                root = self._predicate_boundary_root_4733(
+                    d, initial + "\n    any(False for " + target + " in [predicate_text.TEXT])",
+                    content=content, extra_import=imported)
+                try:
+                    derived, spans, facts = self._derive(root)
+                except scan.ConfigError:
+                    # Explicit refusal is permitted for this unsupported store.
+                    # A returned partial derivation is not.
+                    continue
+                self.assertEqual(facts["request"]["class"], "PhaseRequest")
+                self.assertEqual(len(facts["requests"]), 1)
+                self.assertIn("predicate_text_4733", derived)
+                rel = "src/data_sheets_schema/predicate_text_4733.py"
+                self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 2)})
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("predicate_text_4733", off)
+                self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_assigned_scalar_results_do_not_alias_their_container_inputs_4733(self):
+        """Assigning a fresh string or bool does not retain a mutable reference to parts."""
+        for assignment in ("message = f'{parts}'", "message = not parts"):
+            with self.subTest(assignment=assignment), tempfile.TemporaryDirectory() as d:
+                root = self._predicate_boundary_root_4733(
+                    d, "    parts = [predicate_text.TEXT]\n    " + assignment + "\n    observe(message)")
+                derived, spans, facts = self._derive(root)
+                self.assertEqual(facts["request"]["class"], "PhaseRequest")
+                self.assertIn("predicate_text_4733", derived)
+                rel = "src/data_sheets_schema/predicate_text_4733.py"
+                self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 2)})
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("predicate_text_4733", off)
+
+    def test_known_identity_result_retains_unsupported_receiving_escape_4733(self):
+        """A consumed known helper can return the original list, unlike a fresh scalar expression."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom external_mutator import fill\n"
+            "from data_sheets_schema import identity_alias_4733\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(
+            marker, "    parts = []\n    alias = identity_alias_4733.identity(parts)\n"
+                    "    fill(alias)\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "parts")
+        modules = dict(PRECISION_MODULES)
+        modules["identity_alias_4733"] = "def identity(value):\n    return value\n"
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, runner, modules)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_assigned_formatted_scalar_keeps_its_nested_mutator_check_4733(self):
+        """The assigned result is a string, but its inner call still receives the emitted list."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._predicate_boundary_root_4733(
+                d, "    parts = []\n    message = f'{fill(parts)}'\n    observe(message)")
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+
+    def test_local_text_helper_imports_ignore_disjoint_function_bindings_4588(self):
+        for library, helper in (("json", "dumps"), ("yaml", "safe_dump"), ("textwrap", "dedent")):
+            with self.subTest(library=library), tempfile.TemporaryDirectory() as directory:
+                imported = "from " + library + " import " + helper + " as render"
+                source = ("def content():\n    " + imported +
+                          '\n    return render("Neutral instruction sentence")\n'
+                          "\ndef unrelated():\n    " + imported + '\n    return render("unused")\n')
+                root, derived, spans = self._text_helper_alias_fixture_4733(directory, source)
+                self.assertIn("aliased_text_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/aliased_text_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("aliased_text_4405", off)
+
+    def test_module_text_helper_import_ignores_disjoint_local_shadows_4588(self):
+        """Bindings in unexecuted sibling scopes must not hide a module-level text helper."""
+        for shadow in (
+            "class Unrelated:\n    render = None\n    def method(self):\n"
+            "        from json import dumps as render\n        return render('unused')\n",
+            "def unrelated(render=None):\n    return render\n",
+        ):
+            with self.subTest(shadow=shadow), tempfile.TemporaryDirectory() as directory:
+                source = ('from json import dumps as render\n\ndef content():\n'
+                          '    return render("Neutral instruction sentence")\n\n' + shadow)
+                root, derived, spans = self._text_helper_alias_fixture_4733(directory, source)
+                self.assertIn("aliased_text_4405", derived)
+                self.assertIn(("VOICE", 1), self._violations(
+                    root, "src/data_sheets_schema/aliased_text_4405.py", derived, spans))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("aliased_text_4405", off)
+
+    def test_text_helper_scope_resolution_keeps_actual_rebinding_conservative_4588(self):
+        """Actual rebinding in the active scope must decline text-helper promotion."""
+        prefix = "from json import dumps as render\n\n"
+        cases = {
+            "local_assignment": ('def content():\n    from json import dumps as render\n'
+                                 '    render = lambda value: ""\n'
+                                 '    return render("Neutral instruction sentence")\n'),
+            "parameter_shadow": ('def content(render=lambda value: ""):\n'
+                                 '    return render("Neutral instruction sentence")\n'),
+            "module_rebinding": ('render = lambda value: ""\n'
+                                 'def content():\n'
+                                 '    return render("Neutral instruction sentence")\n'),
+            "del_rebinding": ('def content():\n    from json import dumps as render\n'
+                              '    del render\n'
+                              '    render = lambda value: ""\n'
+                              '    return render("Neutral instruction sentence")\n'),
+        }
+        for label, body in cases.items():
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as directory:
+                root, derived, spans = self._text_helper_alias_fixture_4733(directory, prefix + body)
+                self.assertNotIn("aliased_text_4405", derived)
+                self.assertEqual(set(), self._violations(
+                    root, "src/data_sheets_schema/aliased_text_4405.py", derived, spans))
+
+
+    def _consumed_helper_root_4733(self, directory, invocation, helper, imports=""):
+        """Both the helper's scalar return and its populated list reach a real request."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\n"
+            "from data_sheets_schema import consumed_helper_4733 as effects\n" + imports)
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, "    parts = []\n" + invocation + "\n" + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "[selected, parts]")
+        modules = dict(PRECISION_MODULES)
+        modules["consumed_helper_4733"] = helper
+        modules["consumed_policy_4733"] = (
+            'SYSTEM = "Describe the CHORUS cohort from its source records."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        return self._root(directory, runner, modules)
+
+    def _assert_consumed_policy_4733(self, root, derived, spans, facts):
+        self.assertEqual(facts["request"]["class"], "PhaseRequest")
+        self.assertEqual(len(facts["requests"]), 1)
+        self.assertIn("consumed_policy_4733", derived)
+        rel = "src/data_sheets_schema/consumed_policy_4733.py"
+        self.assertEqual(self._violations(root, rel, derived, spans),
+                         {("CHORUS", 1), ("VOICE", 2)})
+        off, off_spans, _ = self._derive(root, sinks=False)
+        self.assertNotIn("consumed_policy_4733", off)
+        self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_consumed_helper_return_keeps_its_helper_owned_container_text_4733(self):
+        """Consuming a scalar return cannot discard the helper's modeled append."""
+        helper = (
+            'from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+            'def fill(items):\n'
+            '    items.append(policy.SYSTEM)\n'
+            '    return "selected.txt"\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._consumed_helper_root_4733(
+                d, "    selected = effects.fill(parts)", helper)
+            derived, spans, facts = self._derive(root)
+            self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+    def test_consumed_helper_explicit_imported_argument_is_a_masking_control_4733(self):
+        """Historical data-argument traversal already preserves this imported constant."""
+        helper = ('def fill(items, text):\n'
+                  '    items.append(text)\n'
+                  '    return "selected.txt"\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._consumed_helper_root_4733(
+                d, "    selected = effects.fill(parts, policy.SYSTEM)", helper,
+                "from data_sheets_schema import consumed_policy_4733 as policy\n")
+            derived, spans, facts = self._derive(root)
+            self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+    def test_consumed_projected_receiver_either_refuses_or_keeps_real_text_4733(self):
+        """An unmodeled receiver retains a list and mutates it before the request."""
+        helper = (
+            'from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+            'class Holder:\n'
+            '    def __init__(self, items):\n'
+            '        self.items = items\n'
+            '    def fill(self):\n'
+            '        self.items.append(policy.SYSTEM)\n'
+            '        return "selected.txt"\n\n'
+            'def make(items):\n'
+            '    return Holder(items)\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._consumed_helper_root_4733(
+                d, "    selected = effects.make(parts).fill()", helper)
+            try:
+                derived, spans, facts = self._derive(root)
+            except scan.ConfigError as error:
+                self.assertIn("unsupported effect", str(error))
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("consumed_policy_4733", off)
+            else:
+                self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+
+    def _local_receiver_observer_fixture_trace(self, directory, initialization, operation,
+                                               payload="parts", extra_source="", extra_import=""):
+        """The hidden sentence occurs only as this operation's operand/default."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\n"
+            "from data_sheets_schema import observer_operand_trace as hidden\n" + extra_import)
+        if extra_source:
+            runner += "\n" + extra_source
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(marker, initialization + operation + marker)
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", payload)
+        modules = dict(PRECISION_MODULES)
+        modules["observer_operand_trace"] = (
+            'TEXT = "Describe the CHORUS cohort from its source records."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n')
+        root = self._root(directory, runner, modules)
+        parsed = _parsed(root, "src")
+        index = scan._notes_index(root, parsed)
+        sinks, facts = scan.model_input_sinks(root, parsed, index, [], set())
+        self.assertTrue(sinks)
+        self.assertTrue(facts["requests"])
+        off, off_spans, _ = self._derive(root, sinks=False)
+        self.assertNotIn("observer_operand_trace", off)
+        self.assertEqual(
+            self._violations(root, "src/data_sheets_schema/observer_operand_trace.py", off, off_spans),
+            set(),
+        )
+        return root
+    def test_discarded_builtin_observer_operands_do_not_become_emitted_text_trace(self):
+        """Primitive count/index/get operands do not enter the returned container."""
+        cases = (
+            ("list_count", '    parts = ["Neutral instruction."]\n',
+             "    parts.count(hidden.TEXT)\n", "parts"),
+            ("list_index", '    parts = ["Neutral instruction."]\n',
+             "    try:\n        parts.index(hidden.TEXT)\n    except ValueError:\n        pass\n", "parts"),
+            ("dict_get_key", '    parts = {"neutral": "Neutral instruction."}\n',
+             "    parts.get(hidden.TEXT)\n", "list(parts.values())"),
+            ("dict_get_default", '    parts = {"neutral": "Neutral instruction."}\n',
+             '    parts.get("missing", hidden.TEXT)\n', "list(parts.values())"),
+        )
+        for label, initialization, operation, payload in cases:
+            with self.subTest(observer=label), tempfile.TemporaryDirectory() as directory:
+                root = self._local_receiver_observer_fixture_trace(
+                    directory, initialization, operation, payload)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("prompts_4085", derived)
+                self.assertNotIn("observer_operand_trace", derived)
+                self.assertEqual(self._violations(
+                    root, "src/data_sheets_schema/observer_operand_trace.py", derived, spans), set())
+
+    def test_local_observer_correction_preserves_append_and_emitted_default_trace(self):
+        """A real mutation or used get-default still contributes the hidden sentence."""
+        cases = (
+            ("append", "    parts = []\n", "    parts.append(hidden.TEXT)\n", "parts"),
+            ("used_get_default", "    parts = {}\n", "", '[parts.get("missing", hidden.TEXT)]'),
+        )
+        for label, initialization, operation, payload in cases:
+            with self.subTest(emission=label), tempfile.TemporaryDirectory() as directory:
+                root = self._local_receiver_observer_fixture_trace(
+                    directory, initialization, operation, payload)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("observer_operand_trace", derived)
+                self.assertEqual(self._violations(
+                    root, "src/data_sheets_schema/observer_operand_trace.py", derived, spans),
+                    {("CHORUS", 1), ("VOICE", 2)})
+
+    def test_custom_or_unknown_observer_spelling_never_silently_hides_text_trace(self):
+        """A count spelling does not certify a custom/unknown receiver as read-only."""
+        cases = (
+            ("custom_list_subclass", "    parts = CapturingListTrace()\n", "",
+             "class CapturingListTrace(list):\n"
+             "    def count(self, text):\n"
+             "        self.append(text)\n"
+             "        return 0\n"),
+            ("unknown_factory", "    parts = make_parts()\n",
+             "from external_receiver_factory_trace import make_parts\n", ""),
+        )
+        for label, initialization, extra_import, extra_source in cases:
+            with self.subTest(receiver=label), tempfile.TemporaryDirectory() as directory:
+                root = self._local_receiver_observer_fixture_trace(
+                    directory, initialization, "    parts.count(hidden.TEXT)\n",
+                    extra_source=extra_source, extra_import=extra_import)
+                try:
+                    derived, spans, _ = self._derive(root)
+                except scan.ConfigError as exc:
+                    self.assertIn("unsupported effect", str(exc))
+                else:
+                    # Either explicit unsupported-effect refusal or conservative
+                    self.assertIn("observer_operand_trace", derived)
+                    self.assertEqual(
+                        self._violations(root, "src/data_sheets_schema/observer_operand_trace.py", derived, spans),
+                        {("CHORUS", 1), ("VOICE", 2)},
+                    )
+
+    def test_direct_local_text_helper_import_overrides_same_named_module_reader_4588(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = ('from pathlib import Path as render\n\n'
+                      'def content():\n'
+                      '    from json import dumps as render\n'
+                      '    return render("Neutral instruction sentence")\n')
+            root, derived, spans = self._text_helper_alias_fixture_4733(directory, source)
+            self.assertIn("aliased_text_4405", derived)
+            self.assertIn(("VOICE", 1), self._violations(
+                root, "src/data_sheets_schema/aliased_text_4405.py", derived, spans))
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("aliased_text_4405", off)
+            self.assertEqual(set(), self._violations(root, "src/data_sheets_schema/aliased_text_4405.py", off, spans))
+
+    def test_literal_mapping_get_chain_keeps_consumed_text_4733(self):
+        """Literal returned mapping lookups still carry the selected model text."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._consumed_helper_root_4733(
+                d, '    selected = {"row": {"text": policy.SYSTEM}}.get("row").get("text")', "",
+                "from data_sheets_schema import consumed_policy_4733 as policy\n")
+            derived, spans, facts = self._derive(root)
+            self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+
+    def test_builtin_mapping_view_list_copy_retains_emission_projection_trace(self):
+        """Only key/items copies emit an inline key; values copy stays values-only."""
+        for view in ("keys", "items", "values"):
+            with self.subTest(view=view), tempfile.TemporaryDirectory() as directory:
+                body = ('    mapping = {"Neutral instruction sentence": 1}\n'
+                        '    return list(mapping.' + view + '())')
+                root = self._inline_key_context_fixture(directory, body)
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertIn("prompts_4085", derived)
+                if view in {"keys", "items"}:
+                    self.assertIn("key_context_trace", derived)
+                    self.assertEqual(self._violations(
+                        root, "src/data_sheets_schema/key_context_trace.py", derived, spans), {("VOICE", 1)})
+                else:
+                    self.assertNotIn("key_context_trace", derived)
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("key_context_trace", off)
+                self.assertEqual(self._violations(
+                    root, "src/data_sheets_schema/key_context_trace.py", off, off_spans), set())
+
+    def test_mapping_view_copy_requires_actual_builtin_container_and_list_trace(self):
+        """Unknown/custom mapping methods and shadowed list cannot gain purity."""
+        cases = (
+            ("unknown_mapping", '    from external_mapping_source_trace import make_mapping\n'
+             '    mapping = make_mapping()\n    return list(mapping.values())'),
+            ("custom_dict_subclass", '    class Custom(dict):\n'
+             '        def values(self):\n            return ["Custom instruction sentence"]\n'
+             '    mapping = Custom()\n    return list(mapping.values())'),
+            ("shadowed_list", '    list = spec.builder\n'
+             '    mapping = {"Neutral instruction sentence": 1}\n'
+             '    return list(mapping.values())'),
+        )
+        for label, body in cases:
+            with self.subTest(boundary=label), tempfile.TemporaryDirectory() as directory:
+                root = self._inline_key_context_fixture(directory, body)
+                parsed = _parsed(root, "src")
+                index = scan._notes_index(root, parsed)
+                sinks, facts = scan.model_input_sinks(root, parsed, index, [], set())
+                self.assertTrue(sinks)
+                self.assertTrue(facts["requests"])
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("key_context_trace", off)
+
+
+    def test_proved_list_augmentation_keeps_helper_owned_emitted_text_4733(self):
+        """The supported in-place list update follows text owned only by its helper."""
+        helper = (
+            'from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+            'def fill(items):\n'
+            '    items += [policy.SYSTEM]\n'
+            '    return "selected.txt"\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._consumed_helper_root_4733(
+                d, "    selected = effects.fill(parts)", helper)
+            derived, spans, facts = self._derive(root)
+            self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+    def test_list_augmentation_keeps_nested_unknown_receiving_call_refusal_4733(self):
+        """A literal RHS list does not make a nested mutating callback safe."""
+        helper = ('from external_mutator import mutate\n\n'
+                  'def fill(items):\n'
+                  '    items += [mutate(items)]\n'
+                  '    return "selected.txt"\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._consumed_helper_root_4733(
+                d, "    selected = effects.fill(parts)", helper)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("consumed_policy_4733", off)
+
+    def test_literal_join_contract_does_not_certify_custom_receivers_or_iterables_4733(self):
+        cases = (
+            ("custom_receiver", "    selected = joiner.join(parts)",
+             "from external_joiner import joiner\n"),
+            ("custom_iterable", '    parts = make_parts()\n    selected = "".join(parts)',
+             "from external_iterable import make_parts\n"),
+        )
+        for label, invocation, imports in cases:
+            with self.subTest(boundary=label), tempfile.TemporaryDirectory() as d:
+                root = self._consumed_helper_root_4733(d, invocation, "", imports)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("consumed_policy_4733", off)
+
+
+    def _address_adapter_root_4588(self, directory, adapter, *, content=None):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\n"
+            "from data_sheets_schema import address_adapter_4588 as addresses\n")
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]",
+                                'addresses.content("source.txt")')
+        modules = dict(PRECISION_MODULES)
+        modules["address_adapter_4588"] = (
+            'from pathlib import Path\n'
+            'ASIDE = "A VOICE aside the address adapter never sends."\n\n'
+            + adapter + '\n' + (content or
+                'def content(record_path):\n'
+                '    record_path = select_address(record_path)\n'
+                '    return f"Use the neutral record at {record_path}."\n'))
+        return self._root(directory, runner, modules)
+
+    def test_closed_path_address_adapter_keeps_real_text_derivation_4588(self):
+        """A conditional address adapter has no receiving mutation or escape."""
+        adapter = ('def select_address(record_path):\n'
+                   '    path = record_path if record_path is not None else Path("source.txt")\n'
+                   '    if path is None:\n'
+                   '        raise FileNotFoundError("no selected address")\n'
+                   '    return Path(path)\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._address_adapter_root_4588(directory, adapter)
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertEqual(len(facts["requests"]), 1)
+            self.assertIn("address_adapter_4588", derived)
+            rel = "src/data_sheets_schema/address_adapter_4588.py"
+            self.assertIn(("VOICE", 2), self._violations(root, rel, derived, spans))
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("address_adapter_4588", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_path_adapter_does_not_hide_unknown_or_rebound_receiving_calls_4588(self):
+        adapters = (
+            'from external_mutator import fill\n'
+            'def select_address(record_path):\n'
+            '    fill(record_path)\n'
+            '    return Path(record_path)\n',
+            'from external_mutator import fill\n'
+            'def select_address(record_path):\n'
+            '    return Path(fill(record_path))\n',
+            'from external_mutator import Path\n'
+            'def select_address(record_path):\n'
+            '    return Path(record_path)\n',
+            'def select_address(record_path):\n'
+            '    selected = Path(record_path)\n'
+            '    from external_mutator import carrier as selected\n'
+            '    return selected\n',
+        )
+        for adapter in adapters:
+            with self.subTest(adapter=adapter), tempfile.TemporaryDirectory() as directory:
+                root = self._address_adapter_root_4588(directory, adapter)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("address_adapter_4588", off)
+
+    def test_detached_path_result_does_not_erase_an_earlier_incoming_alias_4588(self):
+        """Only the converted result is detached; an earlier alias retains its input."""
+        adapter = ('from external_mutator import fill\n'
+                   'def select_address(record_path):\n'
+                   '    return Path(record_path)\n')
+        content = ('def content(record_path):\n'
+                   '    previous = record_path\n'
+                   '    record_path = select_address(record_path)\n'
+                   '    fill(previous)\n'
+                   '    return [f"Use the neutral record at {record_path}.", previous]\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._address_adapter_root_4588(directory, adapter, content=content)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("address_adapter_4588", off)
+
+    def test_closed_address_proof_rejects_implicit_incoming_callbacks_4588(self):
+        """Address conversion cannot hide earlier invocation/formatting/unpacking."""
+        operations = ("record_path()", 'f"{record_path}"', "[*record_path]",
+                      "{record_path: None}")
+        carrier = ('class Address:\n'
+                   '    def __fspath__(self):\n        return "source.txt"\n'
+                   '    def __call__(self):\n        self.touched = True\n'
+                   '    def __format__(self, spec):\n'
+                   '        self.touched = True\n        return "source.txt"\n'
+                   '    def __iter__(self):\n'
+                   '        self.touched = True\n        return iter(())\n'
+                   '    def __hash__(self):\n'
+                   '        self.touched = True\n        return 1\n\n')
+        for operation in operations:
+            with self.subTest(operation=operation), tempfile.TemporaryDirectory() as directory:
+                adapter = carrier + ('def select_address(record_path):\n'
+                                     '    ' + operation + '\n'
+                                     '    return Path(record_path)\n')
+                root = self._address_adapter_root_4588(directory, adapter)
+                runner = root / "src/data_sheets_schema/api_runner.py"
+                original = runner.read_text(encoding="utf-8")
+                self.assertEqual(original.count('addresses.content("source.txt")'), 1)
+                runner.write_text(original.replace('addresses.content("source.txt")',
+                                                   'addresses.content(addresses.Address())'), encoding="utf-8")
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("address_adapter_4588", off)
+
+
+    def test_primitive_caller_values_support_closed_local_representations_4733(self):
+        """Both import spellings carry real literal text through a list representation."""
+        helper = ('def describe(value):\n'
+                  '    items = []\n    alias = items\n    alias.append(value)\n'
+                  '    return str(items)\n')
+        for actual, imports in (
+            ('policy.SYSTEM', 'from data_sheets_schema import consumed_policy_4733 as policy\n'),
+            ('SYSTEM', 'from data_sheets_schema.consumed_policy_4733 import SYSTEM\n'),
+        ):
+            with self.subTest(actual=actual), tempfile.TemporaryDirectory() as directory:
+                root = self._consumed_helper_root_4733(
+                    directory, '    selected = effects.describe(' + actual + ')', helper, imports)
+                derived, spans, facts = self._derive(root)
+                self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+    def test_primitive_repr_facts_do_not_leak_between_callers_4733(self):
+        """A real custom repr remains unsupported beside a safe caller, in both orders."""
+        helper = ('from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+                  'class Custom:\n    def __repr__(self):\n        return policy.SYSTEM\n\n'
+                  'def describe(value):\n    items = [value]\n    return str(items)\n')
+        calls = ['effects.describe("ordinary text")', 'effects.describe(effects.Custom())']
+        for unsafe_first in (False, True):
+            with self.subTest(unsafe_first=unsafe_first), tempfile.TemporaryDirectory() as directory:
+                ordered = list(reversed(calls)) if unsafe_first else calls
+                root = self._consumed_helper_root_4733(
+                    directory, '    selected = (' + ', '.join(ordered) + ')', helper)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                self._derive(root, sinks=False)
+
+    def test_primitive_repr_proof_keeps_nested_custom_callbacks_4733(self):
+        """A primitive actual does not prove a separately nested custom element harmless."""
+        helper = ('from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+                  'class Custom:\n    def __repr__(self):\n        return policy.SYSTEM\n\n'
+                  'def describe(value):\n    items = [value, [Custom()]]\n'
+                  '    return str(items)\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._consumed_helper_root_4733(
+                directory, '    selected = effects.describe("ordinary text")', helper)
+            with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_primitive_repr_does_not_ignore_prior_receiving_helper_mutation_4733(self):
+        """A fresh literal may gain callback-bearing elements through a resolved helper."""
+        helper = ('from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+                  'class Custom:\n    def __repr__(self):\n        return policy.SYSTEM\n\n'
+                  'def fill(items):\n    items.append(Custom())\n\n'
+                  'def describe(value):\n    items = []\n    fill(items)\n'
+                  '    items.append(value)\n    return str(items)\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._consumed_helper_root_4733(
+                directory, '    selected = effects.describe("ordinary text")', helper)
+            with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_shadowed_str_keeps_its_real_receiving_effect_4733(self):
+        """The spelling str cannot suppress a resolved helper's source-owned append."""
+        helper = ('from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+                  'def str(items):\n    items.append(policy.SYSTEM)\n    return items\n\n'
+                  'def describe(value):\n    items = [value]\n    return str(items)\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._consumed_helper_root_4733(
+                directory, '    selected = effects.describe("ordinary text")', helper)
+            try:
+                derived, spans, facts = self._derive(root)
+            except scan.ConfigError:
+                return  # An explicit bounded refusal is also truthful here.
+            self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+
+    def test_authenticated_json_summary_keeps_mapping_text_trace(self):
+        """Direct external module/name imports retain the established JSON flow."""
+        variants = (
+            ("module", "", "json.dumps"),
+            ("name_alias", "    from json import dumps as encode\n", "encode"),
+            ("module_alias", "    import json as standard_json\n", "standard_json.dumps"),
+        )
+        for label, imports, callee in variants:
+            with self.subTest(route=label), tempfile.TemporaryDirectory() as d:
+                body = (imports + '    mapping = {"Neutral instruction sentence": spec.value}\n'
+                        '    return ' + callee + '(mapping)')
+                root = self._inline_key_context_fixture(d, body)
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertIn("key_context_trace", derived)
+                self.assertEqual(self._violations(root,
+                    "src/data_sheets_schema/key_context_trace.py", derived, spans), {("VOICE", 1)})
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("key_context_trace", off)
+                self.assertEqual(self._violations(root,
+                    "src/data_sheets_schema/key_context_trace.py", off, off_spans), set())
+
+    def test_json_summary_rejects_replaced_identity_and_explicit_callback_trace(self):
+        """A dumps spelling or explicit callback never gets external summary authority."""
+        helper = ('from data_sheets_schema import json_policy_trace as policy\n\n'
+                  'def dumps(mapping):\n'
+                  '    mapping["late"] = policy.TEXT\n'
+                  '    return ""\n\n'
+                  'def convert(value):\n'
+                  '    return policy.TEXT\n')
+        cases = (
+            ("local_helper", '    return key_factory_trace.dumps(mapping)', None),
+            ("rebound_module_attribute", '    json.dumps = key_factory_trace.dumps\n'
+             '    return json.dumps(mapping)', None),
+            ("represented_json_module", '    return json.dumps(mapping)', helper),
+            ("explicit_default_callback", '    return json.dumps(mapping, default=key_factory_trace.convert)', None),
+        )
+        for label, ending, local_json in cases:
+            with self.subTest(route=label), tempfile.TemporaryDirectory() as d:
+                root = self._inline_key_context_fixture(d,
+                    '    mapping = {"neutral": object()}\n' + ending,
+                    {"key_factory_trace": helper,
+                     "json_policy_trace": 'TEXT = "Describe the CHORUS cohort."\n'})
+                if local_json is not None:
+                    _write(root / "src/json.py", local_json)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("json_policy_trace", off)
+
+    def test_json_summary_does_not_skip_separate_receiving_calls_trace(self):
+        """Consumed serialization does not waive a preceding known/unknown mutation."""
+        helper = ('from data_sheets_schema import json_policy_trace as policy\n\n'
+                  'def mutate(mapping):\n'
+                  '    mapping["late"] = policy.TEXT\n')
+        for label, statement in (
+                ("resolved_mutation", "    key_factory_trace.mutate(mapping)"),
+                ("unknown_receiving_call", "    from external_mutator import fill\n    fill(mapping)")):
+            with self.subTest(route=label), tempfile.TemporaryDirectory() as d:
+                root = self._inline_key_context_fixture(d,
+                    '    mapping = {"Neutral instruction sentence": spec.value}\n'
+                    + statement + '\n    return json.dumps(mapping)',
+                    {"key_factory_trace": helper,
+                     "json_policy_trace": 'TEXT = "Describe the CHORUS cohort."\n'})
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("json_policy_trace", off)
+
+
+    def test_entry_address_conversion_dominates_later_readonly_use_4588(self):
+        """A converted formal is a detached Path before its next receiving use."""
+        adapter = ('def select_address(value):\n    return Path(value)\n\n'
+                   'def inspect_address(value):\n    return value.is_absolute()\n')
+        content = ('def content(record_path):\n'
+                   '    record_path = select_address(record_path)\n'
+                   '    inspect_address(record_path)\n'
+                   '    return f"Use the neutral record at {record_path}."\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._address_adapter_root_4588(directory, adapter, content=content)
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertEqual(len(facts["requests"]), 1)
+            self.assertIn("address_adapter_4588", derived)
+            rel = "src/data_sheets_schema/address_adapter_4588.py"
+            self.assertIn(("VOICE", 2), self._violations(root, rel, derived, spans))
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("address_adapter_4588", off)
+
+    def test_entry_address_conversion_keeps_nested_argument_effect_refusal_4588(self):
+        adapter = ('from external_mutator import fill\n'
+                   'def select_address(value):\n    return Path(value)\n')
+        content = ('def content(record_path):\n'
+                   '    record_path = select_address(fill(record_path))\n'
+                   '    return f"Use the neutral record at {record_path}."\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._address_adapter_root_4588(directory, adapter, content=content)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_entry_address_proof_rejects_unknown_factory_and_later_rebinding_4588(self):
+        cases = (
+            ('from external_factory import make_address\n'
+             'def select_address(value):\n    return make_address(value)\n',
+             '    record_path = select_address(record_path)\n'),
+            ('from external_factory import make_address\n'
+             'def select_address(value):\n    return Path(value)\n',
+             '    record_path = select_address(record_path)\n'
+             '    record_path = make_address(record_path)\n'),
+        )
+        for adapter, initialization in cases:
+            with self.subTest(initialization=initialization), tempfile.TemporaryDirectory() as directory:
+                content = ('def content(record_path):\n' + initialization +
+                           '    return f"Use the neutral record at {record_path}."\n')
+                root = self._address_adapter_root_4588(directory, adapter, content=content)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                self._derive(root, sinks=False)
+
+
+    def _destructive_formal_fixture_4733(self, directory, initial, body):
+        """A resolved helper receives the exact container subsequently sent to PhaseRequest."""
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\n"
+            "from data_sheets_schema import destructive_formal_4733 as operations\n"
+            "from data_sheets_schema import destructive_text_4733 as policy\n")
+        marker = "    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,"
+        self.assertEqual(runner.count(marker), 1)
+        runner = runner.replace(
+            marker,
+            "    parts = " + initial + "\n    operations.mutate(parts)\n" + marker,
+        )
+        runner = runner.replace("[guide, value, ids_4085.label(spec)]", "[parts]")
+        modules = dict(PRECISION_MODULES)
+        modules["destructive_formal_4733"] = (
+            "from data_sheets_schema import destructive_text_4733 as policy\n\n"
+            "def mutate(items):\n" + body)
+        modules["destructive_text_4733"] = (
+            'TEXT = "Describe the CHORUS cohort from its source records."\n'
+            'ASIDE = "A VOICE aside this module never sends."\n'
+        )
+        root = self._root(directory, runner, modules)
+        off, off_spans, _ = self._derive(root, sinks=False)
+        self.assertNotIn("destructive_formal_4733", off)
+        self.assertNotIn("destructive_text_4733", off)
+        self.assertEqual(self._violations(
+            root, "src/data_sheets_schema/destructive_text_4733.py", off, off_spans), set())
+        return root
+
+    def test_destructive_list_formals_refuse_unmodeled_deletion_4733(self):
+        for call in ("items.clear()", "items.pop()", "items.remove('CHORUS')"):
+            with self.subTest(call=call), tempfile.TemporaryDirectory() as directory:
+                body = f"    {call}\n    return items\n"
+                root = self._destructive_formal_fixture_4733(
+                    directory, '["CHORUS", "VOICE"]', body)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+
+    def test_destructive_dict_formals_refuse_unmodeled_deletion_4733(self):
+        for call in ("items.clear()", "items.pop('k')", "items.popitem()"):
+            with self.subTest(call=call), tempfile.TemporaryDirectory() as directory:
+                body = f"    {call}\n    return items\n"
+                root = self._destructive_formal_fixture_4733(
+                    directory, '{"k": "CHORUS", "other": "VOICE"}', body)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+
+    def test_supported_formal_append_and_get_keep_real_text_4733(self):
+        """The correction preserves modeled append and nonmutating dict get."""
+        cases = (
+            ("append", "[]", "    items.append(policy.TEXT)\n"),
+            ("get", "{'text': policy.TEXT}", "    items.get('text')\n"),
+        )
+        for label, initial, body in cases:
+            with self.subTest(operation=label), tempfile.TemporaryDirectory() as directory:
+                root = self._destructive_formal_fixture_4733(directory, initial, body)
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertIn("destructive_text_4733", derived)
+                self.assertEqual(self._violations(
+                    root, "src/data_sheets_schema/destructive_text_4733.py", derived, spans),
+                    {("CHORUS", 1), ("VOICE", 2)})
+
+
+    def _carried_projection_root_4588(self, directory, body, helpers):
+        runner = PRECISION_RUNNER.replace(
+            "from pathlib import Path\n",
+            "from pathlib import Path\nfrom data_sheets_schema import projection_client_4588\n")
+        runner = runner.replace(
+            "[guide, value, ids_4085.label(spec)]", "[projection_client_4588.content(spec)]")
+        modules = dict(PRECISION_MODULES)
+        modules["projection_helpers_4588"] = helpers
+        modules["projection_client_4588"] = (
+            'ASIDE = "A VOICE aside this function never sends."\n'
+            "import json\n"
+            "from data_sheets_schema import projection_helpers_4588 as helpers\n\n"
+            "def content(spec):\n" + body + "\n"
+        )
+        return self._root(directory, runner, modules)
+
+    def test_resolved_helper_emits_caller_inline_mapping_keys_4588(self):
+        helpers = (
+            "import json\n"
+            "def encode(mapping):\n"
+            "    return json.dumps(mapping)\n"
+        )
+        mapping = '{"Neutral instruction sentence": "v"}'
+        with tempfile.TemporaryDirectory() as d:
+            root = self._carried_projection_root_4588(
+                d,
+                "    return helpers.encode(" + mapping + ")\n",
+                helpers,
+            )
+            derived, spans, _ = self._derive(root)
+            self.assertIn("projection_client_4588", derived)
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/projection_client_4588.py", derived, spans),
+                {("VOICE", 1)},
+            )
+
+    def test_imported_mapping_key_retains_historical_constant_promotion_4588(self):
+        helpers = (
+            "import json\n"
+            "def encode(mapping):\n"
+            "    return json.dumps(mapping)\n"
+        )
+        with tempfile.TemporaryDirectory() as d:
+            root = self._carried_projection_root_4588(
+                d,
+                "    from data_sheets_schema import keys_4405\n"
+                '    return helpers.encode({keys_4405.KEY: "v"})\n',
+                helpers,
+            )
+            _write(root / "src/data_sheets_schema/keys_4405.py", 'KEY = "Describe the VOICE cohort."\n')
+            derived, spans, _ = self._derive(root)
+            self.assertIn("keys_4405", derived)
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/keys_4405.py", derived, spans),
+                {("VOICE", 1)},
+            )
+
+    def test_helper_values_lookup_and_selected_inner_map_do_not_emit_outer_keys_4588(self):
+        helpers = (
+            "def select_inner(mapping):\n"
+            '    return mapping["Neutral instruction sentence"]\n'
+        )
+        mapping = '{"Neutral instruction sentence": {"inner": "v"}}'
+        for expr, expected in (
+            ('helpers.select_inner(' + mapping + ')["inner"]', False),
+            ('json.dumps(helpers.select_inner(' + mapping + '))', False),
+            ('json.dumps(' + mapping + ')', True),
+        ):
+            with self.subTest(expr=expr), tempfile.TemporaryDirectory() as d:
+                root = self._carried_projection_root_4588(d, "    return " + expr + "\n", helpers)
+                derived, spans, _ = self._derive(root)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/projection_client_4588.py", derived, spans),
+                    {("VOICE", 1)} if expected else set(),
+                )
+
+    def test_helper_result_lookup_and_emission_keep_both_orders_4588(self):
+        helpers = (
+            "def identity(mapping):\n"
+            "    return mapping\n"
+        )
+        mapping = '{"Neutral instruction sentence": "v"}'
+        lookup = 'helpers.identity(' + mapping + ')["Neutral instruction sentence"]'
+        emission = 'json.dumps(helpers.identity(' + mapping + '))'
+        for expressions in ((lookup, emission), (emission, lookup)):
+            with self.subTest(expressions=expressions), tempfile.TemporaryDirectory() as d:
+                root = self._carried_projection_root_4588(
+                    d, '    return (' + ', '.join(expressions) + ')',
+                    'def identity(mapping):\n    return mapping\n')
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertIn("projection_client_4588", derived)
+                self.assertEqual(self._violations(
+                    root, "src/data_sheets_schema/projection_client_4588.py", derived, spans), {("VOICE", 1)})
+
+    def test_recursive_helper_projection_preserves_real_base_emission_in_both_orders_4588(self):
+        first = ('def first(mapping, again=False):\n'
+                 '    return second(mapping) if again else json.dumps(mapping)\n')
+        second = ('def second(mapping, again=False):\n'
+                  '    return first(mapping) if again else "{}"\n')
+        for definitions in ((first, second), (second, first)):
+            with self.subTest(first_definition=definitions[0].splitlines()[0]), tempfile.TemporaryDirectory() as d:
+                root = self._carried_projection_root_4588(
+                    d, '    return helpers.first(mapping={"Neutral instruction sentence": "v"})',
+                    '\n'.join(definitions))
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertIn("projection_client_4588", derived)
+                rel = "src/data_sheets_schema/projection_client_4588.py"
+                self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 1)})
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("projection_client_4588", off)
+                self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+
+    def _json_module_alias_root_trace(self, directory, prefix, expression):
+        helper = ('from data_sheets_schema import json_alias_policy_trace as policy\n\n'
+                  'def replacement(mapping):\n'
+                  '    mapping["late"] = policy.TEXT\n'
+                  '    return policy.TEXT\n')
+        body = (prefix + '    mapping = {"Neutral instruction sentence": spec.value}\n'
+                '    return ' + expression + '(mapping)')
+        return self._inline_key_context_fixture(directory, body, {
+            "key_factory_trace": helper,
+            "json_alias_policy_trace": (
+                'TEXT = "Describe the CHORUS cohort from source records."\n'
+                'ASIDE = "A VOICE aside this replacement never sends."\n'),
+        })
+
+    def test_json_second_module_import_attribute_write_revokes_summary_trace(self):
+        """Two actual imports share a module even when lexical root names differ."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    import json as other\n'
+                '    other.dumps = key_factory_trace.replacement\n', 'json.dumps')
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_json_direct_module_alias_attribute_write_revokes_summary_trace(self):
+        """An explicit ordinary Name alias carries the same module attribute write."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    other = json\n'
+                '    other.dumps = key_factory_trace.replacement\n', 'json.dumps')
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_json_from_import_after_module_write_is_not_original_function_trace(self):
+        """A later from-import captures the explicitly replaced module attribute."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    import json as other\n'
+                '    other.dumps = key_factory_trace.replacement\n'
+                '    from json import dumps as encode\n', 'encode')
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_json_function_local_capture_before_write_refuses_unproven_freshness_trace(self):
+        """A function-local import can recapture a prior invocation's replacement."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    from json import dumps as encode\n'
+                '    import json as other\n'
+                '    other.dumps = key_factory_trace.replacement\n', 'encode')
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("key_context_trace", off)
+
+
+    def test_json_captured_function_name_reassignment_still_refuses_trace(self):
+        """Rebinding the captured name itself differs from changing its old module."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    from json import dumps as encode\n'
+                '    encode = key_factory_trace.replacement\n', 'encode')
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("json_alias_policy_trace", off)
+
+
+    def test_json_module_alias_chain_and_deletion_revoke_summary_trace(self):
+        cases = {
+            "chain": ('    first = json\n'
+                      '    second = first\n'
+                      '    second.dumps = key_factory_trace.replacement\n'),
+            "deletion": ('    import json as other\n'
+                         '    del other.dumps\n'),
+        }
+        for name, prefix in cases.items():
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as d:
+                root = self._json_module_alias_root_trace(d, prefix, 'json.dumps')
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_json_unrelated_nested_local_alias_name_does_not_rebind_module_trace(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    import json as other\n'
+                '    def unused():\n'
+                '        other = key_factory_trace\n'
+                '        other.dumps = key_factory_trace.replacement\n', 'json.dumps')
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts["requests"])
+            self.assertIn("key_context_trace", derived)
+            self.assertNotIn("json_alias_policy_trace", derived)
+            self.assertEqual(self._violations(root,
+                "src/data_sheets_schema/key_context_trace.py", derived, spans), {("VOICE", 1)})
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("key_context_trace", off)
+
+
+    def test_json_local_capture_before_write_repeated_calls_are_not_fresh_trace(self):
+        """The first real source call replaces JSON; the second imports that replacement."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    from json import dumps as encode\n'
+                '    import json as other\n'
+                '    other.dumps = key_factory_trace.replacement\n', 'encode')
+            runner = root / scan.RUNNER
+            text = runner.read_text(encoding="utf-8")
+            one = '[key_context_trace.content(spec)]'
+            self.assertEqual(text.count(one), 1)
+            runner.write_text(text.replace(one,
+                '[key_context_trace.content(spec), key_context_trace.content(spec)]'),
+                encoding="utf-8")
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_json_module_capture_before_function_write_survives_repeated_calls_trace(self):
+        """A module-level captured function is not re-imported on the second call."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    import json as other\n'
+                '    other.dumps = key_factory_trace.replacement\n', 'encode')
+            module = root / 'src/data_sheets_schema/key_context_trace.py'
+            text = module.read_text(encoding="utf-8")
+            self.assertEqual(text.count('import json\n'), 1)
+            module.write_text(text.replace('import json\n',
+                'import json\nfrom json import dumps as encode\n', 1), encoding="utf-8")
+            runner = root / scan.RUNNER
+            text = runner.read_text(encoding="utf-8")
+            one = '[key_context_trace.content(spec)]'
+            self.assertEqual(text.count(one), 1)
+            runner.write_text(text.replace(one,
+                '[key_context_trace.content(spec), key_context_trace.content(spec)]'),
+                encoding="utf-8")
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts["requests"])
+            self.assertIn("key_context_trace", derived)
+            self.assertNotIn("json_alias_policy_trace", derived)
+            self.assertEqual(self._violations(root,
+                "src/data_sheets_schema/key_context_trace.py", derived, spans), {("VOICE", 1)})
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("key_context_trace", off)
+            self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_rebound_projection_helper_keeps_conservative_outer_key_emission_4733(self):
+        """Rebound helpers must not use a stale projection summary."""
+        helpers = (
+            'import json\n'
+            'def select(mapping):\n'
+            '    return mapping["inner"]\n'
+            'select = json.dumps\n'
+        )
+        mapping = '{"Neutral instruction sentence": "v", "inner": "ok"}'
+        with tempfile.TemporaryDirectory() as d:
+            root = self._carried_projection_root_4588(
+                d,
+                '    return helpers.select(' + mapping + ')\n',
+                helpers,
+            )
+            derived, spans, _ = self._derive(root)
+            self.assertIn("projection_client_4588", derived)
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/projection_client_4588.py", derived, spans),
+                {("VOICE", 1)},
+            )
+
+    def test_decorated_projection_helper_keeps_conservative_outer_key_emission_4733(self):
+        """Decorated helpers must not be treated as pure mapping projections."""
+        helpers = (
+            'import json\n'
+            'def wraps(fn):\n'
+            '    return json.dumps\n'
+            '@wraps\n'
+            'def select(mapping):\n'
+            '    return mapping["inner"]\n'
+        )
+        mapping = '{"Neutral instruction sentence": "v", "inner": "ok"}'
+        with tempfile.TemporaryDirectory() as d:
+            root = self._carried_projection_root_4588(
+                d,
+                '    return helpers.select(' + mapping + ')\n',
+                helpers,
+            )
+            derived, spans, _ = self._derive(root)
+            self.assertIn("projection_client_4588", derived)
+            self.assertEqual(
+                self._violations(root, "src/data_sheets_schema/projection_client_4588.py", derived, spans),
+                {("VOICE", 1)},
+            )
+    def test_ambiguous_nested_projection_keeps_keyword_text_in_both_orders_4733(self):
+        """Ambiguous nested helper calls keep keyword/outer mapping text in both orders."""
+        first = (
+            'def outer(mapping):\n'
+            '    return inner(mapping)\n'
+        )
+        second = (
+            'import json\n'
+            'def inner(mapping):\n'
+            '    return json.dumps(mapping)\n'
+        )
+        mapping = '{"Neutral instruction sentence": "v"}'
+        for label, helpers in (("outer_first", first + second), ("inner_first", second + first)):
+            with self.subTest(order=label), tempfile.TemporaryDirectory() as d:
+                root = self._carried_projection_root_4588(
+                    d,
+                    '    return helpers.outer(mapping=' + mapping + ')\n',
+                    helpers,
+                )
+                derived, spans, _ = self._derive(root)
+                self.assertIn("projection_client_4588", derived)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/projection_client_4588.py", derived, spans),
+                    {("VOICE", 1)},
+                )
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("projection_client_4588", off)
+
+
+    def test_authentic_nested_projection_preserves_selected_mapping_depth_4733(self):
+        helpers = (
+            'def inner(mapping):\n'
+            '    return mapping["a"]\n'
+            'def outer(mapping):\n'
+            '    return inner(mapping)["b"]\n'
+        )
+        mapping = '{"a": {"b": {"Neutral instruction sentence": "v"}}}'
+        for label, expr, expected in (
+            ("selected_leaf", 'helpers.outer(' + mapping + ')["Neutral instruction sentence"]', False),
+            ("serialized_submap", 'json.dumps(helpers.outer(' + mapping + '))', True),
+        ):
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as d:
+                root = self._carried_projection_root_4588(d, '    return ' + expr + '\n', helpers)
+                derived, spans, _ = self._derive(root)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/projection_client_4588.py", derived, spans),
+                    {("VOICE", 1)} if expected else set())
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("projection_client_4588", off)
+
+
+    def test_json_module_formal_and_wrapped_alias_escapes_decline_summary_trace(self):
+        cases = {
+            "same_source_formal": '    mutate_json_module(json)\n',
+            "wrapped_projection": ('    holders = [json]\n'
+                                   '    holders[0].dumps = key_factory_trace.replacement\n'),
+        }
+        for label, prefix in cases.items():
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as d:
+                root = self._json_module_alias_root_trace(d, prefix, 'json.dumps')
+                module = root / 'src/data_sheets_schema/key_context_trace.py'
+                _write(module, module.read_text(encoding='utf-8').replace(
+                    'from data_sheets_schema import json_alias_policy_trace\n',
+                    'from data_sheets_schema import json_alias_policy_trace, key_factory_trace\n'))
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_json_direct_alias_and_member_calls_do_not_escape_module_trace(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    other = json\n'
+                '    metadata = other.dumps({"meta": 1})\n'
+                '    decoded = json.loads("{}")\n', 'json.dumps')
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts["requests"])
+            self.assertIn("key_context_trace", derived)
+            self.assertNotIn("json_alias_policy_trace", derived)
+            self.assertEqual(self._violations(root,
+                "src/data_sheets_schema/key_context_trace.py", derived, spans), {("VOICE", 1)})
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("key_context_trace", off)
+
+
+    def test_json_mixed_chained_alias_does_not_hide_projected_escape_trace(self):
+        """One direct alias target cannot hide the same module stored in a list."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    holders = [None]\n'
+                '    other = holders[0] = json\n'
+                '    holders[0].dumps = key_factory_trace.replacement\n', 'json.dumps')
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("json_alias_policy_trace", off)
+
+
+    def test_recursive_selected_branch_keeps_real_base_mapping_keys_4588(self):
+        """A dormant recursive lookup cannot prevent the actual base mapping from emitting."""
+        helpers = ('def encode(mapping, again=False):\n'
+                   '    return encode(mapping, False)["x"] if again else mapping\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._carried_projection_root_4588(
+                d, '    return json.dumps(helpers.encode({"Neutral instruction sentence": "v", '
+                '"x": {"neutral": "v"}}))', helpers)
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts["requests"])
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            self.assertIn("projection_client_4588", derived)
+            rel = "src/data_sheets_schema/projection_client_4588.py"
+            self.assertEqual(self._violations(root, rel, derived, spans), {("VOICE", 1)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("projection_client_4588", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_recursive_projection_keeps_independent_caller_depth_in_both_orders_4588(self):
+        """A shallow call without prose cannot donate key-emission depth to a deeper call."""
+        helpers = ('def encode(mapping, again=False):\n'
+                   '    return encode(mapping, False)["x"] if again else mapping\n')
+        mapping = '{"x": {"Neutral instruction sentence": "v"}}'
+        shallow = 'helpers.encode(' + mapping + ', False)["x"]["Neutral instruction sentence"]'
+        deep = 'json.dumps(helpers.encode(' + mapping + ', True))'
+        for label, expressions in (("shallow_then_deep", (shallow, deep)), ("deep_then_shallow", (deep, shallow))):
+            with self.subTest(order=label), tempfile.TemporaryDirectory() as d:
+                root = self._carried_projection_root_4588(
+                    d, '    return (' + ', '.join(expressions) + ')\n', helpers)
+                derived, spans, _ = self._derive(root)
+                self.assertIn("projection_client_4588", derived)
+                self.assertEqual(
+                    self._violations(
+                        root,
+                        "src/data_sheets_schema/projection_client_4588.py",
+                        derived,
+                        spans,
+                    ),
+                    {("VOICE", 1)},
+                )
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("projection_client_4588", off)
+
+    def test_json_namespace_and_captured_function_mutation_decline_identity_trace(self):
+        cases = {
+            "module_dict": ('    namespace = json.__dict__\n'
+                            '    namespace["dumps"] = key_factory_trace.literal_replacement\n'),
+            "captured_code": ('    captured = json.dumps\n'
+                              '    alias = captured\n'
+                              '    alias.__code__ = key_factory_trace.literal_replacement.__code__\n'),
+        }
+        for label, prefix in cases.items():
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as d:
+                root = self._json_module_alias_root_trace(d, prefix, 'json.dumps')
+                module = root / 'src/data_sheets_schema/key_context_trace.py'
+                _write(module, module.read_text(encoding='utf-8').replace(
+                    'from data_sheets_schema import json_alias_policy_trace\n',
+                    'from data_sheets_schema import json_alias_policy_trace, key_factory_trace\n'))
+                _write(root / 'src/data_sheets_schema/key_factory_trace.py', 'def literal_replacement(*_a, **_kw):\n    return "ok"\n')
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("key_context_trace", off)
+                self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_json_exception_type_reads_preserve_module_identity_trace(self):
+        cases = {
+            "member": ('', 'json.JSONDecodeError'),
+            "import": ('    from json import JSONDecodeError as DecodeError\n', 'DecodeError'),
+        }
+        for name, (prefix, caught) in cases.items():
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as d:
+                root = self._json_module_alias_root_trace(d,
+                    prefix + '    try:\n'
+                    '        metadata = json.loads("{}")\n'
+                    '    except (ValueError, ' + caught + '):\n'
+                    '        metadata = None\n', 'json.dumps')
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertIn("key_context_trace", derived)
+                self.assertNotIn("json_alias_policy_trace", derived)
+                self.assertEqual(self._violations(root,
+                    "src/data_sheets_schema/key_context_trace.py", derived, spans), {("VOICE", 1)})
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("key_context_trace", off)
+                self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_mutual_lookup_recursion_transfers_exact_actual_formals_4588(self):
+        first = ('def first(left, right, swap=True):\n'
+                 '    return second(first_arg=left, second_arg=right) if swap else left["k"]\n')
+        second = ('def second(first_arg, second_arg):\n'
+                  '    return first(left=second_arg, right=first_arg, swap=False)\n')
+        mapping = '{"k": {"Neutral instruction sentence": "v"}}'
+        for order, helpers in (("first_second", first + second), ("second_first", second + first)):
+            for target, right_arg, expected in (
+                ("emitted_right", mapping, True),
+                ("neutral_right", '{"k": {"neutral": "v"}}', False),
+            ):
+                with self.subTest(order=order, target=target), tempfile.TemporaryDirectory() as d:
+                    root = self._carried_projection_root_4588(
+                        d, '    return json.dumps(helpers.first(left={"neutral": "v"}, right=' +
+                        right_arg + '))\n',
+                        helpers)
+                    derived, spans, _ = self._derive(root)
+                    if expected:
+                        self.assertIn("projection_client_4588", derived)
+                    else:
+                        self.assertNotIn("projection_client_4588", derived)
+                    self.assertEqual(
+                        self._violations(root, "src/data_sheets_schema/projection_client_4588.py", derived, spans),
+                        {("VOICE", 1)} if expected else set())
+                    off, _, _ = self._derive(root, sinks=False)
+                    self.assertNotIn("projection_client_4588", off)
+    def test_constructed_recursive_result_preserves_base_keys_and_values_only_4588(self):
+        helpers = ('def encode(mapping, depth=0):\n'
+                   '    return {"outer": encode(mapping, depth - 1)} if depth > 0 else mapping\n')
+        mapping = '{"Neutral instruction sentence": "v"}'
+        for label, expr, expected in (
+            ('base_json', 'json.dumps(helpers.encode(' + mapping + '))', True),
+            ('selected_inner', 'helpers.encode(' + mapping + ', 1)["outer"]["Neutral instruction sentence"]', False),
+            ('emitted_wrapped', 'json.dumps(helpers.encode(' + mapping + ', 1))', True),
+        ):
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as d:
+                root = self._carried_projection_root_4588(
+                    d, '    return ' + expr + '\n', helpers)
+                derived, spans, _ = self._derive(root)
+                if expected:
+                    self.assertIn("projection_client_4588", derived)
+                else:
+                    self.assertNotIn("projection_client_4588", derived)
+                self.assertEqual(
+                    self._violations(root, "src/data_sheets_schema/projection_client_4588.py", derived, spans),
+                    {("VOICE", 1)} if expected else set())
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn("projection_client_4588", off)
+
+    def test_json_imported_noarg_helper_shared_module_write_declines_trace(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    from data_sheets_schema.json_shared_patch_trace import install\n'
+                '    install()\n', 'json.dumps')
+            _write(root / 'src/data_sheets_schema/json_shared_patch_trace.py',
+                'import json\n'
+                'from data_sheets_schema import key_factory_trace\n'
+                'def install():\n'
+                '    json.dumps = key_factory_trace.replacement\n')
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("key_context_trace", off)
+            self.assertNotIn("json_alias_policy_trace", off)
+
+    def test_json_imported_noarg_helper_ordinary_member_use_preserves_trace(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_module_alias_root_trace(d,
+                '    from data_sheets_schema.json_shared_patch_trace import inspect_metadata\n'
+                '    inspect_metadata()\n', 'json.dumps')
+            _write(root / 'src/data_sheets_schema/json_shared_patch_trace.py',
+                'import json\n'
+                'def inspect_metadata():\n'
+                '    return json.dumps({"metadata": 1})\n')
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts["requests"])
+            self.assertIn("key_context_trace", derived)
+            self.assertNotIn("json_alias_policy_trace", derived)
+            self.assertEqual(self._violations(root,
+                "src/data_sheets_schema/key_context_trace.py", derived, spans), {("VOICE", 1)})
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn("key_context_trace", off)
+    def test_json_literal_options_keep_real_renderspec_text_4733(self):
+        """The actual record serializer options preserve emitted mapping text."""
+        cases = (
+            ('recording', '', 'json.dumps', ', sort_keys=True, separators=(",", ":")'),
+            ('metadata', '', 'json.dumps', ', ensure_ascii=False, sort_keys=True'),
+            ('imported', '    from json import dumps as encode\n', 'encode',
+             ', ensure_ascii=True, sort_keys=False, separators=(", ", ": ")'),
+        )
+        for route, imports, callee, options in cases:
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as directory:
+                root = self._inline_key_context_fixture(directory,
+                    imports + '    mapping = {"Neutral instruction sentence": spec.value}\n'
+                    '    return ' + callee + '(mapping' + options + ')')
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts['requests'])
+                self.assertIn('key_context_trace', derived)
+                path = 'src/data_sheets_schema/key_context_trace.py'
+                self.assertEqual(self._violations(root, path, derived, spans), {('VOICE', 1)})
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn('key_context_trace', off)
+                self.assertEqual(self._violations(root, path, off, off_spans), set())
+
+    def test_json_literal_separator_is_emitted_text_not_an_ignored_option_4733(self):
+        """Two entries really emit the item separator, including its inline prose."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._inline_key_context_fixture(directory,
+                '    mapping = {"first": 1, "second": 2}\n'
+                '    return json.dumps(mapping, separators=("Neutral instruction sentence", ":"))')
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts['requests'])
+            self.assertIn('key_context_trace', derived)
+            path = 'src/data_sheets_schema/key_context_trace.py'
+            self.assertEqual(self._violations(root, path, derived, spans), {('VOICE', 1)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn('key_context_trace', off)
+            self.assertEqual(self._violations(root, path, off, off_spans), set())
+
+    def test_json_literal_options_keep_callbacks_mutations_and_identity_refusal_4733(self):
+        """Literal formatting does not admit callbacks, spreads or changed serializer identity."""
+        helper = ('from data_sheets_schema import json_policy_trace as policy\n\n'
+                  'def mutate(mapping):\n'
+                  '    mapping["late"] = policy.TEXT\n'
+                  '    return True\n\n'
+                  'def convert(value):\n'
+                  '    return policy.TEXT\n\n'
+                  'def dumps(mapping, **options):\n'
+                  '    mapping["late"] = policy.TEXT\n'
+                  '    return mapping\n')
+        cases = (
+            ('callback', '', ', sort_keys=True, default=key_factory_trace.convert'),
+            ('nested_mutation', '', ', sort_keys=key_factory_trace.mutate(mapping)'),
+            ('spread', '', ', **{"sort_keys": True}'),
+            ('nonboolean', '', ', sort_keys=1'),
+            ('replaced_identity', '    json.dumps = key_factory_trace.dumps\n', ', sort_keys=True'),
+        )
+        for route, prefix, options in cases:
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as directory:
+                root = self._inline_key_context_fixture(directory,
+                    '    mapping = {"neutral": spec.value}\n' + prefix +
+                    '    return json.dumps(mapping' + options + ')',
+                    {'key_factory_trace': helper,
+                     'json_policy_trace': 'TEXT = "Describe the CHORUS cohort."\n'})
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('json_policy_trace', off)
+
+
+    def test_depth_contracting_recursive_result_keeps_keys_and_values_only_4588(self):
+        helpers = ('def encode(mapping, again=False):\n'
+                   '    return {"x": encode(mapping, False)} if again else mapping\n')
+        mapping = '{"Neutral instruction sentence": "v"}'
+        selected = 'helpers.encode(' + mapping + ', True)["x"]'
+        cases = (
+            ('one_real_wrap_then_json', 'json.dumps(' + selected + ')', True),
+            ('one_real_wrap_then_value', selected + '["Neutral instruction sentence"]', False),
+        )
+        for route, expression, emitted in cases:
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as d:
+                root = self._carried_projection_root_4588(d, '    return ' + expression, helpers)
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts["requests"])
+                self.assertEqual("projection_client_4588" in derived, emitted)
+                rel = "src/data_sheets_schema/projection_client_4588.py"
+                self.assertEqual(self._violations(root, rel, derived, spans),
+                                 {("VOICE", 1)} if emitted else set())
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn("projection_client_4588", off)
+                self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+
+    def test_json_source_dependencies_revoke_cross_file_identity_root(self):
+        replacement = ('import json\n'
+                       'def replacement(mapping):\n'
+                       '    mapping["late"] = "Describe the CHORUS cohort."\n'
+                       '    return "replacement"\n')
+        for route in ('own_package_initializer', 'transitive_helper', 'import_time_write'):
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as directory:
+                root = self._inline_key_context_fixture(directory,
+                    '    mapping = {"Neutral instruction sentence": spec.value}\n'
+                    '    return json.dumps(mapping)')
+                client = root / 'src/data_sheets_schema/key_context_trace.py'
+                client.write_text(client.read_text().replace(
+                    'from data_sheets_schema import key_factory_trace\n', ''))
+                if route == 'own_package_initializer':
+                    _write(root / 'src/data_sheets_schema/__init__.py',
+                           replacement + 'json.dumps = replacement\n')
+                elif route == 'transitive_helper':
+                    _write(root / 'src/data_sheets_schema/closure_patch_root.py', replacement +
+                           'def install():\n    json.dumps = replacement\n')
+                    _write(root / 'src/data_sheets_schema/closure_bridge_root.py',
+                           'from .closure_patch_root import install\n')
+                    client.write_text(client.read_text().replace('    mapping =',
+                        '    from .closure_bridge_root import install\n    install()\n    mapping ='))
+                else:
+                    _write(root / 'src/data_sheets_schema/closure_patch_root.py',
+                           replacement + 'json.dumps = replacement\n')
+                    client.write_text(client.read_text().replace('import json\n',
+                        'import json\nfrom . import closure_patch_root\n'))
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                off, _, facts = self._derive(root, sinks=False)
+                self.assertTrue(facts['requests'])
+                self.assertNotIn('key_context_trace', off)
+
+    def test_json_source_dependencies_keep_readonly_cycles_and_unrelated_files_root(self):
+        for route in ('ordinary_initializer', 'import_cycle', 'unimported_mutator'):
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as directory:
+                root = self._inline_key_context_fixture(directory,
+                    '    mapping = {"Neutral instruction sentence": spec.value}\n'
+                    '    return json.dumps(mapping)')
+                client = root / 'src/data_sheets_schema/key_context_trace.py'
+                client.write_text(client.read_text().replace(
+                    'from data_sheets_schema import key_factory_trace\n', ''))
+                if route == 'ordinary_initializer':
+                    _write(root / 'src/data_sheets_schema/__init__.py',
+                           'import json\nMETADATA = json.dumps({"metadata": 1})\n')
+                elif route == 'import_cycle':
+                    _write(root / 'src/data_sheets_schema/closure_bridge_root.py',
+                           'from . import key_context_trace\nimport json\n'
+                           'def inspect_metadata():\n    return json.dumps({"metadata": 1})\n')
+                    client.write_text(client.read_text().replace('    mapping =',
+                        '    from .closure_bridge_root import inspect_metadata\n'
+                        '    inspect_metadata()\n    mapping ='))
+                else:
+                    _write(root / 'src/data_sheets_schema/unimported_json_mutator_root.py',
+                           'import json\njson.dumps = lambda mapping: "replacement"\n')
+                derived, spans, facts = self._derive(root)
+                self.assertTrue(facts['requests'])
+                self.assertIn('key_context_trace', derived)
+                self.assertEqual(self._violations(root,
+                    'src/data_sheets_schema/key_context_trace.py', derived, spans), {('VOICE', 1)})
+                off, off_spans, _ = self._derive(root, sinks=False)
+                self.assertNotIn('key_context_trace', off)
+                self.assertEqual(self._violations(root,
+                    'src/data_sheets_schema/key_context_trace.py', off, off_spans), set())
+
+
+    def test_definition_time_function_defaults_refuse_unknown_mutation_root(self):
+        cases = ('    def install(value=fill(parts)):\n        pass',
+                 '    def install(*, value=fill(parts)):\n        pass',
+                 '    async def install(value=fill(parts)):\n        pass',
+                 '    install = lambda value=fill(parts): None')
+        for definition in cases:
+            with self.subTest(definition=definition), tempfile.TemporaryDirectory() as directory:
+                root = self._predicate_boundary_root_4733(directory,
+                    '    parts = [predicate_text.TEXT]\n' + definition)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('predicate_text_4733', off)
+
+    def test_definition_time_decorator_refuses_unknown_mutation_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._predicate_boundary_root_4733(directory,
+                '    parts = [predicate_text.TEXT]\n'
+                '    @fill(parts)\n    def install():\n        pass')
+            with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_definition_time_class_headers_refuse_unknown_mutation_root(self):
+        for header in ('class Install(fill(parts)):', 'class Install(metaclass=fill(parts)):'):
+            with self.subTest(header=header), tempfile.TemporaryDirectory() as directory:
+                root = self._predicate_boundary_root_4733(directory,
+                    '    parts = [predicate_text.TEXT]\n    ' + header + '\n        pass')
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                self._derive(root, sinks=False)
+
+    def test_definition_time_class_body_refuses_unknown_mutation_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._predicate_boundary_root_4733(directory,
+                '    parts = [predicate_text.TEXT]\n'
+                '    class Install:\n        fill(parts)')
+            with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                self._derive(root)
+            self._derive(root, sinks=False)
+
+    def test_definition_time_eager_annotation_refuses_unknown_mutation_root(self):
+        for body in ('    class Install:\n        value: fill(parts) = 1', '    def method(value: fill(parts)):\n        return value'):
+            with self.subTest(body=body), tempfile.TemporaryDirectory() as directory:
+                root = self._predicate_boundary_root_4733(directory,
+                    '    parts = [predicate_text.TEXT]\n' + body)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                self._derive(root, sinks=False)
+
+    def test_unexecuted_nested_bodies_and_postponed_annotations_remain_supported_root(self):
+        for label, prefix, body in (
+                ('nested', '', '    class Install:\n        def method(self):\n            fill(parts)'),
+                ('postponed', 'from __future__ import annotations\n', '    def method(value: fill(parts)):\n        return value'),
+        ):
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as directory:
+                root = self._predicate_boundary_root_4733(directory,
+                    '    parts = [predicate_text.TEXT]\n' + body,
+                    prefix=prefix)
+                derived, spans, facts = self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('predicate_text_4733', off)
+                self.assertTrue(facts['requests'])
+                self.assertIn('predicate_text_4733', derived)
+                self.assertEqual(self._violations(root,
+                    'src/data_sheets_schema/predicate_text_4733.py', derived, spans), {('VOICE', 2)})
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('predicate_text_4733', off)
+
+
+    def test_function_local_annotation_does_not_execute_unknown_mutation_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._predicate_boundary_root_4733(directory,
+                '    parts = [predicate_text.TEXT]\n    value: fill(parts)')
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts['requests'])
+            self.assertIn('predicate_text_4733', derived)
+            self.assertEqual(self._violations(root,
+                'src/data_sheets_schema/predicate_text_4733.py', derived, spans), {('VOICE', 2)})
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn('predicate_text_4733', off)
+
+    def test_class_annotation_execution_respects_future_declaration_root(self):
+        for postponed in (False, True):
+            with self.subTest(postponed=postponed), tempfile.TemporaryDirectory() as directory:
+                root = self._predicate_boundary_root_4733(directory,
+                    '    parts = [predicate_text.TEXT]\n    class Install:\n        value: fill(parts)')
+                if postponed:
+                    runner = root / scan.RUNNER
+                    runner.write_text('from __future__ import annotations\n' + runner.read_text())
+                    derived, _, facts = self._derive(root)
+                    self.assertTrue(facts['requests'])
+                    self.assertIn('predicate_text_4733', derived)
+                else:
+                    with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                        self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('predicate_text_4733', off)
+
+
+    def _request_boundary_fixture_4588(self, directory, client):
+        modules = dict(PRECISION_MODULES)
+        modules["request_boundary_4588"] = client
+        modules["request_policy_4588"] = (
+            'TEXT = "Describe the CHORUS record using its source evidence."\n'
+            'ASIDE = "An unused VOICE editorial aside."\n')
+        return self._root(directory, PRECISION_RUNNER, modules)
+
+    def test_shadowed_request_bindings_do_not_certify_diagnostic_calls_4588(self):
+        sources = (
+            ('local_name',
+             'from data_sheets_schema.api_runner import PhaseRequest\n'
+             'def inspect():\n'
+             '    PhaseRequest = lambda **fields: None\n'
+             '    return PhaseRequest(system="Describe this diagnostic record only.")\n'),
+            ('formal_name',
+             'from data_sheets_schema.api_runner import PhaseRequest\n'
+             'def inspect(PhaseRequest):\n'
+             '    return PhaseRequest(system="Describe this diagnostic record only.")\n'),
+            ('local_module',
+             'from data_sheets_schema import api_runner as request_api\n'
+             'class Diagnostics:\n'
+             '    def PhaseRequest(self, **fields):\n        return None\n'
+             'def inspect():\n'
+             '    request_api = Diagnostics()\n'
+             '    return request_api.PhaseRequest(system="Describe this diagnostic record only.")\n'),
+            ('formal_module',
+             'from data_sheets_schema import api_runner as request_api\n'
+             'def inspect(request_api):\n'
+             '    return request_api.PhaseRequest(system="Describe this diagnostic record only.")\n'),
+        )
+        expected_line = PRECISION_RUNNER.splitlines().index(
+            '    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,') + 1
+        for binding, source in sources:
+            with self.subTest(binding=binding), tempfile.TemporaryDirectory() as d:
+                root = self._request_boundary_fixture_4588(d, source)
+                derived, spans, facts = self._derive(root)
+                self.assertEqual(facts["requests"], [f"{scan.RUNNER}:{expected_line}"])
+                self.assertIn("prompts_4085", derived)
+                self.assertNotIn("request_boundary_4588", derived)
+                off, _, off_facts = self._derive(root, sinks=False)
+                self.assertEqual(off_facts["requests"], facts["requests"])
+                self.assertNotIn("request_boundary_4588", off)
+
+    def test_shadowed_receiver_before_genuine_request_still_refuses_4588(self):
+        source = ('from data_sheets_schema.api_runner import PhaseRequest\n'
+                  'from data_sheets_schema import api_runner as actual_request_api\n'
+                  'from external_request_mutator_4588 import fill\n'
+                  'def make_request():\n'
+                  '    PhaseRequest = fill\n'
+                  '    parts = []\n'
+                  '    PhaseRequest(messages=parts)\n'
+                  '    return actual_request_api.PhaseRequest(phase="generation",\n'
+                  '        system="Describe this source record.", messages=parts)\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._request_boundary_fixture_4588(d, source)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, facts = self._derive(root, sinks=False)
+            self.assertTrue(facts["requests"])
+            self.assertNotIn("request_boundary_4588", off)
+
+    def test_unknown_request_spread_carriers_do_not_gain_terminal_authority_4588(self):
+        for expansion, factory in (("*payload", "make_arguments"),
+                                   ("**payload", "make_keywords")):
+            source = ('from data_sheets_schema.api_runner import PhaseRequest\n'
+                      'from external_request_carrier_4588 import ' + factory + '\n'
+                      'def make_request():\n'
+                      '    payload = ' + factory + '()\n'
+                      '    return PhaseRequest(' + expansion + ')\n')
+            with self.subTest(expansion=expansion), tempfile.TemporaryDirectory() as d:
+                root = self._request_boundary_fixture_4588(d, source)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+                off, _, facts = self._derive(root, sinks=False)
+                self.assertTrue(facts["requests"])
+                self.assertNotIn("request_boundary_4588", off)
+
+    def test_exact_literal_request_spreads_keep_genuine_text_fields_4588(self):
+        expansions = (
+            '*("generation", policy.TEXT, [], [])',
+            '**{"phase": "generation", "system": policy.TEXT, "messages": []}',
+        )
+        imports = (
+            ('from data_sheets_schema.api_runner import PhaseRequest\n', 'PhaseRequest'),
+            ('from data_sheets_schema import api_runner as request_api\n',
+             'request_api.PhaseRequest'),
+        )
+        for expansion in expansions:
+            for request_import, constructor in imports:
+                source = (request_import +
+                          'from data_sheets_schema import request_policy_4588 as policy\n'
+                          'def make_request():\n'
+                          '    return ' + constructor + '(' + expansion + ')\n')
+                with self.subTest(expansion=expansion, constructor=constructor), \
+                        tempfile.TemporaryDirectory() as d:
+                    root = self._request_boundary_fixture_4588(d, source)
+                    derived, spans, facts = self._derive(root)
+                    self.assertEqual(len(facts["requests"]), 2)
+                    self.assertIn("prompts_4085", derived)
+                    self.assertIn("request_policy_4588", derived)
+                    rel = "src/data_sheets_schema/request_policy_4588.py"
+                    self.assertEqual(self._violations(root, rel, derived, spans),
+                                     {("CHORUS", 1), ("VOICE", 2)})
+                    off, _, off_facts = self._derive(root, sinks=False)
+                    self.assertEqual(off_facts["requests"], facts["requests"])
+                    self.assertNotIn("request_policy_4588", off)
+
+
+    def _json_sheet_origin_root_trace(self, directory, *, reader_options="", update="", body=None, tuple_result=False):
+        helper = ('from pathlib import Path\nimport json\n'
+                  'from data_sheets_schema import json_sheet_policy_trace as policy\n'
+                  'def load_sheet(path):\n'
+                  '    record = json.loads(Path(path).read_text()' + reader_options + ')\n'
+                  '    sheet = record.get("metadata", {}).get("healthsheet")\n'
+                  '    if not sheet:\n        raise ValueError("missing healthsheet")\n'
+                  '    return sheet, record\n'
+                  'def render_sheet(sheet, record):\n' + update +
+                  '    parts = [policy.TEXT, \"Render every source question faithfully.\"]\n'
+                  '    for section, items in sheet.items():\n'
+                  '        if not isinstance(items, list):\n            continue\n'
+                  '        for item in items:\n'
+                  '            parts.append(str(item.get("question", "")).strip())\n'
+                  '    return " ".join(parts) + str(record.get("title", ""))\n')
+        if tuple_result:
+            helper = helper.replace('return " ".join(parts) + str(record.get("title", ""))',
+                                    'return " ".join(parts) + str(record.get("title", "")), 0')
+        return self._inline_key_context_fixture(directory, body or (
+            '    sheet, record = key_factory_trace.load_sheet(spec.path)\n'
+            '    return key_factory_trace.render_sheet(sheet, record)'), {
+                "key_factory_trace": helper,
+                "json_sheet_policy_trace": (
+                    'TEXT = "Describe the CHORUS source questions faithfully."\n'
+                    'ASIDE = "An unused VOICE editorial aside."\n'),
+            })
+
+    def test_json_decode_tuple_get_and_loop_origins_preserve_real_text_trace(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_sheet_origin_root_trace(d)
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts["requests"])
+            self.assertIn("key_factory_trace", derived)
+            self.assertIn("json_sheet_policy_trace", derived)
+            self.assertEqual(self._violations(root,
+                "src/data_sheets_schema/json_sheet_policy_trace.py", derived, spans),
+                {("CHORUS", 1), ("VOICE", 2)})
+            off, _, off_facts = self._derive(root, sinks=False)
+            self.assertTrue(off_facts["requests"])
+            self.assertNotIn("json_sheet_policy_trace", off)
+
+    def test_json_origin_does_not_hide_shared_tree_writes_or_unknown_escapes_trace(self):
+        changes = (
+            '    sheet["late"] = policy.TEXT\n',
+            '    alias = sheet\n    alias["late"] = policy.TEXT\n',
+            '    from external_json_effect_trace import fill\n    fill(sheet)\n',
+        )
+        for update in changes:
+            with self.subTest(update=update), tempfile.TemporaryDirectory() as d:
+                root = self._json_sheet_origin_root_trace(d, update=update)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+
+    def test_json_equality_result_cannot_hide_a_shared_alias_trace(self):
+        body = ('    from external_json_effect_trace import fill\n'
+                '    record = json.loads("{}")\n'
+                '    class ReflectedEquality:\n'
+                '        def __eq__(self, other):\n            return other\n'
+                '    alias = record == ReflectedEquality()\n'
+                '    fill(alias)\n'
+                '    return json.dumps(record)')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._inline_key_context_fixture(d, body)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+
+    def test_json_get_default_cannot_reuse_an_escaped_literal_origin_trace(self):
+        for setup, fallback in (('fallback = {}; fill(fallback)', 'fallback'),
+                                ('defaults = ({},); fill(defaults[0])', 'defaults[0]')):
+            body = ('    from external_json_effect_trace import fill\n'
+                    '    ' + setup + '\n'
+                    '    record = json.loads("{}")\n'
+                    '    selected = record.get("missing", ' + fallback + ')\n'
+                    '    return json.dumps(selected)')
+            with self.subTest(setup=setup), tempfile.TemporaryDirectory() as d:
+                root = self._inline_key_context_fixture(d, body)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+
+    def test_json_origin_refuses_decode_hooks_and_unpack_before_unknown_call_trace(self):
+        for options in (', object_hook=lambda value: value', ', cls=json.JSONDecoder'):
+            with self.subTest(options=options), tempfile.TemporaryDirectory() as d:
+                root = self._json_sheet_origin_root_trace(d, reader_options=options)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+
+    def test_json_formal_facts_do_not_leak_to_unknown_callers_trace(self):
+        for safe_first in (False, True):
+            calls = ['key_factory_trace.render_sheet(sheet, record)',
+                     'key_factory_trace.render_sheet(spec.unknown_sheet, record)']
+            if not safe_first:
+                calls.reverse()
+            body = ('    sheet, record = key_factory_trace.load_sheet(spec.path)\n'
+                    '    return [' + ', '.join(calls) + ']')
+            with self.subTest(safe_first=safe_first), tempfile.TemporaryDirectory() as d:
+                root = self._json_sheet_origin_root_trace(d, body=body)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+
+    def test_json_readonly_scalar_result_tuple_does_not_drop_input_facts_trace(self):
+        body = ('    sheet, record = key_factory_trace.load_sheet(spec.path)\n'
+                '    text, stats = key_factory_trace.render_sheet(sheet, record)\n'
+                '    return text')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._json_sheet_origin_root_trace(d, body=body, tuple_result=True)
+            derived, spans, facts = self._derive(root)
+            self.assertTrue(facts["requests"])
+            self.assertIn("json_sheet_policy_trace", derived)
+            self.assertEqual(self._violations(root,
+                "src/data_sheets_schema/json_sheet_policy_trace.py", derived, spans),
+                {("CHORUS", 1), ("VOICE", 2)})
+
+    def test_json_origin_declines_shared_binding_and_nested_target_exports_trace(self):
+        statements = (
+            '    global saved\n    saved = record\n    touch_saved()\n',
+            '    (holder.slot,) = (record,)\n    touch_saved()\n',
+            '    global saved\n    for saved in record:\n        pass\n    touch_saved()\n',
+        )
+        for statement in statements:
+            body = ('    from external_json_effect_trace import holder, touch_saved\n'
+                    '    record = json.loads("[{}]")\n' + statement +
+                    '    return json.dumps(record)')
+            with self.subTest(statement=statement), tempfile.TemporaryDirectory() as d:
+                root = self._inline_key_context_fixture(d, body)
+                with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                    self._derive(root)
+
+    def test_json_origin_recursive_tuple_packing_declines_finitely_trace(self):
+        helper = ('def wrap(value, again=False):\n'
+                  '    return wrap((value,), False) if again else value\n')
+        body = ('    record = json.loads("{}")\n'
+                '    wrapped = key_factory_trace.wrap(record, True)\n'
+                '    return json.dumps(wrapped)')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._inline_key_context_fixture(d, body, {"key_factory_trace": helper})
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect|recursive"):
+                self._derive(root)
+
+
+    def test_definition_time_implicit_decorators_and_metaclass_refuse_shared_container_root(self):
+        definitions = (
+            '    @fill\n    def install(value=parts):\n        pass',
+            '    def decorate(fn):\n        fill(parts)\n        return fn\n'
+            '    @decorate\n    def install():\n        pass',
+            '    class Install(metaclass=fill):\n        value = parts',
+            '    @fill\n    class Install:\n        value = parts',
+        )
+        for definition in definitions:
+            with self.subTest(definition=definition), tempfile.TemporaryDirectory() as directory:
+                root = self._predicate_boundary_root_4733(directory,
+                    '    parts = [predicate_text.TEXT]\n' + definition)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('predicate_text_4733', off)
+
+
+    def test_equivalent_request_module_import_write_invalidates_diagnostic_sink_trace(self):
+        source = ('from data_sheets_schema import api_runner as request_api\n'
+                  'from data_sheets_schema import api_runner as other_api\n'
+                  'def diagnostic(**fields):\n    return None\n'
+                  'other_api.PhaseRequest = diagnostic\n'
+                  'def inspect():\n'
+                  '    return request_api.PhaseRequest(system="Describe this diagnostic record only.")\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._request_boundary_fixture_4588(d, source)
+            derived, spans, facts = self._derive(root)
+            self.assertFalse([row for row in facts["requests"]
+                              if row.startswith("src/data_sheets_schema/request_boundary_4588.py:")])
+            self.assertNotIn("request_boundary_4588", derived)
+            off, _, off_facts = self._derive(root, sinks=False)
+            self.assertEqual(off_facts["requests"], facts["requests"])
+            self.assertNotIn("request_boundary_4588", off)
+
+    def test_request_class_captured_before_namespace_replacement_keeps_identity_trace(self):
+        source = ('from data_sheets_schema.api_runner import PhaseRequest as OriginalRequest\n'
+                  'from data_sheets_schema import api_runner as other_api\n'
+                  'from data_sheets_schema import request_policy_4588 as policy\n'
+                  'def diagnostic(**fields):\n    return None\n'
+                  'other_api.PhaseRequest = diagnostic\n'
+                  'def inspect():\n'
+                  '    return OriginalRequest(phase="generation", system=policy.TEXT)\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._request_boundary_fixture_4588(d, source)
+            derived, spans, facts = self._derive(root)
+            client = [row for row in facts["requests"]
+                      if row.startswith("src/data_sheets_schema/request_boundary_4588.py:")]
+            self.assertEqual(len(client), 1)
+            self.assertIn("request_policy_4588", derived)
+            self.assertEqual(self._violations(root,
+                "src/data_sheets_schema/request_policy_4588.py", derived, spans),
+                {("CHORUS", 1), ("VOICE", 2)})
+            off, _, off_facts = self._derive(root, sinks=False)
+            self.assertEqual(off_facts["requests"], facts["requests"])
+            self.assertNotIn("request_policy_4588", off)
+
+    def test_request_class_imported_after_namespace_replacement_has_no_identity_trace(self):
+        source = ('from data_sheets_schema import api_runner as other_api\n'
+                  'def diagnostic(**fields):\n    return None\n'
+                  'other_api.PhaseRequest = diagnostic\n'
+                  'from data_sheets_schema.api_runner import PhaseRequest as ReplacedRequest\n'
+                  'from data_sheets_schema import request_policy_4588 as policy\n'
+                  'def inspect():\n'
+                  '    return ReplacedRequest(phase="generation", system=policy.TEXT)\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._request_boundary_fixture_4588(d, source)
+            derived, spans, facts = self._derive(root)
+            self.assertFalse([row for row in facts["requests"]
+                              if row.startswith("src/data_sheets_schema/request_boundary_4588.py:")])
+            self.assertNotIn("request_policy_4588", derived)
+            off, _, off_facts = self._derive(root, sinks=False)
+            self.assertEqual(off_facts["requests"], facts["requests"])
+            self.assertNotIn("request_policy_4588", off)
+
+    def test_implicit_definition_without_shared_carrier_keeps_real_text_root(self):
+        for definition in ('    @fill\n    def install(value=42):\n        return value',
+                           '    class Install(metaclass=fill):\n        value = 42'):
+            with self.subTest(definition=definition), tempfile.TemporaryDirectory() as directory:
+                root = self._predicate_boundary_root_4733(directory,
+                    '    parts = [predicate_text.TEXT]\n' + definition)
+                derived, _, facts = self._derive(root)
+                self.assertTrue(facts['requests'])
+                self.assertIn('predicate_text_4733', derived)
+
+
+    def test_implicit_decorator_alias_bindings_refuse_captured_container_root(self):
+        definitions = (
+            '    (decorate := mutate)\n    @decorate\n    def install():\n        pass',
+            '    decorate, = (mutate,)\n    @decorate\n    def install():\n        pass',
+            '    for decorate in (mutate,):\n        @decorate\n        def install():\n            pass',
+            '    decorators = []\n    decorators.append(mutate)\n'
+            '    @decorators[0]\n    def install():\n        pass',
+            '    (decorators := [])\n    fill(decorators, mutate)\n'
+            '    @decorators[0]\n    def install():\n        pass',
+        )
+        for definition in definitions:
+            with self.subTest(definition=definition), tempfile.TemporaryDirectory() as directory:
+                root = self._predicate_boundary_root_4733(directory,
+                    '    parts = [predicate_text.TEXT]\n'
+                    '    def mutate(fn):\n        fill(parts)\n        return fn\n' + definition)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                self._derive(root, sinks=False)
+
+
+    def test_repeated_local_request_capture_has_no_fresh_identity_trace(self):
+        source = ('from data_sheets_schema import api_runner as other_api\n'
+                  'from data_sheets_schema import request_policy_4588 as policy\n'
+                  'def diagnostic(**fields):\n    return None\n'
+                  'def inspect():\n'
+                  '    from data_sheets_schema.api_runner import PhaseRequest as LocalRequest\n'
+                  '    other_api.PhaseRequest = diagnostic\n'
+                  '    return LocalRequest(phase="generation", system=policy.TEXT)\n'
+                  'inspect()\ninspect()\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._request_boundary_fixture_4588(d, source)
+            with self.assertRaisesRegex(scan.ConfigError, "unsupported effect"):
+                self._derive(root)
+            off, _, off_facts = self._derive(root, sinks=False)
+            self.assertTrue([row for row in off_facts["requests"]
+                             if row.startswith("src/data_sheets_schema/request_boundary_4588.py:")])
+            self.assertNotIn("request_policy_4588", off)
+
+
+    def test_module_request_before_namespace_replacement_keeps_actual_text_trace(self):
+        source = ('from data_sheets_schema import api_runner as request_api\n'
+                  'from data_sheets_schema import api_runner as other_api\n'
+                  'from data_sheets_schema import request_policy_4588 as policy\n'
+                  'def diagnostic(**fields):\n    return None\n'
+                  'original = request_api.PhaseRequest(phase="generation", system=policy.TEXT)\n'
+                  'other_api.PhaseRequest = diagnostic\n')
+        with tempfile.TemporaryDirectory() as d:
+            root = self._request_boundary_fixture_4588(d, source)
+            derived, spans, facts = self._derive(root)
+            client = [row for row in facts["requests"]
+                      if row.startswith("src/data_sheets_schema/request_boundary_4588.py:")]
+            self.assertEqual(len(client), 1)
+            self.assertIn("request_policy_4588", derived)
+            self.assertEqual(self._violations(root,
+                "src/data_sheets_schema/request_policy_4588.py", derived, spans),
+                {("CHORUS", 1), ("VOICE", 2)})
+            off, _, off_facts = self._derive(root, sinks=False)
+            self.assertEqual(off_facts["requests"], facts["requests"])
+            self.assertNotIn("request_policy_4588", off)
+
+
+    def test_fresh_record_list_field_and_counter_keep_emitted_text_4733(self):
+        """A genuine field factory allocates the list; append text and counters are emitted."""
+        helper = ('from __future__ import annotations\n'
+                  'from dataclasses import dataclass, field\n'
+                  'from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+                  '@dataclass\nclass Stats:\n'
+                  '    count: int = 0\n'
+                  '    text: list = field(default_factory=list)\n\n'
+                  'def describe() -> tuple[str, Stats]:\n'
+                  '    stats = Stats()\n'
+                  '    stats.count += 1\n'
+                  '    stats.text.append(policy.SYSTEM)\n'
+                  '    return f"{stats.count}: {stats.text}", stats\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._consumed_helper_root_4733(directory, '    selected, stats = effects.describe()', helper)
+            derived, spans, facts = self._derive(root)
+            self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+    def test_fresh_record_field_keeps_shared_nested_mutation_refusal_4733(self):
+        """Fresh field allocation never detaches an object later appended into the list."""
+        helper = ('from dataclasses import dataclass, field\n'
+                  'from data_sheets_schema import consumed_policy_4733 as policy\n\n'
+                  '@dataclass\nclass Stats:\n'
+                  '    text: list = field(default_factory=list)\n\n'
+                  'def describe(shared):\n'
+                  '    stats = Stats()\n'
+                  '    stats.text.append(shared)\n'
+                  '    stats.text[0].append(policy.SYSTEM)\n'
+                  '    return f"{stats.text}"\n')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._consumed_helper_root_4733(directory, '    selected = effects.describe([])', helper)
+            with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn('consumed_policy_4733', off)
+
+    def test_fresh_record_proof_rejects_custom_factory_descriptor_and_replacement_4733(self):
+        """The class spelling cannot authenticate factories, post-init or replaced fields."""
+        base = ('from dataclasses import dataclass, field\n'
+                'from data_sheets_schema import consumed_policy_4733 as policy\n\n')
+        cases = (
+            ('custom_factory',
+             'def factory():\n    return []\n\n@dataclass\nclass Stats:\n'
+             '    text: list = field(default_factory=factory)\n', ''),
+            ('post_init',
+             '@dataclass\nclass Stats:\n    text: list = field(default_factory=list)\n'
+             '    def __post_init__(self):\n        self.text.append(policy.SYSTEM)\n', ''),
+            ('shadowed_list',
+             'def list():\n    return []\n\n@dataclass\nclass Stats:\n'
+             '    text: object = field(default_factory=list)\n', ''),
+            ('replaced_field',
+             '@dataclass\nclass Stats:\n    text: list = field(default_factory=list)\n',
+             '    stats.text = make_custom()\n'),
+        )
+        for route, declaration, replacement in cases:
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as directory:
+                helper = base + declaration + ('\ndef describe():\n'
+                    '    stats = Stats()\n' + replacement +
+                    '    stats.text.append(policy.SYSTEM)\n'
+                    '    return f"{stats.text}"\n')
+                root = self._consumed_helper_root_4733(directory, '    selected = effects.describe()', helper)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('consumed_policy_4733', off)
+
+    def test_fresh_record_class_and_factory_objects_cannot_escape_identity_proof_4733(self):
+        """A sole class name does not prove an unmodified constructor object."""
+        prefix = ('from dataclasses import dataclass, field\n'
+                  'from data_sheets_schema import consumed_policy_4733 as policy\n\n')
+        declaration = ('@dataclass\nclass Stats:\n'
+                       '    text: list = field(default_factory=list)\n\n')
+        replacement = ('def replacement(self):\n    self.text = []\n\n')
+        cases = (
+            ('class_alias_write', declaration + replacement +
+             'Other = Stats\nOther.__init__ = replacement\n', None),
+            ('class_argument_escape', declaration + replacement +
+             'def patch(record_type):\n    record_type.__init__ = replacement\n'
+             'patch(Stats)\n', None),
+            ('imported_class_write', declaration +
+             'from data_sheets_schema import record_mutator_4733\n'
+             'record_mutator_4733.patch()\n',
+             'from data_sheets_schema.consumed_helper_4733 import Stats as Other\n'
+             'def replacement(self):\n    self.text = []\n'
+             'def patch():\n    Other.__init__ = replacement\n'),
+            ('decorator_object_escape',
+             'decorate = dataclass\n'
+             'def patch(decorator):\n    decorator.__defaults__ = ()\n'
+             'patch(decorate)\n' + declaration, None),
+        )
+        for route, setup, mutator in cases:
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as directory:
+                helper = prefix + setup + ('\ndef describe():\n'
+                    '    stats = Stats()\n'
+                    '    stats.text.append(policy.SYSTEM)\n'
+                    '    return f"{stats.text}"\n')
+                root = self._consumed_helper_root_4733(directory, '    selected = effects.describe()', helper)
+                if mutator is not None:
+                    (root / 'src/data_sheets_schema/record_mutator_4733.py').write_text(mutator)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('consumed_policy_4733', off)
+
+    def test_fresh_record_namespace_and_global_alias_cannot_hide_constructor_write_4733(self):
+        """Equivalent namespace/global routes retain the same class-object identity check."""
+        helper = ('from dataclasses import dataclass, field\n'
+                  'from data_sheets_schema import consumed_policy_4733 as policy\n'
+                  '@dataclass\nclass Stats:\n    text: list = field(default_factory=list)\n'
+                  'from data_sheets_schema import record_mutator_4733\n'
+                  'record_mutator_4733.patch()\n'
+                  'def describe():\n    stats = Stats()\n'
+                  '    stats.text.append(policy.SYSTEM)\n    return f"{stats.text}"\n')
+        cases = (
+            ('namespace_export',
+             'from data_sheets_schema.consumed_helper_4733 import __dict__ as namespace\n'
+             'def replacement(self):\n    self.text = []\n'
+             'def patch():\n    namespace["Stats"].__init__ = replacement\n'),
+            ('global_module_alias',
+             'from data_sheets_schema import consumed_helper_4733 as module\n'
+             'def replacement(self):\n    self.text = []\n'
+             'def patch():\n    global module\n    module.Stats.__init__ = replacement\n'),
+        )
+        for route, mutator in cases:
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as directory:
+                root = self._consumed_helper_root_4733(directory, '    selected = effects.describe()', helper)
+                (root / 'src/data_sheets_schema/record_mutator_4733.py').write_text(mutator)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('consumed_policy_4733', off)
+
+    def test_returned_fresh_record_cannot_hide_later_constructor_replacement_4733(self):
+        """A prior returned instance exposes its actual class before the later request call."""
+        helper = ('from __future__ import annotations\n'
+                  'from dataclasses import dataclass, field\n'
+                  'from data_sheets_schema import consumed_policy_4733 as policy\n'
+                  '@dataclass\nclass Stats:\n    text: list = field(default_factory=list)\n'
+                  'borrowed = []\n'
+                  'def replacement(self):\n    self.text = borrowed\n'
+                  'def patch_record(record):\n'
+                  '    record_type = type(record)\n'
+                  '    record_type.__init__ = replacement\n'
+                  'def describe():\n    stats = Stats()\n'
+                  '    stats.text.append(policy.SYSTEM)\n'
+                  '    return f"{stats.text}", stats\n')
+        routes = (
+            ('type', '    record_type = type(prior)\n'
+                     '    record_type.__init__ = replacement\n'),
+            ('class_attribute', '    record_type = prior.__class__\n'
+                                '    record_type.__init__ = replacement\n'),
+            ('receiving_helper', '    effects.patch_record(prior)\n'),
+        )
+        for route, mutation in routes:
+            with self.subTest(route=route), tempfile.TemporaryDirectory() as directory:
+                invocation = ('    def replacement(self):\n        self.text = parts\n'
+                              '    earlier, prior = effects.describe()\n' + mutation +
+                              '    selected, stats = effects.describe()')
+                root = self._consumed_helper_root_4733(directory, invocation, helper)
+                with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                    self._derive(root)
+                off, _, _ = self._derive(root, sinks=False)
+                self.assertNotIn('consumed_policy_4733', off)
+
+    def test_repeated_record_returns_with_field_reads_retain_emitted_text_4733(self):
+        """Repeated calls and tuple unpacking alone do not manufacture a reflection escape."""
+        helper = ('from __future__ import annotations\n'
+                  'from dataclasses import dataclass, field\n'
+                  'from data_sheets_schema import consumed_policy_4733 as policy\n'
+                  '@dataclass\nclass Stats:\n    count: int = 0\n'
+                  '    text: list = field(default_factory=list)\n'
+                  'def describe() -> tuple[str, Stats]:\n'
+                  '    stats = Stats()\n    stats.count += 1\n'
+                  '    stats.text.append(policy.SYSTEM)\n'
+                  '    return f"{stats.count}: {stats.text}", stats\n')
+        invocation = ('    earlier, prior = effects.describe()\n'
+                      '    selected, stats = effects.describe()\n'
+                      '    selected = f"{earlier} {selected} {prior.count} {stats.count}"')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._consumed_helper_root_4733(directory, invocation, helper)
+            derived, spans, facts = self._derive(root)
+            self._assert_consumed_policy_4733(root, derived, spans, facts)
+
+    def test_record_origin_recursion_refuses_growing_tuple_context_4733(self):
+        """A finite actual call still has a recursive static origin equation to refuse."""
+        helper = ('from __future__ import annotations\n'
+                  'from dataclasses import dataclass, field\n'
+                  'from data_sheets_schema import consumed_policy_4733 as policy\n'
+                  '@dataclass\nclass Stats:\n    text: list = field(default_factory=list)\n'
+                  'def describe():\n    stats = Stats()\n'
+                  '    stats.text.append(policy.SYSTEM)\n'
+                  '    return f"{stats.text}", stats\n'
+                  'def wrap(record, again=False):\n'
+                  '    return wrap((record,), False) if again else record\n')
+        invocation = ('    earlier, prior = effects.describe()\n'
+                      '    wrapped = effects.wrap(prior, True)\n'
+                      '    selected, stats = effects.describe()')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._consumed_helper_root_4733(directory, invocation, helper)
+            with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn('consumed_policy_4733', off)
+
+    def test_local_imported_record_producer_overrides_same_module_function_4733(self):
+        """Caller discovery must see the imported producer before authenticating its body."""
+        helper = ('from __future__ import annotations\n'
+                  'from dataclasses import dataclass, field\n'
+                  'from data_sheets_schema import consumed_policy_4733 as policy\n'
+                  '@dataclass\nclass Stats:\n    text: list = field(default_factory=list)\n'
+                  'def describe():\n    stats = Stats()\n'
+                  '    stats.text.append(policy.SYSTEM)\n'
+                  '    return f"{stats.text}", stats\n')
+        imports = 'def describe():\n    return "unrelated local function"\n'
+        invocation = ('    from data_sheets_schema.consumed_helper_4733 import describe\n'
+                      '    def replacement(self):\n        self.text = parts\n'
+                      '    earlier, prior = describe()\n'
+                      '    record_type = type(prior)\n'
+                      '    record_type.__init__ = replacement\n'
+                      '    selected, stats = effects.describe()')
+        with tempfile.TemporaryDirectory() as directory:
+            root = self._consumed_helper_root_4733(directory, invocation, helper, imports)
+            with self.assertRaisesRegex(scan.ConfigError, 'unsupported effect'):
+                self._derive(root)
+            off, _, _ = self._derive(root, sinks=False)
+            self.assertNotIn('consumed_policy_4733', off)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #: A runner small enough to make monolithic: one phase, a model-call
@@ -2320,6 +6301,41 @@ class TestDerivationsFailLoudly(unittest.TestCase):
             with self.assertRaisesRegex(scan.ConfigError, "deterministic arm commands"):
                 scan.deterministic_arm_commands(root)
 
+    def test_the_request_and_the_model_inputs_are_read_in_either_form_or_not_at_all(self):
+        """The request type is what `build_phase` returns, directly or
+        through a local; a `build_phase` that returns no construction of a
+        runner class, a request type without a text field, and an arm with
+        no bundle pattern are not derived (#4085)."""
+        ret = "    return PhaseRequest(\n        phase=phase,"
+        self.assertEqual(self.runner_text.count(ret), 1)
+        cases = {"through a local": self.runner_text.replace(ret, "    req = PhaseRequest(\n        phase=phase,"
+                                                              ).replace("        messages=[{\"role\": \"user\", "
+                                                                        "\"content\": parts}],\n    )\n",
+                                                                        "        messages=[{\"role\": \"user\", "
+                                                                        "\"content\": parts}],\n    )\n"
+                                                                        "    return req\n", 1)}
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root / scan.RUNNER, self.runner_text)
+            live = scan.derive_request_type(root)
+            self.assertEqual(live["class"], "PhaseRequest")
+            for why, text in cases.items():
+                self.assertIn("    return req\n", text)
+                _write(root / scan.RUNNER, text)
+                with self.subTest(why=why):
+                    self.assertEqual(scan.derive_request_type(root), live)
+            for broken, why in ((self.runner_text.replace(ret, "    return dict(\n        phase=phase,"),
+                                 "returns a construction of"),
+                                (self.runner_text.replace("    messages: list[dict[str, Any]] = field(",
+                                                          "    turns: list[dict[str, Any]] = field("),
+                                 "has no field messages")):
+                _write(root / scan.RUNNER, broken)
+                with self.subTest(why=why), self.assertRaisesRegex(scan.ConfigError, why):
+                    scan.derive_request_type(root)
+            _write(root / scan.CLI_API, self.cli_text.replace('"{p}_healthsheet_only.txt"', '"healthsheet.txt"'))
+            with self.assertRaisesRegex(scan.ConfigError, "not derived: the model input files"):
+                scan.model_input_files(root, [])
+
     def test_a_runner_that_branches_on_the_arm_is_not_derived(self):
         with tempfile.TemporaryDirectory() as d:
             root = _synthetic_root(Path(d), extra="\ndef _x(spec):\n    if spec.arm == 'other':\n        pass\n")
@@ -2653,9 +6669,13 @@ class TestParseFailures(unittest.TestCase):
             with mock.patch.object(scan, "discover", return_value=(surfaces, {})), mock.patch("sys.stderr", err), \
                     mock.patch("sys.stdout"):
                 code = scan.main(["--root", str(root), "--report", str(root / "r.md")])
+            self.assertFalse((root / "r.md").exists())
+            self.assertFalse((root / "r.json").exists())
         self.assertEqual(code, 2)
         self.assertIn("notes/bad_4092.py", err.getvalue())
         self.assertIn("cannot be parsed", err.getvalue())
+        self.assertIn(sys.executable, err.getvalue())
+        self.assertNotIn("Traceback", err.getvalue())
 
     def test_discovery_refuses_a_module_it_cannot_parse(self):
         """A controller or model client that does not parse could not be
@@ -3642,6 +7662,11 @@ class TestTheWholeAudit(unittest.TestCase):
         for spread in ("`*CLI_FLAGS`", "`*native.CLI_FLAGS`", "`*overlay['cli_flags']`", "`*runtime['cli_flags']`"):
             self.assertIn(spread, markdown)
         self.assertNotIn("does not change a registered run's verdict", markdown)
+        # the derivation of the model-facing modules and its cross-check (#4085)
+        self.assertIn("Cross-checked with the hand-kept `MODEL_FACING_MODULES`: derived and not listed: none; "
+                      "listed and not derived (model-facing by the list alone, through a channel the flow does not "
+                      "read): " + ", ".join(f"`{m}`" for m in LISTED_NOT_DERIVED) + ".", markdown)
+        self.assertIn("`rereceipt`", markdown.split("A module is model-facing where the flow carries")[1][:2000])
 
     def test_claude_md_and_the_agent_script_demo_are_judged_as_they_run(self):
         """Root memory remains model-facing when its project examples move
