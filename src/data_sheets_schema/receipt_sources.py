@@ -85,8 +85,12 @@ verbatim, and none of the 12 is also a tier-screen flag.
 beside whether it is the run's recorded `inputs.source_manifest`. With
 `--at-run-commit` (#3050) it is the bytes the run recorded, recovered by
 hash (`run_source_manifest`). The 24 fig19 records recorded two versions
-(md5 41408d… and 6c71e8…, 12 each, both recovered from git), and both rank
-every document of those runs as today's manifest does: no count moves.
+(md5 41408d… and 6c71e8…, 12 each, both recovered from git). Until #5042
+both ranked every document of those runs as today's manifest does. #5042
+removed AI_READI's RO-Crate (`ro_crate_metadata`) from today's manifest, so
+in the AI_READI records that cite it today's manifest leaves that document
+undeclared. The figures stated above are computed at each run's own manifest,
+where nothing moved.
 """
 from __future__ import annotations
 

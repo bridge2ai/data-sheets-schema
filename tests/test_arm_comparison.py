@@ -425,8 +425,12 @@ class ReleaseInventory(unittest.TestCase):
     def test_the_corpus_limited_project_is_named_with_its_inventory(self):
         text = "\n".join(self.m.release_inventory_section(self.empty, {}))
         self.assertIn("| CHORUS | 0 (0 current) | none | none | none | none | no | `exclude` |", text)
-        self.assertIn("AI_READI's document corpus carries its RO-Crate and its licence "
-                      "(`ro_crate_metadata`; `dataset_license`)", text)
+        # #5042: no document corpus carries an RO-Crate any more; AI_READI keeps
+        # its licence, IRB source and FAIRhub release records.
+        self.assertIn("| AI_READI | 3 (2 current) | `dataset_license` | none | `irb_protocol` | "
+                      "`fairhub_dataset` (superseded), `fairhub_dataset_v3`, "
+                      "`fairhub_dataset_v3_api` | no | `allow` |", text)
+        self.assertNotIn("carries its RO-Crate", text)
         self.assertIn("CHORUS's corpus has 0 tier-1 sources, no release record, no license/DUA/IRB "
                       "source, and the crate manifest declares its crate `document_corpus: exclude`", text)
         self.assertIn("`doi`, `license`, `version` and `issued` are **corpus-driven** for CHORUS, "
