@@ -378,6 +378,9 @@ def observe(transcripts: list[Path], bundle: Path | None,
         out["thinking_from_terminal_results"] = terminal_thinking
     if excluded:
         out["terminal_results_excluded_by_cut"] = excluded
+    if is_truncated_streaming_snapshot(out):
+        out["_output_tokens_payload_floor"] = payload_tokens_floor(out)
+        out["_streaming_snapshot_lower_bound"] = True
     if bundle:
         n_lines = sum(1 for _ in bundle.open(encoding="utf-8"))
         covered = set()
@@ -396,6 +399,34 @@ def observe(transcripts: list[Path], bundle: Path | None,
     if overlapping:
         out["overlapping_evidence"] = overlapping
     return out
+
+
+CHARS_PER_TOKEN = 4
+
+
+def payload_tokens_floor(obs: dict) -> int:
+    """4-chars/token payload floor from visible text + tool-input JSON chars (#5047)."""
+    visible = int(obs.get("visible_text_chars", 0) or 0)
+    tool_in = int(obs.get("tool_input_chars", 0) or 0)
+    return (visible + tool_in) // CHARS_PER_TOKEN
+
+
+def is_truncated_streaming_snapshot(obs: dict) -> bool:
+    """True when summed per-message ``output_tokens`` is below the 4-chars/token
+    payload floor and no terminal ``result`` replaced the streaming snapshots (#5047).
+
+    Claude Code 2.1.299 subagent transcripts log per-block ``message_start``
+    usage snapshots (`output_tokens` ~ 2..26) before ``tool_use`` input tokens
+    finish streaming and emit no terminal ``type == "result"`` event, making
+    ``output_tokens``, ``reasoning_tokens_estimate``, and ``thinking_tokens``
+    strict lower bounds rather than complete turn totals.
+    """
+    if "output_tokens" not in obs or obs.get("usage_from_terminal_result"):
+        return False
+    out_tok = obs.get("output_tokens")
+    if not _count_ok(out_tok):
+        return False
+    return out_tok < payload_tokens_floor(obs)
 
 
 def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage: dict | None) -> tuple[int, dict]:
@@ -497,9 +528,18 @@ def main() -> int:
     run = {k: v for k, v in obs.items() if not k.startswith("_")}
     print(json.dumps(run))
     if info:
-        print(f"note: bundle search touches (not counted as read): "
-              f"{info['_bundle_search_touches']}; bundle reads that errored "
-              f"(not counted as read): {info['_bundle_reads_failed']}", file=sys.stderr)
+        if "_bundle_search_touches" in info:
+            print(f"note: bundle search touches (not counted as read): "
+                  f"{info['_bundle_search_touches']}; bundle reads that errored "
+                  f"(not counted as read): {info['_bundle_reads_failed']}", file=sys.stderr)
+        if info.get("_streaming_snapshot_lower_bound"):
+            print(
+                f"note: output_tokens ({run.get('output_tokens')}) is below the "
+                f"4-chars/token payload floor ({info.get('_output_tokens_payload_floor')}); "
+                "without a terminal result event, output_tokens, reasoning_tokens_estimate, "
+                "and thinking_tokens are truncated streaming-snapshot lower bounds (#5047)",
+                file=sys.stderr,
+            )
         if info.get("_receipt_unopened_ids"):
             print(f"receipt chunks marked reviewed but never opened by the file tool: "
                   f"{info['_receipt_unopened_ids']}", file=sys.stderr)

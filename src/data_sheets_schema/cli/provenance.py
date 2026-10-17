@@ -2187,6 +2187,11 @@ def reasoning_cmd(method, project, label, path):
 
     logs = [p for p in logs if p.exists()]
     if recovered:
+        from data_sheets_schema.agentic_observed import (
+            is_truncated_streaming_snapshot,
+            payload_tokens_floor,
+        )
+
         # The agentic arm's measure, read from the orchestrator's transcript
         # observation (#1000): output tokens per run, the runtime's own
         # thinking count where the transcript carries it, the estimate
@@ -2216,6 +2221,13 @@ def reasoning_cmd(method, project, label, path):
                     "no turn coverage recorded") + ")")
             elif obs.get("reasoning_tokens_estimate") is not None:
                 parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")
+            if is_truncated_streaming_snapshot(obs):
+                parts.append(
+                    f"⚠️  lower_bound: output_tokens ({obs['output_tokens']}) < "
+                    f"payload floor ({payload_tokens_floor(obs)}); output_tokens, "
+                    "reasoning_tokens_estimate, and thinking_tokens are truncated "
+                    "streaming snapshots (#5047)"
+                )
             click.echo(f"   {proj:<9} {run_label}  " + "  ".join(parts))
     if not logs:
         if not recovered:
