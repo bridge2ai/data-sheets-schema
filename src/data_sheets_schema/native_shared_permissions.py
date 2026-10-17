@@ -334,9 +334,11 @@ def projected_policy(expected, selection, effect_root):
         return str(target_root / relative)
     dirs = lookup['output_directories']
     _need(type(dirs) is list and dirs.count(str(source_root)) == 1 and len(set(dirs)) == len(dirs), 'ambiguous stage envelope')
-    lookup['output_directories'] = [effect_root if value == str(source_root) else str(_path(value)) for value in dirs]
+    dir_paths = [_path(value) for value in dirs]
+    lookup['output_directories'] = [effect_root if value == str(source_root) else str(path) for value, path in zip(dirs, dir_paths)]
     inputs = lookup['inputs']
-    _need(type(inputs) is list and len(inputs) == len(set(inputs)), 'ambiguous input paths')
+    input_set = set(inputs) if type(inputs) is list else set()
+    _need(type(inputs) is list and len(inputs) == len(input_set), 'ambiguous input paths')
     lookup['inputs'] = [mapped(value) for value in inputs]
     _need(len(lookup['inputs']) == len(set(lookup['inputs'])), 'projected input collision')
     for field in ('bounded_reads', 'write_paths'):
@@ -350,9 +352,10 @@ def projected_policy(expected, selection, effect_root):
             path = mapped(value)
             _need(path not in new, 'projected file-map collision')
             if field == 'bounded_reads':
-                _need(value in inputs, 'bounded Read is not an input')
+                _need(value in input_set, 'bounded Read is not an input')
             else:
-                _need(any(_path(folder) in _path(value).parents for folder in dirs), 'Write outside output envelope')
+                value_parents = _path(value).parents
+                _need(any(folder in value_parents for folder in dir_paths), 'Write outside output envelope')
             new[path] = cap
         lookup[field] = new
     if lookup.get('write_paths') is not None:
@@ -367,9 +370,9 @@ def projected_policy(expected, selection, effect_root):
         required = [str(target_root / 'responses' / ('%06d.bin' % number))
                     for number in range(1, selection['bounds']['max_submissions'] + 1)]
         for value in ordinary:
-            _path(value)
             _need(source_root not in _path(value).parents, 'ordinary Write domain contains stage paths')
-        _need(all(path in lookup['write_paths'] for path in required + ordinary), 'incomplete global Write map')
+        write_set = set(lookup['write_paths'])
+        _need(all(path in write_set for path in required + ordinary), 'incomplete global Write map')
     return policy
 
 
@@ -424,10 +427,12 @@ def _recipe_data(expected, selection, launch, session):
     return basis, fixed, requests, responses
 
 
-def _view(expected, selection, launch, session, context, *, state='awaiting_response', read=False):
+def _view(expected, selection, launch, session, context, *, state='awaiting_response', read=False, policy=None, recipe=None):
     contract, _ = _dependencies()
-    basis, fixed, requests, responses = _recipe_data(expected, selection, launch, session)
-    root = _path(launch['effect_root']); policy = projected_policy(expected, selection, str(root))
+    basis, fixed, requests, responses = _recipe_data(expected, selection, launch, session) if recipe is None else recipe
+    root = _path(launch['effect_root'])
+    if policy is None:
+        policy = projected_policy(expected, selection, str(root))
     active = state == 'awaiting_response' and context in CONTEXTS
     ordinal = CONTEXTS.index(context) + 1 if context in CONTEXTS else 1
     cursor = contract.StageCursor(ordinal=ordinal, kind=context,
@@ -461,14 +466,16 @@ def _view(expected, selection, launch, session, context, *, state='awaiting_resp
 def projection(expected, selection, launch, session_id):
     """Deterministic software projection; never evidence of a real stage."""
     policy = projected_policy(expected, selection, launch['effect_root'])
+    recipe = _recipe_data(expected, selection, launch, session_id)
     states = []
     for context in CONTEXTS:
         for read in (False, True):
             states.append({'name': context + ('-read' if read else '-unread'),
-                           'view': asdict(_view(expected, selection, launch, session_id, context, read=read))})
+                           'view': asdict(_view(expected, selection, launch, session_id, context, read=read,
+                                                policy=policy, recipe=recipe))})
     for state in NONRESPONSE:
         states.append({'name': state, 'view': asdict(_view(expected, selection, launch, session_id,
-                                                         'worker', state=state))})
+                                                         'worker', state=state, policy=policy, recipe=recipe))})
     return {'kind': 'native_shared_permission_projection', 'version': VERSION,
             'effect_root': launch['effect_root'], 'session_id': session_id, 'states': states,
             'production_policy_sha256': _sha(_encoded(expected['policy'])), 'probe_policy': policy,
@@ -563,11 +570,13 @@ def _file_classification(policy, case):
     return 'not_prescribed', 'a path outside the registered inputs and outputs'
 
 
-def _classification(expected, selection, launch, session, case, controls):
+def _classification(expected, selection, launch, session, case, controls, *, policy=None, recipe=None):
     _, effects = _dependencies()
     context = case['context'] if case['context'] in CONTEXTS else 'worker'
-    view = _view(expected, selection, launch, session, context, read=case['tool'] == 'Write')
-    policy = projected_policy(expected, selection, launch['effect_root'])
+    if policy is None:
+        policy = projected_policy(expected, selection, launch['effect_root'])
+    view = _view(expected, selection, launch, session, context, read=case['tool'] == 'Write',
+                 policy=policy, recipe=recipe)
     governed = command_policy.stage_overlay_governs(view, tool_name=case['tool'],
         tool_input=case['input'], policy=policy)
     _need(type(governed) is bool, 'effect routing is not a strict boolean')
@@ -784,6 +793,7 @@ def _trace(expected, selection, trace, raw, controls):
     _need(type(session) is str and re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}', session),
           'invalid parent session')
     _native_scope(init, session, model)
+    recipe = _recipe_data(expected, selection, launch, session)
     projected = projection(expected, selection, launch, session)
     _need(_same(_json(raw[prefix + 'projection.json']), projected), 'projection is not independently derived')
     _need(_same(_json(raw[prefix + 'neutral.before.json']), _inventory(expected, selection, launch, session, completed=False)),
@@ -812,7 +822,8 @@ def _trace(expected, selection, trace, raw, controls):
         if 'effort' in (callback.get('request') or {}).get('input', {}):
             wanted['request']['input']['effort'] = expected['runtime']['effort']
         _need(_same(callback, wanted), 'callback differs from observed call/selected authority')
-        classification, view = _classification(expected, selection, launch, session, case, controls)
+        classification, view = _classification(expected, selection, launch, session, case, controls,
+                                               policy=policy, recipe=recipe)
         stop_sha, result_sha = None, None
         if case['mode'] == 'observer_stopped':
             _need(offset == len(events), 'stopped file case contains a result or continuation')
@@ -873,9 +884,11 @@ def _trace(expected, selection, trace, raw, controls):
 
 def _derived_controls(expected, selection, launch, session):
     _, effects = _dependencies()
+    policy = projected_policy(expected, selection, launch['effect_root'])
+    recipe = _recipe_data(expected, selection, launch, session)
     checks = []
     for state in NONRESPONSE:
-        view = _view(expected, selection, launch, session, 'worker', state=state)
+        view = _view(expected, selection, launch, session, 'worker', state=state, policy=policy, recipe=recipe)
         command = {'command': expected['commands']['stage']}
         _need(effects.governs_stage_effect(view, tool_name='Bash', tool_input=command) is True,
               'fixed stage helper is outside the selected effect router')
@@ -893,7 +906,7 @@ def _derived_controls(expected, selection, launch, session):
         checks.append({'state': state, 'stage_helper_classification': helper[0],
                        'response_is_none': True, 'denied_response_paths': paths})
     for context in CONTEXTS:
-        view = _view(expected, selection, launch, session, context, read=True)
+        view = _view(expected, selection, launch, session, context, read=True, policy=policy, recipe=recipe)
         for ordinal in range(1, 6):
             path = str(_path(launch['effect_root']) / 'responses' / ('%06d.bin' % ordinal))
             if path == view.response.path:

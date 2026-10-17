@@ -379,6 +379,8 @@ class _CapturedRun:
     _catalogs: object = field(default_factory=receipt_api._ReceiptCatalogContext,
                               init=False, compare=False, repr=False)
     _trace: object = field(default=None, init=False, compare=False, repr=False)
+    _decisions: dict = field(default_factory=dict, init=False, compare=False, repr=False)
+    _prefixes: dict = field(default_factory=dict, init=False, compare=False, repr=False)
 
     def trace(self, transcript=None, control=None):
         if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
@@ -392,7 +394,14 @@ class _CapturedRun:
     def decision(self):
         if self.phase1 is None:
             return None
-        return stage._prepare_next(self.selection, self.binding, self.phase1, self.history, self._catalogs)
+        key = (self.history.journal.pin.sha256, self.phase1.seal.pin.sha256,
+               None if self.phase1.core_seal is None else self.phase1.core_seal.pin.sha256)
+        if key in self._decisions:
+            return self._decisions[key]
+        value = stage._prepare_next(self.selection, self.binding, self.phase1, self.history, self._catalogs)
+        if value.state != 'failed':
+            self._decisions[key] = value
+        return value
 
 
 def _binding_document(selection, value, composition, execution, started, observation_item, session):
@@ -565,14 +574,27 @@ def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files,
         {'binding': c.pin_dict(binding.binding_artifact.pin), 'init_observation': c.pin_dict(item.pin)})
 
 
+def _journal_prefix_digest(run, end):
+    pins = tuple(item.pin for item in run.history.records[:end])
+    key = tuple(pin.sha256 for pin in pins)
+    prefixes = getattr(run, '_prefixes', None)
+    if prefixes is not None and key in prefixes:
+        return prefixes[key]
+    raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
+        execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
+        records=pins)
+    pair = (c.sha(raw), raw)
+    if prefixes is not None:
+        prefixes[key] = pair
+    return pair
+
+
 def _history_prefix(run, digest):
     """Resolve an exact recorded predecessor; never substitute current history."""
     found = []
     for end in range(1, len(run.history.records) + 1):
-        raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
-            execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
-            records=tuple(item.pin for item in run.history.records[:end]))
-        if c.sha(raw) == digest:
+        prefix_digest, raw = _journal_prefix_digest(run, end)
+        if prefix_digest == digest:
             found.append(replace(run.history, journal=_captured('journal', run.selection.role('journal'), raw),
                                  records=run.history.records[:end]))
     if len(found) != 1:
@@ -585,7 +607,15 @@ def _decision_at(run, digest):
     phase1 = _phase1(run.selection, run.binding, history, run.reader)
     if phase1 is None:
         raise ValueError('stage observation precedes actual phase1 seal')
-    return stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs)
+    key = (history.journal.pin.sha256, phase1.seal.pin.sha256,
+           None if phase1.core_seal is None else phase1.core_seal.pin.sha256)
+    decisions = getattr(run, '_decisions', None)
+    if decisions is not None and key in decisions:
+        return decisions[key]
+    value = stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs)
+    if decisions is not None and value.state != 'failed':
+        decisions[key] = value
+    return value
 
 
 def _require_completed_read_before_write(request, read):
@@ -937,10 +967,7 @@ def phase_replay(run, *, complete=False):
             count += 1
         digest = None
         if count >= 3:
-            raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
-                execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
-                records=tuple(item.pin for item in run.history.records[:count]))
-            digest = c.sha(raw)
+            digest = _journal_prefix_digest(run, count)[0]
         blocks = frame.get('message', {}).get('content', [])
         for block in blocks if type(blocks) is list else ():
             if type(block) is not dict:

@@ -324,9 +324,12 @@ class _Replay:
                 'role_review': 'Review each whole containing entity and its owning role slot; an attested name alone does not establish its relationship. Scientific truth remains unverified.'},
             'inner_request': inner, 'response': asdict(response)}
         c.exact(payload, c.OUTER_REQUEST_KEYS, 'native outer request')
-        request_hash = c.sha(c.canonical(payload))
-        raw = c.canonical({'request_sha256': request_hash, 'payload': payload})
-        c.strict_json(raw, 'complete native stage request', self.s.bounds()['max_request_bytes'])
+        payload_raw = c.canonical(payload)
+        request_hash = c.sha(payload_raw)
+        raw = b'{"payload":' + payload_raw + b',"request_sha256":"' + request_hash.encode('ascii') + b'"}'
+        if len(raw) > self.s.bounds()['max_request_bytes']:
+            raise ValueError('complete native stage request requires bounded nonempty immutable bytes')
+        c._JSON_VALIDATION.remember((raw, c.HARD_LIMITS['json_yaml_depth'], c.HARD_LIMITS['json_yaml_nodes_per_document']))
         return _artifact(raw, 'request', _dynamic(self.s, 'request', cursor.ordinal)), response, inner, request_hash
 
     def _derive_response(self, cursor, inner, raw):
