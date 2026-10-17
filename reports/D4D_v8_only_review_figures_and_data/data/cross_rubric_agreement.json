@@ -1,0 +1,242 @@
+[
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "typed": false,
+    "r10_fields": 29,
+    "r20_fields": 40,
+    "shared": 21,
+    "union": 48,
+    "jaccard": 0.4375
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "typed": true,
+    "r10_fields": 34,
+    "r20_fields": 45,
+    "shared": 14,
+    "union": 65,
+    "jaccard": 0.2153846153846154
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "typed": false,
+    "r10_fields": 19,
+    "r20_fields": 30,
+    "shared": 11,
+    "union": 38,
+    "jaccard": 0.2894736842105263
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "typed": true,
+    "r10_fields": 20,
+    "r20_fields": 36,
+    "shared": 6,
+    "union": 50,
+    "jaccard": 0.12
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "typed": false,
+    "r10_fields": 22,
+    "r20_fields": 25,
+    "shared": 10,
+    "union": 37,
+    "jaccard": 0.2702702702702703
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "typed": true,
+    "r10_fields": 24,
+    "r20_fields": 28,
+    "shared": 7,
+    "union": 45,
+    "jaccard": 0.15555555555555556
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "typed": false,
+    "r10_fields": 39,
+    "r20_fields": 39,
+    "shared": 30,
+    "union": 48,
+    "jaccard": 0.625
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "typed": true,
+    "r10_fields": 41,
+    "r20_fields": 47,
+    "shared": 20,
+    "union": 68,
+    "jaccard": 0.29411764705882354
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "typed": false,
+    "r10_fields": 51,
+    "r20_fields": 39,
+    "shared": 33,
+    "union": 57,
+    "jaccard": 0.5789473684210527
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "typed": true,
+    "r10_fields": 62,
+    "r20_fields": 46,
+    "shared": 27,
+    "union": 81,
+    "jaccard": 0.3333333333333333
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "typed": false,
+    "r10_fields": 26,
+    "r20_fields": 39,
+    "shared": 24,
+    "union": 41,
+    "jaccard": 0.5853658536585366
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "typed": true,
+    "r10_fields": 28,
+    "r20_fields": 43,
+    "shared": 23,
+    "union": 48,
+    "jaccard": 0.4791666666666667
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "typed": false,
+    "r10_fields": 28,
+    "r20_fields": 27,
+    "shared": 12,
+    "union": 43,
+    "jaccard": 0.27906976744186046
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "typed": true,
+    "r10_fields": 35,
+    "r20_fields": 34,
+    "shared": 12,
+    "union": 57,
+    "jaccard": 0.21052631578947367
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "typed": false,
+    "r10_fields": 29,
+    "r20_fields": 39,
+    "shared": 20,
+    "union": 48,
+    "jaccard": 0.4166666666666667
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "typed": true,
+    "r10_fields": 30,
+    "r20_fields": 45,
+    "shared": 14,
+    "union": 61,
+    "jaccard": 0.22950819672131148
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "typed": false,
+    "r10_fields": 32,
+    "r20_fields": 34,
+    "shared": 21,
+    "union": 45,
+    "jaccard": 0.4666666666666667
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "typed": true,
+    "r10_fields": 36,
+    "r20_fields": 39,
+    "shared": 11,
+    "union": 64,
+    "jaccard": 0.171875
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "typed": false,
+    "r10_fields": 24,
+    "r20_fields": 28,
+    "shared": 13,
+    "union": 39,
+    "jaccard": 0.3333333333333333
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "typed": true,
+    "r10_fields": 27,
+    "r20_fields": 32,
+    "shared": 6,
+    "union": 53,
+    "jaccard": 0.11320754716981132
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "typed": false,
+    "r10_fields": 25,
+    "r20_fields": 32,
+    "shared": 18,
+    "union": 39,
+    "jaccard": 0.46153846153846156
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "typed": true,
+    "r10_fields": 29,
+    "r20_fields": 37,
+    "shared": 10,
+    "union": 56,
+    "jaccard": 0.17857142857142858
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "typed": false,
+    "r10_fields": 23,
+    "r20_fields": 25,
+    "shared": 13,
+    "union": 35,
+    "jaccard": 0.37142857142857144
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "typed": true,
+    "r10_fields": 26,
+    "r20_fields": 26,
+    "shared": 4,
+    "union": 48,
+    "jaccard": 0.08333333333333333
+  }
+]

@@ -1,0 +1,1201 @@
+[
+  {
+    "section": "Collection",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "source_group": "Docs",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "source_group": "Repositories",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "source_group": "Terms",
+    "records": [
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "source_group": "Awards",
+    "records": [
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "source_group": "Docs",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 10,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "source_group": "Repositories",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "source_group": "Terms",
+    "records": [
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "source_group": "Awards",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "source_group": "Docs",
+    "records": [
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "source_group": "Repositories",
+    "records": [
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 8,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "source_group": "Terms",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "source_group": "Awards",
+    "records": [
+      "CHORUS_v8_rep2"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "source_group": "Docs",
+    "records": [
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "CM4AI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "source_group": "Repositories",
+    "records": [
+      "AI_READI_v8_rep1",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "source_group": "Terms",
+    "records": [
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep2"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "source_group": "Awards",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "source_group": "Docs",
+    "records": [
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "source_group": "Repositories",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "source_group": "Terms",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "source_group": "Awards",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "source_group": "Tutorials",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "source_group": "Publications",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "source_group": "Docs",
+    "records": [
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "source_group": "Repositories",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "source_group": "Terms",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "source_group": "IRB",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "source_group": "Awards",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep1"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "source_group": "Docs",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "source_group": "Repositories",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "source_group": "Terms",
+    "records": [
+      "VOICE_v8_rep1"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "source_group": "Awards",
+    "records": [
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "source_group": "Tutorials",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "source_group": "Docs",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "source_group": "Repositories",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "source_group": "Terms",
+    "records": [
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "source_group": "Awards",
+    "records": [
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "source_group": "Tutorials",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 8,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "source_group": "Docs",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 12,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "source_group": "Repositories",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "source_group": "Terms",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep2"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "source_group": "Awards",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep1"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "source_group": "Docs",
+    "records": [
+      "AI_READI_v8_rep1",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 8,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "source_group": "Repositories",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "source_group": "Terms",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "source_group": "IRB",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "source_group": "Awards",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 12,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "source_group": "Docs",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "source_group": "Repositories",
+    "records": [
+      "CM4AI_v8_rep1",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "source_group": "Terms",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "source_group": "IRB",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "source_group": "Awards",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "source_group": "Docs",
+    "records": [
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "source_group": "Repositories",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "source_group": "Terms",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep1"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "source_group": "Awards",
+    "records": [
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "source_group": "Tutorials",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "source_group": "Publications",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "source_group": "Docs",
+    "records": [
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "source_group": "Repositories",
+    "records": [
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "source_group": "Structured",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "source_group": "Terms",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "source_group": "IRB",
+    "records": [
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "source_group": "Awards",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "source_group": "Tutorials",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  }
+]

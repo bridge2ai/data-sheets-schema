@@ -1,0 +1,290 @@
+[
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "view": "Original",
+    "points": 82,
+    "max": 88,
+    "percentage": 93.18181818181819
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "view": "Without Q19",
+    "points": 78,
+    "max": 83,
+    "percentage": 93.97590361445783
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "view": "Without Q13 and Q19",
+    "points": 74,
+    "max": 78,
+    "percentage": 94.87179487179488
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "view": "Original",
+    "points": 82,
+    "max": 88,
+    "percentage": 93.18181818181819
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "view": "Without Q19",
+    "points": 77,
+    "max": 83,
+    "percentage": 92.7710843373494
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "view": "Without Q13 and Q19",
+    "points": 73,
+    "max": 78,
+    "percentage": 93.58974358974359
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "view": "Original",
+    "points": 83,
+    "max": 88,
+    "percentage": 94.31818181818181
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "view": "Without Q19",
+    "points": 79,
+    "max": 83,
+    "percentage": 95.18072289156626
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "view": "Without Q13 and Q19",
+    "points": 74,
+    "max": 78,
+    "percentage": 94.87179487179488
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "view": "Original",
+    "points": 67,
+    "max": 88,
+    "percentage": 76.13636363636364
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "view": "Without Q19",
+    "points": 63,
+    "max": 83,
+    "percentage": 75.90361445783132
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "view": "Without Q13 and Q19",
+    "points": 61,
+    "max": 78,
+    "percentage": 78.2051282051282
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "view": "Original",
+    "points": 68,
+    "max": 88,
+    "percentage": 77.27272727272727
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "view": "Without Q19",
+    "points": 64,
+    "max": 83,
+    "percentage": 77.10843373493977
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "view": "Without Q13 and Q19",
+    "points": 62,
+    "max": 78,
+    "percentage": 79.48717948717949
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "view": "Original",
+    "points": 65,
+    "max": 88,
+    "percentage": 73.86363636363636
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "view": "Without Q19",
+    "points": 62,
+    "max": 83,
+    "percentage": 74.6987951807229
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "view": "Without Q13 and Q19",
+    "points": 60,
+    "max": 78,
+    "percentage": 76.92307692307692
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "view": "Original",
+    "points": 70,
+    "max": 88,
+    "percentage": 79.54545454545455
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "view": "Without Q19",
+    "points": 66,
+    "max": 83,
+    "percentage": 79.51807228915662
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "view": "Without Q13 and Q19",
+    "points": 61,
+    "max": 78,
+    "percentage": 78.2051282051282
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "view": "Original",
+    "points": 64,
+    "max": 78,
+    "percentage": 82.05128205128206
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "view": "Without Q19",
+    "points": 60,
+    "max": 73,
+    "percentage": 82.1917808219178
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "view": "Without Q13 and Q19",
+    "points": 55,
+    "max": 68,
+    "percentage": 80.88235294117646
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "view": "Original",
+    "points": 69,
+    "max": 88,
+    "percentage": 78.4090909090909
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "view": "Without Q19",
+    "points": 65,
+    "max": 83,
+    "percentage": 78.3132530120482
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "view": "Without Q13 and Q19",
+    "points": 60,
+    "max": 78,
+    "percentage": 76.92307692307692
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "view": "Original",
+    "points": 78,
+    "max": 88,
+    "percentage": 88.63636363636364
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "view": "Without Q19",
+    "points": 73,
+    "max": 83,
+    "percentage": 87.95180722891567
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "view": "Without Q13 and Q19",
+    "points": 69,
+    "max": 78,
+    "percentage": 88.46153846153847
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "view": "Original",
+    "points": 77,
+    "max": 88,
+    "percentage": 87.5
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "view": "Without Q19",
+    "points": 72,
+    "max": 83,
+    "percentage": 86.74698795180723
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "view": "Without Q13 and Q19",
+    "points": 67,
+    "max": 78,
+    "percentage": 85.8974358974359
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "view": "Original",
+    "points": 80,
+    "max": 88,
+    "percentage": 90.9090909090909
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "view": "Without Q19",
+    "points": 75,
+    "max": 83,
+    "percentage": 90.36144578313252
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "view": "Without Q13 and Q19",
+    "points": 70,
+    "max": 78,
+    "percentage": 89.74358974358974
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "Access URL representation": "download_url",
+  "De-identification tension": "NoDeIdentification",
+  "Institution attribution": "Washington University in St[.]? Louis|University of Washington",
+  "Processing-software role": "used_software|software.{0,100}(produc|transform)|no software is named",
+  "Variable-level documentation": "variable.level|column.level|data dictionar|variables is absent|variables field|variables enumerates",
+  "Impact assessment / social impacts": "data_protection_impacts|future_use_impacts|DPIA|impact assessment",
+  "Version / release context": "version numbering|version.sequence|version string|release date|semi.annual|version history|errata",
+  "Provenance representation": "PROV.O|provenance graph|was_derived_from|parent_datasets"
+}

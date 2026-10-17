@@ -1,0 +1,1154 @@
+[
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "labeling_strategies",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "labeling_strategies",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "labeling_strategies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "labeling_strategies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "labeling_strategies",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "labeling_strategies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "labeling_strategies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "labeling_strategies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "labeling_strategies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "labeling_strategies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "labeling_strategies",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "labeling_strategies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": true,
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": true,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "state": "Populated"
+  }
+]
