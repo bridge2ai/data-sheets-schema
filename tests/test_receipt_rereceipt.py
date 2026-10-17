@@ -509,3 +509,40 @@ def test_reconcile_receipt_prunes_unpopulated_leaves():
     ]
 
 
+def test_reconcile_receipt_prunes_not_in_snapshot_and_forwards_identifier_bases():
+    """Paths absent from the phase-1 snapshot must not attach to later-added entries,
+    and explicit identifier_bases must be forwarded to remap_path."""
+    receipt = {
+        "bundle_md5": "abc",
+        "chunks": [
+            {
+                "id": "c001",
+                "status": "extracted",
+                "extracted": [
+                    {"slot": "resources[0].title", "snippet": "Cohort A"},
+                    {"slot": "resources[1].title", "snippet": "Added later"},
+                ],
+            },
+        ],
+    }
+    orig = {
+        "resources": [
+            {"id": "https://example.org/r/a", "title": "Cohort A"},
+        ],
+    }
+    final = {
+        "resources": [
+            {"id": "ex:other", "title": "Inserted first"},
+            {"id": "ex:a", "title": "Cohort A"},
+        ],
+    }
+    clean_rc, stats = rc.reconcile_receipt(
+        receipt,
+        orig,
+        final,
+        identifier_bases=(("https://example.org/r/", "ex"),),
+    )
+    assert stats == {"retained": 0, "remapped": 1, "dropped": 1, "emptied": 0}
+    assert clean_rc["chunks"][0]["extracted"] == [
+        {"slot": "resources[1].title", "snippet": "Cohort A"},
+    ]

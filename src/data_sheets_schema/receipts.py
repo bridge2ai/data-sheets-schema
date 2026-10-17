@@ -742,7 +742,8 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any],
 
 
 def reconcile_receipt(receipt: dict[str, Any], original: dict[str, Any] | None,
-                      final: dict[str, Any]) -> tuple[dict[str, Any], dict[str, int]]:
+                      final: dict[str, Any], *,
+                      identifier_bases: IdentifierBases | None = None) -> tuple[dict[str, Any], dict[str, int]]:
     """Synchronize a coverage receipt against the reconciled/final record (#4858).
 
     In Phase 1, `full` writes a coverage receipt against the initial record.
@@ -763,6 +764,7 @@ def reconcile_receipt(receipt: dict[str, Any], original: dict[str, Any] | None,
     Returns `(reconciled_receipt, stats)` where `stats` contains:
     `{"retained": int, "remapped": int, "dropped": int, "emptied": int}`.
     """
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     out = copy.deepcopy(receipt)
     retained_count = 0
     remapped_count = 0
@@ -780,8 +782,8 @@ def reconcile_receipt(receipt: dict[str, Any], original: dict[str, Any] | None,
             if not slot:
                 dropped_count += 1
                 continue
-            rm = remap_path(slot, original, final)
-            resolved_path = rm.get("path")
+            rm = remap_path(slot, original, final, identifier_bases=identifier_bases)
+            resolved_path = None if rm["basis"] == "not_in_snapshot" else rm.get("path")
             ok, val = _resolve_value(final, resolved_path) if resolved_path else (False, None)
             if ok and _populated(val):
                 if resolved_path != slot:
