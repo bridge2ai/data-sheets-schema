@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import time
 
 from . import native_shared_contract as c
 from . import native_shared_evidence as evidence
@@ -106,7 +107,8 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
     target = Path(path)
     if str(target.resolve(strict=True)) != path:
         raise ValueError('live native stream is not its exact physical path')
-    before = evidence._stat(target.lstat())
+    raw_stat = target.lstat()
+    before = evidence._stat(raw_stat)
     evidence._metadata(before, before['size'])
     if before['size'] > max_bytes:
         raise ValueError('live native stream exceeds its byte bound')
@@ -114,6 +116,18 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
         raise ValueError('live native stream differs from its observed file identity')
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     try:
+        def sample(get_info):
+            nonlocal raw_stat
+            info = get_info()
+            if (info.st_dev == raw_stat.st_dev and info.st_ino == raw_stat.st_ino
+                    and info.st_size == raw_stat.st_size and info.st_mtime_ns != raw_stat.st_mtime_ns):
+                deadline = time.monotonic() + 0.02
+                while info.st_size == raw_stat.st_size and time.monotonic() < deadline:
+                    time.sleep(0.0001)
+                    info = get_info()
+            raw_stat = info
+            return evidence._stat(info)
+
         def progress(earlier, later, stage, *, pass_number=None, offset=0, opened_extent=None):
             return _progress(earlier, later, max_bytes, diagnostic={
                 'role': role, 'path': path, 'stage': stage,
@@ -121,7 +135,7 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
                 'previous_prefix': None if previous is None else {
                     'bytes': previous.bytes, 'sha256': previous.sha256}})
 
-        opened = progress(before, evidence._stat(os.fstat(fd)), 'opened')
+        opened = progress(before, sample(lambda: os.fstat(fd)), 'opened')
         size = opened['size']
         if previous is not None and previous.bytes > size:
             raise ValueError('live native stream lost an observed prefix')
@@ -129,7 +143,7 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
         pieces = []
         offset = 0
         while offset < size:
-            last = progress(last, evidence._stat(os.fstat(fd)), 'before_read',
+            last = progress(last, sample(lambda: os.fstat(fd)), 'before_read',
                             pass_number=1, offset=offset, opened_extent=size)
             count = min(65536, size - offset)
             part = os.pread(fd, count, offset)
@@ -137,24 +151,24 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
                 raise ValueError('live native stream ended inside its opened extent')
             pieces.append(part)
             offset += len(part)
-            last = progress(last, evidence._stat(os.fstat(fd)), 'after_read',
+            last = progress(last, sample(lambda: os.fstat(fd)), 'after_read',
                             pass_number=1, offset=offset, opened_extent=size)
         raw = b''.join(pieces)
         del pieces
         offset = 0
         while offset < size:
-            last = progress(last, evidence._stat(os.fstat(fd)), 'before_read',
+            last = progress(last, sample(lambda: os.fstat(fd)), 'before_read',
                             pass_number=2, offset=offset, opened_extent=size)
             count = min(65536, size - offset)
             part = os.pread(fd, count, offset)
             if not part or len(part) > count or part != raw[offset:offset + len(part)]:
                 raise ValueError('live native stream prefix changed during capture')
             offset += len(part)
-            last = progress(last, evidence._stat(os.fstat(fd)), 'after_read',
+            last = progress(last, sample(lambda: os.fstat(fd)), 'after_read',
                             pass_number=2, offset=offset, opened_extent=size)
-        last = progress(last, evidence._stat(os.fstat(fd)), 'final_fd',
+        last = progress(last, sample(lambda: os.fstat(fd)), 'final_fd',
                         offset=offset, opened_extent=size)
-        progress(last, evidence._stat(target.lstat()), 'final_path',
+        progress(last, sample(target.lstat), 'final_path',
                  offset=offset, opened_extent=size)
         if str(target.resolve(strict=True)) != path:
             raise ValueError('live native stream path changed during capture')

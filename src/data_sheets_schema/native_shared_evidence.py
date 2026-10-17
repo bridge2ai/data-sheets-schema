@@ -220,9 +220,9 @@ def event(prefix,reference):
     """Resolve only an exact event inside the actual observed prefix."""
     if type(prefix) is not EvidencePrefix or type(reference) is not EventRef or reference.stream!=prefix.stream:
         raise ValueError('event reference differs from its observed stream prefix')
-    lines=[part+b'\n' for part in prefix.raw.split(b'\n')[:-1]]
+    lines=prefix.raw.split(b'\n')[:-1]
     if reference.line>len(lines):raise ValueError('event lies beyond its observed prefix')
-    raw=lines[reference.line-1]
+    raw=lines[reference.line-1]+b'\n'
     if sha(raw)!=reference.raw_line_sha256:raise ValueError('event physical line hash differs')
     value=strict_json(raw,'observed event',HARD_LIMITS['stream_bytes'])
     if reference.block is not None:

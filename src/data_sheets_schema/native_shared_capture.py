@@ -264,7 +264,7 @@ def _prefix(member, endpoint=None):
 def _through(prefix, line):
     if type(line) is not int or not 0 <= line <= prefix.lines:
         raise ValueError('observation line is outside the captured prefix')
-    raw = b''.join(part + b'\n' for part in prefix.raw.split(b'\n')[:line])
+    raw = b''.join(part + b'\n' for part in prefix.raw.split(b'\n', line)[:line])
     return c.EvidencePrefix(prefix.stream, prefix.path, raw, len(raw), c.sha(raw), line)
 
 
@@ -378,8 +378,14 @@ class _CapturedRun:
     phase1: object
     _catalogs: object = field(default_factory=receipt_api._ReceiptCatalogContext,
                               init=False, compare=False, repr=False)
+    _trace: object = field(default=None, init=False, compare=False, repr=False)
 
     def trace(self, transcript=None, control=None):
+        if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
+            if self._trace is None:
+                self._trace = observed.Trace(self.transcript, self.control,
+                    session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
+            return self._trace
         return observed.Trace(transcript or self.transcript, control or self.control,
             session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
 
@@ -589,12 +595,52 @@ def _require_completed_read_before_write(request, read):
         raise ValueError('response Write precedes its complete current request Read')
 
 
+def _prefix_trace(base, transcript, control, init_lines=None, settled_cache=None):
+    """Project an already-verified Trace onto an exact earlier stream prefix."""
+    if (base is None or transcript.stream != 'transcript' or control.stream != 'control'
+            or not base.transcript.raw.startswith(transcript.raw)
+            or not base.control.raw.startswith(control.raw)
+            or init_lines is None or transcript.lines < init_lines[0] or control.lines < init_lines[1]):
+        return None
+    t_lines, c_lines = transcript.lines, control.lines
+    for identity, (d_line, _) in base.decisions.items():
+        if d_line <= c_lines and base.callbacks[identity][0] > t_lines:
+            return None
+    if transcript == base.transcript and control == base.control and settled_cache is None:
+        return base
+    sub = object.__new__(observed.Trace)
+    sub.transcript, sub.control = transcript, control
+    sub.session, sub.policy = base.session, base.policy
+    sub.calls = {k: v for k, v in base.calls.items() if v[0] <= t_lines}
+    sub.callbacks = {k: v for k, v in base.callbacks.items() if v[0] <= t_lines}
+    sub.results = {k: v for k, v in base.results.items() if v[0] <= t_lines}
+    sub.decisions = {k: v for k, v in base.decisions.items() if v[0] <= c_lines}
+    sub.frames = {k: v for k, v in base.frames.items() if k <= t_lines}
+    sub.terminal = base.terminal if (base.terminal is not None and base.terminal <= t_lines) else None
+    if settled_cache is not None:
+        def settled(identity, _sub=sub):
+            if (identity not in _sub.calls or identity not in _sub.callbacks
+                    or identity not in _sub.decisions or identity not in _sub.results
+                    or _sub.decisions[identity][1]['classification'] != 'prescribed'
+                    or _sub.results[identity][0] <= _sub.callbacks[identity][0]):
+                return observed.Trace.settled(_sub, identity)
+            if identity not in settled_cache:
+                settled_cache[identity] = observed.Trace.settled(base, identity)
+            return settled_cache[identity]
+        sub.settled = settled
+    return sub
+
+
 def _checked_observations(run):
     """Validate raw joins and current-request chronology, not saved success flags."""
     previous = {'transcript': 0, 'control': 0}
     seen_reads, seen_intents, seen_writes, seen_advances = {}, {}, set(), set()
     checked = []
     previous_decision = None
+    base_trace = None
+    base_attempted = False
+    init_lines = None
+    settled_cache = {}
 
     def decision_at(digest):
         # This invocation owns one immutable captured run. Reuse only the
@@ -609,6 +655,19 @@ def _checked_observations(run):
             previous_decision = (digest, value)
         return value
 
+    def trace_at(transcript, control):
+        nonlocal base_trace, base_attempted
+        if not base_attempted and init_lines is not None:
+            base_attempted = True
+            try:
+                base_trace = run.trace()
+            except ValueError:
+                base_trace = None
+        projected = _prefix_trace(base_trace, transcript, control, init_lines, settled_cache)
+        if projected is not None:
+            return projected
+        return run.trace(transcript, control)
+
     for index, artifact in enumerate(run.observations):
         doc, transcript, control = observation(artifact, run.selection, run.binding, run.pool)
         for prefix in (transcript, control):
@@ -618,10 +677,15 @@ def _checked_observations(run):
         kind, payload = doc['observation_type'], doc['payload']
         if (index == 0) != (kind == 'initialized'):
             raise ValueError('durable observations lack one first actual initialization')
-        trace = run.trace(transcript, control)
         if kind == 'initialized':
+            trace = run.trace(transcript, control)
+            init_lines = (transcript.lines, control.lines)
             if artifact != run.binding.init_observation:
                 raise ValueError('initial observation differs from bound session')
+        else:
+            trace = trace_at(transcript, control)
+        if kind == 'initialized':
+            pass
         elif kind in ('request_read', 'response_written', 'advance_settled'):
             call = _call(payload['call'])
             actual = trace.settled(call.tool_use_id)
@@ -750,9 +814,9 @@ def _persist_observation(run, kind, payload):
         run.transcript, run.control, payload), ordinal=len(run.observations))
 
 
-def capture_stage(selection_registration_path):
+def capture_stage(selection_registration_path, *, _catalogs=None):
     """Capture the sole pending, actually admitted fixed advance invocation."""
-    run = _load_live(str(selection_registration_path))
+    run = _load_live(str(selection_registration_path), _catalogs=_catalogs)
     if run.phase1 is None:
         raise ValueError('advance precedes actual sealed originals')
     phase, _ = phase_replay(run)
@@ -789,12 +853,12 @@ def capture_stage(selection_registration_path):
             working_directory=run.binding.working_directory))
 
 
-def publish_stage(invocation, proposal):
+def publish_stage(invocation, proposal, *, _catalogs=None):
     """Recheck the same current invocation, then perform only derived effects."""
     from .native_shared_publication import publish_derived
     if type(invocation) is not c.StageInvocationCapture:
         raise ValueError('publication requires the actual selected captured invocation')
-    fresh = capture_stage(invocation.selection.registration.pin.path)
+    fresh = capture_stage(invocation.selection.registration.pin.path, _catalogs=_catalogs)
     # A newly persisted admission is an external observation, not part of the
     # journal predecessor; include it consistently in the freshly read history.
     old = replace(invocation, history=replace(invocation.history,
@@ -861,27 +925,32 @@ def phase_replay(run, *, complete=False):
             previous = (digest, value)
         return value
 
-    for line, _, frame in observed.rows(run.transcript):
+    cached_trace = getattr(run, '_trace', None)
+    rows = (((line, None, frame) for line, frame in cached_trace.frames.items())
+            if cached_trace is not None and cached_trace.transcript == run.transcript
+            else observed.rows(run.transcript))
+    for line, _, frame in rows:
         count = 0
         for item in run.history.records:
             if item.pin.sha256 not in visible or visible[item.pin.sha256] >= line:
                 break
             count += 1
-        decision = None
+        digest = None
         if count >= 3:
             raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
                 execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
                 records=tuple(item.pin for item in run.history.records[:count]))
-            decision = decision_at(c.sha(raw))
+            digest = c.sha(raw)
         blocks = frame.get('message', {}).get('content', [])
         for block in blocks if type(blocks) is list else ():
             if type(block) is not dict:
                 continue
             identity = block.get('id') if block.get('type') == 'tool_use' else block.get('tool_use_id')
             if block.get('type') == 'tool_use' and identity in advance_before:
-                decision = decision_at(advance_before[identity])
+                digest = advance_before[identity]
             if block.get('type') == 'tool_result' and identity in advance_after:
-                decision = decision_at(advance_after[identity])
+                digest = advance_after[identity]
+        decision = None if digest is None else decision_at(digest)
         emitted = phase.observe(frame, stage_decision=decision)
         if emitted:
             actions[line] = (emitted, phase.report())
@@ -992,8 +1061,9 @@ def _effect_view_from_decision(run, decision, *, correction_window=False, exclud
         run.composition['policy']['readonly_lookups']['inputs']) if path not in {role.path for role in protected}]
     if run.phase1 is not None:
         protected.append(c.RolePath('sealed_original_receipt_output', run.spec._agentic_artifact_paths['receipt']))
-    pending = [identity for identity in run.trace().pending() if identity != exclude_pending
-               and run.trace().calls[identity][2].get('input', {}).get('command') == run.composition['policy']['native_shared_helpers']['advance']]
+    trace = run.trace()
+    pending = [identity for identity in trace.pending() if identity != exclude_pending
+               and trace.calls[identity][2].get('input', {}).get('command') == run.composition['policy']['native_shared_helpers']['advance']]
     if len(pending) > 1:
         raise ValueError('overlapping selected advance effects')
     return c.NativeEffectView(correction_window=correction_window, cursor=None if decision is None else decision.cursor,
@@ -1244,12 +1314,25 @@ def at_callback(run, line):
         if observation(item, run.selection, run.binding, run.pool)[1].lines < line)
     history = replace(history, observations=observations)
     transcript = _through(run.transcript, line)
-    frames = {c.canonical(frame) for _, _, frame in observed.rows(transcript)}
-    control_lines = 0
-    for number, _, row in observed.rows(run.control):
-        if row.get('kind') == 'decision' and c.canonical(row.get('request')) not in frames:
-            break
-        control_lines = number
+    base_trace = None
+    try:
+        base_trace = run.trace()
+    except ValueError:
+        pass
+    if base_trace is not None and 0 < line <= base_trace.transcript.lines:
+        later = [d_line for identity, (d_line, _) in base_trace.decisions.items()
+                 if base_trace.callbacks[identity][0] > line]
+        control_lines = (min(later) - 1) if later else run.control.lines
+    else:
+        frames = {c.canonical(frame) for _, _, frame in observed.rows(transcript)}
+        control_lines = 0
+        for number, _, row in observed.rows(run.control):
+            if row.get('kind') == 'decision' and c.canonical(row.get('request')) not in frames:
+                break
+            control_lines = number
     control = _through(run.control, control_lines)
-    return replace(run, history=history, observations=observations, transcript=transcript, control=control,
+    result = replace(run, history=history, observations=observations, transcript=transcript, control=control,
         phase1=_phase1(run.selection, run.binding, history, run.reader))
+    if base_trace is not None and 0 < line <= base_trace.transcript.lines and 0 < control_lines <= base_trace.control.lines:
+        result._trace = _prefix_trace(base_trace, transcript, control, (1, 1))
+    return result

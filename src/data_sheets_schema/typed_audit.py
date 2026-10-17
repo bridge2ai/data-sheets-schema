@@ -73,7 +73,25 @@ def _seal(value):
     return {**value, "sha256": _sha(_json(value))}
 
 
+_DEFAULT_OMISSIONS_MAPPING = omissions._mapping
+_DEFAULT_OMISSIONS_READ = omissions._read
+_DEFAULT_OMISSIONS_VALIDATE_JSON = omissions._validate_json
+_DEFAULT_EVIDENCE_LOAD_JSON = evidence.load_json
+
+
 def _bounded_json(raw, label, limit):
+    if (omissions._mapping is _DEFAULT_OMISSIONS_MAPPING
+            and omissions._read is _DEFAULT_OMISSIONS_READ
+            and omissions._validate_json is _DEFAULT_OMISSIONS_VALIDATE_JSON
+            and evidence.load_json is _DEFAULT_EVIDENCE_LOAD_JSON
+            and type(raw) is bytes and 0 < len(raw) <= limit):
+        try:
+            value = evidence.load_json(raw.decode("utf-8"))
+            omissions._validate_json(value, max_nodes=omissions.MAX_NODES, max_depth=omissions.MAX_DEPTH)
+            if isinstance(value, dict):
+                return value
+        except Exception:
+            pass
     return omissions._mapping(raw, label, json_only=True, limit=limit)
 
 
@@ -343,13 +361,28 @@ def _prepare(*, protocol, original_full, bundle, manifest, receipt, context, sch
 def _open(packet, *, derivations=None, captured_assets=None):
     _exact(packet, {"kind", "protocol", "inputs", "schema_sources", "project", "limits", "plan",
         "omission_request", "contracts", "requests", "registered_provenance", "limitations", "sha256"}, "packet")
-    if len(_json(packet)) > MAX_PACKET_BYTES or packet["kind"] != PACKET or _json(packet["protocol"]) != _json(audit_protocol.select(audit_protocol.TYPED)):
+    raw_packet = _json(packet)
+    if len(raw_packet) > MAX_PACKET_BYTES or packet["kind"] != PACKET or _json(packet["protocol"]) != _json(audit_protocol.select(audit_protocol.TYPED)):
         raise ValueError("packet protocol/size mismatch")
+    if type(derivations) is DerivationCache:
+        assets = tuple(sorted((name, _sha(raw)) for name, raw in omissions.captured_asset_bytes(captured_assets).items()))
+        key = (len(raw_packet), _sha(raw_packet), captured_assets is not None, assets)
+        opened = getattr(derivations, "_opened", None)
+        if opened is None:
+            opened = derivations._opened = {}
+        hit = opened.get(key)
+        if hit is not None:
+            raw_bytes, payload_json = hit
+            return dict(raw_bytes), omissions.Prepared(payload_json)
     derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"], derivations=derivations, captured_assets=captured_assets)
     expected = _seal({**{key: packet[key] for key in ("kind", "protocol", "inputs", "schema_sources", "project", "limits")},
                       **derived, "limitations": list(LIMITATIONS)})
-    if _json(packet) != _json(expected):
+    if raw_packet != _json(expected):
         raise ValueError("packet request/plan/contract/input identity mismatch")
+    if type(derivations) is DerivationCache:
+        while len(opened) >= derivations.max_entries:
+            opened.pop(next(iter(opened)))
+        opened[key] = (dict(raw), prepared.payload_json)
     return raw, prepared
 
 

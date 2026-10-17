@@ -209,7 +209,7 @@ class _Replay:
         self.at = 0
         self.receipt = self.packet = self.index = self.assembly = None
         self.workers, self.omission, self.origins = {}, None, []
-        self.cache = typed.DerivationCache()
+        self.cache = self.catalogs.derivations()
         self.options = {'captured_assets': nr.omission_assets(selection), 'derivations': self.cache}
         self.pending = None
         self.failure = None
@@ -324,9 +324,10 @@ class _Replay:
                 'role_review': 'Review each whole containing entity and its owning role slot; an attested name alone does not establish its relationship. Scientific truth remains unverified.'},
             'inner_request': inner, 'response': asdict(response)}
         c.exact(payload, c.OUTER_REQUEST_KEYS, 'native outer request')
-        raw = c.canonical({'request_sha256': c.sha(c.canonical(payload)), 'payload': payload})
+        request_hash = c.sha(c.canonical(payload))
+        raw = c.canonical({'request_sha256': request_hash, 'payload': payload})
         c.strict_json(raw, 'complete native stage request', self.s.bounds()['max_request_bytes'])
-        return _artifact(raw, 'request', _dynamic(self.s, 'request', cursor.ordinal)), response, inner
+        return _artifact(raw, 'request', _dynamic(self.s, 'request', cursor.ordinal)), response, inner, request_hash
 
     def _derive_response(self, cursor, inner, raw):
         envelope, outputs = None, ()
@@ -353,7 +354,7 @@ class _Replay:
 
     def _stage(self, cursor):
         predecessor = self._prefix()
-        request, destination, inner = self._request(cursor, predecessor)
+        request, destination, inner, request_hash = self._request(cursor, predecessor)
         auxiliary = ()
         if cursor.kind == 'worker' and not self.workers:
             auxiliary = (self._output('packet', c.canonical(self.packet)),)
@@ -376,7 +377,6 @@ class _Replay:
         if row['record_type'] != 'response_consumed':
             raise ValueError('native stage requires first response consumption before checking')
         consumed = row['payload']
-        request_hash = c.strict_json(request.raw, max_bytes=self.s.bounds()['max_request_bytes'])['request_sha256']
         if consumed['cursor'] != asdict(cursor) or consumed['request_sha256'] != request_hash:
             raise ValueError('native consumed response belongs to another stage or complete request')
         response = self._captured(consumed['response'])
@@ -626,15 +626,16 @@ def main():
     advance.add_argument('--registration', required=True)
     args = parser.parse_args()
     from .native_shared_capture import capture_stage, publish_stage
-    invocation = capture_stage(args.registration)
+    catalogs = nr._catalog_context()
+    invocation = capture_stage(args.registration, _catalogs=catalogs)
     selected = (invocation.selection, invocation.execution, invocation.phase1, invocation.history)
-    replay = _Replay(*selected).run()
+    replay = _Replay(*selected, _catalogs=catalogs).run()
     if replay.pending is not None and replay.pending[-1] is not None:
         response, _ = replay.pending[-1]
-        proposal = check_response(*selected, replay.pending[2].raw, response.raw)
+        proposal = _check_response(*selected, replay.pending[2].raw, response.raw, catalogs)
     else:
-        proposal = prepare_next(*selected)
-    result = publish_stage(invocation, proposal)
+        proposal = _prepare_next(*selected, catalogs)
+    result = publish_stage(invocation, proposal, _catalogs=catalogs)
     print(c.canonical(result).decode('utf-8'))
 
 

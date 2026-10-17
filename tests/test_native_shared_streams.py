@@ -254,3 +254,51 @@ def test_complete_report_run_remains_strict_and_live_recapture_rechecks_prefixes
     monkeypatch.setattr(capture, '_load_live', live)
     with pytest.raises(ValueError, match='parent-observed'): adapter._run((adapter._stream_prefixes['transcript'].bytes,
         adapter._stream_prefixes['control'].bytes))
+
+
+def test_inflight_append_mtime_before_size_write_settles_without_false_refusal(tmp_path, monkeypatch):
+    path, _ = files(tmp_path)
+    initial = path.read_bytes()
+    later = b'{"next":2}\n'
+    old = prefix(path, initial)
+    actual_open, actual_stat, actual_read = os.open, os.fstat, os.pread
+    target_fd = None
+    first_read_done = False
+    transient_samples = 0
+
+    def opening(name, flags, *args, **kwargs):
+        nonlocal target_fd
+        fd = actual_open(name, flags, *args, **kwargs)
+        if name == str(path):
+            target_fd = fd
+        return fd
+
+    def reading(fd, count, offset):
+        nonlocal first_read_done
+        raw = actual_read(fd, count, offset)
+        if fd == target_fd and not first_read_done:
+            first_read_done = True
+        return raw
+
+    def statting(fd):
+        nonlocal transient_samples
+        info = actual_stat(fd)
+        if fd == target_fd and first_read_done and transient_samples == 0:
+            transient_samples += 1
+            append(path, later)
+            updated = actual_stat(fd)
+            return os.stat_result((
+                info.st_mode, info.st_ino, info.st_dev, info.st_nlink,
+                info.st_uid, info.st_gid, info.st_size,
+                info.st_atime, updated.st_mtime, info.st_ctime,
+            ))
+        return info
+
+    monkeypatch.setattr(streams.os, 'open', opening)
+    monkeypatch.setattr(streams.os, 'pread', reading)
+    monkeypatch.setattr(streams.os, 'fstat', statting)
+    member = streams.read_live_stream(str(path), 'transcript', max_bytes=4096, previous=old)
+    assert transient_samples == 1
+    assert member.captured.raw == initial
+    assert path.read_bytes() == initial + later
+

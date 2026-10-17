@@ -83,8 +83,19 @@ class _ReceiptCatalogContext:
     def __init__(self):
         self._entry = None
         self._typed_marker = None
+        self._derivations = None
+        self._derivations_marker = None
         self._bytes = 0
         self._lock = Lock()
+
+    def derivations(self):
+        from . import audit_omissions as omissions, typed_audit as typed
+        token = (typed._derive, typed._derive_uncached, typed._seal, omissions._prepare)
+        with self._lock:
+            if self._derivations is None or self._derivations_marker != token:
+                self._derivations = typed.DerivationCache()
+                self._derivations_marker = token
+            return self._derivations
 
     def catalog(self, selection, snapshot):
         return self.schema_data(selection, snapshot)[1]
