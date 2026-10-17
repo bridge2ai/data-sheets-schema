@@ -45,14 +45,14 @@ the HTML into its own page and does not load the publication's relative styleshe
 
 On a main-branch publication change, `.github/workflows/d4d_to_synapse_table.yml`
 uploads four HTML rows and one CSS row to `D4D_content` (`syn68885644`) and creates
-a snapshot. JSON RowSets preserve multiline HTML exactly; the Synapse CSV import
-path skips empty physical lines, including inside quoted HTML cells. The uploader
-requires the complete bundle before login, verifies new
-rows before deleting the captured old rows, and snapshots only after verifying
-the final contents. This is not a transactional replacement: a failed cleanup
-can leave both old and new rows in the live table; the previous snapshot remains
-the published version until a successful retry. No direct Synapse operation is
-needed when merging the publication PR.
+a snapshot via the CSV/S3 upload path (`synapseclient.Table(tableId, values=df)`),
+the same mechanism every publication has used since 2025-08-14. The uploader
+requires the complete bundle before login, verifies new rows before deleting the
+captured old rows, and snapshots only after verifying the final contents. This is
+not a transactional replacement: a failed cleanup can leave both old and new rows
+in the live table; the previous snapshot remains the published version until a
+successful retry. No direct Synapse operation is needed when merging the
+publication PR.
 
 The first upload ([run 38981856572](https://github.com/bridge2ai/data-sheets-schema/actions/runs/38981856572))
 authenticated and appended the five initial replicate-1 rows, then stopped on
@@ -65,9 +65,26 @@ hashes and differences. The [captured public JSON responses](standards-explorer-
 are retained as a compressed archive. `scripts/adhoc/inspect_v8_synapse_roundtrip.py`
 reproduces the comparison with `--raw-dir` pointing to the extracted archive and
 `--output-dir` pointing to a fresh external directory, with the failed upload pinned
-to commit `289863340cf864bf0ed6ec2197ca8cb637eec5f1`. The corrected uploader uses
-JSON for both append and verification; it retains exact comparisons and safely
-replaces all captured old/staged rows only after the chosen canonical set verifies.
+to commit `289863340cf864bf0ed6ec2197ca8cb637eec5f1`.
+
+The next fix (`0b484c15e`, #5058) switched the append itself to an inline JSON
+RowSet, preserving blank lines exactly. That traded one problem for another: the
+single-request JSON body for this publication's five rows (~483 KB of JSON-encoded
+HTML/CSS) exceeds what AWS WAF will inspect on
+`/entity/{id}/table/transaction/async/start` for Synapse's production API — every
+run was rejected with a bare, non-Synapse `403 Forbidden` straight from the load
+balancer (`Server: awselb/2.0`), before Synapse's application layer ever saw the
+request. A same-day fix reverted the append to the CSV/S3 path described above, re-accepting
+the empty-physical-line loss. That loss predates v8 entirely — every CSV-based
+upload since 2025-08-14 was almost certainly equally affected; #5055's live
+round-trip check was simply the first time anyone verified exact byte fidelity
+against the live table. It is also confirmed visually inert: this schema's HTML
+never places a blank line inside a whitespace-significant element (no `<pre>`;
+the only `white-space: pre-wrap` rule in `datasheet-v8.css` applies to single-line
+`source-value` spans, none of which contain an embedded newline in any v8 file).
+`generate_table`'s verification now predicts and tolerates exactly this one known
+discrepancy (`_drop_empty_physical_lines` in `utils/d4d_to_synapse_table.py`) and
+still fails on any other content mismatch.
 
 The registry's [publication workflow](https://github.com/bridge2ai/b2ai-standards-registry/blob/main/.github/workflows/project_data_change.yml)
 then advances `mv_D4D_content` (`syn77626807`) and dependent views. It is scheduled

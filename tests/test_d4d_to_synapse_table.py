@@ -1,12 +1,12 @@
 """Offline publication safety tests for #5055, 2026-10-16.
 
-Use the real Synapse JSON request and paginated-query adapters with a fake server;
+Use the real Synapse CSV-upload and paginated-query adapters with a fake server;
 no login, network,
 model calls or changes to historical publication assets are performed.
 """
 
+import asyncio
 import csv
-import json
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -14,7 +14,7 @@ import pandas as pd
 import pytest
 import yaml
 from synapseclient import RowSet
-from synapseclient.table import TableQueryResult
+from synapseclient.table import CsvFileTable, TableQueryResult
 
 from utils import d4d_to_synapse_table as publisher
 
@@ -64,7 +64,7 @@ class RemoteTable:
         self.fail = fail
         self.next_pages = {}
         self.query_iterators = []
-        self.append_requests = []
+        self.csv_uploads = []
         self.deleted_ids = []
         self.delete_csv_headers = []
 
@@ -103,38 +103,39 @@ class RemoteTable:
 
     def store(self, table):
         self.events.append("store")
-        assert isinstance(table, RowSet), "HTML/CSS writes must bypass the server CSV parser"
+        assert isinstance(table, CsvFileTable), (
+            "HTML/CSS writes must go through the CSV/S3 upload path "
+            "(2026-10-16 revert off the WAF-blocked inline JSON transaction body)"
+        )
         assert table.tableId == publisher.TABLE_ID
         if self.fail == "store":
             raise RuntimeError("synthetic upload failure")
-        # Exercise the actual pinned SDK AppendableRowSetRequest constructor.
-        return table._synapse_store(self)
+        # Exercise the actual pinned SDK CsvFileTable CSV-writing/reading code.
+        return asyncio.run(table._synapse_store_async(self))
 
-    def _async_table_update(self, table_id, changes, wait):
-        assert table_id == publisher.TABLE_ID and wait is True
-        payload = json.loads(json.dumps(changes))
-        self.append_requests.append(payload)
-        assert payload[0]["concreteType"] == (
-            "org.sagebionetworks.repo.model.table.AppendableRowSetRequest"
+    async def _uploadCsv_async(self, filepath, schema, **kwargs):
+        assert schema == publisher.TABLE_ID
+        frame = pd.read_csv(
+            filepath, dtype=str, keep_default_na=False,
+            quotechar=kwargs.get("quoteCharacter", '"'),
+            escapechar=kwargs.get("escapeCharacter", "\\"),
         )
-        rowset = payload[0]["toAppend"]
-        assert rowset["headers"] == self.headers
-        assert rowset["tableId"] == publisher.TABLE_ID
-        assert all(set(row) == {"values"} for row in rowset["rows"])
-        uploaded = pd.DataFrame([row["values"] for row in rowset["rows"]], columns=publisher.COLUMNS)
-        uploaded.index = range(self.next_id, self.next_id + len(uploaded))
-        self.next_id += len(uploaded)
+        uploaded = frame[publisher.COLUMNS].copy()
+        self.csv_uploads.append(uploaded.copy(deep=True))
         if self.fail == "corrupt_upload":
             uploaded.iloc[-1, 2] = "truncated HTML"
-        elif self.fail == "drop_blank_lines":
+        else:
+            # Model Synapse's confirmed CSV-import behavior (#5055): empty
+            # physical lines inside quoted multiline cells are silently dropped.
             uploaded["content_text"] = uploaded.content_text.map(
-                lambda text: "\n".join(line for line in text.split("\n") if line)
+                publisher._drop_empty_physical_lines
             )
+        uploaded.index = range(self.next_id, self.next_id + len(uploaded))
+        self.next_id += len(uploaded)
         self.rows = pd.concat([self.rows, uploaded])
-        return {"results": [{"rowReferenceSet": {"tableId": publisher.TABLE_ID}}]}
-
-    def _check_table_transaction_response(self, response):
-        assert response["results"][0]["rowReferenceSet"]["tableId"] == publisher.TABLE_ID
+        return {"results": [{
+            "concreteType": "org.sagebionetworks.repo.model.table.UploadToTableResult",
+        }]}
 
     def delete(self, rowset):
         self.events.append("delete")
@@ -210,22 +211,41 @@ def test_upload_verifies_before_deleting_and_snapshotting(publication_files):
     remote = RemoteTable()
     publisher.generate_table(remote, expected)
     assert remote.events == ["query", "store", "query", "delete", "query", "snapshot"]
-    assert publisher._content_rows(remote.rows) == publisher._content_rows(expected)
-    assert publisher._content_rows(remote.snapshots[0]) == publisher._content_rows(expected)
+    accepted = publisher._accepted_after_csv_upload(expected)
+    assert publisher._content_rows(remote.rows) == accepted
+    assert publisher._content_rows(remote.snapshots[0]) == accepted
 
 
-def test_actual_json_append_preserves_blank_lines_and_special_characters(publication_files):
+def test_csv_upload_drops_only_blank_lines_and_preserves_special_characters(publication_files):
+    """2026-10-16: CSV/S3 upload replaced the inline JSON transaction (#5058) to
+    avoid the AWS WAF body-size block. The traded-off cost is Synapse's own
+    CSV-import parser dropping empty physical lines; everything else must
+    still survive.
+    """
     expected = publisher.load_publication(publication_files)
     remote = RemoteTable()
     publisher.generate_table(remote, expected)
-    request = remote.append_requests[0][0]
-    assert request["entityId"] == publisher.TABLE_ID
-    actual_values = [row["values"] for row in request["toAppend"]["rows"]]
-    assert actual_values == expected.values.tolist()
-    assert all("\r\n\r\n" in row[2] and "\n\n\n" in row[2] for row in actual_values)
-    assert all('"quoted, text"' in row[2] and "π😀" in row[2] for row in actual_values)
-    assert all("literal\\n and backslash\\\\" in row[2] for row in actual_values)
-    # Any CSV upload was strictly the old ROW_ID/ROW_VERSION deletion metadata.
+
+    # The CSV file synapseclient actually wrote and uploaded is itself lossless
+    # (pandas' own CSV round trip preserves everything, including embedded
+    # newlines); only the simulated Synapse-side import drops blank lines.
+    assert len(remote.csv_uploads) == 1
+    assert remote.csv_uploads[0][publisher.COLUMNS].values.tolist() == expected[publisher.COLUMNS].values.tolist()
+
+    final_rows = remote.rows[publisher.COLUMNS].values.tolist()
+    for (expected_type, expected_id, expected_text), (actual_type, actual_id, actual_text) in zip(
+        expected[publisher.COLUMNS].values.tolist(), final_rows
+    ):
+        assert (actual_type, actual_id) == (expected_type, expected_id)
+        assert actual_text == publisher._drop_empty_physical_lines(expected_text)
+        # A lone "\r" is a non-empty line, so a CRLF blank line survives...
+        assert "\r\n\r\n" in actual_text
+        # ...while a run of LF-only blank lines collapses to a single break.
+        assert "\n\n\n" not in actual_text
+        assert '"quoted, text"' in actual_text and "π😀" in actual_text
+        assert "literal\\n and backslash\\\\" in actual_text
+    # Any CSV upload was strictly the content rows; deletion used its own
+    # ROW_ID/ROW_VERSION CSV, never the actual HTML/CSS text.
     assert remote.delete_csv_headers == [["ROW_ID", "ROW_VERSION"]]
 
 
@@ -243,7 +263,7 @@ def test_sdk_pagination_keeps_all_captured_rows_for_deletion(publication_files):
     assert len(remote.snapshots) == 1
 
 
-@pytest.mark.parametrize("failure", ["store", "corrupt_upload", "drop_blank_lines"])
+@pytest.mark.parametrize("failure", ["store", "corrupt_upload"])
 def test_failed_upload_preserves_all_old_rows(publication_files, failure):
     remote = RemoteTable(fail=failure)
     old_rows = remote.rows.copy(deep=True)
@@ -263,7 +283,7 @@ def test_failure_after_append_does_not_publish_and_retry_recovers(publication_fi
     assert remote.snapshots == []
     remote.fail = None
     publisher.generate_table(remote, expected)
-    assert publisher._content_rows(remote.rows) == publisher._content_rows(expected)
+    assert publisher._content_rows(remote.rows) == publisher._accepted_after_csv_upload(expected)
     assert len(remote.rows) == 5
     assert len(remote.snapshots) == 1
 

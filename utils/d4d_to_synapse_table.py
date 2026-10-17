@@ -2,14 +2,35 @@
 
 #5055, 2026-10-16. Reads the four declared HTML files and dedicated stylesheet;
 updates the existing D4D_content table, preserving its schema and older snapshots.
+
+2026-10-16: the brief switch to an inline JSON RowSet append (#5058) made
+every publication exceed the ~483 KB body that Synapse's AWS WAF will inspect on
+`/table/transaction/async/start`, so uploads were rejected outright (bare, non-
+Synapse 403 from the ALB itself). Reverted to the CSV/S3 upload path, which has
+carried every prior publication (v4 onward) since 2025-08-14 without ever hitting
+that limit, because the bulk bytes travel to S3 directly and only a small job
+reference crosses the inspected endpoint. That path's known cost is Synapse's own
+CSV-import parser silently dropping empty physical lines inside quoted multiline
+cells (confirmed via #5055 live round-trip evidence: AI-READI -214, CHORUS -156,
+CM4AI -174, VOICE -216 blank lines; no nonempty line was ever altered). Checked
+against the live rendered page: this schema's HTML never puts blank lines inside
+a whitespace-significant element (no `<pre>`, and the only `white-space: pre-wrap`
+rule in datasheet-v8.css applies to single-line `source-value` spans), so the
+dropped lines have no visible effect. This quirk predates v8; it was simply never
+checked for exact round-trip fidelity before #5055, and almost certainly affects
+every prior snapshot of this table too. Accepted as a known, visually-inert, long-
+standing limitation rather than leaving publication blocked; verification below
+tolerates exactly this discrepancy and nothing else.
 """
 
 from collections import Counter
 from pathlib import Path
+import sys
 
 import pandas as pd
 import synapseclient
-from synapseclient import Row, RowSet
+from synapseclient import RowSet, Table
+from synapseclient.core.exceptions import SynapseHTTPError
 from synapseclient.table import SelectColumn
 
 
@@ -27,6 +48,23 @@ COLUMNS = ["content_type", "content_id", "content_text"]
 # Synapse documents LARGETEXT as less than 524,288 characters:
 # https://python-docs.synapse.org/en/v4.13.0/reference/experimental/sync/table/
 LARGETEXT_CHARACTER_LIMIT = 524_288
+
+
+def _log_http_error(error: SynapseHTTPError) -> None:
+    """Print the raw response so a non-Synapse block (proxy/WAF) is distinguishable
+    from a genuine Synapse rejection: Synapse's own API errors are JSON with a
+    'reason'/'errorCode'; anything else (e.g. a bare HTML error page, or unexpected
+    Server/Via headers) indicates something in front of Synapse intercepted the call.
+    """
+    response = getattr(error, "response", None)
+    if response is None:
+        print(f"SynapseHTTPError with no response object: {error}", file=sys.stderr)
+        return
+    print(f"HTTP {response.status_code} from {response.url}", file=sys.stderr)
+    for header in ("Content-Type", "Server", "Via", "X-Cache", "X-Amzn-Trace-Id"):
+        if header in response.headers:
+            print(f"  {header}: {response.headers[header]}", file=sys.stderr)
+    print(f"  body: {response.text[:500]!r}", file=sys.stderr)
 
 
 def _read_content(path: Path) -> str:
@@ -81,6 +119,23 @@ def _rowset_frame(rows: RowSet) -> pd.DataFrame:
     )
 
 
+def _drop_empty_physical_lines(text: str) -> str:
+    """Predict Synapse's CSV-import behavior: it silently discards any physical
+    line that is exactly empty inside a quoted multiline cell (#5055 live
+    round-trip evidence; 2026-10-16 decision to accept this and revert to the
+    CSV/S3 upload path rather than leave publication WAF-blocked). Used only so
+    verification matches the accepted post-upload shape instead of failing on
+    this known, visually-inert discrepancy every run.
+    """
+    return "\n".join(line for line in text.split("\n") if line)
+
+
+def _accepted_after_csv_upload(frame: pd.DataFrame) -> Counter:
+    normalized = frame.copy()
+    normalized["content_text"] = normalized["content_text"].map(_drop_empty_physical_lines)
+    return _content_rows(normalized)
+
+
 def generate_table(syn, d4d_df: pd.DataFrame):
     """Append and verify replacements before deleting the captured old rows.
 
@@ -90,7 +145,6 @@ def generate_table(syn, d4d_df: pd.DataFrame):
     The portal continues to use its previously selected immutable snapshot.
     A retry captures all current rows and safely replaces them with one set.
     """
-    expected = _content_rows(d4d_df)
     required = Counter({("css", ""): 1})
     required.update(("html", org) for org in ORG_ID_MAP.values())
     if Counter(d4d_df[COLUMNS[:2]].itertuples(index=False, name=None)) != required:
@@ -101,23 +155,24 @@ def generate_table(syn, d4d_df: pd.DataFrame):
     query = f"SELECT content_type, content_id, content_text FROM {TABLE_ID}"
     existing_rows = _capture_rows(syn, query)
     existing = _content_rows(_rowset_frame(existing_rows))
+    expected_after_upload = _accepted_after_csv_upload(d4d_df)
 
-    # The server's CSV reader discards empty physical lines inside multiline
-    # cells (#5055 live round-trip evidence). Send exact strings as JSON RowSet
-    # values, retaining the existing table ID and column IDs. No normalization.
-    replacement = RowSet(
-        tableId=TABLE_ID, headers=existing_rows.headers,
-        rows=[Row(values=list(values)) for values in d4d_df[COLUMNS].itertuples(index=False, name=None)],
-    )
-    uploaded = syn.store(replacement)
+    # Retains the existing table ID so the schema/column IDs carry over; the
+    # CSV/S3 upload path avoids the WAF body-size block that an inline JSON
+    # RowSet append hits at this payload size (see module docstring).
+    try:
+        uploaded = syn.store(Table(TABLE_ID, values=d4d_df))
+    except SynapseHTTPError as error:
+        _log_http_error(error)
+        raise
     staged = _content_rows(_rowset_frame(_capture_rows(syn, query)))
-    if staged != existing + expected:
+    if staged != existing + expected_after_upload:
         raise RuntimeError("Synapse upload verification failed; prior rows were not deleted")
 
     if existing:
         syn.delete(existing_rows)
     actual = _content_rows(_rowset_frame(_capture_rows(syn, query)))
-    if actual != expected:
+    if actual != expected_after_upload:
         raise RuntimeError("Synapse replacement verification failed; no snapshot was created")
     version = syn.create_snapshot_version(TABLE_ID)
     print(f"Published {len(d4d_df)} v8 content rows to {TABLE_ID}.{version}")
