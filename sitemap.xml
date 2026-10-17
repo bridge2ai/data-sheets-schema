@@ -2221,6 +2221,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/source-heading-api-routing/</loc>
+         <lastmod>2026-10-17</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/source-heading-routing-drafts/</loc>
          <lastmod>2026-10-17</lastmod>
          <changefreq>daily</changefreq>
