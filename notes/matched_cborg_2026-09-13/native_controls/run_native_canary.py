@@ -438,11 +438,7 @@ def _signal_group(process, sig):
         return
     except PermissionError as error:
         refusal = error
-    try:
-        process.wait(timeout=2)
-        exited = True
-    except subprocess.TimeoutExpired:
-        exited = False
+    exited = reap_observed(process, 2)
     deadline = time.monotonic() + 2
     while exited:
         try:
@@ -458,17 +454,124 @@ def _signal_group(process, sig):
     raise refusal
 
 
+#: The waitid si_codes that mean the child has terminated (#2960).
+_EXIT_CODES = frozenset(getattr(os, name) for name in ('CLD_EXITED', 'CLD_KILLED', 'CLD_DUMPED')
+                        if hasattr(os, name))
+
+
+def exit_check_available():
+    """Whether the leader's exit can be observed without reaping it (#2714).
+
+    Only waitid(WNOWAIT) does this reliably: Linux, and macOS from Python 3.13.
+    A kqueue NOTE_EXIT watch cannot stand in for it on older macOS Pythons,
+    because XNU answers the same ESRCH for a zombie and for a pid someone else
+    already reaped, and only the zombie still holds the group id (#2942).
+    """
+    return hasattr(os, 'waitid')
+
+
+def leader_exited(process):
+    """True once the child's leader has exited, without reaping it (#2714).
+
+    An exited but unreaped leader is a zombie that keeps its pid, and with it
+    the group id, reserved: no new process or group can take the id, so a
+    signal to the group reaches this group and no other. Reaping releases the
+    id, after which a signal could reach an unrelated group that took it. So
+    the run loop watches the exit with waitid(WNOWAIT), and only
+    terminate_group reaps, after its last signal. A leader already reaped, by
+    `_signal_group`'s refusal path or by anyone else (ECHILD), has exited, and
+    `leader_released` then holds, so terminate_group sends it nothing. ECHILD
+    is latched on the process itself, never through poll(): poll() cannot
+    record a status while a concurrent Popen.wait() holds its lock (#2961), and
+    on ECHILD it invents a status of 0 (#2985). The status an observed exit
+    carries is recorded here, before any reap, for exit_status.
+    """
+    if leader_released(process):
+        return True
+    try:
+        found = os.waitid(os.P_PID, process.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+    except ChildProcessError:
+        process._leader_reaped_elsewhere = True   # the id is no longer held (#2961)
+        return True
+    # XNU also reports a stopped child (CLD_STOPPED) when only WEXITED is asked
+    # for; only an exit, a kill or a core dump is an exit (#2960).
+    if found is None or found.si_code not in _EXIT_CODES:
+        return False
+    process._leader_observed_status = (found.si_status if found.si_code == os.CLD_EXITED
+                                       else -found.si_status)
+    return True
+
+
+def leader_released(process):
+    """Whether the leader has been reaped, releasing its pid and so its group id:
+    by its Popen (returncode) or by anyone else, as the exit check latched (#2961)."""
+    return process.returncode is not None or getattr(process, '_leader_reaped_elsewhere', False)
+
+
+def exit_status(process):
+    """The leader's exit status as waitid reported it for an observed exit, before
+    any reap; None otherwise. Popen's returncode is never trusted on its own: after
+    ECHILD, poll() and wait() invent 0, whichever waiter calls them (#2985, #2986).
+    Every reap in this module follows an observation (reap_observed), so a run
+    the controller reaped always has one."""
+    return getattr(process, '_leader_observed_status', None)
+
+
+def reap_observed(process, timeout):
+    """Reap the leader only once its exit has been observed without reaping, so
+    the status recorded is the kernel's (#2985). A leader reaped elsewhere is not
+    waited for. Returns whether the leader has exited within `timeout`."""
+    if not await_leader_exit(process, timeout):
+        return False
+    if process.returncode is None and not getattr(process, '_leader_reaped_elsewhere', False):
+        process.wait(timeout=timeout)
+    return True
+
+
+def await_leader_exit(process, timeout):
+    """Wait up to `timeout` seconds for the leader to exit, without reaping it."""
+    deadline = time.monotonic() + timeout
+    while not leader_exited(process):
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(0.02)
+    return True
+
+
 def terminate_group(process):
+    """Signal the child's group while its unreaped leader holds the id, then reap (#2714).
+
+    A leader already reaped by someone else is sent nothing: its group id may
+    already name another group. The exit check records such a reap, which a
+    Popen that did not do the reaping cannot know of, before the SIGTERM (#2943)
+    and again after the grace wait, before the SIGKILL (#2953). A check covers
+    only reaps that precede it: nothing in the controller reaps outside this
+    function, but a reaper outside the controller could still act between a
+    check and its send, and no check can exclude that (#2958). None exists in
+    this process today.
+
+    On Linux a zombie leader accepts the signal, so killpg succeeds while the
+    leader is unreaped even when a live member refuses it, and that member's
+    refusal is not reported there (#2954). Darwin, where native runs execute,
+    does not deliver to a zombie, so a refusing member still surfaces.
+    """
     if process is None:
         return
-    _signal_group(process, signal.SIGTERM)
-    try:
-        process.wait(timeout=2)
-    except subprocess.TimeoutExpired:
-        pass
-    # Also remove descendants if the parent exited before them.
-    _signal_group(process, signal.SIGKILL)
-    process.wait(timeout=2)
+    leader_exited(process)
+    if not leader_released(process):
+        _signal_group(process, signal.SIGTERM)
+    if not leader_released(process):          # `_signal_group`'s refusal path reaps
+        await_leader_exit(process, 2)
+    if not leader_released(process):          # nor did anyone else during the wait (#2953)
+        # Also remove descendants if the parent exited before them. The leader
+        # was unreaped at the last check, so the id named this group (#2714).
+        _signal_group(process, signal.SIGKILL)
+    # Reap only an observed exit (#2985). A leader reaped elsewhere is not waited
+    # for: its status is what was observed, or unknown, and never Popen's
+    # invented 0 (#2984). A leader that has not exited within the bound raises,
+    # as on main.
+    if not reap_observed(process, 2):
+        raise subprocess.TimeoutExpired(process.args, 2)
 
 
 #: What an in-flight handler raises when the controller closed admission:
@@ -527,12 +630,16 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                     proxy.control_shutdown = {'control_initialized': True,
                         'control_shutdown_complete': False, 'unfinished_control_workers': None}
                 evidence = stack.enter_context((attempt/'control.jsonl').open('x'))
+            if not exit_check_available():
+                raise BudgetStop('native control needs a non-reaping exit check (os.waitid; macOS Python 3.13+)')
             verify_launch()  # Bind the executable immediately before Popen.
             process = subprocess.Popen(argv, stdin=subprocess.PIPE if control else incoming, cwd=cwd,
                 env=env, stdout=subprocess.PIPE if control else out, stderr=err, start_new_session=True)
             if control:
                 control.start(process, out, evidence, incoming.read())
-            while process.poll() is None or (control and not control.stdout_closed):
+            # Watch for the exit without reaping: cleanup signals the group
+            # before the reap releases its id (#2714).
+            while not leader_exited(process) or (control and not control.stdout_closed):
                 if proxy.failed.is_set():
                     raise BudgetStop(proxy.failure)
                 if time.monotonic() >= deadline:
@@ -545,7 +652,6 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                 control.finish()
         if proxy.failed.is_set():
             raise BudgetStop(proxy.failure)
-        return process.returncode
     except BaseException as exc:
         primary_error = exc
         # Record every controller-originated failure before shutdown (#2042). An
@@ -570,6 +676,13 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
                     control.close()
         else:
             _close_responsive_control(proxy, process, control, attempt, primary_error)
+    # Read after the cleanup above, which is what reaps the leader (#2714).
+    # Callers read a falsy status as success, so an unknown one stops (#2984,
+    # #2985).
+    status = exit_status(process)
+    if status is None:
+        raise BudgetStop('native CLI exit status is unavailable after cleanup')
+    return status
 
 
 def _close_responsive_control(proxy, process, control, attempt, primary_error):
