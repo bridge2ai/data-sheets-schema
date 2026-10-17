@@ -1,0 +1,432 @@
+[
+  {
+    "field": "source_caveats",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "count": 3,
+    "denominator": 3
+  },
+  {
+    "field": "source_caveats",
+    "project": "CHORUS",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "count": 3,
+    "denominator": 3
+  },
+  {
+    "field": "source_caveats",
+    "project": "CM4AI",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "source_caveats",
+    "project": "VOICE",
+    "records": [
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "instances",
+    "project": "AI_READI",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "instances",
+    "project": "CHORUS",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "count": 3,
+    "denominator": 3
+  },
+  {
+    "field": "instances",
+    "project": "CM4AI",
+    "records": [
+      "CM4AI_v8_rep1"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "instances",
+    "project": "VOICE",
+    "records": [
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "regulatory_restrictions",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "regulatory_restrictions",
+    "project": "CHORUS",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "regulatory_restrictions",
+    "project": "CM4AI",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "regulatory_restrictions",
+    "project": "VOICE",
+    "records": [
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "doi",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep3"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "doi",
+    "project": "CHORUS",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "count": 3,
+    "denominator": 3
+  },
+  {
+    "field": "doi",
+    "project": "CM4AI",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "doi",
+    "project": "VOICE",
+    "records": [
+      "VOICE_v8_rep2"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "file_collections",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep2"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "file_collections",
+    "project": "CHORUS",
+    "records": [
+      "CHORUS_v8_rep1"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "file_collections",
+    "project": "CM4AI",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "count": 3,
+    "denominator": 3
+  },
+  {
+    "field": "file_collections",
+    "project": "VOICE",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "issued",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "issued",
+    "project": "CHORUS",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "issued",
+    "project": "CM4AI",
+    "records": [
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "count": 3,
+    "denominator": 3
+  },
+  {
+    "field": "issued",
+    "project": "VOICE",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "creators",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "count": 3,
+    "denominator": 3
+  },
+  {
+    "field": "creators",
+    "project": "CHORUS",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "creators",
+    "project": "CM4AI",
+    "records": [
+      "CM4AI_v8_rep3"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "creators",
+    "project": "VOICE",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "data_governance",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "count": 3,
+    "denominator": 3
+  },
+  {
+    "field": "data_governance",
+    "project": "CHORUS",
+    "records": [
+      "CHORUS_v8_rep2"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "data_governance",
+    "project": "CM4AI",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "data_governance",
+    "project": "VOICE",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "description",
+    "project": "AI_READI",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "description",
+    "project": "CHORUS",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "description",
+    "project": "CM4AI",
+    "records": [
+      "CM4AI_v8_rep1"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "description",
+    "project": "VOICE",
+    "records": [
+      "VOICE_v8_rep1"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "distribution_dates",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "distribution_dates",
+    "project": "CHORUS",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "distribution_dates",
+    "project": "CM4AI",
+    "records": [
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "distribution_dates",
+    "project": "VOICE",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "funders",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "funders",
+    "project": "CHORUS",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "funders",
+    "project": "CM4AI",
+    "records": [
+      "CM4AI_v8_rep1"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "funders",
+    "project": "VOICE",
+    "records": [
+      "VOICE_v8_rep3"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "participant_privacy",
+    "project": "AI_READI",
+    "records": [
+      "AI_READI_v8_rep2"
+    ],
+    "count": 1,
+    "denominator": 3
+  },
+  {
+    "field": "participant_privacy",
+    "project": "CHORUS",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2"
+    ],
+    "count": 2,
+    "denominator": 3
+  },
+  {
+    "field": "participant_privacy",
+    "project": "CM4AI",
+    "records": [],
+    "count": 0,
+    "denominator": 3
+  },
+  {
+    "field": "participant_privacy",
+    "project": "VOICE",
+    "records": [
+      "VOICE_v8_rep1"
+    ],
+    "count": 1,
+    "denominator": 3
+  }
+]

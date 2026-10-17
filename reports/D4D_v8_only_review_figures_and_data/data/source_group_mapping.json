@@ -1,0 +1,16 @@
+{
+  "publication": "Publications",
+  "preprint": "Publications",
+  "white paper": "Publications",
+  "documentation": "Docs",
+  "historical documentation": "Docs",
+  "data resource": "Repositories",
+  "historical data release": "Repositories",
+  "structured metadata": "Structured",
+  "RO-Crate": "Structured",
+  "license": "Terms",
+  "DUA": "Terms",
+  "IRB": "IRB",
+  "NIH project page": "Awards",
+  "tutorial": "Tutorials"
+}

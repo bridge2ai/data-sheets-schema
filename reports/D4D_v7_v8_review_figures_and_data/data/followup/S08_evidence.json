@@ -1,0 +1,1466 @@
+{
+  "sample_id": "S08",
+  "record": "AI_READI_v8_rep2",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml",
+  "d4d_sha256": "225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8",
+  "d4d_fields": {
+    "anomalies": [
+      {
+        "anomaly_details": "In survey data, skipped questions or incomplete responses are expected."
+      },
+      {
+        "anomaly_details": "In wearable data, improper use and technical failure such as battery failure or system malfunction are expected. The Garmin activity monitor has gaps in data collection because the battery had to be charged every two to three days."
+      },
+      {
+        "anomaly_details": "In imaging data, patient uncooperation, noise that may obscure the images, technical failure such as system malfunction, and data transfer failures are expected."
+      },
+      {
+        "anomaly_details": "In a few cases there may have been a data collision at some point in the process, resulting in lost data."
+      },
+      {
+        "anomaly_details": "Image quality for the undilated handheld Optomed Aurora fundus camera varies from patient to patient and within the same patient, because obtaining a good view is challenging without dilation and the device is handheld."
+      }
+    ],
+    "collection_mechanisms": [
+      {
+        "mechanism_details": "REDCap was used to collect patient-reported questionnaire data and clinical data recorded at the visit, including the medications assessment, vitals, visual acuity, contrast sensitivity, monofilament test results and complete blood count results. Clinical data outside expected minimum/maximum ranges were flagged in REDCap and appeared in reports viewed by clinical research coordinators and data managers. The exact forms used for data collection in REDCap are published with the dataset documentation."
+      },
+      {
+        "mechanism_details": "Philips PageWriter TC30 Cardiograph (Amsterdam, The Netherlands): a 12-lead ECG performed while the participant sits in a reclining chair or lies supine, with the position recorded as 0, 30, 60 or 90 degrees relative to supine. Data are exported in .xml format and distributed under the WFDB standard in cardiac_ecg/ecg_12lead/philips_tc30."
+      },
+      {
+        "mechanism_details": "LeeLab Anura environmental sensor, custom designed at the Karalis Johnson Retina Center, University of Washington (Seattle, Washington). Participants were sent home with the device and asked to place it in a frequently used area of the home for 10 continuous days, then to note where it had been placed. It records ambient temperature, relative humidity, nitrogen oxides (NO and NO2), volatile organic compounds, particulate matter counts (PM1.0, PM2.5, PM4 and PM10) and 11 multi-spectral light intensity measurements, exported as .csv.",
+        "notes": "The device was specifically chosen with participant privacy as a primary concern: it does not capture video or audio, is not equipped with GPS location monitoring and is not synced with participant-owned devices."
+      },
+      {
+        "mechanism_details": "Dexcom G6 Continuous Glucose Monitor (Dexcom, Inc., San Diego, California): a real-time integrated continuous glucose monitoring system worn continuously for 10 days that captures blood glucose readings in mg/dL every five minutes without finger sticks. A single sensor is designed to last a maximum of ten days and the transmitter saves data for thirty days, so data must be downloaded within that window. Participants were masked to the results during the monitoring period.",
+        "notes": "Dexcom provided research discounts on study devices. The IRB protocol additionally permits participants already wearing a Dexcom G6 either to place an additional study sensor or to share their existing Dexcom Clarity data, and offers them the option of allowing download of previously collected glucose values for up to 90 days before the visit, for a total of up to 100 days; the dataset documentation describes the collected CGM data as a 10-day monitoring period."
+      },
+      {
+        "mechanism_details": "Garmin Vivosmart 5 physical activity monitor (Garmin Ltd, Schaffhausen, Switzerland). Advised to be worn on the non-dominant wrist for 10 consecutive days, with participants free to choose their preferred wrist, and returned with a form specifying the wrist worn and the dominant hand. The sampling frequency is 5 seconds and the device continuously records physical activity and sleep, including number of steps, heart rate, sleep duration, oxygen saturation, respiratory rate, stress and calories. Data are exported in .FIT format and converted to the Open mHealth standard.",
+        "notes": "There are gaps in data collection because the battery had to be charged every two to three days. Garmin provided research discounts on study devices. Like the environmental sensor, the tracker was chosen for privacy: it captures no video or audio, has no GPS location monitoring and is not synced with participant-owned devices."
+      },
+      {
+        "mechanism_details": "Optomed Aurora IQ handheld fundus camera (Optomed, Oulu, Finland): a non-mydriatic camera with a 50-degree field of view, 5 Mpix sensor and high-contrast optical design, used to take undilated macula- and disc-centered color fundus photographs in a dark room with the participant seated and reclined. Output is DICOM.",
+        "notes": "Optomed loaned devices for research purposes at no cost."
+      },
+      {
+        "mechanism_details": "iCare EIDON widefield TrueColor confocal fundus imaging system (iCare USA, Inc., Raleigh, North Carolina): captures images up to 200 degrees with TrueColor, blue, red, red-free and infrared confocal modalities, operating without dilation at a minimum pupil of 2.5 mm. AI-READI images comprise single field central infrared/fundus autofluorescence and a smart horizontal mosaic, acquired in fully automated mode in a dark room to minimize operator-induced noise. Output is DICOM.",
+        "notes": "iCare World loaned devices for research purposes at no cost."
+      },
+      {
+        "mechanism_details": "Heidelberg Spectralis HRA optical coherence tomography and OCT angiography system (Heidelberg Engineering GmbH, Heidelberg, Germany): combines OCT with retinal angiography using confocal scanning laser ophthalmoscope technology that minimizes the effects of light scatter. AI-READI scans are optic nerve head radial circle high resolution, posterior pole macula high resolution 61 lines, and macula 20x20 high speed 512 lines OCTA, acquired in a dark room. Output is DICOM.",
+        "notes": "Heidelberg Engineering provided research discounts on study devices."
+      },
+      {
+        "mechanism_details": "Heidelberg Fluorescence Lifetime Imaging Ophthalmoscopy (FLIO) (Heidelberg Engineering GmbH, Heidelberg, Germany): a macula-centered, non-invasive measurement of the fluorescence lifetimes of endogenous retinal fluorophores, recorded at short (498-560 nm) and long (560-720 nm) wavelengths and provided as two DICOM files per eye. Exported in .sdt file format and converted to DICOM for the dataset. Because the scan takes longer than a standard OCT and exposes participants to uncomfortable light levels, it is performed last in the visit."
+      },
+      {
+        "mechanism_details": "Topcon Maestro2 3D OCT-1 (Topcon Healthcare, Itabashi-ku, Tokyo, Japan): a robotic OCT and color fundus camera capturing 12x9 mm wide-field OCT including macula and optic disc, 6x6 mm 3D macula OCT and 6x6 mm OCTA at a 50 kHz scan rate, acquired automatically in a dark room with minimal operator involvement. Exported in .fda file format and converted to DICOM for the dataset.",
+        "notes": "Topcon Corporation loaned devices for research purposes at no cost."
+      },
+      {
+        "mechanism_details": "Topcon Triton DRI OCT (Topcon Healthcare, Itabashi-ku, Tokyo, Japan): swept-source OCT with a 1,050 nm wavelength light source and a non-mydriatic color fundus camera, visualizing the deepest layers of the eye including through cataracts. AI-READI protocols are 12x12 mm and 6x6 mm OCTA and 12.0x9.0x6.0 mm 3D horizontal and radial scans. Exported in .fda file format and converted to DICOM for the dataset.",
+        "notes": "Topcon Corporation loaned devices for research purposes at no cost."
+      },
+      {
+        "mechanism_details": "Zeiss Cirrus 5000 Angioplex (Carl Zeiss Meditec AG, Jena, Germany): high-definition OCT with non-invasive imaging of retinal microvasculature. Protocols include 512x512 and 200x200 macula and optic nerve head cubes and 6x6 mm macula and disc OCTA, with a 60-degree OCTA widefield view, 8x8 mm single scans and 14x14 mm automated OCTA montage available. Output is DICOM.",
+        "notes": "Carl Zeiss loaned devices for research purposes at no cost."
+      },
+      {
+        "mechanism_details": "In-clinic measurement instruments whose readings were recorded into REDCap: the Montreal Cognitive Assessment administered on an iPad using the MoCA Duo application (MoCA Cognition, Quebec, Canada); the M&S Technologies Electronic Visual Acuity tester (Niles, Illinois) at 4 meters, with a 2.0 neutral density filter or ND-occluder for mesopic testing; the Mars letter contrast sensitivity chart (Mars Perceptrix, Chappaqua, New York) read monocularly under photopic and mesopic conditions with background luminance of 60 to 120 cd/m2; the Topcon KR-800 auto keratometer/refractor; a standard 10 g monofilament applied at three locations on each foot ten times per location with the participant's eyes closed; blood pressure by OMRON HEM 907XL, Medline MDS4001 or Welch Allyn 6000 series monitors, measured twice two minutes apart; and NIDEK LM-600P, Topcon CL-200 or Topcon CL-300 lensometers."
+      }
+    ],
+    "file_collections": [
+      {
+        "id": "doi:10.60775/fairhub.3#cardiac-ecg",
+        "name": "cardiac_ecg",
+        "path": "cardiac_ecg/",
+        "collection_type": "processed_data",
+        "description": "Electrocardiogram data collected by a 12 lead protocol (the current standard), Holter monitor, or smartwatch; the terms ECG and EKG are often used interchangeably. Contains the modality directory ecg_12lead with the device directory philips_tc30, holding data collected with the Philips PageWriter TC30, and a manifest.tsv metadata file.",
+        "file_count": 4515,
+        "total_bytes": 302931703,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming and organization; WaveForm DataBase (WFDB) for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "WFDB"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#clinical-data",
+        "name": "clinical_data",
+        "path": "clinical_data/",
+        "collection_type": "processed_data",
+        "description": "Clinical data collected through REDCap, including blood and urine lab values and survey data, together with OMOP CDM-formatted health-related measurements and assessments such as laboratory tests, MoCA cognitive testing, monofilament testing, physical and vision assessments and survey questionnaire results. Each CSV file in this directory is a one-to-one mapping to an OMOP CDM table. Includes a dqd_omop.json metadata file supporting the OMOP CDM Data Quality Dashboard.",
+        "file_count": 7,
+        "total_bytes": 176182781,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming; the Observational Medical Outcomes Partnership (OMOP) Common Data Model for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "OMOP_CDM"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#environment",
+        "name": "environment",
+        "path": "environment/",
+        "collection_type": "processed_data",
+        "description": "Data collected through an environmental sensor device custom built for the AI-READI project, under the modality directory environmental_sensor and the device directory leelab_anura, with a manifest.tsv metadata file. Sensor component documentation is referenced for the AS7431 spectral sensor, DS3231 precision real-time clock and Sensirion SEN5x environmental node including its NOx index.",
+        "file_count": 2232,
+        "total_bytes": 55625676514,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming and organization; NASA ASCII File Format Guidelines for Earth Science Data for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "ESDS"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#retinal-flio",
+        "name": "retinal_flio",
+        "path": "retinal_flio/",
+        "collection_type": "processed_data",
+        "description": "Data collected through fluorescence lifetime imaging ophthalmoscopy (FLIO), an imaging modality for in vivo measurement of lifetimes of endogenous retinal fluorophores, under the modality directory flio and the device directory heidelberg_flio, with a manifest.tsv metadata file. Each pixel contains a photon-arrival curve following a Poisson distribution, and two DICOM files per eye record the short (498-560 nm) and long (560-720 nm) wavelength channels.",
+        "file_count": 7969,
+        "total_bytes": 1069466876718,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming and organization; DICOM for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "DICOM"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#retinal-oct",
+        "name": "retinal_oct",
+        "path": "retinal_oct/",
+        "collection_type": "processed_data",
+        "description": "Data collected using optical coherence tomography, a non-invasive imaging method using lasers that renders an in vivo cross-sectional view of the retina accurate to within at least 10-15 microns. Contains the modality directory structural_oct with device directories heidelberg_spectralis, topcon_maestro2, topcon_triton and zeiss_cirrus, and a manifest.tsv metadata file.",
+        "file_count": 56478,
+        "total_bytes": 1317625293027,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming and organization; DICOM for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "DICOM"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#retinal-octa",
+        "name": "retinal_octa",
+        "path": "retinal_octa/",
+        "collection_type": "processed_data",
+        "description": "Data collected using optical coherence tomography angiography, a non-invasive imaging technique that generates volumetric angiography images by mapping red blood cell movement over time without dye injection. Contains three modality directories: enface (2D views derived from 3D volume scans, also called C-scan OCT), flow_cube (3D blood flow information) and segmentation (heightmaps with associated layer information), each with device directories heidelberg_spectralis, topcon_maestro2, topcon_triton and zeiss_cirrus, plus a manifest.tsv metadata file.",
+        "file_count": 173721,
+        "total_bytes": 1155908809724,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming and organization; DICOM for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "DICOM"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#retinal-photography",
+        "name": "retinal_photography",
+        "path": "retinal_photography/",
+        "collection_type": "processed_data",
+        "description": "Two-dimensional retinal photography, also referred to as fundus photography, documenting the optic nerve, macula, retinal vasculature and central and peripheral retina. Contains the modality directories cfp (color fundus photographs, with device directories icare_eidon, optomed_aurora, topcon_maestro2 and topcon_triton), faf (fundus autofluorescence, device directory icare_eidon) and ir (near-infrared reflectance, with device directories heidelberg_spectralis, icare_eidon, topcon_maestro2 and zeiss_cirrus), plus a manifest.tsv metadata file.",
+        "file_count": 93921,
+        "total_bytes": 174381046406,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming and organization; DICOM for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "DICOM"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#wearable-activity-monitor",
+        "name": "wearable_activity_monitor",
+        "path": "wearable_activity_monitor/",
+        "collection_type": "processed_data",
+        "description": "Data collected through a wearable fitness tracker, organized into the modality directories heart_rate, oxygen_saturation, physical_activity, physical_activity_calorie, respiratory_rate, sleep and stress, each containing the device directory garmin_vivosmart5, plus a manifest.tsv metadata file.",
+        "file_count": 15245,
+        "total_bytes": 38313536220,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming and organization; Open mHealth for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "OPEN_MHEALTH"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#wearable-blood-glucose",
+        "name": "wearable_blood_glucose",
+        "path": "wearable_blood_glucose/",
+        "collection_type": "processed_data",
+        "description": "Data collected through a continuous glucose monitoring device, under the modality directory continuous_glucose_monitoring and the device directory dexcom_g6, with a manifest.tsv metadata file.",
+        "file_count": 2246,
+        "total_bytes": 4169006971,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1 for directory naming and organization; Open mHealth for all data files.",
+        "conforms_to_standard": [
+          "CDS",
+          "OPEN_MHEALTH"
+        ]
+      },
+      {
+        "id": "doi:10.60775/fairhub.3#root-metadata",
+        "name": "Root-level CDS metadata and documentation files",
+        "path": "./",
+        "collection_type": "metadata",
+        "description": "The nine metadata and documentation files at the root of the dataset, each based on the Clinical Dataset Structure (CDS) v0.1.1.",
+        "file_count": 9,
+        "conforms_to": "Clinical Data Structure (CDS) v0.1.1",
+        "conforms_to_standard": [
+          "CDS"
+        ],
+        "source_caveats": "The file_count of 9 is this record's own computation, obtained by counting the nine entries in the root metadataFileList of the dataset structure description (CHANGELOG.md, dataset_description.json, dataset_structure_description.json, healthsheet.md, LICENSE.txt, participants.json, participants.tsv, README.md, study_description.json); no source states a file count for the root directory.",
+        "resources": [
+          {
+            "id": "doi:10.60775/fairhub.3#file-readme-md",
+            "name": "README.md",
+            "format": "MD",
+            "media_type": "text/markdown",
+            "file_type": "documentation_file"
+          },
+          {
+            "id": "doi:10.60775/fairhub.3#file-changelog-md",
+            "name": "CHANGELOG.md",
+            "format": "MD",
+            "media_type": "text/markdown",
+            "file_type": "documentation_file"
+          },
+          {
+            "id": "doi:10.60775/fairhub.3#file-healthsheet-md",
+            "name": "healthsheet.md",
+            "format": "MD",
+            "media_type": "text/markdown",
+            "file_type": "documentation_file"
+          },
+          {
+            "id": "doi:10.60775/fairhub.3#file-license-txt",
+            "name": "LICENSE.txt",
+            "format": "TXT",
+            "media_type": "text/plain",
+            "file_type": "documentation_file"
+          },
+          {
+            "id": "doi:10.60775/fairhub.3#file-dataset-description-json",
+            "name": "dataset_description.json",
+            "format": "JSON",
+            "media_type": "application/json",
+            "file_type": "metadata_file"
+          },
+          {
+            "id": "doi:10.60775/fairhub.3#file-dataset-structure-description-json",
+            "name": "dataset_structure_description.json",
+            "format": "JSON",
+            "media_type": "application/json",
+            "file_type": "metadata_file"
+          },
+          {
+            "id": "doi:10.60775/fairhub.3#file-study-description-json",
+            "name": "study_description.json",
+            "format": "JSON",
+            "media_type": "application/json",
+            "file_type": "metadata_file"
+          },
+          {
+            "id": "doi:10.60775/fairhub.3#file-participants-json",
+            "name": "participants.json",
+            "format": "JSON",
+            "media_type": "application/json",
+            "file_type": "metadata_file"
+          },
+          {
+            "id": "doi:10.60775/fairhub.3#file-participants-tsv",
+            "name": "participants.tsv",
+            "format": "TSV",
+            "media_type": "text/tab-separated-values",
+            "file_type": "metadata_file"
+          }
+        ]
+      }
+    ],
+    "known_biases": [
+      {
+        "bias_type": "selection_bias",
+        "bias_description": "Participants are volunteers, so the sample is subject to volunteer bias, which may limit the generalizability of results to those not represented in the study population."
+      },
+      {
+        "bias_type": "representation_bias",
+        "bias_description": "Recruitment is predominantly urban and hospital-based, which may not fully capture all possible cultural and socioeconomic backgrounds, and the cohort does not include other races and ethnicities such as Pacific Islanders and Native Americans.",
+        "mitigation_strategy": "Three recording sites were strategically selected for geographic variability across the United States and to ensure representation across various racial and ethnic groups, and individuals from all demographic backgrounds were recruited at all three sites."
+      },
+      {
+        "bias_type": "sampling_bias",
+        "bias_description": "Although the cross-sectional database ultimately aims to achieve balance across race/ethnicity, biological sex, and diabetes presence and severity, interim releases are not balanced across these parameters; as enrollment is ongoing, periodic updates to data releases may not have achieved balanced distribution across groups.",
+        "affected_subsets": [
+          "The pilot data release and subsequent periodic version releases, including this one."
+        ],
+        "mitigation_strategy": "Uniform data collection protocols were implemented for all subjects irrespective of race/ethnicity, biological sex, or diabetes severity, across all study sites, and the study sites were selected to ensure varied representation and minimize the potential for sampling bias."
+      },
+      {
+        "bias_type": "selection_bias",
+        "bias_description": "Eligibility required participants to speak and read English, which the protocol publication notes may have created challenges in recruiting Hispanic and/or Asian persons."
+      }
+    ]
+  },
+  "receipt_links": [
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c002",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "known_biases[0].bias_description",
+      "root": "known_biases",
+      "section": "Composition",
+      "snippet": "therefore,  there  is  selection  bias",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c003",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[12].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "monofilament test11 assessing touch perception on both",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c003",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[5].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "All retinal images are collected under",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c004",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[2].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "how to use these monitoring devices continuously for 10",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c004",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[3].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "masked to the results from the Dexcom CGM during the",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[2].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Custom designed, Karalis Johnson Retina Center,",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[3].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Dexcom, Inc. (San Diego, California)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[4].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Garmin Ltd (Schaffhausen, Switzerland)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[7].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Heidelberg Engineering GmbH",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[11].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Carl Zeiss Meditec AG (Jena,",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[9].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Topcon Healthcare (Itabashi-",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[6].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "iCare USA, Inc (Raleigh, North",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[5].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "(Oulu, Finland)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "known_biases[3].bias_description",
+      "root": "known_biases",
+      "section": "Composition",
+      "snippet": "Hispanic and/or Asian persons.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c008",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[9].notes",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "cloud services needed for the project. We thank Topcon Corporation (Tokyo, Japan),",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c008",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[5].notes",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Optomed (Oulu, Finland), iCare World (Raleigh, NC) and Carl Zeiss (Oberkochen, Germany)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c008",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[6].notes",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "for loaning their devices for research purposes at no cost. We thank Heidelberg Engineering",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c008",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "collection_mechanisms[4].notes",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "(Heidelberg, Germany), Dexcom (San Diego, CA) and Garmin (Olathe, KS) for research discounts",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c011",
+      "source": "docs_aireadi_org_docs-3_2026-07-24.txt",
+      "source_type": "documentation",
+      "slot": "known_biases[2].bias_description",
+      "root": "known_biases",
+      "section": "Composition",
+      "snippet": "As enrollment is ongoing, the pilot data release and periodic updates to data releases may not have achieved balanced distribution across groups.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[0].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 302931703",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[0].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 4515",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[0].conforms_to",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"standardName\": \"WaveForm DataBase (WFDB)\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[1].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 176182781",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[1].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 7",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[1].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "one-to-one mapping to the OMOP CDM tables",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[1].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "runs a set of > 3500 data quality checks against an OMOP CDM instance",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[0].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "electrocardiogram data collected by a 12 lead protocol (the current standard), Holter monitor, or smartwatch",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[2].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 55625676514",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[2].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 2232",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[2].conforms_to",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"standardName\": \"ASCII File Format Guidelines for Earth Science Data\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[2].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"directoryName\": \"leelab_anura\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[3].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 1069466876718",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[3].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 7969",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[3].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "an imaging modality for in vivo measurement of lifetimes of endogenous retinal fluorophores",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[4].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 1317625293027",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[4].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 56478",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[4].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"directoryName\": \"structural_oct\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[3].conforms_to",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "Digital Imaging and Communications in Medicine (DICOM)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[5].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"directoryName\": \"flow_cube\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[5].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 1155908809724",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[5].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 173721",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[6].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 174381046406",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[6].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 93921",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[6].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"directoryName\": \"optomed_aurora\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[7].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 38313536220",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[7].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 15245",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[7].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"directoryName\": \"garmin_vivosmart5\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[7].conforms_to",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"standardName\": \"Open mHealth\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[5].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "The segmentation information is presented in the form of heightmaps",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[8].total_bytes",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"size\": 4169006971",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[8].file_count",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"numberOfFiles\": 2246",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[8].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"directoryName\": \"dexcom_g6\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[9].resources[8].name",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"metadataFileName\": \"participants.tsv\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[9].resources[0].name",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"metadataFileName\": \"README.md\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "file_collections[9].source_caveats",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "\"metadataFileName\": \"study_description.json\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "anomalies[0].anomaly_details",
+      "root": "anomalies",
+      "section": "Composition",
+      "snippet": "In cases of survey data, skipped questions or incomplete responses are expected.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[3].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The Dexcom G6 is a real-time, integrated continuous glucose monitoring system (iCGM)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[4].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The Garmin Vivosmart 5 Fitness Activity tracker will be used to measure data related to physical activity.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[2].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "a custom-designed sensor unit called the LeeLab Anura",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[5].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The Optomed Aurora IQ is a handheld fundus camera",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "anomalies[4].anomaly_details",
+      "root": "anomalies",
+      "section": "Composition",
+      "snippet": "the quality of the images vary from patient to patient and within the same patient",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[6].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The iCare EIDON is a widefield TrueColor confocal fundus imaging system",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[7].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The Heidelberg Spectralis HRA+OCT is an ophthalmic imaging system",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[10].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The DRI OCT Triton is a device from Topcon Healthcare",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[9].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The Maestro2 is a robotic OCT and color fundus camera system from Topcon Healthcare.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[11].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The Zeiss Cirrus 5000 Angioplex is a high-definition optical coherence tomography (OCT) system",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[8].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Fluorescence Lifetime Imaging Ophthalmoscopy (FLIO) is an advanced imaging technique",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[12].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "M&S Technologies EVA device to test visual acuity.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[12].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "KR 800 Auto Keratometer/Refractor.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[12].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "OMRON HEM 907XL Blood Pressure Monitor",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[12].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "NIDEK LM-600P Auto Lensometer",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "collection_mechanisms[1].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "Philips (manufacturer of Pagewriter TC30 Cardiograph)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "known_biases[2].bias_description",
+      "root": "known_biases",
+      "section": "Composition",
+      "snippet": "While the AI-READI's cross-sectional database ultimately aims to achieve balance",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "known_biases[1].bias_description",
+      "root": "known_biases",
+      "section": "Composition",
+      "snippet": "the predominantly urban and hospital-based recruitment",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "known_biases[2].mitigation_strategy",
+      "root": "known_biases",
+      "section": "Composition",
+      "snippet": "Uniform data collection protocols were implemented for all subjects",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "file_collections[1].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "Clinical data in AI-READI consists of OMOP Common Data Model\u2013formatted health-related measurements",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "anomalies[2].anomaly_details",
+      "root": "anomalies",
+      "section": "Composition",
+      "snippet": "patient uncooperation, noise that may obscure the images and technical failure",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c023",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "file_collections[4].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "Optical Coherence Tomography (OCT) is a non-invasive diagnostic technique",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c023",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "file_collections[5].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "Optical coherence tomography angiography (OCTA) is a non-invasive imaging modality",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c023",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "file_collections[6].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "Retinal photography is a non-invasive procedure that photographs the posterior segment",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c023",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "collection_mechanisms[3].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "A single sensor is designed to last for a maximum of ten days",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c023",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "file_collections[3].description",
+      "root": "file_collections",
+      "section": "FileCollection",
+      "snippet": "short (498-560nm) and long (560-720nm)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c024",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "collection_mechanisms[4].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "the Garmin Vivosmart 5 fitness tracker was utilized for activity monitoring",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c024",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "anomalies[1].anomaly_details",
+      "root": "anomalies",
+      "section": "Composition",
+      "snippet": "There are gaps in data collection as the battery had to be charged every 2-3 days.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c024",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "collection_mechanisms[4].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "The sampling frequency of the Fitness tracker is 5 seconds.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c024",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "collection_mechanisms[2].mechanism_details",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "a custom-designed sensor unit (LeeLab Anura) was utilized to obtain environmental sensor data",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c026",
+      "source": "gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt",
+      "source_type": "IRB",
+      "slot": "collection_mechanisms[3].notes",
+      "root": "collection_mechanisms",
+      "section": "Collection",
+      "snippet": "allow download of the previously collected glucose values for up to 90 days prior to the study visit",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c027",
+      "source": "gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt",
+      "source_type": "IRB",
+      "slot": "known_biases[3].bias_description",
+      "root": "known_biases",
+      "section": "Composition",
+      "snippet": "non-English speaking participants will not be initially enrolled",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "Optomed Aurora"
+  ],
+  "source_excerpts": [
+    {
+      "query": "Optomed Aurora",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "chunk_sha256": "edb0ce22f469ba36f1625d083b46ff23d03dc97b4efcb19e0c4842693beaf20a",
+      "excerpt": "es across the study include: NIDEK LM-600P Auto Lensometer, Topcon-CL-200 computerized Lensometer, and Topcon-CL-300 computerized Lensometer\\n\\n   **Undilated fundus photography - Optomed Aurora**\\n\\n   The Optomed Aurora IQ is a handheld fundus camera that can take non-mydriatic images of the ocular fundus. It has a 50\u00b0 field of view, 5 Mpix sensor, and high-contrast optical design. The camera is non-mydriatic, meaning it doesn't require the pupil to be dilated, so it can be used for deta"
+    }
+  ]
+}

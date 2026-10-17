@@ -1,0 +1,18 @@
+{
+  "v8_records": 12,
+  "primary_ratings": 24,
+  "input_hash_checks": 24,
+  "evaluation_file_hash_checks": 24,
+  "score_and_denominator_arithmetic_checks": 24,
+  "v7_records_included": 0,
+  "repeat_ratings_included": 0,
+  "all_item_ids_consistent": true,
+  "source_association_recomputed": "from v8 record-level fields, reviews, and receipt links",
+  "figures": 8,
+  "normalized_field_record_cells_verified": 1404,
+  "normalized_score_records_reconciled_to_ratings": 12,
+  "all_76_lost_points_accounted_for": true,
+  "unmapped_loss_retained": 22,
+  "paired_and_leave_one_dataset_out_checks": true,
+  "plots_visually_checked": "All 14 figures, including three size-normalized additions"
+}

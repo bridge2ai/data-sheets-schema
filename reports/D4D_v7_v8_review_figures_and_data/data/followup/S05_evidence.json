@@ -1,0 +1,117 @@
+{
+  "sample_id": "S05",
+  "record": "AI_READI_v7_rep3",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml",
+  "d4d_sha256": "d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409",
+  "d4d_fields": {
+    "data_protection_impacts": null,
+    "future_use_impacts": [
+      {
+        "impact_details": "To the extent of the creators' knowledge, no uses of the dataset are currently anticipated that could result in unfair treatment or harm. However, there is a theoretical risk of future re-identification."
+      },
+      {
+        "impact_details": "AI algorithms can infer individual patient characteristics and could facilitate individual-level identification. To prevent re-identification attempts, the project implements a robust data dissemination system, a strict licence agreement and data watermarking for both the public and controlled sets."
+      }
+    ],
+    "participant_privacy": [
+      {
+        "anonymization_method": "No direct identifiers were collected, so no active de-identification was necessary; the project verified that no identifiable data per US HIPAA were present. The public release is stripped of Protected Health Information as defined by the HIPAA Privacy Rule using the Safe Harbor method, and additionally omits sex, race/ethnicity and medication information.",
+        "privacy_techniques": "A robust data dissemination system, a strict licence agreement and static data watermarking that identifies the licensee are implemented for both the public and controlled sets. The home environmental sensor and the Garmin fitness tracker were specifically chosen with participant privacy as a primary concern: these devices do not capture video or audio, are not equipped with GPS location monitoring and are not synced with participant-owned devices. Study data and identifiable information are kept on encrypted servers or in locked cabinets or rooms with restricted access at all sites, under a Level 3 data security classification, with access limited to authorized research personnel.",
+        "reidentification_risk": "The project reports a theoretical risk of future re-identification, and notes that AI algorithms can infer individual patient characteristics and could facilitate individual-level identification.",
+        "data_linkage": "The controlled access version links additional variables to the same participants: 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports."
+      }
+    ]
+  },
+  "receipt_links": [
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c004",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "participant_privacy[0].privacy_techniques",
+      "root": "participant_privacy",
+      "section": "Human",
+      "snippet": "not equipped with GPS location monitoring and are not",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "participant_privacy[0].reidentification_risk",
+      "root": "participant_privacy",
+      "section": "Human",
+      "snippet": "a strict licence agreement and data watermarking for both",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_protection_impacts[0].impact_details",
+      "root": "data_protection_impacts",
+      "section": "Ethics",
+      "snippet": "No, a data protection impact analysis has not been conducted.",
+      "root_present": false
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "future_use_impacts[0].impact_details",
+      "root": "future_use_impacts",
+      "section": "Uses",
+      "snippet": "there is a theoretical risk of future re-identification",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c027",
+      "source": "gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt",
+      "source_type": "IRB",
+      "slot": "participant_privacy[0].privacy_techniques",
+      "root": "participant_privacy",
+      "section": "Human",
+      "snippet": "All study data and identifiable information will be kept on encrypted servers",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "git blob",
+    "path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+    "commit": "b8f2aa4616d438495d9153f683784602413c9bc8"
+  },
+  "source_search_queries": [
+    "impact analysis",
+    "data protection impact"
+  ],
+  "source_excerpts": [
+    {
+      "query": "impact analysis",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "chunk_sha256": "2e01e462052cc2725ddd4ae08bcfc6fcd9b439502686a2bcf0e40b36cb1e5817",
+      "excerpt": " \"USA\"\n        },\n        {\n          \"id\": 12,\n          \"question\": \"Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.\",\n          \"response\": \"No, a data protection impact analysis has not been conducted.\"\n        }\n      ],\n      \"inclusion\": [\n   "
+    },
+    {
+      "query": "data protection impact",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "chunk_sha256": "2e01e462052cc2725ddd4ae08bcfc6fcd9b439502686a2bcf0e40b36cb1e5817",
+      "excerpt": "     \"response\": \"USA\"\n        },\n        {\n          \"id\": 12,\n          \"question\": \"Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.\",\n          \"response\": \"No, a data protection impact analysis has not been conducted.\"\n        }\n      ],\n      \"inclusio"
+    }
+  ]
+}

@@ -1,0 +1,1345 @@
+[
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "version": "v8",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 10,
+    "job": "AI_READI_v8_rep1_r10_rating1",
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:3",
+    "type": "completeness",
+    "severity": "low",
+    "description": "No download_url field is populated. The download route is nevertheless reconstructable from page, data_governance.access_review_process (verified-ID login, T2DM-only attestation, license assent) and the external resource https://fairhub.io/datasets/3/access, so the sub-element's purpose is met by platform access instructions rather than by a direct link.",
+    "recommendation": "Populate download_url with https://fairhub.io/datasets/3 or the access endpoint so machine clients can resolve the retrieval route without parsing prose.",
+    "fields": [
+      "download_url",
+      "page",
+      "data_governance.access_review_process",
+      "external_resources"
+    ],
+    "roots": [
+      "data_governance",
+      "download_url",
+      "external_resources",
+      "page"
+    ],
+    "sections": [
+      "Composition",
+      "Data Governance",
+      "Metadata"
+    ],
+    "absent_roots": [
+      "download_url"
+    ],
+    "sample_id": "S01",
+    "family": "Completeness",
+    "stratum_size": 26,
+    "primary_disposition": "Representation / selective summary",
+    "assessment": "download_url is unpopulated, but the FAIRhub access route and conditions are stated in data_governance and external_resources. The historical schema distinguishes a direct data URL from a landing/access page, so this is not proof that download_url should contain that page.",
+    "recommended_action": "Retain access instructions; populate download_url only if a source supplies an appropriate direct retrieval URL.",
+    "uncertainty": "No direct-download endpoint was established; no live access test.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S01_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "version": "v8",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 10,
+    "job": "AI_READI_v8_rep2_r10_rating1",
+    "issue_id": "AI_READI_v8_rep2_r10_rating1:3",
+    "type": "consistency",
+    "severity": "low",
+    "description": "The de-identification evidence carries an internal tension the record itself surfaces: is_deidentified.deidentification_details reports the FAIRhub deIdentType as 'NoDeIdentification' with deIdentHIPAA true, while is_deidentified.method asserts the public set is stripped of PHI 'via the Safe Harbor method'. The record reconciles this by explaining that no identifiers were collected so no active de-identification step was necessary, which is a coherent reading, but the two statements read as contradictory in isolation.",
+    "recommendation": "State explicitly that 'NoDeIdentification' denotes the absence of a removal step on an already identifier-free collection, rather than the absence of HIPAA conformance.",
+    "fields": [
+      "is_deidentified.method",
+      "is_deidentified.deidentification_details"
+    ],
+    "roots": [
+      "is_deidentified"
+    ],
+    "sections": [
+      "Composition"
+    ],
+    "absent_roots": [],
+    "sample_id": "S02",
+    "family": "Consistency",
+    "stratum_size": 16,
+    "primary_disposition": "Documented source differences",
+    "assessment": "The D4D preserves two source statements: FAIRhub says no identifiers were collected and no active de-identification was necessary; the Nature comment says the public set is stripped using Safe Harbor. The comment itself accepts a coherent interpretation.",
+    "recommended_action": "Attribute each statement to its source and release scope rather than treating either as established false.",
+    "uncertainty": "The actual processing history is not resolved by these documents.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S02_evidence.json",
+    "source_excerpt_count": 2
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "version": "v7",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 10,
+    "job": "AI_READI_v7_rep3_r10_rating1",
+    "issue_id": "AI_READI_v7_rep3_r10_rating1:2",
+    "type": "content_accuracy",
+    "severity": "medium",
+    "description": "is_deidentified.method simultaneously reports that the FAIRhub dataset description records the de-identification type as 'NoDeIdentification' and that the public set is stripped of PHI 'using the Safe Harbor method', with identifiers_removed listing HIPAA PHI plus sex, race/ethnicity and medications. The two statements describe the same release and pull in opposite directions; the record flags the tension but leaves the structured method value carrying both readings.",
+    "recommendation": "State the operative determination (HIPAA Safe Harbor applied, plus removal of sex, race/ethnicity and medications) as the structured method, and relegate the FAIRhub 'NoDeIdentification' registry label to notes with an explanation of why the registry flag differs.",
+    "fields": [
+      "is_deidentified.method",
+      "is_deidentified.identifiers_removed",
+      "preprocessing_strategies",
+      "regulatory_restrictions.other_compliance"
+    ],
+    "roots": [
+      "is_deidentified",
+      "preprocessing_strategies",
+      "regulatory_restrictions"
+    ],
+    "sections": [
+      "Composition",
+      "Data Governance",
+      "Preprocessing"
+    ],
+    "absent_roots": [],
+    "sample_id": "S03",
+    "family": "Accuracy/correctness",
+    "stratum_size": 9,
+    "primary_disposition": "Documented source differences",
+    "assessment": "Both quoted de-identification statements are present in the D4D and recoverable from separate source chunks. This is a source tension carried into the record, not evidence of an invented statement.",
+    "recommended_action": "Separate source-specific statements and distinguish collection from public-release filtering.",
+    "uncertainty": "Historical-publication and current-metadata scope may differ; no operational adjudication.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S03_evidence.json",
+    "source_excerpt_count": 2
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "version": "v8",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 10,
+    "job": "AI_READI_v8_rep3_r10_rating1",
+    "issue_id": "AI_READI_v8_rep3_r10_rating1:9",
+    "type": "semantic_understanding",
+    "severity": "low",
+    "description": "Unresolved institutional attribution: the acronym expansion ('Exploratory' versus 'Equitable'), the lead institution (Washington University in St. Louis as FAIRhub managing organization and license Licensor versus University of Washington as RO-Crate PI affiliation and NIH RePORTER awardee) and the publisher (FAIRhub versus AI-READI Consortium) each differ between equally ranked sources. The record carries both positions in source_caveats rather than asserting one silently, which is the correct handling, but a consumer of creators.principal_investigator.affiliation receives two affiliations for one person.",
+    "recommendation": "Distinguish the roles explicitly: administering/sponsoring institution versus the PI's academic department, which would let both values stand without conflict.",
+    "fields": [
+      "source_caveats",
+      "creators.principal_investigator.affiliation",
+      "publisher",
+      "data_governance.accountable_organization"
+    ],
+    "roots": [
+      "creators",
+      "data_governance",
+      "publisher",
+      "source_caveats"
+    ],
+    "sections": [
+      "Data Governance",
+      "Metadata",
+      "Motivation"
+    ],
+    "absent_roots": [],
+    "sample_id": "S04",
+    "family": "Semantic understanding",
+    "stratum_size": 6,
+    "primary_disposition": "Documented source differences",
+    "assessment": "The record explicitly reports conflicting institutions and publisher values. Source excerpts name Washington University in St. Louis in the license/FAIRhub metadata and University of Washington in RO-Crate investigator affiliation.",
+    "recommended_action": "Preserve role-specific attribution and the source caveat. Seek steward clarification before choosing a single institution.",
+    "uncertainty": "Different organizational roles can coexist; the sources alone do not prove which attribution is wrong.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S04_evidence.json",
+    "source_excerpt_count": 3
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "version": "v7",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 20,
+    "job": "AI_READI_v7_rep3_r20_rating1",
+    "issue_id": "AI_READI_v7_rep3_r20_rating1:3",
+    "type": "completeness",
+    "severity": "medium",
+    "description": "data_protection_impacts is not populated even though the record documents processing of protected health information under HIPAA Safe Harbor, a controlled-access tier holding zip code, genetic sequencing data and medication history, and an explicit residual re-identification risk. The substance of an impact analysis is present (participant_privacy.reidentification_risk, future_use_impacts risk-and-mitigation statements, Level 3 data security classification), but no formal DPIA slot or document is referenced.",
+    "recommendation": "Populate data_protection_impacts with a reference to the project's privacy/security risk assessment (or state explicitly that no formal DPIA was required under US law and that the HIPAA Safe Harbor determination plus the Level 3 security classification serve that function).",
+    "fields": [
+      "data_protection_impacts",
+      "participant_privacy.reidentification_risk",
+      "future_use_impacts"
+    ],
+    "roots": [
+      "data_protection_impacts",
+      "future_use_impacts",
+      "participant_privacy"
+    ],
+    "sections": [
+      "Ethics",
+      "Human",
+      "Uses"
+    ],
+    "absent_roots": [
+      "data_protection_impacts"
+    ],
+    "sample_id": "S05",
+    "family": "Completeness",
+    "stratum_size": 14,
+    "primary_disposition": "Explicit source limitation",
+    "assessment": "The field is absent, and the historical FAIRhub healthsheet explicitly says a data protection impact analysis has not been conducted. The assessment artifact is a source-level absence; the negative statement itself could have been captured.",
+    "recommended_action": "Populate an explicit negative finding with its source, without inventing a DPIA or interpreting scattered privacy discussion as a formal assessment.",
+    "uncertainty": "No conclusion about whether a formal assessment is legally required.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S05_evidence.json",
+    "source_excerpt_count": 2
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "version": "v8",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 20,
+    "job": "AI_READI_v8_rep2_r20_rating1",
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:1",
+    "type": "consistency",
+    "severity": "medium",
+    "description": "is_deidentified is internally contradictory. method states 'No active de-identification was necessary because no identifiers were collected' and simultaneously that 'The public set is stripped of Protected Health Information as defined by the HIPAA Privacy Rule via the Safe Harbor method'. deidentification_details then records the FAIRhub value deIdentType 'NoDeIdentification' alongside deIdentHIPAA true and deIdentDirect true. 'No de-identification was necessary', 'Safe Harbor stripping was performed' and 'NoDeIdentification' cannot all describe the same processing step; identifiers_removed further lists four categories actively removed (PHI, sex, race/ethnicity, medications), which is an active removal, not an absence of need.",
+    "recommendation": "Separate the two claims explicitly: state that no direct identifiers were collected at source, AND that a Safe Harbor review plus removal of sex, race/ethnicity and medications was applied to the public release. Annotate the FAIRhub 'NoDeIdentification' enum value as a platform-metadata artifact that contradicts the documented Safe Harbor step rather than reproducing it unqualified.",
+    "fields": [
+      "is_deidentified.method",
+      "is_deidentified.deidentification_details",
+      "is_deidentified.identifiers_removed",
+      "preprocessing_strategies"
+    ],
+    "roots": [
+      "is_deidentified",
+      "preprocessing_strategies"
+    ],
+    "sections": [
+      "Composition",
+      "Preprocessing"
+    ],
+    "absent_roots": [],
+    "sample_id": "S06",
+    "family": "Consistency",
+    "stratum_size": 30,
+    "primary_disposition": "Documented source differences",
+    "assessment": "The same tension noted in S02 appears in two sources and is reproduced in the same record. The reviewer gives it a stronger interpretation here, but those documents do not determine whether collection and release filtering describe one processing step.",
+    "recommended_action": "Make the source and processing-stage distinction explicit.",
+    "uncertainty": "A same-step contradiction cannot be established from the available excerpts.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S06_evidence.json",
+    "source_excerpt_count": 2
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "version": "v8",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 20,
+    "job": "AI_READI_v8_rep3_r20_rating1",
+    "issue_id": "AI_READI_v8_rep3_r20_rating1:5",
+    "type": "content_accuracy",
+    "severity": "medium",
+    "description": "Institutional attribution is internally divided: Washington University in St. Louis (ROR:01yc7t268) is recorded as accountable organization, managing organization and Licensor, while the IRB (STUDY00016228), the Human Subjects Division, the assay laboratory (UW Nutrition and Obesity Research Center) and the custom environmental sensor lab (Karalis Johnson Retina Center) are all University of Washington. The ROR identifier does match the name it is attached to, so this is a source conflict rather than a malformed identifier, but the governance chain as asserted places accountability at an institution that performs none of the documented oversight functions.",
+    "recommendation": "Distinguish the licensing/sponsoring organization from the human-subjects-accountable organization in separate slots, so the two tier-1 sources can both be asserted without one overriding the other.",
+    "fields": [
+      "data_governance.accountable_organization",
+      "creators.principal_investigator.affiliation",
+      "human_subject_research.ethics_review_board",
+      "license_and_use_terms.license_terms",
+      "source_caveats"
+    ],
+    "roots": [
+      "creators",
+      "data_governance",
+      "human_subject_research",
+      "license_and_use_terms",
+      "source_caveats"
+    ],
+    "sections": [
+      "Data Governance",
+      "Human",
+      "Metadata",
+      "Motivation"
+    ],
+    "absent_roots": [],
+    "sample_id": "S07",
+    "family": "Accuracy/correctness",
+    "stratum_size": 18,
+    "primary_disposition": "Documented source differences",
+    "assessment": "The record names differing institutions and discloses the provenance of each. The review infers that accountability cannot lie with an institution not listed for operational oversight; that inference is not established by the source excerpts.",
+    "recommended_action": "Keep organizational role and source attached to each attribution.",
+    "uncertainty": "The accountable organization cannot be independently settled here.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S07_evidence.json",
+    "source_excerpt_count": 3
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "version": "v8",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 20,
+    "job": "AI_READI_v8_rep2_r20_rating1",
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:11",
+    "type": "semantic_understanding",
+    "severity": "low",
+    "description": "Device heterogeneity is not categorized as a bias. Retinal imaging was acquired on four OCT/OCTA vendor platforms (Heidelberg Spectralis, Topcon Maestro2, Topcon Triton, Zeiss Cirrus) and four fundus platforms, and the record notes that Optomed Aurora image quality 'varies from patient to patient and within the same patient'. Cross-device systematic difference is a textbook measurement_bias for multimodal imaging AI, but it appears only under anomalies, so known_biases omits a bias type that the dataset's own acquisition design makes likely.",
+    "recommendation": "Add a measurement_bias entry covering inter-device and inter-site acquisition variation, with any harmonization or device-stratification guidance as the mitigation strategy.",
+    "fields": [
+      "known_biases",
+      "anomalies",
+      "collection_mechanisms",
+      "file_collections"
+    ],
+    "roots": [
+      "anomalies",
+      "collection_mechanisms",
+      "file_collections",
+      "known_biases"
+    ],
+    "sections": [
+      "Collection",
+      "Composition",
+      "FileCollection"
+    ],
+    "absent_roots": [],
+    "sample_id": "S08",
+    "family": "Semantic understanding",
+    "stratum_size": 5,
+    "primary_disposition": "Representation / selective summary",
+    "assessment": "Device heterogeneity and image-quality variation are documented outside known_biases; known_biases lacks a measurement-bias entry. Adding that taxonomy entry is an interpretive categorization improvement, not proof a source fact was omitted.",
+    "recommended_action": "Consider a qualified measurement-bias entry that cites the documented device/site heterogeneity and labels the risk as an interpretation.",
+    "uncertainty": "The inference from heterogeneous devices to systematic bias is not empirically tested.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S08_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "version": "v7",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 10,
+    "job": "CHORUS_v7_rep1_r10_rating1",
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:12",
+    "type": "completeness",
+    "severity": "medium",
+    "description": "Temporal coverage of the clinical data is unstated. collection_timeframes gives the NIH award period 2022-09-01 to 2026-11-30 and its own source_caveats notes these 'are the NIH project period for award OT2OD032701, not the clinical period the admissions are drawn from'. Temporal ordering of collection, processing and publication therefore cannot be checked.",
+    "recommendation": "State the admission date range covered by the released extract per contributing site.",
+    "fields": [
+      "collection_timeframes.timeframe_details",
+      "collection_timeframes.source_caveats"
+    ],
+    "roots": [
+      "collection_timeframes"
+    ],
+    "sections": [
+      "Collection"
+    ],
+    "absent_roots": [],
+    "sample_id": "S09",
+    "family": "Completeness",
+    "stratum_size": 26,
+    "primary_disposition": "Documentation gap; provenance unresolved",
+    "assessment": "collection_timeframes supplies grant dates and explicitly says these are not admission dates. The source excerpt confirms the grant period. The clinical temporal-coverage gap is real in the D4D.",
+    "recommended_action": "Record clinical coverage as not established in the reviewed sources and request release-specific dates.",
+    "uncertainty": "A targeted source review does not prove no relevant dates exist anywhere in the corpus.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S09_evidence.json",
+    "source_excerpt_count": 2
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "version": "v7",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 10,
+    "job": "CHORUS_v7_rep1_r10_rating1",
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:11",
+    "type": "consistency",
+    "severity": "low",
+    "description": "Two sources disagree on scale and the disagreement is carried into the scored values: tier-2 documentation gives 50,000 admissions and 7,642 admissions with radiology data, while the tier-4 August 2025 webinar gives 'over 45K unique admissions' and 1000 images. The record discloses the conflict and unit mismatch rather than concealing it, which is good practice, but the headline counts remain contested.",
+    "recommendation": "Date-stamp each count to a named release snapshot so the two figures can be read as successive states rather than as a contradiction.",
+    "fields": [
+      "instances.counts",
+      "instances.source_caveats",
+      "source_caveats",
+      "description"
+    ],
+    "roots": [
+      "description",
+      "instances",
+      "source_caveats"
+    ],
+    "sections": [
+      "Composition",
+      "Metadata"
+    ],
+    "absent_roots": [],
+    "sample_id": "S10",
+    "family": "Consistency",
+    "stratum_size": 30,
+    "primary_disposition": "Documented source differences",
+    "assessment": "The website and webinar contain the reported numbers, and the record preserves the August 2025 qualifier and images-versus-admissions distinction. Different dates and units do not by themselves establish conflicting facts.",
+    "recommended_action": "Present numbers in a source/date/unit table; avoid treating all numerical differences as contradictions.",
+    "uncertainty": "Comparable release snapshots are not available to adjudicate an error.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S10_evidence.json",
+    "source_excerpt_count": 4
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "version": "v8",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 10,
+    "job": "CHORUS_v8_rep3_r10_rating1",
+    "issue_id": "CHORUS_v8_rep3_r10_rating1:6",
+    "type": "content_accuracy",
+    "severity": "medium",
+    "description": "Two volume disagreements are retained rather than reconciled: the project website reports 50,000 released admissions while the September 2025 webinar reports over 45,000 unique admissions as of August 2025; and the website reports 7,642 admissions with radiology data while the webinar reports roughly 1,000 images available with de-identification in process. The record discloses both disagreements and its ranking rule, which is good provenance practice, but a reuser cannot determine the volume of the release they would receive.",
+    "recommendation": "Report release-dated counts tied to a version identifier so that admission and imaging volumes are unambiguous for a given release.",
+    "fields": [
+      "instances.counts",
+      "instances.source_caveats",
+      "description",
+      "source_caveats"
+    ],
+    "roots": [
+      "description",
+      "instances",
+      "source_caveats"
+    ],
+    "sections": [
+      "Composition",
+      "Metadata"
+    ],
+    "absent_roots": [],
+    "sample_id": "S11",
+    "family": "Accuracy/correctness",
+    "stratum_size": 20,
+    "primary_disposition": "Documented source differences",
+    "assessment": "The source numbers and their qualifiers are preserved. The D4D explicitly says the imaging counts use different units. The reviewer correctly identifies unresolved release-volume specificity, but not a demonstrated inaccurate number.",
+    "recommended_action": "Use a source/date/unit comparison and distinguish snapshot coverage from current-release counts.",
+    "uncertainty": "No current release audit was performed.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S11_evidence.json",
+    "source_excerpt_count": 4
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "version": "v8",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 10,
+    "job": "CHORUS_v8_rep1_r10_rating1",
+    "issue_id": "CHORUS_v8_rep1_r10_rating1:8",
+    "type": "semantic_understanding",
+    "severity": "medium",
+    "description": "license_and_use_terms conflates two distinct objects: the MIT License applies to the chorus-ai code, while no license is named for the data. The access terms recorded are those of one route (the AIM-AHEAD training program registration), not a general data use agreement, so reuse permissions for the dataset itself remain unstated.",
+    "recommendation": "Name the data use agreement governing dataset access and its reuse and redistribution permissions, kept separate from the software license.",
+    "fields": [
+      "license_and_use_terms",
+      "external_resources"
+    ],
+    "roots": [
+      "external_resources",
+      "license_and_use_terms"
+    ],
+    "sections": [
+      "Composition",
+      "Data Governance"
+    ],
+    "absent_roots": [],
+    "sample_id": "S12",
+    "family": "Semantic understanding",
+    "stratum_size": 9,
+    "primary_disposition": "Reviewer claim overstated or contradicted",
+    "assessment": "license_and_use_terms.source_caveats explicitly says the MIT statement concerns software, not data, and identifies the training-program access route. This contradicts the allegation that the D4D conflates software and data licensing. Missing named data-license details remain a separate valid concern.",
+    "recommended_action": "Withdraw or qualify the conflation allegation while retaining the narrower documentation gap.",
+    "uncertainty": "This is a mixed comment; it is not wholly invalid.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S12_evidence.json",
+    "source_excerpt_count": 2
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "version": "v8",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 20,
+    "job": "CHORUS_v8_rep2_r20_rating1",
+    "issue_id": "CHORUS_v8_rep2_r20_rating1:9",
+    "type": "completeness",
+    "severity": "medium",
+    "description": "prohibited_uses and discouraged_uses are both absent for a controlled-access dataset of critically ill patients' PHI. intended_uses is developed in detail across three categories, so the use guidance is one-sided: no prohibition on re-identification attempts, redistribution, or clinical deployment of unvalidated models is recorded, even though such terms are presumably in the signed licensing agreement.",
+    "recommendation": "Surface the prohibitions from the licensing agreement into prohibited_uses (notably re-identification and redistribution) and add discouraged_uses for analyses the cohort cannot support.",
+    "fields": [
+      "prohibited_uses",
+      "discouraged_uses",
+      "intended_uses",
+      "license_and_use_terms"
+    ],
+    "roots": [
+      "discouraged_uses",
+      "intended_uses",
+      "license_and_use_terms",
+      "prohibited_uses"
+    ],
+    "sections": [
+      "Data Governance",
+      "Uses"
+    ],
+    "absent_roots": [
+      "discouraged_uses",
+      "prohibited_uses"
+    ],
+    "sample_id": "S13",
+    "family": "Completeness",
+    "stratum_size": 17,
+    "primary_disposition": "Documentation gap; provenance unresolved",
+    "assessment": "Both prohibited_uses and discouraged_uses are absent. The source excerpt requires a signed agreement but does not supply its restrictions. The comment\u2019s suggestion that specific prohibitions are presumably in that agreement is speculation.",
+    "recommended_action": "Mark the unprovided agreement terms as unknown; do not invent prohibitions based on expected practice.",
+    "uncertainty": "The unavailable agreement was not obtained or adjudicated.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S13_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "version": "v8",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 20,
+    "job": "CHORUS_v8_rep2_r20_rating1",
+    "issue_id": "CHORUS_v8_rep2_r20_rating1:4",
+    "type": "consistency",
+    "severity": "medium",
+    "description": "The dataset is protected health information from 14 US hospitals and confidential_elements asserts that every data type is under controlled access, but regulatory_restrictions is absent in full: no hipaa_compliant status, no confidentiality_level classification, no other_compliance. The restrictiveness asserted in prose is never expressed as a governance classification.",
+    "recommendation": "Populate regulatory_restrictions with a confidentiality_level, HIPAA compliance status, and the de-identification standard applied (Safe Harbor vs Expert Determination), which is the claim a controlled-access PHI dataset most needs to make explicit.",
+    "fields": [
+      "regulatory_restrictions.hipaa_compliant",
+      "regulatory_restrictions.confidentiality_level",
+      "regulatory_restrictions.other_compliance",
+      "confidential_elements",
+      "is_deidentified"
+    ],
+    "roots": [
+      "confidential_elements",
+      "is_deidentified",
+      "regulatory_restrictions"
+    ],
+    "sections": [
+      "Composition",
+      "Data Governance"
+    ],
+    "absent_roots": [
+      "regulatory_restrictions"
+    ],
+    "sample_id": "S14",
+    "family": "Consistency",
+    "stratum_size": 37,
+    "primary_disposition": "Representation / selective summary",
+    "assessment": "Controlled access is explicitly documented, while regulatory_restrictions is unpopulated. This is a structural classification gap, not an internal contradiction. HIPAA compliance cannot be inferred simply from controlled access.",
+    "recommended_action": "Preserve the access restriction; fill a regulatory classification only when supported by a source or clearly labeled mapping.",
+    "uncertainty": "No compliance determination is made.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S14_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "version": "v7",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 20,
+    "job": "CHORUS_v7_rep1_r20_rating1",
+    "issue_id": "CHORUS_v7_rep1_r20_rating1:11",
+    "type": "content_accuracy",
+    "severity": "low",
+    "description": "The maintainer contact email domain is recorded as 'mgh.havard.edu' (misspelling of harvard), reproduced verbatim from the source with a caveat. The contact is transparently sourced but not actionable as written.",
+    "recommendation": "Verify the address with the program manager and record the corrected form, keeping the caveat about the published typo.",
+    "fields": [
+      "maintainers.maintainer_details"
+    ],
+    "roots": [
+      "maintainers"
+    ],
+    "sections": [
+      "Maintenance"
+    ],
+    "absent_roots": [],
+    "sample_id": "S15",
+    "family": "Accuracy/correctness",
+    "stratum_size": 23,
+    "primary_disposition": "Inherited wording or citation convention",
+    "assessment": "The misspelled contact domain appears verbatim in the recovered website chunk and is explicitly caveated in the D4D. Its origin is upstream rather than generator invention.",
+    "recommended_action": "Retain the original string with a warning; verify a replacement with the steward before correcting the address.",
+    "uncertainty": "Deliverability was not tested, so the claim that it is unusable is unverified.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S15_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "version": "v8",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 20,
+    "job": "CHORUS_v8_rep3_r20_rating1",
+    "issue_id": "CHORUS_v8_rep3_r20_rating1:16",
+    "type": "semantic_understanding",
+    "severity": "low",
+    "description": "labeling_strategies, splits and parts of tasks describe project intentions in the future tense ('a visualization and annotation environment will label data', 'will also provision a holdout test set') and are recorded in fields whose semantics imply realized dataset properties. The record flags this at labeling_strategies.source_caveats, splits.source_caveats and the top-level source_caveats, so the intent/state distinction is preserved - but a consumer reading splits alone would infer a holdout set exists when its size, composition and availability are unstated.",
+    "recommendation": "Add an explicit realized/planned status flag on forward-looking entries so the distinction survives field-level extraction.",
+    "fields": [
+      "labeling_strategies",
+      "splits.split_details",
+      "splits.source_caveats",
+      "tasks"
+    ],
+    "roots": [
+      "labeling_strategies",
+      "splits",
+      "tasks"
+    ],
+    "sections": [
+      "Composition",
+      "Motivation",
+      "Preprocessing"
+    ],
+    "absent_roots": [],
+    "sample_id": "S16",
+    "family": "Semantic understanding",
+    "stratum_size": 7,
+    "primary_disposition": "Reviewer claim overstated or contradicted",
+    "assessment": "splits.split_details itself says the award abstract states the dataset will provision a holdout set, and source_caveats calls this an intention. A reader of splits is therefore not being told unambiguously that a realized holdout exists.",
+    "recommended_action": "Retain the future-tense qualifier; consider a dedicated status field if the schema permits it.",
+    "uncertainty": "Tasks may still benefit from clearer temporal scope; this does not invalidate the entire comment.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S16_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "version": "v7",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 10,
+    "job": "CM4AI_v7_rep1_r10_rating1",
+    "issue_id": "CM4AI_v7_rep1_r10_rating1:6",
+    "type": "completeness",
+    "severity": "low",
+    "description": "Neither `anomalies` nor `missing_data_documentation` is populated. cleaning_strategies records only that single-cell CRISPR screen data 'were reported as undergoing quality control at the time of the CM4AI preprint', without stating outcomes, exclusions, or known quality defects in the released files.",
+    "recommendation": "Document known anomalies (failed antibodies, low-confidence elution profiles, dropped guides) and missing-data patterns per file collection, and update the cleaning status now that the release is published.",
+    "fields": [
+      "anomalies",
+      "missing_data_documentation",
+      "cleaning_strategies"
+    ],
+    "roots": [
+      "anomalies",
+      "cleaning_strategies",
+      "missing_data_documentation"
+    ],
+    "sections": [
+      "Collection",
+      "Composition",
+      "Preprocessing"
+    ],
+    "absent_roots": [
+      "anomalies",
+      "missing_data_documentation"
+    ],
+    "sample_id": "S17",
+    "family": "Completeness",
+    "stratum_size": 35,
+    "primary_disposition": "Documentation gap; provenance unresolved",
+    "assessment": "anomalies and missing_data_documentation are absent; cleaning_strategies reports ongoing quality control. The relevant preprint says the data are being QCed. Detailed QC in the Nature paper concerns a different U2OS dataset and cannot be imported indiscriminately.",
+    "recommended_action": "Seek release-specific QC outcomes, exclusions, and missingness information.",
+    "uncertainty": "No exhaustive source-availability verdict or extraction-error claim.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S17_evidence.json",
+    "source_excerpt_count": 2
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "version": "v8",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 10,
+    "job": "CM4AI_v8_rep3_r10_rating1",
+    "issue_id": "CM4AI_v8_rep3_r10_rating1:2",
+    "type": "consistency",
+    "severity": "medium",
+    "description": "No software is named as having produced or transformed the data actually distributed. The tools the record does name fall outside that role: the Cell Mapping Toolkit / MuSIC pipeline is stated by the record itself to produce computed cell maps that 'are not included in this release'; FAIRSCAPE is packaging and provenance-metadata software; NDEx and the UVA Dataverse are sharing and hosting platforms; the 10x Genomics 3'HT kit is acquisition instrumentation.",
+    "recommendation": "Name the processing software and versions that produced each released archive (for example the MS search/quantification engine, CellRanger or equivalent for the perturb-seq reads, and the image processing toolchain), with repository or DOI links.",
+    "fields": [
+      "external_resources",
+      "notes",
+      "preprocessing_strategies.used_software",
+      "machine_annotation_tools"
+    ],
+    "roots": [
+      "external_resources",
+      "machine_annotation_tools",
+      "notes",
+      "preprocessing_strategies"
+    ],
+    "sections": [
+      "Composition",
+      "Metadata",
+      "Preprocessing"
+    ],
+    "absent_roots": [
+      "machine_annotation_tools",
+      "preprocessing_strategies"
+    ],
+    "sample_id": "S18",
+    "family": "Consistency",
+    "stratum_size": 17,
+    "primary_disposition": "Documentation gap; provenance unresolved",
+    "assessment": "preprocessing_strategies and machine_annotation_tools are unpopulated, while notes identify the cell-map pipeline as producing outputs excluded from the release. The current release source also says predicted cell maps are not included.",
+    "recommended_action": "Prioritize documentation of the processing that produced the distributed archives, with source-specific roles.",
+    "uncertainty": "The absence of a named production tool in this record does not establish that no source provides one.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S18_evidence.json",
+    "source_excerpt_count": 4
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "version": "v7",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 10,
+    "job": "CM4AI_v7_rep1_r10_rating1",
+    "issue_id": "CM4AI_v7_rep1_r10_rating1:8",
+    "type": "correctness",
+    "severity": "low",
+    "description": "The `download_url` slot is not populated; the platform access link is carried in distribution_formats.access_urls (https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C) with a note that the Data Access API is available. The information a consumer needs is present, but not in the slot a harvester would read.",
+    "recommendation": "Mirror the Dataverse access URL into `download_url` so automated harvesters resolve it.",
+    "fields": [
+      "download_url",
+      "distribution_formats.access_urls"
+    ],
+    "roots": [
+      "distribution_formats",
+      "download_url"
+    ],
+    "sections": [
+      "Distribution",
+      "Metadata"
+    ],
+    "absent_roots": [
+      "download_url"
+    ],
+    "sample_id": "S19",
+    "family": "Accuracy/correctness",
+    "stratum_size": 13,
+    "primary_disposition": "Representation / selective summary",
+    "assessment": "The Dataverse retrieval route is already structured in distribution_formats.access_urls. The historical schema says download_url points directly to data rather than a landing page. This correctness-labeled comment is not evidence of an inaccurate value.",
+    "recommended_action": "Do not automatically copy the landing page into download_url; retain the structured access route.",
+    "uncertainty": "No file-level direct endpoint was established.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S19_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "version": "v7",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 10,
+    "job": "CM4AI_v7_rep2_r10_rating1",
+    "issue_id": "CM4AI_v7_rep2_r10_rating1:12",
+    "type": "semantic_understanding",
+    "severity": "low",
+    "description": "acquisition_methods states AP-MS was acquired 'under three conditions (untreated, paclitaxel treated, vorinostat treated)', while the release distributes AP-MS only for the two treated conditions. The acquisition text describes project-level acquisition rather than release contents, which is defensible but not signposted.",
+    "recommendation": "Mark acquisition_methods entries that describe project-wide acquisition as distinct from what the release distributes.",
+    "fields": [
+      "acquisition_methods",
+      "description",
+      "file_collections"
+    ],
+    "roots": [
+      "acquisition_methods",
+      "description",
+      "file_collections"
+    ],
+    "sections": [
+      "Collection",
+      "FileCollection",
+      "Metadata"
+    ],
+    "absent_roots": [],
+    "sample_id": "S20",
+    "family": "Semantic understanding",
+    "stratum_size": 6,
+    "primary_disposition": "Generated scope ambiguity",
+    "assessment": "The acquisition field describes three conditions from the preprint, while description/file inventory limits this release\u2019s AP-MS to treated conditions. The field includes preprint-era context, but its relationship to the release could be clearer.",
+    "recommended_action": "Label the acquisition passage as project/preprint context and state that current AP-MS release coverage is treated conditions only.",
+    "uncertainty": "This is a scope-clarity issue, not proof the acquisition history is false.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S20_evidence.json",
+    "source_excerpt_count": 3
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "version": "v8",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 20,
+    "job": "CM4AI_v8_rep3_r20_rating1",
+    "issue_id": "CM4AI_v8_rep3_r20_rating1:5",
+    "type": "completeness",
+    "severity": "medium",
+    "description": "External repository deposits are named without accession identifiers. raw_data_sources and third_party_sharing state that SEC-MS and AP-MS data are 'Available at the MassIVE Repository' and the CRISPRi atlas is 'Available at Figshare', but give no MassIVE MSV number, no ProteomeXchange PXD number and no Figshare DOI. The contrast is visible inside the record: the related_datasets entry for the separate U2OS Nature paper does supply MSV000097168 and PXD052362.",
+    "recommendation": "Add the MassIVE/ProteomeXchange accessions and the Figshare DOI for this release's own deposits so the third-party copies are resolvable rather than merely named.",
+    "fields": [
+      "raw_data_sources.access_details",
+      "third_party_sharing",
+      "external_resources"
+    ],
+    "roots": [
+      "external_resources",
+      "raw_data_sources",
+      "third_party_sharing"
+    ],
+    "sections": [
+      "Collection",
+      "Composition",
+      "Distribution"
+    ],
+    "absent_roots": [],
+    "sample_id": "S21",
+    "family": "Completeness",
+    "stratum_size": 22,
+    "primary_disposition": "Documentation gap; provenance unresolved",
+    "assessment": "The D4D names MassIVE/Figshare without component accessions. The current-release source likewise names repositories; the explicit identifiers found in the Nature source refer to separate U2OS work.",
+    "recommended_action": "Mark component identifiers as unprovided in the reviewed release text; obtain release-specific links rather than borrowing unrelated accessions.",
+    "uncertainty": "No exhaustive search of external repositories was performed.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S21_evidence.json",
+    "source_excerpt_count": 4
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "version": "v8",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 20,
+    "job": "CM4AI_v8_rep2_r20_rating1",
+    "issue_id": "CM4AI_v8_rep2_r20_rating1:1",
+    "type": "consistency",
+    "severity": "medium",
+    "description": "Version numbering regresses across releases: this June 2026 release declares version: '2.0', while version_access records the earlier October 2025 release (doi:10.18130/V3/K7TGEM) and June 2025 release (doi:10.18130/V3/F3TD5R) as 'version 2.1'. A successor release carrying a lower version string than its predecessors is not explained anywhere in the record, and source_caveats does not flag it among the source conflicts it does disclose.",
+    "recommendation": "State the versioning scheme explicitly (e.g. Dataverse major version V2 vs. internal release version) or correct the version string so that release order and version order agree; if the source itself is inconsistent, record it in source_caveats alongside the other disclosed conflicts.",
+    "fields": [
+      "version",
+      "version_access.versions_available",
+      "related_datasets"
+    ],
+    "roots": [
+      "related_datasets",
+      "version",
+      "version_access"
+    ],
+    "sections": [
+      "Composition",
+      "Maintenance",
+      "Metadata"
+    ],
+    "absent_roots": [],
+    "sample_id": "S22",
+    "family": "Consistency",
+    "stratum_size": 26,
+    "primary_disposition": "Reviewer claim overstated or contradicted",
+    "assessment": "The compared version strings belong to different DOI-identified Dataverse deposits, each of which has its own version. Source excerpts confirm Version 2.0 for June 2026 and Version 2.1 for earlier deposits. Lower local deposit versions do not demonstrate chronological regression across datasets.",
+    "recommended_action": "Revise the reviewer\u2019s regression claim; add a per-deposit version clarification if desired.",
+    "uncertainty": "This is a source/deposit interpretation, not a replacement score.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S22_evidence.json",
+    "source_excerpt_count": 5
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "version": "v7",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 20,
+    "job": "CM4AI_v7_rep3_r20_rating1",
+    "issue_id": "CM4AI_v7_rep3_r20_rating1:10",
+    "type": "correctness",
+    "severity": "low",
+    "description": "The keyword 'mass spectroscopy' is a terminological error for mass spectrometry, the technique actually used throughout (SEC-MS, AP-MS). Spectroscopy and spectrometry are distinct methods, so the keyword misdescribes the assay and will not match controlled-vocabulary searches.",
+    "recommendation": "Replace 'mass spectroscopy' with 'mass spectrometry'. (If the term was transcribed verbatim from the upstream Dataverse keyword list, keep the transcription but add the corrected term alongside it.)",
+    "fields": [
+      "keywords"
+    ],
+    "roots": [
+      "keywords"
+    ],
+    "sections": [
+      "Metadata"
+    ],
+    "absent_roots": [],
+    "sample_id": "S23",
+    "family": "Accuracy/correctness",
+    "stratum_size": 14,
+    "primary_disposition": "Inherited wording or citation convention",
+    "assessment": "The keyword mass spectroscopy is present in the D4D and verbatim in the current Dataverse release metadata; the preprint also uses the phrase. It is inherited source terminology rather than evidence of a generator-created substitution.",
+    "recommended_action": "For controlled-vocabulary indexing, propose normalization to mass spectrometry with source attribution retained.",
+    "uncertainty": "The review does not quantify any actual search failure.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S23_evidence.json",
+    "source_excerpt_count": 3
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "version": "v7",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 20,
+    "job": "CM4AI_v7_rep2_r20_rating1",
+    "issue_id": "CM4AI_v7_rep2_r20_rating1:11",
+    "type": "semantic_understanding",
+    "severity": "low",
+    "description": "The citation string cites this release as 'V2' while the version field records '2.0'. Minor, but it compounds the version-sequence issue above for anyone matching a citation to a deposit version.",
+    "recommendation": "Align the version token in the citation with the value of the version field.",
+    "fields": [
+      "citation",
+      "version"
+    ],
+    "roots": [
+      "citation",
+      "version"
+    ],
+    "sections": [
+      "Metadata"
+    ],
+    "absent_roots": [],
+    "sample_id": "S24",
+    "family": "Semantic understanding",
+    "stratum_size": 8,
+    "primary_disposition": "Reviewer claim overstated or contradicted",
+    "assessment": "The same current-release source displays Version 2.0 and supplies a recommended citation ending V2. The D4D preserves both conventions. Different display precision is not by itself a conflicting version claim.",
+    "recommended_action": "Do not count V2 versus 2.0 as an established factual error.",
+    "uncertainty": "No claim is made about arbitrary version strings; this case has a matching source citation.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S24_evidence.json",
+    "source_excerpt_count": 4
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "version": "v8",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 10,
+    "job": "VOICE_v8_rep1_r10_rating1",
+    "issue_id": "VOICE_v8_rep1_r10_rating1:10",
+    "type": "completeness",
+    "severity": "low",
+    "description": "variables enumerates only four fields (participant_id, session_id, task_name, n_frames) for a release whose phenotype directory holds dozens of diagnosis and questionnaire tables. Column-level semantics are delegated to the per-file JSON data dictionaries, which are described but not enumerated in the record.",
+    "recommendation": "Either extend variables to cover the principal phenotype and static-feature columns or link the data dictionaries individually.",
+    "fields": [
+      "variables",
+      "file_collections"
+    ],
+    "roots": [
+      "file_collections",
+      "variables"
+    ],
+    "sections": [
+      "FileCollection",
+      "Variables"
+    ],
+    "absent_roots": [],
+    "sample_id": "S25",
+    "family": "Completeness",
+    "stratum_size": 26,
+    "primary_disposition": "Representation / selective summary",
+    "assessment": "variables has four entries, while file_collections describes more feature arrays and external JSON dictionaries. The D4D is a selective schema summary, not a full variable dictionary. The limited coverage is real but does not mean all variable semantics are absent.",
+    "recommended_action": "Link or inventory the relevant dictionaries and state the scope of variables; extract additional named variables only where supported.",
+    "uncertainty": "Column-level completeness cannot be scored without an expected-variable inventory for this release.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S25_evidence.json",
+    "source_excerpt_count": 6
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "version": "v8",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 10,
+    "job": "VOICE_v8_rep2_r10_rating1",
+    "issue_id": "VOICE_v8_rep2_r10_rating1:1",
+    "type": "consistency",
+    "severity": "medium",
+    "description": "updates.frequency states a semi-annual (twice yearly) cadence, but the release history the record itself supplies is denser and irregular: 2025-01-17 (1.1), 2025-04-16 (2.0.0), 2025-08-18 (2.0.1), 2025-12-16 (3.0.0), 2026-05-01 (3.1.0) \u2014 five releases in roughly sixteen months. The record caveats that the cadence statement was written against Health Data Nexus hosting, but does not reconcile it with the observed PhysioNet release pattern.",
+    "recommendation": "Restate the update cadence against the PhysioNet release history, or mark the semi-annual figure as a planning target rather than an observed frequency.",
+    "fields": [
+      "updates.frequency",
+      "distribution_dates.release_dates",
+      "version_access.versions_available"
+    ],
+    "roots": [
+      "distribution_dates",
+      "updates",
+      "version_access"
+    ],
+    "sections": [
+      "Distribution",
+      "Maintenance"
+    ],
+    "absent_roots": [],
+    "sample_id": "S26",
+    "family": "Consistency",
+    "stratum_size": 16,
+    "primary_disposition": "Documented source differences",
+    "assessment": "The cadence statement comes from older Health Data Nexus documentation and is caveated as such. PhysioNet history mixes major releases and patches. The statements differ in platform/time scope and planned cadence versus observed events.",
+    "recommended_action": "Move the older cadence to historical context and distinguish planned major-release cadence from patch releases.",
+    "uncertainty": "Irregular realized releases do not alone falsify a stated plan.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S26_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "version": "v7",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 10,
+    "job": "VOICE_v7_rep1_r10_rating1",
+    "issue_id": "VOICE_v7_rep1_r10_rating1:7",
+    "type": "correctness",
+    "severity": "low",
+    "description": "The RRID carried in the citation, RRID:SCR_007345, is well formed and resolves to PhysioNet, the hosting repository, rather than to the dataset itself. Using a repository RRID inside a dataset citation is a category slip: it identifies where the data sit, not the resource being cited.",
+    "recommendation": "Keep the DOI as the dataset identifier and either drop the repository RRID from the citation string or label it explicitly as the hosting platform's RRID.",
+    "fields": [
+      "citation"
+    ],
+    "roots": [
+      "citation"
+    ],
+    "sections": [
+      "Metadata"
+    ],
+    "absent_roots": [],
+    "sample_id": "S27",
+    "family": "Accuracy/correctness",
+    "stratum_size": 12,
+    "primary_disposition": "Inherited wording or citation convention",
+    "assessment": "The recovered official recommended citation includes RRID:SCR_007345 alongside PhysioNet and the dataset DOI, matching the D4D citation convention. This establishes inheritance, not a generator-created identifier error.",
+    "recommended_action": "Preserve the recommended citation and, if useful, explicitly label the repository identifier separately from the dataset DOI.",
+    "uncertainty": "The RRID registry was not independently resolved during this local review.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S27_evidence.json",
+    "source_excerpt_count": 3
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "version": "v8",
+    "rep": 3,
+    "rating": 1,
+    "rubric": 10,
+    "job": "VOICE_v8_rep3_r10_rating1",
+    "issue_id": "VOICE_v8_rep3_r10_rating1:8",
+    "type": "semantic_understanding",
+    "severity": "low",
+    "description": "Ontology references are given as bare CURIEs without labels or resolvable prefixes: instances carry data_topic: B2AI_TOPIC:36 and data_substrate: B2AI_SUBSTRATE:69. A reader cannot determine what topic or substrate is meant from the datasheet alone, even though the same concepts are described richly in prose elsewhere in the record.",
+    "recommendation": "Accompany each CURIE with its human-readable label and register the B2AI_TOPIC and B2AI_SUBSTRATE prefixes against a resolvable namespace.",
+    "fields": [
+      "instances.data_topic",
+      "instances.data_substrate"
+    ],
+    "roots": [
+      "instances"
+    ],
+    "sections": [
+      "Composition"
+    ],
+    "absent_roots": [],
+    "sample_id": "S28",
+    "family": "Semantic understanding",
+    "stratum_size": 7,
+    "primary_disposition": "Representation / selective summary",
+    "assessment": "The record contains bare B2AI CURIEs without local explanatory labels. This supports a standalone-readability concern, but the reviewer\u2019s claim that prefixes are not resolvable was not tested.",
+    "recommended_action": "Add labels and an explicit prefix map for standalone exports if the schema/export format supports them.",
+    "uncertainty": "No ontology-resolution or correctness check of the selected ontology terms was performed.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S28_evidence.json",
+    "source_excerpt_count": 0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "version": "v8",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 20,
+    "job": "VOICE_v8_rep1_r20_rating1",
+    "issue_id": "VOICE_v8_rep1_r20_rating1:6",
+    "type": "completeness",
+    "severity": "medium",
+    "description": "Subpopulations are identified categorically (age, gender, sex, ethnicity, socioeconomic status, five disease cohorts) but never quantified. No per-cohort counts, no demographic distribution, and no enumerated per-diagnosis inclusion/exclusion criteria are given, although sampling_strategies states such criteria were applied and subpopulations states the distribution is skewed.",
+    "recommendation": "Add a demographic and per-cohort count table so the documented representation bias can be assessed quantitatively.",
+    "fields": [
+      "subpopulations.distribution",
+      "instances.counts",
+      "sampling_strategies.strategies",
+      "known_biases"
+    ],
+    "roots": [
+      "instances",
+      "known_biases",
+      "sampling_strategies",
+      "subpopulations"
+    ],
+    "sections": [
+      "Composition"
+    ],
+    "absent_roots": [],
+    "sample_id": "S29",
+    "family": "Completeness",
+    "stratum_size": 23,
+    "primary_disposition": "Documentation gap; provenance unresolved",
+    "assessment": "Subpopulation categories and imbalance are described without counts; criteria are referred to rather than fully enumerated. The source bundle has protocol inclusion criteria, but these are project/time-scoped and do not establish current-release cohort counts.",
+    "recommended_action": "Separate missing release-specific distributions from protocol detail that could be summarized with date/scope attribution.",
+    "uncertainty": "No expected demographic table or complete release-specific criteria list was reconstructed.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S29_evidence.json",
+    "source_excerpt_count": 4
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "version": "v7",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 20,
+    "job": "VOICE_v7_rep1_r20_rating1",
+    "issue_id": "VOICE_v7_rep1_r20_rating1:12",
+    "type": "consistency",
+    "severity": "low",
+    "description": "Identifier rendering is inconsistent: doi is the bare string '10.13026/8xbn-nq66' while id and version_access.latest_version_doi and related_datasets.target_dataset use the 'doi:' CURIE prefix. There is no top-level publisher field, although PhysioNet is identified as host in citation, maintainers and data_governance.stewardship_roles.",
+    "recommendation": "Normalize DOI rendering across fields and add an explicit publisher field naming PhysioNet (MIT Laboratory for Computational Physiology).",
+    "fields": [
+      "doi",
+      "id",
+      "version_access.latest_version_doi",
+      "related_datasets.target_dataset",
+      "publisher"
+    ],
+    "roots": [
+      "doi",
+      "id",
+      "publisher",
+      "related_datasets",
+      "version_access"
+    ],
+    "sections": [
+      "Composition",
+      "Maintenance",
+      "Metadata"
+    ],
+    "absent_roots": [
+      "publisher"
+    ],
+    "sample_id": "S30",
+    "family": "Consistency",
+    "stratum_size": 22,
+    "primary_disposition": "Reviewer claim overstated or contradicted",
+    "assessment": "The historical schema expressly requires a bare DOI in doi and allows a CURIE in id. Thus the mixed rendering is expected, not an identifier inconsistency. The same comment also identifies a genuinely absent publisher field, whose information appears elsewhere.",
+    "recommended_action": "Remove the DOI-format allegation; retain publisher as a separate representation/completeness observation.",
+    "uncertainty": "Compound comment with one contradicted and one supported component.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S30_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "version": "v7",
+    "rep": 2,
+    "rating": 1,
+    "rubric": 20,
+    "job": "VOICE_v7_rep2_r20_rating1",
+    "issue_id": "VOICE_v7_rep2_r20_rating1:2",
+    "type": "content_accuracy",
+    "severity": "medium",
+    "description": "data_protection_impacts states plainly that 'No analysis of the potential impact of the dataset and its use on data subjects has been conducted', while the same record documents biometric voice data, psychiatric and cognitive-impairment cohorts, an explicit statement that k-anonymity with k>=2 is not achieved, and an acknowledgement that voice can never be fully de-identified. The absence of a formal DPIA is honestly disclosed and partly offset by ethicist review of sensitive fields and the published memorandum 'Ethical Justification for Controlled Access to Raw Voice Data Samples', but the substantive gap remains for a dataset of this sensitivity.",
+    "recommendation": "Conduct and document a formal data protection impact assessment covering the residual re-identification risk of derived acoustic features, and link it from data_protection_impacts alongside the existing ethical-justification memorandum.",
+    "fields": [
+      "data_protection_impacts",
+      "participant_privacy.reidentification_risk",
+      "at_risk_populations",
+      "is_deidentified"
+    ],
+    "roots": [
+      "at_risk_populations",
+      "data_protection_impacts",
+      "is_deidentified",
+      "participant_privacy"
+    ],
+    "sections": [
+      "Composition",
+      "Ethics",
+      "Human"
+    ],
+    "absent_roots": [],
+    "sample_id": "S31",
+    "family": "Accuracy/correctness",
+    "stratum_size": 14,
+    "primary_disposition": "Explicit source limitation",
+    "assessment": "data_protection_impacts explicitly records that no analysis was conducted; the historical source gives the same negative response. A populated negative declaration is not an inaccurate result merely because the underlying dataset has privacy risks.",
+    "recommended_action": "Keep the negative declaration and distinguish evaluation of documentation fidelity from evaluation of the dataset\u2019s governance practices.",
+    "uncertainty": "No legal requirement or adequacy determination is made.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S31_evidence.json",
+    "source_excerpt_count": 1
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "version": "v7",
+    "rep": 1,
+    "rating": 1,
+    "rubric": 20,
+    "job": "VOICE_v7_rep1_r20_rating1",
+    "issue_id": "VOICE_v7_rep1_r20_rating1:4",
+    "type": "semantic_understanding",
+    "severity": "low",
+    "description": "The description enumerates five disease cohort categories including 'pediatric voice and speech disorders', but the record's scope is the adult dataset: human_subject_research.special_populations and related_datasets state that pediatric participants were released as a separate Bridge2AI-Voice Pediatric Dataset. subpopulations repeats the five-category list and then notes 'the adult dataset contains adult participants only'. A reader skimming the description could infer pediatric data is included in this release.",
+    "recommendation": "State in the description that the pediatric cohort is documented only as context and is distributed as the separate related dataset doi:10.13026/h995-bt35.",
+    "fields": [
+      "description",
+      "subpopulations",
+      "human_subject_research.special_populations",
+      "related_datasets",
+      "collection_mechanisms"
+    ],
+    "roots": [
+      "collection_mechanisms",
+      "description",
+      "human_subject_research",
+      "related_datasets",
+      "subpopulations"
+    ],
+    "sections": [
+      "Collection",
+      "Composition",
+      "Human",
+      "Metadata"
+    ],
+    "absent_roots": [],
+    "sample_id": "S32",
+    "family": "Semantic understanding",
+    "stratum_size": 8,
+    "primary_disposition": "Generated scope ambiguity",
+    "assessment": "The adult-release description says participants were recruited from five categories including pediatric disorders, and collection_mechanisms includes a pediatric process. Other fields correctly identify pediatric data as a separate release. This is a supported scope-clarity problem in generated wording.",
+    "recommended_action": "Revise the adult-release description to four adult disease categories plus controls; describe pediatric categories only as a separate consortium dataset.",
+    "uncertainty": "The underlying adult/pediatric dataset separation is explicit in sources; no records were inspected.",
+    "reviewer": "Codex assistant evidence assessment",
+    "status": "provisional; human review recommended",
+    "basis": "frozen D4D fields plus selected recovered source excerpts; historical schema for S01/S19/S30",
+    "evidence_file": "S32_evidence.json",
+    "source_excerpt_count": 7
+  }
+]

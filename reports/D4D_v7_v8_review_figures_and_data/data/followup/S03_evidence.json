@@ -1,0 +1,196 @@
+{
+  "sample_id": "S03",
+  "record": "AI_READI_v7_rep3",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml",
+  "d4d_sha256": "d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409",
+  "d4d_fields": {
+    "is_deidentified": {
+      "identifiable_elements_present": false,
+      "method": "No identifiers were collected, so no active de-identification was necessary; the team verified that no identifiable data per US HIPAA were present in the data. The public set is stripped of Protected Health Information as defined by the HIPAA Privacy Rule using the Safe Harbor method. On that basis the FAIRhub dataset description records the de-identification type as \"NoDeIdentification\" while flagging direct identifier removal and HIPAA de-identification as applied, and date shifting, non-arrangement of dates and k-anonymization as not applied.",
+      "identifiers_removed": "HIPAA Safe Harbor identifiers (Protected Health Information); Sex; Race and ethnicity; Medications used.",
+      "deidentification_details": "The RO-Crate records the release as de-identified. Beyond HIPAA identifiers, information related to the sex and race/ethnicity of participants and to medications used has been removed from the public release and is held under controlled access along with 5-digit zip code, genetic sequencing data, past health records, and traffic and accident reports. The dataset was reviewed internally by AI-READI team members to ensure that no personally identifiable information was accidentally included.",
+      "source_caveats": "The healthsheet items asking specifically about measures taken to avoid re-identification and about de-identification preprocessing were returned without a response in the retrieved metadata, so the account above is assembled from the FAIRhub dataset description, the RO-Crate and the Nature Metabolism comment rather than from those healthsheet answers."
+    },
+    "preprocessing_strategies": [
+      {
+        "preprocessing_details": "All data were mapped to standardized terminologies when possible, such as the Observational Medical Outcomes Partnership (OMOP) Common Data Model for observational clinical data and the Digital Imaging and Communications in Medicine (DICOM) standard for medical imaging data."
+      },
+      {
+        "preprocessing_details": "For some devices the data are transformed from their proprietary state into a standard model format prior to upload to FAIRhub: Topcon .fda and Heidelberg .sdt files are converted to DICOM, Garmin .FIT files are converted to the Open mHealth standard, and electrocardiogram data are stored in the WaveForm DataBase (WFDB) format."
+      },
+      {
+        "preprocessing_details": "The public release is stripped of Protected Health Information as defined by the HIPAA Privacy Rule via the Safe Harbor method, as well as information related to the sex and race/ethnicity of the participants, which is removed to prevent stigmatization of findings, and information about medications used."
+      },
+      {
+        "preprocessing_details": "The dataset is organized following the Clinical Dataset Structure (CDS) v0.1.1: at the root level one directory per datatype, then one folder per modality, then one folder per device used to collect that modality, then one folder per participant named after the participant's study ID number. Each datatype directory carries a manifest.tsv metadata file, and the dataset root carries CHANGELOG.md, dataset_description.json, dataset_structure_description.json, healthsheet.md, LICENSE.txt, participants.json, participants.tsv, README.md and study_description.json."
+      }
+    ],
+    "regulatory_restrictions": {
+      "confidentiality_level": "restricted",
+      "hipaa_compliant": "compliant",
+      "regulatory_restrictions": [
+        "The healthsheet refers all questions about export controls and other regulatory restrictions to the dataset license. Licensees must comply with all data security and privacy standards established by the US National Institutes of Health under its Genomic Data Sharing (GDS) Policy, currently the NIH Security Best Practices for Controlled-Access Data Subject to the NIH GDS Policy, and with all applicable laws, regulations and restrictions relating to the distribution and use of the data and of models derived from it. The data may be statically watermarked to identify the licensee for security purposes, and the licensee must take no action to remove, obscure, alter or mask such watermarking."
+      ],
+      "other_compliance": "The study is recorded as not FDA-regulated (isFDARegulatedDrug \"No\", isFDARegulatedDevice \"No\", fdaRegulated false) and as having no data monitoring committee. The public release is de-identified under the HIPAA Privacy Rule Safe Harbor method.",
+      "notes": "The RO-Crate records a confidentiality level of \"HL7:2N (normal)\", which does not map onto the confidentiality level values available in this schema and is therefore recorded here in prose.",
+      "source_caveats": "Two derived values are recorded here rather than quoted. The confidentiality_level of \"restricted\" is derived from the stated access model (verified-ID login, type-2-diabetes-only use attestation, licence agreement) rather than from any source using that term; the RO-Crate's own term is \"HL7:2N (normal)\". The hipaa_compliant value of \"compliant\" is derived from the FAIRhub statement that no identifiers were collected and that the team verified no identifiable data per US HIPAA were present, together with the Nature Metabolism statement that the public set is stripped of Protected Health Information via the HIPAA Safe Harbor method; no source in the bundle makes a compliance determination in those words."
+    }
+  },
+  "receipt_links": [
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c004",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "preprocessing_strategies[0].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": "mapped to applicable data standard formats",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c004",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "preprocessing_strategies[1].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": "Data Model for clinical data and the DICOM format for",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "preprocessing_strategies[2].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": "as well as information related to the sex and race/ethnicity of",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c012",
+      "source": "AI-READI-LICENSE-v2.0_2026-08-12.txt",
+      "source_type": "license",
+      "slot": "regulatory_restrictions.regulatory_restrictions",
+      "root": "regulatory_restrictions",
+      "section": "Data Governance",
+      "snippet": "established by the U.S. National Institutes of Health under its Genomic Data Sharing (GDS) Policy",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "is_deidentified.method",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "No identifiers were collected so no active de-identification was necessary",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "preprocessing_strategies[0].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": "all data were mapped to standardized terminologies when possible",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "preprocessing_strategies[3].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": "data is organized at the root level into one directory per datatype",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "regulatory_restrictions.other_compliance",
+      "root": "regulatory_restrictions",
+      "section": "Data Governance",
+      "snippet": "\"fdaRegulated\": false",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "regulatory_restrictions.notes",
+      "root": "regulatory_restrictions",
+      "section": "Data Governance",
+      "snippet": "\"confidentialityLevel\": \"HL7:2N (normal)\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v7_rep3",
+      "project": "AI_READI",
+      "version": "v7",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "is_deidentified.deidentification_details",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "\"deidentified\": true",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "git blob",
+    "path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+    "commit": "b8f2aa4616d438495d9153f683784602413c9bc8"
+  },
+  "source_search_queries": [
+    "No identifiers were collected",
+    "Safe Harbor"
+  ],
+  "source_excerpts": [
+    {
+      "query": "No identifiers were collected",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "chunk_sha256": "e2d6af016157feb5e26209f763a89668859942380866212a358cfa2d97085563",
+      "excerpt": "      \"deIdentDirect\": true,\n        \"deIdentHIPAA\": true,\n        \"deIdentDates\": false,\n        \"deIdentNonarr\": false,\n        \"deIdentKAnon\": false,\n        \"deIdentDetails\": \"No identifiers were collected so no active de-identification was necessary but we checked that no identifiable data per US HIPAA were present in the data.\"\n      },\n      \"datasetConsent\": {\n        \"consentType\": \"ConsentSpecifiedNotElsewhereCategorised\",\n        \"consentNoncommercial\": false,\n        \"consentGeogRestrict\": fa"
+    },
+    {
+      "query": "Safe Harbor",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "chunk_sha256": "04e5b4f7dd3c70f0de0e82fadc9c525dcf56509532f9612226032723203c06e7",
+      "excerpt": "s for access. The public set is stripped of Protected\nHealth Information (PHI), as defined by the HIPAA (Health Insurance\nPortability and Accountability Act) Privacy Rule via the \u201cSafe Harbor\u201d\nmethod, as well as information related to the sex and race/ethnicity of\nthe participants to prevent stigmatization of findings. The first version\nof the public set was recently shared using a new licence developed\nas part of this project that allows reuse for any purpose but includes\nrestrictions "
+    }
+  ]
+}

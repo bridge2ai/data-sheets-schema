@@ -195,3 +195,7 @@ data/poster_assets/
 data/.run_locks/
 .*_api_run.lock
 notes/arm_comparison_deck_*.pdf
+
+# Review report build artifacts and temporary work directories
+reports/**/work/
+reports/**/*.zip
