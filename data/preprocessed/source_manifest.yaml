@@ -492,7 +492,7 @@ projects:
     # 38c221dbdab605145d617481524a4b25), where tests use them as fixtures.
     # Every AI_READI record generated from 2026-08-13 to 2026-09-07 read a bundle
     # that included it; the bundle_hash_history event for #5042 names the
-    # before and after hashes, and data/d4d_concatenated_wcrate/ holds copies
+    # before and after hashes, and data/_wcrate/ holds copies
     # of those records' results.
     - id: irb_protocol
       source_type: IRB
