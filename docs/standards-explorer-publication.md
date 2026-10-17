@@ -74,17 +74,28 @@ HTML/CSS) exceeds what AWS WAF will inspect on
 `/entity/{id}/table/transaction/async/start` for Synapse's production API — every
 run was rejected with a bare, non-Synapse `403 Forbidden` straight from the load
 balancer (`Server: awselb/2.0`), before Synapse's application layer ever saw the
-request. A same-day fix reverted the append to the CSV/S3 path described above, re-accepting
-the empty-physical-line loss. That loss predates v8 entirely — every CSV-based
-upload since 2025-08-14 was almost certainly equally affected; #5055's live
-round-trip check was simply the first time anyone verified exact byte fidelity
-against the live table. It is also confirmed visually inert: this schema's HTML
-never places a blank line inside a whitespace-significant element (no `<pre>`;
-the only `white-space: pre-wrap` rule in `datasheet-v8.css` applies to single-line
-`source-value` spans, none of which contain an embedded newline in any v8 file).
-`generate_table`'s verification now predicts and tolerates exactly this one known
-discrepancy (`_drop_empty_physical_lines` in `utils/d4d_to_synapse_table.py`) and
-still fails on any other content mismatch.
+request. A same-day fix reverted the append to the CSV/S3 path described above,
+re-accepting the known content loss. That loss predates v8 entirely — every
+CSV-based upload since 2025-08-14 was almost certainly equally affected; #5055's
+live round-trip check was simply the first time anyone verified exact byte
+fidelity against the live table. It is also confirmed visually inert: this
+schema's HTML never places a multi-newline run inside a whitespace-significant
+element (no `<pre>`; the only `white-space: pre-wrap` rule in
+`datasheet-v8.css` applies to single-line `source-value` spans, none of which
+contain an embedded newline in any v8 file).
+
+The exact mechanism was initially mismodeled as "drop every exactly-empty
+physical line," which matched offline tests but failed verification against
+the real table (table version 35, same-day retry): that model also ate a
+genuine leading blank line that Synapse actually preserves. Checked directly
+against the version-35 row content, the real rule is narrower — Synapse's
+CSV-import collapses every run of two or more consecutive bare `\n` characters
+inside a quoted multiline cell down to one; an isolated single newline
+anywhere, including a leading or trailing one, or a CRLF-delimited blank line,
+survives untouched. This reproduces all four HTML cells and the CSS cell
+byte-for-byte. `generate_table`'s verification now predicts and tolerates
+exactly this discrepancy (`_collapse_consecutive_newlines` in
+`utils/d4d_to_synapse_table.py`) and still fails on any other content mismatch.
 
 The registry's [publication workflow](https://github.com/bridge2ai/b2ai-standards-registry/blob/main/.github/workflows/project_data_change.yml)
 then advances `mv_D4D_content` (`syn77626807`) and dependent views. It is scheduled

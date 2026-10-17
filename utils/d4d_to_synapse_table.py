@@ -9,22 +9,25 @@ every publication exceed the ~483 KB body that Synapse's AWS WAF will inspect on
 Synapse 403 from the ALB itself). Reverted to the CSV/S3 upload path, which has
 carried every prior publication (v4 onward) since 2025-08-14 without ever hitting
 that limit, because the bulk bytes travel to S3 directly and only a small job
-reference crosses the inspected endpoint. That path's known cost is Synapse's own
-CSV-import parser silently dropping empty physical lines inside quoted multiline
-cells (confirmed via #5055 live round-trip evidence: AI-READI -214, CHORUS -156,
-CM4AI -174, VOICE -216 blank lines; no nonempty line was ever altered). Checked
-against the live rendered page: this schema's HTML never puts blank lines inside
-a whitespace-significant element (no `<pre>`, and the only `white-space: pre-wrap`
-rule in datasheet-v8.css applies to single-line `source-value` spans), so the
-dropped lines have no visible effect. This quirk predates v8; it was simply never
+reference crosses the inspected endpoint. That path's known cost is a Synapse
+CSV-import quirk: verified against a real publish (table version 35), it collapses
+every run of two or more consecutive bare `\n` characters inside a quoted
+multiline cell down to a single `\n`; an isolated single newline anywhere,
+including a leading or trailing one, or a CRLF-delimited blank line, survives
+untouched (`\r` makes that line non-empty). This schema's HTML never puts a
+multi-newline run inside a whitespace-significant element (no `<pre>`, and the
+only `white-space: pre-wrap` rule in datasheet-v8.css applies to single-line
+`source-value` spans with no embedded newlines), so the collapsed runs have no
+visible effect on the rendered page. This quirk predates v8; it was simply never
 checked for exact round-trip fidelity before #5055, and almost certainly affects
-every prior snapshot of this table too. Accepted as a known, visually-inert, long-
-standing limitation rather than leaving publication blocked; verification below
-tolerates exactly this discrepancy and nothing else.
+every prior snapshot of this table too. Accepted as a known, visually-inert,
+long-standing limitation rather than leaving publication blocked; verification
+below predicts and tolerates exactly this discrepancy and nothing else.
 """
 
 from collections import Counter
 from pathlib import Path
+import re
 import sys
 
 import pandas as pd
@@ -119,20 +122,25 @@ def _rowset_frame(rows: RowSet) -> pd.DataFrame:
     )
 
 
-def _drop_empty_physical_lines(text: str) -> str:
-    """Predict Synapse's CSV-import behavior: it silently discards any physical
-    line that is exactly empty inside a quoted multiline cell (#5055 live
-    round-trip evidence; 2026-10-16 decision to accept this and revert to the
-    CSV/S3 upload path rather than leave publication WAF-blocked). Used only so
-    verification matches the accepted post-upload shape instead of failing on
-    this known, visually-inert discrepancy every run.
+def _collapse_consecutive_newlines(text: str) -> str:
+    """Predict Synapse's CSV-import behavior, verified against a real publish
+    (table version 35, 2026-10-16): it collapses every run of two or more
+    consecutive bare `\\n` characters inside a quoted multiline cell down to a
+    single `\\n`. An isolated single newline anywhere — including a leading or
+    trailing one — is left untouched, and a CRLF-delimited blank line survives
+    because the `\\r` makes that line non-empty. (An earlier line-based model,
+    "drop every exactly-empty physical line", looked right offline but failed
+    against the live table: it also ate a genuine leading blank line that
+    Synapse actually preserves.) Used only so verification matches the
+    accepted post-upload shape instead of failing on this known, visually-
+    inert discrepancy every run.
     """
-    return "\n".join(line for line in text.split("\n") if line)
+    return re.sub(r"\n{2,}", "\n", text)
 
 
 def _accepted_after_csv_upload(frame: pd.DataFrame) -> Counter:
     normalized = frame.copy()
-    normalized["content_text"] = normalized["content_text"].map(_drop_empty_physical_lines)
+    normalized["content_text"] = normalized["content_text"].map(_collapse_consecutive_newlines)
     return _content_rows(normalized)
 
 

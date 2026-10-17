@@ -125,10 +125,11 @@ class RemoteTable:
         if self.fail == "corrupt_upload":
             uploaded.iloc[-1, 2] = "truncated HTML"
         else:
-            # Model Synapse's confirmed CSV-import behavior (#5055): empty
-            # physical lines inside quoted multiline cells are silently dropped.
+            # Model Synapse's confirmed CSV-import behavior, verified against a
+            # real publish (#5055): runs of 2+ consecutive bare newlines inside
+            # a quoted multiline cell collapse to one.
             uploaded["content_text"] = uploaded.content_text.map(
-                publisher._drop_empty_physical_lines
+                publisher._collapse_consecutive_newlines
             )
         uploaded.index = range(self.next_id, self.next_id + len(uploaded))
         self.next_id += len(uploaded)
@@ -216,11 +217,22 @@ def test_upload_verifies_before_deleting_and_snapshotting(publication_files):
     assert publisher._content_rows(remote.snapshots[0]) == accepted
 
 
+def test_collapse_consecutive_newlines_preserves_a_leading_blank_line():
+    """Regression for the model that looked right offline but failed against
+    the live table (2026-10-16): a line-based "drop every exactly-empty
+    physical line" rule also eats a genuine leading blank line, which Synapse
+    actually preserves. Verified exactly against a real publish (table
+    version 35): only *runs* of 2+ consecutive bare newlines collapse.
+    """
+    text = "\nfirst real line\n\n\nsecond\n\nlast\n"
+    assert publisher._collapse_consecutive_newlines(text) == "\nfirst real line\nsecond\nlast\n"
+
+
 def test_csv_upload_drops_only_blank_lines_and_preserves_special_characters(publication_files):
     """2026-10-16: CSV/S3 upload replaced the inline JSON transaction (#5058) to
     avoid the AWS WAF body-size block. The traded-off cost is Synapse's own
-    CSV-import parser dropping empty physical lines; everything else must
-    still survive.
+    CSV-import parser collapsing runs of consecutive blank lines; everything
+    else must still survive.
     """
     expected = publisher.load_publication(publication_files)
     remote = RemoteTable()
@@ -237,7 +249,7 @@ def test_csv_upload_drops_only_blank_lines_and_preserves_special_characters(publ
         expected[publisher.COLUMNS].values.tolist(), final_rows
     ):
         assert (actual_type, actual_id) == (expected_type, expected_id)
-        assert actual_text == publisher._drop_empty_physical_lines(expected_text)
+        assert actual_text == publisher._collapse_consecutive_newlines(expected_text)
         # A lone "\r" is a non-empty line, so a CRLF blank line survives...
         assert "\r\n\r\n" in actual_text
         # ...while a run of LF-only blank lines collapses to a single break.
