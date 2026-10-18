@@ -362,7 +362,25 @@ def activate(selection, execution_raw, started_raw):
         execution_sha256=e.pin.sha256, attempt_id=value['attempt_id'], records=(record.pin,)))
 
 
-def _decision_key(selection, binding, phase1, history):
+def _referenced_artifact_paths(selection, rows):
+    paths = set()
+    for row in rows:
+        payload = row['payload']
+        for value in payload.values():
+            if (type(value) is dict and set(value) == {'role', 'path', 'bytes', 'sha256'}
+                    and value['role'] != 'observation'):
+                paths.add(value['path'])
+        if row['record_type'] == 'request_admitted':
+            role = {'worker': 'packet', 'integration': 'typed_index'}.get(payload['cursor']['kind'])
+            if role is not None:
+                paths.add(selection.role(role))
+        for pin in payload.get('outputs', ()):
+            if type(pin) is dict and 'path' in pin:
+                paths.add(pin['path'])
+    return paths
+
+
+def _decision_key(selection, binding, phase1, history, paths):
     return (
         selection.registration.pin.sha256,
         selection.registration.raw,
@@ -375,7 +393,7 @@ def _decision_key(selection, binding, phase1, history):
         history.journal.pin.sha256,
         history.journal.raw,
         tuple((item.pin, item.raw) for item in history.records),
-        tuple((item.pin, item.raw) for item in history.artifacts),
+        tuple((item.pin, item.raw) for item in history.artifacts if item.pin.path in paths),
     )
 
 
@@ -402,8 +420,20 @@ class _CapturedRun:
     def trace(self, transcript=None, control=None):
         if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
             if self._trace is None:
-                self._trace = observed.Trace(self.transcript, self.control,
-                    session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
+                token = receipt_api.catalog_reuse.runtime_token()
+                traces = getattr(self._catalogs, '_traces', None) if token is not None else None
+                trace_key = None if traces is None else (
+                    token, self.transcript.sha256, self.transcript.raw,
+                    self.control.sha256, self.control.raw, self.binding.session_id,
+                    c.canonical(self.composition['policy']), c.canonical(self.value['runtime']),
+                )
+                if trace_key is not None and trace_key in traces:
+                    self._trace = traces[trace_key]
+                else:
+                    self._trace = observed.Trace(self.transcript, self.control,
+                        session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
+                    if trace_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                        traces[trace_key] = self._trace
             return self._trace
         return observed.Trace(transcript or self.transcript, control or self.control,
             session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
@@ -411,10 +441,15 @@ class _CapturedRun:
     def decision(self):
         if self.phase1 is None:
             return None
+        rows, _ = stage._history(self.selection, self.binding, self.history)
+        paths = _referenced_artifact_paths(self.selection, rows)
         token = receipt_api.catalog_reuse.runtime_token()
-        key = None if token is None else (token, *_decision_key(self.selection, self.binding, self.phase1, self.history))
+        key = None if token is None else (token, *_decision_key(self.selection, self.binding, self.phase1, self.history, paths))
         if key is not None and key in self._decisions:
-            return self._decisions[key]
+            cached = self._decisions[key]
+            if cached.publications:
+                stage._budget(self.selection, self.history, tuple(p.artifact for p in cached.publications))
+            return cached
         value = stage._prepare_next(self.selection, self.binding, self.phase1, self.history, self._catalogs)
         if key is not None and value.state != 'failed' and receipt_api.catalog_reuse.runtime_token() is token:
             self._decisions[key] = value
@@ -529,14 +564,52 @@ def _declared_stream_files(selection, reader):
     return live_streams.identities(doc['payload']['stream_files'])
 
 
-def _base(selection_path):
+def _base(selection_path, *, _catalogs=None):
+    from copy import deepcopy
+    import sys
     from . import native_shared_selection as selected
     from . import native_shared_registration as registration
+    from . import native_execution_authority as authority
     selection = selected.capture(selection_path)
     reader = _Reader(selection)
     e = reader.read('execution_capture', selection.role('execution_capture'))
-    value = registration.verified(e.raw)
-    composition, spec, doc, _ = registration._selection(value['composition_raw_json'].encode('utf-8'))
+    ctx = receipt_api._catalog_context(_catalogs) if _catalogs is not None else None
+    token = receipt_api.catalog_reuse.runtime_token() if ctx is not None else None
+    base_key = None if token is None else (
+        token, selection_path, selection.registration.raw, e.raw,
+        registration.verified, registration.registration, registration._selection, authority.dependency_identity,
+    )
+    hit = False
+    if base_key is not None and base_key in ctx._base:
+        saved_inputs, cached_val, cached_comp, cached_spec, cached_doc = ctx._base[base_key]
+        try:
+            current_inputs = (
+                registration._read(cached_val['composition'], 'composition', c.HARD_LIMITS['request_bytes']),
+                registration._read(cached_val['system_path'], 'system', c.HARD_LIMITS['input_bytes']),
+                registration._read(cached_val['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes']),
+                registration._read(cached_comp['runtime_path'], 'runtime_declaration', c.HARD_LIMITS['input_bytes']),
+                registration._read(cached_comp['instruction_path'], 'instruction', c.HARD_LIMITS['request_bytes']),
+                str(Path.cwd().resolve()), sys.executable, sys.version,
+            )
+            if current_inputs == saved_inputs:
+                value, composition, spec, doc = deepcopy(cached_val), deepcopy(cached_comp), cached_spec, deepcopy(cached_doc)
+                registration._paths(value, composition, fresh=False)
+                hit = True
+        except Exception:
+            hit = False
+    if not hit:
+        value = registration.verified(e.raw)
+        composition, spec, doc, _ = registration._selection(value['composition_raw_json'].encode('utf-8'))
+        if base_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+            saved_inputs = (
+                registration._read(value['composition'], 'composition', c.HARD_LIMITS['request_bytes']),
+                registration._read(value['system_path'], 'system', c.HARD_LIMITS['input_bytes']),
+                registration._read(value['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes']),
+                registration._read(composition['runtime_path'], 'runtime_declaration', c.HARD_LIMITS['input_bytes']),
+                registration._read(composition['instruction_path'], 'instruction', c.HARD_LIMITS['request_bytes']),
+                str(Path.cwd().resolve()), sys.executable, sys.version,
+            )
+            ctx._base[base_key] = (saved_inputs, deepcopy(value), deepcopy(composition), spec, deepcopy(doc))
     if (doc['registration_path'] != selection_path or composition['selection_raw_json'].encode('utf-8') != selection.registration.raw
             or value['selection_sha256'] != selection.registration.pin.sha256):
         raise ValueError('actual E/C/S binding differs from the caller-selected registration')
@@ -622,14 +695,19 @@ def _history_prefix(run, digest):
 
 def _decision_at(run, digest):
     history = _history_prefix(run, digest)
+    rows, _ = stage._history(run.selection, run.binding, history)
     phase1 = _phase1(run.selection, run.binding, history, run.reader)
     if phase1 is None:
         raise ValueError('stage observation precedes actual phase1 seal')
+    paths = _referenced_artifact_paths(run.selection, rows)
     token = receipt_api.catalog_reuse.runtime_token()
-    key = None if token is None else (token, *_decision_key(run.selection, run.binding, phase1, history))
+    key = None if token is None else (token, *_decision_key(run.selection, run.binding, phase1, history, paths))
     decisions = getattr(run, '_decisions', None)
     if key is not None and decisions is not None and key in decisions:
-        return decisions[key]
+        cached = decisions[key]
+        if cached.publications:
+            stage._budget(run.selection, history, tuple(p.artifact for p in cached.publications))
+        return cached
     value = stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs)
     if key is not None and decisions is not None and value.state != 'failed' and receipt_api.catalog_reuse.runtime_token() is token:
         decisions[key] = value
@@ -704,11 +782,21 @@ def _checked_observations(run):
         return value
 
     def trace_at(transcript, control):
-        nonlocal base_trace, base_attempted
+        nonlocal base_trace, base_attempted, settled_cache
         if not base_attempted and init_lines is not None:
             base_attempted = True
             try:
                 base_trace = run.trace()
+                token = receipt_api.catalog_reuse.runtime_token()
+                ctx = getattr(run, '_catalogs', None) if token is not None else None
+                if ctx is not None and hasattr(ctx, '_settled'):
+                    meta = (token, base_trace.session, c.canonical(base_trace.policy))
+                    saved = ctx._settled
+                    if (saved is not None and saved[0] == meta
+                            and base_trace.transcript.raw.startswith(saved[1])
+                            and base_trace.control.raw.startswith(saved[2])):
+                        settled_cache = saved[3]
+                    ctx._settled = (meta, base_trace.transcript.raw, base_trace.control.raw, settled_cache)
             except ValueError:
                 base_trace = None
         projected = _prefix_trace(base_trace, transcript, control, init_lines, settled_cache)
@@ -826,7 +914,7 @@ def _load(selection_path, *, transcript_bytes=None, control_bytes=None):
 
 def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None):
     """Fresh live authority, optionally with owner-reused pure catalog storage."""
-    base = _base(selection_path)
+    base = _base(selection_path, _catalogs=_catalogs)
     anchors = _declared_stream_files(base[0], base[1])
     if stream_files is not None and live_streams.identities(stream_files) != anchors:
         raise ValueError('observed stream identities differ from initialized authority')
