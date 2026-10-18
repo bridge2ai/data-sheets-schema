@@ -169,6 +169,24 @@ class TestTheCommand(unittest.TestCase):
                 self.assertEqual(r.exit_code, 0, r.stderr)
                 self.assertNotIn("#5046", r.stderr)
 
+    def test_the_api_runtime_with_the_agent_directory_is_warned_from_v8(self):
+        """#5068: from generic_v8 the API baseline writes under claudecode_api
+        (#690); through v7 both runtimes wrote under claudecode_agent."""
+        api_rt = ["--runtime", "Claude API (direct)", "--method", "claudecode_agent"]
+        for condition, label, warned in (
+                ("generic_v8", "2026-10-14_claude-opus-5-api-generic-v8_rep1", True),
+                ("generic_v9", "2026-10-14_claude-opus-5-api-generic-v9_rep1", True),
+                ("generic_v7", "2026-08-28c_claude-opus-5-api-generic-v7_rep1", False)):
+            with self.subTest(condition=condition):
+                r = CliRunner(mix_stderr=False).invoke(api, [
+                    "render-prompt", "--project", "VOICE", "--label", label,
+                    "--condition", condition, *api_rt])
+                self.assertEqual(r.exit_code, 0, r.stderr)
+                if warned:
+                    self.assertIn("pass --method claudecode_api", r.stderr)
+                else:
+                    self.assertNotIn("#5046", r.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -380,12 +380,18 @@ class BilledRowsReadTest(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.root = Path(tmp.name)
-        self.spec = SimpleNamespace(provenance_path=self.root / "P_provenance.yaml")
+        self.spec = SimpleNamespace(provenance_path=self.root / "P_provenance.yaml",
+                                    metadata_dir=self.root, project="P")
 
-    def _read(self, journal=()):
+    def _read(self, journal=(), ledger=None):
+        import json
         from data_sheets_schema.cli.api import _billed_rows
+        ledger_file = self.root / "ledger.json"
+        if ledger is not None:
+            ledger_file.write_text(json.dumps(ledger), encoding="utf-8")
         unreadable: list = []
-        with patch("data_sheets_schema.usage_ledger.ledger_path", return_value=self.root / "absent.json"), \
+        with patch("data_sheets_schema.usage_ledger.ledger_path", return_value=ledger_file), \
+             patch("data_sheets_schema.usage_ledger._read", side_effect=lambda spec: json.loads(ledger_file.read_text())), \
              patch("data_sheets_schema.api_runner._abandoned_rows", return_value=list(journal)), \
              patch("data_sheets_schema.usage_ledger.identity_is_foreign",
                    side_effect=lambda spec, ident: ident == "other-run"):
@@ -405,4 +411,71 @@ class BilledRowsReadTest(unittest.TestCase):
         self.spec.provenance_path.write_text("api_usage: [unclosed\n", encoding="utf-8")
         rows, unreadable = self._read()
         self.assertEqual(rows, {})
-        self.assertEqual(unreadable, ["provenance api_usage"])
+        self.assertEqual(unreadable, ["could not read provenance api_usage"])
+
+    def test_a_pending_call_is_named_and_not_priced(self):
+        ledger = {"rows": [{"usage_id": "r1", "input_tokens": 5}],
+                  "pending_call": {"usage_id": "p1", "phase": "audit"}}
+        rows, gaps = self._read(ledger=ledger)
+        self.assertEqual(sorted(rows), ["p1", "r1"])
+        self.assertEqual(rows["p1"], {"usage_id": "p1", "phase": "audit"})     # zero-token, not priced
+        self.assertEqual(gaps, ["call p1 (audit) has no recorded usage"])
+
+    def test_a_pending_call_from_before_the_run_is_not_named(self):
+        from data_sheets_schema.cli.api import _billed_rows
+        rows, _ = self._read(ledger={"rows": [], "pending_call": {"usage_id": "p0", "phase": "full"}})
+        gaps: list = []
+        import json
+        with patch("data_sheets_schema.usage_ledger.ledger_path", return_value=self.root / "ledger.json"), \
+             patch("data_sheets_schema.usage_ledger._read",
+                   side_effect=lambda spec: json.loads((self.root / "ledger.json").read_text())), \
+             patch("data_sheets_schema.api_runner._abandoned_rows", return_value=[]):
+            _billed_rows(self.spec, gaps, set(rows))
+        self.assertEqual(gaps, [])
+
+    def test_a_reasoning_entry_with_no_usage_row_counts_its_output(self):
+        import json
+        (self.root / "P_reasoning.jsonl").write_text("\n".join(json.dumps(e) for e in [
+            {"usage_id": "a", "phase": "full", "output_tokens": 7},              # has a row
+            {"usage_id": "lost", "phase": "core", "output_tokens": 40},
+            {"usage_id": "foreign", "output_tokens": 9, "run_identity": "other-run"},
+            {"phase": "legacy", "output_tokens": 3},                             # no usage id
+        ]) + "\n", encoding="utf-8")
+        self.spec.provenance_path.write_text("api_usage:\n- {usage_id: a, input_tokens: 1}\n", encoding="utf-8")
+        rows, gaps = self._read()
+        self.assertEqual(sorted(rows), ["a", "lost"])
+        self.assertEqual(rows["lost"]["output_tokens"], 40)
+        self.assertNotIn("input_tokens", rows["lost"])
+        self.assertEqual(gaps, ["1 response(s) in the reasoning log have no usage row (input tokens unknown)"])
+
+    def test_an_unreadable_reasoning_log_is_named(self):
+        (self.root / "P_reasoning.jsonl").write_text("{not json\n", encoding="utf-8")
+        _, gaps = self._read()
+        self.assertEqual(gaps, ["could not read reasoning log"])
+
+
+class ApiBatchTotalsWithoutCapTest(ApiBatchCostAccountingTest):
+    """#5068: the printed totals are this invocation's spend whether or not
+    --max-cost-dollars is set."""
+
+    def test_history_is_not_in_the_totals_without_a_cap(self):
+        old = {**self.ROW, "output_tokens": 60_000, "usage_id": "old"}
+
+        def resumed(spec):
+            return {**ApiBatchCostStopTest()._make_mock_execute(1.0)(spec),
+                    "usage": [old, {**self.ROW, "usage_id": f"{spec.label}-new"}]}
+
+        result = self._invoke(MagicMock(side_effect=resumed), lambda spec: {"old": old}, [], reps="1")
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("tokens: 100,000 in, 20,000 out (cost: $1.00)", result.output)
+
+    def test_a_raised_run_is_in_the_totals_without_a_cap(self):
+        on_disk: dict = {}
+
+        def raising(spec):
+            on_disk[spec.label] = {"u1": {**self.ROW, "usage_id": "u1"}}
+            raise RuntimeError("phase audit: retries exhausted")
+
+        result = self._invoke(MagicMock(side_effect=raising), lambda spec: dict(on_disk.get(spec.label, {})),
+                              ["--continue-on-error"], reps="1")
+        self.assertIn("tokens: 100,000 in, 20,000 out (cost: $1.00)", result.output)

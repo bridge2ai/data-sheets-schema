@@ -450,15 +450,22 @@ def api():
     """Generate D4D records via the Anthropic API (four model phases plus a derived core)."""
 
 
-def _warn_method_runtime(method, runtime):
+def _warn_method_runtime(method, runtime, condition=None):
     """Warned, not refused (#5046 review): `{METHOD}` names the output paths
     the instruction tells the run to write, and the baseline arm's default
     is the API directory. An agentic or direct run rendered with it is told
     to write where its own record will not be looked for — the 2026-10-14b
-    failure the flag was added for, still reachable by omitting it."""
+    failure the flag was added for, still reachable by omitting it. The API
+    runtime with `claudecode_agent` is the same mistake from generic_v8 on,
+    where the API baseline writes under `claudecode_api` (#690); through v7
+    both runtimes wrote there, so it is warned only for v8+ (#5068)."""
+    from data_sheets_schema.api_runner import CONDITION_AXES
     from data_sheets_schema.runs import RUNTIME_KEYS
     key = RUNTIME_KEYS.get((runtime or "").strip().lower())
-    expected = {"agentic": "claudecode_agent", "direct": "claudecode_direct"}.get(key)
+    base = (CONDITION_AXES.get(condition) or {}).get("base", "")
+    api_dir_condition = base[1:].isdigit() and int(base[1:]) >= 8
+    expected = {"agentic": "claudecode_agent", "direct": "claudecode_direct",
+                "api": "claudecode_api" if api_dir_condition else None}.get(key)
     contradicts = ((expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct")
                     and method != expected)
                    or (key == "api" and method == "claudecode_direct"))
@@ -534,7 +541,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
                  method=method, **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
-    _warn_method_runtime(spec.method, runtime)
+    _warn_method_runtime(spec.method, runtime, spec.condition)
 
     # Warned, not refused. Rendering is free and reading the text of a draft
     # condition is a legitimate reason to be here; `d4d api run` refuses and
@@ -731,23 +738,37 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 
 def _billed_ids(spec) -> set:
     """The usage ids of every billed attempt already on disk for a run: its
-    provenance record's `api_usage`, the usage ledger and this run's rows of
-    the abandoned-attempts journal (#5045 review). Read before the run, so
-    `--max-cost-dollars` counts what this invocation spends and not a resumed
-    or completed run's earlier history. Unreadable evidence is skipped: the
-    run's rows then count again, which can only stop the batch early."""
+    provenance record's `api_usage`, the usage ledger, the reasoning log and
+    this run's rows of the abandoned-attempts journal (#5045 review). Read
+    before the run, so the batch counts what this invocation spends and not a
+    resumed or completed run's earlier history. Unreadable evidence is skipped:
+    the run's rows then count again, which can only stop the batch early."""
     return set(_billed_rows(spec))
 
 
-def _billed_rows(spec, unreadable: list | None = None) -> dict:
-    """Billed attempts on disk by usage id. A source that cannot be read is
-    skipped and named in `unreadable`: read after a run raised, that is an
-    undercount, so the caller says so (#5068)."""
+def _billed_rows(spec, gaps: list | None = None, before=frozenset()) -> dict:
+    """Billed attempts on disk by usage id. Read after a run raised, anything
+    that leaves the count short is named in `gaps`, so the caller says the
+    cost may be undercounted (#5068); what was already on disk `before` the
+    run is not this run's and is not named:
+
+    - a source that cannot be read;
+    - the ledger's `pending_call`: intent committed before a request whose
+      outcome was never recorded. It carries no token counts, so it is kept
+      as a zero-token row, named and not priced; the provider may or may not
+      have billed it;
+    - a reasoning-log entry with no usage row: a completed response whose
+      usage was lost. Its output tokens are counted (the log carries them),
+      its input tokens are not known."""
     import yaml
-    from data_sheets_schema import usage_ledger
-    from data_sheets_schema.api_runner import _abandoned_rows
+    from data_sheets_schema import reasoning, usage_ledger
+    from data_sheets_schema.api_runner import _abandoned_rows, _reasoning_path
 
     rows: dict = {}
+
+    def note(text):
+        if gaps is not None:
+            gaps.append(text)
 
     def keep(row):
         if isinstance(row, dict) and isinstance(row.get("usage_id"), str):
@@ -757,22 +778,39 @@ def _billed_rows(spec, unreadable: list | None = None) -> dict:
             for row in (yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8")) or {}).get("api_usage") or []:
                 keep(row)
     except Exception:                                  # noqa: BLE001
-        if unreadable is not None:
-            unreadable.append("provenance api_usage")
+        note("could not read provenance api_usage")
+    pending = None
     try:
         if usage_ledger.ledger_path(spec).exists():
-            for row in usage_ledger._read(spec)["rows"]:
+            data = usage_ledger._read(spec)
+            for row in data["rows"]:
                 keep(row)
+            pending = data.get("pending_call")
     except Exception:                                  # noqa: BLE001
-        if unreadable is not None:
-            unreadable.append("usage ledger")
+        note("could not read usage ledger")
     try:
         for row in _abandoned_rows(spec):
             if not usage_ledger.identity_is_foreign(spec, row.get("run_identity")):
                 keep(row)
     except Exception:                                  # noqa: BLE001
-        if unreadable is not None:
-            unreadable.append("abandoned-attempts journal")
+        note("could not read abandoned-attempts journal")
+    if isinstance(pending, dict) and isinstance(pending.get("usage_id"), str) and pending["usage_id"] not in rows:
+        rows[pending["usage_id"]] = {"usage_id": pending["usage_id"], "phase": pending.get("phase")}
+        if pending["usage_id"] not in before:
+            note(f"call {pending['usage_id']} ({pending.get('phase')}) has no recorded usage")
+    try:
+        partial = 0
+        for entry in reasoning.read(_reasoning_path(spec)):
+            uid = entry.get("usage_id")
+            if (isinstance(uid, str) and uid not in rows
+                    and not usage_ledger.identity_is_foreign(spec, entry.get("run_identity"))):
+                rows[uid] = {"usage_id": uid, "phase": entry.get("phase"),
+                             "output_tokens": entry.get("output_tokens") or 0}
+                partial += uid not in before
+        if partial:
+            note(f"{partial} response(s) in the reasoning log have no usage row (input tokens unknown)")
+    except Exception:                                  # noqa: BLE001
+        note("could not read reasoning log")
     return rows
 
 
@@ -975,7 +1013,9 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 # canary stop does: the release below is not in a finally.
                 canary_stop = run_guard.message(late)
                 break
-        billed_before = _billed_ids(s) if max_cost_dollars is not None else set()
+        # Read whether or not a cap is set, so the totals printed are this
+        # invocation's spend either way (#5068).
+        billed_before = _billed_ids(s)
         try:
             if roster:
                 _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
@@ -1098,17 +1138,16 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                                else "     canary ok — fanning out")
             ok.append(s.label)
         except Exception as exc:                       # noqa: BLE001
-            if max_cost_dollars is not None:
-                # A run that raised was billed for every attempt it persisted
-                # before raising; the cap counts them (#5045 review).
-                unreadable: list = []
-                raised_rows = [row for uid, row in _billed_rows(s, unreadable).items() if uid not in billed_before]
-                if unreadable:
-                    click.echo(f"   ⚠️  cost of the raised run may be undercounted: could not read "
-                               f"{', '.join(unreadable)}", err=True)
-                spent_in += sum(u.get("input_tokens") or 0 for u in raised_rows)
-                spent_out += sum(u.get("output_tokens") or 0 for u in raised_rows)
-                spent_dollars += _rows_cost(raised_rows)
+            # A run that raised was billed for every attempt it persisted
+            # before raising; the totals and the cap count them (#5045
+            # review), with or without a cap (#5068).
+            gaps: list = []
+            raised_rows = [row for uid, row in _billed_rows(s, gaps, billed_before).items() if uid not in billed_before]
+            if gaps:
+                click.echo(f"   ⚠️  cost of the raised run may be undercounted: {'; '.join(gaps)}", err=True)
+            spent_in += sum(u.get("input_tokens") or 0 for u in raised_rows)
+            spent_out += sum(u.get("output_tokens") or 0 for u in raised_rows)
+            spent_dollars += _rows_cost(raised_rows)
             click.echo(f"   ❌ {type(exc).__name__}: {exc}", err=True)
             failed.append((s.project, s.label, str(exc)))
             # A canary that *raised* has not passed, and before #619 nothing

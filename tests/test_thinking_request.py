@@ -151,6 +151,51 @@ class TestTheRequestStatesThinking(unittest.TestCase):
                          [{"type": "adaptive", "display": "summarized"}] * 2)
 
 
+    def test_the_runner_request_path_puts_the_display_on_the_wire(self):
+        """The runner's own path, not the SDK called directly (#5068):
+        `_call_with_usage` -> `_call_with_retry` -> the real SDK client on a
+        mock transport, with the settings generic_v10 declares. The ledger
+        hooks are stubbed; the request is built by the runner."""
+        import json
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        import anthropic
+        import httpx
+        from data_sheets_schema import api_runner
+        bodies = []
+
+        def sse(*events):
+            return "".join(f"event: {e['type']}\ndata: {json.dumps(e)}\n\n" for e in events)
+
+        def handler(request):
+            bodies.append(json.loads(request.content))
+            return httpx.Response(200, headers={"content-type": "text/event-stream"}, text=sse(
+                {"type": "message_start", "message": {
+                    "id": "msg_1", "type": "message", "role": "assistant", "model": "claude-opus-5",
+                    "content": [], "stop_reason": None, "stop_sequence": None,
+                    "usage": {"input_tokens": 3, "output_tokens": 0}}},
+                {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
+                {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "ok"}},
+                {"type": "content_block_stop", "index": 0},
+                {"type": "message_delta", "delta": {"stop_reason": "end_turn", "stop_sequence": None},
+                 "usage": {"output_tokens": 1}},
+                {"type": "message_stop"}))
+
+        client = anthropic.Anthropic(api_key="offline", base_url="http://probe.invalid", max_retries=0,
+                                     http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+        settings = _model_settings("generic_v10")
+        spec = SimpleNamespace(shared_generation_version=0)
+        with patch.object(api_runner, "_require_surviving_accounting"), \
+             patch.object(api_runner, "_begin_usage_call", return_value="u1"), \
+             patch.object(api_runner, "_cancel_usage_call"):
+            resp, identifier = api_runner._call_with_usage(
+                spec, "full", 1, "2026-10-18T00:00:00Z", client, model=settings["name"], max_tokens=100,
+                temperature=None, system="s", messages=[{"role": "user", "content": "x"}],
+                thinking=settings["thinking"])
+        self.assertEqual(identifier, "u1")
+        self.assertEqual(resp.stop_reason, "end_turn")
+        self.assertEqual([b["thinking"] for b in bodies], [{"type": "adaptive", "display": "summarized"}])
+
     def test_effort_travels_as_extra_body_and_every_kwarg_binds_to_the_real_sdk(self):
         """The first version passed `output_config=` as a named kwarg, and a
         fake client that accepted anything let the test pass; the pinned SDK
