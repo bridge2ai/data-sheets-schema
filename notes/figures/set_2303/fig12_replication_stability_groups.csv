@@ -1,0 +1,9 @@
+project,cohort,run_labels,n_slots,slots_identical,slots_two_agree,slots_all_differ,slots_intermittent,slots_absent,slots_present_in_all_three,fraction_identical_of_present_in_all_three
+AI_READI,v7,2026-09-01_claude-opus-5-api-generic-v7,97,16,2,57,8,14,75,0.2133
+AI_READI,v8,2026-09-04g_claude-opus-5-api-generic-v8,97,17,2,55,8,15,74,0.2297
+CHORUS,v7,2026-09-01_claude-opus-5-api-generic-v7,97,4,1,40,9,43,45,0.0889
+CHORUS,v8,2026-09-04f_claude-opus-5-api-generic-v8,97,6,2,38,14,37,46,0.1304
+CM4AI,v7,2026-09-01_claude-opus-5-api-generic-v7,97,12,4,39,24,18,55,0.2182
+CM4AI,v8,2026-09-04g_claude-opus-5-api-generic-v8,97,14,4,33,17,29,51,0.2745
+VOICE,v7,2026-09-01_claude-opus-5-api-generic-v7,97,12,6,57,8,14,75,0.16
+VOICE,v8,2026-09-04f_claude-opus-5-api-generic-v8,97,12,4,58,9,14,74,0.1622

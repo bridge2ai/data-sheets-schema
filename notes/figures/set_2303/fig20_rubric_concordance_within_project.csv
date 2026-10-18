@@ -1,0 +1,5 @@
+project,n,spearman_rho,undefined_because,r10_distinct_scores,r20_distinct_scores
+AI_READI,6,,rubric10 gives all 6 records the same score,1,3
+CHORUS,6,0.8061,,4,5
+CM4AI,6,0.6912,,5,5
+VOICE,6,0.0,,2,5
