@@ -40,7 +40,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
             ],
         )
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("--max-cost-dollars must be non-negative", result.output)
+        self.assertIn("--max-cost-dollars must be positive", result.output)
 
     def test_negative_small_fraction_is_rejected(self):
         runner = CliRunner()
@@ -54,7 +54,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
             ],
         )
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("--max-cost-dollars must be non-negative", result.output)
+        self.assertIn("--max-cost-dollars must be positive", result.output)
 
     def test_non_finite_max_cost_dollars_is_rejected(self):
         runner = CliRunner()
@@ -70,7 +70,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
                     ],
                 )
                 self.assertNotEqual(result.exit_code, 0)
-                self.assertIn("--max-cost-dollars must be non-negative", result.output)
+                self.assertIn("--max-cost-dollars must be positive", result.output)
 
 
 class ApiBatchCostStopTest(unittest.TestCase):
@@ -300,3 +300,109 @@ class ApiBatchCostStructureTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ApiBatchCostAccountingTest(unittest.TestCase):
+    """#5045 review: what the cap counts — this invocation's billed attempts,
+    including those of a run that raised, and none of a run's history."""
+
+    ROW = {"phase": "full", "input_tokens": 100_000, "output_tokens": 20_000,
+           "cache_read": 0, "cache_write": 0}               # $1.00
+
+    def _invoke(self, mock_exec, billed, extra, reps="3"):
+        plan = ApiBatchCostStopTest()._dummy_plan
+        with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
+             patch("data_sheets_schema.cli.api._plan_or_refuse", side_effect=plan), \
+             patch("data_sheets_schema.cli.api._billed_rows", side_effect=lambda spec, *a: billed(spec)), \
+             patch("data_sheets_schema.api_runner.execute", mock_exec):
+            return CliRunner().invoke(cli, [
+                "api", "batch", "--projects", "AI_READI", "--replicates", reps, "--arm", "baseline",
+                "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
+                "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate", *extra])
+
+    def test_zero_cap_is_refused(self):
+        result = CliRunner().invoke(cli, ["api", "batch", "--label-prefix", "x", "--max-cost-dollars", "0"])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIn("--max-cost-dollars must be positive", result.output)
+
+    def test_a_run_that_raised_counts_the_attempts_it_persisted(self):
+        on_disk: dict = {}
+
+        def raising(spec):
+            on_disk.setdefault(spec.label, {})[f"{spec.label}-u1"] = {**self.ROW, "usage_id": f"{spec.label}-u1"}
+            raise RuntimeError("phase audit: retries exhausted")
+
+        mock_exec = MagicMock(side_effect=raising)
+        result = self._invoke(mock_exec, lambda spec: dict(on_disk.get(spec.label, {})),
+                              ["--continue-on-error", "--max-cost-dollars", "1.50"])
+        self.assertEqual(mock_exec.call_count, 2, result.output)
+        self.assertIn("cumulative cost stop: spent $2.00 >= $1.50 cap", result.output)
+
+    def test_a_run_that_raises_after_its_usage_was_counted_is_not_counted_twice(self):
+        on_disk: dict = {}
+
+        def counted_then_raises(spec):
+            row = {**self.ROW, "usage_id": f"{spec.label}-u1"}
+            on_disk[spec.label] = {row["usage_id"]: row}
+            return {"usage": [row]}           # no "skipped": raises after the count (#5068)
+
+        mock_exec = MagicMock(side_effect=counted_then_raises)
+        result = self._invoke(mock_exec, lambda spec: dict(on_disk.get(spec.label, {})),
+                              ["--continue-on-error", "--max-cost-dollars", "1.50"])
+        # $1.00 per run, once: the stop comes after run 2, not after run 1 at $2.00.
+        self.assertEqual(mock_exec.call_count, 2, result.output)
+        self.assertIn("cumulative cost stop: spent $2.00 >= $1.50 cap", result.output)
+
+    def test_usage_spent_before_this_invocation_is_not_counted(self):
+        old = {**self.ROW, "output_tokens": 60_000, "usage_id": "old"}     # $2.00 of history
+
+        def resumed(spec):
+            res = ApiBatchCostStopTest()._make_mock_execute(1.0)(spec)
+            res["usage"] = [old] + [{**u, "usage_id": f"{spec.label}-new"} for u in res["usage"]]
+            return res
+
+        mock_exec = MagicMock(side_effect=resumed)
+        result = self._invoke(mock_exec, lambda spec: {"old": old}, ["--max-cost-dollars", "1.50"])
+        # $1.00 per run of new spend: the stop comes after run 2, not run 1.
+        self.assertEqual(mock_exec.call_count, 2, result.output)
+        self.assertIn("cumulative cost stop: spent $2.00 >= $1.50 cap", result.output)
+
+
+class BilledRowsReadTest(unittest.TestCase):
+    """`_billed_rows` over real files (#5068): the provenance record's
+    api_usage and this run's journal rows, keyed by usage id, foreign rows
+    left out, and an unreadable source named rather than silently dropped."""
+
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+        from types import SimpleNamespace
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+        self.spec = SimpleNamespace(provenance_path=self.root / "P_provenance.yaml")
+
+    def _read(self, journal=()):
+        from data_sheets_schema.cli.api import _billed_rows
+        unreadable: list = []
+        with patch("data_sheets_schema.usage_ledger.ledger_path", return_value=self.root / "absent.json"), \
+             patch("data_sheets_schema.api_runner._abandoned_rows", return_value=list(journal)), \
+             patch("data_sheets_schema.usage_ledger.identity_is_foreign",
+                   side_effect=lambda spec, ident: ident == "other-run"):
+            return _billed_rows(self.spec, unreadable), unreadable
+
+    def test_provenance_and_journal_rows_by_usage_id(self):
+        self.spec.provenance_path.write_text(
+            "api_usage:\n- {usage_id: a, input_tokens: 1}\n- {input_tokens: 2}\n- {usage_id: a, input_tokens: 9}\n",
+            encoding="utf-8")
+        rows, unreadable = self._read([{"usage_id": "j1", "run_identity": "this-run"},
+                                       {"usage_id": "j2", "run_identity": "other-run"}])
+        self.assertEqual(sorted(rows), ["a", "j1"])
+        self.assertEqual(rows["a"]["input_tokens"], 1)
+        self.assertEqual(unreadable, [])
+
+    def test_an_unreadable_source_is_named(self):
+        self.spec.provenance_path.write_text("api_usage: [unclosed\n", encoding="utf-8")
+        rows, unreadable = self._read()
+        self.assertEqual(rows, {})
+        self.assertEqual(unreadable, ["provenance api_usage"])

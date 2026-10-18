@@ -93,10 +93,24 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         settings_obj = _model_settings(_Spec())
         self.assertEqual(settings_obj["thinking"], {"type": "adaptive", "display": "summarized"})
 
-        for other in ("generic", "generic_v9", None):
-            other_settings = _model_settings(other)
-            self.assertEqual(other_settings["thinking"], {"type": "adaptive"})
-            self.assertNotIn("display", other_settings["thinking"])
+        # Every earlier condition, not a sample of them (#5043 review): a
+        # display on any would move that condition's declaration. The routed
+        # v10 conditions are not earlier ones, and whether they take the
+        # display is an open owner decision (#5061 F4, D06), so not pinned.
+        from data_sheets_schema.api_runner import CONDITION_AXES, CONDITION_PROMPTS
+        earlier = [c for c in CONDITION_PROMPTS
+                   if c != "generic_v10" and (CONDITION_AXES.get(c) or {}).get("base") != "v10"]
+        for other in earlier + [None]:
+            with self.subTest(condition=other):
+                other_settings = _model_settings(other)
+                self.assertEqual(other_settings["thinking"], {"type": "adaptive"})
+
+    def test_the_basis_names_a_display_the_condition_sets(self):
+        from data_sheets_schema.api_runner import _thinking_basis
+        with_display = _thinking_basis(_model_settings("generic_v10"))
+        self.assertIn("The request also sets display: summarized", with_display)
+        self.assertIn("not the omitted-parameter default", with_display)
+        self.assertNotIn("display", _thinking_basis(_model_settings("generic_v9")))
 
     def test_summarized_display_binds_to_the_real_sdk(self):
         import inspect
@@ -109,6 +123,32 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         self.assertEqual(kw["thinking"], {"type": "adaptive", "display": "summarized"})
         sig = inspect.signature(anthropic.resources.messages.Messages.stream)
         sig.bind(None, **kw)
+
+    def test_summarized_display_reaches_the_wire(self):
+        """Binding shows the kwarg name exists, which predates the display;
+        the serialized body shows the nested key is sent (#5043 review)."""
+        import json
+        import anthropic
+        import httpx
+        bodies = []
+
+        def handler(request):
+            bodies.append(json.loads(request.content))
+            return httpx.Response(400, json={"type": "error", "error": {
+                "type": "invalid_request_error", "message": "offline probe"}})
+
+        client = anthropic.Anthropic(api_key="offline", base_url="http://probe.invalid", max_retries=0,
+                                     http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+        thinking = _model_settings("generic_v10")["thinking"]
+        with self.assertRaises(anthropic.BadRequestError):
+            with client.messages.stream(model="claude-opus-5", max_tokens=10, thinking=thinking,
+                                        messages=[{"role": "user", "content": "x"}]) as stream:
+                stream.get_final_message()
+        with self.assertRaises(anthropic.BadRequestError):
+            client.messages.count_tokens(model="claude-opus-5", thinking=thinking,
+                                         messages=[{"role": "user", "content": "x"}])
+        self.assertEqual([b["thinking"] for b in bodies],
+                         [{"type": "adaptive", "display": "summarized"}] * 2)
 
 
     def test_effort_travels_as_extra_body_and_every_kwarg_binds_to_the_real_sdk(self):
