@@ -471,7 +471,7 @@ def _warn_method_runtime(method, runtime, condition=None):
                    or (key == "api" and method == "claudecode_direct"))
     if contradicts:
         click.echo(f"# ⚠️  --runtime {runtime!r} with method {method}: the instruction names {method}/ output "
-                   f"paths" + (f"; a {key} run writes under {expected}/ — pass --method {expected}"
+                   f"paths" + (f"; {'an' if key == 'api' else 'a'} {key} run writes under {expected}/ — pass --method {expected}"
                                if expected else "") + " (#5046)", err=True)
 
 
