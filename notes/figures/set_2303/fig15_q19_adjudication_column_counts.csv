@@ -1,0 +1,10 @@
+concern,concern_label,group,filled_mark_flagged,filled_mark_not_flagged,named_any_flagged,named_any_not_flagged,flagged_ratings,not_flagged_ratings
+empty_field,empty derivation field,rep,6,0,6,15,9,15
+graph,graph or PROV expression,rep,6,0,6,13,9,15
+machine,machine-readable or traversable,rep,4,0,4,6,9,15
+scattered,links spread across fields,rep,3,0,3,0,9,15
+version,version access or errata,other,1,3,5,5,9,15
+missing,missingness or QC,other,0,2,4,3,9,15
+granularity,artifact-level granularity,other,0,3,2,10,9,15
+overlooked,input evidence overlooked,review,2,0,2,0,9,15
+disclaimer,certification disclaimed,review,9,15,9,15,9,15

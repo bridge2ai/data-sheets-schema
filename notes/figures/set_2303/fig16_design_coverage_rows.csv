@@ -1,0 +1,33 @@
+panel,group,family,row_label,y,records,labels,first_date,last_date,methods,runtime_classes,label_conditions,hashed_prompt_conditions,condition_mismatch_records,header_modes,superseded,reference_rescore
+0,baseline,,(label names model only),1,12,3,2026-07-27,2026-07-27,claudecode_agent,agentic,none,none,0,four-phase project agent,0,0
+0,baseline,deprimed,deprimed,2,9,3,2026-07-28,2026-07-28,claudecode_agent,agentic,none,none,0,"four-phase project agent, de-primed",0,0
+0,baseline,generic,generic,3,43,12,2026-07-28,2026-08-13,claudecode_agent,api;agentic,generic,generic,0,"four-phase project agent, generic prompt",4,0
+0,baseline,programme-deprimed,programme-deprimed,4,3,3,2026-07-28,2026-07-28,claudecode_agent,agentic,none,none,0,"four-phase project agent, pinned-referent",0,0
+0,baseline,canary,canary,5,1,1,2026-07-31,2026-07-31,claudecode_agent,api,none,generic_v2,0,"four-phase project agent, generic-v2 prompt",0,0
+0,baseline,generic-v2,generic-v2,6,12,3,2026-07-31,2026-07-31,claudecode_agent,api,generic_v2,generic_v2,0,"four-phase project agent, generic-v2 prompt",3,0
+0,baseline,bare,bare,7,3,3,2026-08-02,2026-08-02,claudecode_agent,api,none,generic_v2,0,"four-phase project agent, generic-v2 prompt",0,0
+0,baseline,1m-generic-v3,1m-generic-v3,8,4,3,2026-08-05,2026-08-05,claudecode_agent,api,generic_v3,generic_v3,0,"four-phase project agent, generic-v3 prompt",0,0
+0,baseline,generic-v3,generic-v3 †,9,17,4,2026-08-05,2026-08-07,claudecode_agent,api;agentic,generic_v3,generic;generic_v3,15,"four-phase project agent, generic prompt;four-phase project agent, generic-v3 prompt",5,0
+0,baseline,1m-generic-v3-schema2,1m-generic-v3-schema2,10,6,3,2026-08-06,2026-08-06,claudecode_agent,api,generic_v3,generic_v3,0,"four-phase project agent, generic-v3 prompt",0,0
+0,baseline,generic-v4,generic-v4,11,12,3,2026-08-13,2026-08-13,claudecode_agent,api,generic_v4,generic_v4,0,"four-phase project agent, generic-v4 prompt",0,0
+0,baseline,generic-v5,generic-v5,12,41,14,2026-08-16,2026-08-24,claudecode_agent,api;agentic,generic_v5,generic_v5,0,"four-phase project agent, generic-v5 prompt",8,0
+0,baseline,generic-v6,generic-v6,13,12,3,2026-08-28,2026-08-28,claudecode_agent,agentic,generic_v6,generic_v6,0,"four-phase project agent, generic-v6 prompt",0,0
+0,baseline,generic-v7,generic-v7,14,17,7,2026-08-28,2026-09-01,claudecode_agent,api,generic_v7,generic_v7,0,"four-phase project agent, generic-v7 prompt",6,12
+0,baseline,generic-v8,generic-v8,15,18,11,2026-09-04,2026-09-04,claudecode_api,api,generic_v8,generic_v8,0,"four-phase project agent, generic-v8 prompt",0,12
+0,baseline,generic-v9,generic-v9,16,1,1,2026-09-12,2026-09-12,claudecode_api,api,generic_v9,generic_v9,0,"four-phase project agent, generic-v9 prompt",0,0
+1,de_novo,,(label names model only),1,9,3,2026-07-27,2026-07-27,claudecode_agent_crate,agentic,none,none,0,four-phase project agent,0,0
+1,de_novo,deprimed,deprimed,2,6,3,2026-07-28,2026-07-28,claudecode_agent_crate,agentic,none,none,0,"four-phase project agent, de-primed",0,0
+1,de_novo,programme-deprimed,programme-deprimed,3,3,3,2026-07-28,2026-07-28,claudecode_agent_crate,agentic,none,none,0,"four-phase project agent, pinned-referent",0,0
+1,de_novo,generic,generic,4,9,3,2026-07-31,2026-07-31,claudecode_agent_crate,api,generic,generic,0,"four-phase project agent, generic prompt",0,0
+1,crate_only,crateonly,crateonly,6,6,3,2026-07-28,2026-07-28,claudecode_agent_crate_only,agentic,none,none,0,"four-phase project agent, crate-only",0,0
+1,crate_only,crateonly-denoised,crateonly-denoised,7,3,3,2026-07-28,2026-07-28,claudecode_agent_crate_only,agentic,none,none,0,"four-phase project agent, crate-only",0,0
+1,crate_only,crateonly-deprimed,crateonly-deprimed,8,9,3,2026-07-28,2026-07-28,claudecode_agent_crate_only,agentic,none,none,0,"four-phase project agent, crate-only, de-primed;four-phase project agent, crate-only, de-primed, pinned-referent",0,0
+1,crate_only,generic,generic,9,9,3,2026-07-31,2026-07-31,claudecode_agent_crate_only,api,generic,generic,0,"four-phase project agent, generic prompt",0,0
+1,healthsheet_only,,(label names model only),11,3,3,2026-07-27,2026-07-27,claudecode_agent_healthsheet,agentic,none,none,0,four-phase project agent,0,0
+1,healthsheet_only,deprimed,deprimed,12,3,3,2026-07-28,2026-07-28,claudecode_agent_healthsheet,agentic,none,none,0,"four-phase project agent, de-primed",0,0
+1,healthsheet_only,generic,generic,13,6,6,2026-07-28,2026-07-31,claudecode_agent_healthsheet,api;agentic,generic,generic,0,"four-phase project agent, generic prompt",0,0
+1,merged,coverage-union,coverage-union,15,1,1,2026-07-29,2026-07-29,claudecode_agent_merged,unknown,none,none,0,none,0,0
+1,merged,guarded-union,guarded-union,16,4,1,2026-07-29,2026-07-29,claudecode_agent_merged,none,none,none,0,none,0,0
+1,deterministic_ours,ourmap-v1,ourmap-v1,18,3,1,2026-07-27,2026-07-27,rocrate_static_map,none,none,none,0,none,0,0
+1,deterministic_ours,ourmap-v2,ourmap-v2,19,3,1,2026-07-27,2026-07-27,rocrate_static_map,none,none,none,0,none,0,0
+1,deterministic_upstream,deterministic-v1,deterministic-v1,21,2,1,2026-07-24,2026-07-24,rocrate_mapped,none,none,none,0,none,0,0

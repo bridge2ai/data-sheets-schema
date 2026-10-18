@@ -1,0 +1,172 @@
+panel,group,family,project,runtime_class,records,superseded,reference_rescore,canonical_now,x,y,labels
+0,baseline,,AI_READI,agentic,3,0,0,0,-0.1,1,2026-07-27_claude-opus-5_rep1;2026-07-27_claude-opus-5_rep2;2026-07-27_claude-opus-5_rep3
+0,baseline,,CHORUS,agentic,3,0,0,0,0.9,1,2026-07-27_claude-opus-5_rep1;2026-07-27_claude-opus-5_rep2;2026-07-27_claude-opus-5_rep3
+0,baseline,,CM4AI,agentic,3,0,0,0,1.9,1,2026-07-27_claude-opus-5_rep1;2026-07-27_claude-opus-5_rep2;2026-07-27_claude-opus-5_rep3
+0,baseline,,VOICE,agentic,3,0,0,0,2.9,1,2026-07-27_claude-opus-5_rep1;2026-07-27_claude-opus-5_rep2;2026-07-27_claude-opus-5_rep3
+0,baseline,,VOICE_PEDIATRIC,no record,0,0,0,0,4,1,
+0,baseline,deprimed,AI_READI,agentic,3,0,0,0,-0.1,2,2026-07-28_claude-opus-5-deprimed_rep1;2026-07-28_claude-opus-5-deprimed_rep2;2026-07-28_claude-opus-5-deprimed_rep3
+0,baseline,deprimed,CHORUS,agentic,3,0,0,0,0.9,2,2026-07-28_claude-opus-5-deprimed_rep1;2026-07-28_claude-opus-5-deprimed_rep2;2026-07-28_claude-opus-5-deprimed_rep3
+0,baseline,deprimed,CM4AI,no record,0,0,0,0,2,2,
+0,baseline,deprimed,VOICE,agentic,3,0,0,0,2.9,2,2026-07-28_claude-opus-5-deprimed_rep1;2026-07-28_claude-opus-5-deprimed_rep2;2026-07-28_claude-opus-5-deprimed_rep3
+0,baseline,deprimed,VOICE_PEDIATRIC,no record,0,0,0,0,4,2,
+0,baseline,generic,AI_READI,api,4,0,0,0,-0.32,3,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3;2026-08-11_claude-opus-5-api-generic_rep1
+0,baseline,generic,AI_READI,agentic,6,1,0,0,0.2,3,2026-07-28_claude-opus-5-generic_rep1;2026-07-28_claude-opus-5-generic_rep2;2026-07-28_claude-opus-5-generic_rep3;2026-08-11_claude-opus-5-claudecode-generic_rep1;2026-08-11_claude-opus-5-claudecode-generic_rep2;2026-08-11_claude-opus-5-claudecode-generic_rep3
+0,baseline,generic,CHORUS,api,6,0,0,0,0.68,3,2026-07-29_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3;2026-08-11_claude-opus-5-api-generic_rep1;2026-08-13_claude-opus-5-api-generic_rep1
+0,baseline,generic,CHORUS,agentic,6,1,0,0,1.2,3,2026-07-28_claude-opus-5-generic_rep1;2026-07-28_claude-opus-5-generic_rep2;2026-07-28_claude-opus-5-generic_rep3;2026-08-11_claude-opus-5-claudecode-generic_rep1;2026-08-11_claude-opus-5-claudecode-generic_rep2;2026-08-11_claude-opus-5-claudecode-generic_rep3
+0,baseline,generic,CM4AI,api,3,0,0,0,1.68,3,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+0,baseline,generic,CM4AI,agentic,6,1,0,0,2.2,3,2026-07-28_claude-opus-5-generic_rep1;2026-07-28_claude-opus-5-generic_rep2;2026-07-28_claude-opus-5-generic_rep3;2026-08-11_claude-opus-5-claudecode-generic_rep1;2026-08-11_claude-opus-5-claudecode-generic_rep2;2026-08-11_claude-opus-5-claudecode-generic_rep3
+0,baseline,generic,VOICE,api,3,0,0,0,2.68,3,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+0,baseline,generic,VOICE,agentic,6,1,0,0,3.2,3,2026-07-28_claude-opus-5-generic_rep1;2026-07-28_claude-opus-5-generic_rep2;2026-07-28_claude-opus-5-generic_rep3;2026-08-11_claude-opus-5-claudecode-generic_rep1;2026-08-11_claude-opus-5-claudecode-generic_rep2;2026-08-11_claude-opus-5-claudecode-generic_rep3
+0,baseline,generic,VOICE_PEDIATRIC,agentic,3,0,0,1,3.9,3,2026-08-11_claude-opus-5-claudecode-generic_rep1;2026-08-11_claude-opus-5-claudecode-generic_rep2;2026-08-11_claude-opus-5-claudecode-generic_rep3
+0,baseline,programme-deprimed,AI_READI,no record,0,0,0,0,0,4,
+0,baseline,programme-deprimed,CHORUS,no record,0,0,0,0,1,4,
+0,baseline,programme-deprimed,CM4AI,agentic,3,0,0,0,1.9,4,2026-07-28_claude-opus-5-programme-deprimed_rep1;2026-07-28_claude-opus-5-programme-deprimed_rep2;2026-07-28_claude-opus-5-programme-deprimed_rep3
+0,baseline,programme-deprimed,VOICE,no record,0,0,0,0,3,4,
+0,baseline,programme-deprimed,VOICE_PEDIATRIC,no record,0,0,0,0,4,4,
+0,baseline,canary,AI_READI,no record,0,0,0,0,0,5,
+0,baseline,canary,CHORUS,api,1,0,0,0,0.9,5,2026-07-31_canary_rep1
+0,baseline,canary,CM4AI,no record,0,0,0,0,2,5,
+0,baseline,canary,VOICE,no record,0,0,0,0,3,5,
+0,baseline,canary,VOICE_PEDIATRIC,no record,0,0,0,0,4,5,
+0,baseline,generic-v2,AI_READI,api,3,1,0,0,-0.1,6,2026-07-31_claude-opus-5-generic-v2_rep1;2026-07-31_claude-opus-5-generic-v2_rep2;2026-07-31_claude-opus-5-generic-v2_rep3
+0,baseline,generic-v2,CHORUS,api,3,1,0,0,0.9,6,2026-07-31_claude-opus-5-generic-v2_rep1;2026-07-31_claude-opus-5-generic-v2_rep2;2026-07-31_claude-opus-5-generic-v2_rep3
+0,baseline,generic-v2,CM4AI,api,3,1,0,0,1.9,6,2026-07-31_claude-opus-5-generic-v2_rep1;2026-07-31_claude-opus-5-generic-v2_rep2;2026-07-31_claude-opus-5-generic-v2_rep3
+0,baseline,generic-v2,VOICE,api,3,0,0,0,2.9,6,2026-07-31_claude-opus-5-generic-v2_rep1;2026-07-31_claude-opus-5-generic-v2_rep2;2026-07-31_claude-opus-5-generic-v2_rep3
+0,baseline,generic-v2,VOICE_PEDIATRIC,no record,0,0,0,0,4,6,
+0,baseline,bare,AI_READI,no record,0,0,0,0,0,7,
+0,baseline,bare,CHORUS,api,3,0,0,0,0.9,7,2026-08-02_claude-opus-5-bare_rep1;2026-08-02_claude-opus-5-bare_rep2;2026-08-02_claude-opus-5-bare_rep3
+0,baseline,bare,CM4AI,no record,0,0,0,0,2,7,
+0,baseline,bare,VOICE,no record,0,0,0,0,3,7,
+0,baseline,bare,VOICE_PEDIATRIC,no record,0,0,0,0,4,7,
+0,baseline,1m-generic-v3,AI_READI,api,3,0,0,0,-0.1,8,2026-08-05_claude-opus-5-1m-generic-v3_rep1;2026-08-05_claude-opus-5-1m-generic-v3_rep2;2026-08-05_claude-opus-5-1m-generic-v3_rep3
+0,baseline,1m-generic-v3,CHORUS,api,1,0,0,0,0.9,8,2026-08-05_claude-opus-5-1m-generic-v3_rep1
+0,baseline,1m-generic-v3,CM4AI,no record,0,0,0,0,2,8,
+0,baseline,1m-generic-v3,VOICE,no record,0,0,0,0,3,8,
+0,baseline,1m-generic-v3,VOICE_PEDIATRIC,no record,0,0,0,0,4,8,
+0,baseline,generic-v3,AI_READI,api,1,0,0,0,-0.32,9,2026-08-05_claude-opus-5-generic-v3_rep1
+0,baseline,generic-v3,AI_READI,agentic,3,1,0,0,0.2,9,2026-08-07_claude-opus-5-claudecode-generic-v3_rep1;2026-08-07_claude-opus-5-claudecode-generic-v3_rep2;2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
+0,baseline,generic-v3,CHORUS,api,1,0,0,0,0.68,9,2026-08-05_claude-opus-5-generic-v3_rep1
+0,baseline,generic-v3,CHORUS,agentic,3,1,0,0,1.2,9,2026-08-07_claude-opus-5-claudecode-generic-v3_rep1;2026-08-07_claude-opus-5-claudecode-generic-v3_rep2;2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
+0,baseline,generic-v3,CM4AI,agentic,3,1,0,0,1.9,9,2026-08-07_claude-opus-5-claudecode-generic-v3_rep1;2026-08-07_claude-opus-5-claudecode-generic-v3_rep2;2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
+0,baseline,generic-v3,VOICE,agentic,3,1,0,0,2.9,9,2026-08-07_claude-opus-5-claudecode-generic-v3_rep1;2026-08-07_claude-opus-5-claudecode-generic-v3_rep2;2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
+0,baseline,generic-v3,VOICE_PEDIATRIC,agentic,3,1,0,0,3.9,9,2026-08-07_claude-opus-5-claudecode-generic-v3_rep1;2026-08-07_claude-opus-5-claudecode-generic-v3_rep2;2026-08-07_claude-opus-5-claudecode-generic-v3_rep3
+0,baseline,1m-generic-v3-schema2,AI_READI,api,3,0,0,0,-0.1,10,2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1;2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2;2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3
+0,baseline,1m-generic-v3-schema2,CHORUS,api,3,0,0,0,0.9,10,2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1;2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2;2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3
+0,baseline,1m-generic-v3-schema2,CM4AI,no record,0,0,0,0,2,10,
+0,baseline,1m-generic-v3-schema2,VOICE,no record,0,0,0,0,3,10,
+0,baseline,1m-generic-v3-schema2,VOICE_PEDIATRIC,no record,0,0,0,0,4,10,
+0,baseline,generic-v4,AI_READI,api,3,0,0,0,-0.1,11,2026-08-13_claude-opus-5-api-generic-v4_rep1;2026-08-13_claude-opus-5-api-generic-v4_rep2;2026-08-13_claude-opus-5-api-generic-v4_rep3
+0,baseline,generic-v4,CHORUS,api,3,0,0,0,0.9,11,2026-08-13_claude-opus-5-api-generic-v4_rep1;2026-08-13_claude-opus-5-api-generic-v4_rep2;2026-08-13_claude-opus-5-api-generic-v4_rep3
+0,baseline,generic-v4,CM4AI,api,3,0,0,0,1.9,11,2026-08-13_claude-opus-5-api-generic-v4_rep1;2026-08-13_claude-opus-5-api-generic-v4_rep2;2026-08-13_claude-opus-5-api-generic-v4_rep3
+0,baseline,generic-v4,VOICE,api,3,0,0,0,2.9,11,2026-08-13_claude-opus-5-api-generic-v4_rep1;2026-08-13_claude-opus-5-api-generic-v4_rep2;2026-08-13_claude-opus-5-api-generic-v4_rep3
+0,baseline,generic-v4,VOICE_PEDIATRIC,no record,0,0,0,0,4,11,
+0,baseline,generic-v5,AI_READI,api,11,2,0,0,-0.32,12,2026-08-16_claude-opus-5-api-generic-v5_rep1;2026-08-19_claude-opus-5-api-generic-v5_rep1;2026-08-20_claude-opus-5-api-generic-v5_rep1;2026-08-20b_claude-opus-5-api-generic-v5_rep1;2026-08-20b_claude-opus-5-api-generic-v5_rep2;2026-08-20b_claude-opus-5-api-generic-v5_rep3;2026-08-22_claude-opus-5-api-generic-v5_rep1;2026-08-22b_claude-opus-5-api-generic-v5_rep1;2026-08-22c_claude-opus-5-api-generic-v5_rep1;2026-08-22c_claude-opus-5-api-generic-v5_rep2;2026-08-22c_claude-opus-5-api-generic-v5_rep3
+0,baseline,generic-v5,AI_READI,agentic,3,0,0,0,0.2,12,2026-08-24_claude-opus-5-claudecode-generic-v5_rep1;2026-08-24_claude-opus-5-claudecode-generic-v5_rep2;2026-08-24_claude-opus-5-claudecode-generic-v5_rep3
+0,baseline,generic-v5,CHORUS,api,6,2,0,0,0.68,12,2026-08-20b_claude-opus-5-api-generic-v5_rep1;2026-08-20b_claude-opus-5-api-generic-v5_rep2;2026-08-20b_claude-opus-5-api-generic-v5_rep3;2026-08-22c_claude-opus-5-api-generic-v5_rep1;2026-08-22c_claude-opus-5-api-generic-v5_rep2;2026-08-22c_claude-opus-5-api-generic-v5_rep3
+0,baseline,generic-v5,CHORUS,agentic,3,0,0,0,1.2,12,2026-08-24_claude-opus-5-claudecode-generic-v5_rep1;2026-08-24_claude-opus-5-claudecode-generic-v5_rep2;2026-08-24_claude-opus-5-claudecode-generic-v5_rep3
+0,baseline,generic-v5,CM4AI,api,6,2,0,0,1.68,12,2026-08-20b_claude-opus-5-api-generic-v5_rep1;2026-08-20b_claude-opus-5-api-generic-v5_rep2;2026-08-20b_claude-opus-5-api-generic-v5_rep3;2026-08-22c_claude-opus-5-api-generic-v5_rep1;2026-08-22c_claude-opus-5-api-generic-v5_rep2;2026-08-22c_claude-opus-5-api-generic-v5_rep3
+0,baseline,generic-v5,CM4AI,agentic,3,0,0,0,2.2,12,2026-08-24_claude-opus-5-claudecode-generic-v5_rep1;2026-08-24_claude-opus-5-claudecode-generic-v5_rep2;2026-08-24_claude-opus-5-claudecode-generic-v5_rep3
+0,baseline,generic-v5,VOICE,api,6,2,0,0,2.68,12,2026-08-20b_claude-opus-5-api-generic-v5_rep1;2026-08-20b_claude-opus-5-api-generic-v5_rep2;2026-08-20b_claude-opus-5-api-generic-v5_rep3;2026-08-22c_claude-opus-5-api-generic-v5_rep1;2026-08-22c_claude-opus-5-api-generic-v5_rep2;2026-08-22c_claude-opus-5-api-generic-v5_rep3
+0,baseline,generic-v5,VOICE,agentic,3,0,0,0,3.2,12,2026-08-24_claude-opus-5-claudecode-generic-v5_rep1;2026-08-24_claude-opus-5-claudecode-generic-v5_rep2;2026-08-24_claude-opus-5-claudecode-generic-v5_rep3
+0,baseline,generic-v5,VOICE_PEDIATRIC,no record,0,0,0,0,4,12,
+0,baseline,generic-v6,AI_READI,agentic,3,0,0,1,-0.1,13,2026-08-28_claude-opus-5-claudecode-generic-v6_rep1;2026-08-28_claude-opus-5-claudecode-generic-v6_rep2;2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+0,baseline,generic-v6,CHORUS,agentic,3,0,0,1,0.9,13,2026-08-28_claude-opus-5-claudecode-generic-v6_rep1;2026-08-28_claude-opus-5-claudecode-generic-v6_rep2;2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+0,baseline,generic-v6,CM4AI,agentic,3,0,0,1,1.9,13,2026-08-28_claude-opus-5-claudecode-generic-v6_rep1;2026-08-28_claude-opus-5-claudecode-generic-v6_rep2;2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+0,baseline,generic-v6,VOICE,agentic,3,0,0,1,2.9,13,2026-08-28_claude-opus-5-claudecode-generic-v6_rep1;2026-08-28_claude-opus-5-claudecode-generic-v6_rep2;2026-08-28_claude-opus-5-claudecode-generic-v6_rep3
+0,baseline,generic-v6,VOICE_PEDIATRIC,no record,0,0,0,0,4,13,
+0,baseline,generic-v7,AI_READI,api,6,2,3,0,-0.1,14,2026-08-28b_claude-opus-5-api-generic-v7_rep1;2026-08-28c_claude-opus-5-api-generic-v7_rep1;2026-08-28d_claude-opus-5-api-generic-v7_rep1;2026-09-01_claude-opus-5-api-generic-v7_rep1;2026-09-01_claude-opus-5-api-generic-v7_rep2;2026-09-01_claude-opus-5-api-generic-v7_rep3
+0,baseline,generic-v7,CHORUS,api,5,1,3,0,0.9,14,2026-08-28_claude-opus-5-api-generic-v7_rep1;2026-08-28b_claude-opus-5-api-generic-v7_rep1;2026-09-01_claude-opus-5-api-generic-v7_rep1;2026-09-01_claude-opus-5-api-generic-v7_rep2;2026-09-01_claude-opus-5-api-generic-v7_rep3
+0,baseline,generic-v7,CM4AI,api,3,1,3,0,1.9,14,2026-09-01_claude-opus-5-api-generic-v7_rep1;2026-09-01_claude-opus-5-api-generic-v7_rep2;2026-09-01_claude-opus-5-api-generic-v7_rep3
+0,baseline,generic-v7,VOICE,api,3,2,3,0,2.9,14,2026-09-01_claude-opus-5-api-generic-v7_rep1;2026-09-01_claude-opus-5-api-generic-v7_rep2;2026-09-01_claude-opus-5-api-generic-v7_rep3
+0,baseline,generic-v7,VOICE_PEDIATRIC,no record,0,0,0,0,4,14,
+0,baseline,generic-v8,AI_READI,api,4,0,3,1,-0.1,15,2026-09-04f_claude-opus-5-api-generic-v8_rep1;2026-09-04g_claude-opus-5-api-generic-v8_rep1;2026-09-04g_claude-opus-5-api-generic-v8_rep2;2026-09-04g_claude-opus-5-api-generic-v8_rep3
+0,baseline,generic-v8,CHORUS,api,3,0,3,1,0.9,15,2026-09-04f_claude-opus-5-api-generic-v8_rep1;2026-09-04f_claude-opus-5-api-generic-v8_rep2;2026-09-04f_claude-opus-5-api-generic-v8_rep3
+0,baseline,generic-v8,CM4AI,api,6,0,3,1,1.9,15,2026-09-04_claude-opus-5-api-generic-v8_rep1;2026-09-04b_claude-opus-5-api-generic-v8_rep1;2026-09-04c_claude-opus-5-api-generic-v8_rep1;2026-09-04g_claude-opus-5-api-generic-v8_rep1;2026-09-04g_claude-opus-5-api-generic-v8_rep2;2026-09-04g_claude-opus-5-api-generic-v8_rep3
+0,baseline,generic-v8,VOICE,api,5,0,3,1,2.9,15,2026-09-04d_claude-opus-5-api-generic-v8_rep1;2026-09-04e_claude-opus-5-api-generic-v8_rep1;2026-09-04f_claude-opus-5-api-generic-v8_rep1;2026-09-04f_claude-opus-5-api-generic-v8_rep2;2026-09-04f_claude-opus-5-api-generic-v8_rep3
+0,baseline,generic-v8,VOICE_PEDIATRIC,no record,0,0,0,0,4,15,
+0,baseline,generic-v9,AI_READI,no record,0,0,0,0,0,16,
+0,baseline,generic-v9,CHORUS,api,1,0,0,0,0.9,16,2026-09-12_claude-opus-5-api-generic-v9_rep1
+0,baseline,generic-v9,CM4AI,no record,0,0,0,0,2,16,
+0,baseline,generic-v9,VOICE,no record,0,0,0,0,3,16,
+0,baseline,generic-v9,VOICE_PEDIATRIC,no record,0,0,0,0,4,16,
+1,de_novo,,AI_READI,no record,0,0,0,0,0,1,
+1,de_novo,,CHORUS,agentic,3,0,0,0,0.9,1,2026-07-27_claude-opus-5_rep1;2026-07-27_claude-opus-5_rep2;2026-07-27_claude-opus-5_rep3
+1,de_novo,,CM4AI,agentic,3,0,0,0,1.9,1,2026-07-27_claude-opus-5_rep1;2026-07-27_claude-opus-5_rep2;2026-07-27_claude-opus-5_rep3
+1,de_novo,,VOICE,agentic,3,0,0,0,2.9,1,2026-07-27_claude-opus-5_rep1;2026-07-27_claude-opus-5_rep2;2026-07-27_claude-opus-5_rep3
+1,de_novo,,VOICE_PEDIATRIC,no record,0,0,0,0,4,1,
+1,de_novo,deprimed,AI_READI,no record,0,0,0,0,0,2,
+1,de_novo,deprimed,CHORUS,agentic,3,0,0,0,0.9,2,2026-07-28_claude-opus-5-deprimed_rep1;2026-07-28_claude-opus-5-deprimed_rep2;2026-07-28_claude-opus-5-deprimed_rep3
+1,de_novo,deprimed,CM4AI,no record,0,0,0,0,2,2,
+1,de_novo,deprimed,VOICE,agentic,3,0,0,0,2.9,2,2026-07-28_claude-opus-5-deprimed_rep1;2026-07-28_claude-opus-5-deprimed_rep2;2026-07-28_claude-opus-5-deprimed_rep3
+1,de_novo,deprimed,VOICE_PEDIATRIC,no record,0,0,0,0,4,2,
+1,de_novo,programme-deprimed,AI_READI,no record,0,0,0,0,0,3,
+1,de_novo,programme-deprimed,CHORUS,no record,0,0,0,0,1,3,
+1,de_novo,programme-deprimed,CM4AI,agentic,3,0,0,0,1.9,3,2026-07-28_claude-opus-5-programme-deprimed_rep1;2026-07-28_claude-opus-5-programme-deprimed_rep2;2026-07-28_claude-opus-5-programme-deprimed_rep3
+1,de_novo,programme-deprimed,VOICE,no record,0,0,0,0,3,3,
+1,de_novo,programme-deprimed,VOICE_PEDIATRIC,no record,0,0,0,0,4,3,
+1,de_novo,generic,AI_READI,no record,0,0,0,0,0,4,
+1,de_novo,generic,CHORUS,api,3,0,0,0,0.9,4,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+1,de_novo,generic,CM4AI,api,3,0,0,0,1.9,4,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+1,de_novo,generic,VOICE,api,3,0,0,0,2.9,4,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+1,de_novo,generic,VOICE_PEDIATRIC,no record,0,0,0,0,4,4,
+1,crate_only,crateonly,AI_READI,no record,0,0,0,0,0,6,
+1,crate_only,crateonly,CHORUS,agentic,3,0,0,0,0.9,6,2026-07-28_claude-opus-5-crateonly_rep1;2026-07-28_claude-opus-5-crateonly_rep2;2026-07-28_claude-opus-5-crateonly_rep3
+1,crate_only,crateonly,CM4AI,no record,0,0,0,0,2,6,
+1,crate_only,crateonly,VOICE,agentic,3,0,0,0,2.9,6,2026-07-28_claude-opus-5-crateonly_rep1;2026-07-28_claude-opus-5-crateonly_rep2;2026-07-28_claude-opus-5-crateonly_rep3
+1,crate_only,crateonly,VOICE_PEDIATRIC,no record,0,0,0,0,4,6,
+1,crate_only,crateonly-denoised,AI_READI,no record,0,0,0,0,0,7,
+1,crate_only,crateonly-denoised,CHORUS,no record,0,0,0,0,1,7,
+1,crate_only,crateonly-denoised,CM4AI,agentic,3,0,0,0,1.9,7,2026-07-28_claude-opus-5-crateonly-denoised_rep1;2026-07-28_claude-opus-5-crateonly-denoised_rep2;2026-07-28_claude-opus-5-crateonly-denoised_rep3
+1,crate_only,crateonly-denoised,VOICE,no record,0,0,0,0,3,7,
+1,crate_only,crateonly-denoised,VOICE_PEDIATRIC,no record,0,0,0,0,4,7,
+1,crate_only,crateonly-deprimed,AI_READI,no record,0,0,0,0,0,8,
+1,crate_only,crateonly-deprimed,CHORUS,agentic,3,0,0,0,0.9,8,2026-07-28_claude-opus-5-crateonly-deprimed_rep1;2026-07-28_claude-opus-5-crateonly-deprimed_rep2;2026-07-28_claude-opus-5-crateonly-deprimed_rep3
+1,crate_only,crateonly-deprimed,CM4AI,agentic,3,0,0,0,1.9,8,2026-07-28_claude-opus-5-crateonly-deprimed_rep1;2026-07-28_claude-opus-5-crateonly-deprimed_rep2;2026-07-28_claude-opus-5-crateonly-deprimed_rep3
+1,crate_only,crateonly-deprimed,VOICE,agentic,3,0,0,0,2.9,8,2026-07-28_claude-opus-5-crateonly-deprimed_rep1;2026-07-28_claude-opus-5-crateonly-deprimed_rep2;2026-07-28_claude-opus-5-crateonly-deprimed_rep3
+1,crate_only,crateonly-deprimed,VOICE_PEDIATRIC,no record,0,0,0,0,4,8,
+1,crate_only,generic,AI_READI,no record,0,0,0,0,0,9,
+1,crate_only,generic,CHORUS,api,3,0,0,0,0.9,9,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+1,crate_only,generic,CM4AI,api,3,0,0,0,1.9,9,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+1,crate_only,generic,VOICE,api,3,0,0,0,2.9,9,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+1,crate_only,generic,VOICE_PEDIATRIC,no record,0,0,0,0,4,9,
+1,healthsheet_only,,AI_READI,agentic,3,0,0,0,-0.1,11,2026-07-27_claude-opus-5_rep1;2026-07-27_claude-opus-5_rep2;2026-07-27_claude-opus-5_rep3
+1,healthsheet_only,,CHORUS,no record,0,0,0,0,1,11,
+1,healthsheet_only,,CM4AI,no record,0,0,0,0,2,11,
+1,healthsheet_only,,VOICE,no record,0,0,0,0,3,11,
+1,healthsheet_only,,VOICE_PEDIATRIC,no record,0,0,0,0,4,11,
+1,healthsheet_only,deprimed,AI_READI,agentic,3,0,0,0,-0.1,12,2026-07-28_claude-opus-5-deprimed_rep1;2026-07-28_claude-opus-5-deprimed_rep2;2026-07-28_claude-opus-5-deprimed_rep3
+1,healthsheet_only,deprimed,CHORUS,no record,0,0,0,0,1,12,
+1,healthsheet_only,deprimed,CM4AI,no record,0,0,0,0,2,12,
+1,healthsheet_only,deprimed,VOICE,no record,0,0,0,0,3,12,
+1,healthsheet_only,deprimed,VOICE_PEDIATRIC,no record,0,0,0,0,4,12,
+1,healthsheet_only,generic,AI_READI,api,3,0,0,0,-0.32,13,2026-07-31_claude-opus-5-api-generic_rep1;2026-07-31_claude-opus-5-api-generic_rep2;2026-07-31_claude-opus-5-api-generic_rep3
+1,healthsheet_only,generic,AI_READI,agentic,3,0,0,0,0.2,13,2026-07-28_claude-opus-5-generic_rep1;2026-07-28_claude-opus-5-generic_rep2;2026-07-28_claude-opus-5-generic_rep3
+1,healthsheet_only,generic,CHORUS,no record,0,0,0,0,1,13,
+1,healthsheet_only,generic,CM4AI,no record,0,0,0,0,2,13,
+1,healthsheet_only,generic,VOICE,no record,0,0,0,0,3,13,
+1,healthsheet_only,generic,VOICE_PEDIATRIC,no record,0,0,0,0,4,13,
+1,merged,coverage-union,AI_READI,no record,0,0,0,0,0,15,
+1,merged,coverage-union,CHORUS,no record,0,0,0,0,1,15,
+1,merged,coverage-union,CM4AI,unknown,1,0,0,0,1.9,15,2026-07-29_coverage-union
+1,merged,coverage-union,VOICE,no record,0,0,0,0,3,15,
+1,merged,coverage-union,VOICE_PEDIATRIC,no record,0,0,0,0,4,15,
+1,merged,guarded-union,AI_READI,none,1,0,0,0,-0.1,16,2026-07-29_guarded-union
+1,merged,guarded-union,CHORUS,none,1,0,0,0,0.9,16,2026-07-29_guarded-union
+1,merged,guarded-union,CM4AI,none,1,0,0,0,1.9,16,2026-07-29_guarded-union
+1,merged,guarded-union,VOICE,none,1,0,0,0,2.9,16,2026-07-29_guarded-union
+1,merged,guarded-union,VOICE_PEDIATRIC,no record,0,0,0,0,4,16,
+1,deterministic_ours,ourmap-v1,AI_READI,no record,0,0,0,0,0,18,
+1,deterministic_ours,ourmap-v1,CHORUS,none,1,0,0,0,0.9,18,2026-07-27_ourmap-v1
+1,deterministic_ours,ourmap-v1,CM4AI,none,1,0,0,0,1.9,18,2026-07-27_ourmap-v1
+1,deterministic_ours,ourmap-v1,VOICE,none,1,0,0,0,2.9,18,2026-07-27_ourmap-v1
+1,deterministic_ours,ourmap-v1,VOICE_PEDIATRIC,no record,0,0,0,0,4,18,
+1,deterministic_ours,ourmap-v2,AI_READI,no record,0,0,0,0,0,19,
+1,deterministic_ours,ourmap-v2,CHORUS,none,1,0,0,0,0.9,19,2026-07-27_ourmap-v2
+1,deterministic_ours,ourmap-v2,CM4AI,none,1,0,0,0,1.9,19,2026-07-27_ourmap-v2
+1,deterministic_ours,ourmap-v2,VOICE,none,1,0,0,0,2.9,19,2026-07-27_ourmap-v2
+1,deterministic_ours,ourmap-v2,VOICE_PEDIATRIC,no record,0,0,0,0,4,19,
+1,deterministic_upstream,deterministic-v1,AI_READI,no record,0,0,0,0,0,21,
+1,deterministic_upstream,deterministic-v1,CHORUS,none,1,0,0,0,0.9,21,2026-07-24_deterministic-v1
+1,deterministic_upstream,deterministic-v1,CM4AI,none,1,0,0,0,1.9,21,2026-07-24_deterministic-v1
+1,deterministic_upstream,deterministic-v1,VOICE,no record,0,0,0,0,3,21,
+1,deterministic_upstream,deterministic-v1,VOICE_PEDIATRIC,no record,0,0,0,0,4,21,

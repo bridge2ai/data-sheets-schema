@@ -1,0 +1,110 @@
+module_file,module,vocabulary,predicate_id,mapping_status,column,distinct_slots,x,y,marker,marker_s_pt2,slots
+D4D_Base_import,Base (shared slots),schema.org,skos:exactMatch,mapped,exact,17,0,0,o,576.0,bytes; conforms_to; created_on; doi; download_url; format; issued; keywords; language; last_updated_on; license; page; publisher; status; title; version; was_derived_from
+D4D_Base_import,Base (shared slots),schema.org,skos:closeMatch,mapped,close,4,1,0,o,135.529,created_by; dialect; media_type; modified_by
+D4D_Base_import,Base (shared slots),schema.org,skos:narrowMatch,mapped,narrow,3,4,0,o,101.647,conforms_to_class; conforms_to_schema; path
+D4D_Base_import,Base (shared slots),FAIRSCAPE EVI,skos:exactMatch,mapped,exact,3,7,0,o,101.647,hash; md5; sha256
+D4D_Base_import,Base (shared slots),FAIRSCAPE EVI,skos:closeMatch,mapped,close,2,8,0,o,67.765,compression; encoding
+D4D_Base_import,Base (shared slots),no target recorded,semapv:UnmappableProperty,free_text,free text,2,14,0,o,67.765,comment_prefix; url
+D4D_Base_import,Base (shared slots),no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",5,15,0,o,169.412,delimiter; double_quote; header; quote_char; used_software
+D4D_Base_import,Base (shared slots),no target recorded,semapv:UnmappedProperty,unmapped,unmapped,3,16,0,o,101.647,affiliation; email; orcid
+D4D_Base_import,Base (shared slots),not in table,(absent),(absent),no table row,1,17,0,s,26.611,conforms_to_standard
+D4D_Motivation,Motivation,schema.org,skos:exactMatch,mapped,exact,1,0,1,o,33.882,funders
+D4D_Motivation,Motivation,schema.org,skos:closeMatch,mapped,close,1,1,1,o,33.882,creators
+D4D_Motivation,Motivation,schema.org,skos:closeMatch,recommended,close (suggested),1,2,1,o,33.882,credit_roles
+D4D_Motivation,Motivation,Croissant RAI,skos:exactMatch,mapped,exact,1,5,1,o,33.882,tasks
+D4D_Motivation,Motivation,Croissant RAI,skos:closeMatch,mapped,close,1,6,1,o,33.882,purposes
+D4D_Motivation,Motivation,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),1,13,1,o,33.882,addressing_gaps
+D4D_Motivation,Motivation,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,6,16,1,o,203.294,affiliations; grant_number; grantor; grants; principal_investigator; response
+D4D_Composition,Composition,schema.org,skos:exactMatch,mapped,exact,1,0,2,o,33.882,related_datasets
+D4D_Composition,Composition,schema.org,skos:closeMatch,recommended,close (suggested),4,2,2,o,135.529,identifiers_removed; limitation_type; representative_verification; target_dataset
+D4D_Composition,Composition,schema.org,skos:relatedMatch,mapped,related,2,3,2,o,67.765,instances; subpopulations
+D4D_Composition,Composition,Croissant RAI,skos:closeMatch,mapped,close,1,6,2,o,33.882,sensitive_elements
+D4D_Composition,Composition,D4D namespace (D4D-only),skos:exactMatch,mapped,exact (mapped),1,12,2,o,33.882,anomalies
+D4D_Composition,Composition,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),10,13,2,o,338.824,confidential_elements; confidential_elements_present; content_warnings; content_warnings_present; is_deidentified; known_biases; known_limitations; sampling_strategies; strategies; warnings
+D4D_Composition,Composition,no target recorded,semapv:UnmappableProperty,free_text,free text,12,14,2,o,406.588,anomaly_details; bias_description; confidentiality_details; deidentification_details; external_resources; label_description; limitation_description; missing; relationship_details; sensitivity_details; source_data; split_details
+D4D_Composition,Composition,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",15,15,2,o,508.235,affected_subsets; archival; bias_type; identifiable_elements_present; is_random; is_representative; is_sample; label; method; missing_information; recommended_mitigation; relationship_type; scope_impact; subpopulation_elements_present; why_not_representative
+D4D_Composition,Composition,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,12,16,2,o,406.588,counts; data_substrate; data_topic; distribution; future_guarantees; identification; instance_type; mitigation_strategy; relationships; sensitive_elements_present; splits; why_missing
+D4D_Collection,Collection,schema.org,skos:closeMatch,recommended,close (suggested),3,2,3,o,101.647,end_date; start_date; was_validated_verified
+D4D_Collection,Collection,schema.org,skos:relatedMatch,mapped,related,1,3,3,o,33.882,data_collectors
+D4D_Collection,Collection,Croissant RAI,skos:exactMatch,mapped,exact,3,5,3,o,101.647,acquisition_methods; collection_mechanisms; raw_data_sources
+D4D_Collection,Collection,PROV-O,skos:closeMatch,recommended,close (suggested),1,10,3,o,33.882,was_inferred_derived
+D4D_Collection,Collection,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),2,13,3,o,67.765,collection_timeframes; handling_strategy
+D4D_Collection,Collection,no target recorded,semapv:UnmappableProperty,free_text,free text,9,14,3,o,304.941,access_details; acquisition_details; collection_details; collector_details; mechanism_details; missing_data_documentation; missing_data_patterns; source_description; timeframe_details
+D4D_Collection,Collection,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",6,15,3,o,203.294,is_direct; missing_data_causes; raw_data_format; source_type; was_directly_observed; was_reported_by_subjects
+D4D_Collection,Collection,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,1,16,3,o,33.882,direct_collection
+D4D_Preprocessing,Preprocessing,schema.org,skos:closeMatch,recommended,close (suggested),2,2,4,o,67.765,tool_accuracy; tools
+D4D_Preprocessing,Preprocessing,Croissant RAI,skos:exactMatch,mapped,exact,1,5,4,o,33.882,raw_sources
+D4D_Preprocessing,Preprocessing,Croissant RAI,skos:closeMatch,mapped,close,1,6,4,o,33.882,machine_annotation_tools
+D4D_Preprocessing,Preprocessing,DCAT,skos:closeMatch,recommended,close (suggested),1,9,4,o,33.882,access_url
+D4D_Preprocessing,Preprocessing,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),10,13,4,o,338.824,annotation_analyses; cleaning_strategies; data_annotation_protocol; imputation_method; imputation_protocols; imputation_rationale; imputation_validation; imputed_fields; labeling_strategies; preprocessing_strategies
+D4D_Preprocessing,Preprocessing,no target recorded,semapv:UnmappableProperty,free_text,free text,6,14,4,o,203.294,annotation_quality_details; cleaning_details; labeling_details; preprocessing_details; raw_data_details; tool_descriptions
+D4D_Preprocessing,Preprocessing,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",5,15,4,o,169.412,agreement_metric; annotations_per_item; annotator_demographics; disagreement_patterns; inter_annotator_agreement_score
+D4D_Preprocessing,Preprocessing,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,3,16,4,o,101.647,analysis_method; data_annotation_platform; inter_annotator_agreement
+D4D_Uses,Uses,schema.org,skos:relatedMatch,mapped,related,1,3,5,o,33.882,use_repository
+D4D_Uses,Uses,Croissant RAI,skos:exactMatch,mapped,exact,2,5,5,o,67.765,existing_uses; other_tasks
+D4D_Uses,Uses,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),5,13,5,o,169.412,discouraged_uses; future_use_impacts; intended_uses; prohibited_uses; prohibition_reason
+D4D_Uses,Uses,no target recorded,semapv:UnmappableProperty,free_text,free text,4,14,5,o,135.529,discouragement_details; repository_details; task_details; usage_notes
+D4D_Uses,Uses,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",2,15,5,o,67.765,repository_url; use_category
+D4D_Distribution,Distribution,schema.org,skos:exactMatch,mapped,exact,1,0,6,o,33.882,distribution_dates
+D4D_Distribution,Distribution,FAIRSCAPE EVI,skos:exactMatch,mapped,exact,1,7,6,o,33.882,distribution_formats
+D4D_Distribution,Distribution,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,4,16,6,o,135.529,access_urls; is_shared; release_dates; third_party_sharing
+D4D_Distribution,Distribution,not in table,(absent),(absent),no table row,1,17,6,s,26.611,checksum
+D4D_Maintenance,Maintenance,schema.org,skos:closeMatch,mapped,close,1,1,7,o,33.882,extension_mechanism
+D4D_Maintenance,Maintenance,schema.org,skos:relatedMatch,mapped,related,2,3,7,o,67.765,maintainers; version_access
+D4D_Maintenance,Maintenance,Croissant RAI,skos:exactMatch,mapped,exact,1,5,7,o,33.882,updates
+D4D_Maintenance,Maintenance,DCAT,skos:closeMatch,recommended,close (suggested),1,9,7,o,33.882,erratum_url
+D4D_Maintenance,Maintenance,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),3,13,7,o,101.647,errata; retention_limit; retention_period
+D4D_Maintenance,Maintenance,no target recorded,semapv:UnmappableProperty,free_text,free text,6,14,7,o,203.294,erratum_details; extension_details; maintainer_details; retention_details; update_details; version_details
+D4D_Maintenance,Maintenance,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",3,15,7,o,101.647,contribution_url; latest_version_doi; versions_available
+D4D_Maintenance,Maintenance,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,1,16,7,o,33.882,frequency
+D4D_Ethics,Ethics,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),3,13,8,o,101.647,data_protection_impacts; ethical_reviews; reviewing_organization
+D4D_Ethics,Ethics,no target recorded,semapv:UnmappableProperty,free_text,free text,4,14,8,o,135.529,consent_details; notification_details; review_details; revocation_details
+D4D_Ethics,Ethics,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,3,16,8,o,101.647,collection_consents; collection_notifications; consent_revocations
+D4D_Human,Human,Croissant RAI,skos:closeMatch,mapped,close,1,6,9,o,33.882,participant_privacy
+D4D_Human,Human,D4D namespace (D4D-only),skos:exactMatch,mapped,exact (mapped),2,12,9,o,67.765,at_risk_populations; human_subject_research
+D4D_Human,Human,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),5,13,9,o,169.412,compensation_amount; compensation_provided; compensation_rationale; compensation_type; participant_compensation
+D4D_Human,Human,no target recorded,semapv:UnmappableProperty,free_text,free text,4,14,9,o,135.529,anonymization_method; consent_documentation; ethics_review_board; informed_consent
+D4D_Human,Human,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",12,15,9,o,406.588,assent_procedures; consent_obtained; consent_type; data_linkage; guardian_consent; involves_human_subjects; irb_approval; privacy_techniques; regulatory_compliance; reidentification_risk; special_populations; withdrawal_mechanism
+D4D_Human,Human,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,3,16,9,o,101.647,at_risk_groups_included; consent_scope; special_protections
+D4D_Human,Human,not in table,(absent),(absent),no table row,2,17,9,s,53.222,retention_incentive_rationale; retention_incentives
+D4D_Data_Governance,Data Governance,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),5,13,10,o,169.412,confidentiality_level; governance_committee_contact; ip_restrictions; license_and_use_terms; regulatory_restrictions
+D4D_Data_Governance,Data Governance,no target recorded,semapv:UnmappableProperty,free_text,free text,1,14,10,o,33.882,license_terms
+D4D_Data_Governance,Data Governance,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",2,15,10,o,67.765,hipaa_compliant; other_compliance
+D4D_Data_Governance,Data Governance,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,1,16,10,o,33.882,data_use_permission
+D4D_Data_Governance,Data Governance,not in table,(absent),(absent),no table row,9,17,10,s,239.5,access_decision_timeframe; access_review_process; accountable_organization; appeal_process; committee_contact; committee_members; committee_name; data_governance; stewardship_roles
+D4D_Variables,Variables,schema.org,skos:exactMatch,mapped,exact,1,0,11,o,33.882,variables
+D4D_Variables,Variables,schema.org,skos:closeMatch,recommended,close (suggested),2,2,11,o,67.765,missing_value_code; precision
+D4D_Variables,Variables,no target recorded,semapv:UnmappableProperty,free_text,free text,2,14,11,o,67.765,derivation; quality_notes
+D4D_Variables,Variables,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,9,16,11,o,304.941,categories; data_type; is_identifier; is_sensitive; maximum_value; measurement_technique; minimum_value; unit; variable_name
+D4D_FileCollection,FileCollection,no target recorded,semapv:UnmappableProperty,free_text,free text,2,14,12,o,67.765,collection_type; file_type
+D4D_FileCollection,FileCollection,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,3,16,12,o,101.647,file_collections; file_count; total_bytes
+data_sheets_schema,"Root (Dataset, DataSubset)",schema.org,skos:exactMatch,mapped,exact,2,0,13,o,67.765,citation; parent_datasets
+data_sheets_schema,"Root (Dataset, DataSubset)",schema.org,skos:relatedMatch,mapped,related,2,3,13,o,67.765,resources; subsets
+data_sheets_schema,"Root (Dataset, DataSubset)",schema.org,skos:narrowMatch,mapped,narrow,1,4,13,o,33.882,is_tabular
+data_sheets_schema,"Root (Dataset, DataSubset)",no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",2,15,13,o,67.765,is_data_split; is_subpopulation
+data_sheets_schema,"Root (Dataset, DataSubset)",no target recorded,semapv:UnmappedProperty,unmapped,unmapped,2,16,13,o,67.765,total_file_count; total_size_bytes
+data_sheets_schema,"Root (Dataset, DataSubset)",not in table,(absent),(absent),no table row,2,17,13,s,53.222,same_as; themes
+several modules,several modules,RDF,skos:exactMatch,mapped,exact,1,11,14,o,33.882,id
+several modules,several modules,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),1,13,14,o,33.882,contact_person
+several modules,several modules,no target recorded,semapv:UnmappableProperty,free_text,free text,3,14,14,o,101.647,description; impact_details; restrictions
+several modules,several modules,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",2,15,14,o,67.765,examples; role
+several modules,several modules,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,1,16,14,o,33.882,name
+several modules,several modules,not in table,(absent),(absent),no table row,2,17,14,s,53.222,notes; source_caveats
+(all),column total,schema.org,skos:exactMatch,mapped,exact,23,0,15,,,
+(all),column total,schema.org,skos:closeMatch,mapped,close,6,1,15,,,
+(all),column total,schema.org,skos:closeMatch,recommended,close (suggested),12,2,15,,,
+(all),column total,schema.org,skos:relatedMatch,mapped,related,8,3,15,,,
+(all),column total,schema.org,skos:narrowMatch,mapped,narrow,4,4,15,,,
+(all),column total,Croissant RAI,skos:exactMatch,mapped,exact,8,5,15,,,
+(all),column total,Croissant RAI,skos:closeMatch,mapped,close,4,6,15,,,
+(all),column total,FAIRSCAPE EVI,skos:exactMatch,mapped,exact,4,7,15,,,
+(all),column total,FAIRSCAPE EVI,skos:closeMatch,mapped,close,2,8,15,,,
+(all),column total,DCAT,skos:closeMatch,recommended,close (suggested),2,9,15,,,
+(all),column total,PROV-O,skos:closeMatch,recommended,close (suggested),1,10,15,,,
+(all),column total,RDF,skos:exactMatch,mapped,exact,1,11,15,,,
+(all),column total,D4D namespace (D4D-only),skos:exactMatch,mapped,exact (mapped),3,12,15,,,
+(all),column total,D4D namespace (D4D-only),skos:exactMatch,novel_d4d,exact (novel term),45,13,15,,,
+(all),column total,no target recorded,semapv:UnmappableProperty,free_text,free text,55,14,15,,,
+(all),column total,no target recorded,semapv:UnmappedProperty,recommended,"suggested, no target",54,15,15,,,
+(all),column total,no target recorded,semapv:UnmappedProperty,unmapped,unmapped,52,16,15,,,
+(all),column total,not in table,(absent),(absent),no table row,17,17,15,,,

@@ -1,0 +1,6 @@
+rubric,item,item_name,project,primary_ratings,excluded_in,scored_as_applicable_in,scores_where_applicable,excluded_ratings
+rubric10-semantic,4.3,Privacy Protections and Re-identification Risk Assessment,CM4AI,6,6,0,,v7 r1; v7 r2; v7 r3; v8 r1; v8 r2; v8 r3
+rubric10-semantic,4.4,Informed Consent Obtained from Participants,CM4AI,6,6,0,,v7 r1; v7 r2; v7 r3; v8 r1; v8 r2; v8 r3
+rubric10-semantic,4.5,Vulnerable Populations and Compensation Documented,CM4AI,6,6,0,,v7 r1; v7 r2; v7 r3; v8 r1; v8 r2; v8 r3
+rubric20-semantic,Q8,Ethical and Privacy Declarations,CM4AI,6,2,4,4; 4; 4; 4,v7 r2; v8 r2
+rubric20-semantic,Q15,Human Subject Representation,CM4AI,6,2,4,4; 4; 3; 3,v7 r2; v8 r2

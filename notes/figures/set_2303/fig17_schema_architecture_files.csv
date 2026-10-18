@@ -1,0 +1,26 @@
+yaml_file,role,drawn,classes_declared
+D4D_Base_import.yaml,imported by the root,yes,7
+D4D_Collection.yaml,imported by the root,yes,7
+D4D_Composition.yaml,imported by the root,yes,15
+D4D_Core.yaml,not imported by the root,no,
+D4D_Data_Governance.yaml,imported by the root,yes,4
+D4D_Distribution.yaml,imported by the root,yes,3
+D4D_Ethics.yaml,imported by the root,yes,5
+D4D_Evaluation_Summary.yaml,not imported by the root,no,
+D4D_FileCollection.yaml,imported by the root,yes,2
+D4D_Human.yaml,imported by the root,yes,5
+D4D_Maintenance.yaml,imported by the root,yes,6
+D4D_Metadata.yaml,not imported by the root,no,
+D4D_Minimal.yaml,not imported by the root,no,
+D4D_Motivation.yaml,imported by the root,yes,7
+D4D_Preprocessing.yaml,imported by the root,yes,7
+D4D_Uses.yaml,imported by the root,yes,7
+D4D_Variables.yaml,imported by the root,yes,1
+d4d_generation_record.yaml,not imported by the root,no,
+d4d_run_telemetry.yaml,not imported by the root,no,
+data_sheets_schema.yaml,root schema,yes,3
+data_sheets_schema_all.yaml,generated merged schema,no,
+data_sheets_schema_core.yaml,not imported by the root,no,
+data_sheets_schema_core_all.yaml,generated merged schema,no,
+digest_inventory.yaml,not imported by the root,no,
+release_history.yaml,not imported by the root,no,
