@@ -73,7 +73,7 @@ def procedure_table(manifest, rows):
             return vals[0] if len(vals) == 1 else " / ".join(vals)
         versions = sorted({f'{r["rubric"].split("-")[0]} v{r["instrument_version"]}' for r in rows if r["cohort"] == c})
         cols[c] = {
-            "generation runtime": uniq("Agent runtime"),
+            "generation runtime": f"API arm (header: {uniq('Agent runtime')})",
             "generation provider": uniq("Provider"),
             "generation model": uniq("Model"),
             "prompt": re.sub(r".*generic-", "generic-", uniq("Mode")),

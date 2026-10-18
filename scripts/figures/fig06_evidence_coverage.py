@@ -11,17 +11,20 @@ Artifacts read per record (all under data/d4d_concatenated/<method>_core/<label>
   without a receipt) written by `d4d receipts check`, and `repo.commit` for the run;
 - the chunk manifest as it stood at the run's commit (git show <commit>:data/preprocessed/chunks/
   <PROJECT>_chunks.yaml), which maps chunk id -> source document (`source`), keyed by bundle_md5;
-- data/preprocessed/source_manifest.yaml, which maps the document file to its id and source_type.
+- data/preprocessed/source_manifest.yaml at the run's recorded hash (`run_source_manifest`), which maps
+  the document file to its id and source_type as the run saw it (e.g. AI_READI's `ro_crate_metadata`,
+  later removed in #5042).
 
-Panel A: chunk dispositions per run (bar length = manifest chunk count). The API arm reads the whole
-bundle from context, so "partially opened" is not observable here: a chunk is either receipted with a
-closed status or has no entry. Panel B: receipted fields by schema module x source document, per
-project, mean over the 6 runs of that project; only receipt slots that still resolve in the final
-record are counted. Panel C: populated slots by receipt status after audit/repair (from provenance).
+Panel A (top left): chunk dispositions per run (bar length = manifest chunk count). The API arm reads the
+whole bundle from context, so "partially opened" is not observable here: a chunk is either receipted with a
+closed status or has no entry. Panel B (top right): populated leaf paths by receipt status after audit/repair
+(from provenance `receipts.slots`, #2455, #2819). Panel C (bottom, full width): receipted fields by schema
+module x source document, per project, mean over the 6 runs of that project; only distinct resolving
+`(receipt field path, document)` pairs in the final record are counted (#2455, #2819).
 
 Color rules: Panel A keeps the ordinal blue ramp on purpose - the four dispositions are nominal, but
 the ramp order encodes review depth (extracted > redundant > nothing relevant > duplicate), and the
-legend says so. Panel C uses categorical slots 3+ (st.SERIES[3:]) for the support statuses with gray
+legend says so. Panel B uses categorical slots 3+ (st.SERIES[3:]) for the support statuses with gray
 for exempt; slots 0-2 stay reserved for the arms across the figure set.
 """
 from __future__ import annotations
@@ -39,6 +42,11 @@ from matplotlib.patches import Rectangle
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.figures import _style as st  # noqa: E402
+
+sys.path.insert(0, str(st.ROOT / "src"))
+from data_sheets_schema import source_metadata  # noqa: E402
+from data_sheets_schema.receipt_origin_record import split as origin_split  # noqa: E402
+from data_sheets_schema.receipt_sources import run_source_manifest  # noqa: E402
 
 ARCH = st.ROOT / "notes" / "reference_rescore_2026-09-12_cborg_runtime"
 CONCAT = st.ROOT / "data" / "d4d_concatenated"
@@ -138,6 +146,21 @@ def source_docs() -> dict[str, dict[str, dict]]:
     return out
 
 
+def source_docs_for_run(prov: dict, prov_path: Path, project: str) -> dict[str, dict]:
+    raw_sm, _ = run_source_manifest(prov, prov_path)
+    proj = source_metadata.projection(raw_sm, project)
+    docs = {
+        row["source"]: {
+            "id": row["source_id"],
+            "source_type": row["source_type"],
+            "tier": row["effective_priority"],
+        }
+        for row in proj["sources"]
+    }
+    docs["<preamble>"] = {"id": "bundle preamble", "source_type": "bundle preamble", "tier": None}
+    return docs
+
+
 PATH_TOKEN = re.compile(r"([^.\[\]]+)|\[(\d+)\]")
 
 
@@ -166,6 +189,7 @@ def analyse():
     for r in records():
         receipt = yaml.safe_load(r["receipt_path"].read_text())
         prov = yaml.safe_load(r["provenance_path"].read_text())
+        run_docs = source_docs_for_run(prov, r["provenance_path"], r["project"])
         manifest, manifest_ref = chunk_manifest_at(prov["repo"]["commit"], r["project"])
         md5_ok = receipt["bundle_md5"] == manifest["bundle_md5"] == prov["inputs"]["bundle_md5"]
         by_id = {c["id"]: c for c in manifest["chunks"]}
@@ -187,7 +211,7 @@ def analyse():
             if e.get("status") != "extracted" or cid not in by_id:
                 continue
             src = by_id[cid]["source"]
-            doc = docs[r["project"]].get(src, {"id": src, "source_type": "not in manifest"})
+            doc = run_docs.get(src) or docs[r["project"]].get(src, {"id": src, "source_type": "not in manifest"})
             for x in e.get("extracted") or []:
                 slot = str(x.get("slot", "")).strip()
                 if not slot:
@@ -206,12 +230,16 @@ def analyse():
                               "module": module, "document_id": doc_id, "source_type": stype, "fields": n})
         sl = pr["slots"]
         assert sl["with_receipt"] + sl["added_after_receipt"] + sl["never_receipted"] + sl["exempt"] == sl["populated"], r["label"]
+        sp = origin_split(pr)
+        contemp = sp["contemporaneous"] if sp is not None else ""
+        post_draft = sp["post_draft"] if sp is not None else ""
         base = {"label": r["label"], "method": r["method"], "project": r["project"], "cohort": r["cohort"], "rep": r["rep"]}
         rows.append({**base, "chunk_count": manifest["chunk_count"], **{d: counts[d] for d in DISPOSITIONS},
                      "no_entry": counts["no_entry"], "receipt_entries_not_in_manifest": len(extra),
                      "provenance_reviewed": pr["chunks"]["reviewed"], "bundle_md5": receipt["bundle_md5"],
                      "md5_receipt_manifest_provenance_agree": md5_ok, "chunk_manifest": manifest_ref,
                      "receipt_snippets_total": pr["snippets"]["total"], "receipt_snippets_verified": pr["snippets"]["verified"],
+                     "contemporaneous_snippets": contemp, "post_draft_snippets": post_draft,
                      "receipt_slots_cited": sum(cited.values()), "receipt_slots_unresolved_in_final": unresolved,
                      "receipt": str(r["receipt_path"].relative_to(st.ROOT)),
                      "provenance": str(r["provenance_path"].relative_to(st.ROOT))})
@@ -219,7 +247,8 @@ def analyse():
                              "receiptable": sl["receiptable"],
                              "share_receipted_of_populated": round(sl["with_receipt"] / sl["populated"], 4),
                              "share_receipted_of_receiptable": round(sl["with_receipt"] / sl["receiptable"], 4),
-                             "value_changed_after_receipt": sl["value_changed_after_receipt_count"]})
+                             "value_changed_after_receipt": sl["value_changed_after_receipt_count"],
+                             "contemporaneous_snippets": contemp, "post_draft_snippets": post_draft})
     return rows, support_rows, attr_long
 
 
@@ -293,8 +322,8 @@ def draw_panel_c(ax, support_rows, ys, ticks, labels, headers):
         ax.text(-8, y, text, ha="right", va="center", fontsize=8, fontweight="bold", color=st.INK["secondary"],
                 clip_on=False)
     ax.set_xlim(0, 640)
-    ax.set_xlabel("populated slots in the final record; label = share of populated slots receipted (exempt included)")
-    ax.set_title("C  Slot support status after audit and repair (receipt check on the final record)", pad=8)
+    ax.set_xlabel("populated leaf paths in the final record; label = share of populated leaf paths receipted (exempt included)")
+    ax.set_title("B  Slot support status after audit and repair (receipt check on the final record)", pad=8)
     st.hairline_grid(ax, "x")
     ax.tick_params(axis="y", length=0)
     handles = [Rectangle((0, 0), 1, 1, facecolor=SUPPORT_COLOR[k], label=SUPPORT_LABEL[k]) for k in SUPPORT]
@@ -392,23 +421,27 @@ def main() -> int:
     n_md5 = sum(1 for r in rows if not r["md5_receipt_manifest_provenance_agree"])
     unresolved = sum(r["receipt_slots_unresolved_in_final"] for r in rows)
     cited = sum(r["receipt_slots_cited"] for r in rows)
+    leaf_with = [r["with_receipt"] for r in support_rows]
     note = (f"All {len(rows)} runs have a receipt whose bundle_md5 matches the run's provenance and the chunk manifest at "
             f"the run's commit ({n_md5} disagreements); every manifest chunk has a receipt entry. The API arm holds the whole "
             "bundle in context, so 'partially opened' is not an observable state here and the receipt is the run's own "
             "closed declaration per chunk; the receipt check verifies snippets against the bundle, not that a snippet "
-            f"supports its value. Panel B counts {cited} receipt slots that resolve in the final records; {unresolved} receipt "
-            "slots no longer resolve after audit/repair and are excluded (listed in the CSV).")
+            f"supports its value. Units (#2819): Panel B counts populated leaf paths covered by a receipt ({min(leaf_with)}–"
+            f"{max(leaf_with)} per run, `slots.with_receipt`, where an entry receipt covers its leaves); Panel C counts {cited} "
+            f"distinct resolving `(receipt field path, document)` pairs across the {len(rows)} runs ({unresolved} receipt "
+            "entries no longer resolve after audit/repair and are excluded; see CSV for contemporaneous vs post-draft snippet origin).")
     y_note = ax_a.get_position().y0 - 0.105
     fig.text(0.09, y_note, "\n".join(_wrap(note, 200)), fontsize=7, color=st.INK["secondary"], ha="left", va="top")
     y_b = b_axes[0].get_position().y1 + 100 / (16.4 * 72)
-    fig.text(0.09, y_b, "B  Receipted fields by schema module (rows) and source document (columns, grouped by manifest "
-             "source_type), per project;\n    cell = mean over that project's runs of distinct record fields whose receipt "
-             "snippet sits in a chunk of that document", fontsize=9.5, fontweight="bold", color=st.INK["primary"],
+    fig.text(0.09, y_b, "C  Receipted fields by schema module (rows) and source document (columns, grouped by manifest "
+             "source_type), per project;\n    cell = mean over that project's runs of distinct resolving receipt field paths "
+             "whose snippet sits in a chunk of that document", fontsize=9.5, fontweight="bold", color=st.INK["primary"],
              ha="left", va="bottom")
-    fig.suptitle("Evidence coverage of the reference rescore records: receipts, attribution to source documents, and slot support",
+    fig.suptitle("Evidence coverage of the reference rescore records: receipts, slot support, and attribution to source documents",
                  x=0.01, ha="left", fontsize=11.5, fontweight="bold", y=0.995)
     basis = (f"Record set: reference rescore 2026-09-12 (CBORG runtime), {len(rows)} API-arm full records "
-             f"(4 projects x v7/v8 x 3 replicates); receipts, provenance receipts blocks, chunk manifests at run commits, source_manifest.yaml")
+             f"(4 projects x v7/v8 x 3 replicates); receipts, provenance receipts blocks, chunk manifests at run commits, "
+             "source_manifest.yaml at each run's recorded hash (run_source_manifest)")
     st.save(fig, "fig06_evidence_coverage", {"main": rows, "support": support_rows, "attribution": table,
                                             "attribution_by_record": attr_long}, basis)
     return 0

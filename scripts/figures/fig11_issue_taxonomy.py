@@ -35,7 +35,7 @@ from scripts.figures import _style as st  # noqa: E402
 ARCH = st.ROOT / "notes" / "reference_rescore_2026-09-12_cborg_runtime"
 CODES = Path(__file__).with_name("issue_codes.csv")
 RUBRICS = [("rubric10-semantic", "rubric10"), ("rubric20-semantic", "rubric20")]
-RUBRIC_COLOR = {"rubric10-semantic": st.SERIES[6], "rubric20-semantic": st.SERIES[5]}   # fixed slots 7 (violet) and 6 (green)
+RUBRIC_COLOR = {"rubric10-semantic": st.SERIES[6], "rubric20-semantic": st.SERIES[4]}   # fixed slots 7 (violet) and 5 (magenta); slot 6 (green) avoided because Panel C uses green for passed
 SEVERITIES = ["low", "medium", "high"]
 SEV_HATCH = {"low": None, "medium": "//", "high": "////"}      # hatch density carries severity; fill stays at full strength
 TYPES = ["completeness", "consistency", "content_accuracy", "correctness", "semantic_understanding"]

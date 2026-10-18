@@ -26,8 +26,10 @@ trailing "Base / root" group. `source_caveats` is the caveat channel itself and 
 row.
 
 States: populated = non-empty value (not None / "" / [] / {}); caveat-only = the slot is
-absent (or its value carries nothing but `source_caveats`) but some `source_caveats`
-string in the record names the slot as a whole word; empty = absent, not mentioned.
+absent (or its value carries nothing but `source_caveats`) and some `source_caveats`
+string in the record names a multi-token snake_case slot as a whole word or names a
+single-token slot in explicit slot-identifier context (backticked or paired with
+slot/field/property/attribute); empty = absent, not mentioned.
 Module cells are the fraction of the module's slots that are populated (caveat-only does
 not count). No record = blank with a hairline border.
 """
@@ -174,6 +176,26 @@ def records():
     return cols
 
 
+def caveat_mentions_slot(slot: str, text: str) -> bool:
+    """Return True if a source_caveats string names `slot` as a schema slot (#2459).
+
+    Multi-token snake_case slot names (`_` in name) are matched as whole words.
+    Single-token slot names (e.g. `id`, `page`, `version`, `license`, `doi`) are
+    ordinary English prose words and match only in explicit slot-identifier context:
+    backtick-quoted (`` `slot` ``) or paired with `slot`, `field`, `property`, or `attribute`.
+    """
+    esc = re.escape(slot)
+    if "_" in slot:
+        return bool(re.search(r"\b" + esc + r"\b", text))
+    if re.search(r"`" + esc + r"`", text):
+        return True
+    ctx = r"(?:slot|field|property|attribute)s?"
+    return bool(
+        re.search(r"\b" + esc + r"\s+" + ctx + r"\b", text, re.IGNORECASE)
+        or re.search(r"\b" + ctx + r"\s+[`'\"]?" + esc + r"\b", text, re.IGNORECASE)
+    )
+
+
 def classify(doc: dict, slots: list[str]) -> dict[str, str]:
     cav: list[str] = []
     caveat_strings(doc, cav)
@@ -183,7 +205,7 @@ def classify(doc: dict, slots: list[str]) -> dict[str, str]:
         v = doc.get(s)
         if not empty(v) and not only_caveat(v):
             out[s] = "populated"
-        elif re.search(r"\b" + re.escape(s) + r"\b", text) or only_caveat(v):
+        elif caveat_mentions_slot(s, text) or only_caveat(v):
             out[s] = "caveat_only"
         else:
             out[s] = "empty"
@@ -361,7 +383,7 @@ def main() -> int:
     # legend + color scale
     handles = [Patch(facecolor=COLOR["populated"], label="populated (non-empty value)"),
                plt.Line2D([], [], marker="o", markersize=2.5, color=st.INK["primary"], markerfacecolor=st.INK["primary"],
-                          linestyle="none", label="caveat-only: slot absent, named in a source_caveats entry"),
+                          linestyle="none", label="caveat-only: slot absent, named as a slot in source_caveats"),
                Patch(facecolor=COLOR["empty"], label="empty (slot absent)"),
                Patch(facecolor=st.INK["surface"], edgecolor=st.INK["axis"], linewidth=0.5, label="no record in this set")]
     handles[1] = (Patch(facecolor=COLOR["caveat_only"]), handles[1])

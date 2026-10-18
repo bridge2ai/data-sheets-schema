@@ -13,9 +13,10 @@ Method, per record:
    against the sha256 the provenance recorded, and the bundle_md5 of receipt, manifest and
    provenance must agree; a run that fails either check stops the script.
 2. Every `extracted` receipt entry gives (field path, snippet) for one chunk; the chunk manifest maps
-   the chunk to its source file and data/preprocessed/source_manifest.yaml maps the file to a
-   document id and source_type. A field path is kept only if it still names a non-empty value in the
-   final record (fig06's `resolves`); paths dropped by audit/repair are counted and excluded.
+   the chunk to its source file and data/preprocessed/source_manifest.yaml at the run's recorded hash
+   (`run_source_manifest`, #3411) maps the file to a document id, source_type, and priority tier. A field
+   path is kept only if it still names a non-empty value in the final record (fig06's `resolves`); paths
+   dropped by audit/repair are counted and excluded.
 3. For each kept field path, the set of documents whose chunks cite it. A sole-source path of D is
    one whose citing set is exactly {D}, i.e. one that would lose every citation if D's receipt
    entries were deleted. Sole-source share of D = (# kept field paths cited by D only) /
@@ -35,8 +36,9 @@ some of the same fields and the marked document's sole-source share may overstat
 
 Caveats: this is citation dependence inside the generating model's own receipts, not verified factual
 support (the receipt check verifies that snippets occur in the bundle, not that they support the
-value) and not a regeneration experiment without the document. Field paths are counted at receipt
-path granularity (e.g. funders[0] and funders[0].notes are two paths), not by value or importance.
+value) and not a regeneration experiment without the document. Field paths are counted at distinct
+resolving receipt field-path granularity (e.g. funders[0] and funders[0].notes are two paths; #2819,
+distinct from fig06 Panel B's populated leaf paths covered by a receipt), not by value or importance.
 The bundle preamble chunk is not a source document; any field cited from it is counted separately.
 """
 from __future__ import annotations
@@ -58,6 +60,9 @@ from matplotlib.lines import Line2D
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.figures import _style as st  # noqa: E402
 from scripts.figures import fig06_evidence_coverage as f6  # noqa: E402
+
+sys.path.insert(0, str(st.ROOT / "src"))
+from data_sheets_schema.receipt_origin_record import split as origin_split  # noqa: E402
 
 STEM = "fig19_source_dependence"
 COHORTS = f6.COHORTS
@@ -105,15 +110,17 @@ def verified_manifest(commit: str, project: str, prov: dict) -> tuple[dict, str]
 
 
 def analyse():
-    docs = f6.source_docs()                  # project -> processed_file -> {id, source_type}
+    head_docs = f6.source_docs()             # project -> processed_file -> {id, source_type} at HEAD
     per_record, per_doc = [], []
     for r in f6.records():
         receipt = yaml.safe_load(r["receipt_path"].read_text())
         prov = yaml.safe_load(r["provenance_path"].read_text())
+        run_docs = f6.source_docs_for_run(prov, r["provenance_path"], r["project"])
+        all_docs = {**run_docs, **{k: {**v, "tier": None} for k, v in head_docs[r["project"]].items() if k not in run_docs}}
         manifest, ref = verified_manifest(prov["repo"]["commit"], r["project"], prov)
         if not (receipt["bundle_md5"] == manifest["bundle_md5"] == prov["inputs"]["bundle_md5"]):
             raise SystemExit(f'{r["label"]} {r["project"]}: bundle_md5 disagreement')
-        chunk_doc = {c["id"]: docs[r["project"]].get(c["source"], {"id": c["source"], "source_type": "not in manifest"})["id"]
+        chunk_doc = {c["id"]: all_docs.get(c["source"], {"id": c["source"], "source_type": "not in manifest", "tier": None})["id"]
                      for c in manifest["chunks"]}
         final = yaml.safe_load((st.ROOT / r["input"]).read_text())
         citing = defaultdict(set)            # field path -> documents citing it
@@ -136,20 +143,31 @@ def analyse():
                 citing[slot].add(chunk_doc[e["id"]])
         n = len(citing)
         n_single = sum(1 for s in citing.values() if len(s) == 1)
-        preamble_id = docs[r["project"]][PREAMBLE]["id"]
+        preamble_id = all_docs[PREAMBLE]["id"]
+        pr = prov["receipts"]
+        sp = origin_split(pr)
+        contemp = sp["contemporaneous"] if sp is not None else ""
+        post_draft = sp["post_draft"] if sp is not None else ""
         base = {"label": r["label"], "method": r["method"], "project": r["project"], "cohort": r["cohort"], "rep": r["rep"]}
         per_record.append({**base, "receipt_extracted_entries": entries, "entries_unresolved_in_final": unresolved,
-                           "receipted_field_paths": n, "paths_with_one_citing_document": n_single,
+                           "receipted_field_paths": n,
+                           "populated_leaf_paths_with_receipt": pr["slots"]["with_receipt"],
+                           "contemporaneous_snippets": contemp, "post_draft_snippets": post_draft,
+                           "paths_with_one_citing_document": n_single,
                            "share_with_one_citing_document": n_single / n,
                            "paths_cited_by_preamble": sum(1 for s in citing.values() if preamble_id in s),
                            "doc_path_pairs": sum(len(s) for s in citing.values()),
                            "chunk_manifest": ref, "commit": prov["repo"]["commit"]})
-        for f, d in docs[r["project"]].items():
+        for f, d in all_docs.items():
             if f == PREAMBLE and not any(preamble_id in s for s in citing.values()):
                 continue                     # the preamble is not a source document; kept only if cited
             cited_any = sum(1 for s in citing.values() if d["id"] in s)
             sole = sum(1 for s in citing.values() if s == {d["id"]})
-            per_doc.append({**base, "document_id": d["id"], "source_type": d["source_type"], "processed_file": f,
+            tier_val = d.get("tier")
+            per_doc.append({**base, "document_id": d["id"], "source_type": d["source_type"],
+                            "tier": tier_val if tier_val is not None else "",
+                            "present_in_head_manifest": f in head_docs[r["project"]],
+                            "processed_file": f,
                             "field_paths_citing": cited_any, "field_paths_sole_source": sole,
                             "receipted_field_paths": n, "sole_source_share": sole / n,
                             "cited_in_run": cited_any > 0,
@@ -214,7 +232,7 @@ def draw_panel(fig, rect, per_doc, per_record, project, xmax, n_runs_total):
     ax.set_xlim(-1.2, xmax)
     ax.set_xticks(range(0, int(xmax) + 1, 10))
     ax.set_xticklabels([f"{t}%" for t in range(0, int(xmax) + 1, 10)])
-    ax.set_xlabel("share of the run's receipted field paths cited by this document only", fontsize=7.5)
+    ax.set_xlabel("share of the run's distinct resolving receipt field paths cited by this document only", fontsize=7.5)
     st.hairline_grid(ax, "x")
     ax.tick_params(axis="y", length=0)
     ax.spines["left"].set_visible(False)
@@ -229,9 +247,10 @@ def draw_panel(fig, rect, per_doc, per_record, project, xmax, n_runs_total):
         ax.axhline(s - 0.5, color=st.INK["axis"], linewidth=0.6, zorder=1)
     single = [r["share_with_one_citing_document"] * 100 for r in recs]
     paths = [r["receipted_field_paths"] for r in recs]
+    leaf = [r["populated_leaf_paths_with_receipt"] for r in recs]
     header = (project.replace("_", "-"),
-              f"{len(recs)} runs; {min(paths)}\u2013{max(paths)} receipted field paths per run, "
-              f"{min(single):.0f}\u2013{max(single):.0f}% of them cited by exactly one document",
+              f"{len(recs)} runs; {min(paths)}\u2013{max(paths)} distinct resolving receipt field paths per run "
+              f"(vs {min(leaf)}\u2013{max(leaf)} receipted leaf paths in fig06B), {min(single):.0f}\u2013{max(single):.0f}% cited by 1 doc",
               f"highest median sole-source share: {top}, {med[top] * 100:.0f}% of a run's receipted field paths")
     return ax, groups, plotted, header
 
@@ -321,11 +340,13 @@ def main() -> int:
     note = (f"† {n_flag_docs} documents: in {n_flag_runs} of {len(per_record)} runs a chunk of another document was declared "
             "redundant_with a chunk of this document. Receipts itemize no fields for redundant chunks, so these shares may "
             "overstate dependence. A filled dot at 0% is a document cited in that run but never as the only source. "
-            "A sole-source path is one that would lose every citation if this document's receipt entries were deleted; "
-            "this measures citation dependence in the run's own coverage receipt, not verified factual support, and is "
-            "not a regeneration experiment. "
+            "Unit (#2819): distinct resolving receipt field paths per run (whereas fig06 Panel B counts populated leaf paths "
+            "covered by a receipt, `slots.with_receipt`). This measures citation dependence in the run's own coverage receipt, "
+            "not verified factual support, and is not a regeneration experiment. "
             f"{unresolved} of {entries} receipt field entries no longer resolve in the final record after audit/repair and are "
-            f"excluded; {preamble} kept paths cite the bundle preamble. Chunk manifests read at each run's commit, sha256-matched to provenance.")
+            f"excluded; {preamble} kept paths cite the bundle preamble. Chunk manifests read at each run's commit and "
+            "source_manifest.yaml at each run's recorded hash (run_source_manifest, #3411: AI_READI includes ro_crate_metadata, "
+            "later removed at HEAD in #5042).")
     fig.canvas.draw()                          # place the note under the legend's measured bottom edge
     leg_bottom = leg.get_window_extent(fig.canvas.get_renderer()).y0 / fig.dpi
     fig.text(x_left + 0.004, (leg_bottom - 0.10) / H, "\n".join(textwrap.wrap(note, 132)), fontsize=6.9,
@@ -335,8 +356,9 @@ def main() -> int:
                  x=0.012, ha="left", fontsize=11, fontweight="bold", y=0.985)
     basis = (f"Record set: reference rescore 2026-09-12 (CBORG runtime), {len(per_record)} API-arm full records "
              "(4 projects x v7/v8 x 3 replicates); coverage receipts, chunk manifests at run commits (sha256 = provenance), "
-             "source_manifest.yaml; receipt field paths resolving in the final record")
-    order_cols = ["label", "method", "project", "cohort", "rep", "document_id", "source_type", "processed_file",
+             "source_manifest.yaml at each run's recorded hash (run_source_manifest); distinct receipt field paths resolving in the final record")
+    order_cols = ["label", "method", "project", "cohort", "rep", "document_id", "source_type", "tier",
+                  "present_in_head_manifest", "processed_file",
                   "field_paths_citing", "field_paths_sole_source", "receipted_field_paths", "sole_source_share",
                   "median_share_of_project_runs", "cited_in_run", "redundant_chunk_of_other_document_points_here", "y_row",
                   "y_lane_offset"]
@@ -346,12 +368,16 @@ def main() -> int:
     for p in st.PROJECTS:
         order, types, med = doc_order(per_doc, p)
         for d in order:
-            vals = [x["sole_source_share"] for x in per_doc if x["project"] == p and x["document_id"] == d]
-            medians.append({"project": p, "document_id": d, "source_type": types[d], "n_runs": len(vals),
+            doc_rows = [x for x in per_doc if x["project"] == p and x["document_id"] == d]
+            vals = [x["sole_source_share"] for x in doc_rows]
+            medians.append({"project": p, "document_id": d, "source_type": types[d],
+                            "tier": doc_rows[0]["tier"] if doc_rows else "",
+                            "present_in_head_manifest": doc_rows[0]["present_in_head_manifest"] if doc_rows else True,
+                            "n_runs": len(vals),
                             "median_sole_source_share": rnd(med[d]), "min": rnd(min(vals)), "max": rnd(max(vals)),
-                            "runs_cited": sum(1 for x in per_doc if x["project"] == p and x["document_id"] == d and x["cited_in_run"]),
-                            "runs_flagged_redundancy_target": sum(1 for x in per_doc if x["project"] == p and x["document_id"] == d
-                                                                  and x["redundant_chunk_of_other_document_points_here"])})
+                            "runs_cited": sum(1 for x in doc_rows if x["cited_in_run"]),
+                            "runs_flagged_redundancy_target": sum(1 for x in doc_rows
+                                                                  if x["redundant_chunk_of_other_document_points_here"])})
     st.save(fig, STEM, {"main": main_rows, "medians": medians, "records": [{k: rnd(v) for k, v in r.items()} for r in per_record]}, basis)
     return 0
 

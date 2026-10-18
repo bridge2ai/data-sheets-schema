@@ -5,8 +5,9 @@ where it mints its own terms, and where the structural mapping records a type co
 Record sets (two tables, never summed; they overlap in subject matter):
 
   A. src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv, the
-     dated "comprehensive" SSSOM table (header `# Date:`; one row per D4D slot name, every
-     subject written `Dataset.<slot>` even when the slot belongs to a nested class). Read with
+     dated "comprehensive" SSSOM table (header `# Date:`; one row per D4D slot name, keyed by
+     `subject_id` `d4d:<slot>`; `d4d_schema_path` was emptied in #3024 because flat slot rows are
+     not rooted at `Dataset.<slot>` when the slot belongs to a nested class). Read with
      the csv module after dropping `#` header lines, because 34 cells are quoted multi-line
      strings. The current schema's slot names that the table does not list are added as an
      explicit "not in table" column, so they are shown and not silently dropped.
@@ -22,8 +23,9 @@ one row in the comprehensive table, so it lands in exactly one column.
 
 Target vocabulary: from `object_source` (namespace URI), falling back to the `object_id`
 prefix when the source is empty or recorded as "unknown" (one row: `rdf:ID`). The two must
-agree where both exist, or the script stops. Rows without an object form the "no target"
-group, split by `mapping_status` (free_text / recommended / unmapped).
+agree where both exist, or the script stops. Rows without a target (`object_id` empty or
+`sssom:NoTermFound`, #3361) form the "no target" group, split by `mapping_status`
+(free_text / recommended / novel_d4d / unmapped).
 
 Module attribution (a documented rule, not a property of the table): the files are the root
 schema data_sheets_schema.yaml and the modules it imports (D4D_Base_import + 12 topical
@@ -42,12 +44,12 @@ The slots CSV lists every declaring file per slot name, so each override can be 
 
 Panel B: `type_compatible` is the generator's own rule-based check
 (src/semantic_exchange/generate_structural_mapping.py, `_validate_type_compatibility`:
-cardinality and a few literal/relationship heuristics), and composition-path rows are written
-with `type_compatible=True` by construction rather than checked. Both are labeled as such.
-Composition-path rows are also written with `d4d_range=None, d4d_multivalued=False`, which
-`to_sssom_row` serializes as "string" / "False": placeholders, not schema data. The figure
-labels them as generator defaults and prints the current schema's range and cardinality
-(SchemaView, looked up at run time along the path) beside them; both go to the CSVs.
+cardinality and a few literal/relationship heuristics). After #2983 regenerated the structural
+SSSOM table, all 16 `anomalies.*` composition-path rows carry their resolved leaf slot range
+(`DataAnomaly`, `string`, `uriorcurie`, `Software`) and path cardinality (`multivalued=True`)
+and are flagged `type_compatible=False` against the single-valued RO-Crate `str` property.
+The figure compares every non-direct row's written range and cardinality against the current
+schema (SchemaView, looked up at run time) and exports both to the CSVs.
 
 Caveat: these are mapping assertions, not tested interoperability. Nothing here round-trips a
 record through RO-Crate. Every plotted number is computed from the files at run time and
@@ -135,14 +137,14 @@ def git_last_date(path: Path) -> str:
 
 def vocabulary(row: dict) -> str:
     obj, src = row["object_id"].strip(), row["object_source"].strip()
-    if not obj:
+    if not obj or obj == "sssom:NoTermFound":
         assert not src, row
         return NO_TARGET
     prefix = obj.split(":", 1)[0] if ":" in obj else ""
     by_src = next((v for v, uri, _ in VOCABS if src == uri), None)
     by_pfx = next((v for v, _, p in VOCABS if prefix == p), None)
     if by_src and by_pfx:
-        assert by_src == by_pfx, (row["d4d_schema_path"], src, obj)
+        assert by_src == by_pfx, (row["subject_id"], src, obj)
     return by_src or by_pfx or f"other ({prefix or src})"
 
 
@@ -187,14 +189,14 @@ def module_attribution():
 def panel_a():
     rows, header = read_sssom(COMP)
     files, names, attribute = module_attribution()
-    paths = [r["d4d_schema_path"] for r in rows]
-    assert len(paths) == len(set(paths)), "duplicate subject paths in comprehensive table"
-    assert all(p.startswith("Dataset.") for p in paths)
+    subj_ids = [r["subject_id"].strip() for r in rows]
+    assert len(subj_ids) == len(set(subj_ids)), "duplicate subject_id values in comprehensive table"
+    assert all(s.startswith("d4d:") for s in subj_ids)
     slot_rows = []
     for r in rows:
-        slot = r["d4d_schema_path"].split(".", 1)[1]
+        slot = r["subject_id"].strip().split(":", 1)[1]
         mod, rule, several, every = attribute(slot)
-        slot_rows.append({"slot": slot, "subject_path": r["d4d_schema_path"], "module_file": mod,
+        slot_rows.append({"slot": slot, "subject_id": r["subject_id"].strip(), "subject_path": r["d4d_schema_path"], "module_file": mod,
                           "attribution_rule": rule, "declaring_files_if_several": several,
                           "all_declaring_files": every,
                           "vocabulary": vocabulary(r), "predicate_id": r["predicate_id"],
@@ -204,7 +206,7 @@ def panel_a():
     in_table = {s["slot"] for s in slot_rows}
     for slot in sorted(names - in_table):
         mod, rule, several, every = attribute(slot)
-        slot_rows.append({"slot": slot, "subject_path": "", "module_file": mod, "attribution_rule": rule,
+        slot_rows.append({"slot": slot, "subject_id": "", "subject_path": "", "module_file": mod, "attribution_rule": rule,
                           "declaring_files_if_several": several, "all_declaring_files": every,
                           "vocabulary": NOT_IN_TABLE,
                           "predicate_id": "(absent)", "mapping_status": "(absent)", "mapping_justification": "",
@@ -231,10 +233,14 @@ def col_label(c) -> str:
     v, p, m = c
     if v == NOT_IN_TABLE:
         return "no table row"
-    if p == "semapv:UnmappableProperty":
-        return "free text"
-    if p == "semapv:UnmappedProperty":
-        return "suggested, no target" if m == "recommended" else "unmapped"
+    if v == NO_TARGET or p in ("semapv:UnmappableProperty", "semapv:UnmappedProperty"):
+        if m == "free_text" or p == "semapv:UnmappableProperty":
+            return "free text"
+        if m == "recommended":
+            return "suggested, no target"
+        if m == "novel_d4d":
+            return "novel_d4d (heuristic, no target)"
+        return "unmapped"
     lab = PRED_SHORT[p]
     if m == "recommended":
         return f"{lab} (suggested)"
@@ -251,15 +257,17 @@ GROUP_HEADER = {"Croissant RAI": "Croissant\nRAI", "FAIRSCAPE EVI": "FAIRSCAPE\n
 
 
 def marker_style(c) -> dict:
-    """Filled = curated (mapped / novel), hollow ring = suggested; gray = no target; square = no table row."""
+    """Filled = curated (mapped / novel), hollow ring = suggested, hollow diamond = novel_d4d heuristic; gray = no target; square = no table row."""
     v, p, m = c
     if v == NOT_IN_TABLE:
         return dict(marker="s", facecolor="none", edgecolor=st.INK["secondary"], linewidth=1.2)
-    if p == "semapv:UnmappableProperty":
-        return dict(marker="o", facecolor=st.INK["axis"], edgecolor=st.INK["surface"], linewidth=0.8)
-    if p == "semapv:UnmappedProperty":
+    if v == NO_TARGET or p in ("semapv:UnmappableProperty", "semapv:UnmappedProperty"):
+        if m == "free_text" or p == "semapv:UnmappableProperty":
+            return dict(marker="o", facecolor=st.INK["axis"], edgecolor=st.INK["surface"], linewidth=0.8)
         if m == "recommended":
             return dict(marker="o", facecolor="none", edgecolor=st.INK["muted"], linewidth=1.4)
+        if m == "novel_d4d":
+            return dict(marker="D", facecolor="none", edgecolor=st.INK["muted"], linewidth=1.3)
         return dict(marker="o", facecolor=st.INK["muted"], edgecolor=st.INK["surface"], linewidth=0.8)
     color = PRED_COLOR[p]
     if m == "recommended":
@@ -302,19 +310,19 @@ def panel_b():
                                      "subject_multivalued", "rocrate_value_type", "type_compatible",
                                      "composition_path", "warnings")}, "structural_class": cls}
         # The panel B table shows the 20 non-direct rows; for those, the current schema's range and
-        # cardinality are looked up so the written values (placeholders on composition rows) can be
-        # compared with it. Direct rows are not looked up here.
+        # cardinality are looked up so the written values can be compared with it. Direct rows are not looked up here.
         if cls.startswith("direct"):
             rec.update(schema_lookup="not looked up (direct row)", schema_range_current="",
                        schema_multivalued_current="", schema_path_has_multivalued_slot="",
                        written_values_are="")
         else:
             srng, smv, sany = schema_path_shape(view, r["subject_category"], r["subject_label"])
-            rec.update(schema_lookup="current schema (SchemaView), along subject_label from subject_category",
+            agrees = (r["d4d_subject_range"], r["subject_multivalued"]) == (srng, str(sany))
+            rec.update(schema_lookup="current schema (SchemaView), full subject_label path from subject_category",
                        schema_range_current=srng, schema_multivalued_current=str(smv),
                        schema_path_has_multivalued_slot=str(sany),
-                       written_values_are=("generator default (range None -> 'string', multivalued False)"
-                                           if r["composition_path"].strip() else "from the schema slot"))
+                       written_values_are=("from the schema slot" if agrees
+                                           else "generator default (range None -> 'string', multivalued False)"))
         classified.append(rec)
     summary = Counter((c["structural_class"], c["predicate_id"]) for c in classified)
     # group the non-direct rows where every column except class and path agrees
@@ -331,8 +339,8 @@ def panel_b():
         if c["composition_path"] and c["composition_path"] not in g["paths"]:
             g["paths"].append(c["composition_path"])
         g["n_rows"] += 1
-        srng, smv, _ = schema_path_shape(view, c["subject_category"], root)
-        g["root_schema"].add((srng, smv))
+        srng, _, sany = schema_path_shape(view, c["subject_category"], c["subject_label"])
+        g["root_schema"].add((srng, sany))
     for k, g in groups.items():
         assert len(g["root_schema"]) == 1, (k[1], g["root_schema"])   # same shape on every class in the group
         g["root_schema"] = next(iter(g["root_schema"]))
@@ -360,8 +368,8 @@ def draw_panel_a(fig, ax, slot_rows, cols, mods, n_comp, comp_date, not_in_schem
                 continue
             ms = marker_style(c)
             # scatter `s` is the marker's bounding-box area: a circle fills pi/4 of it, a square all
-            # of it, so squares are scaled by pi/4 to give equal counts equal drawn area
-            area = k_area * n * (math.pi / 4 if ms["marker"] == "s" else 1.0)
+            # of it, so squares and diamonds are scaled by pi/4 to give equal counts equal drawn area
+            area = k_area * n * (math.pi / 4 if ms["marker"] in ("s", "D") else 1.0)
             ax.scatter([xi], [yi], s=area, marker=ms["marker"], facecolors=ms["facecolor"],
                        edgecolors=ms["edgecolor"], linewidths=ms["linewidth"], zorder=3)
             d = area ** 0.5                          # diameter (circle) or side (square), points
@@ -419,17 +427,19 @@ def draw_panel_a(fig, ax, slot_rows, cols, mods, n_comp, comp_date, not_in_schem
     lx = 1.02
     lh = [Line2D([], [], marker="o", linestyle="none", markersize=7, markerfacecolor=PRED_COLOR[p],
                  markeredgecolor=st.INK["surface"], label=f"skos:{PRED_SHORT[p]}Match")
-          for p in PRED_ORDER[:5] if any(c[1] == p for c in cols)]
-    absent_preds = [p for p in PRED_ORDER[:5] if not any(c[1] == p for c in cols)]
+          for p in PRED_ORDER[:5] if any(c[1] == p and c[0] != NO_TARGET for c in cols)]
+    absent_preds = [p for p in PRED_ORDER[:5] if not any(c[1] == p and c[0] != NO_TARGET for c in cols)]
     lh += [Line2D([], [], marker="o", linestyle="none", markersize=7, markerfacecolor="none",
                   markeredgecolor=st.INK["secondary"], markeredgewidth=1.4, label="hollow ring: suggested\n(mapping_status recommended)"),
+           Line2D([], [], marker="D", linestyle="none", markersize=6.5, markerfacecolor="none",
+                  markeredgecolor=st.INK["muted"], markeredgewidth=1.3, label="hollow diamond: novel_d4d heuristic\n(no target, UnspecifiedMatching)"),
            Line2D([], [], marker="o", linestyle="none", markersize=7, markerfacecolor=st.INK["axis"],
                   markeredgecolor=st.INK["surface"], label="free text, no URI needed\n(unmappable)"),
            Line2D([], [], marker="o", linestyle="none", markersize=7, markerfacecolor=st.INK["muted"],
                   markeredgecolor=st.INK["surface"], label="unmapped, needs research"),
            Line2D([], [], marker="s", linestyle="none", markersize=7, markerfacecolor="none",
                   markeredgecolor=st.INK["secondary"], markeredgewidth=1.2, label="slot in current schema,\nno row in the table")]
-    leg1 = ax.legend(handles=lh, loc="upper left", bbox_to_anchor=(lx, 1.0), title="color: predicate\nfill: curated / suggested",
+    leg1 = ax.legend(handles=lh, loc="upper left", bbox_to_anchor=(lx, 1.0), title="color: predicate\nshape/fill: status",
                      title_fontsize=7.6, fontsize=7.2, handletextpad=0.5, labelspacing=0.8, alignment="left")
     leg1.get_title().set_color(st.INK["secondary"])
     ax.add_artist(leg1)
@@ -515,11 +525,11 @@ def draw_panel_b(fig, axb, axt, classified, summary, groups, n_struct, struct_da
         subj += f"\n{', '.join(g['classes'])}; {g['n_rows']} rows"
         tc_txt = "False (flagged)" if tc == "False" else ("True, set by construction" if paths else "True")
         srng, smv = g["root_schema"]
-        if paths:
-            # composition rows carry the generator's placeholders, not the slot's range/cardinality
+        agrees = (srng, str(smv)) == (rng, mv)
+        if paths and not agrees:
             rng_txt = (f"not recorded: generator\ndefault \"{rng}, {card(mv)}\"\n"
                        f"({root} in schema:\n{srng}, {card(smv)})")
-        elif (srng, str(smv)) == (rng, mv):
+        elif agrees:
             rng_txt = f"{rng}, {card(mv)}\n(schema agrees)"
         else:
             rng_txt = f"{rng}, {card(mv)}\n(schema: {srng}, {card(smv)})"
@@ -529,8 +539,8 @@ def draw_panel_b(fig, axb, axt, classified, summary, groups, n_struct, struct_da
         table_rows.append({"structural_class": cls, "subject_root": root, "classes": "; ".join(g["classes"]),
                            "predicate_id": pred, "object_id": obj, "confidence": conf, "mapping_justification": just,
                            "d4d_subject_range": rng, "subject_multivalued": mv,
-                           "written_range_cardinality_are": ("generator default (range None -> 'string', multivalued "
-                                                             "False), not schema data" if paths else "from the schema slot"),
+                           "written_range_cardinality_are": ("from the schema slot" if agrees
+                                                             else "generator default (range None -> 'string', multivalued False), not schema data"),
                            "schema_range_current": srng, "schema_multivalued_current": str(smv),
                            "schema_lookup": f"current schema (SchemaView): slot {root} on {', '.join(g['classes'])}",
                            "rocrate_value_type": vt,
@@ -548,30 +558,14 @@ def draw_panel_b(fig, axb, axt, classified, summary, groups, n_struct, struct_da
         elif c == 5 and cells[r - 1][5].startswith("False"):
             cl.set_facecolor(st.STATUS["serious"])
     n_flag = sum(g["n_rows"] for k, g in groups.items() if k[0].startswith("type_compatible False"))
-    n_comp = sum(g["n_rows"] for k, g in groups.items() if k[0].startswith("composition"))
-    note = (f"All {n_flag} rows flagged type_compatible False and all {n_comp} composition-path rows, grouped where only "
-            f"the class (and path) differ; the other {n_struct - n_flag - n_comp} rows are listed in the CSV. "
-            f"type_compatible is the generator's rule-based check (cardinality / literal-vs-relationship), and "
-            f"composition-path rows are written True without a check.")
-    comp_groups = [(k, g) for k, g in groups.items() if g["paths"]]
-    written = {(k[6], k[7]) for k, _ in comp_groups}
-    if comp_groups:
-        assert len(written) == 1, written
-        w_rng, w_mv = next(iter(written))
-        note += (f" They also carry the generator's range and cardinality defaults (\"{w_rng}\", {card(w_mv)}) "
-                 f"instead of the slot's, and its cardinality check was never applied to them")
-        # compare each composition root's schema shape with the shape of the flagged cardinality rows
-        flag_shapes = {(k[7], k[8]) for k, _ in groups.items()
-                       if k[0].startswith("type_compatible False") and "Cardinality mismatch" in k[10]}
-        flag_roots = [k[1] for k, _ in groups.items()
-                      if k[0].startswith("type_compatible False") and "Cardinality mismatch" in k[10]]
-        parts = []
-        for k, g in comp_groups:
-            srng, smv = g["root_schema"]
-            same = (str(smv), k[8]) in flag_shapes
-            parts.append(f"in the current schema {k[1]} is {srng}, {card(smv)}, mapped to a {k[8]} value"
-                         + (f": the shape that got {' and '.join(flag_roots)} flagged" if same else ""))
-        note += ": " + "; ".join(parts) + "."
+    n_comp_flag = sum(g["n_rows"] for k, g in groups.items() if k[0].startswith("type_compatible False") and g["paths"])
+    n_comp_true = sum(g["n_rows"] for k, g in groups.items() if k[0].startswith("composition"))
+    note = (f"All {n_flag} rows flagged type_compatible False ({n_flag - n_comp_flag} direct + {n_comp_flag} composition-path) "
+            f"and {n_comp_true} composition-path rows written True, grouped where only the class (and path) differ; "
+            f"the other {n_struct - n_flag - n_comp_true} rows are listed in the CSV. "
+            "After #2983 regenerated the structural SSSOM table, all 16 anomalies.* composition-path rows record their "
+            "resolved leaf range (DataAnomaly, string, uriorcurie, Software) and path cardinality (multivalued True) "
+            "and are flagged type_compatible False against the single-valued RO-Crate str property.")
     axt.text(0.0, 1.03, textwrap.fill(note, 205), transform=axt.transAxes, fontsize=7.2,
              color=st.INK["secondary"], ha="left", va="bottom", wrap=False)
     return bar_rows, table_rows

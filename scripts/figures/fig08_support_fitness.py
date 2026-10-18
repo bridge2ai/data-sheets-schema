@@ -295,26 +295,33 @@ def main() -> int:
     order = [m for m, _ in mods.most_common()]
     fit_by = Counter((r["module"], r["fit"]) for r in rows if r["fitness_judged"])
     sup_by = Counter((r["module"], r["supported_bool"]) for r in rows if r["support_judged"])
+    sup_seen = {(r["module"], r["slot"], r["value_sha256_12"] if r["support_source"] == "judged on this replicate" else f"rep1_propagated:{r['slot']}", r["supported_bool"])
+                for r in rows if r["support_judged"]}
+    sup_uniq_by = Counter((m, b) for m, _s, _v, b in sup_seen)
     module_rows = []
     for k, mod in enumerate(order):
         y = len(order) - 1 - k
         f_ok, f_no = fit_by[(mod, True)], fit_by[(mod, False)]
         s_ok, s_no = sup_by[(mod, True)], sup_by[(mod, False)]
+        u_ok, u_no = sup_uniq_by[(mod, True)], sup_uniq_by[(mod, False)]
         axB.barh(y + 0.19, f_ok, height=0.34, color=FIT, edgecolor=st.INK["surface"], linewidth=1.0, zorder=3)
         axB.barh(y + 0.19, f_no, left=f_ok, height=0.34, color=UNFIT, edgecolor=st.INK["surface"], linewidth=1.0, zorder=3)
         axB.text(f_ok + f_no + 3, y + 0.19, f"{f_no} unfit of {f_ok + f_no}", va="center", fontsize=6.6, color=st.INK["secondary"])
         if s_ok + s_no:
             axB.barh(y - 0.19, s_ok, height=0.34, color=FIT, edgecolor=st.INK["surface"], linewidth=1.0, zorder=3)
             axB.barh(y - 0.19, s_no, left=s_ok, height=0.34, color=FIT, hatch=st.HATCH, edgecolor=st.INK["surface"], linewidth=1.0, zorder=3)
-            axB.text(s_ok + s_no + 3, y - 0.19, f"{s_no} unsupported of {s_ok + s_no} (CM4AI v1)", va="center", fontsize=6.6, color=st.INK["secondary"])
+            axB.text(s_ok + s_no + 3, y - 0.19,
+                     f"{s_no} unsupported of {s_ok + s_no} verdict rows ({u_no}/{u_ok + u_no} distinct judgments, CM4AI v1)",
+                     va="center", fontsize=6.6, color=st.INK["secondary"])
         else:
             axB.add_patch(Rectangle((0, y - 0.36), 6, 0.34, facecolor="none", edgecolor=NOVERDICT, linestyle=(0, (2, 2)), linewidth=0.8, zorder=3))
             axB.text(9, y - 0.19, "support not judged", va="center", fontsize=6.6, color=st.INK["muted"])
-        module_rows.append({"module": mod, "fit": f_ok, "unfit": f_no, "supported": s_ok, "unsupported": s_no})
+        module_rows.append({"module": mod, "fit": f_ok, "unfit": f_no, "supported": s_ok, "unsupported": s_no,
+                            "supported_distinct_judgments": u_ok, "unsupported_distinct_judgments": u_no})
     axB.set_yticks([len(order) - 1 - k for k in range(len(order))]); axB.set_yticklabels(order, fontsize=7.5)
     axB.set_ylim(-0.7, len(order) - 0.3)
     axB.tick_params(axis="y", length=0)
-    axB.set_xlabel(f"slot verdicts (upper bar: fitness over all {n_records} records; lower bar: support over the 3 CM4AI v1 records)")
+    axB.set_xlabel(f"slot verdict rows (upper bar: fitness over all {n_records} records; lower bar: support over the 3 CM4AI v1 records, stable slots propagated from rep1)")
     axB.set_title("B  Verdicts per schema module (slot attributed by declaring module, else by the module declaring its range class)", pad=8)
     st.hairline_grid(axB, "x")
 

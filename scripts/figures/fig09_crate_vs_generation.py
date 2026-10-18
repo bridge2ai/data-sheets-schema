@@ -28,12 +28,14 @@ from matplotlib.patches import Patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
+from data_sheets_schema.receipts import dataset_identifier_forms  # noqa: E402
 from scripts.figures import _style as st  # noqa: E402
 
 PKG = ROOT / "data" / "ro-crate_packages"
 MANIFEST = ROOT / "notes" / "reference_rescore_2026-09-12_cborg_runtime" / "manifest.json"
-STATUSES = ["filled", "empty", "unresolvable", "unplaceable"]
-STATUS_COL = {"filled": st.SEQ[8], "empty": st.SEQ[3], "unresolvable": None, "unplaceable": None}
+STATUSES = ["filled", "empty", "subsumed", "unresolvable", "unplaceable"]
+STATUS_COL = {"filled": st.SEQ[8], "empty": st.SEQ[3], "subsumed": st.SEQ[5], "unresolvable": None, "unplaceable": None}
 LOSS = ["none", "minimal", "moderate", "high"]
 LOSS_COL = dict(zip(LOSS, [st.ORDINAL[0], st.ORDINAL[3], st.ORDINAL[6], st.ORDINAL[9]]))
 MAPTYPES = ["exactMatch", "closeMatch", "relatedMatch", "narrowMatch"]
@@ -89,6 +91,10 @@ def overlap(project: str, mapped: Path, gen: Path) -> tuple[dict, list[dict]]:
         kind = "nested" if any(isinstance(v, (dict, list)) for v in (crate.get(k), full.get(k))) else "scalar"
         if k in ck and k in gk:
             agree = norm(crate[k]) == norm(full[k])
+            if not agree and k in ("doi", "id"):
+                c_forms = dataset_identifier_forms({"id": str(crate[k]), "doi": str(crate[k])})
+                g_forms = dataset_identifier_forms({"id": str(full[k]), "doi": str(full[k])})
+                agree = bool(c_forms & g_forms)
             state = "both_agree" if agree else f"both_differ_{kind}"
         elif k in ck:
             state = "crate_only"
@@ -142,7 +148,7 @@ def main() -> int:
         base = 0
         for s in STATUSES:
             v = d["outcome"].get(s, 0)
-            if s in ("filled", "empty"):
+            if STATUS_COL[s] is not None:
                 axA.bar(i, v, bottom=base, width=bw, color=STATUS_COL[s], edgecolor=st.INK["surface"], linewidth=0.8, zorder=2)
             else:
                 axA.bar(i, v, bottom=base, width=bw, facecolor="none", edgecolor=st.INK["secondary"],
@@ -158,9 +164,10 @@ def main() -> int:
     axA.set_title("A  Outcome of every mapping-table row", pad=6)
     axA.legend(handles=[Patch(color=STATUS_COL["filled"], label="filled: path resolved, value placed"),
                         Patch(color=STATUS_COL["empty"], label="empty: path valid, no value in the crate"),
+                        Patch(color=STATUS_COL["subsumed"], label="subsumed: narrower sub-slot covered by a parent slot"),
                         Patch(facecolor="none", edgecolor=st.INK["secondary"], linewidth=0.8, label="unresolvable: table declares no crate path"),
                         Patch(facecolor="none", edgecolor=st.INK["secondary"], linewidth=0.8, hatch=st.HATCH, label="unplaceable: no route into a Dataset record")],
-               loc="upper left", bbox_to_anchor=(0, -0.16), fontsize=6.8, ncol=1, handlelength=1.4)
+               loc="upper left", bbox_to_anchor=(0, -0.16), fontsize=6.5, ncol=1, handlelength=1.4)
 
     # --- B: fidelity of filled fields (loss level, and mapping type) -------
     mapped = [p for p in st.PROJECTS if per_project[p]["outcome"]]
@@ -201,8 +208,8 @@ def main() -> int:
     OV = [("both_agree", "both populated, values agree", st.SEQ[10], None),
           ("both_differ_scalar", "both populated, scalar values differ", st.SEQ[6], None),
           ("both_differ_nested", "both populated, nested values differ (serialization rarely identical)", st.SEQ[2], None),
-          ("crate_only", "crate-mapped only", st.SERIES[3], None),
-          ("generated_only", "generated only", st.SERIES[4], None)]
+          ("crate_only", "crate-mapped only", st.SERIES[7], None),
+          ("generated_only", "generated only (API arm v8 rep 1)", st.SERIES[0], None)]
     for i, p in enumerate(st.PROJECTS):
         d = per_project[p]
         if not d["overlap"]:
@@ -216,7 +223,7 @@ def main() -> int:
             axC.barh(i, v, left=base, height=bw, color=c, edgecolor=st.INK["surface"], linewidth=0.8, zorder=2)
             if v >= 3:
                 axC.text(base + v / 2, i, str(v), ha="center", va="center", fontsize=6.8,
-                         color=st.INK["surface"] if key in ("both_agree", "both_differ_scalar") else st.INK["primary"])
+                         color=st.INK["surface"] if key in ("both_agree", "both_differ_scalar", "crate_only", "generated_only") else st.INK["primary"])
             base += v
         axC.text(base + 0.8, i, f"{base} populated top-level slots in either", va="center", fontsize=6.6, color=st.INK["secondary"])
     axC.set_yticks(list(xs)); axC.set_yticklabels(labels); axC.invert_yaxis()
@@ -228,8 +235,9 @@ def main() -> int:
     voice = {r["slot"]: r for r in detail if r["project"] == "VOICE"}
     vc = yaml.safe_load((PKG / "VOICE" / "processed" / "VOICE_crate_mapped_d4d.yaml").read_text())
     vg = yaml.safe_load((ROOT / gen["VOICE"]).read_text())
-    caveat = ("'Values differ' is a ceiling on disagreement: 'agree' requires identical normalized YAML, so two nested values that state the "
-              "same facts in different structure count as differing. Scalar differences can be real: the VOICE crate describes release "
+    caveat = ("'Values differ' is a ceiling on disagreement: 'agree' requires identical normalized YAML (with URI/CURIE normalization on "
+              "`doi` and `id` via `dataset_identifier_forms`), so two nested values that state the same facts in different structure count "
+              "as differing. Scalar differences can be real: the VOICE crate describes release "
               f"{vc['version']} (doi {str(vc['doi']).replace('https://doi.org/', '')}) while the generated record describes "
               f"{vg['version']} (doi {str(vg['doi']).replace('doi:', '')}).")
     fig.text(0.08, 0.075, textwrap.fill(caveat, 175), fontsize=6.6, color=st.INK["secondary"], ha="left", va="top")
@@ -238,7 +246,7 @@ def main() -> int:
                  x=0.01, ha="left", fontsize=11, fontweight="bold", y=0.985)
     fig.subplots_adjust(left=0.08, right=0.98, top=0.92, bottom=0.2)
     basis = ("Record set: crate mapping reports under data/ro-crate_packages/<P>/processed/ (" + ", ".join(mapped) +
-             "); generated records = reference rescore 2026-09-12 v8 rep 1 (claudecode_api/2026-09-04f and 04g); value agreement = normalized YAML equality")
+             "); generated records = reference rescore 2026-09-12 v8 rep 1 (claudecode_api/2026-09-04f and 04g); value agreement = normalized YAML equality (URI/CURIE normalized on doi/id)")
     st.save(fig, "fig09_crate_vs_generation", {"main": panel_rows, "overlap_slots": detail}, basis)
     return 0
 

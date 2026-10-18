@@ -31,6 +31,9 @@ kept (an order-insensitive comparison is exported as `identical_ignoring_list_or
   absent         present in none of the three.
 Identifier alignment of nested entities was not used: only a minority of nested list items
 carry an `id` (the count is printed at run time), so items are compared in record order.
+This figure compares top-level whole slot values only (`slot in doc and not empty(doc[slot])`);
+for the nested-structure basis-split analysis across sub-paths (keyed vs position vs index
+comparisons), see `Below the top level (#3337)` in `notes/arm_comparison.md`.
 
 Caveats (also in the figure): textual difference is not necessarily factual difference
 (paraphrase, reordering and added detail all count as differences, and whole-value comparison
@@ -334,9 +337,11 @@ def main() -> int:
          f"identifier: {n_with_id} of {n_items} nested list items carry an id. "
          f"All {n_nested_mod} slots in the {len(mods) - 1} D4D module blocks are nested (class-valued); Base / root is split by kind. "
          f"Heuristic: long text = single-valued string slot whose median observed length exceeds {LONG_TEXT_CHARS} characters."),
-        ("Caveats: textual difference is not necessarily factual difference (paraphrase, reordering or one changed "
-         f"sub-field makes a value differ). Three replicates per group describe these {len(docs)} records only and cannot "
-         "estimate the reliability of the generation process."),
+        ("Caveats: top-level whole-slot comparison only (for the nested-structure basis-split analysis across "
+         "sub-paths—where position joins outnumber keyed joins on v7/v8 API arms—see notes/arm_comparison.md, "
+         "'Below the top level (#3337)'); textual difference is not necessarily factual difference (paraphrase, "
+         "reordering or one changed sub-field makes a value differ). Three replicates per group describe these "
+         f"{len(docs)} records only and cannot estimate the reliability of the generation process."),
     ]
     yy = 0.07
     for t in notes:
