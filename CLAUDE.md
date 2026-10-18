@@ -33,6 +33,7 @@ dependency identity when comparing timings or reproducing a failure.
 poetry install                         # dependency bootstrap; installs d4d
 git submodule update --init fairscape_models  # required for full test collection
 poetry run d4d --help                   # inspect the actual CLI
+poetry run d4d validate <datasheet.yaml> # validate + lint a datasheet in-process
 poetry run python -m pytest tests/test_example.py -q -p no:cacheprovider
 make lint-modules test-modules          # early schema feedback when relevant
 make test                              # schema + Python + example checks

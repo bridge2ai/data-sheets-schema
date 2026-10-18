@@ -374,18 +374,20 @@ Options:
 
 ## `d4d validate`
 
-Validate and lint one or more data-sheet instance files (YAML or JSON)
-against the D4D LinkML schema. Unlike `d4d schema validate`, this command
-runs the validator in-process (no `poetry run` subprocess), works from an
-installed wheel in any directory, and adds linter checks that go beyond
-schema validity:
+Validate and lint one or more data-sheet instance files (YAML or JSON, one
+datasheet mapping per file) against the D4D LinkML schema. Unlike
+`d4d schema validate` (which runs `linkml-validate` in a subprocess and
+requires a repository checkout), `d4d validate` runs `linkml.validator`
+in-process with a cached `Validator`, works from an installed wheel in any
+directory, and adds linter checks that go beyond schema validity:
 
 - **unknown fields** (with did-you-mean hints for typos),
-- **scalar type mismatches** (`count: not-a-number` on an integer slot —
-  missed by `linkml-validate` itself),
+- **duplicate YAML/JSON keys** (caught before `yaml.safe_load` / `json.loads`
+  silently overwrites earlier values),
 - **placeholder prose** (`TBD`, `N/A`, `?`) and **empty values**,
 - **missing identifier prose** (`title`, `name`, `description`),
-- **British spellings** in prose (the datasheet convention is American English),
+- **British spellings** in prose (the datasheet convention is American English;
+  quoted strings, proper nouns, URLs and verbatim slots are exempted),
 - **per-section completeness** against the Gebru et al. datasheet sections,
   with a 0–100 completeness score.
 
@@ -399,7 +401,7 @@ Options:
 
 | Option | Description |
 | --- | --- |
-| `FILES...` | One or more data-sheet YAML/JSON files to check |
+| `FILES...` | One or more data-sheet YAML/JSON files to check (one mapping per file) |
 | `--schema` | `full` (target class `Dataset`) or `core` (target class `CoreDataset`). Default: `full` |
 | `--schema-file PATH` | Validate against this schema file instead of `--schema` |
 | `--target-class NAME` | Target class in the schema (default: `Dataset` for full, `CoreDataset` for core) |
@@ -411,37 +413,36 @@ Options:
 Exit codes: `0` = all files valid (warnings allowed unless
 `--fail-on-warning`); `1` = at least one file invalid, or warnings with
 `--fail-on-warning`; `2` = usage error (missing file, unknown target class,
-unreadable schema).
+unreadable or malformed schema).
 
 Issue codes emitted in reports:
 
 | Code | Severity | Meaning |
 | --- | --- | --- |
-| `schema-violation` | error | Failed LinkML schema validation, with JSON path |
+| `schema-violation` | error | Failed LinkML schema validation (including scalar type errors), with JSON path |
 | `unknown-field` | error | Field not in the schema (typo candidate), with hint |
-| `type-mismatch` | error | Scalar value that cannot be coerced to the slot range |
-| `unparseable` | error | File could not be parsed as YAML/JSON |
-| `not-a-mapping` | error | Instance is not a mapping for the target class |
+| `duplicate-key` | error | Duplicate mapping key in the YAML/JSON source |
+| `unparseable` | error | File could not be parsed as a single YAML/JSON document |
+| `not-a-mapping` | error | Instance is not a mapping for the target class (e.g. a root-level list) |
 | `placeholder-value` | warning | `TBD`/`N/A`/`?` instead of an answer |
 | `empty-value` | warning | Empty string value |
-| `missing-identifier` | warning | `title`/`name`/`description` missing or empty |
+| `missing-identifier` | warning | `title`/`name`/`description` missing or empty (when induced on the target class) |
 | `british-spelling` | warning | British spelling in prose |
 | `empty-section` | warning | An always-applicable section (identification, motivation, composition, uses, distribution) with no answered questions |
 
 ### CI recipe
 
-Gate pull requests on datasheet validity with a job like this (no
-repository checkout of `data-sheets-schema` needed beyond the schema
-itself — point `--schema-file` at a pinned copy, or install the package):
+Gate pull requests on datasheet validity with a job like this (with the
+`data-sheets-schema` package installed in the environment):
 
 ```yaml
 - name: Validate datasheets
   run: |
-    pip install "linkml==1.9.3" "linkml-runtime==1.9.4" click pyyaml
-    python -m data_sheets_schema.cli validate \
+    pip install .
+    d4d validate \
       --schema core --format json --output d4d-report.json \
       datasheets/*.yaml
-    # or, with the d4d entrypoint installed:
+    # or, to fail on lint warnings too:
     # d4d validate --schema core --fail-on-warning datasheets/*.yaml
 ```
 

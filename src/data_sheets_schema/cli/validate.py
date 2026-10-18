@@ -11,6 +11,8 @@ machine-readable report, ``--fail-on-warning`` turns lint warnings into
 failures.
 """
 
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
@@ -28,11 +30,12 @@ EXIT_USAGE = 2
 
 
 def _resolve_schema(schema_kind: str, schema_file: str | None):
+    default_target = "CoreDataset" if schema_kind == "core" else "Dataset"
     if schema_file:
-        return Path(schema_file), None
+        return Path(schema_file), default_target
     if schema_kind == "core":
-        return resource_path(CORE_SCHEMA_PATH), "CoreDataset"
-    return resource_path(SCHEMA_FULL_PATH), "Dataset"
+        return resource_path(CORE_SCHEMA_PATH), default_target
+    return resource_path(SCHEMA_FULL_PATH), default_target
 
 
 def _render_human(report, quiet: bool) -> list:

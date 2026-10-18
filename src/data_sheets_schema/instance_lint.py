@@ -20,7 +20,8 @@ so importing this module never slows down other ``d4d`` commands.
 from __future__ import annotations
 
 import difflib
-import datetime
+import hashlib
+import json
 import re
 from dataclasses import dataclass, field, asdict
 from functools import lru_cache
@@ -36,17 +37,6 @@ WARNING = "warning"
 PLACEHOLDER_VALUES = frozenset({
     "tbd", "todo", "n/a", "unknown", "?", "not applicable", "not stated",
 })
-
-#: Primitive ranges that get scalar type checks. linkml's validator does not
-#: check scalar coercion (even `linkml-validate` passes `count: not-a-number`
-#: for an integer slot), so the linter does it here.
-_INT_RE = re.compile(r"^[+-]?\d+$")
-_BOOL_WORDS = frozenset(
-    {"true", "false", "yes", "no", "y", "n", "on", "off", "1", "0"})
-_DATE_FORMATS = ("%Y/%m/%d", "%d %B %Y", "%B %d, %Y", "%Y-%m", "%Y")
-_DATETIME_FORMATS = ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S",
-                     "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M")
-_TIME_FORMATS = ("%H:%M:%S", "%H:%M")
 
 #: Identifier prose every datasheet should carry (schema-optional, lint-warned).
 IDENTIFIER_SLOTS = ("title", "name", "description")
@@ -186,6 +176,7 @@ class LintReport:
     valid: bool
     issues: list = field(default_factory=list)
     sections: list = field(default_factory=list)
+    schema_sha256: str = ""
 
     @property
     def errors(self) -> list:
@@ -206,6 +197,7 @@ class LintReport:
         return {
             "file": self.file,
             "schema": self.schema,
+            "schema_sha256": self.schema_sha256,
             "target_class": self.target_class,
             "valid": self.valid,
             "summary": {
@@ -219,43 +211,99 @@ class LintReport:
 
 
 # ---------------------------------------------------------------------------
-# schema loading (cached; heavy imports stay local)
+# schema loading (cached by resolved path + content sha256; heavy imports local)
 # ---------------------------------------------------------------------------
 
-@lru_cache(maxsize=4)
-def _schema_view(schema_path: str):
+def _schema_key(schema_path: str) -> tuple[str, str]:
+    p = Path(schema_path)
+    try:
+        resolved = str(p.resolve())
+        sha = hashlib.sha256(p.read_bytes()).hexdigest()
+    except Exception as exc:
+        raise ValueError(f"Invalid schema ({p.name}): {exc}") from exc
+    return resolved, sha
+
+
+@lru_cache(maxsize=8)
+def _schema_view_cached(resolved_path: str, schema_sha256: str):
     from linkml_runtime import SchemaView
 
-    return SchemaView(schema_path)
+    try:
+        sv = SchemaView(resolved_path)
+        sv.all_classes()
+    except Exception as exc:
+        raise ValueError(
+            f"Invalid schema ({Path(resolved_path).name}): {exc}"
+        ) from exc
+    return sv
+
+
+def _schema_view(schema_path: str):
+    resolved, sha = _schema_key(schema_path)
+    return _schema_view_cached(resolved, sha)
+
+
+@lru_cache(maxsize=8)
+def _validator_cached(resolved_path: str, schema_sha256: str):
+    from linkml.validator import Validator
+    from linkml.validator.plugins import JsonschemaValidationPlugin
+
+    sv = _schema_view_cached(resolved_path, schema_sha256)
+    try:
+        return Validator(
+            sv.schema,
+            validation_plugins=[JsonschemaValidationPlugin(closed=True)],
+        )
+    except Exception as exc:
+        raise ValueError(
+            f"Invalid schema ({Path(resolved_path).name}): {exc}"
+        ) from exc
+
+
+def _validator(schema_path: str):
+    resolved, sha = _schema_key(schema_path)
+    return _validator_cached(resolved, sha)
 
 
 def _module_class_sections(schema_path: str) -> dict:
     """Map class name -> section name from the D4D module files.
 
-    Falls back to the static table when the module sources are not beside
-    the schema file.
+    Starts from ``_FALLBACK_CLASS_SECTIONS`` (which also covers Core-schema
+    classes such as ``CoreDistribution``) and overlays any ``D4D_*.yaml``
+    files from the packaged schema directory and from ``schema_path``'s parent
+    directory using ``schema_cache.load_yaml``.
     """
-    schema_dir = Path(schema_path).parent
-    mapping: dict = {}
-    stems = {stem for stem, _ in SECTION_MODULES}
-    found_any = False
-    for module_file in sorted(schema_dir.glob("D4D_*.yaml")):
-        if module_file.stem not in stems:
-            continue
-        try:
-            doc = yaml.safe_load(module_file.read_text(encoding="utf-8")) or {}
-        except Exception:
-            continue
-        section = dict(SECTION_MODULES)[module_file.stem]
-        for class_name in (doc.get("classes") or {}):
-            mapping[class_name] = section
-        found_any = True
-    if not found_any:
-        mapping = dict(_FALLBACK_CLASS_SECTIONS)
+    from data_sheets_schema import schema_cache
+    from data_sheets_schema.constants import SCHEMA_DIR
+    from data_sheets_schema.resources import resource_path
+
+    mapping: dict = dict(_FALLBACK_CLASS_SECTIONS)
+    stems = dict(SECTION_MODULES)
+    candidate_dirs: list[Path] = []
+    try:
+        default_dir = resource_path(SCHEMA_DIR)
+        if default_dir.is_dir():
+            candidate_dirs.append(default_dir.resolve())
+    except Exception:
+        pass
+    schema_dir = Path(schema_path).parent.resolve()
+    if schema_dir not in candidate_dirs and schema_dir.is_dir():
+        candidate_dirs.append(schema_dir)
+
+    for directory in candidate_dirs:
+        for module_file in sorted(directory.glob("D4D_*.yaml")):
+            section = stems.get(module_file.stem)
+            if section is None:
+                continue
+            try:
+                doc = schema_cache.load_yaml(module_file) or {}
+            except Exception:
+                continue
+            for class_name in (doc.get("classes") or {}):
+                mapping[class_name] = section
     return mapping
 
 
-@lru_cache(maxsize=4)
 def _class_sections(schema_path: str) -> dict:
     return _module_class_sections(schema_path)
 
@@ -276,10 +324,17 @@ def load_instance(path: str | Path) -> Any:
     p = Path(path)
     text = p.read_text(encoding="utf-8")
     if p.suffix.lower() == ".json":
-        import json
-
         return json.loads(text)
     return yaml.safe_load(text)
+
+
+def _dup_json_path(dup: dict[str, Any]) -> str:
+    raw_path = dup.get("path") or "$"
+    key = dup.get("key", "")
+    if raw_path == "$":
+        return f"/{key}"
+    norm = re.sub(r"\[(\d+)\]", r"/\1", raw_path).replace(".", "/")
+    return f"/{norm}/{key}"
 
 
 # ---------------------------------------------------------------------------
@@ -314,10 +369,10 @@ def _json_path(base: str, key: str) -> str:
 def _run_schema_validation(
     data: Any, schema_path: str, target_class: str
 ) -> list:
-    from linkml.validator import validate
     from linkml.validator.report import Severity
 
-    report = validate(data, schema_path, target_class=target_class)
+    validator = _validator(schema_path)
+    report = validator.validate(data, target_class)
     issues = []
     for r in report.results:
         if r.severity == Severity.INFO:
@@ -359,95 +414,41 @@ def _lint_node(data: dict, class_name: str | None, sv, path: str, issues: list) 
     """Recursively lint unknown fields, placeholders, empties, spelling.
 
     Unknown-field detection only runs when the enclosing class is known;
-    otherwise every key would be a false positive.
+    otherwise every key would be a false positive. On nested objects
+    (``path != ""``), slots from any descendant of ``class_name`` are
+    permitted to match LinkML's ``include_range_class_descendants=True``
+    polymorphic range semantics (e.g. ``DataSubset`` under ``Dataset.resources``).
     """
     if not isinstance(data, dict):
         return
     slot_names: dict = {}
     if class_name and class_name in sv.all_classes():
-        for s in sv.class_induced_slots(class_name):
-            slot_names[s.name] = s
+        candidate_classes = (
+            sv.class_descendants(class_name, reflexive=True)
+            if path
+            else [class_name]
+        )
+        for cls in candidate_classes:
+            for s in sv.class_induced_slots(cls):
+                slot_names.setdefault(s.name, s)
     else:
         return
     for key, value in data.items():
-        child = _json_path(path, key)
-        slot = slot_names.get(key)
+        key_str = key if isinstance(key, str) else str(key)
+        child = _json_path(path, key_str)
+        slot = slot_names.get(key) if isinstance(key, str) else None
         if slot is None:
             hint = ""
-            close = difflib.get_close_matches(key, slot_names, n=1, cutoff=0.7)
-            if close:
-                hint = f"; did you mean '{close[0]}'?"
+            if isinstance(key, str):
+                close = difflib.get_close_matches(key, slot_names, n=1, cutoff=0.7)
+                if close:
+                    hint = f"; did you mean '{close[0]}'?"
             issues.append(
                 Issue(ERROR, "unknown-field", child,
-                      f"Unknown field '{key}' for {class_name or 'instance'}{hint}")
+                      f"Unknown field '{key_str}' for {class_name or 'instance'}{hint}")
             )
             continue
-        _lint_value(key, value, slot, class_name, sv, child, issues)
-
-
-def _strptime_any(text: str, formats) -> bool:
-    text = text.strip()
-    for fmt in formats:
-        try:
-            datetime.datetime.strptime(text, fmt)
-            return True
-        except ValueError:
-            continue
-    return False
-
-
-def _lint_scalar_type(key: str, value: Any, rng: str | None, path: str,
-                      issues: list) -> None:
-    """Scalar type checks linkml's validator skips (see module docstring)."""
-    if rng == "integer":
-        ok = ((isinstance(value, int) and not isinstance(value, bool))
-              or (isinstance(value, str) and bool(_INT_RE.match(value.strip()))))
-    elif rng in ("float", "double", "decimal"):
-        ok = isinstance(value, (int, float)) and not isinstance(value, bool)
-        if not ok and isinstance(value, str):
-            try:
-                float(value.strip())
-                ok = True
-            except ValueError:
-                ok = False
-    elif rng == "boolean":
-        ok = (isinstance(value, bool)
-              or (isinstance(value, str)
-                  and value.strip().lower() in _BOOL_WORDS))
-    elif rng == "date":
-        ok = (isinstance(value, datetime.date)
-              or (isinstance(value, str)
-                  and (_fromiso(value, "date") or _strptime_any(value, _DATE_FORMATS))))
-    elif rng == "datetime":
-        ok = (isinstance(value, datetime.datetime)
-              or (isinstance(value, str)
-                  and (_fromiso(value, "datetime")
-                       or _strptime_any(value, _DATETIME_FORMATS))))
-    elif rng == "time":
-        ok = (isinstance(value, datetime.time)
-              or (isinstance(value, str)
-                  and (_fromiso(value, "time") or _strptime_any(value, _TIME_FORMATS))))
-    else:
-        return
-    if not ok:
-        issues.append(
-            Issue(ERROR, "type-mismatch", path,
-                  f"'{key}' should be {rng}, got {value!r}")
-        )
-
-
-def _fromiso(value: str, kind: str) -> bool:
-    try:
-        text = value.strip()
-        if kind == "date":
-            datetime.date.fromisoformat(text)
-        elif kind == "datetime":
-            datetime.datetime.fromisoformat(text)
-        else:
-            datetime.time.fromisoformat(text)
-        return True
-    except ValueError:
-        return False
+        _lint_value(key_str, value, slot, class_name, sv, child, issues)
 
 
 def _lint_value(key, value, slot, class_name, sv, path: str, issues: list) -> None:
@@ -464,7 +465,6 @@ def _lint_value(key, value, slot, class_name, sv, path: str, issues: list) -> No
                                 "instead of an answer"))
         else:
             _lint_spelling(key, value, path, issues)
-            _lint_scalar_type(key, value, rng, path, issues)
         return
     if isinstance(value, dict):
         # Only descend when the range names a schema class; otherwise the
@@ -489,32 +489,29 @@ def _lint_value(key, value, slot, class_name, sv, path: str, issues: list) -> No
                                         f"('{item.strip()}') instead of an answer"))
                 else:
                     _lint_spelling(key, item, item_path, issues)
-                    _lint_scalar_type(key, item, rng, item_path, issues)
-            else:
-                _lint_scalar_type(key, item, rng, item_path, issues)
-        return
-    _lint_scalar_type(key, value, rng, path, issues)
 
 
 def _lint_spelling(key: str, text: str, path: str, issues: list) -> None:
-    if key in NON_PROSE_SLOTS or "://" in text:
+    if key in NON_PROSE_SLOTS:
         return
     from data_sheets_schema import american_spelling
 
-    for pattern, _fix in american_spelling.RULES:
-        match = pattern.search(text)
-        if match:
-            issues.append(
-                Issue(WARNING, "british-spelling", path,
-                      f"'{key}' uses a British spelling ('{match.group(0)}'); "
-                      "the datasheet convention is American English")
-            )
-            return
+    if american_spelling._verbatim(key):
+        return
+    _, rewrites, _ = american_spelling.americanise(text)
+    if rewrites:
+        british_word, _ = rewrites[0]
+        issues.append(
+            Issue(WARNING, "british-spelling", path,
+                  f"'{key}' uses a British spelling ('{british_word}'); "
+                  "the datasheet convention is American English")
+        )
 
 
-def _lint_identifiers(data: dict, issues: list) -> None:
+def _lint_identifiers(data: dict, target_class: str, sv, issues: list) -> None:
+    induced = {s.name for s in sv.class_induced_slots(target_class)}
     for slot in IDENTIFIER_SLOTS:
-        if not _is_substantive(data.get(slot)):
+        if slot in induced and not _is_substantive(data.get(slot)):
             issues.append(
                 Issue(WARNING, "missing-identifier", f"/{slot}",
                       f"'{slot}' is missing or empty; every datasheet should "
@@ -556,6 +553,7 @@ def lint_instance(
     skip_schema_validation: bool = False,
 ) -> LintReport:
     """Validate and lint one loaded instance; return the report."""
+    _, schema_sha256 = _schema_key(schema_path)
     sv = _schema_view(schema_path)
     if target_class not in sv.all_classes():
         raise ValueError(
@@ -569,7 +567,7 @@ def lint_instance(
     sections: list = []
     if isinstance(data, dict):
         _lint_node(data, target_class, sv, "", issues)
-        _lint_identifiers(data, issues)
+        _lint_identifiers(data, target_class, sv, issues)
         class_sections = _class_sections(schema_path)
         sections = _section_coverage(data, target_class, sv, class_sections)
         for sec in sections:
@@ -594,6 +592,7 @@ def lint_instance(
         valid=valid,
         issues=issues,
         sections=sections,
+        schema_sha256=schema_sha256,
     )
 
 
@@ -608,16 +607,51 @@ def lint_file(
     p = Path(path)
     if not p.exists():
         raise FileNotFoundError(f"Instance file not found: {path}")
+    _, schema_sha256 = _schema_key(schema_path)
+    sv = _schema_view(schema_path)
+    if target_class not in sv.all_classes():
+        raise ValueError(
+            f"Target class '{target_class}' is not in the schema "
+            f"({Path(schema_path).name})"
+        )
+    if not skip_schema_validation:
+        _validator(schema_path)
+
+    from data_sheets_schema import duplicate_keys
+
     try:
-        data = load_instance(p)
+        text = p.read_text(encoding="utf-8")
+        if p.suffix.lower() == ".json":
+            data = json.loads(text)
+            dups = duplicate_keys.find_duplicate_keys(text)
+        else:
+            dups = duplicate_keys.find_duplicate_keys(text, strict=True)
+            data = yaml.safe_load(text)
     except Exception as exc:
-        report = LintReport(file=str(p), schema=str(schema_path),
-                            target_class=target_class, valid=False)
+        report = LintReport(
+            file=str(p),
+            schema=str(schema_path),
+            target_class=target_class,
+            valid=False,
+            schema_sha256=schema_sha256,
+        )
         report.issues.append(
             Issue(ERROR, "unparseable", "/", f"Could not parse {p.name}: {exc}")
         )
         return report
+
     report = lint_instance(data, schema_path, target_class,
                            skip_schema_validation=skip_schema_validation)
     report.file = str(p)
+    if dups:
+        for dup in dups:
+            report.issues.append(
+                Issue(
+                    ERROR,
+                    "duplicate-key",
+                    _dup_json_path(dup),
+                    duplicate_keys.describe([dup]),
+                )
+            )
+        report.valid = not any(i.severity == ERROR for i in report.issues)
     return report

@@ -102,7 +102,7 @@ def _validate_d4d_yaml(schema_file, d4d_file):
 @click.option('--schema-file', type=click.Path(exists=True),
               help=f'Schema file path (default: {SCHEMA_FULL_PATH})')
 def validate(d4d_file, schema_file):
-    """Validate D4D YAML file against schema."""
+    """Validate D4D YAML file against schema (see also `d4d validate` for in-process validation + linting)."""
     require_repo_context("d4d schema validate")
 
     click.echo(f"✓ Validating {d4d_file}...")
