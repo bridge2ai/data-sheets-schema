@@ -321,6 +321,7 @@ def check_capture(prepared):
     problems = [*control['problems'], *lifecycle['problems'], *draft['problems']]
     from . import native_shared_policy, native_shared_effects
     draft_seen = False
+    previous_decision = None
     for line, _, frame in observed.rows(run.transcript):
         for block in frame.get('message', {}).get('content', ()):
             if (type(block) is dict and block.get('type') == 'tool_use' and block.get('name') == 'Bash'
@@ -330,7 +331,19 @@ def check_capture(prepared):
             continue
         data = frame['request']['input']
         current = capture_api.at_callback(run, line)
-        view = capture_api.current_effect_view(current, correction_window=draft_seen,
+        key = (current.history.journal.pin.sha256,
+               None if current.phase1 is None else (
+                   current.phase1.seal.pin.sha256,
+                   None if current.phase1.core_seal is None else current.phase1.core_seal.pin.sha256,
+               ))
+        if previous_decision is not None and previous_decision[0] == key:
+            decision = previous_decision[1]
+        else:
+            previous_decision = None
+            decision = current.decision()
+            if decision is None or decision.state != 'failed':
+                previous_decision = (key, decision)
+        view = capture_api._effect_view_from_decision(current, decision, correction_window=draft_seen,
             exclude_pending=data['tool_use_id'])
         if native_shared_policy.stage_overlay_governs(view, tool_name=data['tool_name'],
                 tool_input=data['tool_input'], policy=policy):

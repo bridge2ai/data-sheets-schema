@@ -85,7 +85,6 @@ class _ReceiptCatalogContext:
         self._typed_marker = None
         self._derivations = None
         self._derivations_marker = None
-        self._decisions = {}
         self._prefixes = {}
         self._raw_inputs = {}
         self._completed = {}

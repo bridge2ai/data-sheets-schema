@@ -378,41 +378,6 @@ def activate(selection, execution_raw, started_raw):
         execution_sha256=e.pin.sha256, attempt_id=value['attempt_id'], records=(record.pin,)))
 
 
-def _referenced_artifact_paths(selection, rows):
-    paths = set()
-    for row in rows:
-        payload = row['payload']
-        for value in payload.values():
-            if (type(value) is dict and set(value) == {'role', 'path', 'bytes', 'sha256'}
-                    and value['role'] != 'observation'):
-                paths.add(value['path'])
-        if row['record_type'] == 'request_admitted':
-            role = {'worker': 'packet', 'integration': 'typed_index'}.get(payload['cursor']['kind'])
-            if role is not None:
-                paths.add(selection.role(role))
-        for pin in payload.get('outputs', ()):
-            if type(pin) is dict and 'path' in pin:
-                paths.add(pin['path'])
-    return paths
-
-
-def _decision_key(selection, binding, phase1, history, paths):
-    return (
-        selection.registration.pin.sha256,
-        selection.registration.raw,
-        binding.execution.pin.sha256,
-        binding.execution.raw,
-        phase1.seal.pin.sha256,
-        phase1.full.raw,
-        phase1.original_receipt.raw,
-        None if phase1.core_seal is None else (phase1.core_seal.pin.sha256, phase1.core.raw),
-        history.journal.pin.sha256,
-        history.journal.raw,
-        tuple((item.pin, item.raw) for item in history.records),
-        tuple((item.pin, item.raw) for item in history.artifacts if item.pin.path in paths),
-    )
-
-
 def _extend_trace(prev, transcript, control, runtime):
     if (prev is None or transcript.stream != 'transcript' or control.stream != 'control'
             or transcript.bytes < prev.transcript.bytes or control.bytes < prev.control.bytes
@@ -556,7 +521,6 @@ class _CapturedRun:
     _catalogs: object = field(default_factory=receipt_api._ReceiptCatalogContext,
                               init=False, compare=False, repr=False)
     _trace: object = field(default=None, init=False, compare=False, repr=False)
-    _decisions: dict = field(default_factory=dict, init=False, compare=False, repr=False)
     _prefixes: dict = field(default_factory=dict, init=False, compare=False, repr=False)
     _chronology_cache: object = field(default=None, init=False, compare=False, repr=False)
 
@@ -592,21 +556,8 @@ class _CapturedRun:
             session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
 
     def decision(self):
-        if self.phase1 is None:
-            return None
-        rows, _ = stage._history(self.selection, self.binding, self.history)
-        paths = _referenced_artifact_paths(self.selection, rows)
-        token = receipt_api.catalog_reuse.runtime_token()
-        key = None if token is None else (token, *_decision_key(self.selection, self.binding, self.phase1, self.history, paths))
-        if key is not None and key in self._decisions:
-            cached = self._decisions[key]
-            if cached.publications:
-                stage._budget(self.selection, self.history, tuple(p.artifact for p in cached.publications))
-            return cached
-        value = stage._prepare_next(self.selection, self.binding, self.phase1, self.history, self._catalogs)
-        if key is not None and value.state != 'failed' and receipt_api.catalog_reuse.runtime_token() is token:
-            self._decisions[key] = value
-        return value
+        return None if self.phase1 is None else stage._prepare_next(
+            self.selection, self.binding, self.phase1, self.history, self._catalogs)
 
 
 def _binding_document(selection, value, composition, execution, started, observation_item, session):
@@ -848,23 +799,10 @@ def _history_prefix(run, digest):
 
 def _decision_at(run, digest):
     history = _history_prefix(run, digest)
-    rows, _ = stage._history(run.selection, run.binding, history)
-    phase1 = _phase1(run.selection, run.binding, history, run.reader, _rows=rows)
+    phase1 = _phase1(run.selection, run.binding, history, run.reader)
     if phase1 is None:
         raise ValueError('stage observation precedes actual phase1 seal')
-    paths = _referenced_artifact_paths(run.selection, rows)
-    token = receipt_api.catalog_reuse.runtime_token()
-    key = None if token is None else (token, *_decision_key(run.selection, run.binding, phase1, history, paths))
-    decisions = getattr(run, '_decisions', None)
-    if key is not None and decisions is not None and key in decisions:
-        cached = decisions[key]
-        if cached.publications:
-            stage._budget(run.selection, history, tuple(p.artifact for p in cached.publications))
-        return cached
-    value = stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs)
-    if key is not None and decisions is not None and value.state != 'failed' and receipt_api.catalog_reuse.runtime_token() is token:
-        decisions[key] = value
-    return value
+    return stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs)
 
 
 def _require_completed_read_before_write(request, read):
@@ -1152,7 +1090,6 @@ def _loaded(base, streams, prefixes, *, _catalogs=None):
                        transcript, control, binding, history, observations, phase1)
     if _catalogs is not None:
         run._catalogs = receipt_api._catalog_context(_catalogs)
-        run._decisions = run._catalogs._decisions
         run._prefixes = run._catalogs._prefixes
     _checked_observations(run)
     return run
@@ -1702,7 +1639,6 @@ def at_callback(run, line):
     result = replace(run, history=history, observations=observations, transcript=transcript, control=control,
         phase1=_phase1(run.selection, run.binding, history, run.reader))
     result._catalogs = run._catalogs
-    result._decisions = run._decisions
     result._prefixes = run._prefixes
     if base_trace is not None and 0 < line <= base_trace.transcript.lines and 0 < control_lines <= base_trace.control.lines:
         result._trace = _prefix_trace(base_trace, transcript, control, (1, 1))
