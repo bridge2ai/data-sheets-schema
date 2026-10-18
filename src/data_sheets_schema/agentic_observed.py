@@ -205,6 +205,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
         result_seen = False              # a result occurred, usable or not (#1991)
         usage_by_msg: dict[str, dict] = {}
         blocks_by_msg: dict[str, dict] = {}
+        stopped: set[str] = set()        # messages some line of which carries a stop_reason
         first = last = None
         terminal: dict | None = None
         terminal_excluded = cut_before_terminal = False
@@ -302,6 +303,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
                         usage_by_msg[mid] = usage
                     content = [c for c in msg.get("content") or [] if isinstance(c, dict)]
                     blocks_by_msg.setdefault(mid, {}).update(_block_parts(content))
+                    if msg.get("stop_reason"):
+                        stopped.add(mid)
                 for k, c in enumerate(msg.get("content") or []):
                     if not isinstance(c, dict):
                         continue
@@ -340,7 +343,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
             duration_ms += int((last - first).total_seconds() * 1000)
         usable = terminal is not None and not cut_before_terminal
         total, m = _invocation_measure(usage_by_msg, blocks_by_msg, terminal if usable else None)
-        if not usable and _snapshot_truncated(usage_by_msg, blocks_by_msg):
+        if not usable and _snapshot_truncated(usage_by_msg, blocks_by_msg, stopped):
             # Per invocation (#5047 review, F2): a finalized file beside a
             # truncated one must not hide it in the run's sum.
             snapshot_lower_bound += 1
@@ -384,7 +387,9 @@ def observe(transcripts: list[Path], bundle: Path | None,
         out["terminal_results_excluded_by_cut"] = excluded
     if snapshot_lower_bound:
         out["invocations_snapshot_lower_bound"] = snapshot_lower_bound
-    if is_truncated_streaming_snapshot(out):
+    if snapshot_lower_bound:
+        # Decided per invocation above; the run-level rule is for records
+        # that carry no count, never for a fresh observation (#5068).
         out["_output_tokens_payload_floor"] = payload_tokens_floor(out)
         out["_streaming_snapshot_lower_bound"] = True
     if bundle:
@@ -421,18 +426,21 @@ def is_truncated_streaming_snapshot(obs: dict) -> bool:
     """True when some invocation's per-message ``output_tokens`` are truncated
     streaming snapshots that no terminal ``result`` replaced (#5047).
 
-    Claude Code subagent transcripts (observed from 2.1.278 through 2.1.300;
-    finalized 2.1.269/2.1.273 transcripts are not affected) log per-block
+    Claude Code subagent transcripts (every one sampled from 2.1.278 through
+    2.1.302; most from 2.1.263-2.1.268; one message or two in about a fifth
+    of those from 2.1.269-2.1.274) log per-block
     usage snapshots (``output_tokens`` ~ 2..26) before ``tool_use`` input
     finishes streaming and emit no terminal ``type == "result"`` event, so
     ``output_tokens``, ``reasoning_tokens_estimate`` and ``thinking_tokens``
     are lower bounds rather than turn totals; ``total_tokens`` carries the
     same output snapshots, a negligible share of its cache-dominated sum.
 
-    An observation made since the #5047 review carries the per-invocation
-    count ``invocations_snapshot_lower_bound`` and is read by it alone. One
-    recorded before that carries no count, and the run-level comparison of
-    summed output with the summed payload floor is the only test available.
+    An observation that flagged an invocation carries the per-invocation
+    count ``invocations_snapshot_lower_bound`` and is read by it alone. A
+    recorded observation with no count is read by the run-level comparison
+    of summed output with the summed payload floor: for one recorded before
+    the count it is the only test available, and for one that flagged
+    nothing it disagrees only where per-message floors round down (#5068).
     """
     if "invocations_snapshot_lower_bound" in obs:
         n = obs["invocations_snapshot_lower_bound"]
@@ -445,30 +453,21 @@ def is_truncated_streaming_snapshot(obs: dict) -> bool:
     return out_tok < payload_tokens_floor(obs)
 
 
-#: A file whose messages are mostly below their own payload floor is a
-#: snapshot transcript even when one large message lifts its sum over the
-#: aggregate floor (#5047 review, F3): truncated transcripts have most
-#: messages below it (9 of 11, 107 of 137), finalized ones 0 or 1 of 21–73.
-SNAPSHOT_MIN_MESSAGES = 3
-
-
-def _snapshot_truncated(usage_by_msg: dict, blocks_by_msg: dict) -> bool:
-    """One invocation without a usable terminal result: is its per-message
-    output a truncated streaming snapshot? Either the file's summed output is
-    below its summed payload floor, or more than half its messages (at least
-    ``SNAPSHOT_MIN_MESSAGES``) are each below their own."""
-    if not usage_by_msg:
-        return False
-    below = total_out = total_floor = 0
+def _snapshot_truncated(usage_by_msg: dict, blocks_by_msg: dict, stopped: set) -> bool:
+    """One invocation without a usable terminal result: is any of its
+    per-message output a truncated streaming snapshot? A message is one when
+    its output is below its own payload floor and no line of it carries a
+    ``stop_reason`` (#5068). A majority or summed rule missed real ones: in
+    2.1.302 transcripts a file can have 6 of 18 such messages, every
+    below-floor message lacks the stop line and every finalized one has it.
+    A finalized message below its floor is the runtime's own count of a turn
+    whose payload tokenizes densely, not a snapshot."""
     for mid, u in usage_by_msg.items():
         parts = blocks_by_msg.get(mid, {})
         floor = sum(chars for kind, chars in parts.values() if kind in ("text", "tool_use")) // CHARS_PER_TOKEN
-        out_tok = u.get("output_tokens", 0) or 0
-        total_out += out_tok
-        total_floor += floor
-        below += out_tok < floor
-    return total_out < total_floor or (len(usage_by_msg) >= SNAPSHOT_MIN_MESSAGES
-                                       and 2 * below > len(usage_by_msg))
+        if (u.get("output_tokens", 0) or 0) < floor and mid not in stopped:
+            return True
+    return False
 
 
 def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage: dict | None) -> tuple[int, dict]:

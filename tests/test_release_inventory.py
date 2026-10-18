@@ -96,7 +96,7 @@ def test_no_document_bundle_contains_rocrate_content(project):
     """The same rule read off the bytes generation reads (#5042 review, F2):
     the declaration above is a `source_type`, and a crate re-added under
     another type would pass it."""
-    bundle = Path("data/preprocessed/concatenated") / f"{project}_preprocessed.txt"
+    bundle = Path(__file__).resolve().parents[1] / "data/preprocessed/concatenated" / f"{project}_preprocessed.txt"
     if not bundle.exists():
         pytest.skip(f"{bundle} absent")
     hits = [m.group(0) for m in _CRATE_CONTENT.finditer(bundle.read_text(encoding="utf-8"))]

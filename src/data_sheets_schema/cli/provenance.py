@@ -326,6 +326,22 @@ def _parse_phases(specs) -> list[dict]:
     return out
 
 
+def _generated_date(text: str) -> str | None:
+    """The date in an instruction's `# Generated: YYYY-MM-DD` header, or None.
+    The header is indented in the generic prompts' example blocks, so the
+    pattern is the renderer's own (`api_runner._render`; #5049 review, F6)."""
+    import re
+    from datetime import date
+    m = re.search(r"^\s*#\s*Generated:\s*(\d{4}-\d{2}-\d{2})\b", text, re.MULTILINE)
+    if not m:
+        return None
+    try:
+        date.fromisoformat(m.group(1))
+    except ValueError:
+        return None
+    return m.group(1)
+
+
 @provenance.command()
 @click.option('--project', required=True)
 @click.option('--method', required=True, help='e.g. claudecode_agent')
@@ -665,17 +681,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             # header and in its label (#5049). Extract that header date and
             # verify candidate dates across ±2 days against the supplied
             # instruction digest so midnight-crossing runs record the date they
-            # were actually rendered under. The header is indented in the
-            # generic prompts' example blocks, so the pattern is the
-            # renderer's own (`api_runner._render`; #5049 review, F6).
-            extracted_date: str | None = None
-            m_gen = re.search(r"^\s*#\s*Generated:\s*(\d{4}-\d{2}-\d{2})\b", supplied_text, re.MULTILINE)
-            if m_gen:
-                try:
-                    date.fromisoformat(m_gen.group(1))
-                    extracted_date = m_gen.group(1)
-                except ValueError:
-                    extracted_date = None
+            # were actually rendered under.
+            extracted_date = _generated_date(supplied_text)
             # Local today, while the fallback spec's date is UTC; the two
             # can differ by a day, which is harmless only because every
             # candidate is checked against the hash (#5049 review, F12).
@@ -705,14 +712,24 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                     break
             run_spec = matched_spec
             if matched_spec is None:
-                # No spec rather than a wrong one (#5049 review, F8): the gate
-                # then reports the record unverifiable, which is true, instead
-                # of a `mismatch` against an unchanged prompt file.
                 why = (f"rendering failed: {type(render_error).__name__}: {render_error}"
                        if render_error is not None else
                        f"no date of {', '.join(candidate_dates)} reproduces --prompt-text")
-                click.echo(f"⚠️  no request spec recorded for --condition {condition}: {why}. "
-                           "Pass --run-date with the date the instruction was rendered under.", err=True)
+                if extracted_date is not None and render_error is None:
+                    # The text names the date it was rendered under, so the
+                    # spec at that date is the one it claims, never a guess:
+                    # the gate then reports the edit as a `mismatch`. With no
+                    # spec it would be `unverifiable`, which `runs check
+                    # --strict` passes (#5068).
+                    run_spec = _make_run_spec(extracted_date)
+                    click.echo(f"⚠️  --prompt-text does not reproduce under --condition {condition}: {why}. "
+                               f"The spec is recorded at its # Generated: date {extracted_date}, so the "
+                               "render gate will report a mismatch.", err=True)
+                else:
+                    # No date to claim: no spec rather than a wrong one
+                    # (#5049 review, F8); the gate reports it unverifiable.
+                    click.echo(f"⚠️  no request spec recorded for --condition {condition}: {why}. "
+                               "Pass --run-date with the date the instruction was rendered under.", err=True)
 
         if run_spec is None:
             spec = None
@@ -1455,7 +1472,10 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
             + "; comparable in kind with the API path's reasoning log, never to be averaged with it.")
         if "reasoning_tokens_estimate" in present:
             parts.append(" reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of "
-                         "the text and tool-call payloads: a subtraction, an upper bound, not a measurement.")
+                         "the text and tool-call payloads: a subtraction, "
+                         + ("not a measurement, and an upper bound only where no invocation is counted below."
+                            if "invocations_snapshot_lower_bound" in keys else
+                            "an upper bound, not a measurement."))
     thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
     if "thinking_from_terminal_results" in keys and "thinking_tokens" in keys:
         parts.append(" thinking_tokens is the runtime's own count: the session total from the terminal result "
@@ -1489,9 +1509,10 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
                      "per-message snapshots, so the totals are incomplete (#1945).")
     if "invocations_snapshot_lower_bound" in keys:
         parts.append(" invocations_snapshot_lower_bound counts the invocations whose per-message usage is a "
-                     "truncated streaming snapshot no terminal result replaced: for those, output_tokens, "
-                     "reasoning_tokens_estimate and thinking_tokens are lower bounds, and the estimate is not an "
-                     "upper bound on reasoning (#5047).")
+                     "truncated streaming snapshot no terminal result replaced: for those, output_tokens"
+                     + (", reasoning_tokens_estimate and thinking_tokens are" if "thinking_tokens" in keys else
+                        " and reasoning_tokens_estimate are")
+                     + " lower bounds (#5047/#5068).")
     named = sorted(k for k in (extended or ()) if k in keys)
     if parts and named:
         # No clause where the extension names no key the observation still

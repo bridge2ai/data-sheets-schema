@@ -407,8 +407,33 @@ class TestRunDateRecoveryPaths(unittest.TestCase):
         self.assertEqual(r.exit_code, 0, r.output)
         self.assertEqual(build.call_args.kwargs["prompt_request_spec"]["run_date"], "2026-10-14")
 
-    def test_no_reproducing_date_records_no_spec_and_says_so(self):
+    def test_an_edited_text_records_its_claimed_date_so_the_gate_sees_it(self):
+        # #5068: with no spec the gate says `unverifiable`, which --strict
+        # passes; the text's own # Generated: date makes the edit a mismatch.
         r, build = self._record(self.LABEL, text=self.sent + "\n")
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertEqual(build.call_args.kwargs["prompt_request_spec"]["run_date"], "2026-10-14")
+        self.assertIn("render gate will report a mismatch", r.output)
+
+    def _blind_header(self):
+        """The recorder's # Generated: extractor misses the header (as the
+        unindented pattern did, #5049 review F6), so only the ±day search can
+        find the date (#5068 F7). The rendered text itself is untouched."""
+        from unittest import mock
+        from data_sheets_schema.cli import provenance as prov_cli
+        return mock.patch.object(prov_cli, "_generated_date", return_value=None)
+
+    def test_the_day_search_alone_recovers_a_missed_header_date(self):
+        with self._blind_header():
+            # Neither the label (none) nor the header (missed) gives the date;
+            # only today's ±2-day window reaches it.
+            r, build = self._record("nodate_claude-opus-5-generic-v8_rep1", today="2026-10-16")
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertEqual(build.call_args.kwargs["prompt_request_spec"]["run_date"], "2026-10-14")
+
+    def test_no_claimed_and_no_reproducing_date_records_no_spec_and_says_so(self):
+        with self._blind_header():
+            r, build = self._record(self.LABEL, text=self.sent + "\n")
         self.assertEqual(r.exit_code, 0, r.output)
         self.assertIsNone(build.call_args.kwargs["prompt_request_spec"])
         self.assertIn("no request spec recorded", r.output)

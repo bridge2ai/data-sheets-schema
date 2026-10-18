@@ -94,12 +94,23 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         self.assertEqual(settings_obj["thinking"], {"type": "adaptive", "display": "summarized"})
 
         # Every earlier condition, not a sample of them (#5043 review): a
-        # display on any would move that condition's declaration.
-        from data_sheets_schema.api_runner import CONDITION_PROMPTS
-        for other in [c for c in CONDITION_PROMPTS if c != "generic_v10"] + [None]:
+        # display on any would move that condition's declaration. The routed
+        # v10 conditions are not earlier ones, and whether they take the
+        # display is an open owner decision (#5061 F4, D06), so not pinned.
+        from data_sheets_schema.api_runner import CONDITION_AXES, CONDITION_PROMPTS
+        earlier = [c for c in CONDITION_PROMPTS
+                   if c != "generic_v10" and (CONDITION_AXES.get(c) or {}).get("base") != "v10"]
+        for other in earlier + [None]:
             with self.subTest(condition=other):
                 other_settings = _model_settings(other)
                 self.assertEqual(other_settings["thinking"], {"type": "adaptive"})
+
+    def test_the_basis_names_a_display_the_condition_sets(self):
+        from data_sheets_schema.api_runner import _thinking_basis
+        with_display = _thinking_basis(_model_settings("generic_v10"))
+        self.assertIn("The request also sets display: summarized", with_display)
+        self.assertIn("not the omitted-parameter default", with_display)
+        self.assertNotIn("display", _thinking_basis(_model_settings("generic_v9")))
 
     def test_summarized_display_binds_to_the_real_sdk(self):
         import inspect

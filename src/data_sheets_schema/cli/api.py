@@ -739,7 +739,10 @@ def _billed_ids(spec) -> set:
     return set(_billed_rows(spec))
 
 
-def _billed_rows(spec) -> dict:
+def _billed_rows(spec, unreadable: list | None = None) -> dict:
+    """Billed attempts on disk by usage id. A source that cannot be read is
+    skipped and named in `unreadable`: read after a run raised, that is an
+    undercount, so the caller says so (#5068)."""
     import yaml
     from data_sheets_schema import usage_ledger
     from data_sheets_schema.api_runner import _abandoned_rows
@@ -754,19 +757,22 @@ def _billed_rows(spec) -> dict:
             for row in (yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8")) or {}).get("api_usage") or []:
                 keep(row)
     except Exception:                                  # noqa: BLE001
-        pass
+        if unreadable is not None:
+            unreadable.append("provenance api_usage")
     try:
         if usage_ledger.ledger_path(spec).exists():
             for row in usage_ledger._read(spec)["rows"]:
                 keep(row)
     except Exception:                                  # noqa: BLE001
-        pass
+        if unreadable is not None:
+            unreadable.append("usage ledger")
     try:
         for row in _abandoned_rows(spec):
             if not usage_ledger.identity_is_foreign(spec, row.get("run_identity")):
                 keep(row)
     except Exception:                                  # noqa: BLE001
-        pass
+        if unreadable is not None:
+            unreadable.append("abandoned-attempts journal")
     return rows
 
 
@@ -978,6 +984,10 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             # earlier usage too, a completed one all of it (#5045 review).
             usage_rows = [u for u in res.get("usage") or []
                           if not (isinstance(u, dict) and u.get("usage_id") in billed_before)]
+            # Counted now, so a raise later in this run does not count them
+            # again (#5068).
+            billed_before |= {u["usage_id"] for u in usage_rows
+                              if isinstance(u, dict) and isinstance(u.get("usage_id"), str)}
             spent_in += sum(u.get("input_tokens") or 0 for u in usage_rows)
             spent_out += sum(u.get("output_tokens") or 0 for u in usage_rows)
             cached = sum(u.get("cache_read") or 0 for u in usage_rows)
@@ -1091,7 +1101,11 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             if max_cost_dollars is not None:
                 # A run that raised was billed for every attempt it persisted
                 # before raising; the cap counts them (#5045 review).
-                raised_rows = [row for uid, row in _billed_rows(s).items() if uid not in billed_before]
+                unreadable: list = []
+                raised_rows = [row for uid, row in _billed_rows(s, unreadable).items() if uid not in billed_before]
+                if unreadable:
+                    click.echo(f"   ⚠️  cost of the raised run may be undercounted: could not read "
+                               f"{', '.join(unreadable)}", err=True)
                 spent_in += sum(u.get("input_tokens") or 0 for u in raised_rows)
                 spent_out += sum(u.get("output_tokens") or 0 for u in raised_rows)
                 spent_dollars += _rows_cost(raised_rows)
