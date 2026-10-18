@@ -59,6 +59,44 @@ def stats(level, format, output, schema_file):
     finally:
         sys.argv = old_argv
 
+#: How long `d4d schema validate` waits for linkml-validate: a bound on a
+#: validator that hangs, not a budget for a slow one. The legacy script's 30 s
+#: was exceeded on a heavily loaded machine (#4065); `d4d runs select` gives
+#: the same merged-schema validation 300 s.
+VALIDATE_TIMEOUT_SECONDS = 300
+
+
+def _validate_d4d_yaml(schema_file, d4d_file):
+    """`(is_valid, output)` from this interpreter's linkml-validate (#4188).
+
+    The command used to import `.claude/agents/scripts/validator.py`, which
+    runs `poetry run linkml-validate`: in a checkout with no poetry
+    environment of its own that created an empty one and ran whichever
+    `linkml-validate` came first on PATH, so the verdict depended on the
+    caller's PATH. `resources.linkml_validate()` is the one beside this
+    interpreter, never a PATH search (#1486, #1530). The verdict, the output
+    and the texts for a missing schema, a validator that could not start and
+    a timeout are that script's, except that the timeout names this bound
+    rather than its 30 s.
+    """
+    import subprocess
+
+    from data_sheets_schema.resources import linkml_validate
+
+    schema_path = Path(schema_file)
+    if not schema_path.exists():
+        raise FileNotFoundError(f"D4D schema not found: {schema_file}")
+    try:
+        result = subprocess.run(
+            [*linkml_validate(), "-s", str(schema_path), "-C", "Dataset", str(Path(d4d_file))],
+            capture_output=True, text=True, timeout=VALIDATE_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        return False, f"Validation timeout ({VALIDATE_TIMEOUT_SECONDS}s)"
+    except Exception as e:                              # noqa: BLE001
+        return False, f"Validation error: {e}"
+    return result.returncode == 0, result.stdout + result.stderr
+
+
 @schema.command()
 @click.argument('d4d_file', type=click.Path(exists=True))
 @click.option('--schema-file', type=click.Path(exists=True),
@@ -69,17 +107,11 @@ def validate(d4d_file, schema_file):
 
     click.echo(f"✓ Validating {d4d_file}...")
 
-    # Import and call the validator script
-    setup_repo_imports()
-
     try:
-        from validator import D4DValidator
-
         if not schema_file:
             schema_file = str(SCHEMA_FULL_PATH)
 
-        validator = D4DValidator(schema_file)
-        is_valid, output = validator.validate_d4d_yaml(d4d_file)
+        is_valid, output = _validate_d4d_yaml(schema_file, d4d_file)
 
         if is_valid:
             click.echo(f"✓ {d4d_file} is valid!")

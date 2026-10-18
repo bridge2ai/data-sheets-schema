@@ -60,8 +60,10 @@ class TestMergeCommand(unittest.TestCase):
         out = self._run("--project", "P", "--config", "2026-08-01_cfg")
         self.assertEqual(out.exit_code, 0, out.output)
         self.assertIn("Dry run", out.output)
+        self.assertIn(str(self.root / "claudecode_agent_merged" /
+                          "2026-08-01_cfg_merged" / "P_d4d.yaml"), out.output)
         self.assertFalse(
-            (self.method / "2026-08-01_cfg_merged" / "P_d4d.yaml").exists(),
+            (self.root / "claudecode_agent_merged" / "2026-08-01_cfg_merged" / "P_d4d.yaml").exists(),
             "a dry run wrote a record")
 
     def test_the_union_covers_slots_no_single_replicate_had(self):
@@ -69,7 +71,7 @@ class TestMergeCommand(unittest.TestCase):
                         "--execute")
         self.assertEqual(out.exit_code, 0, out.output)
         merged = yaml.safe_load(
-            (self.method / "2026-08-01_cfg_merged" / "P_d4d.yaml").read_text())
+            (self.root / "claudecode_agent_merged" / "2026-08-01_cfg_merged" / "P_d4d.yaml").read_text())
         self.assertIn("only_in_a", merged)
         self.assertIn("only_in_b", merged)
 
@@ -106,6 +108,61 @@ class TestMergeCommand(unittest.TestCase):
         data = yaml.safe_load(merged[0].read_text())
         self.assertEqual(data.get("record_mode"), "derived",
                          "a merged record must never claim to be live")
+        self.assertEqual(data["run"]["method"], "claudecode_agent_merged")
+        self.assertEqual({row["method"] for row in data["sources"]}, {"claudecode_agent"})
+
+    def test_explicit_output_method_does_not_change_source_selection(self):
+        out = self._run("--method", "claudecode_agent", "--project", "P",
+                        "--config", "2026-08-01_cfg", "--out-method", "reviewed_union",
+                        "--out-label", "chosen_label", "--execute")
+        self.assertEqual(out.exit_code, 0, out.output)
+        output = self.root / "reviewed_union" / "chosen_label" / "P_d4d.yaml"
+        record = yaml.safe_load(output.read_text())
+        self.assertIn("only_in_a", record)
+        self.assertIn("only_in_b", record)
+        provenance = yaml.safe_load((self.root / "reviewed_union_core" / "chosen_label" /
+                                     "P_provenance.yaml").read_text())
+        self.assertEqual(provenance["run"]["method"], "reviewed_union")
+        self.assertEqual(provenance["run"]["label"], "chosen_label")
+        self.assertEqual({row["method"] for row in provenance["sources"]}, {"claudecode_agent"})
+
+    def test_invalid_destination_refuses_in_dry_run_and_execute(self):
+        before = {p.relative_to(self.root): p.read_bytes()
+                  for p in self.root.rglob("*") if p.is_file()}
+        for method in ("claudecode_agent", "claudecode_agent_core", "", "../outside"):
+            for execute in (False, True):
+                with self.subTest(method=method, execute=execute):
+                    args = ["--project", "P", "--config", "2026-08-01_cfg",
+                            "--out-method", method]
+                    result = self._run(*args, *(["--execute"] if execute else []))
+                    self.assertEqual(result.exit_code, 1, result.output)
+                    self.assertIn("Error:", result.output)
+                    self.assertEqual({p.relative_to(self.root): p.read_bytes()
+                                      for p in self.root.rglob("*") if p.is_file()}, before)
+        self.assertFalse((self.root / "claudecode_agent_merged").exists())
+
+    def test_destination_refusal_precedes_optional_scorer_construction(self):
+        from unittest.mock import patch
+        context = Path(self.tmp.name) / "context.json"
+        cache = Path(self.tmp.name) / "cache.jsonl"
+        context.write_text("{}", encoding="utf-8")
+        cache.write_text("", encoding="utf-8")
+        with patch("data_sheets_schema.cli.runs._merge_fitness_scorer",
+                   side_effect=AssertionError("must refuse destination first")) as scorer:
+            result = self._run("--project", "P", "--config", "2026-08-01_cfg",
+                               "--out-method", "claudecode_agent", "--fitness-context",
+                               str(context), "--fitness-cache", str(cache), "--execute")
+        self.assertEqual(result.exit_code, 1, result.output)
+        self.assertIn("distinct", result.output)
+        scorer.assert_not_called()
+
+    def test_publication_refusal_uses_the_cli_error_surface(self):
+        from unittest.mock import patch
+        with patch("data_sheets_schema.merge.write_merge", side_effect=ValueError("destination changed")):
+            result = self._run("--project", "P", "--config", "2026-08-01_cfg", "--execute")
+        self.assertEqual(result.exit_code, 1, result.output)
+        self.assertIn("Error: destination changed", result.output)
+        self.assertFalse((self.root / "claudecode_agent_merged").exists())
 
 
 class TestADerivedRecordIsExcludedAsDerived(unittest.TestCase):

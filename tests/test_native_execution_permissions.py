@@ -1,0 +1,369 @@
+"""Fabricated evidence for verifier software tests, NEVER real native permission.
+
+All observation claims below are invented test inputs. Only the three ordinary
+Python no-I/O stubs execute; no native/auth/provider executable is called.
+"""
+from copy import deepcopy
+import json
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import sys
+
+import pytest
+
+from data_sheets_schema import native_execution_permissions as permission
+from data_sheets_schema import native_attribution_controller as composition
+from data_sheets_schema import native_attribution_registration as draft
+from tests.test_native_attempt_supervisor import make_case
+
+
+def member(text):
+    return {'text': text, 'sha256': draft._sha(text.encode())}
+
+
+def change_member(value, name, text):
+    value['members'][name] = member(text)
+
+
+def jsonlines(rows):
+    return ''.join(json.dumps(row, sort_keys=True) + '\n' for row in rows)
+
+
+@pytest.fixture(scope='module')
+def fixture(tmp_path_factory):
+    root = tmp_path_factory.mktemp('fabricated-permission-data')
+    case = make_case(root/'selected')
+    selected = draft._json(Path(case['value']['composition']).read_bytes())
+    commands = draft._commands(case['spec'])
+    runtime = {'route':'claude_code_direct_stream_json_v1',
+        'executable':{'path':'/fictional/claude','sha256':'a'*64,'version':'fictional test version', 'init_version':'test-only'},
+        'model':'synthetic-test-model','effort':'synthetic-test-effort','budget_guard_usd':'1.0'}
+    expected = {'runtime':runtime, 'policy':selected['policy'],
+        'commands':{'draft':next(c for c,k in commands.items() if k=='draft'),
+                    'final_evidence':next(c for c,k in commands.items() if k=='final_evidence'),
+                    'recorder':selected['policy']['post_final_recorder']['command']},
+        'source':{'path':str(case['spec'].bundle),'sha256':draft._sha(case['spec'].bundle.read_bytes())},
+        'permission_environment':{'PATH':str(Path(sys.executable).parent)+os.pathsep+'/usr/bin:/bin',
+            'PYTHONDONTWRITEBYTECODE':'1','LANG':'en_US.UTF-8',
+            'CLAUDE_CONFIG_DIR':str(root/'future-config'), 'PYTHONPATH':str(composition.ROOT/'src'),
+            'D4D_LAUNCH_INSTRUCTION':selected['instruction_path']},
+        'controller_sources':selected['controller_sources'],
+        'instruction_sha256':selected['instruction_sha256'],'system_sha256':'b'*64}
+    return {'root':root, **fabricated_manifest(expected, root/'separate-probe', case['spec'].bundle.read_bytes())}
+
+
+def fabricated_manifest(expected, neutral, source_raw):
+    """Test-only forged observation; never serialize/use as real launch authority."""
+    runtime = expected['runtime']
+    neutral = Path(neutral); neutral.mkdir()
+    config, stubs = str(neutral/'config'), str(neutral/'stubs')
+    provider = 'http://127.0.0.1:12345'
+    source = source_raw.decode('utf-8')
+    provider_source = '# Fabricated test provider evidence; this file is never executed.\n'
+    launch = {'cwd':expected['policy']['readonly_lookups']['repository'], 'argv':permission.probe_argv(expected),
+        'environment':{**expected['permission_environment'],'CLAUDE_CONFIG_DIR':config,'PYTHONPATH':stubs,
+                       'ANTHROPIC_BASE_URL':provider,'ANTHROPIC_API_KEY':'d4d-local-permission-probe-token'},
+        'config_root':config,'stub_root':stubs,'provider_url':provider,
+        'provider_source_sha256':draft._sha(provider_source.encode()),'exit_code':0,
+        'shutdown':{'control_initialized':True,'control_shutdown_complete':True,'unfinished_control_workers':0},
+        'executable':runtime['executable']}
+    controls = composition.load_controls(); native = controls['native_control']
+    cases = permission.probe_cases(expected)
+    classifications = permission._authority(expected, controls)
+    ack = {'type':'control_response','response':{'subtype':'success','request_id':native.INIT_ID}}
+    session = 'dc2de951-0f4c-4fd3-9e69-4e66285533a1'
+    events = [ack, {'type':'system','subtype':'init','model':runtime['model'],
+        'claude_code_version':runtime['executable']['init_version'],'apiKeySource':'ANTHROPIC_API_KEY',
+        'tools':['Read','Write','Bash'],'cwd':launch['cwd'],'session_id':session}]
+    records = [{'kind':'initialize_sent','policy_sha256':native.digest(expected['policy']),
+                'frame':native.initialize_frame(expected['policy']['pretool_control'])},
+               {'kind':'initialize_ack','frame':ack}]
+    for case_row in cases:
+        identity = case_row['id']; kind, reason = classifications[identity]
+        block = {'type':'tool_use','id':identity,'name':case_row['tool'],'input':case_row['input']}
+        call = {'type':'assistant','session_id':session,'message':{'id':identity,'content':[block]}}
+        callback = {'type':'control_request','request_id':'callback-'+identity,'request':{'subtype':'hook_callback',
+            'callback_id':expected['policy']['pretool_control']['callback_id'],'input':{'hook_event_name':'PreToolUse',
+            'tool_name':case_row['tool'],'tool_use_id':identity,'cwd':launch['cwd'],'tool_input':case_row['input']}}}
+        if case_row['allow'] and case_row['tool']=='Bash':
+            content = json.dumps({'d4d_permission_stub':identity,'argv':shlex.split(case_row['input']['command'])[3:]})
+            metadata = {'exitCode':0,'stdout':content}
+        elif case_row['allow']:
+            content, metadata = source, {}
+        else:
+            content, metadata = 'Outside the registered tool policy: '+reason, {}
+        result = {'type':'user','session_id':session,'tool_use_result':metadata,
+            'message':{'content':[{'type':'tool_result','tool_use_id':identity,'is_error':not case_row['allow'],'content':content}]}}
+        events += [call,callback,result]
+        records.append({'kind':'decision','request':callback,'classification':kind,'basis':reason,
+            'response':{'type':'control_response','response':{'subtype':'success','request_id':'callback-'+identity,
+                        'response':native.hook_output(kind,reason)}}})
+    events.append({'type':'result','session_id':session,'is_error':False,'terminal_reason':'completed','stop_reason':'end_turn',
+                   'permission_denials':[{'tool_use_id':r['id']} for r in cases if not r['allow']]})
+    files = {'policy.json':json.dumps(expected['policy']), 'cases.json':json.dumps(cases), 'launch.json':json.dumps(launch),
+        'config.json':'{}','source.before':source,'source.after':source,'version.txt':runtime['executable']['version']+'\n',
+        'transcript.jsonl':jsonlines(events),'control.jsonl':jsonlines(records),'provider.py':provider_source,
+        **permission.stub_files()}
+    value = {'kind':permission.KIND,'version':1,'origin':permission.ORIGIN,'binding':expected,
+             'members':{name:member(text) for name,text in files.items()}}
+    return {'expected':expected,'manifest':value,'events':events,'records':records,'launch':launch}
+
+
+def test_complete_fabricated_record_is_checked_without_claiming_authentication(fixture):
+    raw = draft._encoded(fixture['manifest'])
+    result = permission.verify_saved_probe(raw, expected=fixture['expected'])
+    assert result['checked'] is result['passed'] is True
+    assert len(result['cases']) == 7
+    assert result['manifest_sha256'] == draft._sha(raw)
+    assert 'observation authenticity' in result['unassessed']
+    assert 'current authentication' in result['unassessed']
+    assert 'helper execution was stubbed' in result['basis']
+
+
+def test_actual_three_selected_commands_run_only_fixed_stubs(fixture):
+    """Usability proof: keep exact selected absolute arguments/cwd, no native CLI."""
+    launch, expected = fixture['launch'], fixture['expected']
+    stubs = Path(launch['stub_root']); stubs.mkdir()
+    for name, text in permission.stub_files().items():
+        target = stubs/name; target.parent.mkdir(parents=True,exist_ok=True);target.write_text(text)
+    before = {str(p):draft._sha(p.read_bytes()) for p in fixture['root'].rglob('*') if p.is_file()}
+    for role, command in expected['commands'].items():
+        process = subprocess.run(shlex.split(command),cwd=launch['cwd'],env=launch['environment'],
+                                 capture_output=True,text=True,timeout=20)
+        assert process.returncode == 0, process.stderr
+        assert json.loads(process.stdout) == {'d4d_permission_stub':role,'argv':shlex.split(command)[3:]}
+    after = {str(p):draft._sha(p.read_bytes()) for p in fixture['root'].rglob('*') if p.is_file()}
+    assert after == before
+    assert not list((fixture['root']/'selected/corpus').glob('data/**/EXAMPLE_d4d*'))
+
+
+@pytest.mark.parametrize('change', ['summary','mock','origin_missing','version_bool','missing_member','member_hash',
+    'changed_source','changed_policy','case_drop','case_duplicate','case_order','case_extra','stub_changed',
+    'callback_drop','result_drop','result_duplicate','post_terminal','cancel','init_version','init_model','init_cwd',
+    'control_policy','control_decision','control_drop','control_callback','terminal_error','terminal_missing',
+    'all_denied','denial_omitted','exit_bool','exit_float','stdout_typed','missing_exit','pending','extra_tool',
+    'binary','env_override','provider_remote','config_populated','argv_weakened','shutdown','process_exit',
+    'authority_drift','closure_drift','unterminated','blank_line','denied_stdout','init_permission'])
+def test_required_authority_and_raw_evidence_cannot_be_replaced_by_summary(fixture, change):
+    value=deepcopy(fixture['manifest']); expected=deepcopy(fixture['expected'])
+    events=deepcopy(fixture['events']); records=deepcopy(fixture['records']); launch=deepcopy(fixture['launch'])
+    if change=='summary':value={'passed':True}
+    elif change=='mock':value['origin']='ordinary_python_fake_cli'
+    elif change=='origin_missing':del value['origin']
+    elif change=='version_bool':value['version']=True
+    elif change=='missing_member':del value['members']['control.jsonl']
+    elif change=='member_hash':value['members']['source.before']['sha256']='f'*64
+    elif change=='changed_source':change_member(value,'source.after','modified source')
+    elif change=='changed_policy':change_member(value,'policy.json','{}')
+    elif change.startswith('case_'):
+        rows=permission.probe_cases(expected)
+        if change=='case_drop':rows.pop()
+        elif change=='case_duplicate':rows[-1]=rows[0]
+        elif change=='case_order':rows.reverse()
+        else:rows.append(deepcopy(rows[0]))
+        change_member(value,'cases.json',json.dumps(rows))
+    elif change=='stub_changed':change_member(value,'data_sheets_schema/cli.py','print("fake")\n')
+    elif change=='callback_drop':events.pop(3)
+    elif change=='result_drop':events.pop(4)
+    elif change=='result_duplicate':events.insert(5,deepcopy(events[4]))
+    elif change=='post_terminal':events.append(deepcopy(events[2]))
+    elif change=='cancel':events[3]['type']='control_cancel_request'
+    elif change=='init_version':events[1]['claude_code_version']='stale'
+    elif change=='init_model':events[1]['model']='foreign'
+    elif change=='init_cwd':events[1]['cwd']='/wrong'
+    elif change=='init_permission':events[1]['permissionMode']='bypassPermissions'
+    elif change=='control_policy':records[0]['policy_sha256']='f'*64
+    elif change=='control_decision':records[2]['response']['response']['response']={'allow':True}
+    elif change=='control_drop':records.pop()
+    elif change=='control_callback':records[2]['request']['request_id']='different'
+    elif change=='terminal_error':events[-1]['is_error']=True
+    elif change=='terminal_missing':events.pop()
+    elif change=='all_denied':
+        for e in events:
+            if e.get('type')=='user':e['message']['content'][0]['is_error']=True
+    elif change=='denial_omitted':events[-1]['permission_denials'].pop()
+    elif change=='exit_bool':events[4]['tool_use_result']['exit_code']=False
+    elif change=='exit_float':events[4]['tool_use_result']['exit_code']=0.0
+    elif change=='stdout_typed':
+        events[4]['tool_use_result']['stdout']='{"d4d_permission_stub":true,"argv":[]}'
+    elif change=='denied_stdout':events[16]['tool_use_result']['stdout']='{"d4d_permission_stub":"executed"}'
+    elif change=='missing_exit':del events[4]['tool_use_result']['exitCode']
+    elif change=='pending':events[4]['tool_use_result']['backgroundTaskId']='pending'
+    elif change=='extra_tool':events[2]['message']['content'].append(deepcopy(events[2]['message']['content'][0]))
+    elif change=='binary':launch['executable']['sha256']='f'*64
+    elif change=='env_override':launch['environment']['LD_PRELOAD']='/foreign.so'
+    elif change=='provider_remote':launch['provider_url']='https://remote.invalid'
+    elif change=='config_populated':change_member(value,'config.json','{"permissions":{"allow":["Bash"]}}')
+    elif change=='argv_weakened':launch['argv'].remove('--restricted')
+    elif change=='shutdown':launch['shutdown']['unfinished_control_workers']=True
+    elif change=='process_exit':launch['exit_code']=False
+    elif change=='authority_drift':expected['runtime']['effort']='changed'
+    elif change=='closure_drift':expected['controller_sources']['version']=False
+    if change not in {'summary','missing_member'}:
+        change_member(value,'transcript.jsonl',jsonlines(events))
+        change_member(value,'control.jsonl',jsonlines(records))
+        change_member(value,'launch.json',json.dumps(launch))
+    if change=='unterminated':change_member(value,'transcript.jsonl',jsonlines(events).rstrip('\n'))
+    if change=='blank_line':change_member(value,'transcript.jsonl',jsonlines(events)+'\n')
+    with pytest.raises(ValueError):permission.verify_saved_probe(draft._encoded(value),expected=expected)
+
+
+def test_path_rewrite_and_nonmodule_helpers_are_explicitly_unsupported(fixture):
+    for role in permission.MODULES:
+        expected=deepcopy(fixture['expected']); expected['commands'][role]='/absolute/helper.py --run'
+        with pytest.raises(ValueError):permission.verify_saved_probe(draft._encoded(fixture['manifest']),expected=expected)
+
+
+def test_duplicate_json_keys_and_nonfinite_numbers_are_rejected(fixture):
+    for raw in (b'{"kind":1,"kind":2}',b'{"value":NaN}',b'{"value":Infinity}'):
+        with pytest.raises(ValueError):permission.verify_saved_probe(raw,expected=fixture['expected'])
+
+
+def completion_text(fixture):
+    # Actual committed native frame shape, with this fixture's session only.
+    # See e0a8:notes/matched_cborg_2026-09-13/native_controls/
+    # offline_fake_provider/transcript.jsonl, line 8. This is not a native call.
+    return {'type':'assistant','message':{'id':'offline_4','type':'message','role':'assistant',
+        'model':fixture['expected']['runtime']['model'],'content':[{'type':'text','text':'OFFLINE_COMPLETE'}],
+        'stop_reason':None,'stop_sequence':None,'usage':{'input_tokens':100,'output_tokens':0},
+        'context_management':None},'parent_tool_use_id':None,
+        'session_id':fixture['events'][1]['session_id'],
+        'uuid':'34b5fc8c-1cc6-456f-8e9d-352e37e8c0b5','timestamp':'2026-09-14T04:14:35.782Z'}
+
+
+def test_native_completion_text_and_settled_narration_are_usable(fixture):
+    value=deepcopy(fixture['manifest']); events=deepcopy(fixture['events'])
+    events.insert(-1,completion_text(fixture))
+    events.insert(5,completion_text(fixture))
+    events.insert(2,completion_text(fixture))
+    change_member(value,'transcript.jsonl',jsonlines(events))
+    assert permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])['passed']
+
+
+@pytest.mark.parametrize('change',['terminal_missing_session','terminal_foreign_session','terminal_bool_session',
+    'text_foreign_session','text_missing_session','text_child_session','text_contains_tool','text_after_terminal',
+    'tool_after_terminal','text_before_init','text_while_case_pending','duplicate_terminal'])
+def test_text_frames_cannot_hide_unbound_or_late_lifecycle_events(fixture,change):
+    value=deepcopy(fixture['manifest']); events=deepcopy(fixture['events']); text=completion_text(fixture)
+    if change=='terminal_missing_session':del events[-1]['session_id']
+    elif change=='terminal_foreign_session':events[-1]['session_id']='00000000-0000-0000-0000-000000000000'
+    elif change=='terminal_bool_session':events[-1]['session_id']=True
+    elif change=='text_foreign_session':text['session_id']='foreign';events.insert(-1,text)
+    elif change=='text_missing_session':del text['session_id'];events.insert(-1,text)
+    elif change=='text_child_session':text['parent_tool_use_id']='child';events.insert(-1,text)
+    elif change=='text_contains_tool':
+        text['message']['content'].append(deepcopy(events[2]['message']['content'][0]));events.insert(-1,text)
+    elif change=='text_after_terminal':events.append(text)
+    elif change=='tool_after_terminal':events.append(deepcopy(events[2]))
+    elif change=='text_before_init':events.insert(0,text)
+    elif change=='text_while_case_pending':events.insert(4,text)
+    else:events.append(deepcopy(events[-1]))
+    change_member(value,'transcript.jsonl',jsonlines(events))
+    with pytest.raises(ValueError):permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])
+
+
+@pytest.mark.parametrize('change',['init_parent','call_parent','result_parent','terminal_parent',
+    'call_message_model','call_outer_model','result_model','terminal_model','call_message_role','call_outer_role',
+    'result_role','text_model','text_role','terminal_error_subtype','terminal_unknown_subtype','terminal_null_subtype'])
+def test_explicit_native_metadata_contradictions_refuse(fixture,change):
+    value=deepcopy(fixture['manifest']); events=deepcopy(fixture['events'])
+    if change.endswith('_parent'):
+        index={'init_parent':1,'call_parent':2,'result_parent':4,'terminal_parent':-1}[change]
+        events[index]['parent_tool_use_id']='unregistered-child'
+    elif change=='call_message_model':events[2]['message']['model']='foreign'
+    elif change=='call_outer_model':events[2]['model']='foreign'
+    elif change=='result_model':events[4]['message']['model']='foreign'
+    elif change=='terminal_model':events[-1]['model']='foreign'
+    elif change=='call_message_role':events[2]['message']['role']='user'
+    elif change=='call_outer_role':events[2]['role']='user'
+    elif change=='result_role':events[4]['message']['role']='assistant'
+    elif change in ('text_model','text_role'):
+        text=completion_text(fixture);text['message']['model' if change=='text_model' else 'role']='foreign'
+        events.insert(-1,text)
+    elif change=='terminal_error_subtype':events[-1]['subtype']='error_during_execution'
+    elif change=='terminal_unknown_subtype':events[-1]['subtype']='unknown'
+    else:events[-1]['subtype']=None
+    change_member(value,'transcript.jsonl',jsonlines(events))
+    with pytest.raises(ValueError):permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])
+
+
+def test_matching_optional_native_metadata_and_completion_remain_valid(fixture):
+    value=deepcopy(fixture['manifest']);events=deepcopy(fixture['events']);model=fixture['expected']['runtime']['model']
+    for event in events:
+        if event['type'] in ('system','assistant','user','result'):
+            event['parent_tool_use_id']=None
+            event['model']=model
+        if event['type'] in ('assistant','user'):
+            event['message'].update(model=model,role=event['type'])
+    events[-1]['subtype']='success';events.insert(-1,completion_text(fixture))
+    change_member(value,'transcript.jsonl',jsonlines(events))
+    assert permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])['passed']
+
+
+@pytest.mark.parametrize('budget',['1.0','01.50','0.0001','1','9'*32,'0.'+'0'*29+'1'])
+def test_exact_positive_decimal_budget_is_preserved_in_probe_argv(fixture,tmp_path,budget):
+    expected=deepcopy(fixture['expected']); expected['runtime']['budget_guard_usd']=budget
+    built=fabricated_manifest(expected,tmp_path/'decimal-probe',
+        fixture['manifest']['members']['source.before']['text'].encode())
+    argv=built['launch']['argv']
+    assert argv[argv.index('--max-budget-usd')+1] == budget
+    assert type(argv[argv.index('--max-budget-usd')+1]) is str
+    assert permission.verify_saved_probe(draft._encoded(built['manifest']),expected=expected)['passed']
+
+
+@pytest.mark.parametrize('budget',[None,True,False,1,1.0,0,0.0,float('nan'),float('inf'),
+    '', '0','00','0.0','00.000','-1','+1','1e2','1E2','NaN','nan','Inf','Infinity',
+    '.5','1.',' 1','1 ','1\n','9'*33,'0.'+'0'*30+'1'])
+def test_noncanonical_or_numeric_budget_never_becomes_a_native_argument(fixture,budget):
+    expected=deepcopy(fixture['expected']);expected['runtime']['budget_guard_usd']=budget
+    with pytest.raises(ValueError,match='decimal string'):
+        permission.probe_argv(expected)
+    with pytest.raises(ValueError,match='decimal string'):
+        permission.verify_saved_probe(draft._encoded(fixture['manifest']),expected=expected)
+
+
+@pytest.mark.parametrize('error', ['explicit failure', {'message': 'execution failed'},
+    True, False, 0, [], {}, ''])
+def test_terminal_error_cannot_contradict_success(fixture, error):
+    value = deepcopy(fixture['manifest']); events = deepcopy(fixture['events'])
+    events[-1]['error'] = error
+    change_member(value, 'transcript.jsonl', jsonlines(events))
+    with pytest.raises(ValueError, match='terminal is not explicitly successful'):
+        permission.verify_saved_probe(draft._encoded(value), expected=fixture['expected'])
+
+
+@pytest.mark.parametrize('case_id', ['arbitrary_python', 'modified_draft', 'source_write'])
+@pytest.mark.parametrize('change', ['wrong_tool', 'null_tool', 'admitted_input',
+    'null_input', 'extra_input', 'wrong_input_type'])
+def test_terminal_denial_details_bind_the_exact_denied_case(fixture, case_id, change):
+    value = deepcopy(fixture['manifest']); events = deepcopy(fixture['events'])
+    case = next(row for row in permission.probe_cases(fixture['expected']) if row['id'] == case_id)
+    row = next(row for row in events[-1]['permission_denials'] if row['tool_use_id'] == case_id)
+    row.update(tool_name=case['tool'], tool_input=deepcopy(case['input']))
+    if change == 'wrong_tool': row['tool_name'] = 'Read'
+    elif change == 'null_tool': row['tool_name'] = None
+    elif change == 'admitted_input': row['tool_input'] = {'command': fixture['expected']['commands']['draft']}
+    elif change == 'null_input': row['tool_input'] = None
+    elif change == 'extra_input': row['tool_input']['unregistered_argument'] = True
+    else: row['tool_input'] = list(row['tool_input'].items())
+    change_member(value, 'transcript.jsonl', jsonlines(events))
+    with pytest.raises(ValueError, match='terminal denial .* contradicts its exact case'):
+        permission.verify_saved_probe(draft._encoded(value), expected=fixture['expected'])
+
+
+@pytest.mark.parametrize('fields', [(), ('tool_name',), ('tool_input',), ('tool_name', 'tool_input')])
+@pytest.mark.parametrize('null_error', [False, True])
+def test_matching_or_omitted_terminal_details_remain_compatible(fixture, fields, null_error):
+    value = deepcopy(fixture['manifest']); events = deepcopy(fixture['events'])
+    cases = {row['id']: row for row in permission.probe_cases(fixture['expected'])}
+    for row in events[-1]['permission_denials']:
+        case = cases[row['tool_use_id']]
+        details = {'tool_name': case['tool'], 'tool_input': case['input']}
+        row.update({key: deepcopy(details[key]) for key in fields})
+    if null_error: events[-1]['error'] = None
+    change_member(value, 'transcript.jsonl', jsonlines(events))
+    checked = permission.verify_saved_probe(draft._encoded(value), expected=fixture['expected'])
+    assert checked['checked'] is checked['passed'] is True
+    assert 'observation authenticity' in checked['unassessed']

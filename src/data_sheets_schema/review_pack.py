@@ -27,6 +27,11 @@ from typing import Any
 
 import yaml
 from data_sheets_schema.schema_view import shared_view
+from data_sheets_schema.receipts import IdentifierBases, _resolver_bases, _validated_identifier_bases
+
+
+class IdentifierAuthorityUnavailable(ValueError):
+    """A pack cannot identify claims under a consistent resolver authority."""
 
 
 class UnreadableYAML(yaml.YAMLError):
@@ -277,20 +282,25 @@ _URL_CONTINUATION = re.compile(r"[A-Za-z0-9/_#?=&%~]")
 _URL_JOINER = re.compile(r"[.\-]")
 
 
-def _canonical_identifier(value: str) -> str:
+def _canonical_identifier(value: str, *, identifier_bases: IdentifierBases | None = None) -> str:
     """A resolver URL of a declared prefix as its CURIE, lower-cased; else the
     value as written, lower-cased. The record's own id and a fragment's base
     can be the same identifier in two forms — #974's normaliser writes the
     CURIE, an agentic run may write the URL — and a self-mint must not read
     as a label on someone else's identifier (#1108 review, finding 8). 0 of
     the corpus's 953 constructed ids are this case today; the guard is for
-    the shape the normaliser creates."""
+    the shape the normaliser creates. None retains the legacy lookup;
+    explicit bases use the run's resolver table, including an empty one."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     value = value.strip()
     try:
         from data_sheets_schema.api_runner import _identifier_form_tables, curie_form
-        _, bases = _identifier_form_tables()
+        bases = (_identifier_form_tables()[1] if identifier_bases is None
+                 else _resolver_bases(identifier_bases))
         value = curie_form(value, bases) or value
     except Exception:                                         # noqa: BLE001
+        if identifier_bases is not None:
+            raise
         pass
     # Scheme and host fold; the path compares exactly — URL paths are
     # case-sensitive, as `api_runner._split_base` says (#1117 round 2).
@@ -301,7 +311,8 @@ def _canonical_identifier(value: str) -> str:
     return (prefix.lower() + sep + local) if sep else value.lower()
 
 
-def _id_origin(value: Any, record_id: str | None) -> tuple[str, str | None]:
+def _id_origin(value: Any, record_id: str | None, *,
+               identifier_bases: IdentifierBases | None = None) -> tuple[str, str | None]:
     """(origin, base). `minted`: a urn or a fragment on the record's own id
     (`receipts._minted`, or the same id in resolver/CURIE alias form).
     `constructed`: a fragment on some *other* base — the record built a
@@ -310,6 +321,7 @@ def _id_origin(value: Any, record_id: str | None) -> tuple[str, str | None]:
     on the attested fairhub page, and the two-way minted flag filed them
     with the DOIs). `stated`: no fragment, or an empty one; the value is
     used as a world-facing reference as written."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     from data_sheets_schema.receipts import _minted
     if not isinstance(value, str):
         return "stated", None
@@ -319,18 +331,21 @@ def _id_origin(value: Any, record_id: str | None) -> tuple[str, str | None]:
     base, sep, fragment = value.partition("#")
     if not sep or not base or not fragment:
         return "stated", None                                 # no fragment, or nothing constructed
-    if record_id and _canonical_identifier(base) == _canonical_identifier(str(record_id)):
+    if record_id and (_canonical_identifier(base, identifier_bases=identifier_bases)
+                      == _canonical_identifier(str(record_id), identifier_bases=identifier_bases)):
         return "minted", None                                 # the record's own id in another form
     return "constructed", base
 
 
-def _base_in(base: str, bundle_text: str) -> bool:
+def _base_in(base: str, bundle_text: str, *, identifier_bases: IdentifierBases | None = None) -> bool:
     """The base appears in the bundle as itself — not as the prefix of a
     longer URL — in either its written form or its resolver/CURIE alias."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     forms = {base}
     try:
         from data_sheets_schema.api_runner import _identifier_form_tables, curie_form
-        _, bases = _identifier_form_tables()
+        bases = (_identifier_form_tables()[1] if identifier_bases is None
+                 else _resolver_bases(identifier_bases))
         curie = curie_form(base, bases)
         if curie:
             forms.add(curie)
@@ -340,6 +355,8 @@ def _base_in(base: str, bundle_text: str) -> bool:
                 if pfx == prefix and local:
                     forms.add(b + local)
     except Exception:                                         # noqa: BLE001
+        if identifier_bases is not None:
+            raise
         pass
     for form in forms:
         start = 0
@@ -359,7 +376,8 @@ def _base_in(base: str, bundle_text: str) -> bool:
 
 
 def _id_slots(full: Any, root_class: str | None = None,
-              bundle_text: str | None = None) -> tuple[list[dict[str, Any]], str | None]:
+              bundle_text: str | None = None, *, identifier_bases: IdentifierBases | None = None
+              ) -> tuple[list[dict[str, Any]], str | None]:
     """Every populated `…id` leaf of the record with whether the schema
     *forces* the id (#803) and whether the value is a *mint* (#823): `File`,
     `FileCollection`, `DataSubset` — and `Person` — ids are LinkML
@@ -386,7 +404,10 @@ def _id_slots(full: Any, root_class: str | None = None,
     walk cannot resolve is listed with resolvable: false rather than
     guessed. gap names why the flags are unavailable (no schema, no
     SchemaView, unknown root class) — named, not filled; exception class
-    only, so pack bytes stay machine-neutral."""
+    only, so pack bytes stay machine-neutral. Class/required/forced flags
+    retain the current implementation schema; only origin and base-presence
+    comparisons use the supplied identifier bases (#4291)."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     try:
         from data_sheets_schema.constants.schemas import SCHEMA_FULL_PATH
         from data_sheets_schema.receipts import _minted, populated_leaves
@@ -416,12 +437,13 @@ def _id_slots(full: Any, root_class: str | None = None,
                 continue
             slot = sv.induced_slot("id", cls)
             ident, req = bool(slot.identifier), bool(slot.required)
-            origin, base = _id_origin(value, record_id)
+            origin, base = _id_origin(value, record_id, identifier_bases=identifier_bases)
             entry = {"path": path, "class": cls, "identifier": ident, "required": req,
                      "forced": ident or req, "minted": origin == "minted", "origin": origin}
             if origin == "constructed":
                 entry["base"] = base
-                entry["base_in_bundle"] = _base_in(base, bundle_text) if bundle_text is not None else None
+                entry["base_in_bundle"] = (_base_in(base, bundle_text, identifier_bases=identifier_bases)
+                                           if bundle_text is not None else None)
             out.append(entry)
         except Exception:                                     # noqa: BLE001
             out.append({"path": path, "resolvable": False})
@@ -450,7 +472,21 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                          "instruction_out, which was not given")
     sample = {**DEFAULT_SAMPLE, **(sample or {})}
     record = _load_mapping(provenance, _split_header(provenance.read_text(encoding="utf-8"))[1])
+    # Resolve once, before the public builder can write the instruction.
+    # A missing historical schema may legitimately select the disclosed
+    # current fallback. A malformed/inconsistent selection is not an empty
+    # table or an ordinary unresolved path: refuse the whole pack (#4291).
+    from data_sheets_schema.receipts import _recorded_identifier_bases
+    try:
+        identifier_bases, identity_basis = _recorded_identifier_bases(record)
+        identifier_bases = _validated_identifier_bases(identifier_bases)
+        if identifier_bases is None:
+            raise ValueError("selected identifier rules did not supply a table")
+    except Exception as exc:                                  # noqa: BLE001
+        raise IdentifierAuthorityUnavailable(
+            f"review pack identifier alias authority unavailable ({type(exc).__name__}: {exc})") from exc
     from data_sheets_schema.profiles import for_record
+    from data_sheets_schema.constants.schemas import SCHEMA_FULL_PATH
     profile = for_record(record)          # the record's instrument, not the environment's (#1462)
     paths = record_paths(provenance)
     run = record.get("run") or {}
@@ -467,7 +503,10 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         #    asked about (no committed pack was at 5 under v1, so no bump)
         # 6: identifier flags come from the merged full schema (#948), whose
         #    compiler normalizes identifiers to required. `forced` is unchanged.
-        "pack_version": 6,
+        # 7: receipt joins and identifier origins/base-presence use one
+        # recorded/fallback resolver table; other schema consumers stay
+        # current and disclose that separate contract (#4291).
+        "pack_version": 7,
         "run": {"label": run.get("label"), "project": run.get("project"), "method": run.get("method"),
                 "condition": (((record.get("prompts") or {}).get("request") or {}).get("spec") or {}).get("condition")},
         # The path only: `review check --write` adds a block to this record,
@@ -477,6 +516,18 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                        "request_sha256": ((record.get("prompts") or {}).get("request") or {}).get("sha256")},
         "seed": seed,
         "schema": list(SCHEMA_FILES),
+        "identity_rules": identity_basis,
+        "schema_bases": {
+            "receipt_join_and_identifier_origins": "identity_rules: the run's resolver bases or its disclosed current fallback",
+            "id_class_flags": {"basis": "current implementation merged full schema",
+                               "path": str(SCHEMA_FULL_PATH)},
+            "reference_attributes": "current implementation Dataset digest",
+            "registry_labels": "current implementation registry vocabulary for the record's selected profile",
+            "pair_warnings": {"basis": "current implementation pair schemas and pair-consistency policy",
+                              "paths": list(PAIR_SCHEMAS),
+                              "historical_adjustments": "unchanged recorded-digest and pair_predates_current_schema rules"},
+            "receipt_exemptions": "released own-ID and carried-identifier exemption rules; independent of resolver aliases",
+        },
         "gaps": [],
     }
 
@@ -536,7 +587,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                 bundle_state = f"bundle drifted (recorded {recorded}, on disk {on_disk} at {bpath})"
             else:
                 bundle_text, bundle_state = raw.decode("utf-8", errors="replace"), "current"
-    id_entries, id_gap = (_id_slots(full_record, bundle_text=bundle_text) if full_record
+    id_entries, id_gap = (_id_slots(full_record, bundle_text=bundle_text, identifier_bases=identifier_bases) if full_record
                           else ([], "id slot flags unavailable: no full record"))
     pack["id_slots"] = {"entries": id_entries,
                         "bundle_state": bundle_state,
@@ -544,25 +595,26 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
                         # identifier for this dataset vs a third party's) can be
                         # made from the pack (round 2, note 7)
                         "record_id": full_record.get("id") if isinstance(full_record, dict) else None,
-                        "note": "Flags use the merged full schema; required includes the compiler's "
-                                "normalization of identifier slots. forced: the schema declares this "
+                        "note": "Class/required/forced flags use the current implementation's merged full schema; "
+                                "they do not establish what the historical run's schema required. "
+                                "required includes the compiler's normalization of identifier slots. "
+                                "forced: the current schema declares this "
                                 "class's id as an identifier or required, "
-                                "so the record could not omit the id given the object — it settles the id's "
-                                "presence, not the object's. origin (#901): minted is a urn or a fragment on "
-                                "the record's own id (in any form); constructed is a fragment on an "
+                                "so current validation requires the id given the object — it settles the id's "
+                                "presence, not the object's. origin/base_in_bundle use the separately disclosed "
+                                "identity_rules resolver basis. origin (#901): minted is a urn or a fragment on "
+                                "the record's own id (under those aliases and the released own-ID exemptions); "
+                                "constructed is a fragment on an "
                                 "identifier the record did not mint (base named; base_in_bundle says whether "
                                 "that base appears in the bytes the record read, as itself and not as the "
                                 "prefix of a longer URL, in its written or alias form; null when those bytes "
                                 "are not on disk — see bundle_state); stated is a reference used as written. "
-                                "The fragment rule is judged on minted AND constructed entries: the rule "
-                                "licenses a fragment on an identifier the evidence supplies, so a constructed "
-                                "id on this dataset's own attested identifier (its DOI, its landing page) is "
-                                "the licensed form and is judged exactly as a mint — a forced one never "
-                                "violates, an unforced one must be pointed at; one built on another entity's "
-                                "identifier (an organisation, a person, another dataset) is the false claim "
-                                "the identifier rule names; one whose base is not in the bundle is an "
-                                "unsupported reference under the evidence rules, and its fragment inherits "
-                                "that. stated entries are the evidence rules' business only. minted (boolean) "
+                                "Judge historical fragment instructions against the recorded instruction and "
+                                "its schema, for both minted and constructed entries. A current forced flag "
+                                "alone does not establish historical compliance. Establish from the evidence "
+                                "whether a constructed base belongs to this dataset or another entity; "
+                                "alias equality and literal base presence are not support judgments. "
+                                "stated entries are the evidence rules' business only. minted (boolean) "
                                 "is kept for packs that read it: it is origin == minted. resources[*].id is "
                                 "also consumed by `d4d derive core`'s projection."}
     if id_gap:
@@ -583,7 +635,8 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         pack["gaps"].append(ref_gap)
     pack["reference_attributes"] = {
         "entries": refs,
-        "note": "A class-ranged attribute that is not inlined is a reference: the record must hold a "
+        "note": "Under the current implementation's Dataset digest, a class-ranged attribute that is not "
+                "inlined is a reference: current validation requires a "
                 "string there (an inline object fails validation, #805), so a rule asking for the "
                 "class's declared fields does not apply to it — judge the string's support, not its shape."}
 
@@ -639,7 +692,7 @@ def build_pack(provenance: Path, instruction_file: Path | None = None,
         else:
             pack["receipt_join"] = {"basis": "index", "reason": "no phase-1 snapshot under intermediate/; "
                                                                 "receipt paths joined by index, not entry identity (#899)"}
-        claims = claim_receipts(receipt, full, original)
+        claims = claim_receipts(receipt, full, original, identifier_bases=identifier_bases)
         rc = record.get("receipts") or {}
         receipted = sorted(claims["slots"])
         rng.shuffle(receipted)

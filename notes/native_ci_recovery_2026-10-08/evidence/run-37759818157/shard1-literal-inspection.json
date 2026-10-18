@@ -1,0 +1,233 @@
+{
+  "case_artifact": {
+    "bytes": 530121,
+    "sha256": "f5092f972f34ebc1e8e78e27b1abc3227b9ba3305c0b9edc79e0ba57164e0f15"
+  },
+  "conclusion": "The saved test failure is a stream-change refusal at 253.860 seconds, not the registered 900-second deadline. The live summary reports tool4 pending; final saved transcript settles tool4 successfully and records the next tool5 request. Control decisions stop at tool4. The bytes alone do not establish the underlying cause.",
+  "control": {
+    "events": [
+      {
+        "at": "2026-10-08T09:59:56.853551+00:00",
+        "basis": null,
+        "kind": "initialize_sent",
+        "line": 1,
+        "tool_id": null
+      },
+      {
+        "at": "2026-10-08T10:00:11.164961+00:00",
+        "basis": null,
+        "kind": "initialize_ack",
+        "line": 2,
+        "tool_id": null
+      },
+      {
+        "at": "2026-10-08T10:00:54.965454+00:00",
+        "basis": "a registered input the instruction reads",
+        "kind": "decision",
+        "line": 3,
+        "tool_id": "shared-test-1"
+      },
+      {
+        "at": "2026-10-08T10:01:25.850206+00:00",
+        "basis": "a registered input the instruction reads",
+        "kind": "decision",
+        "line": 4,
+        "tool_id": "shared-test-2"
+      },
+      {
+        "at": "2026-10-08T10:01:55.457406+00:00",
+        "basis": "a registered input the instruction reads",
+        "kind": "decision",
+        "line": 5,
+        "tool_id": "shared-test-3"
+      },
+      {
+        "at": "2026-10-08T10:02:26.436083+00:00",
+        "basis": "exact selected native shared helper: chunk_check",
+        "kind": "decision",
+        "line": 6,
+        "tool_id": "shared-test-4"
+      }
+    ],
+    "pin": {
+      "bytes": 3951,
+      "sha256": "76e12687a2c3cfd2154714047d7abe1b7eeaa6f6eef9c2bd9fc011cd6674761c"
+    }
+  },
+  "controller_exitstatus": 1,
+  "format": "native_ci_literal_case_inspection_v1",
+  "junit_archive": {
+    "bytes": 54965,
+    "sha256": "1405d00408d25cb3e2ee927334ae3c0b85767e41fe4294dcc5d70e62b6ccefc7"
+  },
+  "junit_duration_matches_sum_of_pytest_phases_within_1ms": true,
+  "junit_failure_embedded_result_equals_archived_result": true,
+  "junit_seconds": "253.860",
+  "junit_totals": {
+    "errors": 0,
+    "failures": 1,
+    "skipped": 22,
+    "testcases": 2654
+  },
+  "junit_xml": {
+    "bytes": 659984,
+    "sha256": "849ca236bc78f87bfaac63423d3288e882500507db61fccdb5d3918e37d3dd8f"
+  },
+  "node_id": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+  "pr_head": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+  "result": {
+    "child_exit_code": null,
+    "first_stop": "native shared observation failed: ValueError: live native stream changed without appending bytes",
+    "live_pending_ids": [
+      "shared-test-4"
+    ],
+    "pin": {
+      "bytes": 12235,
+      "sha256": "96287c2ca7222d3feb70427e6fe21513197f4344e38081c405fb5c33d25bfb85"
+    },
+    "shutdown": {
+      "control_initialized": true,
+      "control_shutdown_complete": true,
+      "unfinished_control_workers": 0
+    },
+    "state": "failed"
+  },
+  "run_id": 37759818157,
+  "scope": "Literal inspection of verified saved bytes only; no extraction, native execution, helper execution or replay. Final capture may include bytes written after the live observer stopped. No causal or performance conclusion is inferred.",
+  "tested_merge": "cfe68ee650e3de0f775bd476f055f25c29eb7a72",
+  "transcript": {
+    "event_count": 16,
+    "pin": {
+      "bytes": 10099,
+      "sha256": "ca567cf3012c5a0867037a62db83ed50f67ab88ca1ca316763dce35ef71607af"
+    },
+    "tail_events": [
+      {
+        "event": {
+          "message": {
+            "content": [
+              {
+                "id": "shared-test-4",
+                "input": {
+                  "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli bundle chunk --bundle /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/authority/bundle.txt --chunk-manifest /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/authority/chunks.json --manifest /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/sources.yaml --check --strict"
+                },
+                "name": "Bash",
+                "type": "tool_use"
+              }
+            ]
+          },
+          "session_id": "43540000-0000-4000-8000-000000000001",
+          "type": "assistant"
+        },
+        "line": 12
+      },
+      {
+        "event": {
+          "request": {
+            "callback_id": "d4d_tool_policy_v3",
+            "input": {
+              "cwd": "/home/runner/work/data-sheets-schema/data-sheets-schema",
+              "effort": "high",
+              "hook_event_name": "PreToolUse",
+              "tool_input": {
+                "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli bundle chunk --bundle /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/authority/bundle.txt --chunk-manifest /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/authority/chunks.json --manifest /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/sources.yaml --check --strict"
+              },
+              "tool_name": "Bash",
+              "tool_use_id": "shared-test-4"
+            },
+            "subtype": "hook_callback"
+          },
+          "request_id": "callback-shared-test-4",
+          "type": "control_request"
+        },
+        "line": 13
+      },
+      {
+        "event": {
+          "message": {
+            "content": [
+              {
+                "content": "   \u2713 current /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/authority/chunks.json: 1 canonical chunks under the selected rule\n",
+                "is_error": false,
+                "tool_use_id": "shared-test-4",
+                "type": "tool_result"
+              }
+            ]
+          },
+          "session_id": "43540000-0000-4000-8000-000000000001",
+          "tool_use_result": {
+            "exitCode": 0,
+            "stdout": "   \u2713 current /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/authority/chunks.json: 1 canonical chunks under the selected rule\n"
+          },
+          "type": "user"
+        },
+        "line": 14
+      },
+      {
+        "event": {
+          "message": {
+            "content": [
+              {
+                "id": "shared-test-5",
+                "input": {
+                  "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli download scope --manifest /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/sources.yaml --project SYNTHETIC"
+                },
+                "name": "Bash",
+                "type": "tool_use"
+              }
+            ]
+          },
+          "session_id": "43540000-0000-4000-8000-000000000001",
+          "type": "assistant"
+        },
+        "line": 15
+      },
+      {
+        "event": {
+          "request": {
+            "callback_id": "d4d_tool_policy_v3",
+            "input": {
+              "cwd": "/home/runner/work/data-sheets-schema/data-sheets-schema",
+              "effort": "high",
+              "hook_event_name": "PreToolUse",
+              "tool_input": {
+                "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli download scope --manifest /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_correction_0/native26/sources.yaml --project SYNTHETIC"
+              },
+              "tool_name": "Bash",
+              "tool_use_id": "shared-test-5"
+            },
+            "subtype": "hook_callback"
+          },
+          "request_id": "callback-shared-test-5",
+          "type": "control_request"
+        },
+        "line": 16
+      }
+    ]
+  },
+  "verified_inventory_report": {
+    "bytes": 20764,
+    "sha256": "864703f6e394708168c971ba7369d8be08659c599f0b1b50377c53c447fe30fc"
+  },
+  "worker": "gw3/outcomes.json",
+  "worker_event": {
+    "capture_status": "retained",
+    "directory": "953c0abb6902046a535af38b4f1bb4a42368993dc8e0b56199dfba39b330c2fc",
+    "node_id": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+    "test_outcome": {
+      "call": {
+        "duration_seconds": 253.85863506700002,
+        "outcome": "failed"
+      },
+      "setup": {
+        "duration_seconds": 0.0009493530000099781,
+        "outcome": "passed"
+      },
+      "teardown": {
+        "duration_seconds": 0.00033177900002101524,
+        "outcome": "passed"
+      }
+    }
+  },
+  "worker_exitstatus": 1
+}

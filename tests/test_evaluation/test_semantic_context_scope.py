@@ -1,4 +1,4 @@
-"""Version-2 semantic output acceptance is tied to its input and context."""
+"""Current semantic output acceptance is tied to its input and context."""
 import copy
 import hashlib
 import json
@@ -27,12 +27,15 @@ def record(tmp_path, rubric, context=None):
     contract = evaluation_contract(rubric, specification, context, document)
     input_path.with_name("caller-context.yaml").write_text(yaml.safe_dump(context))
     result = _rubric10_record() if rubric == "rubric10" else _rubric20_record()
-    result.update(version="2.0", project="EXTERNAL_CLINICAL", method="manual",
+    result.update(version="3.0", project="EXTERNAL_CLINICAL", method="manual",
                   d4d_file=str(input_path), applicability_context=contract["context"],
                   evaluation_scope=contract["scope"],
                   metadata={"context_sha256": context_digest(contract["context"]),
                             "input_sha256": digest, "rubric_sha256": hashlib.sha256(raw).hexdigest(),
                             "instrument_sha256": hashlib.sha256((ROOT / f".claude/agents/d4d-{rubric}-semantic.md").read_bytes()).hexdigest()})
+    from data_sheets_schema.semantic_evidence_authority import authority_digest
+    result["metadata"]["evidence_authority_sha256"] = authority_digest()
+    result["semantic_analysis"]["issues_detected"] = []
     total = adjusted = excluded = 0
     for group in result["elements" if rubric == "rubric10" else "categories"]:
         points = cap = fixed = 0
@@ -42,7 +45,9 @@ def record(tmp_path, rubric, context=None):
             score = rule["fixed_max_score"] if rule["applicable"] else None
             item.update(name=rule["name"], applicable=rule["applicable"], applicability_status=rule["status"],
                         applicability_evidence=rule["evidence"], score=score,
-                        unit_scores=[{"path": unit["path"], "score": score, "evidence": "Synthetic fixture evidence"}
+                        unit_scores=[{"path": unit["path"], "score": score, "evidence": "Synthetic fixture evidence",
+                                      "cited": [{"path": "id"}] if score is not None else [],
+                                      "absent": [], "counts": [], "considered": []}
                                      for unit in contract["scope"]["units"]])
             if rubric == "rubric10":
                 item["item_id"] = key

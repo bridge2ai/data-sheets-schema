@@ -634,7 +634,7 @@ slots:
     annotations:
       # Form-only: docExample annotations reach the agentic runtime, which
       # reads the merged schema file (d4d-full-core.md warns it off them),
-      # and the previous value was a real DOI of an AI-READI licence record
+      # and the previous value was a real DOI of a dataset licence record
       # — a corpus fact whose copy-through would ground (#1126 review, S4).
       "d4d:docExample": "10.xxxxx/example.1234"
 

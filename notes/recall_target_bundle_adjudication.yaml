@@ -1,0 +1,318 @@
+# Hand adjudication of the recall-target bundles (#3289).
+#
+# Read by scripts/recall_target_baseline.py and rendered into
+# notes/recall_target_baseline.md; edit this file, never the note, and
+# regenerate. It answers one question the baseline's zeros leave open:
+# do the bundles state software versions, used software and parent
+# datasets that the records leave out (omission), or do they not state them
+# (a bundle fact)? It is a reading, not a measurement; what the script
+# measures against it is stated beside each table in the note.
+#
+# `chunks`: every lexical candidate (#2930) with a version or lineage cue,
+# keyed on the sha256 of the chunk text (the chunk manifests' `sha256`), so
+# a verdict applies to those bytes only. A candidate whose text has no entry
+# is listed in the note as not adjudicated; an entry no candidate matches is
+# listed as unmatched. Verdicts:
+#   software_version: none      -- the version cue is not a software version
+#                                  (a dataset release, a standard, DOI digits)
+#                     referent  -- a software version stated as used for the
+#                                  dataset the record describes
+#                     companion -- a software version stated for an analysis
+#                                  the bundle documents but does not say was
+#                                  applied to the referent's released data
+#                     cited     -- a versioned software citation with no
+#                                  stated use for the referent's release
+#   parent_dataset:   none | stated -- a dataset the referent is part of or
+#                                  derived from (`parent_datasets`,
+#                                  schema:isPartOf). Earlier releases are the
+#                                  same dataset (source manifest `scope`), and
+#                                  a biological or clinical source is lineage
+#                                  in text form, not a parent dataset (#1349).
+#
+# `facts`: each versioned software statement found in the four bundles,
+# searched in full, not only in the candidates: every line carrying a
+# version-shaped token ("v1.2", "v. 1.2", "(Version 1.2)", "version 1.2",
+# "Name 1.2") was read, and a citation of versioned software is a fact like
+# a use of it (review of #3534 found two the first reading missed). Not facts:
+# dataset releases, standards and schemas, licenses, database releases
+# (CORUM, HPA, BioPlex, NDEx), paper titles ("TorchAudio 2.1", "SciPy 1.0"),
+# a documentation repository's badge (Python 3.12.0) and the hosting
+# platform's own version in the CM4AI Dataverse pages' footers ("Powered by
+# v. 6.6 build ...", "v. 6.9"), which is the host's software, not the
+# releases'. `snippet` is verbatim from
+# the bundle (whitespace collapsed); the script checks it is in the bytes
+# each record hashed and looks for `names` with `version` in the record.
+# `scope` takes the software_version values above other than none.
+#
+# `bundles`: the answer per project, rendered as written.
+
+chunks:
+  - project: AI_READI
+    chunk: c006
+    sha256: [9fe57d4d18aa48262e4e78e98cb4aeafd59e86d9e5d387cecd70101751eb314e]
+    software_version: none
+    parent_dataset: none
+    reading: Reference list of the cohort paper; the version cue is the dataset citation "(1.0.0)".
+  - project: AI_READI
+    chunk: c010
+    sha256: [63f0ca137b46b84baaf9c437306825ad30b75d3df32fe559b9a3a0cc40a411af,
+             d8520f3776f2ea5dca181e1f1224de64dd84b1f6a5b13bff1bd265feed27d18a]
+    software_version: none
+    parent_dataset: none
+    reading: >-
+      Documentation page for dataset v2.0.0; every version cue is a dataset release (v1.0.0,
+      v2.0.0, v3.0.0), releases of the same dataset. The two texts differ only by a mojibake repair.
+  - project: AI_READI
+    chunk: c013
+    sha256: [69dad28786b9dafcc9ac40c06182185630bcf3f7994c7064a8085c398aa7a73b]
+    software_version: none
+    parent_dataset: none
+    reading: FAIRhub page listing dataset versions 1.0.0 to 3.0.0 with their DOIs.
+  - project: AI_READI
+    chunk: c023
+    sha256: [986c66138dfb783f08dbc5510d4ec61961ef168352ec83dce695a72d611d8083]
+    software_version: none
+    parent_dataset: none
+    reading: >-
+      RO-Crate subcrates; "version": "3.0.0" is the dataset release, and each subcrate's isPartOf
+      names the release itself, so the subcrates are parts of the referent, not its parents.
+  - project: AI_READI
+    chunk: c025
+    sha256: [86e8e9fdb79cf43023102e40a1116e0254ffe0521049502c1a8d2cadb67bbb65]
+    software_version: none
+    parent_dataset: none
+    reading: IRB application form; "derived from" is about cannabis products in a form question.
+  - project: CM4AI
+    chunk: c003
+    sha256: [9fbd71fc29fccba883d227d94b174b28cf1d5659ce2336fa105e1a064fb00703]
+    software_version: none
+    parent_dataset: none
+    reading: >-
+      Companion Nature paper on the U2OS cell map (the releases are MDA-MB-468 and KOLF2.1J);
+      names the Cell Mapping Toolkit without a version; "derived from" is about its findings.
+  - project: CM4AI
+    chunk: c004
+    sha256: [25765998c5dfdc5ea5ff6f79801d09f5de53d0bb3ed3baed615f902fe3701a48]
+    software_version: companion
+    parent_dataset: none
+    reading: >-
+      Companion paper methods: DIA-NN v.1.8.1.0, PyTorch v.2.0.1 and GPT-4 v.gpt-4-1106-preview
+      for the U2OS map. CORUM, STRING and HPA versions are reference inputs of that analysis;
+      "subset of" selects assemblies.
+  - project: CM4AI
+    chunk: c005
+    sha256: [54b97ebc1ccf405805052c8952ebccc8b0084cc145628130999c13580b1b72a1]
+    software_version: companion
+    parent_dataset: none
+    reading: >-
+      Companion paper methods: transformers v.4.29.2, scipy v1.7.3, numpy v.1.21.6, MutSigCV
+      v.1.4 and IMP v.2.18 for the U2OS map; "derived from" is about AlphaFold-Multimer restraints.
+  - project: CM4AI
+    chunk: c006
+    sha256: [30baa79daf339fed899fa82040bc326ae8451093b2582be26b69a91e7e3ffcf9]
+    software_version: none
+    parent_dataset: none
+    reading: Companion paper references; the version cue is the digits of a bioRxiv DOI.
+  - project: CM4AI
+    chunk: c013
+    sha256: [152f308ffd98279bf3d4b6c75c60487a405450804bf42efea17922535bc220a9]
+    software_version: none
+    parent_dataset: none
+    reading: Preprint references; the version cues are bioRxiv DOI digits.
+  - project: CM4AI
+    chunk: c020
+    sha256: [147a4351b49f6975821dd04531dd6b7c69a9c590f658cd96755c5f95d647b5af]
+    software_version: none
+    parent_dataset: none
+    reading: >-
+      Dataverse June 2025 release page; "Version 2.1" is the Dataverse version. "Derived from
+      commercially available de-identified human cell lines" is a biological source (text-form
+      lineage), and the provenance cues name provenance-graph files, whose content is not in the bundle.
+  - project: CM4AI
+    chunk: c021
+    sha256: [ef8c0922455b505853a6842c2dae4177d887f8a5c282534408493a090229631a]
+    software_version: none
+    parent_dataset: none
+    reading: Dataverse release page; version cues are bioRxiv DOI digits; the cell-line sentence as in c020.
+  - project: CM4AI
+    chunk: c024
+    sha256: [3cb935d02f07490102ae9cd674498b1106c8fac7a2abcbfbf573dc53bc4f880b]
+    software_version: none
+    parent_dataset: none
+    reading: Dataverse release page; as c021.
+  - project: CM4AI
+    chunk: c027
+    sha256: [170c8aebadaf66e50a385cfcb1be8e49f7650fdf67287eacdafc2c134ae1e2e2]
+    software_version: none
+    parent_dataset: none
+    reading: Dataverse June 2026 release page; as c021.
+  - project: VOICE
+    chunk: c003
+    sha256: [ea3c76a6af36389619426d2d34f0004f5dff562e6195c5c2d44a3e9f1f84cd68]
+    software_version: none
+    parent_dataset: none
+    reading: Feasibility paper tables and references; version cues are DOI digits, "derivation" a cited title.
+  - project: VOICE
+    chunk: c017
+    sha256: [3ae0a74407197ca8e006f69afef7b4ece64f2bcd5c88230107a23681fb69a877]
+    software_version: referent
+    parent_dataset: none
+    reading: >-
+      PhysioNet v3.0.0 page: "This release was generated with b2aiprep v3.0.0." The other version
+      cues are release notes, the REDCap instrument deposit (v3.23.0) and paper titles; "derived
+      from" describes features computed from the raw audio, lineage inside the dataset.
+  - project: VOICE
+    chunk: c021
+    sha256: [9054f042c02bdbc8ab6fd884f14b1049dd4a198e964a2a01cfb371641c5ff0c2]
+    software_version: cited
+    parent_dataset: none
+    reading: >-
+      The pediatric dataset's page, a related-but-distinct dataset (source manifest scope): its
+      references cite the Bridge2AI Data Processing Library (Version 3.0.0).
+
+facts:
+  - id: voice-b2aiprep-3.0.0
+    project: VOICE
+    scope: referent
+    names: [b2aiprep]
+    version: 3.0.0
+    snippet: This release was generated with b2aiprep v3.0.0.
+    reading: >-
+      The adult release pages for v3.0.0 and v3.1.0 both state it, and both cite the "b2aiprep library
+      (Version 3.0.0)" in their references.
+  - id: voice-redcap-3.23.0
+    project: VOICE
+    scope: cited
+    names: [Bridge2AI Voice REDCap, bridge2ai-redcap]
+    version: 3.23.0
+    snippet: Bridge2AI Voice REDCap (v3.23.0)
+    reading: A reference to the Zenodo deposit of the REDCap instruments; no stated use for the release.
+  - id: voice-redcap-3.20.0
+    project: VOICE
+    scope: cited
+    names: [Bridge2AI Voice REDCap, bridge2ai-redcap]
+    version: 3.20.0
+    snippet: Bridge2AI Voice REDCap (v3.20.0)
+    reading: >-
+      The v1.1 page's reference to an earlier Zenodo deposit of the REDCap instruments, in the same
+      reference list as the b2aiprep 0.21.0 citation; no stated use for the release.
+  - id: voice-pediatric-data-processing-library-3.0.0
+    project: VOICE
+    scope: cited
+    names: [Bridge2AI Data Processing Library]
+    version: 3.0.0
+    snippet: Bridge2AI Data Processing Library (Version 3.0.0)
+    reading: >-
+      The pediatric dataset's page (c021) cites the b2aiprep repository under this title. The
+      pediatric dataset is related but distinct, so the citation is not the referent's; a record
+      naming b2aiprep 3.0.0 is counted under voice-b2aiprep-3.0.0, and this row counts the title.
+  - id: voice-b2aiprep-0.21.0
+    project: VOICE
+    scope: cited
+    names: [b2aiprep, My Research Software]
+    version: 0.21.0
+    snippet: My Research Software (Version 0.21.0)
+    reading: The v1.1 page's reference to the b2aiprep repository; v1.1 is an earlier release.
+  - id: ai-readi-fairscape-1.2.1
+    project: AI_READI
+    scope: referent
+    names: [FAIRSCAPE, fairscapeVersion]
+    version: 1.2.1
+    snippet: '"fairscapeVersion": "1.2.1"'
+    reading: The root RO-Crate records the FAIRSCAPE version that packaged the metadata, not a processing step.
+  - id: cm4ai-dia-nn-1.8.1.0
+    project: CM4AI
+    scope: companion
+    names: [DIA-NN]
+    version: 1.8.1.0
+    snippet: searched on DIA-NN (v.1.8.1.0)
+    reading: SEC-MS search for the U2OS map in the companion paper.
+  - id: cm4ai-pytorch-2.0.1
+    project: CM4AI
+    scope: companion
+    names: [PyTorch]
+    version: 2.0.1
+    snippet: provided by Pytorch 74 v.2.0.1
+    reading: Model training for the U2OS map.
+  - id: cm4ai-gpt-4-1106-preview
+    project: CM4AI
+    scope: companion
+    names: [GPT-4]
+    version: gpt-4-1106-preview
+    snippet: GPT-4 model 27 (v.gpt-4-1106-preview)
+    reading: Assembly naming for the U2OS map.
+  - id: cm4ai-transformers-4.29.2
+    project: CM4AI
+    scope: companion
+    names: [transformers]
+    version: 4.29.2
+    snippet: transformers package 85 (v.4.29.2)
+    reading: Name-similarity step of the U2OS annotation reproducibility test.
+  - id: cm4ai-scipy-1.7.3
+    project: CM4AI
+    scope: companion
+    names: [scipy]
+    version: 1.7.3
+    snippet: Python package scipy (v1.7.3)
+    reading: Cancer-assembly density estimate in the companion paper.
+  - id: cm4ai-numpy-1.21.6
+    project: CM4AI
+    scope: companion
+    names: [numpy]
+    version: 1.21.6
+    snippet: Python package numpy (v.1.21.6)
+    reading: Same analysis as scipy.
+  - id: cm4ai-mutsigcv-1.4
+    project: CM4AI
+    scope: companion
+    names: [MutSigCV]
+    version: '1.4'
+    snippet: MutSigCV v.1.4
+    reading: Mutation analysis of the pediatric cancer cohort in the companion paper.
+  - id: cm4ai-imp-2.18
+    project: CM4AI
+    scope: companion
+    names: [Integrative Modeling Platform, Integrative Modelling Platform, IMP]
+    version: '2.18'
+    snippet: Integrative Modeling Platform (IMP) package version 2.18
+    reading: >-
+      The project preprint's structure modelling, which it calls exploratory ("We are currently
+      exploring the feasibility"); the companion paper states the same version for the U2OS map.
+
+bundles:
+  - project: AI_READI
+    software_version: >-
+      No processing software is stated with a version. The one software version is FAIRSCAPE 1.2.1,
+      recorded in the RO-Crate as the metadata packager. Every other version cue is a dataset release,
+      a standard (CDS v0.1.1) or a license version. Software named without a version: the OMOP Data
+      Quality Dashboard, REDCap and the MoCA Duo app.
+    parent_dataset: >-
+      None. Versions 1.0.0 and 2.0.0 are earlier releases of the same dataset, and the subcrates are
+      its parts.
+  - project: CHORUS
+    software_version: >-
+      None. The bundle's only version-like tokens are a row count ("1.6 Billion") and a license
+      (Apache-2.0). Software named without a version: the OHNLP toolkit, the OHDSI tool stack and the
+      chorus-ai GitHub repositories.
+    parent_dataset: >-
+      None. The bundle names clinical source systems (EHR, PACS, bedside monitors, EEG databases),
+      which is lineage in text form (#1349).
+  - project: CM4AI
+    software_version: >-
+      Every stated software version belongs to the companion U2OS analyses (the Nature paper and the
+      preprint's exploratory structure modelling), not to the releases' processing; recording one as
+      the releases' software would move a fact across scope. Software named for the releases without a
+      version: FAIRSCAPE and the MuSIC/Cell Mapping Toolkit pipeline. The Dataverse pages' footers give
+      the hosting platform's version (v. 6.6, v. 6.9), the host's software, not the releases'.
+    parent_dataset: >-
+      None. The releases are "derived from commercially available de-identified human cell lines", a
+      biological source; the lineage graphs are files the bundle names but does not contain.
+  - project: VOICE
+    software_version: >-
+      One: b2aiprep v3.0.0 generated the v3.0.0 and v3.1.0 releases. Tools named without a version:
+      openSMILE, Praat, parselmouth, torchaudio, sparc, ppgs, Whisper Large and SenseLab. "TorchAudio
+      2.1" is a paper title, BIDS v1.9.0 a standard, and Python 3.12.0 a badge on the documentation
+      repository.
+    parent_dataset: >-
+      None. The pediatric dataset is related but distinct (source manifest scope), and the features
+      are derived from raw audio inside the dataset.

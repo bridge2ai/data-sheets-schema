@@ -1,0 +1,998 @@
+# Selected shared-generation playbook v2
+
+This immutable view belongs only to shared_generation_v1. It does not replace
+the unversioned playbook. The initial supported executor is the registered API
+controller, which sends its adapted rules inline; native/direct use requires a
+separately reviewed adapter and explicit runtime registration. This document
+does not authorize a native launch or reading another run's outputs.
+
+Generate paired full D4D and D4D-core records for the projects the selected
+source manifest declares, using a model-neutral, schema-grounded agent workflow
+with four ordered phases:
+
+1. Generate the full D4D directly from the input documents, writing its
+   coverage receipt as you read.
+2. Derive D4D-core from the validated full D4D (one command, no model).
+3. Audit the full record against the current sources and provenance boundary;
+   the core is its projection and is not audited as a second source.
+4. Re-derive the core, run the deterministic checks and the semantic review
+   the pair checker asks for, report, and repair.
+
+Phases 3 and 4 are required for production runs. Write a reconciliation report
+even when no discrepancies are found. Run the requested phases for every
+project the selected manifest declares (`d4d download list-projects`) unless
+the user names specific ones.
+
+Before any phase, read and enforce
+`.claude/agents/d4d-provenance-guard-v2.md`.
+
+Two execution modes are supported:
+
+- **Independent mode:** one fresh agent context for Phase 1; the
+  orchestrator runs Phase 2 (a command, no agent), Phase 3 and Phase 4.
+- **Four-phase project-agent mode:** one project agent runs full generation,
+  core derivation, source/provenance audit, and re-derivation with checks
+  sequentially. Phase 2 must still wait for a validated Phase 1 file; its
+  only input is that file.
+
+### Phase artifacts are snapshots; resume by artifact, not by memory
+
+In independent mode each phase's on-disk artifact is its snapshot, exactly as
+the API runner's progress file treats its phases. A relaunched run under the
+**same version label** must skip any phase whose artifact already exists and
+passes its validation commands, and record that under `phases_skipped` — the
+same field the API path's resumed runs carry. Two rules make this safe:
+
+- **Skip on validated artifact only.** An artifact that exists but fails
+  validation is a phase that did not complete; re-run the phase rather than
+  repairing the artifact in place, because a half-written file repaired by a
+  later phase has no phase that attests it. Phase 1 has two artifacts and
+  two validations: the full YAML (schema and term validation) **and** the
+  coverage receipt (`d4d receipts check --strict`, which needs no record).
+  A receipt with 10 of 28 entries is a Phase 1 that did not complete, however
+  valid the YAML beside it; resume Phase 1 from the first chunk the receipt
+  lacks, never skip it.
+- **Never resume across labels.** An artifact under another label is another
+  run's output; reading it is the prior-D4D leak the evidence boundary
+  prohibits, whether or not the bytes would be identical.
+
+## Arguments
+
+- `$ARGUMENTS`: optional project name(s), and/or an output version label.
+- Output version label: `{YYYY-MM-DD}_{provider-model-settings}` (for example,
+  `2026-07-23_claude-opus-4.6-high` or
+  `2026-07-23_gpt-5.6-sol-ultra-fast`). If not given, construct it from today's
+  date and the selected model. All outputs for one run use the exact same label.
+- Never overwrite a populated version directory, **with one exception**:
+  resuming an incomplete run of the same label per the snapshots section above
+  writes that run's remaining phases into its own directory — that is
+  completion, not overwriting. A *complete* run is never resumed; for another
+  run with the same date and model, append `-r2`, `-r3`, and so on.
+- `-r{N}` means a **revision** (changed pipeline), not a replicate. For repeated
+  samples of the *same* procedure, use `_rep{N}`; `d4d runs list` reports the two
+  differently because runs that differ in procedure are not comparable as
+  samples.
+
+Header substitution fields used below:
+
+| Field | Meaning |
+|---|---|
+| `{RUNTIME}` | what is executing, exactly as the launch instruction header states it — `Claude Code`, `Claude Code (direct)`, `Claude API (direct)`, `Codex CLI`; never shorten one to another |
+| `{PROVIDER}` | exactly as the launch instruction header states it — `Anthropic`, `Anthropic (Claude subscription, direct)`, `OpenAI`, or the proxy actually reached |
+| `{MODEL}` | the model identifier the request carries |
+| `{EFFORT}` | reasoning effort, where the runtime exposes one |
+| `{MODE}` | `four-phase project agent` or `independent` |
+| `{CONDITION}` | `generic` or `tuned` — see Prompt Conditions below |
+| `{PROMPT_PATHS}` | the resolved prompt file(s) this run was launched with |
+| `{METHOD}` | output method directory, e.g. `claudecode_agent` |
+
+Substitute these; never leave a literal `{...}` in a written record, and never
+carry over a value from a different runtime. Records once shipped headed
+`Agent runtime: Claude Code` on `claude-opus-5[1m]` from a run that touched
+neither, because a prompt written for one path was reused verbatim by another.
+
+## Inputs (per project)
+
+- Source documents: `data/preprocessed/concatenated/{PROJECT}_preprocessed.txt`
+  (selected by `data/preprocessed/source_manifest.yaml`; run
+  `make validate-preprocessing` first if inputs were re-downloaded)
+- Full schema: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` (class `Dataset`)
+- Core schema: `src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml` (class `CoreDataset`)
+
+### Scope: what the record is about
+
+The bundle is the evidence. What the record is *about* is declared in the
+`scope:` block of `data/preprocessed/source_manifest.yaml` — the referent, and
+any dataset that is related to it but distinct from it, with the slot that
+carries the relation. Read it with `d4d download scope --project {PROJECT}`.
+
+**A scope constraint goes in the manifest, never in the launch text.** One run
+was once sent a paragraph naming the project, a companion dataset, a file not
+to read, and the issue number of the last time it went wrong (#422). It worked,
+and it was per-dataset adaptation invisible to every prompt test, because it
+lived in the message rather than in a file. If a run
+seems to need a constraint the bundle and the manifest cannot express, that is a
+manifest bug — fix it there, where the next dataset inherits it.
+
+A bundle may legitimately contain sources *about* a related dataset; when it
+does, the manifest says so (`in_bundle: <source id>` on the related dataset).
+Represent the relation through the declared slot — `related_datasets` — rather
+than merging the two, and never as a nested object standing in for the other
+dataset's own record. `d4d download scope --check` verifies afterwards that no
+record identifies itself as a dataset its project declares distinct.
+
+## Outputs (per project)
+
+- Full: `data/d4d_concatenated/claudecode_agent/{VERSION}/{PROJECT}_d4d.yaml`
+- Core: `data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_d4d_core.yaml`
+- Required production reconciliation report:
+  `data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_reconciliation.md`
+- Required coverage receipt (#708/#709), written during Phase 1:
+  `data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_coverage_receipt.yaml`
+
+Never overwrite a previous version's directory; a new run gets a new `{VERSION}`.
+
+## Factual Evidence Boundary
+
+The current source bundle and manifest are the factual source of truth. Schema
+files define structure, not dataset facts.
+
+The schemas are the sole structural authority. Full structure comes from class
+`Dataset` in `data_sheets_schema_all.yaml`; core structure comes from class
+`CoreDataset` in `data_sheets_schema_core_all.yaml`. Resolve inherited slots,
+class ranges, required fields, cardinality, inlining, `slot_usage`, and enums
+from those schemas. No prior YAML or embedded documentation example may supply
+or override structure.
+
+- Phase 1 must not read any prior generated full or core D4D.
+- Phase 2 may read only the exact Phase 1 full D4D from the same version label.
+- Phase 2 must not read an older core, even as a template.
+- Phase 3 may read only the current source bundle, manifest, schemas, the
+  same-run full/core pair, and that run's coverage receipt, whose entries a
+  Phase 3 back-port edits in place.
+- Phase 4 may read only the same Phase 3 inputs plus the Phase 3 audit findings
+  for that exact pair.
+- A fact found only in older generated YAML must be omitted.
+- Historical source documents remain allowed when the current manifest
+  explicitly selects them.
+
+Before launching an agent, the orchestrator may inspect output directory names
+only to choose a new version label. Do not put older D4D contents into an agent's
+context.
+
+### The one exception: derivation, which is not generation
+
+The rules above govern **generation** — producing a record from source documents.
+They exist to stop a fact with no evidence behind it migrating from an old record
+into a new one, acquiring apparent support on the way.
+
+A **derived** record is a different operation and the rules do not apply to it,
+because the failure they prevent cannot occur:
+
+- It consumes generated records *as its declared inputs*, not as a shortcut
+  around evidence. Reading them is the operation, not a leak into it.
+- It introduces no new facts. Every value in a derived record was already in a
+  contributing record; a merge selects and combines, it never asserts.
+- Its provenance says so. `record_mode: derived` names every contributing record
+  by md5 and states the rule that combined them, so what it consumed is
+  checkable rather than hidden — which is exactly what the boundary above is
+  protecting.
+
+Conditions, all of which must hold:
+
+1. **A generation phase may never derive from other runs.** Phases 1–4 remain
+   bound by the rules above without exception (Phase 2's projection of this
+   run's own full record is not this kind of derivation — see Phase 2). Derivation
+   from *other runs* happens after a set of complete runs exists, as a separate
+   operation with its own method directory.
+2. **Only complete, attested runs may contribute.** A partially-attested run
+   cannot be placed, so combining it would produce a record whose inputs cannot
+   be established. See `attestation()` in `runs.py`.
+3. **The output is written under a distinct method**, never into a contributing
+   run's directory, so a derived record can never be mistaken for a generated
+   one or re-consumed as if it were.
+4. **A derived record may not contribute to another derived record.** Chained
+   merges make the source md5s an incomplete account of what the content came
+   from, and the provenance stops being checkable in one step.
+5. **A derived record is not a replicate.** It must not enter agreement or noise
+   figures: it is an order statistic over the runs being measured, so including
+   it would bias the very variance it was built from.
+
+Anything that does not meet all five is generation, and is bound by the rules
+above.
+
+## Prompt Conditions and Priming
+
+Every run belongs to exactly one prompt condition, and the record must say which.
+Conditions come in two families, and the **generic** family has several
+versions. `d4d api prompts check` lists the registered prompt files, and
+`CONDITION_PROMPTS` in `src/data_sheets_schema/api_runner.py` is the registry
+they are derived from — read it rather than trusting a list written here, which
+is how this section came to claim only two conditions existed long after
+`generic_v2` through `generic_v5` were registered (#603).
+
+- **generic**, `generic` (v1) and every `generic_vN` the registry names
+  (`CONDITION_PROMPTS`; read the registry, not this line). Every project and
+  every arm receives *the exact text of that version*; only mechanical fields
+  are substituted (project, arm, method, bundle, label, runtime, provider,
+  model). Nothing in any of them is specific to a project, dataset, or input
+  set. Each version is its predecessor plus one marked block, so a run must
+  name **which** version it used.
+- **tuned** — `src/download/prompts/d4d_tuned_arm_prompt.md` plus the project's
+  component file in `src/download/prompts/components/{PROJECT}.md`. Carries
+  project-specific and input-set-specific content deliberately.
+
+The difference between generic and tuned is what the prompt-condition study
+measures, so **adding a project-specific sentence to any generic version
+silently creates a new condition and destroys the comparison.**
+
+### The priming taxonomy
+
+Four kinds of statement can be added to a generation prompt. They are not
+equivalent, and only the first two are ever acceptable:
+
+| kind | example | generic | tuned |
+|---|---|---|---|
+| **decision rule** | "prefer omission over inference" | ✅ if applied to every project identically | ✅ |
+| **factual disambiguation** | "this bundle describes a release program, not one release" | ❌ project-specific | ✅ |
+| **quality warning** | "earlier runs conflated two entities here" | ❌ | ⚠️ steers behavior; avoid |
+| **outcome expectation** | "expect roughly 60 populated slots" | ❌ | ❌ **never, in any condition** |
+
+Outcome expectations are excluded from *both* conditions. They tell the model
+what answer to produce rather than what the evidence is, so a record generated
+under one cannot be read as evidence about the evidence.
+
+`-deprimed` is **not** a third supported condition. It names the 2026-07-28
+series that removed outcome expectations but retained per-project factual notes,
+making it neither generic nor tuned. Those runs are retained under that label for
+the record; do not create new ones.
+
+### Uniform decision rules (all conditions, all projects)
+
+**Read `.claude/commands/d4d-uniform-rules-v2.md` and enforce every rule in it.**
+It is the single copy; this section deliberately does not restate them, because
+a second copy is what #563 was filed about.
+
+### Recording the condition
+
+Both file headers carry a `# Mode:` line naming the condition and a `# Prompt:`
+line naming the resolved prompt file(s) — see the header blocks below. A record
+that does not name its prompt condition cannot be placed in the study, and a run
+launched without one of the registered prompt files is neither condition; say
+so in the provenance `notes` rather than picking a label.
+
+## Runtime Cases
+
+### Claude Code
+
+- Use fresh Task/subagent contexts.
+- Either launch one project agent that performs all four phases sequentially,
+  or launch fresh phase agents with exact-path handoff.
+- Explicitly tell each agent that prior D4D content from the parent conversation
+  is forbidden evidence.
+- Record the `Agent runtime`, `Provider` and `Model` lines exactly as the launch
+  instruction header states them; the header is rendered for the runtime and
+  provider that actually run you, and two Claude Code arms differ only there.
+
+### Codex / GPT
+
+The following launch instruction is for the outer orchestrator only. A worker
+already running in the fresh Codex context must execute its assigned phases
+directly and must not recursively invoke `codex`.
+
+Before launching, resolve the exact model slug, supported reasoning effort, and
+speed tier from the installed Codex model catalog. Preserve the user's requested
+labels when the catalog supports them; do not silently map `ultra` to another
+effort. Set `MODEL` and `EFFORT` to those exact values, then invoke each
+generation pass with:
+
+```bash
+MODEL="gpt-5.6-sol"
+EFFORT="ultra"
+
+codex -a never exec -m "$MODEL" \
+  -c "model_reasoning_effort=\"$EFFORT\"" \
+  -c 'service_tier="priority"' \
+  --enable fast_mode \
+  -s workspace-write -C "$PWD" "<PASS-SPECIFIC PROMPT>"
+```
+
+The values above are the GPT-5.6-Sol ultra-fast profile used on 2026-07-23.
+For another run, replace them only with values reported as supported by the
+current local model catalog. Omit `service_tier="priority"` and `fast_mode`
+unless the selected model supports the fast tier.
+
+For independent mode, use one fresh `codex exec` invocation per project for
+Phase 1 and run Phases 2–4 from the orchestrator with exact-path handoff. For four-phase
+project-agent mode, use one invocation per project and enforce explicit phase
+gates. In either mode, Phase 2 must begin only after Phase 1 has produced and
+validated the full YAML.
+
+The prompt must name the exact allowed paths and state:
+
+> Do not search or read any prior D4D output. The only generated YAML you may
+> read is the exact same-run full/core path allowed for the current phase.
+
+Record `Agent runtime: Codex CLI`, `Provider: OpenAI`, the exact model,
+reasoning effort, and mode.
+
+## Phase 1 - Full D4D from input documents
+
+**Phase 1 is a receipt protocol, not a reading instruction.** The API path
+has every byte of the bundle in context on every call; this path reads it
+through a file tool, and the 2026-08-24 arm's agents never opened roughly a
+fifth of most of the bundles (#700). "Read the whole bundle" was the
+rule; nothing could tell laziness from compliance. So the reading now leaves
+a mark a validator counts (#708, `notes/receipts_pattern_2026-08-27.md`):
+
+1. **Read the chunk manifest first**:
+   `data/preprocessed/chunks/{PROJECT}_chunks.yaml` (`d4d bundle chunk
+   --check --project {PROJECT}` must say `current`; if it does not, stop —
+   the bundle and its manifest disagree and nothing you write can be
+   anchored). It lists every chunk with its `id` and `lines: [start, end]`,
+   sized to fit one file-tool call.
+2. **For each chunk, in manifest order:** read it with the **file-reading
+   tool** (`Read` with `offset: start` and `limit: end - start + 1`; a
+   chunk read in several smaller windows counts as opened once they cover
+   it) — never
+   through a shell (`sed -n`, `cat`, `head`): the transcript cross-check
+   counts file-tool windows only, and a shell read is honest but invisible
+   to it, so it is recorded as a chunk you claimed without opening. **A read
+   that errors is unread**: re-read that range in smaller windows before
+   writing the entry.
+3. **Write the chunk's coverage-receipt entry before reading the next
+   chunk** — where the reading happens, not reconstructed at the end — into
+   `{PROJECT}_coverage_receipt.yaml` (path under Outputs), which begins
+   with the manifest's `bundle_md5`. One entry per chunk, a closed status,
+   each with its predicate:
+   - `extracted` with `extracted: [{slot, snippet}, …]` — the record slot
+     path the fact fills (`funders[0].grant_id`, or an entry path such as
+     `funders[0]` when one passage attests a whole entry) and a **verbatim**
+     snippet from *this* chunk of at least 8 characters after normalization
+     per `...`-separated part (a grant number or an identifier qualifies; a
+     short common word does not attest a value and is reported separately);
+   - `redundant_with: [chunk ids]` — relevant, but every fact it holds is
+     already receipted from those chunks;
+   - `nothing_relevant` with a `reason`;
+   - `duplicate_of: <chunk id>` — the same content as another chunk.
+   Write every `snippet` and `reason` as a double-quoted YAML string,
+   escaping `"` and `\` inside it: source text often holds `: `, a
+   trailing colon or ` #`, which unquoted YAML reads as a mapping or a
+   comment, and the whole receipt then fails to parse.
+   Write the entry with the file-writing tool (`Write`, or an edit of the
+   receipt file; read a file before rewriting it whole, as the tool
+   requires), never with a shell redirect or `cat >>`: the native
+   allowlist denies the shell form, and a denied append leaves the chunk
+   unreceipted. **Every manifest chunk gets an entry, including the last
+   ones**: a chunk you read but never receipted is a chunk the validator
+   counts as unreviewed, and the run fails on it.
+4. Only then extract into the record. Search (`grep`) is for re-finding a
+   passage you have already receipted, never a substitute for a chunk entry.
+   Do not build your own schema digest with ad-hoc scripts or write scratch
+   files outside the run's directories: the schema files named under
+   Inputs and `d4d prompt render` are the instrument, and a scratch script
+   is a denied call that buys nothing.
+5. **Before Phase 2 — not optional, and not deferred to the end of the
+   run** — run `poetry run d4d receipts check --label {VERSION}
+   --project {PROJECT} --strict` (under a launch instruction, run the
+   instruction's own spelling of it; see "Registered commands take
+   precedence" below) and do not begin Phase 2 until it reports
+   every manifest chunk reviewed. No provenance record exists yet; the
+   command then reads the bundle named in the full record's `# Source
+   bundle:` header as it is on disk (pass `--bundle` if the header is not
+   written yet). It is re-run with `--write` after the record step, which
+   is what puts the block in the record. It must exit successfully under the
+   registered receipt floors. These gate unreviewed chunks, mismatched or
+   unchecked snippets, addressing slips above the registered tolerance,
+   vacuous receipts and other gated findings. Short unattesting snippets,
+   incomplete slot coverage, value-token overlap and attribution diagnostics
+   are reported separately; not every diagnostic is a strict failure. A
+   populated slot whose receipt you cannot name is one to re-examine, not one
+   to pad. The validator cannot tell that a
+   `nothing_relevant` chunk truly had nothing, or that a real snippet
+   supports the value it sits under — those stay review work, made specific
+   by chunk id and slot path.
+
+   A failed Phase 1 receipt check may be corrected before Phase 2. Correct
+   this run's receipt syntax, addresses, dispositions or source quotations
+   using the registered chunks already read, retaining an entry for every
+   chunk. Corrections do not repair missing initial read/write order or
+   authorize a different bundle. Preserve the original writes, failures and
+   corrections in the transcript. Re-run the same strict receipt check after
+   any full-record or receipt change; a previous pass is then stale. Re-run
+   schema and term validation when the full record changed. Do not derive the
+   core while the receipt check is pending or failing. Operators must not
+   rewrite measured artifacts after the attempt to make them pass.
+
+   This Phase 1 correction loop does not authorize continuation after a
+   terminal Phase 3/4 evidence or source-review failure, or after a controller
+   or ledger stop. Preserve the rejected audit and originals unchanged.
+
+The launcher still records what you actually opened (`bundle_lines_read`)
+and, with the receipt, which reviewed chunks the transcript never opened
+(`receipt_chunks_unopened`); a receipt that claims a chunk no window covers
+is the cheap cheat this protocol exists to make deliberate.
+
+Follow the method in `.claude/commands/d4d-agent-v2.md` (read it first). Summary of the
+non-negotiables:
+
+1. Derive and constrain structure directly from class `Dataset` in the full
+   schema. Follow inherited slots, class ranges, required fields, cardinality,
+   inlining, `slot_usage`, and enums. Do not read a prior D4D example or assume
+   a nested-object shape.
+2. Extract exact field names from the schema; `d4d:docExample` annotations are
+   illustrations, not defaults — every value must come from the source documents.
+3. Extract per the checklist in `d4d-agent-v2.md` (identity, creators, purpose, tasks,
+   composition, collection, preprocessing, distribution, licensing, maintenance,
+   access, funding, ethics, uses, limitations).
+4. Validate (NON-SKIPPABLE, fix and re-run until clean):
+   ```bash
+   poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset <full_file>
+   poetry run linkml-term-validator validate-data <full_file> \
+     --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
+     --target-class Dataset
+   ```
+
+File header:
+```yaml
+# D4D Datasheet for {PROJECT} Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: {RUNTIME}
+# Provider: {PROVIDER}
+# Model: {MODEL}
+# Reasoning effort: {EFFORT}
+# Mode: {MODE}, {CONDITION} prompt
+# Prompt: {PROMPT_PATHS}
+# Source bundle: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt
+# Source manifest: data/preprocessed/source_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: unknown (not observed from the agent runtime)
+# Generated: {DATE}
+```
+
+In independent mode, the Phase 1 agent writes the full YAML and the coverage
+receipt, nothing else. It must not create a core record.
+
+## Phase 2 - D4D-core derived from the full D4D
+
+**The core is derived, not generated (#694).** `CoreDataset` is a subset of
+`Dataset`; on the 2026-08-24 arm a deterministic projection reproduced 98.5%
+of every generated core's slot values and the rest was the two core-only
+slots. Generating it was where the API arm's pair errors came from. So Phase
+2 is one command, run on the validated Phase 1 file, and involves no model
+judgment:
+
+```bash
+poetry run d4d derive core \
+  --full data/d4d_concatenated/claudecode_agent/{VERSION}/{PROJECT}_d4d.yaml \
+  --out  data/d4d_concatenated/claudecode_agent_core/{VERSION}/{PROJECT}_d4d_core.yaml
+```
+
+It copies every schema-identical shared slot, projects `resources` by id,
+builds `distributions` from `file_collections` and their `File` entries over
+the slots the classes share, derives `dialect` only where every file agrees
+on one, writes the core header from the full record's, and validates the
+result. A derived core that fails validation means the *full* record carries
+a shape the core schema rejects — fix the full record and re-derive; never
+edit the core by hand, because Phase 4 re-derives it anyway. Record the
+phase as `derive_core`. Print the JSON the command emits into the
+reconciliation report; the provenance recorder needs nothing else, the API
+path records the same facts under `core_derivation`.
+
+**Where the pinned condition text says otherwise, derivation wins.** The
+generic ≤ v5 prompts predate #694: they describe "Phase 2 core generation"
+and mandate a CORE HEADER BLOCK reading `schema-grounded agentic, phase 2`
+with `Sources: {bundle} + {full}`. Under those conditions the derived
+header (`derived by projection from the full record (#694)`,
+`Sources: {full}`) supersedes that block — a header claiming a generation
+that did not happen would be the false attestation this playbook exists to
+prevent — and the run records it under `derive_core`. generic-v6 and later
+carry the derived wording in their own text.
+
+This is not the derivation the evidence boundary forbids. That rule
+(*"A generation phase may never derive"*, above) is about consuming *other
+runs'* records; a core projected from this run's own audited full record
+consumes nothing the run did not itself generate from the declared bundle.
+
+**What the core can no longer do.** The generated core was allowed to read
+the bundle and fill core fields the full record left empty; a derived core
+cannot, by design. Anything the bundle supports that the full record lacks
+is added **to the full record** in Phase 3's back-port, with its receipt,
+and the core inherits it on re-derivation. No fact enters the pair through a
+path the full record's evidence trail does not cover. Do not read the old
+core-generation rules into this phase: there is no core field inventory to
+derive, no value to start from, and no discrepancy to report — the command
+is the whole phase.
+
+In independent mode, the orchestrator runs the command; no Phase 2 agent is
+launched. It must not rewrite the full YAML.
+
+## Phase 3 - Source and provenance audit
+
+Phase 3 establishes the canonical factual content of the **full record**
+before the mechanical checks. The core is its projection and is not a
+second source: it cannot state anything the full record does not, so every
+finding concerns the full record and is repaired there (the API pipeline's
+audit phase carries the same instruction since #705). Phase 3 is not
+allowed to prefer a value merely because the full record already states it.
+
+1. Re-run schema and term validation for the full record.
+2. Confirm from the agent's read history that no prior-run D4D, evaluation,
+   or reconciliation report was used.
+3. Check the full record against the current source bundle and manifest:
+   - establish that any claimed source conflict is genuine using the uniform
+     rules' contextual and numerical compatibility check; then resolve it by
+     the declared manifest ranking and applicable supersession. Retain
+     compatible or uncertain observations with their scope and bounds;
+   - identify unsupported, stale, omitted, or mis-scoped assertions;
+   - verify repeated identifiers, versions, dates, counts, licenses, access
+     rules, people, and organizations are internally consistent;
+   - keep historical values only when their historical scope is explicit;
+   - check structured relationships as well as literal values: pair every
+     count with the source's counted unit and its owning instance type;
+     preserve table row/column ownership; verify the subject and
+     responsibility asserted by each role container and enum. A correct
+     caveat cannot justify an unsupported type or role. Where the registered
+     table text is ambiguous, omit the unestablished mapping and state the
+     limitation. Inspect organizational quantities and other contextual
+     facts under governing headings too;
+   - inspect every occurrence of a claim about availability, deployment,
+     collection, processing or privacy, including prose and nested list
+     entries. Check every member of a composite inventory separately: an
+     "includes" or "consists of" assertion assigns presence to each member,
+     even in a sensitivity, governance or other contextual field. A list can
+     mix present and planned members; one member's evidence or status does not
+     support the others. Compare each occurrence with the passage's subject,
+     release/date and status: completed, in progress, planned or unstated.
+     Include the governing clause or heading when checking and quoting that
+     status, including future scope inherited across a list or sentence. A
+     present-element boolean and an applied-method assertion each need
+     evidence of that state; a neighboring plan or a generic goal does not
+     supply it. Audit negative current-state claims too, including an asserted
+     absence of comparable resources: require a source that establishes that
+     absence, rather than inferring it from a development goal.
+     A repository or tool description establishes a capability, not its use
+     on this dataset; a format table alone does not establish released
+     availability. A caveat in another field does not qualify an unqualified
+     assertion here. Name every affected slot separately in the findings,
+     with the source (and chunk when available), a short supporting passage
+     and the qualifier the record lost. Preserve supported plans in a field
+     that permits them, with their status explicit, rather than removing all
+     planned facts;
+   - for a privacy or identifiability field, verify that the passage attests
+     the operation in the privacy role that field asserts. Tokenization,
+     controlled access, local storage or a software name alone does not
+     attest de-identification or anonymity. Keep documented processing facts
+     in the fields they answer, and retain a privacy method where the source
+     actually attests it;
+   - audit shape as well as evidence (same contract as the API pipeline's
+     audit phase): flag any value whose shape does not conform to the
+     schema — prose where the schema requires a list, enum values the
+     schema does not define, commentary embedded inside a name, identifier
+     or affiliation value — and any slot-filling violation: structured
+     slots left empty while their content sits in prose, narrative in
+     `notes` that belongs in `description`, sibling values restated in
+     `notes`, or evidence commentary outside `source_caveats`.
+4. Back-port every source-supported omission into the full record in the
+   correct full-schema slot, and correct the full record wherever the audit
+   changes a fact, including every occurrence of the same unsupported
+   assertion. Before editing, find every mention of each affected fact,
+   including synonyms and members of prose inventories in fields the audit
+   did not name. After repairing the named locations, revisit occurrences
+   left unchanged; the findings are not a complete occurrence inventory.
+   Check every member of a mixed-status list individually. Qualify or omit an
+   unsupported member without discarding supported members or changing a
+   supported presence boolean to false. Recheck negative current-state
+   claims too: an aim to create or improve a resource does not prove that
+   comparable resources are absent.
+   Recheck count/type/unit relationships, table column ownership and typed
+   roles in unchanged entries as well as repairs. Remove an unsupported
+   structural assertion instead of retaining it with a disclaimer, while
+   preserving independently supported neutral facts in appropriate text.
+   Do not borrow a schema example or an affiliation to fill a different
+   entity type. Keep each clause attached to the source that supports it.
+   Recheck the subject, release/date, operational status and field
+   meaning of every added or changed assertion against its source passage;
+   a repair must not introduce a stronger availability or privacy claim.
+   An audit recommendation is also subject to this check: restore the
+   governing source context before accepting an isolated quotation as an
+   applied method or present element. Correct a manufactured source conflict
+   when its observations are compatible; do not drop an observation merely
+   to follow a source-priority recommendation.
+   Keep a supported plan or in-progress fact qualified in its own value where
+   that field permits it, with evidence commentary in `source_caveats`.
+   **Every back-ported or repaired value gets its receipt**:
+   add the `{slot, snippet}` pair, the snippet double-quoted as in Phase 1,
+   to the *existing* entry of the chunk the passage sits in (edit that entry
+   in place — a second entry for the same chunk is a finding), and re-run
+   `d4d receipts check`. A value you cannot
+   receipt from a chunk is not source-supported.
+5. Re-validate the full record after every correction and record the
+   source and provenance findings for the reconciliation report. Nothing is
+   applied to the core here: Phase 4 re-derives it.
+
+## Phase 4 - Re-derivation, checks, report, repair
+
+Phase 4 turns the audited full record into the shipped pair and proves it.
+There is no full/core reconciliation for a model to perform: the shared
+slots agree because the core is projected from the full record, the
+projection rules (`resources` by id, `file_collections` → `distributions`,
+`dialect` when files agree) are code, and the pair checker is the proof.
+What remains for judgment is the semantic review the checker asks for and
+the repair of what the checkers find.
+
+1. **Re-derive the core from the corrected full record** (Phase 2's command
+   again, now with `--phase4-complete`, which writes the
+   `# Phase 4 reconciliation: completed` header line the condition text
+   mandates) after every Phase 3 correction to the full — the core is a
+   function of the full and is never edited on its own. `--sync-core` is
+   superseded by derivation and should not be needed; if it changes
+   anything, the derivation is wrong and that is a bug to report, not a
+   record to fix. Then run the pair checker as the independent proof:
+   ```bash
+   poetry run python -m data_sheets_schema.d4d_pair_consistency \
+     --full <full_file> --core <core_file>
+   ```
+   An error from the checker on a derived pair is a defect in the
+   derivation or a shape in the full record the core schema rejects — fix
+   the full record, re-derive, re-run; never the core. Never pass
+   `--sync-core`: it rewrites the core file, and the core is re-derived.
+   The checker emits exactly one semantic warning, `semantic-review-required`
+   on `file_collections` ↔ `distributions`; it checks nothing about
+   `total_file_count`/`total_size_bytes` against the entries beneath them,
+   `dialect`/`is_tabular` against the files, or a historical release read as
+   the current one. Those reviews are **unprompted**: perform them and write
+   each as its own row of the `## Semantic review` section, because no
+   warning will remind you and the projection carries values without
+   checking them. A warning is not evidence that review occurred.
+2. **Check the identifiers against the bundle, and the report against the
+   record.** The API path runs both automatically at the end of every run; this
+   path ran neither, so the arm that reads the rules was the arm that did not
+   verify them (#563).
+   ```bash
+   poetry run python -c "
+   from pathlib import Path
+   from data_sheets_schema.grounding import check_run
+   from data_sheets_schema.identifiers import uriorcurie_slots
+   r = check_run(Path('<full_file>'), Path('<core_file>'), Path('<bundle>'),
+                 uriorcurie_slots())
+   if not r.get('checked'):
+       print('NOT CHECKED:', r['reason'])
+   else:
+       print(r['distinct'])
+       for kind, identifier in {(x['kind'], x['identifier']) for x in r['findings']}:
+           print(kind, identifier)"
+   ```
+   Any identifier reported `absent` is one this record states and the bundle
+   does not (#547). Correct it or remove it — a correct identifier the evidence
+   does not contain is still an unsupported claim. `minted_fragment` is fine:
+   the base is attested and the fragment is ours.
+
+   After writing the reconciliation report in step 4, check its claims against
+   the record you actually produced:
+   ```bash
+   poetry run python -c "
+   from pathlib import Path
+   from data_sheets_schema.report_claims import check_report, declared_slots
+   import yaml
+   full = yaml.safe_load(Path('<full_file>').read_text())
+   core = yaml.safe_load(Path('<core_file>').read_text())
+   out = check_report(Path('<report_file>'), full, core, declared_slots())
+   [print(f) for f in out['findings']]"
+   ```
+   Findings are printed once per identifier, not once per slot that repeats
+   it: one record had 19 ungrounded identifiers across 78 occurrences, and the
+   number to act on is 19.
+
+   `removal_not_performed` means the report says a slot was removed and it is
+   still there; `false_schema_claim` means the report says a slot is not
+   declared and it is. Both are decidable, and in the 2026-08-13 API arm every
+   record that emitted a `distributions` block claimed to have removed it (#546).
+3. Re-run schema and term validation for both records.
+4. Write `{PROJECT}_reconciliation.md` with separate Phase 3 and Phase 4
+   sections: source/provenance findings, the derivation facts the Phase 2
+   command printed, corrections, related-content review, files changed, all
+   commands, and final results. If nothing needed correcting, say so explicitly.
+
+   Compute finding totals and severity subtotals from the actual recorded
+   finding entries, using local arithmetic, before writing summary numbers.
+   If a prose audit summary disagrees with those entries, the entries govern.
+   Do not infer zero from missing or malformed audit data. Recheck these
+   totals after any report repair. The API report phase receives a separate
+   computed-count block from its structured audit; this native arm must
+   likewise count its own recorded findings rather than copy a prose total.
+
+   Compare the original and final records for every stated action. A slot
+   absent in both was not removed: describe its continued omission in prose
+   without a removal row. A fact newly added from the bundle was not relocated
+   from the original record; identify its original location and final destination
+   before calling it a relocation. Check each member of a grouped action claim
+   separately. An accurate source addition can still have an inaccurate report.
+
+   **Two sections have a fixed shape.** The report-claims checker
+   (`d4d provenance backfill-checks`; #546) parses exactly two claim forms,
+   and a report written in free prose registers zero claims — its "0
+   findings" is then unmeasured, not clean (#684; 11 of 12 reports in the
+   2026-08-24 arm). Write:
+
+   - `## Claims` — one markdown table row per slot you removed from either
+     record, the slot name in backticks in the first cell and the word
+     **Removed** in the second: `| \`distributions\` | Removed | not declared on CoreDataset |`.
+     The checker counts each such row and tests it (`removal_not_performed`
+     if the slot is still there). Where you assert that a slot is not
+     declared in the schema, say it in an `**Action:**` line naming the slot
+     in backticks; the checker tests the assertion against the schema
+     (`false_schema_claim` when the slot *is* declared) — note this scan
+     does not add to `claims_checked`. If you removed nothing, write the
+     single line `No slots were removed.` — **the checker does not yet read
+     that sentinel** (#684 tracks it), so such a report still shows
+     `claims_checked: 0`; write it anyway so the count is measured the day
+     the checker learns it.
+   - `## Semantic review` — one line per `semantic-review-required` warning
+     the pair checker emitted (today only `file_collections` ↔
+     `distributions`), **plus one line each for the unprompted reviews step 1
+     names** (counts and sizes against the entries beneath them, `dialect`
+     and `is_tabular` against the files, historical vs current release),
+     each ending in **reviewed: consistent** or **reviewed: corrected** with
+     what changed. The warning is the checker saying the review is
+     required; this section is the only evidence any of it happened (#691).
+     No checker reads this section yet; it is for the human reviewer and for
+     the parser #691 proposes. If the checker emitted no warnings, say so —
+     and still write the unprompted rows.
+
+5. **Repair, then re-report — the API pipeline's closing loop, which this path
+   previously lacked.** If step 2's checkers (grounding, report claims) or the
+   final pair-consistency run reported findings that require a change: fix
+   the **full record** (`repair`, recorded as its own phase with
+   `iterations` counting the fix-validate loops) — never the core, which
+   step 1 re-derives — give every repaired value its receipt as Phase 3 step
+   4 prescribes and re-run `d4d receipts check --strict`, re-run every
+   validation from steps 1–3, and **rewrite the reconciliation report** so it describes
+   the bytes that exist (`report_after_repair`). The API pipeline regenerates
+   its report for the same reason (#604): a report describing bytes that no
+   longer exist is the artifact a reviewer reads instead of the diff. If no
+   finding required a change, there is no repair phase — do not record an
+   empty one.
+
+In independent mode, the orchestrator may perform Phases 3 and 4 without another
+model invocation, but it must perform the same source review, re-derivation,
+deterministic checks, semantic related-content review, and reporting.
+
+## Provenance record (required, per project)
+
+After Phase 4 validates, emit a machine-readable provenance record.
+
+**A registered recorder line is run exactly as written.** Where the launch
+instruction's `provenance record` line carries `--render-spec-json`, run that
+line as written and add nothing: it carries the registered specification,
+the launcher records the receipt acceptance itself and, from renderer 13,
+the phase history (a renderer 9 to 12 registered run records no phase
+history, #2345), and where the line ends `--prompt-text-env
+D4D_LAUNCH_INSTRUCTION` the recorder reads the launch instruction from that
+variable. Every other
+launched run completes its concrete line with the template's flags below
+(#2345). Under Claude Code, never add a shell expansion to `--prompt-text` or
+to any other prescribed command: the `${…:?…}` form is observed refused under
+`dontAsk` (#2282), a bare `$VAR` is unprobed, and a refused prescribed
+command disqualifies the run (#2316, #2348). A registered line that already
+carries `${D4D_LAUNCH_INSTRUCTION:?…}` is a registration defect: do not
+rewrite it, run nothing in its place, and report it (#2346).
+
+**Registered commands take precedence over this file's spellings.** Under a
+launch instruction, run every command with the registered interpreter,
+spelled as registered: each `<python> -m data_sheets_schema.cli …` command on
+one line with the instruction's own words and quoting, and each inline
+`<python> -c …` program exactly as the system prompt's registered inline
+Python commands give it, across its lines where it has several. The
+executable playbook view (`agents playbook`) names the same commands, but its
+double-quoted programs and backslash-continued lines are templates, not
+spellings to run. Every `poetry run` spelling in this file is refused under
+the native command policy (#2325, #2347), and so is any other spelling of a
+registered command (#2369). Such a refusal is the controller's and does not
+disqualify the run; where the call keeps the registered interpreter and
+command, it names the registered spelling to run instead.
+
+```bash
+poetry run d4d provenance record \
+  --project {PROJECT} --method {METHOD} --label {VERSION} \
+  --input-bundle {EXACT INPUT BUNDLE PATH} \
+  --prompt {EACH PROMPT FILE THE RUN CONSUMED} \
+  --prompt-text {THE INSTRUCTION AS SENT} \
+  --reasoning-effort {EFFORT, ONLY IF YOU KNOW IT} \
+  --receipt-expected \
+  --phase '{"name":"generate_full","completed":true,"artifacts":["{PROJECT}_d4d.yaml","{PROJECT}_coverage_receipt.yaml"],"observed":{"total_tokens":{TOTAL},"tool_uses":{COUNT},"duration_ms":{MS}}}' \
+  --phase '{"name":"derive_core","completed":true,"artifacts":["{PROJECT}_d4d_core.yaml"]}' \
+  --phase '{"name":"source_audit","completed":true}' \
+  --phase '{"name":"reconcile","completed":true,"iterations":{HOW MANY TIMES YOU RAN VALIDATE-AND-ITERATE}}' \
+  --phase '{"name":"report","completed":true,"artifacts":["{PROJECT}_reconciliation.md"]}' \
+  --phase '{"name":"repair","completed":true,"iterations":{FIX-VALIDATE LOOPS}}' \
+  --phase '{"name":"report_after_repair","completed":true}' \
+  --phase-skipped {EACH PHASE A RESUME SKIPPED, IF ANY}
+```
+
+**Pass one `--phase` per phase you actually performed, in order.** The API path
+records eight `api_usage` entries per run; this path recorded nothing, so its
+phase structure existed only as prose in the reconciliation report — and #546
+showed a report is not a reliable account of what happened. Every comparison
+between the two arms was one-sided as a result (#562).
+
+Record what you did, not what this file describes. A phase you performed is
+listed with `--phase`; a phase a **resume** skipped because its validated
+artifact already existed is listed with `--phase-skipped` (never both for one
+phase); a phase that did not complete gets `"completed": false`. `iterations`
+belongs only on a phase that actually loops — writing `1` on a phase that
+cannot iterate implies the number was measured. `report` attests the
+reconciliation report Phase 4 step 4 always writes. The `repair` and
+`report_after_repair` phases exist only when Phase 4 step 5 actually ran a
+repair; a run with no findings records neither. The phase named `reconcile`
+is Phase 4 steps 1–3 — re-derivation, the checkers and the semantic review —
+not a manual reconciliation; the name is kept because the recorder's phase
+vocabulary and every earlier agentic record use it, and `iterations` counts
+its fix-full/re-derive/re-check loops.
+
+**Token accounting has two different speakers, and only one may speak.** The
+phase agent itself has no access to its own accounting (#400) and must not
+estimate timing or tokens — that rule is unchanged. But an **orchestrator that
+launched a phase as a subagent observes aggregate totals when it completes**
+(total tokens, tool uses, wall duration), and may record what it observed by
+adding an `"observed": {...}` block to that phase. Only phases the orchestrator
+actually observed get one; a phase run inside a shared context has no
+observable boundary and gets none. The block is deliberately not shaped like
+`api_usage` — no input/output split, no per-call timing — so the two arms'
+accounting can never be silently averaged. The recorder refuses `api_usage`
+field names (`input_tokens`, `seconds`, …) inside a phase for the same reason.
+**In four-phase project-agent mode there is no per-phase boundary to observe**
+— the condition text mandates that mode, and one subagent runs all phases —
+so record no per-phase `observed` blocks there; after the run has written its
+own record, the orchestrator adds the whole-run totals it observed with
+
+```bash
+poetry run python scripts/agentic_observed.py --bundle {EXACT INPUT BUNDLE PATH} \
+  --receipt data/d4d_concatenated/{METHOD}_core/{VERSION}/{PROJECT}_coverage_receipt.yaml \
+  --manifest data/preprocessed/chunks/{PROJECT}_chunks.yaml \
+  {EVERY TRANSCRIPT FILE FOR THIS RUN, INCLUDING A KILLED FIRST INVOCATION}
+d4d provenance annotate-observed --project {PROJECT} --method {METHOD} \
+  --label {VERSION} --run '{THE JSON THE SCRIPT PRINTED}'
+```
+
+`--receipt`/`--manifest` add `receipt_chunks_total` / `receipt_chunks_unopened`
+to the JSON — of the manifest's chunks, how many the receipt claims but no
+file-tool window fully covers — and print any receipt ids the manifest lacks,
+duplicates, and manifest chunks the receipt never mentions.
+
+which is the one boundary that exists. The script sums token usage, tool
+uses and wall duration across the transcripts and computes
+`bundle_lines_read` / `bundle_lines_total` — the union of the run's
+file-reading windows over the declared bundle (#700). Transcripts live under
+the runner's config directory, which differs by account (`~/.claude` or
+`~/.claude-work`); pass every invocation's transcript, or the total is the
+killed run's (#688). Annotate once: a second annotation with different
+values is refused, because an observation silently replaced is a measurement
+dropped without trace.
+
+`d4d provenance record` now writes the four deterministic check blocks
+(pair consistency, report claims, grounding, form) into the record itself
+(#687); `backfill-checks --execute` remains the repair route if that step
+reports it could not compute them, and the only route for records
+reconstructed by `d4d provenance backfill`, which does not compute them.
+Reasoning capture remains impossible on this path either way
+(`runtime_cannot_capture`): total spend is now measurable, the reasoning share
+of it is not.
+
+Writes `{METHOD}_core/{VERSION}/{PROJECT}_provenance.yaml` capturing schema
+md5s, model and runtime identity, input bundle hash, repo commit, software
+versions, hardware, output hashes and slot counts.
+
+This is a **live** record: every field is observed at run time. It fails loudly
+if the input bundle is unreadable, because a run that cannot identify its own
+input has not produced reproducible output. Do not substitute a reconstructed
+record — `d4d provenance backfill` exists only for runs that predate this step,
+and it marks what it cannot recover rather than filling it in.
+
+**Reasoning effort is established by the recorder, not by the header** (#397).
+Where the model route carries it — the provider exposes effort as a model-name
+suffix — it is read from there and marked observed. Where it does not, pass
+`--reasoning-effort` *only if you actually know what the run was launched at*;
+it is then recorded as asserted by the launcher. If you do not know, omit it:
+the recorder writes no value and names the gap, which is the honest outcome.
+Under a registered specification that asserts an effort, the rendered recorder
+line already carries it: the recorder takes that value where the copied line
+dropped the flag and refuses a different one (#2216). A header
+`# Reasoning effort:` line that disagrees with the flag is recorded with a
+mismatch note and named as unverified (#2221); do not write one you did not
+observe.
+**Never write "default", "n/a", "unspecified" or a guess** — a run that did not
+choose an effort is a different claim from a run whose effort is unknown, and
+neither is a run at high. Do not add a `# Reasoning effort:` line to the header
+unless the prompt's header block asks for one; the header is defined by the
+prompt condition, and adding to it by hand is the intervention this playbook
+exists to prevent.
+
+**The prompt is an input like the bundle.** `--prompt` may repeat; pass every
+file the condition is built from. `--prompt-text` takes the instruction as
+actually sent — render it with
+
+```bash
+d4d prompt render --project {PROJECT} --label {LABEL} \
+                  --condition {CONDITION} --runtime 'Claude Code' --out <file>
+```
+
+rather than retyping it, so the text and its hash come from the same place.
+
+`d4d prompt render` is the same command as `d4d api render-prompt` (#428). The
+top-level spelling exists because this path is not the API path, and a launcher
+following this playbook has no reason to look under a group named for the
+runtime it is not using. From 2026-08-10 a run without a recorded instruction fails
+`d4d runs check --strict` (#419): the gate was otherwise opt-in by omission,
+since a launcher that simply passes neither flag records nothing and nothing
+says so.
+
+Recording the file is not the same as vouching for it. A paragraph edited into
+a prompt file *before* rendering re-renders to itself, so the render gate
+reports `match` about an instruction nobody published (#432). What catches that
+is the canonical pin: `d4d api prompts check` compares each condition's prompt
+against the hash this repo declared for it, and `d4d runs check` compares the
+hash in the record. If either reports `uncanonical`, the run was made under
+text that is not a published version of its condition — say so in the
+reconciliation report rather than pinning the edit to make the check pass.
+
+## Completion criteria (per project)
+
+- Both YAML files pass their schema and term validations.
+- Every emitted structure is derived from and permitted by its applicable
+  schema.
+- The pair checker reports no errors on the re-derived pair (shared-slot
+  identity holds by construction; the checker is the proof, not the agent).
+- Every semantically related field — the checker's warning and the
+  unprompted reviews Phase 4 step 1 names — has a row in `## Semantic
+  review` ending **reviewed: consistent** or **reviewed: corrected**.
+- The core file header names both its source-document bundle and full YAML input.
+- Both headers state that prior D4D factual reuse is prohibited.
+- The provenance audit confirms that no older full/core YAML was used.
+- `d4d download scope --check --project {PROJECT}` reports the record in
+  scope: it does not identify itself as a dataset the manifest declares
+  distinct from this project.
+- The core header contains `Phase 4 reconciliation: completed`.
+- The Phase 3/4 reconciliation report is present.
+- The coverage receipt is present and `d4d receipts check --strict` passes
+  the registered receipt floors, with reported diagnostics reviewed separately. The
+  provenance record carries `inputs.receipt_expected: true` so the canary gate
+  holds the run to it: a registered recorder line takes it from the registered
+  specification and is run as written (#2350); every other launched run passes
+  the template's `--receipt-expected` flag.
+- The live provenance record is present and its `record_mode` is `live`, and it
+  names both the prompt files and the instruction as sent.
+- `d4d runs check --strict` passes for the run. **Recording provenance is not the
+  same as recording it correctly.** This path writes provenance as a step
+  separate from writing the artifacts, so a record can pin a state the files
+  merely passed through — one reconciliation report was hashed before its
+  closing rows were appended, and a whole series was hashed before its headers
+  were edited. The API path cannot do this, because it writes provenance
+  in-process after every phase; running the check gives this path the same
+  property.
+
+  **Re-recording no longer discards the verdict** (#396). `provenance record`
+  used to rewrite the file from scratch and delete the `validation:` block that
+  `d4d runs validate` had written, so a re-record silently failed the gate while
+  printing a tick. It now carries the block forward when every artifact it names
+  still hashes to what it recorded, and drops it with a warning naming the
+  follow-up command when one does not. So the sequence is no longer
+  order-critical: record and validate in either order, and re-record freely.
+  Still run `d4d runs validate` once after the artifacts are final, because a
+  run that has never been validated has no verdict to carry.
+- Final summary to the user: per project, report full/core line counts as
+  informational metadata, never as a quality gate, plus validation status.
+
+## Settings
+
+- Temperature is unknown unless observed independently from the runtime's
+  request evidence. Do not copy the shared API configuration or a prompt's
+  example as a native setting. Parameter omission does not establish an
+  effective temperature or deterministic generation. Keep this limitation in
+  provenance and reports.
+- Values only from current allowed sources; prefer null/omission for unknowns.
+- Phase 1 projects may run in parallel. Phase 2 projects may run in parallel only
+  after all required full records exist. Never overlap phases for the same project.
+- Four-phase project agents may run in parallel with each other, but each agent
+  must execute its own four phases sequentially.

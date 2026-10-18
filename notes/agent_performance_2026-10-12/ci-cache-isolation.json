@@ -1,0 +1,99 @@
+{
+  "issue": "https://github.com/bridge2ai/data-sheets-schema/issues/5027",
+  "pre_fix_commit": "363714122048ef40b567229158d4995afb7735bb",
+  "source_before": {
+    "path": "tests/test_schema/test_datacite_relationships.py",
+    "sha256": "b6547ad883d61cb09dab1ffbc5ab7959a2a8d96f37b3451ce111b974cc03ba78"
+  },
+  "ci_job": "https://github.com/bridge2ai/data-sheets-schema/actions/runs/38342496007/job/115116774404",
+  "reported_python_versions": {
+    "ci": "3.12.15",
+    "local_root_runner": "3.12.11"
+  },
+  "commands": {
+    "standalone_nodes": [
+      "tests/test_identifier_form.py::TestOnTheRunner::test_the_written_full_and_core_carry_the_curie_and_the_grounding_check_sees_none"
+    ],
+    "ordered_nodes": [
+      "tests/test_schema/test_datacite_relationships.py::TestTheDigestShowsNestedVocabularies::test_truncation_still_announces_itself_if_it_ever_happens",
+      "tests/test_identifier_form.py::TestOnTheRunner::test_the_written_full_and_core_carry_the_curie_and_the_grounding_check_sees_none"
+    ],
+    "scope": "fresh serial pytest process per receipt; real schema-sync guard retained"
+  },
+  "standalone": {
+    "counts": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "xml_suite_seconds": "41.629",
+    "cases": [
+      {
+        "classname": "tests.test_identifier_form.TestOnTheRunner",
+        "name": "test_the_written_full_and_core_carry_the_curie_and_the_grounding_check_sees_none",
+        "time_seconds": "38.927",
+        "outcome": "passed",
+        "failure_messages": []
+      }
+    ],
+    "receipts": [
+      {
+        "name": "identifier-alone.xml",
+        "bytes": 405,
+        "sha256": "dfd54911d3b9e42f722915ce0b09aa6a1146e1f974aaa59d66a3fa5a63add25d"
+      },
+      {
+        "name": "identifier-alone.log",
+        "bytes": 1403,
+        "sha256": "01d6d944b3a22c40c4ce1a324a4ed258e3a633148d54cdaaf437e08170f47f64"
+      }
+    ]
+  },
+  "ordered": {
+    "counts": {
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "xml_suite_seconds": "22.737",
+    "cases": [
+      {
+        "classname": "tests.test_schema.test_datacite_relationships.TestTheDigestShowsNestedVocabularies",
+        "name": "test_truncation_still_announces_itself_if_it_ever_happens",
+        "time_seconds": "3.579",
+        "outcome": "passed",
+        "failure_messages": []
+      },
+      {
+        "classname": "tests.test_identifier_form.TestOnTheRunner",
+        "name": "test_the_written_full_and_core_carry_the_curie_and_the_grounding_check_sees_none",
+        "time_seconds": "18.291",
+        "outcome": "failed",
+        "failure_messages": [
+          "RuntimeError: the merged schema is not built from the current source, so this run would record a digest for a schema that does not exist \u2014 Dataset: the merged schema matches but its digest does not. Rebuild with `make regen-all`, review the diff and commit it, or check with `d4d schema check-digest`."
+        ]
+      }
+    ],
+    "receipts": [
+      {
+        "name": "identifier-ordered.xml",
+        "bytes": 5693,
+        "sha256": "16215e12933d2485d5482ab0ad88d2239780d49423096a6589d01828fa385cb6"
+      },
+      {
+        "name": "identifier-ordered.log",
+        "bytes": 5379,
+        "sha256": "7b2ba1e043794565134a0fef861256b89919edff73a3e1ca77e800b99a5f91a6"
+      }
+    ]
+  },
+  "conclusion": "The same target passes alone and fails after the truncation fixture; production was unchanged.",
+  "fix_validation": "pending root execution; this summary contains pre-fix evidence only",
+  "helper": {
+    "name": "2026-10-12_trace_5027_cache_receipts.py",
+    "bytes": 5247,
+    "sha256": "ed2549bf7bc609c8ca20e6f8af62b34a65e14978805a78c0e1e3980c3a1002c9"
+  }
+}

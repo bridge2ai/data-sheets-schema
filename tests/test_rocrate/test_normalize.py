@@ -22,8 +22,13 @@ from data_sheets_schema.rocrate_normalize import (
     build_person_index,
     document_corpus_exclusions,
     normalize_linkml,
+    normalize_project,
     reduce_metadata,
+    validate_d4d,
+    write_report,
 )
+from data_sheets_schema.rocrate_map import CrateEncodingError
+from data_sheets_schema.schema_cache import sha256_of
 
 PERSON_GRAPH = {
     "@graph": [
@@ -118,6 +123,185 @@ class TestNormalizeLinkML(unittest.TestCase):
         self.assertEqual(first, _org_urn("University of California, San Diego"))
         self.assertTrue(first.startswith("urn:d4d:org:"))
         self.assertNotIn(" ", first)
+
+    def test_a_resolver_url_doi_is_rewritten_bare_and_logged(self):
+        """#2916. Upstream writes the resolver URL; the pattern is anchored to
+        the bare DOI (#646). The repair keeps the case upstream wrote."""
+        out, res = self.normalize(
+            {"name": "d", "doi": "https://doi.org/10.18130/V3/XNBOPG"})
+        self.assertEqual(out["doi"], "10.18130/V3/XNBOPG")
+        change = next(c for c in res.changes if c.step == "doi")
+        self.assertEqual(change.action, "rewrite")
+        self.assertEqual(change.before, "https://doi.org/10.18130/V3/XNBOPG")
+        self.assertEqual(change.after, "10.18130/V3/XNBOPG")
+        # The row the committed CHORUS and CM4AI changes reports carry.
+        self.assertEqual(change.detail, "the slot takes the bare DOI (#646); "
+                                        "resolver or `doi:` prefix removed, case kept")
+
+    def test_a_bare_doi_is_left_alone_and_not_logged(self):
+        out, res = self.normalize({"name": "d", "doi": "10.18130/V3/XNBOPG"})
+        self.assertEqual(out["doi"], "10.18130/V3/XNBOPG")
+        self.assertFalse([c for c in res.changes if c.step == "doi"])
+
+    def test_a_doi_that_is_not_one_is_dropped_with_the_reason(self):
+        out, res = self.normalize({"name": "d", "doi": "ark:59853/not-a-doi"})
+        self.assertNotIn("doi", out)
+        change = next(c for c in res.changes if c.step == "doi")
+        self.assertEqual(change.action, "drop")
+        self.assertIn("not a DOI", change.detail)
+
+    def test_case_variants_of_one_doi_are_rewritten_not_dropped(self):
+        """#2987. Two spellings that differ only in case are one DOI: the first
+        is written, and the log does not call them two distinct DOIs."""
+        value = ["https://doi.org/10.18130/V3/HIGT4C", "doi:10.18130/v3/higt4c"]
+        out, res = self.normalize({"name": "d", "doi": value})
+        self.assertEqual(out["doi"], "10.18130/V3/HIGT4C")
+        change = next(c for c in res.changes if c.step == "doi")
+        self.assertEqual(change.action, "rewrite")
+        self.assertNotIn("distinct", change.detail)
+
+    def test_a_doi_the_slot_pattern_accepts_is_left_as_written(self):
+        """#2989. The arm is repaired only as far as schema validity requires:
+        a value the anchored pattern accepts is neither dropped nor trimmed,
+        though `bare_doi` would not recognise it."""
+        for value in ("10.5555/a b", "10.1234567890/x", "10.5555/x/"):
+            with self.subTest(value=value):
+                out, res = self.normalize({"name": "d", "doi": value})
+                self.assertEqual(out.get("doi"), value)
+                self.assertFalse([c for c in res.changes if c.step == "doi"])
+
+    def test_a_kept_doi_passes_the_validator(self):
+        """#2989. What the step leaves alone is valid by the validator the
+        changes report uses, not only by a regex this file restates."""
+        out, _ = self.normalize({"id": "ark:59853/x", "name": "d",
+                                 "doi": "10.1234567890/x"})
+        self.assertEqual(out.get("doi"), "10.1234567890/x")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_d4d.yaml"
+            path.write_text(yaml.safe_dump(out, sort_keys=False), encoding="utf-8")
+            self.assertEqual(validate_d4d(path), "PASS")
+
+    def test_a_rewrite_says_only_what_came_off(self):
+        """#2989. A list or a stray space is not a prefix, and the log no
+        longer says one was removed."""
+        for value, said in ((" 10.18130/V3/XNBOPG", "surrounding whitespace removed"),
+                            (["10.18130/V3/XNBOPG"], "the one DOI among 1 list item(s)")):
+            with self.subTest(value=value):
+                out, res = self.normalize({"name": "d", "doi": value})
+                self.assertEqual(out["doi"], "10.18130/V3/XNBOPG")
+                change = next(c for c in res.changes if c.step == "doi")
+                self.assertEqual(change.action, "rewrite")
+                self.assertIn(said, change.detail)
+                self.assertNotIn("prefix", change.detail)
+
+
+class TestWriteReport(unittest.TestCase):
+    def test_each_verdict_names_the_schema_it_was_reached_against(self):
+        """#2916. A bare PASS stayed PASS after #646 made the records fail."""
+        res = Result(project="TEST")
+        res.validation["TEST_crate_d4d.yaml"] = "PASS"
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_changes.md"
+            write_report(res, path, {})
+            line = next(l for l in path.read_text(encoding="utf-8").splitlines()
+                        if l.startswith("- `TEST_crate_d4d.yaml`:"))
+        self.assertTrue(line.startswith("- `TEST_crate_d4d.yaml`: **PASS** — schema "), line)
+        self.assertIn(f"sha256 {sha256_of(FULL_SCHEMA)}", line)
+        self.assertRegex(line, r" / \d{4}-\d{2}-\d{2} ")
+
+
+def _write_crate(project_dir: Path, encoding: str) -> None:
+    """A crate JSON holding a copyright sign, which windows-1252 writes as
+    byte 0xa9 and UTF-8 does not (#2969)."""
+    graph = {"@graph": [*PERSON_GRAPH["@graph"],
+                        {"@id": "./", "@type": "Dataset",
+                         "copyrightNotice": "\u00a9 2025 Test"}]}
+    path = project_dir / "raw" / "ro-crate-metadata.json"
+    path.parent.mkdir(parents=True)
+    path.write_bytes(json.dumps(graph, ensure_ascii=False).encode(encoding))
+
+
+class TestUndecodableCrate(unittest.TestCase):
+    """#2969. normalize_project read the crate as UTF-8 after creating
+    processed/, so a windows-1252 crate crashed the run and left an empty
+    processed/ behind."""
+
+    def test_it_is_refused_by_name_and_leaves_no_processed_dir(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _write_crate(Path(tmp) / "TEST", "cp1252")
+            path = Path(tmp) / "TEST" / "raw" / "ro-crate-metadata.json"
+            offset = path.read_bytes().index(b"\xa9")
+            with self.assertRaises(CrateEncodingError) as cm:
+                normalize_project("TEST", Path(tmp), sv=SchemaView(str(FULL_SCHEMA)))
+            self.assertFalse((Path(tmp) / "TEST" / "processed").exists())
+        # Word for word as before `read_crate_json` took a hint for the
+        # routes that read a crate from any path: this arm reads a project's
+        # crate, so its refusal points to the project's note (#4192).
+        self.assertEqual(str(cm.exception), (
+            f"{path} is not UTF-8, as RFC 8259 requires of JSON: byte 0xa9 at "
+            f"offset {offset}, 1 undecodable byte(s) in all. Not decoded under "
+            "a guessed encoding; declare or transcode it deliberately (see the "
+            "project's `encoding_note` in crate_manifest.yaml)"))
+
+    def test_the_normalize_command_reports_it_and_goes_on(self):
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.rocrate import rocrate
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_crate(root / "AI_READI", "cp1252")
+            _write_crate(root / "CHORUS", "utf-8")
+            r = CliRunner().invoke(rocrate, [
+                "normalize", "--project", "AI_READI", "--project", "CHORUS",
+                "--packages-dir", str(root)])
+            self.assertIsInstance(r.exception, SystemExit, r.output)
+            self.assertEqual(r.exit_code, 1, r.output)
+            self.assertIn("AI_READI/raw/ro-crate-metadata.json is not UTF-8", r.output)
+            self.assertTrue((root / "CHORUS" / "processed"
+                             / "CHORUS_crate_metadata_reduced.json").exists(), r.output)
+            self.assertFalse((root / "AI_READI" / "processed").exists())
+
+    def test_a_refusal_is_not_counted_as_a_validation_failure(self):
+        """#3359. The refused crate and each non-PASS record shared one
+        counter, so a run whose every record passed still ended '1
+        validation failure(s)'. Both are failures; each is named as itself."""
+        from unittest import mock
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.rocrate import rocrate
+
+        def fake(name, root, sv=None):
+            if name == "AI_READI":
+                raise FileNotFoundError(f"no crate for {name}")
+            verdict = "PASS" if name == "CHORUS" else "FAIL\nsome problem"
+            return Result(project=name,
+                          validation={f"{name}_crate_d4d.yaml": verdict})
+
+        def run(*projects):
+            args = ["normalize", "--packages-dir", "unused"]
+            for name in projects:
+                args += ["--project", name]
+            with mock.patch("data_sheets_schema.rocrate_normalize.normalize_project",
+                            side_effect=fake):
+                return CliRunner().invoke(rocrate, args)
+
+        r = run("AI_READI", "CHORUS")                 # refused + every record PASS
+        self.assertEqual(r.exit_code, 1, r.output)
+        self.assertIn("✓ CHORUS_crate_d4d.yaml: PASS", r.output)
+        self.assertIn("❌ 1 crate(s) refused (missing or unreadable), "
+                      "0 validation failure(s)", r.output)
+
+        r = run("AI_READI", "CM4AI")                  # refused + one invalid record
+        self.assertEqual(r.exit_code, 1, r.output)
+        self.assertIn("❌ 1 crate(s) refused (missing or unreadable), "
+                      "1 validation failure(s)", r.output)
+
+        r = run("CM4AI")                              # invalid record alone
+        self.assertEqual(r.exit_code, 1, r.output)
+        self.assertIn("❌ 0 crate(s) refused (missing or unreadable), "
+                      "1 validation failure(s)", r.output)
+
+        r = run("CHORUS")                             # nothing wrong
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("✅ Normalization complete", r.output)
 
 
 class TestReduceMetadata(unittest.TestCase):

@@ -7,6 +7,7 @@ RO-Crate nested Dataset entities.
 """
 
 import unittest
+import json
 from pathlib import Path
 import sys
 
@@ -18,6 +19,7 @@ if str(repo_root) not in sys.path:
 try:
     from src.fairscape_integration.d4d_to_fairscape import D4DToFairscapeConverter
     from src.fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
+    from fairscape_models.rocrate import ROCrateV1_2
     # Try to instantiate to check if FAIRSCAPE models are actually available
     try:
         _test_converter = D4DToFairscapeConverter()
@@ -36,6 +38,18 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         """Set up converters."""
         self.d4d_to_rocrate = D4DToFairscapeConverter()
         self.rocrate_to_d4d = FairscapeToD4DConverter()
+
+    def _json_readback(self, rocrate):
+        """Exercise the genuine JSON dispatcher, which a model dump skips."""
+        def encoded(model):
+            return json.dumps(model.model_dump(mode="json", by_alias=True,
+                                                exclude_none=True),
+                              ensure_ascii=True, allow_nan=False, sort_keys=True)
+        original = encoded(rocrate)
+        rebuilt = ROCrateV1_2.model_validate(json.loads(original))
+        self.assertEqual(encoded(rebuilt), original)
+        self.assertEqual(encoded(rocrate), original)
+        return json.loads(original)
 
     def test_d4d_to_rocrate_with_filecollections(self):
         """Test D4D with FileCollections converts to RO-Crate with nested Datasets."""
@@ -89,7 +103,7 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         rocrate = self.d4d_to_rocrate.convert(d4d_data)
 
         # Verify RO-Crate structure
-        rocrate_dict = rocrate.model_dump(by_alias=True, exclude_none=True)
+        rocrate_dict = self._json_readback(rocrate)
         graph = rocrate_dict['@graph']
 
         # Should have: metadata descriptor + root dataset + 2 file collections = 4 entities
@@ -106,7 +120,7 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
                 entity_type = entity.get('@type', [])
                 if isinstance(entity_type, str):
                     entity_type = [entity_type]
-                if 'Dataset' in entity_type and entity.get('@id') != './':
+                if entity_type == ['https://schema.org/Dataset'] and entity.get('@id') != './':
                     nested_datasets.append(entity)
 
         # Verify root dataset
@@ -117,6 +131,10 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
 
         # Verify nested datasets (file collections)
         self.assertEqual(len(nested_datasets), 2)
+        self.assertEqual([node['@id'] for node in nested_datasets],
+                         ['collection-1', 'collection-2'])
+        self.assertEqual(root_dataset['hasPart'],
+                         [{'@id': 'collection-1'}, {'@id': 'collection-2'}])
 
         # Find training collection
         training_collection = next(
@@ -200,7 +218,8 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         # Note: format, bytes, sha256 are now file-level properties, not collection-level
         # Collection has aggregate total_bytes from RO-Crate contentSize
         self.assertEqual(raw_collection.get('total_bytes'), 2097152)
-        self.assertEqual(raw_collection['collection_type'], ['raw_data'])
+        # FileCollection.collection_type is single-valued in the schema (#3969)
+        self.assertEqual(raw_collection['collection_type'], 'raw_data')
         self.assertEqual(raw_collection['file_count'], 200)
 
     def test_roundtrip_preservation(self):
@@ -216,7 +235,7 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
                     'id': 'test-collection',
                     'name': 'Test Files',
                     'description': 'Test data',
-                    'collection_type': ['test_split'],
+                    'collection_type': 'test_split',  # single-valued (#3969)
                     'total_bytes': 1024,
                     'file_count': 10,
                     'path': '/data/test/',
@@ -238,7 +257,7 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
 
         # D4D → RO-Crate
         rocrate = self.d4d_to_rocrate.convert(original_d4d)
-        rocrate_dict = rocrate.model_dump(by_alias=True, exclude_none=True)
+        rocrate_dict = self._json_readback(rocrate)
 
         # RO-Crate → D4D
         recovered_d4d = self.rocrate_to_d4d.convert(rocrate_dict)
@@ -258,6 +277,21 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         self.assertEqual(recovered_collection['collection_type'], original_collection['collection_type'])
         # Note: File-level properties (format, encoding, sha256) are in resources, not on collection
 
+    def test_a_listed_collection_type_comes_back_with_the_rest_reported(self):
+        """An older record lists several collection types; the crate carries
+        the list, and the single-valued slot keeps one and names the rest
+        (#4073), where it used to keep the first without a word."""
+        rocrate = self.d4d_to_rocrate.convert({
+            'id': 'roundtrip-dataset', 'title': 'Round-trip Test Dataset',
+            'file_collections': [{'id': 'test-collection', 'name': 'Test Files',
+                                  'collection_type': ['processed_data', 'metadata']}]})
+        recovered = self.rocrate_to_d4d.convert(
+            self._json_readback(rocrate))
+        collection = recovered['file_collections'][0]
+        self.assertEqual(collection['collection_type'], 'processed_data')
+        dropped = dict(self.rocrate_to_d4d.dropped)
+        self.assertIn('metadata', dropped['file_collections[0].collection_type'])
+
     def test_backward_compatibility_no_filecollections(self):
         """Test that D4D without FileCollections still works."""
         legacy_d4d = {
@@ -273,7 +307,7 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
 
         # Should convert without errors
         rocrate = self.d4d_to_rocrate.convert(legacy_d4d)
-        rocrate_dict = rocrate.model_dump(by_alias=True, exclude_none=True)
+        rocrate_dict = self._json_readback(rocrate)
 
         # Verify file properties at root level
         root_dataset = next(

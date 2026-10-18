@@ -692,3 +692,116 @@ class Round16(unittest.TestCase):
                                                     "usage": {"input_tokens": 1, "output_tokens": 100}})]) + "\n")
                 obs = ao.observe([t], bundle, None, None, None)
                 self.assertEqual(obs["duration_ms"], expected); self.assertEqual(obs["usage_from_terminal_result"], 1)
+
+
+class Round17(unittest.TestCase):
+    """#5047: CC 2.1.299 subagent transcripts with per-block streaming snapshots
+    below the 4-chars/token payload floor and no terminal result event are marked
+    as truncated streaming-snapshot lower bounds."""
+
+    def test_truncated_streaming_snapshot_sets_lower_bound_info_and_emits_stderr_note(self):
+        import io
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            t = root / "agent-cc21299.jsonl"
+            t.write_text(
+                _event(
+                    "2026-10-14T21:00:00Z",
+                    usage={"input_tokens": 10, "output_tokens": 12},
+                    msg_id="m1",
+                    tools=[("Write", {"file_path": "out.yaml", "content": "x" * 400})],
+                    ids=["w1"],
+                )
+                + "\n"
+            )
+            obs = ao.observe([t], None, None, None, None)
+            floor = ao.payload_tokens_floor(obs)
+            self.assertGreater(floor, obs["output_tokens"])
+            self.assertTrue(ao.is_truncated_streaming_snapshot(obs))
+            self.assertTrue(obs.get("_streaming_snapshot_lower_bound"))
+            self.assertEqual(obs.get("_output_tokens_payload_floor"), floor)
+
+            out_buf, err_buf = io.StringIO(), io.StringIO()
+            with mock.patch("sys.argv", ["agentic_observed.py", str(t)]), \
+                 mock.patch("sys.stdout", out_buf), \
+                 mock.patch("sys.stderr", err_buf):
+                rc = ao.main()
+            self.assertEqual(rc, 0)
+            parsed = json.loads(out_buf.getvalue())
+            self.assertNotIn("_streaming_snapshot_lower_bound", parsed)
+            self.assertNotIn("_output_tokens_payload_floor", parsed)
+            self.assertIn("truncated streaming-snapshot lower bounds (#5047)", err_buf.getvalue())
+
+    def test_finalized_terminal_result_or_output_above_floor_is_not_marked_lower_bound(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            above = root / "above.jsonl"
+            above.write_text(
+                _event(
+                    "2026-10-14T21:00:00Z",
+                    usage={"input_tokens": 10, "output_tokens": 500},
+                    msg_id="m1",
+                    tools=[("Write", {"file_path": "out.yaml", "content": "x" * 400})],
+                    ids=["w1"],
+                )
+                + "\n"
+            )
+            obs_above = ao.observe([above], None, None, None, None)
+            self.assertFalse(ao.is_truncated_streaming_snapshot(obs_above))
+            self.assertNotIn("_streaming_snapshot_lower_bound", obs_above)
+
+            finalized = root / "finalized.jsonl"
+            finalized.write_text(
+                "\n".join([
+                    _event(
+                        "2026-10-14T21:00:00Z",
+                        usage={"input_tokens": 10, "output_tokens": 12},
+                        msg_id="m1",
+                        tools=[("Write", {"file_path": "out.yaml", "content": "x" * 400})],
+                        ids=["w1"],
+                    ),
+                    json.dumps({
+                        "type": "result",
+                        "message": "done",
+                        "uuid": "r1",
+                        "usage": {"input_tokens": 10, "output_tokens": 12},
+                    }),
+                ])
+                + "\n"
+            )
+            obs_fin = ao.observe([finalized], None, None, None, None)
+            self.assertEqual(obs_fin["usage_from_terminal_result"], 1)
+            self.assertFalse(ao.is_truncated_streaming_snapshot(obs_fin))
+            self.assertNotIn("_streaming_snapshot_lower_bound", obs_fin)
+
+    def test_provenance_reasoning_marks_truncated_streaming_snapshots_as_lower_bound(self):
+        from click.testing import CliRunner
+        from unittest import mock
+        import yaml
+        from data_sheets_schema.cli import provenance as cli
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            cand = root / "claudecode_agent_core" / "2026-10-14_generic_v8_claude_opus_4_6_rep1" / "AI_READI_reasoning.jsonl"
+            cand.parent.mkdir(parents=True)
+            rec = root / "AI_READI_provenance.yaml"
+            rec.write_text(yaml.safe_dump({
+                "model": {"agent_runtime": "Claude Code"},
+                "phase_log": {
+                    "run_observed": {
+                        "total_tokens": 50000,
+                        "assistant_turns": 69,
+                        "output_tokens": 9023,
+                        "visible_text_chars": 8912,
+                        "tool_input_chars": 343741,
+                        "reasoning_tokens_estimate": 4214,
+                    }
+                },
+            }))
+            with mock.patch("data_sheets_schema.provenance.record_path_for", lambda p, b, l: rec):
+                res = CliRunner().invoke(cli.provenance, ["reasoning", "--path", str(cand)])
+            self.assertEqual(res.exit_code, 0, res.output)
+            self.assertIn("lower_bound: output_tokens (9023) < payload floor (88163)", res.output)
+            self.assertIn("truncated streaming snapshots (#5047)", res.output)

@@ -1,0 +1,344 @@
+{
+  "format": "cross_family_panel_results_validation_v1",
+  "tested_head": "24f3457b3909224603827e8ed9e2861a9aa43402",
+  "tested_tree": "11fd3cb108711e5b0b9cd2b3c5d55c5e73dc1359",
+  "addressed_issues": [
+    4651,
+    4652
+  ],
+  "not_closed": [
+    3328,
+    2911,
+    2912
+  ],
+  "test_run": {
+    "passed": 310,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "new_cases": 49,
+    "existing_controls": 261,
+    "by_module": {
+      "tests.test_evaluation.test_cross_family_panel": 26,
+      "tests.test_evaluation.test_cross_family_panel_adversarial": 33,
+      "tests.test_evaluation.test_cross_family_panel_cli": 2,
+      "tests.test_evaluation.test_cross_family_panel_results": 10,
+      "tests.test_evaluation.test_cross_family_panel_results_adversarial": 39,
+      "tests.test_evaluation.test_semantic_context_scope": 24,
+      "tests.test_evaluation.test_semantic_evaluation_contract": 20,
+      "tests.test_evaluation.test_semantic_evidence": 36,
+      "tests.test_evaluation.test_semantic_evidence_reporting": 32,
+      "tests.test_evaluation.test_semantic_evidence_v3": 43,
+      "tests.test_evaluation.test_semantic_instrument_v4": 45
+    },
+    "junit": {
+      "artifact": "panel-result-tests-01.xml",
+      "bytes": 52981,
+      "sha256": "7b23cb5a7b7047b22a86e53b3f1d6243b514876fad39ff695dd236b38c59999e",
+      "seconds": 389.495,
+      "timestamp_as_recorded": "2026-10-07T23:45:34.514651"
+    },
+    "console_summary": {
+      "passed": 310,
+      "seconds": 389.58,
+      "dependency_deprecation_warnings": 1,
+      "warning_source": "dateutil",
+      "basis": "coordinator terminal summary; not encoded in JUnit"
+    },
+    "invocation": {
+      "working_directory": "<tested-checkout>",
+      "interpreter": "<primary-checkout>/.venv/bin/python",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTHONPATH": "<tested-checkout>/src:<tested-checkout>"
+      },
+      "arguments": [
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_evaluation/test_cross_family_panel_results.py",
+        "tests/test_evaluation/test_cross_family_panel_results_adversarial.py",
+        "tests/test_evaluation/test_cross_family_panel.py",
+        "tests/test_evaluation/test_cross_family_panel_adversarial.py",
+        "tests/test_evaluation/test_cross_family_panel_cli.py",
+        "tests/test_evaluation/test_semantic_evaluation_contract.py",
+        "tests/test_evaluation/test_semantic_context_scope.py",
+        "tests/test_evaluation/test_semantic_evidence.py",
+        "tests/test_evaluation/test_semantic_evidence_v3.py",
+        "tests/test_evaluation/test_semantic_evidence_reporting.py",
+        "tests/test_evaluation/test_semantic_instrument_v4.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        "<external-evidence>/panel-result-pytest-01",
+        "--junitxml",
+        "<external-evidence>/panel-result-tests-01.xml"
+      ],
+      "path_disclosure": "Local private prefixes are replaced by role placeholders."
+    }
+  },
+  "pins": {
+    "production": {
+      "src/data_sheets_schema/cross_family_panel_results.py": {
+        "sha256": "9713c89d70a1ae16818e10f1b9b7d6cb0e47ee36bc7d163c066bf00774dc8854",
+        "bytes": 15489
+      },
+      "src/data_sheets_schema/cross_family_panel.py": {
+        "sha256": "cc21763e5c136817a06633c1999139e70a772b58453a9e43ea413108fa3dadbf",
+        "bytes": 23418
+      },
+      "src/data_sheets_schema/cli/cross_family_panel.py": {
+        "sha256": "2cb81843cf55194297cd63337a21d02bcb4f9928e2f10c785d4882a761cb5760",
+        "bytes": 2916
+      },
+      "src/data_sheets_schema/evaluation/validate.py": {
+        "sha256": "475bd52ef3a11a626d9d95070e99971c33093cfdb5c2171a98a7cfb70f52b952",
+        "bytes": 17165
+      },
+      "src/data_sheets_schema/semantic_scope.py": {
+        "sha256": "850f9b703cbc24e05653fe2a0c063190817d8fe36b6a1b919de7bc726e2ea7ad",
+        "bytes": 9546
+      },
+      "src/data_sheets_schema/semantic_evidence.py": {
+        "sha256": "cec091e5163d0ca3cf7fef497832146d47d398083e202fa363222b7668685b60",
+        "bytes": 35340
+      },
+      "src/data_sheets_schema/semantic_evidence_authority.py": {
+        "sha256": "5f54d279c5cfdb44b613a34b8564c2abf5a67ae0f354322521a9f8f3d0b923b8",
+        "bytes": 1788
+      }
+    },
+    "supporting_source": {
+      "scripts/build_semantic_evidence_authority.py": {
+        "sha256": "9b57a4d0cd9ae3e3d59e9a463cef08da15db99dfc7f4523c90a833ce070373cf",
+        "bytes": 3997
+      },
+      "scripts/report_semantic_comparison.py": {
+        "sha256": "088f4cd32c962217c467b8687beffe7e943872df35bbb57af1619c7d3ea2d0f6",
+        "bytes": 17485
+      },
+      "src/data_sheets_schema/agent_pin.py": {
+        "sha256": "0cc6e0a341efbd7c34675fe71819d017df59a22987e65e40e2b94941946c5f4a",
+        "bytes": 20563
+      },
+      "src/data_sheets_schema/cli/evaluate.py": {
+        "sha256": "1ccdd6cab43f74b6aa4c14cb030e42cf3607b60b67f503fea804dbcf3cb4ac5b",
+        "bytes": 40012
+      },
+      "src/data_sheets_schema/cli/support_results.py": {
+        "sha256": "6e509009d5d7c1f0640a60c7b0b06cf9cbec9559757321d902b362753fc5b382",
+        "bytes": 3521
+      },
+      "src/data_sheets_schema/duplicate_keys.py": {
+        "sha256": "22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2",
+        "bytes": 15690
+      },
+      "src/data_sheets_schema/evaluation/__init__.py": {
+        "sha256": "216a416e75fdb3561aeac7916ba0832573c6cd85d7e2f12ad0454f4955e4501b",
+        "bytes": 45
+      },
+      "src/data_sheets_schema/evaluation_context.py": {
+        "sha256": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e",
+        "bytes": 9204
+      },
+      "src/data_sheets_schema/evaluation_model.py": {
+        "sha256": "b0821c5a33d549e895c2de6c1232d4cd9e1c7e167425ec53a0ccdcecb7cd3718",
+        "bytes": 7254
+      },
+      "src/data_sheets_schema/evidence_assertions.py": {
+        "sha256": "da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583",
+        "bytes": 34760
+      },
+      "src/data_sheets_schema/judge_contract.py": {
+        "sha256": "7905b7e942eb87c4c79418680e3ff697a70ca45102f41d4c349d3a785e24ee6a",
+        "bytes": 9232
+      },
+      "src/data_sheets_schema/nested_support_results.py": {
+        "sha256": "5a7fec7624b73c026048c06e45be2fb46b265731d41c3d17edea1247662358ef",
+        "bytes": 39429
+      },
+      "src/data_sheets_schema/resources.py": {
+        "sha256": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435",
+        "bytes": 15272
+      },
+      "src/data_sheets_schema/semantic_evidence_reporting.py": {
+        "sha256": "00fbbddd243a037f2158a3239b5e48752a65ffd7f90a0e9cdb376480a0a8aef8",
+        "bytes": 7545
+      },
+      "src/data_sheets_schema/semantic_instrument.py": {
+        "sha256": "b77f2a957a7accbb17d00e39d5d03ff095c5f4cc93925dffdf3eef854685a0a7",
+        "bytes": 2065
+      },
+      "src/data_sheets_schema/support_plan.py": {
+        "sha256": "da17006b1f45aa651287abc0ba1afddb13a06ab428023e8fad8f0b8290dc82df",
+        "bytes": 29068
+      },
+      "src/data_sheets_schema/support_targets.py": {
+        "sha256": "1b1293b7def82abf98b84f67f2a7200588e54fb55cd464e6211473ef9f9616bf",
+        "bytes": 25178
+      }
+    },
+    "tests": {
+      "tests/test_evaluation/test_cross_family_panel_results.py": {
+        "sha256": "b2bb507461457d76984bf5052617347227a30e68be81998cd303509b2ffffa86",
+        "bytes": 9490
+      },
+      "tests/test_evaluation/test_cross_family_panel_results_adversarial.py": {
+        "sha256": "ee98ef80446d3932ea2f0d3d344c092ec7e55b4ae9cbb02325fccbbc4b98d69f",
+        "bytes": 20854
+      },
+      "tests/test_evaluation/test_cross_family_panel.py": {
+        "sha256": "610b7c89f3b5b9720ee563ebfae68083431654e199935d1fc74afa6432c44a62",
+        "bytes": 13914
+      },
+      "tests/test_evaluation/test_cross_family_panel_adversarial.py": {
+        "sha256": "2840938dbc9c5a6e513a8dd85aa908734413d59c735dcb35d673696cf34938dd",
+        "bytes": 16106
+      },
+      "tests/test_evaluation/test_cross_family_panel_cli.py": {
+        "sha256": "a8afecca1ef1dd76564ce57113b8df837fff4b70d810b8cbcc1d67f6a2b4786a",
+        "bytes": 2530
+      },
+      "tests/test_evaluation/test_semantic_evaluation_contract.py": {
+        "sha256": "58cb702d083da0c9525a16c33d422ba0359a17e7e3d0c20d00075fdae5208ef8",
+        "bytes": 17856
+      },
+      "tests/test_evaluation/test_semantic_context_scope.py": {
+        "sha256": "07399ca2a72f6755e8e03ee010dd02b0859f7b1e879eaef775243e5bbe381c83",
+        "bytes": 8013
+      },
+      "tests/test_evaluation/test_semantic_evidence.py": {
+        "sha256": "cba30edd258b4e7acf004b4a76a7bbd56caf171ffbf57227246992a73956e0a8",
+        "bytes": 37829
+      },
+      "tests/test_evaluation/test_semantic_evidence_v3.py": {
+        "sha256": "cb46044cf75546217d4d84394ed7492abb7d761a07fea9bd7e44be4bb2bf4e45",
+        "bytes": 13215
+      },
+      "tests/test_evaluation/test_semantic_evidence_reporting.py": {
+        "sha256": "29353b371f55e6d2a1895972f492e722e70757412f3e97ffb5594489ffadf364",
+        "bytes": 11013
+      },
+      "tests/test_evaluation/test_semantic_instrument_v4.py": {
+        "sha256": "94134747288c58433a876f5137159b55d8482f9618bdadfff733baefada41540",
+        "bytes": 15730
+      }
+    },
+    "instrument_resources": {
+      ".claude/agents/d4d-rubric10-semantic.md": {
+        "sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+        "bytes": 93585
+      },
+      ".claude/agents/d4d-rubric10.md": {
+        "sha256": "c7cb23b3693ce9813534214a1da4611dac2f87cb51392204bd826ea26e1562e5",
+        "bytes": 65671
+      },
+      ".claude/agents/d4d-rubric20-semantic-v4.md": {
+        "sha256": "b8f5c7686660aa856fa2317904776c3e25678506d82482dc90fe4bf408cba454",
+        "bytes": 70396
+      },
+      ".claude/agents/d4d-rubric20-semantic.md": {
+        "sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+        "bytes": 68004
+      },
+      ".claude/agents/d4d-rubric20.md": {
+        "sha256": "6b7aeff1d7c2dc827710162129991d5466e63eb12df218ef47347b228ec87b50",
+        "bytes": 45494
+      },
+      "data/rubric/rubric10.txt": {
+        "sha256": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+        "bytes": 17780
+      },
+      "data/rubric/rubric20.txt": {
+        "sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+        "bytes": 21696
+      },
+      "data/rubric/rubric20_semantic_v4.txt": {
+        "sha256": "dac1a89ae97b2c4a019889879d669b6aceba0baa17a3e65f04383a084db5eae5",
+        "bytes": 23735
+      },
+      "data/rubric/semantic_evidence_authority_v3.json": {
+        "sha256": "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872",
+        "bytes": 7747
+      },
+      "src/download/prompts/rubric10_semantic_schema.json": {
+        "sha256": "0241a3ef5fd168204db7d33ea3d2f44db3316216a642577924f1830c8bbdb1a1",
+        "bytes": 22772
+      },
+      "src/download/prompts/rubric20_semantic_schema.json": {
+        "sha256": "70b6f5328128440ad3bfb73cfd774844bab54fc46c12bd7204e8b1d351a4d853",
+        "bytes": 24775
+      },
+      "src/download/prompts/rubric20_semantic_v4_schema.json": {
+        "sha256": "164d31a7f614c5d3da892be13f6b6dce21fececdf69a91e9b142995675a6cd76",
+        "bytes": 23802
+      }
+    },
+    "fixtures": {
+      "tests/fixtures/semantic_v4/released_asset_hashes.json": {
+        "sha256": "166ea266118853078867313e55af66a8b2d5cbe3bff6433c7d97ce4fca779214",
+        "bytes": 1002
+      },
+      ".claude/agents/_preimages.json": {
+        "sha256": "c1316639b834780a9ad863225cc240f820919f9bd491ca100e63c51bfc72eb51",
+        "bytes": 330759
+      },
+      "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml": {
+        "sha256": "af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1",
+        "bytes": 59155
+      },
+      "tests/fixtures/semantic_evidence_authority_v3/data/rubric/rubric10.txt.gz": {
+        "sha256": "b82acedc2b9a09ebc8fb23c0527ec662d250dce70009d1f7c33422c97dd191f8",
+        "bytes": 4816
+      },
+      "tests/fixtures/semantic_evidence_authority_v3/data/rubric/rubric20.txt.gz": {
+        "sha256": "c62867114baa7a2f0f299a4b0a809146a4d4bc97ee2715d9e925be2a2a5209d5",
+        "bytes": 6613
+      },
+      "tests/fixtures/semantic_evidence_authority_v3/src/data_sheets_schema/evaluation_context.py.gz": {
+        "sha256": "8f8309da4e0a5094f860263c4b3bceee13d6d93c0e4cd8fd893686e3785d7263",
+        "bytes": 3062
+      },
+      "tests/fixtures/semantic_evidence_authority_v3/src/data_sheets_schema/schema/data_sheets_schema_all.yaml.gz": {
+        "sha256": "85a856c1ec359a8375bf2ff7164e9f82317e47b14db14a8a10f5dbe2ef589357",
+        "bytes": 86760
+      },
+      "tests/fixtures/semantic_evidence_authority_v3/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml.gz": {
+        "sha256": "26318b4a6ec7f9cea60f58f83d4607c64452394ac0f03c0d99e4b7888cdc046e",
+        "bytes": 70661
+      }
+    },
+    "dependency_declarations": {
+      "pyproject.toml": {
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+        "bytes": 4446
+      },
+      "poetry.lock": {
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "bytes": 592155
+      }
+    }
+  },
+  "pin_verification": {
+    "basis": "Every listed file independently matched both the tested Git blob and current working bytes after the run.",
+    "scope": "Selected source, tests, fixtures, resources and declared dependency files; not a complete imported-code or runtime attestation.",
+    "count": 57
+  },
+  "limitations": [
+    "Synthetic software ratings and existing captured-input regression controls; no empirical second ratings or provider execution.",
+    "Accepted means structural/internal consistency only, not scientific correctness, human review, calibration, independence or authorization.",
+    "Every registered slot remains in the denominator; caller identity declarations are not authenticated provider evidence.",
+    "Historical semantic v2 and panels with different captured validator source pins remain unsupported; fresh successor registration is explicit.",
+    "Portable recheck reads captured instrument/input/result bytes and checks current imported implementation source identities; it never executes captured Python.",
+    "External schema retrieval is disabled for the captured-resource seam; default validator routes remain covered.",
+    "The suite includes existing local CLI subprocess controls; it does not dispatch native or provider helpers.",
+    "Declared dependency file pins do not attest installed dependency versions or the interpreter.",
+    "Scientific/context review and routing/budget/paid execution holds remain unchanged."
+  ],
+  "provider_calls": 0,
+  "empirical_ratings_produced": 0,
+  "execution_authorized": false,
+  "scientific_eligibility": false
+}

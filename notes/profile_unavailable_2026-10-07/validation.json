@@ -1,0 +1,302 @@
+{
+  "candidate_base": "24d688388126a56f1515bb84f9024ed666635b0e",
+  "baseline_checkout_commit": "cdf1a4c5029dba44e0e41c55cdd95722e7518934",
+  "baseline_note": "The two inspected profile implementation files equal main24d688; native diagnostic changes are unrelated.",
+  "source_sha256": {
+    "src/validation/unified_validator.py": "608c17fd02a145e058b6fa47eebb0b1e5ff4c2ab387ca4054c7224837d963a66",
+    "src/data_sheets_schema/rocrate_sources.py": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75",
+    "tests/test_rocrate/test_profile_unavailable.py": "655ebd08f48817b0e4e17455038196a30e4d2ed9d75f3f2c26c4daa3248bb9f7",
+    "notes/profile_unavailable_2026-10-07/replay.py": "9a015f2892a86b001643f7e26a5b526a5332aa70661ac910aa6c40ae5b5013be"
+  },
+  "tests": {
+    "passed": 95,
+    "skipped": 0,
+    "failed": 0,
+    "by_module": {
+      "tests.test_rocrate.test_profile_unavailable": 23,
+      "tests.test_rocrate.test_profile_root_policy": 72
+    },
+    "junit_sha256": "7bf96fcd47643d094d31e2a072db7fb7f6475bdacb1af11842e599256d180fbb"
+  },
+  "replay": {
+    "baseline_label": "profile-availability-baseline-2026-10-07",
+    "candidate_label": "profile-availability-candidate-2026-10-07",
+    "checks_per_checkout": 42,
+    "comparison_checks": {
+      "same_original_input_bytes": true,
+      "same_reversed_input_bytes": true,
+      "minimal_basic_reports_unchanged": true,
+      "complete_unavailable_on_valid_roots": true,
+      "unresolved_root_errors_preserved": true,
+      "all_candidate_reports_invariant_under_graph_reversal": true,
+      "source_files_unchanged_in_both_runs": true,
+      "implementations_unchanged_during_both_runs": true,
+      "no_exceptions": true
+    },
+    "source_sha256": {
+      "data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774",
+      "data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4",
+      "data/ro-crate_packages/CM4AI/processed/CM4AI_crate_metadata_reduced.json": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610",
+      "data/ro-crate_packages/VOICE/raw/ro-crate-prov-graph.json": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608",
+      "data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip": "a8a4fea0aa4cfb9797fe1871de064bf29563516c5de4aa834aa177fb7c6b1d4c"
+    },
+    "baseline_code_sha256": {
+      "src/validation/unified_validator.py": "283a9829be3d10bbba1603da027d554ce8f4864d8069711ea38be9e4dab55a76",
+      "src/data_sheets_schema/rocrate_sources.py": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75"
+    },
+    "candidate_code_sha256": {
+      "src/validation/unified_validator.py": "608c17fd02a145e058b6fa47eebb0b1e5ff4c2ab387ca4054c7224837d963a66",
+      "src/data_sheets_schema/rocrate_sources.py": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75"
+    },
+    "summary_sha256": {
+      "profile-baseline-replay": "8338bd186f14239b295fd09e1b6527e7ba85387a99a08fed10c70ddfde34a5d4",
+      "profile-candidate-replay": "5dd126ff8881d18f69b4d6578d96128cc94f38f4d6ae2dbb3eba595534a7b4f9"
+    },
+    "complete_results": {
+      "CHORUS": {
+        "baseline": {
+          "level": "profile",
+          "passed": true,
+          "errors": [],
+          "warnings": [],
+          "info": [
+            "Profile level 'complete' validation passed (100.0% coverage)"
+          ],
+          "coverage_percentage": 100.0,
+          "missing_fields": [],
+          "metadata": {
+            "level": "complete",
+            "required_count": 0,
+            "found_count": 0
+          }
+        },
+        "candidate": {
+          "level": "profile",
+          "passed": false,
+          "errors": [
+            "Profile 'complete' validation is unavailable: required fields have not been defined."
+          ],
+          "warnings": [],
+          "info": [],
+          "coverage_percentage": null,
+          "missing_fields": null,
+          "metadata": {
+            "level": "complete",
+            "status": "unavailable",
+            "reason": "required_fields_not_defined",
+            "required_count": null,
+            "found_count": null
+          }
+        }
+      },
+      "VOICE": {
+        "baseline": {
+          "level": "profile",
+          "passed": true,
+          "errors": [],
+          "warnings": [],
+          "info": [
+            "Profile level 'complete' validation passed (100.0% coverage)"
+          ],
+          "coverage_percentage": 100.0,
+          "missing_fields": [],
+          "metadata": {
+            "level": "complete",
+            "required_count": 0,
+            "found_count": 0
+          }
+        },
+        "candidate": {
+          "level": "profile",
+          "passed": false,
+          "errors": [
+            "Profile 'complete' validation is unavailable: required fields have not been defined."
+          ],
+          "warnings": [],
+          "info": [],
+          "coverage_percentage": null,
+          "missing_fields": null,
+          "metadata": {
+            "level": "complete",
+            "status": "unavailable",
+            "reason": "required_fields_not_defined",
+            "required_count": null,
+            "found_count": null
+          }
+        }
+      },
+      "CM4AI_reduced": {
+        "baseline": {
+          "level": "profile",
+          "passed": true,
+          "errors": [],
+          "warnings": [],
+          "info": [
+            "Profile level 'complete' validation passed (100.0% coverage)"
+          ],
+          "coverage_percentage": 100.0,
+          "missing_fields": [],
+          "metadata": {
+            "level": "complete",
+            "required_count": 0,
+            "found_count": 0
+          }
+        },
+        "candidate": {
+          "level": "profile",
+          "passed": false,
+          "errors": [
+            "Profile 'complete' validation is unavailable: required fields have not been defined."
+          ],
+          "warnings": [],
+          "info": [],
+          "coverage_percentage": null,
+          "missing_fields": null,
+          "metadata": {
+            "level": "complete",
+            "status": "unavailable",
+            "reason": "required_fields_not_defined",
+            "required_count": null,
+            "found_count": null
+          }
+        }
+      },
+      "VOICE_provenance": {
+        "baseline": {
+          "level": "profile",
+          "passed": true,
+          "errors": [],
+          "warnings": [],
+          "info": [
+            "Profile level 'complete' validation passed (100.0% coverage)"
+          ],
+          "coverage_percentage": 100.0,
+          "missing_fields": [],
+          "metadata": {
+            "level": "complete",
+            "required_count": 0,
+            "found_count": 0
+          }
+        },
+        "candidate": {
+          "level": "profile",
+          "passed": false,
+          "errors": [
+            "Profile 'complete' validation is unavailable: required fields have not been defined."
+          ],
+          "warnings": [],
+          "info": [],
+          "coverage_percentage": null,
+          "missing_fields": null,
+          "metadata": {
+            "level": "complete",
+            "status": "unavailable",
+            "reason": "required_fields_not_defined",
+            "required_count": null,
+            "found_count": null
+          }
+        }
+      },
+      "CM4AI_original": {
+        "baseline": {
+          "level": "profile",
+          "passed": true,
+          "errors": [],
+          "warnings": [],
+          "info": [
+            "Profile level 'complete' validation passed (100.0% coverage)"
+          ],
+          "coverage_percentage": 100.0,
+          "missing_fields": [],
+          "metadata": {
+            "level": "complete",
+            "required_count": 0,
+            "found_count": 0
+          }
+        },
+        "candidate": {
+          "level": "profile",
+          "passed": false,
+          "errors": [
+            "Profile 'complete' validation is unavailable: required fields have not been defined."
+          ],
+          "warnings": [],
+          "info": [],
+          "coverage_percentage": null,
+          "missing_fields": null,
+          "metadata": {
+            "level": "complete",
+            "status": "unavailable",
+            "reason": "required_fields_not_defined",
+            "required_count": null,
+            "found_count": null
+          }
+        }
+      },
+      "descriptor_priority": {
+        "baseline": {
+          "level": "profile",
+          "passed": true,
+          "errors": [],
+          "warnings": [],
+          "info": [
+            "Profile level 'complete' validation passed (100.0% coverage)"
+          ],
+          "coverage_percentage": 100.0,
+          "missing_fields": [],
+          "metadata": {
+            "level": "complete",
+            "required_count": 0,
+            "found_count": 0
+          }
+        },
+        "candidate": {
+          "level": "profile",
+          "passed": false,
+          "errors": [
+            "Profile 'complete' validation is unavailable: required fields have not been defined."
+          ],
+          "warnings": [],
+          "info": [],
+          "coverage_percentage": null,
+          "missing_fields": null,
+          "metadata": {
+            "level": "complete",
+            "status": "unavailable",
+            "reason": "required_fields_not_defined",
+            "required_count": null,
+            "found_count": null
+          }
+        }
+      },
+      "descriptor_unresolved": {
+        "baseline": {
+          "level": "profile",
+          "passed": false,
+          "errors": [
+            "No unambiguous root data entity in RO-Crate @graph: metadata about reference is unresolved or has duplicate entity IDs"
+          ],
+          "warnings": [],
+          "info": [],
+          "coverage_percentage": null,
+          "missing_fields": null,
+          "metadata": {}
+        },
+        "candidate": {
+          "level": "profile",
+          "passed": false,
+          "errors": [
+            "No unambiguous root data entity in RO-Crate @graph: metadata about reference is unresolved or has duplicate entity IDs"
+          ],
+          "warnings": [],
+          "info": [],
+          "coverage_percentage": null,
+          "missing_fields": null,
+          "metadata": {}
+        }
+      }
+    }
+  },
+  "scientific_scores_produced": 0,
+  "coverage_gain_claimed": false
+}

@@ -267,8 +267,12 @@ test-modules:
 # a runner dies — -q's dots and --durations' end-of-run table both say
 # nothing about a test that never finished (#935 review).
 PYTEST_ARGS ?= -q
+# Explicit paths/nodes replace full discovery for local iteration. Keep flags
+# in PYTEST_ARGS; the default still runs the complete tests directory.
+PYTEST_PATHS ?= tests
 test-python:
-	$(RUN) pytest tests $(PYTEST_ARGS) -p no:cacheprovider --durations=25
+	$(if $(strip $(PYTEST_PATHS)),,$(error PYTEST_PATHS must name at least one test path or node))
+	$(RUN) pytest $(PYTEST_PATHS) $(PYTEST_ARGS) -p no:cacheprovider --durations=25
 
 lint:
 	$(RUN) linkml-lint $(SOURCE_SCHEMA_PATH)
@@ -378,26 +382,20 @@ git-status:
 ## SSSOM Alignment Generation
 ## ------------------------------------------------------------------
 
-SSSOM_SCRIPT = src/semantic_exchange/generate_sssom_mapping.py
-SSSOM_URI_SCRIPT = src/semantic_exchange/generate_sssom_uri_mapping.py
 SSSOM_URI_COMPREHENSIVE_SCRIPT = src/semantic_exchange/generate_comprehensive_sssom_uri.py
 SSSOM_COMPREHENSIVE_SCRIPT = src/semantic_exchange/generate_comprehensive_sssom.py
 SSSOM_STRUCTURAL_SCRIPT = src/semantic_exchange/generate_structural_mapping.py
 SKOS_ALIGNMENT = src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
-INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
 D4D_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_all.yaml
 D4D_CORE_SCHEMA = src/data_sheets_schema/schema/data_sheets_schema_core.yaml
 D4D_CORE_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
 URI_RECOMMENDATIONS = notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv
-SSSOM_FULL = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv
-SSSOM_SUBSET = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping_subset.tsv
-SSSOM_URI = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_mapping.tsv
 SSSOM_URI_COMPREHENSIVE = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_comprehensive.tsv
 SSSOM_COMPREHENSIVE = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv
 SSSOM_STRUCTURAL = data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv
 
-.PHONY: check-sssom-structural gen-core-schema validate-core lint-core gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
+.PHONY: check-sssom-structural gen-core-schema validate-core lint-core gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
 
 gen-core-schema: $(D4D_CORE_SCHEMA_ALL) ## Generate merged core exchange schema (data_sheets_schema_core_all.yaml)
 
@@ -435,39 +433,29 @@ lint-core: ## Lint the core exchange schema files
 	$(RUN) linkml-lint src/data_sheets_schema/schema/D4D_Core.yaml
 	$(RUN) linkml-lint $(D4D_CORE_SCHEMA)
 
-gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM property-level mappings (full and subset)
+# The legacy property-level table, its interface subset and the 33-slot URI
+# table were retired (#3884): no running code read them, they had no drift
+# check (their generator stamped the run date), and the committed property
+# table, never regenerated, had fallen 70 SKOS triples behind the TTL (the
+# generator itself transcribes all 184). The comprehensive pair and the
+# structural table replace them; the SKOS alignment TTL stays the curated
+# input. Their last bytes are in git history (`git log --diff-filter=D --
+# <path>`).
+#
+# The structural table is not part of this (#3967). It carries rows its
+# generator cannot produce (KNOWN_UNDERIVABLE in
+# generate_structural_mapping.py, #294), and its rule fires whenever the
+# merged schema, the RO-Crate example or the script is newer, so a schema
+# edit followed by this target rewrote it and silently dropped those rows.
+# Rewriting it is a deliberate act: `make gen-sssom-structural`, then `make
+# check-sssom-structural`, which names every curated row a rewrite dropped.
+gen-sssom-all: gen-sssom-uri-comprehensive gen-sssom-comprehensive ## Regenerate the comprehensive SSSOM pair; leaves the partly curated structural table (see gen-sssom-structural)
 
-gen-sssom-all: gen-sssom gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural ## Generate all SSSOM mappings (property + URI + comprehensive + structural)
+gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for every schema slot
 
-gen-sssom-full: $(SSSOM_FULL) ## Generate full SSSOM mapping from SKOS alignment
-
-$(SSSOM_FULL): $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(INTERFACE_MAPPING) $(SSSOM_SCRIPT)
-	@echo "Generating full SSSOM mapping..."
-	$(RUN) python $(SSSOM_SCRIPT) \
-		--skos $(SKOS_ALIGNMENT) \
-		--rocrate $(ROCRATE_JSON) \
-		--mapping $(INTERFACE_MAPPING) \
-		--output $(SSSOM_FULL) \
-		--output-subset $(SSSOM_SUBSET)
-
-gen-sssom-subset: $(SSSOM_SUBSET) ## Generate subset SSSOM mapping (interface fields only)
-
-$(SSSOM_SUBSET): $(SSSOM_FULL)
-	@echo "Subset SSSOM generated alongside full mapping"
-
-gen-sssom-uri: $(SSSOM_URI) ## Generate URI-level SSSOM mapping (33 slots with slot_uri)
-
-$(SSSOM_URI): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(SSSOM_URI_SCRIPT)
-	@echo "Generating URI-level SSSOM mapping (slots with slot_uri only)..."
-	$(RUN) python $(SSSOM_URI_SCRIPT) \
-		--schema $(D4D_SCHEMA_ALL) \
-		--skos $(SKOS_ALIGNMENT) \
-		--rocrate $(ROCRATE_JSON) \
-		--output $(SSSOM_URI)
-
-gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for ALL 270 attributes
-
-$(SSSOM_URI_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_URI_COMPREHENSIVE_SCRIPT)
+# The URI table imports the comprehensive generator's resolver (#2935), so a
+# change to that script must rebuild it too.
+$(SSSOM_URI_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_URI_COMPREHENSIVE_SCRIPT) $(SSSOM_COMPREHENSIVE_SCRIPT)
 	@echo "Generating comprehensive URI-level SSSOM (all attributes)..."
 	$(RUN) python $(SSSOM_URI_COMPREHENSIVE_SCRIPT) \
 		--schema $(D4D_SCHEMA_ALL) \
@@ -475,7 +463,22 @@ $(SSSOM_URI_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDA
 		--recommendations $(URI_RECOMMENDATIONS) \
 		--output $(SSSOM_URI_COMPREHENSIVE)
 
-gen-sssom-comprehensive: $(SSSOM_COMPREHENSIVE) ## Generate comprehensive SSSOM for ALL 270 D4D attributes
+gen-sssom-comprehensive: $(SSSOM_COMPREHENSIVE) ## Generate comprehensive SSSOM for every schema slot
+
+# Both checks run whatever the first finds, so a drift in both tables is
+# reported as two (#2995); the target fails if either does.
+.PHONY: check-sssom-comprehensive
+check-sssom-comprehensive: ## Report drift between both committed comprehensive SSSOM tables and their generators (writes nothing)
+	@status=0; \
+	$(RUN) python $(SSSOM_COMPREHENSIVE_SCRIPT) --check \
+		--schema $(D4D_SCHEMA_ALL) --skos $(SKOS_ALIGNMENT) \
+		--recommendations $(URI_RECOMMENDATIONS) \
+		--output $(SSSOM_COMPREHENSIVE) || status=1; \
+	$(RUN) python $(SSSOM_URI_COMPREHENSIVE_SCRIPT) --check \
+		--schema $(D4D_SCHEMA_ALL) --skos $(SKOS_ALIGNMENT) \
+		--recommendations $(URI_RECOMMENDATIONS) \
+		--output $(SSSOM_URI_COMPREHENSIVE) || status=1; \
+	exit $$status
 
 $(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_COMPREHENSIVE_SCRIPT)
 	@echo "Generating comprehensive SSSOM mapping (all D4D attributes)..."
@@ -485,9 +488,9 @@ $(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATION
 		--recommendations $(URI_RECOMMENDATIONS) \
 		--output $(SSSOM_COMPREHENSIVE)
 
-gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Generate structure-aware D4D ↔ RO-Crate SSSOM mapping
+gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Rewrite the structural D4D ↔ RO-Crate SSSOM and its summary from the generator when its inputs are newer, dropping the KNOWN_UNDERIVABLE rows it cannot produce (not run by gen-sssom-all)
 
-check-sssom-structural: ## Report drift between the committed structural mapping and its generator
+check-sssom-structural: ## Compare the committed structural mapping and summary with their generator, allowing for the KNOWN_UNDERIVABLE rows (writes nothing; generate_structural_mapping.py --help states exactly what it compares)
 	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT) --check
 
 $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT)
@@ -495,8 +498,10 @@ $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT
 	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT)
 	@echo "✓ Structural mapping: $(SSSOM_STRUCTURAL)"
 
-clean-sssom: ## Remove generated SSSOM files
-	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET) $(SSSOM_URI) $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE) $(SSSOM_STRUCTURAL)
+# Not the structural table: it is committed and partly curated, and
+# regeneration cannot restore the KNOWN_UNDERIVABLE rows (#3967).
+clean-sssom: ## Remove the generated comprehensive SSSOM pair (gen-sssom-all rebuilds it); leaves the partly curated structural table
+	rm -f $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE)
 
 ## ------------------------------------------------------------------
 ## FAIRSCAPE ↔ D4D Bidirectional Conversion
@@ -516,16 +521,39 @@ test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
 		import yaml, json; \
 		d4d = yaml.safe_load(open('data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml')); \
 		rocrate, (valid, errors) = convert_d4d_to_fairscape(d4d); \
-		print('✓ D4D → FAIRSCAPE: PASSED' if valid else '✗ D4D → FAIRSCAPE: FAILED'); \
+		print('✓ D4D → FAIRSCAPE model validation: PASSED (not source preservation)' if valid else '✗ D4D → FAIRSCAPE model validation: FAILED'); \
 		json.dump(rocrate.model_dump(exclude_none=True, by_alias=True), \
 		          open('data/ro-crate/examples/voice_d4d_to_fairscape.json', 'w'), indent=2)"
 
-test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (CM4AI example)
+# The four crates #3969 names, the FAIRSCAPE profile crate and the three
+# examples under data/ro-crate/, must each convert to a record that
+# validates. The release crates under data/ro-crate_packages/ are not in
+# this list: tests/test_fairscape_integration/test_fairscape_to_d4d.py
+# converts CM4AI's and CHORUS's. AI_READI's is windows-1252, not UTF-8,
+# and the script refuses it with the CrateEncodingError `d4d rocrate map`
+# raises, naming the first byte that does not decode, its offset and how
+# many such bytes the crate holds (#4089). The script takes any path, so
+# its refusal says to transcode the file to UTF-8 where the map command's
+# points to crate_manifest.yaml's `encoding_note` (#4192). The test
+# converts it only decoded from windows-1252.
+# The records go to a temporary directory: a test does not rewrite
+# data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml (#3969).
+# Its path is quoted wherever it is expanded: under a TMPDIR with a space
+# in it, an unquoted `rm -rf` took the path's two halves as two paths to
+# remove, and left the directory itself (#4159).
+FAIRSCAPE_CRATES = $(ROCRATE_JSON) \
+	data/ro-crate/examples/CM4AI_roundtrip.json \
+	data/ro-crate/examples/voice_d4d_to_fairscape.json \
+	data/ro-crate/examples/voice_fairscape_test.json
+
+test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (the four data/ro-crate crates)
 	@echo "Testing FAIRSCAPE → D4D conversion..."
-	$(RUN) python $(FAIRSCAPE_TO_D4D) \
-		--input $(ROCRATE_JSON) \
-		--output data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml \
-		--sssom $(SSSOM_FULL)
+	@out="$$(mktemp -d)" || exit 1; status=0; \
+	for crate in $(FAIRSCAPE_CRATES); do \
+		$(RUN) python $(FAIRSCAPE_TO_D4D) --input "$$crate" \
+			--output "$$out/$$(basename "$$crate" .json).yaml" || status=1; \
+	done; \
+	rm -rf -- "$$out"; exit "$$status"
 
 fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
 	@if [ -z "$(INPUT)" ] || [ -z "$(OUTPUT)" ]; then \
@@ -534,8 +562,7 @@ fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
 	fi
 	$(RUN) python $(FAIRSCAPE_TO_D4D) \
 		--input $(INPUT) \
-		--output $(OUTPUT) \
-		--sssom $(SSSOM_FULL)
+		--output $(OUTPUT)
 
 ## ------------------------------------------------------------------
 ## Semantic Review Tools

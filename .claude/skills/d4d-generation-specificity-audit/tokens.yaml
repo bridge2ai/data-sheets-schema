@@ -1,0 +1,122 @@
+# Token source for the generation-specificity audit (#4007).
+#
+# ONE source: the scanner first imports the lists the schema-neutrality test
+# already enforces (tests/test_neutral_generation_schema.py, #1875), parsed
+# with `ast` so the test module is never executed, then adds the extensions
+# below. Add a token here, not in scan.py. A token added to the test's lists
+# reaches this audit with no edit.
+#
+# Patterns are Python regular expressions, matched case-insensitively unless
+# the pattern itself switches case sensitivity off with (?-i:...).
+#
+# Categories:
+#   gc_project          a Bridge2AI Grand Challenge project, its platform, site
+#                       or identifiers. A VIOLATION in generation surfaces:
+#                       move the fact into the manifest/profile or remove it.
+#   bridge2ai_program   the Bridge2AI program itself (name, prefixes, award
+#                       mechanism, the repository's own org). TRACKED: never
+#                       fails the run; each hit needs a recorded reason.
+#   biomedical_clinical biomedical or clinical vocabulary. TRACKED, as above.
+#
+# When one span matches several categories the most specific wins:
+# gc_project > bridge2ai_program > biomedical_clinical.
+
+imported_lists:
+  # list name in tests/test_neutral_generation_schema.py -> category
+  STUDY_IDENTITY: gc_project
+  # The design hallmarks of the study the schema's old example family was
+  # modelled on (AI-READI: diabetes, retina, CGM). The neutrality test fails
+  # on them in the schema; here they are scanned as gc_project because in a
+  # generation instruction they are that study's design, not a domain.
+  STUDY_DESIGN: gc_project
+  PROSE_ONLY: bridge2ai_program
+
+extensions:
+  gc_project:
+    # project names and aliases the test list does not carry
+    - 'aireadi'
+    - 'AI-READI'
+    - 'chorus4ai'
+    - '(?-i:\bCHoRUS\b)'
+    - 'b2ai-voice'
+    - 'Bridge2AI-Voice'
+    - 'VOICE[-_ ]?PEDIATRIC'
+    - '(?-i:\bVOICE_PEDS\b)'
+    - 'voicepeds'
+    - 'Cell Maps'
+    # the platforms and sites the four projects publish through
+    - 'fairhub'
+    - 'physionet'
+    - 'healthdatanexus'
+    - 'health data nexus'
+    - 'dataverse'
+    - 'docs\.aireadi\.org'
+    - 'cm4ai\.org'
+    - 'synapse\.org'
+    # the projects' DOI prefixes and dataset DOIs
+    - '10\.60775/fairhub'
+    - '10\.18130/V3/B35XWX'
+    - 'B35XWX'
+    # The UVA Dataverse DOI prefix, whole like PhysioNet's below: CM4AI
+    # publishes there (B35XWX, F3TD5R and K7TGEM superseded, HIGT4C current:
+    # source_manifest.yaml CM4AI entries, constants/methods.py) and so does
+    # CHORUS (XNBOPG, its crate's release: scope.py, release_inventory.py).
+    # Each id is checked present in the repository (grep -r); a bare release
+    # id is a hit too (#4027)
+    - '\b10\.18130/'
+    - '(?-i:\bHIGT4C\b)'
+    - '(?-i:\bXNBOPG\b)'
+    - '(?-i:\bK7TGEM\b)'
+    - '(?-i:\bF3TD5R\b)'
+    - '10\.13026/37yb-1t42'
+    - '10\.13026/h995-bt35'
+    - '\b10\.13026/'
+    # named project personnel that have reached instructions before
+    - 'Bihorac'
+    - 'Lundberg'
+  bridge2ai_program:
+    - 'Bridge2AI'
+    - '(?-i:\bB2AI\b)'
+    - 'b2ai'
+    - 'bridge2ai\.org'
+    - 'Common Fund'
+    - 'OT2OD'
+    - 'Grand Challenge'
+    - 'w3id\.org/bridge2ai'
+  biomedical_clinical:
+    - 'clinical'
+    - 'clinician'
+    - 'patients?\b'
+    - '(?-i:\bEHRs?\b)'
+    - 'electronic health record'
+    - '(?-i:\bIRBs?\b)'
+    - 'institutional review board'
+    - 'HIPAA'
+    - '(?-i:\bPHI\b)'
+    - 'protected health information'
+    - 'de-?identif'
+    - 'Safe Harbor'
+    - 'diagnos(?!tic)'
+    - 'disease'
+    - 'biomedical'
+    - 'medical'
+    - 'hospital'
+    - 'biomarker'
+    - 'ClinicalTrials\.gov'
+    - '45 CFR'
+    - 'dbGaP'
+    - '(?-i:\bNIH\b)'
+    - '(?-i:\bMeSH\b)'
+    - '(?-i:\bNCIT\b)'
+    - 'health[- ]?care'
+
+# Spans that are never a hit, whatever token they contain. Each needs a
+# reason; keep the list short — an ignore that is too wide hides a finding.
+ignore:
+  # "AI-readiness" / "AI-ready" are generic phrases that the imported
+  # AI[-_ ]?READI pattern matches inside a longer word
+  - 'AI[-_ ]?readiness'
+  - 'AI[-_ ]?ready\b'
+  # tool-output diagnostics and the audit protocol's "independent diagnoses"
+  # (a reviewer's judgement, not a medical diagnosis)
+  - '(?:independent|held-out) diagnos\w*'

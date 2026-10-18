@@ -1,0 +1,58 @@
+{
+  "format": "native_receipt_origin_validation_v1",
+  "tested_head": "36483d08ff0936fbe52a9999293b1f2007f05a73",
+  "tested_tree": "7363bf47224eba41f8eb896d1017d7daca33ddf1",
+  "scope": "Offline receipt-origin reporting and released native/neutral compatibility checks; no scientific or production acceptance",
+  "addressed_issues": [4609, 4611, 4613],
+  "not_closed_by_this_slice": [4442, 4468, 4354],
+  "source_sha256": {
+    "src/data_sheets_schema/native_receipt_origin.py": "f962a17958a1497b51ea2e27b5bc3e0e5f6b2cad78998c83a2fd03ff3e3b76b6",
+    "src/data_sheets_schema/native_attempt_supervisor.py": "19976716dff684540e468f6e0508288d60f5742432ec14c6e2908701b4ed67e4",
+    "src/data_sheets_schema/native_execution.py": "9b9e71190993264bf9feae7302350645ed220ca372ee24356d3b839209eed7f6",
+    "src/data_sheets_schema/native_execution_registration.py": "c23421ab653d76246f82a58d53d994748f4b9771a733074c83308d3a36721c45",
+    "src/data_sheets_schema/receipt_origin.py": "92bda651720370cf5abb86c92458763385c07d4ac91b0e41314180dfeac7265f",
+    "src/data_sheets_schema/native_attribution_results.py": "303d26d22d3003d6e02298311cef1c43879af50ebd0ee3b111beb41afab3ce39",
+    "src/data_sheets_schema/native_supervisor_gates.py": "23b3d20b18b802370d4553b5c41a5d8bedfff4e19e630367c0406e68f0ddfe30",
+    "src/data_sheets_schema/native_execution_gates.py": "60b30694ecee9f708d67d336a59e7c0d1d53b8381fb90edefbeb78bcff18c6f3",
+    "tests/test_native_receipt_origin_reporting.py": "de72669212e80c5eab8a0578967c8f9a69d6eecc395faee849cf807151581044"
+  },
+  "tests": {
+    "passed": 310,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_duration_seconds": 1625.593,
+    "junit_timestamp": "2026-10-07T20:44:51.187439",
+    "by_module": {
+      "tests.test_native_attempt_supervisor": 87,
+      "tests.test_native_execution": 73,
+      "tests.test_native_incomplete_evidence": 50,
+      "tests.test_native_receipt_origin_reporting": 76,
+      "tests.test_receipt_origin_captured": 24
+    },
+    "junit": {
+      "artifact": "receipt-origin-final.xml",
+      "sha256": "4c4be7fb2b30b5deef842c6b234ae9672f66e59fc80715d39ebd0290b3eb76f7"
+    }
+  },
+  "independent_evidence_checks": {
+    "head_matches_tested_head": true,
+    "pinned_files_match_tested_commit": true,
+    "junit_has_310_testcases": true,
+    "junit_has_no_failure_error_or_skipped_nodes": true,
+    "module_counts_sum_to_310": true,
+    "production_and_test_files_unchanged_during_evidence_update": true
+  },
+  "limitations": [
+    "Passing tests establish software behavior only; synthetic native observations and authorization documents are not production authority.",
+    "Origin counts describe receipt-writing history, not source support, scientific validity or improved source coverage.",
+    "Omitted and explicit version 0 preserve selector/report shape and produce identical registrations under the same source; source dependency pins differ across commits.",
+    "The version 1 final-publication size preflight does not change the pre-existing version 0 publisher behavior.",
+    "Saved readback requires the registered local source and captured file identities; it does not authenticate evidence or reconstruct missing history.",
+    "The shared adapter under #4354, original/effective receipt history under #4468 and remaining #4442 integrations remain open.",
+    "Human scientific review, paid-run and audit28 holds remain in force."
+  ],
+  "scientific_scores_produced": 0,
+  "production_attempts_authorized": false,
+  "scientific_eligibility": false
+}

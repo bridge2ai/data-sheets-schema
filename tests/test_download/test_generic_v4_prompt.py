@@ -207,8 +207,10 @@ class TestConditionIsRecoverableFromProvenance(unittest.TestCase):
             if condition == "tuned":
                 continue
             with self.subTest(condition=condition):
-                self.assertEqual(self._infer(f"src/download/prompts/{path.name}"),
-                                 condition)
+                from data_sheets_schema.api_runner import SOURCE_HEADING_CONDITIONS
+                # Shared base bytes do not identify the registered routing mode.
+                expected = "generic_v10" if condition in SOURCE_HEADING_CONDITIONS else condition
+                self.assertEqual(self._infer(f"src/download/prompts/{path.name}"), expected)
 
     def test_the_tuned_arm_is_still_distinguished_from_its_generic_base(self):
         """It shares v1's file, so testing the generic bases first would report

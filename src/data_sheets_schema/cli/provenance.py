@@ -1,5 +1,7 @@
 """Provenance commands for the D4D CLI."""
 
+from __future__ import annotations
+
 import functools
 
 import os
@@ -109,7 +111,22 @@ def _known_phases() -> frozenset[str]:
                                 "report_regate"} | AGENTIC_PHASES
 
 
-def _inline_checks(path: Path) -> None:
+def _recorded_receipt_origin(path: Path):
+    """The `receipts.origin` a record on disk carries, or None (#2933): read
+    before a re-record rewrites the file, because no recorder can read the
+    transcript it was measured from again."""
+    import yaml as _yaml
+
+    from data_sheets_schema.backfill_checks import _split_header
+    try:
+        data = _yaml.safe_load(_split_header(path.read_text(encoding="utf-8"))[1]) if path.exists() else None
+    except (OSError, UnicodeDecodeError, _yaml.YAMLError):
+        return None
+    receipts = data.get("receipts") if isinstance(data, dict) else None
+    return receipts.get("origin") if isinstance(receipts, dict) else None
+
+
+def _inline_checks(path: Path, *, origin_prior=None) -> None:
     """Write the four deterministic check blocks into a just-written record.
 
     The API runner computes pair consistency, report claims, grounding and
@@ -123,13 +140,14 @@ def _inline_checks(path: Path) -> None:
     run without a record is not. Downstream, the canary gate reads
     report_claims and refuses a record that lacks it, so the gap cannot pass
     silently into a fan-out. The one exception is an artifact that does not
-    parse, which is re-raised.
+    parse, which is re-raised. `origin_prior` is the receipt origin the
+    record carried before a re-record rewrote it (#2933).
     """
     import yaml as _yaml
 
     from data_sheets_schema import backfill_checks as bc
     try:
-        blocks = bc.compute(path)
+        blocks = bc.compute(path, origin_prior=origin_prior)
     except _yaml.YAMLError:
         # An artifact that does not parse is a run failure, not a checks
         # failure; hiding it behind a ⚠️ would let a launcher ship it.
@@ -383,10 +401,13 @@ def _parse_phases(specs) -> list[dict]:
                    'canary gate then treats a missing or failing one as a stop '
                    'rather than as not-applicable. Implied by a --render-spec-json '
                    'specification that binds a receipt (#2350)')
+@click.option('--run-date', 'run_date', default=None,
+              help='the # Generated: YYYY-MM-DD date the instruction was rendered under (#5049); '
+                   'default: extracted from --prompt-text or verified across ±2 days')
 def record(project, method, label, input_bundle, prompts, prompt_text,
            condition, arm, runtime, provider, bundle_for_spec,
            reasoning_effort, phase_specs, phases_skipped, manifest, chunk_manifest, receipt_expected,
-           stated_profile=None, render_spec_json=None, prompt_text_env=None):
+           stated_profile=None, render_spec_json=None, prompt_text_env=None, run_date=None):
     """Write a LIVE provenance record for a run just produced.
 
     Refuses to run from anywhere but the repository root — see
@@ -404,8 +425,16 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     so a record that cannot identify its own prompt cannot be placed in it.
     """
     _require_repo_root_cwd("d4d provenance record")
+    from datetime import date, timedelta
+    import hashlib
+    import re
     from data_sheets_schema import schema_digest
     from data_sheets_schema.provenance import build_record, record_path_for
+    if run_date is not None:
+        try:
+            date.fromisoformat(run_date)
+        except ValueError as exc:
+            raise click.BadParameter(f"{run_date!r} is not an ISO date (YYYY-MM-DD)", param_hint="'--run-date'") from exc
     registered = None
     if prompt_text_env is not None:
         # The path comes from the named variable, not from the shell (#2282).
@@ -452,7 +481,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             # refused rather than recorded.
             for name, explicit in (("condition", condition), ("runtime", runtime),
                                    ("provider", provider), ("profile", stated_profile),
-                                   ("reasoning_effort", reasoning_effort)):
+                                   ("reasoning_effort", reasoning_effort), ("run_date", run_date)):
                 if name == "reasoning_effort" and registered.reasoning_effort is None:
                     # A specification that asserts no effort binds none: a
                     # launcher may still state one, recorded as its own
@@ -576,24 +605,71 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         selected = selected_manifest if registered.manifest_used else None
         manifest_basis = None if registered.manifest_used else "the registered instruction declares manifest context unused"
     elif condition:
-        from data_sheets_schema.api_runner import RunSpec
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
         bundle = bundle_for_spec or resolved_bundle
-        # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
-        # token. Storing the token here produced a spec that could never
-        # re-render to what was sent, and the gate blamed an unchanged prompt
-        # file for it (#500). Expanded through the same table, so the two
-        # commands cannot drift apart.
-        run_spec = RunSpec(
-            project=project, arm=_ARMS[arm][0], method=method,
-            bundle=Path(bundle) if bundle else None, label=label,
-            condition=condition, runtime=runtime, provider=provider,
-            manifest_line=_ARMS[arm][3],
-            manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
-            chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
-            # The spec the gate re-renders carries the profile the record
-            # states, not a second selection of this process's own (#1606).
-            profile=profile_selection.name, profile_basis=profile_selection.basis,
-        )
+
+        def _make_run_spec(candidate_date: str | None) -> RunSpec:
+            # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
+            # token. Storing the token here produced a spec that could never
+            # re-render to what was sent, and the gate blamed an unchanged prompt
+            # file for it (#500). Expanded through the same table, so the two
+            # commands cannot drift apart.
+            return RunSpec(
+                project=project, arm=_ARMS[arm][0], method=method,
+                bundle=Path(bundle) if bundle else None, label=label,
+                condition=condition, runtime=runtime, provider=provider,
+                manifest_line=_ARMS[arm][3],
+                manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
+                chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
+                # The spec the gate re-renders carries the profile the record
+                # states, not a second selection of this process's own (#1606).
+                profile=profile_selection.name, profile_basis=profile_selection.basis,
+                **({"run_date": candidate_date} if candidate_date else {}),
+            )
+
+        if run_date is not None or supplied_text is None:
+            run_spec = _make_run_spec(run_date)
+        else:
+            # An agentic run that renders before UTC midnight and records after
+            # midnight carries the launch date in its `# Generated: YYYY-MM-DD`
+            # header and in its label (#5049). Extract that header date and
+            # verify candidate dates across ±2 days against the supplied
+            # instruction digest so midnight-crossing runs record the date they
+            # were actually rendered under.
+            extracted_date: str | None = None
+            m_gen = re.search(r"^#\s*Generated:\s*(\d{4}-\d{2}-\d{2})\b", supplied_text, re.MULTILINE)
+            if m_gen:
+                try:
+                    date.fromisoformat(m_gen.group(1))
+                    extracted_date = m_gen.group(1)
+                except ValueError:
+                    extracted_date = None
+            base_dates = [date.today()]
+            try:
+                base_dates.append(date.fromisoformat(label[:10]))
+            except ValueError:
+                pass
+            candidate_dates: list[str] = []
+            if extracted_date is not None:
+                candidate_dates.append(extracted_date)
+            for base in base_dates:
+                for delta in (0, -1, 1, -2, 2):
+                    iso = (base + timedelta(days=delta)).isoformat()
+                    if iso not in candidate_dates:
+                        candidate_dates.append(iso)
+            target_sha = hashlib.sha256(supplied_text.encode("utf-8")).hexdigest()
+            matched_spec: RunSpec | None = None
+            for cand_date in candidate_dates:
+                cand_spec = _make_run_spec(cand_date)
+                try:
+                    rendered = resolve_prompt(cand_spec)
+                except Exception:
+                    break
+                if hashlib.sha256(rendered.encode("utf-8")).hexdigest() == target_sha:
+                    matched_spec = cand_spec
+                    break
+            run_spec = matched_spec if matched_spec is not None else _make_run_spec(extracted_date)
+
         spec = run_spec.render_spec()
         if not run_spec.manifest_used:
             selected = None
@@ -631,12 +707,13 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # ambient owner; the record itself keeps portable paths at its own root.
     destination = (Path(registered._agentic_artifact_paths["core"]).resolve().parent / f"{project}_provenance.yaml"
                    if registered is not None else record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
+    origin_prior = _recorded_receipt_origin(destination)        # a re-record keeps it (#2933)
     out = rec.write(destination)
     click.echo(f"✓ {out}")
     # Evidence pins retain the same portable spelling as the record's
     # outputs. Reuse the resolved address without another corpus selection.
     inline_address = out if registered is not None or concat_dir.is_absolute() else out.relative_to(Path.cwd())
-    _inline_checks(inline_address)
+    _inline_checks(inline_address, origin_prior=origin_prior)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the
     # honest act — it is what puts the evidence in the record for `d4d runs
@@ -2110,6 +2187,11 @@ def reasoning_cmd(method, project, label, path):
 
     logs = [p for p in logs if p.exists()]
     if recovered:
+        from data_sheets_schema.agentic_observed import (
+            is_truncated_streaming_snapshot,
+            payload_tokens_floor,
+        )
+
         # The agentic arm's measure, read from the orchestrator's transcript
         # observation (#1000): output tokens per run, the runtime's own
         # thinking count where the transcript carries it, the estimate
@@ -2139,6 +2221,13 @@ def reasoning_cmd(method, project, label, path):
                     "no turn coverage recorded") + ")")
             elif obs.get("reasoning_tokens_estimate") is not None:
                 parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")
+            if is_truncated_streaming_snapshot(obs):
+                parts.append(
+                    f"⚠️  lower_bound: output_tokens ({obs['output_tokens']}) < "
+                    f"payload floor ({payload_tokens_floor(obs)}); output_tokens, "
+                    "reasoning_tokens_estimate, and thinking_tokens are truncated "
+                    "streaming snapshots (#5047)"
+                )
             click.echo(f"   {proj:<9} {run_label}  " + "  ".join(parts))
     if not logs:
         if not recovered:
@@ -2542,7 +2631,6 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
 
     from data_sheets_schema.backfill_checks import apply, compute, summarise
     from data_sheets_schema.provenance import CONCAT_DIR
-    from data_sheets_schema.report_claims import declared_slots
 
     paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if method:
@@ -2569,12 +2657,8 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
         if unknown:
             raise click.ClickException(f"unknown block(s) {sorted(unknown)}; choose from {list(BLOCKS)}")
 
-    # Built once. Each call loads two SchemaViews, which over 122 records is
-    # the difference between seconds and minutes. Both maps, together, so
-    # they describe one core schema (#994).
-    from data_sheets_schema.report_claims import declared_ranges
-    declared = declared_slots()
-    ranges = declared_ranges()
+    # Each record selects the full/core schema bytes it was generated under.
+    # Supplying one current-schema map to the entire corpus erases that history.
     written = skipped = 0
     import yaml as _yaml
     from datetime import datetime, timezone
@@ -2584,7 +2668,7 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     for p in paths:
         withheld: list[str] = []
         try:
-            blocks = compute(p, declared, only=wanted, ranges=ranges)
+            blocks = compute(p, only=wanted)
             if "form" in blocks and overwrite:
                 # The audit trail of a form recompute (#907 review): the
                 # prior instrument note and British count are carried
@@ -2745,3 +2829,140 @@ def validate_records(strict, label):
         click.echo("Every matched generation record conforms to its schema.")
     if strict and failed:
         sys.exit(1)
+
+
+@provenance.command("name-grounding")
+@click.option('--full', 'record_file', type=click.Path(exists=True, dir_okay=False, path_type=Path), default=None,
+              help='a D4D record to check (a full or core record, or a phase-1 snapshot); with --bundle')
+@click.option('--bundle', type=click.Path(exists=True, dir_okay=False, path_type=Path), default=None,
+              help='with --full: the bundle to check it against, read as given (no record hash is consulted)')
+@click.option('--label', default=None,
+              help="a run label: check the run's records against the bytes each provenance record hashed")
+@click.option('--project', default=None,
+              help='with --label: one project; default every project with a provenance record under the label')
+@click.option('--method', default=None,
+              help='with --label: run directory family; defaults to the one the label lives in (#934)')
+@click.option('--record', 'which', type=click.Choice(['phase1', 'full', 'core', 'all']), default=None,
+              help="with --label: which of the run's records to check [default: all]")
+@click.option('--schema-policy', type=click.Choice(['recorded', 'legacy_current']), default=None,
+              help='with --label: captured full/core scope [default: recorded], or exact old current-union replay')
+@click.option('--json', 'as_json', is_flag=True, help='emit the result as JSON')
+def name_grounding_cmd(record_file, bundle, label, project, method, which, schema_policy, as_json):
+    """Classify person-name tokens against the bundle a record read (#2918).
+
+    Every token of two or more letters in a Person- or Creator-ranged name
+    (and `principal_investigator`) is `grounded`, `diacritic_dropped`,
+    `initial_expanded` or `absent`; every token that is not grounded is
+    listed with its path. A whole-bundle token match is a lower bound: a
+    given name found anywhere in the bundle, even in another person's
+    entry, grounds the token (see `data_sheets_schema.name_grounding`).
+    Beside it, report-only, the v2 proximity reading (#2978) lists the
+    grounded tokens it would demote: those the bundle never writes near
+    another word of the same name, or beside that word's initial.
+
+    With --label, the bytes are the ones each provenance record hashed: the
+    bundle on disk only where it matches every recorded hash, otherwise the
+    committed version that does (`provenance.bundle_bytes_for`). The record
+    scope — phase-1 snapshot, final full record, derived core — is printed
+    with each result and each record is reported separately. Recorded schema
+    scope selects full for phase1/full and core for core, with an explicit
+    corresponding-current fallback. This remains the established slot-name
+    inventory, not per-owner validation. --schema-policy legacy_current
+    replays the previous current full/core union and output. Read-only:
+    nothing is written, and findings never change the exit status.
+    """
+    import hashlib
+    import json
+
+    from data_sheets_schema import name_grounding as ng
+    if record_file or bundle:
+        if not (record_file and bundle):
+            raise click.UsageError("--full and --bundle go together")
+        if label or project or method or which or schema_policy:
+            raise click.UsageError("--full/--bundle check one file against one bundle; "
+                                   "--label, --project, --method, --record and --schema-policy select a run instead")
+        raw = bundle.read_bytes()
+        text, why = ng.bundle_text(raw)
+        if text is None:
+            raise click.ClickException(f"{bundle}: {why}")
+        doc, why = ng.parse_record(record_file.read_bytes())
+        if why:
+            raise click.ClickException(f"{record_file} {why}")
+        results = [{"instrument": ng.INSTRUMENT, "record_scope": ["given"], "checked": True,
+                    "bundle": {"source": "given on the command line", "path": str(bundle),
+                               "md5": hashlib.md5(raw).hexdigest()},
+                    "records": {"given": {"path": str(record_file), **ng.check_record(doc, text)}}}]
+    elif label:
+        from data_sheets_schema.cli.method import resolve_method
+        from data_sheets_schema.provenance import record_path_for
+        method = method or resolve_method(label, project)
+        if project:
+            paths = [record_path_for(project, method, label)]
+            if not paths[0].exists():
+                raise click.ClickException(f"no provenance record for {project} under {method} {label}: {paths[0]}")
+        else:
+            paths = sorted(record_path_for("_", method, label).parent.glob("*_provenance.yaml"))
+            if not paths:
+                raise click.ClickException(f"no provenance record under {method} {label}")
+        records = ng.RECORDS if which in (None, "all") else (which,)
+        results = [{**ng.check_run(p, records, schema_policy=schema_policy or "recorded"),
+                    "method": method} for p in paths]
+    else:
+        raise click.UsageError("name a run (--label) or a record and a bundle (--full, --bundle)")
+
+    if as_json:
+        click.echo(json.dumps(results, indent=2, default=str))
+        return
+    click.echo(f"{ng.INSTRUMENT}: whole-bundle token match, a lower bound — a given name found "
+               "anywhere in the bundle grounds the token")
+    for res in results:
+        head = f"{res['project']} {res['label']} [{res['method']}]" if "label" in res else "given record"
+        click.echo(f"\n{head}")
+        basis = res.get("bundle") or {}
+        if basis.get("source") == "git blob":
+            where = (f"git blob of {basis['commit'][:12]} ({basis.get('committed_on')}), "
+                     f"matched on {', '.join(basis.get('matched_on') or [])}")
+        elif basis.get("source") == "bundle on disk":
+            where = f"bundle on disk, matched on {', '.join(basis.get('matched_on') or [])}"
+        elif basis.get("source"):
+            where = basis["source"]
+        else:
+            where = None
+        if where:
+            # The md5 of the bytes checked, whichever source supplied them.
+            md5 = f"; md5 {basis['md5']}" if basis.get("md5") else ""
+            click.echo(f"  bundle: {basis.get('path')} — {where}{md5}")
+        click.echo(f"  record scope: {', '.join(res.get('record_scope') or [])} (each reported separately)")
+        if not res.get("checked"):
+            click.echo(f"  not checked: {res.get('reason')}")
+            continue
+        for name, rec in res["records"].items():
+            authority = rec.get("schema_basis")
+            if authority:
+                actual = authority.get("actual") or {}
+                digest = f"; sha256 {actual['sha256']}" if actual.get("sha256") else ""
+                click.echo(f"  {name:6} schema scope: {authority['schema_kind']} "
+                           f"{authority['selection']}{digest}")
+                click.echo(f"         {authority['scope_rule']}")
+                if authority.get("reason"):
+                    click.echo(f"         {authority['reason']}")
+            if not rec.get("checked"):
+                click.echo(f"  {name:6} {rec.get('path') or '—'}: not checked — {rec.get('reason')}")
+                continue
+            counts, distinct = rec["counts"], rec["distinct"]
+            # Occurrences, and distinct tokens beside any class that has some (#556).
+            tally = " · ".join(f"{c} {counts[c]}" + (f" ({distinct[c]} distinct)" if counts[c] else "")
+                               for c in ng.CLASSES)
+            leaves = f"{rec['name_leaves']} name " + ("leaf" if rec['name_leaves'] == 1 else "leaves")
+            click.echo(f"  {name:6} {rec['path']}: {leaves}; {tally}")
+            for f in rec["findings"]:
+                click.echo(f"      {f['path']} {f['name']!r}: {f['token']} ({f['class']})")
+            # The v2 proximity reading (#2978), beside v1 and never a finding.
+            prox = rec.get("proximity")
+            if prox:
+                click.echo(f"         v2 proximity (report-only): {prox['judged']} grounded token(s) judged, "
+                           f"{prox['near']} near their name, {prox['demoted']} would be demoted "
+                           f"({prox['demoted_distinct']} distinct; {prox['demoted_in_clean_leaves']} "
+                           "in leaves v1 finds clean)")
+                for f in prox["demoted_tokens"]:
+                    click.echo(f"      v2 {f['path']} {f['name']!r}: {f['token']} (grounded → {f['class']})")

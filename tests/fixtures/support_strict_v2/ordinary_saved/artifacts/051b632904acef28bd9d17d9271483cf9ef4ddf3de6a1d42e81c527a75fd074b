@@ -1,0 +1,31 @@
+id: https://example.org/plan
+name: plan
+imports:
+  - linkml:types
+prefixes:
+  linkml: https://w3id.org/linkml/
+  ex: https://example.org/
+default_prefix: ex
+classes:
+  Dataset:
+    slots: [id, title, count, enabled, creators, notes]
+  Creator:
+    attributes:
+      name:
+        range: string
+slots:
+  id:
+    range: uriorcurie
+    identifier: true
+  title:
+    range: string
+  count:
+    range: integer
+  enabled:
+    range: boolean
+  notes:
+    range: string
+  creators:
+    range: Creator
+    multivalued: true
+    inlined_as_list: true

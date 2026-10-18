@@ -1,0 +1,71 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "root_class",
+    "scopes",
+    "source_policy",
+    "vocabulary"
+  ],
+  "properties": {
+    "format": {
+      "const": "omission_context_v1"
+    },
+    "root_class": {
+      "const": "Dataset"
+    },
+    "scopes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "owner",
+          "referent",
+          "release",
+          "scope"
+        ],
+        "properties": {
+          "owner": {
+            "type": "string",
+            "pattern": "^(?:/(?:[^~]|~[01])*)*(?![\\s\\S])",
+            "maxLength": 4096
+          },
+          "referent": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 16000
+          },
+          "release": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "\\S",
+                "maxLength": 16000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 16000
+          }
+        }
+      }
+    },
+    "source_policy": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "vocabulary": {
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

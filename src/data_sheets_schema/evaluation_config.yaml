@@ -1,0 +1,4 @@
+# Null preserves the historical generation-model default. Set a model identifier
+# here only for a deliberate evaluator change; register and calibrate that run.
+version: 1
+model: null

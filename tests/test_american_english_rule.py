@@ -71,8 +71,10 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         # map is the regression this guard exists to catch. Nine phase
         # instructions, four versioned phase contracts, the layout, and
         # eleven authored surfaces, plus the versioned evidence contracts and
-        # the two renderer-19 schema-semantics surfaces.
-        self.assertEqual(len(surfaces), 37, sorted(surfaces))
+        # the two renderer-19 schema-semantics surfaces, three renderer-24
+        # receipt completion surfaces, and the opt-in removal repair and
+        # runtime receipt-completion and native attribution draft policies.
+        self.assertEqual(len(surfaces), 43, sorted(surfaces))
         for name, text in surfaces.items():
             with self.subTest(surface=name):
                 found = british_forms(text, exempt_quotes=False)
@@ -139,7 +141,7 @@ class TestItDidNotRedefineACondition(unittest.TestCase):
     #: v5 introduced it and every later version inherits v5's block.
     NEW_CONDITIONS = ("d4d_generic_arm_prompt_v5.md", "d4d_generic_arm_prompt_v6.md",
                       "d4d_generic_arm_prompt_v7.md", "d4d_generic_arm_prompt_v8.md",
-                      "d4d_generic_arm_prompt_v9.md")
+                      "d4d_generic_arm_prompt_v9.md", "d4d_generic_arm_prompt_v10.md")
     #: Listed by hand, not globbed: the guard is that a *human* declares each
     #: new condition as one born with the rule. A derived list would pass for
     #: any prompt that acquired it, which is the thing being forbidden.

@@ -1,0 +1,147 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "request_sha256",
+    "chunks"
+  ],
+  "properties": {
+    "format": {
+      "const": "omission_inventory_v1"
+    },
+    "request_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}(?![\\s\\S])"
+    },
+    "chunks": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "chunk",
+          "status",
+          "reason",
+          "candidates"
+        ],
+        "properties": {
+          "chunk": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 16000
+          },
+          "status": {
+            "enum": [
+              "omission",
+              "no_omission"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "pattern": "\\S",
+            "maxLength": 16000
+          },
+          "candidates": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "kind",
+                "source",
+                "quote",
+                "target",
+                "missing_information",
+                "scope_basis"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,127}(?![\\s\\S])"
+                },
+                "kind": {
+                  "const": "omission"
+                },
+                "source": {
+                  "type": "string",
+                  "pattern": "\\S",
+                  "maxLength": 16000
+                },
+                "quote": {
+                  "type": "string",
+                  "pattern": "\\S",
+                  "maxLength": 16000
+                },
+                "target": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "owner",
+                    "slot_chain"
+                  ],
+                  "properties": {
+                    "owner": {
+                      "type": "string",
+                      "pattern": "^(?:/(?:[^~]|~[01])*)*(?![\\s\\S])",
+                      "maxLength": 4096
+                    },
+                    "slot_chain": {
+                      "type": "array",
+                      "minItems": 1,
+                      "maxItems": 32,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
+                    }
+                  }
+                },
+                "missing_information": {
+                  "type": "string",
+                  "pattern": "\\S",
+                  "maxLength": 16000
+                },
+                "scope_basis": {
+                  "type": "string",
+                  "pattern": "\\S",
+                  "maxLength": 16000
+                }
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "omission"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "candidates": {
+                  "minItems": 1
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "candidates": {
+                  "maxItems": 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

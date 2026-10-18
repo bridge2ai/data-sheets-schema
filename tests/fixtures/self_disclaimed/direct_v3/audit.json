@@ -1,0 +1,207 @@
+{
+ "findings": [
+  {
+   "severity": "high",
+   "slot": "source_caveats",
+   "record": "full",
+   "issue": "Neutralised finding 0.",
+   "review_paths": [
+    "/source_caveats"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/source_caveats"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "source_caveats",
+   "record": "full",
+   "issue": "Neutralised finding 1.",
+   "review_paths": [
+    "/source_caveats",
+    "/external_resources/0/source_caveats"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/source_caveats"
+    },
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/external_resources/0/source_caveats"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "source_caveats",
+   "record": "full",
+   "issue": "Neutralised finding 2.",
+   "review_paths": [
+    "/notes",
+    "/source_caveats",
+    "/funders/0/grants/0/description",
+    "/subpopulations/0/description",
+    "/splits/0/split_details",
+    "/cleaning_strategies/0/source_caveats",
+    "/labeling_strategies/0/labeling_details",
+    "/machine_annotation_tools/0/tool_descriptions",
+    "/is_deidentified/source_caveats",
+    "/participant_privacy/0/privacy_techniques",
+    "/ethical_reviews/0/source_caveats",
+    "/distribution_formats/0/source_caveats",
+    "/license_and_use_terms/source_caveats",
+    "/data_governance/source_caveats",
+    "/maintainers/0/source_caveats",
+    "/version_access/source_caveats",
+    "/variables/0/measurement_technique",
+    "/variables/0/source_caveats",
+    "/external_resources/0/source_caveats"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/ethical_reviews/0/source_caveats"
+    },
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/notes"
+    }
+   ]
+  },
+  {
+   "severity": "low",
+   "slot": "instances",
+   "record": "full",
+   "issue": "Neutralised finding 3.",
+   "review_paths": [
+    "/instances/6/description",
+    "/instances/10/description",
+    "/instances/10/source_caveats"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/instances/10/description"
+    },
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/instances/10/source_caveats"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "instances",
+   "record": "full",
+   "issue": "Neutralised finding 4.",
+   "review_paths": [
+    "/instances/6/source_caveats",
+    "/instances/8/description",
+    "/version_access/version_details"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/instances/8/description"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "data_collectors",
+   "record": "full",
+   "issue": "Neutralised finding 5.",
+   "review_paths": [
+    "/data_collectors/0/role"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/data_collectors/0/role"
+    }
+   ]
+  },
+  {
+   "severity": "low",
+   "slot": "cleaning_strategies",
+   "record": "full",
+   "issue": "Neutralised finding 6.",
+   "review_paths": [
+    "/cleaning_strategies/0/name"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/cleaning_strategies/0/name"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "description",
+   "record": "full",
+   "issue": "Neutralised finding 7.",
+   "review_paths": [
+    "/description"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/description"
+    }
+   ]
+  },
+  {
+   "severity": "low",
+   "slot": "existing_uses",
+   "record": "full",
+   "issue": "Neutralised finding 8.",
+   "review_paths": [
+    "/existing_uses/1/examples/0",
+    "/instances/6/description",
+    "/instances/8/description",
+    "/is_deidentified/method",
+    "/data_governance/access_review_process",
+    "/purposes/1/response"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/existing_uses/1/examples/0"
+    }
+   ]
+  },
+  {
+   "severity": "low",
+   "slot": "raw_data_sources",
+   "record": "full",
+   "issue": "Neutralised finding 9.",
+   "review_paths": [
+    "/raw_data_sources/0/source_description"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/raw_data_sources/0/source_description"
+    }
+   ]
+  }
+ ]
+}

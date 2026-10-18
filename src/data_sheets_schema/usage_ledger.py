@@ -36,11 +36,9 @@ def exclusive_outputs(paths):
     # Split and flat layouts can share a full/core record while storing their
     # metadata elsewhere. Lock the actual files, including resolved aliases,
     # in one order so partial overlap cannot bypass output ownership (#1298).
-    outputs = {path.resolve() for path in paths}
     held = []
     try:
-        for output in sorted(outputs):
-            path = output.with_name(f".{output.name}_api_run.lock")
+        for output, path in output_locks(paths):
             path.parent.mkdir(parents=True, exist_ok=True)
             lock = FileLock(path, timeout=0)
             try:
@@ -53,6 +51,12 @@ def exclusive_outputs(paths):
     finally:
         for lock in reversed(held):
             lock.release()
+
+
+def output_locks(paths) -> tuple[tuple[Path, Path], ...]:
+    """Exact resolved writer/sidecar pairs, shared by acquisition and preflight."""
+    return tuple((output, output.with_name(f".{output.name}_api_run.lock"))
+                 for output in sorted({Path(path).resolve() for path in paths}))
 
 
 def recovery_files(directory: Path, project: str) -> list[Path]:
@@ -133,6 +137,11 @@ def _read(spec) -> dict:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise UsageLedgerError(f"cannot recover API usage from {path}: {exc}") from exc
+    return _validate_data(spec, data, path)
+
+
+def _validate_data(spec, data, path):
+    """Shared ledger shape/identity validation, independent of its byte reader."""
     if (not isinstance(data, dict) or data.get("version") != 1
             or data.get("identity") != run_identity(spec) or not isinstance(data.get("rows"), list)):
         raise UsageLedgerError(f"invalid API usage ledger identity or version: {path}")
@@ -306,6 +315,19 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     data = _read(spec)
     if data.get("evidence_refusal") is not None:
         raise UsageLedgerError("this generation has a terminal evidence refusal; no further calls are allowed")
+    require_removal_repair_admission(spec, phase=phase)
+    if getattr(spec, "receipt_completion_version", 0):
+        from data_sheets_schema.receipt_completion import require_admission, PHASE as RECEIPT_PHASE
+        require_admission(spec, phase)
+        if phase == RECEIPT_PHASE:
+            data["receipt_completion"]["state"] = "admitted"
+    if phase == "removal_repair_full":
+        if removal_repair_attempted(spec):
+            raise UsageLedgerError("this generation already admitted its one removal repair")
+        data["removal_repair_attempted"] = True
+        data["removal_repair_admission"] = {"state": "pending"}
+    if phase == "report_after_repair" and data.get("removal_repair_attempted"):
+        data["removal_repair_admission"]["report_refresh"] = "pending"
     if phase == "report_regate":
         if report_regate_attempted(spec):
             raise UsageLedgerError("this generation already attempted its one report regeneration")
@@ -313,10 +335,87 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
         # discarded, or the transport later fails (#1821).
         data["report_regate_attempted"] = True
     identifier = uuid.uuid4().hex
+    if getattr(spec, "receipt_completion_version", 0) and phase == RECEIPT_PHASE:
+        data["receipt_completion"]["usage_id"] = identifier
+    if getattr(spec, "shared_generation_version", 0):
+        from .typed_audit_runtime import require_admission
+        require_admission(spec, phase, data=data, usage_id=identifier)
+    if getattr(spec, "shared_generation_version", 0) == 2:
+        from .source_heading_admission import bind_admission
+        bind_admission(spec, phase, attempt, data=data, usage_id=identifier)
     data["pending_call"] = {"usage_id": identifier, "phase": phase,
                             "attempt": attempt, "started_at": started_at}
     _write(spec, data)
     return identifier
+
+
+def removal_repair_attempted(spec) -> bool:
+    """Admission exhausts the restore-only allowance, including lost responses."""
+    if not ledger_path(spec).exists():
+        return False
+    data = _read(spec)
+    return (bool(data.get("removal_repair_attempted"))
+            or any(row.get("phase") == "removal_repair_full" for row in data["rows"])
+            or (data.get("pending_call") or {}).get("phase") == "removal_repair_full")
+
+
+def require_removal_repair_admission(spec, *, phase: str | None = None) -> None:
+    """Interrupted restoration cannot authorize regeneration of its old phases."""
+    if not removal_repair_attempted(spec):
+        return
+    data = _read(spec)
+    admission = data.get("removal_repair_admission")
+    if (not isinstance(admission, dict) or admission.get("state") != "accepted"
+            or not re.fullmatch(r"[a-f0-9]{64}", str(admission.get("response_sha256", "")))
+            or not any(row.get("phase") == "removal_repair_full"
+                       and row.get("usage_id") == admission.get("usage_id") for row in data["rows"])):
+        raise UsageLedgerError("removal repair admission is incomplete or invalid; no further calls are allowed")
+    refresh = admission.get("report_refresh")
+    if phase is not None and phase not in {"report_after_repair", "report_regate"}:
+        raise UsageLedgerError("generation and shape-repair phases cannot restart after removal repair admission")
+    if phase == "report_after_repair" and refresh != "ready":
+        raise UsageLedgerError("removal repair report refresh already admitted; no second refresh is allowed")
+    if refresh != "complete" and not (refresh == "ready" and phase == "report_after_repair"):
+        raise UsageLedgerError("removal repair report refresh is incomplete; no further calls are allowed")
+
+
+def accept_removal_repair(spec, reading: dict) -> None:
+    """Publish acceptance only after final bytes and their progress pins exist."""
+    data = _read(spec)
+    if (data.get("evidence_refusal") is not None or data.get("pending_call") is not None
+            or data.get("removal_repair_admission") != {"state": "pending"}
+            or not reading.get("checked") or not reading.get("changed") or reading.get("findings")
+            or not re.fullmatch(r"[a-f0-9]{64}", str(reading.get("response_sha256", "")))
+            or not any(row.get("phase") == "removal_repair_full"
+                       and row.get("usage_id") == reading.get("usage_id") for row in data["rows"])):
+        raise UsageLedgerError("cannot accept an unverified removal repair")
+    data["removal_repair_admission"] = {"state": "accepted", "usage_id": reading["usage_id"],
+        "response_sha256": reading["response_sha256"], "report_refresh": "ready", "reading": reading}
+    _write(spec, data)
+
+
+def finish_removal_report(spec) -> None:
+    """A single refresh must finish before accepted restoration can resume."""
+    data = _read(spec)
+    admission = data.get("removal_repair_admission") or {}
+    if (admission.get("state") != "accepted" or admission.get("report_refresh") != "pending"
+            or data.get("pending_call") is not None or data.get("evidence_refusal") is not None
+            or not any(row.get("phase") == "report_after_repair" for row in data["rows"])):
+        raise UsageLedgerError("cannot finish an unverified removal repair report refresh")
+    admission["report_refresh"] = "complete"
+    _write(spec, data)
+
+
+def accepted_removal_outcome(spec) -> dict:
+    """Recover provenance only; callers still recompute the current reading."""
+    require_removal_repair_admission(spec)
+    admission = _read(spec).get("removal_repair_admission") or {}
+    out = admission.get("reading")
+    if (not isinstance(out, dict) or not out.get("checked") or not out.get("changed")
+            or out.get("findings") or out.get("response_sha256") != admission.get("response_sha256")
+            or out.get("usage_id") != admission.get("usage_id")):
+        raise UsageLedgerError("accepted removal repair outcome is missing or invalid")
+    return out
 
 
 def report_regate_attempted(spec) -> bool:

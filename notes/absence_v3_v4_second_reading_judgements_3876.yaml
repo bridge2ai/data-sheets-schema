@@ -1,0 +1,2892 @@
+# A blind second reading of the record_self_narration judgements behind
+# notes/absence_v3_recall.md and notes/absence_claims_baseline.md (#3876).
+#
+# Items: every record_self_narration row of
+#   notes/absence_v3_recall_judgements_241e910e.yaml (88, the dropped matches),
+#   notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml (50, the
+#     kept-match draw) and
+#   notes/absence_precision_judgements_574f03c2.yaml (50; its 50
+#     bundle_wide_absence rows were carried over from v1, not read, and are not
+#     in the packet),
+# 188 in all, at origin/main c962a6cc88f8844ef59890fb5fa1bd30931edd1e. `source_file` and
+# `n` name the first reading's row; `id` is the packet's.
+#
+# Rater: a separately run agent that saw only the packet and the rubric:
+#   packet  absence_v3_v4_judgements_3876, sha256 `packet_sha256` below: per item
+#           the matched phrase, its patterns, the window the drawing script
+#           prints, the phrase's sentence and the whole leaf, with no verdict,
+#           reading, reason, cause or flag of the first reading;
+#   rubric  notes/absence_v3_v4_second_reading_rubric_3876.md, committed
+#           byte for byte, sha256 `rubric_sha256` below; its wording is the
+#           first reading's files' and scripts', with a "How to answer"
+#           section added and no judged example.
+# It is another instance of the same kind of model as the first reader, not an
+# independent human rater: agreement between the two says how far the verdicts
+# depend on one reading, not on one kind of reader.
+#
+# `class_as_written`, `unsure` and `reason` are the second reader's, verbatim
+# from its output (sha256 `second_reading_sha256` below). Where the item's
+# patterns include rsn.source-ranking it answered with the reading
+# (`reading: <name>`), as the rubric's "How to answer" asks, and not also the
+# verdict; `reading` and `verdict` are derived from `class_as_written` by the
+# rubric's table (construction, referent -> in_class; source -> borderline;
+# absence -> not_in_class). Elsewhere `verdict` is `class_as_written`.
+# Agreement with the first reading: notes/absence_second_reading_agreement_2026-09-30.md.
+# This file changes no first-reader verdict, no committed count and no lint.
+# Written by a one-off script; never edited except to add a correction with
+# its reason.
+#
+# Correction (#3964, review round 1 of PR #3946): the header above calls the
+# rubric one with "no judged example", and the rubric says "No judged example
+# is included". Both are false. The rubric's `absence` reading illustrates
+# itself with ("no tier-1 source states them") -> not_in_class. That is the
+# sentence of item recall_dropped-019 (first reading
+# notes/absence_v3_recall_judgements_241e910e.yaml #19), paired with its
+# first-reader verdict: the example came from the first reader's own header,
+# which was written from that item. So the second reader was not blind on
+# recall_dropped-019, and was blind on the other 187. Its row below is kept as
+# the reader wrote it. The agreement note gives every figure over all 188
+# items and over the 187 blind ones, and lists every item whose leaf contains
+# a phrase the rubric quotes (recall_dropped-045's leaf carries "not stated in
+# the bundle" outside its judged sentence). The rubric stays byte for byte.
+packet: absence_v3_v4_judgements_3876
+source_commit: c962a6cc88f8844ef59890fb5fa1bd30931edd1e
+packet_sha256: 6711e73adb350c371b5e4a1884aa183901dac77b6e467abffb9bd7678a67ac97
+rubric: notes/absence_v3_v4_second_reading_rubric_3876.md
+rubric_sha256: e8d091f73774ebff7695b1034e50a9769f4de91f438e89bb5cac4d12e1986dd7
+second_reading_sha256: 581793a6c90f48d7974f20b24949cb21a51d4c27e49bce35970b7909a3202995
+recorded: '2026-09-30'
+rater: a separately run agent that saw only the packet and the rubric; not an independent human rater
+judgements:
+  record_self_narration:
+  - id: recall_dropped-001
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 1
+    record: claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /creators/1/source_caveats
+    start: 36
+    end: 50
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-002
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 2
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 19
+    end: 33
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-003
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 3
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 226
+    end: 239
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-004
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 4
+    record: claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /creators/1/source_caveats
+    start: 33
+    end: 46
+    patterns:
+    - rsn.source-ranking
+    text: higher ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-005
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 5
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 4
+    end: 18
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-006
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 6
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 208
+    end: 221
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-007
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 7
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_d4d.yaml
+    pointer: /creators/17/source_caveats
+    start: 114
+    end: 126
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-008
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 8
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 4
+    end: 18
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-009
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 9
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_d4d.yaml
+    pointer: /instances/4/source_caveats
+    start: 169
+    end: 180
+    patterns:
+    - rsn.source-ranking
+    text: ranks lower
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-010
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 10
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 145
+    end: 158
+    patterns:
+    - rsn.source-ranking
+    text: tier 1 source
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-011
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 11
+    record: claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 113
+    end: 126
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-012
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 12
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1009
+    end: 1023
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-013
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 13
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1034
+    end: 1048
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-014
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 14
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /human_subject_research/source_caveats
+    start: 600
+    end: 612
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: true
+    reason: sentence records the higher-ranked name in a slot; the matched 'lower-ranked' is in the clause after
+      ';' of that construction sentence
+  - id: recall_dropped-015
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 15
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /version_access/source_caveats
+    start: 272
+    end: 284
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-016
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 16
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 261
+    end: 275
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: says the highest-ranked source may be unstable; about the sources, not what the record did
+  - id: recall_dropped-017
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 17
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 296
+    end: 308
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-018
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 18
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 188
+    end: 202
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-019
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 19
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /participant_compensation/0/source_caveats
+    start: 162
+    end: 175
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    class_as_written: 'reading: absence'
+    reading: absence
+    verdict: not_in_class
+    unsure: false
+    reason: absence asserted across tier-1 sources ('no tier-1 source states ...')
+  - id: recall_dropped-020
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 20
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /creators/0/principal_investigator/source_caveats
+    start: 57
+    end: 71
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-021
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 21
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 4
+    end: 18
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-022
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 22
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 16
+    end: 29
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-023
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 23
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 446
+    end: 459
+    patterns:
+    - rsn.source-ranking
+    text: tier 1 source
+    class_as_written: 'reading: absence'
+    reading: absence
+    verdict: not_in_class
+    unsure: false
+    reason: absence asserted across tier-1 sources ('no tier-1 source states ...')
+  - id: recall_dropped-024
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 24
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 717
+    end: 729
+    patterns:
+    - rsn.source-ranking
+    text: Lower-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-025
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 25
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1578
+    end: 1592
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-026
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 26
+    record: claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 929
+    end: 943
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-027
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 27
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 112
+    end: 126
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-028
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 28
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 41
+    end: 55
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-029
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 29
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /intended_uses/3/source_caveats
+    start: 262
+    end: 275
+    patterns:
+    - rsn.source-ranking
+    text: tier 2 source
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: true
+    reason: '''Both statements are recorded'' with the tier ranking explained as not applying'
+  - id: recall_dropped-030
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 30
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /is_deidentified/source_caveats
+    start: 149
+    end: 163
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: true
+    reason: reports both sources' values and their reconcilability; does not say what the record did
+  - id: recall_dropped-031
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 31
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 2001
+    end: 2013
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-032
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 32
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 72
+    end: 86
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-033
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 33
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 151
+    end: 165
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-034
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 34
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 5
+    end: 19
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-035
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 35
+    record: claudecode_agent/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 299
+    end: 313
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-036
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 36
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /creators/8/source_caveats
+    start: 213
+    end: 225
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-037
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 37
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 1542
+    end: 1555
+    patterns:
+    - rsn.source-ranking
+    text: lowest-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-038
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 38
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml
+    pointer: /purposes/0/source_caveats
+    start: 252
+    end: 264
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-039
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 39
+    record: claudecode_agent/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /subpopulations/0/source_caveats
+    start: 16
+    end: 29
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-040
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 40
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 114
+    end: 128
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-041
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 41
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /instances/1/source_caveats
+    start: 193
+    end: 205
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: reports that a higher-ranked source states no total; a passage-stated absence, record's non-assertion
+      is in the next sentence
+  - id: recall_dropped-042
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 42
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1964
+    end: 1978
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-043
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 43
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/principal_investigator/source_caveats
+    start: 337
+    end: 351
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-044
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 44
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml
+    pointer: /instances/0/source_caveats
+    start: 99
+    end: 112
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-045
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 45
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 174
+    end: 188
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-046
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 46
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 403
+    end: 416
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-047
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 47
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 33
+    end: 47
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-048
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 48
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /creators/9/source_caveats
+    start: 126
+    end: 138
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-049
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 49
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /purposes/4/source_caveats
+    start: 222
+    end: 235
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-050
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 50
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 66
+    end: 80
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-051
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 51
+    record: claudecode_api/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 153
+    end: 167
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-052
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 52
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 126
+    end: 139
+    patterns:
+    - rsn.source-ranking
+    text: higher ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-053
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 53
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml
+    pointer: /external_resources/2/source_caveats
+    start: 116
+    end: 129
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-054
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 54
+    record: claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 1001
+    end: 1014
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-055
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 55
+    record: claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 594
+    end: 606
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-056
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 56
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 217
+    end: 231
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: true
+    reason: '''the two tier-1 sources are not reconciled'' read as the record keeping them apart; could be read
+      as a source report'
+  - id: recall_dropped-057
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 57
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 62
+    end: 76
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-058
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 58
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 61
+    end: 75
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-059
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 59
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1543
+    end: 1557
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-060
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 60
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_d4d.yaml
+    pointer: /creators/8/source_caveats
+    start: 173
+    end: 185
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-061
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 61
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 49
+    end: 63
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-062
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 62
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 492
+    end: 503
+    patterns:
+    - rsn.source-ranking
+    text: ranks lower
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-063
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 63
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1069
+    end: 1083
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-064
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 64
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 463
+    end: 477
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-065
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 65
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1593
+    end: 1607
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-066
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 66
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /maintainers/2/source_caveats
+    start: 200
+    end: 212
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-067
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 67
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 373
+    end: 387
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-068
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 68
+    record: claudecode_agent/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1947
+    end: 1960
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    class_as_written: 'reading: absence'
+    reading: absence
+    verdict: not_in_class
+    unsure: false
+    reason: '''no tier-1 source contradicts this'' - absence asserted across sources'
+  - id: recall_dropped-069
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 69
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 101
+    end: 115
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-070
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 70
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 428
+    end: 442
+    patterns:
+    - rsn.source-ranking
+    text: tier 2 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-071
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 71
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 33
+    end: 47
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: true
+    reason: FAIRhub (highest-ranked) award and URI 'recorded here' - record action, though mostly reports the source
+  - id: recall_dropped-072
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 72
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml
+    pointer: /ethical_reviews/0/source_caveats
+    start: 146
+    end: 160
+    patterns:
+    - rsn.source-ranking
+    text: tier-3 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-073
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 73
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 114
+    end: 128
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-074
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 74
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+    pointer: /creators/13/source_caveats
+    start: 62
+    end: 76
+    patterns:
+    - rsn.source-ranking
+    text: highest ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-075
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 75
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 15
+    end: 29
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-076
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 76
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/0/source_caveats
+    start: 4
+    end: 18
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-077
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 77
+    record: claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 910
+    end: 924
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-078
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 78
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 179
+    end: 193
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-079
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 79
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1198
+    end: 1212
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-080
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 80
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /content_warnings/0/source_caveats
+    start: 128
+    end: 140
+    patterns:
+    - rsn.source-ranking
+    text: ranks higher
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: reports what higher-ranked source states and its consequence for the release, not the record
+  - id: recall_dropped-081
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 81
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /sampling_strategies/0/source_caveats
+    start: 321
+    end: 334
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-082
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 82
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 636
+    end: 649
+    patterns:
+    - rsn.source-ranking
+    text: tier 2 source
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: true
+    reason: reports the source's banner and what it signals; 'the spelling is the source's' is marginal record narration
+  - id: recall_dropped-083
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 83
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 91
+    end: 105
+    patterns:
+    - rsn.source-ranking
+    text: highest-ranked
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: recall_dropped-084
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 84
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 406
+    end: 418
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-085
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 85
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 433
+    end: 447
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-086
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 86
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 654
+    end: 668
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: recall_dropped-087
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 87
+    record: claudecode_agent/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 698
+    end: 712
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: recall_dropped-088
+    source_file: notes/absence_v3_recall_judgements_241e910e.yaml
+    n: 88
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 1764
+    end: 1777
+    patterns:
+    - rsn.source-ranking
+    text: tier 1 source
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: kept_precision-001
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 1
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /is_deidentified/source_caveats
+    start: 368
+    end: 398
+    patterns:
+    - rsn.source-ranking
+    text: preferred as the higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-002
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 2
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1319
+    end: 1332
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-003
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 3
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /creators/8/source_caveats
+    start: 172
+    end: 186
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-004
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 4
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 1923
+    end: 1978
+    patterns:
+    - rsn.source-ranking
+    text: recorded as separate purposes because the higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-005
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 5
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 2120
+    end: 2133
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-006
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 6
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml
+    pointer: /creators/5/source_caveats
+    start: 252
+    end: 265
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-007
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 7
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 464
+    end: 478
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-008
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 8
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 554
+    end: 567
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-009
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 9
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1565
+    end: 1578
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-010
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 10
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 84
+    end: 98
+    patterns:
+    - rsn.source-ranking
+    text: source ranking
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-011
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 11
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 67
+    end: 81
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-012
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 12
+    record: claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 200
+    end: 213
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-013
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 13
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /creators/44/source_caveats
+    start: 259
+    end: 273
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-014
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 14
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1263
+    end: 1277
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-015
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 15
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /creators/0/principal_investigator/source_caveats
+    start: 21
+    end: 56
+    patterns:
+    - rsn.source-ranking
+    text: recorded because two equally ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-016
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 16
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 2141
+    end: 2154
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 source
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: true
+    reason: says where content lacks tier-1 corroboration the record notes it on the slot; conditional, not a bundle-wide
+      absence
+  - id: kept_precision-017
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 17
+    record: claudecode_agent_merged/2026-07-29_guarded-union/VOICE_d4d.yaml
+    pointer: /related_datasets/2/description
+    start: 195
+    end: 210
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: kept_precision-018
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 18
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 394
+    end: 407
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-019
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 19
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /creators/15/source_caveats
+    start: 151
+    end: 164
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-020
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 20
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 413
+    end: 442
+    patterns:
+    - rsn.source-ranking
+    text: used only where higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-021
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 21
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /sampling_strategies/0/source_caveats
+    start: 317
+    end: 330
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-022
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 22
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/CM4AI_d4d.yaml
+    pointer: /updates/source_caveats
+    start: 145
+    end: 175
+    patterns:
+    - rsn.source-ranking
+    text: preferred as the higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-023
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 23
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /content_warnings/0/source_caveats
+    start: 336
+    end: 366
+    patterns:
+    - rsn.source-ranking
+    text: preferred as the higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-024
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 24
+    record: claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /sensitive_elements/2/source_caveats
+    start: 177
+    end: 191
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-025
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 25
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /version_access/source_caveats
+    start: 257
+    end: 271
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: kept_precision-026
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 26
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/AI_READI_d4d.yaml
+    pointer: /version_access/source_caveats
+    start: 187
+    end: 202
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: true
+    reason: reports what the pages and the manifest curation note state; the record's handling is in the next sentence
+  - id: kept_precision-027
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 27
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 343
+    end: 356
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-028
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 28
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /sampling_strategies/0/source_caveats
+    start: 19
+    end: 33
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-029
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 29
+    record: claudecode_api/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 314
+    end: 327
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-030
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 30
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 554
+    end: 567
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-031
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 31
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 543
+    end: 624
+    patterns:
+    - rsn.source-ranking
+    text: stated as support for the research rather than contradicted by the tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-032
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 32
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 1992
+    end: 2007
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: true
+    reason: manifest retention reported, but 'values taken from it are dated accordingly' is record action
+  - id: kept_precision-033
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 33
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 258
+    end: 272
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-034
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 34
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 107
+    end: 130
+    patterns:
+    - rsn.source-ranking
+    text: declared source ranking
+    class_as_written: 'reading: referent'
+    reading: referent
+    verdict: in_class
+    unsure: false
+    reason: says which dataset/release this record describes, justified by the ranking
+  - id: kept_precision-035
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 35
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 71
+    end: 85
+    patterns:
+    - rsn.source-ranking
+    text: source ranking
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-036
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 36
+    record: claudecode_agent_merged/2026-07-29_coverage-union/CM4AI_d4d.yaml
+    pointer: /resources/0/related_datasets/0/description
+    start: 116
+    end: 131
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: kept_precision-037
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 37
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 115
+    end: 131
+    patterns:
+    - rsn.source-ranking
+    text: declared ranking
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-038
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 38
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /version_access/source_caveats
+    start: 105
+    end: 119
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: says where the record's figures came from, citing the manifest's retention
+  - id: kept_precision-039
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 39
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 982
+    end: 996
+    patterns:
+    - rsn.source-ranking
+    text: tier-1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-040
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 40
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /distribution_dates/4/source_caveats
+    start: 277
+    end: 291
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-041
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 41
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /related_datasets/0/source_caveats
+    start: 167
+    end: 182
+    patterns:
+    - rsn.source-ranking
+    text: source manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-042
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 42
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /ethical_reviews/0/source_caveats
+    start: 467
+    end: 479
+    patterns:
+    - rsn.source-ranking
+    text: lower-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-043
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 43
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 147
+    end: 176
+    patterns:
+    - rsn.source-ranking
+    text: recorded in the higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-044
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 44
+    record: claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1278
+    end: 1291
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-045
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 45
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 345
+    end: 358
+    patterns:
+    - rsn.source-ranking
+    text: higher ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-046
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 46
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /creators/6/source_caveats
+    start: 132
+    end: 162
+    patterns:
+    - rsn.source-ranking
+    text: used here as the higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-047
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 47
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /human_subject_research/source_caveats
+    start: 494
+    end: 507
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-048
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 48
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 3710
+    end: 3742
+    patterns:
+    - rsn.source-ranking
+    text: use agreement, an equally ranked
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: sentence reports what sources state or that they conflict; no record action in the sentence (any resolution
+      is in another sentence)
+  - id: kept_precision-049
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 49
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /creators/13/source_caveats
+    start: 208
+    end: 222
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: kept_precision-050
+    source_file: notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml
+    n: 50
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /creators/1/affiliations/0/source_caveats
+    start: 246
+    end: 260
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: v4_precision-001
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 1
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /subpopulations/0/source_caveats
+    start: 246
+    end: 250
+    patterns:
+    - rsn.slot-word
+    text: slot
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-002
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 2
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /regulatory_restrictions/description
+    start: 225
+    end: 246
+    patterns:
+    - rsn.rather-than
+    text: rather than populated
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-003
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 3
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 1569
+    end: 1582
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: v4_precision-004
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 4
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 387
+    end: 407
+    patterns:
+    - rsn.rather-than
+    text: rather than silently
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-005
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 5
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 996
+    end: 1009
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-006
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 6
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1521
+    end: 1532
+    patterns:
+    - rsn.recorded-here
+    text: stated here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-007
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 7
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1841
+    end: 1867
+    patterns:
+    - rsn.recorded-under-slot
+    text: carried in is_deidentified
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-008
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 8
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 1129
+    end: 1148
+    patterns:
+    - rsn.left-empty
+    text: is left unpopulated
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-009
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 9
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /subpopulations/1/source_caveats
+    start: 188
+    end: 201
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-010
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 10
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 1114
+    end: 1125
+    patterns:
+    - rsn.this-record
+    text: this record
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-011
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 11
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /relationships/0/source_caveats
+    start: 171
+    end: 182
+    patterns:
+    - rsn.this-record
+    text: this record
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-012
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 12
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 145
+    end: 158
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-013
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 13
+    record: claudecode_agent_merged/2026-07-29_coverage-union/CM4AI_d4d.yaml
+    pointer: /distribution_dates/0/description
+    start: 356
+    end: 369
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-014
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 14
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_d4d.yaml
+    pointer: /content_warnings/0/source_caveats
+    start: 412
+    end: 430
+    patterns:
+    - rsn.rather-than
+    text: rather than merged
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-015
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 15
+    record: claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d.yaml
+    pointer: /license_and_use_terms/notes
+    start: 612
+    end: 643
+    patterns:
+    - rsn.recorded-under-slot
+    text: recorded in data_use_permission
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-016
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 16
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 206
+    end: 228
+    patterns:
+    - rsn.rather-than
+    text: rather than reconciled
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-017
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 17
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/CM4AI_d4d.yaml
+    pointer: /cleaning_strategies/0/cleaning_details
+    start: 316
+    end: 329
+    patterns:
+    - rsn.recorded-here
+    text: retained here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-018
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 18
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 92
+    end: 105
+    patterns:
+    - rsn.recorded-here
+    text: followed here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-019
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 19
+    record: claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 200
+    end: 213
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: v4_precision-020
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 20
+    record: claudecode_agent/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /creators/0/notes
+    start: 260
+    end: 273
+    patterns:
+    - rsn.recorded-here
+    text: asserted here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-021
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 21
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 406
+    end: 419
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-022
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 22
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/CHORUS_d4d.yaml
+    pointer: /human_subject_research/source_caveats
+    start: 394
+    end: 407
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-023
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 23
+    record: claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_d4d.yaml
+    pointer: /subsets/5/description
+    start: 182
+    end: 193
+    patterns:
+    - rsn.this-record
+    text: this record
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-024
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 24
+    record: claudecode_agent_healthsheet/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d.yaml
+    pointer: /sampling_strategies/0/description
+    start: 518
+    end: 540
+    patterns:
+    - rsn.rather-than
+    text: rather than reconciled
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-025
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 25
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 2493
+    end: 2497
+    patterns:
+    - rsn.slot-word
+    text: slot
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-026
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 26
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /subpopulations/0/source_caveats
+    start: 251
+    end: 264
+    patterns:
+    - rsn.left-empty
+    text: is left empty
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-027
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 27
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CHORUS_d4d.yaml
+    pointer: /maintainers/0/source_caveats
+    start: 80
+    end: 95
+    patterns:
+    - rsn.recorded-here
+    text: reproduced here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-028
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 28
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 2778
+    end: 2867
+    patterns:
+    - rsn.source-ranking
+    text: asserted as a count; the MDA-MB-468 perturbation scale is not stated by any tier 1 source
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: true
+    reason: record asserts only tier-1 count and no count for the other; contains a tier-1 absence clause but the
+      sentence is about what the record did
+  - id: v4_precision-029
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 29
+    record: claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/CM4AI_d4d.yaml
+    pointer: /subsets/2/description
+    start: 172
+    end: 183
+    patterns:
+    - rsn.this-record
+    text: this record
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-030
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 30
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /relationships/0/source_caveats
+    start: 337
+    end: 351
+    patterns:
+    - rsn.recorded-here
+    text: preferred here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-031
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 31
+    record: claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /creators/13/source_caveats
+    start: 136
+    end: 145
+    patterns:
+    - rsn.recorded-here
+    text: used here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-032
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 32
+    record: claudecode_agent/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /acquisition_methods/0/source_caveats
+    start: 23
+    end: 36
+    patterns:
+    - rsn.left-empty
+    text: is left unset
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-033
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 33
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 1923
+    end: 1978
+    patterns:
+    - rsn.source-ranking
+    text: recorded as separate purposes because the higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: v4_precision-034
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 34
+    record: claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /ethical_reviews/0/source_caveats
+    start: 418
+    end: 427
+    patterns:
+    - rsn.recorded-here
+    text: used here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-035
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 35
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1784
+    end: 1797
+    patterns:
+    - rsn.source-ranking
+    text: higher-ranked
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: sentence says what the record did (used/preferred/recorded/left empty) and the ranking bears on it
+  - id: v4_precision-036
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 36
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml
+    pointer: /at_risk_populations/description
+    start: 460
+    end: 473
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-037
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 37
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1149
+    end: 1153
+    patterns:
+    - rsn.slot-word
+    text: slot
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-038
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 38
+    record: claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d.yaml
+    pointer: /funders/1/description
+    start: 584
+    end: 597
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-039
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 39
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 99
+    end: 132
+    patterns:
+    - rsn.slot-not-populated
+    text: '`committee_contact.id` is omitted'
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-040
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 40
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 110
+    end: 119
+    patterns:
+    - rsn.recorded-here
+    text: used here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-041
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 41
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 146
+    end: 164
+    patterns:
+    - rsn.rather-than
+    text: rather than merged
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-042
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 42
+    record: claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 1394
+    end: 1405
+    patterns:
+    - rsn.this-record
+    text: this record
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-043
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 43
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 1783
+    end: 1825
+    patterns:
+    - rsn.source-ranking
+    text: carried over only where the tier 1 sources
+    class_as_written: 'reading: construction'
+    reading: construction
+    verdict: in_class
+    unsure: false
+    reason: healthsheet answers carried over only where tier-1 sources do not contradict - record construction
+  - id: v4_precision-044
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 44
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 1039
+    end: 1073
+    patterns:
+    - rsn.recorded-under-slot
+    text: recorded under sampling_strategies
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-045
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 45
+    record: claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 594
+    end: 623
+    patterns:
+    - rsn.recorded-under-slot
+    text: recorded in committee_contact
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-046
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 46
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /instances/1/source_caveats
+    start: 178
+    end: 192
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    class_as_written: 'reading: source'
+    reading: source
+    verdict: borderline
+    unsure: false
+    reason: reports that a higher-ranked source states no total; a passage-stated absence, record's non-assertion
+      is in the next sentence
+  - id: v4_precision-047
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 47
+    record: claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 1474
+    end: 1505
+    patterns:
+    - rsn.recorded-under-slot
+    text: recorded under related_datasets
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-048
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 48
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 375
+    end: 404
+    patterns:
+    - rsn.recorded-under-slot
+    text: recorded under version_access
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-049
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 49
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 590
+    end: 603
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)
+  - id: v4_precision-050
+    source_file: notes/absence_precision_judgements_574f03c2.yaml
+    n: 50
+    record: claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /errata/2/source_caveats
+    start: 167
+    end: 180
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    class_as_written: in_class
+    verdict: in_class
+    unsure: false
+    reason: statement about how the record was built (what was recorded/left empty/kept apart/minted)

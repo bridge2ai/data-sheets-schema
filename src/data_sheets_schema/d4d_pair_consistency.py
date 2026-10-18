@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -147,8 +148,11 @@ def load_pair_schema(
 ) -> PairSchema:
     """Load schemas and derive strict-identity versus projected shared slots."""
 
-    full_view = shared_view(full_schema)
-    core_view = shared_view(core_schema)
+    return pair_schema_from_views(shared_view(full_schema), shared_view(core_schema))
+
+
+def pair_schema_from_views(full_view: SchemaView, core_view: SchemaView) -> PairSchema:
+    """Derive pair rules from the caller's selected, lifetime-bound views."""
     full_slots = {
         slot.name: slot for slot in full_view.class_induced_slots(FULL_CLASS)
     }
@@ -594,14 +598,17 @@ def _append_distribution_relation_issues(
     )
 
 
-def _slot_resolver(run_digest: str | None):
-    """A callable(slot) -> bool|None over the digest ledger, or None."""
+def _slot_resolver(run_digest: str | None, historical_core_slots: frozenset[str] | None = None):
+    """Ledger membership first, then recovered recorded-core membership."""
     if not run_digest:
         return None
     from data_sheets_schema import schema_digest
 
     def existed(slot: str):
-        return schema_digest.slot_existed_at(run_digest, CORE_CLASS, slot)
+        recorded = schema_digest.slot_existed_at(run_digest, CORE_CLASS, slot)
+        if recorded is None and historical_core_slots is not None:
+            return slot in historical_core_slots
+        return recorded
     return existed
 
 
@@ -611,13 +618,17 @@ def validate_pair_data(
     pair_schema: PairSchema,
     schema_moved: bool = False,
     run_digest: str | None = None,
+    *,
+    historical_core_slots: frozenset[str] | None = None,
 ) -> PairConsistencyReport:
     """Validate strict shared content and schema-related projections.
 
     `run_digest` is the schema digest the pair was generated against. Given
     one, a presence mismatch is excused only for slots the digest ledger shows
     did not exist then; without one, `schema_moved` applies broadly as before
-    (#580).
+    (#580). The CLI may additionally supply membership from hash-verified
+    recorded core bytes when the ledger cannot answer (#4061). This does not
+    replace the selected comparison schemas or recover a rendered digest.
     """
 
     report = PairConsistencyReport(
@@ -631,7 +642,7 @@ def validate_pair_data(
         core_data,
         pair_schema.identity_slots,
         schema_moved=schema_moved,
-        slot_existed=_slot_resolver(run_digest),
+        slot_existed=_slot_resolver(run_digest, historical_core_slots),
     )
 
     if "resources" in pair_schema.projected_slots:
@@ -734,6 +745,80 @@ def synchronize_core_data(
     return synchronized
 
 
+def _captured_pair_history(core_path: Path) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    """One provenance snapshot for digest comparison and recorded-core recovery."""
+    from data_sheets_schema import schema_digest
+    from data_sheets_schema.duplicate_keys import find_duplicate_keys
+    from data_sheets_schema.profiles import for_record
+
+    provenance = core_path.parent / f"{core_path.name.split('_d4d')[0]}_provenance.yaml"
+    history = {"instrument": "pair-presence-context-v1", "provenance_path": str(provenance),
+               "provenance_sha256": None, "provenance_status": "unavailable",
+               "run_digest": None, "current_profile": None, "current_digest": None,
+               "schema_moved": False}
+    try:
+        raw = provenance.read_bytes()
+        history["provenance_sha256"] = hashlib.sha256(raw).hexdigest()
+        text = raw.decode("utf-8")
+        if find_duplicate_keys(text, strict=True):
+            raise ValueError("ambiguous duplicate provenance keys")
+        data = yaml.safe_load(text)
+        if not isinstance(data, dict):
+            raise ValueError("provenance must be a mapping")
+        schema = data.get("schema")
+        if schema is None:
+            schema = {}
+        if not isinstance(schema, dict):
+            raise ValueError("provenance schema must be a mapping")
+        recorded = schema.get("digest_md5")
+        if recorded is None or recorded == "":
+            history["provenance_status"] = "no_recorded_digest"
+            return history, None
+        if not isinstance(recorded, str):
+            raise ValueError("recorded digest must be text")
+    except (OSError, ValueError, TypeError, RecursionError, yaml.YAMLError) as exc:
+        history["reason"] = f"{type(exc).__name__}: {exc}"
+        return history, None
+
+    profile = for_record(data)
+    live = schema_digest.fingerprint(schema_digest.digest_text(FULL_CLASS, profile=profile))
+    history.update(provenance_status="captured", run_digest=recorded,
+                   current_profile=profile.name, current_digest=live,
+                   schema_moved=recorded != live)
+    return history, data
+
+
+def _pair_history(core_path: Path) -> dict[str, Any]:
+    """The existing digest comparison, without historical schema reconstruction."""
+    return _captured_pair_history(core_path)[0]
+
+
+def _historical_core_inventory(record: dict[str, Any]) -> tuple[frozenset[str] | None, dict[str, Any]]:
+    """Recover slot membership only; never rerender or write a digest ledger.
+
+    A resolver basis naming today's schema means recovery failed. It does
+    not authorize using today's membership as historical evidence.
+    """
+    from data_sheets_schema.run_schema import run_schema_bytes
+    from data_sheets_schema.schema_view import version_document, version_view
+
+    raw, basis = run_schema_bytes(record, kind="core")
+    if raw is None:
+        return None, {"status": "unknown", "basis": basis,
+                      "reason": "recorded core bytes unavailable; current-schema membership not substituted"}
+    try:
+        document = version_document(raw)
+        with version_view(basis["path"], document) as view:
+            if view.get_class(CORE_CLASS) is None:
+                raise ValueError(f"recorded core schema does not declare {CORE_CLASS}")
+            slots = frozenset(str(slot.name) for slot in view.class_induced_slots(CORE_CLASS))
+    except Exception as exc:  # noqa: BLE001 — unusable recovered history retains the stated unknown fallback
+        return None, {"status": "unknown", "basis": basis,
+                      "reason": f"recorded core membership could not be read ({type(exc).__name__}: {exc})"}
+    return slots, {"status": "recovered", "basis": basis, "class": CORE_CLASS,
+                   "slot_count": len(slots), "slots": sorted(slots)}
+
+
 def pair_predates_current_schema(core_path: Path) -> bool:
     """Was this pair generated against a schema that has since moved? (#520)
 
@@ -746,21 +831,7 @@ def pair_predates_current_schema(core_path: Path) -> bool:
     cannot show it predates the schema is held to the current one. Silence is
     not a licence.
     """
-    from data_sheets_schema import schema_digest
-
-    provenance = core_path.parent / f"{core_path.name.split('_d4d')[0]}_provenance.yaml"
-    if not provenance.exists():
-        return False
-    try:
-        data = yaml.safe_load(provenance.read_text(encoding="utf-8")) or {}
-    except Exception:                                          # noqa: BLE001
-        return False
-    recorded = (data.get("schema") or {}).get("digest_md5")
-    if not recorded:
-        return False
-    from data_sheets_schema.profiles import for_record
-    live = schema_digest.fingerprint(schema_digest.digest_text(FULL_CLASS, profile=for_record(data)))
-    return recorded != live
+    return _pair_history(core_path)["schema_moved"]
 
 
 def _load_yaml_mapping(path: Path) -> Dict[str, Any]:
@@ -836,11 +907,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         core_data = synchronize_core_data(full_data, core_data, pair_schema)
         _write_synchronized_core(args.core, core_data)
 
+    history, record = _captured_pair_history(args.core)
+    from data_sheets_schema import schema_digest
+    # A False membership answer still proves a known inventory, including
+    # an empty one; None means the class inventory is not recorded (#580).
+    known = (schema_digest.slot_existed_at(history["run_digest"], CORE_CLASS, "id") is not None
+             if history["run_digest"] else False)
+    historical_slots = None
+    if known:
+        inventory = {"status": "not_needed", "reason": "the digest ledger has a CoreDataset inventory"}
+    elif not history["schema_moved"]:
+        inventory = {"status": "not_needed", "reason": "the existing digest comparison keeps presence checks strict"}
+    else:
+        historical_slots, inventory = _historical_core_inventory(record)
     report = validate_pair_data(
         full_data, core_data, pair_schema,
-        schema_moved=pair_predates_current_schema(args.core))
+        schema_moved=history["schema_moved"], run_digest=history["run_digest"],
+        historical_core_slots=historical_slots)
+    history.update(ledger_inventory="known" if known else "unknown",
+                   historical_core_inventory=inventory,
+                   unknown_inventory_policy="retain broad presence warning when schema_moved",
+                   pair_schema_basis="current comparison using selected schema paths",
+                   full_schema_path=str(args.full_schema), core_schema_path=str(args.core_schema))
     if args.as_json:
-        print(json.dumps(report.to_dict(), indent=2))
+        print(json.dumps({**report.to_dict(), "presence_context": history}, indent=2))
     else:
         status = "PASS" if report.passed else "FAIL"
         print(
@@ -853,6 +943,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(f"ERROR [{issue.code}] {issue.path}: {issue.message}")
         for issue in report.warnings:
             print(f"WARNING [{issue.code}] {issue.path}: {issue.message}")
+        print(f"Presence context: {history['provenance_status']}; "
+              f"recorded digest={history['run_digest']}; "
+              f"schema_moved={history['schema_moved']}; ledger inventory={history['ledger_inventory']}")
+        print("Historical core inventory: " + json.dumps(inventory, sort_keys=True))
 
     return 0 if report.passed else 1
 

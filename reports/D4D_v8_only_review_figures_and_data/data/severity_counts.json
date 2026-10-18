@@ -1,0 +1,62 @@
+[
+  {
+    "project": "AI_READI",
+    "severity": "low",
+    "count": 41
+  },
+  {
+    "project": "AI_READI",
+    "severity": "medium",
+    "count": 23
+  },
+  {
+    "project": "AI_READI",
+    "severity": "high",
+    "count": 2
+  },
+  {
+    "project": "CHORUS",
+    "severity": "low",
+    "count": 25
+  },
+  {
+    "project": "CHORUS",
+    "severity": "medium",
+    "count": 44
+  },
+  {
+    "project": "CHORUS",
+    "severity": "high",
+    "count": 23
+  },
+  {
+    "project": "CM4AI",
+    "severity": "low",
+    "count": 32
+  },
+  {
+    "project": "CM4AI",
+    "severity": "medium",
+    "count": 37
+  },
+  {
+    "project": "CM4AI",
+    "severity": "high",
+    "count": 6
+  },
+  {
+    "project": "VOICE",
+    "severity": "low",
+    "count": 42
+  },
+  {
+    "project": "VOICE",
+    "severity": "medium",
+    "count": 27
+  },
+  {
+    "project": "VOICE",
+    "severity": "high",
+    "count": 1
+  }
+]

@@ -82,6 +82,35 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         self.assertNotIn("budget_tokens", settings["thinking"])
         self.assertEqual(settings["thinking"], {"type": "adaptive"})
 
+    def test_generic_v10_condition_requests_summarized_display(self):
+        """Condition 'generic_v10' requests adaptive thinking with summarized display."""
+        settings = _model_settings("generic_v10")
+        self.assertEqual(settings["thinking"], {"type": "adaptive", "display": "summarized"})
+
+        class _Spec:
+            condition = "generic_v10"
+
+        settings_obj = _model_settings(_Spec())
+        self.assertEqual(settings_obj["thinking"], {"type": "adaptive", "display": "summarized"})
+
+        for other in ("generic", "generic_v9", None):
+            other_settings = _model_settings(other)
+            self.assertEqual(other_settings["thinking"], {"type": "adaptive"})
+            self.assertNotIn("display", other_settings["thinking"])
+
+    def test_summarized_display_binds_to_the_real_sdk(self):
+        import inspect
+        import anthropic
+        client, calls = _capturing_client()
+        _call_with_retry(client, model="claude-opus-5", max_tokens=100,
+                         temperature=None, system="s", messages=[],
+                         thinking={"type": "adaptive", "display": "summarized"})
+        kw = calls[0]
+        self.assertEqual(kw["thinking"], {"type": "adaptive", "display": "summarized"})
+        sig = inspect.signature(anthropic.resources.messages.Messages.stream)
+        sig.bind(None, **kw)
+
+
     def test_effort_travels_as_extra_body_and_every_kwarg_binds_to_the_real_sdk(self):
         """The first version passed `output_config=` as a named kwarg, and a
         fake client that accepted anything let the test pass; the pinned SDK
@@ -251,3 +280,4 @@ class TestSummariseNamesTheRegime(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

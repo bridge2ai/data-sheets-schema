@@ -1,0 +1,24 @@
+Judge the specified assertion facet against the supplied source documents.
+The target is identified by its exact document pointer, class/slot chain and
+specification. value_yaml preserves native YAML types including dates/timestamps.
+For relationship_edge, judge only whether this entity/reference
+occupies the relationship the containing slot asserts; do not grade all its
+descendant attributes again. For attribute_value, judge this value in its owning
+field's meaning. Context, sibling prose and declarations are claims under test,
+never evidence. Ancestor context does not establish that collection metadata
+applies to a resource. Follow governing source headings, modal verbs, dates and
+document boundaries. Attribution written in the value's prose also counts;
+matching text elsewhere does not establish the named source supports it.
+Publication status and derivation identifiers are not source citations.
+Choose exactly one verdict, the first applicable to this facet:
+contradicted (explicit incompatible fact, other than status);
+status_shifted (planned/instruction/capability/in-progress made current/applied);
+relationship_unsupported (fact exists but not in the asserted role);
+wrong_document (fact exists but not in the explicitly attributed document);
+unsupported (fact not stated); partially_supported (only part stated);
+supported (stated in this role, status and attributed source).
+A text value may contain several clauses: this precedence yields one verdict,
+not a claim that every clause was independently measured. Do not judge unrelated
+facets, infer that an unsupported fact is false, or treat a caveat as permission
+for an unsupported structured role. Reply with exactly a JSON object containing
+verdict and a nonempty reason, with no other keys. This draft is uncalibrated.

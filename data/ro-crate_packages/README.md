@@ -48,6 +48,21 @@ cd data/ro-crate_packages/CM4AI && unzip -q -o raw/cm4ai_release_metadata.zip \
 | AI_READI | supplied locally (Drive folder, 2026-08-07) | root-level file set, 5 artifacts | No — `ro-crate-metadata.json` is windows-1252, not UTF-8 |
 | VOICE | supplied locally (directory, 2026-07-27) | standalone file set, 8 artifacts | No — no `ro-crate-linkml.yaml` |
 
+The table predates #646, which anchored the `doi` pattern to the bare DOI.
+Every crate here writes its DOI as a resolver URL, so each one now needs one
+more repair: both mappers write the bare DOI in the crate's own case, and
+`d4d rocrate normalize` logs the rewrite as its `doi` step (#2916). A value
+the slot's pattern already accepts is left as written (#2989), spellings
+that differ only in case count as one DOI (#2987), and normalize repairs
+the Dataset's own `doi` only, not one nested in another object (#2988). The
+record `id` of `d4d rocrate map` takes the `doi:` CURIE form, and its
+provenance report names the crate's own value beside each `doi` or `id` it
+rewrote (#3139); its other coercion notes, such as a date widened to a
+date-time, are still not shown on a filled row. Each verdict in
+`processed/` names the schema version, merged-schema sha256 and date it was
+reached against, and `tests/test_rocrate/test_committed_outputs.py` (corpus
+lane) re-validates the committed records against today's schema.
+
 ## What each crate ships
 
 The Dataverse-published crates (CHORUS, CM4AI) follow the same four-artifact

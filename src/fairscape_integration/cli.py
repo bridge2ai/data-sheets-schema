@@ -7,22 +7,34 @@ integration tasks: parsing, converting, validating, and merging.
 """
 
 import sys
+import json
 import click
 from pathlib import Path
 from typing import Optional
+from io import StringIO
+from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
+from data_sheets_schema.legacy_route_dispositions import (
+    prepare_sidecar, protected_sources, validate_evidence, supplemental_report,
+)
 
 # Resolve repository root for bundled schema lookup.
 # Works both from a repo checkout and when installed as a package.
 repo_root = Path(__file__).parent.parent.parent
 
 from fairscape_integration.d4d_to_fairscape import D4DToFairscapeConverter
+from data_sheets_schema.fairscape_forward_types import warning_messages
 from fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
 from fairscape_integration.utils.validator import D4DValidator
-from fairscape_integration.utils.rocrate_parser import ROCrateParser
+from fairscape_integration.utils.rocrate_parser import ROCrateParser, graph_entities
 from fairscape_integration.utils.mapping_loader import MappingLoader
 from fairscape_integration.utils.d4d_builder import D4DBuilder
 from fairscape_integration.utils.rocrate_merger import ROCrateMerger
 from fairscape_integration.utils.informativeness_scorer import InformativenessScorer
+from data_sheets_schema.legacy_root_identity import root_identity_route, scoring_fields
+from data_sheets_schema.legacy_creator_references import reference_evidence, reference_lines
+from data_sheets_schema.legacy_creators import (
+    author_source_presence, source_presence_lines, KEY_BASIS_LABEL, MEASUREMENT_LIMIT,
+)
 
 
 @click.group()
@@ -37,11 +49,23 @@ def cli():
     pass
 
 
+def _check_forward_destinations(source: Path, destinations) -> None:
+    """Refuse input/report/output aliases before any staging or replacement."""
+    paths = [source, *destinations]
+    for index, path in enumerate(paths):
+        for other in paths[index + 1:]:
+            first, second = path.resolve(), other.resolve()
+            if (first == second or first in second.parents or second in first.parents
+                    or (path.exists() and other.exists() and path.samefile(other))):
+                raise ValueError("Forward input/output/report paths collide or alias each other")
+
+
 @cli.command()
 @click.argument('input_file', type=click.Path(exists=True))
 @click.option('-o', '--output', type=click.Path(), help='Output file path (default: stdout)')
 @click.option('--pretty', is_flag=True, help='Pretty-print JSON output')
-def d4d_to_rocrate(input_file: str, output: Optional[str], pretty: bool):
+@click.option('--report', type=click.Path(), help='Write complete detached projection evidence as JSON')
+def d4d_to_rocrate(input_file: str, output: Optional[str], pretty: bool, report: Optional[str]):
     """
     Convert D4D YAML to RO-Crate JSON-LD.
 
@@ -54,27 +78,40 @@ def d4d_to_rocrate(input_file: str, output: Optional[str], pretty: bool):
     import json
 
     try:
-        # Load D4D YAML
-        with open(input_file, 'r') as f:
-            d4d_data = yaml.safe_load(f)
+        destinations = [Path(path) for path in (output, report) if path is not None]
+        _check_forward_destinations(Path(input_file), destinations)
+        with open(input_file, 'r', encoding='utf-8') as stream:
+            d4d_data = yaml.safe_load(stream)
 
-        # Convert to RO-Crate
         converter = D4DToFairscapeConverter()
         rocrate = converter.convert(d4d_data)
-
-        # Serialize to JSON
-        rocrate_dict = rocrate.model_dump(by_alias=True, exclude_none=True)
-
-        if pretty:
-            json_output = json.dumps(rocrate_dict, indent=2)
-        else:
-            json_output = json.dumps(rocrate_dict)
-
-        # Write output
-        if output:
-            with open(output, 'w') as f:
-                f.write(json_output)
-            click.echo(f"✓ RO-Crate written to: {output}")
+        rocrate_dict = rocrate.model_dump(mode='json', by_alias=True, exclude_none=True)
+        json_output = json.dumps(rocrate_dict, indent=2 if pretty else None,
+                                 ensure_ascii=True, allow_nan=False)
+        evidence = converter.route_evidence
+        prepared = []
+        if output is not None:
+            prepared.append((Path(output), json_output.encode('utf-8')))
+        if report is not None:
+            report_bytes = (json.dumps(evidence, indent=2, ensure_ascii=True,
+                                       allow_nan=False) + "\n").encode('utf-8')
+            prepared.append((Path(report), report_bytes))
+        # Recheck aliases immediately before the existing staged publication.
+        # This is not a reservation against unrelated concurrent path mutation.
+        _check_forward_destinations(Path(input_file), destinations)
+        if prepared:
+            publish(prepared, protected=[input_file])
+        messages = warning_messages(evidence)
+        for message in messages:
+            click.echo(message, err=True)
+        if messages:
+            click.echo("Complete raw projection evidence saved to: " + str(report)
+                       if report is not None else
+                       "Raw projection evidence was not saved; request --report PATH.", err=True)
+        if report is not None:
+            click.echo(f"Projection evidence report written to: {report}", err=True)
+        if output is not None:
+            click.echo(f"✓ Model-valid RO-Crate written to: {output}")
         else:
             click.echo(json_output)
 
@@ -96,16 +133,17 @@ def rocrate_to_d4d(input_file: str, output: Optional[str]):
         fairscape-cli rocrate-to-d4d ro-crate-metadata.json -o output.yaml
     """
     import yaml
-    import json
 
     try:
-        # Load RO-Crate JSON-LD
-        with open(input_file, 'r') as f:
-            rocrate_data = json.load(f)
-
-        # Convert to D4D
+        # Convert to D4D. `convert` reads the crate as the static-map arm
+        # does (`rocrate_map.read_crate_json`): one that is not UTF-8 is a
+        # CrateEncodingError naming the first byte that does not decode and
+        # saying to transcode it, and a file whose JSON is not one object
+        # is a ValueError saying what it holds (#4192). Each is reported
+        # below like any other error. Until #4089 the crate was read here,
+        # in the platform's default encoding.
         converter = FairscapeToD4DConverter()
-        d4d_data = converter.convert(rocrate_data)
+        d4d_data = converter.convert(Path(input_file))
 
         # Serialize to YAML
         yaml_output = yaml.dump(d4d_data, default_flow_style=False, sort_keys=False)
@@ -117,6 +155,13 @@ def rocrate_to_d4d(input_file: str, output: Optional[str]):
             click.echo(f"✓ D4D YAML written to: {output}")
         else:
             click.echo(yaml_output)
+
+        # What the record could not hold, on stderr (#3969). That does not
+        # make stdout YAML alone without -o: convert() prints its progress
+        # lines there first, and so do the import warnings when the FAIRSCAPE
+        # models are missing (#4075).
+        for source, reason in converter.dropped:
+            click.echo(f"⚠ not placed: {source}: {reason}", err=True)
 
     except Exception as e:
         click.echo(f"✗ Error: {e}", err=True)
@@ -202,8 +247,16 @@ def info(input_file: str, format: str):
                 data = yaml.safe_load(f)
             file_type = "D4D YAML"
         elif file_path.suffix == '.json':
-            with open(file_path, 'r') as f:
-                data = json.load(f)
+            # Read as the static-map arm reads a crate: JSON that is not
+            # UTF-8, as RFC 8259 requires, is refused with a
+            # CrateEncodingError naming the first byte that does not decode,
+            # and is not decoded in the platform's default encoding (#4089).
+            # The refusal says to transcode the file and does not point to
+            # crate_manifest.yaml's `encoding_note`, which describes a
+            # project's crate, not any file given here (#4192).
+            from data_sheets_schema.rocrate_map import (
+                TRANSCODE_HINT, read_crate_json)
+            data = read_crate_json(file_path, hint=TRANSCODE_HINT)
 
             # Check if it's RO-Crate by looking for @graph
             if '@graph' in data:
@@ -240,7 +293,9 @@ def info(input_file: str, format: str):
                     click.echo(f"  file_collections: {len(data['file_collections'])} collection(s)")
 
             elif file_type == "RO-Crate JSON-LD":
-                graph = data.get('@graph', [])
+                # An `@graph` written as one node object is that one entity,
+                # as `parse` reads it, not one entity per key (#4187)
+                graph = graph_entities(data.get('@graph', []))
                 click.echo(f"RO-Crate Metadata:")
                 click.echo(f"  @graph entities: {len(graph)}")
 
@@ -292,11 +347,20 @@ def parse(input_file: str, verbose: bool):
                         value = value[:97] + "..."
                     click.echo(f"  {key}: {value}")
             click.echo()
+        else:
+            # Parsing is inspection: report why no root was selected, while
+            # still allowing empty graphs and member metadata to be inspected.
+            try:
+                parser.require_root_dataset()
+            except ValueError as exc:
+                click.echo(str(exc), err=True)
 
         # Show entity counts by type
         graph = parser.graph
         type_counts = {}
-        for entity in graph:
+        for entity in graph if isinstance(graph, list) else []:
+            if not isinstance(entity, dict):
+                continue
             entity_type = entity.get('@type')
             if isinstance(entity_type, str):
                 types = [entity_type]
@@ -304,9 +368,10 @@ def parse(input_file: str, verbose: bool):
                 types = entity_type if isinstance(entity_type, list) else []
 
             for t in types:
-                type_counts[t] = type_counts.get(t, 0) + 1
+                if isinstance(t, str):
+                    type_counts[t] = type_counts.get(t, 0) + 1
 
-        click.echo(f"Total Entities: {len(graph)}")
+        click.echo(f"Total Entities: {len(graph) if isinstance(graph, list) else 0}")
         click.echo("Entity Types:")
         for entity_type in sorted(type_counts.keys()):
             click.echo(f"  {entity_type}: {type_counts[entity_type]}")
@@ -370,11 +435,17 @@ def merge(input_files, output, mapping, primary, report, verbose):
         merger = ROCrateMerger(mapping_loader, verbose=verbose)
         dataset = merger.merge_rocrates(parsers, primary_index=primary)
 
-        # Write output
         output_path = Path(output)
-        with open(output_path, 'w') as f:
-            yaml.dump(dataset, f, default_flow_style=False, sort_keys=False)
-
+        prepared = [(output_path, prepare_dataset(
+            dataset, default_flow_style=False, sort_keys=False,
+            context=f"Inputs {input_files}; output {output_path}"))]
+        route_evidence = merger.get_route_dispositions()
+        prepared.extend(prepare_sidecar(output_path, dataset, prepared[0][1], route_evidence, mapping_loader))
+        if report:
+            report_path = output_path.with_name(f"{output_path.stem}_merge_report.txt")
+            prepared.append((report_path, merger.generate_merge_report(parsers).encode("utf-8")))
+        validate_evidence(merger.get_route_dispositions(), dataset, mapping_loader)
+        publish(prepared, protected=[*input_files, mapping, *protected_sources(route_evidence)])
         click.echo(f"✓ Merged D4D YAML written to: {output}")
 
         # Show statistics
@@ -388,9 +459,8 @@ def merge(input_files, output, mapping, primary, report, verbose):
         click.echo(f"  Combined: {stats['fields_combined']}")
         click.echo(f"  Merged arrays: {stats['fields_merged_as_arrays']}")
 
-        # Generate merge report if requested
         if report:
-            merger.save_merge_report(output_path, parsers)
+            click.echo(f"✓ Merge report saved: {report_path}")
 
     except Exception as e:
         click.echo(f"✗ Error: {e}", err=True)
@@ -473,63 +543,68 @@ def transform(input_file, output, mapping, report, validate):
         # Build D4D dataset
         builder = D4DBuilder(mapping_loader, verbose=False)
         dataset = builder.build_dataset(parser)
+        source_presence = author_source_presence(mapping_loader, [parser], [str(input_file)])
+        references = reference_evidence(
+            source_presence, [builder.get_creator_reference_construction()])
 
-        # Write output
         output_path = Path(output)
-        with open(output_path, 'w') as f:
-            yaml.dump(dataset, f, default_flow_style=False, sort_keys=False)
-
-        click.echo(f"✓ D4D YAML written to: {output}")
-
-        # Show statistics
-        covered_fields = mapping_loader.get_covered_fields()
-        click.echo(f"  Fields populated: {len(dataset)}/{len(covered_fields)}")
-        click.echo(f"  Coverage: {len(dataset)/len(covered_fields)*100:.1f}%")
-
-        # Generate transformation report if requested
+        raw = prepare_dataset(dataset, default_flow_style=False, sort_keys=False,
+                              context=f"Input {input_file}; output {output_path}")
+        route_evidence = builder.get_route_dispositions()
+        prepared = [(output_path, raw), *prepare_sidecar(
+            output_path, dataset, raw, route_evidence, mapping_loader)]
+        covered_fields = scoring_fields(mapping_loader)
+        identity_construction = root_identity_route(mapping_loader)
+        populated_count = len(dataset) - int(identity_construction and 'id' in dataset)
+        coverage = populated_count / len(covered_fields) * 100 if covered_fields else 0
         if report:
             report_path = output_path.parent / f"{output_path.stem}_report.txt"
-
-            with open(report_path, 'w') as f:
-                f.write("="*80 + "\n")
-                f.write("RO-Crate to D4D Transformation Report\n")
-                f.write("="*80 + "\n\n")
-
-                f.write("SUMMARY\n")
-                f.write("-"*80 + "\n")
-                f.write(f"Input: {input_file}\n")
-                f.write(f"Output: {output}\n")
-                f.write(f"Mapping: {mapping}\n")
-                f.write(f"Fields populated: {len(dataset)}/{len(covered_fields)}\n")
-                f.write(f"Coverage: {len(dataset)/len(covered_fields)*100:.1f}%\n\n")
-
-                # Show unmapped properties
-                mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
-                unmapped = parser.get_unmapped_properties(mapped_props)
-
-                f.write("UNMAPPED RO-CRATE PROPERTIES\n")
-                f.write("-"*80 + "\n")
-                f.write(f"Found {len(unmapped)} properties with no D4D mapping:\n\n")
-
-                for prop_path, sample_value in sorted(unmapped.items()):
-                    f.write(f"  • {prop_path}\n")
-                    f.write(f"    Sample: {sample_value}\n\n")
-
-            click.echo(f"✓ Transformation report saved: {report_path}")
-
-        # Validate if requested
+            f = StringIO()
+            f.write("="*80 + "\n")
+            f.write("RO-Crate to D4D Transformation Report\n")
+            f.write("="*80 + "\n\n")
+            f.write("SUMMARY\n" + "-"*80 + "\n")
+            f.write(f"Input: {input_file}\nOutput: {output}\nMapping: {mapping}\n")
+            f.write(f"Constructed output keys: {populated_count}/{len(covered_fields)}\n")
+            f.write(f"{KEY_BASIS_LABEL}: {coverage:.1f}%\n{MEASUREMENT_LIMIT}\n\n")
+            f.write("\n".join(source_presence_lines(source_presence)) + "\n")
+            if references is not None:
+                f.write("\n".join(reference_lines(references)) + "\n")
+            if identity_construction:
+                f.write("Required Dataset.id construction is excluded from this count.\n\n")
+            mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
+            accounted, supplemental_lines = supplemental_report(route_evidence)
+            if supplemental_lines:
+                f.write("\n".join(supplemental_lines) + "\n")
+            unmapped = parser.get_unmapped_properties(mapped_props | accounted)
+            f.write("UNMAPPED RO-CRATE PROPERTIES\n" + "-"*80 + "\n")
+            f.write(f"Found {len(unmapped)} properties with no D4D mapping:\n\n")
+            for prop_path, sample_value in sorted(unmapped.items()):
+                if route_evidence is not None:
+                    prop_path = json.dumps(prop_path, ensure_ascii=True, allow_nan=False)
+                    sample_value = json.dumps(sample_value, ensure_ascii=True, allow_nan=False)
+                f.write(f"  • {prop_path}\n    Sample: {sample_value}\n\n")
+            prepared.append((report_path, f.getvalue().encode("utf-8")))
         if validate:
             from data_sheets_schema.resources import resource_path
             schema = str(resource_path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml"))
             validator = D4DValidator(schema)
-            is_valid, validation_output = validator.validate_d4d_yaml(str(output_path))
-
-            if is_valid:
-                click.echo(f"✓ Validation passed")
-            else:
-                click.echo(f"✗ Validation failed", err=True)
-                click.echo(validation_output)
-                sys.exit(1)
+            diagnostic(raw, validator.validate_d4d_yaml)
+        validate_evidence(builder.get_route_dispositions(), dataset, mapping_loader)
+        publish(prepared, protected=[input_file, mapping, *protected_sources(route_evidence)])
+        click.echo(f"✓ D4D YAML written to: {output}")
+        click.echo(f"  Constructed output keys: {populated_count}/{len(covered_fields)}")
+        click.echo(f"  {KEY_BASIS_LABEL}: {coverage:.1f}%")
+        click.echo(f"  {MEASUREMENT_LIMIT}")
+        click.echo("\n".join(source_presence_lines(source_presence, raw=False)))
+        if references is not None:
+            click.echo("\n".join(reference_lines(references)))
+        if identity_construction:
+            click.echo("  Required Dataset.id construction is excluded from this count.")
+        if report:
+            click.echo(f"✓ Transformation report saved: {report_path}")
+        if validate:
+            click.echo("✓ Validation passed")
 
     except Exception as e:
         click.echo(f"✗ Error: {e}", err=True)

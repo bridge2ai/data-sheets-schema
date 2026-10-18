@@ -80,6 +80,7 @@ class ReferentJudgement:
 
     same_referent: bool
     reason: str = ""
+    evaluation_model: dict[str, Any] | None = None
 
 
 class ReferentJudge(Protocol):
@@ -95,6 +96,7 @@ class SlotFinding:
     missing: list[str] = field(default_factory=list)
     values: dict[str, str] = field(default_factory=dict)
     reason: str = ""
+    evaluation_model: dict[str, Any] | None = None
 
     @property
     def blocks_merge(self) -> bool:
@@ -205,7 +207,8 @@ def referent_report(records: dict[str, dict[str, Any]],
         report.findings.append(SlotFinding(
             slot=slot,
             kind=REPRESENTATIONAL if j.same_referent else REFERENTIAL,
-            holders=holders, values=vals, reason=j.reason))
+            holders=holders, values=vals, reason=j.reason,
+            evaluation_model=getattr(j, "evaluation_model", None)))
 
     return report
 
@@ -218,6 +221,9 @@ class MergeResult:
     guarded: bool = False
     report: ReferentReport | None = None
     contested: int = 0
+    selection_mode: str | None = None
+    scorer_identity: str | None = None
+    scorer_instrument: dict[str, Any] | None = None
 
     @property
     def contributions(self) -> dict[str, int]:
@@ -316,19 +322,34 @@ def union_merge(records: dict[str, dict[str, Any]], *,
                 base: str | None = None,
                 guarded: bool = True,
                 judge: ReferentJudge | None = None,
-                source_paths: dict[str, Path] | None = None) -> MergeResult:
-    """Union every replicate's slots, choosing the best-fitting contested value.
+                source_paths: dict[str, Path] | None = None,
+                scorer_identity: str | None = None) -> MergeResult:
+    """Union slots using the base/first holder or a caller-supplied score.
 
     ``guarded`` takes *all* referent-bearing fields from one base record rather
     than picking each independently. That is what keeps the subject single: the
     unguarded merge on CM4AI took its title from the programme-level replicate
     and its DOI from the release-level one, and the result described neither.
-    Non-referent fields still come from whichever replicate supplied the
-    best-fitting value, so the coverage gain survives the guard.
+    Without a scorer, contested fields use the base when present, otherwise the
+    first holder in sorted label order. With a scorer, the maximum supplied
+    numeric score wins, with ties preferring the base then the first holder.
+    ``scorer_identity`` is an optional caller-declared label, not an authenticated
+    instrument or evidence of scientific validity. A scorer is not invoked when
+    there are no contested fields outside the guard.
 
     A merge is refused when the report blocks and ``guarded`` is False, rather
     than written and left for a reader to notice.
     """
+    _validate_scorer_identity(scorer_identity)
+    if scorer_identity is not None and not callable(scorer):
+        raise ValueError("scorer_identity requires a supplied callable scorer")
+    # Only the real fitness scorer can supply this context; generic callables
+    # keep the existing caller-declared label/unknown behavior.
+    instrument = None
+    if scorer is not None:
+        from data_sheets_schema.evidence_score import LLMSlotFitnessScorer
+        if type(scorer) is LLMSlotFitnessScorer:
+            instrument = scorer.pinned_instrument()
     labels = sorted(records)
     if source_paths:
         check_sources(source_paths, project)
@@ -377,8 +398,78 @@ def union_merge(records: dict[str, dict[str, Any]], *,
         merged[slot] = records[best[1]][slot]
         source_of[slot] = best[1]
 
+    if instrument is not None and scorer.pinned_instrument() != instrument:
+        raise ValueError("fitness instrument changed during merge")
     return MergeResult(record=merged, source_of=source_of, base=base,
-                       guarded=guarded, report=report, contested=contested)
+                       guarded=guarded, report=report, contested=contested,
+                       selection_mode=("base_or_first_holder" if scorer is None
+                                       else "maximum_supplied_score"),
+                       scorer_identity=scorer_identity,
+                       scorer_instrument=instrument)
+
+
+def _validate_scorer_identity(identity: str | None) -> None:
+    if identity is not None and (type(identity) is not str or not identity.strip()):
+        raise ValueError("scorer_identity must be a nonempty exact string or None")
+
+
+def _selection_description(result: MergeResult) -> str:
+    """Validate new metadata before publication; legacy mode remains unknown."""
+    mode = result.selection_mode
+    _validate_scorer_identity(result.scorer_identity)
+    if mode is not None and (type(mode) is not str or mode not in {
+            "base_or_first_holder", "maximum_supplied_score"}):
+        raise ValueError("unrecognized merge selection_mode")
+    if result.scorer_identity is not None and mode != "maximum_supplied_score":
+        raise ValueError("scorer_identity requires maximum_supplied_score selection_mode")
+    instrument = _instrument_description(result.scorer_instrument)
+    if instrument is not None and mode != "maximum_supplied_score":
+        raise ValueError("scorer_instrument requires maximum_supplied_score selection_mode")
+    if mode is None:
+        return "Selection mode was not recorded; whether a scorer ran is unknown."
+    if mode == "base_or_first_holder":
+        return (f"Contested slots use base `{result.base}` when it holds the slot, "
+                "otherwise the first holder in sorted label order. No scorer was supplied.")
+    identity = ("unrecorded" if result.scorer_identity is None else
+                "caller-declared " + json.dumps(result.scorer_identity))
+    selection = (f"Contested slots use the maximum supplied numeric score; ties prefer base "
+                 f"`{result.base}`, otherwise the first holder in sorted label order.")
+    invocation = ("No contested slots; the supplied scorer was not invoked."
+                  if result.contested == 0 else "The supplied scorer was invoked for contested slots.")
+    if instrument is not None:
+        return (f"{selection} {invocation} Pinned fitness context: {instrument}. "
+                "This records the checked context and scoring mode, not provider authenticity, "
+                "calibration or scientific validity.")
+    return (f"{selection} {invocation} Scorer identity: {identity}; "
+            "this does not authenticate an instrument, model, calibration or scientific validity.")
+
+
+def _instrument_description(instrument: dict[str, Any] | None) -> str | None:
+    if instrument is None:
+        return None
+    from data_sheets_schema.evidence_score import JudgementContext, validate_fitness_context
+    fields = {"context", "class_name", "profile", "schema_guidance", "mode",
+              "cache_sha256", "cache_bytes"}
+    if type(instrument) is not dict or set(instrument) != fields:
+        raise ValueError("invalid scorer_instrument fields")
+    context = instrument["context"]
+    if type(context) is not dict or set(context) != {
+            "axis", "model", "rubric", "corpus", "schema", "specification"}:
+        raise ValueError("invalid scorer_instrument context")
+    validate_fitness_context(JudgementContext(**context))
+    if (type(instrument["class_name"]) is not str or not instrument["class_name"]
+            or any(value is not None and (type(value) is not str or not value)
+                   for value in (instrument["profile"], instrument["schema_guidance"]))):
+        raise ValueError("invalid scorer_instrument selection")
+    mode = instrument["mode"]
+    if mode == "cache_only":
+        if (type(instrument["cache_sha256"]) is not str
+                or re.fullmatch(r"[0-9a-f]{64}", instrument["cache_sha256"]) is None
+                or type(instrument["cache_bytes"]) is not int or instrument["cache_bytes"] < 0):
+            raise ValueError("invalid scorer_instrument cache pin")
+    elif mode != "live_or_cache" or instrument["cache_sha256"] is not None or instrument["cache_bytes"] is not None:
+        raise ValueError("invalid scorer_instrument mode")
+    return json.dumps(instrument, sort_keys=True)
 
 
 def _fitness(j: Any) -> float:
@@ -414,6 +505,7 @@ class LLMReferentJudge:
                  max_tokens: int = 8000):
         self._client = client
         self._model = model
+        self.evaluation_model = None
         # Sized for reasoning, not the answer — see evidence_score.LLMSlotScorer.
         self.max_tokens = max_tokens
         self.calls = 0
@@ -422,7 +514,13 @@ class LLMReferentJudge:
                  ) -> ReferentJudgement:
         from data_sheets_schema import api_runner
         client = self._client or api_runner._client()
-        model = self._model or api_runner._model_settings()["name"]
+        # One judge instance has one instrument, even if the configuration is
+        # edited between fields of a report (#4231).
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
+        model = self._model
 
         rendered = "\n".join(f"  {lab}: {v[:600]}"
                              for lab, v in sorted(values.items()))
@@ -436,7 +534,10 @@ class LLMReferentJudge:
         self.calls += 1
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
-        return _parse_referent(text)
+        result = _parse_referent(text)
+        from copy import deepcopy
+        result.evaluation_model = deepcopy(self.evaluation_model)
+        return result
 
 
 def _parse_referent(text: str) -> ReferentJudgement:
@@ -462,6 +563,93 @@ def _parse_referent(text: str) -> ReferentJudgement:
     raise ValueError(f"no JSON object in referent judgement: {text[:200]!r}")
 
 
+def check_merge_destination(path: Path, *, sources: dict[str, Path],
+                            project: str, method: str, label: str,
+                            provenance_path: Path | None = None) -> Path:
+    """Validate sourced publication before writes; return its provenance path.
+
+    A distinct label is insufficient: the destination method must differ from
+    every source family, including the provenance ``_core`` alias. Conventional
+    corpus paths must agree with the declared method/label. Explicit disjoint
+    destinations outside a corpus remain supported for library callers.
+
+    Existing symlinks and hard links to contributor artifacts are checked. This
+    preflight does not promise atomic publication against concurrent path edits.
+    """
+    from data_sheets_schema.provenance import record_path_for
+
+    for name, value in (("method", method), ("label", label), ("project", project)):
+        if (not isinstance(value, str) or not value.strip() or value in (".", "..")
+                or any(char in value for char in "/\\\0")):
+            raise ValueError(f"merge destination {name} must be one nonempty path component")
+    if method.endswith("_core"):
+        raise ValueError("merge destination method must be a base method, not a _core alias")
+
+    path = Path(path)
+    provenance = (Path(provenance_path) if provenance_path is not None else
+                  record_path_for(project, method, label, _source_root(path)))
+
+    def resolved(candidate):
+        try:
+            return candidate.resolve()
+        except RuntimeError as exc:  # pathlib on Python 3.9: symlink loop
+            raise ValueError(f"cannot resolve merge destination/source: {candidate}") from exc
+
+    def conventional(candidate, expected_method):
+        if "d4d_concatenated" in candidate.parts:
+            root = _source_root(candidate)
+            expected = root / expected_method / label
+            if (candidate.parent != expected or
+                    resolved(candidate.parent) != resolved(root) / expected_method / label or
+                    resolved(candidate).parent != resolved(root) / expected_method / label):
+                raise ValueError("merge destination path does not match its declared method/label")
+
+    conventional(path, method)
+    conventional(provenance, f"{method}_core")
+    conventional(resolved(path), method)
+    conventional(resolved(provenance), f"{method}_core")
+    targets = (path, provenance)
+    real_targets = tuple(resolved(target) for target in targets)
+
+    def same_file(first, second):
+        return (resolved(first) == resolved(second) or
+                (first.exists() and second.exists() and first.samefile(second)))
+
+    if same_file(path, provenance):
+        raise ValueError("merge full record and provenance must be distinct files")
+
+    for src in sources.values():
+        src = Path(src)
+        source_method = _source_method(src)
+        source_base = source_method[:-5] if source_method.endswith("_core") else source_method
+        source_provenance = record_path_for(
+            project, source_method, _source_label(src), _source_root(src))
+        protected = {src.parent, source_provenance.parent}
+        for source_path in (src, resolved(src)):
+            if "d4d_concatenated" in source_path.parts:
+                source_root = _source_root(source_path)
+                family = _source_method(source_path)
+                family = family[:-5] if family.endswith("_core") else family
+                if method == family:
+                    raise ValueError("merge output method must be distinct from every source method")
+                protected.update((source_root / family, source_root / f"{family}_core"))
+        if method == source_base:
+            raise ValueError("merge output method must be distinct from every source method")
+        for directory in protected:
+            directory = resolved(directory)
+            if any(target == directory or directory in target.parents or
+                   (directory.exists() and any(parent.exists() and parent.samefile(directory)
+                                               for parent in target.parents))
+                   for target in real_targets):
+                raise ValueError("merge destination aliases a contributing method/run directory")
+        artifacts = (src, source_provenance,
+                     source_provenance.parent / f"{project}_d4d_core.yaml",
+                     source_provenance.parent / f"{project}_reconciliation.md")
+        if any(same_file(target, artifact) for target in targets for artifact in artifacts):
+            raise ValueError("merge destination aliases a contributing artifact")
+    return provenance
+
+
 def write_merge(result: MergeResult, path: Path, *,
                 sources: dict[str, Path] | None = None,
                 project: str = "", method: str = "", label: str = "",
@@ -470,12 +658,18 @@ def write_merge(result: MergeResult, path: Path, *,
 
     ``sources`` maps each contributing replicate label to the record it supplied.
     Given it, a `record_mode: derived` provenance record is written naming every
-    contributor by md5 and stating the rule that combined them — which is what
-    makes a merged record shippable rather than an unattributed artifact.
+    contributor by md5 and stating the recorded selection rule. That disclosure
+    does not certify scientific correctness or shipping eligibility.
 
     Omitting ``sources`` still writes the record, for probes and experiments, but
     the result carries no provenance and must not be treated as a datasheet.
     """
+    selection = _selection_description(result)
+    if sources:
+        destination = check_merge_destination(
+            path, sources=sources, project=project, method=method, label=label,
+            provenance_path=provenance_path)
+        check_sources(sources, project)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         yaml.safe_dump(result.record, sort_keys=False, allow_unicode=True),
@@ -485,8 +679,6 @@ def write_merge(result: MergeResult, path: Path, *,
 
     from data_sheets_schema.provenance import (
         build_derived_record, contribution)
-
-    check_sources(sources, project)
 
     contributions = [
         contribution(src, label=lab, project=project,
@@ -498,8 +690,8 @@ def write_merge(result: MergeResult, path: Path, *,
     guard = ("referent-bearing fields pinned to base "
              f"`{result.base}`" if result.guarded else "unguarded union")
     rule = (
-        f"Union of slots across {len(contributions)} replicates; where several "
-        f"supplied one slot, the best-fitting value was taken ({guard}). "
+        f"Union of slots across {len(contributions)} replicates. {selection} "
+        f"Referent guard: {guard}. "
         f"{result.contested} slots were contested.")
     rec = build_derived_record(
         project, method, label, sources=contributions, derivation=rule,
@@ -514,8 +706,5 @@ def write_merge(result: MergeResult, path: Path, *,
     # default one. `record_path_for` defaults to the working corpus, so a merge
     # written to a temp directory would have deposited its provenance in the
     # real repository — right convention, wrong tree.
-    from data_sheets_schema.provenance import record_path_for
-    rec.write(provenance_path
-              or record_path_for(project, method, label,
-                                 _source_root(path)))
+    rec.write(destination)
     return path

@@ -1,0 +1,361 @@
+{
+  "all_prefix_rows_function_calls": [
+    {
+      "calls": 4,
+      "index": 0
+    },
+    {
+      "calls": 4,
+      "index": 1
+    },
+    {
+      "calls": 4,
+      "index": 2
+    },
+    {
+      "calls": 4,
+      "index": 3
+    },
+    {
+      "calls": 4,
+      "index": 4
+    },
+    {
+      "calls": 4,
+      "index": 5
+    },
+    {
+      "calls": 4,
+      "index": 6
+    },
+    {
+      "calls": 4,
+      "index": 7
+    },
+    {
+      "calls": 4,
+      "index": 8
+    },
+    {
+      "calls": 4,
+      "index": 9
+    },
+    {
+      "calls": 4,
+      "index": 10
+    },
+    {
+      "calls": 4,
+      "index": 11
+    },
+    {
+      "calls": 4,
+      "index": 12
+    },
+    {
+      "calls": 4,
+      "index": 13
+    },
+    {
+      "calls": 4,
+      "index": 14
+    }
+  ],
+  "constructor_totals_ns": {
+    "instrumented": {
+      "thread_cpu_ns": 792906247,
+      "wall_ns": 819710459
+    },
+    "plain": {
+      "thread_cpu_ns": 1313390459,
+      "wall_ns": 1347250874
+    }
+  },
+  "focused_tests": {
+    "cases": [
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_binds_original_identity_and_only_observed_physical_rows"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[through_bytes-True]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[through_bytes-1.0]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[through_bytes-0]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[through_bytes--1]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[through_bytes-100000000]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[lines-True]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[lines-2.0]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[lines-0]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[lines-3]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[sha256-0000000000000000000000000000000000000000000000000000000000000000]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[stream_id-0000000000000000000000000000000000000000000000000000000000000000]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[stream-control]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_typed_count_hash_role_and_original_path_mutants[path-/relocated/runner/transcript.jsonl]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_refuses_foreign_execution_partial_line_and_rehashed_blank_row"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_closed_shape[extra]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_prefix_closed_shape[missing]"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_typed_state_distinguishes_types_order_missingness_and_bytes"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_refusal_comparison_preserves_cause_context_and_suppression"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_constructor_refusal_fingerprint_preserves_the_same_failure_graph"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_exception_graph_cycles_are_lossless_and_notes_remain_distinct"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_exception_graph_overflow_refuses_instead_of_equal_truncation"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_verified_loader_ignores_package_init_and_pyc_and_restores_module_owners"
+      },
+      {
+        "class": "tests.test_native_trace_prefix_profile",
+        "name": "test_loader_refuses_changed_source_before_executing_it"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_exact_resolved_interpreter_fixed_bound_and_flags_are_published"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_foreign_child_runtime_or_startup_identity_refuses_before_output[interpreter]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_foreign_child_runtime_or_startup_identity_refuses_before_output[driver]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_foreign_child_runtime_or_startup_identity_refuses_before_output[no_site]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_foreign_child_runtime_or_startup_identity_refuses_before_output[isolated]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_foreign_child_runtime_or_startup_identity_refuses_before_output[bytecode]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_interpreter_drift_after_dispatch_is_not_attributed_to_new_bytes[bytes]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_interpreter_drift_after_dispatch_is_not_attributed_to_new_bytes[same_bytes_replacement]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_timeout_is_bounded_failed_diagnostic_without_partial_measurements"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_worker_or_input_failure_preserves_existing_content_and_no_output[nonzero]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_worker_or_input_failure_preserves_existing_content_and_no_output[stderr]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_worker_or_input_failure_preserves_existing_content_and_no_output[excess_output]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_worker_or_input_failure_preserves_existing_content_and_no_output[invalid_json]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_worker_or_input_failure_preserves_existing_content_and_no_output[source_drift]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_output_refusals_happen_before_dispatch[existing]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_output_refusals_happen_before_dispatch[source_child]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_output_refusals_happen_before_dispatch[recovery_child]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_output_refusals_happen_before_dispatch[symlink_parent]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_unisolated_parent_refuses_before_input_verification[isolated]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_unisolated_parent_refuses_before_input_verification[no_site]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_unisolated_parent_refuses_before_input_verification[dont_write_bytecode]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[socket.__new__]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[socket.connect]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[subprocess.Popen]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[os.exec]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[os.posix_spawn]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[os.system]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[os.fork]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[ctypes.dlopen]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[os.mkdir]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[os.remove]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[os.rename]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_refuses_process_network_and_write_events[os.symlink]"
+      },
+      {
+        "class": "tests.test_native_trace_profile_runtime",
+        "name": "test_effect_guard_distinguishes_read_only_open_from_write_flags"
+      }
+    ],
+    "errors": 0,
+    "failures": 0,
+    "junit_bytes": 9468,
+    "junit_original_basename": "native-profile-tests.xml",
+    "junit_sha256": "c3ca98ae95e724ffb93069e3518320cae144ba92f7f513f99ab44098422b2173",
+    "skipped": 0,
+    "suite_wall_seconds": 0.388,
+    "tests": 58
+  },
+  "format": "native_trace_prefix_validation_v1",
+  "historical_capture_complete": false,
+  "interpretation": [
+    "One plain construction then one instrumented construction per prefix, in the same process.",
+    "Plain construction and untimed semantic readback precede instrumentation; the recovered contract retains its bounded JSON validation cache.",
+    "Instrumented aggregate CPU being lower does not establish a speed improvement or profiler overhead reduction.",
+    "Four rows() calls per instrumented construction characterize known behavior already tracked by #4537/#4576.",
+    "No full-path fraction, optimization gain, native acceptance result, later4366 measurement or scientific score is inferred."
+  ],
+  "native_acceptance_passed": false,
+  "report": {
+    "bytes": 381405,
+    "copied_byte_for_byte": true,
+    "path": "trace_prefix_report.json",
+    "sha256": "f89c77bedf651c6271366ee91d96c33e6efbd63097026fe9869dfb7ab5027e9d"
+  },
+  "results": {
+    "inputs_unchanged": true,
+    "negative_controls": 3,
+    "negative_refusal_parity_matches": 3,
+    "refused": 0,
+    "retained_prefixes": 15,
+    "returned": 15,
+    "semantic_parity_matches": 15,
+    "worker_elapsed_wall_ns": 22544208917,
+    "worker_wall_limit_seconds": 120
+  },
+  "scientific_eligibility": false,
+  "scope": "0125 retained-prefix Trace construction only; no native or scientific acceptance",
+  "validated_files": {
+    "notes/native_profile_recovery_2026-10-07/trace_prefix_profile.py": {
+      "bytes": 31508,
+      "sha256": "4097c8dff6e921b146feb49854b67487adc54b5a4da7943e22c9293849df01bf"
+    },
+    "tests/test_native_trace_prefix_profile.py": {
+      "bytes": 10436,
+      "sha256": "26167f1b6a0860cc666620fe51478aa913df9ab362dd1a648eb021dfee9c51ef"
+    },
+    "tests/test_native_trace_profile_runtime.py": {
+      "bytes": 10534,
+      "sha256": "64bb07d36492b99155786177ef95e4aece1adeca21b50eb8b5af458f5eb562da"
+    }
+  }
+}

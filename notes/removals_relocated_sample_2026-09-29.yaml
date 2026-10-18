@@ -1,0 +1,366 @@
+# Hand-labelled sample for the removals v3 relocation candidate (#3223).
+#
+# Each row is a value removals v2 counted deleted (founded, unfounded or unsorted)
+# on one of the 87 records the removals check reads (every *_core record it
+# checked, the population the 1,280 below counts), not only those the arm table
+# reads: the 64 rows come from 35 records under 27 labels, many outside the arms
+# notes/arm_comparison.md shows, and one is 2026-09-04f v8 rep1 AI_READI, which
+# that table excludes as invalid (#3548). `relocated` is the label: true where the final
+# full record restates the value's content (reworded, moved or split), whatever
+# its role or standing there; false where it does not. Labelled by the implementer
+# while the prototype's scores were visible, so not blind. Drawn at random
+# (seed 3037) from the deleted rows with three or more content words, eight per
+# band of the prototype's share: [0,.4) [.4,.5) [.5,.6) [.6,.7) [.7,.8) [.8,.9)
+# [.9,1) and 1 — so shares below the threshold are over-represented relative to
+# the 1,280 such rows (546 of them at share 1).
+#
+# At RELOCATED_THRESHOLD 0.7 on this sample: 28 candidates, 25 correct
+# (precision 0.89); 31 relocations labelled, 25 found (recall 0.81). At 0.6:
+# 0.81 / 0.81; at 0.8: 0.91 / 0.65. Weighted back to the band populations the
+# 0.7 estimate is precision 0.88, recall 0.91. `candidate` is the path
+# removals v3 reports (null where it reports none).
+#
+# Those figures are over both routes (#3613). The sample was drawn by
+# content-word count, and a URL or CURIE has three or more, so 19 of the 64
+# rows are identifier-shaped: removals v3 decides them by their own text,
+# never by the threshold. By route at 0.7:
+# Identifier route: 19 rows, 5 candidates, 5 correct; 5 relocations labelled,
+# 5 found (0 false positives, 0 missed).
+# Content-word route: 45 rows, 23 candidates, 20 correct (precision 0.87);
+# 26 relocations labelled, 20 found (recall 0.77).
+# On the content-word route alone, at 0.6: 0.77 / 0.77; at 0.8: 0.88 / 0.58.
+# The band-weighted estimate above was not recomputed by route, so it too
+# includes the 19 rows the threshold cannot move.
+instrument: removals v3 (#3223)
+threshold: 0.7
+min_content_words: 3
+rows:
+- label: 2026-08-20b_claude-opus-5-api-generic-v5_rep3
+  project: AI_READI
+  path: "intended_uses[2].usage_notes"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "related_datasets[0].notes"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "variables[4].variable_name"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "variables[6].variable_name"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "variables[17].notes"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "distribution_dates[0].notes"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "variables[24].quality_notes"
+  relocated: false
+  candidate: null
+- label: 2026-09-04g_claude-opus-5-api-generic-v8_rep3
+  project: CM4AI
+  path: "preprocessing_strategies[3].preprocessing_details"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "splits[0].split_details"
+  relocated: true
+  candidate: null
+  note: "the split sizes and balancing restated in known_biases[4].mitigation_strategy; the long value's counts are not"
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "file_collections[3].conforms_to"
+  relocated: false
+  candidate: null
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep2
+  project: AI_READI
+  path: "creators[5].id"
+  relocated: false
+  candidate: null
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep2
+  project: AI_READI
+  path: "creators[9].id"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: CHORUS
+  path: "variables[0].derivation"
+  relocated: true
+  candidate: null
+  note: "restated in collection_mechanisms[5].mechanism_details, reordered"
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep1
+  project: VOICE
+  path: "creators[16].principal_investigator.id"
+  relocated: false
+  candidate: null
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep2
+  project: AI_READI
+  path: "creators[10].id"
+  relocated: false
+  candidate: null
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep1
+  project: VOICE
+  path: "creators[4].principal_investigator.id"
+  relocated: false
+  candidate: null
+- label: 2026-08-19_claude-opus-5-api-generic-v5_rep1
+  project: AI_READI
+  path: "errata[0].erratum_details"
+  relocated: false
+  candidate: null
+- label: 2026-08-11_claude-opus-5-api-generic_rep1
+  project: CHORUS
+  path: "machine_annotation_tools[0].tool_descriptions[2]"
+  relocated: false
+  candidate: null
+- label: 2026-09-04d_claude-opus-5-api-generic-v8_rep1
+  project: VOICE
+  path: "labeling_strategies[0].inter_annotator_agreement"
+  relocated: true
+  candidate: null
+  note: "restated in a known_biases entry"
+- label: 2026-09-04d_claude-opus-5-api-generic-v8_rep1
+  project: VOICE
+  path: "acquisition_methods[1].acquisition_details"
+  relocated: false
+  candidate: null
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep3
+  project: VOICE
+  path: "creators[8].affiliations[1].name"
+  relocated: false
+  candidate: null
+- label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  project: CM4AI
+  path: "creators[4].notes"
+  relocated: true
+  candidate: null
+  note: "restated in the entry's source_caveats (a change of standing)"
+- label: 2026-09-04f_claude-opus-5-api-generic-v8_rep3
+  project: CHORUS
+  path: "existing_uses[0].examples[1]"
+  relocated: true
+  candidate: null
+  note: "restated in third_party_sharing[0].notes"
+- label: 2026-09-01_claude-opus-5-api-generic-v7_rep2
+  project: VOICE
+  path: "collection_mechanisms[3].mechanism_details"
+  relocated: true
+  candidate: null
+  note: "restated in related_datasets[0].description"
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "file_collections[8].description"
+  relocated: false
+  candidate: null
+- label: 2026-09-04b_claude-opus-5-api-generic-v8_rep1
+  project: CM4AI
+  path: "creators[13].affiliations[0].id"
+  relocated: false
+  candidate: null
+- label: 2026-09-04b_claude-opus-5-api-generic-v8_rep1
+  project: CM4AI
+  path: "creators[28].affiliations[0].id"
+  relocated: false
+  candidate: null
+- label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+  project: AI_READI
+  path: "ethical_reviews[1].reviewing_organization"
+  relocated: false
+  candidate: null
+- label: 2026-08-19_claude-opus-5-api-generic-v5_rep1
+  project: AI_READI
+  path: "existing_uses[0].examples"
+  relocated: false
+  candidate: null
+- label: 2026-09-04b_claude-opus-5-api-generic-v8_rep1
+  project: CM4AI
+  path: "creators[46].affiliations[0].id"
+  relocated: false
+  candidate: null
+- label: 2026-08-22c_claude-opus-5-api-generic-v5_rep1
+  project: AI_READI
+  path: "ethical_reviews[0].contact_person.id"
+  relocated: true
+  candidate: "human_subject_research.source_caveats"
+- label: 2026-09-04b_claude-opus-5-api-generic-v8_rep1
+  project: CM4AI
+  path: "creators[1].affiliations[0].id"
+  relocated: false
+  candidate: null
+- label: 2026-08-13_claude-opus-5-api-generic_rep1
+  project: CHORUS
+  path: "distribution_dates[0].release_dates"
+  relocated: true
+  candidate: "description"
+- label: 2026-08-19_claude-opus-5-api-generic-v5_rep1
+  project: AI_READI
+  path: "distribution_formats[6].format"
+  relocated: false
+  candidate: "regulatory_restrictions.regulatory_restrictions"
+  note: "the words recur in an unrelated regulatory restriction"
+- label: 2026-09-04_claude-opus-5-api-generic-v8_rep1
+  project: CM4AI
+  path: "ethical_reviews[2].review_details"
+  relocated: true
+  candidate: "notes"
+- label: 2026-09-04_claude-opus-5-api-generic-v8_rep1
+  project: CM4AI
+  path: "creators[6].affiliations[0].id"
+  relocated: false
+  candidate: null
+- label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+  project: CHORUS
+  path: "ethical_reviews[0].reviewing_organization"
+  relocated: true
+  candidate: "ethical_reviews[0].review_details"
+- label: 2026-08-28b_claude-opus-5-api-generic-v7_rep1
+  project: AI_READI
+  path: "known_biases[1].affected_subsets[0]"
+  relocated: true
+  candidate: "known_biases[1].notes"
+- label: 2026-09-04_claude-opus-5-api-generic-v8_rep1
+  project: CM4AI
+  path: "creators[20].affiliations[0].id"
+  relocated: false
+  candidate: null
+- label: 2026-08-11_claude-opus-5-api-generic_rep1
+  project: CHORUS
+  path: "known_biases[1].bias_description"
+  relocated: true
+  candidate: "description"
+- label: 2026-09-04e_claude-opus-5-api-generic-v8_rep1
+  project: VOICE
+  path: "machine_annotation_tools[0].tool_descriptions[6]"
+  relocated: true
+  candidate: "preprocessing_strategies[8].preprocessing_details"
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep3
+  project: CHORUS
+  path: "creators[0].principal_investigator.id"
+  relocated: false
+  candidate: null
+- label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+  project: CM4AI
+  path: "related_datasets[2].description"
+  relocated: false
+  candidate: "citation"
+  note: "the words recur in the dataset's own citation, a different release"
+- label: 2026-09-01_claude-opus-5-api-generic-v7_rep1
+  project: CM4AI
+  path: "creators[15].id"
+  relocated: false
+  candidate: null
+- label: 2026-09-12_claude-opus-5-api-generic-v9_rep1
+  project: CHORUS
+  path: "maintainers[2].maintainer_details"
+  relocated: true
+  candidate: "data_governance.access_review_process"
+- label: 2026-08-28d_claude-opus-5-api-generic-v7_rep1
+  project: AI_READI
+  path: "funders[2].notes"
+  relocated: true
+  candidate: "funders[1].grants[0].description"
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1
+  project: AI_READI
+  path: "external_resources[0].external_resources[4]"
+  relocated: true
+  candidate: "external_resources[0].notes"
+- label: 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  project: CM4AI
+  path: "human_subject_research.regulatory_compliance[0]"
+  relocated: true
+  candidate: "human_subject_research.regulatory_compliance"
+- label: 2026-08-13_claude-opus-5-api-generic_rep1
+  project: CHORUS
+  path: "instances[0].notes"
+  relocated: true
+  candidate: "description"
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep2
+  project: AI_READI
+  path: "creators[0].notes"
+  relocated: true
+  candidate: "creators[0].notes"
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep2
+  project: VOICE
+  path: "creators[11].principal_investigator.id"
+  relocated: false
+  candidate: null
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "raw_data_sources[6].source_description"
+  relocated: true
+  candidate: "collection_mechanisms[2].mechanism_details"
+- label: 2026-09-04f_claude-opus-5-api-generic-v8_rep1
+  project: AI_READI
+  path: "creators[0].affiliations[0].notes"
+  relocated: true
+  candidate: "creators[0].source_caveats"
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: CHORUS
+  path: "machine_annotation_tools[0].tool_descriptions[3]"
+  relocated: true
+  candidate: "machine_annotation_tools[3].tool_descriptions"
+- label: 2026-09-04g_claude-opus-5-api-generic-v8_rep2
+  project: AI_READI
+  path: "participant_compensation[0].retention_incentives[0]"
+  relocated: true
+  candidate: "participant_compensation[0].notes"
+- label: 2026-08-20b_claude-opus-5-api-generic-v5_rep2
+  project: CHORUS
+  path: "human_subject_research.special_populations[0]"
+  relocated: true
+  candidate: "human_subject_research.special_populations[0]"
+- label: 2026-09-04d_claude-opus-5-api-generic-v8_rep1
+  project: VOICE
+  path: "distribution_formats[2].access_urls[0]"
+  relocated: true
+  candidate: "page"
+- label: 2026-09-01_claude-opus-5-api-generic-v7_rep3
+  project: CM4AI
+  path: "data_governance.committee_members[1].id"
+  relocated: true
+  candidate: "creators[33].id"
+- label: 2026-08-28c_claude-opus-5-api-generic-v7_rep1
+  project: AI_READI
+  path: "variables[0].description"
+  relocated: true
+  candidate: "variables[0].measurement_technique"
+- label: 2026-08-22c_claude-opus-5-api-generic-v5_rep3
+  project: CM4AI
+  path: "creators[1].principal_investigator.id"
+  relocated: true
+  candidate: "creators[1].notes"
+- label: 2026-08-22c_claude-opus-5-api-generic-v5_rep1
+  project: CM4AI
+  path: "license_and_use_terms.contact_person.id"
+  relocated: true
+  candidate: "creators[46].id"
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep1
+  project: AI_READI
+  path: "variables[0].notes"
+  relocated: true
+  candidate: "variables[0].quality_notes"
+- label: 2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2
+  project: AI_READI
+  path: "variables[27].variable_name"
+  relocated: false
+  candidate: "collection_mechanisms[5].mechanism_details"
+  note: "the measurement is described, the variable is not named"
+- label: 2026-08-13_claude-opus-5-api-generic-v4_rep3
+  project: CM4AI
+  path: "ethical_reviews[1].reviewing_organization"
+  relocated: true
+  candidate: "creators[33].affiliations[0].name"

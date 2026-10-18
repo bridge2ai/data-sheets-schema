@@ -937,6 +937,14 @@ def check_report(report: Path, full: dict, core: dict,
         return {"checked": False, "reason": f"no report at {report}",
                 "findings": []}
     text = report.read_text(encoding="utf-8", errors="replace")
+    return _check_report_text(text, full, core, declared, snapshot, dispositions_expected,
+                              ranges, instrument_version=instrument_version)
+
+
+def _check_report_text(text, full, core, declared, snapshot=None, dispositions_expected=None,
+                       ranges=None, *, instrument_version=8):
+    if type(instrument_version) is not int or instrument_version not in (7, 8):
+        raise ValueError(f"unsupported report-claims instrument version: {instrument_version}")
     findings: list[dict[str, str]] = []
     claims = unnamed = core_cannot_hold = 0
     # Refused up front, not only on the row that would consult it (#993): a
@@ -1501,10 +1509,14 @@ def phase1_snapshot_with_pin_for(core_path: Path, *, spec=None, record: dict | N
 def declared_slots() -> dict[str, set[str]]:
     """Induced slots for the classes a report makes claims about."""
     from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA
+    return declared_slots_of(shared_view(FULL_SCHEMA), shared_view(CORE_SCHEMA))
+
+
+def declared_slots_of(full_view, core_view) -> dict[str, set[str]]:
+    """Report declarations from the selected full/core schema views."""
     out: dict[str, set[str]] = {}
-    for schema, classes in ((FULL_SCHEMA, ("Dataset",)),
-                            (CORE_SCHEMA, ("CoreDataset", "CoreDistribution"))):
-        view = shared_view(schema)
+    for view, classes in ((full_view, ("Dataset",)),
+                          (core_view, ("CoreDataset", "CoreDistribution"))):
         for cls in classes:
             if cls in view.all_classes():
                 out[cls] = {s.name for s in view.class_induced_slots(cls)}
@@ -1521,7 +1533,11 @@ def declared_ranges() -> dict[str, dict[str, str | None]]:
     range is not a class in this schema is recorded as `None`: a scalar,
     and the end of any walk that reaches it."""
     from data_sheets_schema.provenance import CORE_SCHEMA
-    view = shared_view(CORE_SCHEMA)
+    return declared_ranges_of(shared_view(CORE_SCHEMA))
+
+
+def declared_ranges_of(view) -> dict[str, dict[str, str | None]]:
+    """Nested report path ranges from the same selected core view."""
     classes = set(view.all_classes())
     out: dict[str, dict[str, str | None]] = {}
     for cls in classes:

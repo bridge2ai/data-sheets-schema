@@ -65,6 +65,14 @@ class NewEvaluationOutputs(unittest.TestCase):
 
     def test_new_output_cannot_use_archive_or_superseded_exemptions(self):
         bad = self.make("rubric10")
+        # The current fixture has no issues. Supply a valid v3 issue first so
+        # this test isolates severity validation, not legacy fixture contents.
+        bad["semantic_analysis"]["issues_detected"] = [{
+            "type": "consistency", "category": "other", "severity": "medium",
+            "description": "Synthetic observation", "recommendation": "Review observation",
+            "fields_involved": [], "item_ids": [], "score_effect": "noted_only",
+        }]
+        self.assertEqual(self.check([self.write("valid-issue.json", bad)])[0], 0)
         bad["semantic_analysis"]["issues_detected"][0]["severity"] = "info"
         for name in ("label_aware/answer.json", "2026-09-11/answer.json",
                      "_archive/answer.json", "superseded/answer.json"):

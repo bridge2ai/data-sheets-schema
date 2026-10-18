@@ -16,9 +16,12 @@ def healthsheet():
               help='the upstream record JSON carrying a Healthsheet; default: the '
                    "active profile's (the study's capture under bridge2ai; none under neutral)")
 @click.option('--project', default=None,
-              help="the dataset the bundle identifies itself as; default: the active profile's (none under neutral)")
+              help="the dataset the bundle identifies itself as; default: the active profile's, "
+                   "for its own record only (none under neutral)")
 @click.option('--name', default=None,
-              help="the bundle's file name; default: the active profile's, else <record stem>_healthsheet_only.txt")
+              help="the bundle's file name; default: the active profile's, for its own record "
+                   "filed under its own project; else {PROJECT}_healthsheet_only.txt "
+                   "(refused where that is a profile's bundle name)")
 @click.option('--output-dir', type=click.Path(), default='data/preprocessed/concatenated',
               show_default=True)
 def bundle(record, output_dir, project, name):

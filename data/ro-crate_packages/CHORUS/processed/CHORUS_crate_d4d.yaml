@@ -127,7 +127,7 @@ description: 'The Collaborative Hospital Repository Uniting Standards (CHoRUS) f
   maintaining compliance with HIPAA and NIH data-sharing policies.
 
   '
-doi: https://doi.org/10.18130/V3/XNBOPG
+doi: 10.18130/V3/XNBOPG
 download_url: http://chorus4ai.org/dataset
 ethical_reviews:
 - description: Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes,

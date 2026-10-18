@@ -1,0 +1,18 @@
+{
+  "categories": {
+    "R": "Representation / selective summary",
+    "S": "Documented source differences",
+    "G": "Documentation gap; provenance unresolved",
+    "L": "Explicit source limitation",
+    "O": "Reviewer claim overstated or contradicted",
+    "W": "Inherited wording or citation convention",
+    "A": "Generated scope ambiguity"
+  },
+  "limitations": [
+    "One primary label per compound comment is a summary; read the component-level explanation.",
+    "The balanced 32-comment sample is not a prevalence estimate for all 562 comments.",
+    "Source searches are targeted and non-exhaustive; absence of a match does not prove source absence.",
+    "No reviewer precision/recall or factual error rate is estimated.",
+    "No original D4D, score, or evaluator text was changed."
+  ]
+}

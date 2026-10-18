@@ -1,0 +1,17 @@
+{
+  "head": "00b80002371fe119bc089445234d6b2f5bd5e24d",
+  "base": "ab13b8e1d3e216ad11359de3c66047a6af32c05b",
+  "expected_merge_tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe",
+  "ci_run": 38127758181,
+  "ci_conclusion": "success",
+  "all_ci_jobs_accepted": true,
+  "all_head_checks_accepted": true,
+  "actual_plugin_approved": true,
+  "tested_postimages_preserved": true,
+  "issues_to_keep_open": [
+    4932,
+    2915,
+    4594,
+    4385
+  ]
+}

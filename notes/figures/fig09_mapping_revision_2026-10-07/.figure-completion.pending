@@ -1,0 +1,137 @@
+{
+  "state": "complete",
+  "format_version": 1,
+  "code_commit": "d6364e58ba77fa975ce594096b11301cd55a68b3",
+  "historical_generated_comparator": "generic-v8 rep 1, API arm",
+  "inputs": [
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/notes/reference_rescore_2026-09-12_cborg_runtime/manifest.json",
+      "sha256": "c6a637ddc84b3ced1db9ee18fdeff63a90e25c5ffb981a23be3fd25707308ee2"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml",
+      "sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml",
+      "sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/CHORUS/processed/CHORUS_crate_mapping_provenance.md",
+      "sha256": "1d70468387a7161c12f1652cd6efdad6389d4c63d3a5b322ed286f047e9956a7"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/CHORUS/processed/CHORUS_crate_mapping_sources.json",
+      "sha256": "bd7ef9938b3c9c2d7c39be5362e1184d2ad1082e1a28b1158796b45ec546b3d7"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv",
+      "sha256": "4992fb8bd7aacd1356b3ed628906aedb9e951ae54b14c1f9f97a2d9e4fc456d3"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json",
+      "sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/src/data_sheets_schema/rocrate_map.py",
+      "sha256": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/src/data_sheets_schema/rocrate_sources.py",
+      "sha256": "0fc36066d42b4d17716c78d1f9906730adbfbd2a0440bf0d2e2ab4fa716234d7"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/src/data_sheets_schema/rocrate_assertions.py",
+      "sha256": "db29413b43226201e2c6686d2d66beb18bfef12b37176a7a0c3180e94bba533f"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/src/data_sheets_schema/scope.py",
+      "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/src/data_sheets_schema/schema_view.py",
+      "sha256": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/d4d_concatenated/rocrate_static_map/2026-10-07_ourmap-v3/CHORUS_d4d.yaml",
+      "sha256": "f3be594c5006d8923ea4f6ae2e293d305caa6d6e27453059acecf27a92190c25"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/CHORUS/processed/CHORUS_crate_mapped_d4d.yaml",
+      "sha256": "4c89011a146778ff628f1b02dcedc170c605cee0a712179c2138307bde854ee8"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml",
+      "sha256": "b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/CM4AI/processed/CM4AI_crate_mapping_provenance.md",
+      "sha256": "3e4c9e4058980f8fefdd4ab51a60d4866f6b03014d10b35d3c789eedaa27b3c9"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/CM4AI/processed/CM4AI_crate_mapping_sources.json",
+      "sha256": "603c16448e2665f7bd79d8b0b7a87d5ec6d76e15f917298826f970868648136b"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/CM4AI/raw/ro-crate-metadata.json",
+      "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/d4d_concatenated/rocrate_static_map/2026-10-07_ourmap-v3/CM4AI_d4d.yaml",
+      "sha256": "82d0e8b8cdad790f38ac40b550d12569b19588bfb434b0557d7cfa0f74eea1c4"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/CM4AI/processed/CM4AI_crate_mapped_d4d.yaml",
+      "sha256": "ba9f27964ec5a4c8fa55351c6dea86e769a2200f75860626576170d1a14643cc"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml",
+      "sha256": "6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/VOICE/processed/VOICE_crate_mapping_provenance.md",
+      "sha256": "7c835048d7d704de42502df5b652e8d71440aa73d5a7dbdb08e2008cbfcf2dab"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/VOICE/processed/VOICE_crate_mapping_sources.json",
+      "sha256": "b6a941816dfa95bb321e1e928f77bb59ed6ea417a634c0ad70392dc753167307"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json",
+      "sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/d4d_concatenated/rocrate_static_map/2026-10-07_ourmap-v3/VOICE_d4d.yaml",
+      "sha256": "098529d34a77ed20654a0a29fcaf35d9d1eb71b5d8a8b15c8c29aaf4b802d7ff"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/data/ro-crate_packages/VOICE/processed/VOICE_crate_mapped_d4d.yaml",
+      "sha256": "d3569d00027fae07a26facf9256d63978b0f13ab5853e5d7ac73bae9ec6d52f4"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/scripts/figures/fig09_mapping_revision.py",
+      "sha256": "c34f76517add49ff78bdbdd4da8cabb9fb55998e9e121eae43d9caa47d61a951"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/src/data_sheets_schema/crate_generation_comparison.py",
+      "sha256": "efa8614d1555fea0051226d50fd8f53dc5d9020d41295887f9130932ebd8dcd8"
+    },
+    {
+      "path": "/private/tmp/d4d-2915-implementation-root-knlcr3by/source/src/data_sheets_schema/figure_publication.py",
+      "sha256": "ff55393666c68b0b582fc7536bdf664eb5b1d1e2248c41453398abe90c7c40cc"
+    }
+  ],
+  "artifacts": {
+    "README.txt": "f024665d0f930dfaae3ef2d61353527a5f31ce45d55eee89b3c850609cfa01b3",
+    "fig09_crate_vs_generation.csv": "0c6e61ab50056e2e6a16937b73cada504f5349014d1229839cc0657da2c668e7",
+    "fig09_crate_vs_generation.png": "81f16c3360adff5136a715e57293010b39963a2b0a00d49d466cd042163c0579",
+    "fig09_crate_vs_generation.svg": "0f8ef9920e45144df6510b9b4cc4c7e52b2746d7e165ce387ca8a0b152f1c706",
+    "fig09_crate_vs_generation_overlap_slots.csv": "c3a128027a289c2cd3e8ea0f3cf05c310901451fd67a9deb4d165a8116f2a3b6",
+    "fig09_crate_vs_generation_source_observations.csv": "127513d469bc72ab74b192b46944cddf98ca988f993e69c7ef86273878cb7c8f"
+  },
+  "scientific_scoring": false
+}

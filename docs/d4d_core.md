@@ -21,16 +21,16 @@ make validate-core       # metamodel check of every core file, gen-python resolu
 make lint-core           # linkml-lint on the core module
 ```
 
-## Curated example datasheets
+## Example datasheets
 
-Each Bridge2AI generating center has a curated d4d-core-aligned datasheet:
+Bridge2AI generating center datasheet renderings (note: AI-READI, CM4AI, and VOICE reflect the ChatGPT-chat comparison arm on superseded releases; CHORUS is a d4d-core rendering):
 
-* **[AI-READI](html_output/concatenated/curated/AI_READI_human_readable.html)** — Retinal imaging and diabetes
-* **[CHORUS](html_output/concatenated/curated/CHORUS_human_readable.html)** — Health data for underrepresented populations
-* **[CM4AI](html_output/concatenated/curated/CM4AI_human_readable.html)** — Cell maps for AI
-* **[VOICE](html_output/concatenated/curated/VOICE_human_readable.html)** — Voice biomarker
+* **[AI-READI](html_output/concatenated/curated/AI_READI_human_readable.html)** — Retinal imaging and diabetes (ChatGPT-chat arm, superseded v2.0.0 release)
+* **[CHORUS](html_output/concatenated/curated/CHORUS_human_readable.html)** — Health data for underrepresented populations (d4d-core rendering; no CHORUS ChatGPT-chat record exists)
+* **[CM4AI](html_output/concatenated/curated/CM4AI_human_readable.html)** — Cell maps for AI (ChatGPT-chat arm, superseded B35XWX v1.4 release)
+* **[VOICE](html_output/concatenated/curated/VOICE_human_readable.html)** — Voice biomarker (ChatGPT-chat arm, superseded v2.0 release)
 
-[All D4D examples →](d4d_examples.md)
+[All D4D examples →](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)
 
 ## Core classes
 
@@ -39,9 +39,9 @@ Each Bridge2AI generating center has a curated d4d-core-aligned datasheet:
 | `CoreDataset` | `schema:Dataset` | The primary dataset metadata record (~79 induced slots) |
 | `CoreDatasetCollection` | `schema:Dataset` (RO-Crate root) + `dcat:Catalog` | `tree_root: true`; renders as `@id: "./"` with `@type: ["Dataset", "https://w3id.org/EVI#ROCrate"]` |
 | `CoreDistribution` | `dcat:Distribution` | Concrete download/distribution surface |
-| `Person`, `Creator` | `schema:Person` | People referenced in `creator`, `author`, `contributor`, `maintainer` |
+| `Person` | `schema:Person` | People referenced in `creator`, `author`, `contributor`, `maintainer`. `Creator`, `Maintainer` and `DataCollector` wrap a person or team with a role and are not themselves `schema:Person` (#3942) |
 | `Organization` | `schema:Organization` | Institutional affiliations and publishers |
-| `Grant`, `FundingMechanism` | `schema:Grant` | Funding records linked via `schema:funder` |
+| `Grant` | `schema:Grant` | Funding records; `FundingMechanism` wraps a grantor and its grants and is linked via `schema:funder` (#3942) |
 
 The full crosswalk lives in the [Semantic Exchange Layer](semantic_exchange.md).
 

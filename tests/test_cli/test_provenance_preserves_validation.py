@@ -450,6 +450,13 @@ class PhaseVocabulary(unittest.TestCase):
             self.assertNotIn("deterministic checks not computed", r.output)
             self.assertIn("pair ok", r.output)
             self.assertEqual(rec["form"]["recorded_by"], "d4d provenance record")
+            from data_sheets_schema.grounding import GROUNDING_INSTRUMENT
+            from data_sheets_schema.provenance import check_record
+
+            self.assertTrue(rec["grounding"]["checked"])
+            self.assertEqual(rec["grounding"]["instrument"], GROUNDING_INSTRUMENT)
+            self.assertEqual(rec["grounding"]["recorded_by"], "d4d provenance record")
+            self.assertEqual(check_record(rec), ([], None))
 
             # The fail-soft branch (#687): a computation that fails leaves the
             # record standing and says why.

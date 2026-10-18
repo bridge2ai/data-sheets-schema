@@ -1125,36 +1125,9 @@ def record_schema_path() -> Path:
 
 
 def _profile_digest_disagreement(data: dict[str, Any]) -> str | None:
-    """A record whose effective profile names one instrument while its
-    `schema.digest_md5` is the *other* profile's current digest states an
-    instrument it did not consume (#1581). Only the current digests are
-    known here; an older digest of the same profile is not a finding."""
-    schema = data.get("schema") if isinstance(data, dict) else None
-    if not isinstance(schema, dict) or not schema.get("digest_md5"):
-        return None
-    stated = schema.get("profile")
-    from data_sheets_schema.profiles import for_record
-    effective = for_record(data).name if stated is None else stated
-    if not isinstance(effective, str) or not isinstance(schema["digest_md5"], str):
-        return None                        # a malformed value is the structural validator's finding (#1655)
-    try:
-        from data_sheets_schema import schema_digest
-        from data_sheets_schema.profiles import PROFILES
-        current = {name: schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=prof))
-                   for name, prof in PROFILES.items()}
-    except Exception as exc:                                   # noqa: BLE001 — no schema here: nothing to compare
-        from data_sheets_schema.profiles import MissingVocabulary
-        if isinstance(exc, MissingVocabulary):
-            return (f"the record's profile cannot be checked here: {exc}")   # a finding, not silence (#1729)
-        return None
-    if current.get(effective) == schema["digest_md5"]:
-        return None                        # its own current digest, whatever else renders the same bytes (#1609)
-    for name, md5 in current.items():
-        if name != effective and md5 == schema["digest_md5"]:
-            basis = f" (read as {effective!r})" if stated is None else ""
-            return (f"schema.profile is {stated!r}{basis} but schema.digest_md5 {md5[:12]}… is the "
-                    f"{name} profile's current digest")
-    return None
+    """A reproducible profile/digest conflict; unavailable history is unknown."""
+    from data_sheets_schema.profile_identity import capture
+    return capture(data)['finding']
 
 
 def check_record(data: dict[str, Any]) -> tuple[list[str], str | None]:
@@ -1220,7 +1193,20 @@ def profile_problems(data: dict[str, Any]) -> list[str]:
     """The profile findings `check_record` appends (#1581, #1678), on their
     own so a gate that does not run the structural validator can still
     fail on them (#1699)."""
-    return [p for p in (_profile_digest_disagreement(data), _spec_profile_disagreement(data)) if p]
+    return profile_assessment(data)[0]
+
+
+def profile_assessment(data: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
+    """Findings and identity context from one record/schema/vocabulary capture.
+
+    Reporting callers reuse this context to disclose unknown history without
+    reading mutable schema or vocabulary files a second time (#4061).
+    """
+    from copy import deepcopy
+    from data_sheets_schema.profile_identity import capture
+    snapshot = deepcopy(data)
+    context = capture(snapshot)
+    return [p for p in (context['finding'], _spec_profile_disagreement(snapshot)) if p], context
 
 
 def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
@@ -2261,14 +2247,19 @@ class GitUnavailable(RuntimeError):
 
 def bundle_bytes_for(bundle_path: str, md5: str | None = None,
                      sha256: str | None = None) -> tuple[bytes, dict[str, str]] | None:
-    """The bytes a record read, recovered from the committed version of its
-    declared bundle whose md5 (or sha256) the record hashed (#1140): the
-    newest matching version's blob and its history entry, or None when no
-    committed version matches. Raises `GitUnavailable` as
-    `bundle_blob_history` does. A receipt was written against these bytes,
-    and a recompute of its block on today's bundle is a recompute against
-    the wrong text; this is what lets the block be recomputed on the right
-    one after the path has drifted."""
+    """The bytes of the newest committed version of a repository file whose
+    md5 (or sha256) is the one given, with that version's history entry,
+    or None when no committed version matches. Raises `GitUnavailable` as
+    `bundle_blob_history` does. Every hash given must match.
+
+    The lookup is by path and hash only, so it serves any committed file;
+    `committed_bytes_for` is the same function under a name that says so
+    (#3412). Its first use, and the reason for the name, is a record's
+    declared bundle (#1140): a receipt was written against the bytes the
+    record hashed, and a recompute of its block on today's bundle is a
+    recompute against the wrong text; this lets the block be recomputed on
+    the right one after the path has drifted. `d4d receipts sources
+    --at-run-commit` recovers a run's source manifest the same way (#3050)."""
     if not md5 and not sha256:
         return None
     for entry in bundle_blob_history(bundle_path):
@@ -2290,13 +2281,16 @@ def bundle_bytes_for(bundle_path: str, md5: str | None = None,
 
 @functools.lru_cache(maxsize=None)
 def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
-    """Every committed version of a bundle reachable from HEAD under this
-    name, on every merged side (`--full-history`; 17 versions of the
-    AI_READI bundle against 10 under default simplification), newest
-    first: commit, date, and the sha256 and md5 of the bytes at that
-    commit. Not across a rename: `--follow` cancels `--full-history` and
-    the pre-rename blob lives under a name this function does not read
-    (#1132 round 2). Memoised per path: the backfill asks once per record
+    """Every committed version of a repository file reachable from HEAD
+    under this name, on every merged side (`--full-history`; 17 versions
+    of the AI_READI bundle against 10 under default simplification),
+    newest first: commit, date, and the sha256 and md5 of the bytes at that
+    commit. Nothing here is specific to bundles, which were its first
+    subject; `committed_blob_history` is the same function under a neutral
+    name (#3412). Not across a rename: `--follow` cancels `--full-history`
+    and the pre-rename blob lives under a name this function does not read
+    (#1132 round 2). Memoised per path, whatever the file (one cache,
+    shared by both names): the bundle-md5 backfill asks once per record
     and 82 records name 11 paths. Read-only result — the cached dicts are
     shared. Raises `GitUnavailable` when the log call fails, or when the
     repository is a shallow clone — CI checks out one commit, and a
@@ -2337,6 +2331,14 @@ def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
                     "sha256": hashlib.sha256(blob.stdout).hexdigest(),
                     "md5": hashlib.md5(blob.stdout).hexdigest()})
     return tuple(out)
+
+
+# Neutral names for the two lookups above (#3412): they recover any
+# committed file by path and hash, not only a bundle. Aliases, not wrappers,
+# so behaviour and the memo cache are one. A caller resolves the name it
+# imports at call time, so a test patches the name its code calls.
+committed_bytes_for = bundle_bytes_for
+committed_blob_history = bundle_blob_history
 
 
 def resolve_bundle_md5(record_path: Path,

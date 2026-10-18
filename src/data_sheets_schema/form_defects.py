@@ -182,7 +182,8 @@ def load_form_failures(cache_dir: Path = JUDGEMENT_CACHE) -> list[FormFailure]:
 
 
 def _value_index(root: Path, method: str, configs: dict[str, str],
-                 projects: tuple[str, ...] = tuple(PROJECTS),
+                 projects: tuple[str, ...] = tuple(PROJECTS), *,
+                 _provenance_paths: list[Path] | None = None,
                  ) -> dict[tuple[str, str], set[str]]:
     """(slot, canonical value) -> the configs that produced it.
 
@@ -197,7 +198,13 @@ def _value_index(root: Path, method: str, configs: dict[str, str],
     for cfg, label in configs.items():
         tag = cfg.split()[0]
         for project in projects:
-            for record in load_replicates(root, method, label, project).values():
+            for replicate, record in load_replicates(root, method, label, project).items():
+                if _provenance_paths is not None:
+                    from data_sheets_schema.provenance import record_path_for
+                    # The loader resolves relative roots against this cwd;
+                    # keep record_path_for from re-anchoring the default spelling.
+                    _provenance_paths.append(record_path_for(
+                        project, method, f"{label}_{replicate}", concat_dir=root.absolute()))
                 for slot, value in record.items():
                     index[(slot, json.dumps(value, sort_keys=True))].add(tag)
     return index
@@ -205,7 +212,8 @@ def _value_index(root: Path, method: str, configs: dict[str, str],
 
 def attribute(failures: list[FormFailure], *, root: Path = DEFAULT_ROOT,
               method: str = "claudecode_agent",
-              configs: dict[str, str] | None = None) -> list[FormFailure]:
+              configs: dict[str, str] | None = None,
+              _provenance_paths: list[Path] | None = None) -> list[FormFailure]:
     """Tag each failure with the configuration that produced its value.
 
     The fitness cache records no run label — it is keyed on the judgement, not
@@ -214,7 +222,10 @@ def attribute(failures: list[FormFailure], *, root: Path = DEFAULT_ROOT,
     an approximate attribution would silently mix the two arms being compared,
     which is the one error this whole exercise exists to undo.
     """
-    index = _value_index(root, method, configs or DEFAULT_CONFIGS)
+    index = (_value_index(root, method, configs or DEFAULT_CONFIGS)
+             if _provenance_paths is None else
+             _value_index(root, method, configs or DEFAULT_CONFIGS,
+                          _provenance_paths=_provenance_paths))
     for failure in failures:
         try:
             canonical = json.dumps(json.loads(failure.value), sort_keys=True)
@@ -223,6 +234,57 @@ def attribute(failures: list[FormFailure], *, root: Path = DEFAULT_ROOT,
         tags = index.get((failure.slot, canonical), set())
         failure.config = "+".join(sorted(tags))
     return failures
+
+
+def _profile_from_provenance(paths: list[Path]):
+    """One profile for the actual attribution roster, or the ambient fallback.
+
+    Existing unprofiled provenance keeps for_record's historical Bridge2AI
+    meaning. A missing file is not such a record: only an entirely absent
+    provenance basis falls back to the environment. Partial or contradictory
+    evidence requires the caller to choose explicitly.
+    """
+    import yaml
+    from data_sheets_schema.duplicate_keys import find_duplicate_keys
+    from data_sheets_schema.profiles import for_record, profile_named
+
+    selected = {}
+    missing = []
+    for path in dict.fromkeys(paths):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            missing.append(path)
+            continue
+        except (OSError, UnicodeError) as exc:
+            raise ValueError(f"cannot infer --profile from {path}: {exc}; "
+                             "pass --profile explicitly") from exc
+        try:
+            if find_duplicate_keys(text, strict=True):
+                raise ValueError("duplicate mapping keys in provenance")
+            record = yaml.safe_load(text)
+            if type(record) is not dict:
+                raise ValueError("provenance must be a mapping")
+            schema = record.get("schema")
+            if schema is not None and type(schema) is not dict:
+                raise ValueError("provenance schema must be a mapping or null")
+            name = schema.get("profile") if schema is not None else None
+            if name is not None:
+                if type(name) is not str or not name.strip():
+                    raise ValueError("provenance schema.profile must be a nonempty name or null")
+                profile_named(name)  # Unknown names must not take for_record's legacy fallback.
+            profile = for_record(record)
+        except (ValueError, yaml.YAMLError, RecursionError) as exc:
+            raise ValueError(f"cannot infer --profile from {path}: {exc}; "
+                             "pass --profile explicitly") from exc
+        selected[profile.name] = profile
+    if selected and missing:
+        raise ValueError(f"cannot infer --profile: {len(missing)} selected provenance "
+                         f"file(s) missing, including {missing[0]}; pass --profile explicitly")
+    if len(selected) > 1:
+        raise ValueError(f"cannot infer --profile: selected provenance spans profiles "
+                         f"{sorted(selected)}; pass --profile explicitly")
+    return next(iter(selected.values()), None)
 
 
 class PooledInstruments(ValueError):
@@ -325,6 +387,8 @@ class FormSubtypeClassifier:
         elif schema_snapshot is not None:
             raise ValueError("fitness schema snapshot requires explicit guidance selection")
         self._client, self._model = client, model
+        self.evaluation_model = ({"name": model, "basis": "explicit_override"}
+                                 if model is not None else None)
         self.class_name = class_name
         self.schema_path = schema_path
         # The instrument of the records being classified (#1496); None is
@@ -372,13 +436,16 @@ class FormSubtypeClassifier:
         """
         if self.cache_path and Path(self.cache_path).exists():
             try:
-                return recorded_model(self.cache_path)
+                model = recorded_model(self.cache_path)
+                self.evaluation_model = {"name": model, "basis": "recorded_cache_model"}
+                return model
             except PooledInstruments:
                 raise
             except (ValueError, OSError):
                 pass          # nothing recorded, or unreadable — fall through
-        from data_sheets_schema.api_runner import _model_settings
-        return _model_settings()["name"]
+        from data_sheets_schema.evaluation_model import model_selection
+        self.evaluation_model = model_selection(None)
+        return self.evaluation_model["name"]
 
     def _load(self) -> None:
         if not self.cache_path or not self.cache_path.exists():
@@ -524,6 +591,7 @@ class FormSubtypeClassifier:
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM),
                                  "model": self.model, "chars": VALUE_CHARS,
+                                 "evaluation_model": self.evaluation_model,
                                  "schema": self.schema,
                                  **({"fitness_schema_guidance": self.schema_guidance, "class_name": self.class_name}
                                     if self.schema_guidance else {}),
@@ -675,7 +743,7 @@ def main(argv: list[str] | None = None) -> int:
                         help="fail instead of making a paid call")
     parser.add_argument("--profile", default=None, choices=sorted(__import__("data_sheets_schema.profiles", fromlist=["PROFILES"]).PROFILES),
                         help="the profile the judged records were generated under (bridge2ai | neutral); "
-                             "default: the ambient profile (#1541)")
+                             "default: infer from selected records' provenance; ambient only when none is available")
     parser.add_argument("--limit", type=int, default=None,
                         help="classify only the first N (for a canary)")
     parser.add_argument("--model", default=None,
@@ -732,20 +800,33 @@ def main(argv: list[str] | None = None) -> int:
                   file=sys.stderr)
             return 2
 
-    failures = attribute(load_form_failures(args.judgement_cache),
-                         configs=configs)
+    provenance_paths = [] if args.profile is None else None
+    failures = load_form_failures(args.judgement_cache)
+    failures = (attribute(failures, configs=configs) if provenance_paths is None else
+                attribute(failures, configs=configs, _provenance_paths=provenance_paths))
+    from data_sheets_schema.profiles import profile_named
+    try:
+        profile = (profile_named(args.profile) if args.profile is not None
+                   else _profile_from_provenance(provenance_paths))
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    basis = ("explicit --profile" if args.profile is not None else
+             "selected provenance" if profile is not None else
+             "ambient fallback: no selected provenance")
+    print(f"source profile selection: {profile.name if profile is not None else 'ambient'} "
+          f"({basis})", file=sys.stderr)
     if args.limit:
         failures = failures[:args.limit]
     print(f"{len(failures)} form failure(s) loaded", file=sys.stderr)
 
-    from data_sheets_schema.profiles import profile_named
     try:
         classifier = FormSubtypeClassifier(cache_path=args.cache,
                                            model=args.model,
                                            schema=args.schema,
                                            specification=args.specification,
                                            offline=args.offline,
-                                           profile=profile_named(args.profile) if args.profile else None,
+                                           profile=profile,
                                            **selected)
         # The live instrument is materialised here: an unknown ambient
         # profile surfaces as a named error, not a traceback (#1679, #1703).

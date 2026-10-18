@@ -1,0 +1,169 @@
+{
+  "format": "nested_ancestor_receipts_validation_v1",
+  "issue": 4397,
+  "tested": {
+    "commit": "baeb92d315c488af25661ac60ceaf98536c37e2c",
+    "tree": "5d11d690826df39c5938f14f4a7eb613c2b180c7",
+    "binding": "The coordinator bound the serialized test process to this frozen commit. JUnit independently records outcomes, not the source revision or runtime identity.",
+    "clean_working_tree_verified_before_evidence_edits": true
+  },
+  "test_run": {
+    "junit": {
+      "artifact": "ancestor-diagnostics-tests-01.xml",
+      "bytes": 34387,
+      "sha256": "bf8b88a65ad2faecb731e32ec555653bad38f1d0cfe010f5874c0d63b7ffbff0"
+    },
+    "summary": {
+      "tests": 236,
+      "passed": 236,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": "221.436",
+      "new_tests": 25,
+      "existing_regression_tests": 211
+    },
+    "modules": [
+      {
+        "path": "tests/test_nested_ancestor_receipts.py",
+        "tests": 25
+      },
+      {
+        "path": "tests/test_replicate_structure.py",
+        "tests": 68
+      },
+      {
+        "path": "tests/test_receipts.py",
+        "tests": 50
+      },
+      {
+        "path": "tests/test_attainability_aggregation.py",
+        "tests": 53
+      },
+      {
+        "path": "tests/test_arm_comparison.py",
+        "tests": 40
+      }
+    ],
+    "coordinator_console": {
+      "passed": 236,
+      "warnings": 1,
+      "warning_kind": "dateutil dependency deprecation",
+      "seconds": "221.50",
+      "basis": "Coordinator terminal summary; warning metadata is not attested by JUnit."
+    },
+    "coordinator_invocation": {
+      "cwd": "<checkout>",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTHONPATH": "<checkout>/src:<checkout>"
+      },
+      "argv": [
+        "<coordinator-venv-python>",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_nested_ancestor_receipts.py",
+        "tests/test_replicate_structure.py",
+        "tests/test_receipts.py",
+        "tests/test_attainability_aggregation.py",
+        "tests/test_arm_comparison.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=<external-evidence>/ancestor-diagnostics-pytest-01",
+        "--junitxml=<external-evidence>/ancestor-diagnostics-tests-01.xml"
+      ],
+      "basis": "Coordinator-reported invocation; placeholders replace private paths."
+    }
+  },
+  "pins": {
+    "changed_production": [
+      {
+        "path": "src/data_sheets_schema/replicate_structure.py",
+        "bytes": 52286,
+        "sha256": "c3c3131e8953d15a9f845ee6398d828c536e38d985959c005e49f173a5167b0e"
+      },
+      {
+        "path": "scripts/arm_comparison.py",
+        "bytes": 117512,
+        "sha256": "de83ba888ad7ac4ae9918a8bece0151eeb0dd2462babcef911966372f1b20fa4"
+      }
+    ],
+    "reused_production": [
+      {
+        "path": "src/data_sheets_schema/receipts.py",
+        "bytes": 110811,
+        "sha256": "5cb16046c5a6267274f755ae7e0bb2b6b220fbe70b98bab47878cbfc803a84dc"
+      },
+      {
+        "path": "src/data_sheets_schema/attainability_aggregation.py",
+        "bytes": 49310,
+        "sha256": "a7b4a3cde144a4e475cddf6b5e060a2e5f347b6f0263103bf9d54aca9f121f0f"
+      }
+    ],
+    "tested_modules": [
+      {
+        "path": "tests/test_nested_ancestor_receipts.py",
+        "bytes": 11428,
+        "sha256": "bc74cd350fa1ea5cdac69516b56bfbbe27f262a62eecfd44c5036cf5d9577d46"
+      },
+      {
+        "path": "tests/test_replicate_structure.py",
+        "bytes": 69762,
+        "sha256": "9c0b40517c6b3fcbee3276b3f989cde5433a710cca6dfbf1a672600bce3e3b5c"
+      },
+      {
+        "path": "tests/test_receipts.py",
+        "bytes": 85648,
+        "sha256": "cdfa4709109759e6f9196313b7bb15f951547bb210a960ef8a5f34a932c7fef6"
+      },
+      {
+        "path": "tests/test_attainability_aggregation.py",
+        "bytes": 35568,
+        "sha256": "43e3da87420351d6241fac5c3ea2ee535461f364c98b66090641c20e5816c39a"
+      },
+      {
+        "path": "tests/test_arm_comparison.py",
+        "bytes": 37359,
+        "sha256": "ceb3599f71d151acdaffd6f2ba90defcc01cbe6086bcd4647be12557499f3d7b"
+      }
+    ],
+    "test_support": [
+      {
+        "path": "tests/test_reference_rescore.py",
+        "bytes": 72215,
+        "sha256": "afbb22fa1d212746261d3864b95c490ef8ce2a29530b4dbdfaeb7ecb4e0ab009"
+      },
+      {
+        "path": "tests/conftest.py",
+        "bytes": 3446,
+        "sha256": "768f928bd17d19d2f50a27afa1420fe892621f0db33a8abeb9721154533bfab9"
+      }
+    ],
+    "dependency_declarations": [
+      {
+        "path": "pyproject.toml",
+        "bytes": 4446,
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b"
+      },
+      {
+        "path": "poetry.lock",
+        "bytes": 592155,
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21"
+      }
+    ]
+  },
+  "verification": [
+    "Every listed file matched both the tested Git blob and current working bytes before evidence publication.",
+    "JUnit digest, byte count, five module counts and absence of failure/error/skipped nodes were independently checked.",
+    "Independent source review reported no material finding. No additional test or application execution was used to prepare this evidence."
+  ],
+  "limitations": [
+    "Pins identify selected source files, tested modules, supporting test sources and declared dependencies; they are not a complete imported-code closure or an attestation of installed dependency versions.",
+    "The new diagnostics add no omission-candidate credit, scientific support certification or recall measurement.",
+    "Existing corpus-backed regression controls were included. No full report regeneration, generation replay, new empirical comparison or historical 17-row recount was performed.",
+    "Historical reports, figures, source bundles and receipts remain unchanged. Human annotation/matching approval under #2921 and scalar-list identity decisions under #4398 remain pending."
+  ]
+}

@@ -1,0 +1,23 @@
+# Registered container lexicons (#2913): each file's bytes pinned by sha256.
+#
+# The same form and the same rule as lexicons/registry.yaml (#2919, #3040):
+# a registered file is never edited, and a change is a new version — a new
+# file named {name}_v{N}.yaml beside the old one and a new entry below.
+# data_sheets_schema.self_disclaimed.load_lexicon refuses a file in this
+# directory whose bytes are not its pin, and tests/test_lexicons.py fails on
+# one. Until #3040 these pins lived in tests/test_self_disclaimed.py, which
+# the lexicon files' own header comments still name; their bytes are pinned,
+# so that sentence stays as written. Unlike the files it pins, this registry
+# is edited — once per new version.
+lexicons:
+  self_disclaimed:
+    - version: 1
+      file: self_disclaimed_v1.yaml
+      sha256: 15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a
+      registered: "2026-09-29"
+      issue: 2913
+    - version: 2
+      file: self_disclaimed_v2.yaml
+      sha256: e05cfaf00a62c042c120542b19317b286c6fa2c03223fe79d6566c6fe79834d4
+      registered: "2026-09-29"
+      issue: 3131

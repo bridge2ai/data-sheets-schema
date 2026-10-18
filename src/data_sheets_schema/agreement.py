@@ -358,6 +358,7 @@ class EquivalenceJudge:
                  max_tokens: int = 16000, cache_path: Path | None = None,
                  offline: bool = False):
         self._client, self._model = client, model
+        self.evaluation_model = None
         self.max_tokens = max_tokens
         self.cache_path = Path(cache_path) if cache_path else None
         self.offline = offline
@@ -375,9 +376,10 @@ class EquivalenceJudge:
         Needed at load time to scope the cache, and offline mode must not need
         credentials just to read a file.
         """
-        if self._model is None:
-            from data_sheets_schema.api_runner import _model_settings
-            self._model = _model_settings()["name"]
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
         return self._model
 
     def _resolve(self):
@@ -408,6 +410,7 @@ class EquivalenceJudge:
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rubric": _digest(EQUIVALENCE_SYSTEM),
                                  "model": self.model,
+                                 "evaluation_model": self.evaluation_model,
                                  "judge_chars": JUDGE_VALUE_CHARS,
                                  "key": key, "slot": slot,
                                  "equivalent": ok, "reason": reason}) + "\n")
@@ -605,12 +608,13 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
     slots cannot quietly buy ~1400 embeddings on the way past. The embedder
     reads its cache and stops there unless asked otherwise.
 
-    `judge_model` pins the instrument. Left as None the judge inherits the
-    live config pin — right for a fresh measurement, wrong for reproducing a
-    published one: when #345 switched the pin, every model-scoped cached
-    verdict silently fell out of scope and the offline rebuild of an already
-    frozen artifact failed (#351). A reproduction passes the judge_model the
-    publication records.
+    `judge_model` pins the instrument. Left as None the judge takes the
+    evaluation model (`evaluation_model.evaluation_model_settings`, #2928),
+    which today defaults to the live generation config pin — right for a
+    fresh measurement, wrong for reproducing a published one: when #345
+    switched the pin, every model-scoped cached verdict silently fell out of
+    scope and the offline rebuild of an already frozen artifact failed
+    (#351). A reproduction passes the judge_model the publication records.
     """
     configs = configs or DEFAULT_CONFIGS
     projects = tuple(projects) if projects else default_projects()
@@ -658,6 +662,7 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
                 # when it is not (#253).
                 "similarity_absent": sum(r.similarity is None for r in result),
                 "judge_model": judge.model,
+                "evaluation_model": judge.evaluation_model,
                 "judge_chars": JUDGE_VALUE_CHARS,
                 "replicates": sorted(records),
             }

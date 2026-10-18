@@ -1,0 +1,20 @@
+{
+  "archive_download_url": "https://api.github.com/repos/bridge2ai/data-sheets-schema/actions/artifacts/11542626279/zip",
+  "created_at": "2026-10-08T10:06:42Z",
+  "digest": "sha256:21f8b4831f5c7e9c87ec879ef3d3e1972ca5fcd8dfbeeb8653279a751f9b89d1",
+  "expired": false,
+  "expires_at": "2026-10-22T10:06:41Z",
+  "id": 11542626279,
+  "name": "native-synthetic-cases-cfe68ee650e3de0f775bd476f055f25c29eb7a72-37759818157-1-shard2",
+  "node_id": "MDg6QXJ0aWZhY3QxMTU0MjYyNjI3OQ==",
+  "size_in_bytes": 4744,
+  "updated_at": "2026-10-08T10:06:42Z",
+  "url": "https://api.github.com/repos/bridge2ai/data-sheets-schema/actions/artifacts/11542626279",
+  "workflow_run": {
+    "head_branch": "fix/4537-trace-single-decode",
+    "head_repository_id": 647516072,
+    "head_sha": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+    "id": 37759818157,
+    "repository_id": 647516072
+  }
+}

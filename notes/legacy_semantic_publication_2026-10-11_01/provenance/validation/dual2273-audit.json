@@ -1,0 +1,273 @@
+{
+  "actual_executions": [
+    {
+      "elapsed_seconds": 114.34887099999469,
+      "execution": {
+        "bytes": 6489,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/execution.json",
+        "sha256": "4f34c4755fba72795e42bef90ed0607d4d8af372d162d3da48a76b8804a5e27f"
+      },
+      "exit_code": 0,
+      "individual_audit": {
+        "bytes": 7119,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-candidate313-completed-independent-audit.json",
+        "sha256": "de0648d3c9210e6be14676203b0a6b3811843b15aed0dfad2020976fc1c0356c"
+      },
+      "junit": {
+        "cases": 2273,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "junit_pin": {
+        "bytes": 418690,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/junit.xml",
+        "sha256": "5ecc25e4ea769341b96d791b2d50b70a8c3e29c7671579413e80e74563f33039"
+      },
+      "python": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "slot": "candidate313",
+      "version": [
+        3,
+        13,
+        12
+      ],
+      "worker": {
+        "bytes": 393854,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/worker.json",
+        "sha256": "5fcb9bad901019cd985c4acc3df504f83c1d42859f3a062f8f0062cc6b667587"
+      }
+    },
+    {
+      "elapsed_seconds": 152.1795462910086,
+      "execution": {
+        "bytes": 6804,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate39/execution.json",
+        "sha256": "206fb021218e1cbc5a06cfb93a7b4d71158ee6b60ca7dc2c411bf270afdf7f1e"
+      },
+      "exit_code": 0,
+      "individual_audit": {
+        "bytes": 7295,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-candidate39-completed-independent-audit.json",
+        "sha256": "44eae5b879d2676e4bc2d70ff19eff1422446a742de12c4aaa2b7dce3ce7ee7f"
+      },
+      "junit": {
+        "cases": 2273,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "junit_pin": {
+        "bytes": 418716,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate39/junit.xml",
+        "sha256": "5aff14205297d1b7b590c1853dab04df514fa28a3fe762e6a4af2dc0ba42eba4"
+      },
+      "python": "/private/tmp/d4d-goal-resume-5sVO4ntI/native-owner-4839-python39-env01/venv/bin/python",
+      "slot": "candidate39",
+      "version": [
+        3,
+        9,
+        6
+      ],
+      "worker": {
+        "bytes": 394243,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate39/worker.json",
+        "sha256": "7a5ae9d7de015f1475bd4a8019f18581156690f56a409315394c71c3377d001e"
+      }
+    }
+  ],
+  "format": "legacy4940_4941_dual_runtime_completed_independent_audit_v1",
+  "issues": [
+    4940,
+    4941,
+    4942
+  ],
+  "limits": [
+    "Independent saved-evidence audit only; no project applications, tests, imports, source edits or current Git reads by auditor.",
+    "Actual tests used d900 plus six reviewed dirty postimages. A later commit/reparent/merge must bind these exact tested bytes independently.",
+    "These functional passes establish no study-method registration, source/fidelity coverage gains, parent issue closure, native performance/acceptance, or plugin/CI/merge clearance.",
+    "Failed original baseline wrapper and three product failures are retained; saved confirmation is not relabelled product success."
+  ],
+  "ordered_roster": {
+    "cases_each": 2273,
+    "exact_xml_worker_and_frozen_nodeids": true,
+    "modules": 33,
+    "new_api_cases": 49,
+    "new_case_counts": {
+      "tests/test_rocrate/test_legacy_route_disposition_api_counts.py": 49,
+      "tests/test_rocrate/test_legacy_route_disposition_publication.py": 70,
+      "tests/test_rocrate/test_legacy_route_dispositions_core.py": 276,
+      "tests/test_rocrate/test_legacy_supplemental_report.py": 28
+    },
+    "new_report_cases": 28,
+    "nodeids": {
+      "bytes": 339114,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01/candidate-nodeids.json",
+      "sha256": "5a7b1813ff1bc218566129d4638b11a20119919dbe4ff42da79cb11a43f9666e"
+    },
+    "prior_actual_2196_prefix_unchanged": true,
+    "same_ordered_ids_across_runtimes": true
+  },
+  "package": [
+    {
+      "bytes": 2665,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02/freeze.json",
+      "sha256": "b26a33d76b3bc1f1b51bdb22b29f6168753fde1545a9fd0b75c852d9b604a3b6"
+    },
+    {
+      "bytes": 68174,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02/configuration.disabled.json",
+      "sha256": "2fc939f4d2a090c8552b7aef66293f90e0b71224bd23a99d4ca3fe28d45c5d28"
+    },
+    {
+      "bytes": 68173,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02/configuration.enabled.json",
+      "sha256": "fe1ac70281450ca3db2d174d0b79608b183289ed92d59d7cbaacb497539c5ac6"
+    }
+  ],
+  "publication_status": {
+    "actual_five_input_cli_publications": false,
+    "dataset_and_sidecar_oracles_preserved_in_disabled_plan": true,
+    "enabled": false,
+    "future_merge_ci_whole_pr_plugin_bindings_pending": true,
+    "package": {
+      "bytes": 2568,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution03/freeze.json",
+      "sha256": "88bca1a33130c11fe51d81425b66029b8cd56a57f3cb0c65dfa547387f958b79"
+    }
+  },
+  "red_to_green": {
+    "both_actual_full_candidate_suites_passed": true,
+    "classifier_issue": 4942,
+    "independent_baseline_and_33_controls_audit": {
+      "bytes": 12451,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-baseline-and-classifier-completed-independent-audit.json",
+      "sha256": "25036a313008e35fa4a0400057722e7bdf295c6a1f5aa7bb9c477e5007deb08c"
+    },
+    "no_baseline_application_rerun": true,
+    "only_four_production_file_changes_between_baseline_and_candidates": [
+      ".claude/agents/scripts/rocrate_to_d4d.py",
+      "src/data_sheets_schema/legacy_route_dispositions.py",
+      "src/fairscape_integration/cli.py",
+      "src/transformation/transform_api.py"
+    ],
+    "original_application_tests_passed": false,
+    "original_baseline_execution": {
+      "bytes": 6133,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01-results/baseline313/execution.json",
+      "sha256": "fd47def98151d1292aa8fed94e54137d417c8d1471c72a76115c9e600e6eacef"
+    },
+    "original_junit": {
+      "cases": 3,
+      "errors": 0,
+      "failures": 3,
+      "skipped": 0
+    },
+    "original_pytest_exit": 1,
+    "original_wrapper_passed": false,
+    "saved_only_confirmation": {
+      "bytes": 6028,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/baseline-confirmation.json",
+      "sha256": "3d0bd80f54d9bc665b16c0254dd3724e8994c62cf803aaa4dae2dcc082cee912"
+    },
+    "two_new_test_modules_unchanged": true
+  },
+  "runtime_origins": {
+    "actual_versions": [
+      [
+        3,
+        13,
+        12
+      ],
+      [
+        3,
+        9,
+        6
+      ]
+    ],
+    "findings": [],
+    "genuine39_launcher": {
+      "bytes": 287,
+      "path": "/private/tmp/d4d-legacy-narrative4913-python39-deps/bin/linkml-validate",
+      "sha256": "fca252f3ddbc63b393f31691825b831df6f556f459dbdcf97451fb8c0f5250f5"
+    },
+    "rows": [
+      214,
+      214
+    ],
+    "same39launcher_in_worker_and_coordinator": true,
+    "scope": "Collection/final metadata for full candidate suite; deliberate per-test import mutations remain outside these checkpoints. Baseline has separately audited pre-teardown call metadata.",
+    "source_owned_project_test_origins": true
+  },
+  "source_preservation": {
+    "actual_dirty_paths": [
+      "src/data_sheets_schema/legacy_route_dispositions.py",
+      "src/fairscape_integration/cli.py",
+      ".claude/agents/scripts/rocrate_to_d4d.py",
+      "tests/test_rocrate/test_legacy_supplemental_report.py",
+      "src/transformation/transform_api.py",
+      "tests/test_rocrate/test_legacy_route_disposition_api_counts.py"
+    ],
+    "all_common_and_phase_pins_joined": true,
+    "all_four_before_after_inventories_equal": true,
+    "entries": 10791,
+    "git_directory_excluded_but_head_tree_dirty_paths_checked_separately": true,
+    "historical_head": "d9005cca0ce54e8764ca9fdd740b51444c8a08ab",
+    "historical_tree": "859078630d3ef8ac5bb3c8f4096a8ec0af21e4a6",
+    "ignored_files_directories_symlinks_included": true,
+    "inventory_pins": [
+      {
+        "bytes": 2387953,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/before.json",
+        "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+      },
+      {
+        "bytes": 2387953,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/after.json",
+        "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+      },
+      {
+        "bytes": 2387953,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate39/before.json",
+        "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+      },
+      {
+        "bytes": 2387953,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate39/after.json",
+        "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+      }
+    ],
+    "postimages": [
+      {
+        "bytes": 28634,
+        "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_route_dispositions.py",
+        "sha256": "1bf8af7c24d2a27f22995f9a84c7b141d168763d617d06358be31c13fdd9daf1"
+      },
+      {
+        "bytes": 23795,
+        "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/cli.py",
+        "sha256": "5d8020f0764e35af99f72e5d6e61e83d90455302dd28b075f75121d770b97a1d"
+      },
+      {
+        "bytes": 21320,
+        "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/.claude/agents/scripts/rocrate_to_d4d.py",
+        "sha256": "5cb0a7a976f2547fabeae0302d9d7e4bc9a57d0333831edd7e386a71a41734bb"
+      },
+      {
+        "bytes": 8626,
+        "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_supplemental_report.py",
+        "sha256": "fe4af1e6290dc215a2a6c9770f34b6b1ab2320ccb9d27691e581774d551b7ad2"
+      },
+      {
+        "bytes": 42087,
+        "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/transformation/transform_api.py",
+        "sha256": "7057be40996b553c20105e324705656a0e1cc96ed9c41867f585822534c787e3"
+      },
+      {
+        "bytes": 14115,
+        "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_route_disposition_api_counts.py",
+        "sha256": "cc514fc77b7c66d17e8ee49ca9d02f79f1a7b028b54b44dc613fbc450f314392"
+      }
+    ]
+  },
+  "verdict": "PASS"
+}

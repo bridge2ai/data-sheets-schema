@@ -80,7 +80,12 @@ class TestTheInstalledWheel(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         names = zipfile.ZipFile(self.wheel).namelist()
         rubric = sorted(n for n in names if n.startswith("data/rubric/"))
-        self.assertEqual(rubric, ["data/rubric/rubric10.txt", "data/rubric/rubric20.txt"], rubric)
+        self.assertEqual(rubric, ["data/rubric/rubric10.txt", "data/rubric/rubric20.txt",
+                                 "data/rubric/rubric20_semantic_v4.txt",
+                                 "data/rubric/semantic_evidence_authority_v3.json"], rubric)
+        self.assertIn(".claude/agents/d4d-rubric20-semantic-v4.md", names)
+        self.assertIn("src/download/prompts/rubric20_semantic_v4_schema.json", names)
+        self.assertIn("data_sheets_schema/semantic_instrument.py", names)
 
     def test_the_metadata_requires_linkml_unconditionally(self):
         """#1476: `linkml` was in the `docs` extra as well as the main table, and

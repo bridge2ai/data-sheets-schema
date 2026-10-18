@@ -368,8 +368,14 @@ def test_module_has_no_source_checker_or_io_dependencies():
         if isinstance(node, ast.Import):
             dependencies.update(alias.name for alias in node.names)
         elif isinstance(node, ast.ImportFrom):
-            dependencies.add(node.module)
-    assert dependencies == {"__future__", "json", "math", "re"}
+            dependencies.update("." * node.level + (node.module or alias.name) for alias in node.names)
+    assert dependencies == {"__future__", "json", "math", "re", ".audit_protocol"}
+    # The shared selector is itself pure; allowing it must not admit a source
+    # checker or indirect filesystem/provider dependency into the grammar.
+    from data_sheets_schema import audit_protocol
+    selector = ast.parse(inspect.getsource(audit_protocol))
+    imports = [n for n in ast.walk(selector) if isinstance(n, (ast.Import, ast.ImportFrom))]
+    assert all(isinstance(n, ast.ImportFrom) and n.module == "__future__" for n in imports)
 
 
 def test_repeated_check_has_no_state_or_repair_effect():

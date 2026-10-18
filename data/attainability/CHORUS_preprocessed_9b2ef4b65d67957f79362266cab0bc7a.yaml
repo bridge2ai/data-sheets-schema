@@ -1,0 +1,135 @@
+# Attainability of rubric items on one bundle version (#2925); format in
+# src/data_sheets_schema/attainability.py. Deterministic entries are derived by
+#   python -m data_sheets_schema.attainability derive --bundle PATH --md5 MD5 --write
+# and re-derived by the validator; curator and judge entries are kept on a rewrite.
+format: d4d-attainability
+format_version: 1
+bundle:
+  path: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+  md5: 9b2ef4b65d67957f79362266cab0bc7a
+  sha256: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
+  bytes: 35920
+chunk_rule:
+  version: 2
+  unit: source-document
+  boundary: 'FILE: line followed by PATH: or ROLE:'
+  preamble: own-chunk
+  split: line-window
+  max_lines: 400
+  max_bytes: 48000
+rubrics:
+  rubric10:
+    path: data/rubric/rubric10.txt
+    sha256: 9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97
+entries:
+- rubric: rubric10
+  item_id: E1.1
+  route: doi_rrid
+  status: not_stated_in_source
+  method: deterministic:doi_rrid
+  evidence:
+    pattern: (?i)(?<![a-z])dois?(?![a-z])|10\.\d+(?:\.\d+)*/|(?<![a-z])rrids?(?![a-z])|(?<![a-z0-9])(?:scr|ab|cvcl|nlx)_\d
+    hit_count: 0
+    snippets: []
+  note: 'A DOI in any written form carries ''10.<registrant>/'', a registrant subdivided by full stops
+    (''10.1000.10/'') included, or is named DOI; an RRID is named RRID or written as a SCR_/AB_/CVCL_/NLX_
+    accession, so zero matching lines mean the bundle states no DOI and no RRID. E1.1 also accepts another
+    persistent URI, which no pattern settles: this entry speaks for the DOI/RRID route only. A matching
+    line is one a match touches, the text read line by line and whole: a line break read as a space and,
+    after a hyphen, as nothing (a split word) or as the hyphen alone (a hyphenated compound), each such
+    break read on its own within any 6 consecutive lines. Not seen: a word a break splits with no hyphen,
+    or a statement over more than 6 lines whose hyphens need different readings. Result: no matching line.'
+- rubric: rubric10
+  item_id: E4.1
+  route: null
+  status: unknown
+  method: deterministic:ethics_review
+  evidence:
+    pattern: (?i)(?<![a-z])irbs?(?![a-z])|institutional[-\s]+review|ethic|(?<![a-z])(?:hrec|reb|dpia)s?(?![a-z])|exempt|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|data[-\s]+protection[-\s]+impact|privacy[-\s]+board|human[-\s]+subjects?|(?<![a-z])oversights?(?![a-z])
+    hit_count: 17
+    snippets:
+    - {chunk: c002, lines: [45, 45], sha256: 956c8af5b4c932a133055928f27c75c76c14b46126e554766ece025b149c3365}
+    - {chunk: c002, lines: [47, 47], sha256: c08024af177e7c24a0eda63315c43af9118abc6dfd3f817ec657c4ddf4723a48}
+    - {chunk: c002, lines: [50, 50], sha256: 9db5822180ee272eff359e695b2f7f93c2f8f473e98857c94e1db5371fa51f3b}
+    - {chunk: c003, lines: [422, 422], sha256: 657f16066aa092c33a184fb44e26685ac7c6803cd200416b3f6af0c73c548798}
+    - {chunk: c004, lines: [552, 552], sha256: 6884788cc46c7a3c6e82786ca24fe456def7613036eefaccae89153902e7fd49}
+    - {chunk: c004, lines: [606, 606], sha256: cf1205392fdc9e0df10f17f113e9587566051cf2ae9a1099f82af84b640713b4}
+    - {chunk: c004, lines: [647, 647], sha256: ad2633cf5440f230932c66c67630fe1402a25831751c797ab9a20cacd9557dd9}
+    - {chunk: c004, lines: [651, 651], sha256: ace4e536af5d417422a6003606eef7d0c4e3a7c1dc33690a97fb429cdf7d6cb8}
+    - {chunk: c004, lines: [664, 664], sha256: a4fe8a8f9494d6f2270721689d18fab3c87147d3e16d5673eb2f04edb7b454a7}
+    - {chunk: c004, lines: [666, 666], sha256: 87b8ea66a40c3d6216055c54c0e3af09949ac78d6d73fcf3c8ad49e518ed7588}
+    - {chunk: c004, lines: [769, 769], sha256: cfe6e67e58a997dee3f4e9e8cc2a63d335040c4ff8519ecab922624108010fd7}
+    - {chunk: c006, lines: [1054, 1054], sha256: 1be437b9d4a1765b86a4aa3e5db29f67471801013850e62feda9dbffab1b4a62}
+    - {chunk: c006, lines: [1062, 1062], sha256: bb4d268f95a3cbdec3bf78d396ba1fdf4fb8ac9354d48e5fae0b964dbe33ff2d}
+    - {chunk: c006, lines: [1086, 1086], sha256: 1be437b9d4a1765b86a4aa3e5db29f67471801013850e62feda9dbffab1b4a62}
+    - {chunk: c006, lines: [1103, 1103], sha256: 1be437b9d4a1765b86a4aa3e5db29f67471801013850e62feda9dbffab1b4a62}
+    - {chunk: c007, lines: [1196, 1196], sha256: 19a9a8b2aad22a7be39ce3f8c7d8c5848056947cdd9b8c1ddf227b7f2a07f9e3}
+    - {chunk: c007, lines: [1206, 1206], sha256: d04a09ad13ae76eb8bb8f2fe1d5fc3e547762017883aaf03231df2e1736dbf52}
+  note: 'An ethics review, its waiver or exemption, or a data protection impact assessment is named IRB,
+    institutional review, ethics/ethical, HREC/REB, exemption, waiver, DPIA, privacy board, human subjects
+    or oversight, a compound hyphenated or spaced alike (''human-subjects''), so zero matching lines mean
+    the bundle states none. A matching line is one a match touches, the text read line by line and whole:
+    a line break read as a space and, after a hyphen, as nothing (a split word) or as the hyphen alone
+    (a hyphenated compound), each such break read on its own within any 6 consecutive lines. Not seen:
+    a word a break splits with no hyphen, or a statement over more than 6 lines whose hyphens need different
+    readings. Result: 17 matching line(s). A match is not evidence the item is supported (the words recur
+    in other senses), so the status stays unknown until a curator or judge reads the lines listed.'
+- rubric: rubric10
+  item_id: E4.4
+  route: null
+  status: not_stated_in_source
+  method: deterministic:consent_text
+  evidence:
+    pattern: (?i)consent|(?<![a-z])assent|(?<![a-z])waiv(?:e|ed|er|ers|es|ing)(?![a-z])|permission|authori[sz]ation|(?<![a-z])opt(?:ed|s|ing)?[-\s]*(?:in|out)s?(?![a-z])
+    hit_count: 0
+    snippets: []
+  note: 'Any statement of informed consent names consent, assent, a waiver, parental permission, a HIPAA
+    authorization or an opt-in/opt-out model (written joined, hyphenated or spaced, ''opt  out'' and ''opt-
+    out'' included), so zero matching lines mean the bundle states no consent procedure. Not seen: consent
+    described without any of these words (''participants agreed to ...''). A matching line is one a match
+    touches, the text read line by line and whole: a line break read as a space and, after a hyphen, as
+    nothing (a split word) or as the hyphen alone (a hyphenated compound), each such break read on its
+    own within any 6 consecutive lines. Not seen: a word a break splits with no hyphen, or a statement
+    over more than 6 lines whose hyphens need different readings. Result: no matching line.'
+- rubric: rubric10
+  item_id: E6.1
+  route: null
+  status: unknown
+  method: deterministic:version_string
+  evidence:
+    pattern: (?i)(?<![a-z])version(?:s|ed|ing)?(?![a-z])|releas(?:e|es|ed|ing)(?![a-z])|(?<![a-z])(?:edition|revision)s?(?![a-z])|(?<![a-z0-9])v\d+(?:\.\d+)*(?![a-z])|(?<![\d.])\d+(?:\.\d+){2,}(?!\.?\d)
+    hit_count: 6
+    snippets:
+    - {chunk: c003, lines: [414, 414], sha256: d21ea6aadcedae26e0ba9a174510fbd3f3d078610b02be32f7bc4344018b4c0b}
+    - {chunk: c004, lines: [541, 541], sha256: a5fa6eb7867af2439c60d920f59b9dae1e889c315a466a01410cac341cc74256}
+    - {chunk: c005, lines: [985, 985], sha256: f47df194a1ef21408b8c678521564efbf5684d11b5ead4153027fcea830681e3}
+    - {chunk: c006, lines: [1074, 1074], sha256: ed317fcfb59dadb708bc4a1efd8612d77dba1086f922784d9d38fb3cb69de7a4}
+    - {chunk: c007, lines: [1357, 1357], sha256: 45d6597f3d1df5c65aee5a530235580253dea13cde8fa0efa1cf9c73c3edc502}
+    - {chunk: c008, lines: [1558, 1558], sha256: 79429b316c00d95f5651ac48aec7bfb0d653f21ee42d311d4933da37e2ba2ffc}
+  note: 'A dataset version is named version/release/edition/revision, or written v<n> or as a dotted number
+    of three or more parts (also at the end of a sentence), so zero matching lines mean the bundle states
+    no version. Not seen: a bare two-part number with no such word (''X 2.0''). A matching line is one
+    a match touches, the text read line by line and whole: a line break read as a space and, after a hyphen,
+    as nothing (a split word) or as the hyphen alone (a hyphenated compound), each such break read on
+    its own within any 6 consecutive lines. Not seen: a word a break splits with no hyphen, or a statement
+    over more than 6 lines whose hyphens need different readings. Result: 6 matching line(s). A match
+    is not evidence the item is supported (the words recur in other senses), so the status stays unknown
+    until a curator or judge reads the lines listed.'
+- rubric: rubric10
+  item_id: E10.2
+  route: null
+  status: not_stated_in_source
+  method: deterministic:dataset_citation
+  evidence:
+    pattern: (?i)(?<![a-z])dois?(?![a-z])|10\.\d+(?:\.\d+)*/|(?<![a-z])cit(?:e[sd]?|ing|ations?)(?![a-z])|(?<![a-z])bibtex(?![a-z])|(?<![a-z])acknowledg|(?:please|how\s+to|when|should|must|kindly)\s+(?:be\s+)?referenc|recommended\s+referenc
+    hit_count: 0
+    snippets: []
+  note: 'E10.2 accepts a recommended citation or a DOI. A DOI matches as for E1.1; a citation request
+    names cite/citation, BibTeX or acknowledgement, or asks the reader to reference the data (please,
+    how to, when, should, must or kindly, then reference or be referenced; or a recommended reference),
+    so zero matching lines mean the bundle states neither. Not seen: a bare formatted reference carrying
+    none of those words. A matching line is one a match touches, the text read line by line and whole:
+    a line break read as a space and, after a hyphen, as nothing (a split word) or as the hyphen alone
+    (a hyphenated compound), each such break read on its own within any 6 consecutive lines. Not seen:
+    a word a break splits with no hyphen, or a statement over more than 6 lines whose hyphens need different
+    readings. Result: no matching line.'

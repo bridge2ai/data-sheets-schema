@@ -3,14 +3,16 @@
 Generate schema-structure-aware mappings between D4D and RO-Crate.
 
 This script:
-1. Parses D4D schema structure (inheritance, composition, modules)
+1. Parses D4D schema structure (inheritance, composition)
 2. Parses RO-Crate schema structure (properties, nesting, types)
 3. Generates mappings that respect structural relationships
 4. Validates type compatibility
 5. Outputs SSSOM-compatible mappings
 """
 
+import inspect
 import json
+import textwrap
 import yaml
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Tuple
@@ -41,7 +43,6 @@ class SchemaClass:
     name: str
     description: str = ""
     is_a: Optional[str] = None  # Parent class
-    module: Optional[str] = None
     attributes: Dict[str, 'SchemaSlot'] = field(default_factory=dict)
     class_uri: Optional[str] = None
 
@@ -129,7 +130,9 @@ class StructuralMapping:
             "confidence": str(self.confidence),
             "subject_source": "d4d:data_sheets_schema",
             "object_source": "rocrate:fairscape",
-            "d4d_subject_range": self.d4d_range or "string",
+            # An unknown range is left empty, never written as "string": that
+            # placeholder read as schema data on every composition row (#2936).
+            "d4d_subject_range": self.d4d_range or "",
             "subject_multivalued": str(self.d4d_multivalued),
             "rocrate_value_type": self.rocrate_type,
             "type_compatible": str(self.type_compatible),
@@ -149,7 +152,6 @@ class D4DSchemaParser:
 
         self.classes: Dict[str, SchemaClass] = {}
         self.slots: Dict[str, SchemaSlot] = {}
-        self.modules: Dict[str, List[str]] = {}  # module -> class names
 
         self._parse_schema()
 
@@ -180,30 +182,6 @@ class D4DSchemaParser:
 
             self.classes[class_name] = schema_class
 
-        # Parse module organization from imports and id
-        schema_id = self.schema.get("id", "")
-        if "motivation" in schema_id:
-            module = "Motivation"
-        elif "composition" in schema_id:
-            module = "Composition"
-        elif "collection" in schema_id:
-            module = "Collection"
-        elif "preprocessing" in schema_id:
-            module = "Preprocessing"
-        elif "uses" in schema_id:
-            module = "Uses"
-        elif "distribution" in schema_id:
-            module = "Distribution"
-        elif "maintenance" in schema_id:
-            module = "Maintenance"
-        else:
-            module = "Core"
-
-        for class_name in self.classes.keys():
-            if module not in self.modules:
-                self.modules[module] = []
-            self.modules[module].append(class_name)
-
     def get_dataset_property_subclasses(self) -> List[SchemaClass]:
         """Get all classes that inherit from DatasetProperty."""
         subclasses = []
@@ -223,6 +201,36 @@ class D4DSchemaParser:
             if attr.is_composition(self.classes):
                 paths[attr_name] = attr.get_composition_path(self.classes)
         return paths
+
+    def resolve_path(self, class_name: str, path: str) -> SchemaSlot:
+        """The slot a dotted composition path reaches from `class_name`, as one slot.
+
+        Range and slot_uri are the last segment's, so the bare root path
+        `anomalies` is `DataAnomaly` and `anomalies.id` is `uriorcurie`.
+        Multivalued is True when *any* segment is: `anomalies.name` is a
+        single string per anomaly, but there is one per entry of a list, so
+        the value the path reaches from a `Dataset` is a list (#2936).
+        """
+        segments = []
+        owner = class_name
+        for name in path.split("."):
+            cls = self.classes.get(owner)
+            if cls is None or name not in cls.attributes:
+                raise ValueError(
+                    f"{class_name}.{path}: {name!r} is not an attribute of "
+                    f"{owner!r} in {self.schema_path}")
+            segments.append(cls.attributes[name])
+            owner = segments[-1].range
+        leaf = segments[-1]
+        return SchemaSlot(
+            name=path,
+            description=leaf.description,
+            range=leaf.range,
+            slot_uri=leaf.slot_uri,
+            multivalued=any(s.multivalued for s in segments),
+            required=all(s.required for s in segments),
+            parent_class=class_name,
+        )
 
 
 class ROCrateSchemaParser:
@@ -306,10 +314,15 @@ class StructuralMappingGenerator:
         # 3. Map based on composition paths
         self._map_composition_paths()
 
-        # 4. Map based on module semantics
-        self._map_module_semantics()
+        # There is no module strategy (#3363). One mapped every attribute of
+        # the classes in a D4D module to the properties of that module's
+        # RO-Crate namespaces, and never emitted a row: the merged schema gave
+        # every class one module, and with each class given its own module it
+        # still emits none, because its 0.85 name-similarity cut admits only
+        # an exact match and every candidate's name keeps its namespace
+        # prefix (`rai:dataBiases` compares as `raidatabiases`).
 
-        # 5. Deduplicate mappings (keep highest confidence)
+        # 4. Deduplicate mappings (keep highest confidence)
         self._deduplicate_mappings()
 
         return self.mappings
@@ -377,19 +390,31 @@ class StructuralMappingGenerator:
 
     def _map_composition_paths(self):
         """Map nested composition structures."""
-        # Example: Creator.principal_investigator (Person) -> principalInvestigator
+        # A property is kept only where its path contains the slot name, so
+        # e.g. Creator.principal_investigator comes from the hierarchy
+        # strategy, not from here (#2976).
         for class_name, cls in self.d4d.classes.items():
             comp_paths = self.d4d.get_composition_paths(class_name)
 
             for attr_name, paths in comp_paths.items():
                 # Find matching RO-Crate nested structures
                 for path in paths:
+                    # What the schema says the path reaches. These rows were
+                    # written with range None (emitted as "string"),
+                    # multivalued False and type_compatible True, whatever
+                    # the path was (#2936).
+                    slot = self.d4d.resolve_path(class_name, path)
                     rocrate_candidates = [
                         p for p in self.rocrate.properties.values()
                         if attr_name.lower() in p.path.lower()
                     ]
 
                     for rocrate_prop in rocrate_candidates:
+                        type_compat, warnings = self._validate_type_compatibility(slot, rocrate_prop)
+                        # Kept and flagged when incompatible, as `_map_slot_uris`
+                        # does, rather than skipped as the hierarchy strategy
+                        # does: skipping would silently delete rows the
+                        # committed file carries.
                         mapping = StructuralMapping(
                             d4d_class=class_name,
                             # The whole path, not its last segment (#410).
@@ -401,9 +426,9 @@ class StructuralMappingGenerator:
                             # only in the free-text `structural_notes` column,
                             # which nothing reads.
                             d4d_slot=path,
-                            d4d_slot_uri=None,
-                            d4d_range=None,
-                            d4d_multivalued=False,
+                            d4d_slot_uri=slot.slot_uri,
+                            d4d_range=slot.range,
+                            d4d_multivalued=slot.multivalued,
                             rocrate_property=rocrate_prop.name,
                             rocrate_path=rocrate_prop.path,
                             rocrate_type=rocrate_prop.value_type,
@@ -412,65 +437,10 @@ class StructuralMappingGenerator:
                             confidence=0.7,
                             composition_path=path,
                             structural_notes=f"Composition path: {path}",
-                            type_compatible=True,
+                            type_compatible=type_compat,
+                            warnings=warnings,
                         )
                         self.mappings.append(mapping)
-
-    def _map_module_semantics(self):
-        """Map entire D4D modules to RO-Crate sections."""
-        module_to_namespace = {
-            "Motivation": ["d4d", "schema"],
-            "Composition": ["d4d", "schema"],
-            "Collection": ["rai", "schema"],
-            "Preprocessing": ["rai"],
-            "Uses": ["d4d", "schema"],
-        }
-
-        for module, namespaces in module_to_namespace.items():
-            if module not in self.d4d.modules:
-                continue
-
-            for namespace in namespaces:
-                rocrate_props = self.rocrate.get_properties_by_namespace(namespace)
-
-                # Create module-level mappings
-                for class_name in self.d4d.modules[module]:
-                    if class_name not in self.d4d.classes:
-                        continue
-
-                    cls = self.d4d.classes[class_name]
-                    for attr in cls.attributes.values():
-                        # Try to match with namespace properties
-                        for rocrate_prop in rocrate_props:
-                            similarity = self._semantic_similarity(attr.name, rocrate_prop.name)
-
-                            # Require high similarity for module-based mappings
-                            if similarity < 0.85:
-                                continue
-
-                            type_compat, warnings = self._validate_type_compatibility(attr, rocrate_prop)
-
-                            # Skip if types incompatible
-                            if not type_compat:
-                                continue
-
-                            mapping = StructuralMapping(
-                                d4d_class=class_name,
-                                d4d_slot=attr.name,
-                                d4d_slot_uri=attr.slot_uri,
-                                d4d_range=attr.range,
-                                d4d_multivalued=attr.multivalued,
-                                rocrate_property=rocrate_prop.name,
-                                rocrate_path=rocrate_prop.path,
-                                rocrate_type=rocrate_prop.value_type,
-                                predicate=MappingPredicate.EXACT_MATCH if similarity >= 0.95 else MappingPredicate.CLOSE_MATCH,
-                                justification=MappingJustification.STRUCTURAL,
-                                confidence=similarity,
-                                structural_notes=f"Module mapping: {module} -> {namespace} namespace",
-                                type_compatible=type_compat,
-                                warnings=warnings,
-                            )
-                            self.mappings.append(mapping)
 
     def _map_slot_uris(self):
         """Map based on existing slot_uri annotations."""
@@ -629,18 +599,155 @@ class StructuralMappingGenerator:
         print(f"Exported summary to {output_path}")
 
 
-def read_sssom_rows(path: Path) -> set:
-    """(subject_id, predicate_id, object_id) for every data row.
+TRIPLE = ("subject_id", "predicate_id", "object_id")
 
-    Identity is the triple, not the whole line: confidence and structural notes
-    move for reasons that are not a change of meaning, and a drift check that
-    fires on those is one nobody keeps running.
-    """
+#: Columns that state what the schema says about a subject, or whether the
+#: mapping was checked. Unlike confidence or notes, a wrong value here is a
+#: wrong claim: composition rows carried the generator's placeholders in all
+#: three and a triple-only check could not see it (#2936).
+STRUCTURAL_COLUMNS = ("d4d_subject_range", "subject_multivalued",
+                      "type_compatible")
+
+#: Rows the committed mapping asserts that regeneration does not produce
+#: (#234), each under what is wrong with it; #294 is the work that would
+#: derive them. `--check` (`make check-sssom-structural`) and
+#: tests/test_semantic_exchange/test_structural_mapping_drift.py both read
+#: this one set (#3968); what the check does with it is CHECK_STATEMENT's
+#: to say (#4076). Regeneration cannot produce these rows, so rewriting the
+#: table drops them, which is why `make gen-sssom-all` does not run the
+#: structural target (#3967). Shrinking the set is progress. Growing it
+#: without a reason is the drift both exist to catch.
+KNOWN_UNDERIVABLE = frozenset({
+    # No class-level strategy exists — `class_uri` is parsed and never used.
+    ("d4d:CoreDataset", "skos:exactMatch", "schema:Dataset"),
+    ("d4d:CoreDatasetCollection", "skos:exactMatch", "schema:Dataset"),
+    ("d4d:CoreDistribution", "skos:exactMatch", "schema:DataDownload"),
+    ("d4d:DataSubset", "skos:exactMatch", "schema:Dataset"),
+    # No `schema:` targets are produced.
+    ("d4d:DatasetCollection/resources", "skos:exactMatch", "schema:hasPart"),
+    ("d4d:FileCollection/resources", "skos:exactMatch", "schema:hasPart"),
+    # Target absent from the RO-Crate input, so `_map_slot_uris` cannot match.
+    ("d4d:File/file_type", "skos:exactMatch", "d4d:fileType"),
+    ("d4d:FileCollection/collection_type", "skos:exactMatch", "d4d:collectionType"),
+    ("d4d:FileCollection/file_count", "skos:exactMatch", "d4d:fileCount"),
+    # Also disagrees with the schema, which declares `slot_uri: d4d:total_bytes`.
+    ("d4d:FileCollection/total_bytes", "skos:exactMatch", "dcat:byteSize"),
+})
+
+#: What `--check` does with a mapping and summary it passes, with no triple
+#: repeated, once the value in one column of one row changes and no other
+#: value the csv module reads does, by the kind of row: (the columns, the
+#: verdict on a row regeneration produces, the verdict on a
+#: KNOWN_UNDERIVABLE row), with `None` for every column the other entries
+#: do not name. CHECK_STATEMENT prints it, and
+#: tests/test_semantic_exchange/test_structural_mapping_drift.py makes each
+#: of these changes, column by column, in a copy of the committed table and
+#: holds the check to the verdict given here (#4076).
+EDIT_VERDICTS = (
+    (TRIPLE, "fails", "fails"),
+    (STRUCTURAL_COLUMNS, "fails", "passes"),
+    (None, "passes", "passes"),
+)
+
+
+def _check_statement(width: int = 76) -> str:
+    """CHECK_STATEMENT, written from TRIPLE, STRUCTURAL_COLUMNS and
+    EDIT_VERDICTS, so that it names the columns `run_check` compares and the
+    verdicts the drift test holds it to, and no others (#4076)."""
+    def text(words, first="", rest=None):
+        # Never split a word, so a column name is always printed whole.
+        return textwrap.fill(" ".join(words.split()), width,
+                             initial_indent=first,
+                             subsequent_indent=first if rest is None else rest,
+                             break_long_words=False, break_on_hyphens=False)
+
+    def bullet(words):
+        return text(words, "- ", "  ")
+
+    triple = ", ".join(TRIPLE)
+    structural = (", ".join(STRUCTURAL_COLUMNS[:-1])
+                  + f" and {STRUCTURAL_COLUMNS[-1]}")
+    edits = []
+    for columns, produced, known in EDIT_VERDICTS:
+        edits.append(text((", ".join(columns) if columns
+                           else "any other column") + ":", "  ", "    "))
+        edits.append(text(f"{produced} on a row regeneration produces",
+                          "      "))
+        edits.append(text(f"{known} on a KNOWN_UNDERIVABLE row", "      "))
+    return "\n\n".join([
+        "What --check compares with regeneration, and nothing else:",
+        bullet(f"""The ({triple}) triple of every committed row, a
+            KNOWN_UNDERIVABLE row's included, as a set. A triple the
+            committed mapping carries and regeneration does not produce is
+            accepted and named if KNOWN_UNDERIVABLE lists it, and fails if it
+            does not. A triple regeneration produces that the mapping lacks
+            fails, and so does a listed triple that the mapping lacks or
+            regeneration produces."""),
+        bullet(f"""{structural}, on each row the committed mapping and
+            regeneration both carry, which is never a row the check accepts:
+            a listed row is one of those only when regeneration produces it,
+            and that fails."""),
+        bullet("""A repeated triple is not seen: the rows are a set, and
+            those columns are read from the last row that carries the
+            triple."""),
+        bullet("""The summary's whole text, except the form of its line
+            endings: CRLF and CR are read as LF, but a line ending added,
+            removed or moved is a difference."""),
+        text("""Both files are read as UTF-8 text. The rows are read with
+            Python's csv module from the lines of the tab-separated mapping
+            that do not start with #, the first of which is its header, so
+            an empty line is not a row and double quotes around a value are
+            quoting, not part of it. A missing mapping or summary fails. A
+            mapping without one of the columns named here is an error that
+            names the column, and a file that is not UTF-8 is an error."""),
+        # "Every other value the csv module reads" is needed: on the
+        # committed table a tab, a line break or an unclosed leading double
+        # quote written into a row's `confidence` changes what the csv
+        # module reads beside it and fails the check, and a # starting a
+        # line drops its row (#4076, review round 2).
+        text("""So, from a mapping and summary the check passes, with no
+            triple repeated, a change to the value in one column of one row
+            that leaves every other value the csv module reads as it was (a
+            tab, line break or double quote in the value, or a # starting
+            its line, can change them):"""),
+        "\n".join(edits),
+        text("""A changed triple fails because the triple it replaced is
+            then missing: on a row regeneration produces, as a triple
+            regeneration produces that the mapping lacks, and on a
+            KNOWN_UNDERIVABLE row, as a listed triple the mapping lacks.
+            Unless regeneration produces the new triple or KNOWN_UNDERIVABLE
+            lists it, the new triple fails too, as one the mapping carries
+            that regeneration does not produce and KNOWN_UNDERIVABLE does
+            not list."""),
+    ])
+
+
+#: The one statement of what `--check` compares (#4050, #4076).
+#: `run_check`'s docstring ends with it and `--help` prints it; the README,
+#: docs/semantic_exchange.md, STRUCTURAL_MAPPING_ANALYSIS.md and the
+#: Makefile's help for `check-sssom-structural` point to `--help` rather
+#: than describe the check, after two rounds of review found their
+#: descriptions wrong, first saying it compared more than it does and then
+#: less.
+CHECK_STATEMENT = _check_statement()
+
+
+def _docstring_ends_with(statement: str):
+    """Decorator: end the function's docstring with `statement`, so that the
+    docstring and the `--help` that prints `statement` carry one text."""
+    def end(fn):
+        fn.__doc__ = "\n\n".join(
+            part for part in (inspect.cleandoc(fn.__doc__ or ""), statement)
+            if part)
+        return fn
+    return end
+
+
+def _read_sssom(path: Path, required: tuple) -> list:
     import csv
     with path.open(encoding="utf-8") as fh:
         lines = [l for l in fh if not l.startswith("#")]
     reader = csv.DictReader(lines, delimiter="\t")
-    required = ("subject_id", "predicate_id", "object_id")
     missing = [c for c in required if c not in (reader.fieldnames or [])]
     if missing:
         # Naming the file and the column, because the alternative is a bare
@@ -650,7 +757,17 @@ def read_sssom_rows(path: Path) -> set:
             f"{path} is not a readable SSSOM mapping: no "
             f"{', '.join(missing)} column"
             + (" (no header row at all?)" if not reader.fieldnames else ""))
-    return {tuple(r[c] for c in required) for r in reader}
+    return list(reader)
+
+
+def read_sssom_rows(path: Path) -> set:
+    """(subject_id, predicate_id, object_id) for every data row.
+
+    Identity is the triple, not the whole line: confidence and structural notes
+    move for reasons that are not a change of meaning, and a drift check that
+    fires on those is one nobody keeps running.
+    """
+    return {tuple(r[c] for c in TRIPLE) for r in _read_sssom(path, TRIPLE)}
 
 
 def check_drift(committed: Path, regenerated: Path) -> tuple:
@@ -659,29 +776,232 @@ def check_drift(committed: Path, regenerated: Path) -> tuple:
     return sorted(have - made), sorted(made - have)
 
 
+def check_column_drift(committed: Path, regenerated: Path,
+                       columns: tuple = STRUCTURAL_COLUMNS) -> tuple:
+    """How many rows both files carry, and where their `columns` disagree.
+
+    Compared per triple, so a row only one file has is `check_drift`'s to
+    report, not this. Each difference is (triple, column, committed value,
+    regenerated value).
+    """
+    def by_triple(path):
+        return {tuple(r[c] for c in TRIPLE): r
+                for r in _read_sssom(path, TRIPLE + tuple(columns))}
+    have, made = by_triple(committed), by_triple(regenerated)
+    shared = sorted(have.keys() & made.keys())
+    differ = [(t, c, have[t][c], made[t][c])
+              for t in shared for c in columns if have[t][c] != made[t][c]]
+    return len(shared), differ
+
+
+def check_known_gap(committed: Path, regenerated: Path, known) -> tuple:
+    """The committed rows regeneration does not produce, held to `known`.
+
+    Four sorted lists of triples. `gap`: the rows `known` lists that the
+    committed file carries and regeneration does not produce, which is the
+    part accepted. `unlisted`: the rows the committed file carries and
+    regeneration does not produce that `known` does not list. `missing`: the
+    rows `known` lists that neither the committed file nor regeneration has.
+    `derivable`: the rows `known` lists that regeneration produces.
+
+    The rows regeneration does not produce are exactly `known` only when the
+    last three are empty (#3968). `missing` is how a table the generator
+    rewrote shows: it regenerates exactly, and it has lost every curated
+    row (#3967).
+    """
+    have, made = read_sssom_rows(committed), read_sssom_rows(regenerated)
+    lost = have - made
+    return (sorted(lost & known), sorted(lost - known),
+            sorted(known - have - made), sorted(known & made))
+
+
+@_docstring_ends_with(CHECK_STATEMENT)
+def run_check(generator, committed: Path, summary: Path, known) -> int:
+    """`--check`: compare `committed` and `summary` with what `generator`
+    regenerates, print what differs, and return the exit status: 1 when the
+    check fails, 0 when it passes. `known` is the set `main` passes as
+    KNOWN_UNDERIVABLE (#3968). Writes nothing beside them: regeneration goes
+    to a temporary directory.
+
+    What it compares is CHECK_STATEMENT, the one statement of it: the
+    decorator ends this docstring with it, and `--help` prints it (#4076).
+    """
+    # Never write over the committed file while checking it. Regenerating
+    # in place to compare is how a check becomes the thing it was meant to
+    # detect.
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        scratch = Path(tmp) / "regenerated.sssom.tsv"
+        generator.export_sssom(scratch)
+        if not committed.exists():
+            print(f"\n✗ No committed mapping at {committed}")
+            return 1
+        _, gained = check_drift(committed, scratch)
+        gap, unlisted, missing, derivable = check_known_gap(
+            committed, scratch, known)
+        compared, column_drift = check_column_drift(committed, scratch)
+
+        # The target writes two artifacts from the same mappings list, so
+        # check both. Today the summary is fresh and the mapping is stale
+        # (#295) — the confusing direction, because the artifact that is
+        # right is the one nobody thinks to distrust.
+        scratch_summary = Path(tmp) / "regenerated_summary.md"
+        generator.export_summary(scratch_summary)
+        summary_missing = not summary.exists()
+        summary_drifted = (
+            summary_missing
+            or summary.read_text(encoding="utf-8")
+            != scratch_summary.read_text(encoding="utf-8"))
+    # Said on a pass as well as a failure. Before #2936 a pass printed
+    # only the line below, from a check that compared triples alone, so
+    # without this a column check that found nothing reads exactly like
+    # one that never ran (#3057).
+    agree = (f"\n  The {compared} row(s) both files carry agree on "
+             f"{', '.join(STRUCTURAL_COLUMNS)}.")
+    # The known gap is accepted, not hidden: it is listed on a pass too, so
+    # a check that is green still says what regeneration cannot rebuild.
+    # Before #3968 the check failed on it, so it was red on main by design
+    # and only the drift test, which allowed exactly these rows, could tell
+    # new drift from the gap.
+    apart = f"apart from the {len(gap)} row(s) KNOWN_UNDERIVABLE lists"
+
+    def print_gap():
+        if gap:
+            print(f"\n  {len(gap)} row(s) in the committed file that "
+                  "regeneration does not produce, listed with their reasons "
+                  "in KNOWN_UNDERIVABLE in generate_structural_mapping.py "
+                  "(#294):")
+            for s, p_, o in gap:
+                print(f"      {s}  --{p_}->  {o}")
+
+    # Drift from regeneration and a gap that is not the declared one are
+    # told apart: a table the generator rewrote regenerates exactly, and
+    # fails only for the curated rows it dropped (#3967).
+    mapping_drifted = bool(unlisted or gained or column_drift)
+    gap_drifted = bool(missing or derivable)
+    if not mapping_drifted and not gap_drifted and not summary_drifted:
+        if gap:
+            print(f"\n✓ The committed mapping regenerates {apart}, and the "
+                  "summary regenerates exactly.")
+            print_gap()
+            print(agree)
+            print("\n  The summary describes the generator's output, so not "
+                  f"those {len(gap)} row(s) (#295).")
+        else:
+            print("\n✓ The committed mapping and summary regenerate exactly.")
+            print(agree)
+        return 0
+    # The headline names what drifted. It used to blame the mapping
+    # whatever failed, so a stale summary beside a mapping that
+    # regenerates exactly read as a mapping failure (#3125).
+    if mapping_drifted:
+        print("\n✗ The committed mapping does not regenerate from its inputs.")
+    elif gap_drifted:
+        print("\n✗ The rows regeneration does not produce are not exactly "
+              "the ones KNOWN_UNDERIVABLE lists.")
+    elif summary_missing:
+        print(f"\n✗ No committed summary at {summary}.")
+    else:
+        print("\n✗ The committed summary does not regenerate from the "
+              "mapping's inputs.")
+    if unlisted:
+        print(f"\n  {len(unlisted)} row(s) in the committed file that "
+              "regeneration does not produce and KNOWN_UNDERIVABLE does not "
+              "list:")
+        for s, p_, o in unlisted:
+            print(f"      {s}  --{p_}->  {o}")
+    if gained:
+        print(f"\n  {len(gained)} row(s) regeneration produces that the "
+              "committed file lacks:")
+        for s, p_, o in gained:
+            print(f"      {s}  --{p_}->  {o}")
+    if missing:
+        print(f"\n  {len(missing)} row(s) KNOWN_UNDERIVABLE lists that the "
+              "committed file does not carry:")
+        for s, p_, o in missing:
+            print(f"      {s}  --{p_}->  {o}")
+        print("  Regeneration cannot produce them, so a table the generator "
+              "rewrote lacks them (#3967). Restore their lines from git; if "
+              "one is wrong, take it out of KNOWN_UNDERIVABLE and say why.")
+    if derivable:
+        print(f"\n  {len(derivable)} row(s) KNOWN_UNDERIVABLE lists that "
+              "regeneration now produces:")
+        for s, p_, o in derivable:
+            print(f"      {s}  --{p_}->  {o}")
+        print("  They are no longer a gap: take them out of "
+              "KNOWN_UNDERIVABLE (#294).")
+    print_gap()
+    if column_drift:
+        print(f"\n  {len(column_drift)} value(s) differ on the {compared} "
+              "row(s) both files carry:")
+        for (s, p_, o), col, was, now in column_drift:
+            print(f"      {s}  --{p_}->  {o}  {col}: "
+                  f"committed {was!r}, regenerated {now!r}")
+    else:
+        print(agree)
+    drifted = mapping_drifted or gap_drifted
+    if not drifted and summary_missing:
+        regenerates = f"regenerates {apart}" if gap else "regenerates exactly"
+        print(f"\n  The mapping {regenerates}; the summary beside it is "
+              "missing.")
+    elif not drifted:
+        # Reached only with the summary stale: the pass returned above.
+        does = f"regenerates {apart}" if gap else "does"
+        print("\n  The summary does not regenerate. The mapping beside it "
+              f"{does}, so only the summary is stale.")
+    elif summary_missing:
+        print(f"\n  There is no committed summary either, at {summary}.")
+    elif summary_drifted:
+        print("\n  The summary does not regenerate either.")
+    elif mapping_drifted:
+        print("\n  The summary regenerates exactly, so it describes the "
+              "generator's output rather than the mapping beside it (#295).")
+    else:
+        # Only the gap differs, so the mapping may be the generator's own
+        # output written over the curated rows (#3967), and "rather than the
+        # mapping beside it" would be false.
+        print("\n  The summary regenerates exactly.")
+    if mapping_drifted:
+        print("\n  A mapping nobody can rebuild is a mapping nobody can "
+              "safely change (#234).")
+    return 1
+
+
 def main(argv=None):
     """Generate schema-structure-aware mappings."""
     import argparse
-    ap = argparse.ArgumentParser(description=__doc__)
+    # The epilog is CHECK_STATEMENT, printed as run_check's docstring has
+    # it: the raw formatter keeps its lines rather than refilling them into
+    # one paragraph. It is the only description of the check here (#4076).
+    ap = argparse.ArgumentParser(
+        description=__doc__, epilog=CHECK_STATEMENT,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true",
-                    help="Regenerate to a temporary file and report drift "
-                         "against the committed mapping. Writes nothing. "
-                         "Exits non-zero if they differ.")
+                    help="Regenerate into a temporary directory and compare "
+                         "with the committed mapping and summary, writing "
+                         "nothing. What it compares, and what fails it, is "
+                         "stated below.")
+    # The inputs stay fixed; only where the two artifacts live can move. That
+    # is what lets a test run the check on a copy of the mapping it has
+    # changed, which is the only way to see what `--check` does with a
+    # difference while the committed file carries none (#2999).
+    ap.add_argument("--output-dir", type=Path, default=None,
+                    help="Directory the mapping and its summary are written "
+                         "to, or read from with --check "
+                         "(default: data/semantic_exchange).")
     args = ap.parse_args(argv)
 
     # Paths
     base_dir = Path(__file__).parent.parent.parent
     d4d_schema = base_dir / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
     rocrate_example = base_dir / "data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json"
-    output_dir = base_dir / "data/semantic_exchange"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir = args.output_dir or base_dir / "data/semantic_exchange"
 
     # Parse schemas
     print("Parsing D4D schema structure...")
     d4d_parser = D4DSchemaParser(d4d_schema)
     print(f"  Found {len(d4d_parser.classes)} classes")
     print(f"  Found {len(d4d_parser.slots)} slots")
-    print(f"  Found {len(d4d_parser.modules)} modules")
 
     print("\nParsing RO-Crate schema structure...")
     rocrate_parser = ROCrateSchemaParser(rocrate_example)
@@ -694,58 +1014,20 @@ def main(argv=None):
     print(f"  Generated {len(mappings)} mappings")
 
     committed = output_dir / "d4d_rocrate_structural_mapping.sssom.tsv"
+    summary = output_dir / "d4d_rocrate_structural_mapping_summary.md"
 
     if args.check:
-        # Never write over the committed file while checking it. Regenerating
-        # in place to compare is how a check becomes the thing it was meant to
-        # detect.
-        import tempfile
-        with tempfile.TemporaryDirectory() as tmp:
-            scratch = Path(tmp) / "regenerated.sssom.tsv"
-            generator.export_sssom(scratch)
-            if not committed.exists():
-                print(f"\n✗ No committed mapping at {committed}")
-                return 1
-            lost, gained = check_drift(committed, scratch)
+        # The module's set is read when the check runs, not bound as a
+        # default of `run_check`, so a test can run `main` with another
+        # (#3968).
+        return run_check(generator, committed, summary, KNOWN_UNDERIVABLE)
 
-            # The target writes two artifacts from the same mappings list, so
-            # check both. Today the summary is fresh and the mapping is stale
-            # (#295) — the confusing direction, because the artifact that is
-            # right is the one nobody thinks to distrust.
-            summary = output_dir / "d4d_rocrate_structural_mapping_summary.md"
-            scratch_summary = Path(tmp) / "regenerated_summary.md"
-            generator.export_summary(scratch_summary)
-            summary_drifted = (
-                not summary.exists()
-                or summary.read_text(encoding="utf-8")
-                != scratch_summary.read_text(encoding="utf-8"))
-        if not lost and not gained and not summary_drifted:
-            print("\n✓ The committed mapping and summary regenerate exactly.")
-            return 0
-        print(f"\n✗ The committed mapping does not regenerate from its inputs.")
-        if lost:
-            print(f"\n  {len(lost)} row(s) in the committed file that "
-                  "regeneration does not produce:")
-            for s, p_, o in lost:
-                print(f"      {s}  --{p_}->  {o}")
-        if gained:
-            print(f"\n  {len(gained)} row(s) regeneration produces that the "
-                  "committed file lacks:")
-            for s, p_, o in gained:
-                print(f"      {s}  --{p_}->  {o}")
-        if summary_drifted:
-            print("\n  The summary does not regenerate either.")
-        elif lost or gained:
-            print("\n  The summary regenerates exactly, so it describes the "
-                  "generator's output rather than the mapping beside it (#295).")
-        print("\n  A mapping nobody can rebuild is a mapping nobody can safely "
-              "change (#234).")
-        return 1
-
-    # Export
+    # Export. The directory is made here rather than up front, so `--check`
+    # pointed at one that does not exist creates nothing either.
     print("\nExporting mappings...")
+    output_dir.mkdir(parents=True, exist_ok=True)
     generator.export_sssom(committed)
-    generator.export_summary(output_dir / "d4d_rocrate_structural_mapping_summary.md")
+    generator.export_summary(summary)
 
     print("\n✓ Schema-structure-aware mapping complete")
     return 0

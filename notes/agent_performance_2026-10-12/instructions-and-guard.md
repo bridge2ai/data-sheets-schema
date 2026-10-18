@@ -1,0 +1,28 @@
+# Instruction and notes-guard iteration costs
+
+Implements #5017, #5019 and related test-contract correction #5021; addresses prior guidance issue #3863. Base: `df2aa6c663c8d5712e3bd51885a6806f00982d79`.
+
+The current root operating guide was 178 lines and 12,569 bytes before the one-line bootstrap correction below, compared with 1,873 lines and 109,384 bytes. Both prior entry documents are preserved byte-for-byte in `docs/agent-instructions-history/`; the small topic index links to them without automatically including their bodies. Current corpus/CI/assistant routes, safe bootstrap, schema release duties, scientific holds and evidence preservation are explicit. This is a file-size reduction, not a measured model latency or token-billing claim.
+
+The notes guard still enumerates every file, directory and link under notes using the same os.walk behavior, including ignored and hidden entries. It computes a directory-relative prefix once per directory instead of normalizing every entry. Exact old-function equivalence tests cover path spellings, bytes, hidden/ignored paths, empty/missing/file roots and symlinks. Existing session failure, prior-failure and serial/xdist leak controls remain unchanged.
+
+The paired metadata-only comparison ran old/new/new/old with Python 3.12.11. All four primary results were the identical 109,552-path set: old 3.128/1.583 seconds, new 1.112/1.072 seconds. A clean worktree contained 3,268 paths: old 0.0447/0.0382 seconds, new 0.0235/0.0251 seconds. See [machine-readable results](guard-benchmark.json). Filesystem warm-up and shared-host load affect elapsed times; this is not a CI speedup prediction. No path contents or preexisting work were modified by the traversal comparison.
+
+Validation: 181 tests passed in 182.62 seconds, including the complete specificity skill suite, notes-guard suite and two instruction-contract regressions. The actual root-memory test now requires discovery, exact model-facing roles and the memory-facts row without requiring the live guide to contain study-specific leakage; the separate planted-leak regression still requires a violation. Independent static adversarial reviews found no blockers in either source patch; final CI is still required.
+
+Hook assessment: the primary repository configuration references both `validate_d4d_yaml_hook.py` and `term_validator_hook.py` for PostToolUse Edit|Write, with no explicit timeout in those entries. This establishes configured references, not actual hook executions or measured overhead. The exact conventional user/local settings were checked; managed/plugin/CLI settings were outside this bounded inspection. No hook was disabled and no runtime cost was invented.
+
+Normal iteration should scope searches to affected code and tests, keep scratch worktrees outside repository discovery and use a shared worker budget. Ignored-inclusive searches remain necessary for absence/cleanup claims. Existing data, drafts, histories and worktrees remain intact.
+
+Full-collection setup review found #5023: Poetry installation does not initialize the pinned FAIRSCAPE submodule. The guide now explicitly includes `git submodule update --init fairscape_models`. The initial partial collection failed with three import errors and is retained as unsuccessful setup evidence. The task worktree then initialized the pinned submodule at `8c80311d7d8b0fadac07dca9567d632103691f48`; complete collection verification follows. The root guide is now 179 lines.
+
+After that setup correction, complete collection passed twice with 18,858 occurrences (18,857 distinct node IDs); both Counters were identical and retained the parameter-ID collision. Explicit-file collection matched exactly its 24 occurrences in the complete roster. Warm full collection took 6.41/5.33 seconds versus 0.46/0.36 seconds for the explicit file. The original failed run included first-import cache effects and missing submodule setup; its 30.33-second result is not a valid full-suite baseline. These are collection/session times, not test-body execution.
+
+The subsequent user provenance rule is now included in the operating guide.
+Historical measurement helpers are retained under `scripts/adhoc/` as
+`2026-10-12_5019_notes_listing_benchmark.py` and
+`2026-10-12_5018_pytest_collection_measurement.py`, with SHA-256 sidecars.
+Their original bodies remain byte-for-byte after descriptive headers; they were
+preserved after measurement, not rerun. They retain session-specific paths and
+write outputs beside themselves, so inspect/adapt them before future use.
+`2026-10-12_preserve_performance_helper.py` records this preservation procedure.

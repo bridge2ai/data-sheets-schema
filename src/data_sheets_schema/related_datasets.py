@@ -83,14 +83,16 @@ class Defect:
         return ADDRESSED_BY.get(self.mode)
 
 
-def inspect(record: dict[str, Any]) -> list[Defect]:
+def inspect(record: dict[str, Any], *, vocabulary=None) -> list[Defect]:
     """Every `related_datasets` defect in a record, in entry order.
 
     Reports all of them rather than stopping at the first: rep2 carries one bad
     entry among three good ones, and a checker that stopped early would call it
     fixed as soon as the ordering changed.
     """
-    values, aliases = _vocabulary()
+    # None alone selects the legacy current table. An explicitly selected
+    # historical vocabulary, including an empty alias map, stays selected.
+    values, aliases = _vocabulary() if vocabulary is None else vocabulary
     entries = record.get("related_datasets") or []
     if isinstance(entries, dict):
         entries = [entries]

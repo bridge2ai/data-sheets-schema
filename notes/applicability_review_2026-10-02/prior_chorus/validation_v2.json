@@ -1,0 +1,52 @@
+{
+  "status": "draft_pending_independent_review",
+  "schema_validation": "pass",
+  "context_version": "d4d-evaluation-context-1",
+  "context_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/CHORUS_applicability_draft_v2.yaml",
+  "context_file_sha256": "c20d016a74e5850bf8e6eb9a04ac86f6ed086f6de862b6f1c92cdcfcefe9f26e",
+  "normalized_context_sha256": "9dbc7a148f43e37b20867fa933bf82cb36f8976ebc0a7faaef71dd52c766bc43",
+  "predicate_status": {
+    "data_collection": "applicable",
+    "data_processing": "applicable",
+    "human_subjects": "applicable",
+    "ml_training_dataset": "applicable",
+    "processing_software": "applicable",
+    "regulated_access": "applicable",
+    "shared_dataset": "applicable"
+  },
+  "profile": "bridge2ai",
+  "class_scope": [
+    "Dataset",
+    "CoreDataset"
+  ],
+  "class_scope_note": "Shared dataset predicates; classes are selected by future registered evaluation jobs, not extra YAML keys. No generated/final artifacts read or accepted.",
+  "reference_audit_registration_sha256": "61e37130b7836ecb1f03c8647689852efefd478fa290916957b0b28516296d59",
+  "source_sha256": {
+    "bundle": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+    "chunk_manifest": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a",
+    "source_manifest": "13758a83de3a0d13b367bf21623fbcac611e599c81a9612143bb6987de89abe6"
+  },
+  "evaluation_context_module_sha256": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e",
+  "profiles_module_sha256": "36de6c72c773ca7583705ee24611ddab6ecad4803f63cbc9b541d1ce519600aa",
+  "profile_vocabulary_sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914",
+  "checked_at": "2026-09-19T07:22:32.299009+00:00",
+  "provider_calls": 0,
+  "evaluation_calls": 0,
+  "score_outputs": 0,
+  "ledger_operations": 0,
+  "outside_live_read_policy": true,
+  "source_pins_unchanged": true,
+  "boundary": "Cheap parser/type/key/duplicate/predicate and live-file-policy classification only, no score, registration, model or acceptance.",
+  "revision": "v2",
+  "review_finding": "APPLICABILITY-1",
+  "changes": [
+    "processing_software null\u2192true based on explicit OHNLP extraction/tokenization; other six declarations unchanged"
+  ],
+  "same_applicable_predicate_set_as_original": true,
+  "score_recomputed": false,
+  "original_files": {
+    "CHORUS_applicability_draft.yaml": "0df817a786fc6f7c2914007939d0149fa28c7df3d74faf5c066f0ef003b4e343",
+    "evidence.md": "0f65048655dbcb154492767e34a4e9ba1b82ac26d867b92cbfff747a43ef0e04",
+    "validation.json": "7ae708ce4f98376f42488279cabb51138671cfff5e3d4274112877cfb8b0a8bd"
+  }
+}

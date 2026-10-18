@@ -238,7 +238,13 @@ def prompt_files() -> list[Path]:
                                                TUNED_PROMPT)
 
     from data_sheets_schema.resources import resource_path
-    files = set(CONDITION_PROMPTS.values()) | {TUNED_PROMPT}
+    from data_sheets_schema.api_playbook import POLICY_PATH
+    from data_sheets_schema.removal_repair import POLICY_PATH as REMOVAL_POLICY_PATH
+    from data_sheets_schema.receipt_completion import POLICY_PATH as RECEIPT_POLICY_PATH
+    from data_sheets_schema.native_source_attribution import POLICY_PATH as NATIVE_ATTRIBUTION_POLICY_PATH
+    files = set(CONDITION_PROMPTS.values()) | {TUNED_PROMPT, POLICY_PATH, REMOVAL_POLICY_PATH, RECEIPT_POLICY_PATH, NATIVE_ATTRIBUTION_POLICY_PATH}
+    from .shared_generation import ASSET_HASHES
+    files |= {Path(name) for name in ASSET_HASHES}
     components = resource_path(COMPONENTS)          # from any directory (#1480)
     if components.is_dir():
         # Keyed by the logical relative spelling, read where they are.

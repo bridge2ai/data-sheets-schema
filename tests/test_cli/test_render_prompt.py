@@ -114,6 +114,38 @@ class TestTheCommand(unittest.TestCase):
         r = self._run("--condition", "no-such-condition")
         self.assertNotEqual(r.exit_code, 0)
 
+    def test_method_overrides_the_baseline_directory_for_agentic_runs(self):
+        """#690 moved `ARMS["baseline"][1]` to `claudecode_api`, leaving
+        `d4d prompt render` unable to render the `claudecode_agent` paths that
+        an agentic baseline run actually writes (#5046)."""
+        from data_sheets_schema import runs
+        label = "2026-10-14_claude-opus-5-generic-v8_rep1"
+        r = CliRunner(mix_stderr=False).invoke(
+            api, ["render-prompt", "--project", "VOICE",
+                  "--label", label, "--condition", "generic_v8",
+                  "--method", "claudecode_agent"])
+        self.assertEqual(r.exit_code, 0, r.stderr)
+        self.assertIn(f"data/d4d_concatenated/claudecode_agent/{label}/VOICE_d4d.yaml", r.stdout)
+        self.assertIn(f"data/d4d_concatenated/claudecode_agent_core/{label}/VOICE_d4d_core.yaml", r.stdout)
+        self.assertNotIn("claudecode_api", r.stdout)
+
+        expected_spec = _spec(
+            label=label, condition="generic_v8",
+            method="claudecode_agent", runtime="Claude Code", provider="Anthropic",
+            manifest_line=ARMS["baseline"][3],
+        )
+        reconstructed = RunSpec.from_render_spec(
+            expected_spec.render_spec(),
+            project="VOICE", method="claudecode_agent", label=label,
+        )
+        expected_digest = hashlib.sha256(resolve_prompt(reconstructed).encode("utf-8")).hexdigest()
+        self.assertIn(expected_digest, r.stderr)
+
+    def test_method_conflicting_with_explicit_arm_is_refused(self):
+        r = self._run("--condition", "generic_v3", "--arm", "de_novo", "--method", "claudecode_agent")
+        self.assertNotEqual(r.exit_code, 0)
+        self.assertIn("conflicts with --arm", r.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -140,8 +172,8 @@ class TestTheInstructionIsResolvedOnce(unittest.TestCase):
         s = _spec(runtime="Claude Code")
         first = s.instruction
         original = ar._model_settings
-        ar._model_settings = lambda: {"name": "SOME-OTHER-MODEL",
-                                      "temperature": 0.0}
+        ar._model_settings = lambda condition=None: {"name": "SOME-OTHER-MODEL",
+                                                     "temperature": 0.0}
         try:
             self.assertEqual(first, s.instruction)
             self.assertNotIn("SOME-OTHER-MODEL", s.instruction)

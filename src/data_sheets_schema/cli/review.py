@@ -19,6 +19,28 @@ def review():
     """Review a generated record against its instruction, bundle and receipts."""
 
 
+@review.command("source-attribution-preflight")
+@click.option("--report", type=click.Path(dir_okay=False, path_type=Path), required=True)
+@click.option("--record", type=click.Path(dir_okay=False, path_type=Path), required=True,
+              help="the final full record the report's source_review must bind")
+@click.option("--bundle", type=click.Path(dir_okay=False, path_type=Path), required=True)
+@click.option("--chunk-manifest", type=click.Path(dir_okay=False, path_type=Path), required=True)
+@click.option("--protocol-version", type=click.IntRange(3, 7), required=True)
+@click.option("--source-manifest", type=click.Path(dir_okay=False, path_type=Path))
+@click.option("--project", help="with --source-manifest: the explicitly selected project")
+def source_attribution_preflight(**kwargs):
+    """Read-only JSON diagnostics for a final report draft (#2427).
+
+    Exit 0: preflight passes; 1: findings; 2: unusable inputs. Terminal
+    evidence checks and a registered continuation policy remain required.
+    """
+    import json
+    from data_sheets_schema import source_attribution_preflight as preflight
+    result = preflight.file_result(**kwargs)
+    click.echo(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))
+    raise click.exceptions.Exit(preflight.exit_status(result))
+
+
 def _provenance(method: str, label: str, project: str) -> Path:
     from data_sheets_schema import provenance as pv
     return pv.record_path_for(project, method, label, pv.CONCAT_DIR)
@@ -44,7 +66,7 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     _require_repo_root_cwd("d4d review pack")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(label, project)
-    from data_sheets_schema.review_pack import PackAttested, pack_pins, write_pack
+    from data_sheets_schema.review_pack import IdentifierAuthorityUnavailable, PackAttested, pack_pins, write_pack
     prov = _provenance(method, label, project)
     if not prov.exists():
         raise click.ClickException(f"no provenance record at {prov}")
@@ -56,6 +78,8 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
                             {"receipted_slots": receipted, "receiptless_slots": receiptless},
                             force=force, force_hint="`--force`")
     except PackAttested as exc:
+        raise click.ClickException(str(exc)) from exc
+    except IdentifierAuthorityUnavailable as exc:
         raise click.ClickException(str(exc)) from exc
     except yaml.YAMLError as exc:
         # `review_pack._load_yaml` names the file that failed — the pack
@@ -189,6 +213,117 @@ def check(method, label, project, write, strict):
         click.echo(f"   ✓ review block written to {prov}")
     if strict and (block["findings"] or block["unanswered"]):
         sys.exit(1)
+
+
+@review.command("removals")
+@click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
+@click.option("--label", required=True)
+@click.option("--project", callback=project_choice, required=True)
+@click.option("--flattened", "show_flattened", is_flag=True, help="also list the flattened values and where their text survives")
+@click.option("--rewritten", "show_rewritten", is_flag=True,
+              help="also list the carried values whose path now holds other text (#3243)")
+@click.option("--json", "as_json", is_flag=True, help="print the whole block as JSON")
+def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json):
+    """Classify every value the phase-1 snapshot carried and the final full
+    record does not (#2923): flattened (its text survives), founded (the
+    path of an audit finding not scoped to the core record alone covers it)
+    or unfounded, with the phase that removed it. The text test is the
+    value's own text surviving, so a value reworded, moved or split lists
+    as deleted (#3207), while a lost word or long number can list as
+    flattened by coincidental containment: the counts are not bounds on
+    content lost (#3229). A scalar rewritten in place is not a removal; the
+    summary counts it and --rewritten lists it (#3243). Removals v3
+    names, beside each deleted value, the final path its words recur at
+    (a relocation candidate, reported only, #3223), reads the native and
+    direct arms from their evidence/original_full.yaml, and gives a bound
+    source review's judgment on each deleted value (#3037). Read-only:
+    nothing is
+    written, and a run with no phase-1 snapshot prints that it was not
+    checked rather than zero. Where the audit is missing, or present but
+    unreadable, the deletions are listed unsorted and the summary says
+    which (#3153)."""
+    import json
+
+    from data_sheets_schema.cli.method import resolve_method
+    from data_sheets_schema.removals import for_record
+    method = method or resolve_method(label, project)
+    prov = _provenance(method, label, project)
+    if not prov.exists():
+        raise click.ClickException(f"no provenance record at {prov}")
+    block = for_record(prov)
+    if as_json:
+        click.echo(json.dumps(block, indent=2, default=str))
+        return
+    click.echo(f"   {block['summary']}")
+    if not block["checked"]:
+        return
+    if block["founded_by"] is not None:
+        click.echo("   founded by: " + ", ".join(f"{k} {v}" for k, v in block["founded_by"].items()))
+    audit = block.get("audit") or {}
+    if audit.get("paths_past_end"):
+        click.echo(f"   finding paths indexing past the end of their list: {audit['paths_past_end']}"
+                   f" ({audit['paths_one_past_end']} one past, read as the last entry;"
+                   f" {block['founded_past_end']} value(s) founded so)")
+    if block["phase"] is not None:
+        click.echo("   removed at: " + (", ".join(f"{k} {v}" for k, v in block["phase"].items()) or "nothing"))
+    elif (block.get("artifacts") or {}).get("phases_reason"):
+        click.echo(f"   removed at: not attributed ({block['artifacts']['phases_reason']})")
+    else:
+        click.echo("   removed at: not attributed (a phase output is missing or unreadable)")
+    if block.get("unfounded_phase"):
+        # A repair round acts on validation errors, not on the audit (#3150).
+        click.echo("   unfounded, by the phase that removed them: "
+                   + ", ".join(f"{k} {v}" for k, v in block["unfounded_phase"].items()))
+    sorted_ = block["unfounded"] is not None
+    for row in block["unfounded_paths"] + block["unsorted_paths"]:
+        notes = [row.get("phase") or "phase unattributed"]
+        if row.get("receipted"):
+            notes.append("receipted")
+        if row.get("curator_amend"):
+            notes.append("a curator's amend")                  # #3702: not the model's deletion
+        elif row.get("amended_after_model_removal"):
+            notes.append("amended by a curator after the model removed it")
+        elif row.get("curator_amend_ambiguous"):
+            notes.append("an amend on its list may have emptied it (ambiguous)")   # #3802
+        if row.get("named_by_core_finding"):
+            notes.append("named by a core-only finding")
+        if row.get("mentioned_in_finding_text"):
+            notes.append("its slot is mentioned in a finding's text")
+        if row.get("source_review"):
+            notes.append(f"source review: {row['source_review']}"
+                         + (", only a finding's free-text slot names it" if row.get("supported_slot_only") else ""))
+        where = row.get("relocated_candidate")
+        if where:
+            # Reported only (#3223): where its words recur, not proof they survive.
+            notes.append(f"its words recur at {where['to']} ({where['share']:.0%}"
+                         + (", source_caveats: a change of standing" if where["change_of_standing"] else "") + ")")
+        # Unsorted: the summary says why — no audit, or one that could not be read (#3153).
+        click.echo(f"   {'✗ unfounded' if sorted_ else '? deleted, unsorted'} {row['path']} ({', '.join(notes)})")
+    for cls in ("unfounded", "unsorted"):
+        if block.get(f"{cls}_paths_truncated"):
+            click.echo(f"   … and {block[f'{cls}_paths_truncated']} more {cls} value(s) not listed")
+    if show_flattened:
+        for row in block["flattened_paths"]:
+            caveat = ", source_caveats only" if row.get("into_source_caveats") else ""
+            if row.get("low_confidence"):
+                # #3367: where a coincidence is likeliest, and whether a finding would found it.
+                covered = {True: ", a finding covers it", False: ", no finding covers it"}
+                caveat += ", low confidence: " + " and ".join(row["low_confidence"]) + covered.get(row.get("founded"), "")
+            click.echo(f"   ~ {row['path']} → {row['into']} ({row.get('phase') or 'phase unattributed'}{caveat})")
+        if block.get("flattened_paths_truncated"):
+            click.echo(f"   … and {block['flattened_paths_truncated']} more flattened value(s) not listed")
+    if show_rewritten:
+        for row in block["rewritten_paths"]:
+            state = {True: "founded", False: "unfounded"}.get(row.get("founded"), "unsorted")
+            # #3366: a rewrite of the write-time normaliser's form, or at a curator's amend.
+            whose = "".join([f", the normaliser's {row['normaliser']} form" if row.get("normaliser") else "",
+                             ", a curator's amend" if row.get("curator_amend") else "",
+                             ", amended by a curator after the model rewrote it"
+                             if row.get("amended_after_model_rewrite") else ""])
+            click.echo(f"   ≠ {state} {row['path']} → {row['at']} ({row.get('phase') or 'phase unattributed'}{whose})")
+        if block.get("rewritten_paths_truncated"):
+            click.echo(f"   … and {block['rewritten_paths_truncated']} more rewritten value(s) not listed")
+
 
 @review.command("disposition")
 @click.option("--method", default=None, help="run directory family; defaults to the one the label lives in (claudecode_agent or claudecode_api, #934)")
@@ -421,3 +556,95 @@ def agree_cmd(method, label, project, write):
         ProvenanceRecord(data=rec).write(prov)
         click.echo(f"   ✓ reliability written into {prov}")
 
+
+@review.command("absence-lint")
+@click.option("--record", "records", multiple=True, required=True,
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="a full or core record YAML; repeatable")
+@click.option("--json", "as_json", is_flag=True, help="print one JSON result per record, as a list")
+def absence_lint_cmd(records, as_json):
+    """Bundle-wide absence claims and record self-narration in a record's
+    free text (#2919): each phrase the registered lexicon matches in a
+    `description`, `notes`, `source_caveats` or `*_details` leaf, by class, at
+    its JSON pointer. Read-only and never gating: a record with matches still
+    exits 0. A match is a regex hit, not a reviewed finding."""
+    import json
+
+    from data_sheets_schema import absence_lint
+    from data_sheets_schema.lexicon import LexiconError, load
+    try:
+        lexicon = load(absence_lint.LEXICON)
+        results = [absence_lint.lint_path(p, lexicon) for p in records]
+    except (LexiconError, ValueError, OSError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    if as_json:
+        click.echo(json.dumps(results, indent=2, ensure_ascii=False))
+        return
+    click.echo(f"   {lexicon.instrument} · sha256 {lexicon.sha256[:12]}… · not gating")
+    for r in results:
+        click.echo(f"{r['record']}")
+        click.echo(f"   {r['leaves']} free-text leaves · " + " · ".join(
+            f"{cls} {c['phrases']} phrase(s) in {c['leaves']} leaf/leaves" for cls, c in r["by_class"].items()))
+        for h in r["hits"]:
+            text = h["text"] if len(h["text"]) <= 100 else h["text"][:97] + "…"
+            click.echo(f"   {h['pointer']}  {h['class']}  {','.join(h['patterns'])}  \"{text}\"")
+
+
+@review.command("status-expression")
+@click.option("--audit", "audit_file", required=True, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="an audit JSON carrying source_review, or a bare source_review object")
+@click.option("--record", "record_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the artifact the source_review is bound to; a marker elsewhere in a value then counts")
+@click.option("--bundle", "bundle_file", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the bundle the evidence quotes, to read each quote's context")
+@click.option("--chunk-manifest", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="with --bundle: that bundle's chunk manifest; default the one beside it or the study's")
+@click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
+def status_expression(audit_file, record_file, bundle_file, chunk_manifest, as_json):
+    """Declared status the claim text does not carry (#2917):
+    `status_unexpressed` for a supported claim declared planned or
+    in_progress, `planned_evidence_declared_fact` for one declared fact on
+    planned evidence; label slots apart.
+
+    Read-only and non-gating: `source_review.check` is unchanged and nothing
+    is written. A flag is lexical — see the assurance line it prints.
+    """
+    import json
+
+    from data_sheets_schema import status_context as sc
+    if chunk_manifest is not None and bundle_file is None:
+        # The manifest chunks a bundle; without one it would be ignored (#3212).
+        raise click.UsageError("--chunk-manifest is read only with --bundle")
+    try:
+        out = sc.file_status_expression(audit_file, record=record_file, bundle=bundle_file,
+                                        chunk_manifest=chunk_manifest)
+    except (OSError, UnicodeDecodeError, ValueError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    if as_json:
+        click.echo(json.dumps(out, indent=2, ensure_ascii=False, default=str))
+    else:
+        for line in sc.report_lines(out):
+            click.echo(line)
+
+@review.command("self-disclaimed")
+@click.option("--original", "original", required=True, type=click.Path(exists=True, dir_okay=False),
+              help="the record the audit and any receipt were written against (the phase-1 full record)")
+@click.option("--final", "final", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="the final record: each original flag is followed to it by identity and classified")
+@click.option("--audit", "audit", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="the audit JSON: removal_declared and named_by_finding come from its findings (needs --final)")
+@click.option("--receipt", "receipt", default=None, type=click.Path(exists=True, dir_okay=False),
+              help="the coverage receipt for check (b), the person-role predicates, reported in its own bucket")
+def self_disclaimed_cmd(original, final, audit, receipt):
+    """Typed-container entries whose own prose disclaims their role or
+    presence (#2913). Prints JSON; never gating: the exit status is 0
+    whenever the inputs were read, whatever is flagged."""
+    import json
+
+    from data_sheets_schema import self_disclaimed as sd
+    try:
+        out = sd.check_files(Path(original), Path(final) if final else None,
+                             Path(audit) if audit else None, Path(receipt) if receipt else None)
+    except (OSError, UnicodeError, ValueError, yaml.YAMLError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(json.dumps(out, indent=2, ensure_ascii=False))

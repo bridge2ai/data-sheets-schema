@@ -1,0 +1,179 @@
+{
+  "commit": "03cf94bf08f82e7399201c09140b32221e42c4dc",
+  "path": "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+  "fields": {
+    "doi": {
+      "name": "doi",
+      "annotations": {
+        "d4d:docExample": {
+          "tag": "d4d:docExample",
+          "value": "10.xxxxx/example.1234"
+        }
+      },
+      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx \u2014 a registrant prefix, a slash, a suffix \u2014 providing persistent identification. The bare DOI only \u2014 not the doi: CURIE and not the doi.org resolver URL. The pattern is anchored (#646): unanchored, JSON Schema's search semantics accepted all three surface forms, and one v5 record carried the same DOI three ways. The 2026-08-20b arm already writes the bare form; records written before the anchor keep the validation verdicts they were pinned with (#426) and are not rewritten (#520).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "exact_mappings": [
+        "schema:identifier"
+      ],
+      "broad_mappings": [
+        "dcterms:identifier"
+      ],
+      "slot_uri": "d4d:doiIdentifier",
+      "alias": "doi",
+      "owner": "Information",
+      "domain_of": [
+        "Information",
+        "DatasetCollection",
+        "Dataset",
+        "DataSubset",
+        "File"
+      ],
+      "range": "string",
+      "pattern": "^10\\.\\d{4,}\\/.+$"
+    },
+    "id": {
+      "name": "id",
+      "annotations": {
+        "d4d:docExample": {
+          "tag": "d4d:docExample",
+          "value": "https://example.org/dataset/my-dataset-001"
+        }
+      },
+      "description": "A unique identifier for a thing.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "slot_uri": "schema:identifier",
+      "identifier": true,
+      "alias": "id",
+      "owner": "Information",
+      "domain_of": [
+        "NamedThing",
+        "Organization",
+        "DatasetProperty",
+        "Grant",
+        "DatasetCollection",
+        "Dataset",
+        "DataSubset",
+        "Software",
+        "Person",
+        "Information",
+        "Purpose",
+        "Task",
+        "AddressingGap",
+        "Creator",
+        "FundingMechanism",
+        "Grantor",
+        "Instance",
+        "SamplingStrategy",
+        "MissingInfo",
+        "Relationships",
+        "Splits",
+        "DataAnomaly",
+        "DatasetBias",
+        "DatasetLimitation",
+        "ExternalResource",
+        "Confidentiality",
+        "ContentWarning",
+        "Subpopulation",
+        "Deidentification",
+        "SensitiveElement",
+        "DatasetRelationship",
+        "InstanceAcquisition",
+        "CollectionMechanism",
+        "DataCollector",
+        "CollectionTimeframe",
+        "DirectCollection",
+        "MissingDataDocumentation",
+        "RawDataSource",
+        "PreprocessingStrategy",
+        "CleaningStrategy",
+        "LabelingStrategy",
+        "RawData",
+        "ImputationProtocol",
+        "AnnotationAnalysis",
+        "MachineAnnotationTools",
+        "ExistingUse",
+        "UseRepository",
+        "OtherTask",
+        "FutureUseImpact",
+        "DiscouragedUse",
+        "IntendedUse",
+        "ProhibitedUse",
+        "ThirdPartySharing",
+        "DistributionFormat",
+        "DistributionDate",
+        "Maintainer",
+        "Erratum",
+        "UpdatePlan",
+        "RetentionLimits",
+        "VersionAccess",
+        "ExtensionMechanism",
+        "EthicalReview",
+        "DataProtectionImpact",
+        "CollectionNotification",
+        "CollectionConsent",
+        "ConsentRevocation",
+        "HumanSubjectResearch",
+        "InformedConsent",
+        "ParticipantPrivacy",
+        "HumanSubjectCompensation",
+        "AtRiskPopulations",
+        "LicenseAndUseTerms",
+        "IPRestrictions",
+        "ExportControlRegulatoryRestrictions",
+        "DataGovernance",
+        "VariableMetadata",
+        "File"
+      ],
+      "range": "uriorcurie",
+      "required": true
+    },
+    "download_url": {
+      "name": "download_url",
+      "annotations": {
+        "d4d:docExample": {
+          "tag": "d4d:docExample",
+          "value": "https://fairhub.io/datasets/2/download"
+        }
+      },
+      "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "exact_mappings": [
+        "schema:url"
+      ],
+      "slot_uri": "dcat:downloadURL",
+      "alias": "download_url",
+      "owner": "Information",
+      "domain_of": [
+        "Information",
+        "DistributionFormat",
+        "DatasetCollection",
+        "Dataset",
+        "DataSubset",
+        "File"
+      ],
+      "range": "uri"
+    },
+    "publisher": {
+      "name": "publisher",
+      "annotations": {
+        "d4d:docExample": {
+          "tag": "d4d:docExample",
+          "value": "ROR:0xxxxxxxx  # a ROR CURIE (form only), a DOI, or a URL \u2014 not a plain name"
+        }
+      },
+      "description": "The organization or entity responsible for making the resource available.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "dcterms:publisher",
+      "alias": "publisher",
+      "owner": "Information",
+      "domain_of": [
+        "Information",
+        "DatasetCollection",
+        "Dataset",
+        "DataSubset",
+        "File"
+      ],
+      "range": "uriorcurie"
+    }
+  }
+}

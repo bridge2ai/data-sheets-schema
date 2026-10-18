@@ -1,0 +1,82 @@
+# DRAFT: pending independent scientific/applicability review; not registered.
+# Corrected v2, 2026-09-19: APPLICABILITY-1; original draft preserved.
+# Prepared from the same existing pinned source bundle only.
+# Same dataset context is proposed for future accepted Dataset and CoreDataset.
+# The two classes and their scoring scope belong in the evaluation jobs, not here.
+# Bundle SHA256: 27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c
+# Citations below are inclusive physical lines of CHORUS_preprocessed.txt.
+# This file is outside the live audit5 read policy and must not affect that audit.
+
+human_subjects:
+  value: true
+  evidence: >-
+    The existing CHORUS source describes a patient-admission dataset, including
+    EHR, radiology and waveforms from ICU, PICU and NICU admissions (project
+    documentation, c006, lines 1074-1082); the webinar describes retrospective
+    hospital admissions (c003, lines 236-247). This declaration concerns the
+    human origin and participant/privacy relevance of the data; it does not
+    assert a particular regulatory human-subjects determination, consent
+    procedure, or completed ethics approval.
+
+regulated_access:
+  value: true
+  evidence: >-
+    The 2025-09-09 webinar explicitly labels the CHORUS dataset controlled
+    access (c003, lines 236-240) and requires participants to sign a licensing
+    agreement before dataset access (c003-c004, lines 440-455). A concrete
+    access/governance restriction therefore applies to the documented dataset.
+    This does not identify the exact agreement text, a statutory classification,
+    or an unrestricted public license for the dataset.
+
+shared_dataset:
+  value: true
+  evidence: >-
+    The webinar describes expanding access to CHORUS data for trainee research
+    (c003, lines 213-221), states that datasets are being used for training
+    activities and publications (c003, lines 256-258), and supplies an access
+    process with an agreement requirement (c003-c004, lines 440-455). The
+    project page also labels a current released dataset (c006, lines 1074-1082).
+    Sharing here includes controlled reuse; unrestricted public download is
+    not asserted.
+
+ml_training_dataset:
+  value: true
+  evidence: >-
+    The NIH project abstract explicitly describes generating data for ML/AI
+    applications and developing ML/AI-derived models, while separately planning
+    a holdout set for external validation (c002, lines 45-47). This declaration
+    identifies intended model-development use of the dataset; it does not
+    assert that any particular model was trained, that a released training/test
+    split is documented, or that workforce training is model training.
+
+data_collection:
+  value: true
+  evidence: >-
+    The webinar explicitly describes retrospective data collection and hospital
+    admissions (c003, lines 236-247). The project documentation describes
+    collection of multimodal data across contributing hospitals (c006, lines
+    1083-1085). This establishes a collection process without asserting that
+    all proposed modalities, sites, or planned target counts were completed.
+
+data_processing:
+  value: true
+  evidence: >-
+    The webinar describes OMOP and telemetry in the enclave, clinical notes
+    retained locally except tokens, and imaging de-identification in progress
+    for a larger cohort (c003, lines 245-254). The project page states that
+    the data use ongoing and new standardization practices (c006, lines
+    1083-1085). Processing therefore applies; these statements do not establish
+    completion of every processing step or processing uniformity across all
+    modalities.
+
+processing_software:
+  value: true
+  evidence: >-
+    The 2025-09-09 CHORUS dataset webinar explicitly describes clinical notes
+    extracted and tokenized using the OHNLP toolkit (c003, lines 308-310), in
+    a dataset snapshot that says clinical notes remain local except tokens
+    (c003, lines 245-247). This supports processing-software applicability
+    for the CHORUS dataset as described. The source does not establish the
+    toolkit version, uniform use across all sites or modalities, or which
+    particular release includes each processed output; those details remain
+    unestablished, without negating the explicit dataset-level software use.

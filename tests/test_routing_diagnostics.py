@@ -1,0 +1,1410 @@
+"""Slot-meaning diagnostic: release-timing text under confidential or
+sensitive elements (#2931).
+
+The synthetic records carry no project prose. The corpus replay names its
+record set: the nine CM4AI full records the issue parsed (v6 agentic
+2026-08-28 rep1-3, v7 API 2026-09-01 rep1-3, v8 API 2026-09-04g rep1-3) and
+their nine core twins, each by path.
+"""
+
+import json
+import os
+import sys
+import time
+import unittest
+from pathlib import Path
+
+import pytest
+import yaml
+from click.testing import CliRunner
+
+from data_sheets_schema import routing_diagnostics as rd
+from data_sheets_schema.routing_diagnostics import (
+    AVAILABILITY_TIMING, EMBARGO, RELEASE_TIMING, slot_meaning_mismatch,
+)
+
+ROOT = Path(__file__).resolve().parents[1]
+
+#: Written for these tests, not taken from any record or bundle.
+EMBARGO_TEXT = "Two assay deposits are held under a pre-publication embargo; their download links read Embargoed."
+
+
+def _paths(record):
+    return [m.path for m in slot_meaning_mismatch(record)]
+
+
+class TestTheSlotDecidesNotTheText(unittest.TestCase):
+    """The same sentence is a finding in one slot and correct routing in another."""
+
+    def test_embargo_text_under_confidential_elements_is_flagged(self):
+        record = {"id": "example:ds", "confidential_elements": [{
+            "name": "Deposits under embargo", "confidential_elements_present": True,
+            "confidentiality_details": EMBARGO_TEXT}]}
+        found = slot_meaning_mismatch(record)
+        self.assertEqual([(m.slot, m.path, m.kinds, m.present) for m in found], [
+            ("confidential_elements", "confidential_elements[0].name", (EMBARGO,), True),
+            ("confidential_elements", "confidential_elements[0].confidentiality_details",
+             (EMBARGO, RELEASE_TIMING), True)])
+        self.assertEqual(found[1].terms, ("embargo", "Embargoed", "pre-publication"))
+
+    def test_embargo_text_under_sensitive_elements_is_flagged(self):
+        record = {"sensitive_elements": [{"sensitive_elements_present": False,
+                                          "sensitivity_details": EMBARGO_TEXT}]}
+        found = slot_meaning_mismatch(record)
+        self.assertEqual([(m.slot, m.path, m.present) for m in found],
+                         [("sensitive_elements", "sensitive_elements[0].sensitivity_details", False)])
+
+    def test_the_same_text_under_known_limitations_is_not_flagged(self):
+        self.assertEqual(_paths({"known_limitations": [{"description": EMBARGO_TEXT}]}), [])
+
+    def test_the_same_text_under_distribution_slots_is_not_flagged(self):
+        record = {"distribution_dates": [{"description": EMBARGO_TEXT, "release_dates": ["Q3 2026"]}],
+                  "distribution_formats": [{"description": EMBARGO_TEXT}],
+                  "external_resources": [{"external_resources": [EMBARGO_TEXT]}],
+                  "third_party_sharing": [{"is_shared": True, "description": EMBARGO_TEXT}]}
+        self.assertEqual(_paths(record), [])
+
+    def test_one_record_carrying_the_text_everywhere_is_flagged_only_where_the_slot_is_wrong(self):
+        record = {"known_limitations": [{"description": EMBARGO_TEXT}],
+                  "distribution_dates": [{"description": EMBARGO_TEXT}],
+                  "confidential_elements": [{"confidentiality_details": EMBARGO_TEXT}],
+                  "missing_data_documentation": [{"description": EMBARGO_TEXT}]}
+        self.assertEqual(_paths(record), ["confidential_elements[0].confidentiality_details"])
+
+    def test_a_nested_dataset_answers_the_same_question(self):
+        record = {"resources": [{"id": "example:part", "known_limitations": [{"description": EMBARGO_TEXT}],
+                                 "confidential_elements": [{"description": EMBARGO_TEXT}]}]}
+        self.assertEqual(_paths(record), ["resources[0].confidential_elements[0].description"])
+
+
+class TestTheLexicon(unittest.TestCase):
+    def _kinds(self, text, slot="confidential_elements"):
+        return [m.kinds for m in slot_meaning_mismatch({slot: [{"description": text}]})]
+
+    def test_each_kind_is_reachable_without_the_word_embargo(self):
+        self.assertEqual(self._kinds("Deposits will be released upon publication of the companion paper."),
+                         [(RELEASE_TIMING,)])
+        self.assertEqual(self._kinds("The imaging tier is not yet publicly available."),
+                         [(AVAILABILITY_TIMING,)])
+        self.assertEqual(self._kinds("Assay files will be made publicly available in a later deposit."),
+                         [(AVAILABILITY_TIMING,)])
+        self.assertEqual(self._kinds("Assay files will be made available after publication."),
+                         [(RELEASE_TIMING, AVAILABILITY_TIMING)])
+
+    def test_access_control_language_is_what_these_slots_describe_and_is_not_matched(self):
+        """Withholding a sensitive variable is correct routing; the full schema
+        describes confidential elements as 'why it cannot be released'."""
+        for text in ("Raw recordings are withheld from the public release and available only under controlled access.",
+                     "Full postal codes cannot be released and are held under a data use agreement.",
+                     "The release states that no human subjects were enrolled.",
+                     "Variables treated as sensitive are withheld from this public release.",
+                     "Biospecimens are banked for future studies under restricted access."):
+            with self.subTest(text=text[:40]):
+                self.assertEqual(self._kinds(text), [])
+                self.assertEqual(self._kinds(text, "sensitive_elements"), [])
+
+    def test_identifiers_and_source_caveats_are_not_read_but_notes_are(self):
+        record = {"confidential_elements": [{
+            "id": "example:ds#confidential-embargoed-deposits",
+            "source_caveats": ["The source mentions an embargo only in a table footnote."],
+            "notes": "Two deposits remain under embargo."}]}
+        self.assertEqual(_paths(record), ["confidential_elements[0].notes"])
+
+    def test_a_record_that_breaks_the_list_shape_still_says_what_it_says(self):
+        self.assertEqual([(m.path, m.present) for m in slot_meaning_mismatch(
+            {"confidential_elements": "Under embargo until 2027."})],
+            [("confidential_elements", None)])
+        self.assertEqual(_paths({"confidential_elements": {"confidentiality_details": EMBARGO_TEXT}}),
+                         ["confidential_elements.confidentiality_details"])
+        self.assertEqual(_paths({"confidential_elements": ["Under embargo until 2027.", "ZIP codes"]}),
+                         ["confidential_elements[0]"])
+
+    def test_a_record_that_is_not_a_mapping_is_not_a_clean_one(self):
+        for record in (None, [], "text"):
+            with self.subTest(record=record), self.assertRaises(TypeError):
+                slot_meaning_mismatch(record)
+
+
+#: `safe_load` keeps the second `confidential_elements`, so the parsed record
+#: is clean while the text says the embargo is confidential (#1029).
+DUPLICATED_SLOT = (
+    "confidential_elements:\n"
+    "- confidential_elements_present: true\n"
+    "  confidentiality_details: Two assay deposits are held under embargo.\n"
+    "known_limitations:\n"
+    "- description: Two assay deposits are held under embargo.\n"
+    "confidential_elements:\n"
+    "- confidential_elements_present: false\n"
+)
+
+
+class TestADuplicatedKeyHidesWhatItReplaced(unittest.TestCase):
+    def test_a_scoped_slot_written_twice_is_named(self):
+        self.assertEqual(_paths(yaml.safe_load(DUPLICATED_SLOT)), [])     # what the parse shows
+        self.assertEqual([(d["path"], d["key"], d["lines"]) for d in rd.unread_duplicate_keys(DUPLICATED_SLOT)],
+                         [("$", "confidential_elements", [1, 6])])
+
+    def test_a_key_repeated_inside_a_scoped_entry_is_named(self):
+        for text in ("confidential_elements:\n- name: a\n  name: b\n",
+                     "resources:\n- sensitive_elements:\n  - sensitivity_details: a\n    sensitivity_details: b\n",
+                     "resources:\n- confidential_elements: []\n  confidential_elements: []\n"):
+            with self.subTest(text=text):
+                self.assertEqual(len(rd.unread_duplicate_keys(text)), 1)
+
+    def test_a_duplicate_the_scan_would_not_read_anyway_is_not_named(self):
+        for text in ("source_caveats: a\nsource_caveats: b\n",
+                     "known_limitations:\n- description: a\n  description: b\n",
+                     "confidential_elements:\n- id: x:a\n  id: x:b\n",
+                     "confidential_elements:\n- source_caveats:\n    note: a\n    note: b\n",
+                     # an ancestor whose dropped copy holds no scoped slot
+                     "resources:\n- known_limitations:\n  - description: a\nresources:\n- id: x:part\n",
+                     # the kept copy is the one holding the slot, and it is scanned
+                     "resources:\n- id: x:part\nresources:\n- confidential_elements:\n  - name: a\n",
+                     # `1` and `"1"` are two keys to the loader, so nothing is dropped
+                     "1:\n  confidential_elements:\n  - name: a\n\"1\":\n  id: x:part\n",
+                     # the loader merges every `<<`, so two are not a duplicate
+                     "a: &a\n  confidential_elements: [x]\nb: &b\n  y: 1\nc:\n  <<: *a\n  <<: *b\n"):
+            with self.subTest(text=text):
+                self.assertEqual(rd.unread_duplicate_keys(text), [])
+
+
+#: Two `resources` blocks: `safe_load` keeps the second, so the embargo entry
+#: in the first is never scanned and the parse reads clean (#3005, #2980).
+DUPLICATED_ANCESTOR = (
+    "resources:\n"
+    "- confidential_elements:\n"
+    "  - confidential_elements_present: true\n"
+    "    confidentiality_details: Two assay deposits are held under embargo.\n"
+    "resources:\n"
+    "- id: x:part\n"
+)
+
+
+class TestADuplicatedAncestorHidesAScopedSlot(unittest.TestCase):
+    def test_the_parse_reads_clean_and_the_ancestor_is_named(self):
+        self.assertEqual(_paths(yaml.safe_load(DUPLICATED_ANCESTOR)), [])  # what the parse shows
+        self.assertEqual(_paths(yaml.safe_load(DUPLICATED_ANCESTOR.split("resources:\n- id")[0])),
+                         ["resources[0].confidential_elements[0].confidentiality_details"])
+        self.assertEqual([(d["path"], d["key"], d["lines"]) for d in rd.unread_duplicate_keys(DUPLICATED_ANCESTOR)],
+                         [("$", "resources", [1, 5])])
+
+    def test_the_slot_is_found_at_any_depth_and_through_any_key(self):
+        for text, where in (
+                ("resources:\n- parts:\n    x:\n      sensitive_elements: []\n  parts: {}\n",
+                 ("resources[0]", "parts")),
+                ("source_caveats:\n  confidential_elements: [a]\nsource_caveats: b\n", ("$", "source_caveats")),
+                ("resources:\n- id: x:a\n- id: x:b\n  sub:\n  - confidential_elements: [a]\n  sub: []\n",
+                 ("resources[1]", "sub")),
+                ("base: &b\n  confidential_elements: [a]\nresources:\n  <<: *b\nresources: {}\n",
+                 ("$", "resources"))):
+            with self.subTest(text=text):
+                self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)], [where])
+
+    def test_a_scoped_slot_duplicated_inside_a_dropped_ancestor_is_named_with_it(self):
+        text = ("resources:\n- confidential_elements: [a]\n  confidential_elements: [b]\n"
+                "resources:\n- id: x:part\n")
+        self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)],
+                         [("$", "resources"), ("resources[0]", "confidential_elements")])
+
+    def test_each_duplicate_is_named_once(self):
+        """A scoped slot written twice whose dropped value also nests a scoped
+        slot is caught by both rules and named once."""
+        text = "confidential_elements:\n- sensitive_elements: [a]\nconfidential_elements: []\n"
+        self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)],
+                         [("$", "confidential_elements")])
+
+
+#: The kept `confidential_elements` entry is a finding; the first `resources`
+#: block, which `safe_load` drops, held another the scan never read (#3066).
+KEPT_FINDING_BESIDE_AN_UNREAD_ANCESTOR = (
+    "resources:\n"
+    "- sensitive_elements:\n"
+    "  - sensitivity_details: Deposits will be released upon publication.\n"
+    "confidential_elements:\n"
+    "- confidential_elements_present: true\n"
+    "  confidentiality_details: Two assay deposits are held under embargo.\n"
+    "resources:\n"
+    "- id: x:part\n"
+)
+
+
+class TestARecordWithAnUnreadDuplicateIsNotPartlyChecked(unittest.TestCase):
+    """#3066: the kept values' findings are withheld too, so a record is
+    either checked whole or not checked."""
+
+    def test_the_kept_findings_are_not_reported(self):
+        for text, kept, reason in (
+                (KEPT_FINDING_BESIDE_AN_UNREAD_ANCESTOR, ["confidential_elements[0].confidentiality_details"],
+                 "`resources` at $ on lines 1, 7"),
+                ("confidential_elements:\n- name: Deposits under embargo\n"
+                 "  confidentiality_details: Deposits will be released upon publication.\n"
+                 "  confidentiality_details: Participant ZIP codes.\n",
+                 ["confidential_elements[0].name"], "`confidentiality_details` at confidential_elements[0]")):
+            with self.subTest(reason=reason):
+                self.assertEqual(_paths(yaml.safe_load(text)), kept)          # what the parse would report
+                found, why = rd.check_text(text)
+                self.assertIsNone(found)
+                self.assertIn(reason, why)
+
+
+#: A mapping anchored outside the scoped slots, with a key written twice, and
+#: aliased under `confidential_elements`, where the scan reads it (#3063).
+ALIASED_DUPLICATE = (
+    "base: &b\n"
+    "  confidential_elements_present: true\n"
+    "  confidentiality_details: Two assay deposits are held under embargo.\n"
+    "  confidentiality_details: None known.\n"
+    "confidential_elements:\n"
+    "- *b\n"
+)
+
+#: (text, (path, key) named): a shared node, judged where the scan reads it.
+ALIASED_CASES = (
+    # a leaf written twice in a node anchored outside the slots
+    ("x: &n\n  name: a\n  name: b\nconfidential_elements:\n- *n\n", ("confidential_elements[0]", "name")),
+    # the dropped value a mapping that holds no scoped slot
+    ("x: &n\n  details: {text: a}\n  details: {text: b}\nresources:\n- sensitive_elements: *n\n",
+     ("resources[0].sensitive_elements", "details")),
+    # anchored under a skipped key, merged into another entry
+    ("confidential_elements:\n- source_caveats: &c\n    name: a\n    name: b\n- <<: *c\n",
+     ("confidential_elements[1].<<", "name")),
+    # merged from outside, as one of a list of merges
+    ("x: &n\n  name: a\n  name: b\ny: &m {z: 1}\nsensitive_elements:\n- <<: [*m, *n]\n",
+     ("sensitive_elements[0].<<[1]", "name")),
+)
+
+#: Anchored under the slot and aliased outside it, where its dropped value
+#: holds a scoped slot too: two places, one duplicate.
+SHARED_TWICE = "confidential_elements:\n- &x\n  sub:\n    sensitive_elements: [a]\n  sub: {}\nother: *x\n"
+
+
+class TestAMappingIsJudgedWhereverTheScanReadsIt(unittest.TestCase):
+    """#3063: the #1029 gate visits a shared node once, at its anchor; the
+    scan reads it at every alias and merge."""
+
+    def test_a_duplicate_anchored_outside_and_aliased_under_a_slot_is_named_there(self):
+        without = ALIASED_DUPLICATE.replace("  confidentiality_details: None known.\n", "")
+        self.assertEqual(_paths(yaml.safe_load(without)),                  # the scan reads through the alias
+                         ["confidential_elements[0].confidentiality_details"])
+        self.assertEqual(_paths(yaml.safe_load(ALIASED_DUPLICATE)), [])    # what the parse shows
+        self.assertEqual([(d["path"], d["key"], d["lines"]) for d in rd.unread_duplicate_keys(ALIASED_DUPLICATE)],
+                         [("confidential_elements[0]", "confidentiality_details", [3, 4])])
+        found, reason = rd.check_text(ALIASED_DUPLICATE)
+        self.assertIsNone(found)
+        self.assertIn("`confidentiality_details` at confidential_elements[0] on lines 3, 4", reason)
+
+    def test_through_any_alias_or_merge_key(self):
+        for text, where in ALIASED_CASES:
+            with self.subTest(text=text):
+                self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)], [where])
+
+    def test_a_shared_duplicate_is_named_once_at_the_first_place_the_scan_reads_it(self):
+        self.assertEqual(rd.unread_duplicate_keys(SHARED_TWICE),
+                         [{"path": "confidential_elements[0]", "key": "sub", "lines": [3, 5], "count": 2}])
+
+    def test_a_shared_mapping_the_scan_never_reads_is_not_named(self):
+        for text in (
+                # aliased only outside the scoped slots, and holding none
+                "x: &n\n  name: a\n  name: b\ny: *n\nknown_limitations:\n- *n\n",
+                # inside a slot only under skipped keys
+                "confidential_elements:\n- source_caveats: &c\n    name: a\n    name: b\n  id: x:a\n"
+                "- source_caveats: *c\n"):
+            with self.subTest(text=text):
+                self.assertEqual(rd.unread_duplicate_keys(text), [])
+
+    def test_a_merged_key_an_explicit_key_overrides_is_not_a_duplicate(self):
+        """YAML's override rule, which the #1029 gate does not count either."""
+        text = "x: &n\n  name: a\nconfidential_elements:\n- <<: *n\n  name: b\n"
+        self.assertEqual(yaml.safe_load(text)["confidential_elements"], [{"name": "b"}])
+        self.assertEqual(rd.unread_duplicate_keys(text), [])
+
+    def test_a_duplicate_inside_a_merged_value_that_is_overridden_hides_nothing(self):
+        """#3203: the loader drops an overridden or shadowed merged value
+        whole, so a key repeated inside it was never going to be scanned."""
+        for text, loaded in (
+                # an explicit key of the merging mapping overrides it
+                ("base: &a\n  name: a\n  name: b\nconfidential_elements:\n- <<: *a\n  name: c\n",
+                 {"confidential_elements": [{"name": "c"}]}),
+                # an earlier mapping in a merge list shadows it
+                ("x: &n\n  name: a\n  name: b\ny: &m {name: c}\nsensitive_elements:\n- <<: [*m, *n]\n",
+                 {"sensitive_elements": [{"name": "c"}]}),
+                # a scoped slot merged under a non-slot key, then overridden;
+                # anchored under a skipped key, so no other place reads it
+                ("confidential_elements:\n- source_caveats: &s\n    sensitive_elements:\n"
+                 "    - name: a\n      name: b\nother:\n  <<: *s\n  sensitive_elements: []\n",
+                 {"other": {"sensitive_elements": []}})):
+            with self.subTest(text=text):
+                self.assertLessEqual(loaded.items(), yaml.safe_load(text).items())   # what the loader keeps
+                self.assertEqual(rd.unread_duplicate_keys(text), [])
+                found, reason = rd.check_text(text)
+                self.assertIsNone(reason)
+                self.assertEqual(found, [])
+
+    def test_the_merged_value_the_loader_keeps_is_still_judged(self):
+        """The control for #3203: without the override, or where the merged
+        mapping holding the duplicate comes first in the list, the loader
+        reads it and the dropped earlier value is named."""
+        for text, where in (
+                ("base: &a\n  name: a\n  name: b\nconfidential_elements:\n- <<: *a\n",
+                 ("confidential_elements[0].<<", "name")),
+                ("x: &n\n  name: a\n  name: b\ny: &m {name: c}\nsensitive_elements:\n- <<: [*n, *m]\n",
+                 ("sensitive_elements[0].<<[0]", "name")),
+                # a merged mapping's own merge, kept through two levels
+                ("a: &a\n  name: a\n  name: b\nb: &b\n  <<: *a\nconfidential_elements:\n- <<: *b\n",
+                 ("confidential_elements[0].<<.<<", "name"))):
+            with self.subTest(text=text):
+                self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)], [where])
+                self.assertIsNone(rd.check_text(text)[0])
+
+    def test_a_mapping_merged_into_one_place_twice_is_not_a_duplicate(self):
+        """#3226: a mapping reached twice through merges — a diamond, a list
+        naming it twice, two merge keys — lays out the same key nodes twice,
+        and the loader reads every one of them. Nothing is dropped, so
+        nothing is named, and the record's findings are reported."""
+        a = "a: &a\n  confidentiality_details: " + EMBARGO_TEXT + "\n"
+        for text in (
+                a + "b: &b\n  <<: *a\n  id: x:b\nconfidential_elements:\n- <<: [*a, *b]\n",
+                a + "confidential_elements:\n- <<: [*a, *a]\n",
+                a + "confidential_elements:\n- <<: *a\n  <<: *a\n"):
+            with self.subTest(text=text):
+                loaded = yaml.safe_load(text)["confidential_elements"][0]
+                self.assertEqual(loaded["confidentiality_details"], EMBARGO_TEXT)
+                self.assertEqual(rd.unread_duplicate_keys(text), [])
+                found, reason = rd.check_text(text)
+                self.assertIsNone(reason)
+                self.assertEqual([m.path for m in found],
+                                 ["confidential_elements[0].confidentiality_details"])
+
+    def test_a_mapping_merged_twice_wins_or_loses_as_its_first_merge_does(self):
+        """The repeat is judged at the place whose pairs the loader keeps: in
+        `[*a, *c, *a]` the first `*a` shadows `c`, so a duplicate inside the
+        shadowed value hides nothing; a duplicate inside `a` itself is named
+        once, with its two lines, not once per merge."""
+        shadowed = ("a: &a\n  name: a\nc: &c\n  name: p\n  name: q\n"
+                    "confidential_elements:\n- <<: [*a, *c, *a]\n")
+        self.assertEqual(yaml.safe_load(shadowed)["confidential_elements"], [{"name": "a"}])
+        self.assertEqual(rd.unread_duplicate_keys(shadowed), [])
+        repeated = "a: &a\n  name: a\n  name: b\nconfidential_elements:\n- <<: [*a, *a]\n"
+        self.assertEqual(rd.unread_duplicate_keys(repeated),
+                         [{"path": "confidential_elements[0].<<[0]", "key": "name",
+                           "lines": [2, 3], "count": 2}])
+
+    def test_every_duplicate_named_is_one_the_1029_gate_counts(self):
+        """The walk groups keys as the gate does and only judges more places,
+        so it names no key and no line the gate would not."""
+        from data_sheets_schema.duplicate_keys import find_duplicate_keys
+        texts = [DUPLICATED_SLOT, DUPLICATED_ANCESTOR, KEPT_FINDING_BESIDE_AN_UNREAD_ANCESTOR,
+                 ALIASED_DUPLICATE, SHARED_TWICE, *(text for text, _ in ALIASED_CASES)]
+        for text in texts:
+            with self.subTest(text=text[:40]):
+                named = {(d["key"], tuple(d["lines"])) for d in rd.unread_duplicate_keys(text)}
+                self.assertTrue(named)
+                self.assertLessEqual(named, {(d["key"], tuple(d["lines"])) for d in find_duplicate_keys(text)})
+
+
+class TestAnExplicitMergeTagIsAMerge(unittest.TestCase):
+    """#3410: PyYAML merges any key tagged `tag:yaml.org,2002:merge`, not only
+    one written `<<`, so the duplicate walk does too."""
+
+    def test_the_issue_example_is_named_where_the_merge_is_and_not_checked(self):
+        text = "confidential_elements: [!!merge x: {name: embargo, name: safe}]\n"
+        self.assertEqual(yaml.safe_load(text), {"confidential_elements": [{"name": "safe"}]})
+        self.assertEqual(rd.unread_duplicate_keys(text),
+                         [{"path": "confidential_elements[0].<<", "key": "name", "lines": [1, 1], "count": 2}])
+        found, reason = rd.check_text(text)
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith("duplicate key `name` at confidential_elements[0].<< on lines 1, 1"),
+                        reason)
+
+    def test_a_tagged_merge_an_explicit_key_overrides_hides_nothing(self):
+        """The override rule (#3203) applies to it: the merged `name` is
+        dropped whole, so the key repeated inside it is not a duplicate."""
+        text = "confidential_elements: [{!!merge x: {name: embargo, name: safe}, name: safe}]\n"
+        self.assertEqual(yaml.safe_load(text), {"confidential_elements": [{"name": "safe"}]})
+        self.assertEqual(rd.unread_duplicate_keys(text), [])
+        self.assertEqual(rd.check_text(text), ([], None))
+
+    def test_two_tagged_merges_are_not_a_duplicate_key(self):
+        text = "confidential_elements: [{!!merge x: {name: safe}, !!merge x: {id: a}}]\n"
+        self.assertEqual(yaml.safe_load(text), {"confidential_elements": [{"name": "safe", "id": "a"}]})
+        self.assertEqual(rd.check_text(text), ([], None))
+
+    def test_a_quoted_merge_key_is_an_ordinary_key(self):
+        """`"<<"` is a string key, not a merge, to the loader and here."""
+        text = 'confidential_elements: [{"<<": {name: embargo, name: safe}}]\n'
+        self.assertEqual(yaml.safe_load(text), {"confidential_elements": [{"<<": {"name": "safe"}}]})
+        self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)],
+                         [("confidential_elements[0].<<", "name")])
+
+
+def _doubling(levels, base="{name: safe}"):
+    """`a0` is `base`; each later anchor is two aliases of the one before, so
+    the text grows by a line a level and the paths through it double (#3247)."""
+    return "\n".join([f"a0: &a0 {base}"] + [f"a{i}: &a{i} [*a{i - 1}, *a{i - 1}]"
+                                            for i in range(1, levels + 1)]) + "\n"
+
+
+def _doubling_merges(levels):
+    """`a0` is `{name: safe}`; each later anchor merges the one before twice
+    and adds a key, so PyYAML copies twice as many pairs a level (#3259)."""
+    return "\n".join(["a0: &a0 {name: safe}"] + [f"a{i}: &a{i} {{<<: [*a{i - 1}, *a{i - 1}], k{i}: 1}}"
+                                                 for i in range(1, levels + 1)]) + "\n"
+
+
+def _doubling_single_merges(levels):
+    """As `_doubling_merges`, but each anchor merges the one before through
+    two single-mapping `<<` keys rather than one merge list, so the copies go
+    through the loader's other branch (#3440)."""
+    return "\n".join(["a0: &a0 {name: safe}"] + [f"a{i}: &a{i} {{<<: *a{i - 1}, <<: *a{i - 1}, k{i}: 1}}"
+                                                 for i in range(1, levels + 1)]) + "\n"
+
+
+class TestAMergeOverrideInsideADroppedAncestorHidesNothing(unittest.TestCase):
+    """#3247 (Codex): a dropped ancestor is looked into only for the keys the
+    loader would take from it, so a merged value an explicit key overrides
+    is not a scoped slot the duplicate hid."""
+
+    OVERRIDDEN = ("confidential_elements: [embargo]\n"
+                  "resources: {<<: {payload: {sensitive_elements: [embargo]}}, payload: {}}\n"
+                  "resources: {}\n")
+
+    def test_the_review_reproduction_is_checked_and_keeps_its_finding(self):
+        self.assertEqual(rd.unread_duplicate_keys(self.OVERRIDDEN), [])
+        found, reason = rd.check_text(self.OVERRIDDEN)
+        self.assertIsNone(reason)
+        self.assertEqual([(m.slot, m.path) for m in found], [("confidential_elements", "confidential_elements[0]")])
+
+    def test_a_merge_list_shadow_inside_the_dropped_copy_hides_nothing(self):
+        text = ("confidential_elements: [embargo]\n"
+                "resources: {<<: [{payload: {}}, {payload: {sensitive_elements: [x]}}]}\n"
+                "resources: {}\n")
+        self.assertEqual(rd.unread_duplicate_keys(text), [])
+        self.assertIsNone(rd.check_text(text)[1])
+
+    def test_the_merged_slot_the_loader_would_keep_still_names_the_ancestor(self):
+        for text in (
+                # no override: the merged payload is kept
+                "resources: {<<: {payload: {sensitive_elements: [x]}}}\nresources: {}\n",
+                # the slot-holding mapping first in the merge list wins
+                "resources: {<<: [{payload: {sensitive_elements: [x]}}, {payload: {}}]}\nresources: {}\n",
+                # a key written twice in the dropped copy: either occurrence counts
+                "resources: {payload: {sensitive_elements: [x]}, payload: {}}\nresources: {}\n"):
+            with self.subTest(text=text):
+                # the third also names `payload` inside the dropped copy, as
+                # a duplicate inside a dropped ancestor always is
+                self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)][0],
+                                 ("$", "resources"))
+                self.assertIsNone(rd.check_text(text)[0])
+
+
+class TestASharedGraphIsBounded(unittest.TestCase):
+    """#3247 (Codex): aliases can load a small text as a graph with
+    exponentially many paths. A subtree is decided once; only a branch that
+    can hold a finding is walked; and a walk that still runs past its budget
+    is reported as not checked, never as clean."""
+
+    def test_a_doubling_graph_with_no_scoped_text_costs_its_nodes_not_its_paths(self):
+        text = _doubling(40)                    # 2**40 paths to `name: safe`
+        record = yaml.safe_load(text)
+        self.assertEqual(slot_meaning_mismatch(record, max_steps=500), [])
+        self.assertEqual(rd.unread_duplicate_keys(text, max_steps=500), [])
+        self.assertEqual(rd.check_text(text), ([], None))
+
+    def test_a_shared_finding_is_reported_at_every_path_that_reaches_it(self):
+        text = _doubling(3, "{confidential_elements: [" + EMBARGO_TEXT + "]}")
+        paths = _paths(yaml.safe_load(text))
+        self.assertEqual(paths[0], "a0.confidential_elements[0]")
+        self.assertEqual(paths[1:3], ["a1[0].confidential_elements[0]", "a1[1].confidential_elements[0]"])
+        self.assertEqual(len(paths), 1 + 2 + 4 + 8)
+        self.assertEqual(paths[-1], "a3[1][1][1].confidential_elements[0]")
+
+    def test_a_walk_past_its_budget_is_not_checked(self):
+        text = _doubling(40, "{confidential_elements: [embargo]}")
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            slot_meaning_mismatch(yaml.safe_load(text), max_steps=1_000)
+        found, reason = rd.check_text(text)
+        self.assertIsNone(found)
+        self.assertIn(f"budget of {rd.MAX_TRAVERSAL_STEPS:,} steps", reason)
+
+    def test_doubling_merges_cost_the_duplicate_walk_their_pairs_not_their_copies(self):
+        """The loader flattens these by copying, so only a few levels are
+        loadable at all (#3259). The duplicate walk lays each mapping's
+        merges out once, so it costs the pairs each level holds, not the
+        copies: 25 levels, which the loader cannot load, take it under 1,000
+        steps (#3496). A budget smaller than that still stops it."""
+        for levels in (11, 25):
+            self.assertEqual(rd.unread_duplicate_keys(_doubling_merges(levels), max_steps=1_000), [])
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            rd.unread_duplicate_keys(_doubling_merges(11), max_steps=100)
+
+    def test_a_cycle_is_still_not_checked(self):
+        """A node on a cycle is assumed to hold a finding, so the walk goes in
+        and stops at its budget or the recursion limit: a cycle is not
+        pruned as clean, even one holding no timing text."""
+        for text in ("confidential_elements: &c\n- embargo\n- *c\n",
+                     "confidential_elements:\n- &c [safe, *c]\n"):
+            with self.subTest(text=text):
+                found, reason = rd.check_text(text)
+                self.assertIsNone(found)
+                self.assertTrue(reason)
+
+
+#: #3263 (Codex): a merge cycle PyYAML accepts. The scoped entry loads as
+#: `{name: safe}`, dropping an earlier `name: embargo`; cutting the cycle read
+#: `benign` as the override that dropped it, and the record passed as clean.
+MERGE_CYCLE = ("base: &a {<<: {name: benign}, <<: &b {<<: {name: embargo, name: safe}, <<: *a}}\n"
+               "confidential_elements: [*b]\n")
+
+
+def _merge_chain(links):
+    """A loadable chain of `links` anchors, each merging the one before, whose
+    root repeats `name` and sits under a skipped key of one scoped slot before
+    it is aliased into another. The loader flattens it a link at a time; the
+    duplicate walk once recursed a frame or more a link (#3263) and now
+    follows it with a stack (#3272)."""
+    return "\n".join(["confidential_elements:", "  source_caveats:",
+                      "    a0: &a0 {name: embargo, name: safe}"]
+                     + [f"    a{i}: &a{i} {{<<: *a{i - 1}}}" for i in range(1, links)]
+                     + ["resources:", "  outer:", f"    sensitive_elements: [*a{links - 1}]"]) + "\n"
+
+
+def _reference_kept_pairs(loader, node, path):
+    """The kept pairs as the walk found them before #3496, expanding the
+    merges below `node` afresh: every merge in turn, a merged mapping's own
+    first and a merge list last to first, each mapping at its last place,
+    and each key kept from the last mapping that writes it. Recursive, for
+    the small graphs it is compared on."""
+    def sources(current, label, open_):
+        if id(current) in open_:
+            raise rd.MergeCycle("cycle")
+        out = []
+        for key_node, value_node in current.value:
+            if key_node.tag != "tag:yaml.org,2002:merge":
+                continue
+            items = ([(value_node, f"{label}.<<")] if isinstance(value_node, yaml.MappingNode)
+                     else [(item, f"{label}.<<[{i}]") for i, item in reversed(list(enumerate(value_node.value)))
+                           if isinstance(item, yaml.MappingNode)])
+            for item, item_label in items:
+                out += sources(item, item_label, open_ | {id(current)})
+        return out + [(current, label)]
+    listed = sources(node, path, frozenset())
+    last = {id(source): i for i, (source, _) in enumerate(listed)}
+    pairs = [(source, label, rd._key_identity(loader, key_node), key_node, value_node)
+             for i, (source, label) in enumerate(listed) if last[id(source)] == i
+             for key_node, value_node in source.value if key_node.tag != "tag:yaml.org,2002:merge"]
+    kept = {identity: id(source) for source, _, identity, _, _ in pairs}
+    return [pair for pair in pairs if kept[pair[2]] == id(pair[0])]
+
+
+class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
+    """#3263 (Codex): a merge cycle is reported as not checked, never as an
+    empty list; a merge chain deeper than the recursion limit is no longer
+    cut by it (#3272), though one walked link by link runs past the step
+    budget (#3491); and a string shared by many aliases is matched once and
+    charged per visit."""
+
+    def test_a_merge_cycle_is_not_checked(self):
+        self.assertEqual(yaml.safe_load(MERGE_CYCLE)["confidential_elements"], [{"name": "safe"}])
+        with self.assertRaises(rd.MergeCycle):
+            rd.unread_duplicate_keys(MERGE_CYCLE)
+        found, reason = rd.check_text(MERGE_CYCLE)
+        self.assertIsNone(found)
+        self.assertIn("a merge key reaches the mapping it is written in", reason)
+
+    def test_without_the_cycle_the_duplicate_is_named(self):
+        text = MERGE_CYCLE.replace(", <<: *a}}", "}}")
+        self.assertEqual([d["key"] for d in rd.unread_duplicate_keys(text)], ["name"])
+        self.assertIsNone(rd.check_text(text)[0])
+
+    def test_a_merge_diamond_is_not_a_cycle(self):
+        text = "d: &d {name: safe}\nl: &l {<<: *d}\nr: &r {<<: *d}\nconfidential_elements: [{<<: [*l, *r]}]\n"
+        self.assertEqual(rd.check_text(text), ([], None))
+
+    def test_a_merge_chain_past_the_recursion_limit_names_its_duplicate(self):
+        """#3272: the recursion limit no longer stops the chain, so the `name`
+        its root repeats is named. This chain sits under a skipped key, so
+        the walk expands it once rather than at every link; the usual shape
+        is the next test (#3491)."""
+        links = sys.getrecursionlimit() + 20
+        text = _merge_chain(links)
+        record = yaml.safe_load(text)                  # the loader reads it
+        self.assertEqual(record["resources"]["outer"]["sensitive_elements"], [{"name": "safe"}])
+        self.assertEqual(slot_meaning_mismatch(record), [])
+        self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)],
+                         [("resources.outer.sensitive_elements[0]" + ".<<" * (links - 1), "name")])
+        found, reason = rd.check_text(text)
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith("duplicate key `name`"), reason)
+
+    def test_a_chain_walked_link_by_link_is_checked_until_its_steps_pass_the_budget(self):
+        """#3491/#3496: in the usual shape, every link a top-level anchor
+        merging the one before, the walk visits each link. Expanding the
+        chain below each one cost about L**2/2 steps, so 629 links were not
+        checked; each mapping's merged pairs are now laid out once per
+        walk, so the cost is linear and a chain past the recursion limit is
+        checked. #3504: where each link adds a key, link i holds i pairs,
+        so the walk costs about L**2/2 steps: 627 links are checked, 628 to
+        632 stop on the step budget while the loader still loads them, and
+        from 633 links the loader's copy bound trips first."""
+        def chain(links, added=False):
+            return "\n".join(["a0: &a0 {name: safe}"]
+                             + [f"a{i}: &a{i} {{<<: *a{i - 1}" + (f", k{i}: 1" if added else "") + "}"
+                                for i in range(1, links)]) + "\n"
+        walk_budget = "the walk ran past its budget of 200,000 steps"
+        loader_bound = "the loader's merge keys would copy more than 200,000 pairs"
+        links = sys.getrecursionlimit() + 20
+        self.assertEqual(rd.check_text(chain(links)), ([], None))
+        for n in (links, 2 * links):                   # linear: a few steps a link
+            self.assertEqual(rd.unread_duplicate_keys(chain(n), max_steps=5 * n), [])
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            rd.unread_duplicate_keys(chain(links), max_steps=2 * links)
+        self.assertEqual(rd.check_text(chain(627, added=True)), ([], None))
+        for short in (628, 632):
+            self.assertIsNotNone(rd._load(chain(short, added=True)))
+            found, reason = rd.check_text(chain(short, added=True))
+            self.assertIsNone(found)
+            self.assertTrue(reason.startswith(walk_budget), (short, reason))
+        self.assertTrue(rd.check_text(chain(633, added=True))[1].startswith(loader_bound))
+
+    def test_a_chain_walked_link_by_link_names_its_duplicate_where_the_per_visit_walk_did(self):
+        """#3496: laid out once, the chain's findings are the ones the walk
+        that expanded it at every link found given steps enough (it needed
+        about 520,000): its root's repeated `name` hides nothing where the
+        root is written, outside the scoped slots, and is named once, under
+        the slot the last link is aliased into, on both lines. That walk
+        reported this record as not checked on the budget."""
+        links = sys.getrecursionlimit() + 20
+        text = "\n".join(["a0: &a0 {name: embargo, name: safe}"]
+                         + [f"a{i}: &a{i} {{<<: *a{i - 1}}}" for i in range(1, links)]
+                         + [f"confidential_elements: [*a{links - 1}]"]) + "\n"
+        self.assertEqual(yaml.safe_load(text)["confidential_elements"], [{"name": "safe"}])
+        path = "confidential_elements[0]" + ".<<" * (links - 1)
+        self.assertEqual(rd.unread_duplicate_keys(text),
+                         [{"path": path, "key": "name", "lines": [1, 1], "count": 2}])
+        found, reason = rd.check_text(text)
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith(f"duplicate key `name` at {path} on lines 1, 1"), reason[:80])
+
+    def test_a_chain_the_walk_expands_once_is_checked_past_the_quadratic_bound(self):
+        """#3542: a chain under a skipped key, aliased once, is expanded once
+        and costs about two steps a link, so 700 and 1020 links are checked,
+        and the help no longer quotes the quadratic bound (#3496)."""
+        for links in (700, 1020):
+            text = _merge_chain(links).replace("{name: embargo, name: safe}", "{name: safe}")
+            self.assertEqual(rd.check_text(text), ([], None), links)
+            self.assertEqual(rd.unread_duplicate_keys(text, max_steps=2 * links + 100), [])
+        from data_sheets_schema.cli.evaluate import evaluate
+        help_text = " ".join(CliRunner().invoke(evaluate, ["slot-meaning", "--help"]).output.split())
+        self.assertIn("a merge chain costs about a few steps a link, since each mapping's merges are "
+                      "laid out once (#3496)", help_text)
+        self.assertIn("one of 628 links or more is not checked (#3504)", help_text)
+        self.assertNotIn("629", help_text)
+        self.assertNotIn("a merge chain of a few hundred links or more costs", help_text)
+
+    def test_a_chain_the_walk_expands_once_holds_memory_in_proportion_to_its_links(self):
+        """#3582 (Codex): expanded once, the skipped-key chain costs a step a
+        link, but its paths were strings each copying every link above it,
+        about 1.5·L**2 characters: 12,000 links held 216 million, 281 MiB,
+        under a step budget they never reached. Paths are now links to their
+        parent, rendered only for a duplicate named, so three times the
+        links peak at about three times the memory, where the strings
+        peaked at over five."""
+        import tracemalloc
+
+        def peak(links):
+            text = _merge_chain(links)
+            tracemalloc.start()
+            try:
+                named = rd.unread_duplicate_keys(text)
+                return tracemalloc.get_traced_memory()[1], named
+            finally:
+                tracemalloc.stop()
+
+        small, named_small = peak(600)
+        large, named_large = peak(1_800)
+        self.assertEqual([d["path"] for d in named_large],
+                         ["resources.outer.sensitive_elements[0]" + ".<<" * 1_799])
+        self.assertEqual(len(named_small), 1)
+        self.assertLess(large / small, 4, (small, large))
+
+    def test_a_merge_path_is_a_link_to_its_parent_not_a_copy(self):
+        """#3582/#3496: each link's pair is named through the link below's,
+        relative to it, not a copy of it."""
+        loader = yaml.SafeLoader(_merge_chain(50))
+        try:
+            anchors = loader.get_single_node().value[0][1].value[0][1].value   # a0 .. a49
+            merged = rd._MergedPairs(loader, rd._Budget(None))
+            pairs = merged.kept_pairs(anchors[-1][1], "a49")
+            below = [merged._relative(value)[0][1] for _, value in anchors]
+        finally:
+            loader.dispose()
+        self.assertEqual([(str(label), key.value) for _, label, _, key, _ in pairs],
+                         [("a49" + ".<<" * 49, "name"), ("a49" + ".<<" * 49, "name")])
+        self.assertIs(below[0], rd._HERE)
+        for deeper, shallower in zip(below[2:], below[1:]):
+            self.assertIs(deeper.rel, shallower)
+
+    def test_the_scan_charges_the_paths_it_builds(self):
+        """#3582: the loaded record's paths are strings, since each finding
+        names one; a deep record under long keys builds quadratically many
+        characters, so the scan charges them to their own budget."""
+        record = leaf = {}
+        for _ in range(50):
+            leaf["k" * 100] = leaf = {}
+        leaf["confidential_elements"] = [EMBARGO_TEXT]
+        self.assertEqual(len(slot_meaning_mismatch(record)), 1)
+        with self.assertRaises(rd.TraversalBudgetExceeded) as raised:
+            slot_meaning_mismatch(record, max_path_chars=10_000)
+        self.assertIn("paths ran past their budget of 10,000 characters", str(raised.exception))
+
+    def test_the_stack_lays_merges_out_in_the_loaders_order(self):
+        """Each merge's own merges first, a merge list last to first, each
+        mapping at its last place: the order the recursive expansion had."""
+        loader = yaml.SafeLoader("x: &x {x: 1}\ny: &y {<<: *x, y: 1}\nz: &z {z: 1}\n"
+                                 "top: {<<: [*y, *z, *x], <<: *z, t: 1}\n")
+        try:
+            top = loader.get_single_node().value[3][1]
+            pairs = rd._MergedPairs(loader, rd._Budget(None)).kept_pairs(top, "top")
+        finally:
+            loader.dispose()
+        self.assertEqual([(key.value, str(label)) for _, label, _, key, _ in pairs],
+                         [("x", "top.<<[0].<<"), ("y", "top.<<[0]"), ("z", "top.<<"), ("t", "top")])
+
+    def test_laid_out_once_the_pairs_are_the_per_visit_expansions(self):
+        """#3496: a seeded differential against the expansion the walk made
+        afresh at every mapping (`_reference_kept_pairs`): over random merge
+        graphs — lists, repeats, diamonds, overrides, shadows, cycles and
+        explicit `!!merge` tags — every top-level mapping's kept pairs, their
+        order and their paths are the same, and a cycle raises in both."""
+        import random
+        rng = random.Random(3496)
+        keys = ["name", "confidential_elements", "id", "x"]
+        compared = cycles = 0
+        for _ in range(300):
+            lines = []
+            for i in range(rng.randint(2, 7)):
+                pairs = []
+                for _ in range(rng.randint(0, 4)):
+                    roll = rng.random()
+                    if roll < 0.03:
+                        pairs.append(f"<<: {{{rng.choice(keys)}: 1, <<: *a{i}}}")
+                    elif roll < 0.07:
+                        pairs.append(f"!!merge m: {{{rng.choice(keys)}: 2, name: 3}}")
+                    elif roll < 0.4 and i:
+                        pairs.append("<<: [" + ", ".join(f"*a{rng.randrange(i)}"
+                                                         for _ in range(rng.randint(1, 3))) + "]"
+                                     if rng.random() < 0.5 else f"<<: *a{rng.randrange(i)}")
+                    else:
+                        pairs.append(f"{rng.choice(keys)}: {rng.randint(0, 3)}")
+                lines.append(f"a{i}: &a{i} {{{', '.join(pairs)}}}")
+            loader = yaml.SafeLoader("\n".join(lines) + "\n")
+            try:
+                merged = rd._MergedPairs(loader, rd._Budget(None))
+                for _, node in loader.get_single_node().value:
+                    try:
+                        expected = [(label, identity, key.start_mark.line)
+                                    for _, label, identity, key, _ in _reference_kept_pairs(loader, node, "r")]
+                    except rd.MergeCycle:
+                        cycles += 1
+                        with self.assertRaises(rd.MergeCycle):
+                            rd._MergedPairs(loader, rd._Budget(None)).kept_pairs(node, "r")
+                        continue
+                    got = [(str(label), identity, key.start_mark.line)
+                           for _, label, identity, key, _ in merged.kept_pairs(node, "r")]
+                    self.assertEqual(got, expected, "\n".join(lines))
+                    compared += 1
+            finally:
+                loader.dispose()
+        self.assertGreater(compared, 1_000)
+        self.assertGreater(cycles, 5)
+
+    def test_a_short_merge_chain_names_its_duplicate(self):
+        self.assertEqual([d["key"] for d in rd.unread_duplicate_keys(_merge_chain(5))], ["name"])
+
+    def test_a_string_shared_by_many_aliases_is_matched_once_and_charged_per_visit(self):
+        from unittest import mock
+        text = "big: &s " + "x" * 2_000 + "\nconfidential_elements: [" + ", ".join(["*s"] * 500) + "]\n"
+        record = yaml.safe_load(text)
+        with mock.patch.object(rd, "_match", wraps=rd._match) as matched:
+            self.assertEqual(slot_meaning_mismatch(record), [])
+        self.assertEqual(matched.call_count, 1)
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            slot_meaning_mismatch(record, max_steps=400)
+        self.assertEqual(rd.check_text(text), ([], None))
+
+    def test_a_shared_matching_string_is_still_reported_at_every_path(self):
+        text = f"t: &t {EMBARGO_TEXT}\nsensitive_elements: [*t, *t, *t]\n"
+        self.assertEqual(_paths(yaml.safe_load(text)),
+                         ["sensitive_elements[0]", "sensitive_elements[1]", "sensitive_elements[2]"])
+
+
+class TestTheLoaderIsBounded(unittest.TestCase):
+    """#3259: PyYAML copies merged pairs, so doubling merges stall
+    `safe_load` before either walk spends a step. The record is loaded by a
+    loader that charges each merged pair it copies, and one past the bound is
+    not checked; any other record loads exactly as `safe_load` loads it."""
+
+    def test_doubling_merges_are_not_checked_and_do_not_stall(self):
+        """Twenty-five levels, under 2 KB: unbounded, `safe_load` alone runs
+        for minutes (each level doubles it)."""
+        text = _doubling_merges(25)
+        self.assertLess(len(text), 2_000)
+        started = time.perf_counter()
+        found, reason = rd.check_text(text)
+        elapsed = time.perf_counter() - started
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith(
+            f"the loader's merge keys would copy more than {rd.MAX_TRAVERSAL_STEPS:,} pairs"), reason)
+        self.assertLess(elapsed, 10.0)
+
+    def test_the_bound_counts_the_pairs_merges_copy(self):
+        text = _doubling_merges(6)             # 2 + 6 + 14 + 30 + 62 + 126 = 240 pairs copied
+        self.assertEqual(rd._load(text, max_pairs=240), yaml.safe_load(text))
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            rd._load(text, max_pairs=239)
+        self.assertEqual(rd._load("a: 1\nb: [1, 2]\n", max_pairs=0), {"a": 1, "b": [1, 2]})
+
+    def test_doubling_single_mapping_merges_are_not_checked(self):
+        """The same stall through repeated single-mapping `<<` keys (#3440):
+        the copies a `<<: *x` makes are charged as a merge list's are.
+        Twenty-one levels, under 1 KB: uncharged, the loader copies
+        2**23 - 46 = 8,388,562 pairs (level i copies 2**(i+1) - 2; see
+        `test_the_copy_count_is_the_closed_form`) and the record reaches the
+        later walk budget seconds later."""
+        text = _doubling_single_merges(21)
+        self.assertLess(len(text), 1_000)
+        started = time.perf_counter()
+        found, reason = rd.check_text(text)
+        elapsed = time.perf_counter() - started
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith(
+            f"the loader's merge keys would copy more than {rd.MAX_TRAVERSAL_STEPS:,} pairs"), reason)
+        self.assertLess(elapsed, 10.0)
+
+    def test_the_bound_counts_the_pairs_single_mapping_merges_copy(self):
+        text = _doubling_single_merges(6)      # 2 + 6 + 14 + 30 + 62 + 126 = 240 pairs copied
+        self.assertEqual(rd._load(text, max_pairs=240), yaml.safe_load(text))
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            rd._load(text, max_pairs=239)
+
+    def test_the_copy_count_is_the_closed_form(self):
+        """Level i of either doubling fixture holds 2**(i+1) - 1 pairs and
+        copies the level before twice, 2**(i+1) - 2 pairs; an alias shares
+        the node, flattened once, so n levels copy 2**(n+2) - 4 - 2n pairs in
+        all. The figures the docstrings above quote are this sum (#3472)."""
+        for fixture in (_doubling_merges, _doubling_single_merges):
+            for levels in range(1, 9):
+                with self.subTest(fixture=fixture.__name__, levels=levels):
+                    text = fixture(levels)
+                    copied = 2 ** (levels + 2) - 4 - 2 * levels
+                    self.assertEqual(rd._load(text, max_pairs=copied), yaml.safe_load(text))
+                    with self.assertRaises(rd.TraversalBudgetExceeded):
+                        rd._load(text, max_pairs=copied - 1)
+
+    def test_a_merge_list_item_that_merges_is_flattened_first(self):
+        """A merge-list item that is not an already-flattened alias carries
+        its own `<<`, which the copy flattens before copying its pairs, as
+        PyYAML does; skipped, the inner `<<` would reach the constructor as
+        an unconstructable merge tag (#3473)."""
+        for text in ("x: {<<: [{<<: {a: 1}, b: 2}], c: 3}\n",
+                     "x: {<<: [{b: 2}, {<<: [{<<: {a: 1}, b: 0}], c: 4}], d: 5}\n",
+                     "m: &m {a: 1}\nx: {<<: [{<<: *m, b: 2}], c: 3}\n"):
+            with self.subTest(text=text):
+                self.assertEqual(rd._load(text), yaml.safe_load(text))
+        found, reason = rd.check_text("confidential_elements: [{<<: [{<<: {name: embargo}, k: 1}]}]\n")
+        self.assertIsNone(reason)
+        self.assertEqual([f.kinds for f in found], [(rd.EMBARGO,)])
+
+    def test_each_copy_is_charged_before_it_is_made(self):
+        """The docstring's "having copied at most the bound": every charge
+        is made while the pairs it counts are not yet in `merge`, in both
+        branches (#3473)."""
+        import sys as _sys
+        seen = []
+
+        class Spy(rd._MergeBoundedLoader):
+            def _charge(self, pairs):
+                frame = _sys._getframe(1)
+                seen.append((frame, len(frame.f_locals["merge"]), pairs))   # kept alive: ids unique
+                super()._charge(pairs)
+
+        for text in (_doubling_merges(5), _doubling_single_merges(5),
+                     "x: {<<: [{<<: {a: 1}, b: 2}, {c: 3}], d: 4}\n"):
+            with self.subTest(text=text[:40]):
+                seen.clear()
+                loader = Spy(text, rd.MAX_TRAVERSAL_STEPS)
+                try:
+                    self.assertEqual(loader.get_single_data(), yaml.safe_load(text))
+                finally:
+                    loader.dispose()
+                self.assertTrue(seen)
+                charged = {}
+                for frame, in_merge, pairs in seen:
+                    self.assertEqual(in_merge, charged.get(id(frame), 0))
+                    charged[id(frame)] = charged.get(id(frame), 0) + pairs
+                seen.clear()
+
+    def test_under_the_bound_a_record_loads_as_safe_load_loads_it(self):
+        for text in (MERGE_CYCLE, _merge_chain(50), _doubling_merges(8), _doubling_single_merges(8),
+                     "d: &d {name: safe}\nl: &l {<<: *d}\nr: &r {<<: *d}\nx: {<<: [*l, *r], k: 1}\n",
+                     "a: &a {k: 1, j: 2}\nb: {<<: *a, k: 3}\nc: {<<: [{k: 1}, {k: 2}]}\n",
+                     "a: {=: v, <<: {=: w}}\n",
+                     "x: {<<: [{<<: {a: 1}, b: 2}], c: 3}\n",
+                     "m: &m {a: 1}\nx: {<<: [{<<: *m, k: 2}, {<<: [{j: 3}]}], c: 3}\n"):
+            with self.subTest(text=text[:40]):
+                self.assertEqual(rd._load(text), yaml.safe_load(text))
+
+    def test_the_copied_flatten_is_the_installed_pyyamls(self):
+        """The bounded `flatten_mapping` is a copy of PyYAML's with a charge
+        before each copy. This pins PyYAML's side only: a PyYAML whose own
+        changes fails here, so the copy is re-read against it. A change to
+        the copy is caught by the syntax-tree comparison below (#3473)."""
+        import hashlib
+        import inspect
+        source = inspect.getsource(yaml.constructor.SafeConstructor.flatten_mapping)
+        self.assertEqual(hashlib.sha256(source.encode()).hexdigest(),
+                         "4fdacb962ce20710beec653ea805d7ab01ded4a0f68c93da55e7374aceb2b023",
+                         "PyYAML's flatten_mapping changed: re-copy it into _MergeBoundedLoader")
+
+    def test_the_copy_is_pyyamls_flatten_plus_the_charges(self):
+        """The hash above catches a change in PyYAML, not in the copy
+        (#3473). Here the copy's syntax tree, with its `self._charge(...)`
+        statements and annotations removed and `yaml.`-qualified names read
+        as PyYAML's bare ones, must be PyYAML's own tree."""
+        import ast
+        import inspect
+        import textwrap
+
+        def tree(function, strip_charges):
+            node = ast.parse(textwrap.dedent(inspect.getsource(function))).body[0]
+            node.returns = None
+            for arg in node.args.args:
+                arg.annotation = None
+
+            class Normalise(ast.NodeTransformer):
+                def visit_AnnAssign(self, assign):
+                    return ast.copy_location(ast.Assign(targets=[assign.target], value=assign.value),
+                                             assign)
+
+                def visit_Attribute(self, attribute):
+                    base = attribute.value
+                    while isinstance(base, ast.Attribute):
+                        base = base.value
+                    if isinstance(base, ast.Name) and base.id == "yaml":
+                        return ast.copy_location(ast.Name(id=attribute.attr, ctx=attribute.ctx),
+                                                 attribute)
+                    return self.generic_visit(attribute)
+
+                def visit_Expr(self, statement):
+                    call = statement.value
+                    if (strip_charges and isinstance(call, ast.Call)
+                            and isinstance(call.func, ast.Attribute) and call.func.attr == "_charge"):
+                        return None
+                    return statement
+
+            return ast.dump(Normalise().visit(node), annotate_fields=False)
+
+        self.assertEqual(tree(rd._MergeBoundedLoader.flatten_mapping, True),
+                         tree(yaml.constructor.SafeConstructor.flatten_mapping, False))
+        self.assertEqual(inspect.getsource(rd._MergeBoundedLoader.flatten_mapping).count("self._charge("), 2)
+
+    def test_a_bad_merge_is_rejected_as_safe_load_rejects_it(self):
+        for text in ("a: {<<: 1}\n", "a: {<<: [{k: 1}, 2]}\n"):
+            with self.subTest(text=text):
+                with self.assertRaises(yaml.constructor.ConstructorError) as expected:
+                    yaml.safe_load(text)
+                with self.assertRaises(yaml.constructor.ConstructorError) as got:
+                    rd._load(text)
+                self.assertEqual(str(got.exception), str(expected.exception))
+                self.assertEqual(rd.check_text(text), (None, str(expected.exception).splitlines()[0]))
+
+
+#: Deeper than the composer (two frames a level) can recurse, whatever the limit.
+DEEP = 2 * sys.getrecursionlimit() + 100
+
+
+class TestARecordTheLoaderRejectsIsNotChecked(unittest.TestCase):
+    """`check_text` never raises for a record the loader rejects (#3006)."""
+
+    def test_whatever_the_loader_raises_is_a_reason_not_a_crash(self):
+        for text, raised in (("created_on: 2026-02-30\n", "ValueError: day is out of range for month"),
+                             ("created_on: 2026-13-01\n", "ValueError: month must be in 1..12"),
+                             ("n: !!int abc\n", "ValueError"),
+                             ("t: !!timestamp nope\n", "AttributeError"),
+                             ("[" * DEEP + "]" * DEEP, "RecursionError")):
+            with self.subTest(text=text[:30]):
+                found, reason = rd.check_text(text)
+                self.assertIsNone(found)
+                self.assertIn(f"the YAML loader raised {raised}", reason)
+
+    def test_a_syntax_error_and_a_list_keep_their_reasons(self):
+        self.assertEqual(rd.check_text("a: b: c\n"), (None, "mapping values are not allowed here"))
+        self.assertEqual(rd.check_text("- a list\n"), (None, "a record is a mapping, not list"))
+
+    def test_a_scan_nested_past_the_limit_is_not_checked(self):
+        from unittest import mock
+        with mock.patch.object(rd, "slot_meaning_mismatch", side_effect=RecursionError("too deep")):
+            self.assertEqual(rd.check_text("a: b\n"), (None, "too deep"))
+
+    def test_a_readable_record_is_checked(self):
+        found, reason = rd.check_text(yaml.safe_dump({"confidential_elements": [{"description": EMBARGO_TEXT}]}))
+        self.assertIsNone(reason)
+        self.assertEqual([m.path for m in found], ["confidential_elements[0].description"])
+        self.assertEqual(rd.check_text("known_limitations: []\n"), ([], None))
+
+
+#: What each released version reads. A new version adds a line, and a line
+#: is not edited, so the findings of v1 mean one thing wherever they are
+#: cited. Nothing here enforces that last rule: an old line rewritten in
+#: place passes every test below and shows only in the diff.
+LEXICON_PINS = {
+    1: "03262c5bc4b3676d479ec509226545e7527dbb7090b62c003fbbca60e4834299",
+}
+
+
+class TestTheInstrument(unittest.TestCase):
+    def test_the_lexicon_digest_is_pinned_to_the_version(self):
+        """Editing the scope, the skipped keys, the lexicon or how it is
+        compiled fails here until the new digest is pinned under the current
+        version. A bump is what makes that pin a new line; re-pinning under
+        an existing version also passes, and only the diff shows it (#3008).
+        Two versions pinning one digest fail: a bump that changed nothing."""
+        self.assertEqual(rd.INSTRUMENT_VERSION, max(LEXICON_PINS))
+        self.assertEqual(rd.LEXICON_SHA256, LEXICON_PINS[rd.INSTRUMENT_VERSION])
+        self.assertEqual(len(set(LEXICON_PINS.values())), len(LEXICON_PINS),
+                         "two versions pin one lexicon: a bump that changed nothing, or an old pin rewritten")
+        self.assertEqual(rd.INSTRUMENT, f"routing_diagnostics v{rd.INSTRUMENT_VERSION} (#2931)")
+
+    def test_the_digest_covers_how_the_lexicon_is_compiled(self):
+        """The alternatives alone do not fix what matches: the word-boundary
+        wrapper and the case rule do too, so both move the digest."""
+        import re
+        digest = lambda patterns: rd._digest(rd.SCOPED_SLOTS, rd.SKIPPED_KEYS, patterns)  # noqa: E731
+        self.assertEqual(digest(rd._PATTERNS), rd.LEXICON_SHA256)
+        case_sensitive = {k: re.compile(p.pattern) for k, p in rd._PATTERNS.items()}
+        unbounded = {k: re.compile("(?:" + "|".join(rd.LEXICON[k]) + ")", p.flags)
+                     for k, p in rd._PATTERNS.items()}
+        for changed in (case_sensitive, unbounded):
+            self.assertNotEqual(digest(changed), rd.LEXICON_SHA256)
+        self.assertNotEqual(rd._digest(rd.SCOPED_SLOTS[:1], rd.SKIPPED_KEYS, rd._PATTERNS), rd.LEXICON_SHA256)
+        self.assertNotEqual(rd._digest(rd.SCOPED_SLOTS, frozenset({"id"}), rd._PATTERNS), rd.LEXICON_SHA256)
+
+    def test_the_report_says_it_is_not_a_gate(self):
+        block = rd.report({"confidential_elements": [{"description": EMBARGO_TEXT}]})
+        self.assertEqual((block["instrument"], block["gating"], block["count"]),
+                         (rd.INSTRUMENT, False, 1))
+        self.assertEqual(block["mismatches"][0]["kinds"], [EMBARGO, RELEASE_TIMING])
+        json.dumps(block)                                        # plain data
+
+    def test_both_schemas_declare_the_slots_and_the_present_flags_the_scan_reads(self):
+        """`_entries` reads `<slot>_present` off each entry; a schema rename
+        would leave the instrument reading a key no record carries."""
+        from data_sheets_schema import schema_digest
+        from data_sheets_schema.schema_view import shared_view
+        for target in ("Dataset", "CoreDataset"):
+            view = shared_view(schema_digest.CLASS_SCHEMA[target])
+            for slot in rd.SCOPED_SLOTS:
+                with self.subTest(target=target, slot=slot):
+                    declared = view.induced_slot(slot, target)
+                    flag = view.induced_slot(f"{slot}_present", declared.range)
+                    self.assertEqual(flag.range, "boolean")
+
+
+class TestTheCommand(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        base = Path(self.tmp.name)
+        self.flagged = base / "flagged.yaml"
+        self.flagged.write_text(yaml.safe_dump({"confidential_elements": [
+            {"confidential_elements_present": True, "confidentiality_details": EMBARGO_TEXT}]}))
+        self.routed = base / "routed.yaml"
+        self.routed.write_text(yaml.safe_dump({"known_limitations": [{"description": EMBARGO_TEXT}]}))
+        self.broken = base / "broken.yaml"
+        self.broken.write_text("- a list\n- not a record\n")
+
+    def _invoke(self, *args):
+        from data_sheets_schema.cli.evaluate import evaluate
+        return CliRunner().invoke(evaluate, ["slot-meaning", *map(str, args)])
+
+    def test_findings_are_reported_and_do_not_fail_the_command(self):
+        before = {p: p.read_bytes() for p in Path(self.tmp.name).iterdir()}
+        out = self._invoke(self.flagged, self.routed)
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertIn(f"{self.flagged}\n  confidential_elements[0].confidentiality_details: "
+                      "embargo, release_timing", out.output)
+        self.assertNotIn(str(self.routed), out.output)
+        self.assertIn("1 slot-meaning mismatch(es) in 1 of 2 record(s) checked, 1 in an entry "
+                      "asserting its elements present; not gating", out.output)
+        self.assertEqual({p: p.read_bytes() for p in Path(self.tmp.name).iterdir()}, before)  # read-only
+
+    def test_json_names_the_instrument_and_every_record(self):
+        out = self._invoke("--json", self.flagged, self.routed)
+        self.assertEqual(out.exit_code, 0, out.output)
+        doc = json.loads(out.output)
+        self.assertEqual((doc["instrument"], doc["gating"]), (rd.INSTRUMENT, False))
+        self.assertEqual([(r["path"], r["checked"], r["count"]) for r in doc["records"]],
+                         [(str(self.flagged), True, 1), (str(self.routed), True, 0)])
+
+    def test_a_record_it_could_not_read_fails_the_command(self):
+        """Non-gating on findings, but a record never looked at is not clean."""
+        out = self._invoke(self.flagged, self.broken)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn(f"{self.broken}\n  not checked: a record is a mapping, not list", out.output)
+        self.assertIn("1 record(s) could not be checked", out.output)
+
+    def test_a_record_that_repeats_a_scoped_slot_is_not_checked(self):
+        """The last value parses clean; the one before it is the finding."""
+        duplicated = Path(self.tmp.name) / "duplicated.yaml"
+        duplicated.write_text(DUPLICATED_SLOT)
+        out = self._invoke(self.routed, duplicated)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn(f"{duplicated}\n  not checked: duplicate key `confidential_elements` at $ on lines 1, 6: "
+                      "a loader keeps only the last", out.output)
+        self.assertIn("0 slot-meaning mismatch(es) in 0 of 1 record(s) checked", out.output)
+
+    def test_a_record_whose_ancestor_hides_a_scoped_slot_is_not_checked(self):
+        """#3005: the second `resources` parses clean; the first held the embargo."""
+        duplicated = Path(self.tmp.name) / "ancestor.yaml"
+        duplicated.write_text(DUPLICATED_ANCESTOR)
+        out = self._invoke(duplicated)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn(f"{duplicated}\n  not checked: duplicate key `resources` at $ on lines 1, 5", out.output)
+        self.assertIn("0 slot-meaning mismatch(es) in 0 of 0 record(s) checked", out.output)
+        doc = json.loads(self._invoke("--json", duplicated).output.split("\nError:")[0])
+        self.assertEqual([(r["checked"], "resources" in r["reason"]) for r in doc["records"]], [(False, True)])
+
+    def test_a_record_not_checked_reports_none_of_its_findings(self):
+        """#3066: its kept entry is a finding, and it is still not reported."""
+        mixed = Path(self.tmp.name) / "mixed.yaml"
+        mixed.write_text(KEPT_FINDING_BESIDE_AN_UNREAD_ANCESTOR)
+        out = self._invoke(self.routed, mixed)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn(f"{mixed}\n  not checked: duplicate key `resources` at $ on lines 1, 7", out.output)
+        self.assertNotIn("confidential_elements[0].confidentiality_details", out.output)
+        self.assertIn("0 slot-meaning mismatch(es) in 0 of 1 record(s) checked, 0 in an entry", out.output)
+        doc = json.loads(self._invoke("--json", mixed).output.split("\nError:")[0])
+        self.assertEqual([sorted(r) for r in doc["records"]], [["checked", "path", "reason"]])
+        self.assertFalse(doc["records"][0]["checked"])
+
+    def test_a_record_whose_aliased_mapping_repeats_a_key_is_not_checked(self):
+        """#3063: the duplicate is written under `base` and read under the slot."""
+        aliased = Path(self.tmp.name) / "aliased.yaml"
+        aliased.write_text(ALIASED_DUPLICATE)
+        out = self._invoke(aliased)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn(f"{aliased}\n  not checked: duplicate key `confidentiality_details` at "
+                      "confidential_elements[0] on lines 3, 4", out.output)
+        self.assertIn("0 slot-meaning mismatch(es) in 0 of 0 record(s) checked", out.output)
+
+    def test_the_help_confines_the_hides_nothing_rule_to_ancestors(self):
+        """#3065: a key repeated inside a scoped slot stops the check even
+        when its dropped value holds no scoped slot, and the help says so."""
+        text = " ".join(self._invoke("--help").output.split())
+        self.assertIn("A duplicated ancestor whose dropped copies hold no scoped slot hides nothing", text)
+        self.assertNotIn("A duplicate whose dropped values hold no scoped slot", text)
+        repeated = Path(self.tmp.name) / "repeated.yaml"
+        repeated.write_text("confidential_elements:\n- confidential_elements_present: true\n"
+                            "  confidentiality_details: Two deposits are under embargo until 2027.\n"
+                            "  confidentiality_details: Participant ZIP codes.\n")
+        out = self._invoke(repeated)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIn("not checked: duplicate key `confidentiality_details` at confidential_elements[0]", out.output)
+
+    def test_the_present_count_is_of_entries_asserting_present_only(self):
+        """#3067: one finding each under `true`, `false` and no flag."""
+        absent = Path(self.tmp.name) / "absent.yaml"
+        absent.write_text(yaml.safe_dump({"sensitive_elements": [
+            {"sensitive_elements_present": False, "sensitivity_details": EMBARGO_TEXT}]}))
+        bare = Path(self.tmp.name) / "bare.yaml"
+        bare.write_text(yaml.safe_dump({"confidential_elements": ["Under embargo until 2027."]}))
+        out = self._invoke(self.flagged, absent, bare)
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertIn("; the entry asserts sensitive_elements_present: false", out.output)
+        self.assertIn("; the entry carries no confidential_elements_present", out.output)
+        self.assertIn("3 slot-meaning mismatch(es) in 3 of 3 record(s) checked, 1 in an entry "
+                      "asserting its elements present", out.output)
+
+    def test_a_record_the_loader_rejects_does_not_silence_the_others(self):
+        """#3006: an impossible unquoted date raises a bare ValueError."""
+        bad_date = Path(self.tmp.name) / "bad_date.yaml"
+        bad_date.write_text("id: example:ds\ncreated_on: 2026-02-30\n")
+        out = self._invoke(self.flagged, bad_date, self.routed)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIsInstance(out.exception, SystemExit, out.exception)        # not a traceback
+        self.assertIn(f"{self.flagged}\n  confidential_elements[0].confidentiality_details", out.output)
+        self.assertIn(f"{bad_date}\n  not checked: the YAML loader raised ValueError: day is out of range",
+                      out.output)
+        self.assertIn("1 slot-meaning mismatch(es) in 1 of 2 record(s) checked", out.output)
+        self.assertIn("1 record(s) could not be checked", out.output)
+        doc = json.loads(self._invoke("--json", self.flagged, bad_date).output.split("\nError:")[0])
+        self.assertEqual([(r["path"], r["checked"]) for r in doc["records"]],
+                         [(str(self.flagged), True), (str(bad_date), False)])
+
+    def _assert_not_checked_beside_the_others(self, bad, reason):
+        """The bad path is reported as not checked (exit 1, not click's
+        usage error 2), and the records named before and after it still are."""
+        out = self._invoke(self.flagged, bad, self.routed)
+        self.assertEqual(out.exit_code, 1, out.output)
+        self.assertIsInstance(out.exception, SystemExit, out.exception)        # not a traceback
+        self.assertIn(f"{self.flagged}\n  confidential_elements[0].confidentiality_details", out.output)
+        self.assertIn(f"{bad}\n  not checked: ", out.output)
+        self.assertIn(reason, out.output.split(f"{bad}\n  not checked: ")[1].splitlines()[0])
+        self.assertIn("1 slot-meaning mismatch(es) in 1 of 2 record(s) checked", out.output)
+        self.assertIn("1 record(s) could not be checked", out.output)
+        doc = json.loads(self._invoke("--json", self.flagged, bad, self.routed).output.split("\nError:")[0])
+        self.assertEqual([(r["path"], r["checked"]) for r in doc["records"]],
+                         [(str(self.flagged), True), (str(bad), False), (str(self.routed), True)])
+
+    def test_a_missing_path_is_not_checked_and_the_others_are_reported(self):
+        """#3144: click's `exists=True` made this a usage error that reported nothing."""
+        self._assert_not_checked_beside_the_others(Path(self.tmp.name) / "missing.yaml",
+                                                   "No such file or directory")
+
+    def test_a_directory_is_not_checked_and_the_others_are_reported(self):
+        """#3144: click's `dir_okay=False` made this a usage error that reported nothing."""
+        folder = Path(self.tmp.name) / "folder.yaml"
+        folder.mkdir()
+        self._assert_not_checked_beside_the_others(folder, "Is a directory")
+
+    @unittest.skipIf(sys.platform == "win32" or getattr(os, "geteuid", lambda: 0)() == 0,
+                     "needs a POSIX mode that a non-root user cannot read through")
+    def test_a_file_without_read_permission_is_not_checked_and_the_others_are_reported(self):
+        """#3144: click's default `readable=True` made this a usage error that reported nothing."""
+        locked = Path(self.tmp.name) / "locked.yaml"
+        locked.write_text(yaml.safe_dump({"confidential_elements": [EMBARGO_TEXT]}))
+        locked.chmod(0)
+        self.addCleanup(locked.chmod, 0o600)
+        self._assert_not_checked_beside_the_others(locked, "Permission denied")
+
+    def test_a_file_that_is_not_utf8_is_not_checked_and_the_others_are_reported(self):
+        latin = Path(self.tmp.name) / "latin.yaml"
+        latin.write_bytes(b"id: example:ds\nname: caf\xe9 \xff\n")
+        self._assert_not_checked_beside_the_others(latin, "'utf-8' codec can't decode")
+
+    def test_a_record_past_the_traversal_budget_is_not_checked_and_the_others_are_reported(self):
+        """#3247: a shared graph stops at its budget and the batch goes on."""
+        shared = Path(self.tmp.name) / "shared.yaml"
+        shared.write_text(_doubling(40, "{confidential_elements: [embargo]}"))
+        self._assert_not_checked_beside_the_others(shared, "budget of")
+
+    def test_a_merge_cycle_or_chain_is_not_checked_and_the_others_are_reported(self):
+        """#3263: neither is reported clean with exit 0; the chain is read to
+        its end and its duplicate named (#3272)."""
+        for name, text, reason in (("cycle.yaml", MERGE_CYCLE, "a merge key reaches"),
+                                   ("chain.yaml", _merge_chain(sys.getrecursionlimit() + 20),
+                                    "duplicate key `name`")):
+            with self.subTest(name=name):
+                bad = Path(self.tmp.name) / name
+                bad.write_text(text)
+                self._assert_not_checked_beside_the_others(bad, reason)
+
+    def test_a_long_skipped_key_chain_names_its_duplicate_and_the_others_are_reported(self):
+        """#3582 (Codex): the chain's string paths grew quadratically under a
+        step budget they never reached, and an allocation failure would have
+        escaped check_text and lost every record's report. Its paths are
+        links now, so a chain three times the recursion limit is read to its
+        end and its duplicate named, beside the others."""
+        chain = Path(self.tmp.name) / "chain3420.yaml"
+        chain.write_text(_merge_chain(3 * sys.getrecursionlimit()))
+        self._assert_not_checked_beside_the_others(chain, "duplicate key `name`")
+
+    def test_a_record_whose_scan_paths_pass_their_budget_is_not_checked_and_the_others_are_reported(self):
+        """#3582: a deep record under one aliased long key builds quadratically
+        many path characters in the scan; it is named as not checked on the
+        path budget and the batch goes on. A small budget stands in for the
+        default, so the test allocates little."""
+        from unittest import mock
+        deep = Path(self.tmp.name) / "deep3420.yaml"
+        deep.write_text("\n".join(["key: &k " + "k" * 200, "root:"]
+                                  + ["  " * (d + 1) + "*k :" for d in range(40)]
+                                  + ["  " * 41 + "confidential_elements: [embargo]"]) + "\n")
+        self.assertEqual(len(rd.check_text(deep.read_text())[0]), 1)
+        with mock.patch.object(rd, "MAX_PATH_CHARS", 20_000):
+            self._assert_not_checked_beside_the_others(deep, "paths ran past their budget of 20,000 characters")
+
+    def test_a_record_of_one_string_aliased_many_times_is_checked_and_the_next_is_read(self):
+        """#3263: every alias reran every pattern over the string, so the
+        command stalled on this record and never read the next."""
+        shared = Path(self.tmp.name) / "shared_string.yaml"
+        shared.write_text("big: &s " + "x" * 80_000 + "\nconfidential_elements: ["
+                          + ", ".join(["*s"] * 2_000) + "]\n")
+        from unittest import mock
+        with mock.patch.object(rd, "_match", wraps=rd._match) as matched:
+            out = self._invoke(self.flagged, shared, self.routed)
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertLess(matched.call_count, 20)
+        self.assertIn("1 slot-meaning mismatch(es) in 1 of 3 record(s) checked", out.output)
+        doc = json.loads(self._invoke("--json", self.flagged, shared, self.routed).output)
+        self.assertEqual([(r["path"], r["checked"]) for r in doc["records"]],
+                         [(str(self.flagged), True), (str(shared), True), (str(self.routed), True)])
+
+    def test_the_help_says_a_path_it_cannot_read_is_not_checked(self):
+        """#3144: the help's "cannot be read" covers the file as well as the loader."""
+        text = " ".join(self._invoke("--help").output.split())
+        self.assertIn("the path does not exist, is a directory or is not readable; the file is not UTF-8", text)
+        self.assertIn("the other records named in the same call are still reported", text)
+
+
+#: The nine CM4AI records #2931 parsed, by (method directory, label).
+CM4AI_REPLAY = (
+    ("claudecode_agent", "2026-08-28_claude-opus-5-claudecode-generic-v6_rep1"),
+    ("claudecode_agent", "2026-08-28_claude-opus-5-claudecode-generic-v6_rep2"),
+    ("claudecode_agent", "2026-08-28_claude-opus-5-claudecode-generic-v6_rep3"),
+    ("claudecode_agent", "2026-09-01_claude-opus-5-api-generic-v7_rep1"),
+    ("claudecode_agent", "2026-09-01_claude-opus-5-api-generic-v7_rep2"),
+    ("claudecode_agent", "2026-09-01_claude-opus-5-api-generic-v7_rep3"),
+    ("claudecode_api", "2026-09-04g_claude-opus-5-api-generic-v8_rep1"),
+    ("claudecode_api", "2026-09-04g_claude-opus-5-api-generic-v8_rep2"),
+    ("claudecode_api", "2026-09-04g_claude-opus-5-api-generic-v8_rep3"),
+)
+
+_DETAILS = ["confidential_elements[0].confidentiality_details"]
+_NAME_AND_DETAILS = ["confidential_elements[0].name", *_DETAILS]
+#: Expected flagged paths per label; every other label in the set flags nothing.
+CM4AI_EXPECTED = {
+    "2026-08-28_claude-opus-5-claudecode-generic-v6_rep2": _NAME_AND_DETAILS,
+    "2026-08-28_claude-opus-5-claudecode-generic-v6_rep3": _NAME_AND_DETAILS,
+    "2026-09-01_claude-opus-5-api-generic-v7_rep2": _DETAILS,
+    "2026-09-04g_claude-opus-5-api-generic-v8_rep1": _DETAILS,
+    "2026-09-04g_claude-opus-5-api-generic-v8_rep2": _DETAILS,
+}
+
+
+@pytest.mark.corpus   # reads 18 committed records by name; the main-branch lane (#1203)
+class TestTheCommittedCM4AIRecords(unittest.TestCase):
+    """Replay on the records the issue parsed. Each record's own path is
+    named; nothing is globbed, and a record that moves fails here."""
+
+    def _records(self, core):
+        for method, label in CM4AI_REPLAY:
+            path = (ROOT / "data/d4d_concatenated" / f"{method}_core" / label / "CM4AI_d4d_core.yaml"
+                    if core else ROOT / "data/d4d_concatenated" / method / label / "CM4AI_d4d.yaml")
+            self.assertTrue(path.is_file(), f"named record missing: {path}")
+            yield label, yaml.safe_load(path.read_text(encoding="utf-8"))
+
+    def _check(self, core):
+        flagged = {}
+        for label, record in self._records(core):
+            found = slot_meaning_mismatch(record)
+            if found:
+                flagged[label] = [m.path for m in found]
+                # Every finding here is the embargo, and every one claims the
+                # elements exist — the defect the issue names.
+                self.assertTrue(all(m.present is True and EMBARGO in m.kinds
+                                    and m.slot == "confidential_elements" for m in found), label)
+            # The embargo is stated in every record; unflagged ones state it
+            # elsewhere, so a miss is the scope working, not absent text.
+            self.assertIn("embargo", yaml.safe_dump(record).lower(), label)
+        self.assertEqual(flagged, CM4AI_EXPECTED)
+
+    def test_the_full_records_flag_exactly_the_five_the_issue_found(self):
+        self._check(core=False)
+
+    def test_the_core_twins_carry_the_same_five(self):
+        self._check(core=True)
+
+
+if __name__ == "__main__":
+    unittest.main()

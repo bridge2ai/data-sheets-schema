@@ -475,6 +475,7 @@ class LLMSlotScorer:
                  cache_path: Path | None = None):
         self._client = client
         self._model = model
+        self.evaluation_model = None
         self.max_tokens = max_tokens
         self.log_path = Path(log_path) if log_path else None
         # Judging one slot reads the whole bundle from cache — 7.5M cached-read
@@ -499,8 +500,10 @@ class LLMSlotScorer:
         from data_sheets_schema import api_runner
         if self._client is None:
             self._client = api_runner._client()
-        if self._model is None:
-            self._model = api_runner._model_settings()["name"]
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
         return self._client, self._model
 
     def _load_cache(self, ctx: "JudgementContext") -> None:
@@ -565,7 +568,7 @@ class LLMSlotScorer:
         self.calls += 1
         u = getattr(resp, "usage", None)
         self.usage.append({
-            "slot": slot,
+            "slot": slot, "model": model, "evaluation_model": self.evaluation_model,
             "input": getattr(u, "input_tokens", None),
             "cache_read": getattr(u, "cache_read_input_tokens", None),
             "cache_write": getattr(u, "cache_creation_input_tokens", None),
@@ -577,6 +580,7 @@ class LLMSlotScorer:
         # is. Captured per judgement, and written out if a log path was given.
         cap = reasoning.capture(resp)
         entry = {"project": project, "slot": slot, "model": model,
+                 "evaluation_model": self.evaluation_model,
                  **cap.to_dict()}
         self.reasoning.append(entry)
         if self.log_path is not None:
@@ -606,7 +610,7 @@ class LLMSlotScorer:
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
-                    **ctx.as_entry(), "slot": slot, "value": key[2],
+                    **ctx.as_entry(), "evaluation_model": self.evaluation_model, "slot": slot, "value": key[2],
                     "supported": judgement.supported,
                     "reason": judgement.reason}, ensure_ascii=False) + "\n")
         return judgement
@@ -817,6 +821,28 @@ def slot_specification_snapshot(class_name: str = "Dataset", schema_path: Path |
     return schema, inventory, vocabulary, specification
 
 
+def fitness_request_arguments(*, model: str, max_tokens: int, slot: str,
+                              value: Any, specification: str) -> dict[str, Any]:
+    """Pure live-judge request arguments, also used by offline plans (#3341)."""
+    rendered = yaml.safe_dump({slot: value}, sort_keys=False, allow_unicode=True)
+    prompt = (f"{specification}\n\nValue supplied:\n\n```yaml\n{rendered}```\n\n"
+              "Does this value satisfy the field as specified?")
+    return {"model": model, "max_tokens": max_tokens, "temperature": None,
+            "system": FITNESS_SYSTEM,
+            "messages": [{"role": "user", "content": prompt}]}
+
+
+def validate_fitness_context(context: JudgementContext) -> None:
+    """Require the complete fitness context rather than a caller's label."""
+    if (type(context) is not JudgementContext or context.axis != "fitness"
+            or context.corpus != "" or any(type(value) is not str for value in (
+                context.axis, context.model, context.rubric, context.corpus,
+                context.schema, context.specification))
+            or not all(value.strip() for value in (
+                context.model, context.rubric, context.schema, context.specification))):
+        raise ValueError("expected_context must be a complete fitness JudgementContext")
+
+
 class LLMSlotFitnessScorer:
     """Judge slot values against the schema specification, not the bundle.
 
@@ -830,7 +856,20 @@ class LLMSlotFitnessScorer:
                  class_name: str = "Dataset", max_tokens: int = 8000,
                  log_path: Path | None = None, cache_path: Path | None = None,
                  schema_path: Path | None = None, profile=None,
-                 schema_guidance: str | None = None, schema_snapshot=None):
+                 schema_guidance: str | None = None, schema_snapshot=None,
+                 expected_context: JudgementContext | None = None,
+                 cache_only: bool = False):
+        if type(cache_only) is not bool:
+            raise ValueError("cache_only must be a bool")
+        if expected_context is not None:
+            validate_fitness_context(expected_context)
+        if cache_only and (expected_context is None or model != expected_context.model
+                           or cache_path is None):
+            raise ValueError("cache_only requires a cache, explicit model and expected_context")
+        self.expected_context = expected_context
+        self.cache_only = cache_only
+        # Consume one immutable saved input; provenance pins these exact bytes.
+        self._cache_bytes = Path(cache_path).read_bytes() if cache_only else None
         self.schema_guidance = schema_guidance
         self.schema_snapshot = schema_snapshot
         from data_sheets_schema.fitness_schema import validate_selection
@@ -840,6 +879,7 @@ class LLMSlotFitnessScorer:
             raise ValueError("fitness schema snapshot requires explicit guidance selection")
         self._client = client
         self._model = model
+        self.evaluation_model = None
         self.class_name = class_name
         self.schema_path = schema_path
         # The instrument the judged record was generated under (#1462);
@@ -866,8 +906,10 @@ class LLMSlotFitnessScorer:
         from data_sheets_schema import api_runner
         if self._client is None:
             self._client = api_runner._client()
-        if self._model is None:
-            self._model = api_runner._model_settings()["name"]
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
         return self._client, self._model
 
     def _snapshot(self) -> tuple:
@@ -899,10 +941,14 @@ class LLMSlotFitnessScorer:
         if fp in self._loaded or not self.cache_path:
             return
         self._loaded.add(fp)
-        if not self.cache_path.exists():
-            return
+        if self.cache_only:
+            raw = self._cache_bytes.decode("utf-8")
+        else:
+            if not self.cache_path.exists():
+                return
+            raw = self.cache_path.read_text(encoding="utf-8")
         skipped: dict[str, int] = {}
-        for line in self.cache_path.read_text(encoding="utf-8").splitlines():
+        for line in raw.splitlines():
             if not line.strip():
                 continue
             e = json.loads(line)
@@ -919,6 +965,32 @@ class LLMSlotFitnessScorer:
                 reason=e.get("reason", ""))
         self.cache_loaded = len(self._memo)
         self.cache_skipped = skipped
+
+    def pinned_instrument(self) -> dict[str, Any] | None:
+        """The explicitly requested context, checked against the current instrument.
+
+        This describes a scoring context, not calibration or provider authenticity.
+        Cache-only merges also pin the exact saved judgement bytes consumed.
+        """
+        if self.expected_context is None:
+            return None
+        validate_fitness_context(self.expected_context)
+        model = self._model or self.expected_context.model
+        self._require_context(self._context(model))
+        return {
+            "context": self.expected_context.as_entry(),
+            "class_name": self.class_name,
+            "profile": self.profile.name if self.profile is not None else None,
+            "schema_guidance": self.schema_guidance,
+            "mode": "cache_only" if self.cache_only else "live_or_cache",
+            "cache_sha256": (hashlib.sha256(self._cache_bytes).hexdigest()
+                             if self.cache_only else None),
+            "cache_bytes": len(self._cache_bytes) if self.cache_only else None,
+        }
+
+    def _require_context(self, actual: JudgementContext) -> None:
+        if self.expected_context is not None and actual != self.expected_context:
+            raise ValueError("fitness instrument does not match expected_context")
 
     def as_slot_scorer(self) -> "SlotScorer":
         """Adapt to the SlotScorer protocol, so `run_plan` and
@@ -963,10 +1035,14 @@ class LLMSlotFitnessScorer:
         snapshot = self._snapshot() if self.schema_guidance is not None else None
         if snapshot is not None:
             snapshot[1].spec(slot)  # Unknown declared slots also fail before a client.
-        client, model = self._resolve()
+        if self.cache_only:
+            client, model = None, self._model
+        else:
+            client, model = self._resolve()
         if snapshot is None:
             snapshot = self._snapshot()
         ctx = self._context(model, schema=snapshot[0], specification=snapshot[3])
+        self._require_context(ctx)
         self._load_cache(ctx)
 
         key = (ctx.fingerprint(), slot,
@@ -975,19 +1051,17 @@ class LLMSlotFitnessScorer:
             self.memo_hits += 1
             return self._memo[key]
 
+        if self.cache_only:
+            raise ValueError(f"no saved fitness judgement for slot {slot!r} under expected_context")
+
         from data_sheets_schema.api_runner import _call_with_retry
 
-        rendered = yaml.safe_dump({slot: value}, sort_keys=False,
-                                  allow_unicode=True)
-        prompt = (f"{self._spec_from_snapshot(slot, *snapshot)}\n\n"
-                  f"Value supplied:\n\n```yaml\n{rendered}```\n\n"
-                  "Does this value satisfy the field as specified?")
-        resp = _call_with_retry(client, model=model, max_tokens=self.max_tokens,
-                                temperature=None, system=FITNESS_SYSTEM,
-                                messages=[{"role": "user", "content": prompt}])
+        resp = _call_with_retry(client, **fitness_request_arguments(
+            model=model, max_tokens=self.max_tokens, slot=slot, value=value,
+            specification=self._spec_from_snapshot(slot, *snapshot)))
         self.calls += 1
         u = getattr(resp, "usage", None)
-        self.usage.append({"slot": slot,
+        self.usage.append({"slot": slot, "model": model, "evaluation_model": self.evaluation_model,
                            "input": getattr(u, "input_tokens", None),
                            "output": getattr(u, "output_tokens", None)})
 
@@ -1008,6 +1082,7 @@ class LLMSlotFitnessScorer:
 
         cap = reasoning.capture(resp)
         entry = {"project": project, "slot": slot, "model": model,
+                 "evaluation_model": self.evaluation_model,
                  "axis": "fitness", **cap.to_dict()}
         self.reasoning.append(entry)
         if self.log_path is not None:
@@ -1018,7 +1093,7 @@ class LLMSlotFitnessScorer:
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
-                    **ctx.as_entry(),
+                    **ctx.as_entry(), "evaluation_model": self.evaluation_model,
                     **({"fitness_schema_guidance": self.schema_guidance, "class_name": self.class_name}
                        if self.schema_guidance else {}),
                     "slot": slot, "value": key[2],

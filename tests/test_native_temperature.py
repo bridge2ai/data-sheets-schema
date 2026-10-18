@@ -29,7 +29,7 @@ def replay(version):
 
 
 def test_renderer6_keeps_the_original_instruction_bytes(monkeypatch):
-    monkeypatch.setattr(api, "_model_settings", lambda: {"name": "synthetic-model"})
+    monkeypatch.setattr(api, "_model_settings", lambda condition=None: {"name": "synthetic-model"})
     assert hashlib.sha256(replay(6).instruction.encode()).hexdigest() == "14acf415f6e4caeac84aa1be70925351a60b88cb76fde3c644827dd3ae42f870"
 
 

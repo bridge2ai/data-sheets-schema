@@ -1,0 +1,42 @@
+# Neutralised fixture (#3515): see tests/fixtures/self_disclaimed/README.md. Not a real record.
+chunks:
+- id: c001
+  status: nothing_relevant
+  reason: Placeholder 7851afe8.
+- id: c002
+  status: extracted
+  extracted:
+  - slot: creators[0].principal_investigator
+    snippet: Placeholder 7f0d7087. Principal investigator
+  - slot: creators[0].affiliations[0].name
+    snippet: Placeholder fcce85f6.
+- id: c003
+  status: extracted
+  extracted:
+  - slot: creators[0].notes
+    snippet: Placeholder e68ce359.
+  - slot: creators[0].affiliations[1].name
+    snippet: Placeholder 34053956.
+  - slot: creators[0].affiliations[2].name
+    snippet: Placeholder ab5bc871.
+  - slot: creators[0].affiliations[3].name
+    snippet: Placeholder d137265d.
+- id: c004
+  status: extracted
+  extracted: []
+- id: c005
+  status: extracted
+  extracted: []
+- id: c006
+  status: extracted
+  extracted:
+  - slot: data_collectors[0].collector_details
+    snippet: Placeholder 742ad7a6.
+- id: c007
+  status: extracted
+  extracted:
+  - slot: data_collectors[0].collector_details
+    snippet: Placeholder 88010497. Acquisition contribute
+- id: c008
+  status: extracted
+  extracted: []

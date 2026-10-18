@@ -188,7 +188,7 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
         # with the current v8 reading (#1808). Keep every field comparable.
         assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT_V7
         fresh = bc.compute(path, only={"report_claims"}, declared=declared, ranges=ranges,
-                           report_claims_version=7)["report_claims"]
+                           report_claims_version=7, schema_policy="legacy_current")["report_claims"]
         # #1874: a schema release moves the hashes every checked block attests;
         # the blocks stay as written and the release history says which pairs
         # a block may attest. Every measurement must still reproduce exactly.

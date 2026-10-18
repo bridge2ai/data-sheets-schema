@@ -188,11 +188,18 @@ def vocabularies(*, content: bytes | None = None,
         return {}
     key = content_key(prof.pin_path or VOCABULARY_PIN, content=data)
     if _VOCABULARIES is None or key != _VOCABULARY_KEY:
-        import yaml as _yaml
-        doc = _yaml.safe_load(data) or {}
-        _VOCABULARIES = doc.get("vocabularies") or {}
+        _VOCABULARIES = _vocabularies_from_bytes(data)
         _VOCABULARY_KEY = key
     return copy.deepcopy(_VOCABULARIES)
+
+
+def _vocabularies_from_bytes(data: bytes) -> dict[str, dict[str, str]]:
+    """The same vocabulary parser, without a live path/cache identity."""
+    if not data:
+        return {}
+    import yaml as _yaml
+    doc = _yaml.safe_load(data) or {}
+    return copy.deepcopy(doc.get("vocabularies") or {})
 
 
 def term_sources_of(slot) -> str | None:
@@ -439,6 +446,16 @@ def _build_uncached(class_name: str, schema_path: Path | None = None, *,
     path = (Path(schema_path) if (content is not None or snapshot is not None) and schema_path is not None
             else _schema_path(class_name, schema_path))
     sv = shared_view(path, content=content, snapshot=snapshot)
+    return _build_from_view(class_name, path, sv, complete=complete)
+
+
+def _build_from_view(class_name: str, path: Path, sv: SchemaView, *,
+                     complete: bool = False) -> ClassDigest:
+    """Same inventory from a caller-owned view; never acquire schema files.
+
+    Captured fitness evidence uses its independent releasable view. The
+    ordinary builder still chooses the same path/shared view and cache above.
+    """
     # The digest names the schema it came from, and that name is rendered into
     # the digest text — so an identical schema read from a different location
     # produced a different fingerprint. Verifying a digest by rebuilding the

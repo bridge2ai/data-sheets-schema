@@ -1,0 +1,1250 @@
+[
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 6,
+    "maximum": 9,
+    "percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 2,
+    "maximum": 3,
+    "percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 2,
+    "maximum": 3,
+    "percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 1,
+    "maximum": 3,
+    "percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 5,
+    "maximum": 9,
+    "percent": 55.55555555555556
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 7,
+    "maximum": 9,
+    "percent": 77.77777777777777
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 2,
+    "maximum": 3,
+    "percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 1,
+    "maximum": 3,
+    "percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 5,
+    "maximum": 9,
+    "percent": 55.55555555555556
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 6,
+    "maximum": 9,
+    "percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 2,
+    "maximum": 3,
+    "percent": 66.66666666666667
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 1,
+    "maximum": 3,
+    "percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 1,
+    "maximum": 3,
+    "percent": 33.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 5,
+    "maximum": 9,
+    "percent": 55.55555555555556
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 8,
+    "maximum": 9,
+    "percent": 88.88888888888889
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Human",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 2,
+    "maximum": 3,
+    "percent": 66.66666666666667
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 8,
+    "maximum": 9,
+    "percent": 88.88888888888889
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Human",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 7,
+    "maximum": 9,
+    "percent": 77.77777777777777
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Human",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 2,
+    "maximum": 3,
+    "percent": 66.66666666666667
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 0,
+    "maximum": 1,
+    "percent": 0.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 8,
+    "maximum": 9,
+    "percent": 88.88888888888889
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 7,
+    "maximum": 9,
+    "percent": 77.77777777777777
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Collection",
+    "applicable_items": 2,
+    "points": 2,
+    "maximum": 2,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Composition",
+    "applicable_items": 9,
+    "points": 9,
+    "maximum": 9,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Data Governance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Distribution",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Ethics",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "FileCollection",
+    "applicable_items": 0,
+    "points": 0,
+    "maximum": 0,
+    "percent": null
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Human",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Maintenance",
+    "applicable_items": 3,
+    "points": 3,
+    "maximum": 3,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Metadata",
+    "applicable_items": 9,
+    "points": 7,
+    "maximum": 9,
+    "percent": 77.77777777777777
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Motivation",
+    "applicable_items": 5,
+    "points": 5,
+    "maximum": 5,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Preprocessing",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Uses",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "section": "Variables",
+    "applicable_items": 1,
+    "points": 1,
+    "maximum": 1,
+    "percent": 100.0
+  }
+]

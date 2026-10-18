@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "source_commit": "4ee87580c5472aee2d30cabec4dff1b230de8436",
+  "modules": {
+    "budget_amendment": {
+      "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+      "sha256": "7347b407611871349a50cdb2e11ade7ace1f23dd703451dba5abd9f627cbd3f9"
+    },
+    "budgeted_cborg": {
+      "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+      "sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2"
+    },
+    "native_command_policy": {
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
+      "sha256": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc"
+    },
+    "native_control": {
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+      "sha256": "e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36"
+    },
+    "native_file_policy": {
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+      "sha256": "c6fc332b237fe06200437e4e899b0e6dbb2830b9a40d537b4e8db36bd5e5b33e"
+    },
+    "native_phase_history": {
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py",
+      "sha256": "0a318e7bb3eea8d99067da168de09985d92f7f28c6ed0e0b01d7c01dcf85a1d6"
+    },
+    "native_proxy": {
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+      "sha256": "21f2d16e6c9b93f033664c7b95521076b27786a2b1679c008713f2e40bf599b7"
+    },
+    "native_readonly": {
+      "path": "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py",
+      "sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8"
+    },
+    "prepare_overlay_roster": {
+      "path": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py",
+      "sha256": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819"
+    },
+    "prepare_registration": {
+      "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+      "sha256": "06a31323dfd893e7e16b8d6778c19ed4489f24b8bc3d74a43391296f881c49ae"
+    },
+    "run_api_canary": {
+      "path": "notes/matched_cborg_2026-09-13/run_api_canary.py",
+      "sha256": "8b5ce15695b5808060edfb3d2fb85fd441244c4ee23ea8d8cf556352b8bbbbc4"
+    },
+    "run_native_canary": {
+      "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+      "sha256": "fbb98d66b36b392f5291866ede6acff4b162ad626d98ca7d104c0a45ae96ac5d"
+    }
+  }
+}

@@ -1,0 +1,2196 @@
+{
+  "baseline_commit": "a8ada66534f9e05b58efce5685e79648aa723023",
+  "examples": {
+    "original_full": "alpha: Example alpha.\nbeta: Example beta.\ngamma: Example gamma.\n",
+    "plan": {
+      "schema_version": 1,
+      "kind": "audit_batch_plan_v1",
+      "original_full_sha256": "23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d",
+      "limits": {
+        "max_paths": 96,
+        "max_inventory_bytes": 16384,
+        "max_workers": 16
+      },
+      "inventory": {
+        "artifact": "original_full",
+        "sha256": "23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d",
+        "values": [
+          {
+            "path": "/alpha",
+            "text": "Example alpha.",
+            "record_metadata_allowed": false,
+            "whole_value_required": false
+          },
+          {
+            "path": "/beta",
+            "text": "Example beta.",
+            "record_metadata_allowed": false,
+            "whole_value_required": false
+          },
+          {
+            "path": "/gamma",
+            "text": "Example gamma.",
+            "record_metadata_allowed": false,
+            "whole_value_required": false
+          }
+        ]
+      },
+      "field_roots": [
+        "/alpha",
+        "/beta",
+        "/gamma"
+      ],
+      "workers": [
+        {
+          "id": "worker_0001",
+          "roots": [
+            "/alpha",
+            "/beta",
+            "/gamma"
+          ],
+          "paths": [
+            "/alpha",
+            "/beta",
+            "/gamma"
+          ],
+          "inventory_bytes": 309
+        }
+      ],
+      "sha256": "a645c7f385dabb85c4d0492f0dcc44df57f222dfe50f7527ef0219ff042cc111"
+    },
+    "worker": {
+      "findings": [
+        {
+          "severity": "medium",
+          "record": "full",
+          "slot": "alpha",
+          "issue": "An illustrative concern about this claim.",
+          "review_paths": [
+            "/alpha"
+          ],
+          "evidence": [
+            {
+              "source": "example.txt",
+              "chunk": "c001",
+              "quote": "Illustrative source statement."
+            }
+          ]
+        },
+        {
+          "severity": "medium",
+          "record": "full",
+          "slot": "beta",
+          "issue": "An illustrative concern about this claim.",
+          "review_paths": [
+            "/beta"
+          ],
+          "evidence": [
+            {
+              "source": "example.txt",
+              "chunk": "c001",
+              "quote": "Illustrative source statement."
+            }
+          ]
+        },
+        {
+          "severity": "medium",
+          "record": "full",
+          "slot": "gamma",
+          "issue": "An illustrative concern about this claim.",
+          "review_paths": [
+            "/gamma"
+          ],
+          "evidence": [
+            {
+              "source": "example.txt",
+              "chunk": "c001",
+              "quote": "Illustrative source statement."
+            }
+          ]
+        }
+      ],
+      "summary": "3 illustrative findings: 3 medium.",
+      "source_review": {
+        "artifact": "original_full",
+        "sha256": "23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d",
+        "values": [
+          {
+            "path": "/alpha",
+            "claims": [
+              {
+                "text": "Example alpha.",
+                "verdict": "revise",
+                "attributed_to": [],
+                "claim_status": "fact",
+                "source_status": "unstated",
+                "evidence": [],
+                "reason": "An illustrative claim requiring scientific review."
+              }
+            ]
+          },
+          {
+            "path": "/beta",
+            "claims": [
+              {
+                "text": "Example beta.",
+                "verdict": "revise",
+                "attributed_to": [],
+                "claim_status": "fact",
+                "source_status": "unstated",
+                "evidence": [],
+                "reason": "An illustrative claim requiring scientific review."
+              }
+            ]
+          },
+          {
+            "path": "/gamma",
+            "claims": [
+              {
+                "text": "Example gamma.",
+                "verdict": "revise",
+                "attributed_to": [],
+                "claim_status": "fact",
+                "source_status": "unstated",
+                "evidence": [],
+                "reason": "An illustrative claim requiring scientific review."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "index": {
+      "schema_version": 1,
+      "kind": "audit_batch_index_v1",
+      "plan_sha256": "a645c7f385dabb85c4d0492f0dcc44df57f222dfe50f7527ef0219ff042cc111",
+      "original_full_sha256": "23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d",
+      "workers": [
+        {
+          "id": "worker_0001",
+          "sha256": "46b9acb75a058dfbfce8d4bed67d78cd0c39b0163c3503e0a2f741479083d43c",
+          "bytes": 1519
+        }
+      ],
+      "rows": [
+        {
+          "path": "/alpha",
+          "worker_id": "worker_0001",
+          "sha256": "a8e7468c943066713ff4d3d2af228ad0eddbfb8cbb54d5a87b705b80fe93c287"
+        },
+        {
+          "path": "/beta",
+          "worker_id": "worker_0001",
+          "sha256": "459b5a9498e74489fcee075b13c1a7fa4d2c34a70f69d3410c51647cb0100544"
+        },
+        {
+          "path": "/gamma",
+          "worker_id": "worker_0001",
+          "sha256": "8640a436ff6817ac62aa71dddb6e3b5bbb2b3705c00bcda683bf22ad57b61165"
+        }
+      ],
+      "findings": [
+        {
+          "id": "worker_0001:0001",
+          "worker_id": "worker_0001",
+          "ordinal": 0,
+          "sha256": "d0423368a921ed102d81259abfc5a0ef224ba246c913432d93728e18de597818"
+        },
+        {
+          "id": "worker_0001:0002",
+          "worker_id": "worker_0001",
+          "ordinal": 1,
+          "sha256": "e8991f88c992ada7998360d831e764d203377bed19db9a04716febff8e421d13"
+        },
+        {
+          "id": "worker_0001:0003",
+          "worker_id": "worker_0001",
+          "ordinal": 2,
+          "sha256": "1faabeba8dd713787c2e2c1e5cb8999070f2053d1f4ef389db2c92a856cc9465"
+        }
+      ],
+      "sha256": "2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2"
+    },
+    "integration": {
+      "kind": "audit_integration_v1",
+      "proposal_index_sha256": "2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2",
+      "retain_other_rows_from_index_sha256": "2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2",
+      "row_replacements": [
+        {
+          "path": "/gamma",
+          "previous_sha256": "8640a436ff6817ac62aa71dddb6e3b5bbb2b3705c00bcda683bf22ad57b61165",
+          "row": {
+            "path": "/gamma",
+            "claims": [
+              {
+                "text": "Example gamma.",
+                "verdict": "supported",
+                "attributed_to": [],
+                "claim_status": "fact",
+                "source_status": "fact",
+                "evidence": [
+                  {
+                    "source": "example.txt",
+                    "chunk": "c001",
+                    "quote": "Illustrative source statement."
+                  }
+                ],
+                "reason": "The fictional integration review establishes this fictional claim."
+              }
+            ]
+          },
+          "reason": "A fictional source review justifies this complete row change.",
+          "evidence": [
+            {
+              "source": "example.txt",
+              "chunk": "c001",
+              "quote": "Illustrative source statement."
+            }
+          ]
+        }
+      ],
+      "finding_decisions": [
+        {
+          "id": "worker_0001:0001",
+          "previous_sha256": "d0423368a921ed102d81259abfc5a0ef224ba246c913432d93728e18de597818",
+          "action": "retain",
+          "reason": "An explicit fictional integration disposition.",
+          "evidence": []
+        },
+        {
+          "id": "worker_0001:0002",
+          "previous_sha256": "e8991f88c992ada7998360d831e764d203377bed19db9a04716febff8e421d13",
+          "action": "replace",
+          "reason": "An explicit fictional integration disposition.",
+          "evidence": [
+            {
+              "source": "example.txt",
+              "chunk": "c001",
+              "quote": "Illustrative source statement."
+            }
+          ],
+          "findings": [
+            {
+              "severity": "medium",
+              "record": "full",
+              "slot": "beta",
+              "issue": "The fictional integration review restates this concern precisely.",
+              "review_paths": [
+                "/beta"
+              ],
+              "evidence": [
+                {
+                  "source": "example.txt",
+                  "chunk": "c001",
+                  "quote": "Illustrative source statement."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "worker_0001:0003",
+          "previous_sha256": "1faabeba8dd713787c2e2c1e5cb8999070f2053d1f4ef389db2c92a856cc9465",
+          "action": "drop",
+          "reason": "An explicit fictional integration disposition.",
+          "evidence": [
+            {
+              "source": "example.txt",
+              "chunk": "c001",
+              "quote": "Illustrative source statement."
+            }
+          ]
+        }
+      ],
+      "new_findings": [],
+      "summary": "2 illustrative findings: 2 medium."
+    }
+  },
+  "index": {
+    "schema_version": 1,
+    "kind": "audit_batch_index_v1",
+    "plan_sha256": "a645c7f385dabb85c4d0492f0dcc44df57f222dfe50f7527ef0219ff042cc111",
+    "original_full_sha256": "23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d",
+    "workers": [
+      {
+        "id": "worker_0001",
+        "sha256": "46b9acb75a058dfbfce8d4bed67d78cd0c39b0163c3503e0a2f741479083d43c",
+        "bytes": 1519
+      }
+    ],
+    "rows": [
+      {
+        "path": "/alpha",
+        "worker_id": "worker_0001",
+        "sha256": "a8e7468c943066713ff4d3d2af228ad0eddbfb8cbb54d5a87b705b80fe93c287"
+      },
+      {
+        "path": "/beta",
+        "worker_id": "worker_0001",
+        "sha256": "459b5a9498e74489fcee075b13c1a7fa4d2c34a70f69d3410c51647cb0100544"
+      },
+      {
+        "path": "/gamma",
+        "worker_id": "worker_0001",
+        "sha256": "8640a436ff6817ac62aa71dddb6e3b5bbb2b3705c00bcda683bf22ad57b61165"
+      }
+    ],
+    "findings": [
+      {
+        "id": "worker_0001:0001",
+        "worker_id": "worker_0001",
+        "ordinal": 0,
+        "sha256": "d0423368a921ed102d81259abfc5a0ef224ba246c913432d93728e18de597818"
+      },
+      {
+        "id": "worker_0001:0002",
+        "worker_id": "worker_0001",
+        "ordinal": 1,
+        "sha256": "e8991f88c992ada7998360d831e764d203377bed19db9a04716febff8e421d13"
+      },
+      {
+        "id": "worker_0001:0003",
+        "worker_id": "worker_0001",
+        "ordinal": 2,
+        "sha256": "1faabeba8dd713787c2e2c1e5cb8999070f2053d1f4ef389db2c92a856cc9465"
+      }
+    ],
+    "sha256": "2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2"
+  },
+  "assembled_utf8": "{\"findings\":[{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"An illustrative concern about this claim.\",\"record\":\"full\",\"review_paths\":[\"/alpha\"],\"severity\":\"medium\",\"slot\":\"alpha\"},{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"The fictional integration review restates this concern precisely.\",\"record\":\"full\",\"review_paths\":[\"/beta\"],\"severity\":\"medium\",\"slot\":\"beta\"}],\"source_review\":{\"artifact\":\"original_full\",\"sha256\":\"23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d\",\"values\":[{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[],\"reason\":\"An illustrative claim requiring scientific review.\",\"source_status\":\"unstated\",\"text\":\"Example alpha.\",\"verdict\":\"revise\"}],\"path\":\"/alpha\"},{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[],\"reason\":\"An illustrative claim requiring scientific review.\",\"source_status\":\"unstated\",\"text\":\"Example beta.\",\"verdict\":\"revise\"}],\"path\":\"/beta\"},{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"reason\":\"The fictional integration review establishes this fictional claim.\",\"source_status\":\"fact\",\"text\":\"Example gamma.\",\"verdict\":\"supported\"}],\"path\":\"/gamma\"}]},\"summary\":\"2 illustrative findings: 2 medium.\"}\n",
+  "lineage": {
+    "schema_version": 1,
+    "kind": "audit_batch_lineage_v1",
+    "plan_sha256": "a645c7f385dabb85c4d0492f0dcc44df57f222dfe50f7527ef0219ff042cc111",
+    "proposal_index_sha256": "2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2",
+    "rows": [
+      {
+        "path": "/alpha",
+        "origin": {
+          "kind": "worker",
+          "worker_id": "worker_0001",
+          "row_sha256": "a8e7468c943066713ff4d3d2af228ad0eddbfb8cbb54d5a87b705b80fe93c287"
+        }
+      },
+      {
+        "path": "/beta",
+        "origin": {
+          "kind": "worker",
+          "worker_id": "worker_0001",
+          "row_sha256": "459b5a9498e74489fcee075b13c1a7fa4d2c34a70f69d3410c51647cb0100544"
+        }
+      },
+      {
+        "path": "/gamma",
+        "origin": {
+          "kind": "integration_replacement",
+          "ordinal": 0,
+          "previous_sha256": "8640a436ff6817ac62aa71dddb6e3b5bbb2b3705c00bcda683bf22ad57b61165",
+          "row_sha256": "a44557d9ed5221400a4c26c125c8b237f1a6c1835dac6b9564f96ad8a3979429"
+        }
+      }
+    ],
+    "findings": [
+      {
+        "final_ordinal": 0,
+        "kind": "retain",
+        "predecessor_id": "worker_0001:0001",
+        "decision_ordinal": 0,
+        "replacement_ordinal": null,
+        "finding_sha256": "d0423368a921ed102d81259abfc5a0ef224ba246c913432d93728e18de597818"
+      },
+      {
+        "final_ordinal": 1,
+        "kind": "replace",
+        "predecessor_id": "worker_0001:0002",
+        "decision_ordinal": 1,
+        "replacement_ordinal": 0,
+        "finding_sha256": "483cff408e2be89b485e01714baa7abcb8cab65ee64f66ae017b7d4f207d5d4c"
+      }
+    ],
+    "finding_dispositions": [
+      {
+        "id": "worker_0001:0001",
+        "action": "retain",
+        "decision_ordinal": 0,
+        "decision_sha256": "49c11fcabcf605880cd0b8432bfc0b2fe9ac34e4227bc30f20eb3c0c9d637477"
+      },
+      {
+        "id": "worker_0001:0002",
+        "action": "replace",
+        "decision_ordinal": 1,
+        "decision_sha256": "f30c4d0720eb6425f5d554d7902d5c45b258522027fa31e2259d6c2b4567be30"
+      },
+      {
+        "id": "worker_0001:0003",
+        "action": "drop",
+        "decision_ordinal": 2,
+        "decision_sha256": "33f4e5e7d7099946ea7c0205fe085297dc6319fe60abc6dd34e42d208f89f9b4"
+      }
+    ],
+    "decision_assertions": [
+      {
+        "chunk": "c001",
+        "quote": "Illustrative source statement.",
+        "source": "example.txt"
+      },
+      {
+        "chunk": "c001",
+        "quote": "Illustrative source statement.",
+        "source": "example.txt"
+      },
+      {
+        "chunk": "c001",
+        "quote": "Illustrative source statement.",
+        "source": "example.txt"
+      }
+    ],
+    "integration_sha256": "1db4e5623bca4bb14ece0ee99ed3c1233831c28073df7ef394aca5a0b0915245",
+    "audit_sha256": "9552dbb28bcb334276ec5a7d41ba79ff915c96eda1f0eb46d4c79d92d440fd21"
+  },
+  "grammar_good": {
+    "instrument": "audit_grammar v1",
+    "schema_version": 1,
+    "passed": true,
+    "error_count": 0,
+    "errors": [],
+    "truncated": false
+  },
+  "grammar_bad": {
+    "instrument": "audit_grammar v1",
+    "schema_version": 1,
+    "passed": false,
+    "error_count": 4,
+    "errors": [
+      {
+        "code": "object_keys",
+        "path": ""
+      },
+      {
+        "code": "text_nonempty",
+        "path": "/summary"
+      },
+      {
+        "code": "object_required",
+        "path": "/source_review"
+      },
+      {
+        "code": "array_required",
+        "path": "/findings"
+      }
+    ],
+    "truncated": false
+  },
+  "rendered": {
+    "worker": "# Exact registered batch output format\n\nUse the following closed-key JSON schema together with its identity/link rules. The schema and invented example describe syntax; the selected scientific protocol and actual inputs govern judgments. Follow the registered output commands.\n\n{\"additional_rules\":[\"Emit one strict UTF-8 JSON object, without Markdown fences, duplicate keys, nonfinite numbers or trailing text. Do not add keys beyond the chosen object variant. Blank strings are invalid where text is required; JSON null is not an empty array or omitted optional property.\",\"Draft parts are concatenated as raw UTF-8 bytes in their registered order, with no inserted comma, newline or other separator. The combined bytes must be exactly one complete JSON object, not one object or array per part. Preserve commas, brackets and string escaping across boundaries; do not restart or repeat an enclosing object in a later part. Each individual part must be valid UTF-8 and obey the registered size limit. Never append commentary or code fences.\",\"Every source-review path occurs once. A row has path and nonempty claims, OR path and metadata_reason, never both. The metadata variant is scientifically permitted only for an inventory value marked record_metadata_allowed.\",\"Each claim has exactly text, verdict, attributed_to, claim_status, source_status, evidence and reason. attributed_to is an array of distinct nonblank source filenames, not a string. A supported claim has nonempty evidence and equal claim_status/source_status. source_status=unstated is available only with revise. These are declaration rules, not authority to change a scientific judgment.\",\"Claim evidence contains document assertions OR provenance assertions, never a mixture or original-artifact assertions. Provenance assertions require empty attributed_to and fact/fact statuses. effective_priority is a positive JSON integer: do not write 2.0, true or a quoted numeral. Findings and integration decisions use document/artifact assertions, not provenance assertions.\",\"Every path with any revise claim must be linked by at least one final finding's review_paths. Each listed review_path must contain at least one revise claim. Supporting-only and metadata-only rows do not belong in review_paths. An omission finding may omit review_paths; do not invent a populated path for an omission.\",\"Finding record uses full/core/both; artifact uses original_full/original_core. severity uses high/medium/low. summary is one nonblank string, not a counts object; any stated counts must match final findings. The scientific protocol governs which affected records and evidence are actually available.\",\"remove_relationship is one object. Use path with optional identity, OR path/match=anonymous_structure_v1/original_full_sha256; never mix modes. Identity is a relative JSON Pointer ending in an allowed identifier field. The path-only form's scientific admissibility and every removal's exact identity are governed by the selected protocol; a grammar pass does not approve removal.\",\"Paths are JSON Pointers starting with /; escape ~ as ~0 and / within a key as ~1. @header is permitted only for artifact evidence paths. Digests are 64 lowercase hex characters. Copy the exact registered digest/identity; never copy an example's digest or invent one.\",\"A shape pass does not establish literal coverage, source quotation accuracy, complete clauses, status correctness, attribution, entailment or scientific acceptance. Preserve the assigned scientific review and the selected two-round/seal/terminal-check workflow.\",\"source_review.artifact is exactly original_full; source_review.sha256 equals the complete original-full inventory digest, not a digest of this worker's subset.\",\"source_review.values contains exactly this worker's assigned paths, once each, including zero/false and all clauses. It is an array of row objects, not a pointer-keyed mapping. Empty values is permitted only for an assigned empty inventory. The full original remains available as context.\",\"Every removal's top-level owner belongs to this worker's assigned roots. Source/finding evidence can cite context outside the assignment; review_paths must link this worker's revised rows. Other workers' judgments are not inputs.\"],\"authority\":\"Documentation of existing source-blind grammar, not a new validator or scientific acceptance rule.\",\"format\":\"audit_batch_output_format_v1\",\"json_schema\":{\"$defs\":{\"artifact\":{\"additionalProperties\":false,\"properties\":{\"artifact\":{\"enum\":[\"original_full\",\"original_core\"]},\"op\":{\"enum\":[\"contains\",\"lacks\"]},\"path\":{\"anyOf\":[{\"$ref\":\"#/$defs/pointer\"},{\"const\":\"@header\"}]},\"quote\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"artifact\",\"path\",\"op\",\"quote\"],\"type\":\"object\"},\"assertion\":{\"oneOf\":[{\"$ref\":\"#/$defs/document\"},{\"$ref\":\"#/$defs/artifact\"}]},\"claim\":{\"additionalProperties\":false,\"allOf\":[{\"if\":{\"properties\":{\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"evidence\":{\"minItems\":1}}}},{\"if\":{\"properties\":{\"evidence\":{\"items\":{\"$ref\":\"#/$defs/provenance\"},\"minItems\":1}}},\"then\":{\"properties\":{\"attributed_to\":{\"maxItems\":0},\"claim_status\":{\"const\":\"fact\"},\"source_status\":{\"const\":\"fact\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"applied\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"applied\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"capability\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"capability\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"fact\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"fact\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"in_progress\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"in_progress\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"instruction\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"instruction\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"planned\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"planned\"}}}}],\"properties\":{\"attributed_to\":{\"items\":{\"$ref\":\"#/$defs/text\"},\"minItems\":0,\"type\":\"array\",\"uniqueItems\":true},\"claim_status\":{\"$ref\":\"#/$defs/status\"},\"evidence\":{\"anyOf\":[{\"items\":{\"$ref\":\"#/$defs/document\"},\"minItems\":0,\"type\":\"array\"},{\"items\":{\"$ref\":\"#/$defs/provenance\"},\"minItems\":0,\"type\":\"array\"}]},\"reason\":{\"$ref\":\"#/$defs/text\"},\"source_status\":{\"$ref\":\"#/$defs/source_status\"},\"text\":{\"$ref\":\"#/$defs/text\"},\"verdict\":{\"enum\":[\"supported\",\"revise\"]}},\"required\":[\"text\",\"verdict\",\"attributed_to\",\"claim_status\",\"source_status\",\"evidence\",\"reason\"],\"type\":\"object\"},\"digest\":{\"pattern\":\"^[0-9a-f]{64}(?![\\\\s\\\\S])\",\"type\":\"string\"},\"document\":{\"additionalProperties\":false,\"properties\":{\"chunk\":{\"$ref\":\"#/$defs/text\"},\"quote\":{\"$ref\":\"#/$defs/text\"},\"source\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"source\",\"chunk\",\"quote\"],\"type\":\"object\"},\"finding\":{\"additionalProperties\":false,\"properties\":{\"evidence\":{\"items\":{\"$ref\":\"#/$defs/assertion\"},\"minItems\":1,\"type\":\"array\"},\"issue\":{\"$ref\":\"#/$defs/text\"},\"record\":{\"enum\":[\"full\",\"core\",\"both\"]},\"remove_relationship\":{\"$ref\":\"#/$defs/removal\"},\"review_paths\":{\"items\":{\"$ref\":\"#/$defs/pointer\"},\"minItems\":1,\"type\":\"array\"},\"severity\":{\"enum\":[\"high\",\"medium\",\"low\"]},\"slot\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"severity\",\"record\",\"slot\",\"issue\",\"evidence\"],\"type\":\"object\"},\"pointer\":{\"pattern\":\"^/(?![\\\\s\\\\S]*~(?![01]))\",\"type\":\"string\"},\"provenance\":{\"additionalProperties\":false,\"allOf\":[{\"if\":{\"properties\":{\"field\":{\"const\":\"effective_priority\"}}},\"then\":{\"properties\":{\"value\":{\"minimum\":1,\"type\":\"integer\"}}}},{\"if\":{\"properties\":{\"field\":{\"const\":\"priority_basis\"}}},\"then\":{\"properties\":{\"value\":{\"enum\":[\"source_override\",\"source_type\",\"unranked\"]}}}},{\"if\":{\"properties\":{\"field\":{\"enum\":[\"source_type\",\"captured_at\",\"superseded_by\"]}}},\"then\":{\"properties\":{\"value\":{\"$ref\":\"#/$defs/text\"}}}}],\"properties\":{\"field\":{\"enum\":[\"captured_at\",\"effective_priority\",\"priority_basis\",\"source_type\",\"superseded_by\"]},\"provenance\":{\"const\":\"source_manifest\"},\"sha256\":{\"$ref\":\"#/$defs/digest\"},\"source\":{\"$ref\":\"#/$defs/text\"},\"source_id\":{\"$ref\":\"#/$defs/text\"},\"value\":{}},\"required\":[\"provenance\",\"sha256\",\"source_id\",\"source\",\"field\",\"value\"],\"type\":\"object\"},\"removal\":{\"oneOf\":[{\"additionalProperties\":false,\"properties\":{\"identity\":{\"allOf\":[{\"$ref\":\"#/$defs/pointer\"},{\"pattern\":\"/(checksum|doi|grant_number|hash|id|md5|name|orcid|sha256|target_dataset|variable_name)(?![\\\\s\\\\S])\"}]},\"path\":{\"$ref\":\"#/$defs/pointer\"}},\"required\":[\"path\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"match\":{\"const\":\"anonymous_structure_v1\"},\"original_full_sha256\":{\"$ref\":\"#/$defs/digest\"},\"path\":{\"$ref\":\"#/$defs/pointer\"}},\"required\":[\"path\",\"match\",\"original_full_sha256\"],\"type\":\"object\"}]},\"row\":{\"oneOf\":[{\"additionalProperties\":false,\"properties\":{\"claims\":{\"items\":{\"$ref\":\"#/$defs/claim\"},\"minItems\":1,\"type\":\"array\"},\"path\":{\"$ref\":\"#/$defs/pointer\"}},\"required\":[\"path\",\"claims\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"metadata_reason\":{\"$ref\":\"#/$defs/text\"},\"path\":{\"$ref\":\"#/$defs/pointer\"}},\"required\":[\"path\",\"metadata_reason\"],\"type\":\"object\"}]},\"source_status\":{\"enum\":[\"applied\",\"capability\",\"fact\",\"in_progress\",\"instruction\",\"planned\",\"unstated\"]},\"status\":{\"enum\":[\"applied\",\"capability\",\"fact\",\"in_progress\",\"instruction\",\"planned\"]},\"text\":{\"pattern\":\"\\\\S\",\"type\":\"string\"}},\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"additionalProperties\":false,\"properties\":{\"findings\":{\"items\":{\"$ref\":\"#/$defs/finding\"},\"minItems\":0,\"type\":\"array\"},\"source_review\":{\"additionalProperties\":false,\"properties\":{\"artifact\":{\"const\":\"original_full\"},\"sha256\":{\"$ref\":\"#/$defs/digest\"},\"values\":{\"items\":{\"$ref\":\"#/$defs/row\"},\"minItems\":0,\"type\":\"array\"}},\"required\":[\"artifact\",\"sha256\",\"values\"],\"type\":\"object\"},\"summary\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"findings\",\"summary\",\"source_review\"],\"type\":\"object\"},\"stage\":\"worker\",\"synthetic_example\":{\"original_full\":\"alpha: Example alpha.\\nbeta: Example beta.\\ngamma: Example gamma.\\n\",\"proposal\":{\"findings\":[{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"An illustrative concern about this claim.\",\"record\":\"full\",\"review_paths\":[\"/alpha\"],\"severity\":\"medium\",\"slot\":\"alpha\"},{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"An illustrative concern about this claim.\",\"record\":\"full\",\"review_paths\":[\"/beta\"],\"severity\":\"medium\",\"slot\":\"beta\"},{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"An illustrative concern about this claim.\",\"record\":\"full\",\"review_paths\":[\"/gamma\"],\"severity\":\"medium\",\"slot\":\"gamma\"}],\"source_review\":{\"artifact\":\"original_full\",\"sha256\":\"23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d\",\"values\":[{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[],\"reason\":\"An illustrative claim requiring scientific review.\",\"source_status\":\"unstated\",\"text\":\"Example alpha.\",\"verdict\":\"revise\"}],\"path\":\"/alpha\"},{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[],\"reason\":\"An illustrative claim requiring scientific review.\",\"source_status\":\"unstated\",\"text\":\"Example beta.\",\"verdict\":\"revise\"}],\"path\":\"/beta\"},{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[],\"reason\":\"An illustrative claim requiring scientific review.\",\"source_status\":\"unstated\",\"text\":\"Example gamma.\",\"verdict\":\"revise\"}],\"path\":\"/gamma\"}]},\"summary\":\"3 illustrative findings: 3 medium.\"},\"warning\":\"Invented grammar fixture only. Do not copy any fact, path, source, digest or judgment into your run.\"}}\n",
+    "integration": "# Exact registered batch output format\n\nUse the following closed-key JSON schema together with its identity/link rules. The schema and invented example describe syntax; the selected scientific protocol and actual inputs govern judgments. Follow the registered output commands.\n\n{\"additional_rules\":[\"Emit one strict UTF-8 JSON object, without Markdown fences, duplicate keys, nonfinite numbers or trailing text. Do not add keys beyond the chosen object variant. Blank strings are invalid where text is required; JSON null is not an empty array or omitted optional property.\",\"Draft parts are concatenated as raw UTF-8 bytes in their registered order, with no inserted comma, newline or other separator. The combined bytes must be exactly one complete JSON object, not one object or array per part. Preserve commas, brackets and string escaping across boundaries; do not restart or repeat an enclosing object in a later part. Each individual part must be valid UTF-8 and obey the registered size limit. Never append commentary or code fences.\",\"Every source-review path occurs once. A row has path and nonempty claims, OR path and metadata_reason, never both. The metadata variant is scientifically permitted only for an inventory value marked record_metadata_allowed.\",\"Each claim has exactly text, verdict, attributed_to, claim_status, source_status, evidence and reason. attributed_to is an array of distinct nonblank source filenames, not a string. A supported claim has nonempty evidence and equal claim_status/source_status. source_status=unstated is available only with revise. These are declaration rules, not authority to change a scientific judgment.\",\"Claim evidence contains document assertions OR provenance assertions, never a mixture or original-artifact assertions. Provenance assertions require empty attributed_to and fact/fact statuses. effective_priority is a positive JSON integer: do not write 2.0, true or a quoted numeral. Findings and integration decisions use document/artifact assertions, not provenance assertions.\",\"Every path with any revise claim must be linked by at least one final finding's review_paths. Each listed review_path must contain at least one revise claim. Supporting-only and metadata-only rows do not belong in review_paths. An omission finding may omit review_paths; do not invent a populated path for an omission.\",\"Finding record uses full/core/both; artifact uses original_full/original_core. severity uses high/medium/low. summary is one nonblank string, not a counts object; any stated counts must match final findings. The scientific protocol governs which affected records and evidence are actually available.\",\"remove_relationship is one object. Use path with optional identity, OR path/match=anonymous_structure_v1/original_full_sha256; never mix modes. Identity is a relative JSON Pointer ending in an allowed identifier field. The path-only form's scientific admissibility and every removal's exact identity are governed by the selected protocol; a grammar pass does not approve removal.\",\"Paths are JSON Pointers starting with /; escape ~ as ~0 and / within a key as ~1. @header is permitted only for artifact evidence paths. Digests are 64 lowercase hex characters. Copy the exact registered digest/identity; never copy an example's digest or invent one.\",\"A shape pass does not establish literal coverage, source quotation accuracy, complete clauses, status correctness, attribution, entailment or scientific acceptance. Preserve the assigned scientific review and the selected two-round/seal/terminal-check workflow.\",\"Return an integration delta, not a complete audit object: exactly kind, proposal_index_sha256, retain_other_rows_from_index_sha256, row_replacements, finding_decisions, new_findings and summary. Both index digests equal the exact supplied worker index.sha256, not the plan hash or a raw index-file hash.\",\"Before final decisions, successfully Read every complete canonical worker row, including retained rows, and assess complete findings. Retention binds all unchanged rows to the exact reviewed index; it does not authorize retaining unread rows.\",\"row_replacements may be empty. Each replacement path is an existing indexed path, occurs once, and matches row.path. previous_sha256 is that indexed row's canonical-object sha256. Supply a complete replacement row, a reason and nonempty document/artifact evidence. Never add/delete a row, change its path or submit a partial patch.\",\"finding_decisions contains exactly one entry for every index.findings id, no others. Copy each id and its own canonical-object sha256 into previous_sha256. retain keeps the complete old finding and may use empty evidence; drop removes it and requires nonempty evidence; replace requires nonempty evidence AND a nonempty findings array of complete replacement findings (a split is allowed). findings must be absent for retain/drop, not null or an empty array.\",\"new_findings is an array, possibly empty, of complete independently authored findings. The final summary is model-authored. After all explicit decisions, every revise row must still link to a final finding and every review_path must still have a revise claim. Replacing or dropping a concern must not orphan a revised row; change the complete row explicitly only when scientifically justified.\",\"All final removals must have top-level roots in the full plan. No two final removals may be identical or stand in an ancestor/descendant relation. Resolve any overlap explicitly through finding decisions; the assembler will not infer a repair or discard a finding.\"],\"authority\":\"Documentation of existing source-blind grammar, not a new validator or scientific acceptance rule.\",\"format\":\"audit_batch_output_format_v1\",\"json_schema\":{\"$defs\":{\"artifact\":{\"additionalProperties\":false,\"properties\":{\"artifact\":{\"enum\":[\"original_full\",\"original_core\"]},\"op\":{\"enum\":[\"contains\",\"lacks\"]},\"path\":{\"anyOf\":[{\"$ref\":\"#/$defs/pointer\"},{\"const\":\"@header\"}]},\"quote\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"artifact\",\"path\",\"op\",\"quote\"],\"type\":\"object\"},\"assertion\":{\"oneOf\":[{\"$ref\":\"#/$defs/document\"},{\"$ref\":\"#/$defs/artifact\"}]},\"claim\":{\"additionalProperties\":false,\"allOf\":[{\"if\":{\"properties\":{\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"evidence\":{\"minItems\":1}}}},{\"if\":{\"properties\":{\"evidence\":{\"items\":{\"$ref\":\"#/$defs/provenance\"},\"minItems\":1}}},\"then\":{\"properties\":{\"attributed_to\":{\"maxItems\":0},\"claim_status\":{\"const\":\"fact\"},\"source_status\":{\"const\":\"fact\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"applied\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"applied\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"capability\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"capability\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"fact\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"fact\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"in_progress\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"in_progress\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"instruction\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"instruction\"}}}},{\"if\":{\"properties\":{\"claim_status\":{\"const\":\"planned\"},\"verdict\":{\"const\":\"supported\"}}},\"then\":{\"properties\":{\"source_status\":{\"const\":\"planned\"}}}}],\"properties\":{\"attributed_to\":{\"items\":{\"$ref\":\"#/$defs/text\"},\"minItems\":0,\"type\":\"array\",\"uniqueItems\":true},\"claim_status\":{\"$ref\":\"#/$defs/status\"},\"evidence\":{\"anyOf\":[{\"items\":{\"$ref\":\"#/$defs/document\"},\"minItems\":0,\"type\":\"array\"},{\"items\":{\"$ref\":\"#/$defs/provenance\"},\"minItems\":0,\"type\":\"array\"}]},\"reason\":{\"$ref\":\"#/$defs/text\"},\"source_status\":{\"$ref\":\"#/$defs/source_status\"},\"text\":{\"$ref\":\"#/$defs/text\"},\"verdict\":{\"enum\":[\"supported\",\"revise\"]}},\"required\":[\"text\",\"verdict\",\"attributed_to\",\"claim_status\",\"source_status\",\"evidence\",\"reason\"],\"type\":\"object\"},\"digest\":{\"pattern\":\"^[0-9a-f]{64}(?![\\\\s\\\\S])\",\"type\":\"string\"},\"document\":{\"additionalProperties\":false,\"properties\":{\"chunk\":{\"$ref\":\"#/$defs/text\"},\"quote\":{\"$ref\":\"#/$defs/text\"},\"source\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"source\",\"chunk\",\"quote\"],\"type\":\"object\"},\"finding\":{\"additionalProperties\":false,\"properties\":{\"evidence\":{\"items\":{\"$ref\":\"#/$defs/assertion\"},\"minItems\":1,\"type\":\"array\"},\"issue\":{\"$ref\":\"#/$defs/text\"},\"record\":{\"enum\":[\"full\",\"core\",\"both\"]},\"remove_relationship\":{\"$ref\":\"#/$defs/removal\"},\"review_paths\":{\"items\":{\"$ref\":\"#/$defs/pointer\"},\"minItems\":1,\"type\":\"array\"},\"severity\":{\"enum\":[\"high\",\"medium\",\"low\"]},\"slot\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"severity\",\"record\",\"slot\",\"issue\",\"evidence\"],\"type\":\"object\"},\"pointer\":{\"pattern\":\"^/(?![\\\\s\\\\S]*~(?![01]))\",\"type\":\"string\"},\"provenance\":{\"additionalProperties\":false,\"allOf\":[{\"if\":{\"properties\":{\"field\":{\"const\":\"effective_priority\"}}},\"then\":{\"properties\":{\"value\":{\"minimum\":1,\"type\":\"integer\"}}}},{\"if\":{\"properties\":{\"field\":{\"const\":\"priority_basis\"}}},\"then\":{\"properties\":{\"value\":{\"enum\":[\"source_override\",\"source_type\",\"unranked\"]}}}},{\"if\":{\"properties\":{\"field\":{\"enum\":[\"source_type\",\"captured_at\",\"superseded_by\"]}}},\"then\":{\"properties\":{\"value\":{\"$ref\":\"#/$defs/text\"}}}}],\"properties\":{\"field\":{\"enum\":[\"captured_at\",\"effective_priority\",\"priority_basis\",\"source_type\",\"superseded_by\"]},\"provenance\":{\"const\":\"source_manifest\"},\"sha256\":{\"$ref\":\"#/$defs/digest\"},\"source\":{\"$ref\":\"#/$defs/text\"},\"source_id\":{\"$ref\":\"#/$defs/text\"},\"value\":{}},\"required\":[\"provenance\",\"sha256\",\"source_id\",\"source\",\"field\",\"value\"],\"type\":\"object\"},\"removal\":{\"oneOf\":[{\"additionalProperties\":false,\"properties\":{\"identity\":{\"allOf\":[{\"$ref\":\"#/$defs/pointer\"},{\"pattern\":\"/(checksum|doi|grant_number|hash|id|md5|name|orcid|sha256|target_dataset|variable_name)(?![\\\\s\\\\S])\"}]},\"path\":{\"$ref\":\"#/$defs/pointer\"}},\"required\":[\"path\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"match\":{\"const\":\"anonymous_structure_v1\"},\"original_full_sha256\":{\"$ref\":\"#/$defs/digest\"},\"path\":{\"$ref\":\"#/$defs/pointer\"}},\"required\":[\"path\",\"match\",\"original_full_sha256\"],\"type\":\"object\"}]},\"row\":{\"oneOf\":[{\"additionalProperties\":false,\"properties\":{\"claims\":{\"items\":{\"$ref\":\"#/$defs/claim\"},\"minItems\":1,\"type\":\"array\"},\"path\":{\"$ref\":\"#/$defs/pointer\"}},\"required\":[\"path\",\"claims\"],\"type\":\"object\"},{\"additionalProperties\":false,\"properties\":{\"metadata_reason\":{\"$ref\":\"#/$defs/text\"},\"path\":{\"$ref\":\"#/$defs/pointer\"}},\"required\":[\"path\",\"metadata_reason\"],\"type\":\"object\"}]},\"source_status\":{\"enum\":[\"applied\",\"capability\",\"fact\",\"in_progress\",\"instruction\",\"planned\",\"unstated\"]},\"status\":{\"enum\":[\"applied\",\"capability\",\"fact\",\"in_progress\",\"instruction\",\"planned\"]},\"text\":{\"pattern\":\"\\\\S\",\"type\":\"string\"}},\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"additionalProperties\":false,\"properties\":{\"finding_decisions\":{\"items\":{\"additionalProperties\":false,\"allOf\":[{\"else\":{\"not\":{\"required\":[\"findings\"]}},\"if\":{\"properties\":{\"action\":{\"const\":\"replace\"}}},\"then\":{\"required\":[\"findings\"]}},{\"if\":{\"properties\":{\"action\":{\"enum\":[\"replace\",\"drop\"]}}},\"then\":{\"properties\":{\"evidence\":{\"minItems\":1}}}}],\"properties\":{\"action\":{\"enum\":[\"retain\",\"replace\",\"drop\"]},\"evidence\":{\"items\":{\"$ref\":\"#/$defs/assertion\"},\"minItems\":0,\"type\":\"array\"},\"findings\":{\"items\":{\"$ref\":\"#/$defs/finding\"},\"minItems\":1,\"type\":\"array\"},\"id\":{\"$ref\":\"#/$defs/text\"},\"previous_sha256\":{\"$ref\":\"#/$defs/digest\"},\"reason\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"id\",\"previous_sha256\",\"action\",\"reason\",\"evidence\"],\"type\":\"object\"},\"minItems\":0,\"type\":\"array\"},\"kind\":{\"const\":\"audit_integration_v1\"},\"new_findings\":{\"items\":{\"$ref\":\"#/$defs/finding\"},\"minItems\":0,\"type\":\"array\"},\"proposal_index_sha256\":{\"$ref\":\"#/$defs/digest\"},\"retain_other_rows_from_index_sha256\":{\"$ref\":\"#/$defs/digest\"},\"row_replacements\":{\"items\":{\"additionalProperties\":false,\"properties\":{\"evidence\":{\"items\":{\"$ref\":\"#/$defs/assertion\"},\"minItems\":1,\"type\":\"array\"},\"path\":{\"$ref\":\"#/$defs/pointer\"},\"previous_sha256\":{\"$ref\":\"#/$defs/digest\"},\"reason\":{\"$ref\":\"#/$defs/text\"},\"row\":{\"$ref\":\"#/$defs/row\"}},\"required\":[\"path\",\"previous_sha256\",\"row\",\"reason\",\"evidence\"],\"type\":\"object\"},\"minItems\":0,\"type\":\"array\"},\"summary\":{\"$ref\":\"#/$defs/text\"}},\"required\":[\"kind\",\"proposal_index_sha256\",\"retain_other_rows_from_index_sha256\",\"row_replacements\",\"finding_decisions\",\"new_findings\",\"summary\"],\"type\":\"object\"},\"stage\":\"integration\",\"synthetic_example\":{\"original_full\":\"alpha: Example alpha.\\nbeta: Example beta.\\ngamma: Example gamma.\\n\",\"proposal\":{\"finding_decisions\":[{\"action\":\"retain\",\"evidence\":[],\"id\":\"worker_0001:0001\",\"previous_sha256\":\"d0423368a921ed102d81259abfc5a0ef224ba246c913432d93728e18de597818\",\"reason\":\"An explicit fictional integration disposition.\"},{\"action\":\"replace\",\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"findings\":[{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"The fictional integration review restates this concern precisely.\",\"record\":\"full\",\"review_paths\":[\"/beta\"],\"severity\":\"medium\",\"slot\":\"beta\"}],\"id\":\"worker_0001:0002\",\"previous_sha256\":\"e8991f88c992ada7998360d831e764d203377bed19db9a04716febff8e421d13\",\"reason\":\"An explicit fictional integration disposition.\"},{\"action\":\"drop\",\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"id\":\"worker_0001:0003\",\"previous_sha256\":\"1faabeba8dd713787c2e2c1e5cb8999070f2053d1f4ef389db2c92a856cc9465\",\"reason\":\"An explicit fictional integration disposition.\"}],\"kind\":\"audit_integration_v1\",\"new_findings\":[],\"proposal_index_sha256\":\"2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2\",\"retain_other_rows_from_index_sha256\":\"2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2\",\"row_replacements\":[{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"path\":\"/gamma\",\"previous_sha256\":\"8640a436ff6817ac62aa71dddb6e3b5bbb2b3705c00bcda683bf22ad57b61165\",\"reason\":\"A fictional source review justifies this complete row change.\",\"row\":{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"reason\":\"The fictional integration review establishes this fictional claim.\",\"source_status\":\"fact\",\"text\":\"Example gamma.\",\"verdict\":\"supported\"}],\"path\":\"/gamma\"}}],\"summary\":\"2 illustrative findings: 2 medium.\"},\"warning\":\"Invented grammar fixture only. Do not copy any fact, path, source, digest or judgment into your run.\",\"worker_index\":{\"findings\":[{\"id\":\"worker_0001:0001\",\"ordinal\":0,\"sha256\":\"d0423368a921ed102d81259abfc5a0ef224ba246c913432d93728e18de597818\",\"worker_id\":\"worker_0001\"},{\"id\":\"worker_0001:0002\",\"ordinal\":1,\"sha256\":\"e8991f88c992ada7998360d831e764d203377bed19db9a04716febff8e421d13\",\"worker_id\":\"worker_0001\"},{\"id\":\"worker_0001:0003\",\"ordinal\":2,\"sha256\":\"1faabeba8dd713787c2e2c1e5cb8999070f2053d1f4ef389db2c92a856cc9465\",\"worker_id\":\"worker_0001\"}],\"kind\":\"audit_batch_index_v1\",\"original_full_sha256\":\"23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d\",\"plan_sha256\":\"a645c7f385dabb85c4d0492f0dcc44df57f222dfe50f7527ef0219ff042cc111\",\"rows\":[{\"path\":\"/alpha\",\"sha256\":\"a8e7468c943066713ff4d3d2af228ad0eddbfb8cbb54d5a87b705b80fe93c287\",\"worker_id\":\"worker_0001\"},{\"path\":\"/beta\",\"sha256\":\"459b5a9498e74489fcee075b13c1a7fa4d2c34a70f69d3410c51647cb0100544\",\"worker_id\":\"worker_0001\"},{\"path\":\"/gamma\",\"sha256\":\"8640a436ff6817ac62aa71dddb6e3b5bbb2b3705c00bcda683bf22ad57b61165\",\"worker_id\":\"worker_0001\"}],\"schema_version\":1,\"sha256\":\"2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2\",\"workers\":[{\"bytes\":1519,\"id\":\"worker_0001\",\"sha256\":\"46b9acb75a058dfbfce8d4bed67d78cd0c39b0163c3503e0a2f741479083d43c\"}]},\"worker_proposals\":[{\"id\":\"worker_0001\",\"proposal\":{\"findings\":[{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"An illustrative concern about this claim.\",\"record\":\"full\",\"review_paths\":[\"/alpha\"],\"severity\":\"medium\",\"slot\":\"alpha\"},{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"An illustrative concern about this claim.\",\"record\":\"full\",\"review_paths\":[\"/beta\"],\"severity\":\"medium\",\"slot\":\"beta\"},{\"evidence\":[{\"chunk\":\"c001\",\"quote\":\"Illustrative source statement.\",\"source\":\"example.txt\"}],\"issue\":\"An illustrative concern about this claim.\",\"record\":\"full\",\"review_paths\":[\"/gamma\"],\"severity\":\"medium\",\"slot\":\"gamma\"}],\"source_review\":{\"artifact\":\"original_full\",\"sha256\":\"23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d\",\"values\":[{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[],\"reason\":\"An illustrative claim requiring scientific review.\",\"source_status\":\"unstated\",\"text\":\"Example alpha.\",\"verdict\":\"revise\"}],\"path\":\"/alpha\"},{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[],\"reason\":\"An illustrative claim requiring scientific review.\",\"source_status\":\"unstated\",\"text\":\"Example beta.\",\"verdict\":\"revise\"}],\"path\":\"/beta\"},{\"claims\":[{\"attributed_to\":[],\"claim_status\":\"fact\",\"evidence\":[],\"reason\":\"An illustrative claim requiring scientific review.\",\"source_status\":\"unstated\",\"text\":\"Example gamma.\",\"verdict\":\"revise\"}],\"path\":\"/gamma\"}]},\"summary\":\"3 illustrative findings: 3 medium.\"}}]}}\n"
+  },
+  "contracts": {
+    "worker": {
+      "format": "audit_batch_output_format_v1",
+      "stage": "worker",
+      "authority": "Documentation of existing source-blind grammar, not a new validator or scientific acceptance rule.",
+      "json_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/finding"
+            },
+            "minItems": 0
+          },
+          "summary": {
+            "$ref": "#/$defs/text"
+          },
+          "source_review": {
+            "type": "object",
+            "properties": {
+              "artifact": {
+                "const": "original_full"
+              },
+              "sha256": {
+                "$ref": "#/$defs/digest"
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/row"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "artifact",
+              "sha256",
+              "values"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "findings",
+          "summary",
+          "source_review"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "text": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+          },
+          "pointer": {
+            "type": "string",
+            "pattern": "^/(?![\\s\\S]*~(?![01]))"
+          },
+          "status": {
+            "enum": [
+              "applied",
+              "capability",
+              "fact",
+              "in_progress",
+              "instruction",
+              "planned"
+            ]
+          },
+          "source_status": {
+            "enum": [
+              "applied",
+              "capability",
+              "fact",
+              "in_progress",
+              "instruction",
+              "planned",
+              "unstated"
+            ]
+          },
+          "document": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/text"
+              },
+              "chunk": {
+                "$ref": "#/$defs/text"
+              },
+              "quote": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "required": [
+              "source",
+              "chunk",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "artifact": {
+            "type": "object",
+            "properties": {
+              "artifact": {
+                "enum": [
+                  "original_full",
+                  "original_core"
+                ]
+              },
+              "path": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  {
+                    "const": "@header"
+                  }
+                ]
+              },
+              "op": {
+                "enum": [
+                  "contains",
+                  "lacks"
+                ]
+              },
+              "quote": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "required": [
+              "artifact",
+              "path",
+              "op",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "assertion": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/document"
+              },
+              {
+                "$ref": "#/$defs/artifact"
+              }
+            ]
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "provenance": {
+                "const": "source_manifest"
+              },
+              "sha256": {
+                "$ref": "#/$defs/digest"
+              },
+              "source_id": {
+                "$ref": "#/$defs/text"
+              },
+              "source": {
+                "$ref": "#/$defs/text"
+              },
+              "field": {
+                "enum": [
+                  "captured_at",
+                  "effective_priority",
+                  "priority_basis",
+                  "source_type",
+                  "superseded_by"
+                ]
+              },
+              "value": {}
+            },
+            "required": [
+              "provenance",
+              "sha256",
+              "source_id",
+              "source",
+              "field",
+              "value"
+            ],
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "field": {
+                      "const": "effective_priority"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "field": {
+                      "const": "priority_basis"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "enum": [
+                        "source_override",
+                        "source_type",
+                        "unranked"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "field": {
+                      "enum": [
+                        "source_type",
+                        "captured_at",
+                        "superseded_by"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "$ref": "#/$defs/text"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "claim": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "$ref": "#/$defs/text"
+              },
+              "verdict": {
+                "enum": [
+                  "supported",
+                  "revise"
+                ]
+              },
+              "attributed_to": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/text"
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "claim_status": {
+                "$ref": "#/$defs/status"
+              },
+              "source_status": {
+                "$ref": "#/$defs/source_status"
+              },
+              "evidence": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/document"
+                    },
+                    "minItems": 0
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/provenance"
+                    },
+                    "minItems": 0
+                  }
+                ]
+              },
+              "reason": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "required": [
+              "text",
+              "verdict",
+              "attributed_to",
+              "claim_status",
+              "source_status",
+              "evidence",
+              "reason"
+            ],
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "evidence": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "evidence": {
+                      "minItems": 1,
+                      "items": {
+                        "$ref": "#/$defs/provenance"
+                      }
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "attributed_to": {
+                      "maxItems": 0
+                    },
+                    "claim_status": {
+                      "const": "fact"
+                    },
+                    "source_status": {
+                      "const": "fact"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "applied"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "applied"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "capability"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "capability"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "fact"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "fact"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "in_progress"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "in_progress"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "instruction"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "instruction"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "planned"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "planned"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "row": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  "claims": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/claim"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "path",
+                  "claims"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  "metadata_reason": {
+                    "$ref": "#/$defs/text"
+                  }
+                },
+                "required": [
+                  "path",
+                  "metadata_reason"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "removal": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  "identity": {
+                    "allOf": [
+                      {
+                        "$ref": "#/$defs/pointer"
+                      },
+                      {
+                        "pattern": "/(checksum|doi|grant_number|hash|id|md5|name|orcid|sha256|target_dataset|variable_name)(?![\\s\\S])"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  "match": {
+                    "const": "anonymous_structure_v1"
+                  },
+                  "original_full_sha256": {
+                    "$ref": "#/$defs/digest"
+                  }
+                },
+                "required": [
+                  "path",
+                  "match",
+                  "original_full_sha256"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "finding": {
+            "type": "object",
+            "properties": {
+              "severity": {
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ]
+              },
+              "record": {
+                "enum": [
+                  "full",
+                  "core",
+                  "both"
+                ]
+              },
+              "slot": {
+                "$ref": "#/$defs/text"
+              },
+              "issue": {
+                "$ref": "#/$defs/text"
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertion"
+                },
+                "minItems": 1
+              },
+              "review_paths": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/pointer"
+                },
+                "minItems": 1
+              },
+              "remove_relationship": {
+                "$ref": "#/$defs/removal"
+              }
+            },
+            "required": [
+              "severity",
+              "record",
+              "slot",
+              "issue",
+              "evidence"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additional_rules": [
+        "Emit one strict UTF-8 JSON object, without Markdown fences, duplicate keys, nonfinite numbers or trailing text. Do not add keys beyond the chosen object variant. Blank strings are invalid where text is required; JSON null is not an empty array or omitted optional property.",
+        "Draft parts are concatenated as raw UTF-8 bytes in their registered order, with no inserted comma, newline or other separator. The combined bytes must be exactly one complete JSON object, not one object or array per part. Preserve commas, brackets and string escaping across boundaries; do not restart or repeat an enclosing object in a later part. Each individual part must be valid UTF-8 and obey the registered size limit. Never append commentary or code fences.",
+        "Every source-review path occurs once. A row has path and nonempty claims, OR path and metadata_reason, never both. The metadata variant is scientifically permitted only for an inventory value marked record_metadata_allowed.",
+        "Each claim has exactly text, verdict, attributed_to, claim_status, source_status, evidence and reason. attributed_to is an array of distinct nonblank source filenames, not a string. A supported claim has nonempty evidence and equal claim_status/source_status. source_status=unstated is available only with revise. These are declaration rules, not authority to change a scientific judgment.",
+        "Claim evidence contains document assertions OR provenance assertions, never a mixture or original-artifact assertions. Provenance assertions require empty attributed_to and fact/fact statuses. effective_priority is a positive JSON integer: do not write 2.0, true or a quoted numeral. Findings and integration decisions use document/artifact assertions, not provenance assertions.",
+        "Every path with any revise claim must be linked by at least one final finding's review_paths. Each listed review_path must contain at least one revise claim. Supporting-only and metadata-only rows do not belong in review_paths. An omission finding may omit review_paths; do not invent a populated path for an omission.",
+        "Finding record uses full/core/both; artifact uses original_full/original_core. severity uses high/medium/low. summary is one nonblank string, not a counts object; any stated counts must match final findings. The scientific protocol governs which affected records and evidence are actually available.",
+        "remove_relationship is one object. Use path with optional identity, OR path/match=anonymous_structure_v1/original_full_sha256; never mix modes. Identity is a relative JSON Pointer ending in an allowed identifier field. The path-only form's scientific admissibility and every removal's exact identity are governed by the selected protocol; a grammar pass does not approve removal.",
+        "Paths are JSON Pointers starting with /; escape ~ as ~0 and / within a key as ~1. @header is permitted only for artifact evidence paths. Digests are 64 lowercase hex characters. Copy the exact registered digest/identity; never copy an example's digest or invent one.",
+        "A shape pass does not establish literal coverage, source quotation accuracy, complete clauses, status correctness, attribution, entailment or scientific acceptance. Preserve the assigned scientific review and the selected two-round/seal/terminal-check workflow.",
+        "source_review.artifact is exactly original_full; source_review.sha256 equals the complete original-full inventory digest, not a digest of this worker's subset.",
+        "source_review.values contains exactly this worker's assigned paths, once each, including zero/false and all clauses. It is an array of row objects, not a pointer-keyed mapping. Empty values is permitted only for an assigned empty inventory. The full original remains available as context.",
+        "Every removal's top-level owner belongs to this worker's assigned roots. Source/finding evidence can cite context outside the assignment; review_paths must link this worker's revised rows. Other workers' judgments are not inputs."
+      ],
+      "synthetic_example": {
+        "warning": "Invented grammar fixture only. Do not copy any fact, path, source, digest or judgment into your run.",
+        "original_full": "alpha: Example alpha.\nbeta: Example beta.\ngamma: Example gamma.\n",
+        "proposal": {
+          "findings": [
+            {
+              "severity": "medium",
+              "record": "full",
+              "slot": "alpha",
+              "issue": "An illustrative concern about this claim.",
+              "review_paths": [
+                "/alpha"
+              ],
+              "evidence": [
+                {
+                  "source": "example.txt",
+                  "chunk": "c001",
+                  "quote": "Illustrative source statement."
+                }
+              ]
+            },
+            {
+              "severity": "medium",
+              "record": "full",
+              "slot": "beta",
+              "issue": "An illustrative concern about this claim.",
+              "review_paths": [
+                "/beta"
+              ],
+              "evidence": [
+                {
+                  "source": "example.txt",
+                  "chunk": "c001",
+                  "quote": "Illustrative source statement."
+                }
+              ]
+            },
+            {
+              "severity": "medium",
+              "record": "full",
+              "slot": "gamma",
+              "issue": "An illustrative concern about this claim.",
+              "review_paths": [
+                "/gamma"
+              ],
+              "evidence": [
+                {
+                  "source": "example.txt",
+                  "chunk": "c001",
+                  "quote": "Illustrative source statement."
+                }
+              ]
+            }
+          ],
+          "summary": "3 illustrative findings: 3 medium.",
+          "source_review": {
+            "artifact": "original_full",
+            "sha256": "23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d",
+            "values": [
+              {
+                "path": "/alpha",
+                "claims": [
+                  {
+                    "text": "Example alpha.",
+                    "verdict": "revise",
+                    "attributed_to": [],
+                    "claim_status": "fact",
+                    "source_status": "unstated",
+                    "evidence": [],
+                    "reason": "An illustrative claim requiring scientific review."
+                  }
+                ]
+              },
+              {
+                "path": "/beta",
+                "claims": [
+                  {
+                    "text": "Example beta.",
+                    "verdict": "revise",
+                    "attributed_to": [],
+                    "claim_status": "fact",
+                    "source_status": "unstated",
+                    "evidence": [],
+                    "reason": "An illustrative claim requiring scientific review."
+                  }
+                ]
+              },
+              {
+                "path": "/gamma",
+                "claims": [
+                  {
+                    "text": "Example gamma.",
+                    "verdict": "revise",
+                    "attributed_to": [],
+                    "claim_status": "fact",
+                    "source_status": "unstated",
+                    "evidence": [],
+                    "reason": "An illustrative claim requiring scientific review."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "integration": {
+      "format": "audit_batch_output_format_v1",
+      "stage": "integration",
+      "authority": "Documentation of existing source-blind grammar, not a new validator or scientific acceptance rule.",
+      "json_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "const": "audit_integration_v1"
+          },
+          "proposal_index_sha256": {
+            "$ref": "#/$defs/digest"
+          },
+          "retain_other_rows_from_index_sha256": {
+            "$ref": "#/$defs/digest"
+          },
+          "row_replacements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "$ref": "#/$defs/pointer"
+                },
+                "previous_sha256": {
+                  "$ref": "#/$defs/digest"
+                },
+                "row": {
+                  "$ref": "#/$defs/row"
+                },
+                "reason": {
+                  "$ref": "#/$defs/text"
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/assertion"
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "path",
+                "previous_sha256",
+                "row",
+                "reason",
+                "evidence"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0
+          },
+          "finding_decisions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/text"
+                },
+                "previous_sha256": {
+                  "$ref": "#/$defs/digest"
+                },
+                "action": {
+                  "enum": [
+                    "retain",
+                    "replace",
+                    "drop"
+                  ]
+                },
+                "reason": {
+                  "$ref": "#/$defs/text"
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/assertion"
+                  },
+                  "minItems": 0
+                },
+                "findings": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/finding"
+                  },
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "id",
+                "previous_sha256",
+                "action",
+                "reason",
+                "evidence"
+              ],
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "action": {
+                        "const": "replace"
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": [
+                      "findings"
+                    ]
+                  },
+                  "else": {
+                    "not": {
+                      "required": [
+                        "findings"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "action": {
+                        "enum": [
+                          "replace",
+                          "drop"
+                        ]
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "evidence": {
+                        "minItems": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "minItems": 0
+          },
+          "new_findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/finding"
+            },
+            "minItems": 0
+          },
+          "summary": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "required": [
+          "kind",
+          "proposal_index_sha256",
+          "retain_other_rows_from_index_sha256",
+          "row_replacements",
+          "finding_decisions",
+          "new_findings",
+          "summary"
+        ],
+        "additionalProperties": false,
+        "$defs": {
+          "text": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}(?![\\s\\S])"
+          },
+          "pointer": {
+            "type": "string",
+            "pattern": "^/(?![\\s\\S]*~(?![01]))"
+          },
+          "status": {
+            "enum": [
+              "applied",
+              "capability",
+              "fact",
+              "in_progress",
+              "instruction",
+              "planned"
+            ]
+          },
+          "source_status": {
+            "enum": [
+              "applied",
+              "capability",
+              "fact",
+              "in_progress",
+              "instruction",
+              "planned",
+              "unstated"
+            ]
+          },
+          "document": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "$ref": "#/$defs/text"
+              },
+              "chunk": {
+                "$ref": "#/$defs/text"
+              },
+              "quote": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "required": [
+              "source",
+              "chunk",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "artifact": {
+            "type": "object",
+            "properties": {
+              "artifact": {
+                "enum": [
+                  "original_full",
+                  "original_core"
+                ]
+              },
+              "path": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  {
+                    "const": "@header"
+                  }
+                ]
+              },
+              "op": {
+                "enum": [
+                  "contains",
+                  "lacks"
+                ]
+              },
+              "quote": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "required": [
+              "artifact",
+              "path",
+              "op",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "assertion": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/document"
+              },
+              {
+                "$ref": "#/$defs/artifact"
+              }
+            ]
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "provenance": {
+                "const": "source_manifest"
+              },
+              "sha256": {
+                "$ref": "#/$defs/digest"
+              },
+              "source_id": {
+                "$ref": "#/$defs/text"
+              },
+              "source": {
+                "$ref": "#/$defs/text"
+              },
+              "field": {
+                "enum": [
+                  "captured_at",
+                  "effective_priority",
+                  "priority_basis",
+                  "source_type",
+                  "superseded_by"
+                ]
+              },
+              "value": {}
+            },
+            "required": [
+              "provenance",
+              "sha256",
+              "source_id",
+              "source",
+              "field",
+              "value"
+            ],
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "field": {
+                      "const": "effective_priority"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "field": {
+                      "const": "priority_basis"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "enum": [
+                        "source_override",
+                        "source_type",
+                        "unranked"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "field": {
+                      "enum": [
+                        "source_type",
+                        "captured_at",
+                        "superseded_by"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "value": {
+                      "$ref": "#/$defs/text"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "claim": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "$ref": "#/$defs/text"
+              },
+              "verdict": {
+                "enum": [
+                  "supported",
+                  "revise"
+                ]
+              },
+              "attributed_to": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/text"
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "claim_status": {
+                "$ref": "#/$defs/status"
+              },
+              "source_status": {
+                "$ref": "#/$defs/source_status"
+              },
+              "evidence": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/document"
+                    },
+                    "minItems": 0
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/provenance"
+                    },
+                    "minItems": 0
+                  }
+                ]
+              },
+              "reason": {
+                "$ref": "#/$defs/text"
+              }
+            },
+            "required": [
+              "text",
+              "verdict",
+              "attributed_to",
+              "claim_status",
+              "source_status",
+              "evidence",
+              "reason"
+            ],
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "evidence": {
+                      "minItems": 1
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "evidence": {
+                      "minItems": 1,
+                      "items": {
+                        "$ref": "#/$defs/provenance"
+                      }
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "attributed_to": {
+                      "maxItems": 0
+                    },
+                    "claim_status": {
+                      "const": "fact"
+                    },
+                    "source_status": {
+                      "const": "fact"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "applied"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "applied"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "capability"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "capability"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "fact"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "fact"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "in_progress"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "in_progress"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "instruction"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "instruction"
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "verdict": {
+                      "const": "supported"
+                    },
+                    "claim_status": {
+                      "const": "planned"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "source_status": {
+                      "const": "planned"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "row": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  "claims": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/claim"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "path",
+                  "claims"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  "metadata_reason": {
+                    "$ref": "#/$defs/text"
+                  }
+                },
+                "required": [
+                  "path",
+                  "metadata_reason"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "removal": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  "identity": {
+                    "allOf": [
+                      {
+                        "$ref": "#/$defs/pointer"
+                      },
+                      {
+                        "pattern": "/(checksum|doi|grant_number|hash|id|md5|name|orcid|sha256|target_dataset|variable_name)(?![\\s\\S])"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "$ref": "#/$defs/pointer"
+                  },
+                  "match": {
+                    "const": "anonymous_structure_v1"
+                  },
+                  "original_full_sha256": {
+                    "$ref": "#/$defs/digest"
+                  }
+                },
+                "required": [
+                  "path",
+                  "match",
+                  "original_full_sha256"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "finding": {
+            "type": "object",
+            "properties": {
+              "severity": {
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ]
+              },
+              "record": {
+                "enum": [
+                  "full",
+                  "core",
+                  "both"
+                ]
+              },
+              "slot": {
+                "$ref": "#/$defs/text"
+              },
+              "issue": {
+                "$ref": "#/$defs/text"
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/assertion"
+                },
+                "minItems": 1
+              },
+              "review_paths": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/pointer"
+                },
+                "minItems": 1
+              },
+              "remove_relationship": {
+                "$ref": "#/$defs/removal"
+              }
+            },
+            "required": [
+              "severity",
+              "record",
+              "slot",
+              "issue",
+              "evidence"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additional_rules": [
+        "Emit one strict UTF-8 JSON object, without Markdown fences, duplicate keys, nonfinite numbers or trailing text. Do not add keys beyond the chosen object variant. Blank strings are invalid where text is required; JSON null is not an empty array or omitted optional property.",
+        "Draft parts are concatenated as raw UTF-8 bytes in their registered order, with no inserted comma, newline or other separator. The combined bytes must be exactly one complete JSON object, not one object or array per part. Preserve commas, brackets and string escaping across boundaries; do not restart or repeat an enclosing object in a later part. Each individual part must be valid UTF-8 and obey the registered size limit. Never append commentary or code fences.",
+        "Every source-review path occurs once. A row has path and nonempty claims, OR path and metadata_reason, never both. The metadata variant is scientifically permitted only for an inventory value marked record_metadata_allowed.",
+        "Each claim has exactly text, verdict, attributed_to, claim_status, source_status, evidence and reason. attributed_to is an array of distinct nonblank source filenames, not a string. A supported claim has nonempty evidence and equal claim_status/source_status. source_status=unstated is available only with revise. These are declaration rules, not authority to change a scientific judgment.",
+        "Claim evidence contains document assertions OR provenance assertions, never a mixture or original-artifact assertions. Provenance assertions require empty attributed_to and fact/fact statuses. effective_priority is a positive JSON integer: do not write 2.0, true or a quoted numeral. Findings and integration decisions use document/artifact assertions, not provenance assertions.",
+        "Every path with any revise claim must be linked by at least one final finding's review_paths. Each listed review_path must contain at least one revise claim. Supporting-only and metadata-only rows do not belong in review_paths. An omission finding may omit review_paths; do not invent a populated path for an omission.",
+        "Finding record uses full/core/both; artifact uses original_full/original_core. severity uses high/medium/low. summary is one nonblank string, not a counts object; any stated counts must match final findings. The scientific protocol governs which affected records and evidence are actually available.",
+        "remove_relationship is one object. Use path with optional identity, OR path/match=anonymous_structure_v1/original_full_sha256; never mix modes. Identity is a relative JSON Pointer ending in an allowed identifier field. The path-only form's scientific admissibility and every removal's exact identity are governed by the selected protocol; a grammar pass does not approve removal.",
+        "Paths are JSON Pointers starting with /; escape ~ as ~0 and / within a key as ~1. @header is permitted only for artifact evidence paths. Digests are 64 lowercase hex characters. Copy the exact registered digest/identity; never copy an example's digest or invent one.",
+        "A shape pass does not establish literal coverage, source quotation accuracy, complete clauses, status correctness, attribution, entailment or scientific acceptance. Preserve the assigned scientific review and the selected two-round/seal/terminal-check workflow.",
+        "Return an integration delta, not a complete audit object: exactly kind, proposal_index_sha256, retain_other_rows_from_index_sha256, row_replacements, finding_decisions, new_findings and summary. Both index digests equal the exact supplied worker index.sha256, not the plan hash or a raw index-file hash.",
+        "Before final decisions, successfully Read every complete canonical worker row, including retained rows, and assess complete findings. Retention binds all unchanged rows to the exact reviewed index; it does not authorize retaining unread rows.",
+        "row_replacements may be empty. Each replacement path is an existing indexed path, occurs once, and matches row.path. previous_sha256 is that indexed row's canonical-object sha256. Supply a complete replacement row, a reason and nonempty document/artifact evidence. Never add/delete a row, change its path or submit a partial patch.",
+        "finding_decisions contains exactly one entry for every index.findings id, no others. Copy each id and its own canonical-object sha256 into previous_sha256. retain keeps the complete old finding and may use empty evidence; drop removes it and requires nonempty evidence; replace requires nonempty evidence AND a nonempty findings array of complete replacement findings (a split is allowed). findings must be absent for retain/drop, not null or an empty array.",
+        "new_findings is an array, possibly empty, of complete independently authored findings. The final summary is model-authored. After all explicit decisions, every revise row must still link to a final finding and every review_path must still have a revise claim. Replacing or dropping a concern must not orphan a revised row; change the complete row explicitly only when scientifically justified.",
+        "All final removals must have top-level roots in the full plan. No two final removals may be identical or stand in an ancestor/descendant relation. Resolve any overlap explicitly through finding decisions; the assembler will not infer a repair or discard a finding."
+      ],
+      "synthetic_example": {
+        "warning": "Invented grammar fixture only. Do not copy any fact, path, source, digest or judgment into your run.",
+        "original_full": "alpha: Example alpha.\nbeta: Example beta.\ngamma: Example gamma.\n",
+        "proposal": {
+          "kind": "audit_integration_v1",
+          "proposal_index_sha256": "2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2",
+          "retain_other_rows_from_index_sha256": "2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2",
+          "row_replacements": [
+            {
+              "path": "/gamma",
+              "previous_sha256": "8640a436ff6817ac62aa71dddb6e3b5bbb2b3705c00bcda683bf22ad57b61165",
+              "row": {
+                "path": "/gamma",
+                "claims": [
+                  {
+                    "text": "Example gamma.",
+                    "verdict": "supported",
+                    "attributed_to": [],
+                    "claim_status": "fact",
+                    "source_status": "fact",
+                    "evidence": [
+                      {
+                        "source": "example.txt",
+                        "chunk": "c001",
+                        "quote": "Illustrative source statement."
+                      }
+                    ],
+                    "reason": "The fictional integration review establishes this fictional claim."
+                  }
+                ]
+              },
+              "reason": "A fictional source review justifies this complete row change.",
+              "evidence": [
+                {
+                  "source": "example.txt",
+                  "chunk": "c001",
+                  "quote": "Illustrative source statement."
+                }
+              ]
+            }
+          ],
+          "finding_decisions": [
+            {
+              "id": "worker_0001:0001",
+              "previous_sha256": "d0423368a921ed102d81259abfc5a0ef224ba246c913432d93728e18de597818",
+              "action": "retain",
+              "reason": "An explicit fictional integration disposition.",
+              "evidence": []
+            },
+            {
+              "id": "worker_0001:0002",
+              "previous_sha256": "e8991f88c992ada7998360d831e764d203377bed19db9a04716febff8e421d13",
+              "action": "replace",
+              "reason": "An explicit fictional integration disposition.",
+              "evidence": [
+                {
+                  "source": "example.txt",
+                  "chunk": "c001",
+                  "quote": "Illustrative source statement."
+                }
+              ],
+              "findings": [
+                {
+                  "severity": "medium",
+                  "record": "full",
+                  "slot": "beta",
+                  "issue": "The fictional integration review restates this concern precisely.",
+                  "review_paths": [
+                    "/beta"
+                  ],
+                  "evidence": [
+                    {
+                      "source": "example.txt",
+                      "chunk": "c001",
+                      "quote": "Illustrative source statement."
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "worker_0001:0003",
+              "previous_sha256": "1faabeba8dd713787c2e2c1e5cb8999070f2053d1f4ef389db2c92a856cc9465",
+              "action": "drop",
+              "reason": "An explicit fictional integration disposition.",
+              "evidence": [
+                {
+                  "source": "example.txt",
+                  "chunk": "c001",
+                  "quote": "Illustrative source statement."
+                }
+              ]
+            }
+          ],
+          "new_findings": [],
+          "summary": "2 illustrative findings: 2 medium."
+        },
+        "worker_proposals": [
+          {
+            "id": "worker_0001",
+            "proposal": {
+              "findings": [
+                {
+                  "severity": "medium",
+                  "record": "full",
+                  "slot": "alpha",
+                  "issue": "An illustrative concern about this claim.",
+                  "review_paths": [
+                    "/alpha"
+                  ],
+                  "evidence": [
+                    {
+                      "source": "example.txt",
+                      "chunk": "c001",
+                      "quote": "Illustrative source statement."
+                    }
+                  ]
+                },
+                {
+                  "severity": "medium",
+                  "record": "full",
+                  "slot": "beta",
+                  "issue": "An illustrative concern about this claim.",
+                  "review_paths": [
+                    "/beta"
+                  ],
+                  "evidence": [
+                    {
+                      "source": "example.txt",
+                      "chunk": "c001",
+                      "quote": "Illustrative source statement."
+                    }
+                  ]
+                },
+                {
+                  "severity": "medium",
+                  "record": "full",
+                  "slot": "gamma",
+                  "issue": "An illustrative concern about this claim.",
+                  "review_paths": [
+                    "/gamma"
+                  ],
+                  "evidence": [
+                    {
+                      "source": "example.txt",
+                      "chunk": "c001",
+                      "quote": "Illustrative source statement."
+                    }
+                  ]
+                }
+              ],
+              "summary": "3 illustrative findings: 3 medium.",
+              "source_review": {
+                "artifact": "original_full",
+                "sha256": "23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d",
+                "values": [
+                  {
+                    "path": "/alpha",
+                    "claims": [
+                      {
+                        "text": "Example alpha.",
+                        "verdict": "revise",
+                        "attributed_to": [],
+                        "claim_status": "fact",
+                        "source_status": "unstated",
+                        "evidence": [],
+                        "reason": "An illustrative claim requiring scientific review."
+                      }
+                    ]
+                  },
+                  {
+                    "path": "/beta",
+                    "claims": [
+                      {
+                        "text": "Example beta.",
+                        "verdict": "revise",
+                        "attributed_to": [],
+                        "claim_status": "fact",
+                        "source_status": "unstated",
+                        "evidence": [],
+                        "reason": "An illustrative claim requiring scientific review."
+                      }
+                    ]
+                  },
+                  {
+                    "path": "/gamma",
+                    "claims": [
+                      {
+                        "text": "Example gamma.",
+                        "verdict": "revise",
+                        "attributed_to": [],
+                        "claim_status": "fact",
+                        "source_status": "unstated",
+                        "evidence": [],
+                        "reason": "An illustrative claim requiring scientific review."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "worker_index": {
+          "schema_version": 1,
+          "kind": "audit_batch_index_v1",
+          "plan_sha256": "a645c7f385dabb85c4d0492f0dcc44df57f222dfe50f7527ef0219ff042cc111",
+          "original_full_sha256": "23e734ba351bd2c73166f6929967aa0585e80eea324d775849f898662a29a87d",
+          "workers": [
+            {
+              "id": "worker_0001",
+              "sha256": "46b9acb75a058dfbfce8d4bed67d78cd0c39b0163c3503e0a2f741479083d43c",
+              "bytes": 1519
+            }
+          ],
+          "rows": [
+            {
+              "path": "/alpha",
+              "worker_id": "worker_0001",
+              "sha256": "a8e7468c943066713ff4d3d2af228ad0eddbfb8cbb54d5a87b705b80fe93c287"
+            },
+            {
+              "path": "/beta",
+              "worker_id": "worker_0001",
+              "sha256": "459b5a9498e74489fcee075b13c1a7fa4d2c34a70f69d3410c51647cb0100544"
+            },
+            {
+              "path": "/gamma",
+              "worker_id": "worker_0001",
+              "sha256": "8640a436ff6817ac62aa71dddb6e3b5bbb2b3705c00bcda683bf22ad57b61165"
+            }
+          ],
+          "findings": [
+            {
+              "id": "worker_0001:0001",
+              "worker_id": "worker_0001",
+              "ordinal": 0,
+              "sha256": "d0423368a921ed102d81259abfc5a0ef224ba246c913432d93728e18de597818"
+            },
+            {
+              "id": "worker_0001:0002",
+              "worker_id": "worker_0001",
+              "ordinal": 1,
+              "sha256": "e8991f88c992ada7998360d831e764d203377bed19db9a04716febff8e421d13"
+            },
+            {
+              "id": "worker_0001:0003",
+              "worker_id": "worker_0001",
+              "ordinal": 2,
+              "sha256": "1faabeba8dd713787c2e2c1e5cb8999070f2053d1f4ef389db2c92a856cc9465"
+            }
+          ],
+          "sha256": "2f784534a1ed03e54afb22e12f6abd3014aaefddef98cb97e5c0f476543fc5c2"
+        }
+      }
+    }
+  }
+}

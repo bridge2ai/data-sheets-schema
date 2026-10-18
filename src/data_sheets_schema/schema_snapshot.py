@@ -72,6 +72,17 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
     read = read_bytes or Path.read_bytes
     from data_sheets_schema.resources import physical
     root = physical(resource_path(path))              # from any directory; `..` through the filesystem (#1301, #1570)
+    return _capture_schema(root, read, content=content, namespace_orders=namespace_orders,
+                           strict=strict, physical_identity=True)
+
+
+def _capture_schema(root, read, *, content=None, namespace_orders=None,
+                    strict=False, physical_identity=False):
+    """Shared import traversal; captured readers supply an already logical root.
+
+    The live wrapper alone resolves filesystem aliases. A saved closure never
+    probes a logical original path, including while building its cache key.
+    """
     files = {root: read(root) if content is None else content}
     root_meta = _metadata(files[root])
     names = {root: root_meta[0]}
@@ -125,7 +136,7 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
     identity = []
     for p, data in sorted(files.items()):
         try:
-            target = str(p.resolve())
+            target = str(p.resolve()) if physical_identity else str(p)
         except (OSError, RuntimeError):
             target = str(p)
         stamp = (f"{type(data).__name__}:{data.errno}" if isinstance(data, OSError)

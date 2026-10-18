@@ -568,8 +568,13 @@ def check_report(text: str, *, artifacts: dict, chunks: dict, protocol_version: 
 
 
 def source_chunks(bundle: Path, manifest: Path) -> tuple[dict, dict]:
-    from data_sheets_schema import chunking
     raw, manifest_raw = bundle.read_bytes(), manifest.read_bytes()
+    return source_chunks_from_bytes(raw, manifest_raw)
+
+
+def source_chunks_from_bytes(raw: bytes, manifest_raw: bytes) -> tuple[dict, dict]:
+    """Validate and read chunks from the same captured bytes their pins name."""
+    from data_sheets_schema import chunking
     from data_sheets_schema.duplicate_keys import find_duplicate_keys
     if find_duplicate_keys(manifest_raw.decode("utf-8")):
         raise ValueError("chunk manifest has duplicate YAML mapping keys")

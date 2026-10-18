@@ -1,0 +1,725 @@
+{
+  "actual_executions": [
+    {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-I",
+        "-B",
+        "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/worker.py",
+        "CHORUS"
+      ],
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+      "elapsed_seconds": 3.221344916993985,
+      "environment_removals": [
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "PYTHONPYCACHEPREFIX",
+        "PYTEST_ADDOPTS",
+        "PYTEST_PLUGINS"
+      ],
+      "environment_updates": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "form": "CHORUS",
+      "pid": 61267
+    },
+    {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-I",
+        "-B",
+        "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/worker.py",
+        "VOICE"
+      ],
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+      "elapsed_seconds": 2.736534750001738,
+      "environment_removals": [
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "PYTHONPYCACHEPREFIX",
+        "PYTEST_ADDOPTS",
+        "PYTEST_PLUGINS"
+      ],
+      "environment_updates": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "form": "VOICE",
+      "pid": 61404
+    },
+    {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-I",
+        "-B",
+        "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/worker.py",
+        "CM4AI_reduced"
+      ],
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+      "elapsed_seconds": 2.453558625013102,
+      "environment_removals": [
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "PYTHONPYCACHEPREFIX",
+        "PYTEST_ADDOPTS",
+        "PYTEST_PLUGINS"
+      ],
+      "environment_updates": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "form": "CM4AI_reduced",
+      "pid": 61408
+    },
+    {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-I",
+        "-B",
+        "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/worker.py",
+        "VOICE_provenance"
+      ],
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+      "elapsed_seconds": 2.407274791999953,
+      "environment_removals": [
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "PYTHONPYCACHEPREFIX",
+        "PYTEST_ADDOPTS",
+        "PYTEST_PLUGINS"
+      ],
+      "environment_updates": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "form": "VOICE_provenance",
+      "pid": 61416
+    },
+    {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-I",
+        "-B",
+        "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/worker.py",
+        "CM4AI_original"
+      ],
+      "closure": {
+        "owned_group_absent": true,
+        "signals": []
+      },
+      "cwd": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+      "elapsed_seconds": 5.503552874986781,
+      "environment_removals": [
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "PYTHONPYCACHEPREFIX",
+        "PYTEST_ADDOPTS",
+        "PYTEST_PLUGINS"
+      ],
+      "environment_updates": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "error": null,
+      "exit_code": 0,
+      "form": "CM4AI_original",
+      "pid": 61426
+    }
+  ],
+  "artifacts": [
+    {
+      "bytes": 7791,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d.yaml",
+      "sha256": "97bec858efba1da5372ffbbb5894fbbb6d797dc38f7995c6615816f0d7bae13b"
+    },
+    {
+      "bytes": 12116,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d_report.txt",
+      "sha256": "f935a526cb804ef64c73f8e02d036ab2f2e3ee82a7e1a35ede7274e40f913ddd"
+    },
+    {
+      "bytes": 30422,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CHORUS/CHORUS_d4d_route_dispositions.json",
+      "sha256": "201569d165267c878a77de7905c714636f0e43068768285c7f26c139d7253de1"
+    },
+    {
+      "bytes": 11022,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d.yaml",
+      "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+    },
+    {
+      "bytes": 40904,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d_report.txt",
+      "sha256": "c7725cf8d5fd3e03503ea382a2c5f49f127470cc1baebd2dc09f0a7090460299"
+    },
+    {
+      "bytes": 13033881,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_original/CM4AI_original_d4d_route_dispositions.json",
+      "sha256": "50f39f4c7d362d96cca866de939f82d3f3b02791760bb35419be72a661d3de62"
+    },
+    {
+      "bytes": 11022,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d.yaml",
+      "sha256": "03aae7cd6ad60e9d9bf7e07f3f3f81a53a2a6b6c84c40bdc7017738a09380f5a"
+    },
+    {
+      "bytes": 41982,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d_report.txt",
+      "sha256": "a4d715a8814d22311a6d8803df1b07a1a919ea224746b97a0e9cdf68236f0f25"
+    },
+    {
+      "bytes": 130220,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/CM4AI_reduced/CM4AI_reduced_d4d_route_dispositions.json",
+      "sha256": "4ebdb36ff6d5553f609421798a0ab1c10d38186061fb56a4f314aa06335e5016"
+    },
+    {
+      "bytes": 21274,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d.yaml",
+      "sha256": "4e102b473be6d493cad5aa5c2cb670912fe24f5927588ef147cee1539a02af23"
+    },
+    {
+      "bytes": 38733,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d_report.txt",
+      "sha256": "99a827f0f9090b32cb1e67e15180bc0eeaa1380570564f797edda9d3256458fe"
+    },
+    {
+      "bytes": 829227,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE/VOICE_d4d_route_dispositions.json",
+      "sha256": "0ea926301865df14abfe10484bd1d3315c1b3daf450aee79b454dbfd579f2345"
+    },
+    {
+      "bytes": 739,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d.yaml",
+      "sha256": "79623548f0ba57b8501ab427e6e41fbc99f20c1aa0a6087837356412dabb4827"
+    },
+    {
+      "bytes": 2620,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d_report.txt",
+      "sha256": "e27360b27f5db71c13312878abeb5e7242ef82fa8c2bf639bdba923e2a95ec93"
+    },
+    {
+      "bytes": 7814,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d_route_dispositions.json",
+      "sha256": "b5702fc79bdcd3337f2e0c533086c8a07508abcc4b5f15972c7ed3058b17d4ae"
+    },
+    {
+      "bytes": 2753,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/input-acquisition.json",
+      "sha256": "94e6c694d719d6b04a40a9a172f9c9f926f4590e46c3a1b8b7cfeae9a6d2c465"
+    },
+    {
+      "bytes": 20635,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CHORUS.json",
+      "sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774"
+    },
+    {
+      "bytes": 12242926,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_original.json",
+      "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+    },
+    {
+      "bytes": 107388,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_reduced.json",
+      "sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610"
+    },
+    {
+      "bytes": 726461,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE.json",
+      "sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4"
+    },
+    {
+      "bytes": 1232,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE_provenance.json",
+      "sha256": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608"
+    },
+    {
+      "bytes": 537,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/preservation.json",
+      "sha256": "abdbd749903f27a7bff0d4dc6d03f33ef5dc62858dab7d80945e4d1d1acfc40c"
+    },
+    {
+      "bytes": 693,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CHORUS.execution.json",
+      "sha256": "c04cab9ca22d9a7efd48219778cf4b0843411337323fe972f75502cfa86b3dc7"
+    },
+    {
+      "bytes": 0,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CHORUS.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6268,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CHORUS.stdout.log",
+      "sha256": "bbcc94691c75d999d740d79bcc430e0225b0a0c18f6126a80d96125fc382b881"
+    },
+    {
+      "bytes": 12069,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CHORUS.worker.json",
+      "sha256": "7b90a10700c11e1c9fe4faed8054862c7c86da70a2767cd18fb8a312894f6a7b"
+    },
+    {
+      "bytes": 709,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CM4AI_original.execution.json",
+      "sha256": "1b61c0824ba304051fea90806b7f2e20900fac4271db505e8f4cb5d8f3dca6f3"
+    },
+    {
+      "bytes": 0,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CM4AI_original.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 35401,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CM4AI_original.stdout.log",
+      "sha256": "0a9536508c116b627b677d2fa16a2f189e40b9f54d9edee5b0fd159d1ac53921"
+    },
+    {
+      "bytes": 12460,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CM4AI_original.worker.json",
+      "sha256": "e50879fbbcce488c3bfe3aa29afcd2c0cf37df3e42c5ec5b4be4eb87820877cd"
+    },
+    {
+      "bytes": 707,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CM4AI_reduced.execution.json",
+      "sha256": "0658e918ae5bd4e0ad410cc08b6fcc93b3e35947899e598986452b11aa4a3174"
+    },
+    {
+      "bytes": 0,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CM4AI_reduced.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 35395,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CM4AI_reduced.stdout.log",
+      "sha256": "9945b2678bc91914369ed85887a8e97dcca47b3a1dc38fea05cee8b2075a613b"
+    },
+    {
+      "bytes": 12449,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/CM4AI_reduced.worker.json",
+      "sha256": "4659a50d5e3c3d81601a5014ff48f1d2d9ffc3fd4e7f41d38860c959747867a4"
+    },
+    {
+      "bytes": 691,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/VOICE.execution.json",
+      "sha256": "f47605ba99b7e2790017b800d19d7c44a7671693fa742b563eca6686aa2aaefc"
+    },
+    {
+      "bytes": 0,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/VOICE.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 32818,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/VOICE.stdout.log",
+      "sha256": "3f1e485a305e41a31718a2830be692c01f0f44107aa1f4065607d03cce098787"
+    },
+    {
+      "bytes": 12062,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/VOICE.worker.json",
+      "sha256": "2b17a57f6bd17015dec5a9ad3cdd61c3b4dc8a288a0ddc2d8494bb6f7121a58b"
+    },
+    {
+      "bytes": 713,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/VOICE_provenance.execution.json",
+      "sha256": "8d4f58c16e629465ab28480b231ea357f842668292f4ffaa4481d4ec2b0fcb8b"
+    },
+    {
+      "bytes": 0,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/VOICE_provenance.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2301,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/VOICE_provenance.stdout.log",
+      "sha256": "fff734c65ecf13a0cfc813678c7ee3f03b7feb36f591af39560ba35c5a7b856d"
+    },
+    {
+      "bytes": 12165,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/receipts/VOICE_provenance.worker.json",
+      "sha256": "170713ba8dadebd1b442acb18bd65053e8b08a398ffffbb8d4c3320e0fc5e1af"
+    },
+    {
+      "bytes": 2387953,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/source-after.json",
+      "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+    },
+    {
+      "bytes": 2387953,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/source-before.json",
+      "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+    }
+  ],
+  "elapsed_seconds": 18.210317791003035,
+  "error": null,
+  "format": "legacy4594_actual_cli_publication_release_v1",
+  "inputs": [
+    {
+      "form": "CHORUS",
+      "original": {
+        "bytes": 20635,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/CHORUS.json",
+        "sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774"
+      },
+      "staged": {
+        "bytes": 20635,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CHORUS.json",
+        "sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774"
+      }
+    },
+    {
+      "form": "VOICE",
+      "original": {
+        "bytes": 726461,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/VOICE.json",
+        "sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4"
+      },
+      "staged": {
+        "bytes": 726461,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE.json",
+        "sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4"
+      }
+    },
+    {
+      "form": "CM4AI_reduced",
+      "original": {
+        "bytes": 107388,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/CM4AI_reduced.json",
+        "sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610"
+      },
+      "staged": {
+        "bytes": 107388,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_reduced.json",
+        "sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610"
+      }
+    },
+    {
+      "form": "VOICE_provenance",
+      "original": {
+        "bytes": 1232,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/VOICE_provenance.json",
+        "sha256": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608"
+      },
+      "staged": {
+        "bytes": 1232,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE_provenance.json",
+        "sha256": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608"
+      }
+    },
+    {
+      "form": "CM4AI_original",
+      "original": {
+        "bytes": 12242926,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-replay01/candidate/inputs/CM4AI_original.json",
+        "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+      },
+      "staged": {
+        "bytes": 12242926,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/CM4AI_original.json",
+        "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+      }
+    }
+  ],
+  "label": "2026-10-11_legacy-semantic-default-4932-v1",
+  "limitations": [
+    "This is a legacy semantic TSV software publication release, not a registered study arm or rocrate_static_map/rocrate_mapped output.",
+    "Five software input forms are not five independent datasets. CM4AI reduced/original retain distinct full source evidence.",
+    "Five independent CLI publications; replacement is atomic per file only. A failed sequence leaves preserved fresh partial outputs and no completed manifest.",
+    "Existing staticv4/fig09 publication and43policy/136rule/81legacyranking denominators remain unchanged. Retired rows are not coverage; copied text is not exact/no-loss fidelity.",
+    "Prior2194and2196 tests/replay executions retain their actual dirty-source identities; the new merged producer is separately bound.",
+    "Parent2915/4594/4385 and held2983 adoption/scientific decisions do not close from this bounded release.",
+    "The #4940 supplemental report section accounts for present assertions outside the TSV roster; it is not an extra mapping, ranking denominator, source/fidelity gain, or validation credit. Actual #4941 API tests are prerequisite evidence, not exercised by these CLI publications.",
+    "The anticipated six diagnostic postimages are frozen, but their actual merged producer, new whole-PR plugin review, required CI and saved-baseline confirmation and two actual green test receipts must be bound by root after completion. Failed plugin review02 remains needs-attention evidence.",
+    "Original validation01 baseline wrapper remains failed under #4942; its three actual semantic assertion failures are confirmed separately from saved evidence without an application rerun. Confirmation is not product acceptance."
+  ],
+  "method": "legacy_semantic_tsv",
+  "passed": true,
+  "policy": "root_default_route_dispositions_v1",
+  "preservation": {
+    "bytes": 537,
+    "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/preservation.json",
+    "sha256": "abdbd749903f27a7bff0d4dc6d03f33ef5dc62858dab7d80945e4d1d1acfc40c"
+  },
+  "prior_evidence": {
+    "baseline_classifier_independent_audit": {
+      "bytes": 12451,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-baseline-and-classifier-completed-independent-audit.json",
+      "sha256": "25036a313008e35fa4a0400057722e7bdf295c6a1f5aa7bb9c477e5007deb08c"
+    },
+    "comparison": {
+      "bytes": 10518,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-comparison03-completed-independent-audit.json",
+      "sha256": "a876b97782330c3d0cca7588949469cd343f2de90d32fa7ff0959ec37004571a"
+    },
+    "diagnostic313_independent_audit": {
+      "bytes": 7119,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-candidate313-completed-independent-audit.json",
+      "sha256": "de0648d3c9210e6be14676203b0a6b3811843b15aed0dfad2020976fc1c0356c"
+    },
+    "diagnostic_validation_package": {
+      "bytes": 2665,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02/freeze.json",
+      "sha256": "b26a33d76b3bc1f1b51bdb22b29f6168753fde1545a9fd0b75c852d9b604a3b6"
+    },
+    "original_dual2194_validation": {
+      "bytes": 25139,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-route-dispositions4932-validation02-completed-independent-audit.json",
+      "sha256": "60241bf3d8447bef03a4c6bb39484cb464a88ff96544e1285f6d815940b7a293"
+    },
+    "original_failed_baseline_execution": {
+      "bytes": 6133,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation01-results/baseline313/execution.json",
+      "sha256": "fd47def98151d1292aa8fed94e54137d417c8d1471c72a76115c9e600e6eacef"
+    },
+    "report_api_diagnostic_drafts": [
+      {
+        "bytes": 3708,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-supplemental-report-draft02/freeze.json",
+        "sha256": "9279b5f5157a47de4f844071ed24ff9b9bffec2fde0e81e15afe1f5fad30de3f"
+      },
+      {
+        "bytes": 5609,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-route-api-counts4941-draft01/freeze.json",
+        "sha256": "dec68dff7a924ad8ab712db56eba6d73a61b9cc7d53a60387472bfefc62179f9"
+      }
+    ],
+    "report_fix_red_green_dual2196": {
+      "bytes": 8981,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-transform-report-json-validation02-completed-joint-audit.json",
+      "sha256": "8bec4d28acf9916464f8301eb0f3a77576497d520de19b36e250b90efd5b6463"
+    },
+    "saved_baseline_confirmation": {
+      "bytes": 6028,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/baseline-confirmation.json",
+      "sha256": "3d0bd80f54d9bc665b16c0254dd3724e8994c62cf803aaa4dae2dcc082cee912"
+    }
+  },
+  "producer": {
+    "ci_evidence": [
+      {
+        "bytes": 13619,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/ci-run.json",
+        "sha256": "422b28e43c18e3783d8705beb09951a1dae60a2aa8ac048b0342024c07e8d3ad"
+      },
+      {
+        "bytes": 27252,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/ci-jobs.json",
+        "sha256": "388729f9d0fb783a45e6faf7ba0d8b105da852c39dfcb4893b76b800f03f4a33"
+      },
+      {
+        "bytes": 57948,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/head-checks.json",
+        "sha256": "8b707d313ebbe1ee4bfda063f5f01e1a0b9680e39216f3d1218468de589252d3"
+      },
+      {
+        "bytes": 447,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/premerge-verification.json",
+        "sha256": "64152bab03bce7b1bc340845bb96824582c24f745b8674971154436c6281bb21"
+      }
+    ],
+    "diagnostic_validation_evidence": {
+      "candidate313": {
+        "bytes": 6489,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate313/execution.json",
+        "sha256": "4f34c4755fba72795e42bef90ed0607d4d8af372d162d3da48a76b8804a5e27f"
+      },
+      "candidate39": {
+        "bytes": 6804,
+        "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-diagnostics4940-4941-validation02-results/candidate39/execution.json",
+        "sha256": "206fb021218e1cbc5a06cfb93a7b4d71158ee6b60ca7dc2c411bf270afdf7f1e"
+      }
+    },
+    "head": "ffc4ca922723caa620af2e32a31ad538bc5a5ac9",
+    "merged_pr_snapshot": {
+      "bytes": 20921,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy4938-merge01/pr-merged.json",
+      "sha256": "1f21a31bcab2ad770d12c8f9bdc3f3a4f016c7496ee625d996858d4af93fe4c3"
+    },
+    "plugin_review_evidence": [
+      {
+        "bytes": 2046,
+        "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/execution.json",
+        "sha256": "457ae27cc0e87f3c57b33214cc0ef78d84bc6e27410948f3ac77b233e7e18d87"
+      },
+      {
+        "bytes": 887,
+        "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/stdout.txt",
+        "sha256": "76fa0908971580d1b119c0efeb9c104be8ee10cf48e0dd0a711c9308b4031ac6"
+      },
+      {
+        "bytes": 17402,
+        "path": "/private/tmp/d4d-legacy-dispositions4932-plugin-review03/stderr.txt",
+        "sha256": "6c5cc1ef80527d9bc5d33f957ddfd2841eb973371870caf08119b0952dd7ea00"
+      }
+    ],
+    "python": {
+      "bytes": 5777152,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "sha256": "e425798f1fd82ff2450b84a24b58150996345c0f8fb7f07aae68a5033ba8df19"
+    },
+    "reviewed_pr_head": "00b80002371fe119bc089445234d6b2f5bd5e24d",
+    "reviewed_pr_tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe",
+    "root_readiness": {
+      "bytes": 2486,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-execution05/root-readiness.json",
+      "sha256": "dba27e16ccb4387a7db2ecf89f6111655cba958c7190d983fe467f6014511ed8"
+    },
+    "source": "/private/tmp/d4d-legacy-dispositions-4932-20261011",
+    "source_inventory": {
+      "bytes": 2387953,
+      "path": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-binding-proposal01/source-inventory.json",
+      "sha256": "886c2de344c2ebf2b606281869da3dcc160c09d9c1e059e407db51d126010660"
+    },
+    "tree": "be88ffebf9c55bcf28d6602d66414ba2725df6fe"
+  },
+  "source_files": [
+    {
+      "bytes": 15162,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/.claude/agents/scripts/auto_process_rocrates.py",
+      "sha256": "776afbab5c2c3d99e37e3c7fa2d35e4712347261ff61a318b5e1389ba955afd3"
+    },
+    {
+      "bytes": 16607,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/.claude/agents/scripts/d4d_builder.py",
+      "sha256": "a14d0e35173aeed391e9a661ab7d31b51a107beefadbe2bd86781f93734c8a8c"
+    },
+    {
+      "bytes": 8050,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/.claude/agents/scripts/mapping_loader.py",
+      "sha256": "ab1773f06323c87ad24864ed325a49fe7c13cd4267c36186a9f0323993194477"
+    },
+    {
+      "bytes": 19849,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/.claude/agents/scripts/rocrate_merger.py",
+      "sha256": "fcd7db8116bd226b18e48bc7a56dc7fb47319f8625c9e8e6de01710282191d86"
+    },
+    {
+      "bytes": 21320,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/.claude/agents/scripts/rocrate_to_d4d.py",
+      "sha256": "5cb0a7a976f2547fabeae0302d9d7e4bc9a57d0333831edd7e386a71a41734bb"
+    },
+    {
+      "bytes": 31899,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+      "sha256": "7937c6298293710f94edca909fbd9d25ea05ae353616e3a1163682f1abd30b80"
+    },
+    {
+      "bytes": 23795,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/cli.py",
+      "sha256": "5d8020f0764e35af99f72e5d6e61e83d90455302dd28b075f75121d770b97a1d"
+    },
+    {
+      "bytes": 15792,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/d4d_builder.py",
+      "sha256": "d921541e73e23f2815d46bd3f25ef2102deed883b953ccd830933b103dbf9357"
+    },
+    {
+      "bytes": 7613,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/mapping_loader.py",
+      "sha256": "d259c2fb4694300d7cb0f7af3f7a0bb4e62170258e3840382cad438a127b27e7"
+    },
+    {
+      "bytes": 18933,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/rocrate_merger.py",
+      "sha256": "71d5d9210d7472c610dccffe3a10c736a8fe8335732bf0c8c82a9d2177b7fed7"
+    },
+    {
+      "bytes": 11414,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/fairscape_integration/utils/rocrate_parser.py",
+      "sha256": "452b617186c12d17cd054ffe1fb23532b412a54e77f816591fd16a399f3a0110"
+    },
+    {
+      "bytes": 42087,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/transformation/transform_api.py",
+      "sha256": "7057be40996b553c20105e324705656a0e1cc96ed9c41867f585822534c787e3"
+    },
+    {
+      "bytes": 15640,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_distribution_formats.py",
+      "sha256": "6fdf2d921e1660c5188fe2e2f3e8f5fbb40ebf8b062b88245d74716441656602"
+    },
+    {
+      "bytes": 20186,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_documentary_constructors.py",
+      "sha256": "57079309483cd4cf1e1c0333bc34edc9400fa45155566dda30ed90089fc87996"
+    },
+    {
+      "bytes": 18245,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_root_narrative_descriptions.py",
+      "sha256": "135c06a9603c26ac43afcb7f670ffabdbac19fc938561cc8ff771687fa009019"
+    },
+    {
+      "bytes": 13210,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_sensitive_elements.py",
+      "sha256": "0a5fd511f3aebb597eed7a60cf3051ca972f856674e28e7f7b9734f2edbe1635"
+    },
+    {
+      "bytes": 5123,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/docs/legacy_route_dispositions.md",
+      "sha256": "f1e710c99fd65e1dfa92b346ba7b193492968bbe91892f2cf49d455a55848302"
+    },
+    {
+      "bytes": 28634,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_route_dispositions.py",
+      "sha256": "1bf8af7c24d2a27f22995f9a84c7b141d168763d617d06358be31c13fdd9daf1"
+    },
+    {
+      "bytes": 31601,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_route_disposition_publication.py",
+      "sha256": "af0b9a96280ce02a9cdd4fe9ead60e5a1e896d50b936900f148eed9e60131e91"
+    },
+    {
+      "bytes": 22243,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_route_dispositions_core.py",
+      "sha256": "ac55b36bf7eeabace3f5a12e5bd33b85c9158a2a4a05c1af3f0e1ab06a057184"
+    },
+    {
+      "bytes": 6374,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/legacy_publication.py",
+      "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9"
+    },
+    {
+      "bytes": 15013,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/deterministic_publication.py",
+      "sha256": "ad148752c3c5ae8a24f1e4c04a570233d694ce4034ef76ee90daefe76c37882e"
+    },
+    {
+      "bytes": 58844,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/notes/D4D_GENERATION_ARMS.md",
+      "sha256": "38dc5b7d417f2f20fc4bb11b8ea93b46b5e74b345b9b8563239072602f73f8a2"
+    },
+    {
+      "bytes": 1442513,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+    },
+    {
+      "bytes": 8626,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_supplemental_report.py",
+      "sha256": "fe4af1e6290dc215a2a6c9770f34b6b1ab2320ccb9d27691e581774d551b7ad2"
+    },
+    {
+      "bytes": 14115,
+      "path": "/private/tmp/d4d-legacy-dispositions-4932-20261011/tests/test_rocrate/test_legacy_route_disposition_api_counts.py",
+      "sha256": "cc514fc77b7c66d17e8ee49ca9d02f79f1a7b028b54b44dc613fbc450f314392"
+    }
+  ]
+}

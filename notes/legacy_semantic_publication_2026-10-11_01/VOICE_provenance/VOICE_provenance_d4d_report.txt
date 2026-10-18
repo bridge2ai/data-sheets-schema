@@ -1,0 +1,32 @@
+================================================================================
+RO-Crate to D4D Transformation Report
+================================================================================
+
+SUMMARY
+--------------------------------------------------------------------------------
+Input: /private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE_provenance.json
+Output: /private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/VOICE_provenance/VOICE_provenance_d4d.yaml
+Mapping: /private/tmp/d4d-legacy-dispositions-4932-20261011/data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv
+Constructed output keys: 3/81
+Constructed-field presence (output keys; null-valued keys included): 3.7%
+Construction counts are not source coverage or validation success.
+
+
+ROOT AUTHOR SOURCE PRESENCE
+--------------------------------------------------------------------------------
+Immediate assertion units are not people, unique facts or validation successes.
+Route creators <- author: measured
+{"author_present": false, "immediate_assertion_units": 0, "nonnull": false, "processing_index": 0, "raw_value": null, "root_id": "ark:59853/b2ai-voice-dataset-feature-ppgs", "selected_primary": true, "source_index": 0, "source_name": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE_provenance.json"}
+
+
+CREATOR REFERENCE CONSTRUCTION
+--------------------------------------------------------------------------------
+Source author URI is reused as Creator.id; no PI/CRediT roles or organization IDs are inferred. Projection is not lossless, source coverage, unique-person counting or validation success.
+{"format": "legacy_creator_reference_construction_v1", "limitations": "Source author URI is reused as Creator.id; no PI/CRediT roles or organization IDs are inferred. Projection is not lossless, source coverage, unique-person counting or validation success.", "policy": "creator_author_references_v1", "scope": "selected_root_author_unique_same_crate_person", "sources": [{"author_present": false, "entries": [], "output_range": [0, 0], "processing_index": 0, "raw_author": null, "root_id": "ark:59853/b2ai-voice-dataset-feature-ppgs", "selected_primary": true, "source_index": 0, "source_name": "/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-default-publication4594-results05/inputs/VOICE_provenance.json"}]}
+
+Required Dataset.id construction is excluded from this count.
+
+UNMAPPED RO-CRATE PROPERTIES
+--------------------------------------------------------------------------------
+Found 0 properties with no D4D mapping:
+

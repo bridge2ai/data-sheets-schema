@@ -1,0 +1,34 @@
+# Neutralised fixture (#3515): see tests/fixtures/self_disclaimed/README.md. Not a real record.
+chunks:
+- id: c001
+  status: nothing_relevant
+  reason: Placeholder 1a98aa95.
+- id: c002
+  status: extracted
+  extracted:
+  - slot: creators[0].principal_investigator
+    snippet: Placeholder 7f0d7087. Principal investigator
+  - slot: creators[0].affiliations[0]
+    snippet: Placeholder fcce85f6.
+- id: c003
+  status: extracted
+  extracted:
+  - slot: creators[0].principal_investigator.affiliation[0]
+    snippet: Placeholder 274ab383.
+- id: c004
+  status: extracted
+  extracted: []
+- id: c005
+  status: extracted
+  extracted: []
+- id: c006
+  status: extracted
+  extracted: []
+- id: c007
+  status: extracted
+  extracted:
+  - slot: data_collectors[0]
+    snippet: Placeholder 35a89186. contribute
+- id: c008
+  status: extracted
+  extracted: []

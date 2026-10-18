@@ -6,9 +6,26 @@ This module parses RO-Crate JSON-LD structure and provides methods to extract
 properties for transformation to D4D YAML format.
 """
 
-import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+
+from data_sheets_schema.rocrate_map import TRANSCODE_HINT, _crate_json_from_bytes
+from data_sheets_schema.rocrate_sources import select_root
+
+
+def graph_entities(graph: Any) -> Any:
+    """The entities of a crate's `@graph`, as a list where it holds one.
+
+    JSON-LD lets `@graph` be one node object as well as an array of them,
+    and reads the object as an array that holds it. RO-Crate requires the
+    array, but `ROCrateParser` and `fairscape-cli info` read any JSON-LD
+    file they are given, and
+    data/ro-crate_packages/VOICE/raw/ro-crate-prov-graph.json writes the
+    object. Iterated as it stood, the object gave its keys, and both ended
+    with `'str' object has no attribute 'get'` (#4187). Any other value is
+    returned as it is.
+    """
+    return [graph] if isinstance(graph, dict) else graph
 
 
 class ROCrateParser:
@@ -27,6 +44,7 @@ class ROCrateParser:
         self.context: Union[str, Dict[str, Any]] = {}
         self.graph: List[Dict[str, Any]] = []
         self.root_dataset: Optional[Dict[str, Any]] = None
+        self.root_selection_reason = "RO-Crate has not been loaded"
         self.all_properties: Dict[str, Any] = {}
         self.verbose = verbose
 
@@ -36,15 +54,29 @@ class ROCrateParser:
         self._load_rocrate()
 
     def _load_rocrate(self):
-        """Load and parse the RO-Crate JSON-LD file."""
-        with open(self.rocrate_path, 'r', encoding='utf-8') as f:
-            self.rocrate_data = json.load(f)
+        """Load and parse the RO-Crate JSON-LD file.
+
+        Read as the static-map arm reads a crate (`read_crate_json`): JSON
+        that is not UTF-8, as RFC 8259 requires, is refused with a
+        CrateEncodingError naming the first byte that does not decode, and
+        is not decoded under a guessed encoding. Opened as UTF-8 here,
+        AI_READI's windows-1252 release crate ended `fairscape-cli parse`,
+        `merge`, `rank` and `transform` with a bare UnicodeDecodeError
+        (#4186). The parser takes any path, so the refusal ends by saying
+        to transcode the file, as `fairscape-cli rocrate-to-d4d` and `info`
+        end theirs, not by pointing to crate_manifest.yaml's
+        `encoding_note` (#4192).
+        """
+        raw = self.rocrate_path.read_bytes()
+        self.rocrate_data = _crate_json_from_bytes(raw, self.rocrate_path, hint=TRANSCODE_HINT)
+        self._route_source_capture = (str(self.rocrate_path.resolve()), raw)
 
         # Extract @context
         self.context = self.rocrate_data.get('@context', {})
 
-        # Extract @graph (array of entities)
-        self.graph = self.rocrate_data.get('@graph', [])
+        # Extract @graph: an array of entities, or one entity written as a
+        # node object, read as an array that holds it (#4187)
+        self.graph = graph_entities(self.rocrate_data.get('@graph', []))
 
         # Find root Dataset entity
         self.root_dataset = self._find_root_dataset()
@@ -56,7 +88,7 @@ class ROCrateParser:
                 print(f"Loaded RO-Crate with {len(self.all_properties)} flattened properties")
         else:
             if self.verbose:
-                print("Warning: No root Dataset entity found in RO-Crate")
+                print(f"Warning: No unambiguous root Dataset entity: {self.root_selection_reason}")
 
     def _find_root_dataset(self) -> Optional[Dict[str, Any]]:
         """
@@ -65,38 +97,11 @@ class ROCrateParser:
         Returns:
             Root Dataset dict, or None if not found
         """
-        # First, check if there's a metadata descriptor that points to the root
-        root_id = None
-        for entity in self.graph:
-            if entity.get('@id') == 'ro-crate-metadata.json':
-                about = entity.get('about', {})
-                if isinstance(about, dict) and '@id' in about:
-                    root_id = about['@id']
-                    break
-
-        # Find the Dataset entity
-        for entity in self.graph:
-            entity_type = entity.get('@type', '')
-            entity_id = entity.get('@id', '')
-
-            # Root dataset typically has @type "Dataset" and @id "./" or similar
-            if isinstance(entity_type, str):
-                entity_types = [entity_type]
-            else:
-                entity_types = entity_type
-
-            if 'Dataset' in entity_types or any('Dataset' in str(t) for t in entity_types):
-                # Prefer entity pointed to by metadata descriptor
-                if root_id and entity_id == root_id:
-                    return entity
-                # Prefer entity with @id "./" (root descriptor)
-                if entity_id == './':
-                    return entity
-                # Fallback to first Dataset found
-                if not self.root_dataset:
-                    self.root_dataset = entity
-
-        return self.root_dataset
+        # Keep the original entities, including duplicate IDs, until the
+        # shared selector has checked them. Filtering or indexing first can
+        # conceal a descriptor conflict or make a member look like the root.
+        root, self.root_selection_reason = select_root(self.graph)
+        return root
 
     def _flatten_properties(self, obj: Any, prefix: str = "") -> Dict[str, Any]:
         """
@@ -149,6 +154,42 @@ class ROCrateParser:
             Root Dataset dict, or None if not found
         """
         return self.root_dataset
+
+    def require_root_dataset(self) -> Dict[str, Any]:
+        """Return the authoritative root, or refuse a production operation.
+
+        Construction and ``get_root_dataset`` remain useful for inspection
+        of empty or ambiguous graphs. Building, merging and ranking datasets
+        must call this method before producing output.
+        """
+        if self.root_dataset is None:
+            raise ValueError(
+                f"{self.rocrate_path}: No unambiguous root data entity in the "
+                f"RO-Crate `@graph`: {self.root_selection_reason}"
+            )
+        return self.root_dataset
+
+    def get_all_entities(self) -> Dict[str, Dict[str, Any]]:
+        """Inspect entities with usable IDs, without overwriting duplicates.
+
+        Anonymous or malformed entries remain available in ``graph`` but
+        cannot be represented in this ID-keyed view. Duplicate string IDs
+        are refused, even for identical objects, to preserve their evidence.
+        """
+        entities = {}
+        for entity in self.graph if isinstance(self.graph, list) else []:
+            if not isinstance(entity, dict):
+                continue
+            identifier = entity.get('@id')
+            if not isinstance(identifier, str) or not identifier.strip():
+                continue
+            if identifier in entities:
+                raise ValueError(
+                    f"{self.rocrate_path}: Duplicate entity @id {identifier!r} "
+                    "cannot be represented in an ID-keyed entity view"
+                )
+            entities[identifier] = entity
+        return entities
 
     def get_property(self, property_path: str) -> Optional[Any]:
         """
@@ -235,7 +276,9 @@ class ROCrateParser:
         Returns:
             Entity dict, or None if not found
         """
-        for entity in self.graph:
+        for entity in self.graph if isinstance(self.graph, list) else []:
+            if not isinstance(entity, dict):
+                continue
             if entity.get('@id') == entity_id:
                 return entity
         return None
@@ -251,10 +294,14 @@ class ROCrateParser:
             List of matching entities
         """
         matching = []
-        for entity in self.graph:
+        for entity in self.graph if isinstance(self.graph, list) else []:
+            if not isinstance(entity, dict):
+                continue
             types = entity.get('@type', [])
             if isinstance(types, str):
                 types = [types]
+            if not isinstance(types, list):
+                continue
             if entity_type in types:
                 matching.append(entity)
         return matching

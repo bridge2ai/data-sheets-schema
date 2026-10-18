@@ -394,12 +394,12 @@ class TestConditionComparability(unittest.TestCase):
 
     def test_every_condition_declares_both_axes(self):
         from data_sheets_schema.api_runner import (
-            CONDITION_AXES, CONDITION_PROMPTS)
+            CONDITION_AXES, CONDITION_PROMPTS, SOURCE_HEADING_CONDITIONS)
         self.assertEqual(set(CONDITION_AXES), set(CONDITION_PROMPTS),
                          "a condition without declared axes cannot be placed")
         for name, axes in CONDITION_AXES.items():
             with self.subTest(condition=name):
-                self.assertEqual(set(axes), {"base", "tuned"})
+                self.assertEqual(set(axes), {"base", "tuned"} | ({"routing"} if name in SOURCE_HEADING_CONDITIONS else set()))
 
 
 class TestCarveOutEnforcement(unittest.TestCase):

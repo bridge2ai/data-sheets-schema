@@ -1,0 +1,10 @@
+Assistant publication must recover the original generation attempt and target its captured base
+
+Adversarial review of fix/2088-assistant-shared-generation found two publication defects before merge:
+
+1. GitHub's re-run-failed-jobs action increments github.run_attempt without rerunning an already-successful generation job. Recomputing the artifact name in publication then selects a nonexistent artifact rather than the original completed attempt. After a successful push followed by a failed PR-create call, retrying can also produce a different commit and a non-fast-forward failure.
+2. The generation/publication checkout is the input PR's trusted base SHA, which can belong to a non-default target branch. Calling gh pr create without an explicit base defaults to main and can include unrelated commits from that target branch.
+
+Acceptance: propagate the producer's immutable attempt and artifact identity through job outputs; recover an existing attempt branch only after comparing its complete tree to the expected captured-base-plus-evidence tree; reuse an existing PR; never force-push or launch another paid generation to retry publication. Export the trusted base branch and pass it explicitly to PR creation, or explicitly refuse unsupported non-default targets. Test publication failure after push, failed-job retry, conflicting remote branch, existing PR and non-default base.
+
+Parent: #2088. Related complete-evidence issue: #5052. These are engineering recovery and publication-scope defects, not scientific approval decisions.
