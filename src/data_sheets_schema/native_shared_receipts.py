@@ -466,12 +466,17 @@ def _complete(selection, execution, phase1, response_raw, catalogs):
 
 def check_final(selection, execution, phase1, completion, *, final_full, final_receipt):
     """Check final coverage against the same selected original/effective bytes."""
+    return _check_final(selection, execution, phase1, completion,
+                        final_full=final_full, final_receipt=final_receipt, _catalogs=None)
+
+
+def _check_final(selection, execution, phase1, completion, *, final_full, final_receipt, _catalogs=None):
     if (completion.selection_sha256 != selection.registration.pin.sha256
             or completion.execution_sha256 != execution.execution.pin.sha256
             or completion.phase1_seal_sha256 != phase1.seal.pin.sha256
             or final_receipt != completion.effective_receipt.raw):
         raise ValueError('final native receipt lineage differs from checked stage completion')
-    original, _, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1)
+    original, _, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1, _catalogs=_catalogs)
     full = omissions._mapping(final_full, 'native final full')
     receipt = omissions._mapping(final_receipt, 'native effective receipt')
     block = receipts.check(receipt, manifest, texts, full, md5, original,
@@ -488,3 +493,7 @@ def check_final(selection, execution, phase1, completion, *, final_full, final_r
                 'raw_json': selection.receipt_policy.raw.decode('utf-8')},
             'identity_rules': {'basis': 'captured native full schema', 'identifier_bases': [list(p) for p in bases]},
             'native_stage_completion_history_sha256': completion.history_sha256}
+
+
+_DEFAULT_CHECK_FINAL = check_final
+

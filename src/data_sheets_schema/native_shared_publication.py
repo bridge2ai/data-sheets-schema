@@ -18,10 +18,11 @@ from data_sheets_schema.native_execution import _mkdir_durable
 from data_sheets_schema.native_shared_evidence import read_regular
 
 
-def proposal_publications(invocation,proposal):
+def proposal_publications(invocation,proposal,*,_catalogs=None):
     """Independently derive all effects before opening any output file."""
     if type(invocation) is not c.StageInvocationCapture:
         raise ValueError('publication requires an exact captured stage invocation')
+    catalogs=stage.nr._catalog_context(_catalogs)
     selected=(invocation.selection,invocation.execution,invocation.phase1,invocation.history)
     advance=invocation.current_advance
     argv=(invocation.execution.registered_python,'-m','data_sheets_schema.native_shared_stage',
@@ -33,15 +34,15 @@ def proposal_publications(invocation,proposal):
             or advance.predecessor_history_sha256!=invocation.history.journal.pin.sha256):
         raise ValueError('publisher invocation differs from current selected advance/history')
     if type(proposal) is c.StageDecision:
-        expected=stage.prepare_next(*selected)
+        expected=stage._prepare_next(*selected,catalogs)
         if proposal!=expected:
             raise ValueError('publication decision differs from fresh pure reconstruction')
         publications=proposal.publications
     elif type(proposal) is c.StageTransition:
-        current=stage.prepare_next(*selected)
+        current=stage._prepare_next(*selected,catalogs)
         if current.state!='awaiting_response' or current.request is None:
             raise ValueError('response publication has no current consumed request')
-        expected=stage.check_response(*selected,current.request.raw,proposal.first_response.raw)
+        expected=stage._check_response(*selected,current.request.raw,proposal.first_response.raw,catalogs)
         if proposal!=expected:
             raise ValueError('publication transition differs from first captured response')
         publications=proposal.publications+tuple(c.HelperPublication(action='create_once',artifact=item,
@@ -101,14 +102,15 @@ def _replace_journal(destination,before,after):
     return observed
 
 
-def publish_derived(invocation,proposal):
+def publish_derived(invocation,proposal,*,_catalogs=None):
     """Publish only reconstructed effects after all destinations pass preflight.
 
     Used solely by native_shared_capture.publish_stage after its current
     invocation/context and unchanged-authority checks. No caller paths or
     alternate command, cursor, journal, session or worker can be selected here.
     """
-    publications=proposal_publications(invocation,proposal)
+    catalogs=stage.nr._catalog_context(_catalogs)
+    publications=proposal_publications(invocation,proposal,_catalogs=catalogs)
     root=invocation.selection.role('stage_root')
     for pub in publications:
         destination=_physical_destination(pub.artifact.pin.path,root)
@@ -140,7 +142,7 @@ def publish_derived(invocation,proposal):
             if item.captured.pin.role not in ('record','journal')))
     # Report the actual reconstructed state after publication, never the
     # earlier proposal's state or an unobserved next helper's effects.
-    state=stage.prepare_next(invocation.selection,invocation.execution,invocation.phase1,updated).state
+    state=stage._prepare_next(invocation.selection,invocation.execution,invocation.phase1,updated,catalogs).state
     result={'kind':c.KINDS['advance_result'],'version':c.VERSION,
         'selection_sha256':invocation.selection.registration.pin.sha256,
         'execution_sha256':invocation.execution.execution.pin.sha256,

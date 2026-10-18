@@ -1216,7 +1216,7 @@ def publish_stage(invocation, proposal, *, _catalogs=None):
         observations=fresh.history.observations))
     if old != fresh:
         raise ValueError('selected capture changed before stage publication')
-    result, _ = publish_derived(fresh, proposal)
+    result, _ = publish_derived(fresh, proposal, _catalogs=_catalogs)
     return result
 
 
@@ -1554,14 +1554,27 @@ def _receipt_assessment(run, *, full_path, receipt_path):
     if fresh_selection != run.selection:
         raise ValueError('final receipt selection differs from independent reconstruction')
     # Final reconstruction must not reuse the live run's catalog context.
-    decision = stage.prepare_next(fresh_selection, run.binding, run.phase1, run.history)
-    if decision.state != 'assembly_complete' or decision.completion is None:
-        raise ValueError('final native receipts require the freshly checked complete stage history')
-    completion = stage.check_assembly(fresh_selection, run.binding, run.phase1, run.history,
-                                     decision.completion.assembly.raw)
-    assessed = completion.effective_receipt
-    block = receipts.check_final(fresh_selection, run.binding, run.phase1, completion,
-                                final_full=full.raw, final_receipt=assessed.raw)
+    if (stage.prepare_next is getattr(stage, '_DEFAULT_PREPARE_NEXT', None)
+            and stage.check_assembly is getattr(stage, '_DEFAULT_CHECK_ASSEMBLY', None)
+            and receipts.check_final is getattr(receipts, '_DEFAULT_CHECK_FINAL', None)):
+        fresh_catalogs = receipts._catalog_context()
+        decision = stage._prepare_next(fresh_selection, run.binding, run.phase1, run.history, fresh_catalogs)
+        if decision.state != 'assembly_complete' or decision.completion is None:
+            raise ValueError('final native receipts require the freshly checked complete stage history')
+        completion = stage._check_assembly(fresh_selection, run.binding, run.phase1, run.history,
+                                           decision.completion.assembly.raw, fresh_catalogs)
+        assessed = completion.effective_receipt
+        block = receipts._check_final(fresh_selection, run.binding, run.phase1, completion,
+                                      final_full=full.raw, final_receipt=assessed.raw, _catalogs=fresh_catalogs)
+    else:
+        decision = stage.prepare_next(fresh_selection, run.binding, run.phase1, run.history)
+        if decision.state != 'assembly_complete' or decision.completion is None:
+            raise ValueError('final native receipts require the freshly checked complete stage history')
+        completion = stage.check_assembly(fresh_selection, run.binding, run.phase1, run.history,
+                                         decision.completion.assembly.raw)
+        assessed = completion.effective_receipt
+        block = receipts.check_final(fresh_selection, run.binding, run.phase1, completion,
+                                    final_full=full.raw, final_receipt=assessed.raw)
     block['native_receipt_inputs'] = {'selected_original': c.pin_dict(original.pin),
         'sealed_original': c.pin_dict(run.phase1.original_receipt.pin), 'assessed_effective': c.pin_dict(assessed.pin),
         'final_full': c.pin_dict(full.pin), 'basis': 'Original caller-selected receipt preserved; reconstructed effective receipt assessed.'}
@@ -1645,7 +1658,7 @@ def recorded_receipt_claims(spec, *, record, full_path, receipt_path, expected_b
     if (block.get('native_receipt_stage') != 'final' or block.get('final_stage_complete') is not True
             or c.canonical(expected_block) != c.canonical(block)):
         raise ValueError('claim sidecar expected block differs from the same freshly captured final receipt assessment')
-    _, _, _, _, _, bases, _, _ = receipts._inputs(run.selection, run.phase1)
+    _, _, _, _, _, bases, _, _ = receipts._inputs(run.selection, run.phase1, _catalogs=run._catalogs)
     return rc.claim_receipts(_mapping(effective.raw, 'native effective receipt'),
         _mapping(full.raw, 'native final full'), _mapping(run.phase1.full.raw, 'native original full'),
         identifier_bases=bases)

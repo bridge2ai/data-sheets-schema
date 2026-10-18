@@ -177,12 +177,17 @@ def receipt_gate(prepared):
     if prepared['snapshot'].read(original.pin.path, original.pin.role) != original.raw:
         raise ValueError('ordinary native receipt differs between captured views')
     assembly = run.reader.read('typed_assembly', run.selection.role('typed_assembly'))
-    completion = stage.check_assembly(run.selection, run.binding, run.phase1, run.history, assembly.raw)
+    completion = (stage._check_assembly(run.selection, run.binding, run.phase1, run.history, assembly.raw, run._catalogs)
+                  if stage.check_assembly is getattr(stage, '_DEFAULT_CHECK_ASSEMBLY', None)
+                  else stage.check_assembly(run.selection, run.binding, run.phase1, run.history, assembly.raw))
     effective = run.reader.read('effective_receipt', run.selection.role('effective_receipt'))
     if effective != completion.effective_receipt:
         raise ValueError('effective native receipt differs from reconstructed stage completion')
-    block = receipts.check_final(run.selection, run.binding, run.phase1, completion,
-        final_full=_final(prepared, 'final_full'), final_receipt=effective.raw)
+    block = (receipts._check_final(run.selection, run.binding, run.phase1, completion,
+                 final_full=_final(prepared, 'final_full'), final_receipt=effective.raw, _catalogs=run._catalogs)
+             if receipts.check_final is getattr(receipts, '_DEFAULT_CHECK_FINAL', None)
+             else receipts.check_final(run.selection, run.binding, run.phase1, completion,
+                 final_full=_final(prepared, 'final_full'), final_receipt=effective.raw))
     if block.get('checked') is not True or block.get('final_stage_complete') is not True:
         raise ValueError('native final receipt instrument did not complete')
     floors = canary.receipt_floors(block)

@@ -694,6 +694,10 @@ def check_assembly(selection, execution, phase1, history, assembly_raw):
     return _check_assembly(selection, execution, phase1, history, assembly_raw, nr._ReceiptCatalogContext())
 
 
+_DEFAULT_PREPARE_NEXT = prepare_next
+_DEFAULT_CHECK_ASSEMBLY = check_assembly
+
+
 def _check_assembly(selection, execution, phase1, history, assembly_raw, catalogs):
     replay = _Replay(selection, execution, phase1, history, _catalogs=catalogs).run()
     if replay.pending is not None or replay.failure is not None or replay.assembly is None:
