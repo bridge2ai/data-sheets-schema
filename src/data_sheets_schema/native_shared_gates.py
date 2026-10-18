@@ -58,6 +58,7 @@ def current_evidence(run):
     No declared success flag or ambient original/audit discovery is consulted.
     """
     from . import evidence_assertions as evidence
+    from . import native_catalog_reuse as catalog_reuse
     from .api_runner import _audit_shape_problem
     from .native_shared_capture import _CapturedRun
     if type(run) is not _CapturedRun or type(run.selection) is not c.NativeSelectionCapture:
@@ -76,8 +77,24 @@ def current_evidence(run):
         raise ValueError('native final evidence requires its selected source manifest')
     source_raw = selected.raw('source_manifest')
     authority = {'source_manifest_raw': source_raw, 'project': document['run']['project']}
-    chunks, pins = evidence.source_chunks_from_bytes(selected.raw('bundle'), selected.raw('chunk_manifest'))
+    bundle_raw = selected.raw('bundle')
+    manifest_raw = selected.raw('chunk_manifest')
     audit_raw = run.reader.read('audit', selected.role('audit')).raw
+    token = catalog_reuse.runtime_token()
+    evidence_cache = getattr(getattr(run, '_catalogs', None), '_evidence', None) if token is not None else None
+    pre_key = None if evidence_cache is None else (
+        token, document['run']['project'],
+        raws['original_full'], raws['original_core'], raws['final_full'], raws['final_core'],
+        source_raw, bundle_raw, manifest_raw, audit_raw,
+        evidence.source_chunks_from_bytes, evidence.load_json, _audit_shape_problem,
+        evidence.check_audit, evidence.check_relationship_removals,
+        evidence.load_record, evidence.check_report, evidence._problem,
+    )
+    if pre_key is not None and pre_key in evidence_cache:
+        cached_report_raw, cached_out = evidence_cache[pre_key]
+        if _current(run, 'final_report').raw == cached_report_raw:
+            return deepcopy(cached_out)
+    chunks, pins = evidence.source_chunks_from_bytes(bundle_raw, manifest_raw)
     audit = evidence.load_json(audit_raw)
     shape = _audit_shape_problem(audit) if isinstance(audit, dict) else 'audit must be an object'
     if shape:
@@ -102,6 +119,8 @@ def current_evidence(run):
         out['findings'].append(evidence._problem('evidence_contract', str(exc)))
     out['artifact_sha256'] = pins
     out['scope'] = 'Declared evidence only; semantic support and omitted claims require independent review.'
+    if pre_key is not None and catalog_reuse.runtime_token() is token:
+        evidence_cache[pre_key] = (report_raw, deepcopy(out))
     return out
 
 

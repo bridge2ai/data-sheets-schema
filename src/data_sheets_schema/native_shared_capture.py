@@ -261,11 +261,27 @@ def _prefix(member, endpoint=None):
     return c.EvidencePrefix(item.pin.role, item.pin.path, raw, len(raw), c.sha(raw), raw.count(b'\n'))
 
 
+_THROUGH_CACHE = {}
+
+
 def _through(prefix, line):
     if type(line) is not int or not 0 <= line <= prefix.lines:
         raise ValueError('observation line is outside the captured prefix')
-    raw = b''.join(part + b'\n' for part in prefix.raw.split(b'\n', line)[:line])
-    return c.EvidencePrefix(prefix.stream, prefix.path, raw, len(raw), c.sha(raw), line)
+    if line == prefix.lines:
+        return prefix
+    key = (prefix.sha256, prefix.stream, prefix.path, line)
+    cached = _THROUGH_CACHE.get(key)
+    if cached is not None and cached[0] is prefix.raw:
+        return cached[1]
+    pos = 0
+    for _ in range(line):
+        pos = prefix.raw.index(b'\n', pos) + 1
+    raw = prefix.raw[:pos]
+    result = c.EvidencePrefix(prefix.stream, prefix.path, raw, len(raw), c.sha(raw), line)
+    if len(_THROUGH_CACHE) > 4096:
+        _THROUGH_CACHE.clear()
+    _THROUGH_CACHE[key] = (prefix.raw, result)
+    return result
 
 
 def _observation_paths(selection):
@@ -397,6 +413,132 @@ def _decision_key(selection, binding, phase1, history, paths):
     )
 
 
+def _extend_trace(prev, transcript, control, runtime):
+    if (prev is None or transcript.stream != 'transcript' or control.stream != 'control'
+            or transcript.bytes < prev.transcript.bytes or control.bytes < prev.control.bytes
+            or not transcript.raw.startswith(prev.transcript.raw)
+            or not control.raw.startswith(prev.control.raw)):
+        return None
+    if transcript == prev.transcript and control == prev.control:
+        return prev
+    t_tail = transcript.raw[prev.transcript.bytes:]
+    c_tail = control.raw[prev.control.bytes:]
+    native_tail = []
+    if t_tail:
+        for offset_line, part in enumerate(t_tail.split(b'\n')[:-1], prev.transcript.lines + 1):
+            raw = part + b'\n'
+            if not raw.endswith(b'\n') or not raw.strip():
+                return None
+            value = c.strict_json(raw, 'native observed row', 16 * 1024 * 1024)
+            if type(value) is not dict or value.get('type') == 'control_response' or (
+                    value.get('type') == 'system' and value.get('subtype') == 'init'):
+                return None
+            native_tail.append((offset_line, raw, value))
+    parent_tail = []
+    if c_tail:
+        for offset_line, part in enumerate(c_tail.split(b'\n')[:-1], prev.control.lines + 1):
+            raw = part + b'\n'
+            if not raw.endswith(b'\n') or not raw.strip():
+                return None
+            value = c.strict_json(raw, 'native observed row', 16 * 1024 * 1024)
+            if type(value) is not dict or value.get('kind') in ('initialize_sent', 'initialize_ack'):
+                return None
+            parent_tail.append((offset_line, raw, value))
+    sub = object.__new__(observed.Trace)
+    sub.transcript, sub.control = transcript, control
+    sub.session, sub.policy = prev.session, prev.policy
+    sub.calls = dict(prev.calls)
+    sub.callbacks = dict(prev.callbacks)
+    sub.results = dict(prev.results)
+    sub.decisions = dict(prev.decisions)
+    sub.frames = dict(prev.frames)
+    sub.terminal = prev.terminal
+    callback_ids = {v.get('request_id') for _, v in sub.callbacks.values()}
+    policy = sub.policy
+    session_id = sub.session
+    for number, raw, value in native_tail:
+        sub.frames[number] = value
+        kind = value.get('type')
+        if value.get('parent_tool_use_id') is not None:
+            return None
+        if kind in ('assistant', 'user', 'result'):
+            message = value.get('message')
+            if value.get('model', runtime['model']) != runtime['model'] or (
+                    type(message) is dict and message.get('model', runtime['model']) != runtime['model']):
+                return None
+        if sub.terminal is not None or kind == 'control_cancel_request':
+            return None
+        if kind == 'result':
+            if value.get('session_id') != session_id or value.get('parent_tool_use_id') is not None:
+                return None
+            sub.terminal = number
+        if kind in ('assistant', 'user'):
+            message = value.get('message')
+            if (value.get('session_id') != session_id or value.get('parent_tool_use_id') is not None
+                    or type(message) is not dict or message.get('role', kind) != kind):
+                return None
+            content = message.get('content')
+            if type(content) is not list:
+                return None
+            for offset, item in enumerate(content):
+                if type(item) is not dict:
+                    return None
+                identity = item.get('id') if item.get('type') == 'tool_use' else item.get('tool_use_id')
+                if item.get('type') == 'tool_use':
+                    if (kind != 'assistant' or type(identity) is not str or not identity or identity in sub.calls
+                            or item.get('name') not in ('Read', 'Write', 'Bash') or type(item.get('input')) is not dict):
+                        return None
+                    sub.calls[identity] = (number, offset, item)
+                elif item.get('type') == 'tool_result':
+                    if (kind != 'user' or identity not in sub.calls or identity in sub.results
+                            or sub.calls[identity][0] >= number):
+                        return None
+                    sub.results[identity] = (number, offset, item)
+        if kind == 'control_request':
+            request = value.get('request')
+            data = request.get('input') if type(request) is dict else None
+            if type(data) is not dict:
+                return None
+            identity = data.get('tool_use_id')
+            callback = value.get('request_id')
+            if (identity not in sub.calls or identity in sub.callbacks or identity in sub.results
+                    or type(callback) is not str or not callback or callback in callback_ids
+                    or request.get('subtype') != 'hook_callback'
+                    or request.get('callback_id') != policy['pretool_control']['callback_id']
+                    or request.get('tool_use_id') not in (None, identity)
+                    or data.get('hook_event_name') != policy['pretool_control']['event']
+                    or data.get('cwd') != policy['readonly_lookups']['repository']
+                    or data.get('session_id', session_id) != session_id):
+                return None
+            call = sub.calls[identity]
+            if (call[0] >= number or data.get('tool_name') != call[2]['name']
+                    or not observed._same(data.get('tool_input'), call[2]['input'])):
+                return None
+            sub.callbacks[identity] = (number, value)
+            callback_ids.add(callback)
+    for number, raw, value in parent_tail:
+        if value.get('kind') != 'decision':
+            continue
+        request = value.get('request')
+        data = request.get('request', {}).get('input', {}) if type(request) is dict else {}
+        identity = data.get('tool_use_id')
+        if (identity not in sub.callbacks or identity in sub.decisions
+                or not observed._same(request, sub.callbacks[identity][1])
+                or value.get('classification') not in ('prescribed', 'not_prescribed')
+                or type(value.get('basis')) is not str):
+            return None
+        classification, basis = value['classification'], value['basis']
+        output = {} if classification == 'prescribed' else {'hookSpecificOutput': {
+            'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
+            'permissionDecisionReason': 'Outside the registered tool policy: ' + basis}}
+        expected = {'type': 'control_response', 'response': {'subtype': 'success',
+            'request_id': request['request_id'], 'response': output}}
+        if not observed._same(value.get('response'), expected):
+            return None
+        sub.decisions[identity] = (number, value)
+    return sub
+
+
 @dataclass
 class _CapturedRun:
     selection: c.NativeSelectionCapture
@@ -416,24 +558,35 @@ class _CapturedRun:
     _trace: object = field(default=None, init=False, compare=False, repr=False)
     _decisions: dict = field(default_factory=dict, init=False, compare=False, repr=False)
     _prefixes: dict = field(default_factory=dict, init=False, compare=False, repr=False)
+    _chronology_cache: object = field(default=None, init=False, compare=False, repr=False)
 
     def trace(self, transcript=None, control=None):
         if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
             if self._trace is None:
                 token = receipt_api.catalog_reuse.runtime_token()
                 traces = getattr(self._catalogs, '_traces', None) if token is not None else None
-                trace_key = None if traces is None else (
-                    token, self.transcript.sha256, self.transcript.raw,
-                    self.control.sha256, self.control.raw, self.binding.session_id,
+                meta_key = None if traces is None else (
+                    token, self.binding.session_id,
                     c.canonical(self.composition['policy']), c.canonical(self.value['runtime']),
+                )
+                trace_key = None if meta_key is None else (
+                    *meta_key, self.transcript.sha256, self.transcript.raw,
+                    self.control.sha256, self.control.raw,
                 )
                 if trace_key is not None and trace_key in traces:
                     self._trace = traces[trace_key]
                 else:
-                    self._trace = observed.Trace(self.transcript, self.control,
-                        session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
+                    last = getattr(self._catalogs, '_last_trace', None) if meta_key is not None else None
+                    extended = (_extend_trace(last[1], self.transcript, self.control, self.value['runtime'])
+                                if last is not None and last[0] == meta_key else None)
+                    if extended is not None:
+                        self._trace = extended
+                    else:
+                        self._trace = observed.Trace(self.transcript, self.control,
+                            session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
                     if trace_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
                         traces[trace_key] = self._trace
+                        self._catalogs._last_trace = (meta_key, self._trace)
             return self._trace
         return observed.Trace(transcript or self.transcript, control or self.control,
             session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
@@ -721,6 +874,46 @@ def _require_completed_read_before_write(request, read):
         raise ValueError('response Write precedes its complete current request Read')
 
 
+def _bind_trace_cache(trace, settled_cache, base=None):
+    if settled_cache is None or trace is None:
+        return trace
+    owner = base if base is not None else trace
+
+    def request(identity, _trace=trace, _owner=owner):
+        if identity not in _trace.calls or identity not in _trace.callbacks:
+            return observed.Trace.request(_trace, identity)
+        key = ('request', identity)
+        if key not in settled_cache:
+            settled_cache[key] = observed.Trace.request(_owner, identity)
+        return settled_cache[key]
+
+    def admitted(identity, _trace=trace, _owner=owner):
+        if (identity not in _trace.calls or identity not in _trace.callbacks
+                or identity not in _trace.decisions
+                or _trace.decisions[identity][1]['classification'] != 'prescribed'):
+            return observed.Trace.admitted(_trace, identity)
+        key = ('admitted', identity)
+        if key not in settled_cache:
+            settled_cache[key] = observed.Trace.admitted(_owner, identity)
+        return settled_cache[key]
+
+    def settled(identity, _trace=trace, _owner=owner):
+        if (identity not in _trace.calls or identity not in _trace.callbacks
+                or identity not in _trace.decisions or identity not in _trace.results
+                or _trace.decisions[identity][1]['classification'] != 'prescribed'
+                or _trace.results[identity][0] <= _trace.callbacks[identity][0]):
+            return observed.Trace.settled(_trace, identity)
+        key = ('settled', identity)
+        if key not in settled_cache:
+            settled_cache[key] = observed.Trace.settled(_owner, identity)
+        return settled_cache[key]
+
+    trace.request = request
+    trace.admitted = admitted
+    trace.settled = settled
+    return trace
+
+
 def _prefix_trace(base, transcript, control, init_lines=None, settled_cache=None):
     """Project an already-verified Trace onto an exact earlier stream prefix."""
     if (base is None or transcript.stream != 'transcript' or control.stream != 'control'
@@ -743,18 +936,7 @@ def _prefix_trace(base, transcript, control, init_lines=None, settled_cache=None
     sub.decisions = {k: v for k, v in base.decisions.items() if v[0] <= c_lines}
     sub.frames = {k: v for k, v in base.frames.items() if k <= t_lines}
     sub.terminal = base.terminal if (base.terminal is not None and base.terminal <= t_lines) else None
-    if settled_cache is not None:
-        def settled(identity, _sub=sub):
-            if (identity not in _sub.calls or identity not in _sub.callbacks
-                    or identity not in _sub.decisions or identity not in _sub.results
-                    or _sub.decisions[identity][1]['classification'] != 'prescribed'
-                    or _sub.results[identity][0] <= _sub.callbacks[identity][0]):
-                return observed.Trace.settled(_sub, identity)
-            if identity not in settled_cache:
-                settled_cache[identity] = observed.Trace.settled(base, identity)
-            return settled_cache[identity]
-        sub.settled = settled
-    return sub
+    return _bind_trace_cache(sub, settled_cache, base=base)
 
 
 def _checked_observations(run):
@@ -767,6 +949,9 @@ def _checked_observations(run):
     base_attempted = False
     init_lines = None
     settled_cache = {}
+    token = receipt_api.catalog_reuse.runtime_token()
+    ctx = getattr(run, '_catalogs', None) if token is not None else None
+    verified_obs = getattr(ctx, '_verified_obs', None) if ctx is not None else None
 
     def decision_at(digest):
         # This invocation owns one immutable captured run. Reuse only the
@@ -787,8 +972,6 @@ def _checked_observations(run):
             base_attempted = True
             try:
                 base_trace = run.trace()
-                token = receipt_api.catalog_reuse.runtime_token()
-                ctx = getattr(run, '_catalogs', None) if token is not None else None
                 if ctx is not None and hasattr(ctx, '_settled'):
                     meta = (token, base_trace.session, c.canonical(base_trace.policy))
                     saved = ctx._settled
@@ -797,6 +980,7 @@ def _checked_observations(run):
                             and base_trace.control.raw.startswith(saved[2])):
                         settled_cache = saved[3]
                     ctx._settled = (meta, base_trace.transcript.raw, base_trace.control.raw, settled_cache)
+                _bind_trace_cache(base_trace, settled_cache)
             except ValueError:
                 base_trace = None
         projected = _prefix_trace(base_trace, transcript, control, init_lines, settled_cache)
@@ -833,7 +1017,14 @@ def _checked_observations(run):
                 current = decision_at(payload['history_sha256'])
                 if current.state != 'awaiting_response' or current.request != request:
                     raise ValueError('Read observation names a stale or unpublished request')
-                observed.complete_request_read(trace, actual, request)
+                obs_key = None if verified_obs is None else (
+                    'request_read', token, artifact.pin.sha256, artifact.raw,
+                    request.pin.sha256, request.raw, actual,
+                )
+                if obs_key is None or obs_key not in verified_obs:
+                    observed.complete_request_read(trace, actual, request)
+                    if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                        verified_obs.add(obs_key)
                 if call.tool_use_id in seen_reads or request.pin.path in {row[1].pin.path for row in seen_reads.values()}:
                     raise ValueError('current request has duplicate delivered-read authority')
                 seen_reads[call.tool_use_id] = (artifact, request, current)
@@ -847,13 +1038,27 @@ def _checked_observations(run):
                         or payload['history_sha256'] != intent_doc['history_sha256']
                         or response.pin.path != intent_doc['response']['path'] or response.pin.path in seen_writes):
                     raise ValueError('response was replaced, retried or moved to another stage')
-                observed.first_response_write(trace, actual, response, intent_input_json=call.input_json)
+                obs_key = None if verified_obs is None else (
+                    'response_written', token, artifact.pin.sha256, artifact.raw,
+                    response.pin.sha256, response.raw, call.input_json, actual,
+                )
+                if obs_key is None or obs_key not in verified_obs:
+                    observed.first_response_write(trace, actual, response, intent_input_json=call.input_json)
+                    if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                        verified_obs.add(obs_key)
                 seen_writes.add(response.pin.path)
             else:
                 result = payload['advance_result']
                 if result.get('advance_tool_use_id') != call.tool_use_id or call.tool_use_id not in seen_advances:
                     raise ValueError('advance settlement lacks actual earlier selected admission')
-                observed.helper_result(trace, actual, result)
+                obs_key = None if verified_obs is None else (
+                    'advance_settled', token, artifact.pin.sha256, artifact.raw,
+                    c.canonical(result), actual,
+                )
+                if obs_key is None or obs_key not in verified_obs:
+                    observed.helper_result(trace, actual, result)
+                    if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                        verified_obs.add(obs_key)
                 _history_prefix(run, result['before_history_sha256'])
                 after = decision_at(result['after_history_sha256'])
                 if after.state != result['state']:
@@ -876,11 +1081,18 @@ def _checked_observations(run):
             reads = [row for row in seen_reads.values() if c.pin_dict(row[0].pin) == payload['read_observation']]
             if len(reads) != 1 or reads[0][1] != current.request or current.response.path in {v[1]['response']['path'] for v in seen_intents.values()}:
                 raise ValueError('Write intent reuses a stale Read or spent response destination')
-            inputs = _document(request.input_json, 'Write intent')
-            if (set(inputs) != {'file_path', 'content'} or inputs['file_path'] != current.response.path
-                    or type(inputs['content']) is not str or not inputs['content']
-                    or len(inputs['content'].encode('utf-8')) > current.response.max_bytes):
-                raise ValueError('Write intent exceeds the exact response contract')
+            obs_key = None if verified_obs is None else (
+                'response_intent', token, artifact.pin.sha256, artifact.raw,
+                request.input_json, current.response.path, current.response.max_bytes,
+            )
+            if obs_key is None or obs_key not in verified_obs:
+                inputs = _document(request.input_json, 'Write intent')
+                if (set(inputs) != {'file_path', 'content'} or inputs['file_path'] != current.response.path
+                        or type(inputs['content']) is not str or not inputs['content']
+                        or len(inputs['content'].encode('utf-8')) > current.response.max_bytes):
+                    raise ValueError('Write intent exceeds the exact response contract')
+                if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                    verified_obs.add(obs_key)
             read_call = _call(c.strict_json(reads[0][0].raw)['payload']['call'])
             _require_completed_read_before_write(request, trace.settled(read_call.tool_use_id))
             seen_intents[artifact.pin.sha256] = (artifact, payload)
@@ -969,10 +1181,11 @@ def capture_stage(selection_registration_path, *, _catalogs=None):
     # A helper cannot use bytes prefetched after its own actual callback.
     transcript = _through(run.transcript, call.callback.line)
     control = _through(run.control, call.admission.line)
-    candidates = [item for item in run.observations if c.strict_json(item.raw)['observation_type'] == 'advance_admitted'
-                  and c.strict_json(item.raw)['payload']['call']['tool_use_id'] == call.tool_use_id]
+    obs_docs = [(item, c.strict_json(item.raw)) for item in run.observations]
+    candidates = [item for item, doc in obs_docs if doc['observation_type'] == 'advance_admitted'
+                  and doc['payload']['call']['tool_use_id'] == call.tool_use_id]
     if not candidates:
-        if sum(c.strict_json(item.raw)['observation_type'] == 'advance_admitted' for item in run.observations) >= c.HARD_LIMITS['advance_invocations']:
+        if sum(doc['observation_type'] == 'advance_admitted' for _, doc in obs_docs) >= c.HARD_LIMITS['advance_invocations']:
             raise ValueError('stage helper invocation count exceeds its complete bound')
         admission = _persist_observation(replace(run, transcript=transcript, control=control), 'advance_admitted',
             {'call': call_document(call), 'before_history_sha256': run.history.journal.pin.sha256})
@@ -1008,6 +1221,10 @@ def publish_stage(invocation, proposal, *, _catalogs=None):
 
 
 def _chronology(run):
+    key = (tuple(item.pin for item in run.observations), tuple(item.pin for item in run.history.records))
+    cached = getattr(run, '_chronology_cache', None)
+    if cached is not None and cached[0] == key:
+        return cached[1]
     catalog = {}
     advance_before, advance_after = {}, {}
     visible = {run.history.records[0].pin.sha256: 0}
@@ -1037,7 +1254,9 @@ def _chronology(run):
             if pin['sha256'] not in catalog:
                 raise ValueError('stage record lacks its actual observation visibility')
             visible[item.pin.sha256] = catalog[pin['sha256']][1]
-    return catalog, advance_before, advance_after, visible, seal_observations
+    result = (catalog, advance_before, advance_after, visible, seal_observations)
+    run._chronology_cache = (key, result)
+    return result
 
 
 def phase_replay(run, *, complete=False):
@@ -1255,9 +1474,9 @@ def observe_response_written(run, identity):
     current = run.decision(); trace = run.trace(); actual = trace.settled(identity)
     if current is None or current.state != 'awaiting_response' or current.response is None:
         raise ValueError('response settlement has no current selected destination')
-    matches = [(item, _document(item.raw, 'response intent')['payload']) for item in run.observations
-        if _document(item.raw, 'response intent')['observation_type'] == 'response_intent'
-        and _document(item.raw, 'response intent')['payload']['tool_use_id'] == identity]
+    matches = [(item, doc['payload']) for item, doc in (
+        (item, _document(item.raw, 'response intent')) for item in run.observations
+    ) if doc['observation_type'] == 'response_intent' and doc['payload']['tool_use_id'] == identity]
     if len(matches) != 1:
         raise ValueError('response settlement lacks one preceding exact pre-grant intent')
     intent, payload = matches[0]
@@ -1433,7 +1652,7 @@ def recorded_receipt_claims(spec, *, record, full_path, receipt_path, expected_b
 
 def at_callback(run, line):
     """Pure current authority at one real callback; no future observation credit."""
-    _, _, _, visible, _ = _chronology(run)
+    catalog, _, _, visible, _ = _chronology(run)
     count = 0
     for item in run.history.records:
         if item.pin.sha256 not in visible or visible[item.pin.sha256] >= line:
@@ -1446,7 +1665,7 @@ def at_callback(run, line):
         records=tuple(item.pin for item in run.history.records[:count]))
     history = _history_prefix(run, c.sha(raw))
     observations = tuple(item for item in run.observations
-        if observation(item, run.selection, run.binding, run.pool)[1].lines < line)
+        if catalog[item.pin.sha256][1] < line)
     history = replace(history, observations=observations)
     transcript = _through(run.transcript, line)
     base_trace = None
@@ -1468,6 +1687,9 @@ def at_callback(run, line):
     control = _through(run.control, control_lines)
     result = replace(run, history=history, observations=observations, transcript=transcript, control=control,
         phase1=_phase1(run.selection, run.binding, history, run.reader))
+    result._catalogs = run._catalogs
+    result._decisions = run._decisions
+    result._prefixes = run._prefixes
     if base_trace is not None and 0 < line <= base_trace.transcript.lines and 0 < control_lines <= base_trace.control.lines:
         result._trace = _prefix_trace(base_trace, transcript, control, (1, 1))
     return result

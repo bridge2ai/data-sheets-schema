@@ -155,6 +155,8 @@ class CapturePool:
             raise ValueError('capture pool exceeds its complete encoded byte bound')
         return raw
 
+    _PREFIX_CACHE={}
+
     def prefix(self,reference,*,execution_sha256):
         exact(reference,{'stream_id','stream','path','through_bytes','lines','sha256'},'stream prefix reference')
         selected=stream_id(execution_sha256,reference['stream'],reference['path'])
@@ -168,8 +170,15 @@ class CapturePool:
         end=reference['through_bytes']
         if type(end) is not int or end<0 or end>len(member.raw):
             raise ValueError('prefix endpoint exceeds the captured stream')
-        return EvidencePrefix(stream=reference['stream'],path=reference['path'],raw=member.raw[:end],
+        key=(member.pin.sha256,reference['stream'],reference['path'],end,reference['lines'],reference['sha256'])
+        cached=CapturePool._PREFIX_CACHE.get(key)
+        if cached is not None and cached[0] is member.raw:
+            return cached[1]
+        result=EvidencePrefix(stream=reference['stream'],path=reference['path'],raw=member.raw[:end],
             bytes=end,lines=reference['lines'],sha256=reference['sha256'])
+        if len(CapturePool._PREFIX_CACHE)>4096:CapturePool._PREFIX_CACHE.clear()
+        CapturePool._PREFIX_CACHE[key]=(member.raw,result)
+        return result
 
 
 def decode(raw):
@@ -220,9 +229,12 @@ def event(prefix,reference):
     """Resolve only an exact event inside the actual observed prefix."""
     if type(prefix) is not EvidencePrefix or type(reference) is not EventRef or reference.stream!=prefix.stream:
         raise ValueError('event reference differs from its observed stream prefix')
-    lines=prefix.raw.split(b'\n')[:-1]
-    if reference.line>len(lines):raise ValueError('event lies beyond its observed prefix')
-    raw=lines[reference.line-1]+b'\n'
+    pos=0
+    for _ in range(reference.line):
+        end=prefix.raw.find(b'\n',pos)
+        if end<0:raise ValueError('event lies beyond its observed prefix')
+        raw_start,pos=pos,end+1
+    raw=prefix.raw[raw_start:pos]
     if sha(raw)!=reference.raw_line_sha256:raise ValueError('event physical line hash differs')
     value=strict_json(raw,'observed event',HARD_LIMITS['stream_bytes'])
     if reference.block is not None:

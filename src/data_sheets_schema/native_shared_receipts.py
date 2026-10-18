@@ -91,6 +91,9 @@ class _ReceiptCatalogContext:
         self._completed = {}
         self._base = {}
         self._traces = {}
+        self._last_trace = None
+        self._verified_obs = set()
+        self._evidence = {}
         self._settled = None
         self._bytes = 0
         self._lock = Lock()
