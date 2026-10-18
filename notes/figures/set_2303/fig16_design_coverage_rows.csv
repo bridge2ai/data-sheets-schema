@@ -30,4 +30,7 @@ panel,group,family,row_label,y,records,labels,first_date,last_date,methods,runti
 1,merged,guarded-union,guarded-union,16,4,1,2026-07-29,2026-07-29,claudecode_agent_merged,none,none,none,0,none,0,0
 1,deterministic_ours,ourmap-v1,ourmap-v1,18,3,1,2026-07-27,2026-07-27,rocrate_static_map,none,none,none,0,none,0,0
 1,deterministic_ours,ourmap-v2,ourmap-v2,19,3,1,2026-07-27,2026-07-27,rocrate_static_map,none,none,none,0,none,0,0
-1,deterministic_upstream,deterministic-v1,deterministic-v1,21,2,1,2026-07-24,2026-07-24,rocrate_mapped,none,none,none,0,none,0,0
+1,deterministic_ours,ourmap-v3,ourmap-v3,20,3,1,2026-10-07,2026-10-07,rocrate_static_map,none,none,none,0,none,0,0
+1,deterministic_ours,ourmap-v4,ourmap-v4,21,3,1,2026-10-10,2026-10-10,rocrate_static_map,none,none,none,0,none,0,0
+1,deterministic_upstream,deterministic-v1,deterministic-v1,23,2,1,2026-07-24,2026-07-24,rocrate_mapped,none,none,none,0,none,0,0
+1,deterministic_upstream,deterministic-v2,deterministic-v2,24,2,1,2026-10-07,2026-10-07,rocrate_mapped,none,none,none,0,none,0,0

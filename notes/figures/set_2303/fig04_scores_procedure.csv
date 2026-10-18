@@ -1,5 +1,5 @@
 characteristic,v7,v8
-generation runtime,Claude API (direct),Claude API (direct)
+generation runtime,API arm (header: Claude API (direct)),API arm (header: Claude API (direct))
 generation provider,LBL CBORG (proxy to Anthropic),LBL CBORG (proxy to Anthropic)
 generation model,claude-opus-5,claude-opus-5
 prompt,generic-v7 prompt,generic-v8 prompt

@@ -165,8 +165,23 @@ panel,group,family,project,runtime_class,records,superseded,reference_rescore,ca
 1,deterministic_ours,ourmap-v2,CM4AI,none,1,0,0,0,1.9,19,2026-07-27_ourmap-v2
 1,deterministic_ours,ourmap-v2,VOICE,none,1,0,0,0,2.9,19,2026-07-27_ourmap-v2
 1,deterministic_ours,ourmap-v2,VOICE_PEDIATRIC,no record,0,0,0,0,4,19,
-1,deterministic_upstream,deterministic-v1,AI_READI,no record,0,0,0,0,0,21,
-1,deterministic_upstream,deterministic-v1,CHORUS,none,1,0,0,0,0.9,21,2026-07-24_deterministic-v1
-1,deterministic_upstream,deterministic-v1,CM4AI,none,1,0,0,0,1.9,21,2026-07-24_deterministic-v1
-1,deterministic_upstream,deterministic-v1,VOICE,no record,0,0,0,0,3,21,
-1,deterministic_upstream,deterministic-v1,VOICE_PEDIATRIC,no record,0,0,0,0,4,21,
+1,deterministic_ours,ourmap-v3,AI_READI,no record,0,0,0,0,0,20,
+1,deterministic_ours,ourmap-v3,CHORUS,none,1,0,0,0,0.9,20,2026-10-07_ourmap-v3
+1,deterministic_ours,ourmap-v3,CM4AI,none,1,0,0,0,1.9,20,2026-10-07_ourmap-v3
+1,deterministic_ours,ourmap-v3,VOICE,none,1,0,0,0,2.9,20,2026-10-07_ourmap-v3
+1,deterministic_ours,ourmap-v3,VOICE_PEDIATRIC,no record,0,0,0,0,4,20,
+1,deterministic_ours,ourmap-v4,AI_READI,no record,0,0,0,0,0,21,
+1,deterministic_ours,ourmap-v4,CHORUS,none,1,0,0,0,0.9,21,2026-10-10_ourmap-v4
+1,deterministic_ours,ourmap-v4,CM4AI,none,1,0,0,0,1.9,21,2026-10-10_ourmap-v4
+1,deterministic_ours,ourmap-v4,VOICE,none,1,0,0,0,2.9,21,2026-10-10_ourmap-v4
+1,deterministic_ours,ourmap-v4,VOICE_PEDIATRIC,no record,0,0,0,0,4,21,
+1,deterministic_upstream,deterministic-v1,AI_READI,no record,0,0,0,0,0,23,
+1,deterministic_upstream,deterministic-v1,CHORUS,none,1,0,0,0,0.9,23,2026-07-24_deterministic-v1
+1,deterministic_upstream,deterministic-v1,CM4AI,none,1,0,0,0,1.9,23,2026-07-24_deterministic-v1
+1,deterministic_upstream,deterministic-v1,VOICE,no record,0,0,0,0,3,23,
+1,deterministic_upstream,deterministic-v1,VOICE_PEDIATRIC,no record,0,0,0,0,4,23,
+1,deterministic_upstream,deterministic-v2,AI_READI,no record,0,0,0,0,0,24,
+1,deterministic_upstream,deterministic-v2,CHORUS,none,1,0,0,0,0.9,24,2026-10-07_deterministic-v2
+1,deterministic_upstream,deterministic-v2,CM4AI,none,1,0,0,0,1.9,24,2026-10-07_deterministic-v2
+1,deterministic_upstream,deterministic-v2,VOICE,no record,0,0,0,0,3,24,
+1,deterministic_upstream,deterministic-v2,VOICE_PEDIATRIC,no record,0,0,0,0,4,24,

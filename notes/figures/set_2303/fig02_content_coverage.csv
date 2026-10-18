@@ -574,7 +574,7 @@ CHORUS,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-
 CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Composition,relationships,empty
 CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Composition,relationships,empty
 CHORUS,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml,Claude API (direct),Composition,relationships,empty
-CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Composition,relationships,caveat_only
+CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Composition,relationships,empty
 CHORUS,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_d4d.yaml,Claude Code,Composition,relationships,empty
 CHORUS,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml,Claude Code,Composition,relationships,empty
 CHORUS,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml,Claude Code,Composition,relationships,empty
@@ -1771,7 +1771,7 @@ AI_READI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-o
 AI_READI,direct,,,,,Maintenance,errata,no_record
 CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml,Claude API (direct),Maintenance,errata,empty
 CHORUS,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml,Claude API (direct),Maintenance,errata,empty
-CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Maintenance,errata,caveat_only
+CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Maintenance,errata,empty
 CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Maintenance,errata,empty
 CHORUS,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml,Claude API (direct),Maintenance,errata,empty
 CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Maintenance,errata,empty
@@ -2630,9 +2630,9 @@ CM4AI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus
 CM4AI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_d4d.yaml,Claude Code,Base / root,resources,populated
 CM4AI,direct,,,,,Base / root,resources,no_record
 VOICE,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml,Claude API (direct),Base / root,resources,empty
-VOICE,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml,Claude API (direct),Base / root,resources,caveat_only
+VOICE,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml,Claude API (direct),Base / root,resources,empty
 VOICE,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_d4d.yaml,Claude API (direct),Base / root,resources,empty
-VOICE,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml,Claude API (direct),Base / root,resources,caveat_only
+VOICE,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml,Claude API (direct),Base / root,resources,empty
 VOICE,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml,Claude API (direct),Base / root,resources,empty
 VOICE,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml,Claude API (direct),Base / root,resources,empty
 VOICE,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_d4d.yaml,Claude Code,Base / root,resources,empty
@@ -2809,9 +2809,9 @@ AI_READI,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-o
 AI_READI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml,Claude Code,Base / root,citation,populated
 AI_READI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml,Claude Code,Base / root,citation,populated
 AI_READI,direct,,,,,Base / root,citation,no_record
-CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,citation,caveat_only
+CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,citation,empty
 CHORUS,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,citation,empty
-CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,citation,caveat_only
+CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,citation,empty
 CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,citation,empty
 CHORUS,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,citation,empty
 CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,citation,empty
@@ -3329,10 +3329,10 @@ AI_READI,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-o
 AI_READI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml,Claude Code,Base / root,language,populated
 AI_READI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml,Claude Code,Base / root,language,populated
 AI_READI,direct,,,,,Base / root,language,no_record
-CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,language,caveat_only
+CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,language,empty
 CHORUS,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,language,empty
 CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,language,empty
-CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,language,caveat_only
+CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,language,empty
 CHORUS,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,language,empty
 CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,language,empty
 CHORUS,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_d4d.yaml,Claude Code,Base / root,language,empty
@@ -3346,7 +3346,7 @@ CM4AI,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-ap
 CM4AI,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml,Claude API (direct),Base / root,language,populated
 CM4AI,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml,Claude API (direct),Base / root,language,empty
 CM4AI,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CM4AI_d4d.yaml,Claude Code,Base / root,language,empty
-CM4AI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_d4d.yaml,Claude Code,Base / root,language,caveat_only
+CM4AI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_d4d.yaml,Claude Code,Base / root,language,empty
 CM4AI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_d4d.yaml,Claude Code,Base / root,language,empty
 CM4AI,direct,,,,,Base / root,language,no_record
 VOICE,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml,Claude API (direct),Base / root,language,populated
@@ -3410,14 +3410,14 @@ AI_READI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-o
 AI_READI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml,Claude Code,Base / root,license,populated
 AI_READI,direct,,,,,Base / root,license,no_record
 CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,empty
-CHORUS,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,caveat_only
+CHORUS,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,empty
 CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,empty
-CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,caveat_only
+CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,empty
 CHORUS,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,empty
-CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,caveat_only
-CHORUS,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_d4d.yaml,Claude Code,Base / root,license,caveat_only
-CHORUS,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml,Claude Code,Base / root,license,caveat_only
-CHORUS,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml,Claude Code,Base / root,license,caveat_only
+CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,license,empty
+CHORUS,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_d4d.yaml,Claude Code,Base / root,license,empty
+CHORUS,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml,Claude Code,Base / root,license,empty
+CHORUS,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml,Claude Code,Base / root,license,empty
 CHORUS,direct,,,,,Base / root,license,no_record
 CM4AI,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml,Claude API (direct),Base / root,license,populated
 CM4AI,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml,Claude API (direct),Base / root,license,populated
@@ -3525,7 +3525,7 @@ AI_READI,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-
 AI_READI,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml,Claude API (direct),Base / root,publisher,populated
 AI_READI,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml,Claude API (direct),Base / root,publisher,populated
 AI_READI,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml,Claude API (direct),Base / root,publisher,populated
-AI_READI,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml,Claude Code,Base / root,publisher,caveat_only
+AI_READI,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml,Claude Code,Base / root,publisher,empty
 AI_READI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml,Claude Code,Base / root,publisher,caveat_only
 AI_READI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml,Claude Code,Base / root,publisher,populated
 AI_READI,direct,,,,,Base / root,publisher,no_record
@@ -3649,15 +3649,15 @@ AI_READI,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-o
 AI_READI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml,Claude Code,Base / root,version,populated
 AI_READI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml,Claude Code,Base / root,version,populated
 AI_READI,direct,,,,,Base / root,version,no_record
-CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,version,caveat_only
+CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,version,empty
 CHORUS,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,version,empty
-CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,version,caveat_only
+CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,version,empty
 CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,version,empty
 CHORUS,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,version,empty
 CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,version,empty
 CHORUS,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_d4d.yaml,Claude Code,Base / root,version,empty
-CHORUS,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml,Claude Code,Base / root,version,caveat_only
-CHORUS,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml,Claude Code,Base / root,version,caveat_only
+CHORUS,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml,Claude Code,Base / root,version,empty
+CHORUS,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml,Claude Code,Base / root,version,empty
 CHORUS,direct,,,,,Base / root,version,no_record
 CM4AI,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml,Claude API (direct),Base / root,version,populated
 CM4AI,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml,Claude API (direct),Base / root,version,populated
@@ -3665,8 +3665,8 @@ CM4AI,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-a
 CM4AI,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml,Claude API (direct),Base / root,version,populated
 CM4AI,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml,Claude API (direct),Base / root,version,populated
 CM4AI,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml,Claude API (direct),Base / root,version,populated
-CM4AI,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CM4AI_d4d.yaml,Claude Code,Base / root,version,caveat_only
-CM4AI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_d4d.yaml,Claude Code,Base / root,version,caveat_only
+CM4AI,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CM4AI_d4d.yaml,Claude Code,Base / root,version,empty
+CM4AI,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_d4d.yaml,Claude Code,Base / root,version,empty
 CM4AI,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_d4d.yaml,Claude Code,Base / root,version,empty
 CM4AI,direct,,,,,Base / root,version,no_record
 VOICE,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml,Claude API (direct),Base / root,version,populated
@@ -3853,7 +3853,7 @@ CHORUS,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-
 CHORUS,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,notes,empty
 CHORUS,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,notes,populated
 CHORUS,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml,Claude API (direct),Base / root,notes,populated
-CHORUS,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,notes,caveat_only
+CHORUS,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml,Claude API (direct),Base / root,notes,empty
 CHORUS,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml,Claude API (direct),Base / root,notes,populated
 CHORUS,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_d4d.yaml,Claude Code,Base / root,notes,empty
 CHORUS,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml,Claude Code,Base / root,notes,empty
@@ -3872,10 +3872,10 @@ CM4AI,direct,,,,,Base / root,notes,no_record
 VOICE,api,v7,1,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml,Claude API (direct),Base / root,notes,empty
 VOICE,api,v7,2,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml,Claude API (direct),Base / root,notes,populated
 VOICE,api,v7,3,data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_d4d.yaml,Claude API (direct),Base / root,notes,populated
-VOICE,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml,Claude API (direct),Base / root,notes,caveat_only
+VOICE,api,v8,1,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml,Claude API (direct),Base / root,notes,empty
 VOICE,api,v8,2,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml,Claude API (direct),Base / root,notes,populated
 VOICE,api,v8,3,data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml,Claude API (direct),Base / root,notes,populated
-VOICE,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_d4d.yaml,Claude Code,Base / root,notes,caveat_only
-VOICE,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_d4d.yaml,Claude Code,Base / root,notes,caveat_only
+VOICE,agentic,v6,1,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_d4d.yaml,Claude Code,Base / root,notes,empty
+VOICE,agentic,v6,2,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_d4d.yaml,Claude Code,Base / root,notes,empty
 VOICE,agentic,v6,3,data/d4d_concatenated/claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml,Claude Code,Base / root,notes,populated
 VOICE,direct,,,,,Base / root,notes,no_record
