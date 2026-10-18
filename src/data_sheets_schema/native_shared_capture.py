@@ -726,7 +726,7 @@ def _base(selection_path, *, _catalogs=None):
     selection = selected.capture(selection_path)
     reader = _Reader(selection)
     e = reader.read('execution_capture', selection.role('execution_capture'))
-    ctx = receipt_api._catalog_context(_catalogs) if _catalogs is not None else None
+    ctx = _catalogs if type(_catalogs) is receipt_api._ReceiptCatalogContext else None
     token = receipt_api.catalog_reuse.runtime_token() if ctx is not None else None
     base_key = None if token is None else (
         token, selection_path, selection.registration.raw, e.raw,
@@ -1578,7 +1578,8 @@ def _provenance_block(run):
     decision = run.decision()
     if decision is None or decision.state != 'assembly_complete' or decision.completion is None:
         raise ValueError('native provenance requires complete freshly reconstructed selected stages')
-    completion = stage.check_assembly(run.selection, run.binding, run.phase1, run.history, decision.completion.assembly.raw)
+    completion = stage._check_assembly(run.selection, run.binding, run.phase1, run.history,
+                                       decision.completion.assembly.raw, run._catalogs)
     artifact = run.reader.read('completion', run.selection.role('completion'))
     return {'protocol': c.NAME, 'selection_sha256': run.selection.registration.pin.sha256,
         'execution_sha256': run.binding.execution.pin.sha256, 'attempt_id': run.binding.attempt_id,

@@ -358,7 +358,7 @@ def _prepare(*, protocol, original_full, bundle, manifest, receipt, context, sch
     return packet
 
 
-def _open(packet, *, derivations=None, captured_assets=None):
+def _open(packet, *, derivations=None, captured_assets=None, _catalog_lookup=None):
     _exact(packet, {"kind", "protocol", "inputs", "schema_sources", "project", "limits", "plan",
         "omission_request", "contracts", "requests", "registered_provenance", "limitations", "sha256"}, "packet")
     raw_packet = _json(packet)
@@ -374,7 +374,18 @@ def _open(packet, *, derivations=None, captured_assets=None):
         if hit is not None:
             raw_bytes, payload_json = hit
             return dict(raw_bytes), omissions.Prepared(payload_json)
-    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"], derivations=derivations, captured_assets=captured_assets)
+    _schema_reuse = None
+    if captured_assets is not None and _catalog_lookup is not None:
+        from .native_catalog_reuse import _CatalogLookup
+        if type(_catalog_lookup) is _CatalogLookup:
+            try:
+                snapshot = _snapshot(packet["schema_sources"])
+                catalog = _catalog_lookup.for_snapshot(snapshot.sources[0][1], snapshot)
+                if catalog is not None:
+                    _schema_reuse = _SchemaReuse(snapshot.sources, catalog)
+            except Exception:
+                _schema_reuse = None
+    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"], derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
     expected = _seal({**{key: packet[key] for key in ("kind", "protocol", "inputs", "schema_sources", "project", "limits")},
                       **derived, "limitations": list(LIMITATIONS)})
     if raw_packet != _json(expected):
@@ -532,8 +543,8 @@ def _account(audit, delta, candidates):
              "final_finding_ordinal": links.get(row["id"])} for row in candidates]
 
 
-def _result(packet, workers, omission_response, integration_response, *, derivations=None, captured_assets=None):
-    raw, _ = _open(packet, derivations=derivations, captured_assets=captured_assets)
+def _result(packet, workers, omission_response, integration_response, *, derivations=None, captured_assets=None, _catalog_lookup=None):
+    raw, _ = _open(packet, derivations=derivations, captured_assets=captured_assets, _catalog_lookup=_catalog_lookup)
     bound_index = index(packet, workers, omission_response, derivations=derivations, captured_assets=captured_assets)
     inner_integration = _unwrap(integration_response, bound_index)
     audit_raw, lineage = batches.assemble(packet["plan"], _workers(packet, workers, derivations=derivations, captured_assets=captured_assets), inner_integration, version=2)
@@ -581,9 +592,9 @@ def check_integration(packet, workers, omission_response, integration_response, 
     return _result(packet, workers, omission_response, integration_response, derivations=derivations, captured_assets=captured_assets)[3]
 
 
-def assemble(packet, workers, omission_response, integration_response, *, derivations=None, captured_assets=None):
+def assemble(packet, workers, omission_response, integration_response, *, derivations=None, captured_assets=None, _catalog_lookup=None):
     """Seal a new self-contained assembly only when mechanical checks pass."""
-    bound_index, audit_raw, lineage, report = _result(packet, workers, omission_response, integration_response, derivations=derivations, captured_assets=captured_assets)
+    bound_index, audit_raw, lineage, report = _result(packet, workers, omission_response, integration_response, derivations=derivations, captured_assets=captured_assets, _catalog_lookup=_catalog_lookup)
     if not report["passed"]:
         raise ValueError("source-evidence acceptance failed; use check-integration for bounded diagnostics")
     result = _seal({"kind": ASSEMBLY, "packet": packet,
@@ -596,7 +607,7 @@ def assemble(packet, workers, omission_response, integration_response, *, deriva
     return result
 
 
-def check(assembly, *, derivations=None, captured_assets=None):
+def check(assembly, *, derivations=None, captured_assets=None, _catalog_lookup=None):
     """Rebuild independently from captured original/response bytes, not reports."""
     _exact(assembly, {"kind", "packet", "workers", "omission_response", "integration_response", "index",
                       "audit", "lineage", "acceptance", "sha256"}, "assembly")
@@ -606,7 +617,7 @@ def check(assembly, *, derivations=None, captured_assets=None):
         raise ValueError("assembly exceeds byte bound")
     expected = assemble(assembly["packet"], {key: _unblob(value, MAX_SAVED_RESPONSE_BYTES) for key, value in assembly["workers"].items()},
         _unblob(assembly["omission_response"], omissions.MAX_RESPONSE_BYTES),
-        _unblob(assembly["integration_response"], MAX_SAVED_RESPONSE_BYTES), derivations=derivations, captured_assets=captured_assets)
+        _unblob(assembly["integration_response"], MAX_SAVED_RESPONSE_BYTES), derivations=derivations, captured_assets=captured_assets, _catalog_lookup=_catalog_lookup)
     if _json(assembly) != _json(expected):
         raise ValueError("saved assembly differs from independent captured-byte reconstruction")
     return {**expected["acceptance"], "assembly_sha256": expected["sha256"], "independently_reconstructed": True}
