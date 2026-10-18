@@ -347,10 +347,13 @@ def supported_snapshot(snapshot):
     """The initial optimization excludes all ambient import/prefix-map state."""
     try:
         if (type(snapshot) is not snapshots.SchemaSnapshot or type(snapshot.sources) is not tuple
-                or len(snapshot.sources) != 1):
+                or not snapshot.sources):
             return False
-        _name, _imports, _prefixes, maps = snapshots._metadata(snapshot.sources[0][2])
-        return not _imports and not maps
+        if len(snapshot.sources) == 1:
+            _name, _imports, _prefixes, maps = snapshots._metadata(snapshot.sources[0][2])
+            return not _imports and not maps
+        return all(all(imp == 'linkml:types' for imp in snapshots._metadata(raw)[1])
+                   for _name, _path, raw in snapshot.sources)
     except Exception:
         return False
 

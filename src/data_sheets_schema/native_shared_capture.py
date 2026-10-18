@@ -362,6 +362,23 @@ def activate(selection, execution_raw, started_raw):
         execution_sha256=e.pin.sha256, attempt_id=value['attempt_id'], records=(record.pin,)))
 
 
+def _decision_key(selection, binding, phase1, history):
+    return (
+        selection.registration.pin.sha256,
+        selection.registration.raw,
+        binding.execution.pin.sha256,
+        binding.execution.raw,
+        phase1.seal.pin.sha256,
+        phase1.full.raw,
+        phase1.original_receipt.raw,
+        None if phase1.core_seal is None else (phase1.core_seal.pin.sha256, phase1.core.raw),
+        history.journal.pin.sha256,
+        history.journal.raw,
+        tuple((item.pin, item.raw) for item in history.records),
+        tuple((item.pin, item.raw) for item in history.artifacts),
+    )
+
+
 @dataclass
 class _CapturedRun:
     selection: c.NativeSelectionCapture
@@ -394,12 +411,12 @@ class _CapturedRun:
     def decision(self):
         if self.phase1 is None:
             return None
-        key = (self.history.journal.pin.sha256, self.phase1.seal.pin.sha256,
-               None if self.phase1.core_seal is None else self.phase1.core_seal.pin.sha256)
-        if key in self._decisions:
+        token = receipt_api.catalog_reuse.runtime_token()
+        key = None if token is None else (token, *_decision_key(self.selection, self.binding, self.phase1, self.history))
+        if key is not None and key in self._decisions:
             return self._decisions[key]
         value = stage._prepare_next(self.selection, self.binding, self.phase1, self.history, self._catalogs)
-        if value.state != 'failed':
+        if key is not None and value.state != 'failed' and receipt_api.catalog_reuse.runtime_token() is token:
             self._decisions[key] = value
         return value
 
@@ -576,7 +593,8 @@ def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files,
 
 def _journal_prefix_digest(run, end):
     pins = tuple(item.pin for item in run.history.records[:end])
-    key = tuple(pin.sha256 for pin in pins)
+    key = (run.selection.registration.pin.sha256, run.binding.execution.pin.sha256,
+           run.binding.attempt_id, pins)
     prefixes = getattr(run, '_prefixes', None)
     if prefixes is not None and key in prefixes:
         return prefixes[key]
@@ -607,13 +625,13 @@ def _decision_at(run, digest):
     phase1 = _phase1(run.selection, run.binding, history, run.reader)
     if phase1 is None:
         raise ValueError('stage observation precedes actual phase1 seal')
-    key = (history.journal.pin.sha256, phase1.seal.pin.sha256,
-           None if phase1.core_seal is None else phase1.core_seal.pin.sha256)
+    token = receipt_api.catalog_reuse.runtime_token()
+    key = None if token is None else (token, *_decision_key(run.selection, run.binding, phase1, history))
     decisions = getattr(run, '_decisions', None)
-    if decisions is not None and key in decisions:
+    if key is not None and decisions is not None and key in decisions:
         return decisions[key]
     value = stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs)
-    if decisions is not None and value.state != 'failed':
+    if key is not None and decisions is not None and value.state != 'failed' and receipt_api.catalog_reuse.runtime_token() is token:
         decisions[key] = value
     return value
 
@@ -834,6 +852,8 @@ def _loaded(base, streams, prefixes, *, _catalogs=None):
                        transcript, control, binding, history, observations, phase1)
     if _catalogs is not None:
         run._catalogs = receipt_api._catalog_context(_catalogs)
+        run._decisions = run._catalogs._decisions
+        run._prefixes = run._catalogs._prefixes
     _checked_observations(run)
     return run
 

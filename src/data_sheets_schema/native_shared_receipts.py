@@ -85,6 +85,8 @@ class _ReceiptCatalogContext:
         self._typed_marker = None
         self._derivations = None
         self._derivations_marker = None
+        self._decisions = {}
+        self._prefixes = {}
         self._bytes = 0
         self._lock = Lock()
 
@@ -292,8 +294,9 @@ def prepare(selection, execution, phase1):
     return _prepare(selection, execution, phase1, _ReceiptCatalogContext())
 
 
-def _prepare(selection, execution, phase1, catalogs):
-    full, receipt, manifest, texts, md5, bases, catalog, owners = _inputs(selection, phase1, _catalogs=catalogs)
+def _prepare_with_inputs(selection, execution, phase1, catalogs):
+    inputs = _inputs(selection, phase1, _catalogs=catalogs)
+    full, receipt, manifest, texts, md5, bases, catalog, owners = inputs
     chosen = selection.document()['inputs']
     paths = receipts.uncovered_receiptable_leaves(receipt, manifest, texts, full, md5,
                                                   original=full, identifier_bases=bases)
@@ -310,7 +313,11 @@ def _prepare(selection, execution, phase1, catalogs):
         'schema': catalog, 'owner_classes': owners, 'requested_paths': paths,
         'max_output_tokens': output_ceiling(execution),
         'output_limit_basis': 'asserted runtime output ceiling; not per-stage enforcement or a whole-session token budget',
-        'response_contract': 'Return only {rereceipt: [...]}; exactly one existing path and receipt {chunk,snippet} or unsupported:true with reason per requested leaf. Verified quotes do not establish semantic support.'}
+        'response_contract': 'Return only {rereceipt: [...]}; exactly one existing path and receipt {chunk,snippet} or unsupported:true with reason per requested leaf. Verified quotes do not establish semantic support.'}, inputs
+
+
+def _prepare(selection, execution, phase1, catalogs):
+    return _prepare_with_inputs(selection, execution, phase1, catalogs)[0]
 
 
 def complete(selection, execution, phase1, response_raw):
@@ -318,8 +325,7 @@ def complete(selection, execution, phase1, response_raw):
 
 
 def _complete(selection, execution, phase1, response_raw, catalogs):
-    request = _prepare(selection, execution, phase1, catalogs)
-    full, receipt, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1, _catalogs=catalogs)
+    request, (full, receipt, manifest, texts, md5, bases, _, _) = _prepare_with_inputs(selection, execution, phase1, catalogs)
     listed = request['requested_paths']
     if response_raw is None:
         if listed:
