@@ -88,9 +88,7 @@ class _ReceiptCatalogContext:
         self._decisions = {}
         self._prefixes = {}
         self._raw_inputs = {}
-        self._prepared = {}
         self._completed = {}
-        self._packets = {}
         self._requests = {}
         self._responses = {}
         self._completions = {}
@@ -263,7 +261,7 @@ def _raw_inputs(selection, full_raw, receipt_raw, *, _catalogs=None):
     )
     if raw_key is not None and raw_key in ctx._raw_inputs:
         full, receipt, manifest, texts, md5, cached_bases, owners = ctx._raw_inputs[raw_key]
-        return deepcopy(full), deepcopy(receipt), deepcopy(manifest), dict(texts), md5, cached_bases, catalog, dict(owners)
+        return full, receipt, manifest, dict(texts), md5, cached_bases, catalog, dict(owners)
     full = omissions._mapping(full_raw, 'sealed native full')
     receipt = omissions._mapping(receipt_raw, 'sealed native receipt')
     manifest = omissions._mapping(manifest_raw, 'captured chunks')
@@ -346,15 +344,11 @@ def _prep_key(selection, execution, phase1, catalogs):
 
 
 def _prepare(selection, execution, phase1, catalogs):
-    from copy import deepcopy
-    ctx, token, prep_key = _prep_key(selection, execution, phase1, catalogs)
-    if prep_key is not None and len(prep_key) > 1 and prep_key in ctx._prepared:
-        return deepcopy(ctx._prepared[prep_key][0])
     full, receipt, manifest, texts, md5, bases, catalog, owners = _inputs(selection, phase1, _catalogs=catalogs)
     chosen = selection.document()['inputs']
     paths = receipts.uncovered_receiptable_leaves(receipt, manifest, texts, full, md5,
                                                   original=full, identifier_bases=bases)
-    result = {'protocol': contract.NAME, 'stage': 'receipt',
+    return {'protocol': contract.NAME, 'stage': 'receipt',
         'selection_sha256': selection.registration.pin.sha256,
         'receipt_policy': policy(selection),
         'phase1_seal_sha256': phase1.seal.pin.sha256,
@@ -368,11 +362,6 @@ def _prepare(selection, execution, phase1, catalogs):
         'max_output_tokens': output_ceiling(execution),
         'output_limit_basis': 'asserted runtime output ceiling; not per-stage enforcement or a whole-session token budget',
         'response_contract': 'Return only {rereceipt: [...]}; exactly one existing path and receipt {chunk,snippet} or unsupported:true with reason per requested leaf. Verified quotes do not establish semantic support.'}
-    if (ctx is not None and token is not None and catalog_reuse.runtime_token() is token
-            and ctx._entry is not None and ctx._bytes <= _CATALOG_PAYLOAD_BYTES):
-        actual_key = prep_key[0] if len(prep_key) == 1 else prep_key
-        ctx._prepared[actual_key] = (deepcopy(result), contract.canonical(result))
-    return result
 
 
 def complete(selection, execution, phase1, response_raw):
@@ -381,15 +370,18 @@ def complete(selection, execution, phase1, response_raw):
 
 def _complete(selection, execution, phase1, response_raw, catalogs):
     ctx, token, prep_key = _prep_key(selection, execution, phase1, catalogs)
-    if prep_key is not None and len(prep_key) > 1 and prep_key in ctx._prepared:
-        request, request_raw = ctx._prepared[prep_key]
-    else:
-        request = _prepare(selection, execution, phase1, catalogs)
+    complete_key = None if (
+        ctx is None or token is None or prep_key is None or len(prep_key) == 1
+        or (response_raw is not None and type(response_raw) is not bytes)
+    ) else (token, prep_key, response_raw)
+    if complete_key is not None and complete_key in ctx._completed:
+        return ctx._completed[complete_key]
+    request = _prepare(selection, execution, phase1, catalogs)
+    request_raw = contract.canonical(request)
+    if complete_key is None and ctx is not None and token is not None and (response_raw is None or type(response_raw) is bytes):
         _, _, prep_key = _prep_key(selection, execution, phase1, catalogs)
-        if prep_key is not None and len(prep_key) > 1 and prep_key in ctx._prepared:
-            _, request_raw = ctx._prepared[prep_key]
-        else:
-            request_raw = contract.canonical(request)
+        if prep_key is not None and len(prep_key) > 1:
+            complete_key = (token, prep_key, response_raw)
     listed = request['requested_paths']
     if response_raw is None:
         if listed:
@@ -410,12 +402,6 @@ def _complete(selection, execution, phase1, response_raw, catalogs):
                 raise ValueError('rereceipt must be a list')
         except ValueError as exc:
             answers, problem = [], str(exc)
-    complete_key = None if (ctx is None or token is None or prep_key is None or len(prep_key) == 1) else (
-        token, request_raw, selection.receipt_policy.pin.sha256,
-        selection.receipt_policy.raw, phase1.original_receipt.raw, response_raw,
-    )
-    if complete_key is not None and complete_key in ctx._completed:
-        return ctx._completed[complete_key]
     full, receipt, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1, _catalogs=catalogs)
     before = receipts.check(receipt, manifest, texts, full, md5, full,
                              instrument_version=4, identifier_bases=bases)

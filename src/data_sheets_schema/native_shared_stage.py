@@ -259,9 +259,18 @@ class _Replay:
 
     def _prefix(self, count=None):
         count = self.at if count is None else count
-        return c.sha(journal_bytes(selection_sha256=self.s.registration.pin.sha256,
+        pins = tuple(item.pin for item in self.h.records[:count])
+        key = (self.s.registration.pin.sha256, self.e.execution.pin.sha256,
+               self.e.attempt_id, pins)
+        if self._explicit_catalogs and key in self.catalogs._prefixes:
+            return self.catalogs._prefixes[key][0]
+        raw = journal_bytes(selection_sha256=self.s.registration.pin.sha256,
             execution_sha256=self.e.execution.pin.sha256, attempt_id=self.e.attempt_id,
-            records=tuple(item.pin for item in self.h.records[:count])))
+            records=pins)
+        digest = c.sha(raw)
+        if self._explicit_catalogs:
+            self.catalogs._prefixes[key] = (digest, raw)
+        return digest
 
     def _captured(self, pin, *, observation=False):
         selected = _pin(pin)
@@ -287,10 +296,6 @@ class _Replay:
                 self._output('receipt_result', value.result_json), self._output('receipt_carry', value.carry_json))
 
     def _packet(self):
-        wkey = self._warm_key()
-        pkey = None if wkey is None else (wkey, self.receipt.effective_receipt)
-        if pkey is not None and pkey in self.catalogs._packets:
-            return self.catalogs._packets[pkey]
         inputs, limits = self.s.document()['inputs'], self.s.bounds()
         schema = nr.schema_snapshot(self.s)
         packet = typed._prepare(protocol='typed_audit_protocol_v1', original_full=self.p.full.raw,
@@ -306,8 +311,6 @@ class _Replay:
             _catalog_lookup=catalog_reuse._CatalogLookup(self.catalogs, self.s), **self.options)
         if len(packet['plan']['inventory']['values']) > limits['max_populated_paths']:
             raise ValueError('native global populated path bound exceeded')
-        if pkey is not None and catalog_reuse.runtime_token() is self._token:
-            self.catalogs._packets[pkey] = packet
         return packet
 
     def _inner(self, cursor):

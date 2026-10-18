@@ -646,8 +646,8 @@ def _binding(selection, value, composition, reader, pool):
     return result
 
 
-def _phase1(selection, execution, history, reader):
-    rows, _ = stage._history(selection, execution, history)
+def _phase1(selection, execution, history, reader, *, _rows=None):
+    rows = _rows if _rows is not None else stage._history(selection, execution, history)[0]
     full = [row['payload'] for row in rows if row['record_type'] == 'phase1_sealed']
     core = [row['payload'] for row in rows if row['record_type'] == 'core_sealed']
     if not full:
@@ -849,7 +849,7 @@ def _history_prefix(run, digest):
 def _decision_at(run, digest):
     history = _history_prefix(run, digest)
     rows, _ = stage._history(run.selection, run.binding, history)
-    phase1 = _phase1(run.selection, run.binding, history, run.reader)
+    phase1 = _phase1(run.selection, run.binding, history, run.reader, _rows=rows)
     if phase1 is None:
         raise ValueError('stage observation precedes actual phase1 seal')
     paths = _referenced_artifact_paths(run.selection, rows)
