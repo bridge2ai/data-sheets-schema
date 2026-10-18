@@ -547,6 +547,10 @@ poetry run d4d --help
 <td><code>d4d utils</code></td>
 <td>Inspect pipeline status and validate preprocessing results</td>
 </tr>
+<tr>
+<td><code>d4d validate</code></td>
+<td>Validate and lint data-sheet instances (CI-friendly)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="d4d-download"><code>d4d download</code></h2>
@@ -1072,6 +1076,149 @@ retains its linked fidelity, comparison and publication obligations.</p>
 </tr>
 </tbody>
 </table>
+<h2 id="d4d-validate"><code>d4d validate</code></h2>
+<p>Validate and lint one or more data-sheet instance files (YAML or JSON, one
+datasheet mapping per file) against the D4D LinkML schema. Unlike
+<code>d4d schema validate</code> (which runs <code>linkml-validate</code> in a subprocess and
+requires a repository checkout), <code>d4d validate</code> runs <code>linkml.validator</code>
+in-process with a cached <code>Validator</code>, works from an installed wheel in any
+directory, and adds linter checks that go beyond schema validity:</p>
+<ul>
+<li><strong>unknown fields</strong> (with did-you-mean hints for typos),</li>
+<li><strong>duplicate YAML/JSON keys</strong> (caught before <code>yaml.safe_load</code> / <code>json.loads</code>
+  silently overwrites earlier values),</li>
+<li><strong>placeholder prose</strong> (<code>TBD</code>, <code>N/A</code>, <code>?</code>) and <strong>empty values</strong>,</li>
+<li><strong>missing identifier prose</strong> (<code>title</code>, <code>name</code>, <code>description</code>),</li>
+<li><strong>British spellings</strong> in prose (the datasheet convention is American English;
+  quoted strings, proper nouns, URLs and verbatim slots are exempted),</li>
+<li><strong>per-section completeness</strong> against the Gebru et al. datasheet sections,
+  with a 0–100 completeness score.</li>
+</ul>
+<pre><code class="language-bash">poetry run d4d validate datasheet.yaml
+poetry run d4d validate --schema core datasheet.yaml --format json --output report.json
+poetry run d4d validate --fail-on-warning datasheets/*.yaml
+</code></pre>
+<p>Options:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FILES...</code></td>
+<td>One or more data-sheet YAML/JSON files to check (one mapping per file)</td>
+</tr>
+<tr>
+<td><code>--schema</code></td>
+<td><code>full</code> (target class <code>Dataset</code>) or <code>core</code> (target class <code>CoreDataset</code>). Default: <code>full</code></td>
+</tr>
+<tr>
+<td><code>--schema-file PATH</code></td>
+<td>Validate against this schema file instead of <code>--schema</code></td>
+</tr>
+<tr>
+<td><code>--target-class NAME</code></td>
+<td>Target class in the schema (default: <code>Dataset</code> for full, <code>CoreDataset</code> for core)</td>
+</tr>
+<tr>
+<td><code>--format</code></td>
+<td><code>human</code> (summary + findings) or <code>json</code> (machine-readable report). Default: <code>human</code></td>
+</tr>
+<tr>
+<td><code>--output PATH</code></td>
+<td>Write the report to this file instead of stdout</td>
+</tr>
+<tr>
+<td><code>--fail-on-warning</code></td>
+<td>Exit 1 on lint warnings, not just on schema errors</td>
+</tr>
+<tr>
+<td><code>--quiet</code>, <code>-q</code></td>
+<td>Human format: print only the per-file summary lines</td>
+</tr>
+</tbody>
+</table>
+<p>Exit codes: <code>0</code> = all files valid (warnings allowed unless
+<code>--fail-on-warning</code>); <code>1</code> = at least one file invalid, or warnings with
+<code>--fail-on-warning</code>; <code>2</code> = usage error (missing file, unknown target class,
+unreadable or malformed schema).</p>
+<p>Issue codes emitted in reports:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Severity</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>schema-violation</code></td>
+<td>error</td>
+<td>Failed LinkML schema validation (including scalar type errors), with JSON path</td>
+</tr>
+<tr>
+<td><code>unknown-field</code></td>
+<td>error</td>
+<td>Field not in the schema (typo candidate), with hint</td>
+</tr>
+<tr>
+<td><code>duplicate-key</code></td>
+<td>error</td>
+<td>Duplicate mapping key in the YAML/JSON source</td>
+</tr>
+<tr>
+<td><code>unparseable</code></td>
+<td>error</td>
+<td>File could not be parsed as a single YAML/JSON document</td>
+</tr>
+<tr>
+<td><code>not-a-mapping</code></td>
+<td>error</td>
+<td>Instance is not a mapping for the target class (e.g. a root-level list)</td>
+</tr>
+<tr>
+<td><code>placeholder-value</code></td>
+<td>warning</td>
+<td><code>TBD</code>/<code>N/A</code>/<code>?</code> instead of an answer</td>
+</tr>
+<tr>
+<td><code>empty-value</code></td>
+<td>warning</td>
+<td>Empty string value</td>
+</tr>
+<tr>
+<td><code>missing-identifier</code></td>
+<td>warning</td>
+<td><code>title</code>/<code>name</code>/<code>description</code> missing or empty (when induced on the target class)</td>
+</tr>
+<tr>
+<td><code>british-spelling</code></td>
+<td>warning</td>
+<td>British spelling in prose</td>
+</tr>
+<tr>
+<td><code>empty-section</code></td>
+<td>warning</td>
+<td>An always-applicable section (identification, motivation, composition, uses, distribution) with no answered questions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ci-recipe">CI recipe</h3>
+<p>Gate pull requests on datasheet validity with a job like this (with the
+<code>data-sheets-schema</code> package installed in the environment):</p>
+<pre><code class="language-yaml">- name: Validate datasheets
+  run: |
+    pip install .
+    d4d validate \
+      --schema core --format json --output d4d-report.json \
+      datasheets/*.yaml
+    # or, to fail on lint warnings too:
+    # d4d validate --schema core --fail-on-warning datasheets/*.yaml
+</code></pre>
 <h2 id="recommended-starting-points">Recommended Starting Points</h2>
 <ul>
 <li><code>poetry run d4d --help</code> for the top-level command list</li>
