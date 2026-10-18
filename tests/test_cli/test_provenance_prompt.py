@@ -341,3 +341,95 @@ class TestMidnightCrossingRunDate(unittest.TestCase):
         self.assertNotEqual(bad.exit_code, 0)
         self.assertIn("--run-date", bad.output)
 
+
+
+class TestRunDateRecoveryPaths(unittest.TestCase):
+    """#5049 review: each recovery path isolated, with the recorder's clock
+    frozen so the label date or today's date cannot rescue a broken path."""
+
+    LABEL = "2026-10-14_claude-opus-5-generic-v8_rep1"
+
+    def setUp(self):
+        self.repo_root = Path(__file__).resolve().parents[2]
+        self.bundle = self.repo_root / "data/preprocessed/concatenated/VOICE_preprocessed.txt"
+        if not self.bundle.exists():
+            self.skipTest("VOICE bundle absent")
+        self.sent = self._render(self.LABEL)
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.prompt_file = Path(tmp.name) / "rendered_prompt.txt"
+
+    def _render(self, label):
+        # Rendered under the label it is recorded under, on 2026-10-14.
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli.api import ARMS
+        return resolve_prompt(RunSpec(
+            project="VOICE", arm=ARMS["baseline"][0], method="claudecode_agent",
+            bundle=self.bundle, label=label, condition="generic_v8",
+            runtime="Claude Code", provider="Anthropic", run_date="2026-10-14",
+            manifest_line=ARMS["baseline"][3]))
+
+    def _record(self, label, text=None, today="2026-10-20", extra=()):
+        import datetime as _dt
+        from unittest import mock
+        from data_sheets_schema.cli import provenance as prov_cli
+
+        class FrozenDate(_dt.date):
+            @classmethod
+            def today(cls):
+                return _dt.date.fromisoformat(today)
+
+        self.prompt_file.write_text(self._render(label) if text is None else text, encoding="utf-8")
+        fake_rec = mock.MagicMock(validation_carried=None)
+        fake_rec.write.return_value = self.repo_root / "VOICE_provenance.yaml"
+        with mock.patch("datetime.date", FrozenDate), \
+             mock.patch("data_sheets_schema.provenance.build_record", return_value=fake_rec) as build, \
+             mock.patch.object(prov_cli, "_recorded_receipt_origin", return_value=None), \
+             mock.patch.object(prov_cli, "_inline_checks"):
+            r = CliRunner().invoke(prov_cli.provenance, [
+                "record", "--project", "VOICE", "--method", "claudecode_agent",
+                "--label", label, "--input-bundle", str(self.bundle),
+                "--condition", "generic_v8", "--runtime", "Claude Code",
+                "--provider", "Anthropic", "--prompt-text", str(self.prompt_file), *extra])
+        return r, build
+
+    def test_indented_generated_header_alone_recovers_the_date(self):
+        # Neither today (10-20) nor the label (none) is within ±2 days of the
+        # render date, so only the `# Generated:` line can supply it.
+        self.assertIn("    # Generated: 2026-10-14", self.sent)
+        r, build = self._record("nodate_claude-opus-5-generic-v8_rep1")
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertEqual(build.call_args.kwargs["prompt_request_spec"]["run_date"], "2026-10-14")
+
+    def test_utc_midnight_crossing_with_a_far_label_date(self):
+        # Recorded the next day, under a label dated four days earlier.
+        r, build = self._record("2026-10-10_claude-opus-5-generic-v8_rep1", today="2026-10-15")
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertEqual(build.call_args.kwargs["prompt_request_spec"]["run_date"], "2026-10-14")
+
+    def test_no_reproducing_date_records_no_spec_and_says_so(self):
+        r, build = self._record(self.LABEL, text=self.sent + "\n")
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIsNone(build.call_args.kwargs["prompt_request_spec"])
+        self.assertIn("no request spec recorded", r.output)
+
+    def test_explicit_run_date_must_reproduce_the_prompt_text(self):
+        r, build = self._record(self.LABEL, extra=("--run-date", "2026-10-12"))
+        self.assertNotEqual(r.exit_code, 0)
+        self.assertIn("does not reproduce --prompt-text", r.output)
+        build.assert_not_called()
+        ok, build = self._record(self.LABEL, extra=("--run-date", "2026-10-14"))
+        self.assertEqual(ok.exit_code, 0, ok.output)
+        self.assertEqual(build.call_args.kwargs["prompt_request_spec"]["run_date"], "2026-10-14")
+
+    def test_non_canonical_and_unused_run_dates_are_refused(self):
+        from data_sheets_schema.cli import provenance as prov_cli
+        for value in ("20261014", "2026-W42-3"):
+            r, _ = self._record(self.LABEL, extra=("--run-date", value))
+            self.assertNotEqual(r.exit_code, 0, value)
+            self.assertIn("--run-date", r.output)
+        r = CliRunner().invoke(prov_cli.provenance, [
+            "record", "--project", "VOICE", "--method", "claudecode_agent",
+            "--label", self.LABEL, "--run-date", "2026-10-14"])
+        self.assertNotEqual(r.exit_code, 0)
+        self.assertIn("--condition", r.output)
