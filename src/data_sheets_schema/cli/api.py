@@ -450,6 +450,24 @@ def api():
     """Generate D4D records via the Anthropic API (four model phases plus a derived core)."""
 
 
+def _warn_method_runtime(method, runtime):
+    """Warned, not refused (#5046 review): `{METHOD}` names the output paths
+    the instruction tells the run to write, and the baseline arm's default
+    is the API directory. An agentic or direct run rendered with it is told
+    to write where its own record will not be looked for — the 2026-10-14b
+    failure the flag was added for, still reachable by omitting it."""
+    from data_sheets_schema.runs import RUNTIME_KEYS
+    key = RUNTIME_KEYS.get((runtime or "").strip().lower())
+    expected = {"agentic": "claudecode_agent", "direct": "claudecode_direct"}.get(key)
+    contradicts = ((expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct")
+                    and method != expected)
+                   or (key == "api" and method == "claudecode_direct"))
+    if contradicts:
+        click.echo(f"# ⚠️  --runtime {runtime!r} with method {method}: the instruction names {method}/ output "
+                   f"paths" + (f"; a {key} run writes under {expected}/ — pass --method {expected}"
+                               if expected else "") + " (#5046)", err=True)
+
+
 @api.command("render-prompt")
 @click.option("--shared-generation-version", type=click.IntRange(0, 2), default=0,
               help="explicit shared-generation API condition; requires its immutable registration")
@@ -516,6 +534,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
                  method=method, **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
+    _warn_method_runtime(spec.method, runtime)
 
     # Warned, not refused. Rendering is free and reading the text of a draft
     # condition is a legitimate reason to be here; `d4d api run` refuses and
@@ -710,6 +729,57 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
         click.echo(f"   {k:10} {v}")
 
 
+def _billed_ids(spec) -> set:
+    """The usage ids of every billed attempt already on disk for a run: its
+    provenance record's `api_usage`, the usage ledger and this run's rows of
+    the abandoned-attempts journal (#5045 review). Read before the run, so
+    `--max-cost-dollars` counts what this invocation spends and not a resumed
+    or completed run's earlier history. Unreadable evidence is skipped: the
+    run's rows then count again, which can only stop the batch early."""
+    return set(_billed_rows(spec))
+
+
+def _billed_rows(spec) -> dict:
+    import yaml
+    from data_sheets_schema import usage_ledger
+    from data_sheets_schema.api_runner import _abandoned_rows
+
+    rows: dict = {}
+
+    def keep(row):
+        if isinstance(row, dict) and isinstance(row.get("usage_id"), str):
+            rows.setdefault(row["usage_id"], row)
+    try:
+        if spec.provenance_path.exists():
+            for row in (yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8")) or {}).get("api_usage") or []:
+                keep(row)
+    except Exception:                                  # noqa: BLE001
+        pass
+    try:
+        if usage_ledger.ledger_path(spec).exists():
+            for row in usage_ledger._read(spec)["rows"]:
+                keep(row)
+    except Exception:                                  # noqa: BLE001
+        pass
+    try:
+        for row in _abandoned_rows(spec):
+            if not usage_ledger.identity_is_foreign(spec, row.get("run_identity")):
+                keep(row)
+    except Exception:                                  # noqa: BLE001
+        pass
+    return rows
+
+
+def _rows_cost(rows) -> float:
+    """Dollars at `run_telemetry`'s rates, the arithmetic of its summary."""
+    from data_sheets_schema.run_telemetry import RATE_CACHE_READ, RATE_CACHE_WRITE, RATE_INPUT, RATE_OUTPUT
+    return sum((u.get("input_tokens") or 0) * RATE_INPUT
+               + (u.get("cache_write") or 0) * RATE_CACHE_WRITE
+               + (u.get("cache_read") or 0) * RATE_CACHE_READ
+               + (u.get("output_tokens") or 0) * RATE_OUTPUT
+               for u in rows)
+
+
 @api.command("batch")
 @click.option("--shared-generation-version", type=click.IntRange(0, 2), default=0,
               help="explicit shared-generation API condition; requires its immutable registration")
@@ -756,7 +826,10 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
               help="fan out even if the first run regresses against the "
                    "baseline; the comparison is still printed")
 @click.option("--max-cost-dollars", type=float, default=None,
-              help="stop batch before starting subsequent runs if cumulative cost meets or exceeds this amount")
+              help="stop the batch before starting another run once this invocation's billed attempts reach "
+                   "this many dollars at run_telemetry's opus-5 rates; checked between runs, so the run "
+                   "that crosses the cap finishes and spend can exceed it by up to one run. Usage a "
+                   "resumed run spent before this invocation is not counted (#5045)")
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
@@ -768,8 +841,9 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api batch")          # the record and the outputs land under the cwd (#1643)
-    if max_cost_dollars is not None and (not math.isfinite(max_cost_dollars) or max_cost_dollars < 0):
-        raise click.ClickException("--max-cost-dollars must be non-negative and finite")
+    if max_cost_dollars is not None and (not math.isfinite(max_cost_dollars) or max_cost_dollars <= 0):
+        # A cap of 0 would still run, and bill, the first run (#5045 review).
+        raise click.ClickException("--max-cost-dollars must be positive and finite")
     from data_sheets_schema.api_runner import execute, plan
 
     requested = (AUTO if manifest is None
@@ -895,26 +969,19 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 # canary stop does: the release below is not in a finally.
                 canary_stop = run_guard.message(late)
                 break
+        billed_before = _billed_ids(s) if max_cost_dollars is not None else set()
         try:
             if roster:
                 _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
             res = execute(s)
-            usage_rows = res.get("usage") or []
+            # This invocation's attempts only: a resumed run returns its
+            # earlier usage too, a completed one all of it (#5045 review).
+            usage_rows = [u for u in res.get("usage") or []
+                          if not (isinstance(u, dict) and u.get("usage_id") in billed_before)]
             spent_in += sum(u.get("input_tokens") or 0 for u in usage_rows)
             spent_out += sum(u.get("output_tokens") or 0 for u in usage_rows)
             cached = sum(u.get("cache_read") or 0 for u in usage_rows)
-            from data_sheets_schema.run_telemetry import (
-                RATE_CACHE_READ,
-                RATE_CACHE_WRITE,
-                RATE_INPUT,
-                RATE_OUTPUT,
-            )
-            run_cost = sum((u.get("input_tokens") or 0) * RATE_INPUT
-                           + (u.get("cache_write") or 0) * RATE_CACHE_WRITE
-                           + (u.get("cache_read") or 0) * RATE_CACHE_READ
-                           + (u.get("output_tokens") or 0) * RATE_OUTPUT
-                           for u in usage_rows)
-            spent_dollars += run_cost
+            spent_dollars += _rows_cost(usage_rows)
             note = f"  (resumed, skipped {len(res['skipped'])})" if res["skipped"] else ""
             vp = res.get("validation_problems") or []
             if vp:
@@ -1021,6 +1088,13 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                                else "     canary ok — fanning out")
             ok.append(s.label)
         except Exception as exc:                       # noqa: BLE001
+            if max_cost_dollars is not None:
+                # A run that raised was billed for every attempt it persisted
+                # before raising; the cap counts them (#5045 review).
+                raised_rows = [row for uid, row in _billed_rows(s).items() if uid not in billed_before]
+                spent_in += sum(u.get("input_tokens") or 0 for u in raised_rows)
+                spent_out += sum(u.get("output_tokens") or 0 for u in raised_rows)
+                spent_dollars += _rows_cost(raised_rows)
             click.echo(f"   ❌ {type(exc).__name__}: {exc}", err=True)
             failed.append((s.project, s.label, str(exc)))
             # A canary that *raised* has not passed, and before #619 nothing

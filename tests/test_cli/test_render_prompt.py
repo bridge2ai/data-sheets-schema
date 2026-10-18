@@ -146,6 +146,29 @@ class TestTheCommand(unittest.TestCase):
         self.assertNotEqual(r.exit_code, 0)
         self.assertIn("conflicts with --arm", r.stderr)
 
+    def test_a_runtime_contradicting_the_method_is_warned(self):
+        """#5046 review: omitting --method for an agentic run still renders
+        the API directory; say so where the instruction is obtained."""
+        label = "2026-10-14_claude-opus-5-generic-v8_rep1"
+        base = ["render-prompt", "--project", "VOICE", "--label", label, "--condition", "generic_v8"]
+        for extra, warned in ((["--runtime", "Claude Code"], "pass --method claudecode_agent"),
+                              (["--runtime", "Claude Code", "--method", "claudecode_direct"],
+                               "pass --method claudecode_agent"),
+                              (["--runtime", "Claude Code (direct)", "--method", "claudecode_agent"],
+                               "pass --method claudecode_direct"),
+                              (["--runtime", "Claude API (direct)", "--method", "claudecode_direct"], "(#5046)")):
+            with self.subTest(extra=extra):
+                r = CliRunner(mix_stderr=False).invoke(api, base + extra)
+                self.assertEqual(r.exit_code, 0, r.stderr)
+                self.assertIn(warned, r.stderr)
+        for extra in (["--runtime", "Claude Code", "--method", "claudecode_agent"],
+                      ["--runtime", "Claude API (direct)"],
+                      ["--runtime", "Claude Code (direct)", "--method", "claudecode_direct"]):
+            with self.subTest(extra=extra):
+                r = CliRunner(mix_stderr=False).invoke(api, base + extra)
+                self.assertEqual(r.exit_code, 0, r.stderr)
+                self.assertNotIn("#5046", r.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

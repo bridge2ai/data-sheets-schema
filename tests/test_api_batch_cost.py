@@ -40,7 +40,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
             ],
         )
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("--max-cost-dollars must be non-negative", result.output)
+        self.assertIn("--max-cost-dollars must be positive", result.output)
 
     def test_negative_small_fraction_is_rejected(self):
         runner = CliRunner()
@@ -54,7 +54,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
             ],
         )
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("--max-cost-dollars must be non-negative", result.output)
+        self.assertIn("--max-cost-dollars must be positive", result.output)
 
     def test_non_finite_max_cost_dollars_is_rejected(self):
         runner = CliRunner()
@@ -70,7 +70,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
                     ],
                 )
                 self.assertNotEqual(result.exit_code, 0)
-                self.assertIn("--max-cost-dollars must be non-negative", result.output)
+                self.assertIn("--max-cost-dollars must be positive", result.output)
 
 
 class ApiBatchCostStopTest(unittest.TestCase):
@@ -300,3 +300,54 @@ class ApiBatchCostStructureTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ApiBatchCostAccountingTest(unittest.TestCase):
+    """#5045 review: what the cap counts — this invocation's billed attempts,
+    including those of a run that raised, and none of a run's history."""
+
+    ROW = {"phase": "full", "input_tokens": 100_000, "output_tokens": 20_000,
+           "cache_read": 0, "cache_write": 0}               # $1.00
+
+    def _invoke(self, mock_exec, billed, extra, reps="3"):
+        plan = ApiBatchCostStopTest()._dummy_plan
+        with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
+             patch("data_sheets_schema.cli.api._plan_or_refuse", side_effect=plan), \
+             patch("data_sheets_schema.cli.api._billed_rows", side_effect=billed), \
+             patch("data_sheets_schema.api_runner.execute", mock_exec):
+            return CliRunner().invoke(cli, [
+                "api", "batch", "--projects", "AI_READI", "--replicates", reps, "--arm", "baseline",
+                "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
+                "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate", *extra])
+
+    def test_zero_cap_is_refused(self):
+        result = CliRunner().invoke(cli, ["api", "batch", "--label-prefix", "x", "--max-cost-dollars", "0"])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIn("--max-cost-dollars must be positive", result.output)
+
+    def test_a_run_that_raised_counts_the_attempts_it_persisted(self):
+        on_disk: dict = {}
+
+        def raising(spec):
+            on_disk.setdefault(spec.label, {})[f"{spec.label}-u1"] = {**self.ROW, "usage_id": f"{spec.label}-u1"}
+            raise RuntimeError("phase audit: retries exhausted")
+
+        mock_exec = MagicMock(side_effect=raising)
+        result = self._invoke(mock_exec, lambda spec: dict(on_disk.get(spec.label, {})),
+                              ["--continue-on-error", "--max-cost-dollars", "1.50"])
+        self.assertEqual(mock_exec.call_count, 2, result.output)
+        self.assertIn("cumulative cost stop: spent $2.00 >= $1.50 cap", result.output)
+
+    def test_usage_spent_before_this_invocation_is_not_counted(self):
+        old = {**self.ROW, "output_tokens": 60_000, "usage_id": "old"}     # $2.00 of history
+
+        def resumed(spec):
+            res = ApiBatchCostStopTest()._make_mock_execute(1.0)(spec)
+            res["usage"] = [old] + [{**u, "usage_id": f"{spec.label}-new"} for u in res["usage"]]
+            return res
+
+        mock_exec = MagicMock(side_effect=resumed)
+        result = self._invoke(mock_exec, lambda spec: {"old": old}, ["--max-cost-dollars", "1.50"])
+        # $1.00 per run of new spend: the stop comes after run 2, not run 1.
+        self.assertEqual(mock_exec.call_count, 2, result.output)
+        self.assertIn("cumulative cost stop: spent $2.00 >= $1.50 cap", result.output)
