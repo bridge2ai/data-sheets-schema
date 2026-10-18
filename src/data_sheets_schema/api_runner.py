@@ -6759,6 +6759,25 @@ def _require_same_resume_record(spec: RunSpec, context: _ResumeRecordContext) ->
         raise UsageLedgerError("completed provenance changed after resume authority was captured")
 
 
+def _thinking_basis(settings: dict) -> str:
+    """The provenance sentence for `model.thinking_requested`."""
+    return (
+        ("set on every generation-phase request (full, audit, reconcile, "
+         "report, repair, regate, readdress); on this model family adaptive "
+         "thinking is also the default when the parameter is omitted, so the "
+         "request states the regime rather than changing it, and a phase "
+         "returning no thinking block is a legal adaptive outcome, not a "
+         "deviation. The judging paths (merge, agreement, evidence_score, "
+         "form_defects) send no parameter and are not covered by this line"
+         # A display is a request parameter, not the default the sentence
+         # above describes (#5043 review): the condition chose it.
+         + (f". The request also sets display: {settings['thinking']['display']}, which "
+            "is not the omitted-parameter default; this condition declares it (#5043)"
+            if (settings.get("thinking") or {}).get("display") else ""))
+        if settings.get("thinking") else
+        settings.get("thinking_note", "not requested"))
+
+
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
     if spec.render_version in (24,):
@@ -7397,16 +7416,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # side stays where it is — per phase, in the reasoning log — and the
     # comparison of the two is `d4d provenance reasoning`'s job.
     rec.data["model"]["thinking_requested"] = dict(settings.get("thinking") or {})
-    rec.data["model"]["thinking_basis"] = (
-        ("set on every generation-phase request (full, audit, reconcile, "
-         "report, repair, regate, readdress); on this model family adaptive "
-         "thinking is also the default when the parameter is omitted, so the "
-         "request states the regime rather than changing it, and a phase "
-         "returning no thinking block is a legal adaptive outcome, not a "
-         "deviation. The judging paths (merge, agreement, evidence_score, "
-         "form_defects) send no parameter and are not covered by this line")
-        if settings.get("thinking") else
-        settings.get("thinking_note", "not requested"))
+    rec.data["model"]["thinking_basis"] = _thinking_basis(settings)
     if settings.get("effort"):
         rec.data["model"]["reasoning_effort"] = settings["effort"]
         rec.data["model"]["reasoning_effort_basis"] = (

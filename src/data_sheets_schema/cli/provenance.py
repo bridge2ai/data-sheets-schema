@@ -69,13 +69,17 @@ _RUN_OBSERVED_FIELDS = _OBSERVED_FIELDS | frozenset({
     # assistant/user events were malformed — an observation carrying the
     # latter is refused by every writer below (#1934).
     "usage_from_terminal_result", "terminal_results_excluded_by_cut", "malformed_message_events",
-    "overlapping_evidence", "thinking_from_terminal_results", "terminal_results_without_usage"})
+    "overlapping_evidence", "thinking_from_terminal_results", "terminal_results_without_usage",
+    # #5047: how many invocations' per-message output is a truncated
+    # streaming snapshot, so the reasoning measure is a lower bound.
+    "invocations_snapshot_lower_bound"})
 #: Accounting metadata the observer writes beside the reasoning keys (#1947):
 #: how many sessions' totals are the runtime's own terminal result, and how
 #: many such results the cut excluded. An extension carries them with the
 #: values they qualify.
 _ACCOUNTING_KEYS = frozenset({"usage_from_terminal_result", "terminal_results_excluded_by_cut",
-                              "thinking_from_terminal_results", "terminal_results_without_usage"})
+                              "thinking_from_terminal_results", "terminal_results_without_usage",
+                              "invocations_snapshot_lower_bound"})
 # receipt_chunks_total / receipt_chunks_unopened (#709): of the chunks the
 # coverage receipt marks reviewed, how many the transcript shows no file-tool
 # window over. The receipt is the agent's claim and the windows are the
@@ -322,6 +326,22 @@ def _parse_phases(specs) -> list[dict]:
     return out
 
 
+def _generated_date(text: str) -> str | None:
+    """The date in an instruction's `# Generated: YYYY-MM-DD` header, or None.
+    The header is indented in the generic prompts' example blocks, so the
+    pattern is the renderer's own (`api_runner._render`; #5049 review, F6)."""
+    import re
+    from datetime import date
+    m = re.search(r"^\s*#\s*Generated:\s*(\d{4}-\d{2}-\d{2})\b", text, re.MULTILINE)
+    if not m:
+        return None
+    try:
+        date.fromisoformat(m.group(1))
+    except ValueError:
+        return None
+    return m.group(1)
+
+
 @provenance.command()
 @click.option('--project', required=True)
 @click.option('--method', required=True, help='e.g. claudecode_agent')
@@ -431,10 +451,20 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     from data_sheets_schema import schema_digest
     from data_sheets_schema.provenance import build_record, record_path_for
     if run_date is not None:
+        # `fromisoformat` also takes `20261014` and `2026-W42-3`, which would
+        # be stored and rendered as typed and never reproduce a `# Generated:`
+        # line (#5049 review, F10).
         try:
+            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", run_date):
+                raise ValueError(run_date)
             date.fromisoformat(run_date)
         except ValueError as exc:
             raise click.BadParameter(f"{run_date!r} is not an ISO date (YYYY-MM-DD)", param_hint="'--run-date'") from exc
+        if not condition and render_spec_json is None:
+            # Read only where a spec is built; silently ignoring it would let
+            # the caller believe a date was recorded (#5049 review, F11).
+            raise click.BadParameter("applies only with --condition or --render-spec-json",
+                                     param_hint="'--run-date'")
     registered = None
     if prompt_text_env is not None:
         # The path comes from the named variable, not from the shell (#2282).
@@ -627,8 +657,24 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                 **({"run_date": candidate_date} if candidate_date else {}),
             )
 
-        if run_date is not None or supplied_text is None:
+        target_sha = (hashlib.sha256(supplied_text.encode("utf-8")).hexdigest()
+                      if supplied_text is not None else None)
+
+        def _reproduces(cand_spec: RunSpec) -> bool:
+            return hashlib.sha256(resolve_prompt(cand_spec).encode("utf-8")).hexdigest() == target_sha
+
+        if supplied_text is None:
             run_spec = _make_run_spec(run_date)
+        elif run_date is not None:
+            # An explicit date is checked against the text it claims to have
+            # rendered, as the search below checks its candidates (#5049
+            # review, F9): a wrong one would fail the render gate as a
+            # `mismatch` blamed on an unchanged prompt.
+            run_spec = _make_run_spec(run_date)
+            if not _reproduces(run_spec):
+                raise click.ClickException(
+                    f"--run-date {run_date} does not reproduce --prompt-text under --condition {condition}; "
+                    "pass the date the instruction was rendered under, or omit --run-date to search for it")
         else:
             # An agentic run that renders before UTC midnight and records after
             # midnight carries the launch date in its `# Generated: YYYY-MM-DD`
@@ -636,14 +682,10 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             # verify candidate dates across ±2 days against the supplied
             # instruction digest so midnight-crossing runs record the date they
             # were actually rendered under.
-            extracted_date: str | None = None
-            m_gen = re.search(r"^#\s*Generated:\s*(\d{4}-\d{2}-\d{2})\b", supplied_text, re.MULTILINE)
-            if m_gen:
-                try:
-                    date.fromisoformat(m_gen.group(1))
-                    extracted_date = m_gen.group(1)
-                except ValueError:
-                    extracted_date = None
+            extracted_date = _generated_date(supplied_text)
+            # Local today, while the fallback spec's date is UTC; the two
+            # can differ by a day, which is harmless only because every
+            # candidate is checked against the hash (#5049 review, F12).
             base_dates = [date.today()]
             try:
                 base_dates.append(date.fromisoformat(label[:10]))
@@ -657,23 +699,47 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                     iso = (base + timedelta(days=delta)).isoformat()
                     if iso not in candidate_dates:
                         candidate_dates.append(iso)
-            target_sha = hashlib.sha256(supplied_text.encode("utf-8")).hexdigest()
             matched_spec: RunSpec | None = None
+            render_error: Exception | None = None
             for cand_date in candidate_dates:
                 cand_spec = _make_run_spec(cand_date)
                 try:
-                    rendered = resolve_prompt(cand_spec)
-                except Exception:
+                    if _reproduces(cand_spec):
+                        matched_spec = cand_spec
+                        break
+                except Exception as exc:       # noqa: BLE001 — the same for every date
+                    render_error = exc
                     break
-                if hashlib.sha256(rendered.encode("utf-8")).hexdigest() == target_sha:
-                    matched_spec = cand_spec
-                    break
-            run_spec = matched_spec if matched_spec is not None else _make_run_spec(extracted_date)
+            run_spec = matched_spec
+            if matched_spec is None:
+                why = (f"rendering failed: {type(render_error).__name__}: {render_error}"
+                       if render_error is not None else
+                       f"no date of {', '.join(candidate_dates)} reproduces --prompt-text")
+                if extracted_date is not None and render_error is None:
+                    # The text names the date it was rendered under, so the
+                    # spec at that date is the one it claims, never a guess:
+                    # the gate then reports the edit as a `mismatch`. With no
+                    # spec it would be `unverifiable`, which `runs check
+                    # --strict` passes (#5068).
+                    run_spec = _make_run_spec(extracted_date)
+                    click.echo(f"⚠️  --prompt-text does not reproduce under --condition {condition}: {why}. "
+                               f"The spec is recorded at its # Generated: date {extracted_date}, so the "
+                               "render gate will report a mismatch.", err=True)
+                else:
+                    # No date to claim: no spec rather than a wrong one
+                    # (#5049 review, F8); the gate reports it unverifiable.
+                    click.echo(f"⚠️  no request spec recorded for --condition {condition}: {why}. "
+                               "Pass --run-date with the date the instruction was rendered under.", err=True)
 
-        spec = run_spec.render_spec()
-        if not run_spec.manifest_used:
+        if run_spec is None:
+            spec = None
+            manifest_unused_line = _make_run_spec(None)
+        else:
+            spec = run_spec.render_spec()
+            manifest_unused_line = run_spec
+        if not manifest_unused_line.manifest_used:
             selected = None
-            manifest_basis = f"the arm's header declares the source manifest unused ({run_spec.manifest_line})"
+            manifest_basis = f"the arm's header declares the source manifest unused ({manifest_unused_line.manifest_line})"
 
     rec = build_record(project, method, label, mode="live",
                        # The selected manifest owns outputs even when this
@@ -1406,7 +1472,10 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
             + "; comparable in kind with the API path's reasoning log, never to be averaged with it.")
         if "reasoning_tokens_estimate" in present:
             parts.append(" reasoning_tokens_estimate is output tokens minus a 4-chars-per-token estimate of "
-                         "the text and tool-call payloads: a subtraction, an upper bound, not a measurement.")
+                         "the text and tool-call payloads: a subtraction, "
+                         + ("not a measurement, and an upper bound only where no invocation is counted below."
+                            if "invocations_snapshot_lower_bound" in keys else
+                            "an upper bound, not a measurement."))
     thinking = [k for k in ("thinking_tokens", "turns_with_thinking_tokens") if k in keys]
     if "thinking_from_terminal_results" in keys and "thinking_tokens" in keys:
         parts.append(" thinking_tokens is the runtime's own count: the session total from the terminal result "
@@ -1438,6 +1507,12 @@ def _reasoning_basis(keys: set, *, extended: set | None = None) -> str:
         parts.append(" terminal_results_excluded_by_cut counts the sessions with a finalized result the "
                      "run_observed_until cut set aside while messages no surviving result covers rest on "
                      "per-message snapshots, so the totals are incomplete (#1945).")
+    if "invocations_snapshot_lower_bound" in keys:
+        parts.append(" invocations_snapshot_lower_bound counts the invocations whose per-message usage is a "
+                     "truncated streaming snapshot no terminal result replaced: for those, output_tokens"
+                     + (", reasoning_tokens_estimate and thinking_tokens are" if "thinking_tokens" in keys else
+                        " and reasoning_tokens_estimate are")
+                     + " lower bounds (#5047/#5068).")
     named = sorted(k for k in (extended or ()) if k in keys)
     if parts and named:
         # No clause where the extension names no key the observation still
@@ -2223,10 +2298,13 @@ def reasoning_cmd(method, project, label, path):
                 parts.append(f"estimate {obs['reasoning_tokens_estimate']} (no thinking_tokens in this transcript)")
             if is_truncated_streaming_snapshot(obs):
                 parts.append(
-                    f"⚠️  lower_bound: output_tokens ({obs['output_tokens']}) < "
-                    f"payload floor ({payload_tokens_floor(obs)}); output_tokens, "
-                    "reasoning_tokens_estimate, and thinking_tokens are truncated "
-                    "streaming snapshots (#5047)"
+                    (f"⚠️  lower_bound: {obs['invocations_snapshot_lower_bound']} invocation(s) rest on truncated "
+                     "streaming snapshots"
+                     if obs.get("invocations_snapshot_lower_bound") else
+                     f"⚠️  lower_bound: output_tokens ({obs.get('output_tokens')}) < "
+                     f"payload floor ({payload_tokens_floor(obs)})")
+                    + "; output_tokens, reasoning_tokens_estimate, and thinking_tokens are "
+                    "lower bounds (#5047)"
                 )
             click.echo(f"   {proj:<9} {run_label}  " + "  ".join(parts))
     if not logs:
