@@ -4,6 +4,7 @@ import builtins
 import io
 import json
 import os
+import re
 from pathlib import Path
 
 import pytest
@@ -81,6 +82,25 @@ def test_no_document_corpus_carries_an_rocrate(project):
     content. Crates are the input of the separate with-crate and crate-only
     arms only, built from data/ro-crate_packages/."""
     assert committed(project)["crate_in_document_corpus"] is False
+
+
+#: What an RO-Crate leaves in a concatenated bundle: its JSON-LD context and
+#: graph, or a FILE header naming a crate file (the AI_READI bundle before
+#: #5042 had all three). Prose that mentions a crate (CM4AI's papers) is not
+#: crate content and does not match.
+_CRATE_CONTENT = re.compile(r'w3id\.org/ro/crate|"@graph"|^FILE:.*ro[-_]?crate', re.IGNORECASE | re.MULTILINE)
+
+
+@pytest.mark.parametrize("project", ["AI_READI", "CHORUS", "CM4AI", "VOICE", "VOICE_PEDIATRIC"])
+def test_no_document_bundle_contains_rocrate_content(project):
+    """The same rule read off the bytes generation reads (#5042 review, F2):
+    the declaration above is a `source_type`, and a crate re-added under
+    another type would pass it."""
+    bundle = Path("data/preprocessed/concatenated") / f"{project}_preprocessed.txt"
+    if not bundle.exists():
+        pytest.skip(f"{bundle} absent")
+    hits = [m.group(0) for m in _CRATE_CONTENT.finditer(bundle.read_text(encoding="utf-8"))]
+    assert hits == [], f"{bundle} carries RO-Crate content: {hits[:3]}"
 
 
 @pytest.mark.parametrize("project, current", [("CM4AI", "june_2026_dataverse_release"),

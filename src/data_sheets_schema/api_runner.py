@@ -7404,7 +7404,12 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
          "request states the regime rather than changing it, and a phase "
          "returning no thinking block is a legal adaptive outcome, not a "
          "deviation. The judging paths (merge, agreement, evidence_score, "
-         "form_defects) send no parameter and are not covered by this line")
+         "form_defects) send no parameter and are not covered by this line"
+         # A display is a request parameter, not the default the sentence
+         # above describes (#5043 review): the condition chose it.
+         + (f". The request also sets display: {settings['thinking']['display']}, which "
+            "is not the omitted-parameter default; this condition declares it (#5043)"
+            if (settings.get("thinking") or {}).get("display") else ""))
         if settings.get("thinking") else
         settings.get("thinking_note", "not requested"))
     if settings.get("effort"):
