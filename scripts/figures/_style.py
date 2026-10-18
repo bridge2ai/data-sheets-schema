@@ -19,6 +19,7 @@ from pathlib import Path
 if not os.access(Path.home() / ".gitconfig", os.R_OK):
     os.environ.setdefault("GIT_CONFIG_GLOBAL", "/dev/null")
     os.environ.setdefault("GIT_CONFIG_NOSYSTEM", "1")
+    os.environ.setdefault("XDG_CONFIG_HOME", "/tmp")
 
 import matplotlib
 matplotlib.use("Agg")

@@ -10,9 +10,14 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))
 
 
+EXPLICIT_CLI_SCRIPTS = {"fig07_typed_audits.py", "fig09_mapping_revision.py"}
+
+
 def main() -> int:
     failures = []
     for script in sorted(HERE.glob("fig*_*.py")):
+        if script.name in EXPLICIT_CLI_SCRIPTS:
+            continue
         print(f"== {script.name}")
         try:
             runpy.run_path(str(script), run_name="__main__")
