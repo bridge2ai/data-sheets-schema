@@ -150,7 +150,9 @@ root; corpus data stays with the caller's selected tree.
   launcher assertions and missing measurements distinct; do not write guesses such
   as "default". Partial thinking counts need coverage; absent logs are not low spend,
   and unfinalized streaming snapshots below the 4-chars/token payload floor are
-  strict lower bounds on `output_tokens`, `reasoning_tokens_estimate`, and `thinking_tokens` (#5047).
+  strict lower bounds on `output_tokens`, `reasoning_tokens_estimate`, and `thinking_tokens` (#5047):
+  Claude Code subagent transcripts from 2.1.278 on, detected per invocation and
+  recorded as `run_observed.invocations_snapshot_lower_bound`.
 - A review reads its existing pinned pack, not a rewritten replacement. Preserve
   human dispositions and mark stale attestations explicitly. Review counts remain
   reported-only pending calibration under the [selection policy](notes/review_selection_policy_2026-09-11.md).

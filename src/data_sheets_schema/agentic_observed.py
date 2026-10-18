@@ -186,7 +186,7 @@ def observe(transcripts: list[Path], bundle: Path | None,
     result_refs: list[tuple[Path, str, bool]] = []  # (file, tool_use_id, is_error) of every tool_result (#1996)
     duration_ms = total_tokens = 0
     measure: dict[str, int] = {}
-    from_terminal = excluded = 0
+    from_terminal = excluded = snapshot_lower_bound = 0
     terminal_thinking = without_usage = 0
     for path in transcripts:
         # The same file again — by path, by inode or by bytes — is the same
@@ -340,6 +340,10 @@ def observe(transcripts: list[Path], bundle: Path | None,
             duration_ms += int((last - first).total_seconds() * 1000)
         usable = terminal is not None and not cut_before_terminal
         total, m = _invocation_measure(usage_by_msg, blocks_by_msg, terminal if usable else None)
+        if not usable and _snapshot_truncated(usage_by_msg, blocks_by_msg):
+            # Per invocation (#5047 review, F2): a finalized file beside a
+            # truncated one must not hide it in the run's sum.
+            snapshot_lower_bound += 1
         if usable:
             from_terminal += 1
             if _terminal_thinking(terminal) is not None:
@@ -378,6 +382,8 @@ def observe(transcripts: list[Path], bundle: Path | None,
         out["thinking_from_terminal_results"] = terminal_thinking
     if excluded:
         out["terminal_results_excluded_by_cut"] = excluded
+    if snapshot_lower_bound:
+        out["invocations_snapshot_lower_bound"] = snapshot_lower_bound
     if is_truncated_streaming_snapshot(out):
         out["_output_tokens_payload_floor"] = payload_tokens_floor(out)
         out["_streaming_snapshot_lower_bound"] = True
@@ -412,21 +418,57 @@ def payload_tokens_floor(obs: dict) -> int:
 
 
 def is_truncated_streaming_snapshot(obs: dict) -> bool:
-    """True when summed per-message ``output_tokens`` is below the 4-chars/token
-    payload floor and no terminal ``result`` replaced the streaming snapshots (#5047).
+    """True when some invocation's per-message ``output_tokens`` are truncated
+    streaming snapshots that no terminal ``result`` replaced (#5047).
 
-    Claude Code 2.1.299 subagent transcripts log per-block ``message_start``
-    usage snapshots (`output_tokens` ~ 2..26) before ``tool_use`` input tokens
-    finish streaming and emit no terminal ``type == "result"`` event, making
-    ``output_tokens``, ``reasoning_tokens_estimate``, and ``thinking_tokens``
-    strict lower bounds rather than complete turn totals.
+    Claude Code subagent transcripts (observed from 2.1.278 through 2.1.300;
+    finalized 2.1.269/2.1.273 transcripts are not affected) log per-block
+    usage snapshots (``output_tokens`` ~ 2..26) before ``tool_use`` input
+    finishes streaming and emit no terminal ``type == "result"`` event, so
+    ``output_tokens``, ``reasoning_tokens_estimate`` and ``thinking_tokens``
+    are lower bounds rather than turn totals; ``total_tokens`` carries the
+    same output snapshots, a negligible share of its cache-dominated sum.
+
+    An observation made since the #5047 review carries the per-invocation
+    count ``invocations_snapshot_lower_bound`` and is read by it alone. One
+    recorded before that carries no count, and the run-level comparison of
+    summed output with the summed payload floor is the only test available.
     """
+    if "invocations_snapshot_lower_bound" in obs:
+        n = obs["invocations_snapshot_lower_bound"]
+        return _count_ok(n) and n > 0
     if "output_tokens" not in obs or obs.get("usage_from_terminal_result"):
         return False
     out_tok = obs.get("output_tokens")
     if not _count_ok(out_tok):
         return False
     return out_tok < payload_tokens_floor(obs)
+
+
+#: A file whose messages are mostly below their own payload floor is a
+#: snapshot transcript even when one large message lifts its sum over the
+#: aggregate floor (#5047 review, F3): truncated transcripts have most
+#: messages below it (9 of 11, 107 of 137), finalized ones 0 or 1 of 21–73.
+SNAPSHOT_MIN_MESSAGES = 3
+
+
+def _snapshot_truncated(usage_by_msg: dict, blocks_by_msg: dict) -> bool:
+    """One invocation without a usable terminal result: is its per-message
+    output a truncated streaming snapshot? Either the file's summed output is
+    below its summed payload floor, or more than half its messages (at least
+    ``SNAPSHOT_MIN_MESSAGES``) are each below their own."""
+    if not usage_by_msg:
+        return False
+    below = total_out = total_floor = 0
+    for mid, u in usage_by_msg.items():
+        parts = blocks_by_msg.get(mid, {})
+        floor = sum(chars for kind, chars in parts.values() if kind in ("text", "tool_use")) // CHARS_PER_TOKEN
+        out_tok = u.get("output_tokens", 0) or 0
+        total_out += out_tok
+        total_floor += floor
+        below += out_tok < floor
+    return total_out < total_floor or (len(usage_by_msg) >= SNAPSHOT_MIN_MESSAGES
+                                       and 2 * below > len(usage_by_msg))
 
 
 def _invocation_measure(usage_by_msg: dict, blocks_by_msg: dict, terminal_usage: dict | None) -> tuple[int, dict]:

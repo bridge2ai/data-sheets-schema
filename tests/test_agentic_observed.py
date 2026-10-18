@@ -804,4 +804,56 @@ class Round17(unittest.TestCase):
                 res = CliRunner().invoke(cli.provenance, ["reasoning", "--path", str(cand)])
             self.assertEqual(res.exit_code, 0, res.output)
             self.assertIn("lower_bound: output_tokens (9023) < payload floor (88163)", res.output)
-            self.assertIn("truncated streaming snapshots (#5047)", res.output)
+            self.assertIn("are lower bounds (#5047)", res.output)
+
+
+class Round18(unittest.TestCase):
+    """#5047 review: truncation decided per invocation and per message, and
+    the count carried into the provenance record with its meaning."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+
+    def _file(self, name, outputs, result=None):
+        """One message per output, each writing 400 payload chars (floor 100)."""
+        lines = [_event(f"2026-10-14T21:00:{i:02d}Z", usage={"input_tokens": 10, "output_tokens": o},
+                        msg_id=f"{name}-m{i}", tools=[("Write", {"file_path": "o.yaml", "content": "x" * 400})])
+                 for i, o in enumerate(outputs)]
+        if result is not None:
+            lines.append(json.dumps({"type": "result", "message": "done", "uuid": f"{name}-r",
+                                     "usage": {"input_tokens": 10, "output_tokens": result}}))
+        p = self.root / name
+        p.write_text("\n".join(lines) + "\n")
+        return p
+
+    def test_a_finalized_invocation_does_not_hide_a_truncated_one(self):
+        finalized = self._file("a.jsonl", [5000], result=200000)
+        truncated = self._file("b.jsonl", [4, 4, 4])
+        obs = ao.observe([finalized, truncated], None, None, None, None)
+        self.assertEqual(obs["usage_from_terminal_result"], 1)
+        self.assertEqual(obs["invocations_snapshot_lower_bound"], 1)
+        self.assertTrue(ao.is_truncated_streaming_snapshot(obs))
+
+    def test_most_messages_below_their_own_floor_flags_despite_the_sum(self):
+        # One 6,000-token message lifts the file over its summed floor (600).
+        obs = ao.observe([self._file("c.jsonl", [6000, 8, 8, 8, 8])], None, None, None, None)
+        self.assertGreater(obs["output_tokens"], ao.payload_tokens_floor(obs))
+        self.assertEqual(obs["invocations_snapshot_lower_bound"], 1)
+        # A complete transcript with one short message among many is not.
+        obs = ao.observe([self._file("d.jsonl", [300, 8, 300, 300, 300])], None, None, None, None)
+        self.assertNotIn("invocations_snapshot_lower_bound", obs)
+        self.assertFalse(ao.is_truncated_streaming_snapshot(obs))
+
+    def test_the_count_reaches_run_observed_with_its_basis(self):
+        from data_sheets_schema.cli import provenance as cli
+        obs = cli._observe([self._file("e.jsonl", [4, 4, 4])], None, None, None, None)
+        self.assertEqual(obs["invocations_snapshot_lower_bound"], 1)
+        basis = cli._reasoning_basis(set(obs) & (cli._REASONING_KEYS | cli._ACCOUNTING_KEYS))
+        self.assertIn("are lower bounds", basis)
+        self.assertIn("not an upper bound", basis)
+        self.assertNotIn("not an upper bound",
+                         cli._reasoning_basis({"output_tokens", "reasoning_tokens_estimate"}))
+        # The basis sentence is one the recomputation recognises as its own.
+        self.assertTrue(set(cli._split_sentences(basis)) <= cli._own_sentences())
