@@ -475,6 +475,26 @@ def _warn_method_runtime(method, runtime, condition=None):
                                if expected else "") + " (#5046)", err=True)
 
 
+def _runtime_method(arm, runtime, condition):
+    """The baseline method a `--runtime` writes under, when `--method` is omitted
+    (owner, 2026-10-19; #5063 F1/F2). The arm's own default (`claudecode_api`) told
+    an agentic run that followed the playbook to write where its record is never
+    looked for. Claude Code writes under `claudecode_agent`, the direct arm under
+    `claudecode_direct`, and the API under `claudecode_api` from generic_v8 (#690)
+    and `claudecode_agent` before it. Another arm, or a runtime with no key, keeps
+    the arm's method; a recorded spec carries its method, so re-rendering a run's
+    record never reads this."""
+    from data_sheets_schema.api_runner import CONDITION_AXES
+    from data_sheets_schema.runs import RUNTIME_KEYS
+    if arm != "baseline":
+        return None
+    key = RUNTIME_KEYS.get((runtime or "").strip().lower())
+    base = (CONDITION_AXES.get(condition or "generic") or {}).get("base", "")
+    v8_or_later = base[1:].isdigit() and int(base[1:]) >= 8
+    return {"agentic": "claudecode_agent", "direct": "claudecode_direct",
+            "api": "claudecode_api" if v8_or_later else "claudecode_agent"}.get(key)
+
+
 @api.command("render-prompt")
 @click.option("--shared-generation-version", type=click.IntRange(0, 2), default=0,
               help="explicit shared-generation API condition; requires its immutable registration")
@@ -493,7 +513,9 @@ def _warn_method_runtime(method, runtime, condition=None):
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
               show_default=True)
 @click.option("--method", type=click.Choice(_METHODS), default=None,
-              help="output method directory (e.g. claudecode_agent for an agentic baseline run, #5046); default: the arm's method")
+              help="output method directory (#5046); default for the baseline arm: the one --runtime writes under "
+                   "(Claude Code: claudecode_agent; Claude Code (direct): claudecode_direct; Claude API (direct): "
+                   "claudecode_api from generic_v8, claudecode_agent before), else the arm's method (#5063)")
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies without being called a choice (#1094)" + _CONDITION_SCOPE)
@@ -535,6 +557,9 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     from data_sheets_schema import prompt_registry as pr
     from data_sheets_schema.api_runner import resolve_prompt
 
+    # A shared registration names its own method, which _shared_spec checks.
+    if method is None and not shared_generation_version and shared_generation_registration is None:
+        method = _runtime_method(arm, runtime, condition)
     spec = _spec(project, arm, label, condition, bundle,
                  runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
                  shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration,

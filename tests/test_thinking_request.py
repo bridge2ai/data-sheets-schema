@@ -93,14 +93,22 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         settings_obj = _model_settings(_Spec())
         self.assertEqual(settings_obj["thinking"], {"type": "adaptive", "display": "summarized"})
 
-        # Every earlier condition, not a sample of them (#5043 review): a
-        # display on any would move that condition's declaration. The routed
-        # v10 conditions are not earlier ones, and whether they take the
-        # display is an open owner decision (#5061 F4, D06), so not pinned.
+        # Every v10 condition, the routed ones included, declares it (owner,
+        # D06, 2026-10-19; #5061 F4).
         from data_sheets_schema.api_runner import CONDITION_AXES, CONDITION_PROMPTS
-        earlier = [c for c in CONDITION_PROMPTS
-                   if c != "generic_v10" and (CONDITION_AXES.get(c) or {}).get("base") != "v10"]
-        for other in earlier + [None]:
+        v10 = [c for c in CONDITION_PROMPTS if (CONDITION_AXES.get(c) or {}).get("base") == "v10"]
+        self.assertIn("generic_v10_source_heading_routing_v1", v10)
+        self.assertIn("generic_v10_source_heading_span_v1", v10)
+        for routed in v10:
+            with self.subTest(condition=routed):
+                self.assertEqual(_model_settings(routed)["thinking"],
+                                 {"type": "adaptive", "display": "summarized"})
+
+        # Every earlier condition, not a sample of them (#5043 review): a
+        # display on any would move that condition's declaration. Variants of
+        # the name are not conditions and never opt in.
+        earlier = [c for c in CONDITION_PROMPTS if c not in v10]
+        for other in earlier + [None, "GENERIC_V10", " generic_v10", "generic_v10x"]:
             with self.subTest(condition=other):
                 other_settings = _model_settings(other)
                 self.assertEqual(other_settings["thinking"], {"type": "adaptive"})
