@@ -45,7 +45,6 @@ from __future__ import annotations
 
 import csv
 import hashlib
-import subprocess
 import sys
 import textwrap
 from collections import defaultdict
@@ -98,14 +97,15 @@ def check_lane_geometry() -> str:
 
 # ----------------------------------------------------------------------------- loading
 def verified_manifest(commit: str, project: str, prov: dict) -> tuple[dict, str]:
-    """Chunk manifest at the run's commit via fig06's loader, then checked against the provenance sha256."""
-    manifest, ref = f6.chunk_manifest_at(commit, project)
-    if "@HEAD" in ref:
+    """Chunk manifest at the run's commit via fig06's loader, then checked against the provenance sha256.
+    A run commit that is not reachable (squash-merged; #5076) resolves only to bytes with that sha256."""
+    pinned = prov["inputs"]["chunks"]["sha256"]
+    raw, ref = f6.chunk_manifest_bytes_at(commit, project, pinned)
+    if raw is None:
         raise SystemExit(f"{project} {commit[:10]}: chunk manifest not available at the run commit")
-    rel = f"data/preprocessed/chunks/{project}_chunks.yaml"
-    raw = subprocess.check_output(["git", "show", f"{commit}:{rel}"], cwd=st.ROOT)
-    if hashlib.sha256(raw).hexdigest() != prov["inputs"]["chunks"]["sha256"]:
+    if hashlib.sha256(raw).hexdigest() != pinned:
         raise SystemExit(f"{project} {commit[:10]}: chunk manifest sha256 differs from provenance")
+    manifest = yaml.safe_load(raw)
     return manifest, ref
 
 

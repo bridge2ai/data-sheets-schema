@@ -139,3 +139,29 @@ def test_set_2303_readme_lists_all_22_figures_and_caveat_sections():
     assert "## Release-level corpus caveats (#3878)" in readme
     assert "## Top-level vs nested replication scope (#3936)" in readme
     assert "Below the top level (#3337)" in (f12.__doc__ or "")
+
+
+def test_unreachable_run_commit_resolves_only_to_the_pinned_manifest_bytes():
+    """#5076: a run commit squash-merged away (absent from a CI clone) resolves to the
+    version in HEAD's history with the provenance sha256, and to nothing otherwise."""
+    import hashlib
+    import subprocess
+    rel = "data/preprocessed/chunks/CHORUS_chunks.yaml"
+    # The oldest version, never the working tree's: only a history walk finds it (#5082).
+    oldest = subprocess.check_output(["git", "log", "--full-history", "--format=%H", "HEAD", "--", rel],
+                                     cwd=st.ROOT, text=True).split()[-1]
+    old_raw = subprocess.check_output(["git", "show", f"{oldest}:{rel}"], cwd=st.ROOT)
+    pinned = hashlib.sha256(old_raw).hexdigest()
+    assert pinned != hashlib.sha256((st.ROOT / rel).read_bytes()).hexdigest()
+    missing = "0" * 40
+    raw, ref = f06.chunk_manifest_bytes_at(missing, "CHORUS", pinned)
+    assert raw == old_raw and "not reachable" in ref
+    assert f06.chunk_manifest_bytes_at(missing, "CHORUS", "f" * 64)[0] is None
+    assert f06.chunk_manifest_bytes_at(missing, "CHORUS")[0] is None
+
+
+def test_fig19_refuses_an_unreachable_commit_with_no_matching_version():
+    """#5082: fig19 never falls back to the working-tree manifest."""
+    import pytest
+    with pytest.raises(SystemExit, match="chunk manifest not available at the run commit"):
+        f19.verified_manifest("0" * 40, "CHORUS", {"inputs": {"chunks": {"sha256": "f" * 64}}})
