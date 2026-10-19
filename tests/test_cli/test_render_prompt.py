@@ -191,6 +191,13 @@ class TestTheCommand(unittest.TestCase):
                     self.assertIn("pass --method claudecode_api", r.stderr)
                 else:
                     self.assertNotIn("#5046", r.stderr)
+        pre_v8_api = CliRunner(mix_stderr=False).invoke(api, [
+            "render-prompt", "--project", "VOICE",
+            "--label", "2026-08-28c_claude-opus-5-api-generic-v7_rep1",
+            "--condition", "generic_v7",
+            "--runtime", "Claude API (direct)", "--method", "claudecode_api"])
+        self.assertEqual(pre_v8_api.exit_code, 0, pre_v8_api.stderr)
+        self.assertIn("pass --method claudecode_agent", pre_v8_api.stderr)
 
     def test_an_omitted_method_follows_the_runtime(self):
         """#5063 F1/F2 (owner, 2026-10-19): the playbook renders without
@@ -214,6 +221,9 @@ class TestTheCommand(unittest.TestCase):
                 self.assertEqual(omitted.exit_code, 0, omitted.stderr)
                 self.assertIn(f"data/d4d_concatenated/{method}/{label}/VOICE_d4d.yaml", omitted.stdout)
                 self.assertEqual(omitted.stdout, explicit.stdout)
+        default_condition = self._run()
+        self.assertEqual(default_condition.exit_code, 0, default_condition.stderr)
+        self.assertIn("# rendered generic for VOICE / baseline / runtime=Claude Code", default_condition.stderr)
 
     def test_another_arm_keeps_its_own_method(self):
         r = CliRunner(mix_stderr=False).invoke(api, [

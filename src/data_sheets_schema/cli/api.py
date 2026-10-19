@@ -452,27 +452,20 @@ def api():
 
 def _warn_method_runtime(method, runtime, condition=None):
     """Warned, not refused (#5046 review): `{METHOD}` names the output paths
-    the instruction tells the run to write, and the baseline arm's default
-    is the API directory. An agentic or direct run rendered with it is told
-    to write where its own record will not be looked for — the 2026-10-14b
-    failure the flag was added for, still reachable by omitting it. The API
-    runtime with `claudecode_agent` is the same mistake from generic_v8 on,
-    where the API baseline writes under `claudecode_api` (#690); through v7
-    both runtimes wrote there, so it is warned only for v8+ (#5068)."""
-    from data_sheets_schema.api_runner import CONDITION_AXES
+    the instruction tells the run to write. Since #5063 an omitted `--method`
+    follows `--runtime`, so this catches an explicit `--method` that tells an
+    agentic, direct or API run to write where its own record will not be looked
+    for (for example the 2026-10-14b agentic failure under `claudecode_api/`,
+    or the API runtime with `claudecode_agent` from generic_v8 on, where the
+    API baseline writes under `claudecode_api`, #690; through v7 both runtimes
+    wrote under `claudecode_agent`, #5068)."""
     from data_sheets_schema.runs import RUNTIME_KEYS
     key = RUNTIME_KEYS.get((runtime or "").strip().lower())
-    base = (CONDITION_AXES.get(condition) or {}).get("base", "")
-    api_dir_condition = base[1:].isdigit() and int(base[1:]) >= 8
-    expected = {"agentic": "claudecode_agent", "direct": "claudecode_direct",
-                "api": "claudecode_api" if api_dir_condition else None}.get(key)
-    contradicts = ((expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct")
-                    and method != expected)
-                   or (key == "api" and method == "claudecode_direct"))
-    if contradicts:
+    expected = _runtime_method("baseline", runtime, condition)
+    if expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct") and method != expected:
         click.echo(f"# ⚠️  --runtime {runtime!r} with method {method}: the instruction names {method}/ output "
-                   f"paths" + (f"; {'an' if key[0] in 'aeiou' else 'a'} {key} run writes under {expected}/ — pass --method {expected}"
-                               if expected else "") + " (#5046)", err=True)
+                   f"paths; {'an' if key[0] in 'aeiou' else 'a'} {key} run writes under {expected}/ — pass --method {expected} (#5046)",
+                   err=True)
 
 
 def _runtime_method(arm, runtime, condition):
@@ -566,7 +559,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
                  method=method, **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
-    _warn_method_runtime(spec.method, runtime, spec.condition)
+    _warn_method_runtime(spec.method, spec.runtime, spec.condition)
 
     # Warned, not refused. Rendering is free and reading the text of a draft
     # condition is a legitimate reason to be here; `d4d api run` refuses and
@@ -594,8 +587,8 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
         else:
             Path(out).write_text(text, encoding="utf-8")
         click.echo(f"✓ {out}", err=True)
+    condition, runtime = spec.condition, spec.runtime
     if spec.shared_generation_version:
-        condition, runtime = spec.condition, spec.runtime
         arm = next(key for key, row in ARMS.items() if row[:2] == (spec.arm, spec.method))
     else:
         arm = _ARM_FOR_METHOD.get(spec.method, arm)

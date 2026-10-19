@@ -67,6 +67,7 @@ def test_each_single_route_constructs_actual_selected_spec(registered, monkeypat
     if command=='render-prompt':
         assert 'Shared generation rules v1' in result.output
         assert 'Claude API (direct)' in result.output
+        assert '#5046' not in result.output
     else:
         assert 'dynamic total unavailable' in result.output
         for spec in observed:
