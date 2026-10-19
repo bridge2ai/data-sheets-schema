@@ -1334,8 +1334,10 @@ def _pinned_manifest_rows(data, today: bytes, crate: bytes | None) -> list[str]:
             # A crate the pinned manifest put in the corpus is what those records
             # read, whatever today's corpus holds (#5042, #5060 F3).
             read_crate = [p for p in ps if then[p]["crate_in_document_corpus"] and not now[p]["crate_in_document_corpus"]]
-            note = ("these records read " + ", ".join(read_crate) + "'s RO-Crate, which today's corpus no longer "
-                    "carries (#5042)") if read_crate else ""
+            note = (f"these records read {read_crate[0]}'s RO-Crate, which today's corpus no longer carries (#5042)"
+                    if len(read_crate) == 1 else
+                    f"these records read the RO-Crates of {', '.join(read_crate)}, which today's corpora no longer "
+                    "carry (#5042)" if read_crate else "")
             rows.append(f"| {disp} | {named}, committed {entry['date']} (`{entry['commit'][:10]}`) | "
                         + ("as today" if not corpus else "differs: " + ", ".join(corpus)) + " | "
                         + ("as today" if not tier else "differs: " + ", ".join(

@@ -113,8 +113,9 @@ class TestTheCorpus(unittest.TestCase):
     def _bundle(self, project):
         """The registered bytes: the bundle on disk while it still hashes to
         the registration, else the committed version that does, but only
-        where `bundle_hash_history` records the move away from it (#5042).
-        A moved bundle with no recorded move fails, it does not skip (#1161
+        where `bundle_hash_history` records a chain of moves from it to the
+        bytes on disk (#5042, #5060). A moved bundle with no such chain fails,
+        it does not skip (#1161
         review, S1): the registered count is pinned to bytes, and a rewrite
         nobody re-registered would otherwise leave this test green with no
         coverage — the `bundle_hash_history` guard's discipline."""
@@ -167,15 +168,20 @@ class TestTheCorpus(unittest.TestCase):
 
     def test_the_current_bundle_count_is_registered(self):
         """A bundle that has moved off its registration carries a count for the
-        bytes generation reads now (#5060 F1)."""
+        bytes generation reads now, and every CURRENT entry names a bundle
+        that has moved, so none is left unread (#5060 F1, #5083 M2)."""
+        moved = {}
         for project, (registered, _counts) in REGISTERED.items():
             path = BUNDLES / f"{project}_preprocessed.txt"
             if not path.exists():
-                continue
+                self.skipTest(f"{path} not in this checkout")
             md5 = hashlib.md5(path.read_bytes()).hexdigest()
+            if not md5.startswith(registered):
+                moved[project] = (path, md5)
+        self.assertEqual(set(CURRENT) - set(moved), set(),
+                         "CURRENT registers a bundle that is back on (or never left) its registration")
+        for project, (path, md5) in moved.items():
             with self.subTest(project=project):
-                if md5.startswith(registered):
-                    continue
                 self.assertIn(project, CURRENT, f"{project} has moved to {md5[:12]} with no current count")
                 self.assertTrue(md5.startswith(CURRENT[project][0]),
                                 f"{project} is {md5[:12]}, CURRENT registers {CURRENT[project][0]}")
