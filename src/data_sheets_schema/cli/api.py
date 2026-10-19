@@ -471,7 +471,7 @@ def _warn_method_runtime(method, runtime, condition=None):
                    or (key == "api" and method == "claudecode_direct"))
     if contradicts:
         click.echo(f"# ⚠️  --runtime {runtime!r} with method {method}: the instruction names {method}/ output "
-                   f"paths" + (f"; {'an' if key == 'api' else 'a'} {key} run writes under {expected}/ — pass --method {expected}"
+                   f"paths" + (f"; {'an' if key[0] in 'aeiou' else 'a'} {key} run writes under {expected}/ — pass --method {expected}"
                                if expected else "") + " (#5046)", err=True)
 
 
@@ -736,17 +736,20 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
         click.echo(f"   {k:10} {v}")
 
 
-def _billed_ids(spec) -> set:
+def _billed_ids(spec, pending: set | None = None) -> set:
     """The usage ids of every billed attempt already on disk for a run: its
     provenance record's `api_usage`, the usage ledger, the reasoning log and
     this run's rows of the abandoned-attempts journal (#5045 review). Read
     before the run, so the batch counts what this invocation spends and not a
     resumed or completed run's earlier history. Unreadable evidence is skipped:
-    the run's rows then count again, which can only stop the batch early."""
-    return set(_billed_rows(spec))
+    the run's rows then count again, which can only stop the batch early.
+    A pending call is not billed evidence and is never in the set: a resume
+    can settle it with real counters, and this invocation must count them
+    (#5073 F1). Its id goes in `pending`, for `_billed_rows(before=...)`."""
+    return set(_billed_rows(spec, pending=pending))
 
 
-def _billed_rows(spec, gaps: list | None = None, before=frozenset()) -> dict:
+def _billed_rows(spec, gaps: list | None = None, before=frozenset(), pending: set | None = None) -> dict:
     """Billed attempts on disk by usage id. Read after a run raised, anything
     that leaves the count short is named in `gaps`, so the caller says the
     cost may be undercounted (#5068); what was already on disk `before` the
@@ -754,12 +757,14 @@ def _billed_rows(spec, gaps: list | None = None, before=frozenset()) -> dict:
 
     - a source that cannot be read;
     - the ledger's `pending_call`: intent committed before a request whose
-      outcome was never recorded. It carries no token counts, so it is kept
-      as a zero-token row, named and not priced; the provider may or may not
-      have billed it;
-    - a reasoning-log entry with no usage row: a completed response whose
-      usage was lost. Its output tokens are counted (the log carries them),
-      its input tokens are not known."""
+      outcome was never recorded. It carries no token counts, so it is named,
+      not priced and not returned as a row (its id goes in `pending`); the
+      provider may or may not have billed it;
+    - a reasoning-log entry of the ledger's current generation with no usage
+      row: a completed response whose usage was lost. Its output tokens are
+      counted (the log carries them), its input tokens are not known. Entries
+      of no generation or another one are skipped, as the runner's own reader
+      skips them (`_unrecorded_reasoning_entries`, #5073 F4)."""
     import yaml
     from data_sheets_schema import reasoning, usage_ledger
     from data_sheets_schema.api_runner import _abandoned_rows, _reasoning_path
@@ -779,13 +784,14 @@ def _billed_rows(spec, gaps: list | None = None, before=frozenset()) -> dict:
                 keep(row)
     except Exception:                                  # noqa: BLE001
         note("could not read provenance api_usage")
-    pending = None
+    pending_call = generation = None
     try:
         if usage_ledger.ledger_path(spec).exists():
             data = usage_ledger._read(spec)
             for row in data["rows"]:
                 keep(row)
-            pending = data.get("pending_call")
+            pending_call = data.get("pending_call")
+            generation = data.get("generation_id")
     except Exception:                                  # noqa: BLE001
         note("could not read usage ledger")
     try:
@@ -794,16 +800,19 @@ def _billed_rows(spec, gaps: list | None = None, before=frozenset()) -> dict:
                 keep(row)
     except Exception:                                  # noqa: BLE001
         note("could not read abandoned-attempts journal")
-    if isinstance(pending, dict) and isinstance(pending.get("usage_id"), str) and pending["usage_id"] not in rows:
-        rows[pending["usage_id"]] = {"usage_id": pending["usage_id"], "phase": pending.get("phase")}
-        if pending["usage_id"] not in before:
-            note(f"call {pending['usage_id']} ({pending.get('phase')}) has no recorded usage")
+    if (isinstance(pending_call, dict) and isinstance(pending_call.get("usage_id"), str)
+            and pending_call["usage_id"] not in rows):
+        if pending is not None:
+            pending.add(pending_call["usage_id"])
+        if pending_call["usage_id"] not in before:
+            note(f"call {pending_call['usage_id']} ({pending_call.get('phase')}) has no recorded usage")
     try:
         partial = 0
         for entry in reasoning.read(_reasoning_path(spec)):
             uid = entry.get("usage_id")
             if (isinstance(uid, str) and uid not in rows
-                    and not usage_ledger.identity_is_foreign(spec, entry.get("run_identity"))):
+                    and generation is not None and entry.get("generation_id") == generation
+                    and not usage_ledger.identity_is_foreign(spec, entry.get("run_identity") or entry)):
                 rows[uid] = {"usage_id": uid, "phase": entry.get("phase"),
                              "output_tokens": entry.get("output_tokens") or 0}
                 partial += uid not in before
@@ -1015,7 +1024,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 break
         # Read whether or not a cap is set, so the totals printed are this
         # invocation's spend either way (#5068).
-        billed_before = _billed_ids(s)
+        pending_before: set = set()
+        billed_before = _billed_ids(s, pending_before)
         try:
             if roster:
                 _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
@@ -1142,7 +1152,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             # before raising; the totals and the cap count them (#5045
             # review), with or without a cap (#5068).
             gaps: list = []
-            raised_rows = [row for uid, row in _billed_rows(s, gaps, billed_before).items() if uid not in billed_before]
+            raised_rows = [row for uid, row in _billed_rows(s, gaps, billed_before | pending_before).items() if uid not in billed_before]
             if gaps:
                 click.echo(f"   ⚠️  cost of the raised run may be undercounted: {'; '.join(gaps)}", err=True)
             spent_in += sum(u.get("input_tokens") or 0 for u in raised_rows)

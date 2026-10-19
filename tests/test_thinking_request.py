@@ -155,7 +155,11 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         """The runner's own path, not the SDK called directly (#5068):
         `_call_with_usage` -> `_call_with_retry` -> the real SDK client on a
         mock transport, with the settings generic_v10 declares. The ledger
-        hooks are stubbed; the request is built by the runner."""
+        hooks are stubbed; the request is built by the runner. This is the
+        runner's generic path (`shared_generation_version=0`), not the
+        registered v10 path, whose shared-2 admission swaps in a bounded
+        client (`source_heading_admission.prepare`); that client is not
+        exercised here (#5073 F6)."""
         import json
         from types import SimpleNamespace
         from unittest.mock import patch

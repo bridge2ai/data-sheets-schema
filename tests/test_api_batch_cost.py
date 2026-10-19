@@ -313,7 +313,7 @@ class ApiBatchCostAccountingTest(unittest.TestCase):
         plan = ApiBatchCostStopTest()._dummy_plan
         with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
              patch("data_sheets_schema.cli.api._plan_or_refuse", side_effect=plan), \
-             patch("data_sheets_schema.cli.api._billed_rows", side_effect=lambda spec, *a: billed(spec)), \
+             patch("data_sheets_schema.cli.api._billed_rows", side_effect=lambda spec, *a, **k: billed(spec)), \
              patch("data_sheets_schema.api_runner.execute", mock_exec):
             return CliRunner().invoke(cli, [
                 "api", "batch", "--projects", "AI_READI", "--replicates", reps, "--arm", "baseline",
@@ -383,7 +383,8 @@ class BilledRowsReadTest(unittest.TestCase):
         self.spec = SimpleNamespace(provenance_path=self.root / "P_provenance.yaml",
                                     metadata_dir=self.root, project="P")
 
-    def _read(self, journal=(), ledger=None):
+    def _read(self, journal=(), ledger=None, before=frozenset(), pending=None, real_identity=False):
+        import contextlib
         import json
         from data_sheets_schema.cli.api import _billed_rows
         ledger_file = self.root / "ledger.json"
@@ -393,9 +394,10 @@ class BilledRowsReadTest(unittest.TestCase):
         with patch("data_sheets_schema.usage_ledger.ledger_path", return_value=ledger_file), \
              patch("data_sheets_schema.usage_ledger._read", side_effect=lambda spec: json.loads(ledger_file.read_text())), \
              patch("data_sheets_schema.api_runner._abandoned_rows", return_value=list(journal)), \
-             patch("data_sheets_schema.usage_ledger.identity_is_foreign",
-                   side_effect=lambda spec, ident: ident == "other-run"):
-            return _billed_rows(self.spec, unreadable), unreadable
+             (contextlib.nullcontext() if real_identity else
+              patch("data_sheets_schema.usage_ledger.identity_is_foreign",
+                    side_effect=lambda spec, ident: ident == "other-run")):
+            return _billed_rows(self.spec, unreadable, before, pending), unreadable
 
     def test_provenance_and_journal_rows_by_usage_id(self):
         self.spec.provenance_path.write_text(
@@ -413,36 +415,41 @@ class BilledRowsReadTest(unittest.TestCase):
         self.assertEqual(rows, {})
         self.assertEqual(unreadable, ["could not read provenance api_usage"])
 
-    def test_a_pending_call_is_named_and_not_priced(self):
+    def test_a_pending_call_is_named_and_not_returned_as_a_row(self):
+        """Not a row (#5073 F1): a resume can settle it with real counters,
+        and the id must not be in the pre-run set that excludes them."""
         ledger = {"rows": [{"usage_id": "r1", "input_tokens": 5}],
                   "pending_call": {"usage_id": "p1", "phase": "audit"}}
-        rows, gaps = self._read(ledger=ledger)
-        self.assertEqual(sorted(rows), ["p1", "r1"])
-        self.assertEqual(rows["p1"], {"usage_id": "p1", "phase": "audit"})     # zero-token, not priced
+        pending: set = set()
+        rows, gaps = self._read(ledger=ledger, pending=pending)
+        self.assertEqual(sorted(rows), ["r1"])
+        self.assertEqual(pending, {"p1"})
         self.assertEqual(gaps, ["call p1 (audit) has no recorded usage"])
 
     def test_a_pending_call_from_before_the_run_is_not_named(self):
-        from data_sheets_schema.cli.api import _billed_rows
-        rows, _ = self._read(ledger={"rows": [], "pending_call": {"usage_id": "p0", "phase": "full"}})
-        gaps: list = []
-        import json
-        with patch("data_sheets_schema.usage_ledger.ledger_path", return_value=self.root / "ledger.json"), \
-             patch("data_sheets_schema.usage_ledger._read",
-                   side_effect=lambda spec: json.loads((self.root / "ledger.json").read_text())), \
-             patch("data_sheets_schema.api_runner._abandoned_rows", return_value=[]):
-            _billed_rows(self.spec, gaps, set(rows))
+        _, gaps = self._read(ledger={"rows": [], "pending_call": {"usage_id": "p0", "phase": "full"}},
+                             before={"p0"})
         self.assertEqual(gaps, [])
 
     def test_a_reasoning_entry_with_no_usage_row_counts_its_output(self):
+        """Through the real `identity_is_foreign` with dict identities as the
+        runner writes them, and only the ledger's current generation (#5073
+        F3, F4)."""
         import json
+        self.spec.__dict__.update(label="L", method="claudecode_api", condition="generic_v8")
+        this = {"project": "P", "label": "L", "method": "claudecode_api", "condition": "generic_v8"}
         (self.root / "P_reasoning.jsonl").write_text("\n".join(json.dumps(e) for e in [
-            {"usage_id": "a", "phase": "full", "output_tokens": 7},              # has a row
-            {"usage_id": "lost", "phase": "core", "output_tokens": 40},
-            {"usage_id": "foreign", "output_tokens": 9, "run_identity": "other-run"},
-            {"phase": "legacy", "output_tokens": 3},                             # no usage id
+            {"usage_id": "a", "phase": "full", "output_tokens": 7, "generation_id": "g2", "run_identity": this},
+            {"usage_id": "lost", "phase": "core", "output_tokens": 40, "generation_id": "g2", "run_identity": this},
+            {"usage_id": "foreign", "output_tokens": 9, "generation_id": "g2",
+             "run_identity": {**this, "label": "other"}},
+            {"usage_id": "toplevel", "output_tokens": 9, "generation_id": "g2", **this, "condition": "generic_v7"},
+            {"usage_id": "old", "output_tokens": 5, "generation_id": "g1", "run_identity": this},
+            {"usage_id": "nogen", "output_tokens": 5, "run_identity": this},
+            {"phase": "legacy", "output_tokens": 3, "generation_id": "g2"},          # no usage id
         ]) + "\n", encoding="utf-8")
         self.spec.provenance_path.write_text("api_usage:\n- {usage_id: a, input_tokens: 1}\n", encoding="utf-8")
-        rows, gaps = self._read()
+        rows, gaps = self._read(ledger={"rows": [], "generation_id": "g2"}, real_identity=True)
         self.assertEqual(sorted(rows), ["a", "lost"])
         self.assertEqual(rows["lost"]["output_tokens"], 40)
         self.assertNotIn("input_tokens", rows["lost"])
@@ -479,3 +486,82 @@ class ApiBatchTotalsWithoutCapTest(ApiBatchCostAccountingTest):
         result = self._invoke(MagicMock(side_effect=raising), lambda spec: dict(on_disk.get(spec.label, {})),
                               ["--continue-on-error"], reps="1")
         self.assertIn("tokens: 100,000 in, 20,000 out (cost: $1.00)", result.output)
+
+
+class ApiBatchRealBilledRowsTest(ApiBatchCostAccountingTest):
+    """The batch over the real `_billed_rows`, ledger file stubbed per run
+    (#5073 F1, F2): what is pending before the run, and how a raise names
+    what it could not count."""
+
+    def _invoke_real(self, mock_exec, ledgers, extra=(), reps="1"):
+        import json
+        import tempfile
+        from pathlib import Path
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = Path(tmp.name)
+
+        def path(spec):
+            return root / f"{spec.label}.json"
+
+        def write(spec, data):
+            path(spec).write_text(json.dumps(data), encoding="utf-8")
+
+        def execute(spec):
+            return mock_exec(spec, lambda data: write(spec, data))
+
+        def setup(spec):
+            if spec.label in ledgers:
+                write(spec, ledgers[spec.label])
+        plan = ApiBatchCostStopTest()._dummy_plan
+        with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
+             patch("data_sheets_schema.cli.api._plan_or_refuse",
+                   side_effect=lambda spec: (setup(spec), plan(spec))[1]), \
+             patch("data_sheets_schema.usage_ledger.ledger_path", side_effect=path), \
+             patch("data_sheets_schema.usage_ledger._read", side_effect=lambda spec: json.loads(path(spec).read_text())), \
+             patch("data_sheets_schema.api_runner._abandoned_rows", return_value=[]), \
+             patch("data_sheets_schema.api_runner.execute", side_effect=execute):
+            return CliRunner(mix_stderr=False).invoke(cli, [
+                "api", "batch", "--projects", "AI_READI", "--replicates", reps, "--arm", "baseline",
+                "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
+                "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate", *extra])
+
+    LABEL = "2026-10-17_claude-opus-5-api-generic-testcost9_rep1"
+
+    def test_a_pending_call_settled_on_resume_is_counted_by_this_invocation(self):
+        """#5073 F1: the call an earlier invocation left pending is settled
+        with real counters by this one, which must count them."""
+        recovered = {**self.ROW, "usage_id": "p1", "phase": "audit"}
+
+        def resumed(spec, write):
+            write({"rows": [recovered]})
+            return {**ApiBatchCostStopTest()._make_mock_execute(1.0)(spec), "usage": [recovered]}
+
+        result = self._invoke_real(resumed, {self.LABEL: {"rows": [], "pending_call": {
+            "usage_id": "p1", "phase": "audit"}}})
+        self.assertEqual(result.exit_code, 0, result.output + result.stderr)
+        self.assertIn("tokens: 100,000 in, 20,000 out (cost: $1.00)", result.output)
+
+    def test_a_raise_names_its_own_pending_call_and_not_an_earlier_one(self):
+        """#5073 F2: the real wiring of `gaps` and `before` at batch level."""
+        def raising(spec, write):
+            write({"rows": [{**self.ROW, "usage_id": "u1"}], "pending_call": {"usage_id": "p1", "phase": "report"}})
+            raise RuntimeError("phase report: killed")
+
+        result = self._invoke_real(raising, {self.LABEL: {"rows": [], "pending_call": {
+            "usage_id": "p0", "phase": "full"}}}, ["--continue-on-error"])
+        self.assertIn("cost of the raised run may be undercounted: call p1 (report) has no recorded usage",
+                      result.stderr)
+        self.assertNotIn("p0", result.stderr)
+        self.assertIn("tokens: 100,000 in, 20,000 out (cost: $1.00)", result.output)
+
+    def test_a_raise_does_not_name_a_call_an_earlier_invocation_left_pending(self):
+        """#5073 F2: `before` reaches `_billed_rows` from the batch; without
+        it the earlier pending call is named as this run's (R2)."""
+        def refused(spec, write):
+            raise RuntimeError("API call p0 has unresolved accounting")
+
+        result = self._invoke_real(refused, {self.LABEL: {"rows": [], "pending_call": {
+            "usage_id": "p0", "phase": "full"}}}, ["--continue-on-error"])
+        self.assertIn("unresolved accounting", result.stderr)
+        self.assertNotIn("may be undercounted", result.stderr)

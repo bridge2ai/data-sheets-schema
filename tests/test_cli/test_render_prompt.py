@@ -151,7 +151,7 @@ class TestTheCommand(unittest.TestCase):
         the API directory; say so where the instruction is obtained."""
         label = "2026-10-14_claude-opus-5-generic-v8_rep1"
         base = ["render-prompt", "--project", "VOICE", "--label", label, "--condition", "generic_v8"]
-        for extra, warned in ((["--runtime", "Claude Code"], "pass --method claudecode_agent"),
+        for extra, warned in ((["--runtime", "Claude Code"], "an agentic run writes under claudecode_agent/"),
                               (["--runtime", "Claude Code", "--method", "claudecode_direct"],
                                "pass --method claudecode_agent"),
                               (["--runtime", "Claude Code (direct)", "--method", "claudecode_agent"],
