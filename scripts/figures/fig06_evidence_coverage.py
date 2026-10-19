@@ -29,6 +29,7 @@ for exempt; slots 0-2 stay reserved for the arms across the figure set.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
@@ -93,14 +94,31 @@ def records():
     return out
 
 
-def chunk_manifest_at(commit: str, project: str) -> tuple[dict, str]:
+def chunk_manifest_bytes_at(commit: str, project: str, sha256: str | None = None) -> tuple[bytes | None, str]:
+    """The run's chunk manifest bytes: at its commit, or, when that commit is not
+    reachable here (a squash-merged branch commit; #5076), the version in HEAD's
+    history whose sha256 is the one the provenance pinned. None if neither."""
     rel = f"data/preprocessed/chunks/{project}_chunks.yaml"
     try:
-        text = subprocess.check_output(["git", "show", f"{commit}:{rel}"], cwd=st.ROOT, text=True,
-                                       stderr=subprocess.DEVNULL)
-        return yaml.safe_load(text), f"{rel}@{commit[:10]}"
+        raw = subprocess.check_output(["git", "show", f"{commit}:{rel}"], cwd=st.ROOT, stderr=subprocess.DEVNULL)
+        return raw, f"{rel}@{commit[:10]}"
     except subprocess.CalledProcessError:
-        return yaml.safe_load((st.ROOT / rel).read_text()), f"{rel}@HEAD (run commit unavailable)"
+        pass
+    if sha256:
+        history = subprocess.check_output(["git", "log", "--format=%H", "HEAD", "--", rel], cwd=st.ROOT, text=True)
+        for c in history.split():
+            raw = subprocess.check_output(["git", "show", f"{c}:{rel}"], cwd=st.ROOT, stderr=subprocess.DEVNULL)
+            if hashlib.sha256(raw).hexdigest() == sha256:
+                return raw, f"{rel}@{c[:10]} (sha256 of run commit {commit[:10]}, which is not reachable)"
+    return None, f"{rel} (run commit {commit[:10]} unavailable)"
+
+
+def chunk_manifest_at(commit: str, project: str, sha256: str | None = None) -> tuple[dict, str]:
+    raw, ref = chunk_manifest_bytes_at(commit, project, sha256)
+    if raw is not None:
+        return yaml.safe_load(raw), ref
+    rel = f"data/preprocessed/chunks/{project}_chunks.yaml"
+    return yaml.safe_load((st.ROOT / rel).read_text()), f"{rel}@HEAD (run commit unavailable)"
 
 
 def slot_modules() -> dict[str, str]:
@@ -190,7 +208,8 @@ def analyse():
         receipt = yaml.safe_load(r["receipt_path"].read_text())
         prov = yaml.safe_load(r["provenance_path"].read_text())
         run_docs = source_docs_for_run(prov, r["provenance_path"], r["project"])
-        manifest, manifest_ref = chunk_manifest_at(prov["repo"]["commit"], r["project"])
+        manifest, manifest_ref = chunk_manifest_at(prov["repo"]["commit"], r["project"],
+                                                   ((prov.get("inputs") or {}).get("chunks") or {}).get("sha256"))
         md5_ok = receipt["bundle_md5"] == manifest["bundle_md5"] == prov["inputs"]["bundle_md5"]
         by_id = {c["id"]: c for c in manifest["chunks"]}
         entries = {e["id"]: e for e in receipt["chunks"]}

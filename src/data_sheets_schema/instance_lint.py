@@ -226,10 +226,12 @@ def _schema_key(schema_path: str) -> tuple[str, str]:
 
 @lru_cache(maxsize=8)
 def _schema_view_cached(resolved_path: str, schema_sha256: str):
-    from linkml_runtime import SchemaView
+    # The package's shared view (#926): a view built here would be pinned by
+    # linkml's class-level method caches for the life of the process (#5075).
+    from data_sheets_schema.schema_view import shared_view
 
     try:
-        sv = SchemaView(resolved_path)
+        sv = shared_view(resolved_path)
         sv.all_classes()
     except Exception as exc:
         raise ValueError(

@@ -883,7 +883,10 @@ def _missing_model_facing_modules(root, closures):
     def paths(name):
         return (f"src/data_sheets_schema/{name}.py",
                 f"src/data_sheets_schema/{name}/__init__.py")
-    required = scan.MODEL_FACING_MODULES
+    # The roster lists only modules main carries; the native group left it with
+    # 88f909562 because its sources are on the native branch. It stays a
+    # candidate here, so a native source that lands is required (#5076).
+    required = scan.MODEL_FACING_MODULES | _OPTIONAL_NATIVE_MODEL_FACING
     # Any present native source makes the whole group mandatory: a partial
     # implementation or missing closure edge must not become an exemption.
     if not any((root / path).exists() or (root / path).is_symlink()
@@ -912,7 +915,8 @@ class TestModelFacingClosureCoverage(unittest.TestCase):
             root = Path(d)
             for name in _OPTIONAL_NATIVE_MODEL_FACING:
                 _write(root / f"src/data_sheets_schema/{name}.py", "VALUE = 1\n")
-            closure = {f"src/data_sheets_schema/{name}.py" for name in scan.MODEL_FACING_MODULES}
+            closure = {f"src/data_sheets_schema/{name}.py"
+                       for name in scan.MODEL_FACING_MODULES | _OPTIONAL_NATIVE_MODEL_FACING}
             self.assertEqual(_missing_model_facing_modules(root, closure), set())
             closure.remove("src/data_sheets_schema/native_shared_stage.py")
             self.assertEqual(_missing_model_facing_modules(root, closure), {"native_shared_stage"})

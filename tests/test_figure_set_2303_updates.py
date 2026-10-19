@@ -139,3 +139,19 @@ def test_set_2303_readme_lists_all_22_figures_and_caveat_sections():
     assert "## Release-level corpus caveats (#3878)" in readme
     assert "## Top-level vs nested replication scope (#3936)" in readme
     assert "Below the top level (#3337)" in (f12.__doc__ or "")
+
+
+def test_unreachable_run_commit_resolves_only_to_the_pinned_manifest_bytes():
+    """#5076: a run commit squash-merged away (absent from a CI clone) resolves to the
+    version in HEAD's history with the provenance sha256, and to nothing otherwise."""
+    import hashlib
+    import subprocess
+    rel = "data/preprocessed/chunks/CHORUS_chunks.yaml"
+    old = subprocess.check_output(["git", "log", "--format=%H", "-1", "HEAD~0", "--", rel],
+                                  cwd=st.ROOT, text=True).strip()
+    pinned = hashlib.sha256(subprocess.check_output(["git", "show", f"{old}:{rel}"], cwd=st.ROOT)).hexdigest()
+    missing = "0" * 40
+    raw, ref = f06.chunk_manifest_bytes_at(missing, "CHORUS", pinned)
+    assert hashlib.sha256(raw).hexdigest() == pinned and "not reachable" in ref
+    assert f06.chunk_manifest_bytes_at(missing, "CHORUS", "f" * 64)[0] is None
+    assert f06.chunk_manifest_bytes_at(missing, "CHORUS")[0] is None
