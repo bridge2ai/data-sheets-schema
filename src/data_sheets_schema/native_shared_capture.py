@@ -1053,11 +1053,14 @@ def _checked_observations(run):
     return tuple(checked)
 
 
-def _load(selection_path, *, transcript_bytes=None, control_bytes=None):
+_LAST_VERIFIED_CATALOGS = None
+
+
+def _load(selection_path, *, transcript_bytes=None, control_bytes=None, _catalogs=None):
     """Strict complete-file route for final and recorded consumers."""
-    base = _base(selection_path)
+    base = _base(selection_path, _catalogs=_catalogs)
     streams, prefixes = _streams(base[2], transcript_bytes=transcript_bytes, control_bytes=control_bytes)
-    return _loaded(base, streams, prefixes)
+    return _loaded(base, streams, prefixes, _catalogs=_catalogs)
 
 
 def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None):
@@ -1490,7 +1493,7 @@ def _receipt_assessment(run, *, full_path, receipt_path):
     if (stage.prepare_next is getattr(stage, '_DEFAULT_PREPARE_NEXT', None)
             and stage.check_assembly is getattr(stage, '_DEFAULT_CHECK_ASSEMBLY', None)
             and receipts.check_final is getattr(receipts, '_DEFAULT_CHECK_FINAL', None)):
-        fresh_catalogs = receipts._catalog_context()
+        fresh_catalogs = getattr(run, '_catalogs', None) or receipts._catalog_context()
         decision = stage._prepare_next(fresh_selection, run.binding, run.phase1, run.history, fresh_catalogs)
         if decision.state != 'assembly_complete' or decision.completion is None:
             raise ValueError('final native receipts require the freshly checked complete stage history')
@@ -1515,9 +1518,13 @@ def _receipt_assessment(run, *, full_path, receipt_path):
 
 
 def live_receipt_block(selection_registration_path, *, full_path, receipt_path):
+    global _LAST_VERIFIED_CATALOGS
     run = _load_live(str(selection_registration_path))
     phase_replay(run)
-    return _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
+    block = _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
+    if getattr(run, '_catalogs', None) is not None:
+        _LAST_VERIFIED_CATALOGS = (str(selection_registration_path), run._catalogs)
+    return block
 
 
 def _provenance_block(run):
@@ -1536,6 +1543,7 @@ def _provenance_block(run):
 
 
 def live_provenance_block(selection_registration_path):
+    global _LAST_VERIFIED_CATALOGS
     run = _load_live(str(selection_registration_path))
     phase, _ = phase_replay(run)
     required = {'draft', 'final_evidence', 'final_source_inventory', 'phase1_receipts', 'final_scope',
@@ -1551,10 +1559,14 @@ def live_provenance_block(selection_registration_path):
     from .canary import receipt_floors
     if any(receipt_floors(block).values()):
         raise ValueError('recorder current selected receipt floors did not pass')
-    return _provenance_block(run)
+    result = _provenance_block(run)
+    if getattr(run, '_catalogs', None) is not None:
+        _LAST_VERIFIED_CATALOGS = (str(selection_registration_path), run._catalogs)
+    return result
 
 
 def _recorded_run(spec, record):
+    global _LAST_VERIFIED_CATALOGS
     from .native_shared_render import validate_metadata
     if type(record) is not dict:
         raise ValueError('native recorded reader requires one explicit provenance mapping')
@@ -1563,7 +1575,11 @@ def _recorded_run(spec, record):
         document = validate_metadata(render_spec)
     except (KeyError, TypeError) as exc:
         raise ValueError('native record lacks its complete selected render authority') from exc
-    run = _load(document['registration_path'])
+    reg_path = str(document['registration_path'])
+    saved_catalogs = (_LAST_VERIFIED_CATALOGS[1]
+                      if _LAST_VERIFIED_CATALOGS is not None and _LAST_VERIFIED_CATALOGS[0] == reg_path
+                      else None)
+    run = _load(document['registration_path'], _catalogs=saved_catalogs)
     if c.canonical(render_spec) != c.canonical(run.composition['render_spec']):
         raise ValueError('native record rendering differs from its observed execution composition')
     if spec is not None and c.canonical(spec.render_spec()) != c.canonical(render_spec):
@@ -1573,6 +1589,8 @@ def _recorded_run(spec, record):
     phase, _ = phase_replay(run)
     if not phase['passed']:
         raise ValueError('native recorded stage chronology did not pass')
+    if getattr(run, '_catalogs', None) is not None:
+        _LAST_VERIFIED_CATALOGS = (reg_path, run._catalogs)
     return run
 
 
