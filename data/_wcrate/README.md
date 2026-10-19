@@ -8,13 +8,13 @@ This folder keeps the results of every AI_READI record generated from a bundle t
 - 26 under `claudecode_agent`: v4 to v7, 2026-08-13 to 2026-09-01;
 - 4 under `claudecode_api`: v8, 2026-09-04f rep1 and 2026-09-04g rep1–3.
 
-For each record the folder holds four byte-identical copies, laid out as `AI_READI/<method>/<label>/`:
+For each record the folder holds four copies, laid out as `AI_READI/<method>/<label>/`. Each copy was byte-identical to its original when it was made, on 2026-10-14:
 - the full datasheet (`AI_READI_d4d.yaml`);
 - the derived core (`AI_READI_d4d_core.yaml`);
 - the provenance record;
 - the reconciliation report.
 
-`index.yaml` gives, for each copy, the original path, sha256 and size, and the bundle md5 its record read.
+`index.yaml` gives, for each copy, the original path, sha256 and size, and the bundle md5 its record read. `tests/test_wcrate_copies.py` checks every copy against the sha256 and size recorded there. It does not check copies against today's originals. An original can be rewritten later, for example when a provenance record is re-recorded, and the copy then keeps the bytes as they were on 2026-10-14 (#5060).
 
 **The originals stay where they were**, under `data/d4d_concatenated/`, together with their receipts, reviews, intermediates and evaluations. They remain the evidence, and their provenance records already pin the bundle they read.
 

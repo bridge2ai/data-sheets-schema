@@ -429,7 +429,8 @@ class ReleaseInventory(unittest.TestCase):
         # its licence, IRB source and FAIRhub release records.
         self.assertIn("| AI_READI | 3 (2 current) | `dataset_license` | none | `irb_protocol` | "
                       "`fairhub_dataset` (superseded), `fairhub_dataset_v3`, "
-                      "`fairhub_dataset_v3_api` | no | `allow` |", text)
+                      "`fairhub_dataset_v3_api` | no | `allow` (no URL exclusion; the crate is not a "
+                      "listed source) |", text)   # never a bare `allow` beside "no" (#5060 F4)
         self.assertNotIn("carries its RO-Crate", text)
         self.assertIn("CHORUS's corpus has 0 tier-1 sources, no release record, no license/DUA/IRB "
                       "source, and the crate manifest declares its crate `document_corpus: exclude`", text)
@@ -473,6 +474,38 @@ class ReleaseInventory(unittest.TestCase):
             "(`cccccccccc`) | differs: AI_READI | as today | |",
             "| v8 API production (2026-09-04f/g) | `bbbbbbbbbbbb` (1 records) | – | – | "
             "no committed version of `data/preprocessed/source_manifest.yaml` hashes to it |"])
+
+    def test_records_that_read_a_crate_today_s_corpus_dropped_are_noted(self):
+        """#5060 F3: a pinned manifest that listed AI_READI's RO-Crate says in the
+        note column that those records read it, since #5042 removed it."""
+        import subprocess
+        import tempfile
+        from unittest import mock
+        try:
+            then = subprocess.run(["git", "show", f"1c4debbae^:{self.m.SOURCE_MANIFEST}"], cwd=self.m.ROOT,
+                                  capture_output=True, check=True).stdout
+        except (OSError, subprocess.CalledProcessError) as exc:
+            self.skipTest(f"the pre-#5042 manifest needs git history: {exc}")
+        today = (self.m.ROOT / self.m.SOURCE_MANIFEST).read_bytes()
+        crate = (self.m.ROOT / self.m.CRATE_MANIFEST).read_bytes()
+        with tempfile.TemporaryDirectory() as tmp:
+            concat = Path(tmp)
+            data = {k: {p: [] for p in self.m.PROJECTS} for k, *_ in self.m.ARMS}
+            d = concat / "claudecode_api_core" / "L_rep1"
+            d.mkdir(parents=True)
+            for p in ("AI_READI", "CHORUS"):
+                (d / f"{p}_provenance.yaml").write_text(
+                    f"inputs:\n  source_manifest:\n    path: {self.m.SOURCE_MANIFEST}\n    md5: {'a' * 32}\n")
+                data["v8prod"][p] = [{"label": "L_rep1"}]
+            with mock.patch.object(self.m, "CONCAT", concat), \
+                    mock.patch.object(self.m, "_method_for", lambda label, project: "claudecode_api"), \
+                    mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                               lambda path, md5=None, sha256=None: (then, {"commit": "c" * 40, "date": "2026-10-13"})):
+                rows = self.m._pinned_manifest_rows(data, today, crate)
+        self.assertEqual(len(rows), 1)
+        self.assertIn("| differs: AI_READI |", rows[0])
+        self.assertTrue(rows[0].endswith("| these records read AI_READI's RO-Crate, which today's corpus no "
+                                         "longer carries (#5042) |"), rows[0])
 
     def test_a_record_pinning_no_manifest_or_no_hash_says_so_and_git_is_not_asked(self):
         """#3903: `path: null` (a run that selected no manifest, #621) and a

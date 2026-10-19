@@ -34,9 +34,32 @@ REGISTERED = {
     "VOICE": ("9193c3cbe60b", {"OT2OD032720": 11, "R01EB030362": 5, "U24EB037545": 4}),
 }
 
+#: Counts on the bundle bytes generation reads now, where they differ from the
+#: registration above (#5060 F1). The registered counts stay the v8 instrument;
+#: these say what a run cut from today's corpus is given. The same four AI_READI
+#: awards remain once #5042 dropped the crate's 10 OT2OD032644 mentions.
+CURRENT = {
+    "AI_READI": ("1a58ad7be37d", {"OT2OD032644": 8, "P30DK035816": 2, "UL1TR003096": 1, "UL1TR001442": 1}),
+}
+
 #: The reading registered beside the count: awards the dataset paper's
 #: funding statement attributes to this research or this work.
 FUNDING = {"AI_READI": 3, "CHORUS": 1, "CM4AI": 2, "VOICE": 1}
+
+
+def _recorded_chain(events, project, start):
+    """The md5s `bundle_hash_history` records from `start` on, following each
+    event's `before` to its `after` in order: [registered, ..., latest]. Empty
+    when no event moves away from `start`."""
+    chain = []
+    for ev in events:
+        move = (ev.get("projects") or {}).get(project) or {}
+        before, after = str(move.get("before", "")), str(move.get("after", ""))
+        if not chain and before.startswith(start):
+            chain = [before, after]
+        elif chain and before == chain[-1] and after != before:
+            chain.append(after)
+    return chain
 
 
 class TestThePattern(unittest.TestCase):
@@ -90,8 +113,9 @@ class TestTheCorpus(unittest.TestCase):
     def _bundle(self, project):
         """The registered bytes: the bundle on disk while it still hashes to
         the registration, else the committed version that does, but only
-        where `bundle_hash_history` records the move away from it (#5042).
-        A moved bundle with no recorded move fails, it does not skip (#1161
+        where `bundle_hash_history` records a chain of moves from it to the
+        bytes on disk (#5042, #5060). A moved bundle with no such chain fails,
+        it does not skip (#1161
         review, S1): the registered count is pinned to bytes, and a rewrite
         nobody re-registered would otherwise leave this test green with no
         coverage — the `bundle_hash_history` guard's discipline."""
@@ -104,18 +128,18 @@ class TestTheCorpus(unittest.TestCase):
         if md5.startswith(registered):
             return path
         history = yaml.safe_load((ROOT / "data/preprocessed/source_manifest.yaml").read_text(encoding="utf-8"))
-        befores = [str(ev["projects"][project]["before"])
-                   for ev in ((history.get("bundle_hash_history") or {}).get("events") or [])
-                   if project in (ev.get("projects") or {})
-                   and str(ev["projects"][project].get("before", "")).startswith(registered)]
-        self.assertTrue(befores, f"{project} bundle has moved ({md5[:12]}) and no bundle_hash_history event records "
-                                 f"the move away from {registered}; re-register the count in REGISTERED and the plan note")
+        events = ((history.get("bundle_hash_history") or {}).get("events") or [])
+        chain = _recorded_chain(events, project, registered)
+        self.assertTrue(chain and chain[-1] == md5,
+                        f"{project} bundle has moved ({md5[:12]}) and bundle_hash_history records no chain of moves "
+                        f"from {registered} to it (recorded: {[c[:12] for c in chain]}); a rewrite nobody recorded "
+                        f"leaves the count unpinned. Re-register the count in REGISTERED and the plan note (#5060)")
         from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
         try:
-            found = bundle_bytes_for(rel, md5=befores[-1])
+            found = bundle_bytes_for(rel, md5=chain[0])
         except GitUnavailable as exc:
             self.skipTest(f"the registered bytes need git history: {exc}")
-        self.assertIsNotNone(found, f"no committed version of {rel} has md5 {befores[-1]}")
+        self.assertIsNotNone(found, f"no committed version of {rel} has md5 {chain[0]}")
         tmp = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, tmp, True)
         out = tmp / f"{project}_preprocessed.txt"
@@ -141,6 +165,27 @@ class TestTheCorpus(unittest.TestCase):
         stated = re.search(r"recounted ((?:[A-Z0-9_]+ \d+, )+[A-Z0-9_]+ \d+)", results).group(1)
         self.assertEqual({k: int(v) for k, v in (pair.split() for pair in stated.split(", "))},
                          {project: len(counts) for project, (_md5, counts) in REGISTERED.items()})
+
+    def test_the_current_bundle_count_is_registered(self):
+        """A bundle that has moved off its registration carries a count for the
+        bytes generation reads now, and every CURRENT entry names a bundle
+        that has moved, so none is left unread (#5060 F1, #5083 M2)."""
+        moved = {}
+        for project, (registered, _counts) in REGISTERED.items():
+            path = BUNDLES / f"{project}_preprocessed.txt"
+            if not path.exists():
+                self.skipTest(f"{path} not in this checkout")
+            md5 = hashlib.md5(path.read_bytes()).hexdigest()
+            if not md5.startswith(registered):
+                moved[project] = (path, md5)
+        self.assertEqual(set(CURRENT) - set(moved), set(),
+                         "CURRENT registers a bundle that is back on (or never left) its registration")
+        for project, (path, md5) in moved.items():
+            with self.subTest(project=project):
+                self.assertIn(project, CURRENT, f"{project} has moved to {md5[:12]} with no current count")
+                self.assertTrue(md5.startswith(CURRENT[project][0]),
+                                f"{project} is {md5[:12]}, CURRENT registers {CURRENT[project][0]}")
+                self.assertEqual(awards.bundle_awards(path)["awards"], CURRENT[project][1])
 
     def test_every_registered_bundle_count_reproduces_on_its_bytes(self):
         for project, (_md5, counts) in REGISTERED.items():
