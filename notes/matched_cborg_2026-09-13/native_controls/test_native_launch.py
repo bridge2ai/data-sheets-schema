@@ -1577,3 +1577,36 @@ def test_the_second_bound_starts_when_the_leader_exits(monkeypatch):
         process.stdout.close()
         if process.returncode is None:
             process.kill(); process.wait()
+
+
+def test_unavailable_exit_status_is_recorded_as_a_controller_stop(monkeypatch, tmp_path):
+    """#5078 L2: the stop raised after cleanup goes through record_then_close like
+    every other controller stop, not only through the caller after admission closed."""
+    instruction=tmp_path/'input.txt';instruction.write_text('offline')
+    process=SimpleNamespace(returncode=None, pid=0)
+    stops=[];closed=[]
+    proxy=SimpleNamespace(failed=threading.Event(),failure=None,close_admission=lambda:closed.append(True))
+    monkeypatch.setattr(runner.subprocess,'Popen',lambda *a,**kw:process)
+    monkeypatch.setattr(runner,'leader_exited',lambda p:True)
+    monkeypatch.setattr(runner,'terminate_group',lambda p:None)
+    with pytest.raises(BudgetStop,match='unavailable after cleanup'):
+        execute_child(['synthetic-child'],proxy=proxy,instruction=instruction,attempt=tmp_path,
+            cwd=tmp_path,env={},deadline_seconds=5,verify_launch=lambda:None,record_stop=stops.append)
+    assert stops==['native CLI exit status is unavailable after cleanup'] and closed
+
+
+def test_cleanup_refusal_after_a_failed_run_travels_with_the_primary_error(monkeypatch, tmp_path):
+    """#5078 L1: the run's own error still propagates unchanged, and a cleanup refusal,
+    the only sign a group member may have survived, is attached to it, not dropped."""
+    def refuse(process):
+        raise PermissionError('group member refused SIGKILL')
+    monkeypatch.setattr(runner,'terminate_group',refuse)
+    control=SimpleNamespace(retain_pipe_tail=lambda path:None,close=lambda:None,
+                            control_shutdown_complete=True,unfinished_control_workers=0)
+    proxy=SimpleNamespace(close_admission=lambda:None)
+    primary=BudgetStop('native attempt deadline elapsed')
+    runner._close_responsive_control(proxy,object(),control,tmp_path,primary)
+    assert str(primary)=='native attempt deadline elapsed'
+    assert primary.__notes__==['native cleanup also failed: PermissionError: group member refused SIGKILL']
+    with pytest.raises(PermissionError):
+        runner._close_responsive_control(proxy,object(),control,tmp_path,None)
