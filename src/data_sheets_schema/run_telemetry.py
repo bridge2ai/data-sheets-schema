@@ -44,6 +44,20 @@ RATE_INPUT = 5e-6
 RATE_CACHE_WRITE = 6.25e-6
 RATE_CACHE_READ = 0.5e-6
 RATE_OUTPUT = 25e-6
+#: The model those rates are posted for. A route may carry a provider prefix
+#: and an effort suffix (`google/claude-opus-5-high`); any other model is not
+#: priced by them (#5062).
+RATES_MODEL = "claude-opus-5"
+
+
+def rates_cover(model_name: str | None) -> bool:
+    """Whether the rates above price `model_name`'s calls."""
+    from data_sheets_schema.provenance import _effort_from_route
+    name = (model_name or "").strip().lower().rsplit("/", 1)[-1]
+    effort, _ = _effort_from_route(name)
+    if effort:
+        name = name[: -len(effort) - 1]
+    return name == RATES_MODEL
 
 # Which artifact each phase writes, for attaching the one mtime evidence
 # point to the phase that actually left it behind (the last writer).

@@ -756,6 +756,8 @@ def _billed_rows(spec, gaps: list | None = None, before=frozenset(), pending: se
     run is not this run's and is not named:
 
     - a source that cannot be read;
+    - an unreadable line of the reasoning log: the other lines are still
+      read, and the torn ones are named;
     - the ledger's `pending_call`: intent committed before a request whose
       outcome was never recorded. It carries no token counts, so it is named,
       not priced and not returned as a row (its id goes in `pending`); the
@@ -808,7 +810,13 @@ def _billed_rows(spec, gaps: list | None = None, before=frozenset(), pending: se
             note(f"call {pending_call['usage_id']} ({pending_call.get('phase')}) has no recorded usage")
     try:
         partial = 0
-        for entry in reasoning.read(_reasoning_path(spec)):
+        # Lenient (#5070 R4): one torn line, a killed run's partial write
+        # (#2695), must not drop every other response from the count.
+        entries, torn = reasoning.read_lenient(_reasoning_path(spec))
+        if torn:
+            note(f"{len(torn)} unreadable line(s) in the reasoning log (line {', '.join(map(str, torn[:5]))}"
+                 f"{', …' if len(torn) > 5 else ''})")
+        for entry in entries:
             uid = entry.get("usage_id")
             if (isinstance(uid, str) and uid not in rows
                     and generation is not None and entry.get("generation_id") == generation
@@ -955,6 +963,17 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         if len(specs) > 1 and any(registration(s)["coverage_floor"]["state"] == "pending" for s in specs):
             raise click.ClickException("diagnostic receipt completion floor is pending; fan-out is blocked")
         receipt_gating = registration(specs[0])["coverage_floor"]["state"] == "registered"
+    if max_cost_dollars is not None:
+        # The cap is priced at run_telemetry's posted rates, which are one
+        # model's; another model's spend would be miscounted silently (#5062).
+        from data_sheets_schema.api_runner import _model_settings
+        from data_sheets_schema.run_telemetry import RATES_MODEL, rates_cover
+        unpriced = sorted({name for name in (_model_settings(s)["name"] for s in specs)
+                           if not rates_cover(name)})
+        if unpriced:
+            raise click.ClickException(
+                f"--max-cost-dollars is priced at {RATES_MODEL}'s rates, which do not price "
+                f"{', '.join(unpriced)}; add that model's rates to run_telemetry before capping it")
     plans = [_plan_or_refuse(s) for s in specs]
     total = None if roster else sum(x["approx_total_input_tokens"] for x in plans)
     if roster:
@@ -969,6 +988,11 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             click.echo(f"   {s.project:9} {s.label:44} ~{x['approx_total_input_tokens']:>8,} tok")
     if not roster:
         click.echo(f"   {'TOTAL':9} {'':44} ~{total:>8,} input tokens (uncached)")
+    if max_cost_dollars is not None:
+        # No dollar estimate is printed: output and reasoning tokens, most of
+        # a run's cost, are not known before it runs (#5062).
+        click.echo(f"   cost cap ${max_cost_dollars:,.2f}, checked between runs; no dollar estimate "
+                   "(output and reasoning tokens are unknown before a run)")
 
     if dry_run:
         return
@@ -1032,8 +1056,21 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             res = execute(s)
             # This invocation's attempts only: a resumed run returns its
             # earlier usage too, a completed one all of it (#5045 review).
-            usage_rows = [u for u in res.get("usage") or []
-                          if not (isinstance(u, dict) and u.get("usage_id") in billed_before)]
+            returned = [u for u in res.get("usage") or [] if isinstance(u, dict)]
+            usage_rows = [u for u in returned if u.get("usage_id") not in billed_before]
+            # The record's api_usage can hold billed rows the returned list
+            # lacks, such as an attempt abandoned during repair or the report
+            # regate and merged in at the final accounting (#5069). Rows with
+            # no usage id cannot be matched against them, so the union is
+            # skipped then, and said.
+            unkeyed = sum(1 for u in usage_rows if not isinstance(u.get("usage_id"), str))
+            if unkeyed:
+                click.echo(f"   ⚠️  {unkeyed} returned usage row(s) carry no usage id; billed rows "
+                           "recorded on disk were not added, so the cost may be undercounted", err=True)
+            else:
+                returned_ids = {u["usage_id"] for u in returned if isinstance(u.get("usage_id"), str)}
+                usage_rows += [row for uid, row in _billed_rows(s, None, billed_before | pending_before).items()
+                               if uid not in billed_before and uid not in returned_ids]
             # Counted now, so a raise later in this run does not count them
             # again (#5068).
             billed_before |= {u["usage_id"] for u in usage_rows

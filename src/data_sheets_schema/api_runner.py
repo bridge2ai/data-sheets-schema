@@ -7685,7 +7685,10 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     if not problems:
         _progress_path(spec).unlink(missing_ok=True)
 
-    return {"label": spec.label, "project": spec.project, "usage": usage,
+    # The record's api_usage, not the in-memory list: the final accounting
+    # merges in attempts abandoned after the record was first built (repair,
+    # the report regate), and a batch counts what is returned (#5069).
+    return {"label": spec.label, "project": spec.project, "usage": rec.data.get("api_usage") or usage,
             "skipped": skipped, "validation_problems": problems,
             # The three post-generation checks, returned rather than only
             # written to the record (#579). A batch that cannot see them counts

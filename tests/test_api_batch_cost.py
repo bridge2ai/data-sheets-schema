@@ -455,10 +455,16 @@ class BilledRowsReadTest(unittest.TestCase):
         self.assertNotIn("input_tokens", rows["lost"])
         self.assertEqual(gaps, ["1 response(s) in the reasoning log have no usage row (input tokens unknown)"])
 
-    def test_an_unreadable_reasoning_log_is_named(self):
-        (self.root / "P_reasoning.jsonl").write_text("{not json\n", encoding="utf-8")
-        _, gaps = self._read()
-        self.assertEqual(gaps, ["could not read reasoning log"])
+    def test_a_torn_reasoning_line_is_named_and_the_rest_still_count(self):
+        """#5070 R4: one torn line, a killed run's partial write, no longer
+        drops every other reasoning-only response from the count."""
+        import json
+        entry = {"usage_id": "lost", "phase": "core", "output_tokens": 40, "generation_id": "g2"}
+        (self.root / "P_reasoning.jsonl").write_text(json.dumps(entry) + "\n{not json\n", encoding="utf-8")
+        rows, gaps = self._read(ledger={"rows": [], "generation_id": "g2"})
+        self.assertEqual(sorted(rows), ["lost"])
+        self.assertEqual(gaps, ["1 unreadable line(s) in the reasoning log (line 2)",
+                                "1 response(s) in the reasoning log have no usage row (input tokens unknown)"])
 
 
 class ApiBatchTotalsWithoutCapTest(ApiBatchCostAccountingTest):
@@ -565,3 +571,81 @@ class ApiBatchRealBilledRowsTest(ApiBatchCostAccountingTest):
             "usage_id": "p0", "phase": "full"}}}, ["--continue-on-error"])
         self.assertIn("unresolved accounting", result.stderr)
         self.assertNotIn("may be undercounted", result.stderr)
+
+
+class ApiBatchSuccessPathRowsTest(ApiBatchCostAccountingTest):
+    """#5069: a successful run counts the billed rows recorded on disk that
+    its returned usage lacks, such as an attempt abandoned during the report
+    regate and merged in at the final accounting."""
+
+    def test_a_recorded_row_missing_from_the_returned_usage_is_counted(self):
+        def finished(spec):
+            row = {**self.ROW, "usage_id": "u1"}
+            abandoned = {**self.ROW, "usage_id": "ab1", "phase": "report", "snapshot": "s"}
+            on_disk = {"u1": row, "ab1": abandoned}
+            finished.on_disk = on_disk
+            return {**ApiBatchCostStopTest()._make_mock_execute(1.0)(spec), "usage": [row]}
+        finished.on_disk = {}
+        result = self._invoke(MagicMock(side_effect=finished), lambda spec: dict(finished.on_disk), [], reps="1")
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("tokens: 200,000 in, 40,000 out (cost: $2.00)", result.output)
+
+    def test_returned_rows_without_a_usage_id_are_not_unioned_and_it_is_said(self):
+        def finished(spec):
+            finished.on_disk = {"u1": {**self.ROW, "usage_id": "u1"}}
+            return ApiBatchCostStopTest()._make_mock_execute(1.0)(spec)    # rows carry no usage id
+        finished.on_disk = {}
+        result = CliRunner(mix_stderr=False)
+        with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
+             patch("data_sheets_schema.cli.api._plan_or_refuse", side_effect=ApiBatchCostStopTest()._dummy_plan), \
+             patch("data_sheets_schema.cli.api._billed_rows", side_effect=lambda spec, *a, **k: dict(finished.on_disk)), \
+             patch("data_sheets_schema.api_runner.execute", MagicMock(side_effect=finished)):
+            result = result.invoke(cli, [
+                "api", "batch", "--projects", "AI_READI", "--replicates", "1", "--arm", "baseline",
+                "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
+                "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate"])
+        self.assertEqual(result.exit_code, 0, result.output + result.stderr)
+        self.assertIn("1 returned usage row(s) carry no usage id", result.stderr)
+        self.assertIn("(cost: $1.00)", result.output)          # u1 on disk is not added
+
+
+class ApiBatchPricingTest(unittest.TestCase):
+    """#5062: the cap is priced at one model's posted rates, and a dry run
+    shows the cap without inventing an estimate."""
+
+    ARGS = ["api", "batch", "--projects", "AI_READI", "--replicates", "1", "--arm", "baseline",
+            "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
+            "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate"]
+
+    def _invoke(self, extra, model=None):
+        from data_sheets_schema import api_runner
+        real = api_runner._model_settings
+        settings = (lambda c=None: {**real(c), "name": model}) if model else real
+        with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
+             patch("data_sheets_schema.cli.api._plan_or_refuse", side_effect=ApiBatchCostStopTest()._dummy_plan), \
+             patch("data_sheets_schema.api_runner._model_settings", side_effect=settings), \
+             patch("data_sheets_schema.api_runner.execute") as mock_exec:
+            return CliRunner().invoke(cli, [*self.ARGS, *extra]), mock_exec
+
+    def test_rates_cover_the_opus_5_routes_only(self):
+        from data_sheets_schema.run_telemetry import rates_cover
+        for name in ("claude-opus-5", "google/claude-opus-5-high", "anthropic/claude-opus-5", "CLAUDE-OPUS-5"):
+            self.assertTrue(rates_cover(name), name)
+        for name in ("claude-opus-5-5", "claude-sonnet-4-5-20250929", "google/claude-opus-5-5-high", "", None):
+            self.assertFalse(rates_cover(name), name)
+
+    def test_a_cap_on_a_model_the_rates_do_not_price_is_refused(self):
+        result, mock_exec = self._invoke(["--max-cost-dollars", "5"], model="claude-sonnet-4-5-20250929")
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIn("do not price claude-sonnet-4-5-20250929", result.output)
+        mock_exec.assert_not_called()
+
+    def test_no_cap_means_no_pricing_check(self):
+        result, _ = self._invoke(["--dry-run"], model="claude-sonnet-4-5-20250929")
+        self.assertEqual(result.exit_code, 0, result.output)
+
+    def test_a_dry_run_shows_the_cap_and_says_there_is_no_estimate(self):
+        result, mock_exec = self._invoke(["--dry-run", "--max-cost-dollars", "15"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("cost cap $15.00, checked between runs; no dollar estimate", result.output)
+        mock_exec.assert_not_called()
