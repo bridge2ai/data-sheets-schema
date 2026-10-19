@@ -1584,15 +1584,30 @@ def test_unavailable_exit_status_is_recorded_as_a_controller_stop(monkeypatch, t
     every other controller stop, not only through the caller after admission closed."""
     instruction=tmp_path/'input.txt';instruction.write_text('offline')
     process=SimpleNamespace(returncode=None, pid=0)
-    stops=[];closed=[]
-    proxy=SimpleNamespace(failed=threading.Event(),failure=None,close_admission=lambda:closed.append(True))
+    held=[];stops=[]
+    class state:
+        def __enter__(self):
+            held.append(True)
+        def __exit__(self, *exc):
+            held.pop()
+    def record(reason):
+        assert held, 'the stop is recorded under the proxy lock, as record_then_close does'
+        stops.append(reason)
+    def run(proxy, cleanup=lambda p:None):
+        monkeypatch.setattr(runner,'terminate_group',cleanup)
+        attempt=Path(tmp_path/f'attempt{len(list(tmp_path.glob("attempt*")))}');attempt.mkdir()
+        with pytest.raises(BudgetStop,match='unavailable after cleanup'):
+            execute_child(['synthetic-child'],proxy=proxy,instruction=instruction,attempt=attempt,
+                cwd=tmp_path,env={},deadline_seconds=5,verify_launch=lambda:None,record_stop=record)
     monkeypatch.setattr(runner.subprocess,'Popen',lambda *a,**kw:process)
     monkeypatch.setattr(runner,'leader_exited',lambda p:True)
-    monkeypatch.setattr(runner,'terminate_group',lambda p:None)
-    with pytest.raises(BudgetStop,match='unavailable after cleanup'):
-        execute_child(['synthetic-child'],proxy=proxy,instruction=instruction,attempt=tmp_path,
-            cwd=tmp_path,env={},deadline_seconds=5,verify_launch=lambda:None,record_stop=stops.append)
-    assert stops==['native CLI exit status is unavailable after cleanup'] and closed
+    run(SimpleNamespace(failed=threading.Event(),failure=None,state=state(),close_admission=lambda:None))
+    assert stops==['native CLI exit status is unavailable after cleanup']
+    # #5079: a proxy failure during cleanup keeps its own first record.
+    stops.clear();failed=threading.Event()
+    run(SimpleNamespace(failed=failed,failure='handler failed',state=state(),close_admission=lambda:None),
+        cleanup=lambda p:failed.set())
+    assert stops==[]
 
 
 def test_cleanup_refusal_after_a_failed_run_travels_with_the_primary_error(monkeypatch, tmp_path):
@@ -1607,6 +1622,7 @@ def test_cleanup_refusal_after_a_failed_run_travels_with_the_primary_error(monke
     primary=BudgetStop('native attempt deadline elapsed')
     runner._close_responsive_control(proxy,object(),control,tmp_path,primary)
     assert str(primary)=='native attempt deadline elapsed'
-    assert primary.__notes__==['native cleanup also failed: PermissionError: group member refused SIGKILL']
+    # The class only: an error's text can carry the child's argv (#5079).
+    assert primary.__notes__==['native cleanup also failed: PermissionError']
     with pytest.raises(PermissionError):
         runner._close_responsive_control(proxy,object(),control,tmp_path,None)
