@@ -1,0 +1,340 @@
+{
+  "format": "native_live_stream_diagnostic_validation_v1",
+  "implementation_issue": 4682,
+  "unresolved_parent_issues": [
+    4680,
+    4537,
+    4354
+  ],
+  "tested_commit": "d01ef23c37e22137be367a73f252cc74d4a58d73",
+  "tested_tree": "b072f25cbcec36306ab8de421beecb3c3f6af21a",
+  "parent_commit": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+  "test_binding_provenance": "Coordinator reported this clean committed head/tree immediately before and after the serialized run. The author independently checked current selected bytes against tested Git blobs. JUnit itself does not attest a commit or invocation.",
+  "tested_commit_changed_paths": [
+    "notes/native_stream_diagnostics_2026-10-08/README.md",
+    "src/data_sheets_schema/native_shared_controller.py",
+    "src/data_sheets_schema/native_shared_streams.py",
+    "tests/test_native_shared_stream_diagnostics.py",
+    "tests/test_native_shared_stream_diagnostics_adversarial.py"
+  ],
+  "validation": {
+    "status": "focused_tests_passed",
+    "cases": 105,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit": {
+      "artifact": "native-stream-diagnostic-tests-01.xml",
+      "bytes": 17180,
+      "sha256": "7d36cd9da496dad8b3cc60b43ca9f2679a346d13e34f211cb9af69012da1c394",
+      "suite_seconds": 141.224,
+      "module_counts": [
+        {
+          "path": "tests/test_native_shared_stream_diagnostics.py",
+          "testcases": 26
+        },
+        {
+          "path": "tests/test_native_shared_stream_diagnostics_adversarial.py",
+          "testcases": 15
+        },
+        {
+          "path": "tests/test_native_shared_streams.py",
+          "testcases": 31
+        },
+        {
+          "path": "tests/test_native_shared_stream_bindings.py",
+          "testcases": 7
+        },
+        {
+          "path": "tests/test_native_shared_controller.py",
+          "testcases": 26
+        }
+      ]
+    },
+    "coordinator_reported": {
+      "exit_code": 0,
+      "console_seconds": 141.32,
+      "warning_count": 1,
+      "warning_description": "dateutil deprecation warning",
+      "python_version": "CPython 3.13.12",
+      "interpreter_selection": "existing primary checkout virtual environment",
+      "source_clean_unchanged_after_run": true
+    },
+    "invocation": {
+      "provenance": "coordinator-supplied invocation; public paths are symbolic",
+      "cwd": "candidate checkout",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTHONPATH": "src:."
+      },
+      "argv": [
+        "$PYTHON",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_native_shared_stream_diagnostics.py",
+        "tests/test_native_shared_stream_diagnostics_adversarial.py",
+        "tests/test_native_shared_streams.py",
+        "tests/test_native_shared_stream_bindings.py",
+        "tests/test_native_shared_controller.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=$EVIDENCE/native-stream-diagnostic-pytest-01",
+        "--junitxml=$EVIDENCE/native-stream-diagnostic-tests-01.xml"
+      ]
+    },
+    "independent_author_checks": [
+      "Parsed saved JUnit and checked exact artifact size/SHA256, suite duration and all five module counts.",
+      "Checked all selected source, test and declared dependency bytes against tested Git blobs.",
+      "Checked frozen controller manifest hash and all 12 dependencies against the manifest and unchanged parent bytes."
+    ]
+  },
+  "selected_sources": [
+    {
+      "path": "src/data_sheets_schema/native_shared_streams.py",
+      "bytes": 8575,
+      "sha256": "9600cac865c50f2e863bb5fecb206bbeafaa721b49dda9ae2206044c88d15f7a",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_controller.py",
+      "bytes": 25063,
+      "sha256": "a08b957584f7a253c872806350f28e511562a71136a06d14e6804e6ebb51068c",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_contract.py",
+      "bytes": 38808,
+      "sha256": "76664d4d9023a9a3a1975ca66f82bee0a4ce4b789c99c19606987ab2e50e65b9",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_evidence.py",
+      "bytes": 12908,
+      "sha256": "a50b042d1825456d70571dbf5e314ea5204f9d1451319e1c8353462852e294e5",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_capture.py",
+      "bytes": 77215,
+      "sha256": "0f41fa2db916f66d45082f680e9bcad30704273f02fe1b90972067c0fab2aa05",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_results.py",
+      "bytes": 32198,
+      "sha256": "2047abb3ced650fcb526abf0dc22f23b68b26241f284039ac1c58d42333f3297",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_receipts.py",
+      "bytes": 23106,
+      "sha256": "c2a4725c84e893563605779ec8476658767635b5b065d399f59be0b58112d4ce",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/native_attribution_controller.py",
+      "bytes": 21181,
+      "sha256": "1213d4704f0754efee6a3b1b09db0d3210eaf4fd64195bf733890ac3b1106967",
+      "working_matches_tested_git_blob": true
+    }
+  ],
+  "test_modules": [
+    {
+      "path": "tests/test_native_shared_stream_diagnostics.py",
+      "bytes": 7400,
+      "sha256": "458be79ba4bb67fd05591b08763b23bdaed5d2ac0fba5a0ee407e2cb1e246b8f",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_native_shared_stream_diagnostics_adversarial.py",
+      "bytes": 11275,
+      "sha256": "162376229298f5cc8944cae12ce69a1935babaa2a8b296927aeed40be688d1dc",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_native_shared_streams.py",
+      "bytes": 12721,
+      "sha256": "95703cd932f11a851bf7f262a3f7973aa63edd2952899e6f04c9a39294a6aad5",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_native_shared_stream_bindings.py",
+      "bytes": 5082,
+      "sha256": "9f76ab60c848dc112614661699a5ef63f92454ab19436b9b329c09d645ce1a76",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_native_shared_controller.py",
+      "bytes": 5227,
+      "sha256": "b24ab493c539036037fb3ec2240f18f99dea9ebdbe276a4910f28fe8484e0849",
+      "working_matches_tested_git_blob": true
+    }
+  ],
+  "dependency_declarations": [
+    {
+      "path": "pyproject.toml",
+      "bytes": 4446,
+      "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "poetry.lock",
+      "bytes": 592155,
+      "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "working_matches_tested_git_blob": true
+    }
+  ],
+  "frozen_controller": {
+    "manifest": {
+      "path": "src/data_sheets_schema/native_controller_sources_v1.json",
+      "bytes": 2459,
+      "sha256": "d1f13def58c0832aea3644fb68806d829eb4ab6e087045f14d86f439aed557c1",
+      "working_matches_tested_git_blob": true
+    },
+    "unchanged_from_parent": true,
+    "declared_source_commit": "4ee87580c5472aee2d30cabec4dff1b230de8436",
+    "dependencies": [
+      {
+        "module": "budget_amendment",
+        "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+        "bytes": 31267,
+        "sha256": "7347b407611871349a50cdb2e11ade7ace1f23dd703451dba5abd9f627cbd3f9",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "budgeted_cborg",
+        "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+        "bytes": 32252,
+        "sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "native_command_policy",
+        "path": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
+        "bytes": 34944,
+        "sha256": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "native_control",
+        "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+        "bytes": 45573,
+        "sha256": "e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "native_file_policy",
+        "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+        "bytes": 9211,
+        "sha256": "c6fc332b237fe06200437e4e899b0e6dbb2830b9a40d537b4e8db36bd5e5b33e",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "native_phase_history",
+        "path": "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py",
+        "bytes": 17636,
+        "sha256": "0a318e7bb3eea8d99067da168de09985d92f7f28c6ed0e0b01d7c01dcf85a1d6",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "native_proxy",
+        "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+        "bytes": 49654,
+        "sha256": "21f2d16e6c9b93f033664c7b95521076b27786a2b1679c008713f2e40bf599b7",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "native_readonly",
+        "path": "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py",
+        "bytes": 8254,
+        "sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "prepare_overlay_roster",
+        "path": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py",
+        "bytes": 916,
+        "sha256": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "prepare_registration",
+        "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+        "bytes": 19949,
+        "sha256": "06a31323dfd893e7e16b8d6778c19ed4489f24b8bc3d74a43391296f881c49ae",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "run_api_canary",
+        "path": "notes/matched_cborg_2026-09-13/run_api_canary.py",
+        "bytes": 13596,
+        "sha256": "8b5ce15695b5808060edfb3d2fb85fd441244c4ee23ea8d8cf556352b8bbbbc4",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      },
+      {
+        "module": "run_native_canary",
+        "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+        "bytes": 46837,
+        "sha256": "fbb98d66b36b392f5291866ede6acff4b162ad626d98ca7d104c0a45ae96ac5d",
+        "working_matches_tested_git_blob": true,
+        "matches_frozen_declared_sha256": true,
+        "unchanged_from_parent": true
+      }
+    ]
+  },
+  "diagnostic_contract": {
+    "optional_report_key": "stream_diagnostic",
+    "max_canonical_bytes": 16384,
+    "exception_base": "ValueError",
+    "first_stop_type_text": "ValueError",
+    "raw_stream_contents_retained": false,
+    "additional_reader_io": false,
+    "guard_or_admission_changes": false,
+    "deadline_changes": false,
+    "retries_added": false,
+    "cursor_update_timing_changed": false,
+    "diagnostic_failures_preserve_original_refusal": true
+  },
+  "historical_evidence": {
+    "pull_request": 4683,
+    "url": "https://github.com/bridge2ai/data-sheets-schema/pull/4683",
+    "scope": "Original retained CI artifacts and reviewed evidence verifier; not regenerated or reclassified by this diagnostic change.",
+    "cause_issue": 4680,
+    "cause_established": false
+  },
+  "execution_acceptance_established": false,
+  "scientific_eligibility_established": false,
+  "limitations": [
+    "Deterministic metadata schedules are synthetic observation controls, not a reproduction or cause determination of the hosted failure.",
+    "Focused tests verify reader and adapter behavior without a native workload, controller helper or provider campaign.",
+    "No performance comparison or native completion claim is made.",
+    "Selected byte pins and dependency declarations are not a complete installed-environment or import-cache snapshot.",
+    "Console warnings, interpreter version, invocation and commit-to-run binding are coordinator provenance, separate from what JUnit directly records.",
+    "Historical failure artifacts remain preserved separately in PR #4683. #4680, #4537 and #4354 remain open."
+  ]
+}

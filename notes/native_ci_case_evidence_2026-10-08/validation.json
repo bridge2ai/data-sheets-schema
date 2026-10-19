@@ -1,0 +1,501 @@
+{
+  "format": "native_ci_case_evidence_validation_v1",
+  "issues": [
+    4675,
+    4677
+  ],
+  "pr": 4659,
+  "open_parent_issues": [
+    4537,
+    4354
+  ],
+  "base_commit": "cfe61d29afc6edbf79cf6970e014fd951bee6d15",
+  "tested_commit": "b90ef8a142cdc5770674059b08e81b648e963f5e",
+  "tested_tree": "6324c0d1a479be31f6d3a64a1a301befaf8de73b",
+  "verification": {
+    "coordinator_provenance": "Coordinator reports the invocation at this clean commit. JUnit does not attest source or environment. Console duration/warning count are coordinator reports.",
+    "independent_checks": [
+      "Parsed both JUnit files and counted every testcase/failure/error/skip.",
+      "Compared every pinned working file byte with its tested-commit blob.",
+      "Compared unchanged native/acceptance/fixture paths with the cfe base.",
+      "Verified retained cfe CI archive, log, JUnit and extracted-result digests."
+    ],
+    "dependency_scope": "Dependency declarations and selected source bytes; not installed environment or complete imported closure."
+  },
+  "tests": {
+    "artifact": {
+      "name": "native-ci-evidence-tests-02.xml",
+      "bytes": 5506,
+      "sha256": "44df51e2b64c874fd57be5c356485c954decc391353d23241e4efb3e18a5dd2c"
+    },
+    "cases": 35,
+    "passed": 35,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_seconds": 6.13,
+    "modules": {
+      "tests/test_native_ci_evidence.py": 16,
+      "tests/test_native_ci_evidence_adversarial.py": 6,
+      "tests/test_native_shared_acceptance_runner.py": 13
+    },
+    "exit_code": 0,
+    "console_seconds": 6.16,
+    "console_warnings": 0
+  },
+  "initial_run": {
+    "artifact": {
+      "name": "native-ci-evidence-tests-01.xml",
+      "bytes": 6928,
+      "sha256": "275669ce0d230733a695f9783d8ad1bc76497ad2f9b4acf6b8ff790e965088fb"
+    },
+    "cases": 35,
+    "passed": 34,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0,
+    "junit_seconds": 6.225,
+    "modules": {
+      "tests/test_native_ci_evidence.py": 16,
+      "tests/test_native_ci_evidence_adversarial.py": 6,
+      "tests/test_native_shared_acceptance_runner.py": 13
+    },
+    "tested_commit": "0893589bc8153a4416bf9c6f1370dd5771d01da2",
+    "tested_tree": "cae3a5dcc9121a592e81672d962cee44587d675d",
+    "console_seconds": 6.26,
+    "console_warnings": 0,
+    "failure": "test_external_symlinks_and_json_authority_paths_are_never_followed assumed symlink mode0777; observed macOS0755 was correctly retained. Fixed only the test to compare actual lstat and archive modes."
+  },
+  "invocation": {
+    "cwd": "$CHECKOUT",
+    "environment": {
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHONPATH": "src:."
+    },
+    "command": [
+      "$PYTHON",
+      "-B",
+      "-m",
+      "pytest",
+      "tests/test_native_ci_evidence.py",
+      "tests/test_native_ci_evidence_adversarial.py",
+      "tests/test_native_shared_acceptance_runner.py",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=$EVIDENCE/native-ci-evidence-pytest-02",
+      "--junitxml=$EVIDENCE/native-ci-evidence-tests-02.xml"
+    ]
+  },
+  "files": {
+    ".github/workflows/main.yaml": {
+      "bytes": 13867,
+      "sha256": "7e56e902e3177a19ff36de56394510fba3a37b35872c6fdc74f77d9ef951a496",
+      "git_blob": "249896f4e5bd5a7f26ee4c3081d877eb52862ac8"
+    },
+    ".github/workflows/native-shared-acceptance.yaml": {
+      "bytes": 2016,
+      "sha256": "f76d6aedc0e7a3ceef5538ab3ba303dea9cd1c237992f83cd92174398ff07a5e",
+      "git_blob": "cbee64510cf23bc6652fc5a9226dceb7118cf181",
+      "unchanged_from_base": true
+    },
+    "poetry.lock": {
+      "bytes": 592155,
+      "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "git_blob": "cfe519359b0be36a52544377584f0217c6763fed"
+    },
+    "pyproject.toml": {
+      "bytes": 4446,
+      "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+      "git_blob": "87a84c564d243c134fead266600e96561562a75e"
+    },
+    "src/data_sheets_schema/native_attempt_supervisor.py": {
+      "bytes": 26002,
+      "sha256": "3ac7a91f6ce5ebb60b284ccf3610ad4883a13d34b42570a8f530d6c813358d34",
+      "git_blob": "37c74c0b3789ec571f63e7fc1bf39b49e21aa75a",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_attribution_controller.py": {
+      "bytes": 21181,
+      "sha256": "1213d4704f0754efee6a3b1b09db0d3210eaf4fd64195bf733890ac3b1106967",
+      "git_blob": "1c9dcd77992671b5f8b54a56e24f56ee1b3a1fb6",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_attribution_registration.py": {
+      "bytes": 24342,
+      "sha256": "135be1958e93c682a2083b53d338c44c3acf66efe74cd5da94f7c66cf72e0ab6",
+      "git_blob": "b8c1a3943792d67ec2eabe858994b182f263b5e2",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_attribution_results.py": {
+      "bytes": 54114,
+      "sha256": "303d26d22d3003d6e02298311cef1c43879af50ebd0ee3b111beb41afab3ce39",
+      "git_blob": "d570e02c2bdb8094b3783bc7198645997d11635f",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_catalog_reuse.py": {
+      "bytes": 20455,
+      "sha256": "62658bceb86474ed651351557d9bea1be5ac7ac65f7779a92ce03e00d1ffe3c1",
+      "git_blob": "0a03786814d43992fbeadc2c0f17c93419f2db75",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_execution.py": {
+      "bytes": 10183,
+      "sha256": "8075fcbaacab60a1e73583b9d9b9eed8281ca147a0106eb7532d505f514067fe",
+      "git_blob": "a694300070cca99529aec6ce019de8cc8c9085d8",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_execution_authority.py": {
+      "bytes": 4317,
+      "sha256": "bbb10b0d678ad68a1bd71207f9d5fb3d09086674fb7da739e24c6e440861025a",
+      "git_blob": "9308a9030ab56d73158c1df52b0e0fc13eaec716",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_execution_engine.py": {
+      "bytes": 32195,
+      "sha256": "d87f036382c007dae2a6ce396a8106293ba0d70da570a70d71240d11a16f3870",
+      "git_blob": "b3b992171de71d3385dab6f1f97fe0bf57c6c95d",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_execution_gates.py": {
+      "bytes": 13665,
+      "sha256": "7b75a3d2ee302616628e379765449c00d298df565dd2dcdfeca6a6c2e6290bb6",
+      "git_blob": "37c41698b7d8401659e3a5f14d45858da866a0d5",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_execution_permissions.py": {
+      "bytes": 24358,
+      "sha256": "ea6d866aca57643f647907a00f3d6a7c124f2602faace20907a9c818bd771e21",
+      "git_blob": "a455f0110a2b17dd0c140748d4c86f36bb2253c1",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_execution_registration.py": {
+      "bytes": 20356,
+      "sha256": "7e4002de19c36b3379b1da3702c28ea0c27f6d42fd27ebaf9fbed6b0de82e689",
+      "git_blob": "ffd60a25507e919f96cdc12151c4b96f655bd082",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_gate_engine.py": {
+      "bytes": 11399,
+      "sha256": "dcc939a17f522656830f591f9a135cad45febd6edac5448445619fca75dd243b",
+      "git_blob": "64e7a13aeeb3964512ddb4b5bb7a58d1d0675033",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_neutral_runtime_v1.py": {
+      "bytes": 5370,
+      "sha256": "ae77c08defcc8b9eef3aa2967f884b503d2643c511a587c125e09530e8881826",
+      "git_blob": "54a41a241483fa326feea831d2a7bc5850bcd72a",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_receipt_origin.py": {
+      "bytes": 7225,
+      "sha256": "bfc46c6f7d9ddc287169633e185661dd0a09fd4b47709981e330d446b69df741",
+      "git_blob": "2511acaf5dc19e2ed512717932652f9baa322fe9",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_attribution.py": {
+      "bytes": 11549,
+      "sha256": "f2fff9aa2d953f0122a8c05cbc4f624c182d257ddde15928c07004ea31ba3dda",
+      "git_blob": "129c963ebbfa6e2b56c5650b62bb12279211ad15",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_capture.py": {
+      "bytes": 77215,
+      "sha256": "0f41fa2db916f66d45082f680e9bcad30704273f02fe1b90972067c0fab2aa05",
+      "git_blob": "0c4ec08608b2b4e3d6c75c5d4117172e53afbae3",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_contract.py": {
+      "bytes": 38808,
+      "sha256": "76664d4d9023a9a3a1975ca66f82bee0a4ce4b789c99c19606987ab2e50e65b9",
+      "git_blob": "de25b43beceba21ffc73b5f5fac09ee7d6454f07",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_controller.py": {
+      "bytes": 23927,
+      "sha256": "f04676ae57a4cc65b65351ecbda155ca62269fb21b5ecb327890e9396712ad5c",
+      "git_blob": "24d1fb73e1d4763b78c670a265ef29459b9d7f44",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_current.py": {
+      "bytes": 1628,
+      "sha256": "a4c66c191119060e626873570ad65e4a4626ee331471b6d65f3347d3fe5951bc",
+      "git_blob": "5b5b658f26dfa9a2cab6d5e22a0d8983c4dccd47",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_effects.py": {
+      "bytes": 8651,
+      "sha256": "e4c8fee4621abe29cc484a291216680da01f4f26a28cd746273b687445ef864c",
+      "git_blob": "3a36f9cde14a97e8185abf4304d4eac7beb8a9f7",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_evidence.py": {
+      "bytes": 12908,
+      "sha256": "a50b042d1825456d70571dbf5e314ea5204f9d1451319e1c8353462852e294e5",
+      "git_blob": "c6c7fb5b0b3521721684b28e9498d3cf1b356074",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_execution.py": {
+      "bytes": 3297,
+      "sha256": "fd7f635d44ac877f6b57f3f1c58990ed1da134b281ad54a7779428ef3ee456a9",
+      "git_blob": "fa91798213076c72da43a2e540d5c7b231642e92",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_gates.py": {
+      "bytes": 9978,
+      "sha256": "386d83172e9b065a71e85205c5f1d61873327bd9a482eb6abc283b3d748aa94d",
+      "git_blob": "4e613124ae6083a9d94795ec896bb608fab91966",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_observations.py": {
+      "bytes": 18263,
+      "sha256": "4dc91259ecb079e8efe3067b0eeb01e584b575bdda813fcc6e7494bf39bcbba4",
+      "git_blob": "c3cee904f06a9c5a9dad6697d91d8a964255c378",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_permissions.py": {
+      "bytes": 61966,
+      "sha256": "64d058d685b308da9da08efc61ea73d28a9d2e4901c0d6f86b7d816854a43883",
+      "git_blob": "f19d4bbd6642bae95ac1095a1e5c70104095bd4b",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_phase.py": {
+      "bytes": 25228,
+      "sha256": "fd702cd2ef62991643b81e33579ce45d70a7ef634d7d32eea144be020e598124",
+      "git_blob": "931f4cdac4f4f866b44b6a12c41d479f61230057",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_policy.py": {
+      "bytes": 9926,
+      "sha256": "c92d8f15ba658a6d4c63e560a79d7f02a896ca451f59a60e907ca0e8eda06b02",
+      "git_blob": "2cc7ab2437e152eaf05044c15b867706beea4770",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_publication.py": {
+      "bytes": 9077,
+      "sha256": "bbb8026187644f9d536c743238a9321cdfe41fa16a772398a857e244fbd3660a",
+      "git_blob": "60d8c34e84666751ac06e31de0e99f8a28170f22",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_receipts.py": {
+      "bytes": 23106,
+      "sha256": "c2a4725c84e893563605779ec8476658767635b5b065d399f59be0b58112d4ce",
+      "git_blob": "95a93a026feaca05bf50ba946d4c3be7f1b3088e",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_registration.py": {
+      "bytes": 11654,
+      "sha256": "8abbf4b1a5fefb1e221e69e1fec09d4a6841b42422aa94948d7350a9ad34711d",
+      "git_blob": "615ee27d533d1803fc60be62e027a73c9213111b",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_render.py": {
+      "bytes": 24063,
+      "sha256": "8b09502eeac5488b74334365914d8a1470d84c4a67f6f057b81e0cd61a94c2f7",
+      "git_blob": "2cb9e6a5d9c61ca3c11e293cc8a99af9cbdc3896",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_results.py": {
+      "bytes": 32198,
+      "sha256": "2047abb3ced650fcb526abf0dc22f23b68b26241f284039ac1c58d42333f3297",
+      "git_blob": "173c189a3318890b84ebfb80a186e1e188eca5d4",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_schema_gates.py": {
+      "bytes": 2601,
+      "sha256": "23e0222ce3ad36604d8326d3e2a84b3d01d6a69a1f09cc156f61b0ffee524534",
+      "git_blob": "6ec86248286b83dbd89f4a3c2f576de019e276c0",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_selection.py": {
+      "bytes": 23850,
+      "sha256": "ab398ec47c2c5828b77a0a1a7cd3840052f51e1781656d28482c9569031f0af1",
+      "git_blob": "150bbd2a99298fcf8d3719b158106dc49fa587b2",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_stage.py": {
+      "bytes": 38928,
+      "sha256": "4c85b31383a1e367a180d9952e33be27b4a35577fdc41038812c2a7cf7a8096e",
+      "git_blob": "64ad2a1d85e527c923b2c233aa2ecdf641dccda9",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_shared_streams.py": {
+      "bytes": 6276,
+      "sha256": "d499822bb9ab2f147a60bced938dd2eeebf71cb924130690de105e76d328dc8e",
+      "git_blob": "9b7d23d436138b662aa6b7dbb4339cdb393e6f8a",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_source_attribution.py": {
+      "bytes": 3068,
+      "sha256": "8d2322b4b0c366a00eab5fda9dba3073acf640825d0a2f6fae353eb2ebaa6d0d",
+      "git_blob": "16da04d20d0b33049cd076964aba914f904a35a3",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_supervisor_authority.py": {
+      "bytes": 3536,
+      "sha256": "dd48bee05889e9c9c3bc9dd933999ece38e9edba383e117ed7ec6923171f6247",
+      "git_blob": "162a4fd8c958f0a827b19b11ceed85c6e7e65e67",
+      "unchanged_from_base": true
+    },
+    "src/data_sheets_schema/native_supervisor_gates.py": {
+      "bytes": 22677,
+      "sha256": "7174047c001ec8fb3eb710928545f642f22a7b9f4cd2e9d3fa3b27caa57fe885",
+      "git_blob": "76d5e11993d8562c3d537d2f3797e064aa443c65",
+      "unchanged_from_base": true
+    },
+    "tests/fixtures/native_shared_execution/fake_cli.py": {
+      "bytes": 9434,
+      "sha256": "82622dc176fff332fc2d44dcb5de2920a3e70fdc00a0605ef8b87550d47bb646",
+      "git_blob": "e9ea332dd223f7a5d2a039d64352532381184b14",
+      "unchanged_from_base": true
+    },
+    "tests/native_shared_fixture.py": {
+      "bytes": 14883,
+      "sha256": "305ccabdcdf1a511f562d842d22a1c26ca5b0857acff0b57abf6e0e94acfe582",
+      "git_blob": "1b8800074cf4942aff8c4e54639d076c804bb151",
+      "unchanged_from_base": true
+    },
+    "tests/native_shared_omission_fixture.py": {
+      "bytes": 17977,
+      "sha256": "35229bcbe1be3867ad5b2a7b85023c94eac0f948ee9ed749735f36d0731c610d",
+      "git_blob": "75840d54c17e3b2640e6badce294174254339fae",
+      "unchanged_from_base": true
+    },
+    "tests/test_native_ci_evidence.py": {
+      "bytes": 12185,
+      "sha256": "48f086181b5592e2269e2e28a8471730c832e9f12983e39f02c88f4b074d0d0f",
+      "git_blob": "ae52b4d06e7477d0a490ead3169a5d5a67e2b00f"
+    },
+    "tests/test_native_ci_evidence_adversarial.py": {
+      "bytes": 7782,
+      "sha256": "68142307d4b962522372a6473b7d9612d8d1290a7abd4b12f5a47d2eab9577be",
+      "git_blob": "78c23c417dc0a3ab96bc0acdc5085e0115441cb2"
+    },
+    "tests/test_native_shared_acceptance_runner.py": {
+      "bytes": 9269,
+      "sha256": "aee7a39f2050bbad1d037c6b4b1a15be4f20dff5d28a09b4f92bd0117cb523f7",
+      "git_blob": "22d6578eb707a0d72eccf864c660d00c89af0b73"
+    },
+    "tests/test_native_shared_execution.py": {
+      "bytes": 8137,
+      "sha256": "31ac17b1d66f60570ab0e26b5f96dc9170a8707a56f0798643897822383212c1",
+      "git_blob": "132a176192a6b4eb63fc07050bec21016c699758",
+      "unchanged_from_base": true
+    },
+    "tests/test_native_shared_execution_failure.py": {
+      "bytes": 2113,
+      "sha256": "dd661ca9ec7ea6eaa3099a03baea11971791a6c26c7bba7ccdadb9983f8f1c07",
+      "git_blob": "bb9c5d7e7548805c9296b422f793ed87629931c1",
+      "unchanged_from_base": true
+    },
+    "tests/test_native_shared_execution_variant.py": {
+      "bytes": 7957,
+      "sha256": "54e31f2b3740c96bc1dfefe9c377aa7525a2657fc115ef961f55cf0894a4feb5",
+      "git_blob": "b9f98c24a438cca623e539ef4c8f27364fdf5d76",
+      "unchanged_from_base": true
+    },
+    "utils/native_ci_evidence.py": {
+      "bytes": 12788,
+      "sha256": "7931517c28fcdc90d2b3ad572095c738ecad5db5c69be4fa61822cf329d62f30",
+      "git_blob": "eb128688163f1063f6fa5d15ce89613242f8e914"
+    },
+    "utils/native_shared_acceptance.py": {
+      "bytes": 10131,
+      "sha256": "9e793fb0c9ce9b6d9bb5c9df985a653ec94a8d50692503d936c6b5061acfd9d3",
+      "git_blob": "4144a25835a2821827909cf28d979134ce70d793"
+    }
+  },
+  "preservation": {
+    "all_src_data_sheets_schema_unchanged": true,
+    "original_test_nodes_and_fixtures_unchanged": true,
+    "dedicated_acceptance_workflow_unchanged": true,
+    "ordinary_workflow_delta": "Add explicit retention plugin/option and separate always-upload only; test selection, xdist scheduling and limits unchanged."
+  },
+  "preceding_hosted_ci": {
+    "run_id": 37752376080,
+    "pr_head": "cfe61d29afc6edbf79cf6970e014fd951bee6d15",
+    "tested_merge": "6b677db3c23f4aa69f5bc9c288d15014bfa86f96",
+    "declared_attempt_seconds": 900,
+    "shards": {
+      "1": {
+        "job_id": 113228480772,
+        "tests": 2240,
+        "passed": 2237,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 2,
+        "failed_class": "tests.test_native_shared_execution_variant",
+        "failed_test": "test_actual_public_merged_omissions_and_all_chunk_statuses",
+        "test_seconds": "990.305",
+        "first_stop": "native attempt deadline elapsed; retain all incomplete charge reservations",
+        "phase1_sealed": true,
+        "core_sealed": true,
+        "assembly_complete": false,
+        "pending_tool_ids": [
+          "shared-test-23"
+        ]
+      },
+      "2": {
+        "job_id": 113228480731,
+        "tests": 2857,
+        "passed": 2854,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 2,
+        "failed_class": "tests.test_native_shared_execution",
+        "failed_test": "test_actual_public_correction_three_workers_and_saved_completion",
+        "test_seconds": "996.515",
+        "first_stop": "native attempt deadline elapsed; retain all incomplete charge reservations",
+        "phase1_sealed": true,
+        "core_sealed": true,
+        "assembly_complete": false,
+        "pending_tool_ids": [
+          "shared-test-22"
+        ]
+      }
+    },
+    "artifact_scope": "Both downloaded shard archives contain only pytest.xml. Captured case bytes were not available.",
+    "external_artifacts": {
+      "4659-cfe-shard1-artifact.zip": {
+        "bytes": 47112,
+        "sha256": "a09108280b6982bdf52d21811063d83ebd04407f042fef8df44c26d3b814dd5b"
+      },
+      "4659-cfe-shard1-job.log": {
+        "bytes": 826080,
+        "sha256": "d6329f42bdc4a113a68ecfdc976377d7d9aadddc861177e52c0cf76d73874a0c"
+      },
+      "4659-cfe-shard1-pytest.xml": {
+        "bytes": 409547,
+        "sha256": "ed7fb16b2ed2691f5079fabf400cf7130898ff403d48f222698b58336f0408b2"
+      },
+      "4659-cfe-shard1-result.json": {
+        "bytes": 20415,
+        "sha256": "65189caeb09006720b4deff11dff424b719cbc15a12421aa8566faed2baae6c4"
+      },
+      "4659-cfe-shard2-artifact.zip": {
+        "bytes": 63521,
+        "sha256": "73ec9d5868b3ad1d9981b913068fafce74c868c2d0cb1c89810cf87f79525494"
+      },
+      "4659-cfe-shard2-job.log": {
+        "bytes": 1400674,
+        "sha256": "5f6cbffbe95895baae590bd9b06fae514649d3799488358d17be044768ed702d"
+      },
+      "4659-cfe-shard2-pytest.xml": {
+        "bytes": 693729,
+        "sha256": "1724834a33b7b2e5f9057da7f9cf98d1199a2067b6606f6a23ba13bb3a3707b2"
+      },
+      "4659-cfe-shard2-result.json": {
+        "bytes": 17755,
+        "sha256": "f4d755f296f2bc1f00a3c49ea99dd48ed4a5a3c10fe676aa50e3a8d40ef1440e"
+      }
+    }
+  },
+  "limitations": [
+    "35 passing tests prove only offline retention and small invented pytest lifecycles, not native acceptance completion.",
+    "No new local900-second native run, provider call, hosted case capture, diagnostic replay or CI rerun.",
+    "No source/case content is authenticated by these manifests.",
+    "Partial/unavailable cases and capture failures remain explicit; retained does not mean completed.",
+    "Existing PR4659 dependency only; no standalone main integration or closure of4537/4354."
+  ]
+}

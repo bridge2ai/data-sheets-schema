@@ -528,7 +528,7 @@ def _lexical_budget(text):
 
 class _JSONValidationCache:
     """Bound successful pure byte validation, never mutable values or authority."""
-    def __init__(self, max_entries=128, max_bytes=16 * 1024 * 1024):
+    def __init__(self, max_entries=2048, max_bytes=128 * 1024 * 1024):
         if type(max_entries) is not int or max_entries < 1 or type(max_bytes) is not int or max_bytes < 1:
             raise ValueError("JSON validation cache requires positive integer bounds")
         self._max_entries, self._max_bytes = max_entries, max_bytes
@@ -574,7 +574,7 @@ def strict_json(raw: bytes, label="native shared JSON", max_bytes=2_000_000):
     try:
         text = raw.decode("utf-8")
         if _JSON_VALIDATION.contains(key):
-            return json.loads(text, object_pairs_hook=_pairs, parse_constant=_reject_constant)
+            return json.loads(text)
         _lexical_budget(text)
         value = json.loads(text, object_pairs_hook=_pairs, parse_constant=_reject_constant)
         _json_values(value)

@@ -40,8 +40,183 @@ def _sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+_DEFAULT_CANONICAL_BYTES = batches.canonical_bytes
+_BLOB_KEYS = {"base64", "bytes", "sha256"}
+_SCHEMA_ROW_KEYS = {"name", "path", "content"}
+_REQUESTS_KEYS = {"assembly_rule", "shared_context", "workers"}
+_WORKER_PAYLOAD_KEYS = {"packet_sha256", "worker_id", "shared_context", "stage"}
+_PACKET_UNSEALED_KEYS = {
+    "kind", "protocol", "inputs", "schema_sources", "project", "limits", "plan",
+    "omission_request", "contracts", "requests", "registered_provenance", "limitations",
+}
+_PACKET_SEALED_KEYS = _PACKET_UNSEALED_KEYS | {"sha256"}
+_ASSEMBLY_UNSEALED_KEYS = {
+    "kind", "packet", "workers", "omission_response", "integration_response",
+    "index", "audit", "lineage", "acceptance",
+}
+_ASSEMBLY_SEALED_KEYS = _ASSEMBLY_UNSEALED_KEYS | {"sha256"}
+_SUBTREE_JSON_CACHE = {}
+_STR_JSON_CACHE = {}
+_VALIDATED_BOUNDED_BYTES = set()
+
+
+def _str_json_bytes(value):
+    hit = _STR_JSON_CACHE.get(value)
+    if hit is None:
+        hit = _DEFAULT_CANONICAL_BYTES(value)
+        if len(_STR_JSON_CACHE) >= 256:
+            _STR_JSON_CACHE.pop(next(iter(_STR_JSON_CACHE)))
+        _STR_JSON_CACHE[value] = hit
+    return hit
+
+
+def _inputs_json_bytes(inputs):
+    if type(inputs) is not dict:
+        return None
+    items = []
+    for key, blob in inputs.items():
+        if (type(key) is not str or type(blob) is not dict or len(blob) != 3
+                or set(blob) != _BLOB_KEYS):
+            return None
+        b64, size, sha = blob["base64"], blob["bytes"], blob["sha256"]
+        if type(b64) is not str or type(size) is not int or type(sha) is not str:
+            return None
+        items.append((key, b64, size, sha))
+    items.sort()
+    cache_key = ("inputs", tuple(items))
+    hit = _SUBTREE_JSON_CACHE.get(cache_key)
+    if hit is None:
+        hit = _DEFAULT_CANONICAL_BYTES(inputs)
+        if len(_SUBTREE_JSON_CACHE) >= 64:
+            _SUBTREE_JSON_CACHE.pop(next(iter(_SUBTREE_JSON_CACHE)))
+        _SUBTREE_JSON_CACHE[cache_key] = hit
+    return hit
+
+
+def _schema_sources_json_bytes(rows):
+    if type(rows) is not list:
+        return None
+    items = []
+    for row in rows:
+        if type(row) is not dict or len(row) != 3 or set(row) != _SCHEMA_ROW_KEYS:
+            return None
+        name, path, content = row["name"], row["path"], row["content"]
+        if (type(name) is not str or type(path) is not str or type(content) is not dict
+                or len(content) != 3 or set(content) != _BLOB_KEYS):
+            return None
+        b64, size, sha = content["base64"], content["bytes"], content["sha256"]
+        if type(b64) is not str or type(size) is not int or type(sha) is not str:
+            return None
+        items.append((name, path, b64, size, sha))
+    cache_key = ("schema_sources", tuple(items))
+    hit = _SUBTREE_JSON_CACHE.get(cache_key)
+    if hit is None:
+        hit = _DEFAULT_CANONICAL_BYTES(rows)
+        if len(_SUBTREE_JSON_CACHE) >= 64:
+            _SUBTREE_JSON_CACHE.pop(next(iter(_SUBTREE_JSON_CACHE)))
+        _SUBTREE_JSON_CACHE[cache_key] = hit
+    return hit
+
+
+def _requests_json_bytes(requests):
+    if type(requests) is not dict or len(requests) != 3 or set(requests) != _REQUESTS_KEYS:
+        return None
+    rule, shared, workers = requests["assembly_rule"], requests["shared_context"], requests["workers"]
+    if type(rule) is not str or type(shared) is not str or type(workers) is not dict:
+        return None
+    worker_items = []
+    for key, val in workers.items():
+        if type(key) is not str or type(val) is not str:
+            return None
+        worker_items.append((key, val))
+    worker_items.sort()
+    cache_key = ("requests", rule, shared, tuple(worker_items))
+    hit = _SUBTREE_JSON_CACHE.get(cache_key)
+    if hit is None:
+        hit = _DEFAULT_CANONICAL_BYTES(requests)
+        if len(_SUBTREE_JSON_CACHE) >= 64:
+            _SUBTREE_JSON_CACHE.pop(next(iter(_SUBTREE_JSON_CACHE)))
+        _SUBTREE_JSON_CACHE[cache_key] = hit
+    return hit
+
+
 def _json(value):
-    return batches.canonical_bytes(value)
+    if batches.canonical_bytes is not _DEFAULT_CANONICAL_BYTES:
+        return batches.canonical_bytes(value)
+    if type(value) is dict:
+        if len(value) == 4 and set(value) == _WORKER_PAYLOAD_KEYS:
+            p_sha = value["packet_sha256"]
+            s_ctx = value["shared_context"]
+            stage = value["stage"]
+            w_id = value["worker_id"]
+            if type(p_sha) is str and type(s_ctx) is str and type(stage) is str and type(w_id) is str:
+                return (
+                    b'{"packet_sha256":' + _str_json_bytes(p_sha)
+                    + b',"shared_context":' + _str_json_bytes(s_ctx)
+                    + b',"stage":' + _str_json_bytes(stage)
+                    + b',"worker_id":' + _str_json_bytes(w_id) + b'}'
+                )
+        kind = value.get("kind")
+        if kind == PACKET and len(value) in (12, 13):
+            keys = set(value)
+            if keys in (_PACKET_UNSEALED_KEYS, _PACKET_SEALED_KEYS):
+                inputs_b = _inputs_json_bytes(value["inputs"])
+                req_b = _requests_json_bytes(value["requests"])
+                schema_b = _schema_sources_json_bytes(value["schema_sources"])
+                if inputs_b is not None and req_b is not None and schema_b is not None:
+                    parts = [
+                        b'{"contracts":' + _DEFAULT_CANONICAL_BYTES(value["contracts"]),
+                        b'"inputs":' + inputs_b,
+                        b'"kind":"typed_audit_packet_v1"',
+                        b'"limitations":' + _DEFAULT_CANONICAL_BYTES(value["limitations"]),
+                        b'"limits":' + _DEFAULT_CANONICAL_BYTES(value["limits"]),
+                        b'"omission_request":' + _DEFAULT_CANONICAL_BYTES(value["omission_request"]),
+                        b'"plan":' + _DEFAULT_CANONICAL_BYTES(value["plan"]),
+                        b'"project":' + _DEFAULT_CANONICAL_BYTES(value["project"]),
+                        b'"protocol":' + _DEFAULT_CANONICAL_BYTES(value["protocol"]),
+                        b'"registered_provenance":' + _DEFAULT_CANONICAL_BYTES(value["registered_provenance"]),
+                        b'"requests":' + req_b,
+                        b'"schema_sources":' + schema_b,
+                    ]
+                    if "sha256" in value:
+                        parts.append(b'"sha256":' + _DEFAULT_CANONICAL_BYTES(value["sha256"]))
+                    return b",".join(parts) + b"}"
+        elif kind == ASSEMBLY and len(value) in (9, 10):
+            keys = set(value)
+            if keys in (_ASSEMBLY_UNSEALED_KEYS, _ASSEMBLY_SEALED_KEYS):
+                packet_b = _json(value["packet"])
+                workers_b = _inputs_json_bytes(value["workers"])
+                if workers_b is not None:
+                    parts = [
+                        b'{"acceptance":' + _DEFAULT_CANONICAL_BYTES(value["acceptance"]),
+                        b'"audit":' + _DEFAULT_CANONICAL_BYTES(value["audit"]),
+                        b'"index":' + _DEFAULT_CANONICAL_BYTES(value["index"]),
+                        b'"integration_response":' + _DEFAULT_CANONICAL_BYTES(value["integration_response"]),
+                        b'"kind":"typed_audit_assembly_v1"',
+                        b'"lineage":' + _DEFAULT_CANONICAL_BYTES(value["lineage"]),
+                        b'"omission_response":' + _DEFAULT_CANONICAL_BYTES(value["omission_response"]),
+                        b'"packet":' + packet_b,
+                        b'"workers":' + workers_b,
+                    ]
+                    if "sha256" in value:
+                        parts.append(b'"sha256":' + _DEFAULT_CANONICAL_BYTES(value["sha256"]))
+                    return b",".join(parts) + b"}"
+    elif type(value) is list and len(value) in (2, 3):
+        selected = value[0] if len(value) == 2 else (value[1] if value[0] == "captured_logical_schema_v1" else None)
+        if type(selected) is list and len(selected) == 4:
+            inputs_b = _inputs_json_bytes(selected[0])
+            schema_b = _schema_sources_json_bytes(selected[1])
+            if inputs_b is not None and schema_b is not None:
+                sel_b = (
+                    b"[" + inputs_b + b"," + schema_b + b","
+                    + _DEFAULT_CANONICAL_BYTES(selected[2]) + b","
+                    + _DEFAULT_CANONICAL_BYTES(selected[3]) + b"]"
+                )
+                assets_b = _DEFAULT_CANONICAL_BYTES(value[-1])
+                if len(value) == 2:
+                    return b"[" + sel_b + b"," + assets_b + b"]"
+                return b'["captured_logical_schema_v1",' + sel_b + b"," + assets_b + b"]"
+    return _DEFAULT_CANONICAL_BYTES(value)
 
 
 def _exact(value, keys, label):
@@ -73,7 +248,31 @@ def _seal(value):
     return {**value, "sha256": _sha(_json(value))}
 
 
+_DEFAULT_OMISSIONS_MAPPING = omissions._mapping
+_DEFAULT_OMISSIONS_READ = omissions._read
+_DEFAULT_OMISSIONS_VALIDATE_JSON = omissions._validate_json
+_DEFAULT_EVIDENCE_LOAD_JSON = evidence.load_json
+
+
 def _bounded_json(raw, label, limit):
+    if (omissions._mapping is _DEFAULT_OMISSIONS_MAPPING
+            and omissions._read is _DEFAULT_OMISSIONS_READ
+            and omissions._validate_json is _DEFAULT_OMISSIONS_VALIDATE_JSON
+            and evidence.load_json is _DEFAULT_EVIDENCE_LOAD_JSON
+            and type(raw) is bytes and 0 < len(raw) <= limit):
+        key = (len(raw), _sha(raw), omissions.MAX_NODES, omissions.MAX_DEPTH)
+        if key in _VALIDATED_BOUNDED_BYTES:
+            return json.loads(raw)
+        try:
+            value = evidence.load_json(raw.decode("utf-8"))
+            omissions._validate_json(value, max_nodes=omissions.MAX_NODES, max_depth=omissions.MAX_DEPTH)
+            if isinstance(value, dict):
+                if len(_VALIDATED_BOUNDED_BYTES) >= 128:
+                    _VALIDATED_BOUNDED_BYTES.clear()
+                _VALIDATED_BOUNDED_BYTES.add(key)
+                return value
+        except Exception:
+            pass
     return omissions._mapping(raw, label, json_only=True, limit=limit)
 
 
@@ -340,16 +539,42 @@ def _prepare(*, protocol, original_full, bundle, manifest, receipt, context, sch
     return packet
 
 
-def _open(packet, *, derivations=None, captured_assets=None):
+def _open(packet, *, derivations=None, captured_assets=None, _catalog_lookup=None):
     _exact(packet, {"kind", "protocol", "inputs", "schema_sources", "project", "limits", "plan",
         "omission_request", "contracts", "requests", "registered_provenance", "limitations", "sha256"}, "packet")
-    if len(_json(packet)) > MAX_PACKET_BYTES or packet["kind"] != PACKET or _json(packet["protocol"]) != _json(audit_protocol.select(audit_protocol.TYPED)):
+    raw_packet = _json(packet)
+    if len(raw_packet) > MAX_PACKET_BYTES or packet["kind"] != PACKET or _json(packet["protocol"]) != _json(audit_protocol.select(audit_protocol.TYPED)):
         raise ValueError("packet protocol/size mismatch")
-    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"], derivations=derivations, captured_assets=captured_assets)
+    if type(derivations) is DerivationCache:
+        assets = tuple(sorted((name, _sha(raw)) for name, raw in omissions.captured_asset_bytes(captured_assets).items()))
+        key = (len(raw_packet), _sha(raw_packet), captured_assets is not None, assets)
+        opened = getattr(derivations, "_opened", None)
+        if opened is None:
+            opened = derivations._opened = {}
+        hit = opened.get(key)
+        if hit is not None:
+            raw_bytes, payload_json = hit
+            return dict(raw_bytes), omissions.Prepared(payload_json)
+    _schema_reuse = None
+    if captured_assets is not None and _catalog_lookup is not None:
+        from .native_catalog_reuse import _CatalogLookup
+        if type(_catalog_lookup) is _CatalogLookup:
+            try:
+                snapshot = _snapshot(packet["schema_sources"])
+                catalog = _catalog_lookup.for_snapshot(snapshot.sources[0][1], snapshot)
+                if catalog is not None:
+                    _schema_reuse = _SchemaReuse(snapshot.sources, catalog)
+            except Exception:
+                _schema_reuse = None
+    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"], derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
     expected = _seal({**{key: packet[key] for key in ("kind", "protocol", "inputs", "schema_sources", "project", "limits")},
                       **derived, "limitations": list(LIMITATIONS)})
-    if _json(packet) != _json(expected):
+    if raw_packet != _json(expected):
         raise ValueError("packet request/plan/contract/input identity mismatch")
+    if type(derivations) is DerivationCache:
+        while len(opened) >= derivations.max_entries:
+            opened.pop(next(iter(opened)))
+        opened[key] = (dict(raw), prepared.payload_json)
     return raw, prepared
 
 
@@ -363,19 +588,28 @@ def _omission_findings(findings, candidates=None):
                 raise ValueError("finding references an unknown omission candidate")
 
 
-def worker_request(packet, worker_id, *, derivations=None, captured_assets=None):
-    """Export a request after packet sealing; identity hashes its exact payload."""
-    _open(packet, derivations=derivations, captured_assets=captured_assets)
+def _worker_request(packet, worker_id, *, derivations=None, captured_assets=None, _opened=False):
+    if not _opened:
+        _open(packet, derivations=derivations, captured_assets=captured_assets)
     if type(worker_id) is not str or worker_id not in packet["requests"]["workers"]:
         raise ValueError("unknown worker request")
     payload = {"packet_sha256": packet["sha256"], "worker_id": worker_id,
         "shared_context": packet["requests"]["shared_context"],
         "stage": packet["requests"]["workers"][worker_id]}
+    raw_payload = _json(payload)
     request = {"kind": "typed_audit_worker_request_v1", "payload": payload,
-               "request_sha256": _sha(_json(payload))}
-    if len(_json(request)) > packet["limits"]["max_request_bytes"]:
+               "request_sha256": _sha(raw_payload)}
+    raw_len = (len(raw_payload) + 135
+               if batches.canonical_bytes is _DEFAULT_CANONICAL_BYTES
+               else len(_json(request)))
+    if raw_len > packet["limits"]["max_request_bytes"]:
         raise ValueError("complete worker request exceeds max_request_bytes")
     return request
+
+
+def worker_request(packet, worker_id, *, derivations=None, captured_assets=None):
+    """Export a request after packet sealing; identity hashes its exact payload."""
+    return _worker_request(packet, worker_id, derivations=derivations, captured_assets=captured_assets)
 
 
 def capture_response(request, response):
@@ -426,9 +660,14 @@ def _unwrap(saved, request):
     return raw
 
 
-def _workers(packet, workers, *, derivations=None, captured_assets=None):
+def _workers(packet, workers, *, derivations=None, captured_assets=None, _opened=False):
     if type(workers) is not dict:
         raise ValueError("saved workers must have an explicit id roster")
+    if workers and not _opened and worker_request is _DEFAULT_WORKER_REQUEST:
+        _open(packet, derivations=derivations, captured_assets=captured_assets)
+        _opened = True
+    if worker_request is _DEFAULT_WORKER_REQUEST:
+        return {key: _unwrap(raw, _worker_request(packet, key, derivations=derivations, captured_assets=captured_assets, _opened=_opened)) for key, raw in workers.items()}
     return {key: _unwrap(raw, worker_request(packet, key, derivations=derivations, captured_assets=captured_assets)) for key, raw in workers.items()}
 
 
@@ -455,13 +694,12 @@ def _index(packet, workers):
     return index
 
 
-def index(packet, workers, omission_response, *, derivations=None, captured_assets=None):
-    """Bind workers and complete omission response; render the integration tail."""
-    _, prepared = _open(packet, derivations=derivations, captured_assets=captured_assets)
+def _index_with_workers(packet, workers, omission_response, *, derivations=None, captured_assets=None, _opened=None):
+    _, prepared = _opened if _opened is not None else _open(packet, derivations=derivations, captured_assets=captured_assets)
     report = prepared.check(omission_response, saved_request=packet["omission_request"])
     if not report["protocol_complete"]:
         raise ValueError("omission response does not satisfy complete captured inventory")
-    inner_workers = _workers(packet, workers, derivations=derivations, captured_assets=captured_assets)
+    inner_workers = _workers(packet, workers, derivations=derivations, captured_assets=captured_assets, _opened=True)
     result = _index(packet, inner_workers)
     candidates = {row["id"] for row in report["declared_candidates"]}
     for raw in inner_workers.values():
@@ -477,7 +715,16 @@ def index(packet, workers, omission_response, *, derivations=None, captured_asse
                    "index": result, "omission_check": report, "integration_request": request})
     if len(_json(result)) > packet["limits"]["max_request_bytes"]:
         raise ValueError("complete integration request exceeds max_request_bytes")
-    return result
+    return result, inner_workers
+
+
+def index(packet, workers, omission_response, *, derivations=None, captured_assets=None):
+    """Bind workers and complete omission response; render the integration tail."""
+    return _index_with_workers(packet, workers, omission_response, derivations=derivations, captured_assets=captured_assets)[0]
+
+
+_DEFAULT_WORKER_REQUEST = worker_request
+_DEFAULT_INDEX = index
 
 
 def _account(audit, delta, candidates):
@@ -499,11 +746,16 @@ def _account(audit, delta, candidates):
              "final_finding_ordinal": links.get(row["id"])} for row in candidates]
 
 
-def _result(packet, workers, omission_response, integration_response, *, derivations=None, captured_assets=None):
-    raw, _ = _open(packet, derivations=derivations, captured_assets=captured_assets)
-    bound_index = index(packet, workers, omission_response, derivations=derivations, captured_assets=captured_assets)
+def _result(packet, workers, omission_response, integration_response, *, derivations=None, captured_assets=None, _catalog_lookup=None):
+    opened = _open(packet, derivations=derivations, captured_assets=captured_assets, _catalog_lookup=_catalog_lookup)
+    raw, _ = opened
+    if index is _DEFAULT_INDEX:
+        bound_index, inner_workers = _index_with_workers(packet, workers, omission_response, derivations=derivations, captured_assets=captured_assets, _opened=opened)
+    else:
+        bound_index = index(packet, workers, omission_response, derivations=derivations, captured_assets=captured_assets)
+        inner_workers = _workers(packet, workers, derivations=derivations, captured_assets=captured_assets, _opened=True)
     inner_integration = _unwrap(integration_response, bound_index)
-    audit_raw, lineage = batches.assemble(packet["plan"], _workers(packet, workers, derivations=derivations, captured_assets=captured_assets), inner_integration, version=2)
+    audit_raw, lineage = batches.assemble(packet["plan"], inner_workers, inner_integration, version=2)
     audit, delta = audit_grammar._load(audit_raw), audit_grammar._load(inner_integration)
     # Check candidates in replaced/dropped proposal entry paths too. The final
     # exact-once allocation is separate from proposal membership.
@@ -548,9 +800,9 @@ def check_integration(packet, workers, omission_response, integration_response, 
     return _result(packet, workers, omission_response, integration_response, derivations=derivations, captured_assets=captured_assets)[3]
 
 
-def assemble(packet, workers, omission_response, integration_response, *, derivations=None, captured_assets=None):
+def assemble(packet, workers, omission_response, integration_response, *, derivations=None, captured_assets=None, _catalog_lookup=None):
     """Seal a new self-contained assembly only when mechanical checks pass."""
-    bound_index, audit_raw, lineage, report = _result(packet, workers, omission_response, integration_response, derivations=derivations, captured_assets=captured_assets)
+    bound_index, audit_raw, lineage, report = _result(packet, workers, omission_response, integration_response, derivations=derivations, captured_assets=captured_assets, _catalog_lookup=_catalog_lookup)
     if not report["passed"]:
         raise ValueError("source-evidence acceptance failed; use check-integration for bounded diagnostics")
     result = _seal({"kind": ASSEMBLY, "packet": packet,
@@ -563,7 +815,7 @@ def assemble(packet, workers, omission_response, integration_response, *, deriva
     return result
 
 
-def check(assembly, *, derivations=None, captured_assets=None):
+def check(assembly, *, derivations=None, captured_assets=None, _catalog_lookup=None):
     """Rebuild independently from captured original/response bytes, not reports."""
     _exact(assembly, {"kind", "packet", "workers", "omission_response", "integration_response", "index",
                       "audit", "lineage", "acceptance", "sha256"}, "assembly")
@@ -573,7 +825,7 @@ def check(assembly, *, derivations=None, captured_assets=None):
         raise ValueError("assembly exceeds byte bound")
     expected = assemble(assembly["packet"], {key: _unblob(value, MAX_SAVED_RESPONSE_BYTES) for key, value in assembly["workers"].items()},
         _unblob(assembly["omission_response"], omissions.MAX_RESPONSE_BYTES),
-        _unblob(assembly["integration_response"], MAX_SAVED_RESPONSE_BYTES), derivations=derivations, captured_assets=captured_assets)
+        _unblob(assembly["integration_response"], MAX_SAVED_RESPONSE_BYTES), derivations=derivations, captured_assets=captured_assets, _catalog_lookup=_catalog_lookup)
     if _json(assembly) != _json(expected):
         raise ValueError("saved assembly differs from independent captured-byte reconstruction")
     return {**expected["acceptance"], "assembly_sha256": expected["sha256"], "independently_reconstructed": True}

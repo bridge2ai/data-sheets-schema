@@ -54,6 +54,8 @@ jobs:
           PYTHONPYCACHEPREFIX: ${{ runner.temp }}/d4d-tests-pycache
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
+          -p utils.native_ci_evidence
+          --native-ci-evidence-root=${{ runner.temp }}/d4d-native-cases-${{ github.run_id }}-${{ github.run_attempt }}-shard${{ matrix.shard }}
           -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 6 || 4 }}
           --ci-shard-timings=utils/ci_test_durations.json
           --durations=25 -n logical --maxprocesses=4 --dist load --maxschedchunk=1
@@ -74,6 +76,16 @@ jobs:
         with:
           name: tests-py${{ matrix.python-version }}-shard${{ matrix.shard }}
           path: test-results/*.xml
+          retention-days: 14
+
+      - name: Preserve the two synthetic native cases when their shard runs them
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-synthetic-cases-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}-shard${{ matrix.shard }}
+          path: ${{ runner.temp }}/d4d-native-cases-${{ github.run_id }}-${{ github.run_attempt }}-shard${{ matrix.shard }}/
+          if-no-files-found: warn
+          compression-level: 0
           retention-days: 14
 
   # Run these controls once with their own existing 45-minute job budget.

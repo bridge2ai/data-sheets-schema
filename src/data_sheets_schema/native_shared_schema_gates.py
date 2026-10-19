@@ -5,8 +5,14 @@ full/core schema closures and immutable final bytes, with no path fallback.
 """
 from __future__ import annotations
 
+import yaml.error as _yaml_error
+
+_ORIG_YAML_MARK = getattr(_yaml_error, 'Mark', None)
 from linkml.validator import Validator
 from linkml.validator.plugins import JsonschemaValidationPlugin
+
+if _ORIG_YAML_MARK is not None and getattr(_yaml_error, 'Mark', None) is not _ORIG_YAML_MARK:
+    _yaml_error.Mark = _ORIG_YAML_MARK
 
 from . import audit_omissions, d4d_pair_consistency as pair
 from . import native_shared_contract as contract

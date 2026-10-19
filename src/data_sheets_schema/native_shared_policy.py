@@ -77,6 +77,9 @@ def command_policy(spec, instruction_path, controls=None):
     return policy
 
 
+_VERIFIED_HELPER_TABLES: set[tuple[str, tuple[tuple[str, str], ...]]] = set()
+
+
 def helper_commands(policy):
     if (type(policy) is not dict or type(policy.get('native_shared_generation_version')) is not int
             or policy['native_shared_generation_version'] != 1):
@@ -84,14 +87,19 @@ def helper_commands(policy):
     commands=policy.get('native_shared_helpers')
     c.exact(commands,HELPERS,'native shared helper command table')
     python=c.canonical_path(policy.get('python'),'registered Python')
-    for name,command in commands.items():
-        if type(command) is not str or not command or len(command.encode('utf-8'))>1_000_000:
-            raise ValueError('native helper spelling is absent or oversized')
-        try:words=shlex.split(command)
-        except ValueError as exc:raise ValueError('native helper spelling is malformed') from exc
-        if (len(words)<3 or words[0]!=python or words[1] not in ('-m','-c')
-                or shlex.join(words)!=command):
-            raise ValueError('native helper must retain exact selected Python argv spelling')
+    table_key = ((python, tuple(sorted(commands.items())))
+                 if all(type(v) is str for v in commands.values()) else None)
+    if table_key is None or table_key not in _VERIFIED_HELPER_TABLES:
+        for name,command in commands.items():
+            if type(command) is not str or not command or len(command.encode('utf-8'))>1_000_000:
+                raise ValueError('native helper spelling is absent or oversized')
+            try:words=shlex.split(command)
+            except ValueError as exc:raise ValueError('native helper spelling is malformed') from exc
+            if (len(words)<3 or words[0]!=python or words[1] not in ('-m','-c')
+                    or shlex.join(words)!=command):
+                raise ValueError('native helper must retain exact selected Python argv spelling')
+        if table_key is not None and len(_VERIFIED_HELPER_TABLES) < 64:
+            _VERIFIED_HELPER_TABLES.add(table_key)
     if (policy.get('attribution_command')!=commands['draft']
             or policy.get('post_final_recorder',{}).get('command')!=commands['recorder']):
         raise ValueError('native helper roles disagree with draft/recorder authority')

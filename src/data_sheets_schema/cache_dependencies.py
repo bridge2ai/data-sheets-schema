@@ -92,6 +92,20 @@ def setting_key(value: Any) -> tuple:
     raise TypeError('unsupported mutable cache dependency')
 
 
+from yaml._yaml import CParser as _CParser
+
+_CALLABLE_TYPES = (
+    types.FunctionType, types.BuiltinFunctionType,
+    types.MethodDescriptorType, types.WrapperDescriptorType,
+    types.ClassMethodDescriptorType, type(_CParser.check_event),
+)
+_IMMUTABLE_DESCRIPTOR_TYPES = (
+    types.BuiltinFunctionType, types.MethodDescriptorType,
+    types.WrapperDescriptorType, types.ClassMethodDescriptorType,
+    type(_CParser.check_event),
+)
+
+
 class FunctionBindings:
     """A closed set of effective functions; changes bypass the consumer cache."""
 
@@ -105,6 +119,8 @@ class FunctionBindings:
         self._callable_defaults = callable_defaults
         self._modules = _SHIPPED_MODULES | additional_modules
         self._functions: dict[Any, tuple[tuple, int]] = {}
+        self._fast_functions: dict[Any, tuple[Any, tuple[int]]] = {}
+        self._fast_descriptors: dict[Any, tuple[int]] = {}
         self._binding = False
         self._dataclass_reprs: set[Any] = set()
         self._bound = False
@@ -118,8 +134,18 @@ class FunctionBindings:
             capture()
         except Exception:
             self._functions.clear()
+            self._fast_functions.clear()
+            self._fast_descriptors.clear()
             self._dataclass_reprs.clear()
         else:
+            for fn, (state, token) in self._functions.items():
+                if type(fn) in _IMMUTABLE_DESCRIPTOR_TYPES:
+                    self._fast_descriptors[fn] = (token,)
+                elif (type(fn) is types.FunctionType and fn not in self._dataclass_reprs
+                      and state[2] == (type(None), None) and state[3] == (type(None), None)
+                      and state[4] == () and state[5] == () and state[6] == ()
+                      and not fn.__dict__):
+                    self._fast_functions[fn] = (state[1], (token,))
             self.ready = True
         finally:
             self._binding = False
@@ -166,14 +192,23 @@ class FunctionBindings:
         return setting_key(value)
 
     def key(self, function: Any, seen: frozenset[int] = frozenset()) -> tuple:
-        from yaml._yaml import CParser
         if function is None:
             return ()
-        if not self._binding and (not self.ready or function not in self._functions):
-            raise TypeError('unfamiliar cache dependency callable')
-        if not isinstance(function, (types.FunctionType, types.BuiltinFunctionType,
-                types.MethodDescriptorType, types.WrapperDescriptorType,
-                types.ClassMethodDescriptorType, type(CParser.check_event))):
+        if not self._binding:
+            if not self.ready:
+                raise TypeError('unfamiliar cache dependency callable')
+            if not seen:
+                desc_token = self._fast_descriptors.get(function)
+                if desc_token is not None:
+                    return desc_token
+                fast = self._fast_functions.get(function)
+                if (fast is not None and function.__code__ is fast[0]
+                        and function.__defaults__ is None and function.__kwdefaults__ is None
+                        and function.__closure__ is None and not function.__dict__):
+                    return fast[1]
+            if function not in self._functions:
+                raise TypeError('unfamiliar cache dependency callable')
+        if not isinstance(function, _CALLABLE_TYPES):
             raise TypeError('unsupported cache dependency callable state')
         if (self._binding and isinstance(function, types.FunctionType)
                 and function.__module__ not in self._modules):

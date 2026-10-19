@@ -21,7 +21,7 @@ def _report_only_correction(case):
     transcript = Path(case['value']['attempt_directory']) / 'transcript.jsonl'
     calls, results = {}, {}
     for line, raw in enumerate(transcript.read_bytes().splitlines()):
-        event = c.strict_json(raw)
+        event = c.strict_json(raw, max_bytes=16 * 1024 * 1024)
         for block in event.get('message', {}).get('content', []):
             if block['type'] == 'tool_use':
                 assert block['id'] not in calls

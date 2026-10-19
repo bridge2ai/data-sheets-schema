@@ -261,11 +261,27 @@ def _prefix(member, endpoint=None):
     return c.EvidencePrefix(item.pin.role, item.pin.path, raw, len(raw), c.sha(raw), raw.count(b'\n'))
 
 
+_THROUGH_CACHE = {}
+
+
 def _through(prefix, line):
     if type(line) is not int or not 0 <= line <= prefix.lines:
         raise ValueError('observation line is outside the captured prefix')
-    raw = b''.join(part + b'\n' for part in prefix.raw.split(b'\n')[:line])
-    return c.EvidencePrefix(prefix.stream, prefix.path, raw, len(raw), c.sha(raw), line)
+    if line == prefix.lines:
+        return prefix
+    key = (prefix.sha256, prefix.stream, prefix.path, line)
+    cached = _THROUGH_CACHE.get(key)
+    if cached is not None and cached[0] is prefix.raw:
+        return cached[1]
+    pos = 0
+    for _ in range(line):
+        pos = prefix.raw.index(b'\n', pos) + 1
+    raw = prefix.raw[:pos]
+    result = c.EvidencePrefix(prefix.stream, prefix.path, raw, len(raw), c.sha(raw), line)
+    if len(_THROUGH_CACHE) > 4096:
+        _THROUGH_CACHE.clear()
+    _THROUGH_CACHE[key] = (prefix.raw, result)
+    return result
 
 
 def _observation_paths(selection):
@@ -362,6 +378,135 @@ def activate(selection, execution_raw, started_raw):
         execution_sha256=e.pin.sha256, attempt_id=value['attempt_id'], records=(record.pin,)))
 
 
+def _extend_trace(prev, transcript, control, runtime):
+    if (prev is None or transcript.stream != 'transcript' or control.stream != 'control'
+            or transcript.bytes < prev.transcript.bytes or control.bytes < prev.control.bytes
+            or not transcript.raw.startswith(prev.transcript.raw)
+            or not control.raw.startswith(prev.control.raw)):
+        return None
+    if transcript == prev.transcript and control == prev.control:
+        return prev
+    t_tail = transcript.raw[prev.transcript.bytes:]
+    c_tail = control.raw[prev.control.bytes:]
+    native_tail = []
+    if t_tail:
+        for offset_line, part in enumerate(t_tail.split(b'\n')[:-1], prev.transcript.lines + 1):
+            raw = part + b'\n'
+            if not raw.endswith(b'\n') or not raw.strip():
+                return None
+            value = c.strict_json(raw, 'native observed row', 16 * 1024 * 1024)
+            if type(value) is not dict or value.get('type') == 'control_response' or (
+                    value.get('type') == 'system' and value.get('subtype') == 'init'):
+                return None
+            native_tail.append((offset_line, raw, value))
+    parent_tail = []
+    if c_tail:
+        for offset_line, part in enumerate(c_tail.split(b'\n')[:-1], prev.control.lines + 1):
+            raw = part + b'\n'
+            if not raw.endswith(b'\n') or not raw.strip():
+                return None
+            value = c.strict_json(raw, 'native observed row', 16 * 1024 * 1024)
+            if type(value) is not dict or value.get('kind') in ('initialize_sent', 'initialize_ack'):
+                return None
+            parent_tail.append((offset_line, raw, value))
+    sub = object.__new__(observed.Trace)
+    sub.transcript, sub.control = transcript, control
+    sub.session, sub.policy = prev.session, prev.policy
+    sub.calls = dict(prev.calls)
+    sub.callbacks = dict(prev.callbacks)
+    sub.results = dict(prev.results)
+    sub.decisions = dict(prev.decisions)
+    sub.frames = dict(prev.frames)
+    sub.terminal = prev.terminal
+    sub._req_cache = dict(getattr(prev, '_req_cache', {}))
+    sub._adm_cache = dict(getattr(prev, '_adm_cache', {}))
+    sub._set_cache = dict(getattr(prev, '_set_cache', {}))
+    callback_ids = {v.get('request_id') for _, v in sub.callbacks.values()}
+    policy = sub.policy
+    session_id = sub.session
+    for number, raw, value in native_tail:
+        sub.frames[number] = value
+        kind = value.get('type')
+        if value.get('parent_tool_use_id') is not None:
+            return None
+        if kind in ('assistant', 'user', 'result'):
+            message = value.get('message')
+            if value.get('model', runtime['model']) != runtime['model'] or (
+                    type(message) is dict and message.get('model', runtime['model']) != runtime['model']):
+                return None
+        if sub.terminal is not None or kind == 'control_cancel_request':
+            return None
+        if kind == 'result':
+            if value.get('session_id') != session_id or value.get('parent_tool_use_id') is not None:
+                return None
+            sub.terminal = number
+        if kind in ('assistant', 'user'):
+            message = value.get('message')
+            if (value.get('session_id') != session_id or value.get('parent_tool_use_id') is not None
+                    or type(message) is not dict or message.get('role', kind) != kind):
+                return None
+            content = message.get('content')
+            if type(content) is not list:
+                return None
+            for offset, item in enumerate(content):
+                if type(item) is not dict:
+                    return None
+                identity = item.get('id') if item.get('type') == 'tool_use' else item.get('tool_use_id')
+                if item.get('type') == 'tool_use':
+                    if (kind != 'assistant' or type(identity) is not str or not identity or identity in sub.calls
+                            or item.get('name') not in ('Read', 'Write', 'Bash') or type(item.get('input')) is not dict):
+                        return None
+                    sub.calls[identity] = (number, offset, item)
+                elif item.get('type') == 'tool_result':
+                    if (kind != 'user' or identity not in sub.calls or identity in sub.results
+                            or sub.calls[identity][0] >= number):
+                        return None
+                    sub.results[identity] = (number, offset, item)
+        if kind == 'control_request':
+            request = value.get('request')
+            data = request.get('input') if type(request) is dict else None
+            if type(data) is not dict:
+                return None
+            identity = data.get('tool_use_id')
+            callback = value.get('request_id')
+            if (identity not in sub.calls or identity in sub.callbacks or identity in sub.results
+                    or type(callback) is not str or not callback or callback in callback_ids
+                    or request.get('subtype') != 'hook_callback'
+                    or request.get('callback_id') != policy['pretool_control']['callback_id']
+                    or request.get('tool_use_id') not in (None, identity)
+                    or data.get('hook_event_name') != policy['pretool_control']['event']
+                    or data.get('cwd') != policy['readonly_lookups']['repository']
+                    or data.get('session_id', session_id) != session_id):
+                return None
+            call = sub.calls[identity]
+            if (call[0] >= number or data.get('tool_name') != call[2]['name']
+                    or not observed._same(data.get('tool_input'), call[2]['input'])):
+                return None
+            sub.callbacks[identity] = (number, value)
+            callback_ids.add(callback)
+    for number, raw, value in parent_tail:
+        if value.get('kind') != 'decision':
+            continue
+        request = value.get('request')
+        data = request.get('request', {}).get('input', {}) if type(request) is dict else {}
+        identity = data.get('tool_use_id')
+        if (identity not in sub.callbacks or identity in sub.decisions
+                or not observed._same(request, sub.callbacks[identity][1])
+                or value.get('classification') not in ('prescribed', 'not_prescribed')
+                or type(value.get('basis')) is not str):
+            return None
+        classification, basis = value['classification'], value['basis']
+        output = {} if classification == 'prescribed' else {'hookSpecificOutput': {
+            'hookEventName': 'PreToolUse', 'permissionDecision': 'deny',
+            'permissionDecisionReason': 'Outside the registered tool policy: ' + basis}}
+        expected = {'type': 'control_response', 'response': {'subtype': 'success',
+            'request_id': request['request_id'], 'response': output}}
+        if not observed._same(value.get('response'), expected):
+            return None
+        sub.decisions[identity] = (number, value)
+    return sub
+
+
 @dataclass
 class _CapturedRun:
     selection: c.NativeSelectionCapture
@@ -378,15 +523,39 @@ class _CapturedRun:
     phase1: object
     _catalogs: object = field(default_factory=receipt_api._ReceiptCatalogContext,
                               init=False, compare=False, repr=False)
+    _trace: object = field(default=None, init=False, compare=False, repr=False)
+    _prefixes: dict = field(default_factory=dict, init=False, compare=False, repr=False)
+    _chronology_cache: object = field(default=None, init=False, compare=False, repr=False)
+    _callback_state_cache: dict = field(default_factory=dict, init=False, compare=False, repr=False)
+
+    def __post_init__(self):
+        self._prefixes = self._catalogs._prefixes
 
     def trace(self, transcript=None, control=None):
+        if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
+            if self._trace is None:
+                token = receipt_api.catalog_reuse.runtime_token()
+                meta_key = None if (token is None or self._catalogs is None) else (
+                    token, self.binding.session_id,
+                    c.canonical(self.composition['policy']), c.canonical(self.value['runtime']),
+                )
+                last = getattr(self._catalogs, '_last_trace', None) if meta_key is not None else None
+                extended = (_extend_trace(last[1], self.transcript, self.control, self.value['runtime'])
+                            if last is not None and last[0] == meta_key else None)
+                if extended is not None:
+                    self._trace = extended
+                else:
+                    self._trace = observed.Trace(self.transcript, self.control,
+                        session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
+                if meta_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                    self._catalogs._last_trace = (meta_key, self._trace)
+            return self._trace
         return observed.Trace(transcript or self.transcript, control or self.control,
             session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
 
     def decision(self):
-        if self.phase1 is None:
-            return None
-        return stage._prepare_next(self.selection, self.binding, self.phase1, self.history, self._catalogs)
+        return None if self.phase1 is None else stage._prepare_next(
+            self.selection, self.binding, self.phase1, self.history, self._catalogs)
 
 
 def _binding_document(selection, value, composition, execution, started, observation_item, session):
@@ -426,8 +595,8 @@ def _binding(selection, value, composition, reader, pool):
     return result
 
 
-def _phase1(selection, execution, history, reader):
-    rows, _ = stage._history(selection, execution, history)
+def _phase1(selection, execution, history, reader, *, _rows=None):
+    rows = _rows if _rows is not None else stage._history(selection, execution, history)[0]
     full = [row['payload'] for row in rows if row['record_type'] == 'phase1_sealed']
     core = [row['payload'] for row in rows if row['record_type'] == 'core_sealed']
     if not full:
@@ -497,14 +666,52 @@ def _declared_stream_files(selection, reader):
     return live_streams.identities(doc['payload']['stream_files'])
 
 
-def _base(selection_path):
+def _base(selection_path, *, _catalogs=None):
+    from copy import deepcopy
+    import sys
     from . import native_shared_selection as selected
     from . import native_shared_registration as registration
+    from . import native_execution_authority as authority
     selection = selected.capture(selection_path)
     reader = _Reader(selection)
     e = reader.read('execution_capture', selection.role('execution_capture'))
-    value = registration.verified(e.raw)
-    composition, spec, doc, _ = registration._selection(value['composition_raw_json'].encode('utf-8'))
+    ctx = _catalogs if type(_catalogs) is receipt_api._ReceiptCatalogContext else None
+    token = receipt_api.catalog_reuse.runtime_token() if ctx is not None else None
+    base_key = None if token is None else (
+        token, selection_path, selection.registration.raw, e.raw,
+        registration.verified, registration.registration, registration._selection, authority.dependency_identity,
+    )
+    hit = False
+    if base_key is not None and base_key in ctx._base:
+        saved_inputs, cached_val, cached_comp, cached_spec, cached_doc = ctx._base[base_key]
+        try:
+            current_inputs = (
+                registration._read(cached_val['composition'], 'composition', c.HARD_LIMITS['request_bytes']),
+                registration._read(cached_val['system_path'], 'system', c.HARD_LIMITS['input_bytes']),
+                registration._read(cached_val['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes']),
+                registration._read(cached_comp['runtime_path'], 'runtime_declaration', c.HARD_LIMITS['input_bytes']),
+                registration._read(cached_comp['instruction_path'], 'instruction', c.HARD_LIMITS['request_bytes']),
+                str(Path.cwd().resolve()), sys.executable, sys.version,
+            )
+            if current_inputs == saved_inputs:
+                value, composition, spec, doc = deepcopy(cached_val), deepcopy(cached_comp), cached_spec, deepcopy(cached_doc)
+                registration._paths(value, composition, fresh=False)
+                hit = True
+        except Exception:
+            hit = False
+    if not hit:
+        value = registration.verified(e.raw)
+        composition, spec, doc, _ = registration._selection(value['composition_raw_json'].encode('utf-8'))
+        if base_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+            saved_inputs = (
+                registration._read(value['composition'], 'composition', c.HARD_LIMITS['request_bytes']),
+                registration._read(value['system_path'], 'system', c.HARD_LIMITS['input_bytes']),
+                registration._read(value['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes']),
+                registration._read(composition['runtime_path'], 'runtime_declaration', c.HARD_LIMITS['input_bytes']),
+                registration._read(composition['instruction_path'], 'instruction', c.HARD_LIMITS['request_bytes']),
+                str(Path.cwd().resolve()), sys.executable, sys.version,
+            )
+            ctx._base[base_key] = (saved_inputs, deepcopy(value), deepcopy(composition), spec, deepcopy(doc))
     if (doc['registration_path'] != selection_path or composition['selection_raw_json'].encode('utf-8') != selection.registration.raw
             or value['selection_sha256'] != selection.registration.pin.sha256):
         raise ValueError('actual E/C/S binding differs from the caller-selected registration')
@@ -559,14 +766,28 @@ def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files,
         {'binding': c.pin_dict(binding.binding_artifact.pin), 'init_observation': c.pin_dict(item.pin)})
 
 
+def _journal_prefix_digest(run, end):
+    pins = tuple(item.pin for item in run.history.records[:end])
+    key = (run.selection.registration.pin.sha256, run.binding.execution.pin.sha256,
+           run.binding.attempt_id, pins)
+    prefixes = getattr(run, '_prefixes', None)
+    if prefixes is not None and key in prefixes:
+        return prefixes[key]
+    raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
+        execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
+        records=pins)
+    pair = (c.sha(raw), raw)
+    if prefixes is not None:
+        prefixes[key] = pair
+    return pair
+
+
 def _history_prefix(run, digest):
     """Resolve an exact recorded predecessor; never substitute current history."""
     found = []
     for end in range(1, len(run.history.records) + 1):
-        raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
-            execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
-            records=tuple(item.pin for item in run.history.records[:end]))
-        if c.sha(raw) == digest:
+        prefix_digest, raw = _journal_prefix_digest(run, end)
+        if prefix_digest == digest:
             found.append(replace(run.history, journal=_captured('journal', run.selection.role('journal'), raw),
                                  records=run.history.records[:end]))
     if len(found) != 1:
@@ -589,12 +810,84 @@ def _require_completed_read_before_write(request, read):
         raise ValueError('response Write precedes its complete current request Read')
 
 
+def _bind_trace_cache(trace, settled_cache, base=None):
+    if settled_cache is None or trace is None:
+        return trace
+    owner = base if base is not None else trace
+
+    def request(identity, _trace=trace, _owner=owner):
+        if identity not in _trace.calls or identity not in _trace.callbacks:
+            return observed.Trace.request(_trace, identity)
+        key = ('request', identity)
+        if key not in settled_cache:
+            settled_cache[key] = observed.Trace.request(_owner, identity)
+        return settled_cache[key]
+
+    def admitted(identity, _trace=trace, _owner=owner):
+        if (identity not in _trace.calls or identity not in _trace.callbacks
+                or identity not in _trace.decisions
+                or _trace.decisions[identity][1]['classification'] != 'prescribed'):
+            return observed.Trace.admitted(_trace, identity)
+        key = ('admitted', identity)
+        if key not in settled_cache:
+            settled_cache[key] = observed.Trace.admitted(_owner, identity)
+        return settled_cache[key]
+
+    def settled(identity, _trace=trace, _owner=owner):
+        if (identity not in _trace.calls or identity not in _trace.callbacks
+                or identity not in _trace.decisions or identity not in _trace.results
+                or _trace.decisions[identity][1]['classification'] != 'prescribed'
+                or _trace.results[identity][0] <= _trace.callbacks[identity][0]):
+            return observed.Trace.settled(_trace, identity)
+        key = ('settled', identity)
+        if key not in settled_cache:
+            settled_cache[key] = observed.Trace.settled(_owner, identity)
+        return settled_cache[key]
+
+    trace.request = request
+    trace.admitted = admitted
+    trace.settled = settled
+    return trace
+
+
+def _prefix_trace(base, transcript, control, init_lines=None, settled_cache=None):
+    """Project an already-verified Trace onto an exact earlier stream prefix."""
+    if (base is None or transcript.stream != 'transcript' or control.stream != 'control'
+            or not base.transcript.raw.startswith(transcript.raw)
+            or not base.control.raw.startswith(control.raw)
+            or init_lines is None or transcript.lines < init_lines[0] or control.lines < init_lines[1]):
+        return None
+    t_lines, c_lines = transcript.lines, control.lines
+    for identity, (d_line, _) in base.decisions.items():
+        if d_line <= c_lines and base.callbacks[identity][0] > t_lines:
+            return None
+    if transcript == base.transcript and control == base.control and settled_cache is None:
+        return base
+    sub = object.__new__(observed.Trace)
+    sub.transcript, sub.control = transcript, control
+    sub.session, sub.policy = base.session, base.policy
+    sub.calls = {k: v for k, v in base.calls.items() if v[0] <= t_lines}
+    sub.callbacks = {k: v for k, v in base.callbacks.items() if v[0] <= t_lines}
+    sub.results = {k: v for k, v in base.results.items() if v[0] <= t_lines}
+    sub.decisions = {k: v for k, v in base.decisions.items() if v[0] <= c_lines}
+    sub.frames = {k: v for k, v in base.frames.items() if k <= t_lines}
+    sub.terminal = base.terminal if (base.terminal is not None and base.terminal <= t_lines) else None
+    return _bind_trace_cache(sub, settled_cache, base=base)
+
+
 def _checked_observations(run):
     """Validate raw joins and current-request chronology, not saved success flags."""
     previous = {'transcript': 0, 'control': 0}
     seen_reads, seen_intents, seen_writes, seen_advances = {}, {}, set(), set()
     checked = []
     previous_decision = None
+    base_trace = None
+    base_attempted = False
+    init_lines = None
+    settled_cache = {}
+    token = receipt_api.catalog_reuse.runtime_token()
+    ctx = getattr(run, '_catalogs', None) if token is not None else None
+    verified_obs = getattr(ctx, '_verified_obs', None) if ctx is not None else None
 
     def decision_at(digest):
         # This invocation owns one immutable captured run. Reuse only the
@@ -609,6 +902,28 @@ def _checked_observations(run):
             previous_decision = (digest, value)
         return value
 
+    def trace_at(transcript, control):
+        nonlocal base_trace, base_attempted, settled_cache
+        if not base_attempted and init_lines is not None:
+            base_attempted = True
+            try:
+                base_trace = run.trace()
+                if ctx is not None and hasattr(ctx, '_settled'):
+                    meta = (token, base_trace.session, c.canonical(base_trace.policy))
+                    saved = ctx._settled
+                    if (saved is not None and saved[0] == meta
+                            and base_trace.transcript.raw.startswith(saved[1])
+                            and base_trace.control.raw.startswith(saved[2])):
+                        settled_cache = saved[3]
+                    ctx._settled = (meta, base_trace.transcript.raw, base_trace.control.raw, settled_cache)
+                _bind_trace_cache(base_trace, settled_cache)
+            except ValueError:
+                base_trace = None
+        projected = _prefix_trace(base_trace, transcript, control, init_lines, settled_cache)
+        if projected is not None:
+            return projected
+        return run.trace(transcript, control)
+
     for index, artifact in enumerate(run.observations):
         doc, transcript, control = observation(artifact, run.selection, run.binding, run.pool)
         for prefix in (transcript, control):
@@ -618,10 +933,15 @@ def _checked_observations(run):
         kind, payload = doc['observation_type'], doc['payload']
         if (index == 0) != (kind == 'initialized'):
             raise ValueError('durable observations lack one first actual initialization')
-        trace = run.trace(transcript, control)
         if kind == 'initialized':
+            trace = run.trace(transcript, control)
+            init_lines = (transcript.lines, control.lines)
             if artifact != run.binding.init_observation:
                 raise ValueError('initial observation differs from bound session')
+        else:
+            trace = trace_at(transcript, control)
+        if kind == 'initialized':
+            pass
         elif kind in ('request_read', 'response_written', 'advance_settled'):
             call = _call(payload['call'])
             actual = trace.settled(call.tool_use_id)
@@ -633,10 +953,17 @@ def _checked_observations(run):
                 current = decision_at(payload['history_sha256'])
                 if current.state != 'awaiting_response' or current.request != request:
                     raise ValueError('Read observation names a stale or unpublished request')
-                observed.complete_request_read(trace, actual, request)
+                obs_key = None if verified_obs is None else (
+                    'request_read', token, artifact.pin.sha256, request.pin.sha256, actual,
+                )
+                obs_val = None if obs_key is None else (artifact.raw, request.raw)
+                if obs_key is None or verified_obs.get(obs_key) != obs_val:
+                    observed.complete_request_read(trace, actual, request)
+                    if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                        verified_obs[obs_key] = obs_val
                 if call.tool_use_id in seen_reads or request.pin.path in {row[1].pin.path for row in seen_reads.values()}:
                     raise ValueError('current request has duplicate delivered-read authority')
-                seen_reads[call.tool_use_id] = (artifact, request, current)
+                seen_reads[call.tool_use_id] = (artifact, request, current, call)
             elif kind == 'response_written':
                 intent = seen_intents.get(payload['intent_observation']['sha256'])
                 if intent is None or c.pin_dict(intent[0].pin) != payload['intent_observation']:
@@ -647,13 +974,27 @@ def _checked_observations(run):
                         or payload['history_sha256'] != intent_doc['history_sha256']
                         or response.pin.path != intent_doc['response']['path'] or response.pin.path in seen_writes):
                     raise ValueError('response was replaced, retried or moved to another stage')
-                observed.first_response_write(trace, actual, response, intent_input_json=call.input_json)
+                obs_key = None if verified_obs is None else (
+                    'response_written', token, artifact.pin.sha256, response.pin.sha256, actual,
+                )
+                obs_val = None if obs_key is None else (artifact.raw, response.raw, call.input_json)
+                if obs_key is None or verified_obs.get(obs_key) != obs_val:
+                    observed.first_response_write(trace, actual, response, intent_input_json=call.input_json)
+                    if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                        verified_obs[obs_key] = obs_val
                 seen_writes.add(response.pin.path)
             else:
                 result = payload['advance_result']
                 if result.get('advance_tool_use_id') != call.tool_use_id or call.tool_use_id not in seen_advances:
                     raise ValueError('advance settlement lacks actual earlier selected admission')
-                observed.helper_result(trace, actual, result)
+                obs_key = None if verified_obs is None else (
+                    'advance_settled', token, artifact.pin.sha256, actual,
+                )
+                obs_val = None if obs_key is None else (artifact.raw, result)
+                if obs_key is None or verified_obs.get(obs_key) != obs_val:
+                    observed.helper_result(trace, actual, result)
+                    if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                        verified_obs[obs_key] = obs_val
                 _history_prefix(run, result['before_history_sha256'])
                 after = decision_at(result['after_history_sha256'])
                 if after.state != result['state']:
@@ -676,12 +1017,19 @@ def _checked_observations(run):
             reads = [row for row in seen_reads.values() if c.pin_dict(row[0].pin) == payload['read_observation']]
             if len(reads) != 1 or reads[0][1] != current.request or current.response.path in {v[1]['response']['path'] for v in seen_intents.values()}:
                 raise ValueError('Write intent reuses a stale Read or spent response destination')
-            inputs = _document(request.input_json, 'Write intent')
-            if (set(inputs) != {'file_path', 'content'} or inputs['file_path'] != current.response.path
-                    or type(inputs['content']) is not str or not inputs['content']
-                    or len(inputs['content'].encode('utf-8')) > current.response.max_bytes):
-                raise ValueError('Write intent exceeds the exact response contract')
-            read_call = _call(c.strict_json(reads[0][0].raw)['payload']['call'])
+            obs_key = None if verified_obs is None else (
+                'response_intent', token, artifact.pin.sha256, current.response.path, current.response.max_bytes,
+            )
+            obs_val = None if obs_key is None else (artifact.raw, request.input_json)
+            if obs_key is None or verified_obs.get(obs_key) != obs_val:
+                inputs = _document(request.input_json, 'Write intent')
+                if (set(inputs) != {'file_path', 'content'} or inputs['file_path'] != current.response.path
+                        or type(inputs['content']) is not str or not inputs['content']
+                        or len(inputs['content'].encode('utf-8')) > current.response.max_bytes):
+                    raise ValueError('Write intent exceeds the exact response contract')
+                if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                    verified_obs[obs_key] = obs_val
+            read_call = reads[0][3]
             _require_completed_read_before_write(request, trace.settled(read_call.tool_use_id))
             seen_intents[artifact.pin.sha256] = (artifact, payload)
         elif kind == 'advance_admitted':
@@ -705,16 +1053,19 @@ def _checked_observations(run):
     return tuple(checked)
 
 
-def _load(selection_path, *, transcript_bytes=None, control_bytes=None):
+_LAST_VERIFIED_CATALOGS = None
+
+
+def _load(selection_path, *, transcript_bytes=None, control_bytes=None, _catalogs=None):
     """Strict complete-file route for final and recorded consumers."""
-    base = _base(selection_path)
+    base = _base(selection_path, _catalogs=_catalogs)
     streams, prefixes = _streams(base[2], transcript_bytes=transcript_bytes, control_bytes=control_bytes)
-    return _loaded(base, streams, prefixes)
+    return _loaded(base, streams, prefixes, _catalogs=_catalogs)
 
 
 def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None):
     """Fresh live authority, optionally with owner-reused pure catalog storage."""
-    base = _base(selection_path)
+    base = _base(selection_path, _catalogs=_catalogs)
     anchors = _declared_stream_files(base[0], base[1])
     if stream_files is not None and live_streams.identities(stream_files) != anchors:
         raise ValueError('observed stream identities differ from initialized authority')
@@ -726,12 +1077,10 @@ def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, str
 def _loaded(base, streams, prefixes, *, _catalogs=None):
     selection, reader, value, composition, spec = base
     transcript, control = prefixes
-    for path in _observation_paths(selection):
-        reader.read('observation', path)
+    observations = tuple(reader.read('observation', path) for path in _observation_paths(selection))
     pool = _pool(reader, streams)
     binding = _binding(selection, value, composition, reader, pool)
     history = reader.history(binding)
-    observations = tuple(reader.read('observation', path) for path in _observation_paths(selection))
     # The complete closed observation catalog includes pre-grant intents that
     # intentionally cannot yet be referenced by response-consumed records.
     history = replace(history, observations=observations)
@@ -740,6 +1089,7 @@ def _loaded(base, streams, prefixes, *, _catalogs=None):
                        transcript, control, binding, history, observations, phase1)
     if _catalogs is not None:
         run._catalogs = receipt_api._catalog_context(_catalogs)
+        run._prefixes = run._catalogs._prefixes
     _checked_observations(run)
     return run
 
@@ -750,9 +1100,9 @@ def _persist_observation(run, kind, payload):
         run.transcript, run.control, payload), ordinal=len(run.observations))
 
 
-def capture_stage(selection_registration_path):
+def capture_stage(selection_registration_path, *, _catalogs=None):
     """Capture the sole pending, actually admitted fixed advance invocation."""
-    run = _load_live(str(selection_registration_path))
+    run = _load_live(str(selection_registration_path), _catalogs=_catalogs)
     if run.phase1 is None:
         raise ValueError('advance precedes actual sealed originals')
     phase, _ = phase_replay(run)
@@ -767,10 +1117,11 @@ def capture_stage(selection_registration_path):
     # A helper cannot use bytes prefetched after its own actual callback.
     transcript = _through(run.transcript, call.callback.line)
     control = _through(run.control, call.admission.line)
-    candidates = [item for item in run.observations if c.strict_json(item.raw)['observation_type'] == 'advance_admitted'
-                  and c.strict_json(item.raw)['payload']['call']['tool_use_id'] == call.tool_use_id]
+    obs_docs = [(item, c.strict_json(item.raw)) for item in run.observations]
+    candidates = [item for item, doc in obs_docs if doc['observation_type'] == 'advance_admitted'
+                  and doc['payload']['call']['tool_use_id'] == call.tool_use_id]
     if not candidates:
-        if sum(c.strict_json(item.raw)['observation_type'] == 'advance_admitted' for item in run.observations) >= c.HARD_LIMITS['advance_invocations']:
+        if sum(doc['observation_type'] == 'advance_admitted' for _, doc in obs_docs) >= c.HARD_LIMITS['advance_invocations']:
             raise ValueError('stage helper invocation count exceeds its complete bound')
         admission = _persist_observation(replace(run, transcript=transcript, control=control), 'advance_admitted',
             {'call': call_document(call), 'before_history_sha256': run.history.journal.pin.sha256})
@@ -789,23 +1140,27 @@ def capture_stage(selection_registration_path):
             working_directory=run.binding.working_directory))
 
 
-def publish_stage(invocation, proposal):
+def publish_stage(invocation, proposal, *, _catalogs=None):
     """Recheck the same current invocation, then perform only derived effects."""
     from .native_shared_publication import publish_derived
     if type(invocation) is not c.StageInvocationCapture:
         raise ValueError('publication requires the actual selected captured invocation')
-    fresh = capture_stage(invocation.selection.registration.pin.path)
+    fresh = capture_stage(invocation.selection.registration.pin.path, _catalogs=_catalogs)
     # A newly persisted admission is an external observation, not part of the
     # journal predecessor; include it consistently in the freshly read history.
     old = replace(invocation, history=replace(invocation.history,
         observations=fresh.history.observations))
     if old != fresh:
         raise ValueError('selected capture changed before stage publication')
-    result, _ = publish_derived(fresh, proposal)
+    result, _ = publish_derived(fresh, proposal, _catalogs=_catalogs)
     return result
 
 
 def _chronology(run):
+    key = (tuple(item.pin for item in run.observations), tuple(item.pin for item in run.history.records))
+    cached = getattr(run, '_chronology_cache', None)
+    if cached is not None and cached[0] == key:
+        return cached[1]
     catalog = {}
     advance_before, advance_after = {}, {}
     visible = {run.history.records[0].pin.sha256: 0}
@@ -835,7 +1190,9 @@ def _chronology(run):
             if pin['sha256'] not in catalog:
                 raise ValueError('stage record lacks its actual observation visibility')
             visible[item.pin.sha256] = catalog[pin['sha256']][1]
-    return catalog, advance_before, advance_after, visible, seal_observations
+    result = (catalog, advance_before, advance_after, visible, seal_observations)
+    run._chronology_cache = (key, result)
+    return result
 
 
 def phase_replay(run, *, complete=False):
@@ -861,27 +1218,29 @@ def phase_replay(run, *, complete=False):
             previous = (digest, value)
         return value
 
-    for line, _, frame in observed.rows(run.transcript):
+    cached_trace = getattr(run, '_trace', None)
+    rows = (((line, None, frame) for line, frame in cached_trace.frames.items())
+            if cached_trace is not None and cached_trace.transcript == run.transcript
+            else observed.rows(run.transcript))
+    for line, _, frame in rows:
         count = 0
         for item in run.history.records:
             if item.pin.sha256 not in visible or visible[item.pin.sha256] >= line:
                 break
             count += 1
-        decision = None
+        digest = None
         if count >= 3:
-            raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
-                execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
-                records=tuple(item.pin for item in run.history.records[:count]))
-            decision = decision_at(c.sha(raw))
+            digest = _journal_prefix_digest(run, count)[0]
         blocks = frame.get('message', {}).get('content', [])
         for block in blocks if type(blocks) is list else ():
             if type(block) is not dict:
                 continue
             identity = block.get('id') if block.get('type') == 'tool_use' else block.get('tool_use_id')
             if block.get('type') == 'tool_use' and identity in advance_before:
-                decision = decision_at(advance_before[identity])
+                digest = advance_before[identity]
             if block.get('type') == 'tool_result' and identity in advance_after:
-                decision = decision_at(advance_after[identity])
+                digest = advance_after[identity]
+        decision = None if digest is None else decision_at(digest)
         emitted = phase.observe(frame, stage_decision=decision)
         if emitted:
             actions[line] = (emitted, phase.report())
@@ -992,8 +1351,9 @@ def _effect_view_from_decision(run, decision, *, correction_window=False, exclud
         run.composition['policy']['readonly_lookups']['inputs']) if path not in {role.path for role in protected}]
     if run.phase1 is not None:
         protected.append(c.RolePath('sealed_original_receipt_output', run.spec._agentic_artifact_paths['receipt']))
-    pending = [identity for identity in run.trace().pending() if identity != exclude_pending
-               and run.trace().calls[identity][2].get('input', {}).get('command') == run.composition['policy']['native_shared_helpers']['advance']]
+    trace = run.trace()
+    pending = [identity for identity in trace.pending() if identity != exclude_pending
+               and trace.calls[identity][2].get('input', {}).get('command') == run.composition['policy']['native_shared_helpers']['advance']]
     if len(pending) > 1:
         raise ValueError('overlapping selected advance effects')
     return c.NativeEffectView(correction_window=correction_window, cursor=None if decision is None else decision.cursor,
@@ -1050,9 +1410,9 @@ def observe_response_written(run, identity):
     current = run.decision(); trace = run.trace(); actual = trace.settled(identity)
     if current is None or current.state != 'awaiting_response' or current.response is None:
         raise ValueError('response settlement has no current selected destination')
-    matches = [(item, _document(item.raw, 'response intent')['payload']) for item in run.observations
-        if _document(item.raw, 'response intent')['observation_type'] == 'response_intent'
-        and _document(item.raw, 'response intent')['payload']['tool_use_id'] == identity]
+    matches = [(item, doc['payload']) for item, doc in (
+        (item, _document(item.raw, 'response intent')) for item in run.observations
+    ) if doc['observation_type'] == 'response_intent' and doc['payload']['tool_use_id'] == identity]
     if len(matches) != 1:
         raise ValueError('response settlement lacks one preceding exact pre-grant intent')
     intent, payload = matches[0]
@@ -1130,14 +1490,27 @@ def _receipt_assessment(run, *, full_path, receipt_path):
     if fresh_selection != run.selection:
         raise ValueError('final receipt selection differs from independent reconstruction')
     # Final reconstruction must not reuse the live run's catalog context.
-    decision = stage.prepare_next(fresh_selection, run.binding, run.phase1, run.history)
-    if decision.state != 'assembly_complete' or decision.completion is None:
-        raise ValueError('final native receipts require the freshly checked complete stage history')
-    completion = stage.check_assembly(fresh_selection, run.binding, run.phase1, run.history,
-                                     decision.completion.assembly.raw)
-    assessed = completion.effective_receipt
-    block = receipts.check_final(fresh_selection, run.binding, run.phase1, completion,
-                                final_full=full.raw, final_receipt=assessed.raw)
+    if (stage.prepare_next is getattr(stage, '_DEFAULT_PREPARE_NEXT', None)
+            and stage.check_assembly is getattr(stage, '_DEFAULT_CHECK_ASSEMBLY', None)
+            and receipts.check_final is getattr(receipts, '_DEFAULT_CHECK_FINAL', None)):
+        fresh_catalogs = getattr(run, '_catalogs', None) or receipts._catalog_context()
+        decision = stage._prepare_next(fresh_selection, run.binding, run.phase1, run.history, fresh_catalogs)
+        if decision.state != 'assembly_complete' or decision.completion is None:
+            raise ValueError('final native receipts require the freshly checked complete stage history')
+        completion = stage._check_assembly(fresh_selection, run.binding, run.phase1, run.history,
+                                           decision.completion.assembly.raw, fresh_catalogs)
+        assessed = completion.effective_receipt
+        block = receipts._check_final(fresh_selection, run.binding, run.phase1, completion,
+                                      final_full=full.raw, final_receipt=assessed.raw, _catalogs=fresh_catalogs)
+    else:
+        decision = stage.prepare_next(fresh_selection, run.binding, run.phase1, run.history)
+        if decision.state != 'assembly_complete' or decision.completion is None:
+            raise ValueError('final native receipts require the freshly checked complete stage history')
+        completion = stage.check_assembly(fresh_selection, run.binding, run.phase1, run.history,
+                                         decision.completion.assembly.raw)
+        assessed = completion.effective_receipt
+        block = receipts.check_final(fresh_selection, run.binding, run.phase1, completion,
+                                    final_full=full.raw, final_receipt=assessed.raw)
     block['native_receipt_inputs'] = {'selected_original': c.pin_dict(original.pin),
         'sealed_original': c.pin_dict(run.phase1.original_receipt.pin), 'assessed_effective': c.pin_dict(assessed.pin),
         'final_full': c.pin_dict(full.pin), 'basis': 'Original caller-selected receipt preserved; reconstructed effective receipt assessed.'}
@@ -1145,16 +1518,21 @@ def _receipt_assessment(run, *, full_path, receipt_path):
 
 
 def live_receipt_block(selection_registration_path, *, full_path, receipt_path):
+    global _LAST_VERIFIED_CATALOGS
     run = _load_live(str(selection_registration_path))
     phase_replay(run)
-    return _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
+    block = _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
+    if getattr(run, '_catalogs', None) is not None:
+        _LAST_VERIFIED_CATALOGS = (str(selection_registration_path), run._catalogs)
+    return block
 
 
 def _provenance_block(run):
     decision = run.decision()
     if decision is None or decision.state != 'assembly_complete' or decision.completion is None:
         raise ValueError('native provenance requires complete freshly reconstructed selected stages')
-    completion = stage.check_assembly(run.selection, run.binding, run.phase1, run.history, decision.completion.assembly.raw)
+    completion = stage._check_assembly(run.selection, run.binding, run.phase1, run.history,
+                                       decision.completion.assembly.raw, run._catalogs)
     artifact = run.reader.read('completion', run.selection.role('completion'))
     return {'protocol': c.NAME, 'selection_sha256': run.selection.registration.pin.sha256,
         'execution_sha256': run.binding.execution.pin.sha256, 'attempt_id': run.binding.attempt_id,
@@ -1165,6 +1543,7 @@ def _provenance_block(run):
 
 
 def live_provenance_block(selection_registration_path):
+    global _LAST_VERIFIED_CATALOGS
     run = _load_live(str(selection_registration_path))
     phase, _ = phase_replay(run)
     required = {'draft', 'final_evidence', 'final_source_inventory', 'phase1_receipts', 'final_scope',
@@ -1180,10 +1559,14 @@ def live_provenance_block(selection_registration_path):
     from .canary import receipt_floors
     if any(receipt_floors(block).values()):
         raise ValueError('recorder current selected receipt floors did not pass')
-    return _provenance_block(run)
+    result = _provenance_block(run)
+    if getattr(run, '_catalogs', None) is not None:
+        _LAST_VERIFIED_CATALOGS = (str(selection_registration_path), run._catalogs)
+    return result
 
 
 def _recorded_run(spec, record):
+    global _LAST_VERIFIED_CATALOGS
     from .native_shared_render import validate_metadata
     if type(record) is not dict:
         raise ValueError('native recorded reader requires one explicit provenance mapping')
@@ -1192,7 +1575,11 @@ def _recorded_run(spec, record):
         document = validate_metadata(render_spec)
     except (KeyError, TypeError) as exc:
         raise ValueError('native record lacks its complete selected render authority') from exc
-    run = _load(document['registration_path'])
+    reg_path = str(document['registration_path'])
+    saved_catalogs = (_LAST_VERIFIED_CATALOGS[1]
+                      if _LAST_VERIFIED_CATALOGS is not None and _LAST_VERIFIED_CATALOGS[0] == reg_path
+                      else None)
+    run = _load(document['registration_path'], _catalogs=saved_catalogs)
     if c.canonical(render_spec) != c.canonical(run.composition['render_spec']):
         raise ValueError('native record rendering differs from its observed execution composition')
     if spec is not None and c.canonical(spec.render_spec()) != c.canonical(render_spec):
@@ -1202,6 +1589,8 @@ def _recorded_run(spec, record):
     phase, _ = phase_replay(run)
     if not phase['passed']:
         raise ValueError('native recorded stage chronology did not pass')
+    if getattr(run, '_catalogs', None) is not None:
+        _LAST_VERIFIED_CATALOGS = (reg_path, run._catalogs)
     return run
 
 
@@ -1220,7 +1609,7 @@ def recorded_receipt_claims(spec, *, record, full_path, receipt_path, expected_b
     if (block.get('native_receipt_stage') != 'final' or block.get('final_stage_complete') is not True
             or c.canonical(expected_block) != c.canonical(block)):
         raise ValueError('claim sidecar expected block differs from the same freshly captured final receipt assessment')
-    _, _, _, _, _, bases, _, _ = receipts._inputs(run.selection, run.phase1)
+    _, _, _, _, _, bases, _, _ = receipts._inputs(run.selection, run.phase1, _catalogs=run._catalogs)
     return rc.claim_receipts(_mapping(effective.raw, 'native effective receipt'),
         _mapping(full.raw, 'native final full'), _mapping(run.phase1.full.raw, 'native original full'),
         identifier_bases=bases)
@@ -1228,7 +1617,7 @@ def recorded_receipt_claims(spec, *, record, full_path, receipt_path, expected_b
 
 def at_callback(run, line):
     """Pure current authority at one real callback; no future observation credit."""
-    _, _, _, visible, _ = _chronology(run)
+    catalog, _, _, visible, _ = _chronology(run)
     count = 0
     for item in run.history.records:
         if item.pin.sha256 not in visible or visible[item.pin.sha256] >= line:
@@ -1236,20 +1625,42 @@ def at_callback(run, line):
         count += 1
     if count < 2:
         raise ValueError('callback precedes actual session publication')
-    raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
-        execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
-        records=tuple(item.pin for item in run.history.records[:count]))
-    history = _history_prefix(run, c.sha(raw))
     observations = tuple(item for item in run.observations
-        if observation(item, run.selection, run.binding, run.pool)[1].lines < line)
-    history = replace(history, observations=observations)
+        if catalog[item.pin.sha256][1] < line)
+    state_key = (count, tuple(item.pin.sha256 for item in observations))
+    cached_state = getattr(run, '_callback_state_cache', None)
+    if cached_state is not None and state_key in cached_state:
+        history, phase1 = cached_state[state_key]
+    else:
+        digest, _ = _journal_prefix_digest(run, count)
+        history = replace(_history_prefix(run, digest), observations=observations)
+        phase1 = _phase1(run.selection, run.binding, history, run.reader)
+        if cached_state is not None:
+            cached_state[state_key] = (history, phase1)
     transcript = _through(run.transcript, line)
-    frames = {c.canonical(frame) for _, _, frame in observed.rows(transcript)}
-    control_lines = 0
-    for number, _, row in observed.rows(run.control):
-        if row.get('kind') == 'decision' and c.canonical(row.get('request')) not in frames:
-            break
-        control_lines = number
+    base_trace = None
+    try:
+        base_trace = run.trace()
+    except ValueError:
+        pass
+    if base_trace is not None and 0 < line <= base_trace.transcript.lines:
+        later = [d_line for identity, (d_line, _) in base_trace.decisions.items()
+                 if base_trace.callbacks[identity][0] > line]
+        control_lines = (min(later) - 1) if later else run.control.lines
+    else:
+        frames = {c.canonical(frame) for _, _, frame in observed.rows(transcript)}
+        control_lines = 0
+        for number, _, row in observed.rows(run.control):
+            if row.get('kind') == 'decision' and c.canonical(row.get('request')) not in frames:
+                break
+            control_lines = number
     control = _through(run.control, control_lines)
-    return replace(run, history=history, observations=observations, transcript=transcript, control=control,
-        phase1=_phase1(run.selection, run.binding, history, run.reader))
+    result = replace(run, history=history, observations=observations, transcript=transcript, control=control,
+        phase1=phase1)
+    result._catalogs = run._catalogs
+    result._prefixes = run._prefixes
+    result._chronology_cache = run._chronology_cache
+    result._callback_state_cache = run._callback_state_cache
+    if base_trace is not None and 0 < line <= base_trace.transcript.lines and 0 < control_lines <= base_trace.control.lines:
+        result._trace = _prefix_trace(base_trace, transcript, control, (1, 1))
+    return result

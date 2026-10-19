@@ -97,7 +97,7 @@ def _captured_selection(pool, value):
     return selection_api.rebuild(registration, authority, schemas, artifacts['receipt_policy'])
 
 
-def rebuild(pool, value):
+def rebuild(pool, value, *, _catalogs=None):
     """Reconstruct the captured run; this function performs no filesystem reads."""
     from .api_runner import RunSpec
     selected = _captured_selection(pool, value)
@@ -136,6 +136,9 @@ def rebuild(pool, value):
     phase1 = capture_api._phase1(selected, binding, history, reader)
     result = capture_api._CapturedRun(selected, value, composition, spec, reader, pool,
         transcript, control, binding, history, tuple(observations), phase1)
+    if _catalogs is not None:
+        result._catalogs = _catalogs
+        result._prefixes = _catalogs._prefixes
     capture_api._checked_observations(result)
     return result
 
@@ -152,7 +155,8 @@ def capture(value, controls, *, authority_inputs, registration_raw):
     """One actual bounded capture, followed by the same saved-only reconstruction."""
     composition = c.strict_json(value['composition_raw_json'].encode(), 'captured C', c.HARD_LIMITS['request_bytes'])
     selected_doc = c.parse_selection(composition['selection_raw_json'].encode('utf-8'))
-    live = capture_api._load(selected_doc['registration_path'])
+    live = capture_api._load(selected_doc['registration_path'], _catalogs=capture_api._LAST_VERIFIED_CATALOGS)
+    capture_api._LAST_VERIFIED_CATALOGS = live._catalogs
     snapshot = Snapshot(value['working_directory'], live.pool.members)
     selection = live.selection
     for item in (selection.registration, selection.receipt_policy, *selection.authority,
@@ -210,7 +214,7 @@ def capture(value, controls, *, authority_inputs, registration_raw):
         raise ValueError('complete capture exceeds the selected evidence bound')
     snapshot.verify_unchanged()
     snapshot.sealed = True
-    return prepare(pool, value, controls, snapshot=snapshot)
+    return prepare(pool, value, controls, snapshot=snapshot, _catalogs=live._catalogs)
 
 
 def _readonly(command, policy, snapshot, controls):
@@ -239,11 +243,11 @@ def _readonly(command, policy, snapshot, controls):
         return False
 
 
-def prepare(pool, value, controls, *, snapshot=None):
+def prepare(pool, value, controls, *, snapshot=None, _catalogs=None):
     from . import native_shared_attribution as attribution
     from . import native_shared_gates as gates
     from .audit_omissions import _mapping
-    run = rebuild(pool, value)
+    run = rebuild(pool, value, _catalogs=_catalogs)
     if snapshot is None:
         snapshot = Snapshot(value['working_directory'], pool.members)
         snapshot.sealed = True
@@ -321,6 +325,7 @@ def check_capture(prepared):
     problems = [*control['problems'], *lifecycle['problems'], *draft['problems']]
     from . import native_shared_policy, native_shared_effects
     draft_seen = False
+    previous_decision = None
     for line, _, frame in observed.rows(run.transcript):
         for block in frame.get('message', {}).get('content', ()):
             if (type(block) is dict and block.get('type') == 'tool_use' and block.get('name') == 'Bash'
@@ -330,7 +335,19 @@ def check_capture(prepared):
             continue
         data = frame['request']['input']
         current = capture_api.at_callback(run, line)
-        view = capture_api.current_effect_view(current, correction_window=draft_seen,
+        key = (current.history.journal.pin.sha256,
+               None if current.phase1 is None else (
+                   current.phase1.seal.pin.sha256,
+                   None if current.phase1.core_seal is None else current.phase1.core_seal.pin.sha256,
+               ))
+        if previous_decision is not None and previous_decision[0] == key:
+            decision = previous_decision[1]
+        else:
+            previous_decision = None
+            decision = current.decision()
+            if decision is None or decision.state != 'failed':
+                previous_decision = (key, decision)
+        view = capture_api._effect_view_from_decision(current, decision, correction_window=draft_seen,
             exclude_pending=data['tool_use_id'])
         if native_shared_policy.stage_overlay_governs(view, tool_name=data['tool_name'],
                 tool_input=data['tool_input'], policy=policy):
@@ -425,44 +442,47 @@ def require_saved_basis(value, result):
     raw = _read_pool(pin['path'], pin['bytes'])
     if len(raw) != pin['bytes'] or c.sha(raw) != pin['sha256']:
         raise ValueError('saved pool differs from its complete raw identity')
-    from .native_attribution_controller import load_controls
-    prepared = prepare(evidence.decode(raw), value, load_controls())
-    if c.canonical(prepared['saved_result']) != c.canonical(summary['result']):
-        raise ValueError('saved native result differs from fresh byte-only reconstruction')
-    snapshot = prepared['snapshot']
-    for actual, key in ((snapshot.identity(), 'captured_files'), (snapshot.metadata, 'captured_metadata'),
-            (snapshot.aliases, 'captured_aliases'), (snapshot.alias_metadata, 'captured_alias_metadata')):
-        if c.canonical(actual) != c.canonical(result[key]):
-            raise ValueError('flat captured pool differs from final captured file identities or metadata')
-    if result['runtime_gates_passed'] and not prepared['saved_result']['passed']:
-        raise ValueError('native completion contradicts fresh saved stage/control reconstruction')
-    # Re-run every original obligation. Existing exclusive projections are
-    # checked against complete captured bytes before the unchanged file-based
-    # observation/accounting consumers can open them.
-    projections = {}
-    for index, (original, body) in enumerate(sorted(snapshot.raw.items())):
-        projected = path.parent / 'captured' / str(index) / Path(original).name
-        actual = evidence.read_regular(str(projected), 'saved_projection', max_bytes=max(1, len(body)))
-        if actual.captured.raw != body:
-            raise ValueError('saved projection differs from its exact flat captured member')
-        projections[original] = projected
+    from .native_execution_authority import loaded_dependencies
     from . import native_shared_gates as gates
     from .native_execution import expected_runtime_observation
-    fresh_live = {**prepared['saved_result']['draft'],
-        'recorder_completed': prepared['saved_result']['recorder_completed_in_trace'],
-        'controller_stop': None if prepared['saved_result']['passed'] else 'saved reconstruction failed'}
-    cleanup = result['lifecycle_artifacts'].get('keep-awake.json')
-    cleanup_raw = (evidence.read_regular(cleanup['path'], 'cleanup',
-        max_bytes=c.HARD_LIMITS['input_bytes']).captured.raw if cleanup is not None else None)
-    fresh = gates.check(prepared, projections,
-        {**value['runtime'], 'attempt_directory': value['attempt_directory']}, prepared['controls'],
-        exit_code=result['child_exit_code'], shutdown=result['shutdown'], live=fresh_live,
-        first_stop=result['first_stop'], runtime_authority=result['runtime_observation'],
-        keep_awake=result['keep_awake'], keep_awake_raw=cleanup_raw,
-        runtime_authority_expected=expected_runtime_observation(value))
-    if 'receipt_origin_reporting' in value:
-        from .native_receipt_origin import attach_prepared
-        fresh = attach_prepared(value, fresh, prepared)
+    with loaded_dependencies(value['dependencies']) as controls:
+        prepared = prepare(evidence.decode(raw), value, controls,
+            _catalogs=capture_api._LAST_VERIFIED_CATALOGS)
+        capture_api._LAST_VERIFIED_CATALOGS = prepared['run']._catalogs
+        if c.canonical(prepared['saved_result']) != c.canonical(summary['result']):
+            raise ValueError('saved native result differs from fresh byte-only reconstruction')
+        snapshot = prepared['snapshot']
+        for actual, key in ((snapshot.identity(), 'captured_files'), (snapshot.metadata, 'captured_metadata'),
+                (snapshot.aliases, 'captured_aliases'), (snapshot.alias_metadata, 'captured_alias_metadata')):
+            if c.canonical(actual) != c.canonical(result[key]):
+                raise ValueError('flat captured pool differs from final captured file identities or metadata')
+        if result['runtime_gates_passed'] and not prepared['saved_result']['passed']:
+            raise ValueError('native completion contradicts fresh saved stage/control reconstruction')
+        # Re-run every original obligation. Existing exclusive projections are
+        # checked against complete captured bytes before the unchanged file-based
+        # observation/accounting consumers can open them.
+        projections = {}
+        for index, (original, body) in enumerate(sorted(snapshot.raw.items())):
+            projected = path.parent / 'captured' / str(index) / Path(original).name
+            actual = evidence.read_regular(str(projected), 'saved_projection', max_bytes=max(1, len(body)))
+            if actual.captured.raw != body:
+                raise ValueError('saved projection differs from its exact flat captured member')
+            projections[original] = projected
+        fresh_live = {**prepared['saved_result']['draft'],
+            'recorder_completed': prepared['saved_result']['recorder_completed_in_trace'],
+            'controller_stop': None if prepared['saved_result']['passed'] else 'saved reconstruction failed'}
+        cleanup = result['lifecycle_artifacts'].get('keep-awake.json')
+        cleanup_raw = (evidence.read_regular(cleanup['path'], 'cleanup',
+            max_bytes=c.HARD_LIMITS['input_bytes']).captured.raw if cleanup is not None else None)
+        fresh = gates.check(prepared, projections,
+            {**value['runtime'], 'attempt_directory': value['attempt_directory']}, prepared['controls'],
+            exit_code=result['child_exit_code'], shutdown=result['shutdown'], live=fresh_live,
+            first_stop=result['first_stop'], runtime_authority=result['runtime_observation'],
+            keep_awake=result['keep_awake'], keep_awake_raw=cleanup_raw,
+            runtime_authority_expected=expected_runtime_observation(value))
+        if 'receipt_origin_reporting' in value:
+            from .native_receipt_origin import attach_prepared
+            fresh = attach_prepared(value, fresh, prepared)
     for name, recomputed in fresh.items():
         old = result['gates'][name]
         if old['passed'] and (recomputed.get('checked') is not True or recomputed.get('passed') is not True):

@@ -127,11 +127,14 @@ class CallbackAdapter:
             report_path=paths['report'], receipt_path=paths['receipt'], working_directory=self.value['working_directory'])
         self.state = attribution.live(self.selection, execution_raw=registration_raw, spec=self.spec, composition_raw=composition_raw)
         self.failure = self.final_evidence = self.recorder_identity = None
+        self._stream_diagnostic_json = None
         self.recorder_call = None
         self.recorder_done = False
         self._activated = self._initialized = False
         self._stream_prefixes = {}
         self._stream_files = {}
+        self._stream_members = ()
+        self._phase_cache = None
         self._receipt_catalogs = _ReceiptCatalogContext()
 
     def require_phase_authority(self):
@@ -151,6 +154,20 @@ class CallbackAdapter:
         if self.failure is None:
             self.failure = str(reason)
         raise self.controls['budgeted_cborg'].BudgetStop(self.failure)
+
+    def _failure_detail(self, exc):
+        # Preserve the historical first-stop text, not the private subclass
+        # name. The first failure alone may contribute optional diagnostics.
+        is_stream = isinstance(exc, live_streams._LiveStreamRefusal)
+        if self.failure is None and is_stream:
+            try:
+                raw = exc.diagnostic_json
+                live_streams.diagnostic_document(raw)
+                if getattr(self, '_stream_diagnostic_json', None) is None:
+                    self._stream_diagnostic_json = raw
+            except Exception:
+                pass  # Diagnostic failure must never replace the refusal.
+        return ('ValueError' if is_stream else type(exc).__name__) + ': ' + str(exc)
 
     def _observed_endpoint(self, event):
         members, prefixes = [], {}
@@ -175,6 +192,7 @@ class CallbackAdapter:
         # Neither cursor advances if either acquisition or the event fails.
         anchors = live_streams.stream_files(tuple(members))
         self._stream_prefixes, self._stream_files = prefixes, anchors
+        self._stream_members = tuple(members)
         return prefixes['transcript'].bytes, prefixes['control'].bytes
 
     def _run(self, endpoints=None):
@@ -187,6 +205,27 @@ class CallbackAdapter:
         if self._stream_prefixes != {'transcript': run.transcript, 'control': run.control}:
             raise ValueError('recaptured streams differ from exact parent-observed prefixes')
         return run
+
+    def _phase_state(self, endpoints, *, refresh=False):
+        from dataclasses import replace
+        from . import native_shared_capture as capture
+        if refresh or getattr(self, '_phase_cache', None) is None:
+            run = self._run(endpoints)
+            decision = run.decision()
+            self._phase_cache = (run, decision)
+            return run, decision
+        cached_run, decision = self._phase_cache
+        members = getattr(self, '_stream_members', ())
+        pool = capture._pool(cached_run.reader, members) if members else cached_run.pool
+        run = replace(cached_run, pool=pool,
+                      transcript=self._stream_prefixes['transcript'],
+                      control=self._stream_prefixes['control'])
+        run._catalogs = cached_run._catalogs
+        run._prefixes = cached_run._prefixes
+        run._chronology_cache = cached_run._chronology_cache
+        run._callback_state_cache = cached_run._callback_state_cache
+        self._phase_cache = (run, decision)
+        return run, decision
 
     def _current_final(self, run):
         from .native_shared_gates import current_evidence
@@ -240,14 +279,14 @@ class CallbackAdapter:
                     transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files,
                     observed_prefixes=self._stream_prefixes)
                 self._initialized = True
+                self._phase_cache = None
             if not self._initialized:
                 if event.get('type') != 'control_response':
                     raise ValueError('native effects precede actual initialization binding')
                 self.phase.observe(event)
                 self.state.observe(event)
                 return
-            run = self._run(endpoints)
-            decision = run.decision()
+            run, decision = self._phase_state(endpoints)
             content = event.get('message', {}).get('content', [])
             content = content if type(content) is list else ()
             # Validate actual advance effects before the phase checker can
@@ -257,8 +296,9 @@ class CallbackAdapter:
                     continue
                 call = run.trace().calls.get(block.get('tool_use_id'))
                 if call and call[2].get('input', {}).get('command') == self.policy['native_shared_helpers']['advance']:
+                    run = self._run(endpoints)
                     capture.observe_advance_settled(run, block['tool_use_id'])
-                    run = self._run(endpoints); decision = run.decision()
+                    run, decision = self._phase_state(endpoints, refresh=True)
             if event.get('type') == 'control_request':
                 data = event.get('request', {}).get('input', {})
                 name, inputs = data.get('tool_name'), data.get('tool_input')
@@ -274,6 +314,7 @@ class CallbackAdapter:
                         raise ValueError('native stage callback refused: ' + basis)
                     if name == 'Write':
                         capture.observe_response_intent(run, data['tool_use_id'])
+                        self._phase_cache = None
                 if inputs.get('command') == self.policy['native_shared_helpers']['recorder']:
                     if self.final_evidence is None or self.state.accepted is None or self.recorder_call != data['tool_use_id']:
                         raise ValueError('recorder callback lacks its settled fresh draft/final evidence')
@@ -313,9 +354,12 @@ class CallbackAdapter:
                     inputs = call['input']
                     if call['name'] == 'Read' and decision is not None and decision.request is not None and inputs.get('file_path') == decision.request.pin.path:
                         capture.observe_request_read(run, identity)
+                        self._phase_cache = None
                     elif call['name'] == 'Write' and decision is not None and decision.response is not None and inputs.get('file_path') == decision.response.path:
                         capture.observe_response_written(run, identity)
+                        self._phase_cache = None
                     elif call['name'] == 'Bash' and inputs.get('command') == self.policy['native_shared_helpers']['final_evidence']:
+                        run, decision = self._phase_state(endpoints, refresh=True)
                         current = self._current_final(run)
                         actual = trace.settled(identity)
                         observed_result = evidence.event(run.transcript, actual.result)
@@ -325,6 +369,7 @@ class CallbackAdapter:
                                 raise ValueError('final helper stdout differs from actual captured final evidence')
                         self.final_evidence = current
                     elif identity == self.recorder_call:
+                        run, decision = self._phase_state(endpoints, refresh=True)
                         metadata = event.get('tool_use_result', {})
                         codes = [metadata[k] for k in ('exitCode', 'exit_code') if k in metadata]
                         if not codes or any(type(code) is not int or code != 0 for code in codes) or block.get('is_error') is not False:
@@ -340,13 +385,14 @@ class CallbackAdapter:
                 # These fixed side effects independently replay the settled
                 # phase boundary before creating any original seal.
                 capture.seal_originals(self._run(endpoints), action)
+                self._phase_cache = None
             self.state.observe(event, preserved_shell_commands=preserved)
             problems = self.state.report()['problems']
             if problems:
                 raise ValueError('native attribution: ' + '; '.join(problems))
             self._final_unchanged(run)
         except Exception as exc:
-            self._stop('native shared observation failed: ' + type(exc).__name__ + ': ' + str(exc))
+            self._stop('native shared observation failed: ' + self._failure_detail(exc))
 
     def classify(self, command, python, programs, selected_policy):
         if self.failure is not None:
@@ -364,13 +410,19 @@ class CallbackAdapter:
                     raise ValueError('; '.join(phase['problems']))
                 self._final_unchanged(run)
             except Exception as exc:
-                self.failure = 'completed native shared history cannot be verified: ' + type(exc).__name__ + ': ' + str(exc)
+                self.failure = 'completed native shared history cannot be verified: ' + self._failure_detail(exc)
         out = self.state.report(complete=complete)
+        diagnostic = {}
+        if self.failure is not None and getattr(self, '_stream_diagnostic_json', None) is not None:
+            try:
+                diagnostic['stream_diagnostic'] = live_streams.diagnostic_document(self._stream_diagnostic_json)
+            except Exception:
+                pass  # Existing failed reports remain available without it.
         return {**out, 'execution': EXECUTION, 'composition_sha256': c.sha(self.raw),
             'controller_stop': self.failure, 'final_evidence': deepcopy(self.final_evidence),
             'recorder_completed': self.recorder_done, 'recorder_identity': deepcopy(self.recorder_identity),
             'phase_history': self.phase.report(complete=complete),
-            'draft_gate_passed': out['draft_gate_passed'] and self.failure is None}
+            'draft_gate_passed': out['draft_gate_passed'] and self.failure is None, **diagnostic}
 
 
 def capture_phase(run, *, complete):

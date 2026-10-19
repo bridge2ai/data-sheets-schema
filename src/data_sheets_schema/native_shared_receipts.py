@@ -83,8 +83,34 @@ class _ReceiptCatalogContext:
     def __init__(self):
         self._entry = None
         self._typed_marker = None
+        self._derivations = None
+        self._derivations_marker = None
+        self._prefixes = {}
+        self._raw_inputs = {}
+        self._prepared = {}
+        self._completed = {}
+        self._requests = {}
+        self._responses = {}
+        self._completions = {}
+        self._packets = {}
+        self._base = {}
+        self._last_trace = None
+        self._verified_obs = {}
+        self._warm_key_cache = None
+        self._prep_key_cache = None
+        self._evidence = {}
+        self._settled = None
         self._bytes = 0
         self._lock = Lock()
+
+    def derivations(self):
+        from . import audit_omissions as omissions, typed_audit as typed
+        token = (typed._derive, typed._derive_uncached, typed._seal, omissions._prepare)
+        with self._lock:
+            if self._derivations is None or self._derivations_marker != token:
+                self._derivations = typed.DerivationCache()
+                self._derivations_marker = token
+            return self._derivations
 
     def catalog(self, selection, snapshot):
         return self.schema_data(selection, snapshot)[1]
@@ -215,6 +241,7 @@ def _inputs(selection, phase1, *, _catalogs=None):
 
 
 def _raw_inputs(selection, full_raw, receipt_raw, *, _catalogs=None):
+    from copy import deepcopy
     chosen = selection.document()['inputs']
     bounds = selection.bounds()
     for raw in (full_raw, receipt_raw):
@@ -222,10 +249,35 @@ def _raw_inputs(selection, full_raw, receipt_raw, *, _catalogs=None):
             raise ValueError('native initial inputs require captured bytes')
         if len(raw) > min(bounds['max_input_bytes'], contract.HARD_LIMITS['original_full_bytes']):
             raise ValueError('phase-1 input exceeds the supplied native byte bound')
+    bundle = selection.raw(chosen['bundle']['path'])
+    manifest_raw = selection.raw(chosen['chunk_manifest']['path'])
+    context_raw = selection.raw(chosen['context']['path'])
+    snapshot = schema_snapshot(selection)
+    ctx = _catalog_context(_catalogs)
+    cat_key = _catalog_key(selection, snapshot)
+    token = catalog_reuse.runtime_token() if _catalogs is not None else None
+    raw_key = None if token is None else (
+        token, omissions._owners, receipts.populated_leaves, chunk_texts, validate_manifest_mapping,
+        selection.registration.pin.sha256, selection.registration.raw,
+        bundle, manifest_raw, context_raw, full_raw, receipt_raw,
+        cat_key,
+    )
+    if (raw_key is not None and type(ctx).schema_data is _ReceiptCatalogContext.schema_data
+            and 'schema_data' not in vars(ctx) and ctx._entry is not None
+            and ctx._bytes <= _CATALOG_PAYLOAD_BYTES and ctx._entry[0] == cat_key):
+        if ctx._prep_key_cache is not None and ctx._prep_key_cache[0] == 'raw' and ctx._prep_key_cache[1] == raw_key:
+            raw_key = ctx._prep_key_cache[1]
+        if raw_key in ctx._raw_inputs:
+            ctx._prep_key_cache = ('raw', raw_key)
+            full, receipt, manifest, texts, md5, cached_bases, cached_catalog, owners = ctx._raw_inputs[raw_key]
+            return full, receipt, manifest, dict(texts), md5, cached_bases, cached_catalog, dict(owners)
+    bases, catalog = ctx.schema_data(selection, snapshot)
+    if raw_key is not None and raw_key in ctx._raw_inputs:
+        full, receipt, manifest, texts, md5, cached_bases, _cached_catalog, owners = ctx._raw_inputs[raw_key]
+        return full, receipt, manifest, dict(texts), md5, cached_bases, catalog, dict(owners)
     full = omissions._mapping(full_raw, 'sealed native full')
     receipt = omissions._mapping(receipt_raw, 'sealed native receipt')
-    bundle = selection.raw(chosen['bundle']['path'])
-    manifest = omissions._mapping(selection.raw(chosen['chunk_manifest']['path']), 'captured chunks')
+    manifest = omissions._mapping(manifest_raw, 'captured chunks')
     validate_manifest_mapping(manifest, bundle, manifest.get('bundle'))
     md5 = hashlib.md5(bundle).hexdigest()
     if receipt.get('bundle_md5') != md5:
@@ -234,13 +286,16 @@ def _raw_inputs(selection, full_raw, receipt_raw, *, _catalogs=None):
                      chunk_texts(bundle.decode('utf-8'), manifest['chunks'])))
     if len(receipts.populated_leaves(full)) > bounds['max_populated_paths']:
         raise ValueError('complete native populated inventory exceeds the global bound')
-    snapshot = schema_snapshot(selection)
-    bases, catalog = _catalog_context(_catalogs).schema_data(selection, snapshot)
-    context = omissions._mapping(selection.raw(chosen['context']['path']), 'scope context', json_only=True)
+    context = omissions._mapping(context_raw, 'scope context', json_only=True)
     owners = omissions._owners(full, catalog, context['vocabulary'])
     scopes = [row['owner'] for row in context['scopes']]
     if scopes.count('') != 1 or len(set(scopes)) != len(scopes) or any(p not in owners for p in scopes):
         raise ValueError('native scope must name distinct existing full-record owners and root once')
+    if raw_key is not None and catalog_reuse.runtime_token() is token:
+        ctx._raw_inputs[raw_key] = (
+            deepcopy(full), deepcopy(receipt), deepcopy(manifest), dict(texts), md5, bases, deepcopy(catalog), dict(owners),
+        )
+        ctx._prep_key_cache = ('raw', raw_key)
     return full, receipt, manifest, texts, md5, bases, catalog, owners
 
 
@@ -281,6 +336,29 @@ def prepare(selection, execution, phase1):
     return _prepare(selection, execution, phase1, _ReceiptCatalogContext())
 
 
+def _prep_key(selection, execution, phase1, catalogs):
+    if catalogs is None:
+        return None, None, None
+    ctx = _catalog_context(catalogs)
+    token = catalog_reuse.runtime_token()
+    if token is None:
+        return ctx, None, None
+    snapshot = schema_snapshot(selection)
+    cat_key = _catalog_key(selection, snapshot)
+    fn_key = (receipts.uncovered_receiptable_leaves, receipts.check, receipts.apply_rereceipt,
+              policy, output_ceiling, _inputs, _raw_inputs)
+    key = (
+        token, fn_key, cat_key, selection.registration.pin.sha256, selection.registration.raw,
+        selection.descriptor.raw, selection.receipt_policy.pin.sha256, selection.receipt_policy.raw,
+        selection.bounds_json, tuple((item.pin.role, item.pin.path, item.raw) for item in selection.authority),
+        execution.runtime_declaration.pin.sha256, execution.runtime_declaration.raw,
+        execution.runtime_declaration_sha256, phase1.seal.pin.sha256,
+        phase1.full.pin, phase1.full.raw, phase1.original_receipt.pin, phase1.original_receipt.raw,
+    )
+    warm = (ctx._entry is not None and ctx._bytes <= _CATALOG_PAYLOAD_BYTES and ctx._entry[0] == cat_key)
+    return ctx, token, key if warm else (key,)
+
+
 def _prepare(selection, execution, phase1, catalogs):
     full, receipt, manifest, texts, md5, bases, catalog, owners = _inputs(selection, phase1, _catalogs=catalogs)
     chosen = selection.document()['inputs']
@@ -307,8 +385,19 @@ def complete(selection, execution, phase1, response_raw):
 
 
 def _complete(selection, execution, phase1, response_raw, catalogs):
+    ctx, token, prep_key = _prep_key(selection, execution, phase1, catalogs)
+    complete_key = None if (
+        ctx is None or token is None or prep_key is None or len(prep_key) == 1
+        or (response_raw is not None and type(response_raw) is not bytes)
+    ) else (token, prep_key, response_raw)
+    if complete_key is not None and complete_key in ctx._completed:
+        return ctx._completed[complete_key]
     request = _prepare(selection, execution, phase1, catalogs)
-    full, receipt, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1, _catalogs=catalogs)
+    request_raw = contract.canonical(request)
+    if complete_key is None and ctx is not None and token is not None and (response_raw is None or type(response_raw) is bytes):
+        _, _, prep_key = _prep_key(selection, execution, phase1, catalogs)
+        if prep_key is not None and len(prep_key) > 1:
+            complete_key = (token, prep_key, response_raw)
     listed = request['requested_paths']
     if response_raw is None:
         if listed:
@@ -329,6 +418,7 @@ def _complete(selection, execution, phase1, response_raw, catalogs):
                 raise ValueError('rereceipt must be a list')
         except ValueError as exc:
             answers, problem = [], str(exc)
+    full, receipt, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1, _catalogs=catalogs)
     before = receipts.check(receipt, manifest, texts, full, md5, full,
                              instrument_version=4, identifier_bases=bases)
     merged = receipts.apply_rereceipt(receipt, full, answers, texts, listed=listed, instrument_version=4)
@@ -345,7 +435,7 @@ def _complete(selection, execution, phase1, response_raw, catalogs):
     result = {'protocol': contract.NAME, 'receipt_instrument_version': 4,
         'selection_sha256': selection.registration.pin.sha256,
         'policy_sha256': selection.receipt_policy.pin.sha256,
-        'request_sha256': contract.sha(contract.canonical(request)),
+        'request_sha256': contract.sha(request_raw),
         'response_sha256': None if response_raw is None else contract.sha(response_raw),
         'original_receipt_sha256': phase1.original_receipt.pin.sha256,
         'effective_receipt_sha256': contract.sha(effective),
@@ -370,17 +460,25 @@ def _complete(selection, execution, phase1, response_raw, catalogs):
         'unanswered_paths': unanswered, 'rejected_paths': result['rejected_paths'],
         'rejections': merged['rejections'], 'added_pairs': merged['added_pairs'],
         'scientific_support': 'unverified; independent audit required, no deletion instruction'}
-    return ReceiptResult(tuple(listed), contract.canonical(request), effective, result_raw, contract.canonical(carry))
+    built = ReceiptResult(tuple(listed), request_raw, effective, result_raw, contract.canonical(carry))
+    if complete_key is not None and catalog_reuse.runtime_token() is token:
+        ctx._completed[complete_key] = built
+    return built
 
 
 def check_final(selection, execution, phase1, completion, *, final_full, final_receipt):
     """Check final coverage against the same selected original/effective bytes."""
+    return _check_final(selection, execution, phase1, completion,
+                        final_full=final_full, final_receipt=final_receipt, _catalogs=None)
+
+
+def _check_final(selection, execution, phase1, completion, *, final_full, final_receipt, _catalogs=None):
     if (completion.selection_sha256 != selection.registration.pin.sha256
             or completion.execution_sha256 != execution.execution.pin.sha256
             or completion.phase1_seal_sha256 != phase1.seal.pin.sha256
             or final_receipt != completion.effective_receipt.raw):
         raise ValueError('final native receipt lineage differs from checked stage completion')
-    original, _, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1)
+    original, _, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1, _catalogs=_catalogs)
     full = omissions._mapping(final_full, 'native final full')
     receipt = omissions._mapping(final_receipt, 'native effective receipt')
     block = receipts.check(receipt, manifest, texts, full, md5, original,
@@ -397,3 +495,7 @@ def check_final(selection, execution, phase1, completion, *, final_full, final_r
                 'raw_json': selection.receipt_policy.raw.decode('utf-8')},
             'identity_rules': {'basis': 'captured native full schema', 'identifier_bases': [list(p) for p in bases]},
             'native_stage_completion_history_sha256': completion.history_sha256}
+
+
+_DEFAULT_CHECK_FINAL = check_final
+
