@@ -681,7 +681,13 @@ def execute_child(argv, *, proxy, instruction, attempt, cwd, env, deadline_secon
     # #2985).
     status = exit_status(process)
     if status is None:
-        raise BudgetStop('native CLI exit status is unavailable after cleanup')
+        # Recorded like every other controller stop (#2042, #5078), and like
+        # them it leaves a proxy failure's own record standing (#5079).
+        reason = 'native CLI exit status is unavailable after cleanup'
+        failed = getattr(proxy, 'failed', None)
+        if failed is None or not failed.is_set():
+            record_then_close(proxy, record_stop, reason)
+        raise BudgetStop(reason)
     return status
 
 
@@ -702,8 +708,15 @@ def _close_responsive_control(proxy, process, control, attempt, primary_error):
         'control_initialized': True,
         'control_shutdown_complete': control.control_shutdown_complete,
         'unfinished_control_workers': control.unfinished_control_workers}
-    if primary_error is None and cleanup_error is not None:
+    if cleanup_error is None:
+        return
+    if primary_error is None:
         raise cleanup_error
+    # The run already failed and its error propagates. A cleanup refusal is the
+    # only sign a group member may have survived, so it travels with it (#5078).
+    # The class name only, as other cleanup records keep: an error's text can
+    # carry the child's argv (#5079).
+    primary_error.add_note(f'native cleanup also failed: {type(cleanup_error).__name__}')
 
 
 def main():

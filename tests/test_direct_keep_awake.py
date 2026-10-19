@@ -302,11 +302,13 @@ def test_native_process_cleanup_finishes_before_assertions_release(real_direct, 
     api = FakeAPI()
     cleaned = []
     class Child:
-        returncode = 0
-        def poll(self):
-            assert len(api.active) == 3
-            raise awake.LaunchSignal("synthetic interrupt during child wait")
+        # Unreaped: the run loop watches the exit through leader_exited, not
+        # poll(), and a set returncode would read as already reaped (#2714, #5074).
+        returncode = None
     process = Child()
+    def exit_check(child):
+        assert child is process and len(api.active) == 3
+        raise awake.LaunchSignal("synthetic interrupt during child wait")
     def terminate(child):
         assert child is process and len(api.active) == 3
         cleaned.append(True)
@@ -315,6 +317,7 @@ def test_native_process_cleanup_finishes_before_assertions_release(real_direct, 
     attempt = tmp_path / "neutral-attempt"
     attempt.mkdir()
     monkeypatch.setattr(native.subprocess, "Popen", lambda *a, **kw: process)
+    monkeypatch.setattr(native, "leader_exited", exit_check)
     monkeypatch.setattr(native, "terminate_group", terminate)
     with pytest.raises(awake.LaunchSignal):
         with awake.KeepAwake(api):
