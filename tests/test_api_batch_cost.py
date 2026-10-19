@@ -466,6 +466,23 @@ class BilledRowsReadTest(unittest.TestCase):
         self.assertEqual(gaps, ["1 unreadable line(s) in the reasoning log (line 2)",
                                 "1 response(s) in the reasoning log have no usage row (input tokens unknown)"])
 
+    def test_a_torn_line_from_before_the_run_is_not_named(self):
+        """#5085 N2: `_billed_ids` lists the torn lines on disk before the run,
+        and `_billed_rows` names only the ones this invocation left."""
+        from collections import Counter
+        from data_sheets_schema.cli.api import _billed_ids
+        log = self.root / "P_reasoning.jsonl"
+        log.write_text("{torn\n", encoding="utf-8")
+        with patch("data_sheets_schema.usage_ledger.ledger_path", return_value=self.root / "none.json"), \
+             patch("data_sheets_schema.api_runner._abandoned_rows", return_value=[]):
+            before = _billed_ids(self.spec, set(), Counter())
+        self.assertEqual(before, {("torn-reasoning-line", 1)})
+        _, gaps = self._read(before=before)
+        self.assertEqual(gaps, [])
+        log.write_text("{torn\n{torn again\n", encoding="utf-8")
+        _, gaps = self._read(before=before)
+        self.assertEqual(gaps, ["1 unreadable line(s) in the reasoning log (line 2)"])
+
 
 class ApiBatchTotalsWithoutCapTest(ApiBatchCostAccountingTest):
     """#5068: the printed totals are this invocation's spend whether or not
@@ -573,6 +590,21 @@ class ApiBatchRealBilledRowsTest(ApiBatchCostAccountingTest):
         self.assertNotIn("may be undercounted", result.stderr)
 
 
+class ApiBatchSuccessGapsTest(ApiBatchRealBilledRowsTest):
+    """#5085 N3: on success, what the on-disk read could not count is said."""
+
+    def test_a_success_names_what_the_recorded_rows_could_not_count(self):
+        def finished(spec, write):
+            row = {**self.ROW, "usage_id": "u1"}
+            write({"rows": [row], "pending_call": {"usage_id": "p9", "phase": "report"}})
+            return {**ApiBatchCostStopTest()._make_mock_execute(1.0)(spec), "usage": [row]}
+
+        result = self._invoke_real(finished, {})
+        self.assertEqual(result.exit_code, 0, result.output + result.stderr)
+        self.assertIn("recorded rows may be missing from the cost: call p9 (report) has no recorded usage",
+                      result.stderr)
+
+
 class ApiBatchSuccessPathRowsTest(ApiBatchCostAccountingTest):
     """#5069: a successful run counts the billed rows recorded on disk that
     its returned usage lacks, such as an attempt abandoned during the report
@@ -590,23 +622,70 @@ class ApiBatchSuccessPathRowsTest(ApiBatchCostAccountingTest):
         self.assertEqual(result.exit_code, 0, result.output)
         self.assertIn("tokens: 200,000 in, 40,000 out (cost: $2.00)", result.output)
 
-    def test_returned_rows_without_a_usage_id_are_not_unioned_and_it_is_said(self):
+    def test_an_on_disk_row_from_before_the_run_is_not_added(self):
+        """#5085 L2: the union's `billed_before` filter. An id on disk before
+        the run that `execute` does not return is earlier spend."""
+        old = {**self.ROW, "output_tokens": 60_000, "usage_id": "old"}      # $2.00 of history
+
         def finished(spec):
-            finished.on_disk = {"u1": {**self.ROW, "usage_id": "u1"}}
-            return ApiBatchCostStopTest()._make_mock_execute(1.0)(spec)    # rows carry no usage id
-        finished.on_disk = {}
-        result = CliRunner(mix_stderr=False)
+            row = {**self.ROW, "usage_id": "u1"}
+            finished.on_disk["u1"] = row
+            return {**ApiBatchCostStopTest()._make_mock_execute(1.0)(spec), "usage": [row]}
+        finished.on_disk = {"old": old}
+        result = self._invoke(MagicMock(side_effect=finished), lambda spec: dict(finished.on_disk), [], reps="1")
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn("tokens: 100,000 in, 20,000 out (cost: $1.00)", result.output)
+
+
+#: A row as the 133 legacy records carry it: no usage id (#5085).
+LEGACY_ROW = {"phase": "full", "attempt": 1, "started_at": "2026-09-04T01:25:10+00:00", "seconds": 304.869,
+              "input_tokens": 100_000, "output_tokens": 20_000, "cache_read": 0, "cache_write": 0,
+              "max_tokens": 128000, "stop_reason": "end_turn"}                       # $1.00
+
+
+class ApiBatchLegacyRowsTest(unittest.TestCase):
+    """#5085 L1: rows with no usage id, as records written before ids carry
+    them, are matched against the pre-run record by canonical text: a
+    re-invoked completed legacy label adds $0, and only a row that matches
+    nothing is counted, with a warning that the count may be over."""
+
+    def _invoke(self, recorded, returned):
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import PropertyMock
+        import yaml
+        from data_sheets_schema.api_runner import RunSpec
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        record = Path(tmp.name) / "AI_READI_provenance.yaml"
+        record.write_text(yaml.safe_dump({"api_usage": recorded}), encoding="utf-8")
+
+        def finished(spec):
+            return {**ApiBatchCostStopTest()._make_mock_execute(1.0)(spec), "usage": returned,
+                    "skipped": ["full", "core"]}
         with patch("data_sheets_schema.cli.api._require_bundle", return_value=None), \
              patch("data_sheets_schema.cli.api._plan_or_refuse", side_effect=ApiBatchCostStopTest()._dummy_plan), \
-             patch("data_sheets_schema.cli.api._billed_rows", side_effect=lambda spec, *a, **k: dict(finished.on_disk)), \
+             patch.object(RunSpec, "provenance_path", new_callable=PropertyMock, return_value=record), \
              patch("data_sheets_schema.api_runner.execute", MagicMock(side_effect=finished)):
-            result = result.invoke(cli, [
+            return CliRunner(mix_stderr=False).invoke(cli, [
                 "api", "batch", "--projects", "AI_READI", "--replicates", "1", "--arm", "baseline",
                 "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
                 "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate"])
+
+    def test_a_reinvoked_completed_legacy_label_adds_nothing(self):
+        recorded = [LEGACY_ROW, {**LEGACY_ROW, "phase": "audit"}, dict(LEGACY_ROW)]   # a repeated row too
+        result = self._invoke(recorded, [dict(r) for r in recorded])
         self.assertEqual(result.exit_code, 0, result.output + result.stderr)
-        self.assertIn("1 returned usage row(s) carry no usage id", result.stderr)
-        self.assertIn("(cost: $1.00)", result.output)          # u1 on disk is not added
+        self.assertIn("tokens: 0 in, 0 out (cost: $0.00)", result.output)
+        self.assertNotIn("usage id", result.stderr)
+
+    def test_an_unkeyed_row_that_matches_nothing_is_counted_and_said_to_risk_an_overcount(self):
+        result = self._invoke([LEGACY_ROW], [dict(LEGACY_ROW), dict(LEGACY_ROW)])     # one more than recorded
+        self.assertEqual(result.exit_code, 0, result.output + result.stderr)
+        self.assertIn("(cost: $1.00)", result.output)
+        self.assertIn("1 returned usage row(s) carry no usage id and match no row recorded before this run",
+                      result.stderr)
+        self.assertIn("the cost is overcounted", result.stderr)
 
 
 class ApiBatchPricingTest(unittest.TestCase):
