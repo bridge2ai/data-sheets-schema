@@ -119,6 +119,15 @@ MODEL_FACING_MODULES = frozenset({
     "rereceipt", "api_playbook", "native_source_attribution", "receipt_completion", "receipts", "removals",
 })
 
+#: The native shared-protocol modules, whose sources live on the native branch
+#: and not on main, so they are not listed above: a listed module the
+#: derivation cannot reach fails the list cross-check (88f909562). They keep
+#: the list's guarantee anyway: present in a checkout, each is model-facing
+#: even when the derivation misses it (#5082).
+NATIVE_SHARED_MODULES = frozenset({
+    "native_shared_render", "native_shared_stage", "native_shared_receipts", "native_shared_contract",
+})
+
 # Offline draft text remains distinct from live request text. The compiler can
 # also be a run-shaping dependency of the explicit captured routing adapter.
 OFFLINE_DRAFT_MODULES = ("src/data_sheets_schema/source_heading_routing.py",)
@@ -1388,9 +1397,11 @@ def _module_role(p: Path, derived=frozenset()) -> str:
     package whose text the data flow found reaching a model (`derived`,
     #4085) or that MODEL_FACING_MODULES names, matched by its place in the
     package and not its stem alone (`cli/healthsheet.py` is not
-    `healthsheet.py`)."""
+    `healthsheet.py`). A native shared module is model-facing as if listed
+    (NATIVE_SHARED_MODULES)."""
     name = _package_module_name(p)
-    return "model_facing" if name in MODEL_FACING_MODULES or name in derived else "run_shaping"
+    listed = name in MODEL_FACING_MODULES or name in NATIVE_SHARED_MODULES
+    return "model_facing" if listed or name in derived else "run_shaping"
 
 
 def _package_module_name(p: Path) -> str | None:

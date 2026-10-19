@@ -874,9 +874,7 @@ class TestProjectKeyedCode(unittest.TestCase):
 
 # Native scanner support can ship before the native runtime. Only this complete
 # optional group may be absent from a standalone API checkout (#4514).
-_OPTIONAL_NATIVE_MODEL_FACING = frozenset({
-    "native_shared_render", "native_shared_stage", "native_shared_receipts", "native_shared_contract",
-})
+_OPTIONAL_NATIVE_MODEL_FACING = scan.NATIVE_SHARED_MODULES
 
 
 def _missing_model_facing_modules(root, closures):
@@ -893,6 +891,23 @@ def _missing_model_facing_modules(root, closures):
                for name in _OPTIONAL_NATIVE_MODEL_FACING for path in paths(name)):
         required = required - _OPTIONAL_NATIVE_MODEL_FACING
     return {name for name in required if not any(path in closures for path in paths(name))}
+
+
+class TestNativeSharedModulesGateWithoutTheDerivation(unittest.TestCase):
+    """#5082: the native group left MODEL_FACING_MODULES (88f909562) but keeps the
+    list's guarantee: a native module the derivation misses still gates."""
+
+    def test_a_native_module_the_derivation_misses_is_model_facing_and_gates(self):
+        line = 'NOTE_5082 = "Describe the CHORUS cohort."'
+        for name in sorted(scan.NATIVE_SHARED_MODULES):
+            rel = f"src/data_sheets_schema/{name}.py"
+            role = scan._module_role(ROOT / rel, frozenset())
+            self.assertEqual(role, "model_facing", name)
+            hits = _scan_text(rel, line + "\n", scan.Surface(rel, ["native_agentic"], role, "live", "t"))
+            self.assertTrue(hits and all(h["violation"] for h in hits), (name, hits))
+
+    def test_the_group_is_not_listed_so_main_s_list_cross_check_holds(self):
+        self.assertFalse(scan.NATIVE_SHARED_MODULES & scan.MODEL_FACING_MODULES)
 
 
 class TestModelFacingClosureCoverage(unittest.TestCase):

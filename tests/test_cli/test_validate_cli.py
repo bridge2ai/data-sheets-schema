@@ -404,3 +404,15 @@ class ValidateCoreIntegrationTestCase(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_schema_cache_key_covers_imported_modules(tmp_path):
+    """#5082: an edit confined to an imported module changes the instance-lint cache key."""
+    from data_sheets_schema import instance_lint
+    head = "prefixes: {linkml: https://w3id.org/linkml/}\ndefault_range: string\n"
+    (tmp_path / "imp.yaml").write_text("id: https://x/imp\nname: imp\n" + head + "imports: [linkml:types]\nclasses: {A: {}}\n")
+    root = tmp_path / "root.yaml"
+    root.write_text("id: https://x/root\nname: root\n" + head + "imports: [linkml:types, imp]\nclasses: {R: {}}\n")
+    before = instance_lint._cache_key(str(root))
+    (tmp_path / "imp.yaml").write_text((tmp_path / "imp.yaml").read_text().replace("A: {}", "A: {}, B: {}"))
+    assert instance_lint._cache_key(str(root)) != before

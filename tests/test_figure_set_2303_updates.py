@@ -147,11 +147,21 @@ def test_unreachable_run_commit_resolves_only_to_the_pinned_manifest_bytes():
     import hashlib
     import subprocess
     rel = "data/preprocessed/chunks/CHORUS_chunks.yaml"
-    old = subprocess.check_output(["git", "log", "--format=%H", "-1", "HEAD~0", "--", rel],
-                                  cwd=st.ROOT, text=True).strip()
-    pinned = hashlib.sha256(subprocess.check_output(["git", "show", f"{old}:{rel}"], cwd=st.ROOT)).hexdigest()
+    # The oldest version, never the working tree's: only a history walk finds it (#5082).
+    oldest = subprocess.check_output(["git", "log", "--full-history", "--format=%H", "HEAD", "--", rel],
+                                     cwd=st.ROOT, text=True).split()[-1]
+    old_raw = subprocess.check_output(["git", "show", f"{oldest}:{rel}"], cwd=st.ROOT)
+    pinned = hashlib.sha256(old_raw).hexdigest()
+    assert pinned != hashlib.sha256((st.ROOT / rel).read_bytes()).hexdigest()
     missing = "0" * 40
     raw, ref = f06.chunk_manifest_bytes_at(missing, "CHORUS", pinned)
-    assert hashlib.sha256(raw).hexdigest() == pinned and "not reachable" in ref
+    assert raw == old_raw and "not reachable" in ref
     assert f06.chunk_manifest_bytes_at(missing, "CHORUS", "f" * 64)[0] is None
     assert f06.chunk_manifest_bytes_at(missing, "CHORUS")[0] is None
+
+
+def test_fig19_refuses_an_unreachable_commit_with_no_matching_version():
+    """#5082: fig19 never falls back to the working-tree manifest."""
+    import pytest
+    with pytest.raises(SystemExit, match="chunk manifest not available at the run commit"):
+        f19.verified_manifest("0" * 40, "CHORUS", {"inputs": {"chunks": {"sha256": "f" * 64}}})

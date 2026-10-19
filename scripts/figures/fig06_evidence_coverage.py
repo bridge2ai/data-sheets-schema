@@ -105,9 +105,15 @@ def chunk_manifest_bytes_at(commit: str, project: str, sha256: str | None = None
     except subprocess.CalledProcessError:
         pass
     if sha256:
-        history = subprocess.check_output(["git", "log", "--format=%H", "HEAD", "--", rel], cwd=st.ROOT, text=True)
+        # --full-history: a version that lived only on a merged side branch is
+        # not simplified away (#5082).
+        history = subprocess.check_output(["git", "log", "--full-history", "--format=%H", "HEAD", "--", rel],
+                                          cwd=st.ROOT, text=True)
         for c in history.split():
-            raw = subprocess.check_output(["git", "show", f"{c}:{rel}"], cwd=st.ROOT, stderr=subprocess.DEVNULL)
+            try:
+                raw = subprocess.check_output(["git", "show", f"{c}:{rel}"], cwd=st.ROOT, stderr=subprocess.DEVNULL)
+            except subprocess.CalledProcessError:
+                continue             # the commit that deleted or renamed it (#5082)
             if hashlib.sha256(raw).hexdigest() == sha256:
                 return raw, f"{rel}@{c[:10]} (sha256 of run commit {commit[:10]}, which is not reachable)"
     return None, f"{rel} (run commit {commit[:10]} unavailable)"
