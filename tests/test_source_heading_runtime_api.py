@@ -427,7 +427,7 @@ def test_nonempty_captured_vocabulary_does_not_resolve_original_path(tmp_path, d
     import os
     from data_sheets_schema import source_heading_completed as complete
     spec = selected_spec(tmp_path, draft_files, profile='bridge2ai')
-    spec.bind_api_header_values(api._model_settings())
+    spec.bind_api_header_values(api._model_settings(spec.condition))
     captured = sg.capture(spec)
     expected = sg.digest_text(spec, 'Dataset')
     frozen = complete._CompletedSpec.from_render_spec(spec.render_spec(), project=spec.project, method=spec.method, label=spec.label)
@@ -468,7 +468,7 @@ def test_selected_form_captures_actual_default_instrument_per_invocation(tmp_pat
     from data_sheets_schema.run_schema import IdentifierRules
     from data_sheets_schema import source_heading_completed as complete
     spec = selected_spec(tmp_path, draft_files, source_naming={'canonical_label': 'Other Project', 'variants': ['Different Programme']})
-    spec.bind_api_header_values(api._model_settings())
+    spec.bind_api_header_values(api._model_settings(spec.condition))
     authority = sg.capture(spec)
     spec.full_path.parent.mkdir(parents=True, exist_ok=True)
     spec.full_path.write_text('description: Sample Programme\n')
