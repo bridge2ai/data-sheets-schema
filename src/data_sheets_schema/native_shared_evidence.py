@@ -225,26 +225,75 @@ def prefix_reference(prefix,*,execution_sha256):
         'path':prefix.path,'through_bytes':prefix.bytes,'lines':prefix.lines,'sha256':prefix.sha256}
 
 
+_PREFIX_LINES_CACHE: dict = {}
+_EVENT_HASH_CACHE: dict = {}
+_LAST_PARSED_LINE: tuple | None = None
+
+
+def _prefix_lines(prefix):
+    key = (prefix.stream, prefix.sha256, prefix.bytes)
+    entry = _PREFIX_LINES_CACHE.get(key)
+    if entry is not None and entry[0] == prefix.raw:
+        return entry[1]
+    raw_bytes = prefix.raw
+    last = _PREFIX_LINES_CACHE.get((prefix.stream, 'last'))
+    if last is not None and last[0].endswith(b'\n') and raw_bytes.startswith(last[0]):
+        tail = raw_bytes[len(last[0]):]
+        lines = last[1] + tuple(part + b'\n' for part in tail.split(b'\n')[:-1]) if tail else last[1]
+    else:
+        lines = tuple(part + b'\n' for part in raw_bytes.split(b'\n')[:-1])
+    if len(_PREFIX_LINES_CACHE) > 32:
+        _PREFIX_LINES_CACHE.clear()
+    _PREFIX_LINES_CACHE[key] = (raw_bytes, lines)
+    if raw_bytes.endswith(b'\n'):
+        _PREFIX_LINES_CACHE[(prefix.stream, 'last')] = (raw_bytes, lines)
+    return lines
+
+
+def _line_raw(prefix, line, error_message='event lies beyond its observed prefix'):
+    lines = _prefix_lines(prefix)
+    if type(line) is not int or not 1 <= line <= len(lines):
+        raise ValueError(error_message)
+    return lines[line - 1]
+
+
+def _limits_token():
+    return (
+        HARD_LIMITS['stream_bytes'],
+        HARD_LIMITS['json_yaml_depth'],
+        HARD_LIMITS['json_yaml_nodes_per_document'],
+        strict_json,
+        canonical,
+        sha,
+    )
+
+
 def event(prefix,reference):
     """Resolve only an exact event inside the actual observed prefix."""
+    global _LAST_PARSED_LINE
     if type(prefix) is not EvidencePrefix or type(reference) is not EventRef or reference.stream!=prefix.stream:
         raise ValueError('event reference differs from its observed stream prefix')
-    pos=0
-    for _ in range(reference.line):
-        end=prefix.raw.find(b'\n',pos)
-        if end<0:raise ValueError('event lies beyond its observed prefix')
-        raw_start,pos=pos,end+1
-    raw=prefix.raw[raw_start:pos]
-    if sha(raw)!=reference.raw_line_sha256:raise ValueError('event physical line hash differs')
+    raw=_line_raw(prefix,reference.line,'event lies beyond its observed prefix')
+    ltok=_limits_token()
+    hkey=(raw,reference.block,ltok) if type(reference.block) in (int,type(None)) else None
+    cached=_EVENT_HASH_CACHE.get(hkey) if hkey is not None else None
+    raw_sha=cached[0] if cached is not None else sha(raw)
+    if raw_sha!=reference.raw_line_sha256:raise ValueError('event physical line hash differs')
     value=strict_json(raw,'observed event',HARD_LIMITS['stream_bytes'])
     if reference.block is not None:
         message=value.get('message') if type(value) is dict else None
         content=message.get('content') if type(message) is dict else None
-        if type(content) is not list or reference.block>=len(content):
+        if type(content) is not list or type(reference.block) is not int or not 0<=reference.block<len(content):
             raise ValueError('event block is absent from the captured physical line')
         value=content[reference.block]
-    if sha(canonical(value))!=reference.value_sha256:raise ValueError('event value hash differs')
+    val_sha=cached[1] if cached is not None else sha(canonical(value))
+    if val_sha!=reference.value_sha256:raise ValueError('event value hash differs')
+    if cached is None and hkey is not None:
+        if len(_EVENT_HASH_CACHE)>512:
+            _EVENT_HASH_CACHE.clear()
+        _EVENT_HASH_CACHE[hkey]=(raw_sha,val_sha)
     return value
+
 
 
 def require_append_only(earlier,later):

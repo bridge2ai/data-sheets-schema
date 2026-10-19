@@ -94,9 +94,10 @@ class _ReceiptCatalogContext:
         self._completions = {}
         self._packets = {}
         self._base = {}
-        self._traces = {}
         self._last_trace = None
-        self._verified_obs = set()
+        self._verified_obs = {}
+        self._warm_key_cache = None
+        self._prep_key_cache = None
         self._evidence = {}
         self._settled = None
         self._bytes = 0
@@ -263,10 +264,13 @@ def _raw_inputs(selection, full_raw, receipt_raw, *, _catalogs=None):
     )
     if (raw_key is not None and type(ctx).schema_data is _ReceiptCatalogContext.schema_data
             and 'schema_data' not in vars(ctx) and ctx._entry is not None
-            and ctx._bytes <= _CATALOG_PAYLOAD_BYTES and ctx._entry[0] == cat_key
-            and raw_key in ctx._raw_inputs):
-        full, receipt, manifest, texts, md5, cached_bases, cached_catalog, owners = ctx._raw_inputs[raw_key]
-        return full, receipt, manifest, dict(texts), md5, cached_bases, deepcopy(cached_catalog), dict(owners)
+            and ctx._bytes <= _CATALOG_PAYLOAD_BYTES and ctx._entry[0] == cat_key):
+        if ctx._prep_key_cache is not None and ctx._prep_key_cache[0] == 'raw' and ctx._prep_key_cache[1] == raw_key:
+            raw_key = ctx._prep_key_cache[1]
+        if raw_key in ctx._raw_inputs:
+            ctx._prep_key_cache = ('raw', raw_key)
+            full, receipt, manifest, texts, md5, cached_bases, cached_catalog, owners = ctx._raw_inputs[raw_key]
+            return full, receipt, manifest, dict(texts), md5, cached_bases, cached_catalog, dict(owners)
     bases, catalog = ctx.schema_data(selection, snapshot)
     if raw_key is not None and raw_key in ctx._raw_inputs:
         full, receipt, manifest, texts, md5, cached_bases, _cached_catalog, owners = ctx._raw_inputs[raw_key]
@@ -291,6 +295,7 @@ def _raw_inputs(selection, full_raw, receipt_raw, *, _catalogs=None):
         ctx._raw_inputs[raw_key] = (
             deepcopy(full), deepcopy(receipt), deepcopy(manifest), dict(texts), md5, bases, deepcopy(catalog), dict(owners),
         )
+        ctx._prep_key_cache = ('raw', raw_key)
     return full, receipt, manifest, texts, md5, bases, catalog, owners
 
 
@@ -355,16 +360,11 @@ def _prep_key(selection, execution, phase1, catalogs):
 
 
 def _prepare(selection, execution, phase1, catalogs):
-    from copy import deepcopy
-    ctx, token, prep_key = _prep_key(selection, execution, phase1, catalogs)
-    if (ctx is not None and token is not None and prep_key is not None
-            and len(prep_key) > 1 and prep_key in ctx._prepared):
-        return deepcopy(ctx._prepared[prep_key])
     full, receipt, manifest, texts, md5, bases, catalog, owners = _inputs(selection, phase1, _catalogs=catalogs)
     chosen = selection.document()['inputs']
     paths = receipts.uncovered_receiptable_leaves(receipt, manifest, texts, full, md5,
                                                   original=full, identifier_bases=bases)
-    result = {'protocol': contract.NAME, 'stage': 'receipt',
+    return {'protocol': contract.NAME, 'stage': 'receipt',
         'selection_sha256': selection.registration.pin.sha256,
         'receipt_policy': policy(selection),
         'phase1_seal_sha256': phase1.seal.pin.sha256,
@@ -378,12 +378,6 @@ def _prepare(selection, execution, phase1, catalogs):
         'max_output_tokens': output_ceiling(execution),
         'output_limit_basis': 'asserted runtime output ceiling; not per-stage enforcement or a whole-session token budget',
         'response_contract': 'Return only {rereceipt: [...]}; exactly one existing path and receipt {chunk,snippet} or unsupported:true with reason per requested leaf. Verified quotes do not establish semantic support.'}
-    if ctx is not None and token is not None and catalog_reuse.runtime_token() is token:
-        if prep_key is not None and len(prep_key) == 1:
-            _, _, prep_key = _prep_key(selection, execution, phase1, catalogs)
-        if prep_key is not None and len(prep_key) > 1:
-            ctx._prepared[prep_key] = deepcopy(result)
-    return result
 
 
 def complete(selection, execution, phase1, response_raw):

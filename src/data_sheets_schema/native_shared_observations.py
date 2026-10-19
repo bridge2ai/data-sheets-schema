@@ -9,7 +9,25 @@ from dataclasses import dataclass
 import json
 
 from data_sheets_schema import native_shared_contract as c
-from data_sheets_schema.native_shared_evidence import event
+from data_sheets_schema.native_shared_evidence import (
+    _EVENT_HASH_CACHE,
+    _line_raw,
+    _prefix_lines,
+    event,
+)
+
+_LAST_REF_FRAME: tuple | None = None
+
+
+def _ref_limits_token():
+    return (
+        16 * 1024 * 1024,
+        c.HARD_LIMITS['json_yaml_depth'],
+        c.HARD_LIMITS['json_yaml_nodes_per_document'],
+        c.strict_json,
+        c.canonical,
+        c.sha,
+    )
 
 
 def _same(left,right):
@@ -20,8 +38,7 @@ def rows(prefix):
     if type(prefix) is not c.EvidencePrefix:
         raise ValueError('observation requires an exact captured prefix')
     result=[]
-    for number,part in enumerate(prefix.raw.split(b'\n')[:-1],1):
-        raw=part+b'\n'
+    for number,raw in enumerate(_prefix_lines(prefix),1):
         # Split only physical LF, not embedded Unicode line separators.
         if not raw.endswith(b'\n') or not raw.strip():
             raise ValueError('native prefix contains an incomplete or blank physical row')
@@ -33,17 +50,33 @@ def rows(prefix):
 
 
 def reference(prefix,line,block=None):
-    lines=prefix.raw.split(b'\n')
-    if type(line) is not int or not 1<=line<len(lines):
-        raise ValueError('event reference exceeds the actually observed prefix')
-    raw=lines[line-1]+b'\n'
-    value=c.strict_json(raw,'observed frame',16*1024*1024)
+    global _LAST_REF_FRAME
+    raw=_line_raw(prefix,line,'event reference exceeds the actually observed prefix')
+    ltok=_ref_limits_token()
+    hkey=(raw,block,ltok) if type(block) in (int,type(None)) else None
+    if hkey is not None:
+        cached=_EVENT_HASH_CACHE.get(hkey)
+        if cached is not None:
+            return c.EventRef(prefix.stream,line,block,cached[0],cached[1])
+    last=_LAST_REF_FRAME
+    if last is not None and last[0]==raw and last[1]==ltok:
+        raw_sha,frame=last[2],last[3]
+    else:
+        frame=c.strict_json(raw,'observed frame',16*1024*1024)
+        raw_sha=c.sha(raw)
+        _LAST_REF_FRAME=(raw,ltok,raw_sha,frame)
+    value=frame
     if block is not None:
-        content=value.get('message',{}).get('content')
+        content=value.get('message',{}).get('content') if type(value) is dict and type(value.get('message')) is dict else None
         if type(block) is not int or type(content) is not list or not 0<=block<len(content):
             raise ValueError('event block does not identify actual native content')
         value=content[block]
-    return c.EventRef(prefix.stream,line,block,c.sha(raw),c.sha(c.canonical(value)))
+    val_sha=c.sha(c.canonical(value))
+    if hkey is not None:
+        if len(_EVENT_HASH_CACHE)>512:
+            _EVENT_HASH_CACHE.clear()
+        _EVENT_HASH_CACHE[hkey]=(raw_sha,val_sha)
+    return c.EventRef(prefix.stream,line,block,raw_sha,val_sha)
 
 
 def _frame(value,session,role=None):
@@ -84,6 +117,7 @@ class Trace:
             raise ValueError('observation requires actual initialized session')
         self.calls={};self.callbacks={};self.results={};self.decisions={}
         self.frames={};self.terminal=None
+        self._req_cache={};self._adm_cache={};self._set_cache={}
         callback_ids=set()
         for number,raw,value in native:
             self.frames[number]=value
@@ -162,19 +196,31 @@ class Trace:
     def request(self,identity):
         if identity not in self.calls or identity not in self.callbacks:
             raise ValueError('tool lacks an observed call and callback')
+        rcache=getattr(self,'_req_cache',None)
+        if rcache is not None and identity in rcache:
+            return rcache[identity]
         line,offset,call=self.calls[identity]
-        return c.ObservedToolRequest(call=reference(self.transcript,line,offset),
+        res=c.ObservedToolRequest(call=reference(self.transcript,line,offset),
             callback=reference(self.transcript,self.callbacks[identity][0]),
             input_json=c.canonical(call['input']),session_id=self.session,
             tool_name=call['name'],tool_use_id=identity)
+        if rcache is not None:
+            rcache[identity]=res
+        return res
 
     def admitted(self,identity):
         request=self.request(identity)
         if identity not in self.decisions or self.decisions[identity][1]['classification']!='prescribed':
             raise ValueError('tool has no exact parent admission')
-        return c.ObservedCall(call=request.call,callback=request.callback,
+        acache=getattr(self,'_adm_cache',None)
+        if acache is not None and identity in acache:
+            return acache[identity]
+        res=c.ObservedCall(call=request.call,callback=request.callback,
             admission=reference(self.control,self.decisions[identity][0]),input_json=request.input_json,
             session_id=request.session_id,tool_name=request.tool_name,tool_use_id=identity)
+        if acache is not None:
+            acache[identity]=res
+        return res
 
     def settled(self,identity):
         admitted=self.admitted(identity)
@@ -183,7 +229,13 @@ class Trace:
         line,offset,_=self.results[identity]
         if line<=self.callbacks[identity][0]:
             raise ValueError('tool result precedes its callback')
-        return ToolEvidence(admitted,reference(self.transcript,line,offset),reference(self.transcript,line))
+        scache=getattr(self,'_set_cache',None)
+        if scache is not None and identity in scache:
+            return scache[identity]
+        res=ToolEvidence(admitted,reference(self.transcript,line,offset),reference(self.transcript,line))
+        if scache is not None:
+            scache[identity]=res
+        return res
 
     def pending(self):
         return tuple(identity for identity in self.calls if identity not in self.results)

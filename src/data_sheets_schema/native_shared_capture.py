@@ -418,6 +418,9 @@ def _extend_trace(prev, transcript, control, runtime):
     sub.decisions = dict(prev.decisions)
     sub.frames = dict(prev.frames)
     sub.terminal = prev.terminal
+    sub._req_cache = dict(getattr(prev, '_req_cache', {}))
+    sub._adm_cache = dict(getattr(prev, '_adm_cache', {}))
+    sub._set_cache = dict(getattr(prev, '_set_cache', {}))
     callback_ids = {v.get('request_id') for _, v in sub.callbacks.values()}
     policy = sub.policy
     session_id = sub.session
@@ -532,29 +535,20 @@ class _CapturedRun:
         if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
             if self._trace is None:
                 token = receipt_api.catalog_reuse.runtime_token()
-                traces = getattr(self._catalogs, '_traces', None) if token is not None else None
-                meta_key = None if traces is None else (
+                meta_key = None if (token is None or self._catalogs is None) else (
                     token, self.binding.session_id,
                     c.canonical(self.composition['policy']), c.canonical(self.value['runtime']),
                 )
-                trace_key = None if meta_key is None else (
-                    *meta_key, self.transcript.sha256, self.transcript.raw,
-                    self.control.sha256, self.control.raw,
-                )
-                if trace_key is not None and trace_key in traces:
-                    self._trace = traces[trace_key]
+                last = getattr(self._catalogs, '_last_trace', None) if meta_key is not None else None
+                extended = (_extend_trace(last[1], self.transcript, self.control, self.value['runtime'])
+                            if last is not None and last[0] == meta_key else None)
+                if extended is not None:
+                    self._trace = extended
                 else:
-                    last = getattr(self._catalogs, '_last_trace', None) if meta_key is not None else None
-                    extended = (_extend_trace(last[1], self.transcript, self.control, self.value['runtime'])
-                                if last is not None and last[0] == meta_key else None)
-                    if extended is not None:
-                        self._trace = extended
-                    else:
-                        self._trace = observed.Trace(self.transcript, self.control,
-                            session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
-                    if trace_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
-                        traces[trace_key] = self._trace
-                        self._catalogs._last_trace = (meta_key, self._trace)
+                    self._trace = observed.Trace(self.transcript, self.control,
+                        session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
+                if meta_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
+                    self._catalogs._last_trace = (meta_key, self._trace)
             return self._trace
         return observed.Trace(transcript or self.transcript, control or self.control,
             session_id=self.binding.session_id, policy=self.composition['policy'], runtime=self.value['runtime'])
@@ -960,16 +954,16 @@ def _checked_observations(run):
                 if current.state != 'awaiting_response' or current.request != request:
                     raise ValueError('Read observation names a stale or unpublished request')
                 obs_key = None if verified_obs is None else (
-                    'request_read', token, artifact.pin.sha256, artifact.raw,
-                    request.pin.sha256, request.raw, actual,
+                    'request_read', token, artifact.pin.sha256, request.pin.sha256, actual,
                 )
-                if obs_key is None or obs_key not in verified_obs:
+                obs_val = None if obs_key is None else (artifact.raw, request.raw)
+                if obs_key is None or verified_obs.get(obs_key) != obs_val:
                     observed.complete_request_read(trace, actual, request)
                     if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
-                        verified_obs.add(obs_key)
+                        verified_obs[obs_key] = obs_val
                 if call.tool_use_id in seen_reads or request.pin.path in {row[1].pin.path for row in seen_reads.values()}:
                     raise ValueError('current request has duplicate delivered-read authority')
-                seen_reads[call.tool_use_id] = (artifact, request, current)
+                seen_reads[call.tool_use_id] = (artifact, request, current, call)
             elif kind == 'response_written':
                 intent = seen_intents.get(payload['intent_observation']['sha256'])
                 if intent is None or c.pin_dict(intent[0].pin) != payload['intent_observation']:
@@ -981,26 +975,26 @@ def _checked_observations(run):
                         or response.pin.path != intent_doc['response']['path'] or response.pin.path in seen_writes):
                     raise ValueError('response was replaced, retried or moved to another stage')
                 obs_key = None if verified_obs is None else (
-                    'response_written', token, artifact.pin.sha256, artifact.raw,
-                    response.pin.sha256, response.raw, call.input_json, actual,
+                    'response_written', token, artifact.pin.sha256, response.pin.sha256, actual,
                 )
-                if obs_key is None or obs_key not in verified_obs:
+                obs_val = None if obs_key is None else (artifact.raw, response.raw, call.input_json)
+                if obs_key is None or verified_obs.get(obs_key) != obs_val:
                     observed.first_response_write(trace, actual, response, intent_input_json=call.input_json)
                     if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
-                        verified_obs.add(obs_key)
+                        verified_obs[obs_key] = obs_val
                 seen_writes.add(response.pin.path)
             else:
                 result = payload['advance_result']
                 if result.get('advance_tool_use_id') != call.tool_use_id or call.tool_use_id not in seen_advances:
                     raise ValueError('advance settlement lacks actual earlier selected admission')
                 obs_key = None if verified_obs is None else (
-                    'advance_settled', token, artifact.pin.sha256, artifact.raw,
-                    c.canonical(result), actual,
+                    'advance_settled', token, artifact.pin.sha256, actual,
                 )
-                if obs_key is None or obs_key not in verified_obs:
+                obs_val = None if obs_key is None else (artifact.raw, result)
+                if obs_key is None or verified_obs.get(obs_key) != obs_val:
                     observed.helper_result(trace, actual, result)
                     if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
-                        verified_obs.add(obs_key)
+                        verified_obs[obs_key] = obs_val
                 _history_prefix(run, result['before_history_sha256'])
                 after = decision_at(result['after_history_sha256'])
                 if after.state != result['state']:
@@ -1024,18 +1018,18 @@ def _checked_observations(run):
             if len(reads) != 1 or reads[0][1] != current.request or current.response.path in {v[1]['response']['path'] for v in seen_intents.values()}:
                 raise ValueError('Write intent reuses a stale Read or spent response destination')
             obs_key = None if verified_obs is None else (
-                'response_intent', token, artifact.pin.sha256, artifact.raw,
-                request.input_json, current.response.path, current.response.max_bytes,
+                'response_intent', token, artifact.pin.sha256, current.response.path, current.response.max_bytes,
             )
-            if obs_key is None or obs_key not in verified_obs:
+            obs_val = None if obs_key is None else (artifact.raw, request.input_json)
+            if obs_key is None or verified_obs.get(obs_key) != obs_val:
                 inputs = _document(request.input_json, 'Write intent')
                 if (set(inputs) != {'file_path', 'content'} or inputs['file_path'] != current.response.path
                         or type(inputs['content']) is not str or not inputs['content']
                         or len(inputs['content'].encode('utf-8')) > current.response.max_bytes):
                     raise ValueError('Write intent exceeds the exact response contract')
                 if obs_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
-                    verified_obs.add(obs_key)
-            read_call = _call(c.strict_json(reads[0][0].raw)['payload']['call'])
+                    verified_obs[obs_key] = obs_val
+            read_call = reads[0][3]
             _require_completed_read_before_write(request, trace.settled(read_call.tool_use_id))
             seen_intents[artifact.pin.sha256] = (artifact, payload)
         elif kind == 'advance_admitted':

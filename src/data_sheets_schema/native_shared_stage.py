@@ -100,6 +100,10 @@ def record_bytes(*, record_type, sequence, previous_record_sha256, selection_sha
     return raw
 
 
+_RECORD_VERIFY_CACHE = {}
+_JOURNAL_VERIFY_CACHE = {}
+
+
 def _history(selection, execution, history):
     if type(history) is not c.RawHistory or history.journal.pin.path != selection.role('journal'):
         raise ValueError('native history does not name the selected journal')
@@ -120,25 +124,49 @@ def _history(selection, execution, history):
         raise ValueError('native history byte bound exceeded')
     if sum(len(item.raw) for item in members) > bounds['max_evidence_bytes']:
         raise ValueError('native history evidence byte bound exceeded')
+    sel_sha = selection.registration.pin.sha256
+    exe_sha = execution.execution.pin.sha256
+    att_id = execution.attempt_id
+    sess_id = execution.session_id
+    limit_bytes = c.HARD_LIMITS['metadata_record_bytes']
     rows, previous = [], None
     for sequence, artifact in enumerate(history.records):
-        if artifact.pin.role != 'record' or artifact.pin.path != _dynamic(selection, 'record', sequence):
+        rec_key = (
+            sel_sha, exe_sha, att_id, sess_id, sequence, previous,
+             _dynamic(selection, 'record', sequence), limit_bytes,
+            artifact.pin, artifact.raw,
+        )
+        cached_row = _RECORD_VERIFY_CACHE.get(rec_key)
+        if cached_row is not None:
+            rows.append(dict(cached_row))
+            previous = artifact.pin.sha256
+            continue
+        if artifact.pin.role != 'record' or artifact.pin.path != rec_key[6]:
             raise ValueError('native record path/ordinal differs from complete ordered history')
-        row = c.strict_json(artifact.raw, 'native stage record', c.HARD_LIMITS['metadata_record_bytes'])
+        row = c.strict_json(artifact.raw, 'native stage record', limit_bytes)
         c.exact(row, RECORD_KEYS, 'native stage record')
         expected = record_bytes(record_type=row['record_type'], sequence=sequence,
-            previous_record_sha256=previous, selection_sha256=selection.registration.pin.sha256,
-            execution_sha256=execution.execution.pin.sha256, attempt_id=execution.attempt_id,
-            session_id=None if sequence == 0 else execution.session_id, payload=row['payload'])
+            previous_record_sha256=previous, selection_sha256=sel_sha,
+            execution_sha256=exe_sha, attempt_id=att_id,
+            session_id=None if sequence == 0 else sess_id, payload=row['payload'])
         if artifact.raw != expected:
             raise ValueError('native record chronology/identity differs from the captured session')
+        if len(_RECORD_VERIFY_CACHE) > 512:
+            _RECORD_VERIFY_CACHE.clear()
+        _RECORD_VERIFY_CACHE[rec_key] = dict(row)
         rows.append(row)
         previous = artifact.pin.sha256
-    expected = journal_bytes(selection_sha256=selection.registration.pin.sha256,
-        execution_sha256=execution.execution.pin.sha256, attempt_id=execution.attempt_id,
-        records=tuple(item.pin for item in history.records))
-    if history.journal.raw != expected:
-        raise ValueError('native journal omits, reorders or changes captured records')
+    record_pins = tuple(item.pin for item in history.records)
+    j_key = (sel_sha, exe_sha, att_id, record_pins, c.HARD_LIMITS['metadata_record_bytes'], history.journal.raw)
+    if j_key not in _JOURNAL_VERIFY_CACHE:
+        expected = journal_bytes(selection_sha256=sel_sha,
+            execution_sha256=exe_sha, attempt_id=att_id,
+            records=record_pins)
+        if history.journal.raw != expected:
+            raise ValueError('native journal omits, reorders or changes captured records')
+        if len(_JOURNAL_VERIFY_CACHE) > 128:
+            _JOURNAL_VERIFY_CACHE.clear()
+        _JOURNAL_VERIFY_CACHE[j_key] = True
     artifacts = {}
     for item in (*history.artifacts, *history.observations):
         if item.pin.path in artifacts:
@@ -206,6 +234,7 @@ class _Replay:
         self._explicit_catalogs = _catalogs is not None
         self.catalogs = nr._catalog_context(_catalogs)
         self._token = catalog_reuse.runtime_token() if self._explicit_catalogs else None
+        self._wkey_cache = {}
         self.s, self.e, self.p, self.h = selection, execution, phase1, history
         self.rows, self.artifacts = _history(selection, execution, history)
         self.at = 0
@@ -224,11 +253,13 @@ class _Replay:
         if (self._token is None or self.catalogs._entry is None
                 or self.catalogs._bytes > nr._CATALOG_PAYLOAD_BYTES):
             return None
+        if include_core in self._wkey_cache:
+            return self._wkey_cache[include_core]
         fn_token = (typed._derive, typed._derive_uncached, typed._seal, typed._open,
                     typed._result, typed.assemble, typed.check, typed.check_worker,
                     typed.index, typed.worker_request, typed.capture_response,
                     nr.omissions._prepare, nr._prepare, nr._complete, nr._inputs, nr._raw_inputs)
-        return (
+        key = (
             self._token, fn_token, self.catalogs._entry[0],
             self.s.registration.pin.sha256, self.s.registration.raw,
             self.s.descriptor.raw, self.s.receipt_policy.raw, self.s.bounds_json, self.s.roles,
@@ -241,6 +272,16 @@ class _Replay:
             None if (not include_core or self.p.core is None) else (
                 self.p.core.pin, self.p.core.raw, self.p.core_seal.pin, self.p.core_seal_observation.pin),
         )
+        wcache = self.catalogs._warm_key_cache
+        if wcache is not None and include_core in wcache and wcache[include_core] == key:
+            key = wcache[include_core]
+        else:
+            if wcache is None:
+                wcache = {}
+                self.catalogs._warm_key_cache = wcache
+            wcache[include_core] = key
+        self._wkey_cache[include_core] = key
+        return key
 
     def _expect(self, kind, payload):
         if self.at >= len(self.rows) or self.rows[self.at]['record_type'] != kind:
@@ -299,10 +340,6 @@ class _Replay:
                 self._output('receipt_result', value.result_json), self._output('receipt_carry', value.carry_json))
 
     def _packet(self):
-        wkey = self._warm_key()
-        pkey = None if wkey is None else (wkey, self.receipt.effective_receipt)
-        if pkey is not None and pkey in self.catalogs._packets:
-            return self.catalogs._packets[pkey]
         inputs, limits = self.s.document()['inputs'], self.s.bounds()
         schema = nr.schema_snapshot(self.s)
         packet = typed._prepare(protocol='typed_audit_protocol_v1', original_full=self.p.full.raw,
@@ -318,8 +355,6 @@ class _Replay:
             _catalog_lookup=catalog_reuse._CatalogLookup(self.catalogs, self.s), **self.options)
         if len(packet['plan']['inventory']['values']) > limits['max_populated_paths']:
             raise ValueError('native global populated path bound exceeded')
-        if pkey is not None and catalog_reuse.runtime_token() is self._token:
-            self.catalogs._packets[pkey] = packet
         return packet
 
     def _inner(self, cursor):
