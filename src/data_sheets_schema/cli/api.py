@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import json
 import math
 import sys
@@ -736,7 +737,13 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
         click.echo(f"   {k:10} {v}")
 
 
-def _billed_ids(spec, pending: set | None = None) -> set:
+def _row_key(row) -> str:
+    """A row's canonical text: how a row with no usage id is matched against
+    the rows recorded before a run (#5085)."""
+    return json.dumps(row, sort_keys=True, default=str)
+
+
+def _billed_ids(spec, pending: set | None = None, unkeyed: Counter | None = None) -> set:
     """The usage ids of every billed attempt already on disk for a run: its
     provenance record's `api_usage`, the usage ledger, the reasoning log and
     this run's rows of the abandoned-attempts journal (#5045 review). Read
@@ -745,17 +752,27 @@ def _billed_ids(spec, pending: set | None = None) -> set:
     the run's rows then count again, which can only stop the batch early.
     A pending call is not billed evidence and is never in the set: a resume
     can settle it with real counters, and this invocation must count them
-    (#5073 F1). Its id goes in `pending`, for `_billed_rows(before=...)`."""
-    return set(_billed_rows(spec, pending=pending))
+    (#5073 F1). Its id goes in `pending`, for `_billed_rows(before=...)`.
+    The record's rows with no usage id, written before ids existed, are
+    counted by canonical text in `unkeyed`, and the reasoning log's torn lines
+    go in the set as `("torn-reasoning-line", n)`, so neither is later taken
+    for this invocation's (#5085)."""
+    torn: list = []
+    ids = set(_billed_rows(spec, pending=pending, unkeyed=unkeyed, torn_lines=torn))
+    return ids | {("torn-reasoning-line", n) for n in torn}
 
 
-def _billed_rows(spec, gaps: list | None = None, before=frozenset(), pending: set | None = None) -> dict:
+def _billed_rows(spec, gaps: list | None = None, before=frozenset(), pending: set | None = None,
+                 unkeyed: Counter | None = None, torn_lines: list | None = None) -> dict:
     """Billed attempts on disk by usage id. Read after a run raised, anything
     that leaves the count short is named in `gaps`, so the caller says the
     cost may be undercounted (#5068); what was already on disk `before` the
     run is not this run's and is not named:
 
     - a source that cannot be read;
+    - an unreadable line of the reasoning log: the other lines are still
+      read, and the torn ones are named (and listed in `torn_lines`), unless
+      `before` already holds them;
     - the ledger's `pending_call`: intent committed before a request whose
       outcome was never recorded. It carries no token counts, so it is named,
       not priced and not returned as a row (its id goes in `pending`); the
@@ -782,6 +799,8 @@ def _billed_rows(spec, gaps: list | None = None, before=frozenset(), pending: se
         if spec.provenance_path.exists():
             for row in (yaml.safe_load(spec.provenance_path.read_text(encoding="utf-8")) or {}).get("api_usage") or []:
                 keep(row)
+                if unkeyed is not None and isinstance(row, dict) and not isinstance(row.get("usage_id"), str):
+                    unkeyed[_row_key(row)] += 1
     except Exception:                                  # noqa: BLE001
         note("could not read provenance api_usage")
     pending_call = generation = None
@@ -808,7 +827,16 @@ def _billed_rows(spec, gaps: list | None = None, before=frozenset(), pending: se
             note(f"call {pending_call['usage_id']} ({pending_call.get('phase')}) has no recorded usage")
     try:
         partial = 0
-        for entry in reasoning.read(_reasoning_path(spec)):
+        # Lenient (#5070 R4): one torn line, a killed run's partial write
+        # (#2695), must not drop every other response from the count.
+        entries, torn = reasoning.read_lenient(_reasoning_path(spec))
+        if torn_lines is not None:
+            torn_lines.extend(torn)
+        torn = [n for n in torn if ("torn-reasoning-line", n) not in before]   # not an earlier run's (#5085)
+        if torn:
+            note(f"{len(torn)} unreadable line(s) in the reasoning log (line {', '.join(map(str, torn[:5]))}"
+                 f"{', …' if len(torn) > 5 else ''})")
+        for entry in entries:
             uid = entry.get("usage_id")
             if (isinstance(uid, str) and uid not in rows
                     and generation is not None and entry.get("generation_id") == generation
@@ -955,6 +983,17 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         if len(specs) > 1 and any(registration(s)["coverage_floor"]["state"] == "pending" for s in specs):
             raise click.ClickException("diagnostic receipt completion floor is pending; fan-out is blocked")
         receipt_gating = registration(specs[0])["coverage_floor"]["state"] == "registered"
+    if max_cost_dollars is not None:
+        # The cap is priced at run_telemetry's posted rates, which are one
+        # model's; another model's spend would be miscounted silently (#5062).
+        from data_sheets_schema.api_runner import _model_settings
+        from data_sheets_schema.run_telemetry import RATES_MODEL, rates_cover
+        unpriced = sorted({name for name in (_model_settings(s)["name"] for s in specs)
+                           if not rates_cover(name)})
+        if unpriced:
+            raise click.ClickException(
+                f"--max-cost-dollars is priced at {RATES_MODEL}'s rates, which do not price "
+                f"{', '.join(unpriced)}; add that model's rates to run_telemetry before capping it")
     plans = [_plan_or_refuse(s) for s in specs]
     total = None if roster else sum(x["approx_total_input_tokens"] for x in plans)
     if roster:
@@ -969,6 +1008,11 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             click.echo(f"   {s.project:9} {s.label:44} ~{x['approx_total_input_tokens']:>8,} tok")
     if not roster:
         click.echo(f"   {'TOTAL':9} {'':44} ~{total:>8,} input tokens (uncached)")
+    if max_cost_dollars is not None:
+        # No dollar estimate is printed: output and reasoning tokens, most of
+        # a run's cost, are not known before it runs (#5062).
+        click.echo(f"   cost cap ${max_cost_dollars:,.2f}, checked between runs; no dollar estimate "
+                   "(output and reasoning tokens are unknown before a run)")
 
     if dry_run:
         return
@@ -1025,15 +1069,42 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         # Read whether or not a cap is set, so the totals printed are this
         # invocation's spend either way (#5068).
         pending_before: set = set()
-        billed_before = _billed_ids(s, pending_before)
+        unkeyed_before: Counter = Counter()
+        billed_before = _billed_ids(s, pending_before, unkeyed_before)
         try:
             if roster:
                 _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
             res = execute(s)
             # This invocation's attempts only: a resumed run returns its
             # earlier usage too, a completed one all of it (#5045 review).
-            usage_rows = [u for u in res.get("usage") or []
-                          if not (isinstance(u, dict) and u.get("usage_id") in billed_before)]
+            returned = [u for u in res.get("usage") or [] if isinstance(u, dict)]
+            usage_rows, unmatched = [], 0
+            for u in returned:
+                if isinstance(u.get("usage_id"), str):
+                    if u["usage_id"] not in billed_before:
+                        usage_rows.append(u)
+                elif unkeyed_before[_row_key(u)]:
+                    # Written before usage ids existed and recorded before
+                    # this run: earlier spend, not this invocation's (#5085).
+                    unkeyed_before[_row_key(u)] -= 1
+                else:
+                    usage_rows.append(u)
+                    unmatched += 1
+            if unmatched:
+                click.echo(f"   ⚠️  {unmatched} returned usage row(s) carry no usage id and match no row "
+                           "recorded before this run; they are counted as this invocation's, so if they "
+                           "are earlier spend the cost is overcounted", err=True)
+            # The record's api_usage can hold billed rows the returned list
+            # lacks, such as an attempt abandoned during repair or the report
+            # regate and merged in at the final accounting (#5069). Every row
+            # `_billed_rows` returns has a usage id, so these are matched by
+            # id; what it could not read is said, as on the raise path.
+            gaps: list = []
+            returned_ids = {u["usage_id"] for u in returned if isinstance(u.get("usage_id"), str)}
+            usage_rows += [row for uid, row in _billed_rows(s, gaps, billed_before | pending_before).items()
+                           if uid not in billed_before and uid not in returned_ids]
+            if gaps:
+                click.echo(f"   ⚠️  recorded rows may be missing from the cost: {'; '.join(gaps)}", err=True)
             # Counted now, so a raise later in this run does not count them
             # again (#5068).
             billed_before |= {u["usage_id"] for u in usage_rows

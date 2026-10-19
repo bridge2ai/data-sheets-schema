@@ -158,8 +158,8 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         hooks are stubbed; the request is built by the runner. This is the
         runner's generic path (`shared_generation_version=0`), not the
         registered v10 path, whose shared-2 admission swaps in a bounded
-        client (`source_heading_admission.prepare`); that client is not
-        exercised here (#5073 F6)."""
+        client (`source_heading_admission.prepare`); the next test covers
+        that client (#5073 F6)."""
         import json
         from types import SimpleNamespace
         from unittest.mock import patch
@@ -199,6 +199,92 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         self.assertEqual(identifier, "u1")
         self.assertEqual(resp.stop_reason, "end_turn")
         self.assertEqual([b["thinking"] for b in bodies], [{"type": "adaptive", "display": "summarized"}])
+
+    def test_the_shared_2_admission_path_puts_the_display_on_the_wire(self):
+        """The registered v10 path (#5073 F6): `_call_with_usage` with
+        shared_generation_version 2 goes through `source_heading_admission.prepare`,
+        which swaps in the bounded single-attempt client and counts the request
+        with `messages.count_tokens` before sending it. Both the count and the
+        stream leave through that real client on a mock transport and carry the
+        display; the ledger and registration checks around them are stubbed."""
+        import json
+        from contextlib import ExitStack
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        import anthropic
+        import httpx
+        from data_sheets_schema import api_runner, receipt_completion, shared_generation
+        from data_sheets_schema import source_heading_admission as admission
+        from data_sheets_schema import typed_audit_runtime, usage_ledger
+        bodies = []
+
+        def sse(*events):
+            return "".join(f"event: {e['type']}\ndata: {json.dumps(e)}\n\n" for e in events)
+
+        def handler(request):
+            bodies.append((request.url.path, json.loads(request.content)))
+            if request.url.path.endswith("/count_tokens"):
+                return httpx.Response(200, json={"input_tokens": 3})
+            return httpx.Response(200, headers={"content-type": "text/event-stream"}, text=sse(
+                {"type": "message_start", "message": {
+                    "id": "msg_1", "type": "message", "role": "assistant", "model": "claude-opus-5",
+                    "content": [], "stop_reason": None, "stop_sequence": None,
+                    "usage": {"input_tokens": 3, "output_tokens": 0}}},
+                {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}},
+                {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "ok"}},
+                {"type": "content_block_stop", "index": 0},
+                {"type": "message_delta", "delta": {"stop_reason": "end_turn", "stop_sequence": None},
+                 "usage": {"output_tokens": 1}},
+                {"type": "message_stop"}))
+
+        client = anthropic.Anthropic(api_key="offline", base_url="http://probe.invalid", max_retries=2,
+                                     http_client=httpx.Client(transport=httpx.MockTransport(handler)))
+        used = []
+        real_bound = receipt_completion._single_attempt_client
+
+        def bounded(c):
+            used.append(real_bound(c))
+            return used[-1]
+        streamed_with = []
+        real_retry = api_runner._call_with_retry
+
+        def retry(c, **kw):
+            streamed_with.append(c)
+            return real_retry(c, **kw)
+        settings = _model_settings("generic_v10")
+        spec = SimpleNamespace(shared_generation_version=2)
+        limits = {"max_calls": 5, "aggregate_input_tokens": 10**9, "aggregate_output_tokens": 10**9,
+                  "context_limit_tokens": 1_000_000, "context_limit_basis": "offline test"}
+        with ExitStack() as stack:
+            for target, name, kw in [
+                    (api_runner, "_require_surviving_accounting", {}),
+                    (api_runner, "_begin_usage_call", {"return_value": "u1"}),
+                    (api_runner, "_cancel_usage_call", {}), (api_runner, "_persist_usage", {}),
+                    (typed_audit_runtime, "require_request", {}),
+                    (usage_ledger, "require_resolved", {}),
+                    (usage_ledger, "_read", {"return_value": {"generation_id": "g"}}),
+                    (usage_ledger, "_write", {}),
+                    (admission, "_recheck", {"return_value": (None, [])}),
+                    (admission, "_limits", {"return_value": limits}),
+                    (admission, "_check_wire", {}), (admission, "_check_payload", {}),
+                    (admission, "_base", {"return_value": {"generation_id": "g", "registration_sha256": "r"}}),
+                    (admission, "require_wire", {}), (admission, "remember_response", {}),
+                    (shared_generation, "require_client", {}),
+                    (receipt_completion, "_save", {"return_value": {"path": "p", "sha256": "s"}}),
+                    (receipt_completion, "_single_attempt_client", {"side_effect": bounded}),
+                    (api_runner, "_call_with_retry", {"side_effect": retry})]:
+                stack.enter_context(patch.object(target, name, **kw))
+            resp, identifier = api_runner._call_with_usage(
+                spec, "full", 1, "2026-10-18T00:00:00Z", client, model=settings["name"], max_tokens=100,
+                temperature=None, system="s", messages=[{"role": "user", "content": "x"}],
+                thinking=settings["thinking"])
+        self.assertEqual((identifier, resp.stop_reason), ("u1", "end_turn"))
+        self.assertEqual(len(used), 1)
+        self.assertEqual(used[0].max_retries, 0)
+        self.assertEqual(streamed_with, used)                 # the stream left through it too
+        self.assertEqual([path.rsplit("/", 1)[-1] for path, _ in bodies], ["count_tokens", "messages"])
+        self.assertEqual([b["thinking"] for _, b in bodies],
+                         [{"type": "adaptive", "display": "summarized"}] * 2)
 
     def test_effort_travels_as_extra_body_and_every_kwarg_binds_to_the_real_sdk(self):
         """The first version passed `output_config=` as a named kwarg, and a
