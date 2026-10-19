@@ -1331,11 +1331,16 @@ def _pinned_manifest_rows(data, today: bytes, crate: bytes | None) -> list[str]:
             corpus = [p for p in ps if _release_facts(then[p]) != _release_facts(now[p])]
             tier = [p for p in ps if [e["source_id"] for e in then[p]["tier1"]]
                     != [e["source_id"] for e in now[p]["tier1"]]]
+            # A crate the pinned manifest put in the corpus is what those records
+            # read, whatever today's corpus holds (#5042, #5060 F3).
+            read_crate = [p for p in ps if then[p]["crate_in_document_corpus"] and not now[p]["crate_in_document_corpus"]]
+            note = ("these records read " + ", ".join(read_crate) + "'s RO-Crate, which today's corpus no longer "
+                    "carries (#5042)") if read_crate else ""
             rows.append(f"| {disp} | {named}, committed {entry['date']} (`{entry['commit'][:10]}`) | "
                         + ("as today" if not corpus else "differs: " + ", ".join(corpus)) + " | "
                         + ("as today" if not tier else "differs: " + ", ".join(
                             f"{p} {then[p]['tier1_count']} (today {now[p]['tier1_count']})" for p in tier))
-                        + " | |")
+                        + (f" | {note} |" if note else " | |"))
     return rows
 
 
@@ -1385,7 +1390,14 @@ def release_inventory_section(data, scores) -> list[str]:
 
     def policy(inv) -> str:
         cp = inv["crate_policy"]
-        return f"`{cp['document_corpus']}`" if cp["status"] == "declared" else cp["status"].replace("_", " ")
+        if cp["status"] != "declared":
+            return cp["status"].replace("_", " ")
+        # `allow` registers no URL exclusion; it does not put a crate in the
+        # corpus. Beside "crate in corpus: no" it reads as the opposite, so say
+        # what keeps the crate out (#5042, #5060 F4).
+        if cp["document_corpus"] == "allow" and not inv["crate_in_document_corpus"]:
+            return "`allow` (no URL exclusion; the crate is not a listed source)"
+        return f"`{cp['document_corpus']}`"
 
     table = [f"| {p} | {inv['tier1_count']} ({inv['tier1_current_count']} current) | "
              f"{ids(inv['governance']['license'])} | {ids(inv['governance']['DUA'])} | "
