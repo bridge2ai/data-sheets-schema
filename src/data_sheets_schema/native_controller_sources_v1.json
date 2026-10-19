@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source_commit": "1601b8ddf7e19292df6d03f046eb44bc13b0ed34",
+  "source_commit": "8044e51b6413e3b93268a819fe13d11ac4cbdc1b",
   "modules": {
     "budget_amendment": {
       "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
@@ -48,7 +48,7 @@
     },
     "run_native_canary": {
       "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
-      "sha256": "9e702549a173324034ed6188bd1c1ff352d871122875b4f15eb300f74de8b067"
+      "sha256": "f27bfcb855be9957a6e3eef0347083be57f9729a9300ddffdc9d1ff8dcecd90d"
     }
   }
 }
