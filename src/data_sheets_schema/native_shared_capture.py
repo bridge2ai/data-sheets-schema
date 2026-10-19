@@ -523,6 +523,7 @@ class _CapturedRun:
     _trace: object = field(default=None, init=False, compare=False, repr=False)
     _prefixes: dict = field(default_factory=dict, init=False, compare=False, repr=False)
     _chronology_cache: object = field(default=None, init=False, compare=False, repr=False)
+    _callback_state_cache: dict = field(default_factory=dict, init=False, compare=False, repr=False)
 
     def trace(self, transcript=None, control=None):
         if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
@@ -1076,12 +1077,10 @@ def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, str
 def _loaded(base, streams, prefixes, *, _catalogs=None):
     selection, reader, value, composition, spec = base
     transcript, control = prefixes
-    for path in _observation_paths(selection):
-        reader.read('observation', path)
+    observations = tuple(reader.read('observation', path) for path in _observation_paths(selection))
     pool = _pool(reader, streams)
     binding = _binding(selection, value, composition, reader, pool)
     history = reader.history(binding)
-    observations = tuple(reader.read('observation', path) for path in _observation_paths(selection))
     # The complete closed observation catalog includes pre-grant intents that
     # intentionally cannot yet be referenced by response-consumed records.
     history = replace(history, observations=observations)
@@ -1611,13 +1610,18 @@ def at_callback(run, line):
         count += 1
     if count < 2:
         raise ValueError('callback precedes actual session publication')
-    raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
-        execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
-        records=tuple(item.pin for item in run.history.records[:count]))
-    history = _history_prefix(run, c.sha(raw))
     observations = tuple(item for item in run.observations
         if catalog[item.pin.sha256][1] < line)
-    history = replace(history, observations=observations)
+    state_key = (count, tuple(item.pin.sha256 for item in observations))
+    cached_state = getattr(run, '_callback_state_cache', None)
+    if cached_state is not None and state_key in cached_state:
+        history, phase1 = cached_state[state_key]
+    else:
+        digest, _ = _journal_prefix_digest(run, count)
+        history = replace(_history_prefix(run, digest), observations=observations)
+        phase1 = _phase1(run.selection, run.binding, history, run.reader)
+        if cached_state is not None:
+            cached_state[state_key] = (history, phase1)
     transcript = _through(run.transcript, line)
     base_trace = None
     try:
@@ -1637,9 +1641,11 @@ def at_callback(run, line):
             control_lines = number
     control = _through(run.control, control_lines)
     result = replace(run, history=history, observations=observations, transcript=transcript, control=control,
-        phase1=_phase1(run.selection, run.binding, history, run.reader))
+        phase1=phase1)
     result._catalogs = run._catalogs
     result._prefixes = run._prefixes
+    result._chronology_cache = run._chronology_cache
+    result._callback_state_cache = run._callback_state_cache
     if base_trace is not None and 0 < line <= base_trace.transcript.lines and 0 < control_lines <= base_trace.control.lines:
         result._trace = _prefix_trace(base_trace, transcript, control, (1, 1))
     return result

@@ -91,6 +91,7 @@ class _ReceiptCatalogContext:
         self._requests = {}
         self._responses = {}
         self._completions = {}
+        self._packets = {}
         self._base = {}
         self._traces = {}
         self._last_trace = None

@@ -406,9 +406,10 @@ def _artifact(role, path, raw):
     return {'role': role, 'path': path, 'sha256': _sha(raw), 'bytes': len(raw)}
 
 
-def _recipe_data(expected, selection, launch, session):
+def _recipe_data(expected, selection, launch, session, *, roots_checked=False):
     contract, _ = _dependencies()
-    _roots(expected, selection, launch)
+    if not roots_checked:
+        _roots(expected, selection, launch)
     root = _path(launch['effect_root'])
     basis = {'domain': 'native_shared_permission_projection_v1',
              'selection_sha256': expected['selection']['sha256'],
@@ -463,10 +464,12 @@ def _view(expected, selection, launch, session, context, *, state='awaiting_resp
         response_intent_observation_sha256=None)
 
 
-def projection(expected, selection, launch, session_id):
+def projection(expected, selection, launch, session_id, *, policy=None, recipe=None):
     """Deterministic software projection; never evidence of a real stage."""
-    policy = projected_policy(expected, selection, launch['effect_root'])
-    recipe = _recipe_data(expected, selection, launch, session_id)
+    if policy is None:
+        policy = projected_policy(expected, selection, launch['effect_root'])
+    if recipe is None:
+        recipe = _recipe_data(expected, selection, launch, session_id)
     states = []
     for context in CONTEXTS:
         for read in (False, True):
@@ -483,9 +486,9 @@ def projection(expected, selection, launch, session_id):
             'role_recipe_sha256': expected['probe_recipe']['descriptor_sha256']}
 
 
-def probe_cases(expected, selection, launch, session_id):
+def probe_cases(expected, selection, launch, session_id, *, policy=None, recipe=None):
     """Exact twenty-five observed cases and no caller-selected case subset."""
-    _, _, requests, responses = _recipe_data(expected, selection, launch, session_id)
+    _, _, requests, responses = _recipe_data(expected, selection, launch, session_id) if recipe is None else recipe
     root = _path(launch['effect_root'])
     def row(identity, tool, payload, context, mode):
         return {'id': identity, 'tool': tool, 'input': payload, 'context': context, 'mode': mode}
@@ -520,7 +523,8 @@ def probe_cases(expected, selection, launch, session_id):
                      'content': 'D4D_SOURCE_MUST_NOT_CHANGE\n'}, 'baseline', 'observer_stopped'),
               row('helper_owned_write', 'Write', {'file_path': str(root / 'journal.json'),
                      'content': 'D4D_FORBIDDEN\n'}, 'integration', 'observer_stopped')]
-    policy = projected_policy(expected, selection, launch['effect_root'])
+    if policy is None:
+        policy = projected_policy(expected, selection, launch['effect_root'])
     for case in cases:
         path = case['input'].get('file_path')
         if case['tool'] == 'Read' and path in policy['readonly_lookups'].get('bounded_reads', {}):
@@ -529,8 +533,8 @@ def probe_cases(expected, selection, launch, session_id):
     return cases
 
 
-def _inventory(expected, selection, launch, session, *, completed):
-    _, fixed, requests, responses = _recipe_data(expected, selection, launch, session)
+def _inventory(expected, selection, launch, session, *, completed, recipe=None):
+    _, fixed, requests, responses = _recipe_data(expected, selection, launch, session) if recipe is None else recipe
     root = _path(launch['effect_root']); files = dict(fixed)
     for ordinal, context in enumerate(CONTEXTS, 1):
         files[str(root / 'requests' / ('%06d.json' % ordinal))] = requests[context]
@@ -663,14 +667,16 @@ def _settled_text(events, offset, session, model):
     return offset
 
 
-def _read_content(case, expected, selection, launch, session, source_raw, *, observed_lines=None):
+def _read_content(case, expected, selection, launch, session, source_raw, *, observed_lines=None, policy=None, recipe=None):
     if case['id'] == 'source_read':
         raw = source_raw
     else:
-        raw = _recipe_data(expected, selection, launch, session)[2][case['context']]
+        raw = (_recipe_data(expected, selection, launch, session) if recipe is None else recipe)[2][case['context']]
     text = raw.decode(); lines = text.split('\n')
     if 'limit' in case['input']:
-        count = projected_policy(expected, selection, launch['effect_root'])['readonly_lookups']['bounded_reads'][case['input']['file_path']]
+        if policy is None:
+            policy = projected_policy(expected, selection, launch['effect_root'])
+        count = policy['readonly_lookups']['bounded_reads'][case['input']['file_path']]
         _need(count == len(lines), 'bounded Read count contradicts captured raw file')
         if case['id'] != 'source_read':
             _need(case['input']['limit'] == len(lines), 'current request cannot be completely read in this range')
@@ -685,7 +691,7 @@ def _read_content(case, expected, selection, launch, session, source_raw, *, obs
     return text, '\n'.join(str(i+1) + '\t' + line for i,line in enumerate(selected)), len(selected), len(lines)
 
 
-def _tool_result(event, case, expected, selection, launch, session, source_raw):
+def _tool_result(event, case, expected, selection, launch, session, source_raw, *, policy=None, recipe=None):
     content = event.get('message', {}).get('content')
     _need(type(content) is list and len(content) == 1 and type(content[0]) is dict, 'one unique tool result required')
     item = content[0]
@@ -722,7 +728,8 @@ def _tool_result(event, case, expected, selection, launch, session, source_raw):
         file = metadata.get('file')
         _need(type(file) is dict and metadata.get('type') == 'text', 'Read lacks native file metadata')
         raw_text, rendered, count, total = _read_content(case, expected, selection, launch, session, source_raw,
-            observed_lines=file.get('numLines') if case['id'] == 'source_read' else None)
+            observed_lines=file.get('numLines') if case['id'] == 'source_read' else None,
+            policy=policy, recipe=recipe)
         wanted = {'filePath': case['input']['file_path'], 'content': raw_text,
                   'numLines': count, 'startLine': 1, 'totalLines': total}
         _need(_same(file, wanted) and text == rendered, 'Read does not contain exact complete captured range')
@@ -793,14 +800,16 @@ def _trace(expected, selection, trace, raw, controls):
     _need(type(session) is str and re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}', session),
           'invalid parent session')
     _native_scope(init, session, model)
-    recipe = _recipe_data(expected, selection, launch, session)
-    projected = projection(expected, selection, launch, session)
+    recipe = _recipe_data(expected, selection, launch, session, roots_checked=True)
+    projected = projection(expected, selection, launch, session, policy=policy, recipe=recipe)
     _need(_same(_json(raw[prefix + 'projection.json']), projected), 'projection is not independently derived')
-    _need(_same(_json(raw[prefix + 'neutral.before.json']), _inventory(expected, selection, launch, session, completed=False)),
+    _need(_same(_json(raw[prefix + 'neutral.before.json']),
+                _inventory(expected, selection, launch, session, completed=False, recipe=recipe)),
           'neutral before inventory differs')
-    _need(_same(_json(raw[prefix + 'neutral.after.json']), _inventory(expected, selection, launch, session, completed=trace == 'settled')),
+    _need(_same(_json(raw[prefix + 'neutral.after.json']),
+                _inventory(expected, selection, launch, session, completed=trace == 'settled', recipe=recipe)),
           'neutral after inventory shows missing or forbidden effects')
-    all_cases = probe_cases(expected, selection, launch, session)
+    all_cases = probe_cases(expected, selection, launch, session, policy=policy, recipe=recipe)
     cases = [c for c in all_cases if c['mode'] != 'observer_stopped'] if trace == 'settled' else [
         c for c in all_cases if c['id'] == trace[5:]]
     _need(len(clean) == (len(cases) + 2 if trace == 'settled' else 2), 'control has missing/extra grants')
@@ -841,7 +850,8 @@ def _trace(expected, selection, trace, raw, controls):
             _need(_same(clean[number+2], decision), 'parent decision contradicts recomputed classification')
             _need(result.get('type') == 'user', 'missing settled result')
             _native_scope(result, session, model, 'user')
-            _tool_result(result, case, expected, selection, launch, session, raw['source.before'])
+            _tool_result(result, case, expected, selection, launch, session, raw['source.before'],
+                         policy=policy, recipe=recipe)
             result_sha = _sha(_encoded(result))
         outcomes.append({'id': case['id'], 'trace_id': trace, 'state': view.state, 'tool': case['tool'],
             'input_sha256': _sha(_encoded(case['input'])), 'classification': classification[0], 'basis': classification[1],
@@ -882,10 +892,12 @@ def _trace(expected, selection, trace, raw, controls):
         'outcome_sha256': _sha(raw[prefix + 'outcome.json'])}, outcomes, launch
 
 
-def _derived_controls(expected, selection, launch, session):
+def _derived_controls(expected, selection, launch, session, *, policy=None, recipe=None):
     _, effects = _dependencies()
-    policy = projected_policy(expected, selection, launch['effect_root'])
-    recipe = _recipe_data(expected, selection, launch, session)
+    if policy is None:
+        policy = projected_policy(expected, selection, launch['effect_root'])
+    if recipe is None:
+        recipe = _recipe_data(expected, selection, launch, session)
     checks = []
     for state in NONRESPONSE:
         view = _view(expected, selection, launch, session, 'worker', state=state, policy=policy, recipe=recipe)
@@ -966,10 +978,14 @@ def _verify(raw_manifest, expected):
                       for previous in all_roots), 'probe traces reuse or overlap isolation roots')
         all_roots.extend(roots)
         if name == 'settled':
+            policy = projected_policy(expected, selection, launch['effect_root'])
+            recipe = _recipe_data(expected, selection, launch, summary['session_id'], roots_checked=True)
             roster = [{k:v for k,v in c.items() if k != 'input'}
-                      for c in probe_cases(expected, selection, launch, summary['session_id'])]
+                      for c in probe_cases(expected, selection, launch, summary['session_id'],
+                                           policy=policy, recipe=recipe)]
             _need(_same(_json(raw['cases.json']), roster), 'closed case roster differs')
-            derived = _derived_controls(expected, selection, launch, summary['session_id'])
+            derived = _derived_controls(expected, selection, launch, summary['session_id'],
+                                        policy=policy, recipe=recipe)
         traces.append(summary); cases.extend(outcomes)
     _need(len(cases) == 25 and len({case['id'] for case in cases}) == 25, 'not every required case was checked once')
     # These two digests bind ordered per-trace raw-member hashes; the complete
