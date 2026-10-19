@@ -525,6 +525,9 @@ class _CapturedRun:
     _chronology_cache: object = field(default=None, init=False, compare=False, repr=False)
     _callback_state_cache: dict = field(default_factory=dict, init=False, compare=False, repr=False)
 
+    def __post_init__(self):
+        self._prefixes = self._catalogs._prefixes
+
     def trace(self, transcript=None, control=None):
         if (transcript is None or transcript == self.transcript) and (control is None or control == self.control):
             if self._trace is None:

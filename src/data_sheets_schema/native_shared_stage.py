@@ -214,18 +214,20 @@ class _Replay:
         self.cache = self.catalogs.derivations()
         self.options = {'captured_assets': nr.omission_assets(selection), 'derivations': self.cache}
         self.pending = None
+        self.pending_predecessor = None
+        self.pending_request_hash = None
         self.failure = None
         self.checked_outputs = {}
         self._base()
 
-    def _warm_key(self):
+    def _warm_key(self, *, include_core=True):
         if (self._token is None or self.catalogs._entry is None
                 or self.catalogs._bytes > nr._CATALOG_PAYLOAD_BYTES):
             return None
         fn_token = (typed._derive, typed._derive_uncached, typed._seal, typed._open,
                     typed._result, typed.assemble, typed.check, typed.check_worker,
                     typed.index, typed.worker_request, typed.capture_response,
-                    nr.omissions._prepare)
+                    nr.omissions._prepare, nr._prepare, nr._complete, nr._inputs, nr._raw_inputs)
         return (
             self._token, fn_token, self.catalogs._entry[0],
             self.s.registration.pin.sha256, self.s.registration.raw,
@@ -236,7 +238,8 @@ class _Replay:
             self.e.runtime_declaration_sha256, self.e.attempt_id, self.e.session_id,
             self.p.seal.pin, self.p.full.pin, self.p.full.raw,
             self.p.original_receipt.pin, self.p.original_receipt.raw,
-            None if self.p.core is None else (self.p.core.pin, self.p.core.raw, self.p.core_seal.pin),
+            None if (not include_core or self.p.core is None) else (
+                self.p.core.pin, self.p.core.raw, self.p.core_seal.pin, self.p.core_seal_observation.pin),
         )
 
     def _expect(self, kind, payload):
@@ -330,19 +333,20 @@ class _Replay:
         return self.index
 
     def _request(self, cursor, predecessor):
-        wkey = self._warm_key()
+        wkey = self._warm_key(include_core=(cursor.kind != 'receipt'))
         rkey = None if wkey is None else (
             wkey, cursor, predecessor,
             None if self.receipt is None else self.receipt.carry_json,
             None if self.packet is None else self.packet['sha256'],
+            bool(self.workers) if cursor.kind == 'worker' else None,
             tuple(sorted(self.workers.items())) if cursor.kind == 'integration' else (),
             self.omission if cursor.kind == 'integration' else None,
         )
         if rkey is not None and rkey in self.catalogs._requests:
-            artifact, response, inner, request_hash, cached_index = self.catalogs._requests[rkey]
+            artifact, response, inner, request_hash, cached_index, auxiliary = self.catalogs._requests[rkey]
             if cursor.kind == 'integration':
                 self.index = cached_index
-            return artifact, response, inner, request_hash
+            return artifact, response, inner, request_hash, auxiliary
         inner = self._inner(cursor)
         # Receipt precedes core. Replaying it after a genuine core has been
         # sealed must retain the original request's then-absent core context.
@@ -382,20 +386,42 @@ class _Replay:
             raise ValueError('complete native stage request requires bounded nonempty immutable bytes')
         c._JSON_VALIDATION.remember((raw, c.HARD_LIMITS['json_yaml_depth'], c.HARD_LIMITS['json_yaml_nodes_per_document']))
         artifact = _artifact(raw, 'request', _dynamic(self.s, 'request', cursor.ordinal))
+        auxiliary = ()
+        if cursor.kind == 'worker' and not self.workers:
+            auxiliary = (self._output('packet', c.canonical(self.packet)),)
+        elif cursor.kind == 'integration':
+            auxiliary = (self._output('typed_index', c.canonical(self.index)),)
+        if rkey is None:
+            wkey = self._warm_key(include_core=(cursor.kind != 'receipt'))
+            rkey = None if wkey is None else (
+                wkey, cursor, predecessor,
+                None if self.receipt is None else self.receipt.carry_json,
+                None if self.packet is None else self.packet['sha256'],
+                bool(self.workers) if cursor.kind == 'worker' else None,
+                tuple(sorted(self.workers.items())) if cursor.kind == 'integration' else (),
+                self.omission if cursor.kind == 'integration' else None,
+            )
         if rkey is not None and catalog_reuse.runtime_token() is self._token:
-            self.catalogs._requests[rkey] = (artifact, response, inner, request_hash, self.index)
-        return artifact, response, inner, request_hash
+            self.catalogs._requests[rkey] = (artifact, response, inner, request_hash, self.index, auxiliary)
+        return artifact, response, inner, request_hash, auxiliary
 
     def _derive_response(self, cursor, inner, raw):
         envelope, outputs = None, ()
+        wkey = self._warm_key(include_core=(cursor.kind != 'receipt'))
         if cursor.kind == 'receipt':
+            resp_key = None if wkey is None else (wkey, cursor, raw)
+            if resp_key is not None and resp_key in self.catalogs._responses:
+                value, outputs = self.catalogs._responses[resp_key]
+                self.receipt = value
+                return envelope, outputs
             value = nr._complete(self.s, self.e, self.p, raw, self.catalogs)
             outputs = self._receipt_outputs(value)
             if c.strict_json(value.result_json)['state'] != 'answers_complete':
                 raise _IncompleteReceipt(outputs)
             self.receipt = value
+            if resp_key is not None and catalog_reuse.runtime_token() is self._token:
+                self.catalogs._responses[resp_key] = (value, outputs)
             return envelope, outputs
-        wkey = self._warm_key()
         resp_key = None if wkey is None else (
             wkey, cursor, raw,
             None if self.packet is None else self.packet['sha256'],
@@ -430,13 +456,10 @@ class _Replay:
 
     def _stage(self, cursor):
         predecessor = self._prefix()
-        request, destination, inner, request_hash = self._request(cursor, predecessor)
-        auxiliary = ()
-        if cursor.kind == 'worker' and not self.workers:
-            auxiliary = (self._output('packet', c.canonical(self.packet)),)
-        elif cursor.kind == 'integration':
-            auxiliary = (self._output('typed_index', c.canonical(self.index)),)
+        request, destination, inner, request_hash, auxiliary = self._request(cursor, predecessor)
         if self.at == len(self.rows):
+            self.pending_predecessor = predecessor
+            self.pending_request_hash = request_hash
             self.pending = ('request_ready', cursor, request, destination, inner, auxiliary, None)
             return False
         expected = {'cursor': asdict(cursor), 'request': c.pin_dict(request.pin),
@@ -447,6 +470,8 @@ class _Replay:
             raise ValueError('native admitted request differs from complete intended semantic content')
         self._compare_outputs(auxiliary)
         if self.at == len(self.rows):
+            self.pending_predecessor = predecessor
+            self.pending_request_hash = request_hash
             self.pending = ('awaiting_response', cursor, captured_request, destination, inner, (), None)
             return False
         row = self.rows[self.at]
@@ -464,6 +489,8 @@ class _Replay:
         consumed_pin = self.h.records[self.at].pin
         self.at += 1
         if self.at == len(self.rows):
+            self.pending_predecessor = predecessor
+            self.pending_request_hash = request_hash
             self.pending = ('awaiting_response', cursor, captured_request, destination, inner, (),
                             (response, consumed_pin))
             return False
@@ -545,16 +572,18 @@ class _Replay:
             raise ValueError('native stage history has effects after assembly completion')
         return self
 
-    def _completion_artifact(self):
+    def _completion_artifact(self, assembly_sha256=None):
         integration = self.origins[-1]
         consumed = next(index for index, item in enumerate(self.h.records)
                         if item.pin.sha256 == integration['consumed_record_sha256'])
+        if assembly_sha256 is None:
+            assembly_sha256 = self.checked_outputs['typed_assembly'].pin.sha256
         body = {'kind': c.KINDS['completion'], 'version': c.VERSION,
             'selection_sha256': self.s.registration.pin.sha256, 'execution_sha256': self.e.execution.pin.sha256,
             'attempt_id': self.e.attempt_id, 'session_id': self.e.session_id,
             'predecessor_history_sha256': self._prefix(consumed + 1),
             'phase1_seal_sha256': self.p.seal.pin.sha256, 'core_seal_sha256': self.p.core_seal.pin.sha256,
-            'assembly_sha256': c.sha(c.canonical(self.assembly)), 'stage_origins': self.origins,
+            'assembly_sha256': assembly_sha256, 'stage_origins': self.origins,
             'acceptance': self.assembly['acceptance']}
         return self._output('completion', c.canonical(body))
 
@@ -596,7 +625,7 @@ def _prepare_next(selection, execution, phase1, history, catalogs):
         state, cursor, request, response, inner, outputs, consumed = replay.pending
         if state == 'awaiting_response':
             destination = response
-            predecessor = c.strict_json(request.raw, max_bytes=selection.bounds()['max_request_bytes'])['payload']['predecessor_history_sha256']
+            predecessor = replay.pending_predecessor
         else:
             entries = ()
             if state == 'request_ready':
@@ -633,7 +662,7 @@ def _check_response(selection, execution, phase1, history, request_raw, response
     response, consumed_pin = consumed
     if request.raw != request_raw or response.raw != response_raw:
         raise ValueError('native helper answer differs from first consumed request/response bytes')
-    request_hash = c.strict_json(request_raw, max_bytes=selection.bounds()['max_request_bytes'])['request_sha256']
+    request_hash = replay.pending_request_hash
     outputs, entries, disposition = (), (), 'checked'
     try:
         envelope, outputs = replay._derive_response(cursor, inner, response_raw)
@@ -646,9 +675,9 @@ def _check_response(selection, execution, phase1, history, request_raw, response
                 'request_artifact_sha256': request.pin.sha256, 'response_sha256': response.pin.sha256,
                 'session_id': execution.session_id, 'consumed_record_sha256': consumed_pin.sha256,
                 'helper_derived_response_sha256': c.sha(envelope)})
-            completed = replay._completion_artifact()
-            outputs += (completed,)
             by_role = {item.pin.role: item for item in outputs}
+            completed = replay._completion_artifact(by_role['typed_assembly'].pin.sha256)
+            outputs += (completed,)
             entries += (('assembly_checked', c.canonical({'assembly': c.pin_dict(by_role['typed_assembly'].pin),
                 'audit': c.pin_dict(by_role['audit'].pin), 'completion': c.pin_dict(completed.pin)})),)
         records, journal = append_records(selection, execution, history, entries)

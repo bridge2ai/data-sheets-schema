@@ -97,7 +97,7 @@ def _captured_selection(pool, value):
     return selection_api.rebuild(registration, authority, schemas, artifacts['receipt_policy'])
 
 
-def rebuild(pool, value):
+def rebuild(pool, value, *, _catalogs=None):
     """Reconstruct the captured run; this function performs no filesystem reads."""
     from .api_runner import RunSpec
     selected = _captured_selection(pool, value)
@@ -136,6 +136,9 @@ def rebuild(pool, value):
     phase1 = capture_api._phase1(selected, binding, history, reader)
     result = capture_api._CapturedRun(selected, value, composition, spec, reader, pool,
         transcript, control, binding, history, tuple(observations), phase1)
+    if _catalogs is not None:
+        result._catalogs = _catalogs
+        result._prefixes = _catalogs._prefixes
     capture_api._checked_observations(result)
     return result
 
@@ -210,7 +213,7 @@ def capture(value, controls, *, authority_inputs, registration_raw):
         raise ValueError('complete capture exceeds the selected evidence bound')
     snapshot.verify_unchanged()
     snapshot.sealed = True
-    return prepare(pool, value, controls, snapshot=snapshot)
+    return prepare(pool, value, controls, snapshot=snapshot, _catalogs=live._catalogs)
 
 
 def _readonly(command, policy, snapshot, controls):
@@ -239,11 +242,11 @@ def _readonly(command, policy, snapshot, controls):
         return False
 
 
-def prepare(pool, value, controls, *, snapshot=None):
+def prepare(pool, value, controls, *, snapshot=None, _catalogs=None):
     from . import native_shared_attribution as attribution
     from . import native_shared_gates as gates
     from .audit_omissions import _mapping
-    run = rebuild(pool, value)
+    run = rebuild(pool, value, _catalogs=_catalogs)
     if snapshot is None:
         snapshot = Snapshot(value['working_directory'], pool.members)
         snapshot.sealed = True
