@@ -312,9 +312,18 @@ def test_final_receipt_routes_fresh_rebuild_before_assessment(
         seen.append('decision')
         return SimpleNamespace(state='assembly_complete', completion=SimpleNamespace(assembly=assembly))
 
-    run = SimpleNamespace(selection=saved, spec=SimpleNamespace(_agentic_artifact_paths={
-        'full': full_path, 'receipt': receipt_path}), phase1=SimpleNamespace(original_receipt=original),
-        binding=object(), history=object(), decision=lambda: pytest.fail('final reused live decision'))
+    # Keep the actual capture type required by final assessment. Unused fields
+    # remain explicit placeholders: the adapters below test routing and order,
+    # not the validity of a complete native execution.
+    monkeypatch.setattr(capture, '_LAST_VERIFIED_CATALOGS', None)
+    run = capture._CapturedRun(
+        selection=saved, value={}, composition={},
+        spec=SimpleNamespace(_agentic_artifact_paths={
+            'full': full_path, 'receipt': receipt_path}),
+        reader=None, pool=None, transcript=None, control=None,
+        binding=object(), history=object(), observations=(),
+        phase1=SimpleNamespace(original_receipt=original))
+    monkeypatch.setattr(run, 'decision', lambda: pytest.fail('final reused live decision'))
     completion = SimpleNamespace(effective_receipt=effective)
 
     def check_assembly(selection, *args):

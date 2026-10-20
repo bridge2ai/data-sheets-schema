@@ -92,8 +92,10 @@ class SettledResponse:
     def extend(self, native, parent):
         self.native.extend(native)
         self.parent.extend(parent)
-        self.run.transcript = prefix('transcript', self.native)
-        self.run.control = prefix('control', self.parent)
+        # Production captures a new run for each stream prefix. Match that
+        # lifecycle so a prior prefix's derived trace cannot survive extension.
+        self.run = replace(self.run, transcript=prefix('transcript', self.native),
+                           control=prefix('control', self.parent))
 
     def whole_read(self, identity):
         self.extend(*self.frames('Read', identity, self.request))

@@ -403,7 +403,7 @@ def test_selected_full_result_routes_refuse_before_any_live_basis(initialized_ca
 
 
 @pytest.mark.parametrize('consumer', ['block', 'claims'])
-def test_actual_recorded_route_rejects_selected_execution_before_receipt_assessment(initialized_case, consumer):
+def test_actual_recorded_route_rejects_selected_execution_before_receipt_assessment(initialized_case, monkeypatch, consumer):
     case = initialized_case
     live = case['baseline']['live']
     record = {'prompts': {'request': {'spec': deepcopy(live.composition['render_spec'])}}}
@@ -425,8 +425,14 @@ def test_actual_recorded_route_rejects_selected_execution_before_receipt_assessm
     # This does not claim unchanged filesystem metadata or publish a native run.
     try:
         target.write_bytes(case['artifacts']['execution'].raw)
-        with pytest.raises(ValueError, match='execution registration differs from its selected authorities'):
-            consume()
+        # This fixture replaces E only: selected E with the baseline default C
+        # must fail at their profile join, before receipt bytes are assessed.
+        def unexpected_assessment(*args, **kwargs):
+            pytest.fail('mixed execution/composition reached receipt assessment')
+        with monkeypatch.context() as patch:
+            patch.setattr(capture, '_receipt_assessment', unexpected_assessment)
+            with pytest.raises(ValueError, match='^execution and composition selected profiles differ$'):
+                consume()
     finally:
         target.write_bytes(original)
     assert target.read_bytes() == original

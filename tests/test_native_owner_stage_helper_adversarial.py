@@ -55,17 +55,21 @@ def registration_path(session):
 
 
 def current_invocation(session, context):
-    invocation = capture.capture_stage(registration_path(session), owner_context=context)
+    # Match stage.main's one-invocation derivation context. Every capture,
+    # replay and publication still runs under the original owner deadline.
+    catalogs = stage.nr._catalog_context()
+    invocation = capture.capture_stage(registration_path(session), owner_context=context,
+                                       _catalogs=catalogs)
     selected = (invocation.selection, invocation.execution, invocation.phase1, invocation.history)
-    replay = stage._Replay(*selected).run()
+    replay = stage._Replay(*selected, _catalogs=catalogs).run()
     assert replay.pending is not None and replay.pending[0] == 'receipt_zero_work'
     assert replay.pending[-1] is None, 'first zero-work advance has no consumed response'
-    proposal = stage.prepare_next(*selected)
+    proposal = stage._prepare_next(*selected, catalogs)
     assert proposal.state == 'receipt_zero_work'
     assert tuple(invocation.current_advance.argv) == tuple(session.case['helper_argv'])
     assert invocation.current_advance.command == session.case['helper_command']
     assert proposal.publications
-    return invocation, proposal
+    return invocation, proposal, catalogs
 
 
 def proposed_journal(invocation, proposal, route):
@@ -82,9 +86,10 @@ def proposed_journal(invocation, proposal, route):
     return journal, payload
 
 
-def apply_route(invocation, proposal, context, route, payload):
+def apply_route(invocation, proposal, context, route, payload, catalogs):
     if route == 'publish':
-        return publication.publish_derived(invocation, proposal, owner_context=context)
+        return publication.publish_derived(invocation, proposal, owner_context=context,
+                                           _catalogs=catalogs)
     return capture._append(invocation.selection, invocation.execution, invocation.history,
                            'failed', payload, owner_context=context)
 
@@ -104,7 +109,7 @@ def test_independent_scope_direct_publisher_and_terminal_context_boundaries(stag
             assert budget.deadline_ns == owner['deadline_ns']
             assert budget.clock_domain() == owner['clock_domain']
             assert len(budget.stop_events) == 1
-            invocation, proposal = current_invocation(session, context)
+            invocation, proposal, catalogs = current_invocation(session, context)
             old = Path(invocation.history.journal.pin.path).read_bytes()
             with monkeypatch.context() as patch:
                 forbid_helper_clock(patch, 'nested helper acquired a lease')
@@ -117,13 +122,15 @@ def test_independent_scope_direct_publisher_and_terminal_context_boundaries(stag
                               lambda *a: pytest.fail('refused publisher reached physical preflight'))
                 for supplied in (None, object()):
                     with pytest.raises(ValueError, match='exact owner reader context'):
-                        publication.publish_derived(invocation, proposal, owner_context=supplied)
+                        publication.publish_derived(invocation, proposal, owner_context=supplied,
+                                                    _catalogs=catalogs)
                 # Mutate a valid immutable captured call, then let the real fresh
                 # capture prove it is not the currently admitted invocation.
                 call = replace(invocation.current_advance.call, tool_use_id='different-admitted-id')
                 changed = replace(invocation, current_advance=replace(invocation.current_advance, call=call))
                 with pytest.raises(ValueError, match='changed before stage publication'):
-                    publication.publish_derived(changed, proposal, owner_context=context)
+                    publication.publish_derived(changed, proposal, owner_context=context,
+                                                _catalogs=catalogs)
             assert Path(invocation.history.journal.pin.path).read_bytes() == old
         assert profile._ACTIVE.get() is None
         assert coordination.current_reader_budget() is None
@@ -131,7 +138,8 @@ def test_independent_scope_direct_publisher_and_terminal_context_boundaries(stag
             patch.setattr(publication, '_physical_destination',
                           lambda *a: pytest.fail('escaped publisher reached physical preflight'))
             with pytest.raises(ValueError):
-                publication.publish_derived(invocation, proposal, owner_context=context)
+                publication.publish_derived(invocation, proposal, owner_context=context,
+                                            _catalogs=catalogs)
         # The generator context is terminal; a new scope would be a different
         # independently verified entry with the unchanged owner deadline.
         with pytest.raises((AttributeError, RuntimeError, ValueError)):
@@ -252,7 +260,7 @@ def test_equal_owner_bytes_on_another_inode_refuse_bootstrap(stage_helper_factor
 def test_both_actual_cas_callers_accept_proposed_successor_only(stage_helper_factory, monkeypatch, route):
     with pending(stage_helper_factory) as session:
         with capture._helper_owner_scope(registration_path(session)) as context:
-            invocation, proposal = current_invocation(session, context)
+            invocation, proposal, catalogs = current_invocation(session, context)
             after, payload = proposed_journal(invocation, proposal, route)
             assert type(after) is c.ProposedArtifact  # #4739: real producer contract.
             before = invocation.history.journal
@@ -273,7 +281,7 @@ def test_both_actual_cas_callers_accept_proposed_successor_only(stage_helper_fac
                 return real_cas(path, actual_before, actual_after, owner_context=owner_context)
             with monkeypatch.context() as patch:
                 patch.setattr(publication, '_replace_journal', witness)
-                result = apply_route(invocation, proposal, context, route, payload)
+                result = apply_route(invocation, proposal, context, route, payload, catalogs)
             assert calls == [(before, after)]
             assert Path(before.pin.path).read_bytes() == after.raw
             if route == 'publish':
@@ -287,7 +295,7 @@ def test_both_cas_callpaths_stop_inside_staging_before_replace(stage_helper_fact
         staging, attempts, injected = [], [], []
         with pytest.raises(ValueError, match='coordination stopped'):
             with capture._helper_owner_scope(registration_path(session)) as context:
-                invocation, proposal = current_invocation(session, context)
+                invocation, proposal, catalogs = current_invocation(session, context)
                 after, payload = proposed_journal(invocation, proposal, route)
                 assert type(after) is c.ProposedArtifact
                 path = Path(invocation.history.journal.pin.path)
@@ -320,7 +328,7 @@ def test_both_cas_callpaths_stop_inside_staging_before_replace(stage_helper_fact
                     patch.setattr(publication.os, 'fsync', synced)
                     patch.setattr(publication, 'read_regular', reread)
                     patch.setattr(publication.os, 'replace', replacing)
-                    apply_route(invocation, proposal, context, route, payload)
+                    apply_route(invocation, proposal, context, route, payload, catalogs)
         assert injected == [boundary]
         assert attempts == []
         assert len(staging) == 1 and staging[0][1].read_bytes() == after.raw
@@ -333,7 +341,7 @@ def test_selected_cas_partial_write_keeps_first_error_over_close(stage_helper_fa
         staged, closed = [], []
         with pytest.raises(OSError) as caught:
             with capture._helper_owner_scope(registration_path(session)) as context:
-                invocation, proposal = current_invocation(session, context)
+                invocation, proposal, catalogs = current_invocation(session, context)
                 after, payload = proposed_journal(invocation, proposal, 'publish')
                 path = Path(invocation.history.journal.pin.path); before = path.read_bytes()
                 real_temp, real_open = publication.tempfile.mkstemp, publication.os.fdopen
@@ -360,7 +368,8 @@ def test_selected_cas_partial_write_keeps_first_error_over_close(stage_helper_fa
                 with monkeypatch.context() as patch:
                     patch.setattr(publication.tempfile, 'mkstemp', temporary)
                     patch.setattr(publication.os, 'fdopen', opened)
-                    publication.publish_derived(invocation, proposal, owner_context=context)
+                    publication.publish_derived(invocation, proposal, owner_context=context,
+                                                _catalogs=catalogs)
         assert caught.value is primary
         assert closed == [True]
         assert len(staged) == 1 and staged[0][1].read_bytes() == after.raw[:7]
