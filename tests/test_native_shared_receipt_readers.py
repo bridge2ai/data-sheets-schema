@@ -1,4 +1,5 @@
 """Native policy checks and reader routing; fake readers are not native evidence."""
+from contextlib import nullcontext
 import copy
 import hashlib
 import importlib
@@ -125,9 +126,17 @@ def routed(declaration, tmp_path, monkeypatch):
     def recorded(specification, **kwargs):
         calls.append(('recorded', specification, kwargs))
         return copy.deepcopy(result)
+    # This routing fixture deliberately has no live E/owner admission. Select
+    # the default scope explicitly; keep the real ambient-owner refusal guard.
+    native_capture = importlib.import_module('data_sheets_schema.native_shared_capture')
+    def default_scope(path):
+        assert str(path) == cap.registration.pin.path
+        return nullcontext(None)
     monkeypatch.setattr(data_sheets_schema, 'native_shared_capture',
         types.SimpleNamespace(live_receipt_block=live, recorded_receipt_block=recorded,
-            selected_receipt_paths=lambda path: {**paths, 'receipt': receipt}), raising=False)
+            selected_receipt_paths=lambda path: {**paths, 'receipt': receipt},
+            _helper_owner_scope=default_scope,
+            _refuse_implicit_owner_context=native_capture._refuse_implicit_owner_context), raising=False)
     monkeypatch.setattr(receipts, 'phase1_snapshot_state', lambda *a, **k: pytest.fail('native reader used API snapshots'))
     return cap, spec, cli, paths, receipt, calls, result
 

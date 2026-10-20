@@ -67,6 +67,67 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     sha256 it was measured on, and otherwise the origin is `unknown`, never
     `contemporaneous`. Reported, never gated: `--strict` does not read it.
     """
+    arguments = dict(method=method, label=label, project=project, write=write,
+        strict=strict, bundle_opt=bundle_opt, chunk_manifest=chunk_manifest,
+        receipt_completion_registration=receipt_completion_registration,
+        native_shared_selection=native_shared_selection, transcripts=transcripts,
+        receipt_at_run=receipt_at_run, full_at_run=full_at_run)
+    if native_shared_selection is None:
+        return _check_body(**arguments)
+    from data_sheets_schema import native_shared_capture as native_capture
+    output = []
+    with native_capture._helper_owner_scope(native_shared_selection) as owner_context:
+        if owner_context is None:
+            return _check_body(**arguments)
+        status = _check_body(**arguments, owner_context=owner_context, _output=output)
+        owner_context.require_current()
+    # Receipt success/strict diagnostics cannot precede lease cleanup.
+    for line in output:
+        click.echo(line)
+    if status:
+        sys.exit(status)
+
+
+def _selected_receipt_options(selection_path, *, owner_context, method, label, project,
+                              write, strict, bundle_opt, chunk_manifest,
+                              receipt_completion_registration, transcripts,
+                              receipt_at_run, full_at_run):
+    """The registered receipt helper authorizes only its fixed read-only options."""
+    from data_sheets_schema import native_shared_capture as native_capture
+    from data_sheets_schema.corpus import manifest_override
+    if (write is not False or strict is not True or receipt_completion_registration is not None
+            or transcripts or receipt_at_run is not None or full_at_run is not None):
+        raise click.UsageError('selected live receipt check requires its exact read-only registered options')
+    envelope = native_capture.require_receipt_invocation(selection_path, owner_context=owner_context)
+    explicit_manifest = manifest_override()
+    actual = {'selection_path': None if selection_path is None else str(selection_path),
+              'method': method, 'label': label, 'project': project,
+              'bundle': None if bundle_opt is None else str(bundle_opt),
+              'chunk_manifest': None if chunk_manifest is None else str(chunk_manifest),
+              'manifest': None if explicit_manifest is None else str(explicit_manifest)}
+    if any(actual[key] != envelope[key] for key in actual):
+        raise click.UsageError('selected live receipt options differ from the admitted registered command')
+    owner_context.require_current()
+    return envelope['paths']
+
+
+def _check_body(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration,
+                native_shared_selection=None, transcripts=(), receipt_at_run=None, full_at_run=None,
+                *, owner_context=None, _output=None):
+    """Shared assessment; selected output stays buffered until its owner closes."""
+    emit = click.echo if _output is None else _output.append
+    def finish(status):
+        if owner_context is None:
+            sys.exit(status)
+        return status
+
+    selected_paths = None
+    if owner_context is not None:
+        selected_paths = _selected_receipt_options(native_shared_selection,
+            owner_context=owner_context, method=method, label=label, project=project,
+            write=write, strict=strict, bundle_opt=bundle_opt, chunk_manifest=chunk_manifest,
+            receipt_completion_registration=receipt_completion_registration,
+            transcripts=transcripts, receipt_at_run=receipt_at_run, full_at_run=full_at_run)
     if (receipt_at_run or full_at_run) and not transcripts:
         raise click.UsageError("--receipt-at-run and --full-at-run name the files as a --transcript spelled them; "
                                "pass the transcript")
@@ -81,7 +142,8 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             raise click.BadParameter('native and API receipt registrations are mutually exclusive')
         from data_sheets_schema import native_shared_selection as native
         try:
-            native_capture = native.capture(native_shared_selection)
+            native_capture = (native.capture(native_shared_selection) if owner_context is None
+                              else owner_context._association.selection)
             chosen = native_capture.document()
             method = method or chosen['run']['method']
             if (project, label, method) != tuple(chosen['run'][key] for key in ('project', 'label', 'method')):
@@ -100,7 +162,8 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     if native_capture is not None:
         from data_sheets_schema import native_shared_capture
         try:
-            p = native_shared_capture.selected_receipt_paths(native_shared_selection)
+            p = (native_shared_capture.selected_receipt_paths(native_shared_selection)
+                 if owner_context is None else selected_paths)
         except (OSError, ValueError) as exc:
             raise click.ClickException(f'native receipt paths refused: {exc}') from exc
         receipt_file = p['receipt']
@@ -138,7 +201,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             md5 = _md5(bundle) if bundle.exists() else None
         expected = True
         recovery = {}
-        click.echo(f"   · no provenance record yet; checking against {bundle} as on disk")
+        emit(f"   · no provenance record yet; checking against {bundle} as on disk")
     # The same recovery the backfill makes (#1140, #1187 review M2): the gate
     # on attestation must not say "unchecked" of a record the backfill checked.
     chunks = recovery.get("record_chunks") if isinstance(recovery.get("record_chunks"), dict) else None
@@ -175,6 +238,8 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         except (OSError, ValueError) as exc:
             raise click.ClickException(f"receipt completion registration refused: {exc}") from exc
         recovery["receipt_render_spec"] = declaration
+    if owner_context is not None:
+        recovery['owner_context'] = owner_context
     assessment_block = rc.block_for(p["full"], receipt_file, bundle, md5, expected, **recovery)
     from data_sheets_schema import receipt_origin_record as ror
     prior = record["receipts"].get("origin") if isinstance(record, dict) and isinstance(record.get("receipts"), dict) else None
@@ -190,23 +255,23 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     origin_lines = ([ror.line(block)] + [f"· {r}" for r in (block["origin"].get("reasons") or [])[1:]]
                     if ror.ever_measured(block["origin"]) else [])
     if not block.get("checked"):
-        click.echo(f"   · unchecked: {block['reason']}"
+        emit(f"   · unchecked: {block['reason']}"
                    + ("" if block["expected"] else " (this run's procedure wrote none)"))
         for text in origin_lines:
-            click.echo(f"   {text}")
+            emit(f"   {text}")
     else:
-        click.echo(f"   {block['summary']}")
+        emit(f"   {block['summary']}")
         for text in origin_lines:
-            click.echo(f"   {text}")
+            emit(f"   {text}")
         if "coverage_floor" in block:
             floor = block["coverage_floor"]
-            click.echo(f"   · registered receipt coverage: {floor['state']} "
+            emit(f"   · registered receipt coverage: {floor['state']} "
                        f"({floor['with_receipt']}/{floor['receiptable']}); "
                        f"registration {floor['registration_sha256']}")
         for f in block["findings"]:
-            click.echo("   ❌ " + ", ".join(f"{k}={v}" for k, v in f.items()))
+            emit("   ❌ " + ", ".join(f"{k}={v}" for k, v in f.items()))
         for nc in block["non_checks"]:
-            click.echo(f"   · not checked here: {nc}")
+            emit(f"   · not checked here: {nc}")
     if write:
         native_claims_text = None
         if block.get("checked") and block.get('native_receipt_stage') in {'phase1_initial', 'final'}:
@@ -227,11 +292,11 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         if withheld:
             # `apply` keeps a checked block over an unchecked recomputation
             # (#907); the tick said it was written, origin included (#2933).
-            click.echo(f"   · not written: {p['provenance']} keeps its checked receipts block, which this "
+            emit(f"   · not written: {p['provenance']} keeps its checked receipts block, which this "
                        "unchecked recomputation does not replace (#907)"
                        + ("; the receipt origin read from --transcript is not written either" if transcripts else ""))
         else:
-            click.echo(f"   ✓ receipts block written to {p['provenance']}")
+            emit(f"   ✓ receipts block written to {p['provenance']}")
         if block.get("checked"):
             out = rc.claims_path(p["core_dir"], project)
             if native_claims_text is not None:
@@ -241,21 +306,25 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
                 full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}
                 out.write_text(yaml.safe_dump(rc.claim_receipts(receipt, full), sort_keys=False,
                                               allow_unicode=True), encoding="utf-8")
-            click.echo(f"   ✓ claim receipts written to {out}")
+            emit(f"   ✓ claim receipts written to {out}")
     # A run whose procedure wrote no receipt is not failed by --strict: the
     # block is not a metric for it (#727). Expected-and-unchecked is.
     if strict and block.get("expected") and not block.get("checked"):
-        sys.exit(1)
+        return finish(1)
     if strict and block.get("checked") and strict_failure(block):
         # The mandatory initial helper precedes receipt completion. Its
         # observed phase marker cannot certify a final floor or typed audit.
         initial = (block.get('native_receipt_stage') == 'phase1_initial'
                    and block.get('final_stage_complete') is False and block.get('passed') is True)
         if not initial:
-            sys.exit(1)
+            return finish(1)
     if strict and block.get('native_receipt_stage') == 'phase1_initial' and (
             block.get('final_stage_complete') is not False or block.get('passed') is not True):
-        sys.exit(1)
+        return finish(1)
+
+    if owner_context is not None:
+        owner_context.require_current()
+        return 0
 
 
 def strict_failure(block: dict) -> bool:

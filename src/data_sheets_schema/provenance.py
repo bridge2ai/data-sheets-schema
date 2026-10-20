@@ -1312,7 +1312,9 @@ class ProvenanceRecord:
     #: what made #396 hard to notice.
     validation_carried: bool | None = None
 
-    def write(self, path: Path) -> Path:
+    def write(self, path: Path, *, owner_context=None) -> Path:
+        from data_sheets_schema.native_shared_capture import require_recorder_write
+        require_recorder_write(path, owner_context=owner_context, record=self.data)
         path.parent.mkdir(parents=True, exist_ok=True)
         data = dict(self.data)
         had_prior = False
@@ -1343,19 +1345,30 @@ class ProvenanceRecord:
                         data[name] = carry_attestations(name, prior_rec[name], data[name])
             except Exception:                                # noqa: BLE001
                 pass
-        path.write_text(
+        serialized = (
             "# D4D generation provenance record\n"
             f"# record_version {RECORD_VERSION} — see src/data_sheets_schema/provenance.py\n"
-            + dump_yaml(data),
-            encoding="utf-8")
+            + dump_yaml(data))
+        # Serialization may be substantial; grant the actual write only from
+        # a fresh check after it completes, outside prior-record catches.
+        require_recorder_write(path, owner_context=owner_context, record=data)
+        path.write_text(serialized, encoding="utf-8")
         from data_sheets_schema.schema_cache import forget
         forget(path)                               # a reader must not be served the bytes this just replaced (#1203)
+        if owner_context is not None:
+            expected = serialized.encode("utf-8")
+            with path.open("rb") as stream:
+                actual = stream.read(len(expected) + 1)
+            if actual != expected:
+                raise ValueError("selected provenance write differs from its exact readback")
+            require_recorder_write(path, owner_context=owner_context, record=data)
         # Checked here, on the write path, not only by a command someone
         # remembers to run (#605). Reported rather than raised: the record is
         # already on disk and is the run's only account of itself, so losing it
         # to a schema complaint would cost more than the complaint is worth.
         # The caller decides — `d4d api run` fails the run on either outcome.
         self.conformance, self.conformance_failure = check_record(data)
+        require_recorder_write(path, owner_context=owner_context, record=data)
         return path
 
 

@@ -1690,7 +1690,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
               snapshot_spec=None, snapshot_record: dict | None = None,
               allow_manifest_discovery: bool = True,
               receipt_render_spec: dict | None = None,
-              native_selection_path: Path | None = None) -> dict[str, Any]:
+              native_selection_path: Path | None = None,
+              owner_context=None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
@@ -1724,6 +1725,21 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     independently of snapshot/source authority and receipt version 3/4.
     With no record, the existing current-generation output is unchanged.
     """
+    from . import native_shared_capture as native_capture
+    native_capture._refuse_implicit_owner_context(owner_context)
+    live_checked = None
+    if owner_context is not None:
+        from . import native_stream_coordination_v1 as coordination
+        if type(owner_context) is not coordination._OwnerReaderContext:
+            raise ValueError('live receipt assessment requires its exact owner reader context')
+        owner_context.require_current()
+        selected_path = (native_selection_path if native_selection_path is not None
+                         else owner_context._association.selection.registration.pin.path)
+        # Current admission and record identity are proved together. A record
+        # never changes an explicitly live request into saved reconstruction.
+        live_checked = native_capture.live_receipt_block(selected_path,
+            full_path=full_path, receipt_path=receipt, owner_context=owner_context,
+            snapshot_spec=snapshot_spec, snapshot_record=snapshot_record)
     import hashlib
 
     from data_sheets_schema.chunking import chunk_texts as _texts
@@ -1744,11 +1760,20 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 raise ValueError("explicit receipt policy differs from the snapshot spec")
             policy = explicit_policy
     except ValueError as exc:
+        if owner_context is not None:
+            raise
         return {**base, "expected": True, "checked": False,
                 "reason": f"receipt policy selection refused: {exc}"}
     if policy is not None:
         base.update(expected=True, **{selected_receipts.BLOCK_KEY: selected_receipts.block_identity(policy)})
     is_native = policy is not None and policy['registration'].get('kind') == 'd4d_native_shared_receipt_policy'
+    if owner_context is not None:
+        if not is_native:
+            raise ValueError('live receipt reader requires its explicit authoritative native policy')
+        result = {**base, **live_checked}
+        selected_receipts.policy_from_block(result, policy=policy)
+        owner_context.require_current()
+        return result
     if native_selection_path is not None and not is_native:
         return {**base, 'expected': True, 'checked': False,
                 'reason': 'native receipt reader requires its explicit authoritative selection'}

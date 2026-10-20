@@ -1,6 +1,7 @@
 """Provenance commands for the D4D CLI."""
 
 import functools
+from contextlib import contextmanager, nullcontext
 
 import os
 import click
@@ -124,7 +125,30 @@ def _recorded_receipt_origin(path: Path):
     return receipts.get("origin") if isinstance(receipts, dict) else None
 
 
-def _inline_checks(path: Path, *, origin_prior=None) -> None:
+@contextmanager
+def _recorder_owner_lifetime(selection_registration_path):
+    """One original helper scope; cleanup cannot replace an earlier failure."""
+    if selection_registration_path is None:
+        scope = nullcontext(None)
+    else:
+        from data_sheets_schema.native_shared_capture import _helper_owner_scope
+        scope = _helper_owner_scope(selection_registration_path)
+    owner_context = scope.__enter__()
+    try:
+        yield owner_context
+    except BaseException as primary:
+        try:
+            scope.__exit__(type(primary), primary, primary.__traceback__)
+        except BaseException:
+            # The first failure remains the command's result. Do not retry
+            # cleanup or undo an earlier record when a later operation fails.
+            pass
+        raise
+    else:
+        scope.__exit__(None, None, None)
+
+
+def _inline_checks(path: Path, *, origin_prior=None, owner_context=None) -> str | None:
     """Write the four deterministic check blocks into a just-written record.
 
     The API runner computes pair consistency, report claims, grounding and
@@ -139,18 +163,25 @@ def _inline_checks(path: Path, *, origin_prior=None) -> None:
     report_claims and refuses a record that lacks it, so the gap cannot pass
     silently into a fan-out. The one exception is an artifact that does not
     parse, which is re-raised. `origin_prior` is the receipt origin the
-    record carried before a re-record rewrote it (#2933).
+    record carried before a re-record rewrote it (#2933). Selected owner
+    execution propagates failures and returns its summary for acknowledgement
+    only after the original helper scope has cleaned up successfully.
     """
     import yaml as _yaml
 
     from data_sheets_schema import backfill_checks as bc
+    from data_sheets_schema.native_shared_capture import _refuse_implicit_owner_context
+    _refuse_implicit_owner_context(owner_context)
+    owner_keywords = {"owner_context": owner_context} if owner_context is not None else {}
     try:
-        blocks = bc.compute(path, origin_prior=origin_prior)
+        blocks = bc.compute(path, origin_prior=origin_prior, **owner_keywords)
     except _yaml.YAMLError:
         # An artifact that does not parse is a run failure, not a checks
         # failure; hiding it behind a ⚠️ would let a launcher ship it.
         raise
-    except Exception as exc:  # noqa: BLE001 — reported on stdout, exit 0
+    except Exception as exc:  # noqa: BLE001 — default recorder reports on stdout, exit 0
+        if owner_context is not None:
+            raise
         click.echo(f"  ⚠️  deterministic checks not computed ({exc}); the "
                    "record stands — run `d4d provenance backfill-checks "
                    "--execute` once the cause is fixed")
@@ -158,8 +189,12 @@ def _inline_checks(path: Path, *, origin_prior=None) -> None:
     for block in blocks.values():
         if isinstance(block, dict):
             block["recorded_by"] = "d4d provenance record"
-    bc.apply(path, blocks, overwrite=True)
-    click.echo("  " + bc.summarise(blocks))
+    bc.apply(path, blocks, overwrite=True, **owner_keywords)
+    summary = "  " + bc.summarise(blocks)
+    if owner_context is not None:
+        return summary
+    click.echo(summary)
+    return None
 
 
 def _CONDITIONS_FOR_RECORD() -> list[str]:
@@ -419,6 +454,9 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     and the prompt-condition study is precisely a comparison between prompts,
     so a record that cannot identify its own prompt cannot be placed in it.
     """
+    # Capture the exact callback inputs before env resolution and defaults.
+    # The selected capture guard owns their closed shape and fixed envelope.
+    invocation_values = locals().copy()
     _require_repo_root_cwd("d4d provenance record")
     from data_sheets_schema import schema_digest
     from data_sheets_schema.provenance import build_record, record_path_for
@@ -496,194 +534,226 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
         if chunk_manifest is None:
             chunk_manifest = str(registered.chunk_manifest) if registered.chunk_manifest is not None else None
 
-    # The schema is on disk and the run has just been validated against it, so
-    # the digest is observed rather than asserted. `d4d api run` has always
-    # recorded it and this path never could, which left the agentic arm off the
-    # axis the whole prompt comparison is stratified by — and unable to go
-    # STALE when the schema moves (#426, #433, #497). Rendered under the
-    # profile the selected manifest declares, once the manifest is selected
-    # below (#1438).
-
-    # Reconstruct the render spec, so the gate can re-render and compare rather
-    # than reporting `unverifiable`. Only when the caller says which condition
-    # was rendered: guessing it would assert a condition the run may not have
-    # used, which is the failure the gate exists to catch.
-    from data_sheets_schema.registry import AUTO, select_manifest, manifest_declared_unused
-    requested = (None if (manifest and str(manifest).lower() == "none")
-                 else Path(manifest) if manifest else AUTO)
-    from data_sheets_schema.corpus import AUTO as NO_OVERRIDE, manifest_override
-    if requested is AUTO:
-        explicit = manifest_override()
-        if explicit is not NO_OVERRIDE:
-            requested = explicit
-    from data_sheets_schema.provenance import CONCAT_DIR as _CD, parse_header
-    base = method[:-5] if method.endswith("_core") else method
-    # An explicit external bundle can select no manifest even below another
-    # corpus. Resolve that namespace before reading any output header (#1735).
-    selected_manifest = select_manifest(project, input_bundle, requested)
-    for _ in range(2):
-        concat_dir = _corpus_path(_CD, selected_manifest)
-        full_out = concat_dir / base / label / f"{project}_d4d.yaml"
-        if registered is not None:
-            full_out = Path(registered._agentic_artifact_paths["full"])
-        h = parse_header(full_out) if full_out.exists() else {}
-        header_bundle = h.get("Source bundle") or h.get("Source")
-        resolved_bundle = (input_bundle or
-                           (_corpus_path(Path(header_bundle), selected_manifest)
-                            if header_bundle else None))
-        header_manifest = h.get("Source manifest", "").strip()
-        header_unused = manifest_declared_unused(header_manifest)
-        header_selection = requested
-        if requested is AUTO:
-            if header_unused and "no manifest selected" in header_manifest.lower():
-                header_selection = None
-            elif header_manifest and not header_unused:
-                header_selection = _corpus_path(Path(header_manifest), selected_manifest)
-        # Unused context does not erase the selected output namespace.
-        selected_manifest = (None if header_selection is AUTO and resolved_bundle is None
-                             else select_manifest(project, resolved_bundle, header_selection))
-        if _corpus_path(_CD, selected_manifest).resolve() == concat_dir.resolve():
-            break
-        # A header selecting another owner must be read from that owner too.
-    else:
-        raise click.ClickException(
-            "output headers disagree about the corpus owner; pass --manifest to select it")
-    from data_sheets_schema.profiles import select_profile
-    if stated_profile:
-        # The instruction's profile is authoritative (#1581); what this
-        # process would have selected is a diagnostic, and a process whose
-        # own selection is invalid — `D4D_PROFILE=typo` — still records the
-        # profile it was told (#1606).
-        from data_sheets_schema.profiles import Selection, profile_named
-        stated = profile_named(stated_profile)
-        basis = "rendered instruction"
-        try:
-            ambient = select_profile(selected_manifest)
-        except ValueError as exc:
-            basis += f" (this process could not select one: {exc})"
-        else:
-            if stated is not ambient.profile:
-                basis += f" (this process would select {ambient.name}: {ambient.basis})"
-        profile_selection = Selection(stated, basis)
-    else:
-        try:
-            profile_selection = select_profile(selected_manifest)
-        except ValueError as exc:                # a manifest declaring a profile this code does not know (#1630)
-            raise click.ClickException(str(exc))
-    # … and the header governs what the input block attests.
-    selected = None if header_unused else selected_manifest
-    manifest_basis = ("the output header declares the source manifest unused"
-                      if header_unused else None)
-    digest = schema_digest.fingerprint(
-        schema_digest.digest_text("Dataset", profile=profile_selection.profile))
-    spec = None
-    if registered is not None:
-        def same_path(left, right):
-            return ((left is None and right is None) or
-                    (left is not None and right is not None and Path(left).resolve() == Path(right).resolve()))
-        for name, selected_path, registered_path in (
-                ("bundle", resolved_bundle, registered.bundle),
-                ("rendering bundle", bundle_for_spec or resolved_bundle, registered.bundle),
-                ("manifest", selected_manifest, registered.manifest),
-                ("chunk manifest", chunk_manifest, registered.chunk_manifest)):
-            if not same_path(selected_path, registered_path):
-                raise click.ClickException(f"{name} conflicts with the registered rendering specification")
-        spec = registered.render_spec()
-        selected = selected_manifest if registered.manifest_used else None
-        manifest_basis = None if registered.manifest_used else "the registered instruction declares manifest context unused"
-    elif condition:
-        from data_sheets_schema.api_runner import RunSpec
-        bundle = bundle_for_spec or resolved_bundle
-        # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
-        # token. Storing the token here produced a spec that could never
-        # re-render to what was sent, and the gate blamed an unchanged prompt
-        # file for it (#500). Expanded through the same table, so the two
-        # commands cannot drift apart.
-        run_spec = RunSpec(
-            project=project, arm=_ARMS[arm][0], method=method,
-            bundle=Path(bundle) if bundle else None, label=label,
-            condition=condition, runtime=runtime, provider=provider,
-            manifest_line=_ARMS[arm][3],
-            manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
-            chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
-            # The spec the gate re-renders carries the profile the record
-            # states, not a second selection of this process's own (#1606).
-            profile=profile_selection.name, profile_basis=profile_selection.basis,
-        )
-        spec = run_spec.render_spec()
-        if not run_spec.manifest_used:
-            selected = None
-            manifest_basis = f"the arm's header declares the source manifest unused ({run_spec.manifest_line})"
-
-    rec = build_record(project, method, label, mode="live",
-                       # The selected manifest owns outputs even when this
-                       # arm consumes none of its context blocks.
-                       concat_dir=concat_dir,
-                       outputs=({key: Path(value) for key, value in registered._agentic_artifact_paths.items()
-                                 if key in {"full", "core", "report"}} if registered is not None else None),
-                       input_bundle=Path(input_bundle) if input_bundle else None,
-                       input_verified=True,
-                       prompt_paths=[Path(p) for p in prompts] or None,
-                       prompt_request=supplied_text,
-                       prompt_request_spec=spec,
-                       schema_digest_md5=digest,
-                       profile=profile_selection,
-                       reasoning_effort=reasoning_effort,
-                       phases=_parse_phases(phase_specs),
-                       receipt_expected=receipt_expected,
-                       condition=condition,                  # the launcher's own claim (#1094)
-                       manifest=selected, manifest_basis=manifest_basis,
-                       selected_manifest=selected_manifest,
-                       chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
+    native_selection = None
+    parameters = None
     if registered is not None and registered.native_shared_generation_version:
-        from data_sheets_schema.native_shared_capture import live_provenance_block
         from data_sheets_schema.native_shared_render import validate_spec
         native_selection = validate_spec(registered)
-        rec.data["native_shared_generation"] = live_provenance_block(
-            native_selection["registration_path"])
-    if phases_skipped:
-        known = _known_phases()
-        bad = [n for n in phases_skipped if n not in known]
-        if bad:
-            raise click.BadParameter(
-                f"--phase-skipped {bad}: not phases this pipeline has. "
-                f"Known: {', '.join(sorted(known))}")
-        rec.data["phases_skipped"] = list(phases_skipped)
-    # Freeze the write destination so record_path_for cannot rediscover an
-    # ambient owner; the record itself keeps portable paths at its own root.
-    destination = (Path(registered._agentic_artifact_paths["core"]).resolve().parent / f"{project}_provenance.yaml"
-                   if registered is not None else record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
-    origin_prior = _recorded_receipt_origin(destination)        # a re-record keeps it (#2933)
-    out = rec.write(destination)
-    click.echo(f"✓ {out}")
-    # Evidence pins retain the same portable spelling as the record's
-    # outputs. Reuse the resolved address without another corpus selection.
-    inline_address = out if registered is not None or concat_dir.is_absolute() else out.relative_to(Path.cwd())
-    _inline_checks(inline_address, origin_prior=origin_prior)
+        context = click.get_current_context()
+        parameters = {
+            "values": invocation_values,
+            "sources": {name: context.get_parameter_source(name).name for name in invocation_values},
+            "instruction_path": str(Path(prompt_text).resolve()),
+        }
+    messages = []
+    with _recorder_owner_lifetime(
+            native_selection["registration_path"] if native_selection is not None else None) as owner_context:
+        if owner_context is not None:
+            from data_sheets_schema.native_shared_capture import require_recorder_invocation
+            require_recorder_invocation(native_selection["registration_path"], owner_context=owner_context,
+                                        spec=registered, parameters=parameters)
+        emit = messages.append if owner_context is not None else click.echo
+        owner_keywords = {"owner_context": owner_context} if owner_context is not None else {}
+        # The schema is on disk and the run has just been validated against it, so
+        # the digest is observed rather than asserted. `d4d api run` has always
+        # recorded it and this path never could, which left the agentic arm off the
+        # axis the whole prompt comparison is stratified by — and unable to go
+        # STALE when the schema moves (#426, #433, #497). Rendered under the
+        # profile the selected manifest declares, once the manifest is selected
+        # below (#1438).
 
-    # Say it here, but do not refuse. Recording an uncanonical prompt is the
-    # honest act — it is what puts the evidence in the record for `d4d runs
-    # check` to fail on (#432). Refusing would reward not recording at all,
-    # which is the state this whole thread has been climbing out of.
-    from data_sheets_schema import prompt_registry as _pr
-    for p in prompts:
-        st, why = _pr.disk_status(p)
-        if st != _pr.CANONICAL:
-            click.echo(f"  ⚠️  prompt {st}: {why}")
-            click.echo("      This is recorded, and `d4d runs check` reports "
-                       "it. If the text is intentional, declare it with "
-                       "`d4d api prompts pin`.")
-    # Say what happened to any prior verdict. Re-recording used to delete it
-    # silently and the run then failed `--strict` with "nothing to verify",
-    # while this command printed a tick and exited 0 (#396).
-    if rec.validation_carried is True:
-        click.echo("  validation: carried forward — the artifacts it names "
-                   "still hash to what it recorded")
-    elif rec.validation_carried is False:
-        click.echo("  ⚠️  validation: dropped — the artifacts changed since it "
-                   "was recorded, so the verdict is about bytes that no longer "
-                   "exist.\n      Re-run `d4d runs validate --label "
-                   f"{label} --project {project}` before `d4d runs check`.")
+        # Reconstruct the render spec, so the gate can re-render and compare rather
+        # than reporting `unverifiable`. Only when the caller says which condition
+        # was rendered: guessing it would assert a condition the run may not have
+        # used, which is the failure the gate exists to catch.
+        from data_sheets_schema.registry import AUTO, select_manifest, manifest_declared_unused
+        requested = (None if (manifest and str(manifest).lower() == "none")
+                     else Path(manifest) if manifest else AUTO)
+        from data_sheets_schema.corpus import AUTO as NO_OVERRIDE, manifest_override
+        if requested is AUTO:
+            explicit = manifest_override()
+            if explicit is not NO_OVERRIDE:
+                requested = explicit
+        from data_sheets_schema.provenance import CONCAT_DIR as _CD, parse_header
+        base = method[:-5] if method.endswith("_core") else method
+        # An explicit external bundle can select no manifest even below another
+        # corpus. Resolve that namespace before reading any output header (#1735).
+        selected_manifest = select_manifest(project, input_bundle, requested)
+        for _ in range(2):
+            concat_dir = _corpus_path(_CD, selected_manifest)
+            full_out = concat_dir / base / label / f"{project}_d4d.yaml"
+            if registered is not None:
+                full_out = Path(registered._agentic_artifact_paths["full"])
+            h = parse_header(full_out) if full_out.exists() else {}
+            header_bundle = h.get("Source bundle") or h.get("Source")
+            resolved_bundle = (input_bundle or
+                               (_corpus_path(Path(header_bundle), selected_manifest)
+                                if header_bundle else None))
+            header_manifest = h.get("Source manifest", "").strip()
+            header_unused = manifest_declared_unused(header_manifest)
+            header_selection = requested
+            if requested is AUTO:
+                if header_unused and "no manifest selected" in header_manifest.lower():
+                    header_selection = None
+                elif header_manifest and not header_unused:
+                    header_selection = _corpus_path(Path(header_manifest), selected_manifest)
+            # Unused context does not erase the selected output namespace.
+            selected_manifest = (None if header_selection is AUTO and resolved_bundle is None
+                                 else select_manifest(project, resolved_bundle, header_selection))
+            if _corpus_path(_CD, selected_manifest).resolve() == concat_dir.resolve():
+                break
+            # A header selecting another owner must be read from that owner too.
+        else:
+            raise click.ClickException(
+                "output headers disagree about the corpus owner; pass --manifest to select it")
+        from data_sheets_schema.profiles import select_profile
+        if stated_profile:
+            # The instruction's profile is authoritative (#1581); what this
+            # process would have selected is a diagnostic, and a process whose
+            # own selection is invalid — `D4D_PROFILE=typo` — still records the
+            # profile it was told (#1606).
+            from data_sheets_schema.profiles import Selection, profile_named
+            stated = profile_named(stated_profile)
+            basis = "rendered instruction"
+            try:
+                ambient = select_profile(selected_manifest)
+            except ValueError as exc:
+                basis += f" (this process could not select one: {exc})"
+            else:
+                if stated is not ambient.profile:
+                    basis += f" (this process would select {ambient.name}: {ambient.basis})"
+            profile_selection = Selection(stated, basis)
+        else:
+            try:
+                profile_selection = select_profile(selected_manifest)
+            except ValueError as exc:                # a manifest declaring a profile this code does not know (#1630)
+                raise click.ClickException(str(exc))
+        # … and the header governs what the input block attests.
+        selected = None if header_unused else selected_manifest
+        manifest_basis = ("the output header declares the source manifest unused"
+                          if header_unused else None)
+        digest = schema_digest.fingerprint(
+            schema_digest.digest_text("Dataset", profile=profile_selection.profile))
+        spec = None
+        if registered is not None:
+            def same_path(left, right):
+                return ((left is None and right is None) or
+                        (left is not None and right is not None and Path(left).resolve() == Path(right).resolve()))
+            for name, selected_path, registered_path in (
+                    ("bundle", resolved_bundle, registered.bundle),
+                    ("rendering bundle", bundle_for_spec or resolved_bundle, registered.bundle),
+                    ("manifest", selected_manifest, registered.manifest),
+                    ("chunk manifest", chunk_manifest, registered.chunk_manifest)):
+                if not same_path(selected_path, registered_path):
+                    raise click.ClickException(f"{name} conflicts with the registered rendering specification")
+            spec = registered.render_spec()
+            selected = selected_manifest if registered.manifest_used else None
+            manifest_basis = None if registered.manifest_used else "the registered instruction declares manifest context unused"
+        elif condition:
+            from data_sheets_schema.api_runner import RunSpec
+            bundle = bundle_for_spec or resolved_bundle
+            # `render-prompt` substitutes `ARMS[arm][0]`, the display name, not the
+            # token. Storing the token here produced a spec that could never
+            # re-render to what was sent, and the gate blamed an unchanged prompt
+            # file for it (#500). Expanded through the same table, so the two
+            # commands cannot drift apart.
+            run_spec = RunSpec(
+                project=project, arm=_ARMS[arm][0], method=method,
+                bundle=Path(bundle) if bundle else None, label=label,
+                condition=condition, runtime=runtime, provider=provider,
+                manifest_line=_ARMS[arm][3],
+                manifest=selected_manifest,  # what was selected; `manifest_used` reads the header (#1367 review, must-fix 3; #1461)
+                chunk_manifest=Path(chunk_manifest) if chunk_manifest else None,
+                # The spec the gate re-renders carries the profile the record
+                # states, not a second selection of this process's own (#1606).
+                profile=profile_selection.name, profile_basis=profile_selection.basis,
+            )
+            spec = run_spec.render_spec()
+            if not run_spec.manifest_used:
+                selected = None
+                manifest_basis = f"the arm's header declares the source manifest unused ({run_spec.manifest_line})"
+
+        rec = build_record(project, method, label, mode="live",
+                           # The selected manifest owns outputs even when this
+                           # arm consumes none of its context blocks.
+                           concat_dir=concat_dir,
+                           outputs=({key: Path(value) for key, value in registered._agentic_artifact_paths.items()
+                                     if key in {"full", "core", "report"}} if registered is not None else None),
+                           input_bundle=Path(input_bundle) if input_bundle else None,
+                           input_verified=True,
+                           prompt_paths=[Path(p) for p in prompts] or None,
+                           prompt_request=supplied_text,
+                           prompt_request_spec=spec,
+                           schema_digest_md5=digest,
+                           profile=profile_selection,
+                           reasoning_effort=reasoning_effort,
+                           phases=_parse_phases(phase_specs),
+                           receipt_expected=receipt_expected,
+                           condition=condition,                  # the launcher's own claim (#1094)
+                           manifest=selected, manifest_basis=manifest_basis,
+                           selected_manifest=selected_manifest,
+                           chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
+        if native_selection is not None:
+            from data_sheets_schema.native_shared_capture import live_provenance_block
+            rec.data["native_shared_generation"] = live_provenance_block(
+                native_selection["registration_path"], owner_context=owner_context)
+        if phases_skipped:
+            known = _known_phases()
+            bad = [n for n in phases_skipped if n not in known]
+            if bad:
+                raise click.BadParameter(
+                    f"--phase-skipped {bad}: not phases this pipeline has. "
+                    f"Known: {', '.join(sorted(known))}")
+            rec.data["phases_skipped"] = list(phases_skipped)
+        # Freeze the write destination so record_path_for cannot rediscover an
+        # ambient owner; the record itself keeps portable paths at its own root.
+        destination = (Path(registered._agentic_artifact_paths["core"]).resolve().parent / f"{project}_provenance.yaml"
+                       if registered is not None else record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
+        origin_prior = _recorded_receipt_origin(destination)        # a re-record keeps it (#2933)
+        out = rec.write(destination, **owner_keywords)
+        emit(f"✓ {out}")
+        # Evidence pins retain the same portable spelling as the record's
+        # outputs. Reuse the resolved address without another corpus selection.
+        inline_address = out if registered is not None or concat_dir.is_absolute() else out.relative_to(Path.cwd())
+        summary = _inline_checks(inline_address, origin_prior=origin_prior, **owner_keywords)
+        if summary is not None:
+            emit(summary)
+
+        # Say it here, but do not refuse. Recording an uncanonical prompt is the
+        # honest act — it is what puts the evidence in the record for `d4d runs
+        # check` to fail on (#432). Refusing would reward not recording at all,
+        # which is the state this whole thread has been climbing out of.
+        from data_sheets_schema import prompt_registry as _pr
+        for p in prompts:
+            st, why = _pr.disk_status(p)
+            if st != _pr.CANONICAL:
+                emit(f"  ⚠️  prompt {st}: {why}")
+                emit("      This is recorded, and `d4d runs check` reports "
+                           "it. If the text is intentional, declare it with "
+                           "`d4d api prompts pin`.")
+        # Say what happened to any prior verdict. Re-recording used to delete it
+        # silently and the run then failed `--strict` with "nothing to verify",
+        # while this command printed a tick and exited 0 (#396).
+        if rec.validation_carried is True:
+            emit("  validation: carried forward — the artifacts it names "
+                       "still hash to what it recorded")
+        elif rec.validation_carried is False:
+            emit("  ⚠️  validation: dropped — the artifacts changed since it "
+                       "was recorded, so the verdict is about bytes that no longer "
+                       "exist.\n      Re-run `d4d runs validate --label "
+                       f"{label} --project {project}` before `d4d runs check`.")
+
+        if owner_context is not None:
+            # The second writer checked its exact readback. Recheck after the
+            # remaining record/report work before leaving the original lifetime.
+            from data_sheets_schema.native_shared_capture import require_recorder_write
+            import yaml as _yaml
+            final_record = _yaml.safe_load(destination.read_text(encoding="utf-8"))
+            require_recorder_write(destination, owner_context=owner_context, record=final_record)
+
+    # No positive acknowledgement precedes successful owner cleanup.
+    for message in messages:
+        click.echo(message)
 
 
 @provenance.command("backfill-spec")

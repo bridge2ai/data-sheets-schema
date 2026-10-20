@@ -100,7 +100,8 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             only: set[str] | None = None,
             ranges: dict[str, dict[str, str | None]] | None = None, *,
             report_claims_version: int = 8, schema_policy: str = "recorded",
-            origin_prior: dict[str, Any] | None = None) -> dict[str, Any]:
+            origin_prior: dict[str, Any] | None = None,
+            owner_context=None) -> dict[str, Any]:
     """The check blocks for one record, or reasons they cannot be computed.
     `only` restricts the computation to the named blocks (`--blocks`): the
     receipts and grounding checks read the bundle and every chunk, which
@@ -123,6 +124,9 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     while it still describes the receipt, else `unknown`. `origin_prior` is
     that measurement where the record no longer holds it -- a re-record
     rewrites the file before its inline checks run."""
+    from data_sheets_schema.native_shared_capture import (
+        _refuse_implicit_owner_context, require_recorder_write)
+    _refuse_implicit_owner_context(owner_context)
     if schema_policy not in {"recorded", "legacy_current"}:
         raise ValueError("schema_policy must be recorded or legacy_current")
     want = (lambda name: only is None or name in only)
@@ -134,6 +138,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
 
     text = provenance.read_text(encoding="utf-8")
     record = yaml.safe_load(_split_header(text)[1]) or {}
+    require_recorder_write(provenance, owner_context=owner_context, record=record)
     paths = record_paths(provenance)
     full, core, report = paths["full"], paths["core"], paths["report"]
     out: dict[str, Any] = {}
@@ -339,11 +344,13 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                        bundle_rel_path=inputs.get("bundle_path"),
                                        record_bundle_sha256=inputs.get("bundle_sha256"),
                                        record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None,
-                                       snapshot_record=record)
+                                       snapshot_record=record,
+                                       **({"owner_context": owner_context} if owner_context is not None else {}))
         out["receipts"] = {**assessment,
                            "origin": for_assessment(assessment, origin_prior, receipt, full,
                                                     api_path=bool(record.get("api_usage"))),
                            "recorded_by": RECORDED_BY}
+    require_recorder_write(provenance, owner_context=owner_context, record=record)
     return out
 
 
@@ -377,7 +384,8 @@ def carry_attestations(name: str, old: Any, new: Any) -> Any:
 
 
 def apply(provenance: Path, blocks: dict[str, Any],
-          overwrite: bool = False, withheld: list[str] | None = None) -> bool:
+          overwrite: bool = False, withheld: list[str] | None = None, *,
+          owner_context=None) -> bool:
     """Write the blocks into the record. Returns whether anything changed.
     `withheld`, when given, receives the names of blocks kept because the
     recomputation could not measure what the record already attests.
@@ -385,6 +393,9 @@ def apply(provenance: Path, blocks: dict[str, Any],
     Rewrites through `safe_dump` after splitting the leading comments off and
     re-emitting them verbatim, so the header the reader relies on survives.
     """
+    from data_sheets_schema.native_shared_capture import (
+        _refuse_implicit_owner_context, require_recorder_write)
+    _refuse_implicit_owner_context(owner_context)
     text = provenance.read_text(encoding="utf-8")
     header, body = _split_header(text)
     record = yaml.safe_load(body)
@@ -394,6 +405,7 @@ def apply(provenance: Path, blocks: dict[str, Any],
     # blocks — losing the run it describes to make room for a note about it.
     if not isinstance(record, dict) or (body.strip() and not record):
         raise ValueError(f"{provenance} did not parse as a mapping; not written")
+    require_recorder_write(provenance, owner_context=owner_context, record=record)
     changed = False
     for name in BLOCKS:
         if name in record and not overwrite:
@@ -424,12 +436,20 @@ def apply(provenance: Path, blocks: dict[str, Any],
         record[name] = carry_attestations(name, old, blocks[name])
         changed = True
     if not changed:
+        require_recorder_write(provenance, owner_context=owner_context, record=record)
         return False
-    provenance.write_text(
-        header + yaml.safe_dump(record, sort_keys=False, allow_unicode=True),
-        encoding="utf-8")
+    serialized = header + yaml.safe_dump(record, sort_keys=False, allow_unicode=True)
+    require_recorder_write(provenance, owner_context=owner_context, record=record)
+    provenance.write_text(serialized, encoding="utf-8")
     from data_sheets_schema.schema_cache import forget
     forget(provenance)                             # a reader must not be served what this replaced (#1204 review, S1)
+    if owner_context is not None:
+        expected = serialized.encode("utf-8")
+        with provenance.open("rb") as stream:
+            actual = stream.read(len(expected) + 1)
+        if actual != expected:
+            raise ValueError("selected provenance checks write differs from its exact readback")
+    require_recorder_write(provenance, owner_context=owner_context, record=record)
     return True
 
 
