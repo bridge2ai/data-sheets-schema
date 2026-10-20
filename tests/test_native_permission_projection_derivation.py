@@ -331,3 +331,159 @@ def test_inactive_view_does_not_touch_active_bound_property_and_preserves_error_
     inactive = outcome(p._view, *changed, 'worker', state='await_core')
     assert inactive == outcome(previous_view, *changed, 'worker', state='await_core')
     assert inactive[0:3] == ('raised', CommandAccess, ('stage command consulted',))
+
+
+def previous_factory(expected, selection, launch, session, *, policy=None, recipe=None):
+    """Oracle: derive each view afresh with the pre-reuse implementation."""
+    def build(context, *, state='awaiting_response', read=False):
+        return previous_view(expected, selection, launch, session, context,
+                             state=state, read=read, policy=policy, recipe=recipe)
+    return build
+
+
+def test_trace_and_derived_reuse_keeps_all_views_classifiers_and_exact_bytes(inputs, fixture, monkeypatch):
+    raw = {name: row['text'].encode() for name, row in fixture['manifest']['members'].items()}
+    controls = p.composition.load_controls()
+    actual_factory = p._view_factory
+    actual_construct = c.NativeEffectView.__init__
+    actual_initialize = c.NativeEffectView.__post_init__
+    actual_validate = c._validate_carrier
+    actual_effect, actual_bash = effects.classify_effect, p.command_policy.classify_bash
+    actual_classify = p._classify_view
+
+    def run(factory):
+        counts, views, classified, factories = Counter(), [], [], []
+
+        def construct(view, *args, **kwargs):
+            counts['construct'] += 1
+            actual_construct(view, *args, **kwargs)
+            views.append(view)
+
+        def initialize(view):
+            # Classifiers revalidate existing carriers through __post_init__.
+            # Count those checks separately from actual object construction.
+            counts['post_init'] += 1
+            actual_initialize(view)
+
+        def validate(value):
+            if type(value) is c.NativeEffectView:
+                counts['validate_view'] += 1
+            return actual_validate(value)
+
+        def effect(*args, **kwargs):
+            counts['effect'] += 1
+            return actual_effect(*args, **kwargs)
+
+        def bash(*args, **kwargs):
+            counts['bash'] += 1
+            return actual_bash(*args, **kwargs)
+
+        def classify(case, selected_controls, policy, view):
+            counts['classify'] += 1
+            result = actual_classify(case, selected_controls, policy, view)
+            classified.append((case['id'], result[0], asdict(view)))
+            return result
+
+        def local_factory(expected, selection, launch, session, *, policy=None, recipe=None):
+            # Trace/projection/derived callers must pass their current explicit
+            # policy and recipe; no hidden recomputation or cross-trace default.
+            assert policy is not None and recipe is not None
+            build = factory(expected, selection, launch, session, policy=policy, recipe=recipe)
+            row = {'session': session, 'root': launch['effect_root'], 'calls': [], 'build': build}
+            factories.append(row)
+            def observed(context, *, state='awaiting_response', read=False):
+                row['calls'].append((context, state, read))
+                return build(context, state=state, read=read)
+            return observed
+
+        with monkeypatch.context() as patch:
+            patch.setattr(p, '_view_factory', local_factory)
+            patch.setattr(c.NativeEffectView, '__init__', construct)
+            patch.setattr(c.NativeEffectView, '__post_init__', initialize)
+            patch.setattr(c, '_validate_carrier', validate)
+            patch.setattr(effects, 'classify_effect', effect)
+            patch.setattr(p.command_policy, 'classify_bash', bash)
+            patch.setattr(p, '_classify_view', classify)
+            traces = [p._trace(inputs[0], inputs[1], trace, raw, controls) for trace in p.TRACES]
+            derived = p._derived_controls(*inputs)
+        assert len(views) == len({id(view) for view in views})
+        assert len(factories) == len({id(row['build']) for row in factories})
+        return c.canonical((traces, derived, classified)), counts, factories
+
+    before, raw_before = c.canonical(inputs), raw.copy()
+    previous, old_counts, old_factories = run(previous_factory)
+    current, counts, factories = run(actual_factory)
+    assert current == previous and counts == old_counts
+    assert counts['classify'] == 25
+    assert counts['construct'] == 13 * len(p.TRACES) + 25 + 9
+    assert counts['post_init'] == counts['validate_view'] == 251
+    assert counts['effect'] > 25 and counts['bash'] > 0
+    assert len(factories) == 2 * len(p.TRACES) + 1
+    assert [(row['session'], row['root'], row['calls']) for row in factories] == [
+        (row['session'], row['root'], row['calls']) for row in old_factories]
+    for index, trace in enumerate(p.TRACES):
+        projected, classified = factories[2 * index:2 * index + 2]
+        session = get(fixture['manifest'], f'traces/{trace}/outcome.json')['session_id']
+        assert projected['session'] == classified['session'] == session
+        assert len(projected['calls']) == 13
+        assert len(classified['calls']) == (25 - len(p.STOPS) if trace == 'settled' else 1)
+    assert factories[-1]['calls'] == [
+        ('worker', state, False) for state in p.NONRESPONSE
+    ] + [(context, 'awaiting_response', True) for context in p.CONTEXTS]
+    assert c.canonical(inputs) == before and raw == raw_before
+
+
+def test_derived_factory_is_fresh_after_mutation_and_keeps_first_refusal(inputs, monkeypatch):
+    actual_factory = p._view_factory
+    actual_initialize = c.NativeEffectView.__post_init__
+
+    def run(data, factory):
+        views, factories = [], []
+        def initialize(view):
+            actual_initialize(view)
+            views.append(asdict(view))
+        def local_factory(*args, **kwargs):
+            build = factory(*args, **kwargs)
+            factories.append(build)
+            return build
+        before = c.canonical(data)
+        with monkeypatch.context() as patch:
+            patch.setattr(p, '_view_factory', local_factory)
+            patch.setattr(c.NativeEffectView, '__post_init__', initialize)
+            result = outcome(p._derived_controls, *data)
+        assert len(factories) == 1 if result[0] == 'returned' else len(factories) <= 1
+        assert c.canonical(data) == before
+        return result, c.canonical(views), factories[0] if factories else None
+
+    baseline, baseline_views, first_factory = run(inputs, actual_factory)
+    assert baseline[0] == 'returned'
+    retained = [first_factory]
+    mutations = [
+        lambda data: data.__setitem__(3, '00000000-0000-4000-8000-000000000099'),
+        lambda data: data[2].update(effect_root=data[2]['effect_root'] + '-fresh'),
+        lambda data: data[1]['bounds'].update(max_response_bytes=17),
+        lambda data: data[0]['selection'].update(sha256='8' * 64),
+    ]
+    for mutate in mutations:
+        changed = list(deepcopy(inputs))
+        mutate(changed)
+        previous = run(changed, previous_factory)
+        current = run(changed, actual_factory)
+        assert current[:2] == previous[:2]
+        assert current[0][0] == 'returned' and current[1] != baseline_views
+        assert all(current[2] is not item for item in retained)
+        retained.append(current[2])
+        restored = run(inputs, actual_factory)
+        assert restored[:2] == (baseline, baseline_views)
+        assert all(restored[2] is not item for item in retained)
+        retained.append(restored[2])
+
+    # An invalid first inactive carrier must still fail before any later active
+    # response-bound lookup, without retaining the unsuccessful derivation.
+    broken = list(deepcopy(inputs))
+    broken[0]['commands']['stage'] = []
+    broken[1]['bounds'].pop('max_response_bytes')
+    previous = run(broken, previous_factory)
+    current = run(broken, actual_factory)
+    assert current[:2] == previous[:2] and current[0][0] == 'raised'
+    assert run(inputs, actual_factory)[:2] == (baseline, baseline_views)

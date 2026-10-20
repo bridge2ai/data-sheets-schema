@@ -190,8 +190,13 @@ def _selected_reader_scope(scope):
     scope.require()
     if any(sys.modules.get(name) is not module for name, module in scope.members):
         raise ValueError('private reader selected module graph changed')
-    for role, name in profile._MODULES.items():
-        profile._origin(role, sys.modules.get(name))
+    # Worker require() has just checked these same four qualified origins in
+    # _require_parent_graph(). Parent scopes only check their bare loader graph,
+    # so they retain the separate qualified sweep here. No check is retained
+    # beyond this one invocation.
+    if scope._parent is None:
+        for role, name in profile._MODULES.items():
+            profile._origin(role, sys.modules.get(name))
 
 
 def _reader_association(scope, selection, execution_raw, started_raw, owner_raw, budget):

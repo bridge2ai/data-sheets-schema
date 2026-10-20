@@ -613,12 +613,17 @@ def _file_classification(policy, case):
 
 
 def _classification(expected, selection, launch, session, case, controls, *, policy=None, recipe=None):
-    _, effects = _dependencies()
     context = case['context'] if case['context'] in CONTEXTS else 'worker'
     if policy is None:
         policy = projected_policy(expected, selection, launch['effect_root'])
     view = _view(expected, selection, launch, session, context, read=case['tool'] == 'Write',
                  policy=policy, recipe=recipe)
+    return _classify_view(case, controls, policy, view)
+
+
+def _classify_view(case, controls, policy, view):
+    """Classify one fresh strict carrier with the fixed local classifiers."""
+    _, effects = _dependencies()
     governed = command_policy.stage_overlay_governs(view, tool_name=case['tool'],
         tool_input=case['input'], policy=policy)
     _need(type(governed) is bool, 'effect routing is not a strict boolean')
@@ -854,6 +859,7 @@ def _trace(expected, selection, trace, raw, controls, *, argv_controls=None):
         c for c in all_cases if c['id'] == trace[5:]]
     _need(len(clean) == (len(cases) + 2 if trace == 'settled' else 2), 'control has missing/extra grants')
     offset, request_ids, outcomes = 2, set(), []
+    build_view = _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)
     for number, case in enumerate(cases):
         offset = _settled_text(events, offset, session, model)
         call, callback = events[offset:offset+2]; offset += 2
@@ -871,8 +877,9 @@ def _trace(expected, selection, trace, raw, controls, *, argv_controls=None):
         if 'effort' in (callback.get('request') or {}).get('input', {}):
             wanted['request']['input']['effort'] = expected['runtime']['effort']
         _need(_same(callback, wanted), 'callback differs from observed call/selected authority')
-        classification, view = _classification(expected, selection, launch, session, case, controls,
-                                               policy=policy, recipe=recipe)
+        context = case['context'] if case['context'] in CONTEXTS else 'worker'
+        view = build_view(context, read=case['tool'] == 'Write')
+        classification, view = _classify_view(case, controls, policy, view)
         stop_sha, result_sha = None, None
         if case['mode'] == 'observer_stopped':
             _need(offset == len(events), 'stopped file case contains a result or continuation')
@@ -939,8 +946,9 @@ def _derived_controls(expected, selection, launch, session, *, policy=None, reci
     if recipe is None:
         recipe = _recipe_data(expected, selection, launch, session)
     checks = []
+    build_view = _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)
     for state in NONRESPONSE:
-        view = _view(expected, selection, launch, session, 'worker', state=state, policy=policy, recipe=recipe)
+        view = build_view('worker', state=state)
         command = {'command': expected['commands']['stage']}
         _need(effects.governs_stage_effect(view, tool_name='Bash', tool_input=command) is True,
               'fixed stage helper is outside the selected effect router')
@@ -958,7 +966,7 @@ def _derived_controls(expected, selection, launch, session, *, policy=None, reci
         checks.append({'state': state, 'stage_helper_classification': helper[0],
                        'response_is_none': True, 'denied_response_paths': paths})
     for context in CONTEXTS:
-        view = _view(expected, selection, launch, session, context, read=True, policy=policy, recipe=recipe)
+        view = build_view(context, read=True)
         for ordinal in range(1, 6):
             path = str(_path(launch['effect_root']) / 'responses' / ('%06d.bin' % ordinal))
             if path == view.response.path:
