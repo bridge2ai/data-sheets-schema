@@ -1,6 +1,8 @@
 """Malformed caller declarations cannot turn into mutable/native authority."""
 from dataclasses import FrozenInstanceError, replace
 import copy
+from itertools import product
+from pathlib import PurePosixPath
 
 import pytest
 
@@ -104,6 +106,28 @@ def test_mixed_or_boolean_selector_axes_refuse(axis, value):
 def test_alias_spelling_is_never_normalized_into_authority(path):
     with pytest.raises(ValueError):
         c.canonical_path(path)
+
+
+def test_lexical_path_validation_matches_original_posix_identity_rules():
+    """Keep the former path-object predicate as an independent parity oracle."""
+    components = ("", ".", "..", "...", "part", "part name", "é", "\\name")
+    paths = {"/", "//", "relative", "", " ", "\u2003"}
+    for count in range(1, 4):
+        for pieces in product(components, repeat=count):
+            joined = "/".join(pieces)
+            paths.update((joined, "/" + joined, "//" + joined))
+    paths.update("/before" + chr(code) + "/after" for code in range(33))
+    paths.update(("/a\u0085b", "/a\u2028b", "/a\u2003b", "/a\x7fb"))
+    for value in paths:
+        path = PurePosixPath(value)
+        allowed = (bool(value.strip()) and not any(ord(char) < 32 for char in value)
+                   and path.is_absolute() and str(path) == value
+                   and ".." not in path.parts and not value.startswith("//"))
+        if allowed:
+            assert c.canonical_path(value) == value
+        else:
+            with pytest.raises(ValueError):
+                c.canonical_path(value)
 
 
 def test_selection_cannot_claim_future_authority_or_mutable_root():

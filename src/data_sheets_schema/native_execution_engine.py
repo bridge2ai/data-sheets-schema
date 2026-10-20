@@ -101,6 +101,7 @@ class ExecutionEffects:
     authorizations: Callable
     unchanged: Callable
     sys: object
+    launch_guard: object = None
 
 
 def authorizations(raw, value, *, review_path, ci_path, launch_word_path, contract, file):
@@ -160,6 +161,37 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path, contra
             'identity': {name: {'path': inputs[name], 'sha256': draft._sha(body)} for name, body in captured.items()}}
 
 
+def _join_subscription_authority(guard, raw, value, authorization):
+    """Join admission to the engine's independently recaptured authority."""
+    if guard is not None:
+        from .native_subscription_guard import SubscriptionGuard, sha
+        SubscriptionGuard(guard.raw, expected_sha256=sha(guard.raw),
+            registration_raw=raw, runtime=value['runtime'],
+            launch_word_raw=authorization['raw']['launch_word'], check_freshness=False)
+
+
+def _admit_subscription_guard(guard, attempt, file, write):
+    """Consume exact saved admission before the caller may activate/spawn."""
+    if guard is None:
+        return
+    if file(attempt/'subscription-guard.json', 'subscription guard') != guard.raw:
+        raise ValueError('consumed subscription guard changed before dispatch')
+    guard.before_dispatch()
+    write(attempt/'subscription-dispatched.json', draft._encoded({
+        'guard_sha256': draft._sha(guard.raw), 'consumed': True}))
+
+
+def _guarded_observer(guard, adapter, budget_stop):
+    def observe(event):
+        if guard is not None:
+            try:
+                guard.observe(event)
+            except ValueError as exc:
+                raise budget_stop('subscription guard: ' + str(exc)) from exc
+        adapter.observe(event)
+    return observe
+
+
 def launch(registration_raw, *, review_path, ci_path, launch_word_path,
            contract: ExecutionContract, effects: ExecutionEffects):
     """Consume one explicitly authorized native attempt, never retry or resume.
@@ -175,9 +207,13 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
     _mkdir_durable, _signals, _now = effects.mkdir_durable, effects.signals, effects.now
     _probe_runtime, expected_runtime_observation = effects.probe_runtime, effects.expected_runtime_observation
     authorizations, _unchanged, sys = effects.authorizations, effects.unchanged, effects.sys
+    launch_guard = effects.launch_guard
+    if contract.kind == 'd4d_native_shared_attempt' and launch_guard is None:
+        raise ValueError('shared native launch requires a subscription guard')
     value = registration.verified(registration_raw)
     authorization = authorizations(registration_raw, value, review_path=review_path,
                                   ci_path=ci_path, launch_word_path=launch_word_path)
+    _join_subscription_authority(launch_guard, registration_raw, value, authorization)
     _unchanged(value, registration_raw, authorization)
     runtime_identity = expected_runtime_observation(value)
     selected = composition.verified_composition(value['composition_raw_json'].encode())
@@ -188,6 +224,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
     attempt.mkdir(mode=0o700)  # Even a partial reservation consumes the identity.
     _sync_directory(attempt.parent)
     durable_new(attempt/'registration.json', registration_raw)
+    if launch_guard is not None:
+        durable_new(attempt/'subscription-guard.json', launch_guard.raw)
     started = {'kind': KIND, 'version': VERSION, 'state': 'started', 'attempt_id': value['attempt_id'],
         'started_at': _now(), 'registration_sha256': draft._sha(registration_raw),
         'composition_sha256': value['composition_sha256'], 'authority': authorization['identity'],
@@ -233,13 +271,15 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
                             or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
                             or proxy.closed or proxy.failed.is_set()):
                         raise ValueError('native admission is closed or consumed identity changed')
+                    _admit_subscription_guard(launch_guard, attempt, _file, durable_new)
                     contract.activate_before_dispatch(adapter, started_raw)
+                observe = _guarded_observer(launch_guard, adapter, controls['run_native_canary'].BudgetStop)
                 status = controls['run_native_canary'].execute_child(value['argv'], proxy=proxy,
                     instruction=Path(selected['instruction_path']), attempt=attempt,
                     cwd=value['working_directory'], env=value['environment'],
                     deadline_seconds=value['runtime']['deadline_seconds'], verify_launch=launch_check,
                     record_stop=stopped, command_policy=adapter.policy, phase_spec=contract.transport_phase_spec(adapter),
-                    command_classifier=adapter.classify, event_observer=adapter.observe)
+                    command_classifier=adapter.classify, event_observer=observe)
             except BaseException as exc:
                 first_error = exc
                 # Native auth command failures may contain credentials in captured
@@ -344,6 +384,9 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
             if 'receipt_origin_reporting' in value:
                 from .native_receipt_origin import attach_prepared
                 results = attach_prepared(value, results, prepared)
+            if launch_guard is not None and _file(
+                    attempt/'subscription-guard.json', 'subscription guard') != launch_guard.raw:
+                raise ValueError('consumed subscription guard changed before publication')
             completed = (set(results) == set(GATES)
                 and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
             final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
@@ -362,6 +405,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
                 'additional_report': {'path': str(additional_path), 'sha256': draft._sha(_file(additional_path, 'replay report'))}
                     if additional_path.exists() else None,
                 'scope': 'Controller/runtime completion only. Saved authority is not authenticated; native permission observations do not prove production helpers, future permissions, billing or scientific support.'}
+            if launch_guard is not None:
+                final['subscription_guard'] = launch_guard.snapshot()
             final_raw = draft._encoded(final)
             durable_new(evidence/'final.json', final_raw)
             durable_new(evidence/'published.json', draft._encoded({'final_sha256': draft._sha(final_raw),
@@ -405,6 +450,33 @@ def read_final(registration_raw, *, contract: ExecutionContract,
             or _file(attempt/'registration.json', 'consumed registration') != registration_raw
             or any(result.get(k) != v for k, v in UNASSESSED.items())):
         raise ValueError('final identity or scope differs from this consumed native attempt')
+    if 'subscription_guard' not in result and any(
+            path.exists() or path.is_symlink() for path in (
+                attempt/'subscription-guard.json', attempt/'subscription-dispatched.json')):
+        raise ValueError('saved subscription evidence is missing its final snapshot')
+    if 'subscription_guard' in result:
+        from .native_subscription_guard import validate_saved_snapshot
+        guard_reading = result['subscription_guard']
+        guard_raw = _file(attempt/'subscription-guard.json', 'saved subscription guard')
+        if (type(guard_reading) is not dict
+                or guard_reading.get('guard_sha256') != draft._sha(guard_raw)
+                or guard_reading.get('registration_sha256') != expected['registration_sha256']):
+            raise ValueError('saved subscription guard identity differs')
+        validate_saved_snapshot(guard_raw, guard_reading,
+            registration_raw=registration_raw, runtime=value['runtime'],
+            launch_word_raw=_file(attempt/'launch_word.json', 'consumed owner word'))
+        dispatch_path = attempt/'subscription-dispatched.json'
+        if dispatch_path.exists() or dispatch_path.is_symlink():
+            dispatch = draft._json(_file(dispatch_path, 'saved subscription dispatch'))
+            if dispatch != {'guard_sha256': draft._sha(guard_raw), 'consumed': True}:
+                raise ValueError('saved subscription dispatch differs')
+            consumed = True
+        else:
+            consumed = False
+        if guard_reading['dispatched'] is not consumed:
+            raise ValueError('saved subscription dispatch state differs')
+        if result.get('runtime_gates_passed') is True and guard_reading['dispatched'] is not True:
+            raise ValueError('completed native attempt lacks consumed subscription dispatch')
     checks = result.get('gates')
     if (type(checks) is not dict or set(checks) != set(GATES)
             or any(type(row) is not dict or type(row.get('checked')) is not bool or type(row.get('passed')) is not bool

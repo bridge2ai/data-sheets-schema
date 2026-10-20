@@ -20,8 +20,11 @@ _WRITES = frozenset(('Write', 'Edit', 'MultiEdit'))
 
 
 def _within(path, root):
+    # Compare lexical components once instead of allocating every ancestor.
+    # Retain PurePosixPath semantics even for a Python-forged nested carrier;
+    # callers still own canonical-path admission and all authority checks.
     target, parent = PurePosixPath(path), PurePosixPath(root)
-    return target == parent or parent in target.parents
+    return target.anchor == parent.anchor and target.parts[:len(parent.parts)] == parent.parts
 
 
 def _view(view):

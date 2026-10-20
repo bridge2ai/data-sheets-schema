@@ -605,7 +605,7 @@ def _nonnegative(value, label):
 
 def _text(value, label):
     if (type(value) is not str or not value.strip()
-            or any(ord(c) < 32 for c in value)):
+            or re.search(r"[\x00-\x1f]", value) is not None):
         raise ValueError(f"{label} requires explicit nonblank single-line text")
     return value
 
@@ -618,9 +618,11 @@ def _hash(value, label):
 
 def canonical_path(value, label="path") -> str:
     _text(value, label)
-    path = PurePosixPath(value)
-    if (not path.is_absolute() or str(path) != value or ".." in path.parts
-            or value.startswith("//")):
+    # These are lexical POSIX identities, never filesystem resolutions. Check
+    # the forbidden spellings directly rather than allocating a path and its
+    # components for every immutable pin reconstructed during trace replay.
+    if (not value.startswith("/") or value.startswith("//")
+            or value != "/" and re.search(r"//|/\.\.?(/|$)|/$", value) is not None):
         raise ValueError(f"{label} requires an exact canonical absolute path")
     return value
 

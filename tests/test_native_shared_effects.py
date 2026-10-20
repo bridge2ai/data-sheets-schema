@@ -87,6 +87,20 @@ def test_nonstage_does_not_gain_authority_from_stage_approval():
         assert classified(selected,name,payload)=='not_prescribed'
 
 
+@pytest.mark.parametrize('root', ['/', '/selected', '/selected/stages', '/é space', '.', 'relative'])
+@pytest.mark.parametrize('path', [
+    '/', '/selected', '/selected/stages', '/selected/stages/a',
+    '/selected/stages-other/a', '/selected-other/a', '/é space/child',
+    '/selected/./stages/a', '/selected//stages/a', '//selected/stages/a',
+    '/selected/stages/../a', 'relative/child', '.',
+])
+def test_canonical_containment_keeps_component_boundaries(root, path):
+    from pathlib import PurePosixPath
+    expected = (PurePosixPath(path) == PurePosixPath(root)
+                or PurePosixPath(root) in PurePosixPath(path).parents)
+    assert effects._within(path, root) is expected
+
+
 def test_sealed_reads_do_not_grant_stale_request_reads():
     selected=view()
     assert classified(selected,'Read',{'file_path':selected.sealed[0].path})=='prescribed'

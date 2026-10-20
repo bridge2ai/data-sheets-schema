@@ -43,14 +43,14 @@ def _unchanged(value, raw, authorization):
         raise ValueError('registered execution host differs from this process')
 
 
-def _engine_bindings():
+def _engine_bindings(*, launch_guard=None):
     from .native_execution_engine import ExecutionContract, ExecutionEffects
     contract = ExecutionContract(kind=KIND, registration=registration, composition=composition,
         authority=authority, gates=gates, replay=results, shared=results)
     effects = ExecutionEffects(file=_file, durable_new=durable_new, sync_directory=_sync_directory,
         mkdir_durable=_mkdir_durable, signals=_signals, now=_now, probe_runtime=_probe_runtime,
         expected_runtime_observation=expected_runtime_observation, authorizations=authorizations,
-        unchanged=_unchanged, sys=sys)
+        unchanged=_unchanged, sys=sys, launch_guard=launch_guard)
     return contract, effects
 
 
@@ -61,9 +61,18 @@ def authorizations(raw, value, *, review_path, ci_path, launch_word_path):
         launch_word_path=launch_word_path, contract=contract, file=_file)
 
 
-def launch(registration_raw, *, review_path, ci_path, launch_word_path):
+def launch(registration_raw, *, review_path, ci_path, launch_word_path,
+           subscription_guard_path, subscription_guard_sha256):
     from .native_execution_engine import launch as execute
-    contract, effects = _engine_bindings()
+    from .native_subscription_guard import load_guard
+    value = registration.verified(registration_raw)
+    attempt = Path(value['attempt_directory'])
+    if attempt.exists() or attempt.is_symlink():
+        raise ValueError('native attempt must be new; spent identities cannot resume')
+    guard = load_guard(subscription_guard_path, subscription_guard_sha256,
+        registration_raw=registration_raw, runtime=value['runtime'],
+        launch_word_path=launch_word_path)
+    contract, effects = _engine_bindings(launch_guard=guard)
     return execute(registration_raw, review_path=review_path, ci_path=ci_path,
         launch_word_path=launch_word_path, contract=contract, effects=effects)
 

@@ -6,6 +6,7 @@ No paid provider, native binary, authentication or scientific claim is made.
 """
 from dataclasses import replace
 from pathlib import Path
+from datetime import datetime, timezone
 import json
 import sys
 
@@ -82,8 +83,23 @@ def make_case(root, *, fixture='neutral', receipt_origin_version=0):
         'review_sha256': c.sha(review_path.read_bytes()), 'ci_sha256': c.sha(ci_path.read_bytes()),
         'permission_probe_sha256': value['permission_probe_sha256']}
     word_path = parent / 'invented-owner.json'; word_path.write_bytes(c.canonical(word))
+    # Explicitly synthetic, launch-bound quota evidence. The production route
+    # has no exemption for this ordinary-Python peer.
+    from data_sheets_schema import native_subscription_guard as guard
+    now = datetime.now(timezone.utc)
+    event = c.canonical({'type': 'rate_limit_event', 'rate_limit_info': {
+        'status': 'allowed', 'isUsingOverage': False, 'rateLimitType': 'seven_day',
+        'utilization': 0.2, 'resetsAt': int(now.timestamp()) + 3600}})
+    guard_raw = c.canonical({'kind': guard.KIND, 'version': 1,
+        'registration_sha256': c.sha(raw), 'runtime_sha256': c.sha(c.canonical(runtime)),
+        'launch_word_sha256': c.sha(word_path.read_bytes()),
+        'max_starting_weekly_utilization': 0.8, 'max_age_seconds': 300,
+        'captured_at': now.isoformat().replace('+00:00', 'Z'),
+        'event_json': event.decode(), 'event_sha256': c.sha(event)})
+    guard_path = parent / 'invented-subscription.json'; guard_path.write_bytes(guard_raw)
     return {**data, 'root': root, 'spec': spec, 'value': value, 'raw': raw,
-        'kwargs': {'review_path': review_path, 'ci_path': ci_path, 'launch_word_path': word_path}}
+        'kwargs': {'review_path': review_path, 'ci_path': ci_path, 'launch_word_path': word_path,
+            'subscription_guard_path': guard_path, 'subscription_guard_sha256': c.sha(guard_raw)}}
 
 
 def launch_case(case, monkeypatch):
