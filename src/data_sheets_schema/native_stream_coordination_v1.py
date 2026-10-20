@@ -279,12 +279,16 @@ def _reader_association(scope, selection, execution_raw, started_raw, owner_raw,
         if item['path'] != str(attempt / (role + '.jsonl')):
             raise ValueError('private reader owner stream path differs')
         rows.append((role, item['path'], item['device'], item['inode']))
-    selected = authority.dependency_identity(stream_snapshot_profile=1)
+    selected = execution.get('dependencies')
     scope_profile = contract.canonical(json.loads(scope.profile))
-    if (contract.canonical(selected) != contract.canonical(execution.get('dependencies'))
+    if (authority._selector(selected) != 1
             or contract.canonical(owner['coordination_profile']) != scope_profile
             or contract.canonical(selected['stream_snapshot_profile']) != scope_profile):
         raise ValueError('private reader selected source identity differs')
+    # The unchanged proof first compares this exact declaration against a
+    # freshly computed complete dependency identity, then proves its Git
+    # roster and blobs. Do not scan once here and again inside that proof.
+    # No result or authority is reused by another reader association.
     authority.require_committed(selected)
     # Setup does not renew the deadline. Require the same scope after pure
     # reconstruction and local source/Git proof, before any owner/stream I/O.
@@ -451,8 +455,11 @@ def sample_metadata(fd, path, budget, *, include_path=False, reader_context=None
     target = Path(path)
     while True:
         if reader_context is not None:
+            # Its final lifetime check already samples this exact budget.
+            # Keep every owner check at the same lease boundary.
             reader_context.require_current(role, path)
-        budget.remaining()
+        else:
+            budget.remaining()
         lease = try_lease(fd, fcntl.LOCK_SH)
         if lease is None:
             budget.wait()
@@ -467,7 +474,6 @@ def sample_metadata(fd, path, budget, *, include_path=False, reader_context=None
             try:
                 lease.__enter__()
                 reader_context.require_current(role, path)
-                budget.remaining()
                 before = evidence._stat(target.lstat()) if include_path else None
                 opened = evidence._stat(os.fstat(fd))
                 if include_path and str(target.resolve(strict=True)) != path:

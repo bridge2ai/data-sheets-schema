@@ -444,7 +444,11 @@ class CallbackAdapter:
                     continue
                 call = run.trace().calls.get(block.get('tool_use_id'))
                 if call and call[2].get('input', {}).get('command') == self.policy['native_shared_helpers']['advance']:
-                    run = self._run(endpoints, **owner_kwargs)
+                    # Default phase state may be cached. Selected owner state
+                    # was freshly captured above in this same context; only
+                    # pure captured trace inspection has intervened.
+                    if owner_context is None:
+                        run = self._run(endpoints, **owner_kwargs)
                     capture.observe_advance_settled(run, block['tool_use_id'])
                     run, decision = self._phase_state(endpoints, refresh=True, **owner_kwargs)
             if event.get('type') == 'control_request':

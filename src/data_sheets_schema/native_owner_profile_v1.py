@@ -259,8 +259,12 @@ def _reconstruction_controls(profile=_CURRENT_PROFILE):
             guard.require_current()
             budget.remaining()
         scope.require()
-        for role, name in _MODULES.items():
-            _origin(role, sys.modules.get(name))
+        # A worker's require() just checked these same qualified origins
+        # through _require_parent_graph(). Parent scopes check only bare
+        # origins there, so retain their explicit qualified sweep.
+        if scope._parent is None:
+            for role, name in _MODULES.items():
+                _origin(role, sys.modules.get(name))
         if draft._encoded(source_profile(1)) != scope.profile:
             raise ValueError('selected reconstruction source profile changed')
         if guard is not None:
