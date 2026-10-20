@@ -61,8 +61,7 @@ runtime. This note uses the records.
 
 ## Record identity and provenance pins
 
-`data_sheets_schema.__path__`: ['/private/tmp/d4d-claude-track-p-20261020/src/data_sheets_schema', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/src/data_sheets_schema']
-modules used: `data_sheets_schema.canary` from this tree: True; `data_sheets_schema.receipts` from this tree: True; `data_sheets_schema.replicate_structure` from this tree: True
+every module used resolves under this tree's `src/` (asserted): `data_sheets_schema.backfill_checks`, `data_sheets_schema.canary`, `data_sheets_schema.receipts`, `data_sheets_schema.replicate_structure`
 
 | project | rep | provenance sha256 | repo.commit | dirty | dirty files | dirty paths recorded | schema | full schema sha256 |
 |---|---|---|---|---|---|---|---|---|
@@ -87,12 +86,14 @@ What these rows show:
   #1023, which added the path list.
 - All 12 ran under schema 2.0.0. Main is at schema 3.0.0.
 - The provenance sha256s pin the record blocks the tables below read. Those blocks
-  have been rewritten in place before: commits from 2026-09-09 to 2026-09-11 rewrote
-  AI_READI 04g rep2's. A later rewrite changes these hashes.
+  have been rewritten in place before. AI_READI 04g rep2's was created by the fill
+  commit `805e6ac7b` on 2026-09-07 and rewritten by 26 later commits from 2026-09-07
+  to 2026-09-11 (`git log` on the file). A later rewrite changes these hashes.
 
 `data_sheets_schema` is a namespace package. With the primary checkout's virtualenv,
-its `__path__` lists both trees, so the script asserts that every module it uses comes
-from this tree (plan risk 10).
+its `__path__` lists that checkout's `src/` as well as this tree's, so the script
+asserts that every module it uses resolves under this tree's `src/` (plan risk 10). It
+prints no machine paths.
 
 ## Records, hashes and bundles
 
@@ -133,7 +134,10 @@ crate content is a separate arm. `data/_wcrate/README.md` (on main) states:
 > Crates are the input of the separate with-crate and crate-only arms only.
 
 It lists the "4 under `claudecode_api`: v8, 2026-09-04f rep1 and 2026-09-04g rep1–3"
-among the 30 with-crate AI_READI records it keeps.
+among the 30 with-crate AI_READI records it keeps. Issue #5042's body records the same
+ruling on GitHub: "**Owner decision (2026-10-14):** the current generation runs should
+not include RO-Crate content. RO-Crates belong only to the separate with-crate and
+crate-only arms."
 
 **The crate was in their input, and it reached their content.** All three records pin
 the chunk manifest as it was before #5042 (sha256 `a7b083727b56…`, recovered with
@@ -175,6 +179,67 @@ non-crate chunks, so the recall target largely survives.
     bundle d22b61a9".
 
   Today's AI_READI bundle is `1a58ad7b`.
+
+## v8 attempts per comparator cell (for P2's Set A)
+
+comparator prompt pin (`d4d_generic_arm_prompt_v8.md`): `506af01bc9ab`; every comparator record is its cell's final attempt
+
+| project | cell | label | prompt pin | commit | validation | duplicate keys | floors above 0 | coverage | leaves | lineage | variables | tools+ver | lexical |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| CHORUS | rep1 | `2026-09-04f` | `506af01b` | `26f7e4cd` | True | 0 | none | 54/186 | 235 | 1 | 0 | 0 | 0 |
+| CHORUS | rep2 | `2026-09-04f` | `506af01b` | `a2a3e157` | True | 0 | snippets unverified 2 | 83/248 | 278 | 1 | 0 | 0 | 0 |
+| CHORUS | rep3 | `2026-09-04f` | `506af01b` | `a2a3e157` | True | 0 | snippets unverified 1 | 78/198 | 251 | 0 | 0 | 0 | 0 |
+| VOICE | rep1 | `2026-09-04d` | `506af01b` | `b86a729a` | True | 0 | none | 187/343 | 398 | 1 | 9 | 0 | 2 |
+| VOICE | rep1 | `2026-09-04e` | `506af01b` | `b1c5db83` | True | 0 | chunks unreviewed 15 | 7/354 | 452 | 0 | 5 | 0 | 1 |
+| VOICE | rep1 | `2026-09-04f` | `506af01b` | `f294aeba` | True | 0 | none | 223/343 | 386 | 1 | 4 | 0 | 3 |
+| VOICE | rep2 | `2026-09-04f` | `506af01b` | `a2a3e157` | True | 0 | none | 141/261 | 297 | 1 | 4 | 0 | 0 |
+| VOICE | rep3 | `2026-09-04f` | `506af01b` | `a2a3e157` | True | 0 | none | 220/382 | 432 | 1 | 4 | 0 | 1 |
+| AI_READI | rep1 | `2026-09-04f` | `506af01b` | `554edcba` | False | 1 | none | 151/431 | 523 | 0 | 25 | 0 | 2 |
+| AI_READI | rep1 | `2026-09-04g` | `506af01b` | `26f7e4cd` | True | 0 | none | 280/480 | 525 | 0 | 20 | 0 | 3 |
+| AI_READI | rep2 | `2026-09-04g` | `506af01b` | `a2a3e157` | True | 0 | snippets unverified 1 | 163/420 | 525 | 1 | 13 | 0 | 2 |
+| AI_READI | rep3 | `2026-09-04g` | `506af01b` | `a2a3e157` | True | 0 | none | 251/389 | 449 | 0 | 20 | 0 | 0 |
+| CM4AI | rep1 | `2026-09-04_` | `06666c4d` | `4138bfea` | True | 0 | receipt findings 1 | 206/342 | 384 | 0 | 0 | 0 | 5 |
+| CM4AI | rep1 | `2026-09-04b` | `06666c4d` | `a844827e` | True | 0 | none | 288/407 | 455 | 1 | 0 | 0 | 6 |
+| CM4AI | rep1 | `2026-09-04c` | `06666c4d` | `48f49106` | True | 0 | none | 292/415 | 470 | 0 | 0 | 0 | 7 |
+| CM4AI | rep1 | `2026-09-04g` | `506af01b` | `63d6d41c` | True | 0 | none | 279/374 | 422 | 0 | 0 | 0 | 9 |
+| CM4AI | rep2 | `2026-09-04g` | `506af01b` | `a2a3e157` | True | 0 | none | 312/424 | 473 | 0 | 0 | 0 | 5 |
+| CM4AI | rep3 | `2026-09-04g` | `506af01b` | `a2a3e157` | True | 0 | snippets unverified 1 | 226/389 | 479 | 0 | 0 | 0 | 3 |
+
+| definition | project | records | pooled coverage | mean populated leaves | D02 recall targets (mean) | Set B (common gate) records |
+|---|---|---|---|---|---|---|
+| one record per cell (the final attempt) | CHORUS | 3 | 215/632 = 0.340 | 254.7 | lineage 0.67 | 1 of 3 |
+| one record per cell (the final attempt) | VOICE | 3 | 584/986 = 0.592 | 371.7 | variables 4.00; lineage 1.00; lexical 1.33; tools_versioned 0.00 | 3 of 3 |
+| one record per cell (the final attempt) | AI_READI | 3 | 694/1289 = 0.538 | 499.7 | variables 17.67 | 2 of 3 |
+| one record per cell (the final attempt) | CM4AI | 3 | 817/1187 = 0.688 | 458.0 | lexical 5.67 | 2 of 3 |
+| every attempt under the comparator's pin | CHORUS | 3 | 215/632 = 0.340 | 254.7 | lineage 0.67 | 1 of 3 |
+| every attempt under the comparator's pin | VOICE | 5 | 778/1683 = 0.462 | 393.0 | variables 5.20; lineage 0.80; lexical 1.40; tools_versioned 0.00 | 4 of 5 |
+| every attempt under the comparator's pin | AI_READI | 4 | 845/1720 = 0.491 | 505.5 | variables 19.50 | 2 of 4 |
+| every attempt under the comparator's pin | CM4AI | 3 | 817/1187 = 0.688 | 458.0 | lexical 5.67 | 2 of 3 |
+| every attempt, any pin (sensitivity) | CHORUS | 3 | 215/632 = 0.340 | 254.7 | lineage 0.67 | 1 of 3 |
+| every attempt, any pin (sensitivity) | VOICE | 5 | 778/1683 = 0.462 | 393.0 | variables 5.20; lineage 0.80; lexical 1.40; tools_versioned 0.00 | 4 of 5 |
+| every attempt, any pin (sensitivity) | AI_READI | 4 | 845/1720 = 0.491 | 505.5 | variables 19.50 | 2 of 4 |
+| every attempt, any pin (sensitivity) | CM4AI | 6 | 1603/2351 = 0.682 | 447.2 | lexical 5.83 | 4 of 6 |
+
+**What this shows.** The 12 comparator records are each cell's final attempt.
+- Three cells also hold earlier attempts that left full records:
+  - VOICE rep1 (`04d`, `04e`);
+  - AI_READI rep1 (`04f` rep1);
+  - CM4AI rep1 (`04`, `04b`, `04c`).
+- VOICE's and AI_READI's earlier attempts ran the same prompt pin as the comparator
+  (`506af01b…`). CM4AI's ran an earlier pin (`06666c4d…`).
+- The comparator records themselves span four runner commits, so a runner commit does
+  not set the earlier attempts apart.
+
+**The definition moves the comparator.** Counting every attempt under the
+comparator's pin moves:
+- VOICE's pooled coverage from 0.592 to 0.462;
+- AI_READI's from 0.538 to 0.491.
+
+Both shifts are larger than any tolerance P2 proposes for coverage. Which definition
+P2 uses is the owner's choice (P2 item 3).
+
+**Replicate structure is unaffected.** The #2932 rows below are computed over exactly
+three records per project, one per cell, under either definition.
 
 ## v6 drift
 
@@ -378,16 +443,59 @@ reads. They reproduce D21's "recomputed on 2026-10-09" values exactly:
 `d4d runs check` names the same three report findings among the confirmatory records:
 CHORUS rep2 2 claims, VOICE rep2 1 and AI_READI rep3 1.
 
-**Two caveats on instruments:**
+**Three caveats on instruments:**
 - **Grounding.** "Ungrounded identifiers" and "resolver URLs in identifier slots"
   read the grounding block. `d4d runs check` reports "grounding blocks by instrument:
   none declared 19 (current v1)". The v8 blocks were written by the unversioned
   checker, while v10 records will carry v1 (#4090). So a pilot's baseline comparison
   on those two rows crosses instruments.
+- **Report claims.** Every stored v8 `report_claims` block is instrument v7, but new
+  API records are checked under v8. `check_report` defaults to
+  `instrument_version=8` (`report_claims.py:903`), and the runner calls it without a
+  version (`api_runner.py:4304`).
+  - Under v8, a report that says a slot was removed when the slot was already absent
+    from both records is a finding.
+  - `d4d runs check` reports no report-claims instrument, so this crossing appears in
+    no check output.
+  - The next section recomputes the 12 blocks under both versions.
 - **Form.** The form blocks are current (British v4, prefix v3), so the other form
   rows do not cross instruments. `notes/arm_comparison.md` recomputes the form
   metrics live under the current instruments. The figures above are the stored
   blocks that the gate reads, and this note did not compare the two.
+
+## Report claims recomputed under v7 and v8
+
+Recomputed read-only with `backfill_checks.compute(..., only={'report_claims'}, report_claims_version=v)`, which uses each record's recorded full and core schema bytes and writes nothing.
+
+| project | label | stored block | stored findings | recomputed v7 findings | recomputed v8 findings | claims checked (v7 / v8) |
+|---|---|---|---|---|---|---|
+| CHORUS | `2026-09-04f rep1` | v7 | 0 | 0 | 0 | 46 / 46 |
+| CHORUS | `2026-09-04f rep2` | v7 | 2 | 2 | 2 | 33 / 33 |
+| CHORUS | `2026-09-04f rep3` | v7 | 0 | 0 | 1 | 57 / 57 |
+| VOICE | `2026-09-04f rep1` | v7 | 0 | 0 | 0 | 48 / 48 |
+| VOICE | `2026-09-04f rep2` | v7 | 1 | 1 | 1 | 35 / 35 |
+| VOICE | `2026-09-04f rep3` | v7 | 0 | 0 | 0 | 43 / 43 |
+| AI_READI | `2026-09-04g rep1` | v7 | 0 | 0 | 0 | 42 / 42 |
+| AI_READI | `2026-09-04g rep2` | v7 | 0 | 0 | 0 | 47 / 47 |
+| AI_READI | `2026-09-04g rep3` | v7 | 1 | 1 | 1 | 22 / 22 |
+| CM4AI | `2026-09-04g rep1` | v7 | 0 | 0 | 0 | 11 / 11 |
+| CM4AI | `2026-09-04g rep2` | v7 | 0 | 0 | 0 | 38 / 38 |
+| CM4AI | `2026-09-04g rep3` | v7 | 0 | 0 | 0 | 47 / 47 |
+
+per-project worst report findings: CHORUS v7 2, v8 2; VOICE v7 1, v8 1; AI_READI v7 1, v8 1; CM4AI v7 0, v8 0
+
+**Results:**
+- **v7 replay:** it reproduces every stored block exactly, which is the check that the
+  replay is faithful.
+- **v8:** it changes one record. CHORUS `04f` rep3 gains one finding,
+  `removal_of_absent_slot` on `related_datasets`: the report says the slot was removed
+  from the full record, but the key was already absent from the original full
+  snapshot.
+- **Totals:** the per-project worsts are the same under both versions, and the
+  12-record total goes from 5 to 6.
+- **What gets compared:** a v10 pilot's report findings, checked under v8, are compared
+  by `--canary-baseline` with v8's stored v7 counts. That is a v7→v8 crossing, small
+  on these records. Nothing here wrote to any provenance record.
 
 ## Per-call retry tally
 
@@ -457,7 +565,7 @@ command is read-only.
 
 | # | command | exit | what it gives |
 |---|---|---|---|
-| 1 | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python p1_recompute.py` (the script below) | 0 | every table in this note except the recall rows: the import check, record identity and provenance pins, records and bundles, the AI_READI crate citations, the v6 drift, VOICE_PEDIATRIC, receipts and floors, validation and leaves, structure, D21 metrics and the retry tally. About 8 s. It runs `git show` on one historical blob. |
+| 1 | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python p1_recompute.py` (the script below) | 0 | every table in this note except the recall rows of the "Recall-target counts" section:<br>- the import check;<br>- record identity and provenance pins;<br>- records and bundles;<br>- the AI_READI crate citations;<br>- the attempts per cell and Set A definitions;<br>- the v6 drift and VOICE_PEDIATRIC;<br>- receipts and floors, validation and leaves;<br>- structure;<br>- the D21 metrics;<br>- the v7/v8 report-claims recompute;<br>- the retry tally.<br>About 1 minute. It runs `git show` on historical blobs and recovers drifted bundles from git; it writes nothing. |
 | 2 | `PYTHONPATH=src python scripts/recall_target_baseline.py --check` | 0 | "notes/recall_target_baseline.md matches the records": the recall rows are that committed note's rows |
 | 3 | `PYTHONPATH=src python -m data_sheets_schema.cli runs check --method claudecode_api` | 0 | bundle drift, report claims, instruments, profile identity, digest reconstruction, output sizes |
 | 4 | `md5 -q data/preprocessed/concatenated/{P}_preprocessed.txt` for AI_READI, CHORUS, CM4AI, VOICE and VOICE_PEDIATRIC; `wc -c notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt` | 0 | today's bundle md5s and the Kids First bundle size |
@@ -472,7 +580,7 @@ Inputs, by sha256:
 - `src/data_sheets_schema/receipts.py`: `7bfb84709b2e91983eae2b6dbaf8f67e13ef06b68473ad61947ebf6dd7542c9f`
 - `scripts/recall_target_baseline.py`: `e89609655be029b8b562379eee898931d2c3568ea8330108d0660dd3f55fa569`
 - the 12 provenance records: in the identity table above;
-- the script below, saved as `p1_recompute.py` with a trailing newline: `80aedc9e8dc518ddcebbbde2bf58ea01e295ddf6f1cc6305128e1b956a843668`
+- the script below, saved as `p1_recompute.py` with a trailing newline: `fea66c6e53ee7cac48cd8a97dbae0da974c2f067cd719725eefd56c5ab750bfa`
 
 The record and bundle hashes are in the tables above.
 
@@ -491,8 +599,9 @@ from pathlib import Path
 
 import yaml
 
-import data_sheets_schema
-from data_sheets_schema import canary, receipts, replicate_structure
+import importlib.util
+
+from data_sheets_schema import backfill_checks, canary, receipts, replicate_structure
 from data_sheets_schema.receipts import populated_leaves
 from data_sheets_schema.replicate_structure import compare_structure, dataset_slots, summarize
 
@@ -524,10 +633,10 @@ def load(path):
 
 src = (Path.cwd() / "src").resolve()
 print("## 0. Import check and record identity\n")
-print(f"`data_sheets_schema.__path__`: {list(data_sheets_schema.__path__)}")
-used = {m.__name__: Path(m.__file__).resolve() for m in (canary, receipts, replicate_structure)}
-print("modules used: " + "; ".join(f"`{n}` from this tree: {src in p.parents}" for n, p in used.items()))
+used = {m.__name__: Path(m.__file__).resolve() for m in (backfill_checks, canary, receipts, replicate_structure)}
 assert all(src in p.parents for p in used.values()), "a module was imported from another checkout"
+print("every module used resolves under this tree's `src/` (asserted): "
+      + ", ".join(f"`{n}`" for n in sorted(used)))
 print("\n| project | rep | provenance sha256 | repo.commit | dirty | dirty files | dirty paths recorded | schema | full schema sha256 |")
 print("|---|---|---|---|---|---|---|---|---|")
 states = set()
@@ -583,6 +692,75 @@ for prov in v8_records("AI_READI"):
             status[ch["id"]] = ch.get("status")
             slots.update(str(e.get("slot", "")).split("[")[0].split(".")[0] for e in entries)
     print(f"| {rec['run']['replicate']} | {pinned} | {total} | {cited} | {len(slots)} | {status} |")
+
+print("\n## 1c. v8 attempts per comparator cell, and two Set A definitions\n")
+spec = importlib.util.spec_from_file_location("recall_target_baseline", "scripts/recall_target_baseline.py")
+rtb = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(rtb)
+
+
+def prompt_pin(rec):
+    return next(f["sha256"] for f in rec["prompts"]["files"] if "generic_arm_prompt_v8" in f["path"])
+
+
+def gates_pass(rec):
+    floors = canary.receipt_floors(rec["receipts"])
+    return bool(rec["validation"].get("passed")) and canary.duplicate_key_count(rec["validation"]) == 0 \
+        and not any(floors.values())
+
+
+attempts = collections.defaultdict(list)
+for prov in sorted(glob.glob(f"{CONCAT}/claudecode_api_core/*_claude-opus-5-api-generic-v8_rep*/*_provenance.yaml")):
+    rec = load(prov)
+    full = load(rec["outputs"]["full"]["path"])
+    receipt = load(Path(prov).parent / f"{rec['run']['project']}_coverage_receipt.yaml")
+    texts, _basis = rtb.chunk_texts_for(rec["inputs"], Path("."))
+    cand = rtb.receipt_candidates(receipt, texts)["candidates"]
+    counts = rtb.target_counts(full)
+    sl = rec["receipts"]["slots"]
+    attempts[(rec["run"]["project"], rec["run"]["replicate"])].append({
+        "label": rec["run"]["label"], "pin": prompt_pin(rec), "commit": rec["repo"]["commit_short"],
+        "valid": rec["validation"].get("passed"), "dup": canary.duplicate_key_count(rec["validation"]),
+        "floors": {k: v for k, v in canary.receipt_floors(rec["receipts"]).items() if v},
+        "gates": gates_pass(rec), "with": sl["with_receipt"], "receiptable": sl["receiptable"],
+        "leaves": len(populated_leaves(full)), "lineage": counts["lineage"], "variables": counts["variables"],
+        "tools_versioned": counts["tools_versioned"], "lexical": None if cand is None else len(cand)})
+comparator = {(proj, rep): next(a for a in attempts[(proj, rep)] if a["label"].startswith(V8[proj]))
+              for proj in V8 for rep in (1, 2, 3)}
+pins = {a["pin"] for a in comparator.values()}
+assert len(pins) == 1, "the comparator records do not share one prompt pin"
+PIN = pins.pop()
+assert all(attempts[c][-1] is comparator[c] for c in comparator), "a comparator record is not its cell's final attempt"
+print(f"comparator prompt pin (`d4d_generic_arm_prompt_v8.md`): `{PIN[:12]}`; every comparator record is its cell's final attempt\n")
+print("| project | cell | label | prompt pin | commit | validation | duplicate keys | floors above 0 | coverage | leaves | lineage | variables | tools+ver | lexical |")
+print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+for (proj, rep), rows in sorted(attempts.items(), key=lambda kv: (list(V8).index(kv[0][0]), kv[0][1])):
+    for a in rows:
+        print(f"| {proj} | rep{rep} | `{a['label'][:11]}` | `{a['pin'][:8]}` | `{a['commit']}` | {a['valid']} | {a['dup']} | "
+              f"{', '.join(f'{k} {v}' for k, v in a['floors'].items()) or 'none'} | {a['with']}/{a['receiptable']} | "
+              f"{a['leaves']} | {a['lineage']} | {a['variables']} | {a['tools_versioned']} | {a['lexical']} |")
+DEFS = {
+    "one record per cell (the final attempt)": lambda proj: [comparator[(proj, r)] for r in (1, 2, 3)],
+    "every attempt under the comparator's pin": lambda proj: [a for r in (1, 2, 3) for a in attempts[(proj, r)] if a["pin"] == PIN],
+    "every attempt, any pin (sensitivity)": lambda proj: [a for r in (1, 2, 3) for a in attempts[(proj, r)]],
+}
+TARGETS = {"AI_READI": ("variables",), "CM4AI": ("lexical",), "VOICE": ("variables", "lineage", "lexical", "tools_versioned"),
+           "CHORUS": ("lineage",)}
+
+
+def mean(values):
+    return sum(values) / len(values)
+
+
+print("\n| definition | project | records | pooled coverage | mean populated leaves | D02 recall targets (mean) | Set B (common gate) records |")
+print("|---|---|---|---|---|---|---|")
+for name, pick in DEFS.items():
+    for proj in V8:
+        rows = pick(proj)
+        w, n = sum(a["with"] for a in rows), sum(a["receiptable"] for a in rows)
+        targets = "; ".join(f"{k} {mean([a[k] for a in rows]):.2f}" for k in TARGETS[proj])
+        print(f"| {name} | {proj} | {len(rows)} | {w}/{n} = {w / n:.3f} | {mean([a['leaves'] for a in rows]):.1f} | "
+              f"{targets} | {sum(a['gates'] for a in rows)} of {len(rows)} |")
 
 print("\n## 2. v6 drift (2026-08-28 agentic arm)\n")
 print("| project | v6 bundle md5 (recorded, rep1–3) | today's bundle md5 | same bytes |")
@@ -674,6 +852,26 @@ print("|---|---|" + "---|" * len(names))
 for project, pre in V8.items():
     worst = canary.baseline_for(project, pre, method="claudecode_api")
     print(f"| {project} | `{pre}` | " + " | ".join(str(worst[n]) for n in names) + " |")
+
+print("\n## 6b. Report claims under instrument v7 and v8\n")
+print("Recomputed read-only with `backfill_checks.compute(..., only={'report_claims'}, report_claims_version=v)`, "
+      "which uses each record's recorded full and core schema bytes and writes nothing.\n")
+print("| project | label | stored block | stored findings | recomputed v7 findings | recomputed v8 findings | claims checked (v7 / v8) |")
+print("|---|---|---|---|---|---|---|")
+worst = {7: collections.Counter(), 8: collections.Counter()}
+for project in V8:
+    for prov in v8_records(project):
+        rec = load(prov)
+        stored = rec["report_claims"]
+        got = {v: backfill_checks.compute(Path(prov), only={"report_claims"}, report_claims_version=v)["report_claims"]
+               for v in (7, 8)}
+        for v in (7, 8):
+            worst[v][project] = max(worst[v][project], len(got[v].get("findings") or []))
+        print(f"| {project} | `{rec['run']['label'][:11]} rep{rec['run']['replicate']}` | {str(stored.get('instrument'))[:2]} | "
+              f"{len(stored.get('findings') or [])} | {len(got[7].get('findings') or [])} | {len(got[8].get('findings') or [])} | "
+              f"{got[7].get('claims_checked')} / {got[8].get('claims_checked')} |")
+print("\nper-project worst report findings: "
+      + "; ".join(f"{p} v7 {worst[7][p]}, v8 {worst[8][p]}" for p in V8))
 
 print("\n## 7. Per-call retry tally (`api_usage`)\n")
 calls = transport = answer = 0
