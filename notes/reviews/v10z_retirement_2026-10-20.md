@@ -4,7 +4,13 @@ This note follows step Z1 of `notes/d4d_generation_plan_2026-10-09.md` ("#### Z1
 It contains no amounts: on 2026-10-09 the owner decided to keep the CBORG chain amounts
 out of the plan, and Z1's note gives none either (G3). It edits no file under
 `notes/matched_cborg_*`. It is written at main `0a1132ecf` on branch
-`claude/track-p-analysis-plan`. No provider was called.
+`claude/track-p-analysis-plan`. No provider was called. It was revised on 2026-10-20
+after an independent read-only review.
+
+**Integration (for agy).** Plan Z1 asks for this note in its own dated notes PR,
+gated by review, green CI and the owner's merge. It releases N6b and Z2, so it should
+not wait on the P2 analysis plan's P3 and P4 gates. Split it from the P2 draft when
+the branch is integrated.
 
 ## The owner's decisions
 
@@ -25,6 +31,9 @@ The questions and answers, verbatim:
    - **The option chosen read:** "They do not extend to generic_v10, and they are
      withdrawn now along with the retired lineage. Every generic_v10 generation and
      evaluation needs its own word."
+   - **The question paraphrased the record.** Its inner quotation was a paraphrase:
+     the record reads "suceed", not "succeed". The record's exact text is quoted
+     under "Withdrawal of the v10z standing authorizations" below.
 
 **This note is the record of the decision; the earlier one was not.** #4761 was closed on
 2026-10-11 with a comment that cited a "documented owner decision" in commit
@@ -65,8 +74,16 @@ counts below are the plan's; this note does not recount them.
 1. **The v10z lineage:** generation `d4810ca2` plus 26 billed audits (and the unbilled
    audit10).
 2. **The matched native sequence:** 9 generations plus 26 audits.
-3. **The shared ledger total.** This is a third group, not a sum of the first two. The
-   same ledger also holds the 15 CHORUS API attempts and the transport probe.
+3. **The shared ledger total**, which also holds the 15 CHORUS API attempts and the
+   transport probe.
+
+**The groups nest; they do not add.**
+- The plan gives both of the first two groups the same 26 billed audits.
+- The v10z generation is one of the matched sequence's 9 generations: the plan's
+  risk 1 counts "9 native generations" in all.
+- The shared ledger contains both groups.
+
+So no total is the sum of the others. This note does not decompose them further.
 
 No full/core pair from this lineage was accepted.
 
@@ -76,11 +93,15 @@ No full/core pair from this lineage was accepted.
   roots;
 - its README records a restore drill that reproduced every entry byte for byte.
 
-This note did not re-verify the copy. That would hash 3.9 GB while CPU-timing work
-runs. Before relying on it, run
-`python3 d4d-executions/lineage-durable/lineage_durable.py verify --durable`. The
-`git bundle` copies of the Codex session's unpublished branches (plan G1a, #4763) are
-tracked on #4763, not here.
+**The durable copy is now the only copy.** On 2026-10-20, none of the 46 roots in its
+`roots.txt` existed at its original `/private/tmp` path (checked by `stat`, without
+hashing). Plan Z1's "all artifacts are preserved" therefore rests on that one copy,
+and it remains **unverified** until it is checked with
+`python3 d4d-executions/lineage-durable/lineage_durable.py verify --durable`. This
+note did not run that check: it would hash 3.9 GB while CPU-timing work runs.
+
+The `git bundle` copies of the Codex session's unpublished branches (plan G1a, #4763)
+are tracked on #4763, not here.
 
 ## Superseded by generic_v10
 
@@ -133,7 +154,7 @@ writing to that worktree. The values below are the attempt's own `result.json`.
 | Terminal reason | `blocking_limit` (`result_subtype: success`, `stop_reason: stop_sequence`) |
 | Seven-day utilization | 0.96 at the first rate-limit event, 1.0 at the last (maximum 1.0), over 20 events. The five-hour window peaked at 0.2 |
 | Overage | not used (`overage_used: false`) |
-| Phases | phase 2 started and completed (`phase_history`); `receipt_gate_current: false`; no terminal failures, no problems in the command or phase history |
+| Phases | Phase 2 started and completed (`phase_history`). Of the two phase-1 receipt checks, the first failed (epoch 10) and the second passed (epoch 11). `receipt_gate_current: false`, which the record does not explain; it is reported as recorded. No terminal failures, and no problems in the command or phase history |
 | Controls | 201 Bash and 79 file calls, 280 pretool decisions, no input rejections; 5 permission denials, none disqualifying |
 | Outputs | Full, core, receipt, reconciliation and the evidence files were written (sha256s in `result.json`). No provenance record was written. The outputs are untracked and were never accepted |
 
@@ -179,8 +200,9 @@ Their state was read from GitHub on 2026-10-20:
 | #3856 | open |
 
 The three PRs merged before this decision, while #4761's hold was recorded as
-standing. Those merges were not an owner decision on audit28, and this note does not
-treat them as one.
+standing. All three were merged by the owner's account in the same second. No owner
+decision on audit28 is recorded for those merges, and this note does not treat them
+as one.
 
 ## Z2: still the owner's
 
@@ -189,7 +211,10 @@ Plan step Z2 leaves each released item to the owner, separately:
   reason;
 - the three PRs, which are already merged.
 
-PR #2922 was to be decided at N6b. It is merged, and its controller bytes were adopted
-by the pin rotation in #5077.
+PR #2922 was to be decided at N6b. It is merged. #5077 records an owner decision that
+bears on it: "The owner decided to rotate the frozen native controller pin to the
+reviewed #2714 cleanup series, rather than revert that series" (#5077's description).
+That rotation adopted the series' controller bytes. Whether that settles N6b is the
+owner's to say.
 
 Cost of this step: $0. No provider call was made.
