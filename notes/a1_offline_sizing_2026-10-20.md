@@ -28,7 +28,7 @@ projects, under the current protocol.
   is. On each project's primary record the largest worker moved by at most
   0.5% across the valid grids.
 
-**2. No worker's answer fits its output cap, from G2 up.**
+**2. No worker's valid answer fits its output cap, at any grid.**
 - **The cap.** The registered `worker_output_tokens` is 4,000, and thinking
   draws on the same `max_tokens`.
 - **The floor.** The terminal source review (`source_review.check`, run at
@@ -37,19 +37,30 @@ projects, under the current protocol.
   long, that floor is at least:
   - 10,854–11,816 tokens for the largest worker at G2 (4 bytes a token),
     2.7–3.0 times the cap;
-  - 13,732–24,290 tokens at G5, 3.4–6.1 times.
-- **Even the worker-stage check's minimum is over.** That check
-  (`audit_batches.check_worker`) tests structure only and accepts
-  one-character claims. Its smallest answer is still at least 7,180–9,147
-  tokens at G2. At G1 it is 4,000–4,233, about the cap.
+  - 13,732–24,290 tokens at G5, 3.4–6.1 times;
+  - 5,673–6,028 at G1, where G1 is valid (CHORUS, VOICE, VOICE_PEDIATRIC),
+    1.4–1.5 times.
+- **The worker stage accepts far less.** Its check
+  (`audit_batches.check_worker`) tests structure only. The grammar accepts a
+  declared-metadata row (`{"path", "metadata_reason"}`) for any path, and only
+  the terminal check asks whether the path may be declared metadata. An
+  answer that declares every row as metadata is 2,226–2,904 tokens for the
+  largest worker at G2, under the cap.
 - **Two ways to fail.**
   - **Cut off.** An answer cut off at `max_tokens` does not end with
     `end_turn`. The runtime refuses it ("typed response did not finish
     normally; allowance remains consumed"), and the typed audit is terminal.
     By then full, receipt completion and the first worker are billed.
-  - **Shortened.** An answer that fits by shortening its quotes passes the
-    worker stage and fails the terminal check at assembly. By then every
-    worker, the omission stage and integration are billed.
+  - **Shortened.** An answer that fits, by declaring rows as metadata or by
+    shortening its quotes, passes the worker stage and fails the terminal
+    check at assembly. By then every worker, the omission stage and
+    integration are billed. Under the registered caps this path is open at
+    G2 now. With the raised caps a valid answer needs, it is open at every
+    grid.
+- **A cheaper refusal is possible.** The plan carries `record_metadata_allowed`
+  for every path. A worker check that refused a metadata row on a path not
+  allowed one would stop the metadata form of that failure at the worker
+  stage, at the cost of one worker.
 - **No compaction option helps.** This is output, not input.
 
 **3. Under S7, the report family is not shown to fit for AI_READI or Kids
@@ -72,7 +83,11 @@ So "fits" is not established for either project:
   chunk id. A margin of 172–628 B a row is plausibly too little, so with a real
   audit both regates likely exceed.
 - **The other four projects.** CHORUS, CM4AI, VOICE and VOICE_PEDIATRIC keep at
-  least 949 B a row. Every other request fits on every project under S7.
+  least 949 B a row.
+- **Every other request fits under S7 at the floor**, on every project. The
+  least room is in Kids First's requests:
+  - integration, 718,171: 1,240 envelope bytes a row, about 925 B of answer;
+  - `reconcile_full`, 624,048: 1,829 B a row.
 - **The partition** hardly changes the carry, so no grid fixes this.
 
 **4. The typed input aggregate rules out G2 under S7.** The registered
@@ -104,7 +119,7 @@ This answers the plan's open question 6 and confirms risk 6.
 ## Recommended configuration
 
 **Nothing launches as registered.** Under the current protocol, every worker's
-input (result 1) and output (result 2) fail at every partition from G2 up.
+input (result 1) and valid output (result 2) fail at every partition.
 What follows depends on decisions that belong to others:
 - the owner: S7 and a report-family change;
 - A6: the output limits.
@@ -170,9 +185,9 @@ control).
 **Output limits (for A6), at G5.**
 - **`worker_output_tokens`** must hold the largest worker's whole answer plus
   its thinking. That is at least 24,290 tokens on these records at 4 bytes a
-  token, and 30,298–36,536 for AI_READI at A1b's ratios. A real answer, with
-  real sources, quotes and reasons, is longer. Sizing the cap needs a measured
-  answer; this note has only a floor.
+  token (CM4AI's largest worker), and 33,035–39,836 at A1b's ratios. A real
+  answer, with real sources, quotes and reasons, is longer. Sizing the cap
+  needs a measured answer; this note has only a floor.
 - **`aggregate_output_tokens` (100,000)** must satisfy the runtime's admission
   rule (`typed_audit_runtime`, about :506). Before each typed stage, the
   output already spent plus that stage's `max_tokens` must fit. So the
@@ -274,16 +289,16 @@ Under S7 plus each project's largest record difference at G2 (another record's c
 | VOICE | 529,801 (+66,133) | 394,234 (+51,892) | 629,736 (+74,386) | 312,627 (+6,775) | 665,775 (+60,339) | 761,297 (+60,360) |
 | VOICE_PEDIATRIC (proxy) | 439,429 (+69,307) | 313,894 (+54,021) | 539,362 (+77,559) | 225,938 (+10,418) | 601,075 (+60,339) | 696,573 (+60,359) |
 
-Under S7, G2, primary records: the report family with the audit at its floor (a lower bound) and the report as written read two ways, at its 96k cap (an upper bound) or as the v8 report's text. In brackets, the bytes each source-review row could still add before the request reaches 850,000, at the request's ratio; a real row adds a reason, quotes, a source and a chunk id:
+Under S7, G2, primary records: every request that carries the audit or the worker answers at their floor (a lower bound), with the regate's report as written read two ways, at its 96k cap (an upper bound) or as the v8 report's text. In brackets, the bytes each source-review row could still add before the request reaches its ceiling, at the request's ratio (integration's are envelope bytes, about 1.34 per answer byte); a real row adds a reason, quotes, a source and a chunk id:
 
-| Project | Rows | Report | Regate, report at its cap | Regate, v8 report text |
-|---|---|---|---|---|
-| AI_READI | 554 | 720,721 (658 B) | 816,145 (172 B) | 726,645 (628 B) |
-| CHORUS | 188 | 303,542 (7,888 B) | 398,939 (6,509 B) | 308,473 (7,815 B) |
-| CM4AI | 456 | 511,512 (2,014 B) | 606,981 (1,446 B) | 514,931 (1,993 B) |
-| KIDS_FIRST (proxy) | 554 | 784,703 (320 B) | 880,265 (-148 B) over | 791,024 (289 B) |
-| VOICE | 426 | 605,436 (1,558 B) | 700,937 (949 B) | 610,756 (1,524 B) |
-| VOICE_PEDIATRIC (proxy) | 426 | 540,736 (1,970 B) | 636,214 (1,361 B) | 546,033 (1,936 B) |
+| Project | Rows | Integration | `reconcile_full` | Report | Regate, report at its cap | Regate, v8 report text |
+|---|---|---|---|---|---|---|
+| AI_READI | 554 | 664,487 (1,549 B) | 566,470 (2,190 B) | 720,721 (658 B) | 816,145 (172 B) | 726,645 (628 B) |
+| CHORUS | 188 | 228,793 (10,000 B) | 270,831 (10,454 B) | 303,542 (7,888 B) | 398,939 (6,509 B) | 308,473 (7,815 B) |
+| CM4AI | 456 | 472,312 (2,821 B) | 432,895 (3,352 B) | 511,512 (2,014 B) | 606,981 (1,446 B) | 514,931 (1,993 B) |
+| KIDS_FIRST (proxy) | 554 | 718,171 (1,240 B) | 624,048 (1,829 B) | 784,703 (320 B) | 880,265 (-148 B) over | 791,024 (289 B) |
+| VOICE | 426 | 555,350 (2,545 B) | 498,467 (3,173 B) | 605,436 (1,558 B) | 700,937 (949 B) | 610,756 (1,524 B) |
+| VOICE_PEDIATRIC (proxy) | 426 | 461,803 (3,080 B) | 433,331 (3,585 B) | 540,736 (1,970 B) | 636,214 (1,361 B) | 546,033 (1,936 B) |
 
 Typed input across every typed call of a run, current / S6 / S7, against `aggregate_input_tokens` (4,000,000); the options use the G2 components, since a worker's shared content does not depend on the partition:
 
@@ -298,16 +313,16 @@ Typed input across every typed call of a run, current / S6 / S7, against `aggreg
 
 \* passes the allowance.
 
-The largest worker's answer, in tokens at 4 bytes a token (at least). The first figure is the floor under any answer the terminal source review accepts (claims quoting and covering each value); the second is the smallest answer the worker-stage check accepts (one-character claims); in brackets, the largest assignment's paths. The registered worker cap is 4,000:
+The largest worker's answer, in tokens at 4 bytes a token (at least). The first figure is the floor under any answer the terminal source review accepts (claims quoting and covering each value); the second is the smallest answer the worker-stage check accepts (every row declared as record metadata, which only the terminal check refuses); in brackets, the largest assignment's paths. The registered worker cap is 4,000:
 
 | Project | G1 | G2 | G3 | G4 | G5 | G6 |
 |---|---|---|---|---|---|---|
-| AI_READI | refused | 11,379 / 8,633 (171) | 22,278 / 14,248 (277) | 11,379 / 8,633 (171) | 22,278 / 14,248 (277) | 43,082 / 24,866 (478) |
-| CHORUS | 6,028 / 4,233 (81) | 10,854 / 7,180 (138) | 13,732 / 9,305 (188) | 10,854 / 7,180 (138) | 13,732 / 9,305 (188) | 13,732 / 9,305 (188) |
-| CM4AI | refused | 11,816 / 9,147 (182) | 24,290 / 19,174 (383) | 11,816 / 9,147 (182) | 24,290 / 19,174 (383) | 30,621 / 23,043 (456) |
-| KIDS_FIRST (proxy) | refused | 11,379 / 8,633 (171) | 22,278 / 14,248 (277) | 11,379 / 8,633 (171) | 22,278 / 14,248 (277) | 43,082 / 24,866 (478) |
-| VOICE | 5,673 / 4,000 (77) | 11,379 / 7,434 (142) | 21,721 / 14,268 (278) | 11,379 / 7,434 (142) | 21,721 / 14,268 (278) | 34,555 / 22,272 (426) |
-| VOICE_PEDIATRIC (proxy) | 5,673 / 4,000 (77) | 11,379 / 7,434 (142) | 21,721 / 14,268 (278) | 11,379 / 7,434 (142) | 21,721 / 14,268 (278) | 34,555 / 22,272 (426) |
+| AI_READI | refused | 11,379 / 2,904 (171) | 22,278 / 4,631 (277) | 11,379 / 2,904 (171) | 22,278 / 4,631 (277) | 43,082 / 7,978 (478) |
+| CHORUS | 6,028 / 1,282 (81) | 10,854 / 2,226 (138) | 13,732 / 2,906 (188) | 10,854 / 2,226 (138) | 13,732 / 2,906 (188) | 13,732 / 2,906 (188) |
+| CM4AI | refused | 11,816 / 2,885 (182) | 24,290 / 5,932 (383) | 11,816 / 2,885 (182) | 24,290 / 5,932 (383) | 30,621 / 7,114 (456) |
+| KIDS_FIRST (proxy) | refused | 11,379 / 2,904 (171) | 22,278 / 4,631 (277) | 11,379 / 2,904 (171) | 22,278 / 4,631 (277) | 43,082 / 7,978 (478) |
+| VOICE | 5,673 / 1,355 (77) | 11,379 / 2,349 (142) | 21,721 / 4,636 (278) | 11,379 / 2,349 (142) | 21,721 / 4,636 (278) | 34,555 / 7,141 (426) |
+| VOICE_PEDIATRIC (proxy) | 5,673 / 1,355 (77) | 11,379 / 2,349 (142) | 21,721 / 4,636 (278) | 11,379 / 2,349 (142) | 21,721 / 4,636 (278) | 34,555 / 7,141 (426) |
 
 The smallest `aggregate_output_tokens` the admission rule needs (registered: 100,000), at 4 bytes a token: every worker's cap at the largest floor, each worker spending its floor, the omission output taken as 0 and no thinking (`peak_output_need`, a lower bound); in brackets, the workers' floors summed:
 
@@ -465,8 +480,11 @@ The typed workers' answers are sized from below.
   grammar v2). Every worker in every run had a passing variant, and the
   smallest passing one is the floor. The floor is a lower bound, minimal to
   within about 1%.
-- **The worker-check minimum.** The same variants with one-character claims
-  give it: the worker-stage check tests structure only, and accepts them.
+- **The worker-check minimum** (`metadata_only`). Every row is declared as
+  record metadata. The worker-stage grammar accepts that row for any path;
+  only the terminal check refuses it where the inventory does not allow it
+  (`record_metadata_allowed`). It is the smallest answer the worker stage
+  accepts, and every worker in every run accepted it.
 - **The terminal check.** The sweep ran it (`evidence_assertions.check_audit`,
   as `typed.assemble` does) on each run's assembled floor audit. In all 46
   measured runs, every finding was an evidence assertion on the
@@ -527,18 +545,21 @@ saved counts, whatever window or margin a caller declares.
 
 | Item | Value |
 |---|---|
-| script `scripts/offline_sizing.py` at this commit, sha256 | `e70465f05628aca34800cf3588ae2cc995c2d04978c4659f275172e4e3451434` |
-| results file, sha256 | `71cfcab3feb39542a7a902ca896f9fe9960693fe676506c49ce42c4f5e5e7446` |
+| script `scripts/offline_sizing.py` at this commit, sha256 | `c435c4404ec7de4891a358c1df3182566c014fa0d2d66a72ee0acd5b6a08d150` |
+| results file, sha256 | `211e7e8c2b0ad825c961c3b0f3933d474ff65b08aaef7e859335879b5eb069d5` |
 | connection attempts | none |
 | modules from outside the tree | none |
 
-- **Earlier sweeps.** Two earlier sweeps with earlier versions of the script
-  gave byte-identical figures for every worker and every other request.
-  They differed only in what changed between versions:
+- **Earlier sweeps.** Earlier versions of the script gave byte-identical
+  worker requests, and identical requests apart from those named below.
+  Each differs from the one after it only in:
+  - `e70465f0…`, results `71cfcab3…`: the worker-check minimum, which was
+    then the one-character-claim answer;
   - `48f49c59…`, results `b2cc6f0b…`: integration without the workers'
-    envelopes;
+    envelopes; the floors without the per-row variant (132 of 148 workers
+    changed); and the edit labels;
   - `a42b47a7…`, results `adb3e32a…`: the six requests that carry the audit
-    or the workers' answers.
+    or the workers' answers, then sized at the caps' bound.
 - **The run directory.** It reaches each typed request three times (plan risk
   7). Here it was 220–240 characters; a production run directory is 88 when
   relative. So the typed figures overstate by up to 456 B a request, about
@@ -590,11 +611,21 @@ saved counts, whatever window or margin a caller declares.
    - It said the catalog S6 removes does not depend on the record. S5's half
      does, so record differences are added unscaled as a conservative reading.
 
-   An intermediate revision (`118af93de`, never pushed) had two more errors:
-   - It attributed the floor's quoting rule to the worker-stage check, which
-     tests structure only.
-   - It read the S7 report family's figures as fits, though they pair a
-     floor audit with a report at its cap.
+   Two intermediate revisions, never pushed, had more errors.
+   - **`118af93de`**:
+     - It attributed the floor's quoting rule to the worker-stage check, which
+       tests structure only.
+     - It read the S7 report family's figures as fits, though they pair a
+       floor audit with a report at its cap.
+     - Its integration figures omitted the workers' envelopes (S7 at G2: 4.24M
+       and 4.61M, now 4.33M and 4.71M).
+     - It misquoted D07, and five figures were off.
+   - **`9dcb4390a`**:
+     - It took the one-character-claim answer as the worker stage's minimum,
+       and so said the stage accepts nothing under the cap. The stage accepts
+       an all-metadata answer under the cap.
+     - It said "every other request fits" under S7 for figures that carry a
+       floor.
 
 ## Findings for the integrator
 
@@ -607,17 +638,24 @@ I can't file issues; agy files these.
      path.
    - **The numbers.** Even the floor of such an answer exceeds the A3 draft's
      `worker_output_tokens` of 4,000 (`DEFAULT_AUDIT_LIMITS`) for every
-     project at every grid from G2 up: 2.7–3.0 times at G2, and 3.4–6.1 times
-     at G5.
+     project at every valid grid: 2.7–3.0 times at G2, 3.4–6.1 times at G5,
+     and 1.4–1.5 times at G1.
    - **The worker-stage check** (`audit_batches.check_worker`) tests structure
-     only. Its own minimum, with one-character claims, is still 1.8–2.3 times
-     the cap at G2.
+     only. It accepts an answer that declares every row as record metadata:
+     2,226–2,904 tokens for the largest worker at G2, under the cap. Only the
+     terminal check refuses it.
    - **Two failure paths.**
      - An answer cut off at `max_tokens` is refused at the worker stage, for
        not ending with `end_turn`. The typed audit is terminal after one
        worker is billed.
-     - An answer shortened to fit passes the worker stage and fails at
-       assembly, after every typed stage is billed.
+     - An answer that fits by declaring rows as metadata, or by shortening its
+       quotes, passes the worker stage. It fails at assembly, after every
+       typed stage is billed. Under the registered caps the metadata form is
+       open now.
+   - **A runtime fix to consider.** The plan carries `record_metadata_allowed`
+     for every path. If `check_worker` refused a metadata row on a path not
+     allowed one, that form would fail at the worker stage, at the cost of one
+     worker.
    - **For A6.** It must size `worker_output_tokens` and
      `aggregate_output_tokens` from a measured worker answer, against the
      admission rule. This note gives only floors.
@@ -753,15 +791,15 @@ Primary record `2026-09-04g_claude-opus-5-api-generic-v8_rep2`.
 
 "Over" in the last column passes the registered typed `aggregate_input_tokens` (4,000,000). The assigned inventory is what a worker must answer for, one row per path with complete claims, inside its output cap of 4,000 tokens.
 
-Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-stage check alone accepts the smaller one-character-claim answer. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
+Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-check minimum is the smallest answer the worker-stage check accepts, every row declared as record metadata, which only the terminal check refuses. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
 
 | Grid | Workers | Largest assignment (paths) | Largest worker's floor B | Its tokens, at least | Worker-check minimum, tokens | All workers' floors, tokens | Peak output need |
 |---|---|---|---|---|---|---|---|
-| G2 | 6 | 171 | 45,515 | 11,379 over | 8,633 over | 48,630 | 54,777 |
-| G3 | 3 | 277 | 89,111 | 22,278 over | 14,248 over | 48,393 | 59,001 |
-| G4 | 6 | 171 | 45,515 | 11,379 over | 8,633 over | 48,630 | 54,777 |
-| G5 | 3 | 277 | 89,111 | 22,278 over | 14,248 over | 48,393 | 59,001 |
-| G6 | 2 | 478 | 172,326 | 43,082 over | 24,866 over | 48,314 | 86,164 |
+| G2 | 6 | 171 | 45,515 | 11,379 over | 2,904 | 48,630 | 54,777 |
+| G3 | 3 | 277 | 89,111 | 22,278 over | 4,631 over | 48,393 | 59,001 |
+| G4 | 6 | 171 | 45,515 | 11,379 over | 2,904 | 48,630 | 54,777 |
+| G5 | 3 | 277 | 89,111 | 22,278 over | 4,631 over | 48,393 | 59,001 |
+| G6 | 2 | 478 | 172,326 | 43,082 over | 7,978 over | 48,314 | 86,164 |
 
 Every request at G2 (largest worker shown for the typed workers):
 
@@ -822,16 +860,16 @@ Primary record `2026-09-12_claude-opus-5-api-generic-v9_rep1`.
 
 "Over" in the last column passes the registered typed `aggregate_input_tokens` (4,000,000). The assigned inventory is what a worker must answer for, one row per path with complete claims, inside its output cap of 4,000 tokens.
 
-Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-stage check alone accepts the smaller one-character-claim answer. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
+Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-check minimum is the smallest answer the worker-stage check accepts, every row declared as record metadata, which only the terminal check refuses. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
 
 | Grid | Workers | Largest assignment (paths) | Largest worker's floor B | Its tokens, at least | Worker-check minimum, tokens | All workers' floors, tokens | Peak output need |
 |---|---|---|---|---|---|---|---|
-| G1 | 3 | 81 | 24,111 | 6,028 over | 4,233 over | 13,892 | 17,892 |
-| G2 | 2 | 138 | 43,414 | 10,854 over | 7,180 over | 13,812 | 21,708 |
-| G3 | 1 | 188 | 54,925 | 13,732 over | 9,305 over | 13,732 | 17,732 |
-| G4 | 2 | 138 | 43,414 | 10,854 over | 7,180 over | 13,812 | 21,708 |
-| G5 | 1 | 188 | 54,925 | 13,732 over | 9,305 over | 13,732 | 17,732 |
-| G6 | 1 | 188 | 54,925 | 13,732 over | 9,305 over | 13,732 | 17,732 |
+| G1 | 3 | 81 | 24,111 | 6,028 over | 1,282 | 13,892 | 17,892 |
+| G2 | 2 | 138 | 43,414 | 10,854 over | 2,226 | 13,812 | 21,708 |
+| G3 | 1 | 188 | 54,925 | 13,732 over | 2,906 | 13,732 | 17,732 |
+| G4 | 2 | 138 | 43,414 | 10,854 over | 2,226 | 13,812 | 21,708 |
+| G5 | 1 | 188 | 54,925 | 13,732 over | 2,906 | 13,732 | 17,732 |
+| G6 | 1 | 188 | 54,925 | 13,732 over | 2,906 | 13,732 | 17,732 |
 
 Every request at G2 (largest worker shown for the typed workers):
 
@@ -893,15 +931,15 @@ Primary record `2026-09-04g_claude-opus-5-api-generic-v8_rep1`.
 
 "Over" in the last column passes the registered typed `aggregate_input_tokens` (4,000,000). The assigned inventory is what a worker must answer for, one row per path with complete claims, inside its output cap of 4,000 tokens.
 
-Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-stage check alone accepts the smaller one-character-claim answer. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
+Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-check minimum is the smallest answer the worker-stage check accepts, every row declared as record metadata, which only the terminal check refuses. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
 
 | Grid | Workers | Largest assignment (paths) | Largest worker's floor B | Its tokens, at least | Worker-check minimum, tokens | All workers' floors, tokens | Peak output need |
 |---|---|---|---|---|---|---|---|
-| G2 | 3 | 182 | 47,264 | 11,816 over | 9,147 over | 30,780 | 34,780 |
-| G3 | 2 | 383 | 97,160 | 24,290 over | 19,174 over | 30,700 | 48,580 |
-| G4 | 3 | 182 | 47,264 | 11,816 over | 9,147 over | 30,780 | 34,780 |
-| G5 | 2 | 383 | 97,160 | 24,290 over | 19,174 over | 30,700 | 48,580 |
-| G6 | 1 | 456 | 122,481 | 30,621 over | 23,043 over | 30,621 | 34,621 |
+| G2 | 3 | 182 | 47,264 | 11,816 over | 2,885 | 30,780 | 34,780 |
+| G3 | 2 | 383 | 97,160 | 24,290 over | 5,932 over | 30,700 | 48,580 |
+| G4 | 3 | 182 | 47,264 | 11,816 over | 2,885 | 30,780 | 34,780 |
+| G5 | 2 | 383 | 97,160 | 24,290 over | 5,932 over | 30,700 | 48,580 |
+| G6 | 1 | 456 | 122,481 | 30,621 over | 7,114 over | 30,621 | 34,621 |
 
 Every request at G2 (largest worker shown for the typed workers):
 
@@ -964,15 +1002,15 @@ Primary record `2026-09-04g_claude-opus-5-api-generic-v8_rep2`.
 
 "Over" in the last column passes the registered typed `aggregate_input_tokens` (4,000,000). The assigned inventory is what a worker must answer for, one row per path with complete claims, inside its output cap of 4,000 tokens.
 
-Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-stage check alone accepts the smaller one-character-claim answer. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
+Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-check minimum is the smallest answer the worker-stage check accepts, every row declared as record metadata, which only the terminal check refuses. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
 
 | Grid | Workers | Largest assignment (paths) | Largest worker's floor B | Its tokens, at least | Worker-check minimum, tokens | All workers' floors, tokens | Peak output need |
 |---|---|---|---|---|---|---|---|
-| G2 | 6 | 171 | 45,515 | 11,379 over | 8,633 over | 48,630 | 54,777 |
-| G3 | 3 | 277 | 89,111 | 22,278 over | 14,248 over | 48,393 | 59,001 |
-| G4 | 6 | 171 | 45,515 | 11,379 over | 8,633 over | 48,630 | 54,777 |
-| G5 | 3 | 277 | 89,111 | 22,278 over | 14,248 over | 48,393 | 59,001 |
-| G6 | 2 | 478 | 172,326 | 43,082 over | 24,866 over | 48,314 | 86,164 |
+| G2 | 6 | 171 | 45,515 | 11,379 over | 2,904 | 48,630 | 54,777 |
+| G3 | 3 | 277 | 89,111 | 22,278 over | 4,631 over | 48,393 | 59,001 |
+| G4 | 6 | 171 | 45,515 | 11,379 over | 2,904 | 48,630 | 54,777 |
+| G5 | 3 | 277 | 89,111 | 22,278 over | 4,631 over | 48,393 | 59,001 |
+| G6 | 2 | 478 | 172,326 | 43,082 over | 7,978 over | 48,314 | 86,164 |
 
 Every request at G2 (largest worker shown for the typed workers):
 
@@ -1033,16 +1071,16 @@ Primary record `2026-09-04f_claude-opus-5-api-generic-v8_rep1`.
 
 "Over" in the last column passes the registered typed `aggregate_input_tokens` (4,000,000). The assigned inventory is what a worker must answer for, one row per path with complete claims, inside its output cap of 4,000 tokens.
 
-Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-stage check alone accepts the smaller one-character-claim answer. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
+Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-check minimum is the smallest answer the worker-stage check accepts, every row declared as record metadata, which only the terminal check refuses. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
 
 | Grid | Workers | Largest assignment (paths) | Largest worker's floor B | Its tokens, at least | Worker-check minimum, tokens | All workers' floors, tokens | Peak output need |
 |---|---|---|---|---|---|---|---|
-| G1 | 8 | 77 | 22,689 | 5,673 over | 4,000 | 35,085 | 39,184 |
-| G2 | 4 | 142 | 45,515 | 11,379 over | 7,434 over | 34,795 | 44,390 |
-| G3 | 2 | 278 | 86,883 | 21,721 over | 14,268 over | 34,635 | 43,442 |
-| G4 | 4 | 142 | 45,515 | 11,379 over | 7,434 over | 34,795 | 44,390 |
-| G5 | 2 | 278 | 86,883 | 21,721 over | 14,268 over | 34,635 | 43,442 |
-| G6 | 1 | 426 | 138,220 | 34,555 over | 22,272 over | 34,555 | 38,555 |
+| G1 | 8 | 77 | 22,689 | 5,673 over | 1,355 | 35,085 | 39,184 |
+| G2 | 4 | 142 | 45,515 | 11,379 over | 2,349 | 34,795 | 44,390 |
+| G3 | 2 | 278 | 86,883 | 21,721 over | 4,636 over | 34,635 | 43,442 |
+| G4 | 4 | 142 | 45,515 | 11,379 over | 2,349 | 34,795 | 44,390 |
+| G5 | 2 | 278 | 86,883 | 21,721 over | 4,636 over | 34,635 | 43,442 |
+| G6 | 1 | 426 | 138,220 | 34,555 over | 7,141 over | 34,555 | 38,555 |
 
 Every request at G2 (largest worker shown for the typed workers):
 
@@ -1105,16 +1143,16 @@ Primary record `2026-09-04f_claude-opus-5-api-generic-v8_rep1`.
 
 "Over" in the last column passes the registered typed `aggregate_input_tokens` (4,000,000). The assigned inventory is what a worker must answer for, one row per path with complete claims, inside its output cap of 4,000 tokens.
 
-Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-stage check alone accepts the smaller one-character-claim answer. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
+Worker output. The floor (`response_floor`) is a floor under any answer the terminal source review accepts; the worker-check minimum is the smallest answer the worker-stage check accepts, every row declared as record metadata, which only the terminal check refuses. Tokens are at 4 bytes a token, so they err low, and thinking draws on the same `max_tokens`. "Over" on the largest worker passes its cap (4,000). The peak is the smallest `aggregate_output_tokens` the admission rule needs with every worker's cap at the largest floor and outputs at their floors, the omission output taken as 0 (`peak_output_need`); "over" passes the registered 100,000.
 
 | Grid | Workers | Largest assignment (paths) | Largest worker's floor B | Its tokens, at least | Worker-check minimum, tokens | All workers' floors, tokens | Peak output need |
 |---|---|---|---|---|---|---|---|
-| G1 | 8 | 77 | 22,689 | 5,673 over | 4,000 | 35,085 | 39,184 |
-| G2 | 4 | 142 | 45,515 | 11,379 over | 7,434 over | 34,795 | 44,390 |
-| G3 | 2 | 278 | 86,883 | 21,721 over | 14,268 over | 34,635 | 43,442 |
-| G4 | 4 | 142 | 45,515 | 11,379 over | 7,434 over | 34,795 | 44,390 |
-| G5 | 2 | 278 | 86,883 | 21,721 over | 14,268 over | 34,635 | 43,442 |
-| G6 | 1 | 426 | 138,220 | 34,555 over | 22,272 over | 34,555 | 38,555 |
+| G1 | 8 | 77 | 22,689 | 5,673 over | 1,355 | 35,085 | 39,184 |
+| G2 | 4 | 142 | 45,515 | 11,379 over | 2,349 | 34,795 | 44,390 |
+| G3 | 2 | 278 | 86,883 | 21,721 over | 4,636 over | 34,635 | 43,442 |
+| G4 | 4 | 142 | 45,515 | 11,379 over | 2,349 | 34,795 | 44,390 |
+| G5 | 2 | 278 | 86,883 | 21,721 over | 4,636 over | 34,635 | 43,442 |
+| G6 | 1 | 426 | 138,220 | 34,555 over | 7,141 over | 34,555 | 38,555 |
 
 Every request at G2 (largest worker shown for the typed workers):
 
