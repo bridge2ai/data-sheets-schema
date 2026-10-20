@@ -87,8 +87,8 @@ What these rows show:
   #1023, which added the path list.
 - All 12 ran under schema 2.0.0. Main is at schema 3.0.0.
 - The provenance sha256s pin the record blocks the tables below read. Those blocks
-  have been rewritten in place before: backfills of 2026-09-10/11 touched AI_READI
-  04g rep2. A later rewrite changes these hashes.
+  have been rewritten in place before: commits from 2026-09-09 to 2026-09-11 rewrote
+  AI_READI 04g rep2's. A later rewrite changes these hashes.
 
 `data_sheets_schema` is a namespace package. With the primary checkout's virtualenv,
 its `__path__` lists both trees, so the script asserts that every module it uses comes

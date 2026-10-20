@@ -123,9 +123,14 @@ longer holds.
   - Under (a), the pilot keeps that baseline. Its seven AI_READI rows are read as
     cross-arm context, not as a like-for-like bar, and never as a reason to reject
     (item 5).
-  - Under (b) or (c), the pilot runs without `--canary-baseline`. Under a pending floor
-    with no baseline, `d4d api batch` computes no verdict at all (D15's text), so the
-    A11 rows alone decide.
+  - Under (b), the pilot runs without `--canary-baseline`. Under a pending floor with
+    no baseline, `d4d api batch` computes no verdict at all (D15's text), so the A11
+    rows alone decide.
+  - Under (c), there are two choices:
+    - the same as (b);
+    - the `2026-10-14b` prefix as a cross-runtime baseline, once those records are on
+      the launch base. `canary.baseline_for` reads only records under the
+      repository's own `data/` tree.
   - Under (d), the new run's prefix becomes the baseline.
 - **E2's blind batch:**
   - Under (a), the AI_READI v8 records enter E2 as they are, and the analysis
@@ -205,8 +210,8 @@ filter the two arms differently:
 - v10 replicates are gated on the registered coverage floor and the receipt floors
   (D21(b)), and the batch stops on invalid output.
 - The v8 comparator was not gated the same way. Only its rep1 records passed a canary
-  gate, after failed canaries in two projects. Its rep2 and rep3 are an ungated fill
-  (`805e6ac7b`, #1049).
+  gate, in three projects after earlier canaries that were not retained. Its rep2 and
+  rep3 are an ungated fill (`805e6ac7b`, #1049).
 - Four of the 12 v8 records fail today's "snippets unverified" floor (P1): CHORUS `04f`
   rep2 (2), CHORUS `04f` rep3 (1), AI_READI `04g` rep2 (1) and CM4AI `04g` rep3 (1).
 
@@ -263,8 +268,9 @@ package-level (plan risk 21, D02):
   records are with-crate results; v10 reads `1a58ad7b`, without the crate (item 2;
   #5042). The other three projects read byte-identical bundles.
 - **Gating and selection asymmetry:**
-  - v8 rep1 records each survived a canary gate, after failed canaries for CM4AI (`04`,
-    `04b`, `04c`), VOICE (`04d`, `04e`) and AI_READI (`04f` rep1, later invalid).
+  - v8 rep1 records each survived a canary gate. In three projects, earlier canaries
+    were not retained: CM4AI (`04`, `04b`, `04c`), VOICE (`04d`, `04e`) and AI_READI
+    (`04f` rep1, which passed and was later found invalid). CHORUS had none.
   - v8 rep2 and rep3 were never gated.
   - v10 replicates are gated under D21(b).
   - Item 3's two sets are the mitigation.
