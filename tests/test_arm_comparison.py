@@ -402,6 +402,7 @@ def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, m
     data["v8prod"]["CHORUS"] = [{"report": 0, "claims_checked": 5}]
     m.OUT_MD = tmp_path / "comparison.md"
     original = m.render_markdown(data, {})
+    assert "## Bundle identity by arm" in original
     m.OUT_MD.write_text(original)
     monkeypatch.setattr(m, "collect", lambda: data)
     monkeypatch.setattr(m, "EVAL_DIRS", {})
@@ -417,14 +418,65 @@ def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, m
     assert not m.OUT_MD.exists()
 
 
+def test_report_bundle_drift_uses_selected_cohort_in_stable_order(tmp_path, monkeypatch):
+    m = _module()
+    monkeypatch.setattr(m, "ROOT", tmp_path)
+    data = {key: {project: [] for project in m.PROJECTS} for key, *_ in m.ARMS}
+    for project in reversed(m.PROJECTS):
+        record, _, _ = _bundle_record(
+            tmp_path, project, current=None if project == "CHORUS" else b"changed")
+        data["v6agentic"][project] = [{"label": "rep1", "rec": record}]
+    result = m.bundle_drift_by_arm(data)
+    rows = result["v6agentic"]["records"]
+    assert [row["project"] for row in rows] == sorted(m.PROJECTS)
+    assert {row["project"]: row["disk_status"] for row in rows} == {
+        "AI_READI": "drift", "CHORUS": "match", "CM4AI": "drift", "VOICE": "drift"}
+    assert result["v6agentic"]["disk"] == {"match": 1, "drift": 3, "unknown": 0}
+    assert all(row["manifest_status"] == "match" for row in rows)
+    assert result["v8prod"]["count"] == 0
+
+
+def test_bundle_drift_survives_real_metrics_collection(tmp_path, monkeypatch):
+    import yaml
+
+    m = _module()
+    record, _, _ = _bundle_record(tmp_path, "CHORUS", current=b"revised")
+    record["run"]["label"] = "fixture_rep1"
+    monkeypatch.setattr(m, "ROOT", tmp_path)
+    monkeypatch.setattr(m, "CONCAT", tmp_path / "records")
+    monkeypatch.setattr(m, "ARMS", (("fixture", "fixture", "fixture", "offline", "reps"),))
+    monkeypatch.setattr(m, "PROJECTS", ("CHORUS",))
+    monkeypatch.setattr(m, "_method_for", lambda *args: "fixture_method")
+    monkeypatch.setattr(m, "form_facts", lambda *args, **kwargs: {})
+    monkeypatch.setattr(m, "removal_metrics", lambda *args, **kwargs: {})
+    for method, name, content in (
+        ("fixture_method", "CHORUS_d4d.yaml", {"id": "ex:dataset"}),
+        ("fixture_method_core", "CHORUS_d4d_core.yaml", {"id": "ex:dataset"}),
+        ("fixture_method_core", "CHORUS_provenance.yaml", record),
+    ):
+        path = m.CONCAT / method / "fixture_rep1" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(yaml.safe_dump(content))
+    result = m.bundle_drift_by_arm(m.collect())["fixture"]
+    assert result["disk"] == {"match": 0, "drift": 1, "unknown": 0}
+    assert result["manifest"] == {"match": 1, "drift": 0, "unknown": 0}
+    assert result["records"][0]["label"] == "fixture_rep1"
+
+
 @pytest.mark.corpus
 def test_committed_comparison_matches_current_records():
     """Catch changed report measurements that leave the published rows stale."""
     m = _module()
     data = m.collect()
+    drift = m.bundle_drift_by_arm(data)["v6agentic"]
+    assert drift["disk"] == {"match": 3, "drift": 9, "unknown": 0}
+    assert {row["project"]: row["disk_status"] for row in drift["records"]} == {
+        "AI_READI": "drift", "CHORUS": "match", "CM4AI": "drift", "VOICE": "drift"}
     scores = {rubric: {key: {p: m.rubric_scores(prefix, p, rubric) for p in m.PROJECTS}
                       for key, _display, prefix, *_ in m.ARMS} for rubric in m.EVAL_DIRS}
-    assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(data, scores), (
+    rendered = m.render_markdown(data, scores)
+    assert "## Bundle identity by arm" in rendered
+    assert m.OUT_MD.read_text(encoding="utf-8") == rendered, (
         "Run scripts/arm_comparison.py to refresh the committed table and figures")
 
 
