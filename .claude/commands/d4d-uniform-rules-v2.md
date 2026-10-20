@@ -298,12 +298,30 @@ to every project:
   labels a part of that entity, not of this one.
 
 - **A slot whose declared range is an enumeration is populated only from a
-  passage that states the category** (v9, R9, #830), in the source's own
+  passage that states the category** (v9, R9, #830; v10, #5048), in the
+  source's own
   words or a plain restatement of them — never from what a value's name,
   unit or position suggests. A variable's `data_type` and a collection's
   `collection_type` are claims about how a thing is classified, and a
   passage that names the thing without classifying it supports the name
-  and not the class. Where no passage states the category the slot stays
+  and not the class. Where an enumeration's permissible values are defined
+  in the schema by observable criteria rather than by a bare category
+  label, a passage that states the facts meeting a value's definition is a
+  plain restatement of that value, and the coverage receipt for the slot is
+  the passage stating those facts: in `confidentiality_level`
+  (ConfidentialityLevelEnum), a passage stating that the data are publicly
+  available without access restrictions supports unrestricted, a passage
+  stating that access requires registration, a credentialed account,
+  authorization or a data use agreement supports restricted, and a passage
+  stating that access requires institutional review board, ethics or
+  access-committee approval under strict controls supports confidential; in
+  `hipaa_compliant` (ComplianceStatusEnum), a passage stating that the
+  dataset contains no human-subjects or protected health information
+  supports not_applicable. A label from an external classification scheme
+  is recorded as prose where relevant and never mapped across schemes to an
+  enumeration value unless the source also states the observable facts that
+  meet the schema's definition. Where no passage states the category the
+  slot stays
   empty — an empty enumeration slot is a gap the reader can see, a guessed
   one an error the reader cannot — except where the schema requires the
   slot, in which case the entry itself is what the evidence must support: a
