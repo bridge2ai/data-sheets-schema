@@ -79,8 +79,9 @@ counts below are the plan's; this note does not recount them.
 
 **The groups nest; they do not add.**
 - The plan gives both of the first two groups the same 26 billed audits.
-- The v10z generation is one of the matched sequence's 9 generations: the plan's
-  risk 1 counts "9 native generations" in all.
+- The v10z generation is one of the matched sequence's 9 generations. The plan says so
+  directly: "9 native generations, the v10z generation d4810ca2 among them" (its CBORG
+  spend row, line 2425; the amounts on that row are not repeated here).
 - The shared ledger contains both groups.
 
 So no total is the sum of the others. This note does not decompose them further.
@@ -93,12 +94,26 @@ No full/core pair from this lineage was accepted.
   roots;
 - its README records a restore drill that reproduced every entry byte for byte.
 
-**The durable copy is now the only copy.** On 2026-10-20, none of the 46 roots in its
-`roots.txt` existed at its original `/private/tmp` path (checked by `stat`, without
-hashing). Plan Z1's "all artifacts are preserved" therefore rests on that one copy,
-and it remains **unverified** until it is checked with
-`python3 d4d-executions/lineage-durable/lineage_durable.py verify --durable`. This
-note did not run that check: it would hash 3.9 GB while CPU-timing work runs.
+**The originals are gone.** On 2026-10-20, none of the 46 roots in its `roots.txt`
+existed at its original `/private/tmp` path (checked by `stat`, without hashing).
+
+**The durable copy is the only complete copy known.** Some files also exist under the
+primary checkout's gitignored
+`notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/` directory. Four
+were checked by hashing both copies read-only, and each copy equals its namesake in the
+durable tree:
+
+| file | sha256 (16 hex) |
+|---|---|
+| `audit27-fresh-proposal-independent-review.json` | `36093a0e5162bd85` |
+| `audit27-public-adversarial-r1.json` | `a9e3932f72b86f44` |
+| `second-budget-amendment-integration-author-checks.json` | `110b3cebb2bcc18f` |
+| `test_audit24_extractor_independent.py` | `575e3901b7657de2` |
+
+**Preservation is unverified.** Plan Z1's "all artifacts are preserved" rests on the
+durable copy, and it remains unverified until the copy is checked with
+`python3 d4d-executions/lineage-durable/lineage_durable.py verify --durable`. This note
+did not run that check: it would hash 3.9 GB while CPU-timing work runs.
 
 The `git bundle` copies of the Codex session's unpublished branches (plan G1a, #4763)
 are tracked on #4763, not here.
