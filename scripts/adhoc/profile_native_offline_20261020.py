@@ -190,6 +190,110 @@ class ThreadSamples:
                     stream.write(f"{count:6d} {thread} {path}:{function}\n")
 
 
+class ThreadCpuProfiles:
+    """Bounded per-thread CPU profiles for the offline owner diagnostic.
+
+    Inputs: real ordinary Thread.run calls; outputs: profiles and a completion
+    ledger after pytest exits. No runtime clock or authority result is replaced.
+    Worker finalization retains only in-memory data so artifact serialization
+    cannot extend an application worker's bounded cleanup. Added 2026-10-20.
+    """
+    def __init__(self, limit=96):
+        self.limit = limit
+        self.lock = threading.Lock()
+        self.rows = []
+        self.capped = 0
+        self.capped_rows = []
+        self.original = threading.Thread.run
+        self.installed = None
+
+    def start(self):
+        original = self.original
+
+        def run(thread):
+            if thread.name.startswith("native-diagnostic-"):
+                return original(thread)
+            with self.lock:
+                if len(self.rows) >= self.limit:
+                    self.capped += 1
+                    if len(self.capped_rows) < self.limit:
+                        self.capped_rows.append({
+                            "name": thread.name, "ident": thread.ident,
+                            "native_id": thread.native_id,
+                        })
+                    row = None
+                else:
+                    row = {
+                        "ordinal": len(self.rows) + 1, "name": thread.name,
+                        "ident": thread.ident, "native_id": thread.native_id,
+                        "completed": False,
+                    }
+                    self.rows.append(row)
+            if row is None:
+                return original(thread)
+            profiler = cProfile.Profile(timer=time.thread_time)
+            started = time.thread_time()
+            profiler.enable()
+            try:
+                return original(thread)
+            finally:
+                profiler.disable()
+                cpu = time.thread_time() - started
+                # No disk writes, pstats processing, joins or cancellation here.
+                with self.lock:
+                    row.update(completed=True, cpu_seconds=cpu, profile=profiler)
+
+        self.installed = run
+        threading.Thread.run = run
+
+    def restore(self):
+        current_is_installed = threading.Thread.run is self.installed
+        threading.Thread.run = self.original
+        return current_is_installed
+
+    def write(self, output, *, restored):
+        # Snapshot completed profiles only. An unfinished application thread
+        # remains explicitly unfinished; never inspect its active profiler.
+        with self.lock:
+            rows = [dict(row) for row in self.rows]
+            capped = self.capped
+            capped_rows = [dict(row) for row in self.capped_rows]
+        profiles = []
+        for row in rows:
+            profiler = row.pop("profile", None)
+            if profiler is None:
+                continue
+            name = f"thread-cpu-{row['ordinal']:03d}.pstats"
+            profiler.dump_stats(output / name)
+            row["profile"] = name
+            profiles.append(str(output / name))
+            with (output / name.replace(".pstats", ".txt")).open("w") as stream:
+                pstats.Stats(profiler, stream=stream).sort_stats("cumulative").print_stats(70)
+        if profiles:
+            with (output / "thread-cpu-aggregate.txt").open("w") as stream:
+                combined = pstats.Stats(*profiles, stream=stream)
+                combined.dump_stats(output / "thread-cpu-aggregate.pstats")
+                combined.sort_stats("cumulative").print_stats(100)
+                combined.sort_stats("tottime").print_stats(100)
+        result = {
+            "timer": "time.thread_time", "profile_limit": self.limit,
+            "profiled_threads": len(rows), "capped_threads": capped,
+            "capped_thread_identities": capped_rows,
+            "omitted_capped_identities": capped - len(capped_rows),
+            "completed_threads": sum(row["completed"] for row in rows),
+            "incomplete_threads": [
+                {key: row[key] for key in ("ordinal", "name", "ident", "native_id")}
+                for row in rows if not row["completed"]
+            ],
+            "wrapper_was_current_at_restore": restored,
+            "original_run_restored": threading.Thread.run is self.original,
+            "scope": "Instrumented per-thread CPU diagnostics; not acceptance timing. "
+                     "Artifact serialization occurs only after pytest returns.",
+            "threads": rows,
+        }
+        (output / "thread-cpu.json").write_text(json.dumps(result, indent=2) + "\n")
+
+
 def source_state():
     """Bind both tracked edits and newly added source/tests in a shared lane."""
     diff = subprocess.check_output(["git", "diff", "--binary", "HEAD", "--", "src", "tests"])
@@ -335,8 +439,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("case", choices=(*NODES, 'origin_resolution', 'origin_resolution_contended'))
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--sample-threads", action="store_true",
-                        help="Sample Python stacks instead of cProfile; preserves owner-thread execution.")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--sample-threads", action="store_true",
+                      help="Sample Python stacks instead of cProfile; preserves owner-thread execution.")
+    mode.add_argument("--profile-thread-cpu", action="store_true",
+                      help="Diagnostic bounded Thread.run profiles using each thread's CPU clock.")
     parser.add_argument("--summarize-existing", action="store_true",
                         help="Rebuild only a saved thread-summary.txt; do not run tests.")
     args = parser.parse_args()
@@ -351,8 +458,8 @@ def main():
         return 0
     output.mkdir(parents=True, exist_ok=False)
     if args.case in ('origin_resolution', 'origin_resolution_contended'):
-        if args.sample_threads:
-            parser.error('origin-resolution comparison does not run a sampler')
+        if args.sample_threads or args.profile_thread_cpu:
+            parser.error('origin-resolution comparison does not profile test threads')
         return origin_resolution_benchmark(
             root, output, contended=args.case == 'origin_resolution_contended')
     import data_sheets_schema.native_shared_capture as capture
@@ -364,8 +471,12 @@ def main():
     before = [resource.getrusage(kind) for kind in (resource.RUSAGE_SELF, resource.RUSAGE_CHILDREN)]
     load_before = os.getloadavg()
     started = time.perf_counter()
-    profile = cProfile.Profile()
+    profile = (cProfile.Profile(timer=time.thread_time) if args.profile_thread_cpu
+               else cProfile.Profile())
     sampler = ThreadSamples() if args.sample_threads else None
+    thread_profiles = ThreadCpuProfiles() if args.profile_thread_cpu else None
+    if thread_profiles is not None:
+        thread_profiles.start()
     if sampler is None:
         profile.enable()
     else:
@@ -378,12 +489,15 @@ def main():
             profile.disable()
         else:
             sampler.finish(output)
+        restored = thread_profiles.restore() if thread_profiles is not None else None
         elapsed = time.perf_counter() - started
         after = [resource.getrusage(kind) for kind in (resource.RUSAGE_SELF, resource.RUSAGE_CHILDREN)]
         if sampler is None:
             profile.dump_stats(output / "profile.pstats")
             with (output / "profile.txt").open("w") as stream:
                 pstats.Stats(profile, stream=stream).sort_stats("cumulative").print_stats(100)
+        if thread_profiles is not None:
+            thread_profiles.write(output, restored=restored)
         cpu = [b.ru_utime + b.ru_stime - a.ru_utime - a.ru_stime
                for a, b in zip(before, after)]
         source_after = source_state()
@@ -396,7 +510,10 @@ def main():
             "cpu_self_seconds": cpu[0], "cpu_child_seconds": cpu[1],
             "load_before": load_before, "load_after": os.getloadavg(),
             "python": sys.version, "pytest_rc": int(code) if "code" in locals() else None,
-            "timing_scope": ("Thread-sampled diagnostic pytest process; not acceptance timing."
+            "timing_scope": ("Per-thread CPU-profiled diagnostic; artifact serialization excluded "
+                             "from pytest wall time; not acceptance timing."
+                             if thread_profiles is not None else
+                             "Thread-sampled diagnostic pytest process; not acceptance timing."
                              if sampler is not None else
                              "cProfile-instrumented parent pytest process; child CPU included separately"),
         }
