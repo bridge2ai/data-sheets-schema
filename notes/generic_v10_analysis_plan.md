@@ -16,7 +16,7 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
   - `notes/recall_target_baseline.md`;
   - `notes/arm_comparison.md`;
   - `data/_wcrate/README.md`;
-  - Lane C1's A1 note, commit `9dcb4390a` (item 15).
+  - Lane C1's A1 note, commit `e38abbf4c` (item 15).
 - **Plan dependencies:** P2 depends on G3, P1, A1 and A1b.
   - P1 is done.
   - G3 is partly decided (see the decision status below).
@@ -580,15 +580,22 @@ states it and its source before P4.
         not exercised there.
     - **A registered limit no valid answer can meet** (Lane C1 Finding 1). The
       registered `worker_output_tokens` (4,000) is below the floor of any worker answer
-      the terminal source review accepts. It stops a run in one of two ways:
+      the terminal source review accepts, at every valid grid. It stops a run in one of
+      two ways:
       - a cut-off answer is refused at the worker stage, and the typed audit is
         terminal after one worker is billed;
-      - a shortened answer passes the worker stage and fails at assembly, after every
-        typed stage is billed.
+      - an answer that fits, by declaring rows as metadata or by shortening its
+        quotes, passes the worker stage and fails at assembly, after every typed stage
+        is billed. The metadata form is open now under the registered caps. The worker
+        grammar accepts a metadata row for any path, and an all-metadata answer is
+        2,226–2,904 tokens for the largest worker at G2.
 
-      The cause is the registration, so a contingency under the same limits would
-      reproduce it. The remedy is A6's output limits, set before any registration is
-      put to the owner.
+      The causes are the registration's limit and the worker check's permissiveness,
+      so a contingency under the same limits would reproduce the stop. The remedies:
+      - A6's output limits, set before any registration is put to the owner;
+      - optionally, the runtime fix C1 suggests: `check_worker` refusing a metadata row
+        on a path that `record_metadata_allowed` does not allow, which would move the
+        metadata form's failure to the worker stage.
     - The defect is filed as an engineering issue before the classification;
   - **instrument:** an offline recomputation shows that a gate or checker misread a
     record that is valid under the registered rules. The defect is filed as an issue
@@ -728,11 +735,13 @@ not the numbers. Item 15 shows the numbers cannot yet be set.
 
 Still pending. The A1 offline sizing has a result: Lane C1's
 `notes/a1_offline_sizing_2026-10-20.md` on branch `fix/5072-offline-sizing-recovery`,
-commit `9dcb4390a`, local and readable with `git show`, note sha256
-`f62da63baf6264bd4bfd757ed2461aee057b04e7d05d1df03b818fff7044865b`.
-- It was still under independent review when this was written.
+commit `e38abbf4c`, local and readable with `git show`, note sha256
+`c17aed61085a04baba171544ff43da7c592d7f238312f10501e5b0fef2642cd8`.
+- It was under a final verification when this was written.
 - It replaces the note's first version (`64082b98d`, `e6d46f3a3`), whose
-  recommendation and three of whose claims it corrects.
+  recommendation and three of whose claims it corrects. Its "Corrections" section
+  also lists the errors of two unpushed intermediate revisions, `118af93de` and
+  `9dcb4390a`. The second of these is the one this draft cited before.
 - It measured tree `8ea79861` (PR #5095's pre-launch stack).
 - Every token figure in it is an estimate from bytes, except where it quotes A1b's
   count.
@@ -749,14 +758,28 @@ Its answer, in the order a run would meet the problems:
      (1,486,502 bytes in every worker and in integration), and again as the schema
      context's induced-slot classes. The worker's own assignment, the only part
      partitioning controls, is 0.2–0.3% of the request.
-2. **No worker's answer fits its output cap, from G2 up** (C1 Finding 1).
+2. **No worker's valid answer fits its output cap, at any valid grid** (C1 Finding 1).
    - The registered `worker_output_tokens` is 4,000, and thinking draws on the same
      `max_tokens`.
-   - The floor of an answer the terminal source review accepts is 2.7–3.0 times the
-     cap at G2 and 3.4–6.1 times at G5.
-   - Even the worker-stage check's own minimum, with one-character claims, is 1.8–2.3
-     times the cap at G2.
-   - No compaction option helps: this is output, not input. Item 10 classifies the two
+   - The floor of an answer the terminal source review accepts is:
+     - 2.7–3.0 times the cap at G2;
+     - 3.4–6.1 times at G5;
+     - 1.4–1.5 times at G1, where G1 is valid (CHORUS, VOICE, VOICE_PEDIATRIC).
+   - **The worker stage accepts far less.** Its check (`audit_batches.check_worker`)
+     tests structure only.
+     - Its grammar accepts a declared-metadata row (`{"path", "metadata_reason"}`)
+       for any path. Only the terminal check, at assembly, asks whether the path may be
+       declared metadata (`record_metadata_allowed`).
+     - An answer that declares every row as metadata is 2,226–2,904 tokens for the
+       largest worker at G2, under the cap.
+   - **So the costlier failure path is open now.** Such an answer passes the worker
+     stage under the registered caps, and fails only at assembly, after every typed
+     stage is billed. With the raised caps a valid answer needs, the path is open at
+     every grid.
+   - **A runtime fix to consider** (C1 Finding 1). If `check_worker` refused a
+     metadata row on a path not allowed one, that form would fail at the worker stage,
+     at the cost of one worker.
+   - No compaction option helps: this is output, not input. Item 10 classifies the
      ways it stops a run.
 3. **Under S7, the closest compaction option, the report family is not shown to fit
    for AI_READI or Kids First.** The audit is carried at its floor, a lower bound, and
@@ -770,8 +793,13 @@ Its answer, in the order a run would meet the problems:
      - carry only the audit's findings and revised rows;
      - drop the remaining classes from the report family's schema context;
      - stop repeating the source-review inventory there.
-   - The other four projects keep at least 949 bytes per row. Every other request's
-     input fits on every project under S7, but result 2's output problem remains.
+   - The other four projects keep at least 949 bytes per row.
+   - Every other request fits under S7 at the floor, on every project. The least room
+     is in Kids First's requests:
+     - integration, 718,171 tokens, about 925 bytes of answer per row;
+     - `reconcile_full`, 624,048 tokens, 1,829 bytes per row.
+
+     Result 2's output problem remains.
 4. **The typed input aggregate rules out G2 under S7.** The registered
    `aggregate_input_tokens` is 4,000,000.
    - At G2, AI_READI needs 4.33M and Kids First 4.71M.
@@ -784,8 +812,9 @@ Its answer, in the order a run would meet the problems:
 adopted, it recommends G5 (`max_paths` 384, `max_inventory_bytes` 65,536,
 `max_workers` 4), together with the report-family change. It also needs output limits
 that A6 sizes from a measured worker answer:
-- `worker_output_tokens`: at least 24,290 tokens at the floor (4 bytes a token), and
-  30,298–36,536 for AI_READI at A1b's ratios, before real content and thinking;
+- `worker_output_tokens`: at least 24,290 tokens at the floor (4 bytes a token;
+  CM4AI's largest worker), and 33,035–39,836 at A1b's ratios, before real content and
+  thinking;
 - `aggregate_output_tokens`: the registered 100,000 is likely too small for AI_READI
   and Kids First. The runtime's admission rule needs 80,242–96,762 at A1b's ratios at
   the floor, before thinking.
