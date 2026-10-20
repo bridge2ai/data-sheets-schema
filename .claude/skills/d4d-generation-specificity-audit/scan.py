@@ -1823,6 +1823,9 @@ def _notes_index(root: Path, parsed: dict) -> dict[str, list[Path]]:
     return index
 
 
+_RESOLVED_MODULES: dict[tuple, tuple] = {}
+
+
 def _resolve_module(root: Path, p: Path, dotted: str, level: int, index: dict) -> Path | None:
     """The file an import in module `p` resolves to: a relative import from
     its package; `data_sheets_schema.*` from src/; `src.*` from the checkout
@@ -1831,6 +1834,16 @@ def _resolve_module(root: Path, p: Path, dotted: str, level: int, index: dict) -
     the experiment directory on sys.path; a script run by path imports its
     siblings), and failing that the one notes/ module of that name when
     exactly one exists."""
+    key = (str(root), str(p), dotted, level)
+    entry = _RESOLVED_MODULES.get(key)
+    if entry is not None and entry[0] is index:
+        return entry[1]
+    res = _uncached_resolve_module(root, p, dotted, level, index)
+    _RESOLVED_MODULES[key] = (index, res)
+    return res
+
+
+def _uncached_resolve_module(root: Path, p: Path, dotted: str, level: int, index: dict) -> Path | None:
     here = _resolved(p).parent
     if level:
         base = here
@@ -1903,7 +1916,7 @@ def _bindings(root: Path, p: Path, tree, index: dict) -> dict[str, tuple]:
     a module, (module file, attribute) for a name taken from one. An import
     anywhere in the module counts: a function-level import binds the same
     name for the data flow (#4054)."""
-    key = (str(root), str(p))
+    key = (str(root), str(p), id(tree))
     entry = _BINDINGS.get(key)
     if entry is not None and entry[0] is tree and entry[1] is index:
         return entry[2]
@@ -2629,12 +2642,19 @@ def _launch_flag(e) -> str | None:
     return head if "=" in text and head in LAUNCH_FLAGS else None
 
 
+_PARENTS: dict[int, tuple] = {}
+
+
 def _parents(tree) -> dict[int, ast.AST]:
     """Each node's parent in a module, keyed by the child's id."""
+    entry = _PARENTS.get(id(tree))
+    if entry is not None and entry[0] is tree:
+        return entry[1]
     out: dict[int, ast.AST] = {}
     for n in ast.walk(tree):
         for c in ast.iter_child_nodes(n):
             out[id(c)] = n
+    _PARENTS[id(tree)] = (tree, out)
     return out
 
 
@@ -3072,7 +3092,13 @@ def _params(fn) -> list[str]:
     return names + [x.arg for x in (a.vararg, a.kwarg) if x is not None]
 
 
+_ASSIGNMENTS: dict[int, tuple] = {}
+
+
 def _local_assignments(fn) -> dict[str, list[ast.AST]]:
+    entry = _ASSIGNMENTS.get(id(fn))
+    if entry is not None and entry[0] is fn:
+        return {k: list(v) for k, v in entry[1].items()}
     out: dict[str, list] = {}
     for n in ast.walk(fn):
         if isinstance(n, ast.Assign):
@@ -3082,6 +3108,7 @@ def _local_assignments(fn) -> dict[str, list[ast.AST]]:
                         out.setdefault(x.id, []).append(n.value)
         elif isinstance(n, (ast.AugAssign, ast.AnnAssign)) and n.value is not None and isinstance(n.target, ast.Name):
             out.setdefault(n.target.id, []).append(n.value)
+    _ASSIGNMENTS[id(fn)] = (fn, {k: tuple(v) for k, v in out.items()})
     return out
 
 
@@ -3093,6 +3120,7 @@ def _holder(target) -> str | None:
     return target.id if isinstance(target, ast.Name) else None
 
 
+_VALUES: dict[int, tuple] = {}
 _WRITES: dict[int, tuple] = {}
 
 
@@ -3100,12 +3128,16 @@ def _local_values(fn) -> dict[str, list[ast.AST]]:
     """What each local of a function is bound to: the value of every
     assignment to it (plain, unpacked, annotated or augmented), and the
     iterable of a `for` loop that binds it (#4085). A fresh dict."""
+    entry = _VALUES.get(id(fn))
+    if entry is not None and entry[0] is fn:
+        return {k: list(v) for k, v in entry[1].items()}
     out = {k: list(v) for k, v in _local_assignments(fn).items()}
     for n in ast.walk(fn):
         if isinstance(n, (ast.For, ast.AsyncFor)):
             for x in ast.walk(n.target):
                 if isinstance(x, ast.Name) and isinstance(x.ctx, ast.Store):
                     out.setdefault(x.id, []).append(n.iter)
+    _VALUES[id(fn)] = (fn, {k: tuple(v) for k, v in out.items()})
     return out
 
 
@@ -3135,10 +3167,18 @@ def _local_writes(fn) -> dict[str, list[ast.AST]]:
     return out
 
 
+_RESULTS: dict[int, tuple] = {}
+
+
 def _results(fn) -> list[ast.AST]:
     """What a function's result is built from: its returned values, and the
     values a generator yields."""
-    return [r.value for r in ast.walk(fn) if isinstance(r, (ast.Return, ast.Yield)) and r.value is not None]
+    entry = _RESULTS.get(id(fn))
+    if entry is not None and entry[0] is fn:
+        return list(entry[1])
+    out = tuple(r.value for r in ast.walk(fn) if isinstance(r, (ast.Return, ast.Yield)) and r.value is not None)
+    _RESULTS[id(fn)] = (fn, out)
+    return list(out)
 
 
 def _carried_params(fn) -> tuple[set[int], set[str], int | None, bool]:
@@ -3379,15 +3419,23 @@ def _innermost_function(tree, line: int):
     return best
 
 
+_ENCLOSING: dict[tuple[int, int], tuple] = {}
+
+
 def _enclosing_function(tree, fn):
     if tree is None or fn is None:
         return None
+    key = (id(tree), id(fn))
+    entry = _ENCLOSING.get(key)
+    if entry is not None and entry[0] is tree and entry[1] is fn:
+        return entry[2]
     best = None
     for n in ast.walk(tree):
         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n is not fn:
             if n.lineno <= fn.lineno and getattr(n, "end_lineno", float("inf")) >= getattr(fn, "end_lineno", 0):
                 if best is None or n.lineno >= best.lineno:
                     best = n
+    _ENCLOSING[key] = (tree, fn, best)
     return best
 
 
@@ -3541,20 +3589,39 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         and (root / "src/data_sheets_schema/receipt_completion_policy.py").is_file()
     )
 
+    _real_repo_module_of: dict = {}
+    _audit_evidence_module_of: dict = {}
+
+    def _is_audit_evidence_module(q) -> bool:
+        if q is None:
+            return False
+        res = _audit_evidence_module_of.get(q)
+        if res is not None:
+            return res
+        res = str(q).endswith(_audit_evidence_modules)
+        _audit_evidence_module_of[q] = res
+        return res
+
     def _is_real_repo_module(q):
         if q is None:
             return False
+        res = _real_repo_module_of.get(q)
+        if res is not None:
+            return res
         if _is_real_repo and (
-            str(q).endswith(_audit_evidence_modules)
+            _is_audit_evidence_module(q)
             or (str(q).endswith("api_runner.py") and q in parsed
                 and "def execute(" in parsed[q][0] and "def resolve_prompt(" in parsed[q][0])
         ):
-            return True
-        return (
-            str(q).endswith("healthsheet.py")
-            and q in parsed
-            and "def build_bundle(" in parsed[q][0]
-        )
+            res = True
+        else:
+            res = (
+                str(q).endswith("healthsheet.py")
+                and q in parsed
+                and "def build_bundle(" in parsed[q][0]
+            )
+        _real_repo_module_of[q] = res
+        return res
 
     spans: dict[Path, dict[tuple[int, int], str]] = {}
     literals: dict[Path, dict[tuple[int, int], str]] = {}
@@ -4108,7 +4175,48 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         projected_carried_of.update(pending)
         return projected_carried_of[start]
 
-    def summary_callee(q, fn, expression):
+    summary_callee_of, method_callee_of, single_import_binds_of = {}, {}, {}
+    fn_walk_ids_of, fn_direct_imports_of = {}, {}
+
+    def _fn_walk_ids(fn):
+        fid = id(fn)
+        entry = fn_walk_ids_of.get(fid)
+        if entry is not None and entry[0] is fn:
+            return entry[1]
+        ids = {id(node) for node in ast.walk(fn)}
+        fn_walk_ids_of[fid] = (fn, ids)
+        return ids
+
+    def _fn_direct_imports(fn):
+        fid = id(fn)
+        entry = fn_direct_imports_of.get(fid)
+        if entry is not None and entry[0] is fn:
+            return entry[1]
+        by_name = {}
+        nodes_to_visit = list(fn.body)
+        while nodes_to_visit:
+            curr = nodes_to_visit.pop()
+            if isinstance(curr, (ast.Import, ast.ImportFrom)):
+                for alias in curr.names:
+                    alias_name = alias.asname or (alias.name.split(".")[0] if isinstance(curr, ast.Import) else alias.name)
+                    by_name.setdefault(alias_name, []).append(curr)
+            elif isinstance(curr, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                continue
+            else:
+                nodes_to_visit.extend(ast.iter_child_nodes(curr))
+        fn_direct_imports_of[fid] = (fn, by_name)
+        return by_name
+
+    def single_import_binds(q, binding):
+        key = (q, id(binding))
+        entry = single_import_binds_of.get(key)
+        if entry is not None and entry[0] is binding:
+            return entry[1]
+        res = _bindings(root, q, ast.Module(body=[binding], type_ignores=[]), index)
+        single_import_binds_of[key] = (binding, res)
+        return res
+
+    def _uncached_summary_callee(q, fn, expression):
         # A syntactic body is not necessarily the called object: decorators,
         # rebinding and import/local shadowing invalidate strict summaries.
         # Gate BOTH graph edges and final caller exclusions here so an
@@ -4121,23 +4229,10 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         binding = stable_bindings(q).get(name)
         if binding is None and fn is not None:
             candidate = unique_bindings(q).get(name)
-            if isinstance(candidate, (ast.Import, ast.ImportFrom)) and any(
-                    node is candidate for node in ast.walk(fn)):
+            if isinstance(candidate, (ast.Import, ast.ImportFrom)) and id(candidate) in _fn_walk_ids(fn):
                 binding = candidate
             elif _is_real_repo_module(q):
-                fn_imports = []
-                nodes_to_visit = list(fn.body)
-                while nodes_to_visit:
-                    curr = nodes_to_visit.pop()
-                    if isinstance(curr, (ast.Import, ast.ImportFrom)):
-                        for alias in curr.names:
-                            alias_name = alias.asname or (alias.name.split(".")[0] if isinstance(curr, ast.Import) else alias.name)
-                            if alias_name == name:
-                                fn_imports.append(curr)
-                    elif isinstance(curr, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                        continue
-                    else:
-                        nodes_to_visit.extend(ast.iter_child_nodes(curr))
+                fn_imports = _fn_direct_imports(fn).get(name, ())
                 if len(fn_imports) == 1:
                     binding = fn_imports[0]
                 elif len(fn_imports) > 1:
@@ -4174,7 +4269,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     if not shadowed:
                         binding = top_defs[0]
         if _is_real_repo_module(q) and hit is None and isinstance(binding, (ast.Import, ast.ImportFrom)):
-            bound_target, bound_attr = _bindings(root, q, ast.Module(body=[binding], type_ignores=[]), index).get(name, (None, None))
+            bound_target, bound_attr = single_import_binds(q, binding).get(name, (None, None))
             if isinstance(expression, ast.Name):
                 if bound_target is not None and bound_attr and bound_target in parsed and bound_attr in defs(bound_target):
                     hit = (bound_target, bound_attr)
@@ -4213,14 +4308,49 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             return None
         imported = binds(q).get(name)
         if _is_real_repo_module(q) and imported != hit and isinstance(binding, (ast.Import, ast.ImportFrom)):
-            imported = _bindings(root, q, ast.Module(body=[binding], type_ignores=[]), index).get(name)
+            imported = single_import_binds(q, binding).get(name)
         if isinstance(expression, ast.Name) and imported == hit:
             return hit
         if isinstance(expression, ast.Attribute) and imported == (hit[0], None):
             return hit
         return None
 
-    def resolve_method_callee(target_q, target_fn, expression):
+    def summary_callee(q, fn, expression):
+        if isinstance(expression, ast.Name):
+            expr_key = (0, expression.id)
+        elif isinstance(expression, ast.Attribute) and isinstance(expression.value, ast.Name):
+            expr_key = (1, expression.value.id, expression.attr)
+        else:
+            return None
+        key = (q, id(fn), expr_key)
+        entry = summary_callee_of.get(key)
+        if entry is not None and entry[0] is fn:
+            return entry[1]
+        res = _uncached_summary_callee(q, fn, expression)
+        summary_callee_of[key] = (fn, res)
+        return res
+
+    module_classes_of, module_functions_of = {}, {}
+
+    def _module_classes(q):
+        res = module_classes_of.get(q)
+        if res is not None:
+            return res
+        nodes = list(ast.walk(parsed[q][1])) if q in parsed else []
+        classes = [n for n in nodes if isinstance(n, ast.ClassDef)]
+        funcs = [n for n in nodes if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        module_classes_of[q] = classes
+        module_functions_of[q] = funcs
+        return classes
+
+    def _module_functions(q):
+        res = module_functions_of.get(q)
+        if res is not None:
+            return res
+        _module_classes(q)
+        return module_functions_of[q]
+
+    def _uncached_resolve_method_callee(target_q, target_fn, expression):
         if not (isinstance(expression, ast.Attribute) and isinstance(expression.value, ast.Name)):
             return None, None
         rec_name = expression.value.id
@@ -4236,31 +4366,31 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                         if cls_hit is not None:
                             cls_q = cls_hit[0]
                             if cls_q in parsed:
-                                for n in ast.walk(parsed[cls_q][1]):
-                                    if isinstance(n, ast.ClassDef) and n.name == cls_hit[1]:
+                                for n in _module_classes(cls_q):
+                                    if n.name == cls_hit[1]:
                                         for m in n.body:
                                             if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
                                                 return cls_q, m
                         elif isinstance(cls_func, ast.Name):
                             if target_q in parsed:
-                                for n in ast.walk(parsed[target_q][1]):
-                                    if isinstance(n, ast.ClassDef) and n.name == cls_func.id:
+                                for n in _module_classes(target_q):
+                                    if n.name == cls_func.id:
                                         for m in n.body:
                                             if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
                                                 return target_q, m
                             cls_mod, cls_attr = binds(target_q).get(cls_func.id, (None, None))
                             if cls_mod is not None and cls_mod in parsed:
                                 target_cls = cls_attr or cls_func.id
-                                for n in ast.walk(parsed[cls_mod][1]):
-                                    if isinstance(n, ast.ClassDef) and n.name == target_cls:
+                                for n in _module_classes(cls_mod):
+                                    if n.name == target_cls:
                                         for m in n.body:
                                             if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
                                                 return cls_mod, m
                         elif isinstance(cls_func, ast.Attribute) and isinstance(cls_func.value, ast.Name):
                             cls_mod, _ = binds(target_q).get(cls_func.value.id, (None, None))
                             if cls_mod is not None and cls_mod in parsed:
-                                for n in ast.walk(parsed[cls_mod][1]):
-                                    if isinstance(n, ast.ClassDef) and n.name == cls_func.attr:
+                                for n in _module_classes(cls_mod):
+                                    if n.name == cls_func.attr:
                                         for m in n.body:
                                             if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
                                                 return cls_mod, m
@@ -4271,26 +4401,45 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                 else:
                     break
         if rec_name in {"self", "cls"} and target_q in parsed and target_fn is not None:
-            for n in ast.walk(parsed[target_q][1]):
-                if isinstance(n, ast.ClassDef) and any(m is target_fn for m in n.body):
+            for n in _module_classes(target_q):
+                if any(m is target_fn for m in n.body):
                     for m in n.body:
                         if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef)) and m.name == method_name:
                             return target_q, m
         if target_q in parsed:
-            matches = [n for n in ast.walk(parsed[target_q][1])
-                       if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == method_name]
+            matches = [n for n in _module_functions(target_q) if n.name == method_name]
             if len(matches) == 1:
                 return target_q, matches[0]
         return None, None
 
-    text_helper_parents_of, text_helper_scopes_of = {}, {}
+    def resolve_method_callee(target_q, target_fn, expression):
+        if not (isinstance(expression, ast.Attribute) and isinstance(expression.value, ast.Name)):
+            return None, None
+        key = (target_q, id(target_fn), expression.value.id, expression.attr)
+        entry = method_callee_of.get(key)
+        if entry is not None and entry[0] is target_fn:
+            return entry[1]
+        res = _uncached_resolve_method_callee(target_q, target_fn, expression)
+        method_callee_of[key] = (target_fn, res)
+        return res
+
+    text_helper_parents_of, text_helper_scopes_of, text_helper_eval_scope_of = {}, {}, {}
     text_helper_identities = frozenset({
         ("json", "dumps"), ("yaml", "safe_dump"), ("textwrap", "dedent")})
 
     def text_helper_evaluation_scope(q, node):
+        q_cache = text_helper_eval_scope_of.get(q)
+        if q_cache is None:
+            q_cache = {}
+            text_helper_eval_scope_of[q] = q_cache
+        nid = id(node)
+        entry = q_cache.get(nid)
+        if entry is not None and entry[0] is node:
+            return entry[1]
         parents = text_helper_parents_of[q]
         scope = _scope_of(node, parents)
         if isinstance(node, ast.arg):
+            q_cache[nid] = (node, scope)
             return scope
         # Defaults, decorators, bases and annotations are evaluated outside
         # the function/class body. Do not treat explicit stores or helper
@@ -4302,6 +4451,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             if any(branch is statement for statement in scope.body):
                 break
             scope = _scope_of(scope, parents)
+        q_cache[nid] = (node, scope)
         return scope
 
     def text_helper_scope_bindings(q):
@@ -4518,7 +4668,46 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                 tuple(escapes))
         return json_module_identity_of[key]
 
-    json_source_dependencies_of = {}
+    json_source_dependencies_of, direct_json_deps_of = {}, {}
+
+    def _direct_json_deps(source):
+        res = direct_json_deps_of.get(source)
+        if res is not None:
+            return res
+        deps = []
+        # Importing a package member also executes its containing
+        # package initializers even if this member imports only json.
+        # Include namespace gaps; an outer regular package can still
+        # own a namespace descendant. No initializer is invented.
+        for parent in source.parents:
+            if parent == root or not _is_inside(parent, root):
+                break
+            initializer = _module_at(parent, "")
+            if initializer is not None:
+                deps.append(initializer)
+        if source not in parsed:
+            res = (tuple(deps), False)
+            direct_json_deps_of[source] = res
+            return res
+        for node in _summary(parsed[source][1])["imports"]:
+            level = node.level if isinstance(node, ast.ImportFrom) else 0
+            if isinstance(node, ast.Import):
+                names = [alias.name for alias in node.names]
+            else:
+                module = node.module or ""
+                names = [module] + [".".join(filter(None, (module, alias.name)))
+                                    for alias in node.names if alias.name != "*"]
+            prefixes = {""} if level else set()
+            for name in names:
+                parts = name.split(".")
+                prefixes.update(".".join(parts[:i]) for i in range(1, len(parts) + 1))
+            for name in prefixes:
+                target = _resolve_module(root, source, name, level, index)
+                if target is not None:
+                    deps.append(target)
+        res = (tuple(deps), True)
+        direct_json_deps_of[source] = res
+        return res
 
     def json_source_dependencies(q):
         """Resolved local import closure, including package initializers.
@@ -4536,35 +4725,12 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                 if source in seen:
                     continue
                 seen.add(source)
-                # Importing a package member also executes its containing
-                # package initializers even if this member imports only json.
-                # Include namespace gaps; an outer regular package can still
-                # own a namespace descendant. No initializer is invented.
-                for parent in source.parents:
-                    if parent == root or not _is_inside(parent, root):
-                        break
-                    initializer = _module_at(parent, "")
-                    if initializer is not None and initializer not in seen:
-                        pending.append(initializer)
-                if source not in parsed:
+                deps, source_complete = _direct_json_deps(source)
+                if not source_complete:
                     complete = False
-                    continue
-                for node in _summary(parsed[source][1])["imports"]:
-                    level = node.level if isinstance(node, ast.ImportFrom) else 0
-                    if isinstance(node, ast.Import):
-                        names = [alias.name for alias in node.names]
-                    else:
-                        module = node.module or ""
-                        names = [module] + [".".join(filter(None, (module, alias.name)))
-                                            for alias in node.names if alias.name != "*"]
-                    prefixes = {""} if level else set()
-                    for name in names:
-                        parts = name.split(".")
-                        prefixes.update(".".join(parts[:i]) for i in range(1, len(parts) + 1))
-                    for name in prefixes:
-                        target = _resolve_module(root, source, name, level, index)
-                        if target is not None and target not in seen:
-                            pending.append(target)
+                for target in deps:
+                    if target not in seen:
+                        pending.append(target)
             json_source_dependencies_of[q] = (seen - {q}, complete)
         return json_source_dependencies_of[q]
 
@@ -4583,7 +4749,27 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         return binding in owner.body and statement in owner.body \
             and owner.body.index(binding) < owner.body.index(statement)
 
-    def authenticated_json_member(q, fn, expression, member):
+    json_member_module_state_of = {}
+    auth_json_member_of = {}
+
+    def _json_member_module_state(q, member):
+        key = (q, member)
+        if key not in json_member_module_state_of:
+            if _resolve_module(root, q, "json", 0, index) is not None \
+                    or _module_at(_resolved(root / "src"), "json") is not None \
+                    or _module_at(_resolved(root), "json") is not None:
+                json_member_module_state_of[key] = None
+            else:
+                dependencies, complete = json_source_dependencies(q)
+                if not complete or any(any(json_module_identity_state(source, member))
+                                       for source in dependencies):
+                    json_member_module_state_of[key] = None
+                else:
+                    writes, escapes = json_module_identity_state(q, member)
+                    json_member_module_state_of[key] = None if escapes else writes
+        return json_member_module_state_of[key]
+
+    def _uncached_authenticated_json_member(q, fn, expression, member):
         """External dumps/loads identity only; callers supply operation contracts."""
         if member not in {"dumps", "loads"}:
             return False
@@ -4620,18 +4806,12 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             identity = isinstance(binding, ast.Import) and any(
                 alias.name == "json" and (alias.asname or alias.name) == name
                 for alias in binding.names)
+        if not identity:
+            return False
         # The existing import resolver also covers caller/notes roots. A
         # top-level source or checkout module can shadow stdlib JSON too.
-        if not identity or _resolve_module(root, q, "json", 0, index) is not None \
-                or _module_at(_resolved(root / "src"), "json") is not None \
-                or _module_at(_resolved(root), "json") is not None:
-            return False
-        dependencies, complete = json_source_dependencies(q)
-        if not complete or any(any(json_module_identity_state(source, member))
-                               for source in dependencies):
-            return False
-        writes, escapes = json_module_identity_state(q, member)
-        if escapes:
+        writes = _json_member_module_state(q, member)
+        if writes is None:
             return False
         if writes and (not direct or any(
                 not json_capture_precedes_write(q, scope, binding, write_scope, write)
@@ -4647,6 +4827,15 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             statement = parents.get(id(statement))
         return statement is not None and any(statement is node for node in fn.body) \
             and fn.body.index(binding) < fn.body.index(statement)
+
+    def authenticated_json_member(q, fn, expression, member):
+        key = (q, id(fn), id(expression), member)
+        entry = auth_json_member_of.get(key)
+        if entry is not None and entry[0] is fn and entry[1] is expression:
+            return entry[2]
+        res = _uncached_authenticated_json_member(q, fn, expression, member)
+        auth_json_member_of[key] = (fn, expression, res)
+        return res
 
     def authenticated_json_dumps(q, fn, expression):
         # Preserve the existing call seam; loads gains no operation admission
@@ -4804,7 +4993,50 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             scalar_helpers_of.setdefault(hit, False)
             scalar_helpers_active.discard(hit)
 
-    def _is_str_carrier(node, q=None, fn=None, visiting=None):
+    fn_str_names_of, fn_for_iters_of = {}, {}
+    str_carrier_of, iter_scalar_of, scalar_result_of = {}, {}, {}
+
+    def _fn_str_names(fn):
+        entry = fn_str_names_of.get(id(fn))
+        if entry is not None and entry[0] is fn:
+            return entry[1]
+        names = set()
+        string_methods = {
+            "startswith", "endswith", "find", "rfind", "index", "rindex",
+            "split", "rsplit", "splitlines", "strip", "lstrip", "rstrip",
+            "replace", "lower", "upper", "casefold", "title", "capitalize",
+            "center", "ljust", "rjust", "zfill", "encode", "decode", "format"
+        }
+        for call in ast.walk(fn):
+            if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) \
+                    and isinstance(call.func.value, ast.Name) \
+                    and call.func.attr in string_methods:
+                names.add(call.func.value.id)
+            elif isinstance(call, ast.Call) and isinstance(call.func, ast.Name) and call.func.id == "isinstance" \
+                    and len(call.args) >= 2 and isinstance(call.args[0], ast.Name):
+                types = call.args[1].elts if isinstance(call.args[1], ast.Tuple) else [call.args[1]]
+                if any(isinstance(t, ast.Name) and t.id == "str" for t in types):
+                    names.add(call.args[0].id)
+        if isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            for arg in fn.args.posonlyargs + fn.args.args + fn.args.kwonlyargs:
+                if arg.annotation is not None:
+                    if (isinstance(arg.annotation, ast.Name) and arg.annotation.id == "str") or (
+                        isinstance(arg.annotation, ast.Constant) and arg.annotation.value == "str"
+                    ):
+                        names.add(arg.arg)
+        res = frozenset(names)
+        fn_str_names_of[id(fn)] = (fn, res)
+        return res
+
+    def _fn_for_iters(fn):
+        entry = fn_for_iters_of.get(id(fn))
+        if entry is not None and entry[0] is fn:
+            return entry[1]
+        res = {id(n.iter): n for n in ast.walk(fn) if isinstance(n, (ast.For, ast.AsyncFor))}
+        fn_for_iters_of[id(fn)] = (fn, res)
+        return res
+
+    def _uncached_is_str_carrier(node, q=None, fn=None, visiting=None):
         if node is None:
             return False
         if isinstance(node, (ast.Constant, ast.JoinedStr)):
@@ -4817,29 +5049,8 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                 visiting = frozenset()
             if node.id in visiting:
                 return False
-            string_methods = {
-                "startswith", "endswith", "find", "rfind", "index", "rindex",
-                "split", "rsplit", "splitlines", "strip", "lstrip", "rstrip",
-                "replace", "lower", "upper", "casefold", "title", "capitalize",
-                "center", "ljust", "rjust", "zfill", "encode", "decode", "format"
-            }
-            for call in ast.walk(fn):
-                if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) \
-                        and isinstance(call.func.value, ast.Name) and call.func.value.id == node.id \
-                        and call.func.attr in string_methods:
-                    return True
-                if isinstance(call, ast.Call) and isinstance(call.func, ast.Name) and call.func.id == "isinstance" \
-                        and len(call.args) >= 2 and isinstance(call.args[0], ast.Name) and call.args[0].id == node.id:
-                    types = call.args[1].elts if isinstance(call.args[1], ast.Tuple) else [call.args[1]]
-                    if any(isinstance(t, ast.Name) and t.id == "str" for t in types):
-                        return True
-            if isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                for arg in fn.args.posonlyargs + fn.args.args + fn.args.kwonlyargs:
-                    if arg.arg == node.id and arg.annotation is not None:
-                        if isinstance(arg.annotation, ast.Name) and arg.annotation.id == "str":
-                            return True
-                        if isinstance(arg.annotation, ast.Constant) and arg.annotation.value == "str":
-                            return True
+            if node.id in _fn_str_names(fn):
+                return True
             vals = _local_values(fn).get(node.id, ())
             if vals and all(_is_str_carrier(v, q, fn, visiting | {node.id}) for v in vals):
                 return True
@@ -4859,7 +5070,18 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             return _is_str_carrier(node.body, q, fn, visiting) and _is_str_carrier(node.orelse, q, fn, visiting)
         return False
 
-    def iter_yields_scalar(node, q=None, fn=None, visiting=None):
+    def _is_str_carrier(node, q=None, fn=None, visiting=None):
+        if not visiting:
+            key = ("Name", node.id, q, id(fn)) if isinstance(node, ast.Name) else ("Node", id(node), q, id(fn))
+            entry = str_carrier_of.get(key)
+            if entry is not None and entry[0] is fn and (isinstance(node, ast.Name) or entry[1] is node):
+                return entry[2]
+            res = _uncached_is_str_carrier(node, q, fn, visiting)
+            str_carrier_of[key] = (fn, None if isinstance(node, ast.Name) else node, res)
+            return res
+        return _uncached_is_str_carrier(node, q, fn, visiting)
+
+    def _uncached_iter_yields_scalar(node, q=None, fn=None, visiting=None):
         if node is None:
             return False
         if _is_str_carrier(node, q, fn, visiting) or scalar_result(node, q, fn, visiting):
@@ -4906,6 +5128,17 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     if all_yield:
                         return True
         return False
+
+    def iter_yields_scalar(node, q=None, fn=None, visiting=None):
+        if not visiting:
+            key = ("Name", node.id, q, id(fn)) if isinstance(node, ast.Name) else ("Node", id(node), q, id(fn))
+            entry = iter_scalar_of.get(key)
+            if entry is not None and entry[0] is fn and (isinstance(node, ast.Name) or entry[1] is node):
+                return entry[2]
+            res = _uncached_iter_yields_scalar(node, q, fn, visiting)
+            iter_scalar_of[key] = (fn, None if isinstance(node, ast.Name) else node, res)
+            return res
+        return _uncached_iter_yields_scalar(node, q, fn, visiting)
 
     def iter_index_yields_scalar(iter_node, idx, q=None, fn=None, visiting=None):
         if iter_node is None:
@@ -5001,7 +5234,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                 return iter_index_yields_scalar(loop.iter, idx, q, fn, visiting)
         return False
 
-    def scalar_result(value, q=None, fn=None, visiting=None):
+    def _uncached_scalar_result(value, q=None, fn=None, visiting=None):
         # Result identity, not evaluation purity: explicit calls used to
         # compute one of these values remain independently indexed below.
         if not _is_real_repo_module(q):
@@ -5084,7 +5317,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     return True
                 vals = _local_values(fn).get(value.id, ())
                 if vals:
-                    for_iters = {id(n.iter): n for n in ast.walk(fn) if isinstance(n, (ast.For, ast.AsyncFor))}
+                    for_iters = _fn_for_iters(fn)
                     if all(loop_target_yields_scalar(for_iters[id(v)], value.id, q, fn, visiting | {value.id}) if id(v) in for_iters
                            else scalar_result(v, q, fn, visiting | {value.id}) for v in vals):
                         return True
@@ -5141,6 +5374,17 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     if child is not None and scalar_helper((callee_q, child)):
                         return True
         return False
+
+    def scalar_result(value, q=None, fn=None, visiting=None):
+        if not visiting:
+            key = ("Name", value.id, q, id(fn)) if isinstance(value, ast.Name) else ("Node", id(value), q, id(fn))
+            entry = scalar_result_of.get(key)
+            if entry is not None and entry[0] is fn and (isinstance(value, ast.Name) or entry[1] is value):
+                return entry[2]
+            res = _uncached_scalar_result(value, q, fn, visiting)
+            scalar_result_of[key] = (fn, None if isinstance(value, ast.Name) else value, res)
+            return res
+        return _uncached_scalar_result(value, q, fn, visiting)
 
     address_helpers_of, address_helpers_active = {}, set()
 
@@ -5291,18 +5535,28 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             address_helpers_active.remove(hit)
 
     record_helpers_of, record_helpers_active = {}, set()
+    fn_record_scope_of, detached_record_of = {}, {}
+
+    def _fn_record_scope(q, fn):
+        if fn is None:
+            return {}, frozenset()
+        key = (q, id(fn))
+        entry = fn_record_scope_of.get(key)
+        if entry is not None and entry[0] is fn:
+            return entry[1], entry[2]
+        fn_binds = {}
+        fn_imports = [n for n in ast.walk(fn) if isinstance(n, (ast.Import, ast.ImportFrom))]
+        if fn_imports and q is not None:
+            fn_binds = _bindings(root, q, ast.Module(body=fn_imports, type_ignores=[]), index)
+        local_classes = frozenset(n.name for n in ast.walk(fn) if isinstance(n, ast.ClassDef))
+        fn_record_scope_of[key] = (fn, fn_binds, local_classes)
+        return fn_binds, local_classes
 
     def record_constructor_call(q, value, fn=None):
         if not _is_real_repo_module(q) or not isinstance(value, ast.Call):
             return False
         func = value.func
-        fn_binds = {}
-        local_classes = set()
-        if fn is not None:
-            fn_imports = [n for n in ast.walk(fn) if isinstance(n, (ast.Import, ast.ImportFrom))]
-            if fn_imports and q is not None:
-                fn_binds = _bindings(root, q, ast.Module(body=fn_imports, type_ignores=[]), index)
-            local_classes = {n.name for n in ast.walk(fn) if isinstance(n, ast.ClassDef)}
+        fn_binds, local_classes = _fn_record_scope(q, fn)
         if isinstance(func, ast.Name):
             target, attr = binds(q).get(func.id, (None, None)) if q is not None else (None, None)
             if target is None and func.id in fn_binds:
@@ -5372,7 +5626,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             record_helpers_of.setdefault(hit, False)
             record_helpers_active.remove(hit)
 
-    def detached_record(q, fn, value):
+    def _uncached_detached_record(q, fn, value):
         if not _is_real_repo_module(q):
             return False
         if record_constructor_call(q, value, fn):
@@ -5383,6 +5637,15 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             return False
         hit = summary_callee(q, fn, value.func)
         return hit is not None and record_helper(hit)
+
+    def detached_record(q, fn, value):
+        key = (q, id(fn), id(value))
+        entry = detached_record_of.get(key)
+        if entry is not None and entry[0] is fn and entry[1] is value:
+            return entry[2]
+        res = _uncached_detached_record(q, fn, value)
+        detached_record_of[key] = (fn, value, res)
+        return res
 
     container_helpers_of = {}
     container_helpers_active = set()
@@ -6045,7 +6308,10 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                 return "scalar"
             return None
 
-        def value(expression, bindings=None):
+        value_cache = {}
+        references_cache = {}
+
+        def _uncached_value(expression, bindings=None):
             if isinstance(expression, ast.Constant) and type(expression.value) in {
                     str, int, float, bool, type(None)}:
                 return "scalar"
@@ -6115,6 +6381,18 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                         return context[2]
             return None
 
+        def value(expression, bindings=None):
+            if bindings is not None or resolving:
+                return _uncached_value(expression, bindings)
+            nid = id(expression)
+            entry = value_cache.get(nid)
+            if entry is not None and entry[0] is expression:
+                return entry[1]
+            res = _uncached_value(expression, None)
+            if not resolving:
+                value_cache[nid] = (expression, res)
+            return res
+
         def _comp_scopes(generators, extra_carriers, extra_shadow):
             scoped_carriers = set(extra_carriers)
             scoped_shadow = set(extra_shadow)
@@ -6128,7 +6406,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     scoped_carriers -= gen_targets
             return frozenset(scoped_carriers), frozenset(scoped_shadow)
 
-        def references(expression, extra_carriers=frozenset(), extra_shadow=frozenset()):
+        def _uncached_references(expression, extra_carriers=frozenset(), extra_shadow=frozenset()):
             fact = value(expression)
             if fact is not None:
                 return carrier(fact)
@@ -6150,6 +6428,18 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             if scalar_result(expression):
                 return False
             return any(references(child, extra_carriers, extra_shadow) for child in ast.iter_child_nodes(expression))
+
+        def references(expression, extra_carriers=frozenset(), extra_shadow=frozenset()):
+            if extra_carriers or extra_shadow or resolving:
+                return _uncached_references(expression, extra_carriers, extra_shadow)
+            nid = id(expression)
+            entry = references_cache.get(nid)
+            if entry is not None and entry[0] is expression:
+                return entry[1]
+            res = _uncached_references(expression, extra_carriers, extra_shadow)
+            if not resolving:
+                references_cache[nid] = (expression, res)
+            return res
 
         def safe_call(call):
             if not references(call.func) and not any(references(a) for a in call.args) \
@@ -6222,6 +6512,8 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                              expression, (ast.Dict, ast.List, ast.Set, ast.DictComp, ast.ListComp, ast.SetComp))))
                         ) for expression, path, iteration in entries):
                     may_json.add(name)
+                    value_cache.clear()
+                    references_cache.clear()
                     changed = True
 
         def local_target(target):
@@ -6952,6 +7244,9 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             return True
         return False
 
+    detached_value_helpers_of = {}
+    entry_scalar_rebinding_of = {}
+
     def detached_value_call(q, fn, value, visiting=frozenset()):
         if not _is_real_repo_module(q) or not isinstance(value, ast.Call):
             return False
@@ -6964,19 +7259,31 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
         hit = summary_callee(q, fn, value.func)
         if hit is None or hit in visiting:
             return False
+        if not visiting and hit in detached_value_helpers_of:
+            return detached_value_helpers_of[hit]
         q_target, name = hit
         if q_target is not None and str(q_target).endswith("schema_snapshot.py") and name == "_metadata":
+            if not visiting:
+                detached_value_helpers_of[hit] = True
             return True
         if q_target is not None and str(q_target).endswith("schema_semantics.py") and name in {"_record", "_json", "_metadata", "_plain", "build_record"}:
+            if not visiting:
+                detached_value_helpers_of[hit] = True
             return True
         if q_target not in parsed or name not in defs(q_target):
+            if not visiting:
+                detached_value_helpers_of[hit] = False
             return False
         fn_target = defs(q_target)[name]
         if not isinstance(fn_target, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if not visiting:
+                detached_value_helpers_of[hit] = False
             return False
         nodes = list(_own_nodes(fn_target, eager_annotations=id(fn_target) not in postponed_annotation_functions))
         returns = [n for n in nodes if isinstance(n, ast.Return) and n.value is not None]
         if not returns:
+            if not visiting:
+                detached_value_helpers_of[hit] = False
             return False
         local_vals = _local_values(fn_target)
         params_target = set(_params(fn_target))
@@ -7024,7 +7331,10 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     return True
             return False
 
-        return all(_is_detached_expr(r.value) for r in returns)
+        res = all(_is_detached_expr(r.value) for r in returns)
+        if not visiting:
+            detached_value_helpers_of[hit] = res
+        return res
 
     def value_carries_alias_expr(q, fn, val, aliases):
         if val is None:
@@ -7107,7 +7417,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             return any(value_carries_alias_expr(q, fn, child, aliases) for child in ast.iter_child_nodes(val))
         return any(value_carries_alias_expr(q, fn, child, aliases) for child in ast.iter_child_nodes(val))
 
-    def compute_entry_scalar_rebinding(q, fn, name, visiting=frozenset()):
+    def _uncached_compute_entry_scalar_rebinding(q, fn, name, visiting=frozenset()):
         if fn is None or name in visiting:
             return False
         params = set(_params(fn))
@@ -7155,6 +7465,17 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
             if any(isinstance(part, ast.Name) and part.id == name for part in ast.walk(statement)):
                 return False
         return False
+
+    def compute_entry_scalar_rebinding(q, fn, name, visiting=frozenset()):
+        if not visiting:
+            key = (q, id(fn), name)
+            entry = entry_scalar_rebinding_of.get(key)
+            if entry is not None and entry[0] is fn:
+                return entry[1]
+            res = _uncached_compute_entry_scalar_rebinding(q, fn, name, visiting)
+            entry_scalar_rebinding_of[key] = (fn, res)
+            return res
+        return _uncached_compute_entry_scalar_rebinding(q, fn, name, visiting)
 
     def compute_aliases_of(q, fn, name):
         key = (q, id(fn), name)
@@ -8774,67 +9095,6 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                 receiver = _holder(receiver_value) if receiver_value is not None else None
                 if receiver is None and isinstance(receiver_value, ast.Call) and isinstance(receiver_value.func, ast.Attribute) and receiver_value.func.attr == "setdefault":
                     receiver = _holder(receiver_value.func.value)
-                _audit_evidence_modules = (
-                    "schema_semantics.py", "duplicate_keys.py", "schema_view.py", "receipts.py",
-                    "schema_snapshot.py", "schema_digest.py", "fitness_schema.py", "profiles.py",
-                    "resources.py", "corpus.py", "registry.py", "snapshot_store.py",
-                    "usage_ledger.py", "receipt_completion_policy.py", "removal_repair.py",
-                    "healthsheet.py", "source_priority.py", "source_review.py", "provenance.py",
-                    "native_source_attribution.py", "audit_batch_context.py", "audit_batch_format.py",
-                    "api_playbook.py", "agentic_runtime.py", "typed_audit_runtime.py",
-                    "chunking.py", "receipt_completion.py", "removals.py", "rereceipt.py",
-                    "shared_generation.py", "rocrate_normalize.py", "concatenate_documents.py",
-                    "organized_dataset_extractor.py", "preprocess_sources.py",
-                    "source_metadata.py", "audit_batches.py", "audit_grammar.py", "audit_omissions.py",
-                    "evidence_assertions.py", "grounding.py", "scope.py", "typed_audit.py",
-                    "audit_protocol.py", "support_targets.py", "anonymous_removals.py",
-                    "run_direct_canary.py", "prepare_registration.py", "native_context.py",
-                    "native_context_control.py", "batch_output.py", "batch_registration.py",
-                    "contract.py", "contract_context.py", "draft_output.py", "native.py",
-                    "output_parts.py", "prepare.py", "registration.py", "native_command_policy.py",
-                    "native_control.py", "native_file_policy.py", "native_phase_history.py",
-                    "native_readonly.py", "prepare_overlay_roster.py", "run_native_canary.py",
-                    "budgeted_cborg.py", "budget_amendment.py", "run_api_canary.py", "inventory.py",
-                    "sequence_claim.py", "runtime_closure.py", "transport.py", "batch_history.py",
-                    "batch_native.py", "draft_history.py", "checkpoint_eligibility.py",
-                    "worker_checkpoint.py", "bounded_transport.py", "bounded_stream.py",
-                    "reconcile_stopped.py", "transport_probe.py", "native_proxy.py",
-                    "prepare_overlay.py", "probe_predecessor.py",
-                    "shared_generation_resources.py", "shared_write_footprint.py",
-                    "agent_pin.py", "agentic_observed.py", "american_spelling.py", "awards.py",
-                    "backfill_checks.py", "canary.py", "d4d_pair_consistency.py", "derive_core.py",
-                    "evaluate_d4d_llm.py", "evaluation_context.py", "evaluation_model.py",
-                    "evidence_score.py", "fetch.py", "identifiers.py", "judge_contract.py",
-                    "merge.py", "name_grounding.py", "output_ownership.py", "prompt_registry.py",
-                    "reasoning.py", "receipt_origin.py", "receipt_sources.py",
-                    "reconstructed_bytes.py", "record_schema.py", "redundancy.py",
-                    "release_inventory.py", "report_claims.py", "review_pack.py", "rocrate_map.py",
-                    "run_guard.py", "run_lock.py", "run_pair_schema.py", "run_schema.py",
-                    "run_telemetry.py", "runs.py", "schema_cache.py", "schema_sync.py",
-                    "status_context.py", "stream_evidence.py", "source_heading_routing.py",
-                    "d4d_builder.py", "field_prioritizer.py", "informativeness_scorer.py",
-                    "mapping_loader.py", "rocrate_merger.py", "rocrate_parser.py",
-                    "rocrate_to_d4d.py", "validator.py", "check_mapping_coverage.py",
-                    "schema_stats.py", "check_budget.py", "description_comprehensive_review.py",
-                    "description_quality_analyzer.py", "validate_evaluation_schema.py",
-                    "data_sheets_schema.py", "evaluate_d4d.py", "d4d_to_fairscape.py",
-                    "fairscape_to_d4d.py", "generate_d4d_metadata.py",
-                    "validate_d4d_completeness.py", "human_readable_renderer.py",
-                    "generate_comprehensive_sssom.py", "validate.py", "field_agent_contract.py",
-                    "semantic_evidence.py", "semantic_evidence_authority.py",
-                    "semantic_instrument.py", "semantic_scope.py",
-                    "bind_direct_launch.py", "prepare_direct.py", "run_direct_canary_awake.py",
-                    "continuation_sequence.py", "adapter_closure.py", "closure.py",
-                    "instructions.py", "offline.py", "prepare_evaluation.py",
-                    "prepare_subtype.py", "run_evaluation.py", "source_pair.py", "validation.py",
-                    "probe_native_buffered_stall.py", "probe_native_stall.py",
-                    "fix_failed_extractions.py", "claude_max_d4d_processor.py",
-                    "d4d_agent_wrapper.py", "interactive_d4d_wrapper.py",
-                    "process_concatenated_d4d.py", "process_concatenated_d4d_claude.py",
-                    "process_individual_d4d_claude_direct.py", "process_individual_d4d_gpt5.py",
-                    "prompt_loader.py", "standalone_d4d_wrapper.py",
-                    "process_d4d_claude_API_temp0.py", "schema_extract.py",
-                )
                 if receiver in aliases and receiver not in context \
                         and id(node) in fresh_record_operations(receiver):
                     # Only this fresh outer field operation is admitted.
@@ -8873,7 +9133,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                     def _is_local_nested_container_subscript(recv, sub, attr):
                         if not _is_real_repo_module(q):
                             return False
-                        if not formal and q is not None and str(q).endswith(_audit_evidence_modules) and (
+                        if not formal and _is_audit_evidence_module(q) and (
                             isinstance(sub, ast.Subscript)
                             or (isinstance(sub, ast.Call) and isinstance(sub.func, ast.Attribute) and sub.func.attr == "setdefault")
                         ) and attr in {"append", "extend", "insert", "update", "add", "pop", "discard", "setdefault"}:
@@ -9010,8 +9270,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                                     or (proven_container_kind(receiver) == "dict" and node.func.attr in allowed_dict_attrs)
                                     or (
                                         _is_real_repo_module(q)
-                                        and q is not None
-                                        and str(q).endswith(_audit_evidence_modules)
+                                        and _is_audit_evidence_module(q)
                                         and receiver not in params
                                         and node.func.attr in {"append", "extend", "insert", "pop", "update", "add", "discard", "setdefault"}
                                     )
@@ -9114,7 +9373,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                             "render_spec", "input_identity", "approx_tokens", "document", "raw",
                             "identity", "paths", "to_dict", "merge_imports", "flush", "fileno", "discard"}:
                         continue
-                    if _is_real_repo_module(q) and not formal and q is not None and str(q).endswith(_audit_evidence_modules) \
+                    if _is_real_repo_module(q) and not formal and _is_audit_evidence_module(q) \
                             and isinstance(node.func, ast.Attribute) \
                             and node.func.attr in {"append", "extend", "insert", "update", "add", "pop", "discard", "setdefault", "sort", "clear", "remove"}:
                         continue
@@ -9420,7 +9679,7 @@ def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path
                             continue
                         if q is not None and str(q).endswith("schema_snapshot.py") and isinstance(node.func, ast.Name) and node.func.id == "read":
                             continue
-                        if q is not None and str(q).endswith(_audit_evidence_modules):
+                        if _is_audit_evidence_module(q):
                             continue
                     if may_reference(actual, context):
                         receiving.append(actual)
@@ -9939,6 +10198,9 @@ def _eager_annotations(tree):
                    for node in tree.body)
 
 
+_OWN_NODES: dict[tuple[int, bool], tuple] = {}
+
+
 def _own_nodes(fn, *, eager_annotations=True):
     """Executable function-body nodes, including nested definition headers.
 
@@ -9947,10 +10209,15 @@ def _own_nodes(fn, *, eager_annotations=True):
     and class annotations obey the module's postponed-annotation declaration;
     local variable annotations inside functions are never evaluated here.
     """
+    key = (id(fn), bool(eager_annotations))
+    entry = _OWN_NODES.get(key)
+    if entry is not None and entry[0] is fn:
+        return entry[1]
+    out = []
     todo = [(node, False) for node in fn.body]
     while todo:
         node, class_body = todo.pop()
-        yield node
+        out.append(node)
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
             args = node.args
             children = list(args.defaults) + [value for value in args.kw_defaults if value is not None]
@@ -9973,6 +10240,9 @@ def _own_nodes(fn, *, eager_annotations=True):
             todo += [(child, class_body) for child in children]
         else:
             todo += [(child, class_body) for child in ast.iter_child_nodes(node)]
+    res = tuple(out)
+    _OWN_NODES[key] = (fn, res)
+    return res
 
 
 def _file_writes(fn, *, eager_annotations=True) -> list[tuple[ast.AST, ast.AST, ast.Call]]:

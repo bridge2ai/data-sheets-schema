@@ -20,6 +20,23 @@ from data_sheets_schema.cli import cli
 from data_sheets_schema.cli.api import batch_cmd
 
 
+def _isolate_run_lock(test: unittest.TestCase) -> None:
+    """Give each test its own run-lock directory so parallel xdist workers
+    sharing a `--label-prefix` never collide on `data/.run_locks/`."""
+    import tempfile
+    from pathlib import Path
+    from data_sheets_schema import run_lock
+
+    tmp = tempfile.TemporaryDirectory()
+    test.addCleanup(tmp.cleanup)
+    lock_dir = Path(tmp.name)
+    real_path_for = run_lock._path_for
+    patcher = patch("data_sheets_schema.run_lock._path_for",
+                    side_effect=lambda lp, _d=None: real_path_for(lp, lock_dir))
+    patcher.start()
+    test.addCleanup(patcher.stop)
+
+
 class ApiBatchCostValidationTest(unittest.TestCase):
     """CLI option registration and argument validation."""
 
@@ -75,6 +92,9 @@ class ApiBatchCostValidationTest(unittest.TestCase):
 
 class ApiBatchCostStopTest(unittest.TestCase):
     """Stopping behavior between runs when the cumulative cap is met."""
+
+    def setUp(self):
+        _isolate_run_lock(self)
 
     def _dummy_plan(self, spec):
         return {
@@ -305,6 +325,9 @@ if __name__ == "__main__":
 class ApiBatchCostAccountingTest(unittest.TestCase):
     """#5045 review: what the cap counts — this invocation's billed attempts,
     including those of a run that raised, and none of a run's history."""
+
+    def setUp(self):
+        _isolate_run_lock(self)
 
     ROW = {"phase": "full", "input_tokens": 100_000, "output_tokens": 20_000,
            "cache_read": 0, "cache_write": 0}               # $1.00
@@ -649,6 +672,9 @@ class ApiBatchLegacyRowsTest(unittest.TestCase):
     re-invoked completed legacy label adds $0, and only a row that matches
     nothing is counted, with a warning that the count may be over."""
 
+    def setUp(self):
+        _isolate_run_lock(self)
+
     def _invoke(self, recorded, returned):
         import tempfile
         from pathlib import Path
@@ -691,6 +717,9 @@ class ApiBatchLegacyRowsTest(unittest.TestCase):
 class ApiBatchPricingTest(unittest.TestCase):
     """#5062: the cap is priced at one model's posted rates, and a dry run
     shows the cap without inventing an estimate."""
+
+    def setUp(self):
+        _isolate_run_lock(self)
 
     ARGS = ["api", "batch", "--projects", "AI_READI", "--replicates", "1", "--arm", "baseline",
             "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
