@@ -1,0 +1,31 @@
+# Evaluation applicability context for Voice (Voice as a Biomarker of Health)
+# Bridge2AI Data Generation Project: multi-institutional acoustic voice recordings and clinical metadata
+# Format: d4d-evaluation-context-1
+
+human_subjects:
+  value: true
+  evidence: "Voice acquires acoustic voice recordings, speech tasks, and clinical phenotyping from prospective human participants and clinical cohorts."
+
+regulated_access:
+  value: true
+  evidence: "Voice dataset distribution involves human acoustic recordings containing potential biometric voiceprints, requiring controlled credentialed access, participant consent compliance, and DUA governance."
+
+shared_dataset:
+  value: true
+  evidence: "Voice shares standardized acoustic recordings and clinical acoustic metadata with approved research investigators."
+
+data_collection:
+  value: true
+  evidence: "Voice captures structured speech protocols, voice tasks, acoustic telemetry, and comprehensive clinical metadata across participating medical centers."
+
+data_processing:
+  value: true
+  evidence: "Voice audio and clinical data are processed for acoustic feature extraction, audio quality verification, HIPAA de-identification, and metadata structuring."
+
+processing_software:
+  value: true
+  evidence: "Voice employs standardized audio capture applications, acoustic signal processing libraries, and automated quality-control software."
+
+ml_training_dataset:
+  value: true
+  evidence: "Voice dataset is designed to benchmark and train AI models using voice and speech as digital biomarkers for clinical diagnosis and monitoring."

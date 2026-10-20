@@ -1,0 +1,31 @@
+# Evaluation applicability template for Clinical and Human Subjects Studies
+# Template for clinical trials, cohort studies, EHR, and human participant datasets
+# Format: d4d-evaluation-context-1
+
+human_subjects:
+  value: true
+  evidence: "Study involves prospective or retrospective human research participants, patient cohorts, or human-derived clinical specimens."
+
+regulated_access:
+  value: true
+  evidence: "Access requires credentialing, institutional compliance, Data Access Committee (DAC) review, or signed Data Use Agreements (DUA)."
+
+shared_dataset:
+  value: true
+  evidence: "Dataset is deposited and shared with qualified investigators under regulated access mechanisms."
+
+data_collection:
+  value: true
+  evidence: "Data is acquired through clinical observations, biometric sensors, patient surveys, or electronic health records."
+
+data_processing:
+  value: true
+  evidence: "Data is cleaned, standardized, harmonized, or de-identified prior to dissemination."
+
+processing_software:
+  value: true
+  evidence: "Processing utilizes documented clinical informatics or data harmonization software tools."
+
+ml_training_dataset:
+  value: true
+  evidence: "Data is prepared for development, validation, or benchmarking of biomedical and clinical AI/ML models."

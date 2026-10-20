@@ -28,6 +28,8 @@ from data_sheets_schema.run_telemetry import (
     RATE_CACHE_WRITE,
     RATE_INPUT,
     RATE_OUTPUT,
+    RATES_MODEL,
+    rates_cover,
 )
 
 # Phase output caps (tokens)
@@ -347,6 +349,22 @@ def compute_readout(
     condition = identity.get("condition")
 
     rows = ledger_data.get("rows") or []
+    candidate_models: list[str] = []
+    if isinstance(identity.get("model"), str) and identity["model"].strip():
+        candidate_models.append(identity["model"].strip())
+    if registration and isinstance(registration.get("runtime"), Mapping):
+        reg_model = registration["runtime"].get("model")
+        if isinstance(reg_model, str) and reg_model.strip():
+            candidate_models.append(reg_model.strip())
+    for row in rows:
+        if isinstance(row, Mapping) and isinstance(row.get("model"), str) and row["model"].strip():
+            candidate_models.append(row["model"].strip())
+    for model_name in candidate_models:
+        if not rates_cover(model_name):
+            raise ValueError(
+                f"Dollar readout is priced at {RATES_MODEL} rates, which do not cover model {model_name!r}"
+            )
+
     settled_cost = price_settled_rows(rows)
     settled_call_count = len(rows)
 
@@ -356,6 +374,20 @@ def compute_readout(
     pending_unknown = False
 
     if pending_raw and isinstance(pending_raw, Mapping) and pending_raw.get("phase"):
+        pending_model = pending_raw.get("model")
+        if isinstance(pending_model, str) and pending_model.strip() and not rates_cover(pending_model.strip()):
+            raise ValueError(
+                f"Dollar readout is priced at {RATES_MODEL} rates, which do not cover pending model {pending_model!r}"
+            )
+        pending_ident = pending_raw.get("run_identity")
+        if isinstance(pending_ident, Mapping):
+            for key in ("project", "label", "method", "condition"):
+                expected_val = identity.get(key)
+                actual_val = pending_ident.get(key)
+                if expected_val and actual_val and expected_val != actual_val:
+                    raise ValueError(
+                        f"Pending call run_identity[{key!r}]={actual_val!r} conflicts with ledger identity {expected_val!r}"
+                    )
         pending_info = price_pending_call(
             pending_raw,
             project=resolved_project,

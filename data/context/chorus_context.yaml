@@ -1,0 +1,31 @@
+# Evaluation applicability context for CHORUS
+# Bridge2AI Data Generation Project: multimodal intensive care unit (ICU) clinical benchmark data
+# Format: d4d-evaluation-context-1
+
+human_subjects:
+  value: true
+  evidence: "CHORUS acquires multimodal clinical data from critically ill intensive care unit (ICU) patients across multiple hospital healthcare systems."
+
+regulated_access:
+  value: true
+  evidence: "CHORUS data distribution is governed via PhysioNet credentialed access requiring human subjects research training (e.g., CITI), Data Use Agreement (DUA) execution, and institutional credentialing."
+
+shared_dataset:
+  value: true
+  evidence: "CHORUS disseminates curated ICU benchmark datasets through credentialed data repository infrastructure."
+
+data_collection:
+  value: true
+  evidence: "CHORUS collects high-frequency physiological waveforms, bedside monitor data, EHR entries, clinical narratives, and medical imaging from hospital ICU bedsides."
+
+data_processing:
+  value: true
+  evidence: "CHORUS clinical data undergoes extensive de-identification (HIPAA Safe Harbor), waveform time-alignment, unit conversion, and multimodal feature synchronization."
+
+processing_software:
+  value: true
+  evidence: "CHORUS develops and utilizes open reproducible preprocessing, waveform extraction, and clinical data harmonization code pipelines."
+
+ml_training_dataset:
+  value: true
+  evidence: "CHORUS datasets are engineered specifically to train and validate AI/ML algorithms for acute illness detection and critical care decision support."

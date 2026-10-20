@@ -22,6 +22,7 @@ from scripts.build_api_registrations import (
     build_registration,
     build_roster,
     cli,
+    parse_coverage_floor,
     validate_registration_document,
     validate_roster_file,
 )
@@ -365,3 +366,83 @@ def test_cli_error_validation(tmp_path: Path) -> None:
     )
     assert res_multi_ctx.exit_code != 0
     assert "--context can only be used with a single project" in res_multi_ctx.output
+
+
+def test_parse_coverage_floor() -> None:
+    """Test coverage_floor parsing for pending, NUM/DEN, and decimal inputs."""
+    assert parse_coverage_floor(None) == {"state": "pending", "mode": "diagnostic_pilot"}
+    assert parse_coverage_floor("pending") == {"state": "pending", "mode": "diagnostic_pilot"}
+    assert parse_coverage_floor("13/20") == {"state": "registered", "numerator": 13, "denominator": 20}
+    assert parse_coverage_floor("0.65") == {"state": "registered", "numerator": 13, "denominator": 20}
+
+    with pytest.raises(ValueError, match="require 0 < numerator <= denominator <= 1000"):
+        parse_coverage_floor("25/20")
+    with pytest.raises(ValueError, match="must be in \\(0, 1\\]"):
+        parse_coverage_floor("0.0")
+
+
+def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
+    """Build registration for KIDS_FIRST with neutral profile and registered coverage floor (Step A19-reg)."""
+    reg_path = tmp_path / "reg_kids_first.json"
+    reg = build_registration(
+        project="KIDS_FIRST",
+        label="2026-10-kfa_claude-opus-5-api-generic-v10_rep1",
+        registration_path=reg_path,
+        coverage_floor="13/20",
+        write_to_disk=True,
+    )
+    assert reg_path.is_file()
+    assert reg["inputs"]["project"] == "KIDS_FIRST"
+    assert reg["inputs"]["bundle"]["path"].endswith("KIDS_FIRST_preprocessed.txt")
+    assert reg["inputs"]["chunk_manifest"]["path"].endswith("kids_first/chunks.yaml")
+    assert reg["inputs"]["profile"]["name"] == "neutral"
+    assert reg["inputs"]["profile"]["vocabulary"] is None
+    assert reg["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
+    validate_registration_document(reg)
+
+
+def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
+    """CLI --label-prefix --replicates 3 --coverage-floor 13/20 builds a valid 3-row production roster."""
+    runner = CliRunner()
+    out_dir = tmp_path / "prod_registrations"
+    prefix = "2026-10-pda_claude-opus-5-api-generic-v10"
+
+    res = runner.invoke(
+        cli,
+        [
+            "-p", "CHORUS",
+            "--label-prefix", prefix,
+            "--replicates", "3",
+            "--coverage-floor", "13/20",
+            "--max-paths", "144",
+            "--max-workers", "18",
+            "--max-calls", "20",
+            "-o", str(out_dir),
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    roster_file = out_dir / f"roster_{prefix}.json"
+    assert roster_file.is_file()
+
+    expected_pairs = [("CHORUS", f"{prefix}_rep{i}") for i in (1, 2, 3)]
+    validated = validate_roster_file(roster_file, expected_pairs)
+    assert len(validated["registrations"]) == 3
+
+    reg1 = json.loads((out_dir / f"registration_chorus_{prefix}_rep1.json").read_text(encoding="utf-8"))
+    assert reg1["audit_limits"]["max_paths"] == 144
+    assert reg1["audit_limits"]["max_workers"] == 18
+    assert reg1["audit_limits"]["max_calls"] == 20
+    assert reg1["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
+
+    # Check mode succeeds for multi-replicate roster
+    check_res = runner.invoke(
+        cli,
+        [
+            "-p", "CHORUS",
+            "--label-prefix", prefix,
+            "--replicates", "3",
+            "-o", str(out_dir),
+            "--check",
+        ],
+    )
+    assert check_res.exit_code == 0, check_res.output

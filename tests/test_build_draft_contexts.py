@@ -18,11 +18,13 @@ from jsonschema import Draft202012Validator
 from data_sheets_schema import audit_omissions as omissions
 from data_sheets_schema import shared_generation as sg
 from scripts.build_draft_contexts import (
+    ALL_CAMPAIGN_PROJECTS,
+    ALL_GC_PROJECTS,
     DEFAULT_MANIFEST_PATH,
     DEFAULT_OUT_DIR,
-    SCHEMA_PATH,
-    ALL_GC_PROJECTS,
     DEFAULT_PROJECTS,
+    KIDS_FIRST_MANIFEST_PATH,
+    SCHEMA_PATH,
     build_draft_scope_context,
     generate_draft_contexts,
     load_context_schema,
@@ -170,3 +172,26 @@ def test_build_registration_finds_draft_contexts(tmp_path):
     # Context should resolve to the newly created data/omission_contexts/chorus_omission_context.json
     expected_context_path = str(DEFAULT_OUT_DIR / "chorus_omission_context.json")
     assert reg["inputs"]["context"]["path"] == expected_context_path
+
+
+def test_kids_first_draft_context_neutral_profile(context_schema):
+    """Test KIDS_FIRST draft context uses neutral profile with empty vocabulary and valid source_policy."""
+    import yaml
+
+    kf_data = yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
+    doc = build_draft_scope_context("KIDS_FIRST", kf_data)
+
+    assert doc["format"] == "omission_context_v1"
+    assert doc["root_class"] == "Dataset"
+    assert doc["vocabulary"] == {}
+    assert len(doc["scopes"]) == 1
+    assert doc["scopes"][0]["owner"] == ""
+    assert "Kids First Data Resource" in doc["scopes"][0]["referent"]
+    assert doc["scopes"][0]["release"] == "https://kidsfirstdrc.org/"
+    assert len(doc["source_policy"]["priority"]) >= 3
+    assert "publication abstract" in doc["source_policy"]["priority"]
+
+    errors = list(Draft202012Validator(context_schema).iter_errors(doc))
+    assert not errors, f"KIDS_FIRST context validation errors: {errors}"
+    assert omissions._shape(doc, context_schema) == []
+    assert "KIDS_FIRST" in ALL_CAMPAIGN_PROJECTS

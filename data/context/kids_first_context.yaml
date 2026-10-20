@@ -1,0 +1,31 @@
+# Evaluation applicability context for KIDS_FIRST (Gabriella Miller Kids First Pediatric Research Program)
+# External Clinical/Genomic Holdout: pediatric cancer and structural birth defects cohort
+# Format: d4d-evaluation-context-1
+
+human_subjects:
+  value: true
+  evidence: "KIDS_FIRST aggregates genomic sequencing and clinical phenotypic data from pediatric patients and family trios across childhood cancer and structural birth defect cohorts."
+
+regulated_access:
+  value: true
+  evidence: "Individual-level genomic and clinical data require controlled dbGaP / Cavatica authorized access and Data Use Certification (DUC) compliance."
+
+shared_dataset:
+  value: true
+  evidence: "KIDS_FIRST disseminates harmonized clinical and genomic datasets through the Kids First Data Resource Portal and Cavatica."
+
+data_collection:
+  value: true
+  evidence: "KIDS_FIRST collects whole-genome sequencing, RNA-seq, and HPO/MONDO/NCIt harmonized clinical phenotypes from participating pediatric cohorts."
+
+data_processing:
+  value: true
+  evidence: "KIDS_FIRST applies standardized bioinformatics alignment, variant calling, and clinical phenotype harmonization pipelines."
+
+processing_software:
+  value: true
+  evidence: "KIDS_FIRST publishes and executes CWL/Cavatica genomics workflows and FHIR/phenotype harmonization tools."
+
+ml_training_dataset:
+  value: true
+  evidence: "KIDS_FIRST harmonized multimodal genomic and phenotypic datasets support machine learning and discovery analytics across pediatric cohorts."

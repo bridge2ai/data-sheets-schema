@@ -39,6 +39,9 @@ if (ROOT / "src").is_dir() and str(ROOT / "src") not in sys.path:
 from data_sheets_schema import shared_generation as sg
 
 DEFAULT_MANIFEST_PATH = ROOT / "data" / "preprocessed" / "source_manifest.yaml"
+KIDS_FIRST_MANIFEST_PATH = (
+    ROOT / "notes" / "matched_cborg_2026-09-13" / "kids_first" / "manifest.yaml"
+)
 DEFAULT_OUT_DIR = ROOT / "data" / "omission_contexts"
 SCHEMA_PATH = (
     ROOT / "src" / "data_sheets_schema" / "omission_inventory_v1" / "context.schema.json"
@@ -50,6 +53,7 @@ DEFAULT_VOCABULARIES_PATH = (
 # Standard Grand Challenge projects declared in source_manifest.yaml
 DEFAULT_PROJECTS = ["CHORUS", "AI_READI"]
 ALL_GC_PROJECTS = ["CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC"]
+ALL_CAMPAIGN_PROJECTS = [*ALL_GC_PROJECTS, "KIDS_FIRST"]
 
 FORBIDDEN_SUBSTRINGS = [
     "diagnosis",
@@ -67,25 +71,45 @@ def load_context_schema() -> dict[str, Any]:
     return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 
 
-def extract_source_policy(manifest_data: dict[str, Any]) -> dict[str, Any]:
-    """Extract tier priority hierarchy from source_manifest.yaml."""
+def extract_source_policy(
+    manifest_data: dict[str, Any],
+    project: str | None = None,
+) -> dict[str, Any]:
+    """Extract tier priority hierarchy from source_manifest.yaml or project manifest."""
     sp = manifest_data.get("source_priority", {})
     if isinstance(sp, dict) and sp:
         priority_list = [
             ", ".join(sp[k]) if isinstance(sp[k], list) else str(sp[k])
             for k in sorted(sp.keys())
         ]
+        basis = "Declared source_manifest.yaml tier hierarchy."
     else:
-        priority_list = [
-            "RO-Crate, structured metadata, data resource",
-            "documentation, license, DUA, IRB",
-            "publication, preprint, white paper",
-            "NIH project page, tutorial",
-            "historical data release, historical documentation",
-        ]
+        # Check if project declares source_type entries under projects.<P>.sources
+        declared_types: list[str] = []
+        projects_block = manifest_data.get("projects", {})
+        if project and isinstance(projects_block, dict):
+            entry = projects_block.get(project) or projects_block.get(project.upper())
+            sources = entry.get("sources", []) if isinstance(entry, dict) else (entry if isinstance(entry, list) else [])
+            for src in sources:
+                if isinstance(src, dict):
+                    st = src.get("source_type")
+                    if isinstance(st, str) and st.strip() and st.strip() not in declared_types:
+                        declared_types.append(st.strip())
+        if declared_types:
+            priority_list = declared_types
+            basis = "Declared source types from project manifest (no tier hierarchy declared)."
+        else:
+            priority_list = [
+                "RO-Crate, structured metadata, data resource",
+                "documentation, license, DUA, IRB",
+                "publication, preprint, white paper",
+                "NIH project page, tutorial",
+                "historical data release, historical documentation",
+            ]
+            basis = "Declared source_manifest.yaml tier hierarchy."
     return {
         "priority": priority_list,
-        "basis": "Declared source_manifest.yaml tier hierarchy.",
+        "basis": basis,
     }
 
 
@@ -121,10 +145,11 @@ def build_draft_scope_context(
     elif norm_project.upper() == "CHORUS":
         referent_id = None
 
-    source_policy = extract_source_policy(manifest_data)
+    source_policy = extract_source_policy(manifest_data, project=norm_project)
 
     vocabulary: dict[str, Any] = {}
-    if DEFAULT_VOCABULARIES_PATH.is_file():
+    declared_prof = str(manifest_data.get("profile") or "").strip().lower()
+    if declared_prof != "neutral" and DEFAULT_VOCABULARIES_PATH.is_file():
         vocab_data = yaml.safe_load(DEFAULT_VOCABULARIES_PATH.read_text(encoding="utf-8")) or {}
         vocabulary = vocab_data.get("vocabularies", {})
 
@@ -189,7 +214,18 @@ def generate_draft_contexts(
         out_dir.mkdir(parents=True, exist_ok=True)
 
     for proj in projects:
-        doc = build_draft_scope_context(proj, manifest_data)
+        proj_manifest_data = manifest_data
+        scope_map = manifest_data.get("scope", {}) if isinstance(manifest_data, dict) else {}
+        if (
+            proj.strip().upper() == "KIDS_FIRST"
+            and not any(k.upper() == "KIDS_FIRST" for k in (scope_map or {}))
+            and KIDS_FIRST_MANIFEST_PATH.is_file()
+        ):
+            proj_manifest_data = (
+                yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
+            )
+
+        doc = build_draft_scope_context(proj, proj_manifest_data)
         out_file = out_dir / f"{proj.lower()}_omission_context.json"
         out_paths[proj] = out_file
 
@@ -223,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--all",
         action="store_true",
-        help="Generate draft contexts for all declared Grand Challenge projects",
+        help="Generate draft contexts for all declared campaign projects (5 GC + KIDS_FIRST)",
     )
     parser.add_argument(
         "--source-manifest",
@@ -246,7 +282,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.all:
-        selected_projects = ALL_GC_PROJECTS
+        selected_projects = ALL_CAMPAIGN_PROJECTS
     elif args.projects:
         selected_projects = [p.strip() for p in args.projects.split(",") if p.strip()]
     else:

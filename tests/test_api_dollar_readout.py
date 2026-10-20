@@ -342,3 +342,35 @@ def test_cli_runner_trigger_exit_code(tmp_path):
     res2 = runner.invoke(cli_main, ["--ledger", str(ledger_file), "--cap", "8.0"])
     assert res2.exit_code == 2
     assert "CAP EXCEEDED" in res2.output
+
+
+def test_unpriced_model_raises_value_error():
+    """Ledger or registration naming a model outside opus-5 pricing raises ValueError."""
+    ledger = {
+        "version": 1,
+        "identity": {
+            "project": "CHORUS",
+            "label": "test_unpriced",
+            "model": "claude-sonnet-4",
+        },
+        "rows": [{"output_tokens": 1000}],
+    }
+    with pytest.raises(ValueError, match="do not cover model"):
+        compute_readout(ledger)
+
+
+def test_pending_call_foreign_identity_raises_value_error():
+    """Pending call with mismatched run_identity raises ValueError."""
+    ledger = {
+        "version": 1,
+        "identity": {"project": "CHORUS", "label": "lbl_a", "method": "claudecode_api"},
+        "rows": [],
+        "pending_call": {
+            "phase": "full",
+            "attempt": 1,
+            "run_identity": {"project": "AI_READI", "label": "lbl_b", "method": "claudecode_api"},
+        },
+    }
+    with pytest.raises(ValueError, match="conflicts with ledger identity"):
+        compute_readout(ledger)
+

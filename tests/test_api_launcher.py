@@ -163,7 +163,41 @@ class TestCommandValidation:
             validate_command(["bash", "-c", "echo hi"])
 
     def test_accept_api_batch(self):
-        validate_command(["d4d", "api", "batch", "--manifest", "data/preprocessed/source_manifest.yaml"])
+        validate_command([
+            "d4d", "api", "batch",
+            "--manifest", "data/preprocessed/source_manifest.yaml",
+            "--max-cost-dollars", "15.0",
+        ])
+
+    def test_reject_api_batch_without_max_cost_dollars(self):
+        with pytest.raises(LauncherError, match="requires '--max-cost-dollars"):
+            validate_command(["d4d", "api", "batch", "--manifest", "data/preprocessed/source_manifest.yaml"])
+
+    def test_accept_api_batch_dry_run_without_max_cost_dollars(self):
+        validate_command(
+            ["d4d", "api", "batch", "--manifest", "data/preprocessed/source_manifest.yaml"],
+            dry_run=True,
+        )
+        validate_command(
+            ["d4d", "api", "batch", "--dry-run", "--manifest", "data/preprocessed/source_manifest.yaml"],
+            dry_run=False,
+        )
+
+    def test_reject_skip_credential_check_without_dry_run(self):
+        with pytest.raises(LauncherError, match="--skip-credential-check is only permitted"):
+            validate_command([
+                "d4d", "api", "batch",
+                "--skip-credential-check",
+                "--max-cost-dollars", "15.0",
+            ])
+        validate_command(
+            ["d4d", "api", "batch", "--skip-credential-check", "--dry-run"],
+            dry_run=False,
+        )
+
+    def test_reject_unknown_api_subcommand(self):
+        with pytest.raises(LauncherError, match="API subcommand 'unknown-sub' is not allowed"):
+            validate_command(["d4d", "api", "unknown-sub"])
 
     def test_accept_other_gates(self):
         validate_command(["d4d", "api", "prompts", "check", "--strict"])

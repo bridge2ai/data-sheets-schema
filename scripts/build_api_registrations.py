@@ -54,6 +54,9 @@ from data_sheets_schema.resources import resource_path
 from data_sheets_schema.schema_snapshot import capture_schema
 
 DEFAULT_PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE")
+KIDS_FIRST_MANIFEST_PATH = (
+    ROOT / "notes" / "matched_cborg_2026-09-13" / "kids_first" / "manifest.yaml"
+)
 DEFAULT_CONDITION = "generic_v10"
 DEFAULT_ID_PREFIX = "generic-v10"
 DEFAULT_RECEIPT_ID = "generic-v10-receipt"
@@ -99,6 +102,53 @@ DEFAULT_AUDIT_TRANSPORT: dict[str, int] = {
 }
 
 
+def parse_coverage_floor(value: str | dict[str, Any] | None) -> dict[str, Any]:
+    """Parse a coverage floor specification into receipt_completion_registration_v2 format.
+
+    Accepts:
+      - None, "pending", or "diagnostic_pilot" -> {"state": "pending", "mode": "diagnostic_pilot"}
+      - "NUM/DEN" (e.g. "13/20") -> {"state": "registered", "numerator": NUM, "denominator": DEN}
+      - Decimal multiple of 0.05 in (0, 1] (e.g. "0.65") -> {"state": "registered", "numerator": 13, "denominator": 20}
+      - An existing dict.
+    """
+    if value is None:
+        return {"state": "pending", "mode": "diagnostic_pilot"}
+    if isinstance(value, dict):
+        return copy.deepcopy(value)
+    text = str(value).strip()
+    if text.lower() in ("pending", "diagnostic_pilot"):
+        return {"state": "pending", "mode": "diagnostic_pilot"}
+    if "/" in text:
+        parts = text.split("/", 1)
+        try:
+            num = int(parts[0].strip())
+            den = int(parts[1].strip())
+        except ValueError as exc:
+            raise ValueError(
+                f"invalid coverage_floor {value!r}; expected 'pending' or 'NUM/DEN'"
+            ) from exc
+        if not (0 < num <= den <= 1000):
+            raise ValueError(
+                f"invalid coverage_floor {value!r}; require 0 < numerator <= denominator <= 1000"
+            )
+        return {"state": "registered", "numerator": num, "denominator": den}
+    try:
+        dec = float(text)
+    except ValueError as exc:
+        raise ValueError(
+            f"invalid coverage_floor {value!r}; expected 'pending', 'NUM/DEN', or decimal in (0, 1]"
+        ) from exc
+    if not (0.0 < dec <= 1.0):
+        raise ValueError(f"coverage_floor decimal {value!r} must be in (0, 1]")
+    num_20 = round(dec * 20)
+    if abs(num_20 / 20.0 - dec) < 1e-9 and 0 < num_20 <= 20:
+        return {"state": "registered", "numerator": num_20, "denominator": 20}
+    num_1000 = round(dec * 1000)
+    if not (0 < num_1000 <= 1000):
+        raise ValueError(f"invalid coverage_floor {value!r}")
+    return {"state": "registered", "numerator": num_1000, "denominator": 1000}
+
+
 def build_draft_context(
     project: str,
     source_manifest_path: Path | str | None = None,
@@ -121,12 +171,15 @@ def build_draft_context(
         "historical data release, historical documentation",
     ]
     source_policy_basis = "Declared source_manifest.yaml tier hierarchy."
+    manifest_profile: str | None = None
 
     if source_manifest_path:
         sm = Path(source_manifest_path)
         if sm.is_file():
             try:
                 data = yaml.safe_load(sm.read_text(encoding="utf-8")) or {}
+                if isinstance(data.get("profile"), str):
+                    manifest_profile = data["profile"].strip()
                 scope_map = data.get("scope", {})
                 if isinstance(scope_map, dict) and project in scope_map:
                     entry = scope_map[project]
@@ -143,11 +196,25 @@ def build_draft_context(
                         ", ".join(str(x) for x in sp[k]) if isinstance(sp[k], list) else str(sp[k])
                         for k in sorted(sp.keys())
                     ]
+                elif isinstance(data.get("projects"), dict) and project in data["projects"]:
+                    proj_entry = data["projects"][project]
+                    sources = proj_entry.get("sources", []) if isinstance(proj_entry, dict) else []
+                    seen_types: list[str] = []
+                    for src in sources:
+                        if isinstance(src, dict):
+                            st = str(src.get("source_type") or "").strip()
+                            if st and st not in seen_types:
+                                seen_types.append(st)
+                    if seen_types:
+                        source_policy_priority = seen_types
+                        source_policy_basis = (
+                            "Declared source types from project manifest (no tier hierarchy declared)."
+                        )
             except Exception:
                 pass
 
     vocabulary: dict[str, Any] = {}
-    if DEFAULT_VOCABULARIES_PATH.is_file():
+    if manifest_profile != "neutral" and DEFAULT_VOCABULARIES_PATH.is_file():
         vocab_data = yaml.safe_load(DEFAULT_VOCABULARIES_PATH.read_text(encoding="utf-8")) or {}
         vocabulary = vocab_data.get("vocabularies", {})
 
@@ -191,6 +258,7 @@ def build_registration(
     bundle_path: Path | str | None = None,
     chunk_manifest_path: Path | str | None = None,
     profile_name: str | None = None,
+    coverage_floor: str | dict[str, Any] | None = None,
     audit_limits: dict[str, Any] | None = None,
     receipt_limits: dict[str, Any] | None = None,
     synthesize_draft_context: bool = False,
@@ -206,6 +274,7 @@ def build_registration(
     arm_display, method, pattern, _ = ARMS[arm]
 
     # Resolve manifest
+    default_study_manifest = (ROOT / "data" / "preprocessed" / "source_manifest.yaml").resolve()
     sm_resolved: Path | None = None
     if source_manifest_path is not None:
         raw_sm = Path(source_manifest_path)
@@ -219,12 +288,20 @@ def build_registration(
         else:
             raise FileNotFoundError(f"source manifest not found: {source_manifest_path}")
     else:
-        # Check standard location
-        candidate = (ROOT / "data" / "preprocessed" / "source_manifest.yaml").resolve()
-        if candidate.is_file():
-            sm_resolved = candidate
+        if project.upper() == "KIDS_FIRST" and KIDS_FIRST_MANIFEST_PATH.is_file():
+            sm_resolved = KIDS_FIRST_MANIFEST_PATH.resolve()
+        elif default_study_manifest.is_file():
+            sm_resolved = default_study_manifest
 
     reg_registry = load_registry(sm_resolved)
+    if (
+        not reg_registry.declares(project)
+        and project.upper() == "KIDS_FIRST"
+        and sm_resolved == default_study_manifest
+        and KIDS_FIRST_MANIFEST_PATH.is_file()
+    ):
+        sm_resolved = KIDS_FIRST_MANIFEST_PATH.resolve()
+        reg_registry = load_registry(sm_resolved)
 
     # Resolve bundle
     if bundle_path is not None:
@@ -243,6 +320,10 @@ def build_registration(
         resolved_chunks = Path(chunk_manifest_path).resolve()
     else:
         resolved_chunks = manifest_for(resolved_bundle, source_manifest=sm_resolved).resolve()
+        if not resolved_chunks.is_file():
+            alt_chunks = (resolved_bundle.parent / "chunks.yaml").resolve()
+            if alt_chunks.is_file():
+                resolved_chunks = alt_chunks
 
     if not resolved_chunks.is_file():
         raise FileNotFoundError(f"chunk manifest not found: {resolved_chunks}")
@@ -312,7 +393,7 @@ def build_registration(
     if profile_name is not None:
         prof = profile_named(profile_name)
         prof_name = prof.name
-        prof_basis = "stated by caller"
+        prof_basis = "stated by the caller"
     else:
         sel = select_profile(sm_resolved)
         prof = profile_named(sel.name)
@@ -353,6 +434,12 @@ def build_registration(
         active_audit_limits.update(audit_limits)
 
     active_receipt = copy.deepcopy(DEFAULT_RECEIPT_LIMITS)
+    if coverage_floor is not None:
+        active_receipt["coverage_floor"] = parse_coverage_floor(coverage_floor)
+    if "context_limit_tokens" in (audit_limits or {}) and "context_limit_tokens" not in (receipt_limits or {}):
+        active_receipt["context_limit_tokens"] = active_audit_limits["context_limit_tokens"]
+    if "context_limit_basis" in (audit_limits or {}) and "context_limit_basis" not in (receipt_limits or {}):
+        active_receipt["context_limit_basis"] = active_audit_limits["context_limit_basis"]
     if receipt_limits:
         active_receipt.update(receipt_limits)
     active_receipt["runtime_policy_sha256"] = rc.policy_identity(version=2)["sha256"]
@@ -491,9 +578,20 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     help=f"Build registrations for all four study projects ({', '.join(DEFAULT_PROJECTS)}).",
 )
 @click.option(
-    "--label", "-l",
-    required=True,
-    help="Replicate / run label (e.g. 2026-10-DDa_claude-opus-5-api-generic-v10_rep1).",
+    "--label", "-l", "labels",
+    multiple=True,
+    help="Replicate / run label(s) (e.g. 2026-10-DDa_claude-opus-5-api-generic-v10_rep1).",
+)
+@click.option(
+    "--label-prefix",
+    help="Label prefix for replicate fan-out (e.g. 2026-10-DDa_claude-opus-5-api-generic-v10).",
+)
+@click.option(
+    "--replicates",
+    type=int,
+    default=1,
+    show_default=True,
+    help="Number of replicates when --label-prefix is used (generates <label-prefix>_rep1..N).",
 )
 @click.option(
     "--arm", "-a",
@@ -512,7 +610,7 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
 @click.option(
     "--roster-path", "-r",
     type=click.Path(path_type=Path),
-    help="Path to write batch roster JSON file. Defaults to <output-dir>/roster_<label>.json.",
+    help="Path to write batch roster JSON file. Defaults to <output-dir>/roster_<label_or_prefix>.json.",
 )
 @click.option(
     "--context", "-c", "context_file",
@@ -530,6 +628,85 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     default=Path("data/preprocessed/source_manifest.yaml"),
     show_default=True,
     help="Path to source_manifest.yaml.",
+)
+@click.option(
+    "--bundle",
+    type=click.Path(path_type=Path),
+    help="Explicit bundle path override (for single project).",
+)
+@click.option(
+    "--chunk-manifest",
+    type=click.Path(path_type=Path),
+    help="Explicit chunk manifest path override (for single project).",
+)
+@click.option(
+    "--profile", "profile_name",
+    help="Explicit profile name (e.g. bridge2ai or neutral).",
+)
+@click.option(
+    "--coverage-floor",
+    default="pending",
+    show_default=True,
+    help="Receipt coverage floor: 'pending' or 'NUM/DEN' (e.g. '13/20') or decimal in (0, 1] (e.g. '0.65').",
+)
+@click.option(
+    "--max-paths",
+    type=int,
+    help="Override audit_limits.max_paths.",
+)
+@click.option(
+    "--max-workers",
+    type=int,
+    help="Override audit_limits.max_workers.",
+)
+@click.option(
+    "--max-calls",
+    type=int,
+    help="Override audit_limits.max_calls.",
+)
+@click.option(
+    "--max-inventory-bytes",
+    type=int,
+    help="Override audit_limits.max_inventory_bytes.",
+)
+@click.option(
+    "--max-input-tokens-per-call",
+    type=int,
+    help="Override audit_limits.max_input_tokens_per_call.",
+)
+@click.option(
+    "--aggregate-input-tokens",
+    type=int,
+    help="Override audit_limits.aggregate_input_tokens.",
+)
+@click.option(
+    "--aggregate-output-tokens",
+    type=int,
+    help="Override audit_limits.aggregate_output_tokens.",
+)
+@click.option(
+    "--worker-output-tokens",
+    type=int,
+    help="Override audit_limits.worker_output_tokens.",
+)
+@click.option(
+    "--omission-output-tokens",
+    type=int,
+    help="Override audit_limits.omission_output_tokens.",
+)
+@click.option(
+    "--integration-output-tokens",
+    type=int,
+    help="Override audit_limits.integration_output_tokens.",
+)
+@click.option(
+    "--context-limit-tokens",
+    type=int,
+    help="Override audit_limits.context_limit_tokens and receipt.context_limit_tokens.",
+)
+@click.option(
+    "--context-limit-basis",
+    help="Override audit_limits.context_limit_basis and receipt.context_limit_basis.",
 )
 @click.option(
     "--id-prefix",
@@ -555,13 +732,31 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
 def cli(
     projects: tuple[str, ...],
     all_projects: bool,
-    label: str,
+    labels: tuple[str, ...],
+    label_prefix: str | None,
+    replicates: int,
     arm: str,
     output_dir: Path,
     roster_path: Path | None,
     context_file: Path | None,
     context_dir: Path | None,
     source_manifest: Path,
+    bundle: Path | None,
+    chunk_manifest: Path | None,
+    profile_name: str | None,
+    coverage_floor: str,
+    max_paths: int | None,
+    max_workers: int | None,
+    max_calls: int | None,
+    max_inventory_bytes: int | None,
+    max_input_tokens_per_call: int | None,
+    aggregate_input_tokens: int | None,
+    aggregate_output_tokens: int | None,
+    worker_output_tokens: int | None,
+    omission_output_tokens: int | None,
+    integration_output_tokens: int | None,
+    context_limit_tokens: int | None,
+    context_limit_basis: str | None,
     id_prefix: str,
     synthesize_draft_context: bool,
     dry_run: bool,
@@ -580,48 +775,92 @@ def cli(
     else:
         raise click.UsageError("Specify at least one --project or use --all.")
 
+    target_labels: list[str] = []
+    if labels and label_prefix:
+        raise click.UsageError("Specify either --label or --label-prefix, not both.")
+    if label_prefix:
+        if replicates < 1:
+            raise click.UsageError("--replicates must be at least 1.")
+        target_labels = [f"{label_prefix}_rep{i}" for i in range(1, replicates + 1)]
+    elif labels:
+        for raw_label in labels:
+            for item in raw_label.split(","):
+                item = item.strip()
+                if item and item not in target_labels:
+                    target_labels.append(item)
+    else:
+        raise click.UsageError("Specify --label (-l) or --label-prefix.")
+
     if context_file and len(target_projects) > 1:
         raise click.UsageError("--context can only be used with a single project. Use --context-dir for multiple projects.")
+    if (bundle or chunk_manifest) and len(target_projects) > 1:
+        raise click.UsageError("--bundle and --chunk-manifest can only be used with a single project.")
+
+    audit_overrides: dict[str, Any] = {}
+    for key, val in (
+        ("max_paths", max_paths),
+        ("max_workers", max_workers),
+        ("max_calls", max_calls),
+        ("max_inventory_bytes", max_inventory_bytes),
+        ("max_input_tokens_per_call", max_input_tokens_per_call),
+        ("aggregate_input_tokens", aggregate_input_tokens),
+        ("aggregate_output_tokens", aggregate_output_tokens),
+        ("worker_output_tokens", worker_output_tokens),
+        ("omission_output_tokens", omission_output_tokens),
+        ("integration_output_tokens", integration_output_tokens),
+        ("context_limit_tokens", context_limit_tokens),
+        ("context_limit_basis", context_limit_basis),
+    ):
+        if val is not None:
+            audit_overrides[key] = val
 
     out_dir = output_dir.resolve()
-    target_roster_path = (roster_path or (out_dir / f"roster_{label}.json")).resolve()
+    roster_stem = label_prefix or target_labels[0]
+    target_roster_path = (roster_path or (out_dir / f"roster_{roster_stem}.json")).resolve()
 
     if check:
-        click.echo(f"Checking registrations for {target_projects} under {out_dir}...")
+        click.echo(f"Checking registrations for {target_projects} x {target_labels} under {out_dir}...")
         for proj in target_projects:
-            reg_file = out_dir / f"registration_{proj.lower()}_{label}.json"
-            if not reg_file.is_file():
-                raise click.ClickException(f"Missing registration file: {reg_file}")
-            raw = reg_file.read_bytes()
-            sg.parse_registration(raw)
-            click.echo(f"  ✓ {proj}: {reg_file.name}")
+            for lbl in target_labels:
+                reg_file = out_dir / f"registration_{proj.lower()}_{lbl}.json"
+                if not reg_file.is_file():
+                    raise click.ClickException(f"Missing registration file: {reg_file}")
+                raw = reg_file.read_bytes()
+                sg.parse_registration(raw)
+                click.echo(f"  ✓ {proj}: {reg_file.name}")
         if not target_roster_path.is_file():
             raise click.ClickException(f"Missing roster file: {target_roster_path}")
-        pairs = [(p, label) for p in target_projects]
+        pairs = [(p, lbl) for p in target_projects for lbl in target_labels]
         validate_roster_file(target_roster_path, pairs)
         click.echo(f"  ✓ Roster valid: {target_roster_path.name}")
         click.echo("All checks passed.")
         return
 
     registrations: list[dict[str, Any]] = []
-    click.echo(f"Building registrations for {target_projects} (arm: {arm}, label: {label})...")
+    click.echo(f"Building registrations for {target_projects} (arm: {arm}, labels: {target_labels})...")
 
     for proj in target_projects:
-        reg_file = out_dir / f"registration_{proj.lower()}_{label}.json"
-        reg = build_registration(
-            project=proj,
-            label=label,
-            arm=arm,
-            registration_path=reg_file,
-            id_prefix=id_prefix,
-            context_path=context_file,
-            context_dir=context_dir or out_dir,
-            source_manifest_path=source_manifest,
-            synthesize_draft_context=synthesize_draft_context,
-            write_to_disk=not dry_run,
-        )
-        registrations.append(reg)
-        click.echo(f"  ✓ {proj}: registration_id={reg['registration_id']}")
+        for lbl in target_labels:
+            reg_file = out_dir / f"registration_{proj.lower()}_{lbl}.json"
+            reg = build_registration(
+                project=proj,
+                label=lbl,
+                arm=arm,
+                registration_path=reg_file,
+                id_prefix=id_prefix,
+                context_path=context_file,
+                context_dir=context_dir or out_dir,
+                source_manifest_path=source_manifest,
+                bundle_path=bundle,
+                chunk_manifest_path=chunk_manifest,
+                profile_name=profile_name,
+                coverage_floor=coverage_floor,
+                audit_limits=audit_overrides or None,
+                synthesize_draft_context=synthesize_draft_context,
+                write_to_disk=not dry_run,
+            )
+            registrations.append(reg)
+            click.echo(f"  ✓ {proj}: registration_id={reg['registration_id']}")
 
     roster = build_roster(
         registrations=registrations,

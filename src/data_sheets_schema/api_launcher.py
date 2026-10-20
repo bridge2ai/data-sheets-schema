@@ -43,6 +43,16 @@ ALLOWED_TOP_COMMANDS = frozenset({
     "utils",
 })
 
+ALLOWED_API_SUBCOMMANDS = frozenset({
+    "batch",
+    "plan",
+    "status",
+    "stop",
+    "verdict",
+    "prompts",
+    "check-routing-completed",
+})
+
 
 class LauncherError(Exception):
     """Raised when launcher validation or execution checks fail."""
@@ -139,8 +149,10 @@ def check_cborg_key(env: dict[str, str], allow_missing: bool = False) -> None:
         )
 
 
-def validate_command(cmd_args: Sequence[str]) -> None:
-    """Reject forbidden subcommands ('d4d api run' per D20) and non-allowlisted entry points."""
+def validate_command(cmd_args: Sequence[str], *, dry_run: bool = False) -> None:
+    """Reject forbidden subcommands ('d4d api run' per D20), unbudgeted batch runs, and non-allowlisted entry points."""
+    import math
+
     tokens = list(cmd_args)
     if tokens and tokens[0] == "--":
         tokens = tokens[1:]
@@ -153,7 +165,14 @@ def validate_command(cmd_args: Sequence[str]) -> None:
             f"Command entry point {first!r} is not allowed; must be one of {sorted(ALLOWED_TOP_COMMANDS)}."
         )
 
-    # Extract non-flag arguments
+    is_dry = dry_run or ("--dry-run" in tokens)
+    if any(arg == "--skip-credential-check" or arg.startswith("--skip-credential-check=") for arg in tokens):
+        if not is_dry:
+            raise LauncherError(
+                "--skip-credential-check is only permitted when --dry-run is active."
+            )
+
+    # Extract non-flag arguments (skipping values attached to known value-taking options)
     words = [arg for arg in tokens if not arg.startswith("-")]
     for i in range(len(words) - 1):
         if words[i] == "api" and words[i + 1] == "run":
@@ -169,6 +188,53 @@ def validate_command(cmd_args: Sequence[str]) -> None:
                 raise LauncherError(
                     "Subcommand 'd4d api run' is forbidden by D20; use 'd4d api batch' instead."
                 )
+
+    # Identify api subcommand if present
+    api_subcmd: str | None = None
+    if first == "api" and len(words) >= 2:
+        api_subcmd = words[1]
+    elif first == "d4d":
+        for i in range(len(tokens) - 1):
+            if tokens[i] == "api":
+                for nxt in tokens[i + 1:]:
+                    if not nxt.startswith("-"):
+                        api_subcmd = nxt
+                        break
+                break
+
+    if api_subcmd is not None:
+        if api_subcmd == "run":
+            raise LauncherError(
+                "Subcommand 'd4d api run' is forbidden by D20; use 'd4d api batch' instead."
+            )
+        if api_subcmd not in ALLOWED_API_SUBCOMMANDS:
+            raise LauncherError(
+                f"API subcommand {api_subcmd!r} is not allowed; must be one of {sorted(ALLOWED_API_SUBCOMMANDS)}."
+            )
+
+    if api_subcmd == "batch" and not is_dry:
+        cap_raw: str | None = None
+        for idx, tok in enumerate(tokens):
+            if tok == "--max-cost-dollars" and idx + 1 < len(tokens):
+                cap_raw = tokens[idx + 1]
+                break
+            if tok.startswith("--max-cost-dollars="):
+                cap_raw = tok.split("=", 1)[1]
+                break
+        if cap_raw is None:
+            raise LauncherError(
+                "Live 'd4d api batch' launch requires '--max-cost-dollars <positive_amount>'."
+            )
+        try:
+            cap_val = float(cap_raw)
+        except ValueError as exc:
+            raise LauncherError(
+                f"--max-cost-dollars value {cap_raw!r} must be a positive finite number."
+            ) from exc
+        if not math.isfinite(cap_val) or cap_val <= 0:
+            raise LauncherError(
+                f"--max-cost-dollars value {cap_raw!r} must be positive and finite."
+            )
 
 
 def find_worktree_root(worktree_arg: str | Path | None = None) -> Path:
@@ -352,7 +418,7 @@ def launch(
             "or use --check-only."
         )
 
-    validate_command(tokens)
+    validate_command(tokens, dry_run=dry_run)
     final_cmd = resolve_execution_command(tokens, python_bin, d4d_bin)
 
     if background:
