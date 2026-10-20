@@ -1,9 +1,12 @@
-"""#4537: complete constructor parity with the exact literal 0125 source.
+"""#4537: constructor/public-join parity with the exact literal 0125 source.
 
-Reversing only the reviewed factoring reconstructs the complete original module.
+Reverse the reviewed factoring and the later a462 memoization source changes.
 Its fixed SHA256 is checked before compilation, so the oracle neither requires
 Git/history at test time nor silently follows an unrelated production change.
 The oracle uses the canonical module name; no type-name normalization is needed.
+Only the three explicitly checked derived caches are projected from Trace state.
+This does not assert universal reference() error parity: a462 separately changed
+malformed-message handling outside the constructor/public-join cases below.
 """
 from copy import deepcopy
 from dataclasses import fields, is_dataclass, replace
@@ -30,16 +33,102 @@ def _initialization_from_rows(transcript,control,native,parent,*,policy,runtime)
     """Validate already decoded rows owned by this one caller."""
 '''
 
+CACHE_IMPORTS = '''from data_sheets_schema.native_shared_evidence import (
+    _EVENT_HASH_CACHE,
+    _line_raw,
+    _prefix_lines,
+    event,
+)
+
+_LAST_REF_FRAME: tuple | None = None
+
+
+def _ref_limits_token():
+    return (
+        16 * 1024 * 1024,
+        c.HARD_LIMITS['json_yaml_depth'],
+        c.HARD_LIMITS['json_yaml_nodes_per_document'],
+        c.strict_json,
+        c.canonical,
+        c.sha,
+    )
+'''
+CACHED_REFERENCE = '''def reference(prefix,line,block=None):
+    global _LAST_REF_FRAME
+    raw=_line_raw(prefix,line,'event reference exceeds the actually observed prefix')
+    ltok=_ref_limits_token()
+    hkey=(raw,block,ltok) if type(block) in (int,type(None)) else None
+    if hkey is not None:
+        cached=_EVENT_HASH_CACHE.get(hkey)
+        if cached is not None:
+            return c.EventRef(prefix.stream,line,block,cached[0],cached[1])
+    last=_LAST_REF_FRAME
+    if last is not None and last[0]==raw and last[1]==ltok:
+        raw_sha,frame=last[2],last[3]
+    else:
+        frame=c.strict_json(raw,'observed frame',16*1024*1024)
+        raw_sha=c.sha(raw)
+        _LAST_REF_FRAME=(raw,ltok,raw_sha,frame)
+    value=frame
+    if block is not None:
+        content=value.get('message',{}).get('content') if type(value) is dict and type(value.get('message')) is dict else None
+        if type(block) is not int or type(content) is not list or not 0<=block<len(content):
+            raise ValueError('event block does not identify actual native content')
+        value=content[block]
+    val_sha=c.sha(c.canonical(value))
+    if hkey is not None:
+        if len(_EVENT_HASH_CACHE)>512:
+            _EVENT_HASH_CACHE.clear()
+        _EVENT_HASH_CACHE[hkey]=(raw_sha,val_sha)
+    return c.EventRef(prefix.stream,line,block,raw_sha,val_sha)
+'''
+ORIGINAL_REFERENCE = r'''def reference(prefix,line,block=None):
+    lines=prefix.raw.split(b'\n')
+    if type(line) is not int or not 1<=line<len(lines):
+        raise ValueError('event reference exceeds the actually observed prefix')
+    raw=lines[line-1]+b'\n'
+    value=c.strict_json(raw,'observed frame',16*1024*1024)
+    if block is not None:
+        content=value.get('message',{}).get('content')
+        if type(block) is not int or type(content) is not list or not 0<=block<len(content):
+            raise ValueError('event block does not identify actual native content')
+        value=content[block]
+    return c.EventRef(prefix.stream,line,block,c.sha(raw),c.sha(c.canonical(value)))
+'''
+CACHE_METHODS = {"request": "_req_cache", "admitted": "_adm_cache", "settled": "_set_cache"}
+
 
 @pytest.fixture(scope="module")
 def literal_parent():
     source = Path(observed.__file__).read_text(encoding="utf-8")
-    substitutions = (
+    substitutions = [
+        (CACHE_IMPORTS, "from data_sheets_schema.native_shared_evidence import event\n"),
+        ("    for number,raw in enumerate(_prefix_lines(prefix),1):\n",
+         r"    for number,part in enumerate(prefix.raw.split(b'\n')[:-1],1):" + "\n"
+         + r"        raw=part+b'\n'" + "\n"),
+        (CACHED_REFERENCE, ORIGINAL_REFERENCE),
+        ("        self._req_cache={};self._adm_cache={};self._set_cache={}\n", ""),
+    ]
+    for local, field, carrier in (
+        ("rcache", "_req_cache", "c.ObservedToolRequest"),
+        ("acache", "_adm_cache", "c.ObservedCall"),
+        ("scache", "_set_cache", "ToolEvidence"),
+    ):
+        substitutions.extend((
+            (f"        {local}=getattr(self,'{field}',None)\n"
+             f"        if {local} is not None and identity in {local}:\n"
+             f"            return {local}[identity]\n", ""),
+            (f"        res={carrier}(", f"        return {carrier}("),
+            (f"        if {local} is not None:\n"
+             f"            {local}[identity]=res\n"
+             "        return res\n", ""),
+        ))
+    substitutions.extend((
         (CONSTRUCTOR_REUSE, "        initialized,*_=initialization(transcript,control,policy=policy,runtime=runtime)\n"),
         ("        for number,raw,value in native:\n", "        for number,raw,value in rows(transcript):\n"),
         ("        for number,raw,value in parent:\n", "        for number,raw,value in rows(control):\n"),
         (HELPER_SPLIT, ""),
-    )
+    ))
     for candidate, original in substitutions:
         assert source.count(candidate) == 1
         source = source.replace(candidate, original)
@@ -83,17 +172,42 @@ def outcome(call):
         return ("refused", exception_graph(error))
 
 
+def semantic_state(trace, module, successful):
+    """Check every derived entry before removing only the three named fields."""
+    state = dict(vars(trace))
+    initialized = "frames" in state and "terminal" in state
+    if module is observed and initialized:
+        caches = [state[field] for field in CACHE_METHODS.values()]
+        assert len({id(cache) for cache in caches}) == len(CACHE_METHODS)
+        for method, field in CACHE_METHODS.items():
+            cache = state.pop(field)
+            expected = successful[method]
+            assert type(cache) is dict
+            assert tuple(cache) == tuple(expected)
+            assert all(type(key) is str for key in cache)
+            assert tuple((key, typed(value)) for key, value in cache.items()) == tuple(expected.items())
+    else:
+        assert not any(field in state for field in CACHE_METHODS.values())
+    return typed(state)
+
+
 def constructor(module, transcript, control, *, runtime, session=SESSION, policy=POLICY):
     trace = module.Trace.__new__(module.Trace)
+    successful = {method: {} for method in CACHE_METHODS}
     try:
         trace.__init__(transcript, control, session_id=session, policy=deepcopy(policy), runtime=deepcopy(runtime))
     except Exception as error:
-        return ("refused", exception_graph(error), typed(vars(trace)))
+        return ("refused", exception_graph(error), semantic_state(trace, module, successful))
+    semantic_state(trace, module, successful)  # Every cache starts empty.
     methods = [("pending", outcome(trace.pending))]
     for identity in (*trace.calls, "missing"):
-        for method in ("request", "admitted", "settled"):
-            methods.append(((identity, method), outcome(lambda: getattr(trace, method)(identity))))
-    return ("returned", typed(vars(trace)), tuple(methods))
+        for method in CACHE_METHODS:
+            result = outcome(lambda: getattr(trace, method)(identity))
+            methods.append(((identity, method), result))
+            if result[0] == "returned":
+                successful[method][identity] = result[1]
+            semantic_state(trace, module, successful)
+    return ("returned", semantic_state(trace, module, successful), tuple(methods))
 
 
 def inputs(tool="Read", raw=b'{"value":false,"missing":null,"list":[1,"x"]}\n'):
@@ -206,6 +320,35 @@ def test_changed_capture_and_independent_mutable_trace_state(literal_parent):
     expected = constructor(literal_parent, *changed, runtime=runtime)
     assert expected[0] == "refused"
     assert constructor(observed, *changed, runtime=runtime) == expected
+
+
+@pytest.mark.parametrize("tool", ["Read", "Write"])
+def test_join_caches_are_cold_per_trace_and_warm_only_for_successes(monkeypatch, literal_parent, tool):
+    native, parent, runtime = inputs(tool)
+    args = prefix("transcript", native), prefix("control", parent)
+    options = dict(session_id=SESSION, policy=deepcopy(POLICY), runtime=runtime)
+    first, second = observed.Trace(*args, **options), observed.Trace(*args, **options)
+    historical = literal_parent.Trace(*args, **options)
+    successful = {method: {} for method in CACHE_METHODS}
+    semantic_state(first, observed, successful)
+    semantic_state(second, observed, successful)
+    semantic_state(historical, literal_parent, successful)
+    assert all(getattr(first, field) is not getattr(second, field) for field in CACHE_METHODS.values())
+    cold = {}
+    for method in CACHE_METHODS:
+        cold[method] = getattr(first, method)("tool-1")
+        successful[method]["tool-1"] = typed(cold[method])
+        assert typed(cold[method]) == typed(getattr(historical, method)("tool-1"))
+        semantic_state(first, observed, successful)
+    semantic_state(second, observed, {method: {} for method in CACHE_METHODS})
+    def no_reference(*args, **kwargs):
+        pytest.fail("warm join unexpectedly reconstructed an event reference")
+    monkeypatch.setattr(observed, "reference", no_reference)
+    for method in CACHE_METHODS:
+        assert getattr(first, method)("tool-1") is cold[method]
+        assert outcome(lambda: getattr(first, method)("missing")) == outcome(
+            lambda: getattr(historical, method)("missing"))
+        semantic_state(first, observed, successful)
 
 
 @pytest.mark.parametrize("parent_decision", [False, True])
