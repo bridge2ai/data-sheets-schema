@@ -874,22 +874,40 @@ class TestProjectKeyedCode(unittest.TestCase):
 
 # Native scanner support can ship before the native runtime. Only this complete
 # optional group may be absent from a standalone API checkout (#4514).
-_OPTIONAL_NATIVE_MODEL_FACING = frozenset({
-    "native_shared_render", "native_shared_stage", "native_shared_receipts", "native_shared_contract",
-})
+_OPTIONAL_NATIVE_MODEL_FACING = scan.NATIVE_SHARED_MODULES
 
 
 def _missing_model_facing_modules(root, closures):
     def paths(name):
         return (f"src/data_sheets_schema/{name}.py",
                 f"src/data_sheets_schema/{name}/__init__.py")
-    required = scan.MODEL_FACING_MODULES
+    # The roster lists only modules main carries; the native group left it with
+    # 88f909562 because its sources are on the native branch. It stays a
+    # candidate here, so a native source that lands is required (#5076).
+    required = scan.MODEL_FACING_MODULES | _OPTIONAL_NATIVE_MODEL_FACING
     # Any present native source makes the whole group mandatory: a partial
     # implementation or missing closure edge must not become an exemption.
     if not any((root / path).exists() or (root / path).is_symlink()
                for name in _OPTIONAL_NATIVE_MODEL_FACING for path in paths(name)):
         required = required - _OPTIONAL_NATIVE_MODEL_FACING
     return {name for name in required if not any(path in closures for path in paths(name))}
+
+
+class TestNativeSharedModulesGateWithoutTheDerivation(unittest.TestCase):
+    """#5082: the native group left MODEL_FACING_MODULES (88f909562) but keeps the
+    list's guarantee: a native module the derivation misses still gates."""
+
+    def test_a_native_module_the_derivation_misses_is_model_facing_and_gates(self):
+        line = 'NOTE_5082 = "Describe the CHORUS cohort."'
+        for name in sorted(scan.NATIVE_SHARED_MODULES):
+            rel = f"src/data_sheets_schema/{name}.py"
+            role = scan._module_role(ROOT / rel, frozenset())
+            self.assertEqual(role, "model_facing", name)
+            hits = _scan_text(rel, line + "\n", scan.Surface(rel, ["native_agentic"], role, "live", "t"))
+            self.assertTrue(hits and all(h["violation"] for h in hits), (name, hits))
+
+    def test_the_group_is_not_listed_so_main_s_list_cross_check_holds(self):
+        self.assertFalse(scan.NATIVE_SHARED_MODULES & scan.MODEL_FACING_MODULES)
 
 
 class TestModelFacingClosureCoverage(unittest.TestCase):
@@ -912,7 +930,8 @@ class TestModelFacingClosureCoverage(unittest.TestCase):
             root = Path(d)
             for name in _OPTIONAL_NATIVE_MODEL_FACING:
                 _write(root / f"src/data_sheets_schema/{name}.py", "VALUE = 1\n")
-            closure = {f"src/data_sheets_schema/{name}.py" for name in scan.MODEL_FACING_MODULES}
+            closure = {f"src/data_sheets_schema/{name}.py"
+                       for name in scan.MODEL_FACING_MODULES | _OPTIONAL_NATIVE_MODEL_FACING}
             self.assertEqual(_missing_model_facing_modules(root, closure), set())
             closure.remove("src/data_sheets_schema/native_shared_stage.py")
             self.assertEqual(_missing_model_facing_modules(root, closure), {"native_shared_stage"})

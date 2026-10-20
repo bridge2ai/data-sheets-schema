@@ -211,10 +211,12 @@ class LintReport:
 
 
 # ---------------------------------------------------------------------------
-# schema loading (cached by resolved path + content sha256; heavy imports local)
+# schema loading (cached by resolved path + a digest of the root and its
+# transitive imports; heavy imports local)
 # ---------------------------------------------------------------------------
 
 def _schema_key(schema_path: str) -> tuple[str, str]:
+    """(resolved path, sha256 of the root file): what the report records."""
     p = Path(schema_path)
     try:
         resolved = str(p.resolve())
@@ -224,12 +226,27 @@ def _schema_key(schema_path: str) -> tuple[str, str]:
     return resolved, sha
 
 
+def _cache_key(schema_path: str) -> tuple[str, str]:
+    """(resolved path, digest of the root and its transitive imports), as
+    shared_view keys its views: an edit confined to an imported module must
+    not return the cached view or validator (#5082)."""
+    from data_sheets_schema.schema_snapshot import capture_schema
+
+    resolved, _ = _schema_key(schema_path)
+    try:
+        return resolved, capture_schema(resolved).key[1]
+    except Exception as exc:
+        raise ValueError(f"Invalid schema ({Path(schema_path).name}): {exc}") from exc
+
+
 @lru_cache(maxsize=8)
-def _schema_view_cached(resolved_path: str, schema_sha256: str):
-    from linkml_runtime import SchemaView
+def _schema_view_cached(resolved_path: str, closure_digest: str):
+    # The package's shared view (#926): a view built here would be pinned by
+    # linkml's class-level method caches for the life of the process (#5075).
+    from data_sheets_schema.schema_view import shared_view
 
     try:
-        sv = SchemaView(resolved_path)
+        sv = shared_view(resolved_path)
         sv.all_classes()
     except Exception as exc:
         raise ValueError(
@@ -239,16 +256,15 @@ def _schema_view_cached(resolved_path: str, schema_sha256: str):
 
 
 def _schema_view(schema_path: str):
-    resolved, sha = _schema_key(schema_path)
-    return _schema_view_cached(resolved, sha)
+    return _schema_view_cached(*_cache_key(schema_path))
 
 
 @lru_cache(maxsize=8)
-def _validator_cached(resolved_path: str, schema_sha256: str):
+def _validator_cached(resolved_path: str, closure_digest: str):
     from linkml.validator import Validator
     from linkml.validator.plugins import JsonschemaValidationPlugin
 
-    sv = _schema_view_cached(resolved_path, schema_sha256)
+    sv = _schema_view_cached(resolved_path, closure_digest)
     try:
         return Validator(
             sv.schema,
@@ -261,8 +277,7 @@ def _validator_cached(resolved_path: str, schema_sha256: str):
 
 
 def _validator(schema_path: str):
-    resolved, sha = _schema_key(schema_path)
-    return _validator_cached(resolved, sha)
+    return _validator_cached(*_cache_key(schema_path))
 
 
 def _module_class_sections(schema_path: str) -> dict:

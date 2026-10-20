@@ -465,6 +465,8 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
             # the caller believe a date was recorded (#5049 review, F11).
             raise click.BadParameter("applies only with --condition or --render-spec-json",
                                      param_hint="'--run-date'")
+    from data_sheets_schema.runs import canonical_runtime
+    runtime = canonical_runtime(runtime)   # as render-prompt reads it (#5091 R1)
     registered = None
     if prompt_text_env is not None:
         # The path comes from the named variable, not from the shell (#2282).

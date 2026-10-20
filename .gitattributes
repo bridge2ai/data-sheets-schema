@@ -1,0 +1,2 @@
+# The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).
+data/_wcrate/** -text

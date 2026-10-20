@@ -486,10 +486,11 @@ projects:
     # owner's rule: generation runs read no RO-Crate content; crates are the
     # input of the separate with-crate and crate-only arms only
     # (data/ro-crate_packages/crate_manifest.yaml). The crate itself stays in
-    # data/ro-crate_packages/AI_READI/, and its raw and preprocessed copies stay
-    # in data/raw/AI_READI/ and data/preprocessed/individual/AI_READI/
-    # (aireadi_ro_crate_metadata_2026-08-12.*, md5 of the raw file
-    # 38c221dbdab605145d617481524a4b25), where tests use them as fixtures.
+    # data/ro-crate_packages/AI_READI/, and its raw copy stays in data/raw/AI_READI/
+    # (aireadi_ro_crate_metadata_2026-08-12.json, md5
+    # 38c221dbdab605145d617481524a4b25), where tests use it as a fixture. Its
+    # preprocessed text was removed from data/preprocessed/individual/AI_READI/
+    # (#5060): nothing read it, and it made validate-preprocessing report it.
     # Every AI_READI record generated from 2026-08-13 to 2026-09-07 read a bundle
     # that included it; the bundle_hash_history event for #5042 names the
     # before and after hashes, and data/_wcrate/ holds copies

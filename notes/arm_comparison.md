@@ -585,26 +585,26 @@ Receipting replicates by removals status (distinct arm × project × replicate; 
 
 ## Release-level corpus inventory (#2914, #3282)
 
-What release evidence each project's document corpus holds (`release_inventory v2 (#2914, #3283)`, `d4d download release-inventory`), read from today's `data/preprocessed/source_manifest.yaml` (`6146ae707350`) and crate manifest `data/ro-crate_packages/crate_manifest.yaml` (`99285827c8b9`). It counts what the manifests declare, not what the documents say: a source typed `license` is a licence source whatever its text, and a related-but-distinct dataset's declared `in_bundle` source is not this dataset's evidence.
+What release evidence each project's document corpus holds (`release_inventory v2 (#2914, #3283)`, `d4d download release-inventory`), read from today's `data/preprocessed/source_manifest.yaml` (`0c5078c84f81`) and crate manifest `data/ro-crate_packages/crate_manifest.yaml` (`99285827c8b9`). It counts what the manifests declare, not what the documents say: a source typed `license` is a licence source whatever its text, and a related-but-distinct dataset's declared `in_bundle` source is not this dataset's evidence.
 
 | project | tier-1 sources | licence | DUA | IRB | release records | crate in corpus | crate policy |
 |---|---|---|---|---|---|---|---|
-| AI_READI | 3 (2 current) | `dataset_license` | none | `irb_protocol` | `fairhub_dataset` (superseded), `fairhub_dataset_v3`, `fairhub_dataset_v3_api` | no | `allow` |
+| AI_READI | 3 (2 current) | `dataset_license` | none | `irb_protocol` | `fairhub_dataset` (superseded), `fairhub_dataset_v3`, `fairhub_dataset_v3_api` | no | `allow` (no URL exclusion; the crate is not a listed source) |
 | CHORUS | 0 (0 current) | none | none | none | none | no | `exclude` |
-| CM4AI | 2 (1 current) | `dataset_license` | none | none | `october_2025_dataverse_release` (superseded), `june_2026_dataverse_release` | no | `allow` |
-| VOICE | 3 (2 current) | none | `data_transfer_use_agreement` | `irb_protocol` | `physionet_1_1`, `physionet_3_0_0` (superseded), `physionet_3_1_0` | no | `allow` |
+| CM4AI | 2 (1 current) | `dataset_license` | none | none | `october_2025_dataverse_release` (superseded), `june_2026_dataverse_release` | no | `allow` (no URL exclusion; the crate is not a listed source) |
+| VOICE | 3 (2 current) | none | `data_transfer_use_agreement` | `irb_protocol` | `physionet_1_1`, `physionet_3_0_0` (superseded), `physionet_3_1_0` | no | `allow` (no URL exclusion; the crate is not a listed source) |
 
 The source-manifest version each arm's records pinned (`inputs.source_manifest`), recovered from git by that hash and inventoried against today's crate manifest — the records pin no crate-manifest hash, so that column is today's declaration for every arm. **Corpus** compares the licence/DUA/IRB sources and release records, crate included; **tier 1** compares the priority ranking the manifest declares, which is a ranking of the same documents and not a document:
 
 | arm | source manifest pinned | corpus release evidence | tier 1 | note |
 |---|---|---|---|---|
-| v4 API (2026-08-13) | `86259692ac47` (12 records), committed 2026-08-12 (`9049904493`) | differs: AI_READI | differs: AI_READI 0 (today 3), CM4AI 0 (today 2), VOICE 0 (today 3) | |
-| v5 API (2026-08-22c) | `6c71e8d26497` (12 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | |
-| v5 agentic (2026-08-24) | `6c71e8d26497` (12 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | |
-| v6 agentic (2026-08-28) | `6c71e8d26497` (12 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | |
-| v7 API canaries (2026-08-28…d, exploratory) | `6c71e8d26497` (5 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | |
-| v7 API production (2026-09-01) | `6c71e8d26497` (12 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | |
-| v8 API production (2026-09-04f/g) | `41408d33c174` (12 records), committed 2026-09-03 (`b618ede256`) | differs: AI_READI | differs: AI_READI 4 (today 3) | |
+| v4 API (2026-08-13) | `86259692ac47` (12 records), committed 2026-08-12 (`9049904493`) | differs: AI_READI | differs: AI_READI 0 (today 3), CM4AI 0 (today 2), VOICE 0 (today 3) | these records read AI_READI's RO-Crate, which today's corpus no longer carries (#5042) |
+| v5 API (2026-08-22c) | `6c71e8d26497` (12 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | these records read AI_READI's RO-Crate, which today's corpus no longer carries (#5042) |
+| v5 agentic (2026-08-24) | `6c71e8d26497` (12 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | these records read AI_READI's RO-Crate, which today's corpus no longer carries (#5042) |
+| v6 agentic (2026-08-28) | `6c71e8d26497` (12 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | these records read AI_READI's RO-Crate, which today's corpus no longer carries (#5042) |
+| v7 API canaries (2026-08-28…d, exploratory) | `6c71e8d26497` (5 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | these records read AI_READI's RO-Crate, which today's corpus no longer carries (#5042) |
+| v7 API production (2026-09-01) | `6c71e8d26497` (12 records), committed 2026-08-22 (`7860e0df83`) | differs: AI_READI | differs: AI_READI 4 (today 3) | these records read AI_READI's RO-Crate, which today's corpus no longer carries (#5042) |
+| v8 API production (2026-09-04f/g) | `41408d33c174` (12 records), committed 2026-09-03 (`b618ede256`) | differs: AI_READI | differs: AI_READI 4 (today 3) | these records read AI_READI's RO-Crate, which today's corpus no longer carries (#5042) |
 
 CHORUS's corpus has 0 tier-1 sources, no release record, no license/DUA/IRB source, and the crate manifest declares its crate `document_corpus: exclude`. A record can state only the release facts its bundle carries, so differences between projects on `doi`, `license`, `version` and `issued` are **corpus-driven** for CHORUS, not a measure of generation quality, and so are the rubric10 sub-elements those slots decide:
 
