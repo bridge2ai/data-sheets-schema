@@ -329,3 +329,15 @@ def test_help_discloses_selected_v2_boundaries(command):
     assert result.exit_code == 0
     text = ' '.join(result.output.split())
     assert '2 requires shared generation 1 / API renderer 25' in text
+
+
+def test_a_shared_registration_names_its_own_method_without_the_runtime_default(registered, monkeypatch):
+    """#5089 F3: with a shared registration the render takes the registration's
+    method; the --runtime default is never consulted for it."""
+    _, reg = registered
+    def consulted(*a, **k):
+        raise AssertionError('the runtime default was consulted for a shared registration')
+    monkeypatch.setattr(module, '_runtime_method', consulted)
+    monkeypatch.setattr(module, '_warn_method_runtime', lambda *a, **k: None)
+    result = single(reg, 'render-prompt')
+    assert result.exit_code == 0, result.output

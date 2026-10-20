@@ -459,10 +459,16 @@ def _warn_method_runtime(method, runtime, condition=None):
     for (for example the 2026-10-14b agentic failure under `claudecode_api/`,
     or the API runtime with `claudecode_agent` from generic_v8 on, where the
     API baseline writes under `claudecode_api`, #690; through v7 both runtimes
-    wrote under `claudecode_agent`, #5068)."""
+    wrote under `claudecode_agent`, #5068, so re-rendering such a record with its
+    own method stays quiet)."""
+    from data_sheets_schema.api_runner import CONDITION_AXES
     from data_sheets_schema.runs import RUNTIME_KEYS
     key = RUNTIME_KEYS.get((runtime or "").strip().lower())
     expected = _runtime_method("baseline", runtime, condition)
+    base = (CONDITION_AXES.get(condition or "generic") or {}).get("base", "")
+    pre_v8 = not (base[1:].isdigit() and int(base[1:]) >= 8)
+    if key == "api" and pre_v8 and method == "claudecode_agent":
+        return
     if expected is not None and method in ("claudecode_api", "claudecode_agent", "claudecode_direct") and method != expected:
         click.echo(f"# ⚠️  --runtime {runtime!r} with method {method}: the instruction names {method}/ output "
                    f"paths; {'an' if key[0] in 'aeiou' else 'a'} {key} run writes under {expected}/ — pass --method {expected} (#5046)",
@@ -474,19 +480,34 @@ def _runtime_method(arm, runtime, condition):
     (owner, 2026-10-19; #5063 F1/F2). The arm's own default (`claudecode_api`) told
     an agentic run that followed the playbook to write where its record is never
     looked for. Claude Code writes under `claudecode_agent`, the direct arm under
-    `claudecode_direct`, and the API under `claudecode_api` from generic_v8 (#690)
-    and `claudecode_agent` before it. Another arm, or a runtime with no key, keeps
-    the arm's method; a recorded spec carries its method, so re-rendering a run's
-    record never reads this."""
-    from data_sheets_schema.api_runner import CONDITION_AXES
+    `claudecode_direct`, and the API under `claudecode_api` for every condition:
+    that is where `d4d api run`/`plan`/`batch` write today (`_spec`, the baseline
+    arm), so the render is the instruction such a run is sent (#5089 F1). The v6/v7
+    API runs wrote under `claudecode_agent` (#690), but their records carry that
+    method, so re-rendering one never reads this. Another arm, or a runtime with no
+    key, keeps the arm's method."""
     from data_sheets_schema.runs import RUNTIME_KEYS
     if arm != "baseline":
         return None
     key = RUNTIME_KEYS.get((runtime or "").strip().lower())
-    base = (CONDITION_AXES.get(condition or "generic") or {}).get("base", "")
-    v8_or_later = base[1:].isdigit() and int(base[1:]) >= 8
     return {"agentic": "claudecode_agent", "direct": "claudecode_direct",
-            "api": "claudecode_api" if v8_or_later else "claudecode_agent"}.get(key)
+            "api": "claudecode_api"}.get(key)
+
+
+#: The spelling each runtime key is recorded under (`RunSpec.is_agentic`, the
+#: provenance recorder and `AGENTIC_RUNTIMES` compare exact strings).
+_CANONICAL_RUNTIME = {"agentic": "Claude Code", "api": "Claude API (direct)",
+                      "direct": "Claude Code (direct)"}
+
+
+def _canonical_runtime(runtime):
+    """`--runtime` in the spelling the records use (#5089 F2). The method default
+    folds case and whitespace through `RUNTIME_KEYS`, but the rendered text keys on
+    exact membership, so `'claude code'` rendered the API instruction with agentic
+    paths and no warning. A runtime with no key is left as given."""
+    from data_sheets_schema.runs import RUNTIME_KEYS
+    key = RUNTIME_KEYS.get((runtime or "").strip().lower())
+    return _CANONICAL_RUNTIME.get(key, runtime)
 
 
 @api.command("render-prompt")
@@ -509,7 +530,7 @@ def _runtime_method(arm, runtime, condition):
 @click.option("--method", type=click.Choice(_METHODS), default=None,
               help="output method directory (#5046); default for the baseline arm: the one --runtime writes under "
                    "(Claude Code: claudecode_agent; Claude Code (direct): claudecode_direct; Claude API (direct): "
-                   "claudecode_api from generic_v8, claudecode_agent before), else the arm's method (#5063)")
+                   "claudecode_api, where d4d api run writes), else the arm's method (#5063, #5089)")
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies without being called a choice (#1094)" + _CONDITION_SCOPE)
@@ -522,7 +543,8 @@ def _runtime_method(arm, runtime, condition):
 @click.option("--chunk-manifest", default=None, type=click.Path(),
               help="an explicit chunk manifest for the bundle (default: discovered beside it, #1299)")
 @click.option("--runtime", default="Claude Code", show_default=True,
-              help="runtime the instruction should declare")
+              help="runtime the instruction should declare; a known runtime is read in its recorded spelling, "
+                   "whatever its case or surrounding whitespace (#5089)")
 @click.option("--provider", default="Anthropic", show_default=True)
 @click.option("--out", type=click.Path(), default=None,
               help="write the instruction here as well as printing its digest")
@@ -551,6 +573,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     from data_sheets_schema import prompt_registry as pr
     from data_sheets_schema.api_runner import resolve_prompt
 
+    runtime = _canonical_runtime(runtime)
     # A shared registration names its own method, which _shared_spec checks.
     if method is None and not shared_generation_version and shared_generation_registration is None:
         method = _runtime_method(arm, runtime, condition)

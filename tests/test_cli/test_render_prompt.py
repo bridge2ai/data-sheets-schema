@@ -197,7 +197,8 @@ class TestTheCommand(unittest.TestCase):
             "--condition", "generic_v7",
             "--runtime", "Claude API (direct)", "--method", "claudecode_api"])
         self.assertEqual(pre_v8_api.exit_code, 0, pre_v8_api.stderr)
-        self.assertIn("pass --method claudecode_agent", pre_v8_api.stderr)
+        # #5089 F1: a v7 API run made today writes under claudecode_api, so naming it is no contradiction.
+        self.assertNotIn("#5046", pre_v8_api.stderr)
 
     def test_an_omitted_method_follows_the_runtime(self):
         """#5063 F1/F2 (owner, 2026-10-19): the playbook renders without
@@ -210,7 +211,7 @@ class TestTheCommand(unittest.TestCase):
             ("generic_v8", ["--runtime", "Claude Code (direct)"], "2026-10-14_claude-opus-5-direct-generic-v8_rep1", "claudecode_direct"),
             ("generic_v8", ["--runtime", "Claude API (direct)"], "2026-10-14_claude-opus-5-api-generic-v8_rep1", "claudecode_api"),
             ("generic_v9", ["--runtime", "Claude API (direct)"], "2026-10-14_claude-opus-5-api-generic-v9_rep1", "claudecode_api"),
-            ("generic_v7", ["--runtime", "Claude API (direct)"], "2026-08-28c_claude-opus-5-api-generic-v7_rep1", "claudecode_agent"),
+            ("generic_v7", ["--runtime", "Claude API (direct)"], "2026-08-28c_claude-opus-5-api-generic-v7_rep1", "claudecode_api"),
             ("generic_v8", ["--runtime", "Some Other Runtime"], "2026-10-14_claude-opus-5-generic-v8_rep1", "claudecode_api"),
         )
         for condition, runtime, label, method in cases:
@@ -229,11 +230,51 @@ class TestTheCommand(unittest.TestCase):
         r = CliRunner(mix_stderr=False).invoke(api, [
             "render-prompt", "--project", "VOICE", "--label", "2026-10-14_claude-opus-5-generic-v8_rep1",
             "--condition", "generic_v8", "--arm", "de_novo", "--runtime", "Claude Code"])
-        if r.exit_code == 0:
-            self.assertIn("claudecode_agent_crate/", r.stdout)
-            self.assertNotIn("claudecode_agent/", r.stdout.replace("claudecode_agent_crate/", ""))
-        else:   # no crate bundle in this checkout: refused before any method is used
-            self.assertNotIn("conflicts with --arm", r.stderr)
+        self.assertNotIn("conflicts with --arm", r.stderr)
+        if r.exit_code != 0:   # #5089 F4: without the crate bundle the paths cannot be shown
+            self.skipTest("no VOICE crate bundle in this checkout: " + r.stderr.strip().splitlines()[-1])
+        self.assertIn("claudecode_agent_crate/", r.stdout)
+        self.assertNotIn("claudecode_agent/", r.stdout.replace("claudecode_agent_crate/", ""))
+
+    def test_an_api_render_is_the_instruction_d4d_api_run_sends(self):
+        """#5089 F1: `d4d api run` has no --method and writes under the baseline
+        arm's claudecode_api for every condition, so the API render must name the
+        same paths, before generic_v8 as well as after it."""
+        from data_sheets_schema.cli.api import _spec
+        for condition, label in (("generic_v6", "2026-08-28c_claude-opus-5-api-generic-v6_rep1"),
+                                 ("generic_v7", "2026-08-28c_claude-opus-5-api-generic-v7_rep1"),
+                                 ("generic_v8", "2026-10-14_claude-opus-5-api-generic-v8_rep1")):
+            with self.subTest(condition=condition):
+                r = CliRunner(mix_stderr=False).invoke(api, [
+                    "render-prompt", "--project", "VOICE", "--label", label, "--condition", condition,
+                    "--runtime", "Claude API (direct)"])
+                self.assertEqual(r.exit_code, 0, r.stderr)
+                # The run resolves its provider from the route; the render's --provider
+                # default predates #5063 and is not a path, so that one header line is
+                # set aside.
+                lines = lambda t: [l for l in t.rstrip("\n").splitlines()
+                                   if not l.lstrip().startswith("# Provider:")]
+                self.assertEqual(lines(r.stdout), lines(resolve_prompt(_spec("VOICE", "baseline", label, condition))))
+                self.assertIn(f"data/d4d_concatenated/claudecode_api/{label}/VOICE_d4d.yaml", r.stdout)
+
+    def test_a_runtime_in_another_case_or_spacing_renders_as_its_recorded_spelling(self):
+        """#5089 F2: the method default folded case and whitespace but the text
+        keyed on exact spelling, so 'claude code' rendered API text with agentic
+        paths and no warning. A known runtime is now read in its recorded spelling."""
+        label = "2026-10-14_claude-opus-5-generic-v8_rep1"
+        base = ["render-prompt", "--project", "VOICE", "--label", label, "--condition", "generic_v8"]
+        for canonical, variants in (("Claude Code", ("claude code", "CLAUDE CODE", " Claude Code", "Claude Code ")),
+                                    ("Claude Code (direct)", ("claude code (direct)", " Claude Code (Direct) ")),
+                                    ("Claude API (direct)", ("claude api (direct)",))):
+            expected = CliRunner(mix_stderr=False).invoke(api, base + ["--runtime", canonical])
+            self.assertEqual(expected.exit_code, 0, expected.stderr)
+            for variant in variants:
+                with self.subTest(runtime=variant):
+                    r = CliRunner(mix_stderr=False).invoke(api, base + ["--runtime", variant])
+                    self.assertEqual(r.exit_code, 0, r.stderr)
+                    self.assertEqual(r.stdout, expected.stdout)
+                    self.assertIn(f"runtime={canonical}", r.stderr)
+                    self.assertNotIn("#5046", r.stderr)
 
 
 if __name__ == "__main__":
