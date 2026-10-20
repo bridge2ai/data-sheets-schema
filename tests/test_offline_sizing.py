@@ -498,6 +498,67 @@ def test_typed_input_is_summed_over_every_typed_call_and_an_option_removes_from_
     assert sweep.typed_aggregate("CHORUS", {"typed": {"status": "REFUSED"}}) is None
 
 
+TINY_RECORD = ("id: doi:10.1/x\n"
+               "conforms_to_schema: https://example.org/schema\n"
+               "title: A dataset, with a clause.\n"
+               "creators:\n"
+               "  - id: doi:10.1/x#person-1\n"
+               "    name: Jane Doe\n"
+               "  - id: other:2\n"
+               "    name: Ann Roe\n"
+               "size: 42\n")
+
+
+def test_the_response_floor_is_a_response_the_worker_check_accepts():
+    import yaml
+    from data_sheets_schema import audit_batches
+    plan = audit_batches.make_plan(TINY_RECORD, max_paths=4, max_inventory_bytes=4_096, max_workers=4, version=2)
+    check = lambda raw, p, worker_id: audit_batches.check_worker(raw, p, worker_id, version=2)
+    text = {row["path"]: row["text"] for row in plan["inventory"]["values"]}
+    assert len(plan["workers"]) > 1
+    for worker in plan["workers"]:
+        floor = sweep.response_floor(plan, worker, check)
+        variants = sweep.floor_variants(plan, worker)
+        assert floor["passed"] and floor["bytes"] == min(len(raw) for raw in variants.values())
+        for raw in variants.values():
+            rows = yaml.safe_load(raw)["source_review"]["values"]
+            assert [r["path"] for r in rows] == worker["paths"]
+            for r in rows:
+                if r["path"] in ("/conforms_to_schema", "/creators/0/id"):    # declared record metadata
+                    assert set(r) == {"path", "metadata_reason"}
+                else:
+                    assert [c["text"] for c in r["claims"]] == [text[r["path"]]]  # the whole value, quoted
+            # Every assigned path needs its row: one fewer is refused.
+            short = yaml.safe_load(raw)
+            short["source_review"]["values"].pop()
+            assert not check(json.dumps(short).encode(), plan, worker["id"])["passed"]
+    refused = sweep.response_floor(plan, plan["workers"][0], lambda *a: {"passed": False, "errors": [{"code": "x"}]})
+    assert refused == {"bytes": None, "passed": False, "errors": {"supported": ["x"], "revised": ["x"]}}
+    assert sweep.floor_tokens(10) == 3 and sweep.floor_tokens(None) is None
+
+
+def test_the_floor_audit_is_the_assembled_audit_of_every_row():
+    import yaml
+    from data_sheets_schema import audit_batches, audit_grammar
+    plan = audit_batches.make_plan(TINY_RECORD, max_paths=4, max_inventory_bytes=4_096, max_workers=4, version=2)
+    text = sweep.floor_assembly(audit_batches, plan)
+    assert audit_grammar.check(text.encode("utf-8"), version=2)["passed"]
+    rows = yaml.safe_load(text)["source_review"]["values"]
+    assert [r["path"] for r in rows] == [r["path"] for r in plan["inventory"]["values"]]
+    # At least every worker's rows: the assembled audit drops only their envelopes.
+    rows_bytes = sum(len(sweep.floor_variants(plan, w)["supported"]) for w in plan["workers"])
+    assert len(text.encode("utf-8")) > rows_bytes - 200 * len(plan["workers"])
+    broken = {**plan, "workers": plan["workers"][:-1]}          # a path no worker answers
+    assert sweep.floor_assembly(audit_batches, broken) is None
+
+
+def test_the_larger_audit_carry_is_kept():
+    caps = (900_000, 96_000, 28_000, "registered output caps")
+    floor = (1_000_000, 96_000, 0, "workers' smallest responses, assembled")
+    assert sweep.larger_carry("AI_READI", "report", [caps, floor])[3] == floor[3]
+    assert sweep.larger_carry("AI_READI", "report", [caps, (900_100, 96_000, 0, "x")])[3] == caps[3]
+
+
 def test_a_foreign_checkout_on_the_import_path_is_filtered(tmp_path):
     root, other = tmp_path / "root", tmp_path / "other"
     for base in (root, other):

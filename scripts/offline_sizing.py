@@ -29,14 +29,24 @@ PR #5095), so `--root` names a checkout that has them. Example::
 
     PYTHONPATH=<root>/src:<root> python scripts/offline_sizing.py sweep \\
         --root <root> --workdir <new dir> --out <new file>.json
+    python scripts/offline_sizing.py table <file>.json      # per-project tables
+    python scripts/offline_sizing.py summary <file>.json    # the note's cross-project tables
 
-Placeholders for content that does not exist before a run (the assembled
-audit, the report as written) are sized at their output caps in TOKENS,
-added after the byte estimate. A1b sized them as runs of 'x' at 4 bytes per
-token, and the endpoint counted about one token per 'x' (see A1B below). So
-each A1b placeholder counted about four times its intended size, and those
-rows overstate the report family by about three times each placeholder's
-intended size.
+Placeholders for content that does not exist before a run (the report as
+written, the responses integration carries) are sized at their output caps in
+TOKENS, added after the byte estimate. A1b sized them as runs of 'x' at 4
+bytes per token, and the endpoint counted about one token per 'x' (see A1B
+below). So each A1b placeholder counted about four times its intended size,
+and those rows overstate the report family by about three times each
+placeholder's intended size.
+
+Each typed worker's smallest valid response is built and put through the
+runtime's own worker check (`response_floor`): one row per assigned path, each
+claim quoting its value, every other string one character. The audit that
+`reconcile_full` and the report family carry is sized at the larger of the
+registered output caps' bound and those smallest responses assembled by
+`audit_batches.assemble` (`floor_assembly`): a completed audit carries at
+least every row, whatever the caps.
 """
 from __future__ import annotations
 
@@ -44,8 +54,8 @@ import argparse
 import contextlib
 import copy
 import json
+import math
 import re
-import shutil
 import socket
 import sys
 from pathlib import Path
@@ -222,7 +232,7 @@ def load(root):
             sys.path.remove(entry)
         sys.path.insert(0, entry)
     from data_sheets_schema import api_runner as api, receipt_completion as rc, shared_generation as sg
-    from data_sheets_schema import snapshot_store, typed_audit as typed, typed_audit_runtime as tar
+    from data_sheets_schema import audit_batches, snapshot_store, typed_audit as typed, typed_audit_runtime as tar
     from data_sheets_schema import usage_ledger as ledger
     from data_sheets_schema.cli.api import ARMS
     try:
@@ -235,7 +245,8 @@ def load(root):
     if strays:
         raise SystemExit(f"modules loaded from outside {root}: {strays}")
     return SimpleNamespace(root=root, api=api, rc=rc, sg=sg, snapshot_store=snapshot_store, typed=typed,
-                           tar=tar, ledger=ledger, ARMS=ARMS, DEFAULT_AUDIT_LIMITS=DEFAULT_AUDIT_LIMITS,
+                           tar=tar, ledger=ledger, audit_batches=audit_batches, ARMS=ARMS,
+                           DEFAULT_AUDIT_LIMITS=DEFAULT_AUDIT_LIMITS,
                            build_registration=build_registration, build_draft_context=build_draft_context)
 
 
@@ -546,8 +557,96 @@ def nbytes(m, payload):
     return len(m.sg.canonical(payload))
 
 
+#: Tokens per byte assumed for a response floor: 4 bytes a token, the usual
+#: figure for English prose and below every ratio A1b counted (0.34-0.41), so
+#: a floor in tokens errs low.
+FLOOR_TOKENS_PER_BYTE = 0.25
+
+
+def floor_variants(plan, worker):
+    """The two smallest candidate worker responses, as compact JSON bytes.
+
+    A worker must return one source-review row per assigned path
+    (`audit_batches.check_worker`). Here each row is a declared-metadata row
+    where the inventory allows one; otherwise it is one claim quoting the whole
+    value, since source acceptance requires the claims to quote the value, with
+    one-character source, chunk, quote and reason. The variants are:
+    - `supported`: every claim supported, with one document assertion;
+    - `revised`: every claim revised with no evidence, plus one finding
+      linking them."""
+    by_path = {row["path"]: row for row in plan["inventory"]["values"]}
+    supported, revised, revise_paths = [], [], []
+    for path in worker["paths"]:
+        row = by_path[path]
+        if row["record_metadata_allowed"]:
+            supported.append({"path": path, "metadata_reason": "m"})
+            revised.append(supported[-1])
+            continue
+        claim = {"text": row["text"], "attributed_to": [], "claim_status": "fact", "reason": "r"}
+        supported.append({"path": path, "claims": [{**claim, "verdict": "supported", "source_status": "fact",
+                          "evidence": [{"source": "s", "chunk": "c", "quote": "q"}]}]})
+        revised.append({"path": path, "claims": [{**claim, "verdict": "revise", "source_status": "unstated",
+                        "evidence": []}]})
+        revise_paths.append(path)
+    body = lambda rows, findings: {"findings": findings, "summary": "s", "source_review": {
+        "artifact": "original_full", "sha256": plan["original_full_sha256"], "values": rows}}
+    linked = [{"severity": "low", "record": "full", "slot": "s", "issue": "i", "review_paths": revise_paths,
+               "evidence": [{"artifact": "original_full", "path": "/id", "op": "contains", "quote": "q"}]}]
+    compact = lambda value: json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    return {"supported": compact(body(supported, [])),
+            "revised": compact(body(revised, linked if revise_paths else []))}
+
+
+def response_floor(plan, worker, check):
+    """The smallest worker response the worker check accepts, in bytes.
+
+    Each of `floor_variants` is checked with `check(raw, plan, worker_id)`, and
+    the smaller passing one is the floor. A real response cites real sources,
+    quotes and reasons, so it is larger."""
+    best, errors = None, {}
+    for name, raw in floor_variants(plan, worker).items():
+        report = check(raw, plan, worker["id"])
+        if report["passed"]:
+            if best is None or len(raw) < best["bytes"]:
+                best = {"bytes": len(raw), "variant": name, "passed": True}
+        else:
+            errors[name] = [e.get("code") for e in report.get("errors", [])][:3]
+    return best or {"bytes": None, "passed": False, "errors": errors}
+
+
+def floor_tokens(floor_bytes):
+    return None if floor_bytes is None else math.ceil(floor_bytes * FLOOR_TOKENS_PER_BYTE)
+
+
+def floor_assembly(audit_batches, plan):
+    """The assembled audit the runner carries as "Audit findings"
+    (`audit_batches.assemble`'s canonical JSON), built from every worker's
+    smallest supported response and an integration that keeps every row.
+    None when assembly refuses. A real audit is larger."""
+    compact = lambda value: json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    proposals = {w["id"]: floor_variants(plan, w)["supported"] for w in plan["workers"]}
+    try:
+        index = audit_batches.build_index(plan, proposals, version=2)
+        integration = {"kind": "audit_integration_v2", "proposal_index_sha256": index["sha256"],
+                       "retain_other_rows_from_index_sha256": index["sha256"], "row_replacements": [],
+                       "finding_decisions": [], "new_findings": [], "summary": "s", "omission_dispositions": []}
+        raw, _ = audit_batches.assemble(plan, proposals, compact(integration), version=2)
+    except (audit_batches.AuditBatchError, ValueError):
+        return None
+    return raw.decode("utf-8")
+
+
+def larger_carry(project, phase, alternatives):
+    """Of one request built with different audit carries, as (payload bytes,
+    max_tokens, placeholder tokens, basis), the one with the larger estimate:
+    the conservative reading."""
+    return max(alternatives, key=lambda a: estimate(project, phase, a[0], a[1], placeholder_tokens=a[2])[
+        "estimated_in_flight_tokens"])
+
+
 def measure_typed(m, spec, settings):
     """Workers, omission and integration through prepare_packet/build_request."""
+    check = lambda raw, plan, worker_id: m.audit_batches.check_worker(raw, plan, worker_id, version=2)
     with offline_receipt_and_index(m):
         packet = m.tar.prepare_packet(spec)
         rows, largest = [], None
@@ -556,7 +655,8 @@ def measure_typed(m, spec, settings):
             _, payload, _ = m.tar.build_request(spec, packet, stage, workers={}, omission=None, settings=settings)
             rows.append({"worker_id": worker["id"], "paths": len(worker["paths"]),
                          "inventory_bytes": worker["inventory_bytes"], "payload_bytes": nbytes(m, payload),
-                         "max_output_tokens": payload["max_tokens"]})
+                         "max_output_tokens": payload["max_tokens"],
+                         "response_floor": response_floor(packet["plan"], worker, check)})
             if largest is None or rows[-1]["payload_bytes"] > nbytes(m, largest):
                 largest = payload
         _, omission, _ = m.tar.build_request(spec, packet, {"phase": m.tar.OMISSION_PHASE}, workers={},
@@ -692,10 +792,14 @@ def delivered_body(record, receipt, mark):
     return f"{record.rstrip(chr(10))}\n{mark}\n{receipt}"
 
 
-def measure_ordinary(m, project, spec, settings, reg, files, worker_count):
+def measure_ordinary(m, project, spec, settings, reg, files, worker_count, audit_floor=None):
     """Ordinary phases as the runner builds them (A1: build_phase, the
     PHASE_NEEDS carries, _append_regate, build_repair + generation_context).
-    `worker_count` sizes the assembled audit the runner carries."""
+    `worker_count` sizes the assembled audit the runner carries at the
+    registered caps' bound; `audit_floor`, when given, is that audit at its
+    smallest. Returns {phase: (payload, placeholder tokens)} and the audit
+    carry basis of each phase that carries it."""
+    bases = {}
     read = lambda path: path.read_bytes().decode("utf-8") if path is not None else ""
     # The staged originals, as the typed stages saw them.
     run_dir = Path(spec.out_dir)
@@ -741,28 +845,43 @@ def measure_ordinary(m, project, spec, settings, reg, files, worker_count):
         "usage_id": "scratch"}
     out["full_receipt_completion"] = (completion(exchange(full_req, body)), 0)
     out["full_receipt_completion_after_readdress"] = (completion(exchange(readdress, "")), readdress_cap)
-    # The audit exists only after the typed stages: an empty carry, sized at
-    # its bound in tokens.
-    out["reconcile_full"] = (payload(m.api.build_phase(spec, "reconcile_full",
-        carry={"Completed full record": full, "Audit findings": ""}), "reconcile_full"), findings)
-    report_carry = {"Audit findings": "", "Original full record": full, "Original core record": core,
-                    "Reconciled full record": reconciled, "Completed core record": completed}
-    out["report"] = (payload(m.api.build_phase(spec, "report", carry=report_carry), "report"), findings)
+    # The audit exists only after the typed stages. Each request that carries
+    # it is built twice: the carry empty and sized at the registered output
+    # caps' bound, and the workers' smallest responses assembled (the least a
+    # completed audit carries). The larger estimate is kept.
+    carries = [("", findings, "registered output caps")]
+    if audit_floor is not None:
+        carries.append((audit_floor, 0, "workers' smallest responses, assembled"))
+
+    def audited(phase, cap_phase, build, extra=0, max_tokens=None):
+        options = []
+        for text, placeholder, basis in carries:
+            p = payload(build(text), cap_phase, max_tokens)
+            options.append((nbytes(m, p), p["max_tokens"], placeholder + extra, basis, p))
+        chosen = larger_carry(project, "report_regate" if phase.startswith("report_regate") else phase, options)
+        out[phase] = (chosen[4], chosen[2])
+        bases[phase] = chosen[3]
+    audited("reconcile_full", "reconcile_full", lambda a: m.api.build_phase(spec, "reconcile_full",
+            carry={"Completed full record": full, "Audit findings": a}))
+    report_carry = lambda a: {"Audit findings": a, "Original full record": full, "Original core record": core,
+                              "Reconciled full record": reconciled, "Completed core record": completed}
+    audited("report", "report", lambda a: m.api.build_phase(spec, "report", carry=report_carry(a)))
+
+    def regate(audit, report_as_written):
+        request = m.api.build_phase(spec, "report", carry=report_carry(audit))
+        m.api._append_regate(request, spec, report_as_written, [])
+        return request
     # The regate's contradiction listing is not sized: no cap bounds it, and
-    # a regate happens only when it is non-empty (`_gate_report`).
-    regate = m.api.build_phase(spec, "report", carry=report_carry)
-    m.api._append_regate(regate, spec, "", [])
-    # The report as written, at most the report cap; a v8 report shows a realistic size.
-    out["report_regate"] = (payload(regate, "report", report_cap), findings + report_cap)
-    realistic = m.api.build_phase(spec, "report", carry=report_carry)
-    m.api._append_regate(realistic, spec, report_text, [])
-    out["report_regate_with_v8_report"] = (payload(realistic, "report", report_cap), findings)
+    # a regate happens only when it is non-empty (`_gate_report`). The report
+    # as written is at most the report cap; a v8 report shows a realistic size.
+    audited("report_regate", "report", lambda a: regate(a, ""), extra=report_cap, max_tokens=report_cap)
+    audited("report_regate_with_v8_report", "report", lambda a: regate(a, report_text), max_tokens=report_cap)
     repair = m.api.build_repair("full", reconciled,
         errors=["Slot 'data_collection' has validation error: missing required source link"],
         profile=spec.profile_obj, _captured_digest=m.sg.digest_text(spec, "Dataset"))
     repair.messages[0]["content"].insert(-1, {"type": "text", "text": m.sg.generation_context(spec)})
     out["repair_full"] = (payload(repair, "repair_full"), 0)
-    return out
+    return out, bases
 
 
 def size_one(m, project, label, limits, workdir, *, with_components=False):
@@ -790,6 +909,7 @@ def size_one(m, project, label, limits, workdir, *, with_components=False):
                               "omission_output_tokens", "integration_output_tokens", "max_paths",
                               "max_inventory_bytes", "max_workers")}
     worker_count, result["findings_basis"] = limits["max_workers"], "max_workers: the typed stage was refused"
+    audit_floor = None
     try:
         packet, workers, omission, integration, largest = measure_typed(m, spec, settings)
     except Exception as exc:                      # noqa: BLE001
@@ -801,14 +921,24 @@ def size_one(m, project, label, limits, workdir, *, with_components=False):
         result["stages"]["typed_audit_omission"] = estimate(project, "typed_audit_omission",
             nbytes(m, omission), omission["max_tokens"])
         # Integration also carries every worker response and the omission
-        # response at their caps: the plan's upper bound from the output caps.
-        bound = sum(w["max_output_tokens"] for w in workers) + omission["max_tokens"]
+        # response: the workers' part at the larger of their output caps and
+        # their smallest responses (which can exceed the caps), the omission
+        # response at its cap.
+        floors = [w["response_floor"] for w in workers]
+        options = [(sum(w["max_output_tokens"] for w in workers), "registered output caps")]
+        if floors and all(f.get("passed") for f in floors):
+            audit_floor = floor_assembly(m.audit_batches, packet["plan"])
+            options.append((round(sum(f["bytes"] for f in floors) * ratios(project, "typed_audit_integration")[0]),
+                            "workers' smallest responses"))
+        carried, basis = max(options)
         result["stages"]["typed_audit_integration"] = estimate(project, "typed_audit_integration",
-            nbytes(m, integration), integration["max_tokens"], placeholder_tokens=bound)
+            nbytes(m, integration), integration["max_tokens"], placeholder_tokens=carried + omission["max_tokens"])
+        result["stages"]["typed_audit_integration"]["carry_basis"] = basis
+        result["audit_floor_bytes"] = len(audit_floor.encode("utf-8")) if audit_floor is not None else None
         parts.update({WORKER_PHASE + " (largest)": largest, "typed_audit_omission": omission,
                       "typed_audit_integration": integration})
     try:
-        ordinary = measure_ordinary(m, project, spec, settings, reg, files, worker_count)
+        ordinary, bases = measure_ordinary(m, project, spec, settings, reg, files, worker_count, audit_floor)
     except Exception as exc:                      # noqa: BLE001
         result["ordinary"] = {"status": "REFUSED", "reason": f"{type(exc).__name__}: {exc}"}
     else:
@@ -818,6 +948,8 @@ def size_one(m, project, label, limits, workdir, *, with_components=False):
                                                placeholder_tokens=placeholder)
             if family_phase != phase:
                 result["stages"][phase]["phase"] = family_phase
+            if phase in bases:
+                result["stages"][phase]["carry_basis"] = bases[phase]
             parts[phase] = payload
         result["stages"]["report_after_repair"] = {**result["stages"]["report"], "note": "same request as report, "
             "built from the repaired records; sized here from the reconciled records"}
@@ -1035,6 +1167,32 @@ def table(results):
         out.append(f"\n\"Over\" in the last column passes the registered typed `aggregate_input_tokens` "
                    f"({allowance:,}). The assigned inventory is what a worker must answer for, one row per "
                    f"path with complete claims, inside its output cap of {worker_cap:,} tokens.")
+        output_allowance = registered.get("aggregate_output_tokens", 100_000)
+        integration_cap = registered.get("integration_output_tokens", 4_000)
+        out.append(f"\nWorker output: the smallest response the worker check accepts (`response_floor`), "
+                   f"against the registered caps. Tokens are at {round(1 / FLOOR_TOKENS_PER_BYTE)} bytes a "
+                   f"token, so they err low, and thinking draws on the same `max_tokens`. \"Over\" on the "
+                   f"largest worker passes its cap ({worker_cap:,}). \"Over\" on the sum means the workers' "
+                   f"smallest responses plus integration's cap ({integration_cap:,}) pass "
+                   f"`aggregate_output_tokens` ({output_allowance:,}); the runtime admits a stage only while "
+                   "the output already spent plus that stage's `max_tokens` stays inside it.\n")
+        out.append("| Grid | Workers | Largest assignment (paths) | Largest worker's smallest response B | "
+                   "Its tokens, at least | All workers' smallest responses, tokens at least |")
+        out.append("|---|---|---|---|---|---|")
+        for key, row in runs.items():
+            typed = row.get("typed", {})
+            if not key.startswith(label + "|") or typed.get("status") != "MEASURED":
+                continue
+            floors = [w.get("response_floor", {}) for w in typed["workers"]]
+            if not floors or any(not f.get("passed") for f in floors):
+                out.append(f"| {key.split('|')[1]} | {typed['worker_count']} | | not measured or refused | | |")
+                continue
+            top = max(floor_tokens(f["bytes"]) for f in floors)
+            total = sum(floor_tokens(f["bytes"]) for f in floors)
+            out.append(f"| {key.split('|')[1]} | {typed['worker_count']} | "
+                       f"{max(w['paths'] for w in typed['workers'])} | {max(f['bytes'] for f in floors):,} | "
+                       f"{top:,}{' over' if top > worker_cap else ''} | "
+                       f"{total:,}{' over' if total + integration_cap > output_allowance else ''} |")
         g2 = runs.get(f"{label}|G2")
         if g2 and g2.get("stages"):
             out.append("\nEvery request at G2 (largest worker shown for the typed workers):\n")
@@ -1049,6 +1207,8 @@ def table(results):
             rows += [(k, v) for k, v in g2["stages"].items() if k != "report_after_repair"]
             for name, e in rows:
                 low, high = e["estimated_in_flight_range"]
+                if e.get("carry_basis"):
+                    name = f"{name} (audit carried at: {e['carry_basis']})"
                 out.append(f"| {name} | {e['payload_bytes']:,} | {e['ratio']} ({e['ratio_basis']}) | "
                            f"{e['placeholder_tokens']:,} | {e['max_output_tokens']:,} | "
                            f"{e['estimated_in_flight_tokens']:,} ({low:,}–{high:,}) | {e['ceiling_tokens']:,} | "
@@ -1118,6 +1278,134 @@ def table(results):
     return "\n".join(out)
 
 
+#: The note's cross-project columns: (heading, stage key; None is the largest worker).
+SUMMARY_STAGES = (("Largest worker", None), ("Omission", "typed_audit_omission"),
+                  ("Integration", "typed_audit_integration"),
+                  ("Receipt completion (with a re-address turn)", "full_receipt_completion_after_readdress"),
+                  ("Report", "report"), ("Regate (report at its 96k cap)", "report_regate"))
+
+
+def option_estimate(project, run, stage, keys=()):
+    """One request of a measured run, re-estimated after removing the parts
+    `keys` names (an option's), using the run's own components."""
+    components = run.get("components") or {}
+    if stage is None:
+        e, phase = max(run["typed"]["workers"], key=lambda w: w["payload_bytes"]), WORKER_PHASE
+        parts = components.get(WORKER_PHASE + " (largest)")
+    else:
+        e = run["stages"][stage]
+        phase, parts = e.get("phase", stage), components.get(stage)
+    removed = removed_bytes(parts, keys) if keys else 0
+    return {**estimate(project, phase, max(e["payload_bytes"] - removed, 0), e["max_output_tokens"],
+                       placeholder_tokens=e["placeholder_tokens"]), "carry_basis": e.get("carry_basis")}
+
+
+def summary(results):
+    """The note's cross-project tables, generated from a sweep's results."""
+    out, measured = [], {p: b for p, b in results["projects"].items() if b.get("status") == "MEASURED"}
+    floor_basis = ("workers' smallest responses", "workers' smallest responses, assembled")
+    tag = lambda e: (f"{e['estimated_in_flight_tokens']:,}" + (" over" if e["verdict"] != "estimate_fits" else "")
+                     + (" †" if e.get("carry_basis") in floor_basis else ""))
+
+    def primary(block, grid="G2"):
+        return block["runs"].get(f"{block['primary']}|{grid}", {})
+
+    def name(project, block):
+        return f"{project} (proxy)" if block.get("proxy") else project
+    heads = [h for h, _ in SUMMARY_STAGES]
+    out.append("Current protocol, G2, primary records (estimated tokens in flight; \"over\" passes the "
+               "request's ceiling; † carries the audit at the workers' smallest responses, which here exceed "
+               "the registered output caps' bound):\n")
+    out.append("| Project | " + " | ".join([heads[0], "Largest worker, every record at G2"] + heads[1:]) + " |")
+    out.append("|---|" + "---|" * (len(heads) + 1))
+    for project, block in measured.items():
+        run = primary(block)
+        across = [max(w["estimated_in_flight_tokens"] for w in r["typed"]["workers"])
+                  for k, r in block["runs"].items() if k.endswith("|G2") and r.get("typed", {}).get("status") == "MEASURED"]
+        cells = [tag(option_estimate(project, run, s)) for _, s in SUMMARY_STAGES]
+        out.append(f"| {name(project, block)} | {cells[0]} | {min(across):,}–{max(across):,} ({len(across)}) | "
+                   + " | ".join(cells[1:]) + " |")
+    keys = OPTIONS["S7"][1]
+    out.append("\nUnder S7, G2, primary records:\n")
+    out.append("| Project | " + " | ".join(heads) + " |")
+    out.append("|---|" + "---|" * len(heads))
+    for project, block in measured.items():
+        run = primary(block)
+        out.append(f"| {name(project, block)} | "
+                   + " | ".join(tag(option_estimate(project, run, s, keys)) for _, s in SUMMARY_STAGES) + " |")
+    out.append("\nUnder S7 plus each project's largest record difference at G2 (another record's current "
+               "figure minus the primary's, where positive), the conservative reading:\n")
+    out.append("| Project | " + " | ".join(heads) + " |")
+    out.append("|---|" + "---|" * len(heads))
+    for project, block in measured.items():
+        run, cells = primary(block), []
+        for _, stage in SUMMARY_STAGES:
+            base = option_estimate(project, run, stage)["estimated_in_flight_tokens"]
+            others = [option_estimate(project, r, stage)["estimated_in_flight_tokens"]
+                      for k, r in block["runs"].items() if k.endswith("|G2") and r is not run
+                      and r.get("typed", {}).get("status") == "MEASURED" and (stage is None or stage in r["stages"])]
+            extra = max([o - base for o in others] + [0])
+            e = option_estimate(project, run, stage, keys)
+            total = e["estimated_in_flight_tokens"] + extra
+            cells.append(f"{total:,} (+{extra:,})" + (" over" if total > e["ceiling_tokens"] else ""))
+        out.append(f"| {name(project, block)} | " + " | ".join(cells) + " |")
+    grids = list(results["grid"])
+    allowance = next((r["audit_limits"]["aggregate_input_tokens"] for b in measured.values()
+                      for r in b["runs"].values() if r.get("audit_limits")), 4_000_000)
+    out.append(f"\nTyped input across every typed call of a run, current / S6 / S7, against "
+               f"`aggregate_input_tokens` ({allowance:,}); the options use the G2 components, since a "
+               "worker's shared content does not depend on the partition:\n")
+    out.append("| Project | " + " | ".join(grids) + " |")
+    out.append("|---|" + "---|" * len(grids))
+    for project, block in measured.items():
+        g2, cells = primary(block), []
+        for grid in grids:
+            run = primary(block, grid)
+            totals = [typed_aggregate(project, run)] + [
+                typed_aggregate(project, run, g2.get("components"), OPTIONS[o][1]) for o in ("S6", "S7")]
+            cells.append("refused" if totals[0] is None else " / ".join(
+                f"{t / 1e6:.2f}M" + ("*" if t > allowance else "") for t in totals))
+        out.append(f"| {name(project, block)} | " + " | ".join(cells) + " |")
+    out.append("\n\\* passes the allowance.\n")
+    caps = next((r["audit_limits"] for b in measured.values() for r in b["runs"].values() if r.get("audit_limits")),
+                {})
+    out.append(f"Worker output: the smallest response the worker check accepts, largest worker / all workers, "
+               f"in tokens at {round(1 / FLOOR_TOKENS_PER_BYTE)} bytes a token (at least), with the largest "
+               f"assignment's paths. The registered worker cap is {caps.get('worker_output_tokens', 4_000):,}; "
+               f"`aggregate_output_tokens` is {caps.get('aggregate_output_tokens', 100_000):,}:\n")
+    out.append("| Project | " + " | ".join(grids) + " |")
+    out.append("|---|" + "---|" * len(grids))
+    for project, block in measured.items():
+        cells = []
+        for grid in grids:
+            typed = primary(block, grid).get("typed", {})
+            floors = [w.get("response_floor", {}) for w in typed.get("workers", [])]
+            if typed.get("status") != "MEASURED" or not floors or not all(f.get("passed") for f in floors):
+                cells.append("refused" if typed.get("status") == "REFUSED" else "—")
+                continue
+            tokens = [floor_tokens(f["bytes"]) for f in floors]
+            cells.append(f"{max(tokens):,} / {sum(tokens):,} ({max(w['paths'] for w in typed['workers'])})")
+        out.append(f"| {name(project, block)} | " + " | ".join(cells) + " |")
+    out.append("\nStaging of each stand-in record (conformance edits to the current schema's cardinality):\n")
+    out.append("| Record | Edits | Undeclared slots removed | Bytes before → after |")
+    out.append("|---|---|---|---|")
+    seen = set()
+    for project, block in measured.items():
+        for key, run in block["runs"].items():
+            label = key.split("|")[0]
+            if not key.endswith("|G2") or (block["record_project"], label) in seen:
+                continue
+            seen.add((block["record_project"], label))
+            staging = run.get("staging", {}).get("original_full", {})
+            edits = staging.get("conformance_edits", [])
+            removed = [e.split(" (")[0] for e in edits if e.endswith(", removed)")]
+            before, after = staging.get("source_bytes"), staging.get("staged_bytes")
+            out.append(f"| {block['record_project']} `{label}` | {len(edits)} | "
+                       f"{', '.join(f'`{r}`' for r in removed) or '—'} | {before:,} → {after:,} "
+                       f"({after - before:+,}, {100 * (after - before) / before:+.2f}%) |")
+    return "\n".join(out) + "\n"
+
+
 def merge(full, again):
     """Put a primary-only rerun's component breakdown into a full sweep's results.
 
@@ -1181,6 +1469,8 @@ def main(argv=None):
     run.add_argument("--primary-only", action="store_true", help="each project's primary record only")
     tables = commands.add_parser("table", help="markdown tables from a sweep's results")
     tables.add_argument("results", type=Path)
+    pivot = commands.add_parser("summary", help="the note's cross-project tables from a sweep's results")
+    pivot.add_argument("results", type=Path)
     combine = commands.add_parser("merge", help="add a primary-only rerun's components to a full sweep")
     combine.add_argument("full", type=Path)
     combine.add_argument("rerun", type=Path)
@@ -1188,6 +1478,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.command == "table":
         print(table(json.loads(args.results.read_text(encoding="utf-8"))))
+        return 0
+    if args.command == "summary":
+        print(summary(json.loads(args.results.read_text(encoding="utf-8"))), end="")
         return 0
     if args.command == "merge":
         merged = merge(json.loads(args.full.read_text(encoding="utf-8")),

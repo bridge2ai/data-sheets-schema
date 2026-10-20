@@ -271,12 +271,34 @@ requires:
 
 Content that cannot exist before a run is sized at its output cap, in
 tokens:
-- the assembled audit that reconcile and the report carry: every worker's
-  rows and findings plus integration, so W × the worker cap plus the
-  integration cap;
 - the report as written;
 - the re-address response;
-- every worker and omission response that integration carries.
+- the omission response that integration carries.
+
+The typed workers' output is sized from below as well. For each worker the
+sweep builds its smallest valid response (`response_floor`) and puts it
+through the runtime's own worker check, `audit_batches.check_worker`, which
+the response must pass:
+- one source-review row for every assigned path;
+- each claim quoting its whole value, as source acceptance requires;
+- every other string one character long.
+
+A real response cites real sources, quotes and reasons, so it is larger. The
+tables report the floor against the registered `worker_output_tokens` and
+`aggregate_output_tokens` at 4 bytes a token. That figure is an assumption,
+below every ratio A1b counted, so it errs low. Thinking also draws on each
+worker's `max_tokens`.
+
+Two carries are sized at the larger of two figures, since a completed audit
+carries every row whatever the caps:
+- **The assembled audit** that `reconcile_full` and the report family carry.
+  One figure is the registered caps' bound, W × the worker cap plus the
+  integration cap. The other is the workers' smallest responses assembled
+  by `audit_batches.assemble`, the bytes the runner carries (`floor_assembly`).
+- **The worker responses integration carries.** One figure is their caps;
+  the other is their smallest responses.
+
+Each request records which basis it used (`carry_basis`).
 
 The regate's contradiction listing is not sized. No cap bounds it, and a
 regate happens only when the listing is non-empty.
@@ -295,7 +317,12 @@ The tables also report, for each grid:
 - the estimated input across all of a run's typed calls, against the
   registered `aggregate_input_tokens`, which the runtime checks before every
   typed stage;
-- each worker's assigned inventory, which its output cap must answer for.
+- each worker's assigned inventory and smallest valid response, which its
+  output cap must hold.
+
+`table <results>` prints the per-project tables. `summary <results>` prints
+the cross-project tables an A1 note quotes, so that no cell is copied by
+hand.
 
 A row's verdict is `estimate_fits` or `estimate_exceeds`, against the same
 ceilings as the evidence reader. It is never `PASS`: only an exact saved
