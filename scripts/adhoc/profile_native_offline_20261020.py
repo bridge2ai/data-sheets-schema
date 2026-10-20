@@ -12,8 +12,10 @@ from collections import Counter
 import cProfile
 import hashlib
 import json
+import marshal
 import os
 from pathlib import Path
+import profile as python_profile
 import pstats
 import resource
 import subprocess
@@ -204,6 +206,7 @@ class ThreadCpuProfiles:
         self.rows = []
         self.capped = 0
         self.capped_rows = []
+        self.skipped = Counter()
         self.original = threading.Thread.run
         self.installed = None
 
@@ -211,7 +214,10 @@ class ThreadCpuProfiles:
         original = self.original
 
         def run(thread):
-            if thread.name.startswith("native-diagnostic-"):
+            if not thread.name.endswith("(evaluate)"):
+                with self.lock:
+                    self.skipped[thread.name if len(self.skipped) < self.limit
+                                 or thread.name in self.skipped else "<additional roles>"] += 1
                 return original(thread)
             with self.lock:
                 if len(self.rows) >= self.limit:
@@ -231,17 +237,37 @@ class ThreadCpuProfiles:
                     self.rows.append(row)
             if row is None:
                 return original(thread)
-            profiler = cProfile.Profile(timer=time.thread_time)
+            profiler = None
+            previous = sys.getprofile()
+            entered = False
+            error = None
             started = time.thread_time()
-            profiler.enable()
-            try:
+
+            def target():
+                nonlocal entered
+                entered = True
                 return original(thread)
+
+            try:
+                # CPython 3.13 cProfile uses one interpreter-wide monitoring
+                # slot. stdlib profile instead uses this thread's sys.setprofile.
+                profiler = python_profile.Profile(timer=time.thread_time)
+                return profiler.runcall(target)
+            except BaseException as exc:
+                error = type(exc).__module__ + "." + type(exc).__qualname__
+                if not entered:
+                    sys.setprofile(previous)
+                    return original(thread)
+                raise
             finally:
-                profiler.disable()
+                sys.setprofile(previous)
                 cpu = time.thread_time() - started
                 # No disk writes, pstats processing, joins or cancellation here.
                 with self.lock:
-                    row.update(completed=True, cpu_seconds=cpu, profile=profiler)
+                    row.update(completed=True, cpu_seconds=cpu,
+                               profile=profiler if entered else None,
+                               profile_error=error,
+                               previous_profile_restored=sys.getprofile() is previous)
 
         self.installed = run
         threading.Thread.run = run
@@ -258,17 +284,23 @@ class ThreadCpuProfiles:
             rows = [dict(row) for row in self.rows]
             capped = self.capped
             capped_rows = [dict(row) for row in self.capped_rows]
+            skipped = dict(self.skipped)
         profiles = []
         for row in rows:
             profiler = row.pop("profile", None)
             if profiler is None:
                 continue
             name = f"thread-cpu-{row['ordinal']:03d}.pstats"
-            profiler.dump_stats(output / name)
+            # snapshot_stats never reads the current thread's clock. Calling
+            # create_stats/dump_stats here would finish fake frames using the
+            # MAIN thread's clock, corrupting a completed worker's CPU data.
+            profiler.snapshot_stats()
+            with (output / name).open("wb") as stream:
+                marshal.dump(profiler.stats, stream)
             row["profile"] = name
             profiles.append(str(output / name))
             with (output / name.replace(".pstats", ".txt")).open("w") as stream:
-                pstats.Stats(profiler, stream=stream).sort_stats("cumulative").print_stats(70)
+                pstats.Stats(str(output / name), stream=stream).sort_stats("cumulative").print_stats(70)
         if profiles:
             with (output / "thread-cpu-aggregate.txt").open("w") as stream:
                 combined = pstats.Stats(*profiles, stream=stream)
@@ -277,6 +309,9 @@ class ThreadCpuProfiles:
                 combined.sort_stats("tottime").print_stats(100)
         result = {
             "timer": "time.thread_time", "profile_limit": self.limit,
+            "backend": "profile.Profile with thread-specific sys.setprofile",
+            "selected_role": "thread name ending (evaluate)",
+            "skipped_thread_names": skipped,
             "profiled_threads": len(rows), "capped_threads": capped,
             "capped_thread_identities": capped_rows,
             "omitted_capped_identities": capped - len(capped_rows),
@@ -292,6 +327,69 @@ class ThreadCpuProfiles:
             "threads": rows,
         }
         (output / "thread-cpu.json").write_text(json.dumps(result, indent=2) + "\n")
+        return result
+
+
+def thread_cpu_selfcheck(output):
+    """Offline two-worker isolation check for the profiler, not native acceptance."""
+    recorder = ThreadCpuProfiles()
+    original_profile = sys.getprofile()
+    failures = []
+
+    def main_only_sentinel():
+        return sum(range(100))
+
+    def owner_only_sentinel():
+        return sum(range(200))
+
+    def evaluate_sentinel():
+        return sum(range(300))
+
+    recorder.start()
+    try:
+        for ordinal in range(2):
+            ready, release = threading.Event(), threading.Event()
+
+            def evaluate():
+                ready.set()
+                if not release.wait(2):
+                    failures.append("selfcheck worker release timed out")
+                    return
+                evaluate_sentinel()
+
+            worker = threading.Thread(target=evaluate, name=f"selfcheck-{ordinal}(evaluate)")
+            worker.start()
+            if not ready.wait(2):
+                failures.append("selfcheck worker did not enter its target")
+            main_only_sentinel()
+            owner = threading.Thread(target=owner_only_sentinel, name="stage-fixture-owner")
+            owner.start()
+            owner.join(2)
+            release.set()
+            worker.join(2)
+            if owner.is_alive() or worker.is_alive():
+                failures.append("selfcheck worker did not finish")
+    finally:
+        restored = recorder.restore()
+    result = recorder.write(output, restored=restored)
+    for row in result["threads"]:
+        if not row["completed"] or row.get("profile_error"):
+            failures.append("selfcheck profile incomplete or failed")
+        if not row.get("previous_profile_restored"):
+            failures.append("worker sys.setprofile was not restored")
+        if "profile" in row:
+            names = {key[2] for key in pstats.Stats(str(output / row["profile"])).stats}
+            if "evaluate_sentinel" not in names:
+                failures.append("worker sentinel absent from its profile")
+            if {"main_only_sentinel", "owner_only_sentinel"} & names:
+                failures.append("foreign thread sentinel entered worker profile")
+    if result["completed_threads"] != 2 or sys.getprofile() is not original_profile:
+        failures.append("selfcheck count or main profile restoration mismatch")
+    result.update(passed=not failures, failures=failures)
+    (output / "thread-cpu-selfcheck.json").write_text(json.dumps(result, indent=2) + "\n")
+    print(json.dumps({"passed": result["passed"], "failures": failures,
+                      "completed_threads": result["completed_threads"]}), flush=True)
+    return int(bool(failures))
 
 
 def source_state():
@@ -437,13 +535,14 @@ def origin_resolution_benchmark(root, output, *, contended=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("case", choices=(*NODES, 'origin_resolution', 'origin_resolution_contended'))
+    parser.add_argument("case", choices=(*NODES, 'origin_resolution', 'origin_resolution_contended',
+                                        'thread_cpu_selfcheck'))
     parser.add_argument("--output", required=True, type=Path)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--sample-threads", action="store_true",
                       help="Sample Python stacks instead of cProfile; preserves owner-thread execution.")
     mode.add_argument("--profile-thread-cpu", action="store_true",
-                      help="Diagnostic bounded Thread.run profiles using each thread's CPU clock.")
+                      help="Diagnostic evaluate-worker profiles using thread-specific CPU clocks.")
     parser.add_argument("--summarize-existing", action="store_true",
                         help="Rebuild only a saved thread-summary.txt; do not run tests.")
     args = parser.parse_args()
@@ -457,6 +556,8 @@ def main():
         ThreadSamples.write_summary(output, json.loads((output / "thread-samples.json").read_text()))
         return 0
     output.mkdir(parents=True, exist_ok=False)
+    if args.case == "thread_cpu_selfcheck":
+        return thread_cpu_selfcheck(output)
     if args.case in ('origin_resolution', 'origin_resolution_contended'):
         if args.sample_threads or args.profile_thread_cpu:
             parser.error('origin-resolution comparison does not profile test threads')
@@ -471,28 +572,27 @@ def main():
     before = [resource.getrusage(kind) for kind in (resource.RUSAGE_SELF, resource.RUSAGE_CHILDREN)]
     load_before = os.getloadavg()
     started = time.perf_counter()
-    profile = (cProfile.Profile(timer=time.thread_time) if args.profile_thread_cpu
-               else cProfile.Profile())
+    profile = cProfile.Profile() if not args.profile_thread_cpu else None
     sampler = ThreadSamples() if args.sample_threads else None
     thread_profiles = ThreadCpuProfiles() if args.profile_thread_cpu else None
     if thread_profiles is not None:
         thread_profiles.start()
-    if sampler is None:
+    if profile is not None and sampler is None:
         profile.enable()
-    else:
+    elif sampler is not None:
         sampler.thread.start()
     try:
         code = pytest.main(["-q", "-p", "no:cacheprovider",
                             "--basetemp", str(output / "cases"), NODES[args.case]])
     finally:
-        if sampler is None:
+        if profile is not None and sampler is None:
             profile.disable()
-        else:
+        elif sampler is not None:
             sampler.finish(output)
         restored = thread_profiles.restore() if thread_profiles is not None else None
         elapsed = time.perf_counter() - started
         after = [resource.getrusage(kind) for kind in (resource.RUSAGE_SELF, resource.RUSAGE_CHILDREN)]
-        if sampler is None:
+        if profile is not None and sampler is None:
             profile.dump_stats(output / "profile.pstats")
             with (output / "profile.txt").open("w") as stream:
                 pstats.Stats(profile, stream=stream).sort_stats("cumulative").print_stats(100)
