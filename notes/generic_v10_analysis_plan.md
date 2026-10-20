@@ -16,7 +16,7 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
   - `notes/recall_target_baseline.md`;
   - `notes/arm_comparison.md`;
   - `data/_wcrate/README.md`;
-  - Lane C1's A1 note, commit `e38abbf4c` (item 15).
+  - Lane C1's A1 note, commit `0d45c1ec8` (item 15).
 - **Plan dependencies:** P2 depends on G3, P1, A1 and A1b.
   - P1 is done.
   - G3 is partly decided (see the decision status below).
@@ -586,9 +586,13 @@ states it and its source before P4.
         terminal after one worker is billed;
       - an answer that fits, by declaring rows as metadata or by shortening its
         quotes, passes the worker stage and fails at assembly, after every typed stage
-        is billed. The metadata form is open now under the registered caps. The worker
-        grammar accepts a metadata row for any path, and an all-metadata answer is
-        2,226–2,904 tokens for the largest worker at G2.
+        is billed. The worker grammar accepts a metadata row for any path.
+        - Under the registered caps, the metadata form is open where an all-metadata
+          answer fits under the cap at A1b's ratios: at G1, and at G2 and G4 for
+          CHORUS, VOICE and VOICE_PEDIATRIC (1,744–3,852 tokens for the largest
+          worker, before thinking).
+        - For AI_READI, CM4AI and Kids First it is at the cap's edge (3,924–4,763).
+        - With raised caps it is open at every grid (item 15).
 
       The causes are the registration's limit and the worker check's permissiveness,
       so a contingency under the same limits would reproduce the stop. The remedies:
@@ -735,13 +739,13 @@ not the numbers. Item 15 shows the numbers cannot yet be set.
 
 Still pending. The A1 offline sizing has a result: Lane C1's
 `notes/a1_offline_sizing_2026-10-20.md` on branch `fix/5072-offline-sizing-recovery`,
-commit `e38abbf4c`, local and readable with `git show`, note sha256
-`c17aed61085a04baba171544ff43da7c592d7f238312f10501e5b0fef2642cd8`.
+commit `0d45c1ec8`, local and readable with `git show`, note sha256
+`9df27d8e77a24aed80aa3bc206a32fa94755781f80e8474bd496f6102832b4e3`.
 - It was under a final verification when this was written.
 - It replaces the note's first version (`64082b98d`, `e6d46f3a3`), whose
   recommendation and three of whose claims it corrects. Its "Corrections" section
   also lists the errors of two unpushed intermediate revisions, `118af93de` and
-  `9dcb4390a`. The second of these is the one this draft cited before.
+  `9dcb4390a`. This draft cited `9dcb4390a` and then `e38abbf4c` before.
 - It measured tree `8ea79861` (PR #5095's pre-launch stack).
 - Every token figure in it is an estimate from bytes, except where it quotes A1b's
   count.
@@ -770,12 +774,24 @@ Its answer, in the order a run would meet the problems:
      - Its grammar accepts a declared-metadata row (`{"path", "metadata_reason"}`)
        for any path. Only the terminal check, at assembly, asks whether the path may be
        declared metadata (`record_metadata_allowed`).
-     - An answer that declares every row as metadata is 2,226–2,904 tokens for the
-       largest worker at G2, under the cap.
-   - **So the costlier failure path is open now.** Such an answer passes the worker
-     stage under the registered caps, and fails only at assembly, after every typed
-     stage is billed. With the raised caps a valid answer needs, the path is open at
-     every grid.
+     - An all-metadata answer for the largest worker, before any thinking (C1 Result
+       2):
+
+       | grid | at 4 bytes a token | at A1b's ratios | against the 4,000 cap |
+       |---|---|---|---|
+       | G1 (CHORUS, VOICE, VOICE_PEDIATRIC) | 1,282–1,355 | 1,744–2,223 | under |
+       | G2 and G4, those three | 2,226–2,349 | 3,027–3,852 | under |
+       | G2 and G4, AI_READI, CM4AI, Kids First | 2,885–2,904 | 3,924–4,763 | at the edge |
+
+       Figures at 4 bytes a token err low (the note), so they cannot by themselves
+       show that an answer fits under the cap. The verdict column rests on A1b's
+       ratios.
+   - **So the costlier failure path is open where that answer fits.** Such an answer
+     passes the worker stage and fails only at assembly, after every typed stage is
+     billed.
+     - Under the registered caps, it is open at G1, and at G2 and G4 for CHORUS, VOICE
+       and VOICE_PEDIATRIC. For AI_READI, CM4AI and Kids First it is at the edge.
+     - With the raised caps any valid answer needs, it is open at every grid.
    - **A runtime fix to consider** (C1 Finding 1). If `check_worker` refused a
      metadata row on a path not allowed one, that form would fail at the worker stage,
      at the cost of one worker.
