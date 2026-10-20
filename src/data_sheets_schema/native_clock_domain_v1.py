@@ -22,6 +22,9 @@ _NAMESPACE_PATH = '/proc/thread-self/ns/time'
 _NS_GET_NSTYPE = 0xb703
 _CLONE_NEWTIME = 0x00000080
 _OMITTED = object()
+# Declaration storage only; never retain a boot identifier, timebase value or
+# domain verdict. Threads own separate ctypes functions and their signatures.
+_DARWIN_BINDINGS = threading.local()
 
 
 class ClockDomainError(ValueError):
@@ -168,14 +171,46 @@ def _linux():
         raise ClockDomainError('Linux clock-domain acquisition unavailable') from error
 
 
-def _darwin_values():
-    """Two fixed in-process libSystem queries; no search, process or provider."""
-    import ctypes
+def _darwin_sysctl_binding(ctypes):
+    key = tuple(getattr(ctypes, name, _OMITTED) for name in (
+        'CDLL', 'POINTER', 'c_char_p', 'c_void_p', 'c_size_t', 'c_int'))
+    saved = getattr(_DARWIN_BINDINGS, 'sysctl', None)
+    if saved is not None and all(a is b for a, b in zip(key, saved[0])):
+        return saved[1]
     library = ctypes.CDLL('/usr/lib/libSystem.B.dylib', use_errno=True)
     sysctl = library.sysctlbyname
     sysctl.argtypes = [ctypes.c_char_p, ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t),
                       ctypes.c_void_p, ctypes.c_size_t]
     sysctl.restype = ctypes.c_int
+    value = library, sysctl
+    _DARWIN_BINDINGS.sysctl = key, value
+    return value
+
+
+def _darwin_timebase_binding(ctypes, library):
+    # This helper is called only after the current boot query is validated,
+    # preserving the first refusal when the boot and Mach binding both fail.
+    key = (library,) + tuple(getattr(ctypes, name, _OMITTED) for name in (
+        'Structure', 'c_uint32', 'POINTER', 'c_int'))
+    saved = getattr(_DARWIN_BINDINGS, 'timebase', None)
+    if saved is not None and all(a is b for a, b in zip(key, saved[0])):
+        return saved[1]
+
+    class Timebase(ctypes.Structure):
+        _fields_ = [('numer', ctypes.c_uint32), ('denom', ctypes.c_uint32)]
+
+    timebase = library.mach_timebase_info
+    timebase.argtypes = [ctypes.POINTER(Timebase)]
+    timebase.restype = ctypes.c_int
+    value = Timebase, timebase
+    _DARWIN_BINDINGS.timebase = key, value
+    return value
+
+
+def _darwin_values():
+    """Two fresh in-process libSystem queries; only declarations are reused."""
+    import ctypes
+    library, sysctl = _darwin_sysctl_binding(ctypes)
     output = ctypes.create_string_buffer(37)
     size = ctypes.c_size_t(37)
     if sysctl(b'kern.bootsessionuuid', output, ctypes.byref(size), None, 0) != 0:
@@ -186,12 +221,7 @@ def _darwin_values():
     if not _uuid(boot):
         raise ClockDomainError('macOS boot identifier is invalid')
 
-    class Timebase(ctypes.Structure):
-        _fields_ = [('numer', ctypes.c_uint32), ('denom', ctypes.c_uint32)]
-
-    timebase = library.mach_timebase_info
-    timebase.argtypes = [ctypes.POINTER(Timebase)]
-    timebase.restype = ctypes.c_int
+    Timebase, timebase = _darwin_timebase_binding(ctypes, library)
     result = Timebase()
     if timebase(ctypes.byref(result)) != 0 or not result.numer or not result.denom:
         raise ClockDomainError('macOS Mach timebase unavailable')
