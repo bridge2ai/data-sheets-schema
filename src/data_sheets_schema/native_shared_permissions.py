@@ -823,6 +823,14 @@ def effect_stop(expected, policy, case, view, call, callback, classification):
 
 
 def _trace(expected, selection, trace, raw, controls, *, argv_controls=None):
+    # A fresh context for each trace, restored even on refusal. All routing,
+    # strict carrier checks and classifiers still execute for every case.
+    with command_policy._policy_digest_scope():
+        return _trace_body(expected, selection, trace, raw, controls,
+                           argv_controls=argv_controls)
+
+
+def _trace_body(expected, selection, trace, raw, controls, *, argv_controls=None):
     prefix = 'traces/' + trace + '/'
     launch = _json(raw[prefix + 'launch.json'])
     policy = projected_policy(expected, selection, launch['effect_root'])
@@ -1011,10 +1019,16 @@ def _verify(raw_manifest, expected, *, argv_controls=None):
     # The wrapper has two supported canonical UTF-8 encodings. Raw member text
     # itself is never normalized. This makes the metadata wire bound exact,
     # rather than allowing arbitrary whitespace to evade that separate bound.
-    canonical_forms = [json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=ascii_only,
-                                  allow_nan=False).encode('utf-8') for ascii_only in (False, True)]
-    _need(raw_manifest in canonical_forms, 'manifest wrapper must use canonical JSON encoding')
-    ascii_only = raw_manifest == canonical_forms[1]
+    canonical_utf8 = json.dumps(value, sort_keys=True, separators=(',', ':'),
+                                ensure_ascii=False, allow_nan=False).encode('utf-8')
+    ascii_only = False
+    if raw_manifest != canonical_utf8:
+        canonical_ascii = json.dumps(value, sort_keys=True, separators=(',', ':'),
+                                     ensure_ascii=True, allow_nan=False).encode('utf-8')
+        _need(raw_manifest == canonical_ascii, 'manifest wrapper must use canonical JSON encoding')
+        ascii_only = True
+    # When both encodings coincide, every member's encoded length also
+    # coincides. Choosing UTF-8 therefore preserves the exact metadata bound.
     raw = _members(value['members'])
     content_wire = sum(len(json.dumps(row['text'], ensure_ascii=ascii_only).encode()) - 2
                        for row in value['members'].values())

@@ -6,6 +6,8 @@ renderer. This adapter does not widen the historical helper argument grammar.
 from __future__ import annotations
 
 import shlex
+from contextlib import contextmanager
+from contextvars import ContextVar
 from copy import deepcopy
 from functools import lru_cache
 from pathlib import Path
@@ -165,6 +167,40 @@ def classify_bash(command,python,programs,policy,controls=None):
     return controls['run_native_canary']._classify_command(command,python,programs,policy)
 
 
+# One exact-byte digest, only during a saved trace's synchronous replay. This
+# stores no parsed policy, permission result, source check or admission.
+_TRACE_POLICY_DIGEST = ContextVar('native_shared_trace_policy_digest', default=None)
+_TRACE_POLICY_DIGEST_BYTES = 4 * 1024 * 1024
+
+
+@contextmanager
+def _policy_digest_scope():
+    token = _TRACE_POLICY_DIGEST.set(())
+    try:
+        yield
+    finally:
+        _TRACE_POLICY_DIGEST.reset(token)
+
+
+def _stage_policy_sha(policy):
+    # Canonicalize the current policy on EVERY call, including cache hits.
+    # Mutation, malformed values and encoding errors cannot hide behind an
+    # earlier digest. Keep the current hash implementation in the exact key.
+    raw = c.canonical(policy)
+    memo = _TRACE_POLICY_DIGEST.get()
+    implementation, constructor = c.sha, c.hashlib.sha256
+    if (memo and memo[1] is implementation and memo[2] is constructor
+            and memo[0] == raw):
+        return memo[3]
+    digest = implementation(raw)
+    if memo is not None:
+        # Oversized input keeps the original behavior without retaining it.
+        _TRACE_POLICY_DIGEST.set(
+            (raw, implementation, constructor, digest)
+            if len(raw) <= _TRACE_POLICY_DIGEST_BYTES else ())
+    return digest
+
+
 def stage_overlay_governs(view, *, tool_name, tool_input, policy):
     """Route exact selected helpers after the independent phase check.
 
@@ -175,7 +211,7 @@ def stage_overlay_governs(view, *, tool_name, tool_input, policy):
     from . import native_shared_effects as effects
     governed = effects.governs_stage_effect(view, tool_name=tool_name, tool_input=tool_input)
     commands = helper_commands(policy)
-    if (view.static_policy_sha256 != c.sha(c.canonical(policy))
+    if (view.static_policy_sha256 != _stage_policy_sha(policy)
             or view.stage_command != commands['advance']):
         raise ValueError('stage routing policy differs from the selected view')
     if governed and tool_name == 'Bash':
