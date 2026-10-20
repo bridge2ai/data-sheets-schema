@@ -369,7 +369,7 @@ class TestRunDateRecoveryPaths(unittest.TestCase):
             runtime="Claude Code", provider="Anthropic", run_date="2026-10-14",
             manifest_line=ARMS["baseline"][3]))
 
-    def _record(self, label, text=None, today="2026-10-20", extra=()):
+    def _record(self, label, text=None, today="2026-10-20", extra=(), runtime="Claude Code"):
         import datetime as _dt
         from unittest import mock
         from data_sheets_schema.cli import provenance as prov_cli
@@ -389,9 +389,40 @@ class TestRunDateRecoveryPaths(unittest.TestCase):
             r = CliRunner().invoke(prov_cli.provenance, [
                 "record", "--project", "VOICE", "--method", "claudecode_agent",
                 "--label", label, "--input-bundle", str(self.bundle),
-                "--condition", "generic_v8", "--runtime", "Claude Code",
+                "--condition", "generic_v8", "--runtime", runtime,
                 "--provider", "Anthropic", "--prompt-text", str(self.prompt_file), *extra])
         return r, build
+
+    def test_a_non_canonical_runtime_records_the_spec_render_prompt_used(self):
+        """#5091 R1: render-prompt reads `--runtime 'claude code'` as 'Claude Code'.
+        The recorder must too, or a pair given the same spelling records a spec
+        that re-renders to other text and the gate reports a false mismatch."""
+        import datetime as _dt
+        import hashlib
+        from data_sheets_schema.api_runner import RunSpec, resolve_prompt
+        from data_sheets_schema.cli.api import api as api_cli
+
+        canonical = None
+        for spelling in ("Claude Code", "claude code", " Claude Code ", "CLAUDE CODE"):
+            with self.subTest(runtime=spelling):
+                rendered = CliRunner(mix_stderr=False).invoke(api_cli, [
+                    "render-prompt", "--project", "VOICE", "--label", self.LABEL,
+                    "--condition", "generic_v8", "--runtime", spelling, "--method", "claudecode_agent",
+                    "--provider", "Anthropic", "--bundle", str(self.bundle), "--out", str(self.prompt_file)])
+                self.assertEqual(rendered.exit_code, 0, rendered.stderr)
+                sent = self.prompt_file.read_text(encoding="utf-8")
+                canonical = canonical or sent
+                self.assertEqual(sent, canonical)   # the 'Claude Code' instruction
+                # Recorded the day it was rendered, with the same spelling.
+                r, build = self._record(self.LABEL, text=sent, today=_dt.date.today().isoformat(),
+                                        runtime=spelling)
+                self.assertEqual(r.exit_code, 0, r.output)
+                spec = build.call_args.kwargs["prompt_request_spec"]
+                self.assertIsNotNone(spec, r.output)
+                self.assertEqual(spec["runtime"], "Claude Code")
+                replay = RunSpec.from_render_spec(spec, project="VOICE", method="claudecode_agent", label=self.LABEL)
+                self.assertEqual(hashlib.sha256(resolve_prompt(replay).encode()).hexdigest(),
+                                 hashlib.sha256(sent.encode()).hexdigest())
 
     def test_indented_generated_header_alone_recovers_the_date(self):
         # Neither today (10-20) nor the label (none) is within ±2 days of the

@@ -85,6 +85,10 @@ RUNTIME_KEYS = {"claude code": "agentic", "claude api (direct)": "api",
 #: Every runtime key, in the order the reports list them: what `--runtime`
 #: admits and what `canonical_sets` enumerates (#2211, #2210).
 RUNTIME_CHOICES = ("api", "agentic", "direct")
+#: The spelling each key is recorded under. `RunSpec.is_agentic`,
+#: `AGENTIC_RUNTIMES` and the rendered text compare exact strings.
+CANONICAL_RUNTIMES = {"agentic": "Claude Code", "api": "Claude API (direct)",
+                      "direct": "Claude Code (direct)"}
 #: The keys whose executing program is the Claude Code binary, whatever
 #: transport reaches the model (#2202): the agentic arm through the local
 #: proxy to CBORG, the direct arm on the maintainer's subscription. Both read
@@ -98,6 +102,19 @@ def is_claude_code_runtime(runtime: str | None) -> bool:
     if not isinstance(runtime, str):
         return False
     return RUNTIME_KEYS.get(runtime.strip().lower()) in CLAUDE_CODE_KEYS
+
+
+def canonical_runtime(runtime: str | None) -> str | None:
+    """A `--runtime` in the spelling the records use (#5089 F2, #5091 R1).
+
+    `RUNTIME_KEYS` folds case and whitespace, but the rendered text keys on
+    exact membership, so `'claude code'` once rendered API text with agentic
+    paths. The render and the recorder both pass their `--runtime` through
+    here, so a pair given the same spelling builds the same spec. A runtime
+    with no key (`Codex CLI`, a double space) is returned as given."""
+    if not isinstance(runtime, str):
+        return runtime
+    return CANONICAL_RUNTIMES.get(RUNTIME_KEYS.get(runtime.strip().lower()), runtime)
 
 
 def runtime_of(record: dict) -> str | None:
