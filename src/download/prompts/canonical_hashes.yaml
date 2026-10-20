@@ -509,13 +509,20 @@ files:
       released condition.
     sha256: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
   .claude/commands/d4d-uniform-rules-v2.md:
-    bytes: 26356
-    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    bytes: 27544
+    pinned_at_commit: a40ea01d119fea06165afc3dcab241f273b084f8
     pinned_blob_path: .claude/commands/d4d-uniform-rules-v2.md
-    pinned_on: '2026-10-03'
-    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-      released condition.
-    sha256: 7b511b1ef15d6fb56d47dc58b367196ed9c7269a61406ed19127481f719c885a
+    pinned_on: '2026-10-19'
+    reason: Clarify R9 criteria-defined enumerations (ConfidentialityLevelEnum and
+      ComplianceStatusEnum) at the generic_v10 boundary (#5048); preserve v8/v9
+      prompt digests unchanged.
+    sha256: 5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129
+    superseded:
+    - pinned_on: '2026-10-03'
+      reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+        released condition.
+      retired_on: '2026-10-19'
+      sha256: 7b511b1ef15d6fb56d47dc58b367196ed9c7269a61406ed19127481f719c885a
   src/download/prompts/api_playbook_v2.md:
     body_sha256: 0a559d17c802f68a3e349185399e1d6255d14cb10303f1ed6e58f03a010813b3
     bytes: 4492
@@ -526,14 +533,21 @@ files:
       released condition.
     sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
   src/download/prompts/d4d_generic_arm_prompt_v10.md:
-    body_sha256: b19350c15903696d1c11781ff7257751985ce401947f3c9588b8ce19da208d13
-    bytes: 29014
-    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    body_sha256: 398559e0050492a728085992a1cd14534b860780dda94ce63330855359afcca9
+    bytes: 30186
+    pinned_at_commit: a40ea01d119fea06165afc3dcab241f273b084f8
     pinned_blob_path: src/download/prompts/d4d_generic_arm_prompt_v10.md
-    pinned_on: '2026-10-03'
-    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-      released condition.
-    sha256: a3a2004cef2147b3351613cb38a67abde1d58c91c19ee0c72c66ff476d0722ec
+    pinned_on: '2026-10-19'
+    reason: Clarify R9 criteria-defined enumerations (ConfidentialityLevelEnum and
+      ComplianceStatusEnum) at the generic_v10 boundary (#5048); preserve v8/v9
+      prompt digests unchanged.
+    sha256: 7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb
+    superseded:
+    - pinned_on: '2026-10-03'
+      reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+        released condition.
+      retired_on: '2026-10-19'
+      sha256: a3a2004cef2147b3351613cb38a67abde1d58c91c19ee0c72c66ff476d0722ec
   src/download/prompts/receipt_completion_runtime_v2.md:
     bytes: 3158
     pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
