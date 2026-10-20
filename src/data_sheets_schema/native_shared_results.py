@@ -6,7 +6,7 @@ passing flags for stage, phase, permission, attribution or final evidence checks
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -20,6 +20,31 @@ from . import native_supervisor_gates as shared
 
 POOL_NAME = 'native-shared-capture.json'
 REPORT_KIND = 'native_shared_saved_reconstruction'
+
+
+@dataclass(frozen=True, slots=True)
+class _OwnerInitializationEvidence:
+    """Detached captured claims, with no run/reader/decision/publication surface."""
+    _raw: bytes
+
+    def __post_init__(self):
+        if type(self._raw) is not bytes:
+            raise ValueError('initialization evidence requires immutable canonical bytes')
+        document = c.strict_json(self._raw, 'owner initialization evidence', c.HARD_LIMITS['request_bytes'])
+        c.exact(document, {'format', 'scope', 'identities', 'owner', 'initialized_observation',
+            'session_binding', 'history', 'stream_files', 'prefixes', 'members', 'counts'},
+            'owner initialization evidence')
+        if (document['format'] != 'native_owner_initialized_evidence_v1'
+                or document['scope'] != 'captured_initialization_only' or c.canonical(document) != self._raw):
+            raise ValueError('unknown or noncanonical owner initialization evidence')
+
+    def as_dict(self):
+        return c.strict_json(self._raw, 'owner initialization evidence', c.HARD_LIMITS['request_bytes'])
+
+
+def _require_default_result(value):
+    if capture_api._selected_owner_execution(value):
+        raise ValueError('selected owner evidence is initialization-only; full result certification is unavailable')
 
 
 class Snapshot:
@@ -99,6 +124,8 @@ def _captured_selection(pool, value):
 
 def rebuild(pool, value, *, _catalogs=None):
     """Reconstruct the captured run; this function performs no filesystem reads."""
+    if capture_api._selected_owner_execution(value):
+        return _rebuild_owner_initialization(pool, value)
     from .api_runner import RunSpec
     selected = _captured_selection(pool, value)
     if sum(member.captured.pin.bytes for member in pool.members) > selected.bounds()['max_evidence_bytes']:
@@ -141,6 +168,85 @@ def rebuild(pool, value, *, _catalogs=None):
         result._prefixes = _catalogs._prefixes
     capture_api._checked_observations(result)
     return result
+
+
+def _rebuild_owner_initialization(pool, value):
+    """Check the complete initial checkpoint, then discard all run machinery."""
+    selected = capture_api._saved_selection(pool, value)
+    execution = capture_api._saved_member(pool, 'execution_capture', selected.role('execution_capture')).captured
+    actual = c.strict_json(execution.raw, 'owner captured E', c.HARD_LIMITS['request_bytes'])
+    if c.canonical(actual) != c.canonical(value):
+        raise ValueError('owner captured execution differs from the exact supplied typed value')
+    reader = capture_api._Reader(selected, pool=pool, execution=execution)
+    value, composition = capture_api._saved_owner_execution(selected, pool, execution)
+    raw_total = sum(member.captured.pin.bytes for member in pool.members)
+    if raw_total > selected.bounds()['max_evidence_bytes']:
+        raise ValueError('complete owner initialization capture exceeds the selected evidence bound')
+    # Every pool entry must be one exact authority or checkpoint member. Keep
+    # all schema closure bytes; refuse later outputs instead of dropping them.
+    authorities = (selected.registration, selected.receipt_policy, *selected.authority,
+                   *(item for schema in selected.schemas for item in schema.sources))
+    allowed = {(item.pin.role, item.pin.path) for item in authorities}
+    allowed.update((role, selected.role(role)) for role in
+                   ('execution_capture', 'started_capture', 'session_binding', 'journal'))
+    allowed.add(('owner', str(Path(value['attempt_directory']) / 'stream-owner.json')))
+    allowed.update((role, str(Path(value['attempt_directory']) / (role + '.jsonl')))
+                   for role in ('transcript', 'control'))
+    allowed.add(('observation', str(Path(selected.role('observations_root')) / '000000.json')))
+    allowed.update(('record', str(Path(selected.role('journal_records_root')) / f'{number:06d}.json'))
+                   for number in (0, 1))
+    pairs = [(member.captured.pin.role, member.captured.pin.path) for member in pool.members]
+    if len(set(pairs)) != len(pairs) or set(pairs) != allowed:
+        raise ValueError('owner initialization requires the complete exact one-observation/two-record pool')
+    for member in pool.members:
+        # Recheck the actual immutable raw/metadata contract, not a saved pass flag.
+        c.CapturedArtifact(pin=member.captured.pin, raw=member.captured.raw)
+        evidence.PoolMember(captured=member.captured, metadata_json=member.metadata_json)
+    binding = capture_api._binding(selected, value, composition, reader, pool)
+    doc, transcript, control = capture_api.observation(binding.init_observation, selected, binding, pool)
+    if doc['version'] != 2 or doc['observation_type'] != 'initialized':
+        raise ValueError('owner initialization requires its sole initialized-v2 observation')
+    owner_artifact = reader.pinned(doc['payload']['owner'])
+    owner = capture_api._saved_owner(selected, pool, execution, binding.started, owner_artifact)
+    streams = tuple(_member(pool, role, str(Path(value['attempt_directory']) / (role + '.jsonl')))
+                    for role in ('transcript', 'control'))
+    for prefix, member in zip((transcript, control), streams):
+        if prefix.raw != member.captured.raw:
+            raise ValueError('initialization prefixes must account for the complete captured streams')
+    # The finite checkpoint ends at initialization, not a later tool/decision.
+    native_rows, control_rows = observed.rows(transcript), observed.rows(control)
+    if (len(native_rows) != 2 or len(control_rows) != 2
+            or [row[2].get('type') for row in native_rows] != ['control_response', 'system']
+            or [row[2].get('kind') for row in control_rows] != ['initialize_sent', 'initialize_ack']):
+        raise ValueError('owner initialization contains unsupported later or additional stream rows')
+    observed.Trace(transcript, control, session_id=binding.session_id,
+                   policy=composition['policy'], runtime=value['runtime'])
+    history = reader.history(binding)
+    from . import native_shared_stage as stage
+    rows, _ = stage._history(selected, binding, history)
+    if ([row['record_type'] for row in rows] != ['genesis', 'session_bound']
+            or rows[0]['payload'] != {'execution': c.pin_dict(execution.pin), 'started': c.pin_dict(binding.started.pin)}
+            or rows[1]['payload'] != {'binding': c.pin_dict(binding.binding_artifact.pin),
+                                     'init_observation': c.pin_dict(binding.init_observation.pin)}):
+        raise ValueError('owner initialization lacks exactly its genesis/session_bound records')
+    document = {'format': 'native_owner_initialized_evidence_v1', 'scope': 'captured_initialization_only',
+        'identities': {'selection_sha256': selected.registration.pin.sha256,
+            'execution_sha256': execution.pin.sha256, 'composition_sha256': value['composition_sha256'],
+            'started_sha256': binding.started.pin.sha256, 'attempt_id': binding.attempt_id,
+            'session_id': binding.session_id},
+        'owner': {'pin': c.pin_dict(owner_artifact.pin), 'declaration': owner},
+        'initialized_observation': {'pin': c.pin_dict(binding.init_observation.pin), 'document': doc},
+        'session_binding': {'pin': c.pin_dict(binding.binding_artifact.pin),
+            'document': c.strict_json(binding.binding_artifact.raw, 'captured binding')},
+        'history': {'journal': c.pin_dict(history.journal.pin),
+            'records': [c.pin_dict(item.pin) for item in history.records]},
+        'stream_files': doc['payload']['stream_files'],
+        'prefixes': {prefix.stream: evidence.prefix_reference(prefix, execution_sha256=execution.pin.sha256)
+                     for prefix in (transcript, control)},
+        'members': [{'pin': c.pin_dict(member.captured.pin), 'metadata': c.strict_json(member.metadata_json)}
+                    for member in sorted(pool.members, key=lambda item: (item.captured.pin.role, item.captured.pin.path))],
+        'counts': {'members': len(pool.members), 'raw_bytes': raw_total, 'observations': 1, 'history_records': 2}}
+    return _OwnerInitializationEvidence(c.canonical(document))
 
 
 def _capture_member(snapshot, path, role, limit, expected=None):
@@ -244,6 +350,7 @@ def _readonly(command, policy, snapshot, controls):
 
 
 def prepare(pool, value, controls, *, snapshot=None, _catalogs=None):
+    _require_default_result(value)
     from . import native_shared_attribution as attribution
     from . import native_shared_gates as gates
     from .audit_omissions import _mapping
@@ -401,8 +508,11 @@ project = shared.project
 
 
 def write_report(prepared, destination):
+    if type(prepared) is _OwnerInitializationEvidence:
+        raise ValueError('initialization-only evidence cannot publish a full result report')
     from .native_attempt_supervisor import durable_new
     value = prepared['value']
+    _require_default_result(value)
     expected = Path(value['evidence_directory']) / 'attribution-replay.json'
     if Path(destination) != expected:
         raise ValueError('native saved report must use its exact E evidence destination')
@@ -420,6 +530,7 @@ def require_saved_basis(value, result):
     """Additional fixed readback; failed attempts never gain success by omission."""
     # The common reader has already checked a declared report from the bytes
     # retained by its file validation loop, including an unavailable capture.
+    _require_default_result(value)
     if 'receipt_origin_reporting' not in value and 'receipt_origin' in result['gates']['receipts']:
         raise ValueError('undeclared receipt-origin gate extension')
     additional = result.get('additional_report')
@@ -498,6 +609,7 @@ def require_saved_basis(value, result):
 
 def validate_file_basis(value, result, *, retain_paths=()):
     """Native-only bound before the common reader's historical file loop."""
+    _require_default_result(value)
     files = result['captured_files']
     if len(files) > c.HARD_LIMITS['captured_members']:
         raise ValueError('saved native file catalog exceeds its bounded count')

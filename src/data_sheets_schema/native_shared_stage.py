@@ -786,18 +786,23 @@ def main():
     advance = commands.add_parser('advance')
     advance.add_argument('--registration', required=True)
     args = parser.parse_args()
-    from .native_shared_capture import capture_stage, publish_stage
-    catalogs = nr._catalog_context()
-    invocation = capture_stage(args.registration, _catalogs=catalogs)
-    selected = (invocation.selection, invocation.execution, invocation.phase1, invocation.history)
-    replay = _Replay(*selected, _catalogs=catalogs).run()
-    if replay.pending is not None and replay.pending[-1] is not None:
-        response, _ = replay.pending[-1]
-        proposal = _check_response(*selected, replay.pending[2].raw, response.raw, catalogs)
-    else:
-        proposal = _prepare_next(*selected, catalogs)
-    result = publish_stage(invocation, proposal, _catalogs=catalogs)
-    print(c.canonical(result).decode('utf-8'))
+    from .native_shared_capture import _helper_owner_scope, capture_stage, publish_stage
+    with _helper_owner_scope(args.registration) as owner_context:
+        catalogs = nr._catalog_context()
+        invocation = capture_stage(args.registration, owner_context=owner_context, _catalogs=catalogs)
+        selected = (invocation.selection, invocation.execution, invocation.phase1, invocation.history)
+        replay = _Replay(*selected, _catalogs=catalogs).run()
+        if replay.pending is not None and replay.pending[-1] is not None:
+            response, _ = replay.pending[-1]
+            proposal = _check_response(*selected, replay.pending[2].raw, response.raw, catalogs)
+        else:
+            proposal = _prepare_next(*selected, catalogs)
+        result = publish_stage(invocation, proposal, owner_context=owner_context, _catalogs=catalogs)
+        acknowledgement = c.canonical(result).decode('utf-8')
+        if owner_context is not None:
+            owner_context.require_current()
+    # Cleanup-only failure must not emit a success-shaped acknowledgement.
+    print(acknowledgement)
 
 
 if __name__ == '__main__':

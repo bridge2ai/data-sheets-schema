@@ -10,6 +10,7 @@ from pathlib import Path
 import sys
 from copy import deepcopy
 from dataclasses import asdict
+from contextlib import contextmanager, nullcontext
 
 from . import native_shared_contract as c
 from . import native_shared_render as render
@@ -46,53 +47,116 @@ def bind_runtime(spec, runtime_path, max_draft_checks):
     return spec
 
 
-def compose(spec, *, runtime_path, instruction_path, max_draft_checks):
-    """Capture selected S/R/instruction/policy; this is not launch authority."""
-    bind_runtime(spec, runtime_path, max_draft_checks)
-    declared = render.validate_spec(spec)
-    current = selection.capture(declared['registration_path'])
-    if current.registration.raw != spec.native_shared_generation_registration.encode('utf-8'):
-        raise ValueError('composition selection differs from actual S bytes')
-    if current.generation_context() != render.metadata(spec)['native_shared_generation_context']:
-        raise ValueError('composition generation context differs from captured S authority')
-    spec._native_shared_generation_capture = current
-    instruction = read_regular(str(instruction_path), 'instruction', max_bytes=c.HARD_LIMITS['request_bytes']).captured
-    if instruction.raw != spec.instruction.encode('utf-8'):
-        raise ValueError('composition instruction differs from the actual selected rendering')
-    controls = inherited.load_controls()
-    selected_policy = policy.command_policy(spec, instruction.pin.path, controls)
-    runtime = spec._native_shared_runtime_capture
-    return {'kind': KIND, 'version': VERSION, 'execution': EXECUTION,
-        'selection_raw_json': current.registration.raw.decode('utf-8'),
-        'selection_sha256': current.registration.pin.sha256,
-        'runtime_path': runtime.pin.path, 'runtime_raw_json': runtime.raw.decode('utf-8'),
-        'runtime_sha256': runtime.pin.sha256, 'max_draft_checks': max_draft_checks,
-        'render_spec': spec.render_spec(), 'instruction_path': instruction.pin.path,
-        'instruction_sha256': instruction.pin.sha256,
-        'controller_sources': inherited.controller_sources(),
-        'controller_sources_sha256': inherited.SOURCES_SHA256,
-        'policy': selected_policy, 'policy_sha256': c.sha(c.canonical(selected_policy)),
-        'working_directory': str(Path.cwd().resolve()), 'python': sys.executable, 'python_version': sys.version}
+def _compose(spec, *, runtime_path, instruction_path, max_draft_checks, profile):
+    from . import native_owner_profile_v1 as owner_profile
+    context = nullcontext(None) if profile is None else owner_profile._reconstruction_controls(profile)
+    with context as controls:
+        bind_runtime(spec, runtime_path, max_draft_checks)
+        declared = render.validate_spec(spec)
+        current = selection.capture(declared['registration_path'])
+        if current.registration.raw != spec.native_shared_generation_registration.encode('utf-8'):
+            raise ValueError('composition selection differs from actual S bytes')
+        if current.generation_context() != render.metadata(spec)['native_shared_generation_context']:
+            raise ValueError('composition generation context differs from captured S authority')
+        spec._native_shared_generation_capture = current
+        instruction = read_regular(str(instruction_path), 'instruction', max_bytes=c.HARD_LIMITS['request_bytes']).captured
+        if instruction.raw != spec.instruction.encode('utf-8'):
+            raise ValueError('composition instruction differs from the actual selected rendering')
+        if profile is None:
+            controls = inherited.load_controls()
+        selected_policy = policy.command_policy(spec, instruction.pin.path, controls)
+        runtime = spec._native_shared_runtime_capture
+        value = {'kind': KIND, 'version': VERSION, 'execution': EXECUTION,
+            'selection_raw_json': current.registration.raw.decode('utf-8'),
+            'selection_sha256': current.registration.pin.sha256,
+            'runtime_path': runtime.pin.path, 'runtime_raw_json': runtime.raw.decode('utf-8'),
+            'runtime_sha256': runtime.pin.sha256, 'max_draft_checks': max_draft_checks,
+            'render_spec': spec.render_spec(), 'instruction_path': instruction.pin.path,
+            'instruction_sha256': instruction.pin.sha256,
+            'controller_sources': inherited.controller_sources(),
+            'controller_sources_sha256': inherited.SOURCES_SHA256,
+            'policy': selected_policy, 'policy_sha256': c.sha(c.canonical(selected_policy)),
+            'working_directory': str(Path.cwd().resolve()), 'python': sys.executable, 'python_version': sys.version}
+        if profile is not None:
+            value['stream_snapshot_profile'] = c.strict_json(c.canonical(profile))
+        return value
 
 
-def verified_composition(raw):
-    """Rebuild from exact captured metadata and recheck current S/R identities."""
-    from .api_runner import RunSpec
+def compose(spec, *, runtime_path, instruction_path, max_draft_checks, stream_snapshot_profile=0):
+    """Capture default S/R/instruction/policy; selected public dispatch is gated."""
+    if type(stream_snapshot_profile) is not int or stream_snapshot_profile != 0:
+        raise ValueError('public stream_snapshot_profile requires exact zero until selected engine integration')
+    return _compose(spec, runtime_path=runtime_path, instruction_path=instruction_path,
+                    max_draft_checks=max_draft_checks, profile=None)
+
+
+def _compose_in_scope(spec, *, runtime_path, instruction_path, max_draft_checks, profile):
+    """Construct complete selected C in its actual current loader/budget."""
+    if type(profile) is not dict:
+        raise ValueError('selected composition requires its exact profile declaration')
+    return _compose(spec, runtime_path=runtime_path, instruction_path=instruction_path,
+                    max_draft_checks=max_draft_checks, profile=profile)
+
+
+def _composition_value(raw):
     value = c.strict_json(raw, 'native shared composition', c.HARD_LIMITS['request_bytes'])
     if type(value) is not dict or value.get('kind') != KIND:
         raise ValueError('not a native shared callback composition')
+    return value
+
+
+def _rebuild_composition(value, profile):
+    from .api_runner import RunSpec
     try:
         doc = c.parse_selection(value['selection_raw_json'].encode('utf-8'))
         run = doc['run']
         spec = RunSpec.from_render_spec(value['render_spec'], project=run['project'],
                                        method=run['method'], label=run['label'])
-        expected = compose(spec, runtime_path=value['runtime_path'],
-                           instruction_path=value['instruction_path'], max_draft_checks=value['max_draft_checks'])
+        expected = _compose(spec, runtime_path=value['runtime_path'],
+                           instruction_path=value['instruction_path'], max_draft_checks=value['max_draft_checks'],
+                           profile=profile)
     except (KeyError, AttributeError, TypeError) as exc:
         raise ValueError('malformed native shared callback composition') from exc
     if c.canonical(value) != c.canonical(expected):
         raise ValueError('native shared composition identity changed')
     return value
+
+
+def verified_composition(raw):
+    """Rebuild default metadata; never route a selected C through its loader."""
+    value = _composition_value(raw)
+    if 'stream_snapshot_profile' in value:
+        raise ValueError('selected composition is not enabled in the public execution route')
+    return _rebuild_composition(value, None)
+
+
+def _verified_composition_in_scope(raw):
+    """Rebuild all selected metadata, with no public/global-loader fallback."""
+    from . import native_owner_profile_v1 as owner_profile
+    value = _composition_value(raw)
+    profile = value.get('stream_snapshot_profile')
+    with owner_profile._reconstruction_controls(profile):
+        return _rebuild_composition(value, profile)
+
+
+def _callback_adapter_in_scope(composition_raw, *, execution, registration_raw):
+    """Construct the real adapter in one original selected loader entry."""
+    from . import native_owner_profile_v1 as owner_profile
+    from . import native_shared_registration as registration
+    declared = _composition_value(composition_raw)
+    profile = declared.get('stream_snapshot_profile')
+    with owner_profile._reconstruction_controls(profile) as controls:
+        scope = owner_profile._ACTIVE.get()
+        if scope._parent is not None:
+            raise ValueError('selected callback construction requires its original loader scope')
+        verified = registration._verified_in_scope(registration_raw)
+        if c.canonical(execution) != c.canonical(verified):
+            raise ValueError('selected callback differs from its complete verified execution')
+        adapter = CallbackAdapter.__new__(CallbackAdapter)
+        adapter._owner_profile_raw = c.canonical(profile)
+        adapter._initialize(composition_raw, execution=execution, registration_raw=registration_raw,
+                            value=declared, controls=controls)
+        return adapter
 
 
 class CallbackAdapter:
@@ -103,12 +167,17 @@ class CallbackAdapter:
     command classification remains the exact selected fixed policy.
     """
     def __init__(self, composition_raw, *, execution, registration_raw):
+        self._owner_profile_raw = None
+        self._initialize(composition_raw, execution=execution, registration_raw=registration_raw,
+                         value=verified_composition(composition_raw), controls=None)
+
+    def _initialize(self, composition_raw, *, execution, registration_raw, value, controls):
         from .api_runner import RunSpec
         from .native_shared_phase import PhaseState
         from . import native_shared_attribution as attribution
         from .native_shared_receipts import _ReceiptCatalogContext
         self.raw = composition_raw
-        self.value = verified_composition(composition_raw)
+        self.value = deepcopy(value)
         if (c.canonical(execution) != c.canonical(c.strict_json(registration_raw, 'execution', c.HARD_LIMITS['request_bytes']))
                 or execution['composition_raw_json'].encode('utf-8') != composition_raw
                 or execution['composition_sha256'] != c.sha(composition_raw)
@@ -120,7 +189,7 @@ class CallbackAdapter:
         run = doc['run']
         self.spec = RunSpec.from_render_spec(self.value['render_spec'], project=run['project'], method=run['method'], label=run['label'])
         self.selection = selection.capture(doc['registration_path'])
-        self.controls = inherited.load_controls()
+        self.controls = inherited.load_controls() if controls is None else controls
         self.policy = deepcopy(self.value['policy'])
         paths = self.spec._agentic_artifact_paths
         self.phase = PhaseState(render.commands(self.spec), full_path=paths['full'], core_path=paths['core'],
@@ -131,6 +200,8 @@ class CallbackAdapter:
         self.recorder_call = None
         self.recorder_done = False
         self._activated = self._initialized = False
+        self._activation_ready = False
+        self._started_raw = self._owner_raw = None
         self._stream_prefixes = {}
         self._stream_files = {}
         self._stream_members = ()
@@ -142,13 +213,54 @@ class CallbackAdapter:
                 or self.spec.native_shared_generation_version != 1 or self.phase is None):
             raise ValueError('native26 requires its actual fixed phase observer and selected policy')
 
-    def activate_before_dispatch(self, started_raw):
+    def activate_before_dispatch(self, started_raw, *, owner_raw=None):
         from . import native_shared_capture as capture
         if self._activated:
             raise ValueError('native shared callback identity is already spent')
         # Latch before any fallible write: partial activation cannot redispatch.
         self._activated = True
-        capture.activate(self.selection, self.registration_raw, started_raw)
+        if getattr(self, '_owner_profile_raw', None) is None:
+            if owner_raw is not None:
+                raise ValueError('default callback cannot accept a selected owner record')
+            capture.activate(self.selection, self.registration_raw, started_raw)
+        else:
+            from . import native_owner_profile_v1 as owner_profile
+            scope = owner_profile._ACTIVE.get()
+            if (type(scope) is not owner_profile._Scope or scope._parent is not None
+                    or scope.controls is not self.controls
+                    or c.canonical(c.strict_json(scope.profile)) != self._owner_profile_raw):
+                raise ValueError('selected activation requires its original owner loader scope')
+            if type(owner_raw) is not bytes or type(started_raw) is not bytes:
+                raise ValueError('selected activation requires exact owner and started bytes')
+            self._started_raw, self._owner_raw = started_raw, owner_raw
+            with self._owner_reader() as context:
+                capture.activate(self.selection, self.registration_raw, started_raw, owner_context=context)
+        self._activation_ready = True
+
+    @contextmanager
+    def _owner_reader(self):
+        """Borrow the consuming thread's existing selected scope and deadline."""
+        from . import native_owner_profile_v1 as owner_profile
+        from . import native_stream_coordination_v1 as coordination
+        if self._owner_profile_raw is None or self._owner_raw is None or self._started_raw is None:
+            raise ValueError('selected callback lacks its actual owner activation association')
+        self._require_owner_adapter()
+        context = owner_profile.bind_reader_context(c.strict_json(self._owner_profile_raw), self.controls,
+            selection=self.selection, execution_raw=self.registration_raw, started_raw=self._started_raw,
+            owner_raw=self._owner_raw, budget=coordination.current_reader_budget())
+        with context:
+            yield context
+            self._require_owner_adapter()
+
+    def _require_owner_adapter(self):
+        execution = c.strict_json(self.registration_raw, 'selected callback execution', c.HARD_LIMITS['request_bytes'])
+        composition = c.strict_json(self.raw, 'selected callback composition', c.HARD_LIMITS['request_bytes'])
+        if (execution['composition_raw_json'].encode('utf-8') != self.raw
+                or c.canonical(self.execution) != c.canonical(execution)
+                or c.canonical(self.value) != c.canonical(composition)
+                or c.canonical(self.policy) != c.canonical(composition['policy'])
+                or c.canonical(composition.get('stream_snapshot_profile')) != self._owner_profile_raw):
+            raise ValueError('selected callback changed its execution, composition or policy')
 
     def _stop(self, reason):
         if self.failure is None:
@@ -169,14 +281,20 @@ class CallbackAdapter:
                 pass  # Diagnostic failure must never replace the refusal.
         return ('ValueError' if is_stream else type(exc).__name__) + ': ' + str(exc)
 
-    def _observed_endpoint(self, event):
+    def _observed_endpoint(self, event, *, owner_context=None):
         members, prefixes = [], {}
         for role in live_streams.ROLES:
             path = str(Path(self.execution['attempt_directory']) / (role + '.jsonl'))
             previous = self._stream_prefixes.get(role)
+            if getattr(self, '_owner_profile_raw', None) is not None:
+                from .native_shared_capture import _require_owner_association
+                _require_owner_association(owner_context, self.selection,
+                    self.registration_raw, self._started_raw)
+            kwargs = {} if owner_context is None else {'coordination': owner_context}
             member = live_streams.read_live_stream(path, role,
-                max_bytes=c.HARD_LIMITS['stream_bytes'], previous=previous,
-                identity=self._stream_files.get(role))
+                max_bytes=(c.HARD_LIMITS['stream_bytes'] if owner_context is None
+                           else owner_context._association.max_bytes), previous=previous,
+                identity=self._stream_files.get(role), **kwargs)
             members.append(member)
             if role == 'transcript':
                 start = previous.bytes if previous is not None else 0
@@ -195,20 +313,30 @@ class CallbackAdapter:
         self._stream_members = tuple(members)
         return prefixes['transcript'].bytes, prefixes['control'].bytes
 
-    def _run(self, endpoints=None):
+    def _run(self, endpoints=None, *, owner_context=None):
         from . import native_shared_capture as capture
         if endpoints is None:
+            if getattr(self, '_owner_profile_raw', None) is not None:
+                raise ValueError('selected complete report requires the later stopped full-capture closure')
             return capture._load(self.selection.registration.pin.path)
+        if getattr(self, '_owner_profile_raw', None) is not None:
+            capture._require_owner_association(owner_context, self.selection,
+                self.registration_raw, self._started_raw)
+        kwargs = {} if owner_context is None else {'owner_context': owner_context}
         run = capture._load_live(self.selection.registration.pin.path,
             transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files,
-            _catalogs=self._receipt_catalogs)
+            _catalogs=self._receipt_catalogs, **kwargs)
         if self._stream_prefixes != {'transcript': run.transcript, 'control': run.control}:
             raise ValueError('recaptured streams differ from exact parent-observed prefixes')
         return run
 
-    def _phase_state(self, endpoints, *, refresh=False):
+    def _phase_state(self, endpoints, *, refresh=False, owner_context=None):
         from dataclasses import replace
         from . import native_shared_capture as capture
+        if owner_context is not None:
+            # An owner reader lease never reuses another callback's live run.
+            run = self._run(endpoints, owner_context=owner_context)
+            return run, run.decision()
         if refresh or getattr(self, '_phase_cache', None) is None:
             run = self._run(endpoints)
             decision = run.decision()
@@ -245,6 +373,8 @@ class CallbackAdapter:
     def _effect_stop(self, run, event, classification, basis):
         """Persist exact observer restriction before the frozen callback grant."""
         from .native_attempt_supervisor import durable_new
+        from .native_shared_capture import _require_run_effect
+        _require_run_effect(run)
         data = event['request']['input']
         trace = run.trace(); request = trace.request(data['tool_use_id'])
         view = self._view(run, exclude_pending=data['tool_use_id'])
@@ -255,7 +385,10 @@ class CallbackAdapter:
             'tool_input_sha256': c.sha(request.input_json), 'classification': classification, 'basis': basis,
             'call_event_sha256': c.sha(c.canonical(trace.frames[request.call.line])),
             'callback_event_sha256': c.sha(c.canonical(event))}
-        durable_new(Path(self.execution['attempt_directory']) / 'native-shared-effect-stop.json', c.canonical(body))
+        raw = c.canonical(body)
+        _require_run_effect(run)
+        durable_new(Path(self.execution['attempt_directory']) / 'native-shared-effect-stop.json', raw)
+        _require_run_effect(run)
         self._stop('native shared observer restriction: ' + basis)
 
     def _view(self, run, *, exclude_pending=None):
@@ -263,6 +396,19 @@ class CallbackAdapter:
         return current_effect_view(run, correction_window=bool(self.state.checks), exclude_pending=exclude_pending)
 
     def observe(self, event):
+        if getattr(self, '_owner_profile_raw', None) is None:
+            return self._observe(event)
+        if self.failure is not None:
+            self._stop(self.failure)
+        try:
+            if not self._activation_ready:
+                raise ValueError('selected observation precedes successful owner activation')
+            with self._owner_reader() as context:
+                return self._observe(event, owner_context=context)
+        except Exception as exc:
+            self._stop('native shared observation failed: ' + self._failure_detail(exc))
+
+    def _observe(self, event, *, owner_context=None):
         from . import native_shared_capture as capture
         from . import native_shared_effects as effects
         from . import native_shared_evidence as evidence
@@ -271,13 +417,15 @@ class CallbackAdapter:
         try:
             if not self._activated:
                 raise ValueError('native observation precedes consumed execution activation')
-            endpoints = self._observed_endpoint(event)
+            owner_kwargs = {} if owner_context is None else {'owner_context': owner_context}
+            endpoints = self._observed_endpoint(event, **owner_kwargs)
             if event.get('type') == 'system' and event.get('subtype') == 'init':
                 if self._initialized:
                     raise ValueError('native initialization repeated')
+                kwargs = {} if owner_context is None else {'owner_context': owner_context}
                 capture.initialize(self.selection.registration.pin.path,
                     transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files,
-                    observed_prefixes=self._stream_prefixes)
+                    observed_prefixes=self._stream_prefixes, **kwargs)
                 self._initialized = True
                 self._phase_cache = None
             if not self._initialized:
@@ -286,7 +434,7 @@ class CallbackAdapter:
                 self.phase.observe(event)
                 self.state.observe(event)
                 return
-            run, decision = self._phase_state(endpoints)
+            run, decision = self._phase_state(endpoints, **owner_kwargs)
             content = event.get('message', {}).get('content', [])
             content = content if type(content) is list else ()
             # Validate actual advance effects before the phase checker can
@@ -296,9 +444,9 @@ class CallbackAdapter:
                     continue
                 call = run.trace().calls.get(block.get('tool_use_id'))
                 if call and call[2].get('input', {}).get('command') == self.policy['native_shared_helpers']['advance']:
-                    run = self._run(endpoints)
+                    run = self._run(endpoints, **owner_kwargs)
                     capture.observe_advance_settled(run, block['tool_use_id'])
-                    run, decision = self._phase_state(endpoints, refresh=True)
+                    run, decision = self._phase_state(endpoints, refresh=True, **owner_kwargs)
             if event.get('type') == 'control_request':
                 data = event.get('request', {}).get('input', {})
                 name, inputs = data.get('tool_name'), data.get('tool_input')
@@ -359,7 +507,7 @@ class CallbackAdapter:
                         capture.observe_response_written(run, identity)
                         self._phase_cache = None
                     elif call['name'] == 'Bash' and inputs.get('command') == self.policy['native_shared_helpers']['final_evidence']:
-                        run, decision = self._phase_state(endpoints, refresh=True)
+                        run, decision = self._phase_state(endpoints, refresh=True, **owner_kwargs)
                         current = self._current_final(run)
                         actual = trace.settled(identity)
                         observed_result = evidence.event(run.transcript, actual.result)
@@ -369,7 +517,7 @@ class CallbackAdapter:
                                 raise ValueError('final helper stdout differs from actual captured final evidence')
                         self.final_evidence = current
                     elif identity == self.recorder_call:
-                        run, decision = self._phase_state(endpoints, refresh=True)
+                        run, decision = self._phase_state(endpoints, refresh=True, **owner_kwargs)
                         metadata = event.get('tool_use_result', {})
                         codes = [metadata[k] for k in ('exitCode', 'exit_code') if k in metadata]
                         if not codes or any(type(code) is not int or code != 0 for code in codes) or block.get('is_error') is not False:
@@ -384,7 +532,7 @@ class CallbackAdapter:
             for action in actions:
                 # These fixed side effects independently replay the settled
                 # phase boundary before creating any original seal.
-                capture.seal_originals(self._run(endpoints), action)
+                capture.seal_originals(self._run(endpoints, **owner_kwargs), action)
                 self._phase_cache = None
             self.state.observe(event, preserved_shell_commands=preserved)
             problems = self.state.report()['problems']
@@ -395,6 +543,19 @@ class CallbackAdapter:
             self._stop('native shared observation failed: ' + self._failure_detail(exc))
 
     def classify(self, command, python, programs, selected_policy):
+        if getattr(self, '_owner_profile_raw', None) is None:
+            return self._classify(command, python, programs, selected_policy)
+        if self.failure is not None:
+            self._stop(self.failure)
+        try:
+            if not self._activation_ready:
+                raise ValueError('selected classification precedes successful owner activation')
+            with self._owner_reader():
+                return self._classify(command, python, programs, selected_policy)
+        except Exception as exc:
+            self._stop('native shared classification failed: ' + self._failure_detail(exc))
+
+    def _classify(self, command, python, programs, selected_policy):
         if self.failure is not None:
             self._stop(self.failure)
         if c.canonical(selected_policy) != c.canonical(self.policy):

@@ -88,7 +88,7 @@ def _progress(earlier, later, maximum, *, diagnostic=None):
     return later
 
 
-def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
+def read_live_stream(path, role, *, max_bytes, previous=None, identity=None, coordination=None):
     """Read the fixed opened extent twice; never chase a growing EOF.
 
     Later append is allowed on the same regular single-link inode. The return
@@ -96,6 +96,9 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
     Visible truncation, prefix mutation and replacement refuse. Finite reads
     cannot authenticate an arbitrary host or an ABA hidden between all checks.
     """
+    if coordination is not None:
+        return _read_owner_stream(path, role, max_bytes=max_bytes, previous=previous,
+                                  identity=identity, context=coordination)
     c.canonical_path(path, 'live native stream path')
     c.positive_int(max_bytes, 'live stream byte limit', c.HARD_LIMITS['stream_bytes'])
     if role not in ROLES:
@@ -178,6 +181,102 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
         os.close(fd)
     return evidence.PoolMember(c.CapturedArtifact(c.ArtifactPin(role, path, size, c.sha(raw)), raw),
                                c.canonical(opened))
+
+
+def _read_owner_stream(path, role, *, max_bytes, previous, identity, context):
+    """Private selected branch: lock each metadata sample, never a byte pass.
+
+    The original opened extent, two byte passes and progress refusals are kept.
+    The fixed context supplies local association and scope, not public permission.
+    """
+    from . import native_stream_coordination_v1 as coordination
+
+    if type(context) is not coordination._OwnerReaderContext:
+        raise ValueError('selected live stream requires the fixed owner reader context')
+    c.canonical_path(path, 'live native stream path')
+    c.positive_int(max_bytes, 'live stream byte limit', c.HARD_LIMITS['stream_bytes'])
+    if role not in ROLES:
+        raise ValueError('live snapshots are restricted to native stream roles')
+    expected = _identity(identity) if identity is not None else None
+    if previous is not None and (type(previous) is not c.EvidencePrefix
+            or previous.stream != role or previous.path != path):
+        raise ValueError('previous observed prefix belongs to another stream')
+    context.require_current(role, path, max_bytes=max_bytes)
+    owner_identity = context.identity(role, path)
+    if expected is not None and expected != owner_identity:
+        raise ValueError('live native stream differs from its observed file identity')
+
+    # No unlocked preliminary path metadata can enter a progress comparison.
+    # The paired initial path/fd sample includes physical resolution under SH.
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    failed = False
+    try:
+        def sample(*, include_path=False):
+            return coordination.sample_metadata(fd, path, context.budget,
+                include_path=include_path, reader_context=context)
+
+        def progress(earlier, later, stage, *, pass_number=None, offset=0, opened_extent=None):
+            return _progress(earlier, later, max_bytes, diagnostic={
+                'role': role, 'path': path, 'stage': stage,
+                'pass_number': pass_number, 'offset': offset, 'opened_extent': opened_extent,
+                'previous_prefix': None if previous is None else {
+                    'bytes': previous.bytes, 'sha256': previous.sha256}})
+
+        before, opened_meta = sample(include_path=True)
+        evidence._metadata(before, before['size'])
+        if before['size'] > max_bytes:
+            raise ValueError('live native stream exceeds its byte bound')
+        if any(before[k] != owner_identity[k] for k in owner_identity):
+            raise ValueError('live native stream differs from its observed file identity')
+        opened = progress(before, opened_meta, 'opened')
+        size = opened['size']
+        if previous is not None and previous.bytes > size:
+            raise ValueError('live native stream lost an observed prefix')
+        last, pieces, offset = opened, [], 0
+        while offset < size:
+            last = progress(last, sample(), 'before_read', pass_number=1,
+                            offset=offset, opened_extent=size)
+            count = min(65536, size - offset)
+            context.require_current(role, path)
+            part = os.pread(fd, count, offset)
+            if not part or len(part) > count:
+                raise ValueError('live native stream ended inside its opened extent')
+            pieces.append(part)
+            offset += len(part)
+            last = progress(last, sample(), 'after_read', pass_number=1,
+                            offset=offset, opened_extent=size)
+        raw = b''.join(pieces)
+        del pieces
+        offset = 0
+        while offset < size:
+            last = progress(last, sample(), 'before_read', pass_number=2,
+                            offset=offset, opened_extent=size)
+            count = min(65536, size - offset)
+            context.require_current(role, path)
+            part = os.pread(fd, count, offset)
+            if not part or len(part) > count or part != raw[offset:offset + len(part)]:
+                raise ValueError('live native stream prefix changed during capture')
+            offset += len(part)
+            last = progress(last, sample(), 'after_read', pass_number=2,
+                            offset=offset, opened_extent=size)
+        final_path, final_fd = sample(include_path=True)
+        last = progress(last, final_fd, 'final_fd', offset=offset, opened_extent=size)
+        progress(last, final_path, 'final_path', offset=offset, opened_extent=size)
+        if previous is not None and raw[:previous.bytes] != previous.raw:
+            raise ValueError('previously observed native stream prefix changed')
+    except BaseException:
+        failed = True
+        raise
+    finally:
+        try:
+            os.close(fd)
+        except BaseException:
+            if not failed:
+                raise
+    result = evidence.PoolMember(c.CapturedArtifact(c.ArtifactPin(role, path, size, c.sha(raw)), raw),
+                                 c.canonical(opened))
+    context.require_current(role, path)
+    return result
 
 
 def prefix(member, endpoint=None):

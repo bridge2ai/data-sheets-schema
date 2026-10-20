@@ -82,7 +82,7 @@ def _path(value):
     _text(value, 'path')
     path = PurePosixPath(value)
     _need(value.startswith('/') and not value.startswith('//') and '..' not in path.parts
-          and str(path) == value and value != '/' and all(ord(c) >= 32 for c in value),
+          and str(path) == value and value != '/' and re.search(r'[\x00-\x1f]', value) is None,
           'path is not canonical absolute')
     return path
 
@@ -324,9 +324,11 @@ def projected_policy(expected, selection, effect_root):
     _path(effect_root)
     source_root = _path(selection['stage_root']); target_root = _path(effect_root)
     policy = deepcopy(expected['policy']); lookup = policy['readonly_lookups']
+    source_parts = source_root.parts
     def mapped(value):
         path = _path(value)
-        if source_root not in path.parents:
+        parts = path.parts
+        if not (len(source_parts) < len(parts) and parts[:len(source_parts)] == source_parts):
             _need(path != source_root, 'directory cannot be a file-map key')
             return value
         relative = str(path.relative_to(source_root))
@@ -385,15 +387,25 @@ def _roots(expected, selection, launch):
     protected += [value for key,value in expected['permission_environment'].items()
                   if key in ('CLAUDE_CONFIG_DIR', 'D4D_LAUNCH_INSTRUCTION') and value.startswith('/')]
     protected_paths = [_path(x) for x in protected]
-    for number, root in enumerate(roots):
-        for other in roots[number+1:] + protected_paths:
-            _need(root != other and root not in other.parents and other not in root.parents, 'neutral roots overlap authority')
+    # Canonical absolute POSIX paths overlap exactly when one component tuple
+    # prefixes the other. Keep all validation and pair order, without rebuilding
+    # every ancestor path for each comparison. These tuples live for this call.
+    root_parts = [root.parts for root in roots]
+    protected_parts = [path.parts for path in protected_paths]
+    for number, parts in enumerate(root_parts):
+        for other in root_parts[number+1:] + protected_parts:
+            common = min(len(parts), len(other))
+            _need(parts[:common] != other[:common], 'neutral roots overlap authority')
     return roots
 
 
 def probe_argv(expected, probe_policy):
     """Exact recorded argv, never executed here."""
-    controls = composition.load_controls(); runtime = expected['runtime']
+    return _probe_argv(expected, probe_policy, composition.load_controls())
+
+
+def _probe_argv(expected, probe_policy, controls):
+    runtime = expected['runtime']
     return [runtime['executable']['path'], '--print', '--safe-mode', '--restricted',
             '--strict-mcp-config', '--no-session-persistence', '--model', runtime['model'],
             '--effort', runtime['effort'], '--disable-slash-commands', '--max-budget-usd',
@@ -742,12 +754,14 @@ def _tool_result(event, case, expected, selection, launch, session, source_raw, 
         _need(text.startswith('File created successfully at: ' + case['input']['file_path']), 'Write success names another path')
 
 
-def _launch(expected, selection, trace, launch, raw, policy):
+def _launch(expected, selection, trace, launch, raw, policy, *, argv_controls=None):
     _object(launch, {'cwd', 'argv', 'environment', 'config_root', 'stub_root', 'effect_root', 'evidence_root',
                      'provider_url', 'provider_source_sha256', 'exit_code', 'shutdown', 'executable'}, 'launch')
     _roots(expected, selection, launch)
     _need(launch['cwd'] == expected['policy']['readonly_lookups']['repository'], 'callback cwd differs')
-    _need(_same(launch['argv'], probe_argv(expected, policy)), 'native argv differs')
+    argv = (probe_argv(expected, policy) if argv_controls is None
+            else _probe_argv(expected, policy, argv_controls))
+    _need(_same(launch['argv'], argv), 'native argv differs')
     _need(_same(launch['executable'], expected['runtime']['executable']), 'executable identity differs')
     _need(raw['version.txt'] == (expected['runtime']['executable']['version'] + '\n').encode(), 'version stdout differs')
     prefix = 'traces/' + trace + '/'
@@ -777,11 +791,11 @@ def effect_stop(expected, policy, case, view, call, callback, classification):
             'callback_event_sha256': _sha(_encoded(callback))}
 
 
-def _trace(expected, selection, trace, raw, controls):
+def _trace(expected, selection, trace, raw, controls, *, argv_controls=None):
     prefix = 'traces/' + trace + '/'
     launch = _json(raw[prefix + 'launch.json'])
     policy = projected_policy(expected, selection, launch['effect_root'])
-    _launch(expected, selection, trace, launch, raw, policy)
+    _launch(expected, selection, trace, launch, raw, policy, argv_controls=argv_controls)
     events = _rows(raw[prefix + 'transcript.jsonl'], 'transcript')
     records = _rows(raw[prefix + 'control.jsonl'], 'control')
     clean = [{k:v for k,v in row.items() if k != 'at'} for row in records]
@@ -944,7 +958,18 @@ def verify_saved_probe(raw_manifest: bytes, *, expected: dict) -> dict:
         raise ValueError('native shared permission evidence is malformed, unavailable or incomplete') from exc
 
 
-def _verify(raw_manifest, expected):
+def _verify_saved_probe_in_scope(raw_manifest: bytes, *, expected: dict, profile: dict) -> dict:
+    """The complete saved proof using only this exact selected loader graph."""
+    from . import native_owner_profile_v1 as owner_profile
+    with owner_profile._reconstruction_controls(profile) as controls:
+        try:
+            return _verify(raw_manifest, expected, argv_controls=controls)
+        except (KeyError, TypeError, IndexError, AttributeError, UnicodeError, OverflowError,
+                RecursionError, OSError) as exc:
+            raise ValueError('native shared permission evidence is malformed, unavailable or incomplete') from exc
+
+
+def _verify(raw_manifest, expected, *, argv_controls=None):
     value = _object(_json(raw_manifest, MAX_WIRE), {'kind','version','origin','binding','members'}, 'manifest')
     _need(value['kind'] == KIND and type(value['version']) is int and value['version'] == VERSION
           and value['origin'] == ORIGIN, 'unknown native shared observation protocol/origin')
@@ -963,13 +988,14 @@ def _verify(raw_manifest, expected):
     contract, _ = _dependencies()
     selection = contract.parse_selection(raw['selection.json'])
     _pin(expected['selection'], raw['selection.json']); _pin(expected['source'], raw['source.before'])
-    controls = composition.load_controls()
+    controls = composition.load_controls() if argv_controls is None else argv_controls
     _authority(expected, selection, controls)
     _need(_same(_json(raw['policy.json']), expected['policy']), 'common production policy differs')
     _need(raw['source.before'] == raw['source.after'], 'selected source changed')
     traces, cases, all_roots, sessions = [], [], [], set()
     for name in TRACES:
-        summary, outcomes, launch = _trace(expected, selection, name, raw, controls)
+        summary, outcomes, launch = _trace(expected, selection, name, raw, controls,
+                                          argv_controls=argv_controls)
         _need(summary['session_id'] not in sessions, 'probe traces reuse one session')
         sessions.add(summary['session_id'])
         roots = [_path(launch[key]) for key in ('config_root','stub_root','effect_root','evidence_root')]

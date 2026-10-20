@@ -66,8 +66,21 @@ def _view(view):
     paths = [pin.path for pin in view.sealed]
     if len(paths) != len(set(paths)):
         raise ValueError('sealed effects contain duplicate path identities')
+    # Reuse only this call's lexical prefixes, never a previous view's verdict.
+    root_anchor, root_parts = root.anchor, root.parts
+    request_parts = root_parts + ('requests',)
+    response_parts = root_parts + ('responses',)
     for path in paths:
-        if _within(path, str(root/'requests')) or _within(path, str(root/'responses')):
+        if type(path) is str:
+            target = PurePosixPath(path)
+            target_parts = target.parts
+            forbidden = (target.anchor == root_anchor and
+                (target_parts[:len(request_parts)] == request_parts or
+                 target_parts[:len(response_parts)] == response_parts))
+        else:
+            # Preserve constructor and short-circuit order for mutated pins.
+            forbidden = _within(path, str(root/'requests')) or _within(path, str(root/'responses'))
+        if forbidden:
             raise ValueError('request/response files cannot gain sealed-read authority')
     return roles
 

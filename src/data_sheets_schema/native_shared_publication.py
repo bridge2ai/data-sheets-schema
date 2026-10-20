@@ -78,41 +78,108 @@ def _physical_destination(path,root):
     return destination
 
 
-def _replace_journal(destination,before,after):
+def _journal_owner_guard(destination,before,after,owner_context):
+    if owner_context is None:
+        return
+    from . import native_shared_capture as capture
+    from . import native_stream_coordination_v1 as coordination
+    if type(owner_context) is not coordination._OwnerReaderContext:
+        raise ValueError('selected journal requires its exact owner reader context')
+    association=owner_context._association
+    capture._require_owner_association(owner_context,association.selection,association.execution_raw,
+                                      association.started_raw)
+    expected=association.selection.role('journal')
+    if (str(destination)!=expected or type(before) is not c.CapturedArtifact
+            or type(after) is not c.ProposedArtifact
+            or before.pin.role!='journal' or after.pin.role!='journal'
+            or before.pin.path!=expected or after.pin.path!=expected):
+        raise ValueError('selected journal replacement differs from its owner selection')
+
+
+def _replace_journal(destination,before,after,*,owner_context=None):
     """CAS over exact observed bytes, with exclusive partial file and parent fsync.
 
     All stage writers share the actual pending-advance boundary. This does not
     claim atomic protection against an unrelated process modifying the host.
     A failed partial file is intentionally retained as incomplete evidence.
     """
+    _journal_owner_guard(destination,before,after,owner_context)
     current=read_regular(str(destination),'journal',max_bytes=c.HARD_LIMITS['journal_bytes'])
     if current.captured!=before:
         raise ValueError('journal changed before its checked replacement')
+    _journal_owner_guard(destination,before,after,owner_context)
     fd,temporary=tempfile.mkstemp(prefix='journal.partial-',dir=destination.parent)
-    with os.fdopen(fd,'wb') as stream:
-        stream.write(after.raw);stream.flush();os.fsync(stream.fileno())
+    if owner_context is None:
+        with os.fdopen(fd,'wb') as stream:
+            stream.write(after.raw);stream.flush();os.fsync(stream.fileno())
+    else:
+        try:
+            # Unbuffered selected writes cannot be resumed by close() after
+            # a later owner refusal. A partial positive write stays failed.
+            stream=os.fdopen(fd,'wb',buffering=0)
+        except BaseException:
+            try:
+                os.close(fd)
+            except BaseException:
+                pass
+            raise
+        try:
+            _journal_owner_guard(destination,before,after,owner_context)
+            written=stream.write(after.raw)
+            if type(written) is not int or written!=len(after.raw):
+                raise OSError('selected journal staging write was incomplete')
+            _journal_owner_guard(destination,before,after,owner_context)
+            stream.flush()
+            _journal_owner_guard(destination,before,after,owner_context)
+            os.fsync(stream.fileno())
+        except BaseException:
+            try:
+                stream.close()
+            except BaseException:
+                pass
+            raise
+        else:
+            stream.close()
     # Check actual bytes AND opened metadata immediately before replacement.
+    _journal_owner_guard(destination,before,after,owner_context)
     if read_regular(str(destination),'journal',max_bytes=c.HARD_LIMITS['journal_bytes'])!=current:
         raise ValueError('journal changed while its replacement was being persisted')
+    _journal_owner_guard(destination,before,after,owner_context)
     os.replace(temporary,destination)
+    _journal_owner_guard(destination,before,after,owner_context)
     _sync_directory(destination.parent)
     observed=read_regular(str(destination),'journal',max_bytes=c.HARD_LIMITS['journal_bytes'])
     if observed.captured.pin!=after.pin or observed.captured.raw!=after.raw:
         raise ValueError('published journal differs from its proposed bytes')
+    _journal_owner_guard(destination,before,after,owner_context)
     return observed
 
 
-def publish_derived(invocation,proposal,*,_catalogs=None):
+def _invocation_owner_guard(invocation,owner_context):
+    if owner_context is not None:
+        from . import native_shared_capture as capture
+        capture._require_owner_association(owner_context,invocation.selection,
+            invocation.execution.execution.raw,invocation.execution.started.raw)
+
+
+def publish_derived(invocation,proposal,*,owner_context=None,_catalogs=None):
     """Publish only reconstructed effects after all destinations pass preflight.
 
-    Used solely by native_shared_capture.publish_stage after its current
-    invocation/context and unchanged-authority checks. No caller paths or
+    Selected calls independently recheck their current captured invocation,
+    including direct calls. Default pure-component behavior is unchanged. No caller paths or
     alternate command, cursor, journal, session or worker can be selected here.
     """
+    from . import native_shared_capture as capture
+    if capture._stage_owner_selected(invocation):
+        invocation=capture._fresh_stage_invocation(invocation,owner_context,_catalogs=_catalogs)
+    elif owner_context is not None:
+        raise ValueError('default publication cannot use a selected owner context')
     catalogs=stage.nr._catalog_context(_catalogs)
     publications=proposal_publications(invocation,proposal,_catalogs=catalogs)
+    _invocation_owner_guard(invocation,owner_context)
     root=invocation.selection.role('stage_root')
     for pub in publications:
+        _invocation_owner_guard(invocation,owner_context)
         destination=_physical_destination(pub.artifact.pin.path,root)
         if pub.action=='create_once':
             if destination.exists() or destination.is_symlink():
@@ -122,15 +189,21 @@ def publish_derived(invocation,proposal,*,_catalogs=None):
                 raise ValueError('stage journal differs before any proposed output write')
     observed=[]
     for pub in publications:
+        _invocation_owner_guard(invocation,owner_context)
         destination=_physical_destination(pub.artifact.pin.path,root)
         if pub.action=='create_once':
+            _invocation_owner_guard(invocation,owner_context)
             _mkdir_durable(destination.parent)
+            _invocation_owner_guard(invocation,owner_context)
             durable_new(destination,pub.artifact.raw)
             actual=read_regular(str(destination),pub.artifact.pin.role,max_bytes=max(1,pub.artifact.pin.bytes))
             if actual.captured.pin!=pub.artifact.pin:
                 raise ValueError('published output differs from proposed complete bytes')
         else:
-            actual=_replace_journal(destination,invocation.history.journal,pub.artifact)
+            actual=(_replace_journal(destination,invocation.history.journal,pub.artifact)
+                    if owner_context is None else _replace_journal(destination,invocation.history.journal,
+                                                                  pub.artifact,owner_context=owner_context))
+        _invocation_owner_guard(invocation,owner_context)
         observed.append(actual)
     after=next((item.captured.pin.sha256 for item in observed if item.captured.pin.role=='journal'),
                invocation.history.journal.pin.sha256)
@@ -151,4 +224,7 @@ def publish_derived(invocation,proposal,*,_catalogs=None):
         'before_history_sha256':invocation.history.journal.pin.sha256,
         'after_history_sha256':after,'state':state,
         'publications':[c.pin_dict(item.captured.pin) for item in observed]}
+    if owner_context is not None:
+        c.canonical(result)
+        _invocation_owner_guard(invocation,owner_context)
     return result,tuple(observed)

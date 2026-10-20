@@ -559,7 +559,10 @@ class _JSONValidationCache:
             self._bytes += size
 
 
-_JSON_VALIDATION = _JSONValidationCache()
+# Keep large documents through small-input churn without raising the combined
+# limits: 128 entries and 16 MiB of raw keys. Values still decode afresh.
+_JSON_VALIDATION = _JSONValidationCache(112, 7 * 1024 * 1024)
+_JSON_LARGE_VALIDATION = _JSONValidationCache(16, 9 * 1024 * 1024)
 
 
 def strict_json(raw: bytes, label="native shared JSON", max_bytes=2_000_000):
@@ -571,16 +574,17 @@ def strict_json(raw: bytes, label="native shared JSON", max_bytes=2_000_000):
     # always applies. Retain both limits so a different bound cannot reuse an
     # earlier validation. No parsed object crosses calls through this cache.
     key = (raw, HARD_LIMITS["json_yaml_depth"], HARD_LIMITS["json_yaml_nodes_per_document"])
+    cache = _JSON_LARGE_VALIDATION if len(raw) > 64 * 1024 else _JSON_VALIDATION
     try:
         text = raw.decode("utf-8")
-        if _JSON_VALIDATION.contains(key):
+        if cache.contains(key):
             return json.loads(text)
         _lexical_budget(text)
         value = json.loads(text, object_pairs_hook=_pairs, parse_constant=_reject_constant)
         _json_values(value)
         # Surrogate escapes can parse, but cannot represent canonical UTF-8.
         canonical(value)
-        _JSON_VALIDATION.remember(key)
+        cache.remember(key)
         return value
     except (UnicodeError, json.JSONDecodeError, RecursionError) as exc:
         raise ValueError(f"{label} is not strict UTF-8 JSON") from exc

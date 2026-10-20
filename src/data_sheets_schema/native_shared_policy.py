@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import shlex
 from copy import deepcopy
+from functools import lru_cache
 from pathlib import Path
 
 from data_sheets_schema import native_shared_contract as c
@@ -15,6 +16,23 @@ from data_sheets_schema import native_attribution_controller as inherited
 HELPERS = frozenset(('chunk_check','source_scope','full_schema','full_terms','phase1_receipts',
     'advance','derive_core','core_schema','pair','original_source_inventory','final_source_inventory',
     'draft','audit_evidence','final_evidence','derive_final_core','final_scope','recorder'))
+_HELPER_TOKEN_CACHE_ENTRIES = 32
+_HELPER_TOKEN_CACHE_BYTES = 32_768
+
+
+@lru_cache(maxsize=_HELPER_TOKEN_CACHE_ENTRIES)
+def _cached_helper_tokens(command):
+    # Immutable parse data only. Even direct private calls cannot retain a
+    # larger spelling; exceptions are not cached by lru_cache.
+    if type(command) is not str or len(command.encode('utf-8')) > _HELPER_TOKEN_CACHE_BYTES:
+        raise ValueError('helper token cache requires a bounded exact string')
+    return tuple(shlex.split(command))
+
+
+def _helper_tokens(command):
+    if len(command.encode('utf-8')) <= _HELPER_TOKEN_CACHE_BYTES:
+        return _cached_helper_tokens(command)
+    return tuple(shlex.split(command))
 
 
 def command_policy(spec, instruction_path, controls=None):
@@ -37,7 +55,22 @@ def command_policy(spec, instruction_path, controls=None):
     from .native_shared_evidence import read_regular
     if read_regular(path, 'instruction', max_bytes=c.HARD_LIMITS['request_bytes']).captured.raw != spec.instruction.encode('utf-8'):
         raise ValueError('selected instruction differs from the exact native request')
-    commands = {name: shlex.join(argv) for name, argv in render.commands(spec).items()}
+    commands = {}
+    rendered_words = {}
+    for name, argv in render.commands(spec).items():
+        commands[name] = shlex.join(argv)
+        # Retain only immutable words from this rendering. Other iterables
+        # keep the original parse of the joined spelling, at its original use.
+        if type(argv) is tuple and all(type(word) is str for word in argv):
+            rendered_words[name] = (commands[name], argv)
+
+    def tokens(name):
+        saved = rendered_words.get(name)
+        if saved is not None and commands[name] == saved[0]:
+            # Match shlex.split's list indexing, including short-argv errors.
+            return list(saved[1])
+        return shlex.split(commands[name])
+
     c.exact(commands, HELPERS, 'source-derived native helper table')
     artifacts = spec._agentic_artifact_paths
     inputs = {a.pin.path for a in (cap.registration, cap.receipt_policy, *cap.authority,
@@ -53,7 +86,7 @@ def command_policy(spec, instruction_path, controls=None):
     rules += [grammar._literal_rule('sed -n' if name == 'sed' else name, arguments=True)
               for name in controls['native_readonly'].PROGRAMS]
     rules += [grammar._literal_rule(text) for text in sorted(set(commands.values()))]
-    programs = sorted({shlex.split(text)[2] for text in commands.values() if shlex.split(text)[1] == '-c'})
+    programs = sorted({tokens(name)[2] for name in commands if tokens(name)[1] == '-c'})
     helper_view = {'version': controls['native_phase_history'].HELPER_ARGUMENTS,
         'repository': repository, 'python': python, 'method': spec.method, 'label': spec.label,
         'project': spec.project, 'bundle': str(spec.bundle), 'chunk_manifest': str(spec.chunk_manifest),
@@ -63,7 +96,7 @@ def command_policy(spec, instruction_path, controls=None):
     policy = {'version': grammar.POLICY_VERSION, 'literal_admission': grammar.LITERAL_ADMISSION,
         'pretool_control': deepcopy(controls['native_control'].HISTORY_CONTRACT), 'python': python,
         'manifest_paths': [str(spec.manifest)], 'programs': [{'code': code, 'arguments': True} for code in programs],
-        'command_examples': sorted(commands[name] for name in commands if shlex.split(commands[name])[1] == '-c'),
+        'command_examples': sorted(commands[name] for name in commands if tokens(name)[1] == '-c'),
         'allowed_tools': rules, 'readonly_lookups': {'version': 1, 'repository': repository,
             'inputs': sorted(inputs), 'output_directories': sorted(outputs)},
         'lookup_literal_admission': grammar.LOOKUP_LITERAL_ADMISSION, 'helper_arguments': helper_view,
@@ -93,7 +126,7 @@ def helper_commands(policy):
         for name,command in commands.items():
             if type(command) is not str or not command or len(command.encode('utf-8'))>1_000_000:
                 raise ValueError('native helper spelling is absent or oversized')
-            try:words=shlex.split(command)
+            try:words=_helper_tokens(command)
             except ValueError as exc:raise ValueError('native helper spelling is malformed') from exc
             if (len(words)<3 or words[0]!=python or words[1] not in ('-m','-c')
                     or shlex.join(words)!=command):
@@ -156,6 +189,17 @@ def command_guidance(policy):
     """Truthful new helper guidance, without the old copy/freeze instruction."""
     commands = helper_commands(policy)
     controls = inherited.load_controls()
+    return _command_guidance(commands, controls)
+
+
+def _command_guidance_in_scope(policy, profile):
+    """Keep exact guidance text without reopening the selected global loader."""
+    from . import native_owner_profile_v1 as owner_profile
+    with owner_profile._reconstruction_controls(profile) as controls:
+        return _command_guidance(helper_commands(policy), controls)
+
+
+def _command_guidance(commands, controls):
     return ('\n\n## Exact native shared helper spellings\n\n'
         'Use each command exactly as written, only when its selected phase permits it. '
         'The fixed advance helper alone publishes stage requests, first-response records, '

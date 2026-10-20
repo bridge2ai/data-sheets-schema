@@ -6,6 +6,7 @@ The shared lifetime separately requires exact review, CI and owner authority.
 from __future__ import annotations
 
 from pathlib import Path
+from contextlib import nullcontext
 import re
 
 from . import native_shared_contract as c
@@ -29,8 +30,17 @@ def _read(path, label, limit):
 
 
 def _selection(raw):
+    return _selected_composition(composition.verified_composition(raw))
+
+
+def _selection_in_scope(raw):
+    from . import native_owner_profile_v1 as owner_profile
+    with owner_profile._reconstruction_controls():
+        return _selected_composition(composition._verified_composition_in_scope(raw))
+
+
+def _selected_composition(selected):
     from .api_runner import RunSpec
-    selected = composition.verified_composition(raw)
     doc = c.parse_selection(selected['selection_raw_json'].encode('utf-8'))
     run = doc['run']
     spec = RunSpec.from_render_spec(selected['render_spec'], project=run['project'], method=run['method'], label=run['label'])
@@ -110,6 +120,35 @@ def _paths(value, selected, *, fresh, extra_protected=()):
 def registration(composition_path, system_path, *, permission_probe_path, attempt_id,
                  attempt_directory, evidence_directory, max_draft_checks, receipt_origin_version=0):
     """Prepare E, without consuming an attempt or asserting actual permission."""
+    return _registration(composition_path, system_path, permission_probe_path=permission_probe_path,
+        attempt_id=attempt_id, attempt_directory=attempt_directory, evidence_directory=evidence_directory,
+        max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version, controls=None)
+
+
+def _registration_in_scope(composition_path, system_path, *, permission_probe_path, attempt_id,
+                           attempt_directory, evidence_directory, max_draft_checks, receipt_origin_version=0):
+    """Prepare all of selected E in the admitted scope; no public dispatch."""
+    from . import native_owner_profile_v1 as owner_profile
+    with owner_profile._reconstruction_controls() as controls:
+        return _registration(composition_path, system_path, permission_probe_path=permission_probe_path,
+            attempt_id=attempt_id, attempt_directory=attempt_directory, evidence_directory=evidence_directory,
+            max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version, controls=controls)
+
+
+def _registration(composition_path, system_path, *, permission_probe_path, attempt_id,
+                  attempt_directory, evidence_directory, max_draft_checks, receipt_origin_version, controls):
+    from . import native_owner_profile_v1 as owner_profile
+    context = nullcontext(None) if controls is None else owner_profile._reconstruction_controls()
+    with context as current:
+        if current is not controls:
+            raise ValueError('selected registration requires the exact current controls map')
+        return _registration_body(composition_path, system_path, permission_probe_path=permission_probe_path,
+            attempt_id=attempt_id, attempt_directory=attempt_directory, evidence_directory=evidence_directory,
+            max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version, controls=controls)
+
+
+def _registration_body(composition_path, system_path, *, permission_probe_path, attempt_id,
+                       attempt_directory, evidence_directory, max_draft_checks, receipt_origin_version, controls):
     if type(receipt_origin_version) is not int or receipt_origin_version not in (0, 1):
         raise ValueError('receipt_origin_version must be exact integer 0 or 1')
     if type(attempt_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', attempt_id) is None:
@@ -121,7 +160,7 @@ def registration(composition_path, system_path, *, permission_probe_path, attemp
     if Path(paths['attempt_directory']).name != attempt_id:
         raise ValueError('attempt basename must equal its one-use identity')
     raw = _read(paths['composition'], 'composition', c.HARD_LIMITS['request_bytes'])
-    selected, spec, doc, runtime = _selection(raw)
+    selected, spec, doc, runtime = _selection(raw) if controls is None else _selection_in_scope(raw)
     if max_draft_checks != selected['max_draft_checks']:
         raise ValueError('execution draft allowance differs from selected composition')
     if selected['working_directory'] != str(Path.cwd().resolve()):
@@ -129,16 +168,25 @@ def registration(composition_path, system_path, *, permission_probe_path, attemp
     system = _read(paths['system_path'], 'system', c.HARD_LIMITS['input_bytes'])
     if not system.decode('utf-8').strip():
         raise ValueError('system instructions must be explicit nonblank UTF-8')
-    dependencies = authority.dependency_identity()
-    effective = system.decode('utf-8') + policy.command_guidance(selected['policy'])
+    dependencies = (authority.dependency_identity() if controls is None
+                    else authority.dependency_identity(stream_snapshot_profile=1))
+    if controls is not None and c.canonical(dependencies['stream_snapshot_profile']) != c.canonical(selected['stream_snapshot_profile']):
+        raise ValueError('selected execution dependencies differ from the composition profile')
+    guidance = (policy.command_guidance(selected['policy']) if controls is None else
+                policy._command_guidance_in_scope(selected['policy'], selected['stream_snapshot_profile']))
+    effective = system.decode('utf-8') + guidance
     config = Path(paths['attempt_directory']) / 'cli_config'
     expected = permission_expectation(runtime, selected, spec, effective, config, dependencies)
     probe = _read(paths['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes'])
-    from .native_shared_permissions import verify_saved_probe
-    checked = verify_saved_probe(probe, expected=expected)
+    from .native_shared_permissions import verify_saved_probe, _verify_saved_probe_in_scope
+    checked = (verify_saved_probe(probe, expected=expected) if controls is None else
+               _verify_saved_probe_in_scope(probe, expected=expected, profile=selected['stream_snapshot_profile']))
     if checked.get('checked') is not True or checked.get('passed') is not True:
         raise ValueError('native shared saved permission observations are not complete and passing')
-    with authority.loaded_dependencies(dependencies) as controls:
+    if controls is None:
+        with authority.loaded_dependencies(dependencies) as loaded:
+            argv = inherited.command(runtime, selected, effective, attempt_id, loaded)
+    else:
         argv = inherited.command(runtime, selected, effective, attempt_id, controls)
     value = {'kind': KIND, 'version': VERSION, 'execution': EXECUTION, 'attempt_id': attempt_id, **paths,
         'runtime': runtime, 'max_draft_checks': max_draft_checks, 'selection_sha256': selected['selection_sha256'],
@@ -158,27 +206,66 @@ def registration(composition_path, system_path, *, permission_probe_path, attemp
     if (raw != _read(paths['composition'], 'composition', c.HARD_LIMITS['request_bytes'])
             or system != _read(paths['system_path'], 'system', c.HARD_LIMITS['input_bytes'])
             or probe != _read(paths['permission_probe'], 'saved permission', c.HARD_LIMITS['permission_wire_bytes'])
-            or c.canonical(dependencies) != c.canonical(authority.dependency_identity())):
+            or c.canonical(dependencies) != c.canonical(authority.dependency_identity() if controls is None
+                else authority.dependency_identity(stream_snapshot_profile=1))):
         raise ValueError('execution authority changed during capture')
     return value
 
 
-def verified(raw):
+def _execution_value(raw):
     value = c.strict_json(raw, 'native shared execution', c.HARD_LIMITS['request_bytes'])
     if (type(value) is not dict or value.get('kind') != KIND or type(value.get('version')) is not int
             or value['version'] != VERSION or value.get('execution') != EXECUTION):
         raise ValueError('not the selected native shared execution registration')
+    return value
+
+
+def _execution_profile(value):
+    """Inspect both declarations before any default reconstruction/loader."""
+    try:
+        selector = authority._selector(value['dependencies'])
+        selected = composition._composition_value(value['composition_raw_json'].encode('utf-8'))
+    except (KeyError, AttributeError, TypeError) as exc:
+        raise ValueError('incomplete native shared execution profile') from exc
+    if selector == 0:
+        if 'stream_snapshot_profile' in selected or 'stream_snapshot_profile' in value:
+            raise ValueError('execution has a partial selected profile declaration')
+        return None
+    profile = value['dependencies']['stream_snapshot_profile']
+    if (type(profile) is not dict or type(selected.get('stream_snapshot_profile')) is not dict
+            or c.canonical(profile) != c.canonical(selected['stream_snapshot_profile'])
+            or 'stream_snapshot_profile' in value):
+        raise ValueError('execution and composition selected profiles differ')
+    return profile
+
+
+def _rebuild_execution(value, controls):
     origin_version = 0
     if 'receipt_origin_reporting' in value:
         from .native_receipt_origin import version
         origin_version = version(value)
     try:
-        expected = registration(value['composition'], value['system_path'], permission_probe_path=value['permission_probe'],
+        expected = _registration(value['composition'], value['system_path'], permission_probe_path=value['permission_probe'],
             attempt_id=value['attempt_id'], attempt_directory=value['attempt_directory'],
             evidence_directory=value['evidence_directory'], max_draft_checks=value['max_draft_checks'],
-            receipt_origin_version=origin_version)
+            receipt_origin_version=origin_version, controls=controls)
     except (KeyError, TypeError) as exc:
         raise ValueError('incomplete native shared execution registration') from exc
     if c.canonical(value) != c.canonical(expected):
         raise ValueError('execution registration differs from its selected authorities')
     return value
+
+
+def verified(raw):
+    value = _execution_value(raw)
+    if _execution_profile(value) is not None:
+        raise ValueError('selected execution is not enabled in the public execution route')
+    return _rebuild_execution(value, None)
+
+
+def _verified_in_scope(raw):
+    from . import native_owner_profile_v1 as owner_profile
+    value = _execution_value(raw)
+    profile = _execution_profile(value)
+    with owner_profile._reconstruction_controls(profile) as controls:
+        return _rebuild_execution(value, controls)

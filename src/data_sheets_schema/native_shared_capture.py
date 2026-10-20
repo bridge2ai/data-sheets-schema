@@ -6,6 +6,7 @@ Live callers and the saved replay use the same closed observation joins.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path, PurePosixPath
 import re
@@ -44,6 +45,251 @@ _OBSERVATION_PAYLOADS = {
     'core_sealed': {'core', 'helper_calls'},
     'advance_settled': {'call', 'result', 'result_event', 'advance_result'},
 }
+_OWNER_LIMIT = 16_384
+# Canonical JSON of the released manifest whose raw SHA is d1f13def58c0… .
+# This fixes the entire declared roster without consulting today's files.
+_OWNER_CONTROLLER_DECLARATION_SHA = 'c75e1e2cf9939f6b8f9bb82b3b76e5886acd89aecf183fee1ae9795f5f9a3f59'
+
+
+def _selected_owner_execution(value):
+    """Recognize the reserved saved-only branch, including malformed attempts."""
+    dependencies = value.get('dependencies') if type(value) is dict else None
+    return type(dependencies) is dict and (
+        'stream_snapshot_profile' in dependencies or dependencies.get('version') == 2)
+
+
+def _require_owner_association(context, selection, execution_raw, started_raw=None):
+    """Borrow only the exact active reader and its immutable captured joins."""
+    from . import native_stream_coordination_v1 as coordination
+    if type(context) is not coordination._OwnerReaderContext:
+        raise ValueError('selected live capture requires its exact owner reader context')
+    context.require_current()
+    association = context._association
+    if (type(execution_raw) is not bytes or association.selection != selection
+            or association.execution_raw != execution_raw
+            or (started_raw is not None and association.started_raw != started_raw)):
+        raise ValueError('selected live capture differs from its reader association')
+    return association
+
+
+def _publication_guard(selection, owner_context):
+    if owner_context is not None:
+        from . import native_stream_coordination_v1 as coordination
+        if type(owner_context) is not coordination._OwnerReaderContext:
+            raise ValueError('selected publication requires its exact owner reader context')
+        _require_owner_association(owner_context, selection,
+                                  owner_context._association.execution_raw)
+
+
+@contextmanager
+def _helper_owner_scope(selection_registration_path):
+    """Independently join the actual owner; retain one scope through helper writes.
+
+    Bootstrap claims grant no command permission. capture_stage must still
+    prove its actual pending fixed advance and complete current phase history.
+    """
+    from . import native_shared_selection as selections
+    from . import native_shared_registration as registration
+    selection = selections.capture(str(selection_registration_path))
+    reader = _Reader(selection)
+    execution = reader.read('execution_capture', selection.role('execution_capture'))
+    value = registration._execution_value(execution.raw)
+    profile = registration._execution_profile(value)
+    if profile is None:
+        yield None
+        return
+
+    import threading
+    from . import native_clock_domain_v1 as clocks
+    from . import native_execution_authority as authority
+    from . import native_owner_profile_v1 as profiles
+    from . import native_stream_coordination_v1 as coordination
+    from .native_owner_runner_v1 import validate_owner_record_v2
+    if (profiles._ACTIVE.get() is not None or coordination.current_reader_budget() is not None
+            or coordination._SCOPE.get() is not None or coordination._OWNER_READER.get() is not None):
+        raise ValueError('independent helper cannot borrow or nest another owner scope')
+    started = reader.read('started_capture', selection.role('started_capture'))
+    attempt = Path(c.canonical_path(value.get('attempt_directory'), 'helper attempt'))
+    owner_member = evidence.read_regular(str(attempt / 'stream-owner.json'), 'owner', max_bytes=_OWNER_LIMIT)
+    owner = validate_owner_record_v2(c.strict_json(owner_member.captured.raw, 'helper owner', _OWNER_LIMIT))
+    if (owner['execution_sha256'] != execution.pin.sha256 or owner['started_sha256'] != started.pin.sha256
+            or c.canonical(owner['coordination_profile']) != c.canonical(profile)):
+        raise ValueError('helper owner differs from its captured execution, started or source profile')
+    # A local event is not a shared parent Event. The reader also checks the
+    # durable owner-stop marker on every admission and SH contention poll.
+    with clocks.capture_domain() as lease:
+        lease.require_current(owner['clock_domain'])
+        budget = coordination.ReaderBudget(owner['deadline_ns'], (threading.Event(),),
+                                            clock_domain=owner['clock_domain'])
+        with coordination.reader_budget(budget, clock_lease=lease):
+            budget.remaining()
+            with authority.loaded_dependencies(value['dependencies']) as controls:
+                budget.remaining()
+                registration._verified_in_scope(execution.raw)
+                for filename, expected in (('registration.json', execution.raw), ('started.json', started.raw)):
+                    budget.remaining()
+                    actual = evidence.read_regular(str(attempt / filename), 'attempt_identity',
+                                                   max_bytes=c.HARD_LIMITS['request_bytes'])
+                    if actual.captured.raw != expected:
+                        raise ValueError('helper capture differs from the actual one-use attempt')
+                # Binding reconstructs S and exact E/C/started joins, proves
+                # named committed sources and rechecks this same deadline.
+                context = profiles.bind_reader_context(profile, controls, selection=selection,
+                    execution_raw=execution.raw, started_raw=started.raw,
+                    owner_raw=owner_member.captured.raw, budget=budget)
+                with context:
+                    if context._owner_metadata != owner_member.metadata_json:
+                        raise ValueError('helper owner identity changed during bootstrap')
+                    yield context
+                budget.remaining()
+
+
+def _saved_member(pool, role, path):
+    if type(pool) is not evidence.CapturePool:
+        raise ValueError('owner initialization requires an exact immutable captured pool')
+    found = [member for member in pool.members
+             if member.captured.pin.role == role and member.captured.pin.path == path]
+    if len(found) != 1:
+        raise ValueError('saved pool lacks one exact artifact role/path: ' + role)
+    return found[0]
+
+
+def _saved_selection_carriers(pool, value):
+    """Extract the complete current-pool carriers without granting validity."""
+    from . import native_shared_selection as selection_api
+    if type(value) is not dict or type(value.get('composition_raw_json')) is not str:
+        raise ValueError('saved owner execution lacks bounded captured composition text')
+    composition = c.strict_json(value['composition_raw_json'].encode('utf-8'),
+                               'captured C', c.HARD_LIMITS['request_bytes'])
+    if type(composition) is not dict or type(composition.get('selection_raw_json')) is not str:
+        raise ValueError('saved owner composition lacks captured selection text')
+    raw = composition['selection_raw_json'].encode('utf-8')
+    doc = c.parse_selection(raw)
+    registration = _saved_member(pool, 'selection', doc['registration_path']).captured
+    if registration.raw != raw:
+        raise ValueError('saved selection differs from the execution declaration')
+    artifacts = {role: _saved_member(pool, role, pin['path']).captured
+                 for role, pin in selection_api._declarations(doc)}
+    schemas = selection_api._declared_schemas(doc, artifacts)
+    authority = tuple(a for role, a in artifacts.items()
+                      if role != 'receipt_policy' and not role.startswith(('full_schema:', 'core_schema:')))
+    return registration, authority, schemas, artifacts['receipt_policy']
+
+
+def _saved_selection(pool, value):
+    """Uncached saved-entry oracle over complete current-pool carriers."""
+    from . import native_shared_selection as selection_api
+    return selection_api.rebuild(*_saved_selection_carriers(pool, value))
+
+
+def _saved_owner_execution(selection, pool, execution):
+    """Pure captured E/C/S association; neither public verification nor loading."""
+    if type(execution) is not c.CapturedArtifact:
+        raise ValueError('saved owner association requires exact immutable execution bytes')
+    value = c.strict_json(execution.raw, 'owner captured E', c.HARD_LIMITS['request_bytes'])
+    if (type(value) is not dict or value.get('kind') != c.KINDS['execution']
+            or type(value.get('version')) is not int or value['version'] != 1
+            or type(value.get('composition_raw_json')) is not str):
+        raise ValueError('owner initialization requires the exact shared execution kind/version')
+    from . import native_shared_selection as selection_api
+    # Repeated owner joins may reuse only exact-byte schema derivation
+    # metadata. Every carrier, declaration, bound and non-schema authority is
+    # freshly checked; the independent saved-entry oracle remains uncached.
+    rebuilt = selection_api._rebuild(*_saved_selection_carriers(pool, value), use_schema_cache=True)
+    if rebuilt != selection:
+        raise ValueError('owner selection differs from its complete captured reconstruction')
+    member = _saved_member(pool, 'execution_capture', rebuilt.role('execution_capture'))
+    if member.captured != execution:
+        raise ValueError('owner execution differs from its unique captured pool member')
+    composition_raw = value['composition_raw_json'].encode('utf-8')
+    composition = c.strict_json(composition_raw, 'owner captured C', c.HARD_LIMITS['request_bytes'])
+    if (type(composition) is not dict
+            or composition.get('kind') != 'd4d_native_shared_callback_composition'
+            or type(composition.get('version')) is not int or composition['version'] != 1
+            or c.sha(composition_raw) != value.get('composition_sha256')
+            or composition.get('selection_raw_json') != rebuilt.registration.raw.decode('utf-8')
+            or composition.get('selection_sha256') != rebuilt.registration.pin.sha256
+            or value.get('selection_sha256') != rebuilt.registration.pin.sha256):
+        raise ValueError('owner captured E/C/S raw identities disagree')
+    if type(composition.get('runtime_raw_json')) is not str:
+        raise ValueError('owner captured composition lacks exact runtime text')
+    runtime_raw = composition['runtime_raw_json'].encode('utf-8')
+    runtime = c.strict_json(runtime_raw, 'owner captured runtime', c.HARD_LIMITS['request_bytes'])
+    if (type(runtime) is not dict
+            or c.sha(runtime_raw) != composition.get('runtime_sha256')
+            or value.get('runtime_declaration_sha256') != composition.get('runtime_sha256')
+            or c.canonical(value.get('runtime')) != c.canonical(runtime)):
+        raise ValueError('owner captured E/C runtime bytes, hashes or typed values disagree')
+    dependencies = c.exact(value.get('dependencies'),
+        {'version', 'base', 'additional_modules', 'stream_snapshot_profile'}, 'owner dependencies')
+    if type(dependencies['version']) is not int or dependencies['version'] != 2:
+        raise ValueError('owner initialization requires selected dependency version 2')
+    if type(dependencies['base']) is not dict or type(dependencies['additional_modules']) is not dict:
+        raise ValueError('owner captured dependency declarations are malformed')
+    if ('stream_snapshot_profile' in composition and c.canonical(composition['stream_snapshot_profile'])
+            != c.canonical(dependencies['stream_snapshot_profile'])):
+        raise ValueError('captured composition profile differs from its execution')
+    c.canonical_path(value.get('attempt_directory'), 'owner attempt')
+    if (type(value.get('attempt_id')) is not str or not value['attempt_id']
+            or PurePosixPath(value['attempt_directory']).name != value['attempt_id']
+            or value.get('working_directory') != composition.get('working_directory')):
+        raise ValueError('owner execution attempt/composition association differs')
+    return value, composition
+
+
+def _owner_document(artifact):
+    from .native_owner_runner_v1 import validate_owner_record_v2
+    if (type(artifact) is not c.CapturedArtifact or artifact.pin.role != 'owner'
+            or PurePosixPath(artifact.pin.path).name != 'stream-owner.json'
+            or artifact.pin.bytes > _OWNER_LIMIT):
+        raise ValueError('initialized owner differs from its fixed bounded artifact role')
+    return validate_owner_record_v2(c.strict_json(artifact.raw, 'captured owner', _OWNER_LIMIT))
+
+
+def _saved_owner(selection, pool, execution, started, owner_artifact):
+    value, composition = _saved_owner_execution(selection, pool, execution)
+    if (type(started) is not c.CapturedArtifact
+            or _saved_member(pool, 'started_capture', selection.role('started_capture')).captured != started):
+        raise ValueError('owner started identity differs from the captured member')
+    consumed = c.strict_json(started.raw, 'owner started identity', c.HARD_LIMITS['metadata_record_bytes'])
+    if (type(consumed) is not dict or consumed.get('kind') != 'd4d_native_shared_attempt'
+            or type(consumed.get('version')) is not int or consumed['version'] != 1
+            or consumed.get('state') != 'started' or type(consumed.get('dispatch_limit')) is not int
+            or consumed['dispatch_limit'] != 1 or consumed.get('attempt_id') != value['attempt_id']
+            or consumed.get('registration_sha256') != execution.pin.sha256
+            or consumed.get('composition_sha256') != value['composition_sha256']):
+        raise ValueError('owner initialization lacks exact consumed E/C/started identity')
+    owner = _owner_document(owner_artifact)
+    path = str(PurePosixPath(value['attempt_directory']) / 'stream-owner.json')
+    if (owner_artifact.pin.path != path
+            or _saved_member(pool, 'owner', path).captured != owner_artifact
+            or owner['execution_sha256'] != execution.pin.sha256
+            or owner['started_sha256'] != started.pin.sha256):
+        raise ValueError('owner differs from its exact attempt/execution/started pins')
+    dependencies = value['dependencies']
+    profile = owner['coordination_profile']
+    if c.canonical(profile) != c.canonical(dependencies['stream_snapshot_profile']):
+        raise ValueError('owner profile differs from captured execution dependencies')
+    base = dependencies['base']
+    package = base.get('package_sources')
+    manifest = composition.get('controller_sources')
+    if (type(package) is not dict or type(base.get('modules')) is not dict
+            or type(manifest) is not dict or type(manifest.get('modules')) is not dict
+            or c.sha(c.canonical(manifest)) != _OWNER_CONTROLLER_DECLARATION_SHA
+            or composition.get('controller_sources_sha256') != profile['base_controller_sources_sha256']
+            or any(package.get(pin['path']) != pin['sha256'] for pin in profile['implementations'].values())
+            or any(c.canonical(base['modules'].get(name)) != c.canonical(pin)
+                   for name, pin in manifest['modules'].items())):
+        raise ValueError('owner source profile differs from captured controller/package declarations')
+    runtime = value.get('runtime')
+    if (type(runtime) is not dict or type(runtime.get('deadline_seconds')) is not int
+            or runtime['deadline_seconds'] <= 0
+            or owner['duration_ns'] != runtime['deadline_seconds'] * 1_000_000_000):
+        raise ValueError('owner original duration differs from captured execution')
+    for role in live_streams.ROLES:
+        if owner[role]['path'] != str(PurePosixPath(value['attempt_directory']) / (role + '.jsonl')):
+            raise ValueError('owner stream is outside its exact captured attempt')
+    return owner
 
 
 def _pin(value):
@@ -53,17 +299,65 @@ def _pin(value):
 
 class _Reader:
     """One bounded capture transaction; no directory discovery or read fallback."""
-    def __init__(self, selection, *, pool=None):
+    def __init__(self, selection, *, pool=None, execution=None, owner_context=None):
         if type(selection) is not c.NativeSelectionCapture:
             raise ValueError('capture requires the exact immutable selection')
         if pool is not None and type(pool) is not evidence.CapturePool:
             raise ValueError('saved reader requires the exact immutable pool')
         self.selection, self.pool = selection, pool
+        self.owner_context = owner_context
+        self._owner_execution = None
+        if owner_context is not None:
+            if pool is not None or execution is not None:
+                raise ValueError('live owner reader cannot also use a saved pool')
+            association = _require_owner_association(owner_context, selection,
+                owner_context._association.execution_raw)
+            self._owner_execution = _captured('execution_capture',
+                selection.role('execution_capture'), association.execution_raw)
+        if execution is not None:
+            _saved_owner_execution(selection, pool, execution)
+            self._owner_execution = execution
         self.members = {}
         self.total = 0
+        if owner_context is not None:
+            # The saved observation resolver must have the complete actual S
+            # closure, including metadata, rather than invented pool members.
+            artifacts = (selection.registration, *selection.authority,
+                *(item for closure in selection.schemas for item in closure.sources),
+                selection.receipt_policy)
+            for artifact in artifacts:
+                _publication_guard(selection, owner_context)
+                member = evidence.read_regular(artifact.pin.path, artifact.pin.role,
+                    max_bytes=max(1, artifact.pin.bytes))
+                if member.captured != artifact:
+                    raise ValueError('live owner selection authority changed')
+                self._remember(member)
+            self.read('owner', association.owner_path)
+
+    def _remember(self, member):
+        key = (member.captured.pin.role, member.captured.pin.path)
+        if key not in self.members:
+            self.total += member.captured.pin.bytes
+            if (self.total > self.selection.bounds()['max_evidence_bytes']
+                    or len(self.members) >= c.HARD_LIMITS['captured_members']):
+                raise ValueError('complete stage capture exceeds its total bound')
+            self.members[key] = member
 
     def destination(self, role, path):
         c.canonical_path(path, 'selected stage artifact')
+        if role == 'owner':
+            if self.owner_context is not None:
+                association = _require_owner_association(self.owner_context, self.selection,
+                    self._owner_execution.raw)
+                if path != association.owner_path:
+                    raise ValueError('owner artifact is outside its exact live execution role')
+                return _OWNER_LIMIT
+            if self.pool is None or self._owner_execution is None:
+                raise ValueError('owner role is available only through exact saved execution association')
+            value, _ = _saved_owner_execution(self.selection, self.pool, self._owner_execution)
+            if path != str(PurePosixPath(value['attempt_directory']) / 'stream-owner.json'):
+                raise ValueError('owner artifact is outside its exact captured execution role')
+            return _OWNER_LIMIT
         if role in _DYNAMIC:
             root, suffix, ceiling, first = _DYNAMIC[role]
             p = PurePosixPath(path)
@@ -87,6 +381,7 @@ class _Reader:
         return limit
 
     def read(self, role, path, expected=None):
+        _publication_guard(self.selection, self.owner_context)
         limit = self.destination(role, path)
         if expected is not None and (type(expected) is not c.ArtifactPin or expected.role != role
                                     or expected.path != path or expected.bytes > limit):
@@ -96,6 +391,8 @@ class _Reader:
             member = self.members[key]
         elif self.pool is None:
             member = evidence.read_regular(path, role, max_bytes=limit)
+        elif role == 'owner':
+            member = _saved_member(self.pool, role, path)
         else:
             candidates = [m for m in self.pool.members if m.captured.pin.role == role and m.captured.pin.path == path
                           and (expected is None or m.captured.pin == expected)]
@@ -104,12 +401,12 @@ class _Reader:
             member = candidates[0]
         if member.captured.pin.bytes > limit or (expected is not None and member.captured.pin != expected):
             raise ValueError('captured artifact differs from its exact pin or bound')
-        if key not in self.members:
-            self.total += member.captured.pin.bytes
-            if (self.total > self.selection.bounds()['max_evidence_bytes']
-                    or len(self.members) >= c.HARD_LIMITS['captured_members']):
-                raise ValueError('complete stage capture exceeds its total bound')
-            self.members[key] = member
+        if role == 'owner' and self.owner_context is not None:
+            if (member.captured.raw != self.owner_context._association.owner_raw
+                    or member.metadata_json != self.owner_context._owner_metadata):
+                raise ValueError('captured live owner differs from its admitted bytes or identity')
+        self._remember(member)
+        _publication_guard(self.selection, self.owner_context)
         return member.captured
 
     def pinned(self, value):
@@ -177,13 +474,20 @@ class _Reader:
 
 
 def observation_bytes(kind, selection, execution_sha256, attempt_id, session_id,
-                      transcript, control, payload):
+                      transcript, control, payload, *, owner=None):
     if kind not in _OBSERVATION_PAYLOADS:
         raise ValueError('unknown native shared observation type')
     c.exact(payload, _OBSERVATION_PAYLOADS[kind], 'observation payload')
     if kind == 'initialized':
         live_streams.identities(payload['stream_files'])
-    raw = c.canonical({'kind': c.KINDS['observation'], 'version': 1, 'observation_type': kind,
+    if owner is not None:
+        if kind != 'initialized':
+            raise ValueError('owner pins are supported only by initialized observations')
+        owner_value = _owner_document(owner)
+        if owner_value['execution_sha256'] != execution_sha256:
+            raise ValueError('initialized owner belongs to another execution')
+        payload = {**payload, 'owner': c.pin_dict(owner.pin)}
+    raw = c.canonical({'kind': c.KINDS['observation'], 'version': 1 if owner is None else 2, 'observation_type': kind,
         'selection_sha256': selection.registration.pin.sha256, 'execution_sha256': execution_sha256,
         'attempt_id': attempt_id, 'session_id': session_id,
         'transcript_prefix': evidence.prefix_reference(transcript, execution_sha256=execution_sha256),
@@ -197,17 +501,53 @@ def observation(artifact, selection, execution, pool):
     """Resolve a closed durable observation through its actual captured prefixes."""
     if artifact.pin.role != 'observation':
         raise ValueError('not a captured native observation')
-    _Reader(selection).destination('observation', artifact.pin.path)
     doc = c.strict_json(artifact.raw, 'native observation', c.HARD_LIMITS['metadata_record_bytes'])
     c.exact(doc, _OBSERVATION_KEYS, 'native observation')
     kind = doc['observation_type']
-    if (doc['kind'] != c.KINDS['observation'] or type(doc['version']) is not int or doc['version'] != 1
+    if (doc['kind'] != c.KINDS['observation'] or type(doc['version']) is not int or doc['version'] not in (1, 2)
             or kind not in _OBSERVATION_PAYLOADS or doc['selection_sha256'] != execution.selection_sha256
             or doc['selection_sha256'] != selection.registration.pin.sha256
             or doc['execution_sha256'] != execution.execution.pin.sha256
             or doc['attempt_id'] != execution.attempt_id or doc['session_id'] != execution.session_id):
         raise ValueError('native observation belongs to another exact execution/session')
-    c.exact(doc['payload'], _OBSERVATION_PAYLOADS[kind], 'native observation payload')
+    execution_value = c.strict_json(execution.execution.raw, 'captured execution', c.HARD_LIMITS['request_bytes'])
+    selected = _selected_owner_execution(execution_value)
+    if doc['version'] == 2:
+        if kind != 'initialized' or not selected:
+            raise ValueError('initialized v2 requires the selected saved owner association')
+        reader = _Reader(selection, pool=pool, execution=execution.execution)
+        expected_streams = {evidence.stream_id(execution.execution.pin.sha256, role,
+            str(PurePosixPath(execution_value['attempt_directory']) / (role + '.jsonl')))
+            for role in live_streams.ROLES}
+        if set(dict(pool.stream_bindings)) != expected_streams:
+            raise ValueError('owner initialization lacks its two exact captured stream bindings')
+        keys = _OBSERVATION_PAYLOADS['initialized'] | {'owner'}
+    else:
+        if selected and kind == 'initialized':
+            raise ValueError('selected owner initialization cannot use v1 observations')
+        if selected:
+            # Later v1 records do not repeat the owner pin. Their immutable
+            # binding must resolve the same actual initialized-v2 observation.
+            init = _saved_member(pool, 'observation', execution.init_observation.pin.path).captured
+            if init != execution.init_observation:
+                raise ValueError('later selected observation has another initialization')
+            header = c.strict_json(init.raw, 'selected initialization', c.HARD_LIMITS['metadata_record_bytes'])
+            if (type(header) is not dict or header.get('kind') != c.KINDS['observation']
+                    or type(header.get('version')) is not int or header['version'] != 2
+                    or header.get('observation_type') != 'initialized'):
+                raise ValueError('later selected observation requires an initialized-v2 binding')
+            initial, _, _ = observation(init, selection, execution, pool)
+            if initial['version'] != 2 or initial['observation_type'] != 'initialized':
+                raise ValueError('later selected observation lacks initialized owner binding')
+            _, composition = _saved_owner_execution(selection, pool, execution.execution)
+            if 'stream_snapshot_profile' not in composition:
+                raise ValueError('historical private composition supports initialization-only evidence')
+            reader = _Reader(selection, pool=pool, execution=execution.execution)
+        else:
+            reader = _Reader(selection)
+        keys = _OBSERVATION_PAYLOADS[kind]
+    reader.destination('observation', artifact.pin.path)
+    c.exact(doc['payload'], keys, 'native observation payload')
     if kind == 'initialized':
         anchors = live_streams.identities(doc['payload']['stream_files'])
         members = tuple(pool.member(dict(pool.stream_bindings)[
@@ -215,9 +555,14 @@ def observation(artifact, selection, execution, pool):
             for role in live_streams.ROLES)
         if anchors != live_streams.stream_files(members):
             raise ValueError('initialized stream files differ from captured physical identities')
+        if doc['version'] == 2:
+            owner_artifact = reader.pinned(doc['payload']['owner'])
+            owner_value = _saved_owner(selection, pool, execution.execution, execution.started, owner_artifact)
+            if c.canonical(anchors) != c.canonical({role: {key: owner_value[role][key]
+                    for key in ('device', 'inode')} for role in live_streams.ROLES}):
+                raise ValueError('initialized stream files differ from captured owner identities')
     transcript = pool.prefix(doc['transcript_prefix'], execution_sha256=execution.execution.pin.sha256)
     control = pool.prefix(doc['control_prefix'], execution_sha256=execution.execution.pin.sha256)
-    execution_value = c.strict_json(execution.execution.raw, 'captured execution', c.HARD_LIMITS['request_bytes'])
     if (transcript.path != str(Path(execution_value['attempt_directory']) / 'transcript.jsonl')
             or control.path != str(Path(execution_value['attempt_directory']) / 'control.jsonl')):
         raise ValueError('native observation streams are outside their exact registered attempt')
@@ -305,10 +650,11 @@ def _observation_paths(selection):
     return tuple(str(root / name) for name in names)
 
 
-def _create(selection, role, raw, *, ordinal=None):
+def _create(selection, role, raw, *, ordinal=None, owner_context=None):
     """Sole parent/helper create-once primitive for explicitly derived S roles."""
     from .native_attempt_supervisor import durable_new
     from .native_execution import _mkdir_durable
+    _publication_guard(selection, owner_context)
     if role == 'observation':
         paths = _observation_paths(selection)
         if ordinal is not None and ordinal != len(paths):
@@ -326,31 +672,46 @@ def _create(selection, role, raw, *, ordinal=None):
     if (root not in target.parents or target.resolve() != target or target.exists() or target.is_symlink()
             or not root.is_dir() or root.is_symlink() or root.resolve() != root):
         raise ValueError('native publication is not one new physical S-owned destination')
+    _publication_guard(selection, owner_context)
     _mkdir_durable(target.parent)
+    _publication_guard(selection, owner_context)
     durable_new(target, raw)
     item = evidence.read_regular(path, role, max_bytes=limit).captured
     if item.raw != raw:
         raise ValueError('published native artifact differs from its intended bytes')
+    _publication_guard(selection, owner_context)
     return item
 
 
-def _append(selection, execution, history, kind, payload):
+def _append(selection, execution, history, kind, payload, *, owner_context=None):
     """Parent record publication shares C's exact serializer and journal CAS."""
     from .native_shared_publication import _replace_journal
+    if _selected_owner_execution(c.strict_json(execution.execution.raw)):
+        _require_owner_association(owner_context, selection,
+            execution.execution.raw, execution.started.raw)
     records, journal = stage.append_records(selection, execution, history, ((kind, c.canonical(payload)),))
     for record in records:
-        _create(selection, 'record', record.raw, ordinal=len(history.records))
-    _replace_journal(Path(selection.role('journal')), history.journal, journal)
+        _create(selection, 'record', record.raw, ordinal=len(history.records), owner_context=owner_context)
+    _publication_guard(selection, owner_context)
+    if owner_context is None:
+        _replace_journal(Path(selection.role('journal')), history.journal, journal)
+    else:
+        _replace_journal(Path(selection.role('journal')), history.journal, journal, owner_context=owner_context)
+    _publication_guard(selection, owner_context)
 
 
-def activate(selection, execution_raw, started_raw):
+def activate(selection, execution_raw, started_raw, *, owner_context=None):
     """Called only by the fixed lifetime immediately before its single dispatch.
 
     This writes no session declaration. The later session binding must come
     from actual initialized native/control streams.
     """
     from . import native_shared_registration as registration
-    value = registration.verified(execution_raw)
+    if owner_context is None:
+        value = registration.verified(execution_raw)
+    else:
+        _require_owner_association(owner_context, selection, execution_raw, started_raw)
+        value = registration._verified_in_scope(execution_raw)
     composition = _document(value['composition_raw_json'].encode('utf-8'), 'composition')
     if composition['selection_raw_json'].encode('utf-8') != selection.registration.raw:
         raise ValueError('activation E does not capture this exact selected S')
@@ -367,15 +728,16 @@ def activate(selection, execution_raw, started_raw):
     destinations = ('execution_capture', 'started_capture', 'journal')
     if any(Path(selection.role(role)).exists() or Path(selection.role(role)).is_symlink() for role in destinations):
         raise ValueError('native stage activation is spent and cannot be resumed')
-    e = _create(selection, 'execution_capture', execution_raw)
-    s = _create(selection, 'started_capture', started_raw)
+    e = _create(selection, 'execution_capture', execution_raw, owner_context=owner_context)
+    s = _create(selection, 'started_capture', started_raw, owner_context=owner_context)
     raw = stage.record_bytes(record_type='genesis', sequence=0, previous_record_sha256=None,
         selection_sha256=selection.registration.pin.sha256, execution_sha256=e.pin.sha256,
         attempt_id=value['attempt_id'], session_id=None,
         payload={'execution': c.pin_dict(e.pin), 'started': c.pin_dict(s.pin)})
-    record = _create(selection, 'record', raw, ordinal=0)
+    record = _create(selection, 'record', raw, ordinal=0, owner_context=owner_context)
     _create(selection, 'journal', stage.journal_bytes(selection_sha256=selection.registration.pin.sha256,
-        execution_sha256=e.pin.sha256, attempt_id=value['attempt_id'], records=(record.pin,)))
+        execution_sha256=e.pin.sha256, attempt_id=value['attempt_id'], records=(record.pin,)),
+        owner_context=owner_context)
 
 
 def _extend_trace(prev, transcript, control, runtime):
@@ -527,6 +889,7 @@ class _CapturedRun:
     _prefixes: dict = field(default_factory=dict, init=False, compare=False, repr=False)
     _chronology_cache: object = field(default=None, init=False, compare=False, repr=False)
     _callback_state_cache: dict = field(default_factory=dict, init=False, compare=False, repr=False)
+    _owner_context: object = field(default=None, compare=False, repr=False)
 
     def __post_init__(self):
         self._prefixes = self._catalogs._prefixes
@@ -558,6 +921,50 @@ class _CapturedRun:
             self.selection, self.binding, self.phase1, self.history, self._catalogs)
 
 
+def _require_captured_run(run):
+    if type(run) is not _CapturedRun:
+        raise ValueError('effect/assessment requires a captured run, not initialization-only evidence')
+
+
+def _require_run_effect(run):
+    _require_captured_run(run)
+    value = c.strict_json(run.binding.execution.raw, 'captured execution', c.HARD_LIMITS['request_bytes'])
+    if _selected_owner_execution(value):
+        association = _require_owner_association(run._owner_context, run.selection,
+            run.binding.execution.raw, run.binding.started.raw)
+        if (type(run.pool) is not evidence.CapturePool
+                or sum(member.captured.pin.bytes for member in run.pool.members)
+                   > association.selection.bounds()['max_evidence_bytes']):
+            raise ValueError('selected live pool exceeds its complete evidence byte bound')
+        if (type(run.reader) is not _Reader or run.reader.pool is not None
+                or run.reader.owner_context is not run._owner_context
+                or run.reader.selection != run.selection
+                or run.reader._owner_execution != run.binding.execution):
+            raise ValueError('selected effect requires its actual live owner reader')
+        if (c.canonical(run.value) != c.canonical(value)
+                or c.canonical(run.composition) != c.canonical(c.strict_json(
+                    value['composition_raw_json'].encode('utf-8')))):
+            raise ValueError('selected live run changed its execution or composition')
+        owner = _saved_member(run.pool, 'owner', association.owner_path)
+        if (owner.captured.raw != association.owner_raw
+                or owner.metadata_json != run._owner_context._owner_metadata):
+            raise ValueError('selected effect owner differs from its admitted bytes or identity')
+        # Reconstruct solely from this immutable pool: assigning a live context
+        # to a saved/altered run cannot substitute its binding or prefix roles.
+        saved = _Reader(run.selection, pool=run.pool, execution=run.binding.execution)
+        if _binding(run.selection, value, run.composition, saved, run.pool) != run.binding:
+            raise ValueError('selected effect binding differs from its captured initialization')
+        for role, prefix in (('transcript', run.transcript), ('control', run.control)):
+            if (prefix.stream != role or run.pool.prefix(evidence.prefix_reference(prefix,
+                    execution_sha256=run.binding.execution.pin.sha256),
+                    execution_sha256=run.binding.execution.pin.sha256) != prefix):
+                raise ValueError('selected effect prefix differs from its exact captured stream')
+        _require_owner_association(run._owner_context, run.selection,
+            run.binding.execution.raw, run.binding.started.raw)
+    elif run._owner_context is not None or _selected_owner_execution(run.value):
+        raise ValueError('selected live run contradicts its captured execution')
+
+
 def _binding_document(selection, value, composition, execution, started, observation_item, session):
     return {'kind': c.KINDS['binding'], 'version': 1,
         'selection_sha256': selection.registration.pin.sha256,
@@ -587,10 +994,12 @@ def _binding(selection, value, composition, reader, pool):
     observation_doc, transcript, control = observation(init, selection, result, pool)
     session, sent, ack, initialized = observed.initialization(transcript, control,
         policy=composition['policy'], runtime=value['runtime'])
+    expected_payload = {'initialize_sent': asdict(sent), 'initialize_ack': asdict(ack), 'native_init': asdict(initialized),
+        'stream_files': live_streams.stream_files(tuple(pool.member(member_id) for _, member_id in pool.stream_bindings))}
+    if observation_doc['version'] == 2:
+        expected_payload['owner'] = observation_doc['payload']['owner']
     if (session != result.session_id or observation_doc['observation_type'] != 'initialized'
-            or observation_doc['payload'] != {'initialize_sent': asdict(sent), 'initialize_ack': asdict(ack), 'native_init': asdict(initialized),
-                'stream_files': live_streams.stream_files(tuple(pool.member(member_id)
-                    for _, member_id in pool.stream_bindings))}):
+            or c.canonical(observation_doc['payload']) != c.canonical(expected_payload)):
         raise ValueError('session binding lacks exact actual initialization observations')
     return result
 
@@ -640,13 +1049,24 @@ def _streams(value, *, transcript_bytes=None, control_bytes=None):
     return tuple(members), tuple(prefixes)
 
 
-def _live_streams(value, *, stream_files, transcript_bytes=None, control_bytes=None):
+def _live_streams(value, *, stream_files, transcript_bytes=None, control_bytes=None, owner_context=None):
+    if _selected_owner_execution(value):
+        if owner_context is None:
+            raise ValueError('selected live streams require their exact owner context')
+        association = _require_owner_association(owner_context, owner_context._association.selection,
+            owner_context._association.execution_raw)
+        if c.canonical(value) != c.canonical(c.strict_json(association.execution_raw)):
+            raise ValueError('live streams differ from their owner execution')
+    elif owner_context is not None:
+        raise ValueError('default live streams cannot borrow selected owner authority')
     anchors = live_streams.identities(stream_files)
     members, prefixes = [], []
     for role, endpoint in (('transcript', transcript_bytes), ('control', control_bytes)):
+        kwargs = {} if owner_context is None else {'coordination': owner_context}
         member = live_streams.read_live_stream(
             str(Path(value['attempt_directory']) / (role + '.jsonl')), role,
-            max_bytes=c.HARD_LIMITS['stream_bytes'], identity=anchors[role])
+            max_bytes=(c.HARD_LIMITS['stream_bytes'] if owner_context is None
+                       else owner_context._association.max_bytes), identity=anchors[role], **kwargs)
         members.append(member)
         prefixes.append(live_streams.prefix(member, endpoint))
     return tuple(members), tuple(prefixes)
@@ -655,6 +1075,11 @@ def _live_streams(value, *, stream_files, transcript_bytes=None, control_bytes=N
 def _declared_stream_files(selection, reader):
     # This early declaration can only restrict an opened identity. _binding
     # subsequently verifies every E/S/init/prefix join before any effect.
+    if reader.owner_context is not None:
+        association = _require_owner_association(reader.owner_context, selection,
+            reader._owner_execution.raw)
+        return {role: {'device': device, 'inode': inode}
+                for role, _, device, inode in association.streams}
     binding = _document(reader.read('session_binding', selection.role('session_binding')).raw,
                         'actual session binding')
     init = reader.pinned(binding['init_observation'])
@@ -662,20 +1087,32 @@ def _declared_stream_files(selection, reader):
     c.exact(doc, _OBSERVATION_KEYS, 'initialized observation')
     if doc['observation_type'] != 'initialized':
         raise ValueError('stream identity must come from the initialized observation')
+    if type(doc['version']) is int and doc['version'] == 2:
+        if reader.pool is None or reader._owner_execution is None:
+            raise ValueError('initialized v2 stream declarations require a saved owner reader')
+        value, composition = _saved_owner_execution(selection, reader.pool, reader._owner_execution)
+        _binding(selection, value, composition, reader, reader.pool)
+        return live_streams.identities(doc['payload']['stream_files'])
     c.exact(doc['payload'], _OBSERVATION_PAYLOADS['initialized'], 'initialized payload')
     return live_streams.identities(doc['payload']['stream_files'])
 
 
-def _base(selection_path, *, _catalogs=None):
+def _base(selection_path, *, _catalogs=None, owner_context=None):
     from copy import deepcopy
     import sys
     from . import native_shared_selection as selected
     from . import native_shared_registration as registration
     from . import native_execution_authority as authority
+    if owner_context is not None:
+        association = _require_owner_association(owner_context, owner_context._association.selection,
+            owner_context._association.execution_raw)
+        if selection_path != association.selection.registration.pin.path:
+            raise ValueError('live selection path differs from the owner reader')
     selection = selected.capture(selection_path)
-    reader = _Reader(selection)
+    reader = _Reader(selection, owner_context=owner_context)
     e = reader.read('execution_capture', selection.role('execution_capture'))
-    ctx = _catalogs if type(_catalogs) is receipt_api._ReceiptCatalogContext else None
+    ctx = (_catalogs if owner_context is None and
+           type(_catalogs) is receipt_api._ReceiptCatalogContext else None)
     token = receipt_api.catalog_reuse.runtime_token() if ctx is not None else None
     base_key = None if token is None else (
         token, selection_path, selection.registration.raw, e.raw,
@@ -699,7 +1136,7 @@ def _base(selection_path, *, _catalogs=None):
                 hit = True
         except Exception:
             hit = False
-    if not hit:
+    if not hit and owner_context is None:
         value = registration.verified(e.raw)
         composition, spec, doc, _ = registration._selection(value['composition_raw_json'].encode('utf-8'))
         if base_key is not None and receipt_api.catalog_reuse.runtime_token() is token:
@@ -712,6 +1149,10 @@ def _base(selection_path, *, _catalogs=None):
                 str(Path.cwd().resolve()), sys.executable, sys.version,
             )
             ctx._base[base_key] = (saved_inputs, deepcopy(value), deepcopy(composition), spec, deepcopy(doc))
+    if owner_context is not None:
+        _require_owner_association(owner_context, selection, e.raw)
+        value = registration._verified_in_scope(e.raw)
+        composition, spec, doc, _ = registration._selection_in_scope(value['composition_raw_json'].encode('utf-8'))
     if (doc['registration_path'] != selection_path or composition['selection_raw_json'].encode('utf-8') != selection.registration.raw
             or value['selection_sha256'] != selection.registration.pin.sha256):
         raise ValueError('actual E/C/S binding differs from the caller-selected registration')
@@ -727,22 +1168,33 @@ def _base(selection_path, *, _catalogs=None):
             or started.get('composition_sha256') != value['composition_sha256']
             or type(started.get('dispatch_limit')) is not int or started['dispatch_limit'] != 1):
         raise ValueError('selected stage does not have its actual one-use started identity')
+    if owner_context is not None:
+        _require_owner_association(owner_context, selection, e.raw,
+            reader.read('started_capture', selection.role('started_capture')).raw)
     return selection, reader, value, composition, spec
 
 
 def _pool(reader, streams):
+    if reader.owner_context is not None:
+        reader.read('execution_capture', reader.selection.role('execution_capture'))
+        reader.read('started_capture', reader.selection.role('started_capture'))
     members = tuple(reader.members.values()) + tuple(streams)
     unique = {member.member_id: member for member in members}
+    if (reader.owner_context is not None
+            and sum(member.captured.pin.bytes for member in unique.values())
+                > reader.selection.bounds()['max_evidence_bytes']):
+        raise ValueError('selected live pool exceeds its complete evidence byte bound')
     execution = reader.read('execution_capture', reader.selection.role('execution_capture'))
     return evidence.CapturePool(tuple(unique.values()), tuple((
         evidence.stream_id(execution.pin.sha256, member.captured.pin.role, member.captured.pin.path),
         member.member_id) for member in streams))
 
 
-def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files, observed_prefixes):
+def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files, observed_prefixes, owner_context=None):
     """Bind the actual parent-observed initialization, never owner summary flags."""
-    selection, reader, value, composition, _ = _base(selection_path)
-    streams, (transcript, control) = _live_streams(value, stream_files=stream_files, transcript_bytes=transcript_bytes, control_bytes=control_bytes)
+    selection, reader, value, composition, _ = _base(selection_path, owner_context=owner_context)
+    streams, (transcript, control) = _live_streams(value, stream_files=stream_files,
+        transcript_bytes=transcript_bytes, control_bytes=control_bytes, owner_context=owner_context)
     c.exact(observed_prefixes, {'transcript', 'control'}, 'parent observed prefixes')
     if observed_prefixes != {'transcript': transcript, 'control': control}:
         raise ValueError('initialization differs from the exact parent-observed prefixes')
@@ -752,18 +1204,23 @@ def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files,
         raise ValueError('native initialization binding is spent or repeated')
     execution = reader.read('execution_capture', selection.role('execution_capture'))
     started = reader.read('started_capture', selection.role('started_capture'))
+    owner = None if owner_context is None else reader.read('owner', owner_context._association.owner_path)
+    if owner_context is not None:
+        _pool(reader, streams)  # Bound both streams plus captured sources before any init publication.
     item = _create(selection, 'observation', observation_bytes('initialized', selection, execution.pin.sha256,
         value['attempt_id'], session, transcript, control,
-        {'initialize_sent': asdict(sent), 'initialize_ack': asdict(ack), 'native_init': asdict(init), 'stream_files': live_streams.stream_files(streams)}))
+        {'initialize_sent': asdict(sent), 'initialize_ack': asdict(ack), 'native_init': asdict(init),
+         'stream_files': live_streams.stream_files(streams)}, owner=owner), owner_context=owner_context)
     _create(selection, 'session_binding', c.canonical(_binding_document(selection, value, composition,
-        execution, started, item, session)))
-    reader = _Reader(selection)
+        execution, started, item, session)), owner_context=owner_context)
+    reader = _Reader(selection, owner_context=owner_context)
     binding = _binding(selection, value, composition, reader, _pool(reader, streams))
     history = reader.history(binding)
     if len(history.records) != 1:
         raise ValueError('native session binding requires the sole prior genesis')
     _append(selection, binding, history, 'session_bound',
-        {'binding': c.pin_dict(binding.binding_artifact.pin), 'init_observation': c.pin_dict(item.pin)})
+        {'binding': c.pin_dict(binding.binding_artifact.pin), 'init_observation': c.pin_dict(item.pin)},
+        owner_context=owner_context)
 
 
 def _journal_prefix_digest(run, end):
@@ -1063,14 +1520,15 @@ def _load(selection_path, *, transcript_bytes=None, control_bytes=None, _catalog
     return _loaded(base, streams, prefixes, _catalogs=_catalogs)
 
 
-def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None):
+def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None,
+               _catalogs=None, owner_context=None):
     """Fresh live authority, optionally with owner-reused pure catalog storage."""
-    base = _base(selection_path, _catalogs=_catalogs)
+    base = _base(selection_path, _catalogs=_catalogs, owner_context=owner_context)
     anchors = _declared_stream_files(base[0], base[1])
     if stream_files is not None and live_streams.identities(stream_files) != anchors:
         raise ValueError('observed stream identities differ from initialized authority')
     streams, prefixes = _live_streams(base[2], stream_files=anchors,
-        transcript_bytes=transcript_bytes, control_bytes=control_bytes)
+        transcript_bytes=transcript_bytes, control_bytes=control_bytes, owner_context=owner_context)
     return _loaded(base, streams, prefixes, _catalogs=_catalogs)
 
 
@@ -1086,23 +1544,28 @@ def _loaded(base, streams, prefixes, *, _catalogs=None):
     history = replace(history, observations=observations)
     phase1 = _phase1(selection, binding, history, reader)
     run = _CapturedRun(selection, value, composition, spec, reader, _pool(reader, streams),
-                       transcript, control, binding, history, observations, phase1)
+                       transcript, control, binding, history, observations, phase1,
+                       _owner_context=reader.owner_context)
     if _catalogs is not None:
         run._catalogs = receipt_api._catalog_context(_catalogs)
         run._prefixes = run._catalogs._prefixes
     _checked_observations(run)
+    if reader.owner_context is not None:
+        _require_run_effect(run)
     return run
 
 
 def _persist_observation(run, kind, payload):
+    _require_run_effect(run)
     return _create(run.selection, 'observation', observation_bytes(kind, run.selection,
         run.binding.execution.pin.sha256, run.binding.attempt_id, run.binding.session_id,
-        run.transcript, run.control, payload), ordinal=len(run.observations))
+        run.transcript, run.control, payload), ordinal=len(run.observations), owner_context=run._owner_context)
 
 
-def capture_stage(selection_registration_path, *, _catalogs=None):
+def capture_stage(selection_registration_path, *, _catalogs=None, owner_context=None):
     """Capture the sole pending, actually admitted fixed advance invocation."""
-    run = _load_live(str(selection_registration_path), _catalogs=_catalogs)
+    run = _load_live(str(selection_registration_path), _catalogs=_catalogs,
+                     owner_context=owner_context)
     if run.phase1 is None:
         raise ValueError('advance precedes actual sealed originals')
     phase, _ = phase_replay(run)
@@ -1140,19 +1603,56 @@ def capture_stage(selection_registration_path, *, _catalogs=None):
             working_directory=run.binding.working_directory))
 
 
-def publish_stage(invocation, proposal, *, _catalogs=None):
-    """Recheck the same current invocation, then perform only derived effects."""
-    from .native_shared_publication import publish_derived
+def _stage_owner_selected(invocation):
+    """Recognize reserved E/C declarations without changing pure v1 fixtures."""
     if type(invocation) is not c.StageInvocationCapture:
         raise ValueError('publication requires the actual selected captured invocation')
-    fresh = capture_stage(invocation.selection.registration.pin.path, _catalogs=_catalogs)
+    value = c.strict_json(invocation.execution.execution.raw, 'stage execution', c.HARD_LIMITS['request_bytes'])
+    reserved = _selected_owner_execution(value)
+    if type(value) is dict:
+        reserved = reserved or 'stream_snapshot_profile' in value
+        raw = value.get('composition_raw_json')
+        if type(raw) is str:
+            composition = c.strict_json(raw.encode('utf-8'), 'stage composition', c.HARD_LIMITS['request_bytes'])
+            reserved = reserved or (type(composition) is dict and 'stream_snapshot_profile' in composition)
+    if reserved:
+        from . import native_shared_registration as registration
+        if registration._execution_profile(registration._execution_value(invocation.execution.execution.raw)) is None:
+            raise ValueError('stage invocation has an incomplete selected owner profile')
+    return reserved
+
+
+def _fresh_stage_invocation(invocation, owner_context, *, _catalogs=None):
+    """Actual current invocation check shared by capture and selected writer."""
+    if type(invocation) is not c.StageInvocationCapture:
+        raise ValueError('publication requires the actual selected captured invocation')
+    if _stage_owner_selected(invocation):
+        _require_owner_association(owner_context, invocation.selection,
+            invocation.execution.execution.raw, invocation.execution.started.raw)
+    elif owner_context is not None:
+        raise ValueError('default stage invocation cannot use a selected owner context')
+    fresh = capture_stage(invocation.selection.registration.pin.path,
+                          owner_context=owner_context, _catalogs=_catalogs)
     # A newly persisted admission is an external observation, not part of the
     # journal predecessor; include it consistently in the freshly read history.
     old = replace(invocation, history=replace(invocation.history,
         observations=fresh.history.observations))
     if old != fresh:
         raise ValueError('selected capture changed before stage publication')
-    result, _ = publish_derived(fresh, proposal, _catalogs=_catalogs)
+    return fresh
+
+
+def publish_stage(invocation, proposal, *, owner_context=None, _catalogs=None):
+    """Recheck the same current invocation, then perform only derived effects."""
+    from .native_shared_publication import publish_derived
+    if _stage_owner_selected(invocation):
+        # The actual selected publisher performs the one fresh check, even
+        # when called directly rather than through this convenience wrapper.
+        result, _ = publish_derived(invocation, proposal, owner_context=owner_context,
+                                    _catalogs=_catalogs)
+    else:
+        fresh = _fresh_stage_invocation(invocation, owner_context, _catalogs=_catalogs)
+        result, _ = publish_derived(fresh, proposal, _catalogs=_catalogs)
     return result
 
 
@@ -1261,6 +1761,7 @@ def phase_replay(run, *, complete=False):
 
 def seal_originals(run, kind):
     """Parent-only observation effect after genuine settled helper results."""
+    _require_run_effect(run)
     if kind not in ('seal_phase1', 'seal_core'):
         raise ValueError('unknown native seal action')
     report, actions = phase_replay(run)
@@ -1283,7 +1784,7 @@ def seal_originals(run, kind):
     captured = {source: evidence.read_regular(paths[source], role,
         max_bytes=min(c.HARD_LIMITS['original_full_bytes'], run.selection.bounds()['max_input_bytes'])).captured for source, role in inputs}
     for source, role in inputs:
-        _create(run.selection, role, captured[source].raw)
+        _create(run.selection, role, captured[source].raw, owner_context=run._owner_context)
     sealed = {source: _captured(role, run.selection.role(role), captured[source].raw) for source, role in inputs}
     calls = [row['tool_use_id'] for row in report['checks'] if row['helper'] in helpers]
     if kind == 'seal_phase1':
@@ -1293,10 +1794,11 @@ def seal_originals(run, kind):
             'selection_sha256': run.selection.registration.pin.sha256, 'execution_sha256': run.binding.execution.pin.sha256,
             'session_id': run.binding.session_id, 'full': payload['full'], 'original_receipt': payload['original_receipt'],
             'observation': c.pin_dict(obs.pin)}
-        seal = _create(run.selection, 'phase1_seal', c.canonical(body))
+        seal = _create(run.selection, 'phase1_seal', c.canonical(body), owner_context=run._owner_context)
         record_payload = {'seal': c.pin_dict(seal.pin), 'full': payload['full'],
             'original_receipt': payload['original_receipt'], 'observation': c.pin_dict(obs.pin)}
-        _append(run.selection, run.binding, run.history, 'phase1_sealed', record_payload)
+        _append(run.selection, run.binding, run.history, 'phase1_sealed', record_payload,
+                owner_context=run._owner_context)
     else:
         payload = {'core': c.pin_dict(sealed['core'].pin), 'helper_calls': calls}
         obs = _persist_observation(run, 'core_sealed', payload)
@@ -1304,18 +1806,21 @@ def seal_originals(run, kind):
             'selection_sha256': run.selection.registration.pin.sha256, 'execution_sha256': run.binding.execution.pin.sha256,
             'session_id': run.binding.session_id, 'phase1_seal_sha256': run.phase1.seal.pin.sha256,
             'core': payload['core'], 'observation': c.pin_dict(obs.pin)}
-        seal = _create(run.selection, 'core_seal', c.canonical(body))
+        seal = _create(run.selection, 'core_seal', c.canonical(body), owner_context=run._owner_context)
         _append(run.selection, run.binding, run.history, 'core_sealed',
-            {'seal': c.pin_dict(seal.pin), 'core': payload['core'], 'observation': c.pin_dict(obs.pin)})
+            {'seal': c.pin_dict(seal.pin), 'core': payload['core'], 'observation': c.pin_dict(obs.pin)},
+            owner_context=run._owner_context)
     # A mutating host cannot make a result certify different bytes between
     # actual helper settlement and the original-copy publication.
     for source, role in inputs:
         if evidence.read_regular(paths[source], role, max_bytes=c.HARD_LIMITS['original_full_bytes']).captured != captured[source]:
             raise ValueError('original output changed during its exact observed seal')
+    _require_run_effect(run)
 
 
 def current_effect_view(run, *, correction_window=False, exclude_pending=None):
     """Derive the restrictive overlay solely from captured state and events."""
+    _require_captured_run(run)
     return _effect_view_from_decision(run, run.decision(),
         correction_window=correction_window, exclude_pending=exclude_pending)
 
@@ -1327,6 +1832,7 @@ def _effect_view_from_decision(run, decision, *, correction_window=False, exclud
     own decision; the controller can pass the one it just checked for this
     event before granting an effect. All view and chronology checks stay here.
     """
+    _require_captured_run(run)
     state = decision.state if decision is not None else 'request_ready'
     request = decision.request if decision is not None else None
     response = decision.response if decision is not None else None
@@ -1367,6 +1873,7 @@ def _effect_view_from_decision(run, decision, *, correction_window=False, exclud
 
 
 def observe_request_read(run, identity):
+    _require_run_effect(run)
     current = run.decision()
     if current is None or current.state != 'awaiting_response' or current.request is None:
         raise ValueError('request delivery has no current admitted outer request')
@@ -1386,6 +1893,7 @@ def observe_request_read(run, identity):
 
 
 def observe_response_intent(run, identity):
+    _require_run_effect(run)
     from .native_shared_effects import classify_effect
     trace = run.trace(); request = trace.request(identity)
     inputs = _document(request.input_json, 'response Write')
@@ -1407,6 +1915,7 @@ def observe_response_intent(run, identity):
 
 
 def observe_response_written(run, identity):
+    _require_run_effect(run)
     current = run.decision(); trace = run.trace(); actual = trace.settled(identity)
     if current is None or current.state != 'awaiting_response' or current.response is None:
         raise ValueError('response settlement has no current selected destination')
@@ -1424,10 +1933,12 @@ def observe_response_written(run, identity):
     request_hash = c.strict_json(current.request.raw, max_bytes=run.selection.bounds()['max_request_bytes'])['request_sha256']
     _append(run.selection, run.binding, run.history, 'response_consumed', {'cursor': asdict(current.cursor),
         'request_sha256': request_hash, 'response': c.pin_dict(response.pin),
-        'read_observation': payload['read_observation'], 'response_observation': c.pin_dict(obs.pin)})
+        'read_observation': payload['read_observation'], 'response_observation': c.pin_dict(obs.pin)},
+        **({} if run._owner_context is None else {'owner_context': run._owner_context}))
 
 
 def observe_advance_settled(run, identity):
+    _require_run_effect(run)
     trace = run.trace(); actual = trace.settled(identity)
     frame = evidence.event(run.transcript, actual.result_event)
     result = _document(frame.get('tool_use_result', {}).get('stdout', '').encode('utf-8'), 'advance stdout')
@@ -1460,8 +1971,118 @@ def observe_advance_settled(run, identity):
         'result': asdict(actual.result), 'result_event': asdict(actual.result_event), 'advance_result': result})
 
 
-def selected_receipt_paths(selection_registration_path):
+def _refuse_implicit_owner_context(owner_context):
+    """Missing explicit context cannot fall through from a selected scope.
+
+    This detects refusal only. It never borrows an ambient context or grants
+    permission to an otherwise ordinary recorded/default caller.
+    """
+    if owner_context is None:
+        from . import native_owner_profile_v1 as profiles
+        from . import native_stream_coordination_v1 as coordination
+        if profiles._ACTIVE.get() is not None or coordination._OWNER_READER.get() is not None:
+            raise ValueError('selected helper requires its explicit owner context')
+
+
+def _helper_live_run(selection_registration_path, owner_context):
+    _refuse_implicit_owner_context(owner_context)
+    if owner_context is None:
+        return _load_live(str(selection_registration_path))
+    from . import native_stream_coordination_v1 as coordination
+    if type(owner_context) is not coordination._OwnerReaderContext:
+        raise ValueError('selected helper requires its exact owner reader context')
+    association = _require_owner_association(owner_context, owner_context._association.selection,
+                                             owner_context._association.execution_raw)
+    if str(selection_registration_path) != association.selection.registration.pin.path:
+        raise ValueError('selected helper registration differs from its owner context')
+    run = _load_live(str(selection_registration_path), owner_context=owner_context)
+    _require_run_effect(run)
+    return run
+
+
+def _pending_receipt_or_recorder(run, roles):
+    """A fixed internal role set restricts an actual, sole pending admission."""
+    _require_run_effect(run)
+    trace = run.trace()
+    pending = trace.pending()
+    if len(pending) != 1 or trace.terminal is not None:
+        raise ValueError('selected helper requires one pending nonterminal call')
+    call = trace.admitted(pending[0])
+    inputs = c.strict_json(call.input_json, 'selected helper input', c.HARD_LIMITS['request_bytes'])
+    if type(inputs) is not dict:
+        raise ValueError('selected helper input must be a closed tool object')
+    matches = [role for role in roles
+               if inputs.get('command') == run.composition['policy']['native_shared_helpers'][role]]
+    if call.tool_name != 'Bash' or len(matches) != 1:
+        raise ValueError('selected helper differs from its actual fixed admitted purpose')
+    phase, _ = phase_replay(run)
+    if not phase['passed']:
+        raise ValueError('selected helper current phase history did not pass')
+    return matches[0]
+
+
+def _receipt_paths(run):
+    paths = run.spec._agentic_artifact_paths
+    return {'full': Path(paths['full']), 'receipt': Path(paths['receipt']),
+            'provenance': Path(run.composition['policy']['post_final_recorder']['destination']),
+            'core_dir': Path(paths['core']).parent}
+
+
+def _require_cli_process(command):
+    """Check the actual Python CLI invocation, not a caller-provided argv.
+
+    This is trusted local process consistency, not OS authentication or a
+    defense against arbitrary Python mutation of interpreter/module state.
+    """
+    import sys
+    from importlib.machinery import ModuleSpec
+    from types import ModuleType
+    from . import native_execution_authority as authority
+    words = shlex.split(command)
+    original = getattr(sys, 'orig_argv', None)
+    if (len(words) < 4 or words[1:3] != ['-m', 'data_sheets_schema.cli']
+            or type(original) is not list or any(type(word) is not str for word in original)
+            or original != words):
+        raise ValueError('selected helper process differs from its exact registered argv')
+    main = sys.modules.get('__main__')
+    spec = getattr(main, '__spec__', None)
+    if (type(main) is not ModuleType or main.__name__ != '__main__'
+            or type(spec) is not ModuleSpec or spec.name != 'data_sheets_schema.cli.__main__'
+            or getattr(main, '__package__', None) != 'data_sheets_schema.cli'
+            or type(sys.argv) is not list or not sys.argv):
+        raise ValueError('selected helper requires the actual fixed CLI module entry')
+    expected = authority.ROOT / 'src/data_sheets_schema/cli/__main__.py'
+    for origin in (getattr(main, '__file__', None), spec.origin, sys.argv[0]):
+        if type(origin) is not str or not origin or Path(origin).resolve() != expected.resolve():
+            raise ValueError('selected helper CLI module has a foreign physical origin')
+
+
+def require_receipt_invocation(selection_registration_path, *, owner_context):
+    """Fixed read-only receipt helper; caller options may only restrict it."""
+    if owner_context is None:
+        _refuse_implicit_owner_context(owner_context)
+        raise ValueError('selected receipt invocation requires its owner context')
+    run = _helper_live_run(selection_registration_path, owner_context)
+    _pending_receipt_or_recorder(run, ('phase1_receipts',))
+    _require_cli_process(run.composition['policy']['native_shared_helpers']['phase1_receipts'])
+    doc = run.selection.document()
+    result = {'selection_path': run.selection.registration.pin.path,
+        'method': run.spec.method, 'label': run.spec.label, 'project': run.spec.project,
+        'bundle': doc['inputs']['bundle']['path'],
+        'chunk_manifest': doc['inputs']['chunk_manifest']['path'],
+        'manifest': str(run.spec.manifest),
+        'command': run.composition['policy']['native_shared_helpers']['phase1_receipts'],
+        'paths': _receipt_paths(run)}
+    _require_run_effect(run)
+    return result
+
+
+def selected_receipt_paths(selection_registration_path, *, owner_context=None):
     """Explicit live S reaches only the paths captured in its already active E."""
+    _refuse_implicit_owner_context(owner_context)
+    if owner_context is not None:
+        return require_receipt_invocation(selection_registration_path,
+                                          owner_context=owner_context)['paths']
     _, _, _, composition, spec = _base(str(selection_registration_path))
     paths = spec._agentic_artifact_paths
     return {'full': Path(paths['full']), 'receipt': Path(paths['receipt']),
@@ -1473,6 +2094,7 @@ from .native_shared_current import current_artifact
 
 
 def _receipt_assessment(run, *, full_path, receipt_path):
+    _require_captured_run(run)
     from . import native_shared_receipts as receipts
     from . import native_shared_selection as selection_api
     paths = run.spec._agentic_artifact_paths
@@ -1517,17 +2139,28 @@ def _receipt_assessment(run, *, full_path, receipt_path):
     return block, full, assessed
 
 
-def live_receipt_block(selection_registration_path, *, full_path, receipt_path):
+def live_receipt_block(selection_registration_path, *, full_path, receipt_path,
+                       owner_context=None, snapshot_spec=None, snapshot_record=None):
     global _LAST_VERIFIED_CATALOGS
-    run = _load_live(str(selection_registration_path))
-    phase_replay(run)
+    run = _helper_live_run(selection_registration_path, owner_context)
+    if owner_context is None:
+        phase_replay(run)
+    else:
+        _pending_receipt_or_recorder(run, ('phase1_receipts', 'recorder'))
+    if snapshot_record is not None:
+        _record_matches_run(run, snapshot_spec, snapshot_record)
+    elif snapshot_spec is not None and c.canonical(snapshot_spec.render_spec()) != c.canonical(run.composition['render_spec']):
+        raise ValueError('caller spec differs from the explicit native execution')
     block = _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
-    if getattr(run, '_catalogs', None) is not None:
+    if owner_context is not None:
+        _require_run_effect(run)
+    elif getattr(run, '_catalogs', None) is not None:
         _LAST_VERIFIED_CATALOGS = (str(selection_registration_path), run._catalogs)
     return block
 
 
 def _provenance_block(run):
+    _require_captured_run(run)
     decision = run.decision()
     if decision is None or decision.state != 'assembly_complete' or decision.completion is None:
         raise ValueError('native provenance requires complete freshly reconstructed selected stages')
@@ -1542,9 +2175,7 @@ def _provenance_block(run):
         'runtime_acceptance': 'pending independent saved readback'}
 
 
-def live_provenance_block(selection_registration_path):
-    global _LAST_VERIFIED_CATALOGS
-    run = _load_live(str(selection_registration_path))
+def _current_provenance_block(run):
     phase, _ = phase_replay(run)
     required = {'draft', 'final_evidence', 'final_source_inventory', 'phase1_receipts', 'final_scope',
                 'derive_final_core', 'core_schema', 'pair', 'full_schema', 'full_terms', 'audit_evidence'}
@@ -1559,10 +2190,110 @@ def live_provenance_block(selection_registration_path):
     from .canary import receipt_floors
     if any(receipt_floors(block).values()):
         raise ValueError('recorder current selected receipt floors did not pass')
-    result = _provenance_block(run)
-    if getattr(run, '_catalogs', None) is not None:
+    return _provenance_block(run)
+
+
+def live_provenance_block(selection_registration_path, *, owner_context=None):
+    global _LAST_VERIFIED_CATALOGS
+    run = _helper_live_run(selection_registration_path, owner_context)
+    if owner_context is not None:
+        _pending_receipt_or_recorder(run, ('recorder',))
+    block = _current_provenance_block(run)
+    if owner_context is not None:
+        _require_run_effect(run)
+    elif getattr(run, '_catalogs', None) is not None:
         _LAST_VERIFIED_CATALOGS = (str(selection_registration_path), run._catalogs)
-    return result
+    return block
+
+
+_RECORDER_PARAMETERS = frozenset(('project', 'method', 'label', 'input_bundle', 'prompts',
+    'prompt_text', 'condition', 'arm', 'runtime', 'provider', 'bundle_for_spec',
+    'reasoning_effort', 'phase_specs', 'phases_skipped', 'manifest', 'chunk_manifest',
+    'receipt_expected', 'stated_profile', 'render_spec_json', 'prompt_text_env'))
+_RECORDER_FLAGS = {'--project': 'project', '--method': 'method', '--label': 'label',
+    '--input-bundle': 'input_bundle', '--prompt': 'prompts', '--manifest': 'manifest',
+    '--profile': 'stated_profile', '--chunk-manifest': 'chunk_manifest',
+    '--reasoning-effort': 'reasoning_effort', '--render-spec-json': 'render_spec_json',
+    '--prompt-text-env': 'prompt_text_env'}
+
+
+def _recorder_parameters(run, spec, parameters):
+    c.exact(parameters, {'values', 'sources', 'instruction_path'}, 'selected recorder parameters')
+    values = c.exact(parameters['values'], _RECORDER_PARAMETERS, 'selected recorder callback values')
+    sources = c.exact(parameters['sources'], _RECORDER_PARAMETERS, 'selected recorder parameter sources')
+    words = shlex.split(run.composition['policy']['native_shared_helpers']['recorder'])
+    if words[:5] != [run.composition['policy']['python'], '-m', 'data_sheets_schema.cli', 'provenance', 'record']:
+        raise ValueError('selected recorder command has an unsupported fixed prefix')
+    expected = {name: None for name in _RECORDER_PARAMETERS}
+    expected.update(arm='baseline', receipt_expected=False, prompts=(), phase_specs=(), phases_skipped=())
+    supplied = set()
+    if len(words[5:]) % 2:
+        raise ValueError('selected recorder command has an incomplete fixed argument')
+    for flag, value in zip(words[5::2], words[6::2]):
+        name = _RECORDER_FLAGS.get(flag)
+        if name is None or (name in supplied and name != 'prompts'):
+            raise ValueError('selected recorder command has an unsupported or duplicate fixed argument')
+        supplied.add(name)
+        expected[name] = expected[name] + (value,) if name == 'prompts' else value
+    if supplied != set(_RECORDER_FLAGS.values()):
+        raise ValueError('selected recorder command lacks its complete fixed arguments')
+    for name in _RECORDER_PARAMETERS:
+        if (type(values[name]) is not type(expected[name]) or values[name] != expected[name]
+                or (name in ('prompts', 'phase_specs', 'phases_skipped')
+                    and any(type(value) is not str for value in values[name]))
+                or type(sources[name]) is not str
+                or sources[name] != ('COMMANDLINE' if name in supplied else 'DEFAULT')):
+            raise ValueError('selected recorder callback differs from its registered argument: ' + name)
+    if (spec is None or c.canonical(spec.render_spec()) != c.canonical(run.composition['render_spec'])
+            or type(parameters['instruction_path']) is not str
+            or c.canonical_path(parameters['instruction_path'], 'selected recorder instruction')
+               != run.composition['instruction_path']):
+        raise ValueError('selected recorder differs from its used instruction or rendering')
+
+
+def require_recorder_invocation(selection_registration_path, *, owner_context, spec, parameters):
+    if owner_context is None:
+        _refuse_implicit_owner_context(owner_context)
+        raise ValueError('selected recorder invocation requires its owner context')
+    run = _helper_live_run(selection_registration_path, owner_context)
+    _pending_receipt_or_recorder(run, ('recorder',))
+    _require_cli_process(run.composition['policy']['native_shared_helpers']['recorder'])
+    _recorder_parameters(run, spec, parameters)
+    _current_provenance_block(run)
+    _require_run_effect(run)
+
+
+def require_recorder_write(path, *, owner_context=None, record):
+    """Fixed recorder destination guard; never acquire a writer-owned scope.
+
+    Checks surround known Python writer boundaries, not arbitrary host writes
+    or a guarantee that a later syscall cannot race with external changes.
+    """
+    _refuse_implicit_owner_context(owner_context)
+    if owner_context is None:
+        return
+    from . import native_stream_coordination_v1 as coordination
+    if type(owner_context) is not coordination._OwnerReaderContext:
+        raise ValueError('selected recorder write requires its exact owner context')
+    run = _helper_live_run(owner_context._association.selection.registration.pin.path, owner_context)
+    _pending_receipt_or_recorder(run, ('recorder',))
+    _current_provenance_block(run)
+    _record_matches_run(run, None, record)
+    destination = c.canonical_path(str(path), 'selected recorder destination')
+    expected = run.composition['policy']['post_final_recorder']['destination']
+    if type(expected) is not str or not expected:
+        raise ValueError('selected recorder policy destination requires nonempty text')
+    if not expected.startswith('/'):
+        working_directory = c.canonical_path(run.binding.working_directory,
+                                             'selected recorder working directory')
+        # Preserve the registered spelling for validation, including aliases
+        # that Path joining or resolving would silently normalize away.
+        expected = working_directory.rstrip('/') + '/' + expected
+    expected = c.canonical_path(expected, 'selected recorder policy destination')
+    target = Path(destination)
+    if destination != expected or target.is_symlink() or str(target.resolve()) != destination:
+        raise ValueError('selected recorder write differs from its exact physical destination')
+    _require_run_effect(run)
 
 
 def _recorded_run(spec, record):
@@ -1580,6 +2311,25 @@ def _recorded_run(spec, record):
                       if _LAST_VERIFIED_CATALOGS is not None and _LAST_VERIFIED_CATALOGS[0] == reg_path
                       else None)
     run = _load(document['registration_path'], _catalogs=saved_catalogs)
+    _record_matches_run(run, spec, record)
+    if getattr(run, '_catalogs', None) is not None:
+        _LAST_VERIFIED_CATALOGS = (reg_path, run._catalogs)
+    return run
+
+
+def _record_matches_run(run, spec, record):
+    """Join an optional record to this exact run, without selecting another route."""
+    _require_captured_run(run)
+    from .native_shared_render import validate_metadata
+    if type(record) is not dict:
+        raise ValueError('native recorded reader requires one explicit provenance mapping')
+    try:
+        render_spec = record['prompts']['request']['spec']
+        document = validate_metadata(render_spec)
+    except (KeyError, TypeError) as exc:
+        raise ValueError('native record lacks its complete selected render authority') from exc
+    if document['registration_path'] != run.selection.registration.pin.path:
+        raise ValueError('native record belongs to another selected registration')
     if c.canonical(render_spec) != c.canonical(run.composition['render_spec']):
         raise ValueError('native record rendering differs from its observed execution composition')
     if spec is not None and c.canonical(spec.render_spec()) != c.canonical(render_spec):
@@ -1589,8 +2339,6 @@ def _recorded_run(spec, record):
     phase, _ = phase_replay(run)
     if not phase['passed']:
         raise ValueError('native recorded stage chronology did not pass')
-    if getattr(run, '_catalogs', None) is not None:
-        _LAST_VERIFIED_CATALOGS = (reg_path, run._catalogs)
     return run
 
 

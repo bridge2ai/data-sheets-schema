@@ -35,6 +35,18 @@ def _file(path, name):
 def _unchanged(value, raw, authorization):
     if registration.verified(raw) != value:
         raise ValueError('native shared execution selection changed')
+    _unchanged_authorities(value, authorization)
+
+
+def _unchanged_in_scope(value, raw, authorization):
+    from . import native_owner_profile_v1 as owner_profile
+    with owner_profile._reconstruction_controls():
+        if c.canonical(registration._verified_in_scope(raw)) != c.canonical(value):
+            raise ValueError('native shared execution selection changed')
+        _unchanged_authorities(value, authorization)
+
+
+def _unchanged_authorities(value, authorization):
     authority.require_committed(value['dependencies'])
     for name, path in authorization['inputs'].items():
         if _file(path, name + ' evidence') != authorization['raw'][name]:
