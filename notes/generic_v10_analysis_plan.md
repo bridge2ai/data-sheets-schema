@@ -34,7 +34,7 @@ session.
 | D07 | **Decided 2026-10-19, option 1.**<br>- A $100 named generic_v10 API pilot allocation: CHORUS pilot $15 cap, one CHORUS contingency $15, AI_READI pilot $35 planning ceiling, one AI_READI contingency at most $35.<br>- At most 2 billed attempts per registered cell, then an owner review.<br>- Every run needs its own owner word naming its registration sha256 (for a roster, the roster sha256 and each registration sha256 it lists) and its cap.<br>- `d4d api batch --max-cost-dollars` is the between-run stop.<br>- The operator trigger is the cap minus the worst-case in-flight call: at most about $11.50 against $15 for CHORUS.<br>- The AI_READI lines are provisional (see item 15). | #1763 comment of 2026-10-19 |
 | D10 | **Decided 2026-10-20: retire** the v10z/audit_controls lineage and audit28. | Owner's answer in the Claude worker session. `notes/reviews/v10z_retirement_2026-10-20.md` (this branch). agy is to post it on #4761. |
 | D22 | **Decided 2026-10-20: withdraw.** The v10z standing authorizations do not extend to generic_v10, and they are withdrawn now. | Same record. agy is to post it on #1763 and #4761. |
-| D01–D05, D08, D09, D11–D21, D23–D25 | **Pending.** No owner ruling is recorded. | Several issues carry "Resolved" comments that cite `c92d89824` (#2930, #2926: D01, D07, D15), `25994a4d2` (#2914: D04) and `d9f7d9a72` (#4758, #4759, #4761). None of those commits is on any remote branch. #2914, #4758, #4759 and #4761 were reopened on 2026-10-13 because those comments did not reflect owner decisions. This draft treats every one of these decisions as pending. |
+| D01–D05, D08, D09, D11–D21, D23–D25 | **Pending.** No owner ruling is recorded. | Several issues carry "Resolved" comments that cite `c92d89824` (#2930, #2926: D01, D07 and D15), `25994a4d2` (#2914: D04) and `d9f7d9a72` (#4758, #4759, #4761). None of those commits is on any remote branch. #2914, #4758, #4759 and #4761 were reopened on 2026-10-13 because those comments did not reflect owner decisions. D07 has since been decided (2026-10-19, above); D01 and D15 have not. This draft treats every decision in this row as pending. |
 
 ## 1. Estimands (P2 item 1)
 
@@ -112,15 +112,18 @@ package-level (plan risk 21, D02):
 - **Schema:** 2.0.0 against 3.0.0, and the change in the digest's term source. P1
   shows that no v8 record's schema digest re-renders under today's renderer.
 - **Caps:** the audit and report caps, 24k against 96k.
-- **Thinking display:** v8 sent `{type: adaptive}`. v10 sends `display: summarized`
-  (D06).
+- **Thinking display:** v10 sends `display: summarized` (D06). v8 declared adaptive
+  thinking with no display (the plan's D06: "as v8 and v9 did"). The v8 records
+  predate the `model.thinking_requested` field, so this rests on the plan, not on the
+  records.
 - **AI_READI bundle scope (#5042):** the v8 AI_READI records read `d22b61a9`, a bundle
   that carried the dataset's RO-Crate. v10 will read `1a58ad7b`, without it (P1). The
   other three projects read byte-identical bundles.
 - **Transport and provider:** both arms run CBORG `claude-opus-5`. Provider-side
   model drift under one model id cannot be excluded, so v10 records the returned
   model identity per call (plan G4).
-- **Effort:** a fixed confound. The API arm runs at the provider default (D09). Any
+- **Effort:** a fixed confound. The API arm runs at the provider default (D09), as v8
+  did (each v8 record's `unverified` entry; P1). Any
   Claude Code cell runs at an explicit level chosen at N6.
 - **Repository state:** `repo.dirty` will read true on every v10 run, because run
   inputs and outputs are untracked, as it did on all 12 v8 records (P1). Launch

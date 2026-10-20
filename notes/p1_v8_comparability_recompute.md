@@ -274,11 +274,14 @@ All of these are reported and never fatal:
 - **Temperature header:** the header reads `Temperature: 0.0` while the record says
   `null`, in every v8 API record.
 - **Unverifiable instructions:** the three CM4AI canaries (`04`, `04b`, `04c`) cannot be
-  re-rendered, because their prompt pin was superseded on 2026-09-04. The 12
-  confirmatory records' prompts still match.
+  re-rendered, because their prompt pin was superseded on 2026-09-04. No confirmatory
+  record is among the runs `runs check` could not confirm against its spec.
 - **Values recorded but not observed:** `model.reasoning_effort` and
-  `model.temperature`, 19 each. The v8 API arm ran at the provider's default effort
-  (D09 records effort as a fixed confound).
+  `model.temperature`, 19 each. These are each record's `unverified` entries. For
+  effort, the record states: "no effort is recorded: the header carries none and the
+  route 'claude-opus-5' exposes no effort ladder, so the provider default applied".
+  For temperature: "claude-opus-5 rejects `temperature` … so the 0.0 declared … is
+  not sent".
 
 ## Not recomputed here
 
