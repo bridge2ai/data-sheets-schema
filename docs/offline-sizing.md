@@ -70,16 +70,20 @@ permit arithmetic. It performs the same input validation and no network calls.
 For each exact request with valid saved count evidence:
 
 ```text
-clearance_tokens = context_limit_tokens - input_tokens - payload.max_tokens
+window_tokens    = min(context_limit_tokens, 1,000,000)
+clearance_tokens = window_tokens - input_tokens - payload.max_tokens
 total_tokens     = input_tokens + payload.max_tokens
 PASS if clearance_tokens >= required_margin_tokens
     and total_tokens <= the phase ceiling; otherwise FAIL
 ```
 
-Both the capacity and margin are explicit declarations for that row, with text
-recording their basis. They have no built-in provider default. `fits_window`
-and `fits_margin` distinguish exceeding the context window from fitting the
-window but missing the selected margin.
+The capacity and margin are explicit declarations for that row, with text
+recording their basis. A declared capacity above the route window
+(1,000,000 tokens, as the A3 draft registrations declare it; the plan's open
+question 4 on the route's effective window is still open) is capped to it, so
+`window_tokens`, `clearance_tokens` and `fits_window` agree with the verdict.
+`fits_window` and `fits_margin` distinguish exceeding the window from fitting
+it but missing the selected margin.
 
 Each phase also has a ceiling that no declaration can raise (#5072). It is
 reported as `ceiling_tokens` and `fits_ceiling`:
@@ -90,9 +94,9 @@ reported as `ceiling_tokens` and `fits_ceiling`:
 | `report`, `report_regate`, `report_after_repair` | 850,000, keeping a 15% margin of the window for growth |
 | every other phase | 1,000,000, the route window |
 
-The route window is the generic_v10 CBORG claude-opus-5 route's 1,000,000
-tokens. A declared `context_limit_tokens` above it, or a smaller declared
-margin, cannot make an oversized worker or report-family request `PASS`.
+A smaller declared margin cannot make an oversized worker or report-family
+request `PASS`. `window_status` requires the phase, because the report
+family's ceiling is lower.
 
 Missing request/count evidence produces `UNKNOWN`. A supplied file that is
 missing, malformed or stale is an error rather than a substitute zero count.
@@ -220,6 +224,16 @@ install can put another checkout's `src` on the path. The sweep therefore
 removes every other location before importing, and refuses to report if any
 module it used came from outside `--root`.
 
+Prompts and the schema resolve from the working directory first, so the
+sweep changes into `--root` before importing anything. It refuses to run if
+`resources.resource_root()` still points elsewhere. It also clears
+`D4D_RECEIPT_FULL_MAX_TOKENS`, which would silently change the full cap.
+
+The results record:
+- the tree's HEAD and its dirty tracked paths;
+- the script's sha256;
+- every attempted connection, each refused.
+
 For each project it stages historical phase-1 originals into a scratch run,
 builds a draft registration with each grid's `max_paths`,
 `max_inventory_bytes` and `max_workers`, and calls the production builders:
@@ -231,15 +245,20 @@ builds a draft registration with each grid's `max_paths`,
 - `_append_regate` for the regate;
 - `build_repair` with the generation context.
 
+The re-address turn and receipt completion carry the full phase's whole
+delivered body: the record, the receipt mark, then the receipt. Receipt
+completion is also sized after a re-address, when its transcript is the
+re-address exchange.
+
 The stand-in records are adjusted only as far as the current runtime
 requires:
 - **Normaliser.** Each record passes through the runner's write-time
   normaliser.
 - **Cardinality.** Values whose list-ness differs from the current schema are
   wrapped, unwrapped or joined, and slots the current class does not declare
-  are removed. Every edit is listed. The edits go through a round-trip YAML
-  dump, which keeps each record within 0.4% of its bytes; a plain re-dump
-  shrank them by 7–8%.
+  are removed. Every edit is listed, removals included. The edits go through
+  a round-trip YAML dump, so a record's bytes change only by its edits, at
+  most 1.5% on the stand-ins measured; a plain re-dump shrank them by 7–8%.
 - **Receipt.** A receipt pinned to an earlier bundle (AI_READI before #5042)
   is carried onto today's manifest by chunk sha256. Entries for removed
   chunks are dropped.
@@ -251,17 +270,32 @@ requires:
   A5d context.
 
 Content that cannot exist before a run is sized at its output cap, in
-tokens. That covers the typed audit's findings, the report as written, and
-every worker and omission response that integration carries.
+tokens:
+- the assembled audit that reconcile and the report carry: every worker's
+  rows and findings plus integration, so W × the worker cap plus the
+  integration cap;
+- the report as written;
+- the re-address response;
+- every worker and omission response that integration carries.
+
+The regate's contradiction listing is not sized. No cap bounds it, and a
+regate happens only when the listing is non-empty.
 
 Tokens are estimates: payload bytes times a tokens-per-byte ratio calibrated
 from the 2026-10-12 A1b `messages.count_tokens` results for the same project
 and stage, with the higher calibrated value for projects A1b did not count.
 A1b's report-family payloads carried `'x' * (4 × cap)` placeholders, and the
 endpoint counted about one token per `x` (the regate minus the report is
-+382,173 bytes and +383,458 tokens in both projects). So those A1b rows
-overstate the report family by about the placeholder size; the clean ratios
-remove the placeholders.
++382,173 bytes and +383,458 tokens in both projects). So each placeholder
+counted about four times its intended size, and those A1b rows overstate the
+report family by about three times each placeholder's intended size. The
+clean ratios remove the placeholders.
+
+The tables also report, for each grid:
+- the estimated input across all of a run's typed calls, against the
+  registered `aggregate_input_tokens`, which the runtime checks before every
+  typed stage;
+- each worker's assigned inventory, which its output cap must answer for.
 
 A row's verdict is `estimate_fits` or `estimate_exceeds`, against the same
 ceilings as the evidence reader. It is never `PASS`: only an exact saved

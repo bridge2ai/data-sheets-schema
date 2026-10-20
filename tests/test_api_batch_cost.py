@@ -63,7 +63,7 @@ class BatchRunCase(unittest.TestCase):
         return f"{self.PREFIX}_rep1"
 
 
-class ApiBatchCostValidationTest(unittest.TestCase):
+class ApiBatchCostValidationTest(BatchRunCase):
     """CLI option registration and argument validation."""
 
     def test_max_cost_dollars_option_exists_on_batch_cmd(self):
@@ -78,7 +78,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
             [
                 "api",
                 "batch",
-                "--label-prefix", "2026-10-11_claude-opus-5-api-generic-test",
+                "--label-prefix", self.PREFIX,
                 "--max-cost-dollars", "-1.50",
             ],
         )
@@ -92,7 +92,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
             [
                 "api",
                 "batch",
-                "--label-prefix", "2026-10-11_claude-opus-5-api-generic-test",
+                "--label-prefix", self.PREFIX,
                 "--max-cost-dollars", "-0.01",
             ],
         )
@@ -108,7 +108,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
                     [
                         "api",
                         "batch",
-                        "--label-prefix", "2026-10-11_claude-opus-5-api-generic-test",
+                        "--label-prefix", self.PREFIX,
                         "--max-cost-dollars", bad,
                     ],
                 )
@@ -182,7 +182,7 @@ class ApiBatchCostStopTest(BatchRunCase):
                     "--replicates", "3",
                     "--arm", "baseline",
                     "--condition", "generic",
-                    "--label-prefix", "2026-10-11_claude-opus-5-api-generic-testcost1",
+                    "--label-prefix", self.PREFIX,
                     "--allow-condition-mismatch",
                     "--yes",
                     "--no-branch-guard",
@@ -224,7 +224,7 @@ class ApiBatchCostStopTest(BatchRunCase):
                     "--replicates", "2",
                     "--arm", "baseline",
                     "--condition", "generic",
-                    "--label-prefix", "2026-10-11_claude-opus-5-api-generic-testcost2",
+                    "--label-prefix", self.PREFIX,
                     "--allow-condition-mismatch",
                     "--yes",
                     "--no-branch-guard",
@@ -259,7 +259,7 @@ class ApiBatchCostStopTest(BatchRunCase):
                     "--replicates", "3",
                     "--arm", "baseline",
                     "--condition", "generic",
-                    "--label-prefix", "2026-10-11_claude-opus-5-api-generic-testcost3",
+                    "--label-prefix", self.PREFIX,
                     "--allow-condition-mismatch",
                     "--yes",
                     "--no-branch-guard",
@@ -295,7 +295,7 @@ class ApiBatchCostStopTest(BatchRunCase):
                     "--replicates", "3",
                     "--arm", "baseline",
                     "--condition", "generic",
-                    "--label-prefix", "2026-10-11_claude-opus-5-api-generic-testcost4",
+                    "--label-prefix", self.PREFIX,
                     "--allow-condition-mismatch",
                     "--yes",
                     "--no-branch-guard",
@@ -831,3 +831,17 @@ class BatchRunIsolationTest(unittest.TestCase):
         for path in paths:
             self.assertNotEqual(path.parent.resolve(), Path(run_lock.LOCK_DIR).resolve())
             self.assertFalse(path.parent.exists(), "the per-test lock directory is removed at cleanup")
+
+    def test_every_label_prefix_a_test_passes_is_its_own(self):
+        """The prefixes actually passed to `api batch`, read from this module:
+        each is `self.PREFIX` or a literal used once. Restoring a shared label
+        (the #5092 shape) fails here, whatever `_prefix_for` returns."""
+        import re
+        import sys
+        flag = '"--label-' + 'prefix",'          # split so this line is not itself a match
+        source = inspect.getsource(sys.modules[__name__])
+        passed = [a.strip() for a in re.findall(re.escape(flag) + r"\s*([^,\]\)\n]+)", source)]
+        self.assertGreater(len(passed), 6)
+        literals = [a for a in passed if a != "self.PREFIX"]
+        self.assertEqual(len(literals), len(set(literals)), f"a literal label prefix is shared: {literals}")
+        self.assertEqual(literals, ['"x"'], "only the zero-cap refusal, before the lock, passes a literal")

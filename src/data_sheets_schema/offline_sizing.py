@@ -21,7 +21,10 @@ MAX_ROWS = 1024
 PHASES = frozenset({"full", "full_readdress", "full_receipt_completion",
     "typed_audit_worker", "typed_audit_omission", "typed_audit_integration",
     "reconcile_full", "report", "report_regate", "repair_full", "report_after_repair"})
-#: The generic_v10 route's context window (CBORG claude-opus-5, A1b).
+#: The generic_v10 route's context window, as the A3 draft registrations
+#: declare it (`context_limit_tokens`); the plan's open question 4 on the
+#: route's effective window is still open, and a smaller declared window
+#: still binds.
 ROUTE_WINDOW_TOKENS = 1_000_000
 #: Ceilings on input plus `max_tokens` that no declared window or margin can
 #: raise: a typed-audit worker may use the whole window, and the report
@@ -105,22 +108,30 @@ def _pinned(value):
     return raw
 
 
-def window_status(input_tokens, output_tokens, window_tokens, margin_tokens, phase=None):
+def window_status(input_tokens, output_tokens, window_tokens, margin_tokens, *, phase):
     """Arithmetic against the caller's declared window and margin, and against
-    the phase's ceiling, which no declaration can raise: PASS needs both."""
+    the phase's ceiling, which no declaration can raise: PASS needs both.
+
+    `phase` is required, because a report-family request has a lower ceiling.
+    A declared window above the route window is capped to it, so clearance
+    and `fits_window` agree with the verdict.
+    """
+    if phase not in PHASES:
+        raise ValueError("window_status requires a supported phase")
     _integer(input_tokens, "input tokens")
     _integer(output_tokens, "output tokens", 1)
     _integer(window_tokens, "context window", 1)
     _integer(margin_tokens, "required margin")
     if margin_tokens >= window_tokens:
         raise ValueError("required margin leaves no request capacity")
-    clearance = window_tokens - input_tokens - output_tokens
+    window = min(window_tokens, ROUTE_WINDOW_TOKENS)
+    clearance = window - input_tokens - output_tokens
     total = input_tokens + output_tokens
-    ceiling = min(PHASE_CEILING_TOKENS.get(phase, ROUTE_WINDOW_TOKENS), ROUTE_WINDOW_TOKENS)
+    ceiling = PHASE_CEILING_TOKENS.get(phase, ROUTE_WINDOW_TOKENS)
     fits_ceiling = total <= ceiling
     return {"status": "PASS" if clearance >= margin_tokens and fits_ceiling else "FAIL",
             "input_tokens": input_tokens, "max_output_tokens": output_tokens,
-            "total_tokens": total, "clearance_tokens": clearance,
+            "total_tokens": total, "window_tokens": window, "clearance_tokens": clearance,
             "fits_window": clearance >= 0, "fits_margin": clearance >= margin_tokens,
             "ceiling_tokens": ceiling, "fits_ceiling": fits_ceiling}
 

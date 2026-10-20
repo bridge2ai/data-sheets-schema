@@ -58,18 +58,19 @@ def test_saved_count_has_exact_arithmetic_but_no_campaign_or_provider_approval(s
     assert report["inputs"] == manifest["inputs"]
 
 
-@pytest.mark.parametrize("stage,inputs,output,margin,expected", [
-    ("CHORUS worker", 1_009_249, 16_000, 0, "FAIL"),
-    ("AI_READI worker", 1_557_087, 16_000, 0, "FAIL"),
-    ("AI_READI omission", 1_257_986, 4_000, 0, "FAIL"),
-    ("AI_READI report", 931_279, 96_000, 150_000, "FAIL"),
-    ("AI_READI regate", 1_314_737, 96_000, 150_000, "FAIL"),
-    ("CHORUS regate", 783_597, 96_000, 150_000, "FAIL"),
-    ("exact margin boundary", 754_000, 96_000, 150_000, "PASS"),
-    ("one token below margin", 754_001, 96_000, 150_000, "FAIL"),
+@pytest.mark.parametrize("stage,phase,inputs,output,margin,expected", [
+    ("CHORUS worker", "typed_audit_worker", 1_009_249, 16_000, 0, "FAIL"),
+    ("AI_READI worker", "typed_audit_worker", 1_557_087, 16_000, 0, "FAIL"),
+    ("AI_READI omission", "typed_audit_omission", 1_257_986, 4_000, 0, "FAIL"),
+    ("AI_READI report", "report", 931_279, 96_000, 150_000, "FAIL"),
+    ("AI_READI regate", "report_regate", 1_314_737, 96_000, 150_000, "FAIL"),
+    ("CHORUS regate", "report_regate", 783_597, 96_000, 150_000, "FAIL"),
+    ("exact margin boundary", "report", 754_000, 96_000, 150_000, "PASS"),
+    ("one token below margin", "report", 754_001, 96_000, 150_000, "FAIL"),
 ])
-def test_historical_5072_numbers_are_arithmetic_fixtures_not_new_measurements(stage, inputs, output, margin, expected):
-    verdict = sizing.window_status(inputs, output, 1_000_000, margin)
+def test_historical_5072_numbers_are_arithmetic_fixtures_not_new_measurements(stage, phase, inputs, output, margin,
+                                                                              expected):
+    verdict = sizing.window_status(inputs, output, 1_000_000, margin, phase=phase)
     assert verdict["status"] == expected, stage
     if stage == "CHORUS regate":
         assert verdict["fits_window"] and not verdict["fits_margin"]
@@ -290,7 +291,8 @@ def ceiling_manifest(tmp_path, phase, input_tokens, max_tokens, window, margin):
 def test_the_cli_never_prints_pass_above_a_ceiling(tmp_path, capsys, phase, input_tokens, max_tokens):
     path = ceiling_manifest(tmp_path, phase, input_tokens, max_tokens, window=2_000_000, margin=0)
     row = sizing.review(path)["requests"][0]
-    assert row["status"] == "FAIL" and row["fits_margin"] and not row["fits_ceiling"]
+    # The declared 2M window is capped to the route's 1M, and the ceiling still binds below it.
+    assert row["status"] == "FAIL" and not row["fits_ceiling"] and row["window_tokens"] == 1_000_000
     assert sizing.main(["check", str(path)]) == 1
     printed = json.loads(capsys.readouterr().out)
     assert [r["status"] for r in printed["requests"]] == ["FAIL"]
@@ -452,3 +454,54 @@ def test_kids_first_inputs_come_from_its_canary_directory():
     assert bundle.name == "KIDS_FIRST_preprocessed.txt" and manifest.name == "chunks.yaml"
     assert bundle.parent == root / "notes/matched_cborg_2026-09-13/kids_first"
     assert sweep.PROXY["KIDS_FIRST"] == "AI_READI" and "S7" in sweep.OPTIONS
+
+
+def test_window_status_needs_the_phase_and_caps_a_larger_declared_window():
+    with pytest.raises(TypeError):
+        sizing.window_status(900_000, 96_000, 1_000_000, 0)          # no phase: a report would get 1M
+    with pytest.raises(ValueError):
+        sizing.window_status(900_000, 96_000, 1_000_000, 0, phase="unknown")
+    verdict = sizing.window_status(1_496_000, 4_000, 2_000_000, 0, phase="typed_audit_worker")
+    assert verdict["window_tokens"] == 1_000_000 and verdict["clearance_tokens"] == -500_000
+    assert not verdict["fits_window"] and not verdict["fits_margin"] and verdict["status"] == "FAIL"
+
+
+def test_the_assembled_audit_bound_counts_every_worker():
+    limits = {"worker_output_tokens": 4_000, "integration_output_tokens": 4_000}
+    assert sweep.findings_bound(6, limits) == 28_000 and sweep.findings_bound(2, limits) == 12_000
+    assert sweep.delivered_body("a: 1\n", "chunks: []\n", "--- COVERAGE RECEIPT ---") == \
+        "a: 1\n--- COVERAGE RECEIPT ---\nchunks: []\n"
+
+
+def _typed_run(worker_bytes, omission_bytes, integration_bytes, workers_cap=4_000):
+    worker = lambda b: {"payload_bytes": b, "max_output_tokens": workers_cap, "placeholder_tokens": 0}
+    return {"typed": {"status": "MEASURED", "workers": [worker(b) for b in worker_bytes]},
+            "stages": {"typed_audit_omission": {"payload_bytes": omission_bytes, "max_output_tokens": 4_000,
+                                                "placeholder_tokens": 0},
+                       "typed_audit_integration": {"payload_bytes": integration_bytes, "max_output_tokens": 4_000,
+                                                   "placeholder_tokens": 4_000 * len(worker_bytes) + 4_000}}}
+
+
+def test_typed_input_is_summed_over_every_typed_call_and_an_option_removes_from_each():
+    run = _typed_run([1_000_000, 1_000_000], 800_000, 900_000)
+    r = lambda phase: sweep.ratios("CHORUS", phase)[0]
+    expected = (2 * round(1_000_000 * r("typed_audit_worker")) + round(800_000 * r("typed_audit_omission"))
+                + round(900_000 * r("typed_audit_integration")) + 12_000)
+    assert sweep.typed_aggregate("CHORUS", run) == expected
+    components = {"typed_audit_worker (largest)": {"typed": {"shared.schema": 500_000}},
+                  "typed_audit_omission": {"typed": {"payload.schema": 300_000}},
+                  "typed_audit_integration": {"typed": {"shared.schema": 500_000}}}
+    keys = ("typed.shared.schema", "typed.payload.schema")
+    less = sweep.typed_aggregate("CHORUS", run, components, keys)
+    assert less == (2 * round(500_000 * r("typed_audit_worker")) + round(500_000 * r("typed_audit_omission"))
+                    + round(400_000 * r("typed_audit_integration")) + 12_000)
+    assert sweep.typed_aggregate("CHORUS", {"typed": {"status": "REFUSED"}}) is None
+
+
+def test_a_foreign_checkout_on_the_import_path_is_filtered(tmp_path):
+    root, other = tmp_path / "root", tmp_path / "other"
+    for base in (root, other):
+        (base / "src" / "data_sheets_schema").mkdir(parents=True)
+    assert not sweep.foreign_path(str(root), root) and not sweep.foreign_path(str(root / "src"), root)
+    assert sweep.foreign_path(str(other / "src"), root)
+    assert not sweep.foreign_path(str(tmp_path / "missing"), root)

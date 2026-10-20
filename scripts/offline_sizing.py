@@ -30,12 +30,13 @@ PR #5095), so `--root` names a checkout that has them. Example::
     PYTHONPATH=<root>/src:<root> python scripts/offline_sizing.py sweep \\
         --root <root> --workdir <new dir> --out <new file>.json
 
-Placeholders for content that does not exist before a run (the typed audit's
-findings, the report as written) are sized at their output caps in TOKENS,
+Placeholders for content that does not exist before a run (the assembled
+audit, the report as written) are sized at their output caps in TOKENS,
 added after the byte estimate. A1b sized them as runs of 'x' at 4 bytes per
-token, and the endpoint counted about one token per 'x' (see A1B below), so
-those A1b rows overstate the report family by about four times each
-placeholder.
+token, and the endpoint counted about one token per 'x' (see A1B below). So
+each A1b placeholder counted about four times its intended size, and those
+rows overstate the report family by about three times each placeholder's
+intended size.
 """
 from __future__ import annotations
 
@@ -59,7 +60,8 @@ WORKER_PHASE = "typed_audit_worker"
 #: A1b, 2026-10-12, `messages.count_tokens` on api.cborg.lbl.gov, claude-opus-5,
 #: thinking {adaptive, summarized}: (payload bytes, counted input tokens,
 #: placeholder 'x' bytes in that payload). Source: the A1b report
-#: `notes/.local_drafts/a1b_calibrated_tokens.json` at commit 10dee83fe
+#: `notes/.local_drafts/a1b_calibrated_tokens.json` at commit 10dee83fe, a
+#: local commit on no remote branch, so the figures are copied here
 #: (sha256 3146ef36c265d4d06058da242c49ccd3804d24b771cc4fe43a1d7496c5924186),
 #: payloads built by the A1 harness then (max_paths 192, inventory 32768,
 #: 16 workers, every audit output cap 4000). The findings placeholder was
@@ -93,6 +95,7 @@ TOKENS_PER_X = 1.0
 FAMILY = {
     "full": "full", "full_readdress": "full_readdress",
     "full_receipt_completion": "full_receipt_completion",
+    "full_receipt_completion_after_readdress": "full_receipt_completion",
     WORKER_PHASE: WORKER_PHASE, "typed_audit_omission": "typed_audit_omission",
     # Integration carries the shared context the workers carry.
     "typed_audit_integration": WORKER_PHASE,
@@ -179,12 +182,29 @@ GRID = {
 }
 
 
+#: Connection attempts the blocked socket refused during this process.
+NETWORK_ATTEMPTS = []
+
+
 def block_network():
     def forbidden(*args, **kwargs):
+        NETWORK_ATTEMPTS.append(repr(args[1:2])[:120])
         raise RuntimeError("offline sizing must not open a network connection")
     socket.socket.connect = forbidden
     socket.socket.connect_ex = forbidden
     socket.create_connection = forbidden
+
+
+def foreign_path(entry, root):
+    """Whether an import-path entry could supply `data_sheets_schema` or
+    `scripts` from somewhere other than `root` or `root/src`."""
+    root = Path(root).resolve()
+    try:
+        path = Path(entry or ".").resolve()
+    except OSError:
+        return False
+    return path not in {root, root / "src"} and (
+        (path / "data_sheets_schema").is_dir() or (path / "scripts").is_dir())
 
 
 def load(root):
@@ -196,15 +216,7 @@ def load(root):
     is removed first, and every loaded module is checked afterwards.
     """
     root = Path(root).resolve()
-    own = {root, root / "src"}
-
-    def foreign(entry):
-        try:
-            path = Path(entry or ".").resolve()
-        except OSError:
-            return False
-        return path not in own and ((path / "data_sheets_schema").is_dir() or (path / "scripts").is_dir())
-    sys.path[:] = [entry for entry in sys.path if not foreign(entry)]
+    sys.path[:] = [entry for entry in sys.path if not foreign_path(entry, root)]
     for entry in (str(root), str(root / "src")):
         if entry in sys.path:
             sys.path.remove(entry)
@@ -294,10 +306,11 @@ def conform_record(text, schema_path):
     """Make a stand-in record's cardinality match the current schema.
 
     The typed audit's owner traversal (audit_omissions._owners) refuses a
-    value whose list-ness differs from its slot's `multivalued`. v8/v9
-    records predate later schema changes, and the write-time normaliser
-    lists scalars only where its table names the slot, so nested inlined
-    slots stay scalar. A scalar in a multivalued slot is wrapped, a one-item
+    value whose list-ness differs from its slot's `multivalued`, and receipt
+    completion's linkml validation refuses the same records earlier. The
+    write-time normaliser lists scalars in multivalued slots at any depth,
+    except on a line that opens a list item (`- slot: value`), and nothing
+    unwraps a list in a single-valued slot. A scalar in a multivalued slot is wrapped, a one-item
     list in a single-valued slot unwrapped, and a list of several scalars in
     a single-valued slot joined into one string (the same text, for
     sizing); anything else is left and counted as unfixable. Edits go
@@ -664,19 +677,37 @@ def components(m, payload):
     return result
 
 
-def measure_ordinary(m, project, spec, settings, reg, files):
+def findings_bound(worker_count, audit_limits):
+    """Tokens the carried "Audit findings" can hold: the runner carries the
+    assembled audit (`outcome.audit`, from `batches.assemble`), which merges
+    every worker's source-review rows and findings with the integration
+    output, so its bound is every worker's output cap plus integration's."""
+    return worker_count * audit_limits["worker_output_tokens"] + audit_limits["integration_output_tokens"]
+
+
+def delivered_body(record, receipt, mark):
+    """The full phase's entire delivered body, as production keeps it before
+    `split_receipt` (`api_runner`, #1048): the record, the receipt mark line,
+    then the receipt."""
+    return f"{record.rstrip(chr(10))}\n{mark}\n{receipt}"
+
+
+def measure_ordinary(m, project, spec, settings, reg, files, worker_count):
     """Ordinary phases as the runner builds them (A1: build_phase, the
-    PHASE_NEEDS carries, _append_regate, build_repair + generation_context)."""
+    PHASE_NEEDS carries, _append_regate, build_repair + generation_context).
+    `worker_count` sizes the assembled audit the runner carries."""
     read = lambda path: path.read_bytes().decode("utf-8") if path is not None else ""
     # The staged originals, as the typed stages saw them.
     run_dir = Path(spec.out_dir)
     full = read(run_dir / "intermediate" / f"{project}_full.yaml")
     core = read(run_dir / "intermediate" / f"{project}_core.yaml")
+    receipt = read(run_dir / f"{project}_coverage_receipt.yaml")
     reconciled = read(files["reconciled_full"]) if files["reconciled_full"] else full
     completed = read(files["completed_core"]) if files["completed_core"] else core
     report_text = read(files["report"]) if files["report"] else ""
-    findings_cap = reg["audit_limits"]["integration_output_tokens"]
+    findings = findings_bound(worker_count, reg["audit_limits"])
     report_cap = cap(m, spec, settings, "report")
+    readdress_cap = min(m.api.READDRESS_MAX_TOKENS, m.api.output_limit(settings["name"]))
     out = {}
 
     def payload(req, phase, max_tokens=None):
@@ -685,34 +716,47 @@ def measure_ordinary(m, project, spec, settings, reg, files):
 
     full_req = m.api.build_phase(spec, "full", carry={})
     out["full"] = (payload(full_req, "full"), 0)
+    # The re-address turn and receipt completion both carry the whole
+    # delivered body: the record, then the receipt (#1048).
+    body = delivered_body(full, receipt, m.api.RECEIPT_MARK)
     unresolved = [{"slot": "placeholder", "detail": "one unresolved receipt entry"}]
-    readdress = m.api.build_readdress(full_req, full, unresolved)
-    out["full_readdress"] = (payload(readdress, "full_readdress", min(m.api.READDRESS_MAX_TOKENS,
-                             m.api.output_limit(settings["name"]))), 0)
-    transcript = {"phase": "full", "system": full_req.system, "cached_blocks": copy.deepcopy(full_req.cached_blocks),
-                  "messages": copy.deepcopy(full_req.messages), "response": [{"type": "text", "text": full}]}
-    rc_inputs = {"record": full, "receipt": read(run_dir / f"{project}_coverage_receipt.yaml"),
-                 "manifest": Path(spec.chunk_manifest).read_text(encoding="utf-8"),
-                 "bundle": Path(spec.bundle).read_text(encoding="utf-8"), "schema": m.rc.schema_capture(spec),
-                 "transcript": transcript, "transcript_pin": "scratch_full_transcript.json",
-                 "registration": m.rc.registration_identity(spec),
-                 "policy": m.rc.policy_identity(version=spec.receipt_completion_version),
-                 "input_identity": spec.input_identity(), "max_output_tokens": reg["receipt"]["max_output_tokens"]}
-    rc_req, _ = m.rc.build_request(rc_inputs)
-    out["full_receipt_completion"] = (m.rc.request_payload(rc_req, settings, m.rc.registration(spec)), 0)
-    # Findings exist only after the audit: an empty carry, sized at their cap in tokens.
+    readdress = m.api.build_readdress(full_req, body, unresolved)
+    out["full_readdress"] = (payload(readdress, "full_readdress", readdress_cap), 0)
+
+    def completion(transcript):
+        inputs = {"record": full, "receipt": receipt,
+                  "manifest": Path(spec.chunk_manifest).read_text(encoding="utf-8"),
+                  "bundle": Path(spec.bundle).read_text(encoding="utf-8"), "schema": m.rc.schema_capture(spec),
+                  "transcript": transcript, "transcript_pin": "scratch_full_transcript.json",
+                  "registration": m.rc.registration_identity(spec),
+                  "policy": m.rc.policy_identity(version=spec.receipt_completion_version),
+                  "input_identity": spec.input_identity(),
+                  "max_output_tokens": reg["receipt"]["max_output_tokens"]}
+        request, _ = m.rc.build_request(inputs)
+        return m.rc.request_payload(request, settings, m.rc.registration(spec))
+    # The transcript remember_exchange keeps: the full exchange, or after a
+    # re-address the re-address exchange, whose response is at most its cap.
+    exchange = lambda req, response: {"phase": req.phase, "system": req.system, "messages": copy.deepcopy(
+        req.messages), "cached_blocks": copy.deepcopy(req.cached_blocks), "response": response,
+        "usage_id": "scratch"}
+    out["full_receipt_completion"] = (completion(exchange(full_req, body)), 0)
+    out["full_receipt_completion_after_readdress"] = (completion(exchange(readdress, "")), readdress_cap)
+    # The audit exists only after the typed stages: an empty carry, sized at
+    # its bound in tokens.
     out["reconcile_full"] = (payload(m.api.build_phase(spec, "reconcile_full",
-        carry={"Completed full record": full, "Audit findings": ""}), "reconcile_full"), findings_cap)
+        carry={"Completed full record": full, "Audit findings": ""}), "reconcile_full"), findings)
     report_carry = {"Audit findings": "", "Original full record": full, "Original core record": core,
                     "Reconciled full record": reconciled, "Completed core record": completed}
-    out["report"] = (payload(m.api.build_phase(spec, "report", carry=report_carry), "report"), findings_cap)
+    out["report"] = (payload(m.api.build_phase(spec, "report", carry=report_carry), "report"), findings)
+    # The regate's contradiction listing is not sized: no cap bounds it, and
+    # a regate happens only when it is non-empty (`_gate_report`).
     regate = m.api.build_phase(spec, "report", carry=report_carry)
     m.api._append_regate(regate, spec, "", [])
     # The report as written, at most the report cap; a v8 report shows a realistic size.
-    out["report_regate"] = (payload(regate, "report", report_cap), findings_cap + report_cap)
+    out["report_regate"] = (payload(regate, "report", report_cap), findings + report_cap)
     realistic = m.api.build_phase(spec, "report", carry=report_carry)
     m.api._append_regate(realistic, spec, report_text, [])
-    out["report_regate_with_v8_report"] = (payload(realistic, "report", report_cap), findings_cap)
+    out["report_regate_with_v8_report"] = (payload(realistic, "report", report_cap), findings)
     repair = m.api.build_repair("full", reconciled,
         errors=["Slot 'data_collection' has validation error: missing required source link"],
         profile=spec.profile_obj, _captured_digest=m.sg.digest_text(spec, "Dataset"))
@@ -740,11 +784,18 @@ def size_one(m, project, label, limits, workdir, *, with_components=False):
               "bundle_bytes": bundle.stat().st_size, "original_full_bytes": files["original_full"].stat().st_size,
               "thinking": settings["thinking"], "stages": {}}
     parts = {}
+    limits = reg["audit_limits"]
+    result["audit_limits"] = {k: limits[k] for k in ("aggregate_input_tokens", "aggregate_output_tokens",
+                              "max_calls", "max_input_tokens_per_call", "worker_output_tokens",
+                              "omission_output_tokens", "integration_output_tokens", "max_paths",
+                              "max_inventory_bytes", "max_workers")}
+    worker_count, result["findings_basis"] = limits["max_workers"], "max_workers: the typed stage was refused"
     try:
         packet, workers, omission, integration, largest = measure_typed(m, spec, settings)
     except Exception as exc:                      # noqa: BLE001
         result["typed"] = {"status": "REFUSED", "reason": f"{type(exc).__name__}: {exc}"}
     else:
+        worker_count, result["findings_basis"] = len(workers), "this run's worker count"
         result["typed"] = {"status": "MEASURED", "worker_count": len(workers), "workers": [
             {**w, **estimate(project, WORKER_PHASE, w["payload_bytes"], w["max_output_tokens"])} for w in workers]}
         result["stages"]["typed_audit_omission"] = estimate(project, "typed_audit_omission",
@@ -757,7 +808,7 @@ def size_one(m, project, label, limits, workdir, *, with_components=False):
         parts.update({WORKER_PHASE + " (largest)": largest, "typed_audit_omission": omission,
                       "typed_audit_integration": integration})
     try:
-        ordinary = measure_ordinary(m, project, spec, settings, reg, files)
+        ordinary = measure_ordinary(m, project, spec, settings, reg, files, worker_count)
     except Exception as exc:                      # noqa: BLE001
         result["ordinary"] = {"status": "REFUSED", "reason": f"{type(exc).__name__}: {exc}"}
     else:
@@ -779,17 +830,32 @@ def sweep(root, workdir, projects=PROJECTS, grid=GRID, components_grid="G2", rep
           primary_only=False):
     """Every grid on each project's primary record; `replicate_grid` only on
     the other replicates, which measure record-size sensitivity."""
+    import hashlib
+    import os
     block_network()
-    m = load(root)
     workdir = Path(workdir).resolve()
+    # Prompts, schema and other resources resolve from the working directory
+    # first (`resources.resource_path`), so the sweep runs from the measured
+    # tree, not from wherever it was started.
+    root = Path(root).resolve()
+    os.chdir(root)
+    # A full-phase cap override would silently change every full request.
+    override = os.environ.pop("D4D_RECEIPT_FULL_MAX_TOKENS", None)
+    m = load(root)
+    from data_sheets_schema import resources
+    if Path(resources.resource_root()[0]).resolve() != root:
+        raise SystemExit(f"resources resolve from {resources.resource_root()[0]}, not {root}")
     workdir.mkdir(parents=True, exist_ok=False)
     results = {"format": "d4d_a1_offline_sizing_sweep_v1", "root": str(m.root),
-               "root_head": _head(m.root), "ceilings": {"worker": WORKER_CEILING_TOKENS,
+               "root_head": _head(m.root), "root_dirty_paths": _dirty(m.root),
+               "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+               "cleared_environment": {"D4D_RECEIPT_FULL_MAX_TOKENS": override},
+               "ceilings": {"worker": WORKER_CEILING_TOKENS,
                "report_family": REPORT_CEILING_TOKENS, "window": ROUTE_WINDOW_TOKENS},
                "calibration": {p: {f: {"bytes": v[0], "tokens": v[1], "x_bytes": v[2],
                                "clean_ratio": round(clean_ratio(p, f), 4)} for f, v in A1B[p].items()} for p in A1B},
                "grid": {k: dict(zip(("max_paths", "max_inventory_bytes", "max_workers"), v)) for k, v in grid.items()},
-               "network_calls": 0, "projects": {}}
+               "projects": {}}
     for project in projects:
         record_project = PROXY.get(project, project)
         labels = RUNS.get(record_project, [])
@@ -812,6 +878,9 @@ def sweep(root, workdir, projects=PROJECTS, grid=GRID, components_grid="G2", rep
     if strays:
         raise SystemExit(f"modules loaded from outside {m.root} during the sweep: {strays}")
     results["modules_outside_root"] = strays
+    # Counted, not assumed: every attempt raised, so a non-empty list also
+    # shows up as REFUSED rows.
+    results["network_attempts"] = list(NETWORK_ATTEMPTS)
     return results
 
 
@@ -822,6 +891,17 @@ def _head(root):
                               check=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         return None
+
+
+def _dirty(root):
+    """Tracked paths that differ from HEAD in the measured tree."""
+    import subprocess
+    try:
+        out = subprocess.run(["git", "-C", str(root), "status", "--porcelain", "--untracked-files=no"],
+                             capture_output=True, text=True, check=True).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return [line[3:] for line in out.splitlines() if line.strip()]
 
 
 def _summary(row):
@@ -854,6 +934,28 @@ OPTIONS = {
     "S7": ("S6 plus owners without their typed trees", ("typed.shared.schema", "typed.payload.schema",
            "json.schema", "schema_context.classes_trimmed", "schema_context.owner_typed_tree")),
 }
+
+
+def typed_aggregate(project, run, components=None, keys=()):
+    """Estimated input tokens across one run's typed calls: every worker, the
+    omission stage and integration (with the responses it carries). Before
+    each typed stage the runtime refuses it when this total would pass the
+    registered `aggregate_input_tokens` (`typed_audit_runtime`, about :506).
+    With a primary record's `components` and an option's `keys`, the
+    option's removal is applied to each request; the shared content a worker
+    carries is the same in every worker of a run. None when the typed stages
+    were not measured."""
+    typed, stages = run.get("typed", {}), run.get("stages", {})
+    if typed.get("status") != "MEASURED" or "typed_audit_omission" not in stages:
+        return None
+
+    def after(e, phase, stage_key):
+        removed = removed_bytes(components[stage_key], keys) if components and keys else 0
+        return estimate(project, phase, max(e["payload_bytes"] - removed, 0), e["max_output_tokens"],
+                        placeholder_tokens=e.get("placeholder_tokens", 0))["estimated_input_tokens"]
+    total = sum(after(w, WORKER_PHASE, WORKER_PHASE + " (largest)") for w in typed["workers"])
+    total += after(stages["typed_audit_omission"], "typed_audit_omission", "typed_audit_omission")
+    return total + after(stages["typed_audit_integration"], "typed_audit_integration", "typed_audit_integration")
 
 
 def removed_bytes(parts, keys):
@@ -900,9 +1002,14 @@ def table(results):
         label = block.get("primary") or max(counts, key=lambda k: (counts[k], k == RUNS.get(
             block.get("record_project", project), [None])[0]))
         out.append(f"Primary record `{label}`.\n")
+        components_g2 = runs.get(f"{label}|G2", {}).get("components")
+        registered = next((r["audit_limits"] for r in runs.values() if r.get("audit_limits")), {})
+        allowance = registered.get("aggregate_input_tokens", 4_000_000)
+        worker_cap = registered.get("worker_output_tokens", 4_000)
         out.append("| Grid | max_paths / inventory B / max_workers | Workers | Largest worker B | "
-                   "Est. in flight | Verdict |")
-        out.append("|---|---|---|---|---|---|")
+                   "Est. in flight | Verdict | Assigned inventory per worker B | Typed input, all calls: "
+                   "current / S6 / S7 |")
+        out.append("|---|---|---|---|---|---|---|---|")
         for key, row in runs.items():
             if not key.startswith(label + "|"):
                 continue
@@ -912,11 +1019,22 @@ def table(results):
             typed = row.get("typed", {})
             if row.get("status") != "MEASURED" or typed.get("status") != "MEASURED":
                 reason = row.get("reason") or typed.get("reason")
-                out.append(f"| {grid} | {limit_text} | refused | | | {reason} |")
+                out.append(f"| {grid} | {limit_text} | refused | | | {reason} | | |")
                 continue
             largest = max(typed["workers"], key=lambda w: w["estimated_in_flight_tokens"])
+            inventory = [w["inventory_bytes"] for w in typed["workers"]]
+
+            def mark(total):
+                return "—" if total is None else f"{total:,}" + (" over" if total > allowance else "")
+            totals = [typed_aggregate(project, row)] + [
+                typed_aggregate(project, row, components_g2, OPTIONS[o][1]) if components_g2 else None
+                for o in ("S6", "S7")]
             out.append(f"| {grid} | {limit_text} | {typed['worker_count']} | {largest['payload_bytes']:,} | "
-                       f"{largest['estimated_in_flight_tokens']:,} | {largest['verdict']} |")
+                       f"{largest['estimated_in_flight_tokens']:,} | {largest['verdict']} | "
+                       f"{min(inventory):,}–{max(inventory):,} | {' / '.join(mark(t) for t in totals)} |")
+        out.append(f"\n\"Over\" in the last column passes the registered typed `aggregate_input_tokens` "
+                   f"({allowance:,}). The assigned inventory is what a worker must answer for, one row per "
+                   f"path with complete claims, inside its output cap of {worker_cap:,} tokens.")
         g2 = runs.get(f"{label}|G2")
         if g2 and g2.get("stages"):
             out.append("\nEvery request at G2 (largest worker shown for the typed workers):\n")
@@ -1079,9 +1197,10 @@ def main(argv=None):
             stream.write("\n")
         print(json.dumps(merged["components_from"]["typed_byte_offsets"]))
         return 0
-    results = sweep(args.root, args.workdir, tuple(args.projects), {k: GRID[k] for k in args.grid},
-                    primary_only=args.primary_only)
-    with args.out.open("x", encoding="utf-8") as stream:
+    out = args.out.resolve()          # the sweep changes into --root
+    results = sweep(args.root.resolve(), args.workdir.resolve(), tuple(args.projects),
+                    {k: GRID[k] for k in args.grid}, primary_only=args.primary_only)
+    with out.open("x", encoding="utf-8") as stream:
         json.dump(results, stream, indent=1, sort_keys=True)
         stream.write("\n")
     return 0
