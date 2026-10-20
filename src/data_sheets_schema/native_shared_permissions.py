@@ -1048,7 +1048,9 @@ def _verify(raw_manifest, expected, *, argv_controls=None):
         sessions.add(summary['session_id'])
         roots = [_path(launch[key]) for key in ('config_root','stub_root','effect_root','evidence_root')]
         for root in roots:
-            _need(all(root != previous and root not in previous.parents and previous not in root.parents
+            _need(all(root != previous
+                      and not contract._strict_path_ancestor(root, previous)
+                      and not contract._strict_path_ancestor(previous, root)
                       for previous in all_roots), 'probe traces reuse or overlap isolation roots')
         all_roots.extend(roots)
         if name == 'settled':

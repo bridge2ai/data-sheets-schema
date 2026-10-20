@@ -108,10 +108,12 @@ def _paths(value, selected, *, fresh, extra_protected=()):
             raise ValueError('reserved paths must be canonical physical paths')
         if fresh and (path.exists() or path.is_symlink()):
             raise ValueError('attempt, evidence, output and stage directories must be new; spent identities cannot resume')
-        if any(path == p or path in p.parents or p in path.parents for p in protected):
+        if any(path == p or c._strict_path_ancestor(path, p)
+               or c._strict_path_ancestor(p, path) for p in protected):
             raise ValueError('reserved directory overlaps immutable authority/input or protected source')
     for index, path in enumerate(reserved):
-        if any(path == other or path in other.parents or other in path.parents for other in reserved[index + 1:]):
+        if any(path == other or c._strict_path_ancestor(path, other)
+               or c._strict_path_ancestor(other, path) for other in reserved[index + 1:]):
             raise ValueError('attempt, evidence, output and stage reservations must be disjoint')
     if any(not path.parent.is_dir() for path in reserved[:2]):
         raise ValueError('attempt and evidence parents must already exist')

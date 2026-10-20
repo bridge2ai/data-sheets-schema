@@ -10,7 +10,7 @@ from dataclasses import dataclass, fields
 import hashlib
 import json
 import math
-from pathlib import PurePosixPath
+from pathlib import PosixPath, PurePosixPath
 import re
 from threading import Lock
 from types import MappingProxyType
@@ -620,6 +620,20 @@ def _hash(value, label):
     return value
 
 
+def _strict_path_ancestor(parent, child):
+    """Exact lexical ``parent in child.parents`` without ancestor allocation.
+
+    The selected callers construct ordinary POSIX path objects themselves.
+    Retain the original operation for other flavors or custom subclasses;
+    never resolve, normalize input declarations, or cache a path verdict.
+    """
+    if type(parent) not in (PurePosixPath, PosixPath) or type(child) not in (PurePosixPath, PosixPath):
+        return parent in child.parents
+    parent_parts, child_parts = parent.parts, child.parts
+    return (parent.anchor == child.anchor and len(parent_parts) < len(child_parts)
+            and child_parts[:len(parent_parts)] == parent_parts)
+
+
 def canonical_path(value, label="path") -> str:
     _text(value, label)
     # These are lexical POSIX identities, never filesystem resolutions. Check
@@ -661,7 +675,8 @@ def role_paths(selection_path: str, stage_root: str) -> tuple[RolePath, ...]:
     canonical_path(selection_path, "selection path")
     canonical_path(stage_root, "stage root")
     root = PurePosixPath(stage_root)
-    if root == PurePosixPath("/") or selection_path == stage_root or root in PurePosixPath(selection_path).parents:
+    if (root == PurePosixPath("/") or selection_path == stage_root
+            or _strict_path_ancestor(root, PurePosixPath(selection_path))):
         raise ValueError("selection must be outside the separate mutable stage root")
     return (RolePath("selection", selection_path), RolePath("stage_root", stage_root),
             *(RolePath(role, str(root / relative)) for role, relative in ROLE_RELATIVE_PATHS.items()))
@@ -750,7 +765,7 @@ def parse_selection(raw: bytes) -> dict:
     stage_root = PurePosixPath(value["stage_root"])
     for pin in declarations:
         path = PurePosixPath(pin["path"])
-        if (path == stage_root or stage_root in path.parents
+        if (path == stage_root or _strict_path_ancestor(stage_root, path)
                 or pin["path"] == value["registration_path"]):
             raise ValueError("selection authority overlaps its own declaration or mutable stage root")
         if pin["path"] in by_path and by_path[pin["path"]] != pin:

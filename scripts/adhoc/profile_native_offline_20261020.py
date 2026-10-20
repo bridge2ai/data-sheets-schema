@@ -1,7 +1,7 @@
 """Profile existing offline native acceptance tests for #4354/#4728 (2026-10-20).
 
 Inputs: an explicitly allowlisted pytest node and this checkout's source.
-Outputs: cProfile data, sorted statistics and CPU/wall/load metadata in a fresh
+Outputs: pstats-compatible data, sorted statistics and CPU/wall/load metadata in a fresh
 external evidence directory. Profiling timings are diagnostic, not acceptance.
 No provider, native binary or test implementation is substituted by this helper.
 """
