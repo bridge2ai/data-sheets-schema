@@ -44,8 +44,15 @@ projects, under the current protocol.
   (`audit_batches.check_worker`) tests structure only. The grammar accepts a
   declared-metadata row (`{"path", "metadata_reason"}`) for any path, and only
   the terminal check asks whether the path may be declared metadata. An
-  answer that declares every row as metadata is 2,226–2,904 tokens for the
-  largest worker at G2, under the cap.
+  answer that declares every row as metadata, for the largest worker, is:
+
+  | Grid | At 4 bytes a token | At A1b's ratios | Against the 4,000 cap |
+  |---|---|---|---|
+  | G1 (CHORUS, VOICE, VOICE_PEDIATRIC) | 1,282–1,355 | 1,744–2,223 | under |
+  | G2 and G4, those three | 2,226–2,349 | 3,027–3,852 | under |
+  | G2 and G4, AI_READI, CM4AI, Kids First | 2,885–2,904 | 3,924–4,763 | at the edge |
+
+  All of these are before any thinking.
 - **Two ways to fail.**
   - **Cut off.** An answer cut off at `max_tokens` does not end with
     `end_turn`. The runtime refuses it ("typed response did not finish
@@ -54,9 +61,12 @@ projects, under the current protocol.
   - **Shortened.** An answer that fits, by declaring rows as metadata or by
     shortening its quotes, passes the worker stage and fails the terminal
     check at assembly. By then every worker, the omission stage and
-    integration are billed. Under the registered caps this path is open at
-    G2 now. With the raised caps a valid answer needs, it is open at every
-    grid.
+    integration are billed.
+    - **Under the registered caps,** this path is open at G1, and at G2 and
+      G4 for CHORUS, VOICE and VOICE_PEDIATRIC. For the other three projects
+      it is at the edge.
+    - **With the raised caps** a valid answer needs, it is open at every
+      grid.
 - **A cheaper refusal is possible.** The plan carries `record_metadata_allowed`
   for every path. A worker check that refused a metadata row on a path not
   allowed one would stop the metadata form of that failure at the worker
@@ -641,17 +651,23 @@ I can't file issues; agy files these.
      project at every valid grid: 2.7–3.0 times at G2, 3.4–6.1 times at G5,
      and 1.4–1.5 times at G1.
    - **The worker-stage check** (`audit_batches.check_worker`) tests structure
-     only. It accepts an answer that declares every row as record metadata:
-     2,226–2,904 tokens for the largest worker at G2, under the cap. Only the
-     terminal check refuses it.
+     only. It accepts an answer that declares every row as record metadata.
+     Only the terminal check refuses it. For the largest worker at G2, that
+     answer is:
+     - 2,226–2,904 tokens at 4 bytes a token;
+     - 3,027–4,763 at A1b's ratios: under the cap for CHORUS, VOICE and
+       VOICE_PEDIATRIC, and at its edge for the other three.
    - **Two failure paths.**
      - An answer cut off at `max_tokens` is refused at the worker stage, for
        not ending with `end_turn`. The typed audit is terminal after one
        worker is billed.
      - An answer that fits by declaring rows as metadata, or by shortening its
        quotes, passes the worker stage. It fails at assembly, after every
-       typed stage is billed. Under the registered caps the metadata form is
-       open now.
+       typed stage is billed.
+       - **Under the registered caps,** the metadata form is open at G1, and
+         at G2 and G4 for the three smaller projects.
+       - **With the raised caps** a valid answer needs, it is open at every
+         grid.
    - **A runtime fix to consider.** The plan carries `record_metadata_allowed`
      for every path. If `check_worker` refused a metadata row on a path not
      allowed one, that form would fail at the worker stage, at the cost of one

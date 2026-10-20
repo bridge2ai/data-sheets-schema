@@ -751,7 +751,16 @@ def _summary_results():
 
 
 def test_the_summary_marks_floor_carries_and_derives_the_output_tables():
-    out = sweep.summary(_summary_results())
+    results = _summary_results()
+    out = sweep.summary(results)
+    # The S7 table gives every floor-carrying request, with its room per row.
+    run, keys, cells = results["projects"]["CHORUS"]["runs"]["L|G2"], sweep.OPTIONS["S7"][1], []
+    for stage in ("typed_audit_integration", "reconcile_full", "report", "report_regate",
+                  "report_regate_with_v8_report"):
+        e = sweep.option_estimate("CHORUS", run, stage, keys)
+        cells.append(f"{e['estimated_in_flight_tokens']:,} ({sweep.room_per_row(e, 203):,} B)"
+                     + (" over" if e["verdict"] != "estimate_fits" else ""))
+    assert "| CHORUS | 203 | " + " | ".join(cells) + " |" in out
     first = next(line for line in out.splitlines() if line.startswith("| CHORUS | ") and "(1)" in line)
     assert first.count("†") == 3                       # integration, report and regate carry the floor
     assert "| CHORUS | 10,000 / 7,500 (102) |" in out    # the largest floor and the worker-check minimum
