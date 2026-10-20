@@ -140,6 +140,41 @@ def test_saved_snapshot_rejects_changed_scientific_or_policy_metadata():
                 runtime=RUNTIME, launch_word_raw=WORD)
 
 
+@pytest.mark.parametrize("utilization,maximum", [(0.5, 0.4), (1, 1)])
+def test_self_consistently_rehashed_saved_admission_still_requires_headroom(utilization, maximum):
+    event = observation()
+    event["rate_limit_info"].pop("unifiedWindows")
+    event["rate_limit_info"]["utilization"] = utilization
+    doc = document(event, max_starting_weekly_utilization=maximum)
+    raw = guard.canonical(doc)
+    snapshot = build().snapshot()
+    snapshot.update(guard_sha256=guard.sha(raw), observation_sha256=doc["event_sha256"],
+        weekly={"utilization": utilization, "resets_at": NOW + 3600},
+        maximum_starting_utilization=maximum, dispatched=True)
+    # Identity/hash consistency alone cannot certify a forbidden admission.
+    # No present-day timestamp/reset check is needed for historical readback.
+    with pytest.raises(ValueError, match="headroom"):
+        guard.validate_saved_snapshot(raw, snapshot, registration_raw=REGISTRATION,
+            runtime=RUNTIME, launch_word_raw=WORD)
+
+
+def test_saved_observation_reset_must_follow_capture_but_can_expire_later():
+    item = build()
+    guard.validate_saved_snapshot(item.raw, item.snapshot(), registration_raw=REGISTRATION,
+        runtime=RUNTIME, launch_word_raw=WORD)  # old observations do not get re-aged
+    event = observation()
+    event["rate_limit_info"].pop("unifiedWindows")
+    event["rate_limit_info"]["resetsAt"] = NOW
+    doc = document(event)
+    raw = guard.canonical(doc)
+    snapshot = item.snapshot()
+    snapshot.update(guard_sha256=guard.sha(raw), observation_sha256=doc["event_sha256"],
+        weekly={"utilization": 0.5, "resets_at": NOW}, dispatched=True)
+    with pytest.raises(ValueError, match="reset"):
+        guard.validate_saved_snapshot(raw, snapshot, registration_raw=REGISTRATION,
+            runtime=RUNTIME, launch_word_raw=WORD)
+
+
 @pytest.mark.parametrize("raw", [b'{"x":1,"x":2}', b'{"x":NaN}', b'{"x":Infinity}'])
 def test_json_duplicate_and_nonfinite_refused(raw):
     with pytest.raises(ValueError):

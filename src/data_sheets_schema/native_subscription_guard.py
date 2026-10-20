@@ -168,7 +168,10 @@ class SubscriptionGuard:
         if type(event_raw) is not str or sha(event_raw.encode()) != value["event_sha256"]:
             raise ValueError("subscription event differs from its captured hash")
         self.reading = weekly_reading(strict_json(event_raw))
+        self._require_headroom()
         self.captured_at = _timestamp(value["captured_at"])
+        if self.reading["resets_at"] <= self.captured_at:
+            raise ValueError("subscription window reset is not after its observation")
         self.max_age = age
         self.clock = _now if clock is None else clock
         self.raw = raw
@@ -180,6 +183,11 @@ class SubscriptionGuard:
         if check_freshness:
             self.before_dispatch(check_only=True)
 
+    def _require_headroom(self):
+        # Historical readback skips aging, never the static admission policy.
+        if self.reading["utilization"] >= 1 or self.reading["utilization"] > self.maximum:
+            raise ValueError("insufficient weekly subscription headroom")
+
     def before_dispatch(self, *, check_only=False):
         if self.path is not None and read_regular(self.path) != self.raw:
             raise ValueError("subscription guard file changed before dispatch")
@@ -190,8 +198,7 @@ class SubscriptionGuard:
             raise ValueError("subscription observation is stale or future-dated")
         if self.reading["resets_at"] <= now:
             raise ValueError("subscription window reset since observation")
-        if self.reading["utilization"] >= 1 or self.reading["utilization"] > self.maximum:
-            raise ValueError("insufficient weekly subscription headroom")
+        self._require_headroom()
         if self.dispatched:
             raise ValueError("subscription guard dispatch already consumed")
         if not check_only:
