@@ -523,8 +523,18 @@ def test_the_response_floor_is_a_response_the_worker_check_accepts():
         variants = sweep.floor_variants(plan, worker)
         assert set(variants) == {"supported", "revised", "mixed"}
         assert floor["passed"] and floor["bytes"] == min(len(raw) for raw in variants.values())
+        # `mixed` takes each row in its smaller form; a revised row also costs
+        # its path in the linking finding.
+        rows = {k: yaml.safe_load(variants[k])["source_review"]["values"] for k in variants}
+        size = lambda value: len(json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode())
+        for s, r, mixed in zip(rows["supported"], rows["revised"], rows["mixed"]):
+            assert mixed == (r if s != r and size(r) + size(r["path"]) + 1 < size(s) else s)
+        # The worker stage accepts every row as declared metadata, which is
+        # smaller than the floor wherever a row is not allowed to be metadata.
         low = floor["worker_check_minimum"]
-        assert low["passed"] and low["bytes"] <= floor["bytes"]
+        allowed = {r["path"] for r in plan["inventory"]["values"] if r["record_metadata_allowed"]}
+        assert low["passed"] and low["variant"] == "metadata_only"
+        assert low["bytes"] < floor["bytes"] if set(worker["paths"]) - allowed else low["bytes"] == floor["bytes"]
         for raw in variants.values():
             rows = yaml.safe_load(raw)["source_review"]["values"]
             assert [r["path"] for r in rows] == worker["paths"]
@@ -539,7 +549,8 @@ def test_the_response_floor_is_a_response_the_worker_check_accepts():
             assert not check(json.dumps(short).encode(), plan, worker["id"])["passed"]
     refused = sweep.response_floor(plan, plan["workers"][0], lambda *a: {"passed": False, "errors": [{"code": "x"}]})
     nothing = {"bytes": None, "passed": False, "errors": {"supported": ["x"], "revised": ["x"], "mixed": ["x"]}}
-    assert refused == {**nothing, "worker_check_minimum": nothing}
+    assert refused == {**nothing, "worker_check_minimum": {
+        **nothing, "errors": {"metadata_only": ["x"], **nothing["errors"]}}}
     assert sweep.floor_tokens(10) == 3 and sweep.floor_tokens(None) is None
 
 
@@ -559,6 +570,12 @@ def test_the_floor_meets_the_terminal_quoting_rule_and_the_worker_minimum_does_n
     # only the one-character claims fail the quoting and coverage rules.
     assert floor["findings"] > 0 and floor["quote_or_coverage"] == 0
     assert low["quote_or_coverage"] > 0
+    # The all-metadata answer the worker stage accepts is refused here.
+    rows = [r for w in plan["workers"] for r in json.loads(sweep.metadata_only(plan, w))["source_review"]["values"]]
+    found = source_review.check({"artifact": "original_full", "sha256": plan["original_full_sha256"], "values": rows},
+                                raw=TINY_RECORD, artifact="original_full", chunks=chunks, audit_findings=[],
+                                protocol_version=7)["findings"]
+    assert any(f["detail"] == "only declared record metadata can omit source claims" for f in found)
 
 
 def test_the_floor_audit_is_the_assembled_audit_of_every_row():
@@ -654,6 +671,44 @@ def test_integration_carries_the_larger_of_the_caps_and_the_floor_envelopes():
     chosen = sweep.larger_carry("CHORUS", "typed_audit_integration", alternatives)
     assert chosen[3] == "workers' smallest responses, as saved envelopes"
     assert len(sweep.integration_alternatives(m, workers, omission, [empty])) == 1
+    stage, payload = sweep.integration_estimate(m, "CHORUS", workers, omission, [empty, floored])
+    assert payload is floored and stage["placeholder_tokens"] == 4_000
+    assert stage["carry_basis"] == "workers' smallest responses, as saved envelopes"
+    stage, payload = sweep.integration_estimate(m, "CHORUS", workers, omission, [empty])
+    assert payload is empty and stage["placeholder_tokens"] == 16_000
+
+
+def test_the_integration_stand_in_renders_the_envelopes_and_the_index_twice():
+    typed = SimpleNamespace(index="real", _index=lambda packet, inner: {"rows": sorted(inner)},
+                            _workers=lambda packet, workers, derivations=None: {k: b"in" + v for k, v in workers.items()})
+    m = SimpleNamespace(typed=typed, rc=SimpleNamespace(recover="real", registration_identity=lambda spec: {}))
+    packet = {"sha256": "p", "requests": {"shared_context": {"s": 1}}, "contracts": {"integration": {"c": 1}}}
+    with sweep.offline_receipt_and_index(m):
+        empty = m.typed.index(packet, {}, b"")
+        full = m.typed.index(packet, {"worker_0001": b"envelope"}, b"")
+    assert empty["index"] == {} and empty["integration_request"]["payload"]["workers"] == {}
+    payload = full["integration_request"]["payload"]
+    assert full["index"] == payload["proposal_index"] == {"rows": ["worker_0001"]}
+    assert payload["workers"] == {"worker_0001": "envelope"} and payload["omission_response"] == ""
+    assert m.typed.index == "real" and m.rc.recover == "real"         # restored afterwards
+
+
+def test_measure_typed_builds_integration_from_the_floor_envelopes():
+    from data_sheets_schema import audit_batches
+    plan = audit_batches.make_plan(TINY_RECORD, max_paths=4, max_inventory_bytes=4_096, max_workers=4, version=2)
+    packet = {"plan": plan, "sha256": "p"}
+
+    def build_request(spec, packet, stage, workers, omission, settings):
+        return None, {"phase": stage["phase"], "workers": sorted(workers), "max_tokens": 4_000}, {"for": stage}
+    tar = SimpleNamespace(prepare_packet=lambda spec: packet, build_request=build_request,
+                          WORKER_PHASE="typed_audit_worker", OMISSION_PHASE="typed_audit_omission",
+                          INTEGRATION_PHASE="typed_audit_integration")
+    m = SimpleNamespace(tar=tar, audit_batches=audit_batches, rc=SimpleNamespace(recover=None),
+                        typed=SimpleNamespace(index=None, capture_response=lambda inner, answer: b"envelope"),
+                        sg=SimpleNamespace(canonical=lambda value: json.dumps(value, sort_keys=True).encode()))
+    _, rows, _, integration, _ = sweep.measure_typed(m, None, {})
+    assert all(r["response_floor"]["passed"] for r in rows)
+    assert [i["workers"] for i in integration] == [[], sorted(w["id"] for w in plan["workers"])]
 
 
 def test_the_output_allowance_must_cover_every_stage_admission():
@@ -680,6 +735,7 @@ def _summary_results():
                                              carry_basis="workers' smallest responses, as saved envelopes"),
               "full_receipt_completion_after_readdress": est("full_receipt_completion_after_readdress", 1_000_000,
                                                              4_000, 8_000),
+              "reconcile_full": est("reconcile_full", 900_000, 96_000, carry_basis=basis),
               "report": est("report", 1_000_000, 96_000, carry_basis=basis),
               "report_regate": est("report_regate", 1_000_000, 96_000, 96_000, carry_basis=basis),
               "report_regate_with_v8_report": {**est("report_regate", 1_010_000, 96_000, carry_basis=basis),

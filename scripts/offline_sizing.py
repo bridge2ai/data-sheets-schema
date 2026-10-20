@@ -44,8 +44,9 @@ Each typed worker's answer is floored (`response_floor`). The floor has one
 row per assigned path; each claim quotes and covers its value, as the
 terminal source review requires; every other string is one character.
 - **The worker-stage check** (`audit_batches.check_worker`) accepts the
-  floor. It also accepts a smaller answer with one-character claims, which is
-  recorded too.
+  floor. It tests structure only, and also accepts a far smaller answer:
+  every row declared as record metadata, which only the terminal check
+  refuses. That worker-check minimum is recorded too.
 - **The terminal check** (`evidence_assertions.check_audit`, run at assembly)
   is run on the assembled floor audit, to confirm that it has no quoting or
   coverage finding.
@@ -633,15 +634,28 @@ def floor_variants(plan, worker, *, quote=None):
     return {"supported": body(lambda *a: False), "revised": body(lambda *a: True), "mixed": body(smaller)}
 
 
+def metadata_only(plan, worker):
+    """An answer whose every row is a declared-metadata row
+    (`{"path", "metadata_reason"}`). The worker-stage grammar accepts that row
+    for any path (`audit_grammar`, `review`); only the terminal source review
+    refuses it for a path the inventory does not allow
+    (`record_metadata_allowed`)."""
+    return _compact({"findings": [], "summary": "s", "source_review": {
+        "artifact": "original_full", "sha256": plan["original_full_sha256"],
+        "values": [{"path": path, "metadata_reason": "m"} for path in worker["paths"]]}})
+
+
 def response_floor(plan, worker, check):
     """A floor under any answer the terminal source review accepts, in bytes.
 
     The smallest of `floor_variants` that `check(raw, plan, worker_id)` (the
     worker-stage check) accepts. Its claims quote and cover every value, as the
     terminal check requires, and every other string is one character, which no
-    real answer's sources, quotes and reasons can be. The worker-stage check
-    itself does not test quoting: `worker_check_minimum` is the smallest
-    answer it accepts, with one-character claims."""
+    real answer's sources, quotes and reasons can be.
+
+    The worker-stage check tests structure only. `worker_check_minimum` is the
+    smallest answer it accepts: the all-metadata answer (`metadata_only`), or
+    one-character claims if that were refused."""
     def smallest(variants):
         best, errors = None, {}
         for name, raw in variants.items():
@@ -652,8 +666,8 @@ def response_floor(plan, worker, check):
             else:
                 errors[name] = [e.get("code") for e in report.get("errors", [])][:3]
         return best or {"bytes": None, "passed": False, "errors": errors}
-    return {**smallest(floor_variants(plan, worker)),
-            "worker_check_minimum": smallest(floor_variants(plan, worker, quote="t"))}
+    return {**smallest(floor_variants(plan, worker)), "worker_check_minimum": smallest(
+        {"metadata_only": metadata_only(plan, worker), **floor_variants(plan, worker, quote="t")})}
 
 
 def floor_tokens(floor_bytes):
@@ -719,6 +733,15 @@ def integration_alternatives(m, workers, omission, integration):
         out.append((nbytes(m, integration[1]), integration[1]["max_tokens"], omission["max_tokens"],
                     "workers' smallest responses, as saved envelopes", integration[1]))
     return out
+
+
+def integration_estimate(m, project, workers, omission, integration):
+    """Integration's estimate, from the larger of its alternatives, with the
+    basis recorded; and the payload chosen."""
+    chosen = larger_carry(project, "typed_audit_integration",
+                          integration_alternatives(m, workers, omission, integration))
+    return {**estimate(project, "typed_audit_integration", chosen[0], chosen[1], placeholder_tokens=chosen[2]),
+            "carry_basis": chosen[3]}, chosen[4]
 
 
 def larger_carry(project, phase, alternatives):
@@ -1017,15 +1040,13 @@ def size_one(m, project, label, limits, workdir, *, with_components=False):
             nbytes(m, omission), omission["max_tokens"])
         if len(integration) > 1:
             audit_floor = floor_assembly(m.audit_batches, packet["plan"])
-        chosen = larger_carry(project, "typed_audit_integration",
-                              integration_alternatives(m, workers, omission, integration))
-        result["stages"]["typed_audit_integration"] = {**estimate(project, "typed_audit_integration", chosen[0],
-            chosen[1], placeholder_tokens=chosen[2]), "carry_basis": chosen[3]}
+        result["stages"]["typed_audit_integration"], chosen_integration = integration_estimate(
+            m, project, workers, omission, integration)
         result["audit_floor_bytes"] = len(audit_floor.encode("utf-8")) if audit_floor is not None else None
         if audit_floor is not None:
             result["audit_floor_terminal_check"] = terminal_check(m, spec, packet, audit_floor)
         parts.update({WORKER_PHASE + " (largest)": largest, "typed_audit_omission": omission,
-                      "typed_audit_integration": chosen[4]})
+                      "typed_audit_integration": chosen_integration})
     try:
         ordinary, bases = measure_ordinary(m, project, spec, settings, reg, files, worker_count, audit_floor)
     except Exception as exc:                      # noqa: BLE001
@@ -1260,8 +1281,9 @@ def table(results):
         omission_cap = registered.get("omission_output_tokens", 4_000)
         integration_cap = registered.get("integration_output_tokens", 4_000)
         out.append(f"\nWorker output. The floor (`response_floor`) is a floor under any answer the terminal "
-                   "source review accepts; the worker-stage check alone accepts the smaller one-character-claim "
-                   f"answer. Tokens are at {round(1 / FLOOR_TOKENS_PER_BYTE)} bytes a token, so they err low, "
+                   "source review accepts; the worker-check minimum is the smallest answer the worker-stage "
+                   "check accepts, every row declared as record metadata, which only the terminal check refuses. "
+                   f"Tokens are at {round(1 / FLOOR_TOKENS_PER_BYTE)} bytes a token, so they err low, "
                    f"and thinking draws on the same `max_tokens`. \"Over\" on the largest worker passes its cap "
                    f"({worker_cap:,}). The peak is the smallest `aggregate_output_tokens` the admission rule "
                    "needs with every worker's cap at the largest floor and outputs at their floors, the omission "
@@ -1461,19 +1483,23 @@ def summary(results):
             total = e["estimated_in_flight_tokens"] + extra
             cells.append(f"{total:,} (+{extra:,})" + (" over" if total > e["ceiling_tokens"] else ""))
         out.append(f"| {name(project, block)} | " + " | ".join(cells) + " |")
-    out.append("\nUnder S7, G2, primary records: the report family with the audit at its floor (a lower bound) "
-               "and the report as written read two ways, at its 96k cap (an upper bound) or as the v8 report's "
-               "text. In brackets, the bytes each source-review row could still add before the request reaches "
-               "850,000, at the request's ratio; a real row adds a reason, quotes, a source and a chunk id:\n")
-    out.append("| Project | Rows | Report | Regate, report at its cap | Regate, v8 report text |")
-    out.append("|---|---|---|---|---|")
+    out.append("\nUnder S7, G2, primary records: every request that carries the audit or the worker answers at "
+               "their floor (a lower bound), with the regate's report as written read two ways, at its 96k cap "
+               "(an upper bound) or as the v8 report's text. In brackets, the bytes each source-review row could "
+               "still add before the request reaches its ceiling, at the request's ratio (integration's are "
+               "envelope bytes, about 1.34 per answer byte); a real row adds a reason, quotes, a source and a "
+               "chunk id:\n")
+    out.append("| Project | Rows | Integration | `reconcile_full` | Report | Regate, report at its cap | "
+               "Regate, v8 report text |")
+    out.append("|---|---|---|---|---|---|---|")
     for project, block in measured.items():
         run = primary(block)
         if run.get("typed", {}).get("status") != "MEASURED":
             continue
         rows = sum(w["paths"] for w in run["typed"]["workers"])
         cells = []
-        for stage in ("report", "report_regate", "report_regate_with_v8_report"):
+        for stage in ("typed_audit_integration", "reconcile_full", "report", "report_regate",
+                      "report_regate_with_v8_report"):
             e = option_estimate(project, run, stage, keys)
             cells.append(f"{e['estimated_in_flight_tokens']:,} ({room_per_row(e, rows):,} B)"
                          + (" over" if e["verdict"] != "estimate_fits" else ""))
@@ -1501,8 +1527,9 @@ def summary(results):
     unit = round(1 / FLOOR_TOKENS_PER_BYTE)
     out.append(f"The largest worker's answer, in tokens at {unit} bytes a token (at least). The first figure "
                "is the floor under any answer the terminal source review accepts (claims quoting and covering "
-               "each value); the second is the smallest answer the worker-stage check accepts (one-character "
-               "claims); in brackets, the largest assignment's paths. The registered worker cap is "
+               "each value); the second is the smallest answer the worker-stage check accepts (every row "
+               "declared as record metadata, which only the terminal check refuses); in brackets, the largest "
+               "assignment's paths. The registered worker cap is "
                f"{caps.get('worker_output_tokens', 4_000):,}:\n")
     out.append("| Project | " + " | ".join(grids) + " |")
     out.append("|---|" + "---|" * len(grids))

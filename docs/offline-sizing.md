@@ -286,8 +286,11 @@ sweep builds a floor under any answer the terminal source review would accept
   reason can be.
 
 The worker-stage check (`audit_batches.check_worker`) accepts the floor. It
-checks structure only, though, and also accepts a smaller answer whose claims
-are one character: the sweep records that worker-check minimum too.
+checks structure only, though. The grammar accepts a
+`{"path", "metadata_reason"}` row for any path; whether the path may be
+declared metadata (`record_metadata_allowed`) is checked only at assembly.
+So it also accepts a far smaller answer, every row declared as record
+metadata (`metadata_only`). The sweep records that worker-check minimum too.
 
 The sweep runs the terminal check on the assembled floor audit
 (`audit_floor_terminal_check`). Its one-character evidence must fail the
