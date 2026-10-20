@@ -434,3 +434,21 @@ def test_a_rerun_merges_only_when_it_repeats_the_measurement():
                     _sweep_results("abc", 100, 1_101, 1_001)):    # more than a path's length
         with pytest.raises(ValueError):
             sweep.merge(full, changed)
+
+
+def test_a_project_the_full_sweep_could_not_stage_is_added_whole():
+    full = _sweep_results("abc", 100, 1_000, 900)
+    full["projects"]["KIDS_FIRST"] = {"status": "UNKNOWN", "reason": "no bundle, context or record to stage"}
+    rerun = {"root_head": "abc", "projects": {"KIDS_FIRST": {"status": "MEASURED", "primary": "L", "runs": {}}}}
+    merged = sweep.merge(full, rerun)
+    assert merged["projects"]["KIDS_FIRST"]["status"] == "MEASURED"
+    assert merged["components_from"]["added_projects"] == ["KIDS_FIRST"]
+
+
+def test_kids_first_inputs_come_from_its_canary_directory():
+    root = Path(__file__).resolve().parents[1]
+    bundle, manifest, context, missing = sweep.inputs_for(root, "KIDS_FIRST")
+    assert missing == [] and context is None                   # the A3 builder synthesizes a draft context
+    assert bundle.name == "KIDS_FIRST_preprocessed.txt" and manifest.name == "chunks.yaml"
+    assert bundle.parent == root / "notes/matched_cborg_2026-09-13/kids_first"
+    assert sweep.PROXY["KIDS_FIRST"] == "AI_READI" and "S7" in sweep.OPTIONS

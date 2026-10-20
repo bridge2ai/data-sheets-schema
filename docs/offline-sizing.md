@@ -243,6 +243,12 @@ requires:
 - **Receipt.** A receipt pinned to an earlier bundle (AI_READI before #5042)
   is carried onto today's manifest by chunk sha256. Entries for removed
   chunks are dropped.
+- **Projects with no record.** These are sized by proxy: another project's
+  records with this project's own bundle and chunk manifest, and a minimal
+  receipt. VOICE_PEDIATRIC uses VOICE's records. Kids First uses AI_READI's;
+  its inputs come from `notes/matched_cborg_2026-09-13/kids_first/`, and a
+  root-only draft context is synthesized by the A3 builder because it has no
+  A5d context.
 
 Content that cannot exist before a run is sized at its output cap, in
 tokens. That covers the typed audit's findings, the report as written, and

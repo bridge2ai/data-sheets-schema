@@ -159,7 +159,16 @@ RUNS = {
     "VOICE": ["2026-09-04f_claude-opus-5-api-generic-v8_rep1", "2026-09-04f_claude-opus-5-api-generic-v8_rep2",
               "2026-09-04f_claude-opus-5-api-generic-v8_rep3"],
 }
-PROXY = {"VOICE_PEDIATRIC": "VOICE"}
+PROXY = {"VOICE_PEDIATRIC": "VOICE", "KIDS_FIRST": "AI_READI"}
+#: Projects whose inputs live outside `data/preprocessed/`. Kids First's
+#: bundle, chunk manifest and source manifest are in its canary directory.
+#: It has no A5d omission context, so a root-only draft is synthesized with
+#: the A3 builder's `build_draft_context` (a few KB next to MB-sized
+#: requests), and it uses the neutral profile (A19-reg). It has no record,
+#: so AI_READI's, the largest, stand in.
+EXTERNAL = {"KIDS_FIRST": {"dir": "notes/matched_cborg_2026-09-13/kids_first",
+                           "bundle": "KIDS_FIRST_preprocessed.txt", "manifest": "chunks.yaml",
+                           "source_manifest": "manifest.yaml", "profile": "neutral"}}
 PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC", "KIDS_FIRST")
 
 #: (max_paths, max_inventory_bytes, max_workers). G2 is the A3 draft default
@@ -205,7 +214,7 @@ def load(root):
     from data_sheets_schema import usage_ledger as ledger
     from data_sheets_schema.cli.api import ARMS
     try:
-        from scripts.build_api_registrations import DEFAULT_AUDIT_LIMITS, build_registration
+        from scripts.build_api_registrations import DEFAULT_AUDIT_LIMITS, build_draft_context, build_registration
     except ImportError as exc:
         raise SystemExit(f"{root} has no A3 registration builder (scripts/build_api_registrations.py, #5095): {exc}")
     strays = sorted(name for name, module in list(sys.modules.items())
@@ -215,7 +224,7 @@ def load(root):
         raise SystemExit(f"modules loaded from outside {root}: {strays}")
     return SimpleNamespace(root=root, api=api, rc=rc, sg=sg, snapshot_store=snapshot_store, typed=typed,
                            tar=tar, ledger=ledger, ARMS=ARMS, DEFAULT_AUDIT_LIMITS=DEFAULT_AUDIT_LIMITS,
-                           build_registration=build_registration)
+                           build_registration=build_registration, build_draft_context=build_draft_context)
 
 
 def loaded_from(root):
@@ -241,6 +250,12 @@ def run_files(root, project, label):
 
 
 def inputs_for(root, project):
+    """(bundle, chunk manifest, context or None to synthesize, missing paths)."""
+    if project in EXTERNAL:
+        source = EXTERNAL[project]
+        base = root / source["dir"]
+        paths = [base / source["bundle"], base / source["manifest"], base / source["source_manifest"]]
+        return paths[0], paths[1], None, [str(p.relative_to(root)) for p in paths if not p.is_file()]
     bundle = root / f"data/preprocessed/concatenated/{project}_preprocessed.txt"
     manifest = root / f"data/preprocessed/chunks/{project}_chunks.yaml"
     context = root / f"data/omission_contexts/{project.lower()}_omission_context.json"
@@ -452,9 +467,18 @@ def stage_run(m, project, files, bundle, manifest, context, limits, workdir, lab
     (run_dir / "intermediate").mkdir(parents=True)
     audit_limits = copy.deepcopy(m.DEFAULT_AUDIT_LIMITS)
     audit_limits.update(limits)
+    external = {}
+    if project in EXTERNAL:
+        source = EXTERNAL[project]
+        source_manifest = m.root / source["dir"] / source["source_manifest"]
+        context = workdir / f"{project.lower()}_draft_omission_context.json"
+        m.build_draft_context(project, source_manifest_path=source_manifest, context_path=context,
+                              write_to_disk=True)
+        external = {"source_manifest_path": source_manifest, "profile_name": source["profile"]}
     reg = m.build_registration(project=project, label=label, arm="baseline",
         registration_path=workdir / f"{project}_registration.json", context_path=context,
-        bundle_path=bundle, chunk_manifest_path=manifest, audit_limits=audit_limits, write_to_disk=True)
+        bundle_path=bundle, chunk_manifest_path=manifest, audit_limits=audit_limits, write_to_disk=True,
+        **external)
     # Each record passes through the runner's write-time normaliser, as every
     # record the generic_v10 runner writes does, then conform_record.
     staging = {}
@@ -827,6 +851,8 @@ OPTIONS = {
            ("schema_context.classes_trimmed",)),
     "S6": ("S1 plus S5", ("typed.shared.schema", "typed.payload.schema", "json.schema",
                           "schema_context.classes_trimmed")),
+    "S7": ("S6 plus owners without their typed trees", ("typed.shared.schema", "typed.payload.schema",
+           "json.schema", "schema_context.classes_trimmed", "schema_context.owner_typed_tree")),
 }
 
 
@@ -861,8 +887,11 @@ def table(results):
             out.append(f"UNKNOWN: {block.get('reason')}\n")
             continue
         if block.get("proxy"):
-            out.append(f"Proxy: {block['record_project']}'s records with {project}'s own bundle, manifest and "
-                       "context, and a minimal receipt; an estimate for a run that has no record yet.\n")
+            context = ("a root-only draft context synthesized by the A3 builder" if project in EXTERNAL
+                       else "its own context")
+            out.append(f"Proxy: {block['record_project']}'s records with {project}'s own bundle and chunk "
+                       f"manifest, {context}, and a minimal receipt; an estimate for a run that has no record "
+                       "yet.\n")
         runs = block["runs"]
         # The primary record carries every grid (results are stored with sorted keys).
         counts = {}
@@ -983,9 +1012,14 @@ def merge(full, again):
     if full["root_head"] != again["root_head"]:
         raise ValueError("the two sweeps measured different trees")
     typed_stages = ("typed_audit_omission", "typed_audit_integration")
-    merged, problems, offsets = copy.deepcopy(full), [], {}
+    merged, problems, offsets, added = copy.deepcopy(full), [], {}, []
     for project, block in again["projects"].items():
         if block.get("status") != "MEASURED":
+            continue
+        if merged["projects"].get(project, {}).get("status") != "MEASURED":
+            # A project the full sweep could not measure: the rerun's block is the measurement.
+            merged["projects"][project] = copy.deepcopy(block)
+            added.append(project)
             continue
         key = f"{block['primary']}|G2"
         a, b = merged["projects"][project]["runs"][key], block["runs"][key]
@@ -1008,8 +1042,12 @@ def merge(full, again):
         merged["projects"][project]["primary"] = block["primary"]
     if problems:
         raise ValueError(f"the rerun differs from the full sweep beyond a scratch-path offset: {problems[:5]}")
-    merged["components_from"] = {"typed_byte_offsets": offsets, "note": "primary records at G2 from a rerun; "
-        "ordinary phases matched exactly and each typed stage differed only by the uniform offset shown"}
+    previous = merged.get("components_from", {})
+    merged["components_from"] = {
+        "typed_byte_offsets": {**previous.get("typed_byte_offsets", {}), **offsets},
+        "added_projects": previous.get("added_projects", []) + added,
+        "note": "primary records at G2 from a rerun; ordinary phases matched exactly and each typed stage "
+                "differed only by the uniform offset shown; added projects were measured only by the rerun"}
     return merged
 
 

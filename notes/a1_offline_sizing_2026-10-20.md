@@ -13,7 +13,7 @@ A1b `messages.count_tokens` count can, read through `offline_sizing check`
 ## Answer
 
 **No `max_paths` / `max_workers` setting makes a generic_v10 typed-audit
-worker fit the 1,000,000-token window, for any project measured.**
+worker fit the 1,000,000-token window, for any of the six projects.**
 Partitioning changes how many workers there are, not how large each one is.
 Every worker request repeats the same shared content. On each project's
 primary record the largest worker moved by at most 0.4% across six grids:
@@ -32,33 +32,36 @@ worker and every other request, 850,000 for the report family.
 | CM4AI | 1,244,905 over | 1,244,905–1,276,340 (3) | 986,532 | 1,221,330 over | 829,263 | 690,922 | 786,450 |
 | VOICE | 1,447,155 over | 1,430,528–1,513,288 (3) | 1,163,040 over | 1,421,276 over | 870,319 | 892,063 over | 987,660 over |
 | VOICE_PEDIATRIC (proxy) | 1,353,608 over | 1,337,456–1,422,915 (3) | 1,080,571 over | 1,327,730 over | 793,958 | 827,362 | 922,938 over |
-| KIDS_FIRST | UNKNOWN: no bundle, chunk manifest, omission context or record on main or in #5095 | | | | | | |
+| KIDS_FIRST (proxy) | 1,599,199 over | 1,503,476–1,599,199 (3) | 1,269,845 over | 1,561,193 over | 947,084 | 1,058,687 over | 1,154,342 over |
 
 How far over:
 - **CHORUS** is at the edge. Its largest worker estimate is 1.4% over, and
   the range of calibrated ratios (966,371–1,013,951) straddles the ceiling.
   Its v8 records are larger, up to 1,098,816.
-- **AI_READI, CM4AI, VOICE and VOICE_PEDIATRIC** are 24–50% over, beyond any
-  ratio uncertainty.
+- **Every other project** is 24–60% over, beyond any ratio uncertainty.
+- **Kids First** now has the largest bundle (541,184 B against AI_READI's
+  430,393 since #5042), and so the largest requests. It is sized by proxy:
+  no record exists.
 
 Full, the re-address turn, receipt completion, `reconcile_full` and repair fit
-for every project. CM4AI's omission stage fits on its primary record but not
-on its other two (1,014,934 and 1,013,549).
+for every project; Kids First's receipt completion (947,084) and
+`reconcile_full` (899,562) fit narrowly. CM4AI's omission stage fits on its
+primary record but not on its other two (1,014,934 and 1,013,549).
 
 **Why.** The schema is carried twice in every typed request:
 1. **The typed request's own catalog.** It covers every class reachable from
    `Dataset`, with every induced slot's full LinkML definition
    (`audit_omissions._schema`), whatever the record holds. Its size is
-   identical in all five projects:
+   identical in all six projects:
    - 1,486,502 B in every worker and in integration: 60% of CHORUS's largest
-     worker and 39% of AI_READI's;
+     worker, 39% of AI_READI's and 38% of Kids First's;
    - 1,246,504 B in the omission request;
    - 1,542,013 B inside receipt completion's inputs.
 2. **The schema context's induced-slot `classes`** for the classes the record
    occupies: 615,443 B for CHORUS and 949,673 B for AI_READI.
 
 Next to these, the rest is small:
-- the bundle: 13% of AI_READI's worker, 2% of CHORUS's;
+- the bundle: 15% of Kids First's worker, 13% of AI_READI's, 2% of CHORUS's;
 - the owners' YAML and typed trees;
 - the full-record inventory, repeated in every worker (2–4%);
 - the worker's own assignment, 0.1–0.3%, the only part partitioning controls.
@@ -69,40 +72,43 @@ This answers the plan's open question 6 and confirms risk 6.
 
 **Partition: keep G2 (`max_paths` 192, `max_inventory_bytes` 32,768,
 `max_workers` 16), the A3 draft default.**
-- It is valid for every measured project. G1, `typed_audit.prepare`'s own
-  default (96 / 16,384), is refused for AI_READI and CM4AI with
+- It is valid for every project. G1, `typed_audit.prepare`'s own default
+  (96 / 16,384), is refused for AI_READI, CM4AI and Kids First with
   `indivisible_field_bound`.
 - It gives 2–6 workers, inside `max_calls` 18 (W + 2).
 - Larger grids save calls but make every worker slightly larger.
 
 It does not make a worker fit, and no partition does.
 
-**To meet the A1 rule, the shared payload must shrink.** Six options were
+**To meet the A1 rule, the shared payload must shrink.** Seven options were
 measured by removing parts from the actual requests: exact for bytes,
 estimated for tokens. The complete table for each project is in the
 appendix.
 
 | Option | What changes | Result on the primary records |
 |---|---|---|
-| S1 | typed requests stop carrying their own schema catalog; the schema context stays | every typed stage fits for every project; the report family still exceeds for AI_READI and VOICE, and VOICE_PEDIATRIC's regate |
-| S2 | the schema context's induced-slot `classes` dropped; the typed catalog stays | the report family fits everywhere; workers and integration still exceed for AI_READI and VOICE |
+| S1 | typed requests stop carrying their own schema catalog; the schema context stays | every typed stage fits for every project (Kids First's worker by 1.1%); the report family still exceeds for AI_READI, VOICE and Kids First, and VOICE_PEDIATRIC's regate |
+| S2 | the schema context's induced-slot `classes` dropped; the typed catalog stays | the report family fits everywhere; workers and integration still exceed for AI_READI, VOICE and Kids First |
 | S3 | S1 plus the full-record inventory dropped from each worker | as S1, slightly smaller workers |
-| S4 | S1 plus owners without their typed trees | as S1; VOICE's report fits, its regate still exceeds |
-| S5 | induced-slot definitions trimmed to name, description, range, cardinality and inlining | the report family fits everywhere; workers still exceed for every project but CHORUS |
-| **S6** | **S1 plus S5** | **every stage fits for every measured project** |
+| S4 | S1 plus owners without their typed trees | as S1; VOICE's report fits, but its regate and AI_READI's and Kids First's report and regate still exceed |
+| S5 | induced-slot definitions trimmed to name, description, range, cardinality and inlining | the report family fits except Kids First's regate; workers still exceed for every project but CHORUS |
+| S6 | S1 plus S5 | every stage fits for every project except Kids First's regate (881,096, 3.7% over) |
+| **S7** | **S6 plus owners without their typed trees** | **every stage fits for all six projects** |
 
-Under S6, on the primary records:
+Under S7, on the primary records:
 
 | Project | Largest worker | Omission | Integration | Receipt completion | Report | Regate (cap) |
 |---|---|---|---|---|---|---|
-| CHORUS | 207,321 | 150,051 | 201,910 | 113,389 | 300,682 | 396,077 |
-| AI_READI | 628,701 | 474,193 | 593,804 | 321,487 | 721,671 | 817,095 |
-| CM4AI | 423,210 | 315,864 | 399,635 | 241,932 | 500,605 | 596,068 |
-| VOICE | 520,582 | 395,118 | 494,704 | 282,989 | 603,648 | 699,147 |
-| VOICE_PEDIATRIC (proxy) | 427,035 | 312,649 | 401,157 | 206,628 | 538,947 | 634,424 |
+| CHORUS | 187,252 | 131,441 | 181,841 | 113,389 | 284,009 | 379,399 |
+| AI_READI | 551,321 | 400,851 | 516,425 | 321,487 | 647,337 | 742,753 |
+| CM4AI | 381,354 | 277,051 | 357,778 | 241,932 | 462,266 | 557,716 |
+| VOICE | 463,677 | 342,350 | 437,799 | 282,989 | 551,437 | 646,918 |
+| VOICE_PEDIATRIC (proxy) | 370,130 | 259,881 | 344,252 | 206,628 | 486,737 | 582,195 |
+| KIDS_FIRST (proxy) | 599,614 | 434,218 | 561,608 | 359,754 | 708,262 | 803,796 |
 
-AI_READI's regate under S6 (817,095) is 3.9% under 850,000. That is inside
-the estimate's uncertainty, so it needs a count.
+The closest are Kids First's regate (803,796, 5.4% under 850,000) and
+AI_READI's (742,753, 12.6% under). Both are estimates, and Kids First's rests
+on a stand-in record.
 
 The other records can be larger than the primary, as the record-sensitivity
 tables show:
@@ -112,29 +118,32 @@ tables show:
 - VOICE rep3: 66,133 and 52,536 more;
 - CM4AI: 31,435 and 16,532 more.
 
-AI_READI's primary is its largest record. Adding each project's largest
-difference to its S6 figures keeps every one under its ceiling. The closest
-are AI_READI's regate (817,095) and VOICE rep3's regate (about 751,700,
-11.6% under). The catalog S6 removes does not depend on the record, so a
-larger record adds about the same absolute amount with or without S6. That
-is why the differences are added rather than scaled.
+AI_READI's primary is its largest record, and Kids First's proxy uses the
+same records. Adding each project's largest difference to its S7 figures
+keeps every one under its ceiling. The catalog S7 removes does not depend on
+the record, so a larger record adds about the same absolute amount with or
+without S7. That is why the differences are added rather than scaled.
 
-**S6 is not decided here.** It changes model-facing text, which makes it a
+**S7 is not decided here.** It changes model-facing text, which makes it a
 new shared-generation version at a condition boundary (D17). It touches:
 - `shared_generation.py`, which only agy edits;
 - the typed audit (`typed_audit.py`, `audit_omissions.py`);
 - receipt completion;
 - an asset and prompt pin review.
 
-It needs the owner's decision. Two design questions stand out:
+It needs the owner's decision. Three design questions stand out:
 - **The catalog's role.** The typed audit's code keeps using its catalog for
   its own checks; S1 removes only the model-facing copy.
 - **S5's key list** (`domain_of`, `from_schema`, `alias`, `owner`, `@type`,
   `slot_uri`, `annotations`, `exact_mappings`). It is a candidate; whether
   `slot_uri` and mappings must stay model-facing is a design question.
+- **The owners' typed trees** (`whole_value_identity`). They duplicate each
+  owner's YAML in another form; whether relationship review needs them is
+  also open.
 
 Under D07 the AI_READI lines are already provisional and re-planned before
-A14 when a request does not fit. This is that evidence.
+A14 when a request does not fit. This is that evidence, and it reaches Kids
+First too.
 
 ## Method
 
@@ -153,6 +162,12 @@ contexts:
 - runtime: claude-opus-5, thinking `{adaptive, summarized}` (D06);
 - audit limits: the builder's defaults (worker, omission and integration
   output 4,000 each; `max_calls` 18), with each grid's partition values.
+
+Kids First has no A5d context. Its root-only draft context was synthesized
+by the same builder's `build_draft_context` from its own source manifest
+(`notes/matched_cborg_2026-09-13/kids_first/manifest.yaml`). It runs with
+the neutral profile (A19-reg), its bundle (541,184 B, md5 `93b80751`) and
+its 58-chunk manifest (`chunks.yaml`).
 
 The run specification is read back from the registration, as
 `offline_sizing._spec_from_registration` does.
@@ -182,14 +197,17 @@ originals stand in:
 | CM4AI | v8 `2026-09-04g` rep1 | rep2, rep3 |
 | VOICE | v8 `2026-09-04f` rep1 | rep2, rep3 |
 | VOICE_PEDIATRIC | proxy: VOICE's records | as VOICE |
+| KIDS_FIRST | proxy: AI_READI's records, the largest | as AI_READI |
 
 Notes on the stand-ins:
 - **AI_READI `2026-09-04f` rep1** is left out. It carries three top-level
   `source_caveats` and is declared invalid by its own validation block
   (#1029).
-- **The VOICE_PEDIATRIC proxy** uses VOICE's records with VOICE_PEDIATRIC's
-  own bundle, manifest and context. Its receipt is minimal (every chunk
-  `nothing_relevant`), which understates a real receipt by about 33–37 KB.
+- **The proxies** use the stand-in project's records with the proxy
+  project's own bundle and chunk manifest. VOICE_PEDIATRIC uses its own
+  context; Kids First uses the synthesized draft. Each proxy's receipt is
+  minimal (every chunk `nothing_relevant`), which understates a real receipt
+  by about 33–37 KB.
 
 Each record passes through the runner's write-time normaliser. It is then
 conformed to the current schema's cardinality, which the typed audit's owner
@@ -217,8 +235,8 @@ in tokens:
 A1b counted for the same project and stage on 2026-10-12. The source is
 `notes/.local_drafts/a1b_calibrated_tokens.json` at local commit `10dee83fe`,
 sha256 `3146ef36c265d4d06058da242c49ccd3804d24b771cc4fe43a1d7496c5924186`.
-- **Projects A1b did not count** (CM4AI, VOICE, VOICE_PEDIATRIC) get the
-  higher of the CHORUS and AI_READI ratios.
+- **Projects A1b did not count** (CM4AI, VOICE, VOICE_PEDIATRIC, Kids First)
+  get the higher of the CHORUS and AI_READI ratios.
 - **Ranges.** Each estimate's range uses the lower and higher ratio.
 - **Ratios.** The calibrated ratios run 0.34–0.41.
 - **Placeholder correction.** A1b's report-family payloads carried
@@ -236,17 +254,25 @@ sha256 `3146ef36c265d4d06058da242c49ccd3804d24b771cc4fe43a1d7496c5924186`.
 They never read `PASS`. The evidence reader now enforces the same ceilings
 on saved counts, whatever window or margin a caller declares.
 
-**Reproducibility.** The full sweep ran with a snapshot of the script,
-sha256 `19c54ebe…`. The primary-record component rerun ran with
-`e9f2b22b…`. The committed script differs from those only in reporting: the
-`table` and `merge` subcommands and path tidying.
+**Reproducibility.** Three sweeps were run:
 
-Merging the rerun into the full sweep refuses any difference except one
-uniform byte offset on typed stages:
-- **Ordinary phases** matched exactly.
+| Sweep | Script snapshot (sha256) |
+|---|---|
+| full sweep | `19c54ebe…` |
+| primary-record component rerun | `e9f2b22b…` |
+| Kids First sweep | the committed script before the `S7` option was added |
+
+The committed script differs from those only in reporting: the `table` and
+`merge` subcommands, the options and path tidying.
+
+Merging refuses any difference except one uniform byte offset on typed
+stages:
+- **Ordinary phases** matched exactly between the full sweep and the rerun.
 - **Typed stages** differed by +18 B in every project. The run directory's
   path reaches typed-stage text (plan risk 7), and the rerun's scratch
   directory name was 6 characters longer.
+- **Kids First** was measured only by its own sweep, which the full sweep
+  could not stage.
 
 Scratch paths are longer than the launch base's, so the figures overstate by
 a few dozen bytes per request.
@@ -257,7 +283,8 @@ Results files:
 |---|---|
 | full sweep | `1991d8625724526fa4cd596051af45ab15278d104ff0f56c1964ca1e964577d1` |
 | rerun | `54075fcf98f2a111eb225352947464cfff6d167fcb6080b3fb9648a855b9133b` |
-| merged | `aa931bcfcc846b0eea96a953c4e37eadec06f5bdbd160c5dc146a998d8a5ae27` |
+| Kids First | `c8d1c25b638004ae81d8f06488396f116f22e914c76ecc52286c89aa46917d5a` |
+| merged | `1310952d9067103b0a2bfa5ee65a9a72330ffc46342fdd03c8de85fb7c63309d` |
 
 They are not committed. The commands below regenerate them from tracked
 files.
@@ -309,13 +336,17 @@ I can't file issues; agy files these.
    pre-#5042 bundle, so receipt validation refuses them against today's. An
    A1b recount on today's bundle needs a carried receipt (as here) or a fresh
    run.
-4. **KIDS_FIRST has nothing to size.** There is no bundle, chunk manifest,
-   omission context or record on main or in #5095.
+4. **Kids First is the largest case, and its inputs are incomplete.** Its
+   bundle (541,184 B) and chunk and source manifests are tracked under
+   `notes/matched_cborg_2026-09-13/kids_first/`, not `data/preprocessed/`.
+   It has no A5d omission context in #5095 and no record, so here it is
+   sized by proxy. Its A1b count needs an A5d context first, and its
+   requests are the largest of the six.
 5. **The integration figure is only partly bounded.** It counts each worker
    and omission response at its cap, but not the proposal index derived from
    them, so it understates.
 6. **`typed_audit.prepare`'s default limits** (96 paths, 16,384 B) are refused
-   for AI_READI and CM4AI. The A3 default (G2) is valid.
+   for AI_READI, CM4AI and Kids First. The A3 default (G2) is valid.
 7. **Run-specific strings reach typed-stage text.** A 6-character longer run
    directory adds 18 B to every typed request, which confirms plan risk 7 for
    these stages.
@@ -324,13 +355,13 @@ I can't file issues; agy files these.
 
 - **Token counts.** Every figure is bytes times a ratio. Ratios differ by
   content, so a request whose mix differs from what A1b counted carries more
-  uncertainty than its range shows. That applies to the S1–S6 rows above
+  uncertainty than its range shows. That applies to the S1–S7 rows above
   all, since they remove one kind of content and keep the request's ratio.
 - **Fit.** Nothing here makes a request fit, or makes a launch acceptable.
 - **The report as v10 will write it.** The report-family estimates use the
   v8 reconciled records and, at worst, the 96k cap.
-- **VOICE_PEDIATRIC and KIDS_FIRST.** VOICE_PEDIATRIC is a proxy; KIDS_FIRST
-  is unmeasured.
+- **The proxies.** VOICE_PEDIATRIC and Kids First are proxies, and Kids
+  First's record and context are stand-ins.
 - **The provider side.** Provider support, billing and the thinking display
   on count calls are not checked here; agy's A1b count settles them.
 
@@ -342,16 +373,24 @@ this branch's script. Make no provider call; the script blocks sockets.
 ```sh
 git -C <repository> worktree add --detach <tree> 8ea7986160a5b0a3079f64c12f9d59074ff564af
 cd <tree>
-PYTHONPATH=<tree>/src:<tree> python <branch>/scripts/offline_sizing.py sweep \
-  --root <tree> --workdir <new dir A> --out full.json
-PYTHONPATH=<tree>/src:<tree> python <branch>/scripts/offline_sizing.py sweep \
-  --root <tree> --workdir <new dir B> --out rerun.json --grid G2 --primary-only \
+P="PYTHONPATH=<tree>/src:<tree>"
+env $P python <branch>/scripts/offline_sizing.py sweep --root <tree> \
+  --workdir <new dir A> --out full.json
+env $P python <branch>/scripts/offline_sizing.py sweep --root <tree> \
+  --workdir <new dir B> --out rerun.json --grid G2 --primary-only \
   --projects CHORUS AI_READI CM4AI VOICE VOICE_PEDIATRIC
+env $P python <branch>/scripts/offline_sizing.py sweep --root <tree> \
+  --workdir <new dir C> --out kids_first.json --projects KIDS_FIRST
 python <branch>/scripts/offline_sizing.py merge full.json rerun.json --out merged.json
-python <branch>/scripts/offline_sizing.py table merged.json
+python <branch>/scripts/offline_sizing.py merge merged.json kids_first.json --out final.json
+python <branch>/scripts/offline_sizing.py table final.json
 ```
 
-The appendix is that last command's output.
+Today the full sweep also measures Kids First, because the committed script
+knows its inputs. The separate Kids First sweep reproduces how these results
+were made.
+
+The appendix is the last command's output.
 
 ## Appendix: complete tables (generated)
 
@@ -411,6 +450,7 @@ Compaction options (protocol changes nobody has made; estimated tokens in flight
 | S4: S1 plus owners without their typed trees | 845,342 (fits) | 679,529 (fits) | 810,446 (fits) | 337,420 (fits) | 910,101 (exceeds) | 1,005,547 (exceeds) |
 | S5: induced-slot definitions trimmed to name, description, range, cardinality and inlining | 1,209,793 (exceeds) | 936,039 (fits) | 1,174,897 (exceeds) | 877,757 (fits) | 721,671 (fits) | 817,095 (fits) |
 | S6: S1 plus S5 | 628,701 (fits) | 474,193 (fits) | 593,804 (fits) | 321,487 (fits) | 721,671 (fits) | 817,095 (fits) |
+| S7: S6 plus owners without their typed trees | 551,321 (fits) | 400,851 (fits) | 516,425 (fits) | 321,487 (fits) | 647,337 (fits) | 742,753 (fits) |
 
 #### CHORUS
 
@@ -467,6 +507,7 @@ Compaction options (protocol changes nobody has made; estimated tokens in flight
 | S4: S1 plus owners without their typed trees | 384,061 (fits) | 313,943 (fits) | 378,650 (fits) | 129,744 (fits) | 444,223 (fits) | 539,667 (fits) |
 | S5: induced-slot definitions trimmed to name, description, range, cardinality and inlining | 817,143 (fits) | 624,246 (fits) | 811,732 (fits) | 684,365 (fits) | 300,682 (fits) | 396,077 (fits) |
 | S6: S1 plus S5 | 207,321 (fits) | 150,051 (fits) | 201,910 (fits) | 113,389 (fits) | 300,682 (fits) | 396,077 (fits) |
+| S7: S6 plus owners without their typed trees | 187,252 (fits) | 131,441 (fits) | 181,841 (fits) | 113,389 (fits) | 284,009 (fits) | 379,399 (fits) |
 
 #### CM4AI
 
@@ -522,10 +563,65 @@ Compaction options (protocol changes nobody has made; estimated tokens in flight
 | S4: S1 plus owners without their typed trees | 593,227 (fits) | 473,523 (fits) | 569,652 (fits) | 258,287 (fits) | 652,582 (fits) | 748,098 (fits) |
 | S5: induced-slot definitions trimmed to name, description, range, cardinality and inlining | 1,033,032 (exceeds) | 790,059 (fits) | 1,009,457 (exceeds) | 812,908 (fits) | 500,605 (fits) | 596,068 (fits) |
 | S6: S1 plus S5 | 423,210 (fits) | 315,864 (fits) | 399,635 (fits) | 241,932 (fits) | 500,605 (fits) | 596,068 (fits) |
+| S7: S6 plus owners without their typed trees | 381,354 (fits) | 277,051 (fits) | 357,778 (fits) | 241,932 (fits) | 462,266 (fits) | 557,716 (fits) |
 
 #### KIDS_FIRST
 
-UNKNOWN: no bundle, context or record to stage
+Proxy: AI_READI's records with KIDS_FIRST's own bundle and chunk manifest, a root-only draft context synthesized by the A3 builder, and a minimal receipt; an estimate for a run that has no record yet.
+
+Primary record `2026-09-04g_claude-opus-5-api-generic-v8_rep2`.
+
+| Grid | max_paths / inventory B / max_workers | Workers | Largest worker B | Est. in flight | Verdict |
+|---|---|---|---|---|---|
+| G1 | 96 / 16,384 / 16 | refused | | | AuditBatchError: indivisible_field_bound |
+| G2 | 192 / 32,768 / 16 | 6 | 3,888,459 | 1,599,199 | estimate_exceeds |
+| G3 | 384 / 65,536 / 16 | 3 | 3,893,264 | 1,601,171 | estimate_exceeds |
+| G4 | 192 / 32,768 / 8 | 6 | 3,888,457 | 1,599,199 | estimate_exceeds |
+| G5 | 384 / 65,536 / 4 | 3 | 3,893,262 | 1,601,170 | estimate_exceeds |
+| G6 | 768 / 131,072 / 2 | 2 | 3,902,793 | 1,605,080 | estimate_exceeds |
+
+Every request at G2 (largest worker shown for the typed workers):
+
+| Request | Payload B | Tokens/B (basis) | Placeholder tok | max_tokens | Est. in flight (range) | Ceiling | Verdict |
+|---|---|---|---|---|---|---|---|
+| typed_audit_worker (largest) | 3,888,459 | 0.4102 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI typed_audit_worker) | 0 | 4,000 | 1,599,199 (1,524,047–1,599,199) | 1,000,000 | estimate_exceeds |
+| full | 783,623 | 0.3614 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI full) | 0 | 128,000 | 411,184 (395,035–411,184) | 1,000,000 | estimate_fits |
+| full_readdress | 880,370 | 0.3602 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI full_readdress) | 0 | 8,000 | 325,098 (307,851–325,098) | 1,000,000 | estimate_fits |
+| full_receipt_completion | 2,546,952 | 0.3703 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI full_receipt_completion) | 0 | 4,000 | 947,084 (922,794–947,084) | 1,000,000 | estimate_fits |
+| reconcile_full | 2,155,265 | 0.371 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI reconcile_full) | 4,000 | 96,000 | 899,562 (870,048–899,562) | 1,000,000 | estimate_fits |
+| repair_full | 155,015 | 0.4048 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI repair_full) | 0 | 96,000 | 158,750 (153,941–158,750) | 1,000,000 | estimate_fits |
+| report | 2,601,590 | 0.3685 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI report) | 4,000 | 96,000 | 1,058,687 (1,022,223–1,058,687) | 850,000 | estimate_exceeds |
+| report_regate | 2,599,763 | 0.3686 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI report_regate) | 100,000 | 96,000 | 1,154,342 (1,117,682–1,154,342) | 850,000 | estimate_exceeds |
+| report_regate_with_v8_report | 2,618,098 | 0.3686 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI report_regate) | 4,000 | 96,000 | 1,065,101 (1,028,182–1,065,101) | 850,000 | estimate_exceeds |
+| typed_audit_integration | 3,727,562 | 0.4102 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI typed_audit_worker) | 28,000 | 4,000 | 1,561,193 (1,489,150–1,561,193) | 1,000,000 | estimate_exceeds |
+| typed_audit_omission | 3,327,495 | 0.3804 (no A1b count for KIDS_FIRST: higher of CHORUS/AI_READI typed_audit_omission) | 0 | 4,000 | 1,269,845 (1,236,881–1,269,845) | 1,000,000 | estimate_exceeds |
+
+Record sensitivity at G2 (estimated tokens in flight):
+
+| Record | Staged full B | Edits | Workers | Largest worker | Omission | Integration | Receipt completion | Report | Regate (cap) |
+|---|---|---|---|---|---|---|---|---|---|
+| `2026-09-04g_claude-opus-5-api-generic-v8_rep1` | 72,954 | 5 | 4 | 1,503,476 | 1,197,619 | 1,466,503 | 931,734 | 965,014 | 1,060,636 |
+| `2026-09-04g_claude-opus-5-api-generic-v8_rep2` | 94,145 | 8 | 6 | 1,599,199 | 1,269,845 | 1,561,193 | 947,084 | 1,058,687 | 1,154,342 |
+| `2026-09-04g_claude-opus-5-api-generic-v8_rep3` | 80,149 | 10 | 4 | 1,542,195 | 1,231,978 | 1,506,180 | 936,360 | 981,115 | 1,076,744 |
+
+What the largest requests carry (bytes, by emptying each part):
+
+- **typed_audit_worker (largest)** (3,888,459 B): m0.6: # Exact typed stage request 2,496,031 (64%); inside: shared.schema 1,486,502 (38%); m0.3: # Shared generation: captured schema owners and complete containing va 1,351,652 (35%); schema context: classes 949,673 (24%); inside: shared.bundle 574,250 (15%); schema context: owners 401,167 (10%); schema context: nested_owners 203,349 (5%); schema context: owner_typed_tree 197,947 (5%); schema context: owner_yaml 183,437 (5%)
+- **typed_audit_omission** (3,327,495 B): m0.6: # Exact typed stage request 1,935,095 (58%); m0.3: # Shared generation: captured schema owners and complete containing va 1,351,652 (41%); inside: payload.schema 1,246,504 (37%); schema context: classes 949,673 (29%); inside: payload.chunks 563,582 (17%); schema context: owners 401,167 (12%); schema context: nested_owners 203,349 (6%); schema context: owner_typed_tree 197,947 (6%); schema context: owner_yaml 183,437 (6%)
+- **full_receipt_completion** (2,546,952 B): m2.0: {"input_sha256":{"bundle":"cc45c89548158a7a909699fbf1f75e6cc88c32ac848 1,664,202 (65%); inside: json.schema 1,542,013 (61%); m0.1: # Declared input bundle — <path> 549,154 (22%); inside: json.record_yaml 97,505 (4%); m0.5: ## API factual and phase policy v2 97,239 (4%); m1.0: # D4D Datasheet for AI_READI Dataset 95,787 (4%); m0.6: # Shared generation: captured schema owners and complete containing va 76,978 (3%); schema context: classes 76,166 (3%); m0.0: # Target class `Dataset` — slot inventory 42,964 (2%)
+- **report_regate** (2,599,763 B): m0.13: # Shared generation: captured schema owners and complete containing va 1,361,964 (52%); schema context: classes 936,972 (36%); m0.1: # Declared input bundle — <path> 549,154 (21%); schema context: owners 424,180 (16%); schema context: nested_owners 213,250 (8%); schema context: owner_typed_tree 209,695 (8%); schema context: owner_yaml 194,815 (7%); m0.12: # Required source-review inventory 164,691 (6%); m0.9: # Reconciled full record 102,602 (4%)
+
+Compaction options (protocol changes nobody has made; estimated tokens in flight after removing the parts, with the request's own tokens-per-byte ratio):
+
+| Option | typed_audit_worker (largest) | typed_audit_omission | typed_audit_integration | full_receipt_completion | report | report_regate |
+|---|---|---|---|---|---|---|
+| S1: schema carried once: the typed request's own schema copy dropped, the schema context kept | 989,378 (fits) | 795,650 (fits) | 951,371 (fits) | 376,108 (fits) | 1,058,687 (exceeds) | 1,154,342 (exceeds) |
+| S2: schema carried once: the schema context's induced-slot `classes` dropped, the typed copy kept | 1,209,606 (exceeds) | 908,571 (fits) | 1,171,600 (exceeds) | 918,881 (fits) | 713,413 (fits) | 808,949 (fits) |
+| S3: S1 plus the full-record inventory repeated in every worker dropped | 922,394 (fits) | 795,650 (fits) | 951,371 (fits) | 376,108 (fits) | 1,058,687 (exceeds) | 1,154,342 (exceeds) |
+| S4: S1 plus owners without their typed trees | 908,172 (fits) | 720,347 (fits) | 870,166 (fits) | 376,108 (fits) | 981,415 (exceeds) | 1,077,043 (exceeds) |
+| S5: induced-slot definitions trimmed to name, description, range, cardinality and inlining | 1,290,641 (exceeds) | 983,716 (fits) | 1,252,635 (exceeds) | 930,729 (fits) | 785,535 (fits) | 881,096 (exceeds) |
+| S6: S1 plus S5 | 680,820 (fits) | 509,521 (fits) | 642,813 (fits) | 359,754 (fits) | 785,535 (fits) | 881,096 (exceeds) |
+| S7: S6 plus owners without their typed trees | 599,614 (fits) | 434,218 (fits) | 561,608 (fits) | 359,754 (fits) | 708,262 (fits) | 803,796 (fits) |
 
 #### VOICE
 
@@ -581,10 +677,11 @@ Compaction options (protocol changes nobody has made; estimated tokens in flight
 | S4: S1 plus owners without their typed trees | 780,428 (fits) | 636,076 (fits) | 754,550 (fits) | 299,343 (fits) | 839,852 (fits) | 935,432 (exceeds) |
 | S5: induced-slot definitions trimmed to name, description, range, cardinality and inlining | 1,130,404 (exceeds) | 869,313 (fits) | 1,104,526 (exceeds) | 853,964 (fits) | 603,648 (fits) | 699,147 (fits) |
 | S6: S1 plus S5 | 520,582 (fits) | 395,118 (fits) | 494,704 (fits) | 282,989 (fits) | 603,648 (fits) | 699,147 (fits) |
+| S7: S6 plus owners without their typed trees | 463,677 (fits) | 342,350 (fits) | 437,799 (fits) | 282,989 (fits) | 551,437 (fits) | 646,918 (fits) |
 
 #### VOICE_PEDIATRIC
 
-Proxy: VOICE's records with VOICE_PEDIATRIC's own bundle, manifest and context, and a minimal receipt; an estimate for a run that has no record yet.
+Proxy: VOICE's records with VOICE_PEDIATRIC's own bundle and chunk manifest, its own context, and a minimal receipt; an estimate for a run that has no record yet.
 
 Primary record `2026-09-04f_claude-opus-5-api-generic-v8_rep1`.
 
@@ -638,4 +735,5 @@ Compaction options (protocol changes nobody has made; estimated tokens in flight
 | S4: S1 plus owners without their typed trees | 686,881 (fits) | 553,607 (fits) | 661,003 (fits) | 222,982 (fits) | 775,152 (fits) | 870,709 (exceeds) |
 | S5: induced-slot definitions trimmed to name, description, range, cardinality and inlining | 1,036,857 (exceeds) | 786,844 (fits) | 1,010,979 (exceeds) | 777,603 (fits) | 538,947 (fits) | 634,424 (fits) |
 | S6: S1 plus S5 | 427,035 (fits) | 312,649 (fits) | 401,157 (fits) | 206,628 (fits) | 538,947 (fits) | 634,424 (fits) |
+| S7: S6 plus owners without their typed trees | 370,130 (fits) | 259,881 (fits) | 344,252 (fits) | 206,628 (fits) | 486,737 (fits) | 582,195 (fits) |
 
