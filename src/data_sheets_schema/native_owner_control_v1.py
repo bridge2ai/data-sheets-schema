@@ -22,6 +22,7 @@ from . import native_attribution_controller as inherited
 from . import native_shared_contract as contract
 from . import native_shared_evidence as evidence
 from . import native_stream_coordination_v1 as coordination
+from .native_origin_resolution import resolve_fixed_origin
 
 SUMMARY_LIMIT = 16 * 1024
 RECORD_LIMIT = 16 * 1024 * 1024
@@ -91,8 +92,10 @@ def make_control(controls):
     def current_graph():
         for name, pin in manifest['modules'].items():
             module = bound[name]
+            expected = str(inherited.ROOT / pin['path'])
             if (type(module) is not ModuleType or sys.modules.get(name) is not module
-                    or Path(getattr(module, '__file__', '')).resolve() != (inherited.ROOT / pin['path']).resolve()):
+                    or resolve_fixed_origin(getattr(module, '__file__', ''), expected) !=
+                       resolve_fixed_origin(expected, expected)):
                 raise ValueError('owner factory has a stale or foreign controller object graph')
         native = bound['native_control']
         if native.NativeControl._collect_work.__globals__.get('BudgetStop') is not bound['budgeted_cborg'].BudgetStop:

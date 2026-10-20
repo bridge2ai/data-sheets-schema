@@ -14,6 +14,7 @@ from types import MappingProxyType, ModuleType
 
 from . import native_attribution_controller as inherited
 from . import native_attribution_registration as draft
+from .native_origin_resolution import resolve_fixed_origin
 
 ROOT = inherited.ROOT
 FORMAT = 'native_stream_snapshot_profile_v1'
@@ -46,7 +47,8 @@ def _origin(role, module):
     if (type(module) is not ModuleType or module.__name__ != _MODULES[role]
             or sys.modules.get(_MODULES[role]) is not module
             or not getattr(module, '__file__', None)
-            or Path(module.__file__).resolve() != expected.resolve()):
+            or resolve_fixed_origin(module.__file__, str(expected)) !=
+               resolve_fixed_origin(str(expected), str(expected))):
         raise ValueError('private owner implementation has a foreign qualified origin')
 
 
@@ -122,7 +124,7 @@ class _Scope:
             if (type(module) is not ModuleType or module.__name__ != name
                     or sys.modules.get(name) is not module
                     or type(source) is not str or not source
-                    or str(Path(source).resolve()) != expected):
+                    or str(resolve_fixed_origin(source, expected)) != expected):
                 raise ValueError('private selected bare module has a stale or foreign origin: ' + name)
 
     def _require_parent_graph(self):
