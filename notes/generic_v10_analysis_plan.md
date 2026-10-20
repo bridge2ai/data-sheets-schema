@@ -52,12 +52,22 @@ session.
 commits that are on no remote branch:
 - `027c2272c`: on #2930 and #2926, 2026-10-11T03:43Z;
 - `c92d89824`: on #2930 and #2926, 2026-10-11T08:51Z, naming D01, D07 and D15;
-- `25994a4d2`: on #2914, naming D04;
-- `d9f7d9a72`: on #4758, #4759 and #4761.
+- `25994a4d2`: on #2914, 2026-10-11T03:44Z. It records a proposed Path B (D04's
+  subject) and does not name D04;
+- `d9f7d9a72`: on #4758, #4759 and #4761, 2026-10-11T03:43–03:44Z.
 
-All six issues were reopened on 2026-10-13, because those comments did not reflect
-owner decisions: #2914, #4758, #4759 and #4761, and #2930 and #2926 at 17:35Z. D07 has
-since been decided (2026-10-19, above). D01 and D15 have not.
+All six issues were reopened on 2026-10-13, in two groups that state different reasons:
+- **#4758, #4759 and #4761, at 06:08Z.** The comments each say the closing record "does
+  not reflect an owner decision".
+- **#2914, #2930 and #2926, at 17:35:44–17:35:59Z.** These were reopened "at the
+  owner's request following the 2026-10-13 closure audit". The cited commits were
+  outside GitHub main, and they do not establish the issues' required acceptance. For
+  #2914 the comment adds that scheduling a proposed Path B does not establish its
+  experimental acceptance.
+
+#2930 and #2926 had already been closed, reopened and closed again on 2026-10-11 (at
+03:43, 04:18 and 08:51Z). D07 has since been decided (2026-10-19, above). D01 and D15
+have not.
 
 ## 1. Estimands (P2 item 1)
 
@@ -111,7 +121,7 @@ longer holds.
 |---|---|---|
 | (a) | keep v8 `04g` rep1–3, **labelled cross-arm** | AI_READI's package effect also crosses the with-crate/no-crate boundary, and it is reported as such, never pooled unlabelled with the other three projects |
 | (b) | **leave AI_READI out** of the confirmatory v8 contrast | the confirmatory set is CHORUS, CM4AI and VOICE, 9 + 9 records. AI_READI v10 is reported descriptively |
-| (c) | the **2026-10-14b no-crate agentic rerun** (`claudecode_agent`, runtime `Claude Code`, bundle `1a58ad7b`, rep1–3; untracked in `d4d-executions/aireadi-v8-b`) | another runtime and harness, so the AI_READI contrast becomes runtime + package. The records are not on main, so they need a reviewed data PR first |
+| (c) | the **2026-10-14b no-crate agentic rerun** (`claudecode_agent`, rep1–3, bundle `1a58ad7b`; untracked in `d4d-executions/aireadi-v8-b`) | Its three provenance records carry runtime `Claude Code`, provider `Anthropic` (not CBORG; `base_url` null) and no `reasoning_effort`. So the AI_READI contrast becomes runtime, provider, transport and effort together, plus the package: item 1.5's terms, never any one of them. The records are not on main, so they need a reviewed data PR first |
 | (d) | a **new no-crate v8 API run** of AI_READI | billed; needs its own registration, review, allocation and owner word. D07's allocation covers generic_v10 runs only |
 
 **Consequences that hold whichever option is chosen:**
@@ -128,16 +138,20 @@ longer holds.
     rows alone decide.
   - Under (c), there are two choices:
     - the same as (b);
-    - the `2026-10-14b` prefix as a cross-runtime baseline, once those records are on
-      the launch base. `canary.baseline_for` reads only records under the
-      repository's own `data/` tree.
+    - the `2026-10-14b` prefix as a baseline, once those records are on the launch
+      base. It differs in runtime, provider, transport and effort as well as package,
+      and is read only as such. The batch calls `canary.baseline_for` with no method
+      (`cli/api.py:1207`), so it searches `claudecode_agent` too. It reads only records
+      under the repository's own `data/` tree.
   - Under (d), the new run's prefix becomes the baseline.
 - **E2's blind batch:**
   - Under (a), the AI_READI v8 records enter E2 as they are, and the analysis
     stratifies AI_READI.
   - Under (b), AI_READI leaves the confirmatory comparison, and its v10 records are
     reviewed as a descriptive stratum.
-  - Under (c) or (d), the replacement records enter E2.
+  - Under (c) or (d), the replacement records enter E2. Under (c) they differ from
+    the v10 records in runtime, provider, transport and effort as well as package, and
+    the E2 comparison is labelled so.
 - **Plan gates that cannot pass as written** (for agy and the owner; P1):
   - A4's gate, "The CHORUS and AI_READI bundle md5s equal the comparators'
     (9b2ef4b6, d22b61a9)";
@@ -159,8 +173,9 @@ longer holds.
 | With-crate CHORUS (A21–A22) | only under D04 path B | — | separate stage **[pending D04]** |
 
 The v10 confirmatory set is the CHORUS gate plus the production records: 12 records,
-or 9 if AI_READI leaves the contrast under (b). That matches E2's 12 v8 + 12 v10
-comparison batch.
+matching E2's 12 v8 + 12 v10 batch under options (a), (c) and (d). Under (b), the
+confirmatory sets are 9 + 9, and AI_READI's records form a descriptive stratum
+(item 12).
 
 ### Metrics
 
@@ -205,32 +220,64 @@ Classified as D02 classifies them:
 
 ## 3. Analysis sets and the rules for n=1 and n=3 (P2 item 3; [pending D02])
 
-**One rule for both arms (review H2; [proposed; owner fixes at P4]).** The gates
-filter the two arms differently:
+**Why the two arms need one rule (reviews H2 and N1).** Gates and retries filter the
+two arms differently:
 - v10 replicates are gated on the registered coverage floor and the receipt floors
   (D21(b)), and the batch stops on invalid output.
 - The v8 comparator was not gated the same way. Only its rep1 records passed a canary
-  gate, in three projects after earlier canaries that were not retained. Its rep2 and
+  gate, in three projects after earlier attempts that were not retained. Its rep2 and
   rep3 are an ungated fill (`805e6ac7b`, #1049).
 - Four of the 12 v8 records fail today's "snippets unverified" floor (P1): CHORUS `04f`
   rep2 (2), CHORUS `04f` rep3 (1), AI_READI `04g` rep2 (1) and CM4AI `04g` rep3 (1).
+- Three v8 rep1 cells also hold earlier attempts that left full records (P1, "v8
+  attempts per comparator cell"):
+  - VOICE `04d` and `04e`, and AI_READI `04f` rep1, under the comparator's prompt pin
+    (`506af01b…`);
+  - CM4AI `04`, `04b` and `04c`, under an earlier pin (`06666c4d…`).
 
-Every primary metric is therefore reported in two sets, computed the same way for both
-arms:
-- **Set A, all records.**
-  - v8: every comparator record.
-  - v10: every attempt in a confirmatory cell that left a full record, whether
-    accepted, stopped or rejected. This is the intention-to-treat set.
-  - **The directional rules below are judged in Set A.**
-- **Set B, common gate.** The records of either arm that pass the same absolute rows:
-  - validation passed;
-  - duplicate keys 0;
-  - the five receipt floors at 0 (item 5).
+**Set A: which records each arm contributes. [pending owner decision; it overlaps
+D02's "exclude the canaries"]** Either of two definitions applies one rule to both
+arms. The v8 figures are P1's, recomputed.
 
-  The coverage floor is applied to neither arm in Set B, because v8 never had one and
-  applying v10's floor would select on the measured outcome. Under today's floors,
-  v8's Set B is 8 of 12 records. Set B is reported beside Set A as a sensitivity
-  analysis, never instead of it.
+| definition | v8 records | v10 records | v8 pooled coverage (CHORUS / VOICE / AI_READI / CM4AI) | v8 mean populated leaves |
+|---|---|---|---|---|
+| (1) every attempt in a comparator cell, under the arm's prompt pin, that left a full record | the 12, plus VOICE `04d`, `04e` and AI_READI `04f` rep1: 15. CM4AI `04`–`04c` (the earlier pin) enter only a sensitivity row: 18 | every attempt in a confirmatory cell that left a full record (up to 2 per cell under D07, plus any D21 continuation) | 0.340 / 0.462 / 0.491 / 0.688 (0.682 in the sensitivity row) | 254.7 / 393.0 / 505.5 / 458.0 (447.2) |
+| (2) one record per cell: the cell's final attempt that left a full record | the 12 | each confirmatory cell's final attempt | 0.340 / 0.592 / 0.538 / 0.688 | 254.7 / 371.7 / 499.7 / 458.0 |
+
+The recall targets move as well. Under (1), VOICE variables average 5.20 (4.00 under
+(2)) and VOICE lineage 0.80 (1.00), and AI_READI variables 19.50 (17.67) (P1).
+
+**Recommendation: definition (2) for the directional rules, with (1) reported beside
+it as a sensitivity row. [proposed; owner decides]** The reasons:
+- **Equal cell weights.** A cell retried more often does not count more. The v8 VOICE
+  rep1 cell holds 3 attempts and CM4AI rep1 holds 4, while a v10 cell can hold up to 2
+  plus D21 continuations.
+- **It is D02's comparator exactly** (the 12), and it matches E2's batch of one record
+  per cell.
+- **v8's earlier attempts ran a different package.** They were made while the v8
+  package was still being changed: VOICE `04f` rep1 "passed under the final package"
+  (commit `251b4ddc3`) after `04d` and `04e` regressed. So pooling v8 attempts mixes
+  package states, while every v10 attempt runs the one frozen package (D17).
+
+**What (2) costs.** v8 rep1 is survivor-selected: each was retained after passing a
+gate, as late as the fourth attempt, so it has no intention-to-treat counterpart. A
+v10 cell gets at most two attempts. This asymmetry stays a stated confound (item 4);
+definition (1) shows how large it is from the other side.
+
+**Set B, common gate.** Within whichever Set A definition is chosen, these are the
+records of either arm that pass the same absolute rows:
+- validation passed;
+- duplicate keys 0;
+- the five receipt floors at 0 (item 5).
+
+The coverage floor is applied to neither arm, because v8 never had one and applying
+v10's floor would select on the measured outcome. v8's Set B is 8 of 12 records under
+(2) and 9 of 15 under (1) (P1). Set B is reported beside Set A as a sensitivity
+analysis, never instead of it.
+
+**Replicate structure** (#2932, prediction 8) is computed over exactly three records
+per arm and project, one per cell (the cell's final attempt), under either definition,
+so cells weigh equally.
 
 **Rules for n=1 and n=3.**
 - **Default:** D02 recommends descriptive comparisons (per project, v10 values beside
@@ -253,8 +300,11 @@ package-level (plan risk 21, D02):
 - **Prompt:** the generic_v10 text against `d4d_generic_arm_prompt_v8.md`.
 - **Harness:** renderer 25's typed audit and receipt completion against v8's
   four-phase runner, and renderer 26 against 25 where it applies.
-- **Coverage timing.** v10 coverage is post-turn and v8's is not. So the
-  like-for-like coverage comparison uses v10's pre-turn figure (item 3, prediction 2).
+- **Coverage timing.** v10 coverage is post-turn and v8's is not, so the coverage
+  comparison uses v10's pre-turn figure (prediction 2). That figure is on the
+  full-phase record, before audit, reconcile and repair. v8's is on the final record,
+  where reconcile and repair had added leaves that have no receipt route (49 of 4094 in
+  v8; P1). That residual difference stays a confound.
 - **Schema:** 2.0.0 against 3.0.0, and the change in the digest's term source.
   - P1: no v8 record's schema digest re-renders under today's renderer.
   - `d4d runs check` reproduces all 19 digest texts from historical code, but that
@@ -273,10 +323,19 @@ package-level (plan risk 21, D02):
     (`04f` rep1, which passed and was later found invalid). CHORUS had none.
   - v8 rep2 and rep3 were never gated.
   - v10 replicates are gated under D21(b).
-  - Item 3's two sets are the mitigation.
-- **Check instruments:** the v8 grounding blocks declare no instrument, while v10's
-  will carry v1 (#4090). That affects "ungrounded identifiers" and "resolver URLs"
-  (P1). The form blocks are current on both sides.
+  - Item 3's Set A definitions and Set B bound this asymmetry but do not remove it.
+    Under definition (2), v8 rep1's survivorship has no counterpart.
+- **Check instruments:**
+  - **Grounding:** the v8 grounding blocks declare no instrument, while v10's will
+    carry v1 (#4090). That affects "ungrounded identifiers" and "resolver URLs" (P1).
+  - **Report claims:** v8's stored `report_claims` blocks are instrument v7, while
+    v10's will be v8, the `check_report` default. Recomputed under v8, the 12 v8
+    records change in one place: CHORUS rep3 gains one finding (P1).
+  - **Form:** current on both sides.
+- **The recall rule and the newly exposed Software keys.** #2930's reopen comment of
+  2026-10-13 requires the API comparison to "retain the documented confound between the
+  recall rule and newly exposed Software keys". Recall-target rises in software counts
+  are read with that confound.
 - **Transport and provider:** both arms run CBORG `claude-opus-5`. Provider-side
   model drift under one model id cannot be excluded, so v10 records the returned
   model identity per call (plan G4).
@@ -354,7 +413,8 @@ It carries:
 ## 7. Attempt accounting, canonical marks and missing cells (P2 item 7; D07 decided)
 
 - **Every attempt counts**, stopped and rejected ones included, together with its
-  usage rows. Set A uses every attempt that left a full record (item 3).
+  usage rows, in the attempt table. Which attempts enter Set A follows item 3's
+  definition.
 - **Attempt bound:** at most 2 billed attempts per registered cell (D07), for example
   a pilot plus one contingency, or a replicate plus one D21 re-run. Then the owner
   reviews.
@@ -371,7 +431,8 @@ It carries:
   then lowest label" (`cli/runs.py`).
   - Review counts are reported but neither gate nor rank, and `--review-margin` is
     retired.
-  - Remaining ties go to the lowest label, which is rep1.
+  - The sort is by most slots, then lowest label (`cli/runs.py:1810-1811`), so rep1
+    wins any tie it is part of, and only those.
   - The four v8 canonical marks P1 shows were made under the earlier, retired
     criterion (`reviews_applied: true`, `review_margin: 2`).
 
@@ -426,9 +487,10 @@ D21 recommends option (b) with continuation (ii).
 
 **Pilots** keep `--canary-baseline`:
 - CHORUS (A10): `2026-09-04f_claude-opus-5-api-generic-v8`;
-- AI_READI (A14-reg): `2026-09-04g_claude-opus-5-api-generic-v8`, as planned. It is
-  never `04f`, because that prefix's AI_READI rep1 is declared invalid. How it is read
-  depends on item 2's AI_READI decision.
+- AI_READI (A14-reg): `2026-09-04g_claude-opus-5-api-generic-v8` as planned, under
+  option (a). Under (b) the pilot runs with no baseline, and under (c) and (d) as item
+  2 says. It is never `04f`, because that prefix's AI_READI rep1 is declared
+  invalid.
 
 The v8 per-project worst values, recomputed in P1. The AI_READI row is with-crate.
 
@@ -456,7 +518,8 @@ decides at A15 between three options:
 
 **[proposed; owner fixes at P4]:** the A15 choice changes what runs next, not how
 results are judged, so it sits outside the confirmatory analysis.
-- Whichever option is chosen, Set A and Set B are computed the same way.
+- Whichever option is chosen, Set A and Set B keep the definitions item 3 settles;
+  the A15 choice does not change them.
 - Cells completed under a different procedure, such as (c), are flagged in every
   table.
 - The choice and its basis are recorded in the A15 amendment before any multi-row
@@ -469,7 +532,9 @@ single-delivery trigger (#5050)". No such threshold exists in any of these place
 - the primary checkout's `notes/`, `.local_drafts` included, or any `d4d-executions`
   worktree's `notes/`.
 
-The only occurrence is the coordination prompt itself. #5050 is the GitHub assistant
+The only occurrence is the coordination prompt itself,
+`notes/coordination/2026-10-20-claude-prompt.md`, an untracked file in the primary
+checkout. #5050 is the GitHub assistant
 smoke-test issue. This draft keeps the plan's trigger above: any terminal
 single-delivery failure in either pilot. If a numeric trigger is intended, the owner
 states it and its source before P4.
@@ -496,14 +561,34 @@ states it and its source before P4.
   - **transport:** the terminal call's `api_usage` row records a transport error or a
     dropped stream, or the provider returned an HTTP error, and no content defect is
     identified in what was written;
+  - **harness:** a deterministic refusal by the run's own validation before a call
+    is admitted. It is caused neither by the provider nor by the instruction's rules.
+    - For example, receipt completion validates the persisted full record against the
+      captured schema (`_validate_record`, called from `_inputs`;
+      `receipt_completion.py:154`, `:178`, `:215`). It does so before
+      `_call_with_usage` admits the receipt-completion call (`run`, `:554`, `:584`).
+    - A record shape it refuses stops the run after the full phase, and any
+      re-address, have been billed, and before receipt completion is. A cardinality
+      the write-time normaliser leaves in place is one such shape.
+    - `_repair_invalid` runs only after the phase loop (`api_runner.py:7456-7471`), so
+      nothing repairs that shape before the originals freeze.
+    - The defect is filed as an engineering issue before the classification;
   - **instrument:** an offline recomputation shows that a gate or checker misread a
     record that is valid under the registered rules. The defect is filed as an issue
     before the classification;
   - **rule-level:** otherwise, a deterministic row failure or an A12 rejecting-class
     finding attributable to the generated content.
 
-  The class and its evidence appear in the attempt table. Only a transport or
-  operational cause allows a contingency (A13).
+  The class and its evidence appear in the attempt table.
+
+  **A13's "operational" cause** ("a transport or operational cause allows one
+  contingency") is read as transport or harness [proposed; owner fixes at P4]. Under
+  that reading:
+  - a harness stop allows one contingency;
+  - if the contingency is refused for the same shape, the fix is an engineering
+    change, which lands only by D17's advance procedure or at the next
+    shared-generation version;
+  - neither stop counts toward the defect-class stop-loss.
 - **Single-delivery terminal-failure estimate:**
   - Typed stages and receipt completion admit exactly one delivery.
   - At v8's per-call rate of 8 retried calls in 92 (5 transport, 3 answer-level; P1),
@@ -586,7 +671,8 @@ standing authorization covers it.
   procedure.
 - A stopped label is never re-run.
 - Every generic_v10 launch, continuations included, goes through `d4d api batch` with
-  a roster, never `d4d api run` (D20). `d4d api run` has no floor verdict, canary
+  a roster, never `d4d api run` ([pending D20]: D20's recommendation). `d4d api run`
+  has no floor verdict, canary
   block, run lock or #795 guard.
 - Immediately before every billed launch, the operator hashes the roster, every
   registration it lists and the launcher script, and stops on any difference from the
@@ -723,8 +809,9 @@ Each prediction names its metric, comparator, decision rule and instrument, fixe
 before any v10 data exist. **Every rule is [proposed; owner fixes at P4].**
 
 **Notation:**
-- For project p, `v8_p` is the comparator's values and `v10_p` the v10 confirmatory
-  values, both in Set A (item 3).
+- For project p, `v8_p` and `v10_p` are each arm's values in Set A, under the
+  definition item 3 settles. Rows 1–3, 3a and 6–8 read Set A. Row 4 reads E2's
+  records (item 12), and row 5 reads the records E5 re-rates.
 - "Holds in k of K" counts the projects whose rule holds. K is 4, or 3 if AI_READI
   leaves the contrast.
 - Set B results are reported beside every row, as a sensitivity analysis.
@@ -734,15 +821,15 @@ under (a) it is labelled cross-arm.
 
 | # | prediction (from #2930, restated against v8 per D02) | metric and instrument | decision rule [proposed; owner fixes at P4] | v8 values (P1) |
 |---|---|---|---|---|
-| 1 | Populated leaves do not fall | `len(receipts.populated_leaves(full))` per record | holds for p if mean(v10_p) ≥ 0.9 × mean(v8_p). v8's replicate SD is 8.5% (CHORUS), 8.8% (AI_READI), 6.8% (CM4AI) and 18.5% (VOICE) of the mean, so 10% is about one SD for three projects and about half an SD for VOICE | AI_READI [525, 525, 449], CHORUS [235, 278, 251], CM4AI [422, 473, 479], VOICE [386, 297, 432] |
-| 2 | Receipt coverage does not fall, measured pre-turn, like-for-like | v10: pre-turn coverage `(receiptable − never_receipted_before_turn − added_after_receipt) / receiptable`, from the receipts block's before-turn figures (#2926). v8: `with_receipt / receiptable`. `d4d receipts check` | holds for p if v10_p's pooled pre-turn coverage ≥ v8_p's pooled coverage − 0.05 (absolute). A v10 record without the before-turn figure has missing pre-turn coverage: never 0, and never replaced by the post-turn value. Post-turn coverage, which the gate selects on, is reported descriptively only | pooled 2310/4094 = 56.4%; per project in P1 |
-| 3 | The recall rule raises recall where the bundle states the targets | `scripts/recall_target_baseline.py` (cues `768a26a3…`, tools `4726c005…`) per record, at D02's targets:<br>- AI_READI variables 20/13/20;<br>- CM4AI lexical candidates 9/5/3;<br>- VOICE variables 4/4/4, lineage 1/1/1, lexical candidates 3/0/1, tools with a version token 0/0/0;<br>- CHORUS lineage 1/1/0. | for counts the rule should raise (variables, lineage entries, versioned tools): holds for a target if mean(v10_p) > mean(v8_p). For lexical candidates, which should fall as cue chunks are extracted rather than set aside: holds if mean(v10_p) < mean(v8_p). Each target gets its own verdict. AI_READI's v8 counts were taken over the with-crate chunking (P1) | as listed |
+| 1 | Populated leaves do not fall | `len(receipts.populated_leaves(full))` per record | holds for p if mean(v10_p) ≥ 0.9 × mean(v8_p). v8's replicate SDs are 21.7 (CHORUS), 43.9 (AI_READI), 31.3 (CM4AI) and 68.6 (VOICE) leaves, so 10% of the v8 mean is 1.2, 1.1, 1.5 and 0.5 SD respectively | AI_READI [525, 525, 449], CHORUS [235, 278, 251], CM4AI [422, 473, 479], VOICE [386, 297, 432] |
+| 2 | Receipt coverage does not fall, measured pre-turn | **v10:** `receipt_completion.before.slots.with_receipt / receipt_completion.before.slots.receiptable`, from the provenance record's `receipt_completion` block (written by `api_runner.py:7384-7386` from `receipt_completion.recover`). Its `before` check is `rereceipt.complete`'s `receipts.check` of the full-phase record with `original=record`. So its `added_after_receipt` is 0, and `receipt_completion.counts.never_receipted_before` equals its `receiptable − with_receipt`.<br>**v8:** `receipts.slots.with_receipt / receipts.slots.receiptable` of the final record.<br>The v4 instrument's coverage is v3's (`receipts.py`: "v3 coverage and gates unchanged") | holds for p if v10_p's pooled pre-turn coverage ≥ v8_p's pooled coverage − 0.05 (absolute). A v10 record without a `receipt_completion.before` block has missing pre-turn coverage: never 0, and never replaced by the post-turn value. Residual confound: v10's figure is on the full-phase record, and v8's is on the final record after reconcile and repair (item 4). Post-turn coverage, which the gate selects on, is reported descriptively only | pooled, under item 3's definition (2): CHORUS 0.340, VOICE 0.592, AI_READI 0.538, CM4AI 0.688. Under (1): VOICE 0.462, AI_READI 0.491 (P1) |
+| 3 | The recall rule raises recall where the bundle states the targets | `scripts/recall_target_baseline.py` (cues `768a26a3…`, tools `4726c005…`) per record, at D02's targets:<br>- AI_READI variables 20/13/20;<br>- CM4AI lexical candidates 9/5/3;<br>- VOICE variables 4/4/4, lineage 1/1/1, lexical candidates 3/0/1, tools with a version token 0/0/0;<br>- CHORUS lineage 1/1/0. | **Counts the rule should raise** (variables, lineage entries, versioned tools): holds for a target if mean(v10_p) > mean(v8_p).<br>**Targets at their ceiling:** where every v8 replicate already sits at the target's ceiling under this plan's rules, the target holds if mean(v10_p) ≥ mean(v8_p) ("does not fall"). VOICE lineage 1/1/1 is at its ceiling: the count is the top-level `was_derived_from`, a single-valued slot (not `multivalued` in the run's schema or today's), and row 3a forbids `parent_datasets`.<br>**Lexical candidates**, which should fall as cue chunks are extracted rather than set aside: holds if mean(v10_p) < mean(v8_p).<br>**Combination:** a project's row-3 verdict holds if every target listed for it holds, and "holds in k of K" then counts projects [proposed].<br>AI_READI's v8 counts were taken over the with-crate chunking (P1) | as listed |
 | 3a | A rise is an error where the bundle states nothing | Same counts, read against the #3289 adjudication in `notes/recall_target_baseline.md`:<br>- no parent dataset in any of the four bundles;<br>- no processing-software version in the AI_READI, CHORUS or CM4AI bundles (CM4AI's versions belong to companion analyses);<br>- VOICE's one stated version is b2aiprep v3.0.0.<br>The adjudication read AI_READI's pre-#5042 bundle, when it still had its RO-Crate, which recorded FAIRSCAPE 1.2.1 as the metadata packager, not processing software. It is re-read against `1a58ad7b` before P4. | holds if every confirmatory v10 record has `parent_datasets` 0 and, for AI_READI, CHORUS and CM4AI, `used_software` with a version 0. Any non-zero instance means it does not hold, and each instance is listed | 0 today |
-| 4 | The unsupported-claim and adverse-slot rates do not rise (a review-pass prediction) | The D24 instrument: E2 blind counts of the rejecting classes over the denominator fixed in the E2 protocol | holds if the pooled v10 rate ≤ the pooled v8 rate over the E2 batch, per rate, with no tolerance. Ties hold | no v8 record reviewed yet; measured in E2 |
-| 5 | Rubric20 Q11/Q19 do not fall (secondary) | E5 joint re-rating, instrument version per E4 | holds for p if mean(v10_p) ≥ mean(v8_p) − 0.5 on the item's scale, under the one joint re-rating | measured in E5 |
+| 4 | The unsupported-claim and adverse-slot rates do not rise (a review-pass prediction) | The D24 instrument: E2 blind counts of the rejecting classes over the denominator fixed in the E2 protocol | **The one exception to per-project verdicts:** pooled over the E2 batch, because E2's denominator is set per batch, not per project (item 16). The v10 records are E2's 12 confirmatory records (item 12), not Set A's attempts. Holds if the pooled v10 rate ≤ the pooled v8 rate, per rate, with no tolerance. Ties hold | no v8 record reviewed yet; measured in E2 |
+| 5 | Rubric20 Q11/Q19 do not fall (secondary) | E5 joint re-rating, instrument version per E4 | holds for p if mean(v10_p) ≥ mean(v8_p) − 0.5 on the item's scale, over the records E5 re-rates, under the one joint re-rating | measured in E5 |
 | 6 | **Not a prediction: an acceptance invariant.** Validation passes with 0 duplicate keys | `validation.passed` and `canary.duplicate_key_count` | true by construction for accepted v10 records, since the batch stops on invalid output and duplicate keys gate. Set A reports the count of v10 attempts whose output failed either, descriptively | 12/12 passed, 0 duplicate keys |
-| 7 | **Descriptive, no direction:** report findings | `report_claims.findings` | reported per record and per project in both sets. Reason: the claims parser (v7) reads renderer 25's report, which carries the typed audit's finding totals (#4766) that v8's report did not, and v8's values are 0–2 per record. A directional rule would be decided by noise, as D21 argues against its option (a) | worst: CHORUS 2, VOICE 1, AI_READI 1, CM4AI 0 |
-| 8 | **Descriptive, no direction:** replicate structure (#2932) | `replicate_structure` per project:<br>- all / some / none;<br>- identical;<br>- nested counts differ;<br>- max/min ≥ 2;<br>- intermittent slots. | reported per project (needs ≥ 2 replicates per arm; item 7). Reason: #2932's source-anchored granularity rule is not established to be in generic_v10 (#2932 is open, and #3336's retained remainder asks to verify it). Without it, the recall rule could raise intermittency by filling slots in some replicates, or lower it, so there is no directional hypothesis | P1 section "Replicate structure"; intermittent AI_READI 8, CHORUS 14, CM4AI 17, VOICE 9 |
+| 7 | **Descriptive, no direction:** report findings | `report_claims.findings` | reported per record and per project in both sets. Reasons:<br>- the counts cross instrument versions: v8's stored blocks are v7, and new runs are checked under v8;<br>- renderer 25's report carries the typed audit's finding totals (#4766), which v8's report did not;<br>- v8's values are 0–2 per record.<br>A directional rule would be decided by noise, as D21 argues against its option (a) | worst, stored v7 and recomputed under v8 alike: CHORUS 2, VOICE 1, AI_READI 1, CM4AI 0. Under v8, CHORUS rep3 goes from 0 to 1 (P1) |
+| 8 | **Descriptive, no direction:** replicate structure (#2932) | `replicate_structure` per project:<br>- all / some / none;<br>- identical;<br>- nested counts differ;<br>- max/min ≥ 2;<br>- intermittent slots. | reported per project, over exactly three records per arm and project, one per cell (item 3). It needs at least 2 replicates per arm (item 7). Reason: #2932's source-anchored granularity rule is not established to be in generic_v10 (#2932 is open, and #3336's retained remainder asks to verify it). Without it, the recall rule could raise intermittency by filling slots in some replicates, or lower it, so there is no directional hypothesis | P1 section "Replicate structure"; intermittent AI_READI 8, CHORUS 14, CM4AI 17, VOICE 9 |
 
 Rows 1–5 are directional and decidable, rows 6–8 are not predictions, and every
 rule is the owner's to fix at P4. Coverage and leaves use #2930's "do not fall".
@@ -765,7 +852,8 @@ The plan is followed in every case:
    (item 4).
 5. **Line numbers.** The prompt cites "lines 1295–1330" for Track P. In the plan at
    `fcc78fab`, Track P spans lines 853–921: P1 857–875, P2 876–903, P3 904–912 and P4
-   913–921. Lines 1295–1330 hold A12 to A10c-reg.
+   913–921. Lines 1295–1330 fall in A12 (which starts at line 1283) through A10c-rev
+   (from line 1327).
 6. **Worktree.** The plan asks for this file in a durable worktree under
    `d4d-executions`. The coordination prompt put it in
    `/private/tmp/d4d-claude-track-p-20261020`. The branch ref and commits live in the
@@ -774,7 +862,8 @@ The plan is followed in every case:
 ## Open before P4
 
 - **Owner rulings.** Every [pending Dxx] above. In order of need:
-  - D02, including the **AI_READI comparator** (options (a)–(d), item 2);
+  - D02, including the **AI_READI comparator** (options (a)–(d), item 2) and the
+    **Set A definition** (item 3);
   - D03, D20, D21, D24, D17, D23, D09, D04, D15, D05, D08 and D19.
 - **The S7 compaction decision and the A1b counts**, for items 14 and 15.
 - **Plan amendments, for agy and the owner; this draft does not edit the plan:**
