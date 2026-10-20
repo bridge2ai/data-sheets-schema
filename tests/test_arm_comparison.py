@@ -7,6 +7,7 @@ of records, which is the mis-measure #831's own body made by dividing by a
 list capped at 50 entries.
 """
 import importlib.util
+import hashlib
 import unittest
 from pathlib import Path
 
@@ -21,6 +22,225 @@ def _module():
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
+
+
+def _bundle_record(tmp_path, project="AI_READI", *, old=b"original", current=None):
+    """Independent bundle/manifest pins for #4762, including changed disk bytes."""
+    import yaml
+
+    bundle = tmp_path / f"{project}.txt"
+    bundle.write_bytes(old if current is None else current)
+    manifest = tmp_path / f"{project}_chunks.yaml"
+    raw = yaml.safe_dump({
+        "bundle": bundle.name, "bundle_md5": hashlib.md5(old).hexdigest(),
+        "chunks": [],
+    }).encode()
+    manifest.write_bytes(raw)
+    return {
+        "run": {"project": project, "label": "rep1"},
+        "inputs": {"bundle_path": bundle.name,
+                   "bundle_md5": hashlib.md5(old).hexdigest(),
+                   "chunks": {"path": manifest.name,
+                              "sha256": hashlib.sha256(raw).hexdigest()}},
+    }, manifest, raw
+
+
+def test_bundle_drift_checks_every_arm_project_and_replicate(tmp_path):
+    from copy import deepcopy
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift
+
+    records = []
+    for project in ("AI_READI", "CM4AI", "VOICE"):
+        rec, _, _ = _bundle_record(tmp_path, project, current=b"new")
+        records.append(rec)
+    matching, _, _ = _bundle_record(tmp_path, "CHORUS")
+    latest = deepcopy(records[0])
+    latest["inputs"]["bundle_md5"] = hashlib.md5(b"new").hexdigest()
+    latest["inputs"].pop("chunks")
+    mixed = deepcopy(matching)
+    mixed["run"]["label"] = "rep2"
+    mixed["inputs"]["bundle_md5"] = "a" * 32
+    result = compare_bundle_drift({
+        "v6": records, "v7": [matching, mixed], "v8": [matching],
+        "v10": [latest], "unrun": [],
+    }, tmp_path)
+    assert result["v6"]["disk"] == {"match": 0, "drift": 3, "unknown": 0}
+    assert result["v6"]["manifest"] == {"match": 3, "drift": 0, "unknown": 0}
+    assert result["v7"]["disk"] == {"match": 1, "drift": 1, "unknown": 0}
+    assert result["v7"]["manifest"]["drift"] == 1
+    assert result["v8"]["disk"]["match"] == 1
+    assert result["v10"]["disk"]["match"] == 1
+    assert result["v10"]["manifest"]["unknown"] == 1
+    assert result["unrun"]["count"] == 0
+
+
+def test_bundle_drift_recovers_pinned_manifest_not_current_replacement(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    record, manifest, original = _bundle_record(tmp_path, current=b"new")
+    manifest.write_bytes(b"bundle: AI_READI.txt\nbundle_md5: " + b"0" * 32 + b"\n")
+    calls = []
+
+    def recover(path, **pins):
+        calls.append((path, pins))
+        return original, {"commit": "a" * 40}
+
+    result = bundle_drift(record, tmp_path, recover=recover)
+    assert calls == [(manifest.name, {"md5": None, "sha256": hashlib.sha256(original).hexdigest()})]
+    assert result["disk_status"] == "drift"
+    assert result["manifest_status"] == "match"
+    assert result["manifest_basis"] == "pinned manifest recovered from history"
+    assert manifest.read_bytes().endswith(b"0" * 32 + b"\n")
+
+
+@pytest.mark.parametrize("recovery", ["absent", "wrong_bytes", "git_unavailable"])
+def test_bundle_drift_unavailable_history_never_uses_changed_manifest(tmp_path, recovery):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    record, manifest, _ = _bundle_record(tmp_path)
+    manifest.write_bytes(b"changed")
+
+    def recover(*args, **kwargs):
+        if recovery == "git_unavailable":
+            raise RuntimeError("shallow checkout")
+        return None if recovery == "absent" else (b"changed", {})
+
+    result = bundle_drift(record, tmp_path, recover=recover)
+    assert result["disk_status"] == "match"
+    assert result["manifest_status"] == "unknown"
+    assert result["manifest_md5"] is None
+
+
+def test_bundle_drift_requires_every_manifest_hash(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    record, _, raw = _bundle_record(tmp_path)
+    record["inputs"]["chunks"]["md5"] = "0" * 32
+    result = bundle_drift(record, tmp_path, recover=lambda *a, **k: (raw, {}))
+    assert result["manifest_status"] == "unknown"
+
+
+def test_bundle_drift_rejects_hash_pinned_duplicate_manifest_keys(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    record, manifest, raw = _bundle_record(tmp_path)
+    raw += b"bundle_md5: " + b"0" * 32 + b"\n"
+    manifest.write_bytes(raw)
+    record["inputs"]["chunks"]["sha256"] = hashlib.sha256(raw).hexdigest()
+    result = bundle_drift(record, tmp_path)
+    assert result["manifest_md5"] is None
+    assert result["manifest_status"] == "unknown"
+
+
+def test_bundle_drift_history_lookup_uses_recorded_name_after_symlink_change(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    record, manifest, original = _bundle_record(tmp_path)
+    target = tmp_path / "new_chunks.yaml"
+    target.write_bytes(b"changed")
+    manifest.unlink()
+    manifest.symlink_to(target)
+    calls = []
+
+    def recover(path, **pins):
+        calls.append(path)
+        return original, {}
+
+    assert bundle_drift(record, tmp_path, recover=recover)["manifest_status"] == "match"
+    assert calls == [record["inputs"]["chunks"]["path"]]
+
+
+@pytest.mark.parametrize("inputs", [{}, {"bundle_md5": "malformed"}, {"chunks": []}])
+def test_bundle_drift_missing_pins_are_unknown_not_zero(tmp_path, inputs):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    result = bundle_drift({"inputs": inputs}, tmp_path,
+                          recover=lambda *a, **k: pytest.fail("unbound historical lookup"))
+    assert result["disk_status"] == result["manifest_status"] == "unknown"
+
+
+def test_bundle_drift_does_not_cache_current_disk_identity(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    record, _, _ = _bundle_record(tmp_path)
+    assert bundle_drift(record, tmp_path)["disk_status"] == "match"
+    (tmp_path / "AI_READI.txt").write_bytes(b"changed")
+    assert bundle_drift(record, tmp_path)["disk_status"] == "drift"
+    (tmp_path / "AI_READI.txt").unlink()
+    assert bundle_drift(record, tmp_path)["disk_status"] == "unknown"
+
+
+def test_bundle_drift_rejects_manifest_for_another_bundle(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    record, manifest, raw = _bundle_record(tmp_path)
+    raw = raw.replace(b"AI_READI.txt", b"OTHER.txt")
+    manifest.write_bytes(raw)
+    record["inputs"]["chunks"]["sha256"] = hashlib.sha256(raw).hexdigest()
+    assert bundle_drift(record, tmp_path)["manifest_status"] == "unknown"
+
+
+def test_bundle_drift_does_not_read_paths_outside_selected_checkout(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    root = tmp_path / "checkout"
+    root.mkdir()
+    outside = tmp_path / "private.txt"
+    outside.write_bytes(b"must not read")
+    alias = root / "alias"
+    alias.symlink_to(outside)
+    for path in ("../private.txt", str(outside), "alias"):
+        result = bundle_drift({"inputs": {"bundle_path": path, "bundle_md5": "a" * 32}}, root)
+        assert result["disk_md5"] is None
+        assert result["disk_status"] == "unknown"
+
+
+def test_bundle_drift_rejects_external_manifest_link_back_into_checkout(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    root = tmp_path / "checkout"
+    root.mkdir()
+    target = root / "manifest.yaml"
+    target.write_text("bundle: example.txt\n")
+    external = tmp_path / "outside-link.yaml"
+    external.symlink_to(target)
+    result = bundle_drift({"inputs": {"chunks": {
+        "path": str(external), "sha256": "a" * 64}}}, root,
+        recover=lambda *a, **k: pytest.fail("external lexical name reached Git lookup"))
+    assert result["manifest_status"] == "unknown"
+
+
+def test_bundle_drift_report_retains_denominators_unknowns_and_record_labels(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift, render_bundle_drift
+
+    record, _, _ = _bundle_record(tmp_path, current=b"new")
+    record["run"]["label"] = "rep1|unexpected\nheader"
+    result = compare_bundle_drift({"v6": [record, {}], "v10": []}, tmp_path)
+    text = "\n".join(render_bundle_drift(result))
+    assert "| v6 | 2 | 0 / 1 / 1 | 1 / 0 / 1 |" in text
+    assert "| v10 | 0 | 0 / 0 / 0 | 0 / 0 / 0 |" in text
+    assert "supply no comparison evidence" in text
+    assert "rep1\\|unexpected header" in text
+    assert hashlib.md5(b"original").hexdigest() in text
+    assert "Unknown evidence is not a match" in text
+
+
+def test_bundle_drift_cli_reads_explicit_cohort_without_writing(tmp_path, capsys):
+    import json
+    import yaml
+    from data_sheets_schema.evaluation.arm_comparison import main
+
+    record, _, _ = _bundle_record(tmp_path, current=b"new")
+    source = tmp_path / "record.yaml"
+    source.write_text(yaml.safe_dump(record))
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    assert main(["--root", str(tmp_path), "--arm", "v6=record.yaml", "--format", "json"]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert set(result) == {"v6"}
+    assert result["v6"]["disk"]["drift"] == 1
+    assert before == {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    with pytest.raises(SystemExit):
+        main(["--root", str(tmp_path), "--arm", "v6=record.yaml", "--arm", "v6=record.yaml"])
 
 
 class Rate(unittest.TestCase):
