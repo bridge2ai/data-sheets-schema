@@ -288,6 +288,13 @@ classes:
         inlined: true
         range: AnyBlock
 
+      report_audit_totals:
+        description: >-
+          Deterministic check comparing written report's stated finding total
+          and per-severity subtotals against structured audit counts (#4766).
+        inlined: true
+        range: AnyBlock
+
       form:
         description: >-
           Counts that are properties of the records alone — undeclared CURIE
