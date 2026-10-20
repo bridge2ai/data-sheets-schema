@@ -2,45 +2,99 @@
 
 Step P1 of `notes/d4d_generation_plan_2026-10-09.md` ("#### P1"), recomputed on
 2026-10-20 at main `0a1132ecf` (`0a1132ecf23f92c2cd128f6357f5248e57cd63f8`), the
-base of branch `claude/track-p-analysis-plan`. Everything here is read from committed
-records, bundles and notes by the commands in the manifest at the end. Nothing was
-written to `data/`, no record or provenance block changed, and no provider was called.
+base of branch `claude/track-p-analysis-plan`. It was revised the same day after an
+independent read-only review.
+
+Everything here is read from committed records, bundles, notes and git objects by the
+commands in the manifest at the end. Nothing was written to `data/`, no record or
+provenance block changed, and no provider was called.
 
 The plan wrote P1 against `15d053d1a`. Where today's files differ from what the plan
 states, this note gives today's value and says what changed.
 
 ## Which records are the v8 baseline
 
-The v8 records on main are all API-runtime records under `claudecode_api/` and
-`claudecode_api_core/` (`model.agent_runtime: Claude API (direct)`, provider
-`LBL CBORG (proxy to Anthropic)`, model `claude-opus-5`). There is no other v8
-method directory.
+On main, the v8 records are all API-runtime records under `claudecode_api/` and
+`claudecode_api_core/`:
+- runtime `model.agent_runtime: Claude API (direct)`;
+- provider `LBL CBORG (proxy to Anthropic)`;
+- model `claude-opus-5`.
 
-- **Confirmatory arm (D02's primary comparator): 12 records**, 3 per project:
-  `2026-09-04f_claude-opus-5-api-generic-v8_rep{1,2,3}` for CHORUS and VOICE, and
-  `2026-09-04g_claude-opus-5-api-generic-v8_rep{1,2,3}` for AI_READI and CM4AI. These
-  are the records `notes/recall_target_baseline.md` and `notes/arm_comparison.md` call
-  "v8 API production (2026-09-04f/g)".
-- **Not in the baseline (D02 excludes them):** the canaries `2026-09-04`, `04b` and
-  `04c` (CM4AI) and `04d` and `04e` (VOICE), and AI_READI `2026-09-04f` rep1, which
-  `d4d runs check` reports as invalid by its own validation block (three top-level
-  `source_caveats` keys, #1029).
+Main has no other v8 method directory. Outside main there are untracked agentic
+generic-v8 AI_READI runs (`claudecode_agent`, runtime `Claude Code`, rep1–3 each):
+- `2026-10-14a_…` in `d4d-executions/aireadi-v8-a`, which read bundle `d22b61a9`, the
+  one with the crate;
+- `2026-10-14b_…` in `d4d-executions/aireadi-v8-b`, which read `1a58ad7b`, the one
+  without it.
+
+**Proposed confirmatory arm (D02 recommends it; D02 is pending): 12 records**, 3 per
+project:
+- `2026-09-04f_claude-opus-5-api-generic-v8_rep{1,2,3}` for CHORUS and VOICE;
+- `2026-09-04g_claude-opus-5-api-generic-v8_rep{1,2,3}` for AI_READI and CM4AI.
+
+These are the records `notes/recall_target_baseline.md` and `notes/arm_comparison.md`
+call "v8 API production (2026-09-04f/g)". D02 recommends excluding:
+- the canaries `2026-09-04`, `04b` and `04c` (CM4AI) and `04d` and `04e` (VOICE);
+- AI_READI `2026-09-04f` rep1, which `d4d runs check` reports as invalid by its own
+  validation block (three top-level `source_caveats` keys, #1029).
+
+**Each rep1 is a canary that passed the gate; rep2 and rep3 are not.**
+- rep1:
+  - CHORUS and VOICE under `04f`. VOICE's passed after the `04d` and `04e` canaries
+    regressed.
+  - AI_READI and CM4AI under `04g` (commits `586a34b9f` and `ffe71d9e1`, 2026-09-06).
+    AI_READI's came after `04f` rep1, which passed and was later found invalid. CM4AI's
+    came after `04`, `04b` and `04c`.
+- rep2 and rep3: the eight records of the v8 fill (`805e6ac7b`, 2026-09-07, #1049),
+  run without a per-run gate verdict.
+
+Only the rep1 records carry a `canary` block, and those blocks are offline
+re-verdicts from 2026-09-10/11 (section "Validation, duplicate keys…"). That
+selection is a comparability fact for P2: v8 rep1 survived a gate, and its rep2 and
+rep3 were never gated.
 
 **The coordination prompt's naming does not match the records.** It calls the arm
 "v8 04f (`claudecode_assistant_agent`) and 04g (`claudecode_api_agent`)". Neither
-method directory exists. `04f` and `04g` are two date-letter prefixes of one API
-arm in `claudecode_api`, split by project pair rather than by method or runtime.
-This note uses the records.
+method directory exists anywhere. `04f` and `04g` are two date-letter prefixes of
+one API arm in `claudecode_api`, split by project pair rather than by method or
+runtime. This note uses the records.
 
-All 12 confirmatory records were generated under schema 2.0.0 (merged full schema
-sha256 `b9b31acad29e…`) from four different dirty trees. By `repo.commit`:
-- `26f7e4cd`: CHORUS and AI_READI rep1;
-- `f294aeba`: VOICE rep1;
-- `63d6d41c`: CM4AI rep1;
-- `a2a3e157`: every rep2 and rep3.
+## Record identity and provenance pins
 
-Every record has `repo.dirty: true`. Main is at schema 3.0.0 (merged full schema
-sha256 `eb543e1597b2…`).
+`data_sheets_schema.__path__`: ['/private/tmp/d4d-claude-track-p-20261020/src/data_sheets_schema', '/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/src/data_sheets_schema']
+modules used: `data_sheets_schema.canary` from this tree: True; `data_sheets_schema.receipts` from this tree: True; `data_sheets_schema.replicate_structure` from this tree: True
+
+| project | rep | provenance sha256 | repo.commit | dirty | dirty files | dirty paths recorded | schema | full schema sha256 |
+|---|---|---|---|---|---|---|---|---|
+| CHORUS | 1 | `49e29d0b9882e27a` | `26f7e4cd` | True | 15 | 15 | 2.0.0 | `b9b31acad29e` |
+| CHORUS | 2 | `fde00d1d09ce32b8` | `a2a3e157` | True | 10 | 10 | 2.0.0 | `b9b31acad29e` |
+| CHORUS | 3 | `fbafb60adb190e40` | `a2a3e157` | True | 10 | 10 | 2.0.0 | `b9b31acad29e` |
+| VOICE | 1 | `c8536ee18cdbef98` | `f294aeba` | True | 3 | not recorded | 2.0.0 | `b9b31acad29e` |
+| VOICE | 2 | `ff69edd52fb5448c` | `a2a3e157` | True | 6 | 6 | 2.0.0 | `b9b31acad29e` |
+| VOICE | 3 | `fb6cf4554e84b6a7` | `a2a3e157` | True | 10 | 10 | 2.0.0 | `b9b31acad29e` |
+| AI_READI | 1 | `25b431b81c48245d` | `26f7e4cd` | True | 18 | 18 | 2.0.0 | `b9b31acad29e` |
+| AI_READI | 2 | `9debb857c95777de` | `a2a3e157` | True | 6 | 6 | 2.0.0 | `b9b31acad29e` |
+| AI_READI | 3 | `a3b311e5f7cd59f3` | `a2a3e157` | True | 10 | 10 | 2.0.0 | `b9b31acad29e` |
+| CM4AI | 1 | `ac9f6dedd874e6ff` | `63d6d41c` | True | 15 | 15 | 2.0.0 | `b9b31acad29e` |
+| CM4AI | 2 | `1d4a520f503ab481` | `a2a3e157` | True | 10 | 10 | 2.0.0 | `b9b31acad29e` |
+| CM4AI | 3 | `63a8d3adf1bf650c` | `a2a3e157` | True | 10 | 10 | 2.0.0 | `b9b31acad29e` |
+
+distinct recorded dirty states (commit, dirty paths): 6; today's schema 3.0.0, merged full schema sha256 `eb543e1597b2`
+
+What these rows show:
+- The 12 records come from four commits and six distinct recorded dirty states.
+- VOICE rep1 records `dirty_file_count: 3` but no `dirty_paths`; that record predates
+  #1023, which added the path list.
+- All 12 ran under schema 2.0.0. Main is at schema 3.0.0.
+- The provenance sha256s pin the record blocks the tables below read. Those blocks
+  have been rewritten in place before: backfills of 2026-09-10/11 touched AI_READI
+  04g rep2. A later rewrite changes these hashes.
+
+`data_sheets_schema` is a namespace package. With the primary checkout's virtualenv,
+its `__path__` lists both trees, so the script asserts that every module it uses comes
+from this tree (plan risk 10).
+
+## Records, hashes and bundles
 
 | project | label | canonical | full sha256 | core sha256 | bundle md5 (recorded) | today's bundle md5 | same bytes |
 |---|---|---|---|---|---|---|---|
@@ -58,17 +112,69 @@ sha256 `eb543e1597b2…`).
 | CM4AI | `2026-09-04g_claude-opus-5-api-generic-v8_rep3` | api | `e3311d40121521b8` | `20c9276b95567525` | `50037fc6` | `50037fc6` | yes |
 
 **What changed since the plan.** The plan says every v8 baseline bundle matches
-today's file ("all four match today's files"; D02 lists AI_READI `d22b61a9`). That
-held at `15d053d1a`. It no longer holds for AI_READI. #5042 removed the RO-Crate
+today's file:
+- "all four match today's files";
+- D02's option text: "bundles byte-identical to today's for all four projects".
+
+That held at `15d053d1a`. It no longer holds for AI_READI. #5042 removed the RO-Crate
 source from the AI_READI corpus and rebuilt the bundle, so today's
-`AI_READI_preprocessed.txt` is `1a58ad7b…` and all three AI_READI confirmatory
-records (and the invalid `04f` rep1) now name a bundle whose bytes have changed. `d4d
-runs check --method claudecode_api` reports the same: "4 record(s) name an input
-bundle whose bytes have since changed … AI_READI_preprocessed.txt 4". CHORUS, CM4AI
-and VOICE still match. Each record correctly states the bytes it consumed. A
-generic_v10 AI_READI run will read different bytes, without the crate (#5042), so the
-AI_READI comparison carries a bundle-scope difference the other three projects do
-not.
+`AI_READI_preprocessed.txt` is `1a58ad7b…`. `d4d runs check --method claudecode_api`
+reports the same: "4 record(s) name an input bundle whose bytes have since changed …
+AI_READI_preprocessed.txt 4". CHORUS, CM4AI and VOICE still match.
+
+## AI_READI: the v8 comparator records were generated with the crate
+
+**What this means: by the owner's own ruling, the three AI_READI v8 records are
+with-crate results.** The issue is not only that the bundle has since changed. The
+records were generated with the RO-Crate in their input, and the owner has ruled that
+crate content is a separate arm. `data/_wcrate/README.md` (on main) states:
+
+> On 2026-10-14 the owner ruled that generation runs read no RO-Crate content.
+> Crates are the input of the separate with-crate and crate-only arms only.
+
+It lists the "4 under `claudecode_api`: v8, 2026-09-04f rep1 and 2026-09-04g rep1–3"
+among the 30 with-crate AI_READI records it keeps.
+
+**The crate was in their input, and it reached their content.** All three records pin
+the chunk manifest as it was before #5042 (sha256 `a7b083727b56…`, recovered with
+`git show 1c4debbae^:data/preprocessed/chunks/AI_READI_chunks.yaml`). In that
+manifest, chunks c022–c024 are the RO-Crate document. Today's manifest differs
+(`fc3631ad7e8d…`). Each record's coverage receipt marks those chunks `extracted`:
+
+pre-#5042 chunk manifest (`git show 1c4debbae^:data/preprocessed/chunks/AI_READI_chunks.yaml`): sha256 `a7b083727b56f9cf`, 28 chunks; RO-Crate chunks: c022, c023, c024
+
+| rep | pinned chunk manifest is the pre-#5042 one | receipted snippets | citing a crate chunk | top-level slots receipted from the crate | crate-chunk statuses |
+|---|---|---|---|---|---|
+| 1 | True | 351 | 32 | 17 | {'c022': 'extracted', 'c023': 'extracted', 'c024': 'extracted'} |
+| 2 | True | 339 | 33 | 19 | {'c022': 'extracted', 'c023': 'extracted', 'c024': 'extracted'} |
+| 3 | True | 314 | 37 | 22 | {'c022': 'extracted', 'c023': 'extracted', 'c024': 'extracted'} |
+
+So about a tenth of each AI_READI v8 replicate's receipted snippets come from the
+crate, spread over 17–22 top-level slots. That includes 2 of AI_READI rep2's 17
+`variables` receipts, which cite c023 and c024. Most `variables` receipts cite
+non-crate chunks, so the recall target largely survives.
+
+**Consequences for P2.** P1 does not choose a comparator; that choice is the owner's
+(P2 item 2). The consequences:
+- **Package effect.** An AI_READI v10 run reads `1a58ad7b`, without the crate.
+  Measured against these records, the AI_READI difference crosses an input-arm
+  boundary the owner has defined, as well as the package.
+- **The AI_READI pilot's baseline.** Plan A14-reg plans the pilot with
+  `--canary-baseline 2026-09-04g_claude-opus-5-api-generic-v8`, but
+  `canary.baseline_for` checks no bundle. It reads the stored check blocks of every
+  record whose label matches the prefix. So that baseline would silently compare a
+  run without the crate against records that had it.
+- **E2's blind batch** would mix crate-derived v8 AI_READI content with no-crate v10
+  records.
+- **Plan gates that cannot pass as written** (agy and the owner to amend; this note
+  does not edit the plan):
+  - A4's gate: "The CHORUS and AI_READI bundle md5s equal the comparators'
+    (9b2ef4b6, d22b61a9)";
+  - A14-reg's gate: "the bundle md5 is d22b61a9";
+  - the plan's run tables, which say the AI_READI comparators read "the identical
+    bundle d22b61a9".
+
+  Today's AI_READI bundle is `1a58ad7b`.
 
 ## v6 drift
 
@@ -94,15 +200,20 @@ older bundles, and no record consumed today's bytes. None is a generic_v8 record
 VOICE_PEDIATRIC has no v8 comparator on any arm, as D02 says.
 
 KIDS_FIRST has no `data/preprocessed/concatenated/` bundle on main. Its frozen inputs
-are under `notes/matched_cborg_2026-09-13/kids_first/` (plan A19-reg), outside P1.
+are under `notes/matched_cborg_2026-09-13/kids_first/` (plan A19-reg). Its bundle,
+`KIDS_FIRST_preprocessed.txt`, is 541,184 bytes, now the largest of the six projects;
+AI_READI is 430,393 since #5042.
 
 ## Recall-target counts per record
 
-From `notes/recall_target_baseline.md` (sha256 `a7f96768e976eb70594912a7f66b60fb9d4872defb0ecac35d083106ed5f48cf`), generated by
-`scripts/recall_target_baseline.py` (sha256 `e89609655be029b8b562379eee898931d2c3568ea8330108d0660dd3f55fa569`). `--check` exits 0:
-the committed note matches the records. The note fixes the cue patterns (sha256
-`768a26a370bd…`) and the tools-version pattern (sha256 `4726c0058b01…`), the two
-hashes the plan cites. Columns, in order:
+These rows are copied from the committed `notes/recall_target_baseline.md` (sha256
+`a7f96768e976eb70594912a7f66b60fb9d4872defb0ecac35d083106ed5f48cf`), which `scripts/recall_target_baseline.py` (sha256
+`e89609655be029b8b562379eee898931d2c3568ea8330108d0660dd3f55fa569`) generates. The recompute script does not print them. What
+reproduces them is that `recall_target_baseline.py --check` exits 0, meaning the
+committed note matches the records (command 2).
+
+The note fixes the cue patterns (sha256 `768a26a370bd…`) and the tools-version pattern
+(sha256 `4726c0058b01…`), the two hashes the plan cites. Columns, in order:
 - lineage entries, `was_derived_from`, `parent_datasets`;
 - variables entries;
 - `used_software` with a version, `used_software`;
@@ -142,45 +253,75 @@ the table above and matches:
   - tools with a version token 0/0/0. The plain tools column is 9/8/8.
 - CHORUS variables and lexical candidates are 0/0/0 each, and its lineage is 1/1/0.
 
-## Receipt coverage, with denominators
+For AI_READI the receipts above include crate chunks (previous section). The
+lexical-candidate and `nothing_relevant` counts are over the pre-#5042 chunking.
 
-| project | label | chunks reviewed | snippets verified | snippets not in the chunk cited | receiptable slots with a receipt | never receipted | added after the receipt | gated receipt findings |
-|---|---|---|---|---|---|---|---|---|
-| CHORUS | `2026-09-04f rep1` | 8/8 | 79/79 | 0/79 | 54/186 | 127/186 | 5/186 | 0 |
-| CHORUS | `2026-09-04f rep2` | 8/8 | 87/90 | 1/90 | 83/248 | 157/248 | 8/248 | 0 |
-| CHORUS | `2026-09-04f rep3` | 8/8 | 114/117 | 1/117 | 78/198 | 118/198 | 2/198 | 0 |
-| VOICE | `2026-09-04f rep1` | 22/22 | 238/243 | 5/243 | 223/343 | 116/343 | 4/343 | 0 |
-| VOICE | `2026-09-04f rep2` | 22/22 | 237/248 | 11/248 | 141/261 | 120/261 | 0/261 | 0 |
-| VOICE | `2026-09-04f rep3` | 22/22 | 222/231 | 9/231 | 220/382 | 159/382 | 3/382 | 0 |
-| AI_READI | `2026-09-04g rep1` | 28/28 | 346/351 | 5/351 | 280/480 | 192/480 | 8/480 | 0 |
-| AI_READI | `2026-09-04g rep2` | 28/28 | 319/339 | 19/339 | 163/420 | 250/420 | 7/420 | 0 |
-| AI_READI | `2026-09-04g rep3` | 28/28 | 310/314 | 4/314 | 251/389 | 137/389 | 1/389 | 0 |
-| CM4AI | `2026-09-04g rep1` | 28/28 | 156/174 | 18/174 | 279/374 | 95/374 | 0/374 | 0 |
-| CM4AI | `2026-09-04g rep2` | 28/28 | 153/186 | 33/186 | 312/424 | 109/424 | 3/424 | 0 |
-| CM4AI | `2026-09-04g rep3` | 28/28 | 136/184 | 47/184 | 226/389 | 155/389 | 8/389 | 0 |
-| **pooled** | 12 records | 258/258 | 2397/2556 | 153/2556 = 6.0% | 2310/4094 = 56.4% | 1735/4094 = 42.4% | 49/4094 = 1.2% | |
+## Receipt coverage, with denominators, and the receipt floors
 
-The pooled row reproduces `notes/arm_comparison.md` (sha256 `802e07da46e9851d880f82f2d1c1237f2a5126bcfdfb2e8b08e26b106123ac3f`,
-"Receipt coverage and attribution, pooled per arm") exactly: 2310/4094 = 56.4% with a
-receipt, 1735/4094 never receipted, 49/4094 added after the receipt, and 153/2556 not
-in the chunk cited. Every receipts block is instrument v3, the current one (`d4d runs
-check`: "receipts blocks by instrument: v3 19 (current v3)"). No confirmatory record
-has a gated receipt finding.
+| project | label | chunks reviewed | snippets verified | snippets not in the chunk cited | mismatched / unattesting | receiptable slots with a receipt | never receipted | added after the receipt | receipt floors above 0 (`canary.receipt_floors`) |
+|---|---|---|---|---|---|---|---|---|---|
+| CHORUS | `2026-09-04f rep1` | 8/8 | 79/79 | 0/79 | 0 / 0 | 54/186 | 127/186 | 5/186 | none |
+| CHORUS | `2026-09-04f rep2` | 8/8 | 87/90 | 1/90 | 2 / 0 | 83/248 | 157/248 | 8/248 | snippets unverified 2 |
+| CHORUS | `2026-09-04f rep3` | 8/8 | 114/117 | 1/117 | 1 / 1 | 78/198 | 118/198 | 2/198 | snippets unverified 1 |
+| VOICE | `2026-09-04f rep1` | 22/22 | 238/243 | 5/243 | 0 / 0 | 223/343 | 116/343 | 4/343 | none |
+| VOICE | `2026-09-04f rep2` | 22/22 | 237/248 | 11/248 | 0 / 0 | 141/261 | 120/261 | 0/261 | none |
+| VOICE | `2026-09-04f rep3` | 22/22 | 222/231 | 9/231 | 0 / 0 | 220/382 | 159/382 | 3/382 | none |
+| AI_READI | `2026-09-04g rep1` | 28/28 | 346/351 | 5/351 | 0 / 0 | 280/480 | 192/480 | 8/480 | none |
+| AI_READI | `2026-09-04g rep2` | 28/28 | 319/339 | 19/339 | 1 / 0 | 163/420 | 250/420 | 7/420 | snippets unverified 1 |
+| AI_READI | `2026-09-04g rep3` | 28/28 | 310/314 | 4/314 | 0 / 0 | 251/389 | 137/389 | 1/389 | none |
+| CM4AI | `2026-09-04g rep1` | 28/28 | 156/174 | 18/174 | 0 / 0 | 279/374 | 95/374 | 0/374 | none |
+| CM4AI | `2026-09-04g rep2` | 28/28 | 153/186 | 33/186 | 0 / 0 | 312/424 | 109/424 | 3/424 | none |
+| CM4AI | `2026-09-04g rep3` | 28/28 | 136/184 | 47/184 | 1 / 0 | 226/389 | 155/389 | 8/389 | snippets unverified 1 |
+| **pooled** | 12 records | 258/258 | 2397/2556 | 153/2556 = 6.0% | 5 / 1 | 2310/4094 = 56.4% | 1735/4094 = 42.4% | 49/4094 = 1.2% | 4 of 12 |
+
+records with a receipt floor above 0: CHORUS 2026-09-04f rep2; CHORUS 2026-09-04f rep3; AI_READI 2026-09-04g rep2; CM4AI 2026-09-04g rep3
+
+The coverage columns reproduce `notes/arm_comparison.md` (sha256 `802e07da46e9851d880f82f2d1c1237f2a5126bcfdfb2e8b08e26b106123ac3f`,
+"Receipt coverage and attribution, pooled per arm") exactly:
+- 2310/4094 = 56.4% with a receipt;
+- 1735/4094 never receipted;
+- 49/4094 added after the receipt;
+- 153/2556 not in the chunk cited.
+
+Every receipts block is instrument v3, the current one (`d4d runs check`: "receipts
+blocks by instrument: v3 19 (current v3)").
+
+**Four of the 12 records fail a receipt floor today: "snippets unverified".**
+- CHORUS `04f` rep2: 2 mismatched snippets.
+- CHORUS `04f` rep3: 1.
+- AI_READI `04g` rep2: 1.
+- CM4AI `04g` rep3: 1.
+
+`canary.receipt_floors` computes each floor from the stored block. The "receipt
+findings" floor is 0 everywhere, but that is only one of the five floors.
+
+Six snippets are neither verified nor attributed to another chunk:
+- five mismatched (the four records above);
+- one unattesting, in CHORUS rep3.
+
+The other unverified snippets are verbatim in the bundle but in a chunk other than the
+one cited. Those are reported and never gated (#763).
 
 ## Validation, duplicate keys and populated leaves
 
-| project | rep1 / rep2 / rep3 validation passed | duplicate keys (full + core) | populated leaves (full record) |
-|---|---|---|---|
-| CHORUS | True/True/True | 0 | [235,278,251] |
-| VOICE | True/True/True | 0 | [386,297,432] |
-| AI_READI | True/True/True | 0 | [525,525,449] |
-| CM4AI | True/True/True | 0 | [422,473,479] |
+| project | rep1 / rep2 / rep3 validation passed | duplicate keys (`canary.duplicate_key_count`) | populated leaves (full record) | gate verdict block (`canary`) |
+|---|---|---|---|---|
+| CHORUS | True/True/True | 0/0/0 | [235,278,251] | rep1: d4d api verdict (offline) |
+| VOICE | True/True/True | 0/0/0 | [386,297,432] | rep1: d4d api verdict (offline) |
+| AI_READI | True/True/True | 0/0/0 | [525,525,449] | rep1: d4d api verdict (offline) |
+| CM4AI | True/True/True | 0/0/0 | [422,473,479] | rep1: d4d api verdict (offline) |
 
-Populated leaves use `receipts.populated_leaves` (sha256 of `receipts.py`
-`7bfb84709b2e91983eae2b6dbaf8f67e13ef06b68473ad61947ebf6dd7542c9f`), the counter `scripts/arm_comparison.py` uses. The bracketed values
-match the committed "populated leaves (full record)" rows of `notes/arm_comparison.md`.
-`validation.passed` is the block `d4d provenance recheck-validation` wrote; it validated
-each record against its run's schema.
+- **Populated leaves** use `receipts.populated_leaves` (sha256 of `receipts.py`
+  `7bfb84709b2e91983eae2b6dbaf8f67e13ef06b68473ad61947ebf6dd7542c9f`), the counter `scripts/arm_comparison.py` uses. The bracketed
+  values match the committed "populated leaves (full record)" rows of
+  `notes/arm_comparison.md`.
+- **Duplicate keys** are counted with `canary.duplicate_key_count`, the gate's own
+  counter.
+- **`validation.passed`** is the block `d4d provenance recheck-validation` wrote. It
+  validated each record against its run's schema.
+- **Gate verdict block:** the `canary` block, where one exists. All four are offline
+  re-verdicts (`recorded_by: d4d api verdict (offline)`) of the retained rep1
+  canaries.
 
 ## Replicate structure (#2932)
 
@@ -237,9 +378,16 @@ reads. They reproduce D21's "recomputed on 2026-10-09" values exactly:
 `d4d runs check` names the same three report findings among the confirmatory records:
 CHORUS rep2 2 claims, VOICE rep2 1 and AI_READI rep3 1.
 
-`notes/arm_comparison.md` recomputes the form metrics live under the current
-instruments. The figures above are the stored blocks that the gate reads; this note
-did not compare the two.
+**Two caveats on instruments:**
+- **Grounding.** "Ungrounded identifiers" and "resolver URLs in identifier slots"
+  read the grounding block. `d4d runs check` reports "grounding blocks by instrument:
+  none declared 19 (current v1)". The v8 blocks were written by the unversioned
+  checker, while v10 records will carry v1 (#4090). So a pilot's baseline comparison
+  on those two rows crosses instruments.
+- **Form.** The form blocks are current (British v4, prefix v3), so the other form
+  rows do not cross instruments. `notes/arm_comparison.md` recomputes the form
+  metrics live under the current instruments. The figures above are the stored
+  blocks that the gate reads, and this note did not compare the two.
 
 ## Per-call retry tally
 
@@ -266,16 +414,26 @@ From `d4d runs check --method claudecode_api` (exit 0: 19 runs checked, 0 failin
 All of these are reported and never fatal:
 - **Profile identity:** for all 19 v8/v9 API records, "the recorded digest is not
   reproduced by the current renderer and profile vocabularies over the recorded
-  schema". The model-facing schema digest these runs saw cannot be re-rendered with
-  today's code, which is one more reason claims stay package-level.
+  schema".
+- **Digest reconstruction:** the same check reports "19 historical digest-text
+  reconstruction(s)", each "reproduced: candidate text reproduces the recorded
+  digest; consumed implementation and profile are not attested by this
+  reconstruction". So the digest text the v8 runs saw can be re-derived with
+  historical code, but not with today's renderer.
 - **Playbooks:** all 19 records name playbooks whose bytes have since changed
   (`d4d-full-core.md`, `d4d-agent.md`). The API runtime does not consume them
   (`playbooks.consumed: false`).
-- **Temperature header:** the header reads `Temperature: 0.0` while the record says
-  `null`, in every v8 API record.
-- **Unverifiable instructions:** the three CM4AI canaries (`04`, `04b`, `04c`) cannot be
-  re-rendered, because their prompt pin was superseded on 2026-09-04. No confirmatory
-  record is among the runs `runs check` could not confirm against its spec.
+- **Temperature header:** in every v8 API record the header reads `Temperature: 0.0`
+  while the record says `null`.
+- **Output sizes:** one confirmatory record, VOICE `04f` rep1, records output sizes
+  that differ from its files: full 64790→64794, core 57326→57348, report
+  15667→17679. They were sized before a later phase rewrote the file (#1021). Its
+  full record's sha256 equals that of its `intermediate/VOICE_repair_full_r1.yaml`, so
+  its identity holds.
+- **Unverifiable instructions:** the three CM4AI canaries (`04`, `04b`, `04c`) cannot
+  be re-rendered, because their prompt pin was superseded on 2026-09-04. No
+  confirmatory record is among the runs `runs check` could not confirm against its
+  spec.
 - **Values recorded but not observed:** `model.reasoning_effort` and
   `model.temperature`, 19 each. These are each record's `unverified` entries. For
   effort, the record states: "no effort is recorded: the header carries none and the
@@ -286,33 +444,35 @@ All of these are reported and never fatal:
 ## Not recomputed here
 
 - The plan's "at 15d053d1a" base. This recompute is at `0a1132ecf`, and the only
-  difference that matters is the AI_READI bundle above.
+  differences that matter are AI_READI's bundle and the crate classification above.
 - Rubric scores and review verdicts. They are not P1 items, and E2/E5 re-measure
   them.
-- Live form-instrument recomputation of British spellings and prefixes (see the note
-  in the D21 section).
+- Live form-instrument recomputation of British spellings and prefixes (see the
+  caveats in the D21 section).
 
 ## Command manifest
 
-Run from the repository root at `0a1132ecf`, with the project's environment
-(`PYTHONPATH=src`). Every command is read-only.
+Run from the repository root at `0a1132ecf`, with the project's environment. Every
+command is read-only.
 
 | # | command | exit | what it gives |
 |---|---|---|---|
-| 1 | `PYTHONPATH=src python p1_recompute.py` (the script below) | 0 | every table in sections "Which records are the v8 baseline" to "Per-call retry tally", in about 8 s |
-| 2 | `PYTHONPATH=src python scripts/recall_target_baseline.py --check` | 0 | "notes/recall_target_baseline.md matches the records" |
-| 3 | `PYTHONPATH=src python -m data_sheets_schema.cli runs check --method claudecode_api` | 0 | bundle drift, report claims, instruments, profile identity |
-| 4 | `md5 -q data/preprocessed/concatenated/{P}_preprocessed.txt` for AI_READI, CHORUS, CM4AI, VOICE and VOICE_PEDIATRIC | 0 | today's bundle md5s |
+| 1 | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python p1_recompute.py` (the script below) | 0 | every table in this note except the recall rows: the import check, record identity and provenance pins, records and bundles, the AI_READI crate citations, the v6 drift, VOICE_PEDIATRIC, receipts and floors, validation and leaves, structure, D21 metrics and the retry tally. About 8 s. It runs `git show` on one historical blob. |
+| 2 | `PYTHONPATH=src python scripts/recall_target_baseline.py --check` | 0 | "notes/recall_target_baseline.md matches the records": the recall rows are that committed note's rows |
+| 3 | `PYTHONPATH=src python -m data_sheets_schema.cli runs check --method claudecode_api` | 0 | bundle drift, report claims, instruments, profile identity, digest reconstruction, output sizes |
+| 4 | `md5 -q data/preprocessed/concatenated/{P}_preprocessed.txt` for AI_READI, CHORUS, CM4AI, VOICE and VOICE_PEDIATRIC; `wc -c notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt` | 0 | today's bundle md5s and the Kids First bundle size |
 
 Inputs, by sha256:
 - `notes/d4d_generation_plan_2026-10-09.md`: `fcc78fab909f94e533d2ed8e00ebc3d5165c82a9d30fcc7aa87db4541ae1266e`
 - `notes/recall_target_baseline.md`: `a7f96768e976eb70594912a7f66b60fb9d4872defb0ecac35d083106ed5f48cf`
 - `notes/arm_comparison.md`: `802e07da46e9851d880f82f2d1c1237f2a5126bcfdfb2e8b08e26b106123ac3f`
+- `data/_wcrate/README.md`: `a66c66563e0288be9840e7e66808a8967b780a4689f0448028539786c97aed50`
 - `src/data_sheets_schema/canary.py`: `edc71f110f81e13e8ca3e94bbaa354d3d938962f9b3952b1928d68990ccfc447`
 - `src/data_sheets_schema/replicate_structure.py`: `c3c3131e8953d15a9f845ee6398d828c536e38d985959c005e49f173a5167b0e`
 - `src/data_sheets_schema/receipts.py`: `7bfb84709b2e91983eae2b6dbaf8f67e13ef06b68473ad61947ebf6dd7542c9f`
 - `scripts/recall_target_baseline.py`: `e89609655be029b8b562379eee898931d2c3568ea8330108d0660dd3f55fa569`
-- the script below, saved as `p1_recompute.py` with a trailing newline: `3d6e97cd3c2926cda21ad90b6aa264051daba26aaeee70e7535a5d0c0b894edd`
+- the 12 provenance records: in the identity table above;
+- the script below, saved as `p1_recompute.py` with a trailing newline: `80aedc9e8dc518ddcebbbde2bf58ea01e295ddf6f1cc6305128e1b956a843668`
 
 The record and bundle hashes are in the tables above.
 
@@ -320,17 +480,20 @@ The record and bundle hashes are in the tables above.
 """P1 comparability recompute for the v8 API arm (read-only).
 
 Run from the repository root:
-    PYTHONPATH=src python p1_recompute.py
-Reads committed records and bundles only; writes nothing.
+    PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python p1_recompute.py
+Reads committed records, bundles and git objects only; writes nothing.
 """
 import collections
 import glob
 import hashlib
+import subprocess
 from pathlib import Path
 
 import yaml
 
-from data_sheets_schema import canary
+import data_sheets_schema
+from data_sheets_schema import canary, receipts, replicate_structure
+from data_sheets_schema.receipts import populated_leaves
 from data_sheets_schema.replicate_structure import compare_structure, dataset_slots, summarize
 
 CONCAT = Path("data/d4d_concatenated")
@@ -338,6 +501,8 @@ BUNDLES = Path("data/preprocessed/concatenated")
 # The v8 API production arm: one date-letter prefix per project pair.
 V8 = {"CHORUS": "2026-09-04f", "VOICE": "2026-09-04f", "AI_READI": "2026-09-04g", "CM4AI": "2026-09-04g"}
 V6 = "2026-08-28_claude-opus-5-claudecode-generic-v6"
+# The AI_READI chunk manifest as it was before #5042 removed the RO-Crate (1c4debbae).
+PRE_5042_CHUNKS = "1c4debbae^:data/preprocessed/chunks/AI_READI_chunks.yaml"
 
 
 def sha256(path):
@@ -357,9 +522,34 @@ def load(path):
     return yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
 
 
+src = (Path.cwd() / "src").resolve()
+print("## 0. Import check and record identity\n")
+print(f"`data_sheets_schema.__path__`: {list(data_sheets_schema.__path__)}")
+used = {m.__name__: Path(m.__file__).resolve() for m in (canary, receipts, replicate_structure)}
+print("modules used: " + "; ".join(f"`{n}` from this tree: {src in p.parents}" for n, p in used.items()))
+assert all(src in p.parents for p in used.values()), "a module was imported from another checkout"
+print("\n| project | rep | provenance sha256 | repo.commit | dirty | dirty files | dirty paths recorded | schema | full schema sha256 |")
+print("|---|---|---|---|---|---|---|---|---|")
+states = set()
+for project in V8:
+    for prov in v8_records(project):
+        rec = load(prov)
+        repo, schema = rec["repo"], rec["schema"]
+        paths = repo.get("dirty_paths")
+        states.add((repo["commit"], tuple(sorted(paths)) if paths is not None else ("<not recorded>", repo.get("dirty_file_count"))))
+        print(f"| {project} | {rec['run']['replicate']} | `{sha256(prov)[:16]}` | `{repo['commit_short']}` | {repo['dirty']} | "
+              f"{repo.get('dirty_file_count')} | {len(paths) if paths is not None else 'not recorded'} | "
+              f"{schema['declared_version']} | `{schema['full_sha256'][:12]}` |")
+today_version = next(line.split(":", 1)[1].strip() for line in
+                     Path("src/data_sheets_schema/schema/data_sheets_schema.yaml").read_text().splitlines()
+                     if line.startswith("version:"))
+print(f"\ndistinct recorded dirty states (commit, dirty paths): {len(states)}; today's schema "
+      f"{today_version}, merged full schema sha256 "
+      f"`{sha256('src/data_sheets_schema/schema/data_sheets_schema_all.yaml')[:12]}`")
+
 today = {p: md5(BUNDLES / f"{p}_preprocessed.txt") for p in ("AI_READI", "CHORUS", "CM4AI", "VOICE", "VOICE_PEDIATRIC")}
 
-print("## 1. Records, hashes and bundles\n")
+print("\n## 1. Records, hashes and bundles\n")
 print("| project | label | canonical | full sha256 | core sha256 | bundle md5 (recorded) | today's bundle md5 | same bytes |")
 print("|---|---|---|---|---|---|---|---|")
 for project in V8:
@@ -370,6 +560,29 @@ for project in V8:
         can = (rec.get("canonical") or {}).get("runtime") or ""
         print(f"| {project} | `{rec['run']['label']}` | {can} | `{sha256(out['full']['path'])[:16]}` | "
               f"`{sha256(out['core']['path'])[:16]}` | `{b[:8]}` | `{today[project][:8]}` | {'yes' if b == today[project] else 'no'} |")
+
+print("\n## 1b. AI_READI: receipts that cite the RO-Crate chunks\n")
+old = subprocess.run(["git", "show", PRE_5042_CHUNKS], capture_output=True, check=True).stdout
+manifest = yaml.safe_load(old)
+crate = [c["id"] for c in manifest["chunks"] if "ro_crate" in str(c.get("source", ""))]
+print(f"pre-#5042 chunk manifest (`git show {PRE_5042_CHUNKS}`): sha256 `{hashlib.sha256(old).hexdigest()[:16]}`, "
+      f"{len(manifest['chunks'])} chunks; RO-Crate chunks: {', '.join(crate)}\n")
+print("| rep | pinned chunk manifest is the pre-#5042 one | receipted snippets | citing a crate chunk | top-level slots receipted from the crate | crate-chunk statuses |")
+print("|---|---|---|---|---|---|")
+for prov in v8_records("AI_READI"):
+    rec = load(prov)
+    pinned = (rec["inputs"].get("chunks") or {}).get("sha256") == hashlib.sha256(old).hexdigest()
+    receipt = load(Path(prov).parent / "AI_READI_coverage_receipt.yaml")
+    total = cited = 0
+    slots, status = set(), {}
+    for ch in receipt["chunks"]:
+        entries = ch.get("extracted") or []
+        total += len(entries)
+        if ch["id"] in crate:
+            cited += len(entries)
+            status[ch["id"]] = ch.get("status")
+            slots.update(str(e.get("slot", "")).split("[")[0].split(".")[0] for e in entries)
+    print(f"| {rec['run']['replicate']} | {pinned} | {total} | {cited} | {len(slots)} | {status} |")
 
 print("\n## 2. v6 drift (2026-08-28 agentic arm)\n")
 print("| project | v6 bundle md5 (recorded, rep1–3) | today's bundle md5 | same bytes |")
@@ -387,39 +600,47 @@ print(f"today's bundle md5 `{today['VOICE_PEDIATRIC'][:8]}`; provenance records:
       f"their bundle md5s: {dict(pins)}; consumed today's bytes: "
       f"{sum(1 for p in vp if load(p)['inputs']['bundle_md5'] == today['VOICE_PEDIATRIC'])}")
 
-print("\n## 4. Receipt coverage, with denominators\n")
-print("| project | label | chunks reviewed | snippets verified | snippets not in the chunk cited | receiptable slots with a receipt | never receipted | added after the receipt | gated receipt findings |")
-print("|---|---|---|---|---|---|---|---|---|")
+print("\n## 4. Receipt coverage, with denominators, and the receipt floors\n")
+print("| project | label | chunks reviewed | snippets verified | snippets not in the chunk cited | mismatched / unattesting | receiptable slots with a receipt | never receipted | added after the receipt | receipt floors above 0 (`canary.receipt_floors`) |")
+print("|---|---|---|---|---|---|---|---|---|---|")
 tot = collections.Counter()
+failing = []
 for project in V8:
     for prov in v8_records(project):
         rec = load(prov)
         r = rec["receipts"]
         c, s, sl = r["chunks"], r["snippets"], r["slots"]
         off = int(s.get("adjacent") or 0) + int(s.get("elsewhere") or 0) + int(s.get("spans_boundary") or 0)
+        floors = {k: v for k, v in canary.receipt_floors(r).items() if v}
+        if floors:
+            failing.append(f"{project} {rec['run']['label'][:11]} rep{rec['run']['replicate']}")
         tot.update({"slots": sl["receiptable"], "with": sl["with_receipt"], "never": sl["never_receipted"],
                     "added": sl["added_after_receipt"], "snip": s["total"], "ver": s["verified"], "off": off,
-                    "chunks": c["total"], "rev": c["reviewed"]})
+                    "chunks": c["total"], "rev": c["reviewed"], "mis": int(s.get("mismatched") or 0),
+                    "una": int(s.get("unattesting") or 0)})
         print(f"| {project} | `{rec['run']['label'][:11]} rep{rec['run']['replicate']}` | {c['reviewed']}/{c['total']} | "
-              f"{s['verified']}/{s['total']} | {off}/{s['total']} | {sl['with_receipt']}/{sl['receiptable']} | "
+              f"{s['verified']}/{s['total']} | {off}/{s['total']} | {s.get('mismatched')} / {s.get('unattesting')} | "
+              f"{sl['with_receipt']}/{sl['receiptable']} | "
               f"{sl['never_receipted']}/{sl['receiptable']} | {sl['added_after_receipt']}/{sl['receiptable']} | "
-              f"{r.get('findings_gated')} |")
+              f"{', '.join(f'{k} {v}' for k, v in floors.items()) or 'none'} |")
 print(f"| **pooled** | 12 records | {tot['rev']}/{tot['chunks']} | {tot['ver']}/{tot['snip']} | "
-      f"{tot['off']}/{tot['snip']} = {100 * tot['off'] / tot['snip']:.1f}% | "
+      f"{tot['off']}/{tot['snip']} = {100 * tot['off'] / tot['snip']:.1f}% | {tot['mis']} / {tot['una']} | "
       f"{tot['with']}/{tot['slots']} = {100 * tot['with'] / tot['slots']:.1f}% | "
       f"{tot['never']}/{tot['slots']} = {100 * tot['never'] / tot['slots']:.1f}% | "
-      f"{tot['added']}/{tot['slots']} = {100 * tot['added'] / tot['slots']:.1f}% | |")
+      f"{tot['added']}/{tot['slots']} = {100 * tot['added'] / tot['slots']:.1f}% | {len(failing)} of 12 |")
+print(f"\nrecords with a receipt floor above 0: {'; '.join(failing)}")
 
 print("\n## 4b. Validation, duplicate keys and populated leaves\n")
-from data_sheets_schema.receipts import populated_leaves
-print("| project | rep1 / rep2 / rep3 validation passed | duplicate keys (full + core) | populated leaves (full record) |")
-print("|---|---|---|---|")
+print("| project | rep1 / rep2 / rep3 validation passed | duplicate keys (`canary.duplicate_key_count`) | populated leaves (full record) | gate verdict block (`canary`) |")
+print("|---|---|---|---|---|")
 for project in V8:
     recs = [load(p) for p in v8_records(project)]
     passed = "/".join(str(r["validation"].get("passed")) for r in recs)
-    dup = sum(int(v or 0) for r in recs for v in ((r["validation"].get("duplicate_keys") or {}).values()))
+    dup = "/".join(str(canary.duplicate_key_count(r["validation"])) for r in recs)
     leaves = ",".join(str(len(populated_leaves(load(r["outputs"]["full"]["path"])))) for r in recs)
-    print(f"| {project} | {passed} | {dup} | [{leaves}] |")
+    gate = "; ".join(f"rep{r['run']['replicate']}: {(r.get('canary') or {}).get('recorded_by')}"
+                     for r in recs if r.get("canary")) or "none"
+    print(f"| {project} | {passed} | {dup} | [{leaves}] | {gate} |")
 
 print("\n## 5. Replicate structure (#2932)\n")
 slots = dataset_slots()
