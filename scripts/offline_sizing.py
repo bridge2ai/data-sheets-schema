@@ -40,13 +40,24 @@ below). So each A1b placeholder counted about four times its intended size,
 and those rows overstate the report family by about three times each
 placeholder's intended size.
 
-Each typed worker's smallest valid response is built and put through the
-runtime's own worker check (`response_floor`): one row per assigned path, each
-claim quoting its value, every other string one character. The audit that
-`reconcile_full` and the report family carry is sized at the larger of the
-registered output caps' bound and those smallest responses assembled by
-`audit_batches.assemble` (`floor_assembly`): a completed audit carries at
-least every row, whatever the caps.
+Each typed worker's answer is floored (`response_floor`). The floor has one
+row per assigned path; each claim quotes and covers its value, as the
+terminal source review requires; every other string is one character.
+- **The worker-stage check** (`audit_batches.check_worker`) accepts the
+  floor. It also accepts a smaller answer with one-character claims, which is
+  recorded too.
+- **The terminal check** (`evidence_assertions.check_audit`, run at assembly)
+  is run on the assembled floor audit, to confirm that it has no quoting or
+  coverage finding.
+
+Two carries are sized at the larger of the registered output caps' bound and
+the floor, since a completed audit carries at least every row whatever the
+caps:
+- the audit that `reconcile_full` and the report family carry;
+- the worker answers integration carries, as saved envelopes with the
+  proposal index.
+
+When the floor wins, the figure is a lower bound for that carry.
 """
 from __future__ import annotations
 
@@ -232,7 +243,8 @@ def load(root):
             sys.path.remove(entry)
         sys.path.insert(0, entry)
     from data_sheets_schema import api_runner as api, receipt_completion as rc, shared_generation as sg
-    from data_sheets_schema import audit_batches, snapshot_store, typed_audit as typed, typed_audit_runtime as tar
+    from data_sheets_schema import audit_batches, evidence_assertions as evidence, snapshot_store
+    from data_sheets_schema import typed_audit as typed, typed_audit_runtime as tar
     from data_sheets_schema import usage_ledger as ledger
     from data_sheets_schema.cli.api import ARMS
     try:
@@ -245,7 +257,7 @@ def load(root):
     if strays:
         raise SystemExit(f"modules loaded from outside {root}: {strays}")
     return SimpleNamespace(root=root, api=api, rc=rc, sg=sg, snapshot_store=snapshot_store, typed=typed,
-                           tar=tar, ledger=ledger, audit_batches=audit_batches, ARMS=ARMS,
+                           tar=tar, ledger=ledger, audit_batches=audit_batches, evidence=evidence, ARMS=ARMS,
                            DEFAULT_AUDIT_LIMITS=DEFAULT_AUDIT_LIMITS,
                            build_registration=build_registration, build_draft_context=build_draft_context)
 
@@ -288,21 +300,29 @@ def inputs_for(root, project):
 
 @contextlib.contextmanager
 def offline_receipt_and_index(m):
-    """As the A1 harness: receipt completion's recovery and the integration
-    index need a live run's results, so both are replaced by inert stand-ins."""
+    """Receipt completion's recovery needs a live run's results, so it is an
+    inert stand-in, as in the A1 harness. The integration tail is rendered as
+    `typed.index` renders it: the workers' saved envelopes (each answer as a
+    base64 blob) and the proposal index built from them, which appears twice.
+    Only the omission check is inert, since no omission response exists
+    offline."""
     saved_recover, saved_index = m.rc.recover, m.typed.index
     m.rc.recover = lambda s, **kw: {"input_identity": s.input_identity(),
         "registration": m.rc.registration_identity(s), "journal": {"result": "scratch_result_artifact.json"},
         "unsupported_audit_candidates": []}
+
     def index(packet, workers, omission, derivations=None):
-        return {"kind": "typed_audit_index_v1", "packet_sha256": packet["sha256"], "index": {},
-                "omission_check": {"protocol_complete": True, "declared_candidates": []},
-                "integration_request": {"kind": "typed_audit_integration_request_v1", "payload": {
-                    "stage": "integration", "packet_sha256": packet["sha256"],
-                    "shared_context": packet["requests"]["shared_context"], "proposal_index": {},
-                    "workers": {}, "omission_response": "",
-                    "omission_check": {"protocol_complete": True, "declared_candidates": []},
-                    "output_contract": packet["contracts"]["integration"]}, "request_sha256": "0" * 64}}
+        inner = m.typed._workers(packet, workers, derivations=derivations) if workers else {}
+        proposals = m.typed._index(packet, inner) if inner else {}
+        check = {"protocol_complete": True, "declared_candidates": []}
+        payload = {"stage": "integration", "packet_sha256": packet["sha256"],
+                   "shared_context": packet["requests"]["shared_context"], "proposal_index": proposals,
+                   "workers": {key: raw.decode("utf-8") for key, raw in workers.items()},
+                   "omission_response": (omission or b"").decode("utf-8"), "omission_check": check,
+                   "output_contract": packet["contracts"]["integration"]}
+        return {"kind": "typed_audit_index_v1", "packet_sha256": packet["sha256"], "index": proposals,
+                "omission_check": check, "integration_request": {"kind": "typed_audit_integration_request_v1",
+                "payload": payload, "request_sha256": "0" * 64}, "sha256": "0" * 64}
     m.typed.index = index
     try:
         yield
@@ -319,9 +339,10 @@ def conform_record(text, schema_path):
     The typed audit's owner traversal (audit_omissions._owners) refuses a
     value whose list-ness differs from its slot's `multivalued`, and receipt
     completion's linkml validation refuses the same records earlier. The
-    write-time normaliser lists scalars in multivalued slots at any depth,
-    except on a line that opens a list item (`- slot: value`), and nothing
-    unwraps a list in a single-valued slot. A scalar in a multivalued slot is wrapped, a one-item
+    write-time normaliser lists scalars in multivalued string slots at any
+    depth, except on a line that opens a list item (`- slot: value`); it
+    skips multivalued slots of other ranges, and nothing unwraps or joins a
+    list in a single-valued slot. A scalar in a multivalued slot is wrapped, a one-item
     list in a single-valued slot unwrapped, and a list of several scalars in
     a single-valued slot joined into one string (the same text, for
     sizing); anything else is left and counted as unfixable. Edits go
@@ -364,11 +385,11 @@ def conform_record(text, schema_path):
             many, here = bool(slot.multivalued), f"{path}/{field}"
             if many and not isinstance(item, list):
                 value[field] = item = CommentedSeq([item])
-                edits.append(here)
+                edits.append(here + " (wrapped)")
             elif not many and isinstance(item, list):
                 if len(item) == 1:
                     value[field] = item = item[0]
-                    edits.append(here)
+                    edits.append(here + " (unwrapped)")
                 elif all(not isinstance(x, (dict, list)) for x in item):
                     value[field] = item = " ".join(str(x) for x in item)
                     edits.append(here + " (joined)")
@@ -563,55 +584,76 @@ def nbytes(m, payload):
 FLOOR_TOKENS_PER_BYTE = 0.25
 
 
-def floor_variants(plan, worker):
-    """The two smallest candidate worker responses, as compact JSON bytes.
+def _compact(value):
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
-    A worker must return one source-review row per assigned path
+
+def floor_variants(plan, worker, *, quote=None):
+    """The smallest candidate worker responses, as compact JSON bytes.
+
+    A worker returns one source-review row per assigned path
     (`audit_batches.check_worker`). Here each row is a declared-metadata row
-    where the inventory allows one; otherwise it is one claim quoting the whole
-    value, since source acceptance requires the claims to quote the value, with
-    one-character source, chunk, quote and reason. The variants are:
+    where the inventory allows one. Otherwise it is one claim with
+    one-character source, chunk, quote and reason. The claim quotes the whole
+    value, because the terminal source review (`source_review.check`, run at
+    assembly) requires a row's claims to quote and cover its value. With
+    `quote`, every claim's text is `quote` instead; the worker-stage check
+    alone accepts that. The variants are:
     - `supported`: every claim supported, with one document assertion;
     - `revised`: every claim revised with no evidence, plus one finding
-      linking them."""
+      linking them;
+    - `mixed`: each row in whichever of those two forms is smaller."""
     by_path = {row["path"]: row for row in plan["inventory"]["values"]}
-    supported, revised, revise_paths = [], [], []
+    forms = []                                   # (path, supported row, revised row or None)
     for path in worker["paths"]:
         row = by_path[path]
         if row["record_metadata_allowed"]:
-            supported.append({"path": path, "metadata_reason": "m"})
-            revised.append(supported[-1])
+            forms.append((path, {"path": path, "metadata_reason": "m"}, None))
             continue
-        claim = {"text": row["text"], "attributed_to": [], "claim_status": "fact", "reason": "r"}
-        supported.append({"path": path, "claims": [{**claim, "verdict": "supported", "source_status": "fact",
-                          "evidence": [{"source": "s", "chunk": "c", "quote": "q"}]}]})
-        revised.append({"path": path, "claims": [{**claim, "verdict": "revise", "source_status": "unstated",
-                        "evidence": []}]})
-        revise_paths.append(path)
-    body = lambda rows, findings: {"findings": findings, "summary": "s", "source_review": {
-        "artifact": "original_full", "sha256": plan["original_full_sha256"], "values": rows}}
-    linked = [{"severity": "low", "record": "full", "slot": "s", "issue": "i", "review_paths": revise_paths,
-               "evidence": [{"artifact": "original_full", "path": "/id", "op": "contains", "quote": "q"}]}]
-    compact = lambda value: json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
-    return {"supported": compact(body(supported, [])),
-            "revised": compact(body(revised, linked if revise_paths else []))}
+        claim = {"text": row["text"] if quote is None else quote, "attributed_to": [], "claim_status": "fact",
+                 "reason": "r"}
+        forms.append((path, {"path": path, "claims": [{**claim, "verdict": "supported", "source_status": "fact",
+                             "evidence": [{"source": "s", "chunk": "c", "quote": "q"}]}]},
+                      {"path": path, "claims": [{**claim, "verdict": "revise", "source_status": "unstated",
+                       "evidence": []}]}))
+
+    def body(revise):
+        rows, linked = [], []
+        for path, supported, revised in forms:
+            take = revised is not None and revise(path, supported, revised)
+            rows.append(revised if take else supported)
+            linked += [path] if take else []
+        findings = [{"severity": "low", "record": "full", "slot": "s", "issue": "i", "review_paths": linked,
+                     "evidence": [{"artifact": "original_full", "path": "/id", "op": "contains", "quote": "q"}]}]
+        return _compact({"findings": findings if linked else [], "summary": "s", "source_review": {
+            "artifact": "original_full", "sha256": plan["original_full_sha256"], "values": rows}})
+    # A revised row also costs its path in the finding's review_paths.
+    smaller = lambda path, supported, revised: len(_compact(revised)) + len(_compact(path)) + 1 < len(
+        _compact(supported))
+    return {"supported": body(lambda *a: False), "revised": body(lambda *a: True), "mixed": body(smaller)}
 
 
 def response_floor(plan, worker, check):
-    """The smallest worker response the worker check accepts, in bytes.
+    """A floor under any answer the terminal source review accepts, in bytes.
 
-    Each of `floor_variants` is checked with `check(raw, plan, worker_id)`, and
-    the smaller passing one is the floor. A real response cites real sources,
-    quotes and reasons, so it is larger."""
-    best, errors = None, {}
-    for name, raw in floor_variants(plan, worker).items():
-        report = check(raw, plan, worker["id"])
-        if report["passed"]:
-            if best is None or len(raw) < best["bytes"]:
-                best = {"bytes": len(raw), "variant": name, "passed": True}
-        else:
-            errors[name] = [e.get("code") for e in report.get("errors", [])][:3]
-    return best or {"bytes": None, "passed": False, "errors": errors}
+    The smallest of `floor_variants` that `check(raw, plan, worker_id)` (the
+    worker-stage check) accepts. Its claims quote and cover every value, as the
+    terminal check requires, and every other string is one character, which no
+    real answer's sources, quotes and reasons can be. The worker-stage check
+    itself does not test quoting: `worker_check_minimum` is the smallest
+    answer it accepts, with one-character claims."""
+    def smallest(variants):
+        best, errors = None, {}
+        for name, raw in variants.items():
+            report = check(raw, plan, worker["id"])
+            if report["passed"]:
+                if best is None or len(raw) < best["bytes"]:
+                    best = {"bytes": len(raw), "variant": name, "passed": True}
+            else:
+                errors[name] = [e.get("code") for e in report.get("errors", [])][:3]
+        return best or {"bytes": None, "passed": False, "errors": errors}
+    return {**smallest(floor_variants(plan, worker)),
+            "worker_check_minimum": smallest(floor_variants(plan, worker, quote="t"))}
 
 
 def floor_tokens(floor_bytes):
@@ -621,48 +663,101 @@ def floor_tokens(floor_bytes):
 def floor_assembly(audit_batches, plan):
     """The assembled audit the runner carries as "Audit findings"
     (`audit_batches.assemble`'s canonical JSON), built from every worker's
-    smallest supported response and an integration that keeps every row.
+    smallest all-supported response and an integration that keeps every row.
+    Within about 1% of the smallest variants, which need finding decisions.
     None when assembly refuses. A real audit is larger."""
-    compact = lambda value: json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     proposals = {w["id"]: floor_variants(plan, w)["supported"] for w in plan["workers"]}
     try:
         index = audit_batches.build_index(plan, proposals, version=2)
         integration = {"kind": "audit_integration_v2", "proposal_index_sha256": index["sha256"],
                        "retain_other_rows_from_index_sha256": index["sha256"], "row_replacements": [],
                        "finding_decisions": [], "new_findings": [], "summary": "s", "omission_dispositions": []}
-        raw, _ = audit_batches.assemble(plan, proposals, compact(integration), version=2)
+        raw, _ = audit_batches.assemble(plan, proposals, _compact(integration), version=2)
     except (audit_batches.AuditBatchError, ValueError):
         return None
     return raw.decode("utf-8")
 
 
+#: The terminal source review's findings about a claim's text: its quoting
+#: and its coverage of the value (`source_review.check`).
+QUOTE_COVERAGE = ("claim text must quote this value, retaining case and punctuation",
+                  "a numeric, boolean or date claim must quote its complete scalar value",
+                  "source review omits part of the value's text", "populated value was not source reviewed")
+
+
+def terminal_check(m, spec, packet, audit_text):
+    """Run the terminal check `typed.assemble` applies
+    (`evidence_assertions.check_audit`) on an assembled floor audit, and sort
+    its findings. The floor's claims must quote and cover every value, so it
+    should have no quoting or coverage finding. Its one-character evidence
+    must fail the evidence assertions."""
+    raw, _ = m.typed._open(packet, derivations=m.tar._derivations(spec))
+    chunks, _ = m.evidence.source_chunks_from_bytes(raw["bundle"], raw["manifest"])
+    artifacts = {key: raw[key].decode("utf-8") for key in ("original_full", "original_core") if key in raw}
+    checked = m.evidence.check_audit(json.loads(audit_text), artifacts=artifacts, chunks=chunks,
+        protocol_version=7, source_manifest_raw=raw.get("source_manifest"), project=packet["project"])
+    return sort_findings(checked["findings"])
+
+
+def sort_findings(findings):
+    quoting = [f for f in findings if f.get("detail") in QUOTE_COVERAGE]
+    return {"findings": len(findings), "quote_or_coverage": len(quoting),
+            "quote_or_coverage_examples": [f.get("detail") for f in quoting[:3]],
+            "other_kinds": sorted({str(f.get("kind")) for f in findings if f not in quoting})}
+
+
+def integration_alternatives(m, workers, omission, integration):
+    """Integration's request as `larger_carry` alternatives (see
+    `measure_typed`). One is an empty carry, with every worker answer and the
+    omission response at their caps. The other carries the floor answers as
+    saved envelopes, with the proposal index built from them (real bytes),
+    and only the omission response at its cap."""
+    out = [(nbytes(m, integration[0]), integration[0]["max_tokens"],
+            sum(w["max_output_tokens"] for w in workers) + omission["max_tokens"], "registered output caps",
+            integration[0])]
+    if len(integration) > 1:
+        out.append((nbytes(m, integration[1]), integration[1]["max_tokens"], omission["max_tokens"],
+                    "workers' smallest responses, as saved envelopes", integration[1]))
+    return out
+
+
 def larger_carry(project, phase, alternatives):
-    """Of one request built with different audit carries, as (payload bytes,
-    max_tokens, placeholder tokens, basis), the one with the larger estimate:
-    the conservative reading."""
+    """Of one request built with different carries, as (payload bytes,
+    max_tokens, placeholder tokens, basis, ...), the one with the larger
+    estimate. When the floor wins, the figure is a lower bound for the
+    carry: it can show that a request exceeds, never that it fits."""
     return max(alternatives, key=lambda a: estimate(project, phase, a[0], a[1], placeholder_tokens=a[2])[
         "estimated_in_flight_tokens"])
 
 
 def measure_typed(m, spec, settings):
-    """Workers, omission and integration through prepare_packet/build_request."""
+    """Workers, omission and integration through prepare_packet/build_request.
+
+    Integration is built twice: with no worker answers (sized later at their
+    caps), and, when every worker's floor passes, with each floor answer as
+    the envelope the runtime saves (`typed.capture_response`)."""
     check = lambda raw, plan, worker_id: m.audit_batches.check_worker(raw, plan, worker_id, version=2)
     with offline_receipt_and_index(m):
         packet = m.tar.prepare_packet(spec)
-        rows, largest = [], None
+        rows, largest, envelopes = [], None, {}
         for worker in packet["plan"]["workers"]:
             stage = {"phase": m.tar.WORKER_PHASE, "worker_id": worker["id"]}
-            _, payload, _ = m.tar.build_request(spec, packet, stage, workers={}, omission=None, settings=settings)
+            _, payload, inner = m.tar.build_request(spec, packet, stage, workers={}, omission=None,
+                                                    settings=settings)
+            floor = response_floor(packet["plan"], worker, check)
             rows.append({"worker_id": worker["id"], "paths": len(worker["paths"]),
                          "inventory_bytes": worker["inventory_bytes"], "payload_bytes": nbytes(m, payload),
-                         "max_output_tokens": payload["max_tokens"],
-                         "response_floor": response_floor(packet["plan"], worker, check)})
+                         "max_output_tokens": payload["max_tokens"], "response_floor": floor})
+            if floor["passed"]:
+                answer = floor_variants(packet["plan"], worker)[floor["variant"]]
+                envelopes[worker["id"]] = m.typed.capture_response(inner, answer)
             if largest is None or rows[-1]["payload_bytes"] > nbytes(m, largest):
                 largest = payload
         _, omission, _ = m.tar.build_request(spec, packet, {"phase": m.tar.OMISSION_PHASE}, workers={},
                                              omission=None, settings=settings)
-        _, integration, _ = m.tar.build_request(spec, packet, {"phase": m.tar.INTEGRATION_PHASE}, workers={},
-                                                omission=b"", settings=settings)
+        integration = [m.tar.build_request(spec, packet, {"phase": m.tar.INTEGRATION_PHASE}, workers=answers,
+                                           omission=b"", settings=settings)[1]
+                       for answers in ([{}, envelopes] if len(envelopes) == len(rows) else [{}])]
     return packet, rows, omission, integration, largest
 
 
@@ -920,23 +1015,17 @@ def size_one(m, project, label, limits, workdir, *, with_components=False):
             {**w, **estimate(project, WORKER_PHASE, w["payload_bytes"], w["max_output_tokens"])} for w in workers]}
         result["stages"]["typed_audit_omission"] = estimate(project, "typed_audit_omission",
             nbytes(m, omission), omission["max_tokens"])
-        # Integration also carries every worker response and the omission
-        # response: the workers' part at the larger of their output caps and
-        # their smallest responses (which can exceed the caps), the omission
-        # response at its cap.
-        floors = [w["response_floor"] for w in workers]
-        options = [(sum(w["max_output_tokens"] for w in workers), "registered output caps")]
-        if floors and all(f.get("passed") for f in floors):
+        if len(integration) > 1:
             audit_floor = floor_assembly(m.audit_batches, packet["plan"])
-            options.append((round(sum(f["bytes"] for f in floors) * ratios(project, "typed_audit_integration")[0]),
-                            "workers' smallest responses"))
-        carried, basis = max(options)
-        result["stages"]["typed_audit_integration"] = estimate(project, "typed_audit_integration",
-            nbytes(m, integration), integration["max_tokens"], placeholder_tokens=carried + omission["max_tokens"])
-        result["stages"]["typed_audit_integration"]["carry_basis"] = basis
+        chosen = larger_carry(project, "typed_audit_integration",
+                              integration_alternatives(m, workers, omission, integration))
+        result["stages"]["typed_audit_integration"] = {**estimate(project, "typed_audit_integration", chosen[0],
+            chosen[1], placeholder_tokens=chosen[2]), "carry_basis": chosen[3]}
         result["audit_floor_bytes"] = len(audit_floor.encode("utf-8")) if audit_floor is not None else None
+        if audit_floor is not None:
+            result["audit_floor_terminal_check"] = terminal_check(m, spec, packet, audit_floor)
         parts.update({WORKER_PHASE + " (largest)": largest, "typed_audit_omission": omission,
-                      "typed_audit_integration": integration})
+                      "typed_audit_integration": chosen[4]})
     try:
         ordinary, bases = measure_ordinary(m, project, spec, settings, reg, files, worker_count, audit_floor)
     except Exception as exc:                      # noqa: BLE001
@@ -1168,31 +1257,34 @@ def table(results):
                    f"({allowance:,}). The assigned inventory is what a worker must answer for, one row per "
                    f"path with complete claims, inside its output cap of {worker_cap:,} tokens.")
         output_allowance = registered.get("aggregate_output_tokens", 100_000)
+        omission_cap = registered.get("omission_output_tokens", 4_000)
         integration_cap = registered.get("integration_output_tokens", 4_000)
-        out.append(f"\nWorker output: the smallest response the worker check accepts (`response_floor`), "
-                   f"against the registered caps. Tokens are at {round(1 / FLOOR_TOKENS_PER_BYTE)} bytes a "
-                   f"token, so they err low, and thinking draws on the same `max_tokens`. \"Over\" on the "
-                   f"largest worker passes its cap ({worker_cap:,}). \"Over\" on the sum means the workers' "
-                   f"smallest responses plus integration's cap ({integration_cap:,}) pass "
-                   f"`aggregate_output_tokens` ({output_allowance:,}); the runtime admits a stage only while "
-                   "the output already spent plus that stage's `max_tokens` stays inside it.\n")
-        out.append("| Grid | Workers | Largest assignment (paths) | Largest worker's smallest response B | "
-                   "Its tokens, at least | All workers' smallest responses, tokens at least |")
-        out.append("|---|---|---|---|---|---|")
+        out.append(f"\nWorker output. The floor (`response_floor`) is a floor under any answer the terminal "
+                   "source review accepts; the worker-stage check alone accepts the smaller one-character-claim "
+                   f"answer. Tokens are at {round(1 / FLOOR_TOKENS_PER_BYTE)} bytes a token, so they err low, "
+                   f"and thinking draws on the same `max_tokens`. \"Over\" on the largest worker passes its cap "
+                   f"({worker_cap:,}). The peak is the smallest `aggregate_output_tokens` the admission rule "
+                   "needs with every worker's cap at the largest floor and outputs at their floors, the omission "
+                   f"output taken as 0 (`peak_output_need`); \"over\" passes the registered {output_allowance:,}.\n")
+        out.append("| Grid | Workers | Largest assignment (paths) | Largest worker's floor B | Its tokens, at "
+                   "least | Worker-check minimum, tokens | All workers' floors, tokens | Peak output need |")
+        out.append("|---|---|---|---|---|---|---|---|")
         for key, row in runs.items():
             typed = row.get("typed", {})
             if not key.startswith(label + "|") or typed.get("status") != "MEASURED":
                 continue
             floors = [w.get("response_floor", {}) for w in typed["workers"]]
             if not floors or any(not f.get("passed") for f in floors):
-                out.append(f"| {key.split('|')[1]} | {typed['worker_count']} | | not measured or refused | | |")
+                out.append(f"| {key.split('|')[1]} | {typed['worker_count']} | | not measured or refused |||||")
                 continue
-            top = max(floor_tokens(f["bytes"]) for f in floors)
-            total = sum(floor_tokens(f["bytes"]) for f in floors)
+            tokens = [floor_tokens(f["bytes"]) for f in floors]
+            low = max(floor_tokens(f["worker_check_minimum"]["bytes"]) for f in floors)
+            need = peak_output_need(tokens, omission_cap, integration_cap)
             out.append(f"| {key.split('|')[1]} | {typed['worker_count']} | "
                        f"{max(w['paths'] for w in typed['workers'])} | {max(f['bytes'] for f in floors):,} | "
-                       f"{top:,}{' over' if top > worker_cap else ''} | "
-                       f"{total:,}{' over' if total + integration_cap > output_allowance else ''} |")
+                       f"{max(tokens):,}{' over' if max(tokens) > worker_cap else ''} | "
+                       f"{low:,}{' over' if low > worker_cap else ''} | {sum(tokens):,} | "
+                       f"{need:,}{' over' if need > output_allowance else ''} |")
         g2 = runs.get(f"{label}|G2")
         if g2 and g2.get("stages"):
             out.append("\nEvery request at G2 (largest worker shown for the typed workers):\n")
@@ -1278,6 +1370,26 @@ def table(results):
     return "\n".join(out)
 
 
+def peak_output_need(floors, omission_cap, integration_cap):
+    """The smallest `aggregate_output_tokens` the runtime's admission rule
+    needs (`typed_audit_runtime`, about :506). Before each typed stage, the
+    output already spent plus that stage's `max_tokens` must fit. Here every
+    worker's cap is the largest floor, each worker spends exactly its floor,
+    and the omission stage's output is taken as 0, since it is not floored. So
+    this is a lower bound."""
+    cap, spent, need = max(floors), 0, 0
+    for floor in floors:
+        need, spent = max(need, spent + cap), spent + floor
+    return max(need, spent + omission_cap, spent + integration_cap)
+
+
+def room_per_row(estimate_row, rows):
+    """Bytes of carried content each source-review row could still add before
+    the request reaches its ceiling, at the request's own ratio."""
+    room = estimate_row["ceiling_tokens"] - estimate_row["estimated_in_flight_tokens"]
+    return round(room / estimate_row["ratio"] / rows)
+
+
 #: The note's cross-project columns: (heading, stage key; None is the largest worker).
 SUMMARY_STAGES = (("Largest worker", None), ("Omission", "typed_audit_omission"),
                   ("Integration", "typed_audit_integration"),
@@ -1295,7 +1407,7 @@ def option_estimate(project, run, stage, keys=()):
     else:
         e = run["stages"][stage]
         phase, parts = e.get("phase", stage), components.get(stage)
-    removed = removed_bytes(parts, keys) if keys else 0
+    removed = removed_bytes(parts or {}, keys) if keys else 0
     return {**estimate(project, phase, max(e["payload_bytes"] - removed, 0), e["max_output_tokens"],
                        placeholder_tokens=e["placeholder_tokens"]), "carry_basis": e.get("carry_basis")}
 
@@ -1303,9 +1415,9 @@ def option_estimate(project, run, stage, keys=()):
 def summary(results):
     """The note's cross-project tables, generated from a sweep's results."""
     out, measured = [], {p: b for p, b in results["projects"].items() if b.get("status") == "MEASURED"}
-    floor_basis = ("workers' smallest responses", "workers' smallest responses, assembled")
+    floored = lambda e: str(e.get("carry_basis") or "").startswith("workers' smallest")
     tag = lambda e: (f"{e['estimated_in_flight_tokens']:,}" + (" over" if e["verdict"] != "estimate_fits" else "")
-                     + (" †" if e.get("carry_basis") in floor_basis else ""))
+                     + (" †" if floored(e) else ""))
 
     def primary(block, grid="G2"):
         return block["runs"].get(f"{block['primary']}|{grid}", {})
@@ -1314,8 +1426,8 @@ def summary(results):
         return f"{project} (proxy)" if block.get("proxy") else project
     heads = [h for h, _ in SUMMARY_STAGES]
     out.append("Current protocol, G2, primary records (estimated tokens in flight; \"over\" passes the "
-               "request's ceiling; † carries the audit at the workers' smallest responses, which here exceed "
-               "the registered output caps' bound):\n")
+               "request's ceiling; † carries the audit, or the worker answers, at their floor, which here "
+               "exceeds the registered output caps' bound: for that carry a † figure is a lower bound):\n")
     out.append("| Project | " + " | ".join([heads[0], "Largest worker, every record at G2"] + heads[1:]) + " |")
     out.append("|---|" + "---|" * (len(heads) + 1))
     for project, block in measured.items():
@@ -1349,6 +1461,23 @@ def summary(results):
             total = e["estimated_in_flight_tokens"] + extra
             cells.append(f"{total:,} (+{extra:,})" + (" over" if total > e["ceiling_tokens"] else ""))
         out.append(f"| {name(project, block)} | " + " | ".join(cells) + " |")
+    out.append("\nUnder S7, G2, primary records: the report family with the audit at its floor (a lower bound) "
+               "and the report as written read two ways, at its 96k cap (an upper bound) or as the v8 report's "
+               "text. In brackets, the bytes each source-review row could still add before the request reaches "
+               "850,000, at the request's ratio; a real row adds a reason, quotes, a source and a chunk id:\n")
+    out.append("| Project | Rows | Report | Regate, report at its cap | Regate, v8 report text |")
+    out.append("|---|---|---|---|---|")
+    for project, block in measured.items():
+        run = primary(block)
+        if run.get("typed", {}).get("status") != "MEASURED":
+            continue
+        rows = sum(w["paths"] for w in run["typed"]["workers"])
+        cells = []
+        for stage in ("report", "report_regate", "report_regate_with_v8_report"):
+            e = option_estimate(project, run, stage, keys)
+            cells.append(f"{e['estimated_in_flight_tokens']:,} ({room_per_row(e, rows):,} B)"
+                         + (" over" if e["verdict"] != "estimate_fits" else ""))
+        out.append(f"| {name(project, block)} | {rows} | " + " | ".join(cells) + " |")
     grids = list(results["grid"])
     allowance = next((r["audit_limits"]["aggregate_input_tokens"] for b in measured.values()
                       for r in b["runs"].values() if r.get("audit_limits")), 4_000_000)
@@ -1369,10 +1498,30 @@ def summary(results):
     out.append("\n\\* passes the allowance.\n")
     caps = next((r["audit_limits"] for b in measured.values() for r in b["runs"].values() if r.get("audit_limits")),
                 {})
-    out.append(f"Worker output: the smallest response the worker check accepts, largest worker / all workers, "
-               f"in tokens at {round(1 / FLOOR_TOKENS_PER_BYTE)} bytes a token (at least), with the largest "
-               f"assignment's paths. The registered worker cap is {caps.get('worker_output_tokens', 4_000):,}; "
-               f"`aggregate_output_tokens` is {caps.get('aggregate_output_tokens', 100_000):,}:\n")
+    unit = round(1 / FLOOR_TOKENS_PER_BYTE)
+    out.append(f"The largest worker's answer, in tokens at {unit} bytes a token (at least). The first figure "
+               "is the floor under any answer the terminal source review accepts (claims quoting and covering "
+               "each value); the second is the smallest answer the worker-stage check accepts (one-character "
+               "claims); in brackets, the largest assignment's paths. The registered worker cap is "
+               f"{caps.get('worker_output_tokens', 4_000):,}:\n")
+    out.append("| Project | " + " | ".join(grids) + " |")
+    out.append("|---|" + "---|" * len(grids))
+    for project, block in measured.items():
+        cells = []
+        for grid in grids:
+            typed = primary(block, grid).get("typed", {})
+            floors = [w.get("response_floor", {}) for w in typed.get("workers", [])]
+            if typed.get("status") != "MEASURED" or not floors or not all(f.get("passed") for f in floors):
+                cells.append("refused" if typed.get("status") == "REFUSED" else "—")
+                continue
+            low = [floor_tokens(f["worker_check_minimum"]["bytes"]) for f in floors]
+            cells.append(f"{max(floor_tokens(f['bytes']) for f in floors):,} / {max(low):,} "
+                         f"({max(w['paths'] for w in typed['workers'])})")
+        out.append(f"| {name(project, block)} | " + " | ".join(cells) + " |")
+    out.append(f"\nThe smallest `aggregate_output_tokens` the admission rule needs (registered: "
+               f"{caps.get('aggregate_output_tokens', 100_000):,}), at {unit} bytes a token: every worker's cap "
+               "at the largest floor, each worker spending its floor, the omission output taken as 0 and no "
+               "thinking (`peak_output_need`, a lower bound); in brackets, the workers' floors summed:\n")
     out.append("| Project | " + " | ".join(grids) + " |")
     out.append("|---|" + "---|" * len(grids))
     for project, block in measured.items():
@@ -1384,10 +1533,13 @@ def summary(results):
                 cells.append("refused" if typed.get("status") == "REFUSED" else "—")
                 continue
             tokens = [floor_tokens(f["bytes"]) for f in floors]
-            cells.append(f"{max(tokens):,} / {sum(tokens):,} ({max(w['paths'] for w in typed['workers'])})")
+            need = peak_output_need(tokens, caps.get("omission_output_tokens", 4_000),
+                                    caps.get("integration_output_tokens", 4_000))
+            cells.append(f"{need:,} ({sum(tokens):,})")
         out.append(f"| {name(project, block)} | " + " | ".join(cells) + " |")
     out.append("\nStaging of each stand-in record (conformance edits to the current schema's cardinality):\n")
-    out.append("| Record | Edits | Undeclared slots removed | Bytes before → after |")
+    out.append("| Record | Edits: wrapped / unwrapped / joined / removed | Undeclared slots removed | "
+               "Bytes before → after |")
     out.append("|---|---|---|---|")
     seen = set()
     for project, block in measured.items():
@@ -1399,8 +1551,10 @@ def summary(results):
             staging = run.get("staging", {}).get("original_full", {})
             edits = staging.get("conformance_edits", [])
             removed = [e.split(" (")[0] for e in edits if e.endswith(", removed)")]
+            kinds = [sum(e.endswith(f" ({k})") for e in edits) for k in ("wrapped", "unwrapped", "joined")]
             before, after = staging.get("source_bytes"), staging.get("staged_bytes")
-            out.append(f"| {block['record_project']} `{label}` | {len(edits)} | "
+            out.append(f"| {block['record_project']} `{label}` | {len(edits)}: "
+                       f"{' / '.join(str(k) for k in kinds)} / {len(removed)} | "
                        f"{', '.join(f'`{r}`' for r in removed) or '—'} | {before:,} → {after:,} "
                        f"({after - before:+,}, {100 * (after - before) / before:+.2f}%) |")
     return "\n".join(out) + "\n"

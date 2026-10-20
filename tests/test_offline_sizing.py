@@ -368,7 +368,7 @@ def test_conformance_wraps_joins_and_removes_without_reformatting(tmp_path):
     text, edits, unfixable = sweep.conform_record(record, schema)
     assert unfixable == []
     assert sorted(edits) == ["/strategy/invented_notes (undeclared in Strategy, removed)",
-                             "/strategy/strategies (joined)", "/tools_used/0/tools"]
+                             "/strategy/strategies (joined)", "/tools_used/0/tools (wrapped)"]
     import yaml
     value = yaml.safe_load(text)
     assert value["tools_used"][0]["tools"] == ["one toolkit"]
@@ -377,6 +377,8 @@ def test_conformance_wraps_joins_and_removes_without_reformatting(tmp_path):
     assert text.startswith("id: x\ntools_used:\n  - id: x#tool\n") and "# a comment survives" in text
     same, none, _ = sweep.conform_record("id: x\n", schema)
     assert same == "id: x\n" and none == []
+    one, unwrapped, _ = sweep.conform_record("id: x\nstrategy:\n  id: x#s\n  strategies:\n    - only\n", schema)
+    assert unwrapped == ["/strategy/strategies (unwrapped)"] and yaml.safe_load(one)["strategy"]["strategies"] == "only"
 
 
 def test_a_receipt_moves_by_chunk_hash_and_drops_removed_chunks():
@@ -519,7 +521,10 @@ def test_the_response_floor_is_a_response_the_worker_check_accepts():
     for worker in plan["workers"]:
         floor = sweep.response_floor(plan, worker, check)
         variants = sweep.floor_variants(plan, worker)
+        assert set(variants) == {"supported", "revised", "mixed"}
         assert floor["passed"] and floor["bytes"] == min(len(raw) for raw in variants.values())
+        low = floor["worker_check_minimum"]
+        assert low["passed"] and low["bytes"] <= floor["bytes"]
         for raw in variants.values():
             rows = yaml.safe_load(raw)["source_review"]["values"]
             assert [r["path"] for r in rows] == worker["paths"]
@@ -533,8 +538,27 @@ def test_the_response_floor_is_a_response_the_worker_check_accepts():
             short["source_review"]["values"].pop()
             assert not check(json.dumps(short).encode(), plan, worker["id"])["passed"]
     refused = sweep.response_floor(plan, plan["workers"][0], lambda *a: {"passed": False, "errors": [{"code": "x"}]})
-    assert refused == {"bytes": None, "passed": False, "errors": {"supported": ["x"], "revised": ["x"]}}
+    nothing = {"bytes": None, "passed": False, "errors": {"supported": ["x"], "revised": ["x"], "mixed": ["x"]}}
+    assert refused == {**nothing, "worker_check_minimum": nothing}
     assert sweep.floor_tokens(10) == 3 and sweep.floor_tokens(None) is None
+
+
+def test_the_floor_meets_the_terminal_quoting_rule_and_the_worker_minimum_does_not():
+    from data_sheets_schema import audit_batches, source_review
+    plan = audit_batches.make_plan(TINY_RECORD, max_paths=4, max_inventory_bytes=4_096, max_workers=4, version=2)
+    chunks = {"c001": {"source": "doc.txt", "text": "Jane Doe and Ann Roe made a dataset."}}
+
+    def review(quote=None):
+        rows = [r for w in plan["workers"] for r in json.loads(sweep.floor_variants(plan, w, quote=quote)[
+            "supported"])["source_review"]["values"]]
+        return source_review.check({"artifact": "original_full", "sha256": plan["original_full_sha256"],
+                                    "values": rows}, raw=TINY_RECORD, artifact="original_full", chunks=chunks,
+                                   audit_findings=[], protocol_version=7)["findings"]
+    floor, low = sweep.sort_findings(review()), sweep.sort_findings(review(quote="t"))
+    # The one-character evidence fails the evidence assertions either way;
+    # only the one-character claims fail the quoting and coverage rules.
+    assert floor["findings"] > 0 and floor["quote_or_coverage"] == 0
+    assert low["quote_or_coverage"] > 0
 
 
 def test_the_floor_audit_is_the_assembled_audit_of_every_row():
@@ -557,6 +581,126 @@ def test_the_larger_audit_carry_is_kept():
     floor = (1_000_000, 96_000, 0, "workers' smallest responses, assembled")
     assert sweep.larger_carry("AI_READI", "report", [caps, floor])[3] == floor[3]
     assert sweep.larger_carry("AI_READI", "report", [caps, (900_100, 96_000, 0, "x")])[3] == caps[3]
+
+
+class _Request:
+    """A request whose wire size is its text."""
+    def __init__(self, phase, texts):
+        self.phase, self.system, self.cached_blocks = phase, "", []
+        self.messages = [{"role": "user", "content": [{"type": "text", "text": t} for t in texts]}]
+
+
+def _stub_runtime():
+    api = SimpleNamespace(
+        build_phase=lambda spec, phase, carry: _Request(phase, [f"{k}: {v}" for k, v in carry.items()]),
+        _append_regate=lambda request, spec, report, findings: request.messages[0]["content"].append(
+            {"type": "text", "text": "regate: " + report}),
+        build_readdress=lambda request, body, unresolved: _Request("full_readdress", [body]),
+        build_repair=lambda phase, record, errors, profile, _captured_digest: _Request(phase, [record]),
+        READDRESS_MAX_TOKENS=8_000, RECEIPT_MARK="--- COVERAGE RECEIPT ---", output_limit=lambda name: 128_000,
+        phase_max_tokens=lambda spec, phase, default, model=None: 128_000 if phase == "full" else 96_000)
+    rc = SimpleNamespace(
+        request_payload=lambda request, settings, registration: {
+            "messages": request.messages, "max_tokens": registration["max_output_tokens"]},
+        build_request=lambda inputs: (_Request("full_receipt_completion", [inputs["record"]]), None),
+        schema_capture=lambda spec: {}, registration_identity=lambda spec: {},
+        policy_identity=lambda version=None: {}, registration=lambda spec: {"max_output_tokens": 4_000})
+    sg = SimpleNamespace(canonical=lambda value: json.dumps(value, sort_keys=True).encode("utf-8"),
+                         generation_context=lambda spec: "context", digest_text=lambda spec, cls: "digest")
+    return SimpleNamespace(api=api, rc=rc, sg=sg)
+
+
+def _stub_run(tmp_path):
+    run = tmp_path / "run"
+    (run / "intermediate").mkdir(parents=True)
+    for name, text in (("intermediate/P_full.yaml", "full: record\n"), ("intermediate/P_core.yaml", "core: x\n"),
+                       ("P_coverage_receipt.yaml", "chunks: []\n"), ("../manifest.yaml", "x\n"), ("../bundle.txt", "x\n")):
+        (run / name).write_text(text)
+    spec = SimpleNamespace(out_dir=str(run), chunk_manifest=str(tmp_path / "manifest.yaml"),
+                           bundle=str(tmp_path / "bundle.txt"), input_identity=lambda: {},
+                           receipt_completion_version=2, profile_obj=None)
+    reg = {"audit_limits": {"worker_output_tokens": 4_000, "integration_output_tokens": 4_000},
+           "receipt": {"max_output_tokens": 4_000}}
+    return spec, reg, {"reconciled_full": None, "completed_core": None, "report": None}
+
+
+AUDITED = ("reconcile_full", "report", "report_regate", "report_regate_with_v8_report")
+
+
+def test_the_requests_that_carry_the_audit_keep_the_larger_carry(tmp_path):
+    m, (spec, reg, files) = _stub_runtime(), _stub_run(tmp_path)
+    settings, bound = {"max_tokens": 96_000, "name": "fictional"}, sweep.findings_bound(2, reg["audit_limits"])
+    measure = lambda floor: sweep.measure_ordinary(m, "P", spec, settings, reg, files, 2, floor)
+    # A floor far above the caps' bound is carried as bytes, with no placeholder
+    # but the regate's report as written.
+    out, bases = measure("a" * 200_000)
+    assert {p: bases[p] for p in AUDITED} == {p: "workers' smallest responses, assembled" for p in AUDITED}
+    assert [out[p][1] for p in AUDITED] == [0, 0, 96_000, 0]
+    assert all("a" * 200_000 in json.dumps(out[p][0]) for p in AUDITED)
+    # A floor below the caps' bound loses to it.
+    out, bases = measure("a" * 100)
+    assert {p: bases[p] for p in AUDITED} == {p: "registered output caps" for p in AUDITED}
+    assert [out[p][1] for p in AUDITED] == [bound, bound, bound + 96_000, bound]
+    out, bases = measure(None)
+    assert set(bases.values()) == {"registered output caps"} and out["full"][1] == 0
+
+
+def test_integration_carries_the_larger_of_the_caps_and_the_floor_envelopes():
+    m, omission = _stub_runtime(), {"max_tokens": 4_000}
+    workers = [{"max_output_tokens": 4_000}] * 3
+    empty, floored = {"messages": [], "max_tokens": 4_000}, {"messages": ["e" * 100_000], "max_tokens": 4_000}
+    alternatives = sweep.integration_alternatives(m, workers, omission, [empty, floored])
+    assert [a[2] for a in alternatives] == [16_000, 4_000] and alternatives[1][4] is floored
+    chosen = sweep.larger_carry("CHORUS", "typed_audit_integration", alternatives)
+    assert chosen[3] == "workers' smallest responses, as saved envelopes"
+    assert len(sweep.integration_alternatives(m, workers, omission, [empty])) == 1
+
+
+def test_the_output_allowance_must_cover_every_stage_admission():
+    # Every worker's cap is the largest floor (30); before the third worker 30
+    # is spent, so 60; omission and integration add their caps to 60.
+    assert sweep.peak_output_need([10, 20, 30], 4, 4) == 64
+    # The largest first: the second worker's admission reserves its full cap.
+    assert sweep.peak_output_need([100, 10], 4, 4) == 200
+    assert sweep.peak_output_need([5], 4_000, 4_000) == 4_005
+    row = {"ceiling_tokens": 850_000, "estimated_in_flight_tokens": 816_145, "ratio": 0.3545}
+    assert sweep.room_per_row(row, 554) == round(33_855 / 0.3545 / 554)
+
+
+def _summary_results():
+    est = lambda phase, size, cap, placeholder=0, **more: {
+        **sweep.estimate("CHORUS", phase, size, cap, placeholder_tokens=placeholder), **more}
+    floor = {"bytes": 40_000, "variant": "revised", "passed": True,
+             "worker_check_minimum": {"bytes": 30_000, "variant": "revised", "passed": True}}
+    workers = [{"worker_id": f"worker_000{i}", "paths": 100 + i, "response_floor": floor,
+                **est("typed_audit_worker", 2_000_000 + i, 4_000)} for i in (1, 2)]
+    basis = "workers' smallest responses, assembled"
+    stages = {"typed_audit_omission": est("typed_audit_omission", 1_500_000, 4_000),
+              "typed_audit_integration": est("typed_audit_integration", 1_900_000, 4_000, 4_000,
+                                             carry_basis="workers' smallest responses, as saved envelopes"),
+              "full_receipt_completion_after_readdress": est("full_receipt_completion_after_readdress", 1_000_000,
+                                                             4_000, 8_000),
+              "report": est("report", 1_000_000, 96_000, carry_basis=basis),
+              "report_regate": est("report_regate", 1_000_000, 96_000, 96_000, carry_basis=basis),
+              "report_regate_with_v8_report": {**est("report_regate", 1_010_000, 96_000, carry_basis=basis),
+                                               "phase": "report_regate"}}
+    limits = {"aggregate_input_tokens": 4_000_000, "aggregate_output_tokens": 100_000, "worker_output_tokens": 4_000,
+              "omission_output_tokens": 4_000, "integration_output_tokens": 4_000}
+    run = {"status": "MEASURED", "typed": {"status": "MEASURED", "worker_count": 2, "workers": workers},
+           "stages": stages, "audit_limits": limits, "staging": {"original_full": {
+               "conformance_edits": ["/a/0/b (wrapped)", "/c (joined)"], "source_bytes": 1_000, "staged_bytes": 990}}}
+    return {"grid": {"G2": {"max_paths": 192, "max_inventory_bytes": 32_768, "max_workers": 16}},
+            "projects": {"CHORUS": {"status": "MEASURED", "primary": "L", "record_project": "CHORUS",
+                                    "proxy": False, "runs": {"L|G2": run}}}}
+
+
+def test_the_summary_marks_floor_carries_and_derives_the_output_tables():
+    out = sweep.summary(_summary_results())
+    first = next(line for line in out.splitlines() if line.startswith("| CHORUS | ") and "(1)" in line)
+    assert first.count("†") == 3                       # integration, report and regate carry the floor
+    assert "| CHORUS | 10,000 / 7,500 (102) |" in out    # the largest floor and the worker-check minimum
+    assert "| CHORUS | 24,000 (20,000) |" in out         # the admission peak: 10,000 + 10,000 + 4,000
+    assert "| CHORUS `L` | 2: 1 / 0 / 1 / 0 |" in out and "| CHORUS | 203 |" in out
 
 
 def test_a_foreign_checkout_on_the_import_path_is_filtered(tmp_path):

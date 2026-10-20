@@ -276,29 +276,52 @@ tokens:
 - the omission response that integration carries.
 
 The typed workers' output is sized from below as well. For each worker the
-sweep builds its smallest valid response (`response_floor`) and puts it
-through the runtime's own worker check, `audit_batches.check_worker`, which
-the response must pass:
+sweep builds a floor under any answer the terminal source review would accept
+(`response_floor`):
 - one source-review row for every assigned path;
-- each claim quoting its whole value, as source acceptance requires;
-- every other string one character long.
+- each claim quoting and covering its whole value, which the terminal check
+  (`source_review.check`, inside `evidence_assertions.check_audit` at
+  assembly) requires;
+- every other string one character long, which no real source, quote or
+  reason can be.
 
-A real response cites real sources, quotes and reasons, so it is larger. The
-tables report the floor against the registered `worker_output_tokens` and
-`aggregate_output_tokens` at 4 bytes a token. That figure is an assumption,
-below every ratio A1b counted, so it errs low. Thinking also draws on each
-worker's `max_tokens`.
+The worker-stage check (`audit_batches.check_worker`) accepts the floor. It
+checks structure only, though, and also accepts a smaller answer whose claims
+are one character: the sweep records that worker-check minimum too.
+
+The sweep runs the terminal check on the assembled floor audit
+(`audit_floor_terminal_check`). Its one-character evidence must fail the
+evidence assertions; it must show no quoting or coverage finding.
+
+The tables report against the registered limits:
+- the floor and the minimum, against `worker_output_tokens`;
+- the smallest `aggregate_output_tokens` that the runtime's admission rule
+  needs (`peak_output_need`). Before each typed stage, the output already
+  spent plus that stage's `max_tokens` must fit. Every worker's cap is set
+  at the largest floor, each worker spends exactly its floor, and the
+  omission output is taken as 0.
+
+Tokens are at 4 bytes a token. That is an assumption, below every ratio A1b
+counted, so it errs low. Thinking also draws on each worker's `max_tokens`.
 
 Two carries are sized at the larger of two figures, since a completed audit
 carries every row whatever the caps:
 - **The assembled audit** that `reconcile_full` and the report family carry.
-  One figure is the registered caps' bound, W × the worker cap plus the
-  integration cap. The other is the workers' smallest responses assembled
-  by `audit_batches.assemble`, the bytes the runner carries (`floor_assembly`).
-- **The worker responses integration carries.** One figure is their caps;
-  the other is their smallest responses.
+  - One figure is the registered caps' bound: W × the worker cap plus the
+    integration cap.
+  - The other is the workers' floor answers assembled by
+    `audit_batches.assemble`, the bytes the runner carries
+    (`floor_assembly`).
+- **The worker answers integration carries.**
+  - One figure is their caps.
+  - The other is the real bytes `typed.index` renders: each floor answer as
+    the runtime's saved envelope (`typed.capture_response`, the answer as a
+    base64 blob), and the proposal index built from them, which appears
+    twice. Base64 likely tokenizes worse than the request's ratio assumes.
 
-Each request records which basis it used (`carry_basis`).
+Each request records which basis it used (`carry_basis`). When the floor
+wins, the figure is a lower bound for that carry: it can show that a request
+exceeds, never that it fits.
 
 The regate's contradiction listing is not sized. No cap bounds it, and a
 regate happens only when the listing is non-empty.
