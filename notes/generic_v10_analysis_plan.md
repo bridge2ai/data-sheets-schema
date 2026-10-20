@@ -16,7 +16,7 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
   - `notes/recall_target_baseline.md`;
   - `notes/arm_comparison.md`;
   - `data/_wcrate/README.md`;
-  - Lane C1's A1 note (item 15).
+  - Lane C1's A1 note, commit `9dcb4390a` (item 15).
 - **Plan dependencies:** P2 depends on G3, P1, A1 and A1b.
   - P1 is done.
   - G3 is partly decided (see the decision status below).
@@ -561,17 +561,34 @@ states it and its source before P4.
   - **transport:** the terminal call's `api_usage` row records a transport error or a
     dropped stream, or the provider returned an HTTP error, and no content defect is
     identified in what was written;
-  - **harness:** a deterministic refusal by the run's own validation before a call
-    is admitted. It is caused neither by the provider nor by the instruction's rules.
-    - For example, receipt completion validates the persisted full record against the
-      captured schema (`_validate_record`, called from `_inputs`;
-      `receipt_completion.py:154`, `:178`, `:215`). It does so before
-      `_call_with_usage` admits the receipt-completion call (`run`, `:554`, `:584`).
-    - A record shape it refuses stops the run after the full phase, and any
-      re-address, have been billed, and before receipt completion is. A cardinality
-      the write-time normaliser leaves in place is one such shape.
-    - `_repair_invalid` runs only after the phase loop (`api_runner.py:7456-7471`), so
-      nothing repairs that shape before the originals freeze.
+  - **harness:** a deterministic stop caused by the run's own validation or by a
+    registered limit, not by the provider and not by the instruction's rules. Two
+    known cases:
+    - **A record shape the runtime refuses** (Lane C1 Finding 2).
+      - Receipt completion validates the persisted full record against the captured
+        schema (`_validate_record`, called from `_inputs`; `receipt_completion.py:154`,
+        `:178`, `:215`). It does so before `_call_with_usage` admits the
+        receipt-completion call (`run`, `:554`, `:584`). So the run stops after the
+        full phase, and any re-address, have been billed.
+      - C1 Finding 2 names the shapes no step repairs. The write-time normaliser misses
+        a scalar on a line that opens a sequence item (`- slot: value`), and a scalar
+        in a multivalued slot whose range is not `string`. Nothing unwraps or joins a
+        list written in a single-valued slot.
+      - `_repair_invalid` runs only after the phase loop (`api_runner.py:7456-7471`),
+        so nothing repairs such a shape before the originals freeze.
+      - C1 notes that its sweep bypasses `_validate_record`, so the gate itself was
+        not exercised there.
+    - **A registered limit no valid answer can meet** (Lane C1 Finding 1). The
+      registered `worker_output_tokens` (4,000) is below the floor of any worker answer
+      the terminal source review accepts. It stops a run in one of two ways:
+      - a cut-off answer is refused at the worker stage, and the typed audit is
+        terminal after one worker is billed;
+      - a shortened answer passes the worker stage and fails at assembly, after every
+        typed stage is billed.
+
+      The cause is the registration, so a contingency under the same limits would
+      reproduce it. The remedy is A6's output limits, set before any registration is
+      put to the owner.
     - The defect is filed as an engineering issue before the classification;
   - **instrument:** an offline recomputation shows that a gate or checker misread a
     record that is valid under the registered rules. The defect is filed as an issue
@@ -584,11 +601,12 @@ states it and its source before P4.
   **A13's "operational" cause** ("a transport or operational cause allows one
   contingency") is read as transport or harness [proposed; owner fixes at P4]. Under
   that reading:
-  - a harness stop allows one contingency;
-  - if the contingency is refused for the same shape, the fix is an engineering
-    change, which lands only by D17's advance procedure or at the next
-    shared-generation version;
-  - neither stop counts toward the defect-class stop-loss.
+  - **a record-shape stop** allows one contingency. If the contingency is refused for
+    the same shape, the fix is an engineering change, which lands only by D17's
+    advance procedure or at the next shared-generation version;
+  - **a registered-limit stop** allows no contingency under the same registration,
+    since it would reproduce the stop. The limits are corrected first;
+  - no harness stop counts toward the defect-class stop-loss.
 - **Single-delivery terminal-failure estimate:**
   - Typed stages and receipt completion admit exactly one delivery.
   - At v8's per-call rate of 8 retried calls in 92 (5 transport, 3 answer-level; P1),
@@ -616,9 +634,10 @@ Frozen are:
 - any #4354 merge that touches the API path.
 
 The launch worktree stays at the launch base for the whole matrix. Any advance follows
-D17's procedure between stages, with no run live. A compaction change such as Lane C1's
-S7 (item 15) must land before A4, or at the next shared-generation version, never
-inside the matrix.
+D17's procedure between stages, with no run live. Any compaction or report-family
+change item 15 describes is model-facing. It lands before A4, or at the next
+shared-generation version, never inside the matrix. The output limits are
+registration values, set at A6.
 
 ## 12. Blinding and reviewers (P2 item 12; [pending D23])
 
@@ -699,7 +718,8 @@ standing authorization covers it.
 - The plan's A1 sizes only CHORUS and AI_READI, and D15 and A19-word describe Kids
   First as "about the size of AI_READI's 542,513", which is now false (for agy and the
   owner).
-- Lane C1 sized Kids First by proxy.
+- Lane C1 sized Kids First by proxy (C1 Finding 5): it has no A5d omission context
+  and no record, and an A1b count of it needs an A5d context first.
 
 The values themselves are set at A6 and reviewed at A7. This draft fixes the rule,
 not the numbers. Item 15 shows the numbers cannot yet be set.
@@ -708,40 +728,92 @@ not the numbers. Item 15 shows the numbers cannot yet be set.
 
 Still pending. The A1 offline sizing has a result: Lane C1's
 `notes/a1_offline_sizing_2026-10-20.md` on branch `fix/5072-offline-sizing-recovery`,
-commit `e6d46f3a3`, local and readable with `git show`, note sha256
-`ac7f68a7dd8638ed915e9c51c45d958417309020a7420ad98f849bb3289b5631`. It measured tree
-`8ea79861` (PR #5095's pre-launch stack). Its findings:
+commit `9dcb4390a`, local and readable with `git show`, note sha256
+`f62da63baf6264bd4bfd757ed2461aee057b04e7d05d1df03b818fff7044865b`.
+- It was still under independent review when this was written.
+- It replaces the note's first version (`64082b98d`, `e6d46f3a3`), whose
+  recommendation and three of whose claims it corrects.
+- It measured tree `8ea79861` (PR #5095's pre-launch stack).
+- Every token figure in it is an estimate from bytes, except where it quotes A1b's
+  count.
 
-1. **No partition fits.** No `max_paths`/`max_workers` setting makes a typed-audit
-   worker fit the 1,000,000-token window, for any of the six projects.
-   - CHORUS is at the edge, its largest worker an estimated 1.4% over.
-   - The other projects are 24–60% over.
-   - The cause: every typed request carries the schema twice. Once as its own
-     catalog, 1,486,502 bytes in every worker, and again as the schema context's
-     induced-slot classes. Partitioning controls only the worker's own assignment,
-     0.1–0.3% of the request.
-2. **Kids First is the largest case**, and it was sized only by proxy, since no Kids
-   First record exists.
-3. **Only one option fits everything.** Of seven measured compaction options, only
-   **S7** fits every stage of all six projects. S7 drops the schema catalog from
-   typed requests, trims induced-slot definitions, and sends owners without their
-   typed trees. Its closest margins are Kids First's regate (5.4% under the 850,000
-   report-family ceiling) and AI_READI's (12.6% under).
-4. **All of these are byte estimates, not counts.** Only the unbilled A1b
-   `messages.count_tokens` count, which agy runs, can clear a request.
+Its answer, in the order a run would meet the problems:
+
+1. **No partition makes a typed-audit worker's input fit**, for any of the six
+   projects, under the current protocol.
+   - CHORUS: A1b counted its largest worker at 1,009,249 input tokens on the same
+     record at the same grid. That is over the 1,000,000-token window before the
+     4,000-token output cap is added.
+   - The other five: an estimated 24–60% over.
+   - The cause: every typed request carries the schema twice. Once as its own catalog
+     (1,486,502 bytes in every worker and in integration), and again as the schema
+     context's induced-slot classes. The worker's own assignment, the only part
+     partitioning controls, is 0.2–0.3% of the request.
+2. **No worker's answer fits its output cap, from G2 up** (C1 Finding 1).
+   - The registered `worker_output_tokens` is 4,000, and thinking draws on the same
+     `max_tokens`.
+   - The floor of an answer the terminal source review accepts is 2.7–3.0 times the
+     cap at G2 and 3.4–6.1 times at G5.
+   - Even the worker-stage check's own minimum, with one-character claims, is 1.8–2.3
+     times the cap at G2.
+   - No compaction option helps: this is output, not input. Item 10 classifies the two
+     ways it stops a run.
+3. **Under S7, the closest compaction option, the report family is not shown to fit
+   for AI_READI or Kids First.** The audit is carried at its floor, a lower bound, and
+   the report as written at its 96k cap. On those figures:
+   - Kids First's regate is 880,265 tokens, 3.6% over the 850,000 report-family
+     ceiling.
+   - AI_READI's is 816,145, with room for 172 bytes per source-review row. The note
+     judges that a real row likely needs more.
+   - A report-family change is needed for Kids First and likely for AI_READI. The note
+     names three, each of which would clear Kids First's excess at the floor:
+     - carry only the audit's findings and revised rows;
+     - drop the remaining classes from the report family's schema context;
+     - stop repeating the source-review inventory there.
+   - The other four projects keep at least 949 bytes per row. Every other request's
+     input fits on every project under S7, but result 2's output problem remains.
+4. **The typed input aggregate rules out G2 under S7.** The registered
+   `aggregate_input_tokens` is 4,000,000.
+   - At G2, AI_READI needs 4.33M and Kids First 4.71M.
+   - With three workers (G3, G5), they need 2.70M and 2.93M.
+5. **Kids First is the largest case and is sized by proxy** (C1 Finding 5; item 14).
+6. **Byte estimates, not counts.** Only the unbilled A1b `messages.count_tokens`
+   count, which agy runs, can clear a request.
+
+**The note's recommendation: "Nothing launches as registered."** If S7 or S6 is
+adopted, it recommends G5 (`max_paths` 384, `max_inventory_bytes` 65,536,
+`max_workers` 4), together with the report-family change. It also needs output limits
+that A6 sizes from a measured worker answer:
+- `worker_output_tokens`: at least 24,290 tokens at the floor (4 bytes a token), and
+  30,298–36,536 for AI_READI at A1b's ratios, before real content and thinking;
+- `aggregate_output_tokens`: the registered 100,000 is likely too small for AI_READI
+  and Kids First. The runtime's admission rule needs 80,242–96,762 at A1b's ratios at
+  the floor, before thinking.
+
+Its alternative is G2, which needs A6 to raise `aggregate_input_tokens` to at least
+4.71M plus a margin.
 
 **What follows for this plan:**
-- S7 changes model-facing text. It is a new shared-generation version at a condition
-  boundary (D17), touching `shared_generation.py`, the typed audit and receipt
-  completion. It needs **the owner's decision, which has not been made**.
-- Until that decision and the A1b counts exist, **no stage cap, input bound or
-  allowance is fixed here.**
-- The rule that will apply, whatever the figures:
+- **Nothing here is decided.** S7 or S6, the report-family change and the partition
+  are the owner's decisions; the output limits are A6's.
+  - Each compaction or report-family change alters model-facing text. That makes it a
+    new shared-generation version at a condition boundary (D17), touching
+    `shared_generation.py`, the typed audit and receipt completion.
+- **No stage cap, input bound or allowance is fixed here**, until those decisions and
+  the A1b counts exist.
+- **D07.** The note quotes D07's two triggers. Its estimates point at the second:
+  "If a counted AI_READI report or regate request, with its 96k output cap, does not
+  fit the route's window, A14 waits for the owner's decision". They point at it for
+  Kids First as well as AI_READI. That trigger fires on A1b counts, not on the note.
+- **The rule that will apply**, whatever the figures:
   - each counted request plus its output cap fits the route's window, and the report
     family fits under 850,000;
+  - **[proposed; owner fixes at P4]** every worker's answer, at the size A6
+    measures, fits its `worker_output_tokens`, and the run's typed stages fit
+    `aggregate_output_tokens` under the admission rule;
   - the report and its regate, with the 96k output cap, are counted figures (A1b);
   - if a worst case does not fit, the dependent pilot waits for the owner's decision
-    (D07's re-plan clause), and Kids First is now among them.
+    (D07), and Kids First is now among them.
 
 #5072 records that the 2026-10-12 A1b calibration report printed PASS on oversized
 rows. It is not launch evidence.
@@ -865,7 +937,10 @@ The plan is followed in every case:
   - D02, including the **AI_READI comparator** (options (a)–(d), item 2) and the
     **Set A definition** (item 3);
   - D03, D20, D21, D24, D17, D23, D09, D04, D15, D05, D08 and D19.
-- **The S7 compaction decision and the A1b counts**, for items 14 and 15.
+- **Item 15's open decisions**, for items 14 and 15:
+  - S7 or S6, a report-family change and the partition (the owner);
+  - the output limits, from a measured worker answer (A6);
+  - the A1b counts (agy), with Kids First's A5d context first.
 - **Plan amendments, for agy and the owner; this draft does not edit the plan:**
   - the `d22b61a9` gates in A4 and A14-reg, and the run tables;
   - D15's and A19-word's "about the size of AI_READI's 542,513";
