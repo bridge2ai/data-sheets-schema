@@ -76,8 +76,18 @@ class ThreadSamples:
                        for (thread, stack), count in self.counts.most_common()],
         }
         (output / "thread-samples.json").write_text(json.dumps(result, indent=2) + "\n")
+        self.write_summary(output, result)
+
+    @staticmethod
+    def write_summary(output, result):
         leaf, inclusive = Counter(), Counter()
-        for (thread, stack), count in self.counts.items():
+        for row in result["stacks"]:
+            thread = row["thread"]
+            if thread.startswith("Thread-") and "(" in thread:
+                thread = thread[thread.index("("):]
+            count = row["count"]
+            stack = [(frame["path"], frame["line"], frame["function"])
+                     for frame in row["frames_leaf_first"]]
             if stack:
                 path, _, function = stack[0]
                 leaf[(thread, path, function)] += count
@@ -113,6 +123,8 @@ def main():
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--sample-threads", action="store_true",
                         help="Sample Python stacks instead of cProfile; preserves owner-thread execution.")
+    parser.add_argument("--summarize-existing", action="store_true",
+                        help="Rebuild only a saved thread-summary.txt; do not run tests.")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
     if Path.cwd().resolve() != root:
@@ -120,6 +132,9 @@ def main():
     output = args.output.resolve()
     if output == root or root in output.parents:
         parser.error("evidence output must be outside the checkout")
+    if args.summarize_existing:
+        ThreadSamples.write_summary(output, json.loads((output / "thread-samples.json").read_text()))
+        return 0
     output.mkdir(parents=True, exist_ok=False)
     import data_sheets_schema.native_shared_capture as capture
     if root / "src" not in Path(capture.__file__).resolve().parents:

@@ -8,6 +8,7 @@ from __future__ import annotations
 from pathlib import Path
 from contextlib import nullcontext
 import re
+import sys
 
 from . import native_shared_contract as c
 from . import native_shared_controller as composition
@@ -137,6 +138,17 @@ def _registration_in_scope(composition_path, system_path, *, permission_probe_pa
 
 def _registration(composition_path, system_path, *, permission_probe_path, attempt_id,
                   attempt_directory, evidence_directory, max_draft_checks, receipt_origin_version, controls):
+    return _registration_capture(composition_path, system_path,
+        permission_probe_path=permission_probe_path, attempt_id=attempt_id,
+        attempt_directory=attempt_directory, evidence_directory=evidence_directory,
+        max_draft_checks=max_draft_checks, receipt_origin_version=receipt_origin_version,
+        controls=controls)[0]
+
+
+def _registration_capture(composition_path, system_path, *, permission_probe_path, attempt_id,
+                          attempt_directory, evidence_directory, max_draft_checks,
+                          receipt_origin_version, controls):
+    """Return the fresh reconstruction's inputs, never a reusable admission."""
     from . import native_owner_profile_v1 as owner_profile
     context = nullcontext(None) if controls is None else owner_profile._reconstruction_controls()
     with context as current:
@@ -209,7 +221,7 @@ def _registration_body(composition_path, system_path, *, permission_probe_path, 
             or c.canonical(dependencies) != c.canonical(authority.dependency_identity() if controls is None
                 else authority.dependency_identity(stream_snapshot_profile=1))):
         raise ValueError('execution authority changed during capture')
-    return value
+    return value, selected, spec, doc, runtime
 
 
 def _execution_value(raw):
@@ -240,20 +252,24 @@ def _execution_profile(value):
 
 
 def _rebuild_execution(value, controls):
+    return _rebuild_execution_capture(value, controls)[0]
+
+
+def _rebuild_execution_capture(value, controls):
     origin_version = 0
     if 'receipt_origin_reporting' in value:
         from .native_receipt_origin import version
         origin_version = version(value)
     try:
-        expected = _registration(value['composition'], value['system_path'], permission_probe_path=value['permission_probe'],
+        captured = _registration_capture(value['composition'], value['system_path'], permission_probe_path=value['permission_probe'],
             attempt_id=value['attempt_id'], attempt_directory=value['attempt_directory'],
             evidence_directory=value['evidence_directory'], max_draft_checks=value['max_draft_checks'],
             receipt_origin_version=origin_version, controls=controls)
     except (KeyError, TypeError) as exc:
         raise ValueError('incomplete native shared execution registration') from exc
-    if c.canonical(value) != c.canonical(expected):
+    if c.canonical(value) != c.canonical(captured[0]):
         raise ValueError('execution registration differs from its selected authorities')
-    return value
+    return (value, *captured[1:])
 
 
 def verified(raw):
@@ -264,8 +280,51 @@ def verified(raw):
 
 
 def _verified_in_scope(raw):
+    return _verified_capture_in_scope(raw)[0]
+
+
+def _verified_capture_in_scope(raw):
+    """Return one fully rebuilt E/C/spec join in its current owner scope."""
     from . import native_owner_profile_v1 as owner_profile
     value = _execution_value(raw)
     profile = _execution_profile(value)
     with owner_profile._reconstruction_controls(profile) as controls:
-        return _rebuild_execution(value, controls)
+        return _rebuild_execution_capture(value, controls)
+
+
+def _recheck_selected_capture(selected, spec, doc, runtime):
+    """Fresh endpoint checks without regenerating already verified policy/text.
+
+    This consumes only the just-returned reconstruction. The caller still owns
+    its exact reader context, and no result is retained between callbacks.
+    """
+    from . import native_shared_selection as selections
+    from . import native_owner_profile_v1 as owner_profile
+    from .agentic_runtime import toolchain
+    with owner_profile._reconstruction_controls(selected['stream_snapshot_profile']):
+        current = selections.capture(doc['registration_path'])
+        if (current.registration.raw != selected['selection_raw_json'].encode('utf-8')
+                or current.generation_context() !=
+                    selected['render_spec']['native_shared_generation_context']):
+            raise ValueError('selected authority changed after execution reconstruction')
+        actual_runtime = _read(selected['runtime_path'], 'runtime declaration', c.HARD_LIMITS['input_bytes'])
+        if actual_runtime != selected['runtime_raw_json'].encode('utf-8'):
+            raise ValueError('selected runtime changed after execution reconstruction')
+        if c.canonical(validate_runtime(c.strict_json(actual_runtime))) != c.canonical(runtime):
+            raise ValueError('selected executable changed after execution reconstruction')
+        instruction = _read(selected['instruction_path'], 'instruction', c.HARD_LIMITS['request_bytes'])
+        if (c.sha(instruction) != selected['instruction_sha256']
+                or instruction != spec.instruction.encode('utf-8')):
+            raise ValueError('selected instruction changed after execution reconstruction')
+        if c.canonical(toolchain()) != c.canonical(spec._agentic_toolchain):
+            raise ValueError('selected toolchain changed after execution reconstruction')
+        if (selected['working_directory'] != str(Path.cwd().resolve())
+                or selected['python'] != sys.executable or selected['python_version'] != sys.version):
+            raise ValueError('selected process identity changed after execution reconstruction')
+        outputs = {str(Path(spec._agentic_artifact_paths[role]).parent.resolve())
+                   for role in ('full', 'core', 'report')}
+        outputs.add(current.role('stage_root'))
+        if sorted(outputs) != selected['policy']['readonly_lookups']['output_directories']:
+            raise ValueError('selected output parents changed after execution reconstruction')
+        if c.canonical(composition.inherited.controller_sources()) != c.canonical(selected['controller_sources']):
+            raise ValueError('selected controller sources changed after execution reconstruction')

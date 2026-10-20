@@ -26,6 +26,7 @@ from data_sheets_schema import native_shared_controller as composition
 from data_sheets_schema import native_shared_execution as execution
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_shared_registration as registration
+from data_sheets_schema import native_subscription_guard as subscription_guard
 from data_sheets_schema import native_stream_coordination_v1 as coordination
 from tests.test_native_shared_controller import bound, native_spec, declaration
 from tests.test_native_shared_permissions import fabricated_manifest
@@ -359,6 +360,7 @@ def test_public_selected_discriminators_and_mixed_routes_refuse_before_dispatch(
         with monkeypatch.context() as patch:
             patch.setattr(execution, '_probe_runtime', forbidden)
             patch.setattr(execution, 'authorizations', forbidden)
+            patch.setattr(subscription_guard, 'load_guard', forbidden)
             for profile_value in (case['profile'], None, False, {}, {'version': 1}):
                 value = deepcopy(case['composition'])
                 value['stream_snapshot_profile'] = deepcopy(profile_value)
@@ -377,7 +379,9 @@ def test_public_selected_discriminators_and_mixed_routes_refuse_before_dispatch(
             with pytest.raises(ValueError):
                 execution.launch(case['raw'], review_path=case['authorization']['inputs']['review'],
                     ci_path=case['authorization']['inputs']['ci'],
-                    launch_word_path=case['authorization']['inputs']['launch'])
+                    launch_word_path=case['authorization']['inputs']['launch'],
+                    subscription_guard_path=case['args']['attempt_directory'] / 'unread-guard.json',
+                    subscription_guard_sha256='0' * 64)
             with pytest.raises(ValueError):
                 registration.registration(**case['args'])
         # A copied map is not an accepted caller extension to these fixed APIs.
@@ -391,6 +395,83 @@ def test_public_selected_discriminators_and_mixed_routes_refuse_before_dispatch(
         with pytest.raises(ValueError, match='exact current controls'):
             registration._registration(**case['args'], receipt_origin_version=0,
                                        controls=dict(case['controls']))
+    require_no_reservation(case)
+
+
+def test_fresh_verified_capture_keeps_value_api_and_reconstructs_composition_once(scoped_case, monkeypatch):
+    case = scoped_case
+    original = registration._selection_in_scope
+    calls = []
+
+    def selection(raw):
+        calls.append(raw)
+        return original(raw)
+
+    monkeypatch.setattr(registration, '_selection_in_scope', selection)
+    value, selected, spec, doc, runtime = registration._verified_capture_in_scope(case['raw'])
+    assert calls == [case['composition_raw']]
+    assert value == case['value'] and selected == case['composition']
+    assert doc == c.parse_selection(selected['selection_raw_json'].encode())
+    assert spec.render_spec() == selected['render_spec']
+    assert runtime == value['runtime']
+    registration._recheck_selected_capture(selected, spec, doc, runtime)
+    assert calls == [case['composition_raw']]
+    assert registration._verified_in_scope(case['raw']) == value
+    require_no_reservation(case)
+
+
+def test_same_capture_endpoint_recheck_reads_current_bundle_runtime_binary_and_instruction(scoped_case):
+    case = scoped_case
+    _, selected, spec, doc, runtime = registration._verified_capture_in_scope(case['raw'])
+    paths = [Path(spec.bundle), case['runtime_path'], case['instruction_path'],
+             Path(runtime['executable']['path'])]
+    for path in paths:
+        raw = path.read_bytes()
+        try:
+            path.write_bytes(raw + b'\nchanged after verified reconstruction\n')
+            with pytest.raises(ValueError):
+                registration._recheck_selected_capture(selected, spec, doc, runtime)
+        finally:
+            path.write_bytes(raw)
+        registration._recheck_selected_capture(selected, spec, doc, runtime)
+    require_no_reservation(case)
+
+
+def test_same_capture_endpoint_recheck_keeps_current_toolchain_and_controller(scoped_case, monkeypatch):
+    case = scoped_case
+    from data_sheets_schema import agentic_runtime
+    _, selected, spec, doc, runtime = registration._verified_capture_in_scope(case['raw'])
+    current = agentic_runtime.toolchain()
+    with monkeypatch.context() as patch:
+        patch.setattr(agentic_runtime, 'toolchain', lambda: {**current, 'python': '/different/python'})
+        with pytest.raises(ValueError, match='toolchain'):
+            registration._recheck_selected_capture(selected, spec, doc, runtime)
+    with monkeypatch.context() as patch:
+        patch.setattr(composition.inherited, 'controller_sources', lambda: {})
+        with pytest.raises(ValueError):
+            registration._recheck_selected_capture(selected, spec, doc, runtime)
+    registration._recheck_selected_capture(selected, spec, doc, runtime)
+    require_no_reservation(case)
+
+
+def test_same_capture_endpoint_recheck_refuses_output_parent_replaced_with_symlink(scoped_case, tmp_path):
+    case = scoped_case
+    _, selected, spec, doc, runtime = registration._verified_capture_in_scope(case['raw'])
+    parent = Path(spec._agentic_artifact_paths['full']).parent
+    assert parent.is_relative_to(tmp_path.resolve())
+    assert not parent.exists() and not parent.is_symlink()
+    other = tmp_path / 'changed-output-parent'
+    other.mkdir()
+    parent.parent.mkdir(parents=True, exist_ok=True)
+    parent.symlink_to(other, target_is_directory=True)
+    try:
+        with pytest.raises(ValueError):
+            registration._selection_in_scope(case['composition_raw'])
+        with pytest.raises(ValueError, match='output parents changed'):
+            registration._recheck_selected_capture(selected, spec, doc, runtime)
+    finally:
+        parent.unlink()
+    registration._recheck_selected_capture(selected, spec, doc, runtime)
     require_no_reservation(case)
 
 

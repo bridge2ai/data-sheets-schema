@@ -1151,8 +1151,9 @@ def _base(selection_path, *, _catalogs=None, owner_context=None):
             ctx._base[base_key] = (saved_inputs, deepcopy(value), deepcopy(composition), spec, deepcopy(doc))
     if owner_context is not None:
         _require_owner_association(owner_context, selection, e.raw)
-        value = registration._verified_in_scope(e.raw)
-        composition, spec, doc, _ = registration._selection_in_scope(value['composition_raw_json'].encode('utf-8'))
+        value, composition, spec, doc, runtime = registration._verified_capture_in_scope(e.raw)
+        registration._recheck_selected_capture(composition, spec, doc, runtime)
+        _require_owner_association(owner_context, selection, e.raw)
     if (doc['registration_path'] != selection_path or composition['selection_raw_json'].encode('utf-8') != selection.registration.raw
             or value['selection_sha256'] != selection.registration.pin.sha256):
         raise ValueError('actual E/C/S binding differs from the caller-selected registration')
