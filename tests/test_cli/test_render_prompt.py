@@ -174,31 +174,32 @@ class TestTheCommand(unittest.TestCase):
                 self.assertEqual(r.exit_code, 0, r.stderr)
                 self.assertNotIn("#5046", r.stderr)
 
-    def test_the_api_runtime_with_the_agent_directory_is_warned_from_v8(self):
-        """#5068: from generic_v8 the API baseline writes under claudecode_api
-        (#690); through v7 both runtimes wrote under claudecode_agent."""
-        api_rt = ["--runtime", "Claude API (direct)", "--method", "claudecode_agent"]
-        for condition, label, warned in (
-                ("generic_v8", "2026-10-14_claude-opus-5-api-generic-v8_rep1", True),
-                ("generic_v9", "2026-10-14_claude-opus-5-api-generic-v9_rep1", True),
-                ("generic_v7", "2026-08-28c_claude-opus-5-api-generic-v7_rep1", False)):
-            with self.subTest(condition=condition):
-                r = CliRunner(mix_stderr=False).invoke(api, [
-                    "render-prompt", "--project", "VOICE", "--label", label,
-                    "--condition", condition, *api_rt])
-                self.assertEqual(r.exit_code, 0, r.stderr)
-                if warned:
-                    self.assertIn("pass --method claudecode_api", r.stderr)
-                else:
-                    self.assertNotIn("#5046", r.stderr)
-        pre_v8_api = CliRunner(mix_stderr=False).invoke(api, [
-            "render-prompt", "--project", "VOICE",
-            "--label", "2026-08-28c_claude-opus-5-api-generic-v7_rep1",
-            "--condition", "generic_v7",
-            "--runtime", "Claude API (direct)", "--method", "claudecode_api"])
-        self.assertEqual(pre_v8_api.exit_code, 0, pre_v8_api.stderr)
-        # #5089 F1: a v7 API run made today writes under claudecode_api, so naming it is no contradiction.
-        self.assertNotIn("#5046", pre_v8_api.stderr)
+    def test_the_warning_across_runtime_method_and_version(self):
+        """#5091 R2/R3: an explicit --method warns exactly when it is not where a
+        new run of that runtime writes: Claude Code → claudecode_agent, direct →
+        claudecode_direct, API → claudecode_api, before generic_v8 as after it.
+        A pre-v8 API render naming claudecode_agent says that the v6/v7 API
+        records wrote there and a new run does not."""
+        writes = {"Claude Code": "claudecode_agent", "Claude Code (direct)": "claudecode_direct",
+                  "Claude API (direct)": "claudecode_api"}
+        labels = {"generic_v7": "2026-08-28c_claude-opus-5-api-generic-v7_rep1",
+                  "generic_v8": "2026-10-14_claude-opus-5-generic-v8_rep1"}
+        for condition, label in labels.items():
+            for runtime, expected in writes.items():
+                for method in ("claudecode_agent", "claudecode_direct", "claudecode_api"):
+                    with self.subTest(condition=condition, runtime=runtime, method=method):
+                        r = CliRunner(mix_stderr=False).invoke(api, [
+                            "render-prompt", "--project", "VOICE", "--label", label, "--condition", condition,
+                            "--runtime", runtime, "--method", method])
+                        self.assertEqual(r.exit_code, 0, r.stderr)
+                        if method == expected:
+                            self.assertNotIn("#5046", r.stderr)
+                            continue
+                        self.assertIn(f"pass --method {expected} (#5046)", r.stderr)
+                        historical = (runtime == "Claude API (direct)" and method == "claudecode_agent"
+                                      and condition == "generic_v7")
+                        self.assertEqual("the v6/v7 API records wrote under claudecode_agent/" in r.stderr,
+                                         historical)
 
     def test_an_omitted_method_follows_the_runtime(self):
         """#5063 F1/F2 (owner, 2026-10-19): the playbook renders without
@@ -245,16 +246,15 @@ class TestTheCommand(unittest.TestCase):
                                  ("generic_v7", "2026-08-28c_claude-opus-5-api-generic-v7_rep1"),
                                  ("generic_v8", "2026-10-14_claude-opus-5-api-generic-v8_rep1")):
             with self.subTest(condition=condition):
+                # The run resolves its provider from the route unless told one; the
+                # render defaults to Anthropic. Given the same provider, the texts are
+                # byte-identical (#5091 R4).
                 r = CliRunner(mix_stderr=False).invoke(api, [
                     "render-prompt", "--project", "VOICE", "--label", label, "--condition", condition,
-                    "--runtime", "Claude API (direct)"])
+                    "--runtime", "Claude API (direct)", "--provider", "Anthropic"])
                 self.assertEqual(r.exit_code, 0, r.stderr)
-                # The run resolves its provider from the route; the render's --provider
-                # default predates #5063 and is not a path, so that one header line is
-                # set aside.
-                lines = lambda t: [l for l in t.rstrip("\n").splitlines()
-                                   if not l.lstrip().startswith("# Provider:")]
-                self.assertEqual(lines(r.stdout), lines(resolve_prompt(_spec("VOICE", "baseline", label, condition))))
+                sent = resolve_prompt(_spec("VOICE", "baseline", label, condition, provider="Anthropic"))
+                self.assertEqual(r.stdout, sent + "\n")   # click.echo's own newline
                 self.assertIn(f"data/d4d_concatenated/claudecode_api/{label}/VOICE_d4d.yaml", r.stdout)
 
     def test_a_runtime_in_another_case_or_spacing_renders_as_its_recorded_spelling(self):
