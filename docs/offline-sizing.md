@@ -71,14 +71,28 @@ For each exact request with valid saved count evidence:
 
 ```text
 clearance_tokens = context_limit_tokens - input_tokens - payload.max_tokens
-PASS if clearance_tokens >= required_margin_tokens; otherwise FAIL
+total_tokens     = input_tokens + payload.max_tokens
+PASS if clearance_tokens >= required_margin_tokens
+    and total_tokens <= the phase ceiling; otherwise FAIL
 ```
 
 Both the capacity and margin are explicit declarations for that row, with text
 recording their basis. They have no built-in provider default. `fits_window`
 and `fits_margin` distinguish exceeding the context window from fitting the
-window but missing the selected margin. Report and report-regate rows follow
-the same rule as other stages.
+window but missing the selected margin.
+
+Each phase also has a ceiling that no declaration can raise (#5072). It is
+reported as `ceiling_tokens` and `fits_ceiling`:
+
+| Phase | Ceiling on `total_tokens` |
+| --- | --- |
+| `typed_audit_worker` | 1,000,000, the whole route window |
+| `report`, `report_regate`, `report_after_repair` | 850,000, keeping a 15% margin of the window for growth |
+| every other phase | 1,000,000, the route window |
+
+The route window is the generic_v10 CBORG claude-opus-5 route's 1,000,000
+tokens. A declared `context_limit_tokens` above it, or a smaller declared
+margin, cannot make an oversized worker or report-family request `PASS`.
 
 Missing request/count evidence produces `UNKNOWN`. A supplied file that is
 missing, malformed or stale is an error rather than a substitute zero count.
@@ -186,6 +200,69 @@ derived from its declared input inventory. Manually relabeling an unrelated
 count with new digests does not make it valid evidence. Review the provenance
 of supplied counts separately. This tool provides no count collector and makes
 no zero-cost, billing, thinking-display or cache-acceptance claim.
+
+## Step A1 sizing sweep
+
+`scripts/offline_sizing.py sweep` sizes every request a generic_v10 API run
+builds before it can know its own outputs, without contacting a provider
+(plan step A1). Sockets are blocked before anything is imported. It needs a
+checkout with the A3 draft registration builder and the A5d omission
+contexts (`scripts/build_api_registrations.py`, `data/omission_contexts/`,
+PR #5095), named by `--root`:
+
+```sh
+PYTHONPATH=<root>/src:<root> python scripts/offline_sizing.py sweep \
+  --root <root> --workdir <new directory> --out <new results file>.json
+```
+
+`data_sheets_schema` and `scripts` are namespace packages, and an editable
+install can put another checkout's `src` on the path. The sweep therefore
+removes every other location before importing, and refuses to report if any
+module it used came from outside `--root`.
+
+For each project it stages historical phase-1 originals into a scratch run,
+builds a draft registration with each grid's `max_paths`,
+`max_inventory_bytes` and `max_workers`, and calls the production builders:
+- `typed_audit_runtime.prepare_packet` and `build_request` for every worker,
+  the omission stage and integration;
+- receipt completion;
+- `api_runner.build_phase` for full, the re-address turn, `reconcile_full`
+  and report;
+- `_append_regate` for the regate;
+- `build_repair` with the generation context.
+
+The stand-in records are adjusted only as far as the current runtime
+requires:
+- **Normaliser.** Each record passes through the runner's write-time
+  normaliser.
+- **Cardinality.** Values whose list-ness differs from the current schema are
+  wrapped, unwrapped or joined, and slots the current class does not declare
+  are removed. Every edit is listed. The edits go through a round-trip YAML
+  dump, which keeps each record within 0.4% of its bytes; a plain re-dump
+  shrank them by 7–8%.
+- **Receipt.** A receipt pinned to an earlier bundle (AI_READI before #5042)
+  is carried onto today's manifest by chunk sha256. Entries for removed
+  chunks are dropped.
+
+Content that cannot exist before a run is sized at its output cap, in
+tokens. That covers the typed audit's findings, the report as written, and
+every worker and omission response that integration carries.
+
+Tokens are estimates: payload bytes times a tokens-per-byte ratio calibrated
+from the 2026-10-12 A1b `messages.count_tokens` results for the same project
+and stage, with the higher calibrated value for projects A1b did not count.
+A1b's report-family payloads carried `'x' * (4 × cap)` placeholders, and the
+endpoint counted about one token per `x` (the regate minus the report is
++382,173 bytes and +383,458 tokens in both projects). So those A1b rows
+overstate the report family by about the placeholder size; the clean ratios
+remove the placeholders.
+
+A row's verdict is `estimate_fits` or `estimate_exceeds`, against the same
+ceilings as the evidence reader. It is never `PASS`: only an exact saved
+count reviewed by `check` can clear a request. Each project's primary record
+also gets a byte decomposition of every request, computed by emptying each
+part and re-encoding. That measures what a schema-context or protocol change
+would save before anyone makes one.
 
 ## Historical evidence and deferred work
 

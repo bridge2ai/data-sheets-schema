@@ -21,6 +21,14 @@ MAX_ROWS = 1024
 PHASES = frozenset({"full", "full_readdress", "full_receipt_completion",
     "typed_audit_worker", "typed_audit_omission", "typed_audit_integration",
     "reconcile_full", "report", "report_regate", "repair_full", "report_after_repair"})
+#: The generic_v10 route's context window (CBORG claude-opus-5, A1b).
+ROUTE_WINDOW_TOKENS = 1_000_000
+#: Ceilings on input plus `max_tokens` that no declared window or margin can
+#: raise: a typed-audit worker may use the whole window, and the report
+#: family keeps 15% of it for growth (#5072). Every other phase is held to
+#: the route window.
+PHASE_CEILING_TOKENS = {"typed_audit_worker": 1_000_000, "report": 850_000,
+                        "report_regate": 850_000, "report_after_repair": 850_000}
 
 
 def canonical(value):
@@ -97,8 +105,9 @@ def _pinned(value):
     return raw
 
 
-def window_status(input_tokens, output_tokens, window_tokens, margin_tokens):
-    """Arithmetic only; every capacity and margin is supplied explicitly."""
+def window_status(input_tokens, output_tokens, window_tokens, margin_tokens, phase=None):
+    """Arithmetic against the caller's declared window and margin, and against
+    the phase's ceiling, which no declaration can raise: PASS needs both."""
     _integer(input_tokens, "input tokens")
     _integer(output_tokens, "output tokens", 1)
     _integer(window_tokens, "context window", 1)
@@ -106,10 +115,14 @@ def window_status(input_tokens, output_tokens, window_tokens, margin_tokens):
     if margin_tokens >= window_tokens:
         raise ValueError("required margin leaves no request capacity")
     clearance = window_tokens - input_tokens - output_tokens
-    return {"status": "FAIL" if clearance < margin_tokens else "PASS",
+    total = input_tokens + output_tokens
+    ceiling = min(PHASE_CEILING_TOKENS.get(phase, ROUTE_WINDOW_TOKENS), ROUTE_WINDOW_TOKENS)
+    fits_ceiling = total <= ceiling
+    return {"status": "PASS" if clearance >= margin_tokens and fits_ceiling else "FAIL",
             "input_tokens": input_tokens, "max_output_tokens": output_tokens,
-            "total_tokens": input_tokens + output_tokens, "clearance_tokens": clearance,
-            "fits_window": clearance >= 0, "fits_margin": clearance >= margin_tokens}
+            "total_tokens": total, "clearance_tokens": clearance,
+            "fits_window": clearance >= 0, "fits_margin": clearance >= margin_tokens,
+            "ceiling_tokens": ceiling, "fits_ceiling": fits_ceiling}
 
 
 def _payload(raw):
@@ -193,7 +206,8 @@ def review(manifest_path, *, dry_run=False):
                     or evidence["request_id"] != identity or evidence["request_sha256"] != digest
                     or evidence["inputs_sha256"] != inputs_sha256):
                 raise ValueError("saved count is not bound to this request and input inventory")
-            verdict = window_status(evidence["input_tokens"], payload["max_tokens"], window, margin)
+            verdict = window_status(evidence["input_tokens"], payload["max_tokens"], window, margin,
+                                    phase=item["phase"])
             row.update(verdict)
             row["reason"] = "saved count arithmetic against caller-declared capacity and margin"
             if item["basis"] == "scenario" or dry_run:
@@ -250,7 +264,7 @@ def _spec_from_registration(path):
 def prepare_full(registration, output_dir, *, context_limit_tokens, context_limit_basis,
                  required_margin_tokens, margin_basis):
     payload, inputs = full_request(_spec_from_registration(registration))
-    window_status(0, payload["max_tokens"], context_limit_tokens, required_margin_tokens)
+    window_status(0, payload["max_tokens"], context_limit_tokens, required_margin_tokens, phase="full")
     _text(context_limit_basis, "context limit basis")
     _text(margin_basis, "margin basis")
     output = Path(output_dir).resolve()

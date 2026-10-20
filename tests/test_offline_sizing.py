@@ -245,3 +245,192 @@ def test_prepare_full_creates_explicit_unknown_later_stages(tmp_path, monkeypatc
         sizing.prepare_full(reg["registration_path"], output,
             context_limit_tokens=900_000, context_limit_basis="Synthetic caller declaration",
             required_margin_tokens=150_000, margin_basis="Synthetic margin")
+
+
+# --- Ceilings no declaration can raise (#5072) ---------------------------------
+
+@pytest.mark.parametrize("phase,inputs,output,window,margin,expected", [
+    ("typed_audit_worker", 996_000, 4_000, 1_000_000, 0, "PASS"),
+    ("typed_audit_worker", 996_001, 4_000, 2_000_000, 0, "FAIL"),    # a larger declared window cannot raise it
+    ("report", 754_000, 96_000, 1_000_000, 0, "PASS"),
+    ("report", 754_001, 96_000, 1_000_000, 0, "FAIL"),               # 850,001 in flight, no margin declared
+    ("report_regate", 783_597, 96_000, 1_000_000, 100_000, "FAIL"),  # A1b's CHORUS regate row
+    ("report_after_repair", 754_001, 96_000, 2_000_000, 0, "FAIL"),
+    ("typed_audit_omission", 996_000, 4_000, 1_000_000, 0, "PASS"),
+    ("full", 872_001, 128_000, 2_000_000, 0, "FAIL"),                # every phase keeps the route window
+])
+def test_a_declaration_cannot_raise_a_phase_ceiling(phase, inputs, output, window, margin, expected):
+    verdict = sizing.window_status(inputs, output, window, margin, phase=phase)
+    assert verdict["status"] == expected
+    assert verdict["fits_ceiling"] == (expected == "PASS")
+    assert verdict["ceiling_tokens"] == sizing.PHASE_CEILING_TOKENS.get(phase, sizing.ROUTE_WINDOW_TOKENS)
+
+
+def ceiling_manifest(tmp_path, phase, input_tokens, max_tokens, window, margin):
+    source = tmp_path / "source.txt"
+    source.write_text("Exact source bytes.\n")
+    inputs = [sizing.pin(source)]
+    request = {"model": "fictional", "messages": [{"role": "user", "content": "source"}], "max_tokens": max_tokens}
+    request_pin = save(tmp_path / "request.json", request)
+    count = {"format": sizing.COUNT_FORMAT, "method": "endpoint messages.count_tokens", "request_id": "row",
+             "request_sha256": sizing.sha(sizing.canonical(request)),
+             "inputs_sha256": sizing.sha(sizing.canonical(inputs)), "input_tokens": input_tokens}
+    manifest = {"format": sizing.FORMAT, "scope": "Invented row above its phase ceiling", "inputs": inputs,
+                "requests": [{"id": "row", "phase": phase, "basis": "exact", "request": request_pin,
+                              "count": save(tmp_path / "count.json", count), "context_limit_tokens": window,
+                              "context_limit_basis": "Synthetic declared capacity", "required_margin_tokens": margin,
+                              "margin_basis": "Synthetic declared margin"}]}
+    path = tmp_path / "manifest.json"
+    save(path, manifest)
+    return path
+
+
+@pytest.mark.parametrize("phase,input_tokens,max_tokens", [
+    ("typed_audit_worker", 996_001, 4_000), ("report_regate", 754_001, 96_000)])
+def test_the_cli_never_prints_pass_above_a_ceiling(tmp_path, capsys, phase, input_tokens, max_tokens):
+    path = ceiling_manifest(tmp_path, phase, input_tokens, max_tokens, window=2_000_000, margin=0)
+    row = sizing.review(path)["requests"][0]
+    assert row["status"] == "FAIL" and row["fits_margin"] and not row["fits_ceiling"]
+    assert sizing.main(["check", str(path)]) == 1
+    printed = json.loads(capsys.readouterr().out)
+    assert [r["status"] for r in printed["requests"]] == ["FAIL"]
+    assert "PASS" not in json.dumps(printed)
+
+
+# --- The A1 sweep's pure parts (scripts/offline_sizing.py) --------------------
+
+from scripts import offline_sizing as sweep
+
+
+def test_the_sweep_holds_the_evidence_readers_ceilings():
+    assert sweep.ROUTE_WINDOW_TOKENS == sizing.ROUTE_WINDOW_TOKENS
+    assert sweep.WORKER_CEILING_TOKENS == sizing.PHASE_CEILING_TOKENS["typed_audit_worker"]
+    assert all(sizing.PHASE_CEILING_TOKENS[p] == sweep.REPORT_CEILING_TOKENS for p in sweep.REPORT_PHASES)
+
+
+def test_placeholder_runs_were_counted_as_one_token_per_x():
+    # With one token per 'x', each project's report and regate give the same clean ratio.
+    for project in sweep.A1B:
+        report, regate = sweep.clean_ratio(project, "report"), sweep.clean_ratio(project, "report_regate")
+        assert abs(report - regate) < 0.0005, project
+        assert all(0.33 < sweep.clean_ratio(project, f) < 0.42 for f in sweep.A1B[project])
+
+
+def test_an_estimate_is_never_a_pass_and_counts_placeholders_in_tokens():
+    worker = sweep.estimate("CHORUS", "typed_audit_worker", 2_461_846, 4_000)
+    assert worker["verdict"] == "estimate_exceeds" and worker["ceiling_tokens"] == 1_000_000
+    regate = sweep.estimate("CHORUS", "report_regate", 977_535, 96_000, placeholder_tokens=100_000)
+    assert regate["ceiling_tokens"] == 850_000
+    assert regate["estimated_input_tokens"] == round(977_535 * sweep.clean_ratio("CHORUS", "report_regate")) + 100_000
+    assert regate["verdict"] == "estimate_fits"
+    other = sweep.estimate("VOICE", "typed_audit_worker", 1_000, 4_000)
+    assert other["ratio"] == round(max(sweep.clean_ratio(p, "typed_audit_worker") for p in sweep.A1B), 4)
+    assert {"PASS", "FAIL"}.isdisjoint({worker["verdict"], regate["verdict"], other["verdict"]})
+
+
+TINY_SCHEMA = """id: https://example.org/tiny
+name: tiny
+prefixes: {linkml: https://w3id.org/linkml/}
+imports: [linkml:types]
+default_range: string
+classes:
+  Dataset:
+    attributes:
+      id: {identifier: true}
+      tools_used: {range: Tool, multivalued: true, inlined_as_list: true}
+      strategy: {range: Strategy, inlined: true}
+  Tool:
+    attributes:
+      id: {identifier: true}
+      tools: {multivalued: true}
+  Strategy:
+    attributes:
+      id: {identifier: true}
+      strategies: {}
+"""
+
+
+def test_conformance_wraps_joins_and_removes_without_reformatting(tmp_path):
+    schema = tmp_path / "tiny.yaml"
+    schema.write_text(TINY_SCHEMA)
+    record = ("id: x\n"
+              "tools_used:\n"
+              "  - id: x#tool\n"
+              "    tools: one toolkit   # a comment survives\n"
+              "strategy:\n"
+              "  id: x#s\n"
+              "  strategies:\n"
+              "    - first\n"
+              "    - second\n"
+              "  invented_notes: not in the schema\n")
+    text, edits, unfixable = sweep.conform_record(record, schema)
+    assert unfixable == []
+    assert sorted(edits) == ["/strategy/invented_notes (undeclared in Strategy, removed)",
+                             "/strategy/strategies (joined)", "/tools_used/0/tools"]
+    import yaml
+    value = yaml.safe_load(text)
+    assert value["tools_used"][0]["tools"] == ["one toolkit"]
+    assert value["strategy"]["strategies"] == "first second"
+    assert "invented_notes" not in value["strategy"]
+    assert text.startswith("id: x\ntools_used:\n  - id: x#tool\n") and "# a comment survives" in text
+    same, none, _ = sweep.conform_record("id: x\n", schema)
+    assert same == "id: x\n" and none == []
+
+
+def test_a_receipt_moves_by_chunk_hash_and_drops_removed_chunks():
+    old = {"bundle_md5": "old", "chunks": [
+        {"id": "c001", "source": "<preamble>", "sha256": "p-old"}, {"id": "c002", "source": "a", "sha256": "A"},
+        {"id": "c003", "source": "crate", "sha256": "C"}, {"id": "c004", "source": "d", "sha256": "D"}]}
+    new = {"bundle_md5": "new", "chunks": [
+        {"id": "c001", "source": "<preamble>", "sha256": "p-new"}, {"id": "c002", "source": "a", "sha256": "A"},
+        {"id": "c003", "source": "d", "sha256": "D"}, {"id": "c004", "source": "e", "sha256": "E"}]}
+    receipt = ("bundle_md5: old\n"
+               "chunks:\n"
+               "- id: c001\n  status: nothing_relevant\n  reason: Header.\n"
+               "- id: c002\n  status: extracted\n  extracted:\n  - slot: description\n    snippet: kept verbatim\n"
+               "- id: c003\n  status: extracted\n  extracted:\n  - slot: x\n    snippet: crate text\n"
+               "- id: c004\n  status: redundant_with\n  chunks:\n  - c003\n  - c002\n")
+    text, info = sweep.remap_receipt(receipt, old, new)
+    import yaml
+    value = yaml.safe_load(text)
+    assert value["bundle_md5"] == "new"
+    assert [c["id"] for c in value["chunks"]] == ["c001", "c002", "c003", "c004"]
+    assert value["chunks"][2] == {"id": "c003", "status": "redundant_with", "chunks": ["c002"]}
+    assert value["chunks"][3]["status"] == "nothing_relevant"
+    assert "crate text" not in text and "kept verbatim" in text
+    assert info["dropped"] == ["c003"] and info["added"] == ["c004"] and info["moved"] == 3
+    with pytest.raises(ValueError):
+        sweep.remap_receipt(receipt.replace("bundle_md5: old", "bundle_md5: other"), old, new)
+
+
+def test_a_minimal_receipt_names_every_chunk(tmp_path):
+    manifest = tmp_path / "chunks.yaml"
+    manifest.write_text("bundle_md5: abc\nchunks:\n- id: c001\n  sha256: x\n- id: c002\n  sha256: y\n")
+    import yaml
+    value = yaml.safe_load(sweep.minimal_receipt(manifest))
+    assert value["bundle_md5"] == "abc"
+    assert [(c["id"], c["status"]) for c in value["chunks"]] == [("c001", "nothing_relevant"),
+                                                                ("c002", "nothing_relevant")]
+
+
+def _sweep_results(head, full_bytes, worker_bytes, omission_bytes):
+    stage = lambda b: {"payload_bytes": b, "estimated_in_flight_tokens": b // 2}
+    return {"root_head": head, "projects": {"CHORUS": {"status": "MEASURED", "primary": "L", "runs": {"L|G2": {
+        "stages": {"full": stage(full_bytes), "typed_audit_omission": stage(omission_bytes)},
+        "typed": {"workers": [{"worker_id": "worker_0001", "payload_bytes": worker_bytes}]},
+        "components": {"rerun": False}}}}}}
+
+
+def test_a_rerun_merges_only_when_it_repeats_the_measurement():
+    full = _sweep_results("abc", 100, 1_000, 900)
+    rerun = _sweep_results("abc", 100, 1_018, 918)          # the scratch-path offset, uniform
+    rerun["projects"]["CHORUS"]["runs"]["L|G2"]["components"] = {"rerun": True}
+    merged = sweep.merge(full, rerun)
+    assert merged["projects"]["CHORUS"]["runs"]["L|G2"]["components"] == {"rerun": True}
+    assert merged["components_from"]["typed_byte_offsets"] == {"CHORUS": [18]}
+    for changed in (_sweep_results("other", 100, 1_018, 918),     # another tree
+                    _sweep_results("abc", 101, 1_018, 918),       # an ordinary phase moved
+                    _sweep_results("abc", 100, 1_018, 919),       # offsets differ between typed stages
+                    _sweep_results("abc", 100, 1_101, 1_001)):    # more than a path's length
+        with pytest.raises(ValueError):
+            sweep.merge(full, changed)
