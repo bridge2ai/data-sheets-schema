@@ -2,8 +2,12 @@
 
 - **Date**: 2026-10-20
 - **Status**: `PENDING HUMAN REVIEW` (no paid API, native, or LLM evaluation runs have been launched; no agent-invented pre-approval is claimed)
-- **Target Worktree**: `/private/tmp/d4d-v10-readiness-20261019` (`feat/v10-preflight-scripts`, PR `#5095`)
-- **Related Issues**: `#1763`, `#2911`, `#2912`, `#2914`, `#2918`, `#2926`, `#2932`, `#4345`, `#4758`, `#4759`, `#4761`, `#4829`, `#4830`
+- **Branches & Lanes**:
+  - **AGY + Codex Lane X1 Integrated**: `/private/tmp/d4d-v10-readiness-20261019` (`feat/v10-preflight-scripts`, PR `#5095`, plus `codex/track-e-eval-runner`)
+  - **Codex Lane X2**: `/private/tmp/d4d-codex-track-n-20261020` (`codex/track-n-direct-adapter`, HEAD `3bcde8004`)
+  - **Claude Lane C1**: `/private/tmp/d4d-sizing-recovery-20261019` (`fix/5072-offline-sizing-recovery`, PR `#5087`, HEAD `0d45c1ec8`)
+  - **Claude Lane C2**: `/private/tmp/d4d-claude-track-p-20261020` (`claude/track-p-analysis-plan`, HEAD `705ac83de`)
+- **Related Issues**: `#1763`, `#1849`, `#2911`, `#2912`, `#2914`, `#2917`, `#2918`, `#2920`, `#2921`, `#2922`, `#2926`, `#2929`, `#2932`, `#4345`, `#4757`, `#4758`, `#4759`, `#4760`, `#4761`, `#4762`, `#4829`, `#4830`, `#5042`, `#5072`
 
 ---
 
@@ -58,17 +62,42 @@ Six draft `omission_context_v1` files have been generated in `data/omission_cont
 
 ---
 
-## 3. Ten Owner Decisions (`D1`–`D10`) — `PENDING HUMAN APPROVAL`
+## 3. Critical Technical Findings from `Step A1` & `Step P1`/`P2` Blocking Launch Until Owner Decision
 
-| Decision ID | Topic & Related Issues | Options / Proposed Resolution | Status |
-| --- | --- | --- | --- |
-| **`D1`** | **Execution Path for Typed-Audit Runs (`#2926`, `#5072`)** | **Path 1 (Recommended)**: Run `generic_v10` via CBORG API (`d4d api batch --shared-generation-version 1`) with bounded per-stage audit limits (`max_workers=8`, `max_paths=80`, `max_calls=10`) so every stage stays within the 200K effective CBORG context window.<br>**Path 2**: Native Claude Code CLI (`claude-opus-5[1m]`) for oversized multi-stage runs. | `PENDING` |
-| **`D2`** | **`CHORUS` Corpus Policy (`#2914`)** | **Path B (Recommended)**: Keep the current frozen 17-file `CHORUS` preprocessed bundle (`d475e424...`, 125,847 bytes) with `dataset_or_release_id: null` for `generic_v10` comparability against `v6`–`v9`, and evaluate any corpus prune (`Path A`) only as a separate registered post-baseline experiment. | `PENDING` |
-| **`D3`** | **`VOICE` Adult vs Pediatric Bundle Scope (`#2918`, `#2932`)** | Keep `VOICE` (`data/preprocessed/individual/VOICE`, adult v2.0.1) and `VOICE_PEDIATRIC` (`data/preprocessed/individual/VOICE_PEDIATRIC`, pediatric v1.0.0) as distinct registered cohorts in `source_manifest.yaml`. | `PENDING` |
-| **`D4`** | **`KIDS_FIRST` Neutral Profile Registration (`Step A21`)** | Run `KIDS_FIRST` under `data/preprocessed/kids_first_manifest.yaml` (`neutral_generic`, `source_manifest` basis) as an out-of-sample neutral external validation cohort. | `PENDING` |
-| **`D5`** | **Direct Arm (`claudecode_direct`) & `v10z` Retirement (`#4758`, `#4761`)** | Retire `v10z` (`generic_v10_zero_shot`) as superseded by `generic_v10` (`API25` + `receipt2`), and defer new `claudecode_direct` runs until the host Claude Code binary (`Step N4b`, `#4759`) is installed and pinned. | `PENDING` |
-| **`D6`** | **Paid API Budget Caps & Operator Stop Triggers (`#4829`, `#4830`)** | Enforce `--max-cost-dollars` on every `d4d api batch` launch (e.g., `$15.00` per single-run pilot/canary with `$11.50` operator trigger; `$45.00` per 3-replicate project batch). | `PENDING` |
-| **`D7`** | **Receipt Completion Coverage Floor Policy (`#2917`)** | Use `coverage_floor: "pending"` for initial diagnostic pilot/canary runs (`Step A5d` / `Step A6`), then freeze the measured rational floor (`NUM/DEN` or `0.05`-step decimal) before 3-replicate fan-out (`Step A8` / `Step A14`–`A22`). | `PENDING` |
-| **`D8`** | **Historical Reference Rescore v2 Execution (`#2912`, `Step E4`)** | After human approval of Section 1 (`data/context/*.yaml`), freeze `notes/reference_rescore_v2/manifest.json` (66 ratings across 24 `v7`/`v8` records: 48 primary + 18 repeatability) and run the single canary (`CHORUS_v7_rep1_r10_rating1`, `$5` cap) before the remaining 65 jobs. | `PENDING` |
-| **`D9`** | **Historical Deterministic Rescoring (`Step E2`)** | Re-run deterministic Rubric 10 and Rubric 20 (`evaluate_d4d.py` with dynamic `Q9` and `CM4AI` context applicability) across historical `v7`/`v8`/`v9` records into a versioned output subdirectory without overwriting archived evaluation artifacts. | `PENDING` |
-| **`D10`** | **Pre-Registered `v10` Primary Inferential Contrasts (`Track P`)** | Pre-register the primary paired contrasts (`v10` vs `v9` API on `CHORUS`; `v10` vs `v8` API across the 4 core Bridge2AI projects; omission-context vs neutral `v10` ablation; `KIDS_FIRST` external generalization) before launching paid `v10` replicates. | `PENDING` |
+### 3.1 `Step A1` Offline Sizing (`notes/a1_offline_sizing_2026-10-20.md`, `#5072`)
+
+1. **Duplicate Schema Carry Exceeds the 1,000,000-Token Input Window**:
+   - Under the current protocol, every typed-audit request carries the schema twice: `audit_omissions._schema` (~1.49 MB) plus the schema context's induced-slot `classes` (615–950 KB).
+   - No partition grid (`G1`–`G6`) makes a typed-audit worker's input fit for any of the 6 projects (`CHORUS` was counted at 1,009,249 input tokens in A1b; the other 5 projects are estimated 24–60% over).
+2. **Registered `worker_output_tokens: 4,000` Is Below the Terminal Source-Review Floor**:
+   - `source_review.check` (at assembly) requires one row per assigned path quoting and covering each value. That minimum valid output floor is `10,854–11,816` tokens at `G2` and `13,732–24,290` tokens at `G5` (before thinking tokens).
+   - Meanwhile `audit_batches.check_worker` currently accepts an all-metadata row (`{"path", "metadata_reason"}`) on any path (`1,282–3,852` tokens for `CHORUS`/`VOICE`/`VOICE_PEDIATRIC`), which passes the worker stage and fails only at terminal assembly after all workers, omission, and integration have been billed.
+3. **Recommended Compaction & Partition (`S7` + `G5` + `A6` Output Caps + Report-Family Trim)**:
+   - **Compaction `S7`**: Drop the duplicate model-facing typed catalog (`S1`), trim induced-slot definitions to `name`, `description`, `range`, `cardinality`, `inlining` (`S5`), and omit duplicate typed trees (`whole_value_identity`) from owners.
+   - **Partition `G5` (`max_paths=384, max_inventory_bytes=65536, max_workers=4`)**: Valid for all 6 projects (1–3 workers) and keeps typed aggregate input within `2.93M` (under the `4.0M` cap, whereas `G2` reaches `4.33M`–`4.71M` on `AI_READI` and `KIDS_FIRST`).
+   - **Report-Family Carry Trim**: Even under `S7`, `KIDS_FIRST` regate is `880,265` tokens at the 96k report cap (over the 850k ceiling) and `AI_READI` regate is `816,145` at the audit floor (only 172 B/row headroom). Trimming the report family's carry (carrying only findings/revised rows from the assembled audit, or dropping classes/inventory from the report family's schema context) clears the 850k ceiling.
+   - **Output Caps (`Step A6`)**: Raise `worker_output_tokens` and `aggregate_output_tokens` above the `G5` terminal floor (`24,290` tokens at 4 B/token, `33,035–39,836` at A1b ratios) plus thinking allowance, and enforce `record_metadata_allowed` in `audit_batches.check_worker`.
+
+### 3.2 `Step P1`/`P2` `AI_READI` Comparator Boundary (`notes/p1_v8_comparability_recompute.md`, `D02`, `#5042`)
+
+- Following `#5042` (owner ruling of 2026-10-14 that standard generation runs read no RO-Crate content), today's `AI_READI_preprocessed.txt` is `1a58ad7b`, whereas the three `v8` `04g` `AI_READI` records were generated from bundle `d22b61a9` (which included RO-Crate chunks `c022`–`c024`, cited in 32–37 of 314–351 receipted snippets across 17–22 top-level slots).
+- The owner must select one of four options for `D02` (`notes/generic_v10_analysis_plan.md` Section 2):
+  - **`(a)`**: Keep `v8` `04g` rep1–3, **explicitly labelled cross-arm** (crossing the with-crate/no-crate boundary) and stratified in analysis.
+  - **`(b)`**: **Exclude `AI_READI`** from the confirmatory `v8` contrast (`CHORUS`, `CM4AI`, `VOICE`, 9 + 9 records) and report `AI_READI` `v10` descriptively.
+  - **`(c)`**: Use the **2026-10-14b no-crate agentic rerun** (`claudecode_agent`, bundle `1a58ad7b`, after a data PR), labelled as a joint runtime/provider/transport/effort/package contrast.
+  - **`(d)`**: Commission a **new no-crate `v8` API run** of `AI_READI` under a separate registration and budget allocation.
+
+---
+
+## 4. Owner Decisions Status (`D01`–`D25`)
+
+| Decision ID | Status | Summary / Required Owner Action |
+| --- | --- | --- |
+| **`D06`** (`#1849`) | **DECIDED (2026-10-19)** | Every `generic_v10` API registration declares `{"type": "adaptive", "display": "summarized"}`; no typed-stage cache breakpoint. |
+| **`D07`** (`#1763`) | **DECIDED (2026-10-19)** | Option 1: `$100` named `generic_v10` API pilot allocation (`CHORUS` pilot `$15`, contingency `$15`; `AI_READI` pilot `$35` provisional ceiling, contingency `$35`); at most 2 billed attempts per cell; explicit registration `sha256` word required per launch. |
+| **`D10`** (`#4761`) | **DECIDED (2026-10-20)** | **Retire** the `v10z`/`audit_controls` native lineage and `audit28` (recorded in `notes/reviews/v10z_retirement_2026-10-20.md`). |
+| **`D22`** (`#1763`, `#4761`) | **DECIDED (2026-10-20)** | **Withdraw** all `v10z` standing authorizations; every `generic_v10` generation and evaluation requires its own explicit owner word. |
+| **`S7` / `G5` / `A6` (`#5072`)** | **`PENDING OWNER`** | Approve `S7` prompt/schema-carry compaction, `G5` partition (`384` paths / `65,536` B / `4` workers), report-family carry trim, and raised `A6` worker/aggregate output limits before `Step A1b` token-count verification. |
+| **`D02` (`#5042`, `P2`)** | **`PENDING OWNER`** | Choose Option `(a)`, `(b)`, `(c)`, or `(d)` for the `AI_READI` `v8` comparator and canary baseline. |
+| **`D04` (`#2914`)** | **`PENDING OWNER`** | Confirm `CHORUS` corpus policy (`Path B` frozen 17-file bundle `9b2ef4b6` for `v10` comparability vs `Path A` prune). |
+| **`D01`, `D03`, `D05`, `D08`, `D09`, `D11`–`D21`, `D23`–`D25`** | **`PENDING OWNER`** | Documented with recommendations and `[proposed; owner fixes at P4]` rules in `notes/generic_v10_analysis_plan.md`. |
