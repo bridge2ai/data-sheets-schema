@@ -422,6 +422,7 @@ def carry_receipt(root, receipt_text, manifest_path):
     nothing_relevant, and `redundant_with` lists are remapped. Returns
     (text, info); info is None when the receipt already names this bundle.
     """
+    import os
     import subprocess
     import yaml
     current = yaml.safe_load(Path(manifest_path).read_text(encoding="utf-8"))
@@ -429,10 +430,11 @@ def carry_receipt(root, receipt_text, manifest_path):
     if pinned == current["bundle_md5"]:
         return receipt_text, None
     relative = str(Path(manifest_path).resolve().relative_to(root))
+    git_env = {**os.environ, "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_NOSYSTEM": "1"}
     for commit in subprocess.run(["git", "-C", str(root), "log", "--format=%H", "--", relative],
-                                 capture_output=True, text=True, check=True).stdout.split():
+                                 capture_output=True, text=True, check=True, env=git_env).stdout.split():
         candidate = yaml.safe_load(subprocess.run(["git", "-C", str(root), "show", f"{commit}:{relative}"],
-                                                  capture_output=True, text=True, check=True).stdout)
+                                                  capture_output=True, text=True, check=True, env=git_env).stdout)
         if candidate.get("bundle_md5") == pinned:
             text, info = remap_receipt(receipt_text, candidate, current)
             return text, {**info, "manifest_commit": commit}
@@ -836,7 +838,7 @@ def components(m, payload):
                     "owners": context_without(lambda c: c.update(owners=[])),
                     "owner_yaml": context_without(lambda c: [o.update(whole_value_yaml="") for o in c["owners"]]),
                     "owner_typed_tree": context_without(
-                        lambda c: [o.update(whole_value_identity=None) for o in c["owners"]]),
+                        lambda c: [o.pop("whole_value_identity", None) for o in c["owners"]]),
                     "nested_owners": context_without(lambda c: c.update(owners=c["owners"][:1])),
                     "owner_count": len(context["owners"])}
             if text.startswith("{"):

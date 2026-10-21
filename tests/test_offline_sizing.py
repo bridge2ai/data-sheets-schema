@@ -529,12 +529,16 @@ def test_the_response_floor_is_a_response_the_worker_check_accepts():
         size = lambda value: len(json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode())
         for s, r, mixed in zip(rows["supported"], rows["revised"], rows["mixed"]):
             assert mixed == (r if s != r and size(r) + size(r["path"]) + 1 < size(s) else s)
-        # The worker stage accepts every row as declared metadata, which is
-        # smaller than the floor wherever a row is not allowed to be metadata.
+        # The worker stage rejects metadata_reason on non-metadata rows and
+        # accepts one-character claims as its smallest structural response.
         low = floor["worker_check_minimum"]
         allowed = {r["path"] for r in plan["inventory"]["values"] if r["record_metadata_allowed"]}
-        assert low["passed"] and low["variant"] == "metadata_only"
-        assert low["bytes"] < floor["bytes"] if set(worker["paths"]) - allowed else low["bytes"] == floor["bytes"]
+        assert low["passed"]
+        if set(worker["paths"]) - allowed:
+            assert low["variant"] in {"supported", "revised", "mixed"}
+            assert low["bytes"] <= floor["bytes"]
+        else:
+            assert low["variant"] == "metadata_only" and low["bytes"] == floor["bytes"]
         for raw in variants.values():
             rows = yaml.safe_load(raw)["source_review"]["values"]
             assert [r["path"] for r in rows] == worker["paths"]

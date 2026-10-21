@@ -245,7 +245,8 @@ def _derive_uncached(inputs, schema_rows, project, limits):
         "original_core": raw.get("original_core", b"").decode("utf-8") or None,
         "bundle": raw["bundle"].decode("utf-8"), "manifest": raw["manifest"].decode("utf-8"),
         "receipt": raw["receipt"].decode("utf-8"), "context": prepared.request()["payload"]["context"],
-        "schema": prepared.request()["payload"]["schema"], "registered_provenance": authority}).decode("utf-8")
+        "schema": {k: v for k, v in prepared.request()["payload"]["schema"].items()
+                   if k not in ("classes", "slots")}, "registered_provenance": authority}).decode("utf-8")
     workers = {worker["id"]: _json({"stage": "worker", "shared_context_sha256": _sha(shared.encode()),
         "plan_sha256": plan["sha256"], "assignment": worker, "inventory": plan["inventory"],
         "output_contract": contracts["worker"]}).decode("utf-8") for worker in plan["workers"]}

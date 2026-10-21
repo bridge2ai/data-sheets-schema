@@ -144,13 +144,15 @@ def _build_request_bytes(spec, captured, packet, stage, workers, omission, setti
                'registration_sha256': sg.sha(captured.registration), 'packet_sha256': packet['sha256'],
                'stage': stage, 'inner_request_sha256': sg.sha(sg.canonical(inner)),
                'scope': 'Declared response association, not provider authentication or scientific approval.'}
+    wire_inner = ({**inner, 'payload': {**inner['payload'], 'schema': {k: v for k, v in inner['payload']['schema'].items()
+                   if k not in ('classes', 'slots')}}} if stage['phase'] == OMISSION_PHASE else inner)
     parts = [{'type': 'text', 'text': sg.policy_text(version=spec.shared_generation_version)},
              {'type': 'text', 'text': api.shared_evidence_contract()},
              {'type': 'text', 'text': receipts.audit_carry(spec) if _live else receipt_carry},
              {'type': 'text', 'text': sg.schema_context(spec, full)},
              {'type': 'text', 'text': sg.generation_context(spec)},
              {'type': 'text', 'text': '# Registered audit request identity\n\n' + sg.canonical(binding).decode()},
-             {'type': 'text', 'text': '# Exact typed stage request\n\n' + sg.canonical(inner).decode()}]
+             {'type': 'text', 'text': '# Exact typed stage request\n\n' + sg.canonical(wire_inner).decode()}]
     routing = sg.routing_context(spec)
     if routing is not None:
         parts.append({'type': 'text', 'text': routing})
