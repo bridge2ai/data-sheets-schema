@@ -68,16 +68,16 @@ DEFAULT_VOCABULARIES_PATH = (
 )
 
 DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
-    "max_paths": 192,
-    "max_inventory_bytes": 32768,
-    "max_workers": 16,
+    "max_paths": 384,
+    "max_inventory_bytes": 65536,
+    "max_workers": 4,
     "max_request_bytes": 32000000,
     "max_input_tokens_per_call": 1000000,
-    "worker_output_tokens": 4000,
-    "omission_output_tokens": 4000,
-    "integration_output_tokens": 4000,
+    "worker_output_tokens": 25000,
+    "omission_output_tokens": 16000,
+    "integration_output_tokens": 16000,
     "aggregate_input_tokens": 4000000,
-    "aggregate_output_tokens": 100000,
+    "aggregate_output_tokens": 150000,
     "max_calls": 18,
     "context_limit_tokens": 1000000,
     "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
@@ -214,7 +214,7 @@ def build_draft_context(
                 pass
 
     vocabulary: dict[str, Any] = {}
-    if manifest_profile != "neutral" and DEFAULT_VOCABULARIES_PATH.is_file():
+    if DEFAULT_VOCABULARIES_PATH.is_file():
         vocab_data = yaml.safe_load(DEFAULT_VOCABULARIES_PATH.read_text(encoding="utf-8")) or {}
         vocabulary = vocab_data.get("vocabularies", {})
 
