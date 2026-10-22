@@ -165,3 +165,5 @@ def test_final_report_wire_common_contract_once(selected):
     text = '\n'.join(p['text'] for p in request.messages[0]['content'])
     for common in (api.ANONYMOUS_REMOVAL_CONTRACT_V15, api.SOURCE_METADATA_CONTRACT_V16, api.CLAIM_CLARIFICATION_CONTRACT_V17):
         assert text.count(common) == 1
+    assert 'every supported claim requires claim_status == source_status' in text
+    assert 'top-level claims must be a flat list of assertion objects' in text

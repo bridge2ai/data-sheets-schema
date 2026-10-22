@@ -32,6 +32,9 @@ def test_full_v2_contract_example_matches_schema_real_parser_and_assembly(stage)
         exact_keys = next(r for r in contract["additional_rules"] if r.startswith("Return an integration delta"))
         assert "summary and omission_dispositions" in exact_keys
         assert "audit_integration_v2" in rendered
+        assert any("Emit a row_replacements entry whenever a worker row quotes a neighboring or parent slot's value" in r for r in contract["additional_rules"])
+    else:
+        assert any("never quote a neighboring or parent slot's value as the claim text for row.path" in r for r in contract["additional_rules"])
 
 
 def multiworker():
