@@ -838,7 +838,7 @@ def components(m, payload):
                     "owners": context_without(lambda c: c.update(owners=[])),
                     "owner_yaml": context_without(lambda c: [o.update(whole_value_yaml="") for o in c["owners"]]),
                     "owner_typed_tree": context_without(
-                        lambda c: [o.pop("whole_value_identity", None) for o in c["owners"]]),
+                        lambda c: [o.update(whole_value_identity=None) for o in c["owners"]]),
                     "nested_owners": context_without(lambda c: c.update(owners=c["owners"][:1])),
                     "owner_count": len(context["owners"])}
             if text.startswith("{"):

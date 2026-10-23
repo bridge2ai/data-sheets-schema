@@ -653,15 +653,11 @@ def schema_context(spec, record: str | None = None) -> str:
         canonical(record)], lambda: _schema_context(captured, record))
 
 
-_TRIMMED_SLOT_KEYS = ('domain_of', 'from_schema', 'alias', 'owner', '@type',
-                      'slot_uri', 'annotations', 'exact_mappings', 'description',
-                      'broad_mappings', 'comments')
-
-
 def _schema_context(captured, record):
     from .schema_view import captured_view
     from .audit_omissions import _mapping
     from linkml_runtime.dumpers import json_dumper
+    from .support_targets import _typed
     import yaml
     owners, classes = [], {}
     value = _mapping(record.encode("utf-8"), "whole record for role review") if record is not None else None
@@ -670,8 +666,7 @@ def _schema_context(captured, record):
             if cls not in classes:
                 if view.get_class(cls) is None:
                     raise ValueError(f"occupied schema owner has no class: {cls}")
-                classes[cls] = {str(slot.name): {k: v for k, v in json.loads(json_dumper.dumps(slot)).items()
-                                                 if k not in _TRIMMED_SLOT_KEYS}
+                classes[cls] = {str(slot.name): json.loads(json_dumper.dumps(slot))
                                 for slot in view.class_induced_slots(cls)}
             return classes[cls]
         describe('Dataset')
@@ -684,7 +679,8 @@ def _schema_context(captured, record):
                 continue
             slots = describe(cls)
             owners.append({'path': pointer, 'class': cls,
-                'whole_value_yaml': yaml.safe_dump(item, sort_keys=False, allow_unicode=True)})
+                'whole_value_yaml': yaml.safe_dump(item, sort_keys=False, allow_unicode=True),
+                'whole_value_identity': _typed(item)})
             for name, child in item.items():
                 slot = slots.get(name)
                 if slot is None or view.get_class(slot.get('range')) is None:

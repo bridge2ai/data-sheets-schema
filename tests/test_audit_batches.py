@@ -369,24 +369,3 @@ def test_replacement_reports_do_not_echo_record_keys_or_candidate_text():
     report = batches.check_integration(encode(value), plan, workers)
     assert not report["passed"]
     assert "PRIVATE_SENTINEL" not in json.dumps(report)
-
-
-def test_worker_and_replacement_metadata_disallowed():
-    plan = batches.make_plan("conforms_to_schema: https://example.org/s\nname: Original")
-    workers = proposals(plan)
-    key = plan["workers"][0]["id"]
-    allowed = json.loads(workers[key])
-    allowed["source_review"]["values"][0] = {"path": "/conforms_to_schema", "metadata_reason": "Schema URI."}
-    assert batches.check_worker(encode(allowed), plan, key)["passed"]
-    disallowed = json.loads(workers[key])
-    disallowed["source_review"]["values"][1] = {"path": "/name", "metadata_reason": "Not a metadata path."}
-    report = batches.check_worker(encode(disallowed), plan, key)
-    assert not report["passed"] and "worker_metadata_disallowed" in codes(report)
-    index = batches.build_index(plan, workers)
-    value = integration(plan, workers)
-    name_row = next(r for r in index["rows"] if r["path"] == "/name")
-    value["row_replacements"] = [{"path": "/name", "previous_sha256": name_row["sha256"],
-        "row": {"path": "/name", "metadata_reason": "Not a metadata path."},
-        "reason": "Attempted replacement with disallowed metadata.", "evidence": [assertion()]}]
-    int_report = batches.check_integration(encode(value), plan, workers)
-    assert not int_report["passed"] and "replacement_metadata_disallowed" in codes(int_report)

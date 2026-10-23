@@ -291,6 +291,10 @@ checks structure only, though. The grammar accepts a
 declared metadata (`record_metadata_allowed`) is checked only at assembly.
 So it also accepts a far smaller answer, every row declared as record
 metadata (`metadata_only`). The sweep records that worker-check minimum too.
+(The committed note `notes/a1_offline_sizing_2026-10-20.md` was generated at
+pre-S7 root tree `8ea798615303ec867b3aaaf1386eb08c18162c67` by script
+`c435c44006c4e6b1448341db654935449bc25de9`, where S1–S7 and worker-stage
+`metadata_reason` rejection are prospective options.)
 
 The sweep runs the terminal check on the assembled floor audit
 (`audit_floor_terminal_check`). Its one-character evidence must fail the

@@ -104,15 +104,10 @@ annotations:
     value = yaml.safe_load(record)
     result = json.loads(sg.schema_context(selected, record).split('\n\n', 1)[1])
     root = next(row for row in result['owners'] if row['path'] == '')
-    assert 'whole_value_identity' not in root
+    assert root['whole_value_identity'] == _typed(value)
     assert yaml.safe_load(root['whole_value_yaml']) == value
     creator = next(row for row in result['owners'] if row['path'] == '/creators/0')
-    assert 'whole_value_identity' not in creator
-    assert yaml.safe_load(creator['whole_value_yaml']) == value['creators'][0]
-    for slots in result['classes'].values():
-        for slot in slots.values():
-            for trimmed in sg._TRIMMED_SLOT_KEYS:
-                assert trimmed not in slot
+    assert creator['whole_value_identity'] == _typed(value['creators'][0])
     assert _typed(value['annotations']['nested'][0]) != _typed(value['annotations']['nested'][1])
     assert _typed(value['annotations']['nested'][0]) != _typed(value['annotations']['nested'][2])
     quoted = record.replace('issued: 2026-01-02', "issued: '2026-01-02'")

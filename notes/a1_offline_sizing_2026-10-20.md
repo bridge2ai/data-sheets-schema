@@ -14,6 +14,15 @@ This revision replaces the note's first version (`64082b98d`, `e6d46f3a3`).
 Its recommendation was wrong, and so were three of its claims; "Corrections"
 lists what changed.
 
+> **Provenance banner:** This note and its tables were generated against pre-S7
+> root tree `8ea798615303ec867b3aaaf1386eb08c18162c67` by `scripts/offline_sizing.py`
+> at `c435c44006c4e6b1448341db654935449bc25de9` (`a1_sizing_2026-10-20_r2.json`).
+> Options S1–S7 and the worker `metadata_reason` check are evaluated here as
+> prospective options on the pre-S7 baseline; `#5087` leaves the runtime code
+> (`shared_generation.py`, `typed_audit.py`, `typed_audit_runtime.py`,
+> `receipt_completion.py`, `rereceipt.py`, `audit_batches.py`) at that pre-S7
+> baseline pending Owner Decision `D-C` on `#5095`.
+
 ## Answer
 
 Four results, in the order a run would meet them.
