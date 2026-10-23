@@ -176,12 +176,24 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     # #1363: do not infer an origin from a block whose origin is being checked.
     # Null means the marker was absent in the registered original-run block;
     # it never means a null-valued recorded_by field is allowed.
-    origins = json.loads(Path("tests/data/report_claims_origins.json").read_text())["origins"]
+    manifest = json.loads(Path("tests/data/report_claims_origins.json").read_text())
+    origins = manifest["origins"]
+    v8_origins = manifest["v8_origins"]
     blocks = []
+    v8_blocks = []
     seen = set()
+    v8_seen = set()
     for path in sorted(Path("data/d4d_concatenated").rglob("*_provenance.yaml")):
         stored = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("report_claims") or {}
         if not stored.get("checked"):
+            continue
+        if str(path) in v8_origins:
+            assert stored["instrument"] == rc.REPORT_CLAIMS_INSTRUMENT
+            fresh = bc.compute(path, only={"report_claims"}, declared=declared, ranges=ranges,
+                               report_claims_version=8, schema_policy="legacy_current")["report_claims"]
+            assert_measurement_matches(stored, fresh, str(path), v8_origins[str(path)], schemas=schemas)
+            v8_blocks.append(fresh)
+            v8_seen.add(str(path))
             continue
         assert str(path) in origins, f"unregistered checked report: {path}"
         # These are frozen v7 measurements, not a request to replace them
@@ -196,6 +208,7 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
         blocks.append(fresh)
         seen.add(str(path))
     assert seen == set(origins), "registered report measurements are missing or unchecked"
+    assert v8_seen == set(v8_origins), "registered v8 report measurements are missing or unchecked"
     # #1361: the September 12 v9 canary adds one original-run block to the
     # historical 277 backfilled blocks, with 25 claims, one prose-retention
     # claim and one checked snapshot. The historical measurements and all
@@ -209,3 +222,11 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     assert sum(b["prose_retention_claims"] for b in blocks) == 165
     assert sum(b.get("removals_unrecorded_count") or 0 for b in blocks) == 41
     assert sum(b["snapshot_checked"] for b in blocks) == 87
+    # October 2026 v10 CHORUS canaries (2026-10-20a and 2026-10-22a) sit beside
+    # the frozen v7 corpus under the v8 instrument (#1808, #1810).
+    assert len(v8_blocks) == 2
+    assert Counter(f["kind"] for b in v8_blocks for f in b["findings"]) == {}
+    assert sum(b["claims_checked"] for b in v8_blocks) == 33
+    assert sum(b["prose_retention_claims"] for b in v8_blocks) == 1
+    assert sum(b.get("removals_unrecorded_count") or 0 for b in v8_blocks) == 0
+    assert sum(b["snapshot_checked"] for b in v8_blocks) == 2
