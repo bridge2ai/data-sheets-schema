@@ -40,17 +40,12 @@ class TestR9ConditionBoundaryAndParity:
         v2_text = " ".join(RULES_V2.read_text(encoding="utf-8").split())
 
         required_phrases = [
-            "enumeration's permissible values are defined in the schema by observable criteria",
-            "confidentiality_level",
-            "ConfidentialityLevelEnum",
-            "unrestricted",
-            "restricted",
-            "confidential",
-            "hipaa_compliant",
-            "ComplianceStatusEnum",
-            "not_applicable",
-            "coverage receipt for the slot is the passage stating those facts",
-            "never mapped across schemes to an enumeration value",
+            "enumeration's permissible values are defined in the schema by observable criteria rather than by a bare category label, a passage that states the facts meeting a value's definition is a plain restatement of that value, and the coverage receipt for the slot is the passage stating those facts",
+            "in `confidentiality_level` (ConfidentialityLevelEnum), a passage stating that the data are publicly available without access restrictions supports unrestricted",
+            "a passage stating that access requires registration, a credentialed account, authorization or a data use agreement supports restricted",
+            "a passage stating that access requires institutional review board, ethics or access-committee approval under strict controls supports confidential",
+            "in `hipaa_compliant` (ComplianceStatusEnum), a passage stating that the dataset contains no human-subjects or protected health information supports not_applicable",
+            "A label from an external classification scheme is recorded as prose where relevant and never mapped across schemes to an enumeration value unless the source also states the observable facts that meet the schema's definition.",
         ]
         for phrase in required_phrases:
             assert phrase in v10_text, f"Missing {phrase!r} in d4d_generic_arm_prompt_v10.md"
@@ -63,7 +58,15 @@ class TestR9ConditionBoundaryAndParity:
 
 
 class TestR9CriteriaDefinedEnumFixtures:
-    """Positive and negative fixtures for R9 criteria-defined enumeration population."""
+    """Receipt and LinkML datamodel shape checks for R9 criteria-defined enumeration records.
+
+    Note: ``receipts.check()`` verifies verbatim snippet presence and path coverage only;
+    it does not evaluate semantic entailment of R9 criteria (which is enforced by the
+    generation prompt and typed audit). These fixtures verify that a record populated under
+    R9 (or omitting an unmapped external classification label) validates against the
+    LinkML datamodel and passes coverage-receipt verification when receipted by the
+    fact-stating passage.
+    """
 
     def test_positive_fixture_access_criteria_populates_enum_with_fact_receipt(self) -> None:
         """A source passage stating observable access facts (registration + DUA) and
