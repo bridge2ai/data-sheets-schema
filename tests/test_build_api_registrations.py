@@ -18,6 +18,7 @@ from scripts.build_api_registrations import (
     DEFAULT_AUDIT_LIMITS,
     DEFAULT_PROJECTS,
     DEFAULT_RECEIPT_LIMITS,
+    REGISTERED_COVERAGE_FLOOR,
     build_draft_context,
     build_registration,
     build_roster,
@@ -123,10 +124,38 @@ def test_build_registration_chorus_baseline(tmp_path: Path) -> None:
     assert receipt["condition"] == "generic_v10"
     assert receipt["receipt_instrument_version"] == 4
     assert receipt["runtime_policy_sha256"] is not None
+    assert receipt["coverage_floor"] == {"state": "registered", "numerator": 17, "denominator": 20}
 
     # Parsing verification
     validated = validate_registration_document(reg)
     assert validated["registration_id"] == reg["registration_id"]
+
+
+def test_parse_and_build_coverage_floor(tmp_path: Path) -> None:
+    """Verify registered numeric coverage_floor (17/20 = 0.85) and pending pilot override."""
+    assert REGISTERED_COVERAGE_FLOOR == {"state": "registered", "numerator": 17, "denominator": 20}
+    assert DEFAULT_RECEIPT_LIMITS["coverage_floor"] == {"state": "registered", "numerator": 17, "denominator": 20}
+    assert parse_coverage_floor(None) == {"state": "registered", "numerator": 17, "denominator": 20}
+    assert parse_coverage_floor("17/20") == {"state": "registered", "numerator": 17, "denominator": 20}
+    assert parse_coverage_floor("0.85") == {"state": "registered", "numerator": 17, "denominator": 20}
+    assert parse_coverage_floor("13/20") == {"state": "registered", "numerator": 13, "denominator": 20}
+    assert parse_coverage_floor("0.65") == {"state": "registered", "numerator": 13, "denominator": 20}
+    assert parse_coverage_floor("pending") == {"state": "pending", "mode": "diagnostic_pilot"}
+
+    with pytest.raises(ValueError, match="require 0 < numerator <= denominator <= 1000"):
+        parse_coverage_floor("25/20")
+    with pytest.raises(ValueError, match="must be in \\(0, 1\\]"):
+        parse_coverage_floor("0.0")
+
+    reg_pending = build_registration(
+        project="CHORUS",
+        label="2026-10-test_pending",
+        registration_path=tmp_path / "reg_pending.json",
+        coverage_floor="pending",
+        write_to_disk=False,
+    )
+    assert reg_pending["receipt"]["coverage_floor"] == {"state": "pending", "mode": "diagnostic_pilot"}
+    validate_registration_document(reg_pending)
 
 
 def test_build_registration_arms(tmp_path: Path) -> None:
@@ -290,7 +319,7 @@ def test_cli_dry_run_single_and_all() -> None:
     assert "[dry-run]" in result.output
 
     # All projects
-    result_all = runner.invoke(cli, ["--all", "-l", "test_dry_all", "--dry-run"])
+    result_all = runner.invoke(cli, ["--all", "-l", "test_dry_all", "--synthesize-draft-context", "--dry-run"])
     assert result_all.exit_code == 0
     for proj in DEFAULT_PROJECTS:
         assert f"✓ {proj}:" in result_all.output
@@ -368,19 +397,6 @@ def test_cli_error_validation(tmp_path: Path) -> None:
     assert "--context can only be used with a single project" in res_multi_ctx.output
 
 
-def test_parse_coverage_floor() -> None:
-    """Test coverage_floor parsing for pending, NUM/DEN, and decimal inputs."""
-    assert parse_coverage_floor(None) == {"state": "pending", "mode": "diagnostic_pilot"}
-    assert parse_coverage_floor("pending") == {"state": "pending", "mode": "diagnostic_pilot"}
-    assert parse_coverage_floor("13/20") == {"state": "registered", "numerator": 13, "denominator": 20}
-    assert parse_coverage_floor("0.65") == {"state": "registered", "numerator": 13, "denominator": 20}
-
-    with pytest.raises(ValueError, match="require 0 < numerator <= denominator <= 1000"):
-        parse_coverage_floor("25/20")
-    with pytest.raises(ValueError, match="must be in \\(0, 1\\]"):
-        parse_coverage_floor("0.0")
-
-
 def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
     """Build registration for KIDS_FIRST with neutral profile and registered coverage floor (Step A19-reg)."""
     reg_path = tmp_path / "reg_kids_first.json"
@@ -388,7 +404,8 @@ def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
         project="KIDS_FIRST",
         label="2026-10-kfa_claude-opus-5-api-generic-v10_rep1",
         registration_path=reg_path,
-        coverage_floor="13/20",
+        coverage_floor="17/20",
+        synthesize_draft_context=True,
         write_to_disk=True,
     )
     assert reg_path.is_file()
@@ -397,12 +414,12 @@ def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
     assert reg["inputs"]["chunk_manifest"]["path"].endswith("kids_first/chunks.yaml")
     assert reg["inputs"]["profile"]["name"] == "neutral"
     assert reg["inputs"]["profile"]["vocabulary"] is None
-    assert reg["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
+    assert reg["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 17, "denominator": 20}
     validate_registration_document(reg)
 
 
 def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
-    """CLI --label-prefix --replicates 3 --coverage-floor 13/20 builds a valid 3-row production roster."""
+    """CLI --label-prefix --replicates 3 --coverage-floor 17/20 builds a valid 3-row production roster."""
     runner = CliRunner()
     out_dir = tmp_path / "prod_registrations"
     prefix = "2026-10-pda_claude-opus-5-api-generic-v10"
@@ -413,7 +430,7 @@ def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
             "-p", "CHORUS",
             "--label-prefix", prefix,
             "--replicates", "3",
-            "--coverage-floor", "13/20",
+            "--coverage-floor", "17/20",
             "--max-paths", "144",
             "--max-workers", "18",
             "--max-calls", "20",
@@ -432,7 +449,7 @@ def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
     assert reg1["audit_limits"]["max_paths"] == 144
     assert reg1["audit_limits"]["max_workers"] == 18
     assert reg1["audit_limits"]["max_calls"] == 20
-    assert reg1["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
+    assert reg1["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 17, "denominator": 20}
 
     # Check mode succeeds for multi-replicate roster
     check_res = runner.invoke(
