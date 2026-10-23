@@ -374,3 +374,79 @@ def test_pending_call_foreign_identity_raises_value_error():
     with pytest.raises(ValueError, match="conflicts with ledger identity"):
         compute_readout(ledger)
 
+
+def test_relative_snapshot_pin_resolves_from_metadata_dir(tmp_path):
+    """Relative pin paths in a registration snapshot resolve against metadata_dir / intermediate/."""
+    meta_dir = tmp_path / "run_dir"
+    inter_dir = meta_dir / "intermediate"
+    inter_dir.mkdir(parents=True)
+    ctx_file = inter_dir / "omission_ctx.json"
+    ctx_bytes = b'{"format": "omission_context_v1", "input_tokens": 12345}\n'
+    ctx_file.write_bytes(ctx_bytes)
+    import hashlib
+    ctx_sha = hashlib.sha256(ctx_bytes).hexdigest()
+
+    pin = {"path": "omission_ctx.json", "sha256": ctx_sha, "bytes": len(ctx_bytes)}
+    snap = extract_saved_snapshot(pin, metadata_dir=meta_dir)
+    assert snap is not None
+    assert snap["input_tokens"] == 12345
+
+    ledger = {
+        "version": 1,
+        "identity": {"project": "CHORUS", "label": "lbl_snap"},
+        "rows": [],
+        "receipt_completion": {"context": pin},
+        "pending_call": {"phase": "receipt_completion", "attempt": 1},
+    }
+    summary = compute_readout(ledger, metadata_dir=meta_dir)
+    assert summary["identity"]["project"] == "CHORUS"
+    assert summary["pending_call"]["input_bound"] == 12345
+
+
+def test_abandoned_attempts_and_reasoning_jsonl_included_in_settled(tmp_path):
+    """Unrecorded abandoned attempts and reasoning JSONL tokens are added to settled_dollars."""
+    meta_dir = tmp_path / "run_abandoned"
+    meta_dir.mkdir()
+    abandoned = meta_dir / "CHORUS_abandoned_attempts.jsonl"
+    abandoned.write_text(
+        json.dumps({"phase": "full", "attempt": 1, "usage_id": "ab_1", "usage": {"input_tokens": 1000, "output_tokens": 2000}}) + "\n",
+        encoding="utf-8",
+    )
+    reasoning = meta_dir / "CHORUS_reasoning.jsonl"
+    reasoning.write_text(
+        json.dumps({"phase": "report", "attempt": 1, "usage_id": "rs_1", "usage": {"output_tokens": 1000}}) + "\n",
+        encoding="utf-8",
+    )
+    ledger = {
+        "version": 1,
+        "identity": {"project": "CHORUS", "label": "lbl_ab"},
+        "rows": [],
+    }
+    summary = compute_readout(ledger, metadata_dir=meta_dir)
+    expected_extra = (1000 * 5.0 + 3000 * 25.0) / 1_000_000.0
+    assert abs(summary["settled_dollars"] - expected_extra) < 1e-9
+
+
+def test_dynamic_upstream_artifact_increases_pending_input_bound(tmp_path):
+    """A large upstream artifact in metadata_dir increases the pending call input token bound."""
+    meta_dir = tmp_path / "run_dynamic"
+    meta_dir.mkdir()
+    large_resp = meta_dir / "CHORUS_full_response.txt"
+    large_resp.write_text("A" * 600_000, encoding="utf-8")  # 600k chars -> 150k tokens @ 4 chars/token
+
+    ledger = {
+        "version": 1,
+        "identity": {"project": "CHORUS", "label": "lbl_dyn", "method": "claudecode_api"},
+        "rows": [],
+        "pending_call": {
+            "phase": "reconcile_full",
+            "attempt": 1,
+            "run_identity": {"project": "CHORUS", "label": "lbl_dyn", "method": "claudecode_api"},
+        },
+    }
+    static_summary = compute_readout(ledger)
+    dyn_summary = compute_readout(ledger, metadata_dir=meta_dir)
+    assert dyn_summary["pending_call"]["input_bound_source"] == "dynamic_artifacts[CHORUS][reconcile_full]"
+    assert dyn_summary["pending_call"]["input_worst_case_dollars"] > static_summary["pending_call"]["input_worst_case_dollars"]
+
+

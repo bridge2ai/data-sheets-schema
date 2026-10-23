@@ -58,8 +58,10 @@ def files(directory):
 
 def build(tmp_path, records, *, name="pack", **kwargs):
     output = tmp_path / name
-    key = pack.build_blind_review_pack(records, output, seed=kwargs.pop("seed", "registered-seed"),
-                                      cohort=kwargs.pop("cohort", "synthetic"), **kwargs)
+    cohort = kwargs.pop("cohort", "synthetic")
+    default_seed = "registered-seed-0123456789abcdef0123456789" if cohort == "campaign" else "registered-seed"
+    key = pack.build_blind_review_pack(records, output, seed=kwargs.pop("seed", default_seed),
+                                      cohort=cohort, **kwargs)
     return output, key
 
 
@@ -494,3 +496,56 @@ def test_cli_missing_seed_and_default_campaign_refusal(tmp_path):
             pack.main(["--record", entry, "--output-dir", str(tmp_path / "pack"), *arguments])
         assert exc.value.code == 2
     assert not (tmp_path / "pack").exists()
+
+
+def test_campaign_seed_minimum_length_and_cli_default_seed(tmp_path):
+    records = campaign(tmp_path)
+    with pytest.raises(ValueError, match="at least 32 characters"):
+        build(tmp_path, records, cohort="campaign", seed="short-seed")
+
+    record = selection(tmp_path, 1)[0]
+    entry = f"{record.arm}:{record.project}:{record.label}={record.source_path}"
+    out_dir = tmp_path / "cli_auto_seed"
+    assert pack.main(["--record", entry, "--cohort", "synthetic", "--output-dir", str(out_dir)]) == 0
+    key = json.loads((out_dir / "sealed_blind_key.json").read_text(encoding="utf-8"))
+    assert len(key["seed"]) == 64
+
+
+def test_campaign_v10_label_and_sibling_provenance_validation(tmp_path):
+    records = campaign(tmp_path)
+    # Bad v10 label
+    bad_label = list(records)
+    v10_idx = next(i for i, r in enumerate(bad_label) if r.arm == "v10")
+    bad_label[v10_idx] = replace(bad_label[v10_idx], label="unregistered-custom-label")
+    with pytest.raises(ValueError, match="requires a v10 or registered-final label"):
+        build(tmp_path, bad_label, cohort="campaign", name="pack_bad_label")
+
+    # Sibling provenance with mismatched full hash refuses
+    v10_rec = records[v10_idx]
+    prov_path = v10_rec.source_path.parent / f"{v10_rec.project}_provenance.yaml"
+    prov_path.write_text(
+        yaml.safe_dump({
+            "run": {"project": v10_rec.project, "label": v10_rec.label, "condition": "generic_v10"},
+            "validation": {"artifacts": {"full": {"sha256": "0" * 64}}},
+        }),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="do not match sibling provenance"):
+        build(tmp_path, records, cohort="campaign", name="pack_bad_prov")
+
+
+def test_short_arm_minimum_length_and_word_boundary_leakage(tmp_path):
+    path = tmp_path / "rec.yaml"
+    path.write_text("id: example:test\ndescription: Architectural armv8a instruction set.\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="at least 2 non-whitespace characters"):
+        pack.Record("v", "CHORUS", "secret-label-01", path)
+
+    # 2-char arm "v8" does not false-positive on substring inside "armv8a"
+    rec = pack.Record("v8", "CHORUS", "secret-label-01", path)
+    build(tmp_path, [rec], name="pack_v8_ok")
+
+    # Standalone "v8" word in scientific text is still caught
+    path.write_text("id: example:test\ndescription: Generated under v8 condition.\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="identity"):
+        build(tmp_path, [pack.Record("v8", "CHORUS", "secret-label-01", path)], name="pack_v8_leak")
+

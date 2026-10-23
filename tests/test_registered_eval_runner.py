@@ -631,3 +631,41 @@ def test_repeat_cannot_reuse_a_previous_session(registration, tmp_path, monkeypa
     assert receipt["status"] == "incomplete" and "distinct fresh sessions" in receipt["error"]
     assert len(calls) == 2 and len(receipt["ratings"]) == 1
     assert receipt["total_cost_usd"] == "1.50"
+
+
+def test_reexecution_lock_refuses_without_prior_receipt_and_records_overshoot(prepared, tmp_path, monkeypatch):
+    install_cli(monkeypatch, prepared)
+    first_dir = tmp_path / "run1"
+    receipt1 = runner.execute(prepared, first_dir, plan_sha256=prepared.digest,
+                              environ={"CBORG_API_KEY": "fake"})
+    assert receipt1["status"] == "validated"
+    assert receipt1["max_overshoot_calls"] == 1
+    assert receipt1["unaccounted_reserved_usd"] == "0"
+
+    second_dir = tmp_path / "run2"
+    with pytest.raises(FileExistsError, match="was already executed"):
+        runner.execute(prepared, second_dir, plan_sha256=prepared.digest,
+                       environ={"CBORG_API_KEY": "fake"})
+
+    receipt2 = runner.execute(
+        prepared,
+        second_dir,
+        plan_sha256=prepared.digest,
+        environ={"CBORG_API_KEY": "fake"},
+        prior_receipt=first_dir / "receipt.json",
+        authorization_basis="owner-reauth-test",
+    )
+    assert receipt2["status"] == "validated"
+    assert receipt2["prior_receipt"] == str((first_dir / "receipt.json").resolve())
+    assert receipt2["authorization_basis"] == "owner-reauth-test"
+
+
+def test_timeout_records_unaccounted_reserved_usd(registration, tmp_path, monkeypatch):
+    selected = runner.prepare(**{**registration, "repeat_count": 3, "max_cost_dollars": "5"})
+    install_cli(monkeypatch, selected, timeout=True)
+    receipt = runner.execute(selected, tmp_path / "timeout_run", plan_sha256=selected.digest,
+                             environ={"CBORG_API_KEY": "fake"})
+    assert receipt["status"] == "incomplete"
+    assert receipt["total_cost_usd"] == "0"
+    assert receipt["unaccounted_reserved_usd"] == "1.666666"
+

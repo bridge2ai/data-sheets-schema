@@ -17,14 +17,14 @@ All 6 project applicability context files under `data/context/` (`schema_version
 
 ### 1.1 Context Files, Digests, and Rubric Denominator Calibration
 
-| Project | Context File | Normalized Context Digest (`SHA-256`) | `human_subjects` | `regulated_access` | `clinical` | `pediatric` | `training` | `software` | Rubric 10 Applicable (`max`) | Rubric 20 Applicable (`max`) |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **AI_READI** | `data/context/ai_readi_context.yaml` | `2d3da438de3d365e54467ba5a6144b20d954198fd2e03e7b101a7b6d81880418` | `true` | `true` | `true` | `false` | `true` | `true` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
-| **CHORUS** | `data/context/chorus_context.yaml` | `21f63f6eaaa3d236210c3f10103b0e283f8b52724b875045c9773cabf46e9c0d` | `true` | `true` | `true` | `true` | `true` | `false` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
-| **CM4AI** | `data/context/cm4ai_context.yaml` | `9077caaaff2112c84dd3fd261eb2ce5025607eacb7f4997150cc8847660286e9` | `false` | `false` | `false` | `false` | `true` | `false` | `44 / 50` (`44.0`) | `17 / 20` (`78.0`) |
-| **VOICE** | `data/context/voice_context.yaml` | `ddf1dcb4127a7d4158515c04307d8f378f5d70268b9bb17f0242af871d863ebd` | `true` | `true` | `true` | `false` | `true` | `false` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
-| **VOICE_PEDIATRIC** | `data/context/voice_pediatric_context.yaml` | `92b9ce7c910ba310e75eb2a7f9dbdf93f161cf17d335c3c6fb0030b620ba78fc` | `true` | `true` | `true` | `true` | `true` | `false` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
-| **KIDS_FIRST** | `data/context/kids_first_context.yaml` | `78bb4a2e161ab8c54bd7ab4966389098f888022211df0e794c4251e936bd5e32` | `true` | `true` | `true` | `true` | `true` | `false` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
+| Project | Context File | Normalized Context Digest (`SHA-256`) | `human_subjects` | `regulated_access` | `shared_dataset` | `data_collection` | `data_processing` | `processing_software` | `ml_training_dataset` | Rubric 10 Applicable (`max`) | Rubric 20 Applicable (`max`) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **AI_READI** | `data/context/ai_readi_context.yaml` | `2d3da438de3d365e54467ba5a6144b20d954198fd2e03e7b101a7b6d81880418` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
+| **CHORUS** | `data/context/chorus_context.yaml` | `21f63f6eaaa3d236210c3f10103b0e283f8b52724b875045c9773cabf46e9c0d` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
+| **CM4AI** | `data/context/cm4ai_context.yaml` | `9077caaaff2112c84dd3fd261eb2ce5025607eacb7f4997150cc8847660286e9` | `false` | `false` | `true` | `true` | `true` | `true` | `true` | `44 / 50` (`44.0`) | `17 / 20` (`78.0`) |
+| **VOICE** | `data/context/voice_context.yaml` | `ddf1dcb4127a7d4158515c04307d8f378f5d70268b9bb17f0242af871d863ebd` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
+| **VOICE_PEDIATRIC** | `data/context/voice_pediatric_context.yaml` | `92b9ce7c910ba310e75eb2a7f9dbdf93f161cf17d335c3c6fb0030b620ba78fc` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
+| **KIDS_FIRST** | `data/context/kids_first_context.yaml` | `78bb4a2e161ab8c54bd7ab4966389098f888022211df0e794c4251e936bd5e32` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `19 / 20` (`88.0`) |
 
 ### 1.2 The 5 Hold Questions Requiring Human Confirmation (`#2912`)
 
@@ -32,16 +32,16 @@ All 6 project applicability context files under `data/context/` (`schema_version
    - **Proposed Setting**: `human_subjects: false`, `regulated_access: false`.
    - **Rationale**: CM4AI generates multiscale cell-architecture maps from established human cell lines (`KOLF2.1J` iPSCs, `MDA-MB-468`, `U2OS`) in vitro with open CC BY-NC-SA 4.0 Dataverse releases and no human subjects IRB protocol or controlled-access tier.
    - **Effect on Scoring**: Excludes non-applicable human-subject/PHI sub-elements (`E4.6` IRB/consent, `E6.1`–`E6.4` regulatory restrictions, `E10.3` privacy/re-identification, `Q10` IRB/ethics, `Q12` data protection impact), reducing CM4AI's maximum denominator from `50`/`88` to `44`/`78`.
-2. **`training: true` Across All Bridge2AI Projects (`AI_READI`, `CHORUS`, `CM4AI`, `VOICE`, `VOICE_PEDIATRIC`) and `KIDS_FIRST`**:
-   - **Proposed Setting**: `training: true`.
+2. **`ml_training_dataset: true` Across All Bridge2AI Projects (`AI_READI`, `CHORUS`, `CM4AI`, `VOICE`, `VOICE_PEDIATRIC`) and `KIDS_FIRST`**:
+   - **Proposed Setting**: `ml_training_dataset: true`.
    - **Rationale**: Bridge2AI flagship datasets and the Kids First congenital heart defect cohort are explicitly curated and released for AI/ML training and benchmarking, keeping `Q17` (training data anomalies) applicable.
-3. **`AI_READI` `software: true` vs Other Cohorts `software: false`**:
-   - **Proposed Setting**: `software: true` for `AI_READI`; `software: false` for `CHORUS`, `CM4AI`, `VOICE`, `VOICE_PEDIATRIC`, and `KIDS_FIRST`.
-   - **Rationale**: `AI_READI` distributes companion preprocessing/harmonization software alongside its dataset release, whereas the remaining bundles document dataset releases rather than standalone software distributions.
+3. **`processing_software: true` Across All 6 Projects (`AI_READI`, `CHORUS`, `CM4AI`, `VOICE`, `VOICE_PEDIATRIC`, `KIDS_FIRST`)**:
+   - **Proposed Setting**: `processing_software: true` across all 6 context files (`data_collection: true`, `data_processing: true`, `shared_dataset: true`).
+   - **Rationale**: Each corpus documents preprocessing, harmonization, or pipeline software used to produce the dataset (`E5.4`), while `Q7` (preprocessing/cleaning/labeling software availability) remains applicable across all 6 cohorts.
 4. **Data Governance & Committee Contact Equivalence (`#2911`)**:
    - **Proposed Setting**: `evaluate_d4d.py` recognizes both `data_governance.committee_contact` and `regulatory_restrictions.governance_committee_contact`, and excludes the 4 regulatory restriction subfields of `Q9` when `regulated_access: false`.
-5. **Adult vs Pediatric Cohort Separation (`VOICE` vs `VOICE_PEDIATRIC`, `CHORUS`, `KIDS_FIRST`)**:
-   - **Proposed Setting**: `VOICE` sets `pediatric: false` (adult cohort, ages 18–98); `VOICE_PEDIATRIC`, `CHORUS`, and `KIDS_FIRST` set `pediatric: true`.
+5. **Adult vs Pediatric Cohort Contexts (`VOICE` vs `VOICE_PEDIATRIC`, `CHORUS`, `KIDS_FIRST`)**:
+   - **Proposed Setting**: Both `VOICE` (`voice_context.yaml`) and `VOICE_PEDIATRIC` (`voice_pediatric_context.yaml`), along with `CHORUS` and `KIDS_FIRST`, have all 7 boolean applicability flags (`human_subjects`, `regulated_access`, `shared_dataset`, `data_collection`, `data_processing`, `processing_software`, `ml_training_dataset`) set to `true` (`50/50` on Rubric 10, `19/20` (`88.0`) on Rubric 20), with cohort-specific `rationale` entries distinguishing adult vs pediatric scope.
 
 ---
 
@@ -49,16 +49,16 @@ All 6 project applicability context files under `data/context/` (`schema_version
 
 Six draft `omission_context_v1` files have been generated in `data/omission_contexts/` via `scripts/build_draft_contexts.py`:
 
-| Project | Draft Omission Context File | `parent_collection_title` | `dataset_or_release_id` | `project_vocabulary` Count |
-| --- | --- | --- | --- | --- |
-| **CHORUS** | `data/omission_contexts/chorus_omission_context.json` | `"CHORUS"` | `null` (reconciled multi-source corpus) | `21` |
-| **AI_READI** | `data/omission_contexts/ai_readi_omission_context.json` | `"AI-READI"` | `"v3.0.0"` (`10.60775/fairhub.3`) | `36` |
-| **CM4AI** | `data/omission_contexts/cm4ai_omission_context.json` | `"CM4AI"` | `"June 2025 Beta Release"` | `28` |
-| **VOICE** | `data/omission_contexts/voice_omission_context.json` | `"Bridge2AI-Voice"` | `"v2.0.1"` (`10.57895/rdp.2025.02.v2`) | `27` |
-| **VOICE_PEDIATRIC** | `data/omission_contexts/voice_pediatric_omission_context.json` | `"Bridge2AI-Voice"` | `"v1.0.0"` | `22` |
-| **KIDS_FIRST** | `data/omission_contexts/kids_first_omission_context.json` | `"Kids First Pediatric Research Program"` | `"phs001138.v4.p2"` | `14` |
+| Project | Draft Omission Context File | `scopes[0].referent` | `scopes[0].release` | `source_policy.basis` | `vocabulary` |
+| --- | --- | --- | --- | --- | --- |
+| **CHORUS** | `data/omission_contexts/chorus_omission_context.json` | `"CHORUS dataset"` | `null` (`D04` website-only URL mapped to `null`) | `"Declared source_manifest.yaml tier hierarchy."` | `B2AI_SUBSTRATE` (`81`), `B2AI_TOPIC` (`56`) |
+| **AI_READI** | `data/omission_contexts/ai_readi_omission_context.json` | `"AI-READI Flagship Dataset"` | `"https://doi.org/10.60775/fairhub.3"` | `"Declared source_manifest.yaml tier hierarchy."` | `B2AI_SUBSTRATE` (`81`), `B2AI_TOPIC` (`56`) |
+| **CM4AI** | `data/omission_contexts/cm4ai_omission_context.json` | `"CM4AI Flagship Dataset"` | `"https://cm4ai.org/"` | `"Declared source_manifest.yaml tier hierarchy."` | `B2AI_SUBSTRATE` (`81`), `B2AI_TOPIC` (`56`) |
+| **VOICE** | `data/omission_contexts/voice_omission_context.json` | `"Bridge2AI-Voice Adult Dataset"` | `"https://doi.org/10.13026/37yb-1t42"` | `"Declared source_manifest.yaml tier hierarchy."` | `B2AI_SUBSTRATE` (`81`), `B2AI_TOPIC` (`56`) |
+| **VOICE_PEDIATRIC** | `data/omission_contexts/voice_pediatric_omission_context.json` | `"Bridge2AI-Voice Pediatric Dataset"` | `"https://doi.org/10.13026/mf9s-5r03"` | `"Declared source_manifest.yaml tier hierarchy."` | `B2AI_SUBSTRATE` (`81`), `B2AI_TOPIC` (`56`) |
+| **KIDS_FIRST** | `data/omission_contexts/kids_first_omission_context.json` | `"Kids First Congenital Heart Defects Dataset"` | `"https://kidsfirstdrc.org/"` | `"Declared source types from project manifest (no tier hierarchy declared)."` | `{}` (`0` terms; neutral profile) |
 
-- **Review Question**: Confirm whether the `parent_collection_title`, `dataset_or_release_id`, `source_policy` tiers, and `project_vocabulary` lists in `data/omission_contexts/*_omission_context.json` are approved for promotion from `draft` to registered `Step A5d` (`CHORUS`) and `Step A19` (fan-out) runs.
+- **Review Question**: Confirm whether `scopes[0].referent`, `scopes[0].release`, `source_policy` tiers, and `vocabulary` in `data/omission_contexts/*_omission_context.json` are approved for promotion from `draft` to registered `Step A5d` (`CHORUS`) and `Step A19` (fan-out) runs.
 
 ---
 
