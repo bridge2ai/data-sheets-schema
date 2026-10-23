@@ -100,4 +100,47 @@ Six draft `omission_context_v1` files have been generated in `data/omission_cont
 | **`S7` / `G5` / `A6` (`#5072`)** | **`PENDING OWNER`** | Approve `S7` prompt/schema-carry compaction, `G5` partition (`384` paths / `65,536` B / `4` workers), report-family carry trim, and raised `A6` worker/aggregate output limits before `Step A1b` token-count verification. |
 | **`D02` (`#5042`, `P2`)** | **`PENDING OWNER`** | Choose Option `(a)`, `(b)`, `(c)`, or `(d)` for the `AI_READI` `v8` comparator and canary baseline. |
 | **`D04` (`#2914`)** | **`PENDING OWNER`** | Confirm `CHORUS` corpus policy (`Path B` frozen 17-file bundle `9b2ef4b6` for `v10` comparability vs `Path A` prune). |
+| **`D-C` (`#5095`, `#5096`)** | **`PENDING OWNER`** | Approve API registration defaults (`64k/32k/32k/320k` tokens, `80` paths / `12,288` B, numeric `coverage_floor` `17/20 = 0.85`) and choose Option 1, 2, or 3 for `2026-10-22b` (`CHORUS` × 3) below. |
 | **`D01`, `D03`, `D05`, `D08`, `D09`, `D11`–`D21`, `D23`–`D25`** | **`PENDING OWNER`** | Documented with recommendations and `[proposed; owner fixes at P4]` rules in `notes/generic_v10_analysis_plan.md`. |
+
+---
+
+## 5. Decision `D-C`: API Registration Limits, Numeric Coverage Floor, and `2026-10-22b` (`CHORUS` × 3) — `PENDING OWNER`
+
+Following the two 1-replicate `CHORUS` `generic_v10` API canaries (`2026-10-20a` and `2026-10-22a`, PR `#5096`, full readout in `notes/reviews/chorus_v10_api_canaries_2026-10-22_outcome.md`), the owner must decide the production API registration defaults and whether to run `2026-10-22b` (`CHORUS` × 3 replicates).
+
+### 5.1 D07 Budget Accounting & Money Left After `2026-10-20a` and `2026-10-22a`
+
+| Budget Slice / Run | Allocation / Limit | Settled Spend | Total Spend (incl. Abandoned Calls) | Remaining Balance / Status |
+| --- | --- | --- | --- | --- |
+| **`2026-10-20a`** (`CHORUS` rep1, `25k/16k/16k/150k`) | Attempt 1 of 2 (`$15.00` pilot) | `$20.59` (11 rows) | `$21.44` (`+$0.85` abandoned `report`) | Completed (`gate.verdict: unmeasurable`, `58/63` slot receipts, `1` unverified snippet) |
+| **`2026-10-22a`** (`CHORUS` rep1, `64k/32k/32k/320k`) | Attempt 2 of 2 (`$15.00` contingency) | `$15.17` (9 rows) | `$17.15` (`+$1.98` abandoned `reconcile_full`) | Completed (`gate.verdict: unmeasurable`, `64/75` slot receipts, `0` unverified snippets) |
+| **`D07` `CHORUS` API Canary Slice** | **`$30.00`** (`$15 + $15`, max 2 attempts) | **`$35.76`** | **`$38.59`** | **`$0.00` left** (`-$5.76` settled / `-$8.59` total over `$30.00`; **2 of 2 allowed attempts used**) |
+| **`D07` Option 1 Total API Pilot Envelope** | **`$100.00`** (`$30` `CHORUS` + `$70` `AI_READI`) | `$35.76` | `$38.59` | **`$64.24` settled / `$61.41` total** unspent (earmarked for `AI_READI` `$35 + $35` pilot slice) |
+| **`D07` Overall Campaign Ceiling** | **`$420.00`** | `$35.76` | `$38.59` | **`$384.24` settled / `$381.41` total** unspent (requires explicit per-run owner word under `D22`) |
+
+### 5.2 Projected Cost of `2026-10-22b` (`CHORUS` × 3 Replicates)
+
+- Based on measured `CHORUS` API canary costs (`$15.17` settled on the clean 9-call `64k/32k/32k/320k` run `2026-10-22a`, up to `$20.59` settled when `report_regate` triggers as in `2026-10-20a`), running **3 replicates (`rep1..rep3`)** in `2026-10-22b` has a projected cost of:
+  - **Settled ledger cost (0–1 regate/run)**: **`$45.51 – $61.77`** (`3 × $15.17` to `3 × $20.59`).
+  - **Total cost including typical abandoned-call overhead**: **`$51.45 – $64.32`** (`3 × $17.15` to `3 × $21.44`).
+- Because the `$30.00` `CHORUS` canary slice and its 2-attempt cap are exhausted, `2026-10-22b` cannot launch under the existing `D07` `CHORUS` pilot authorization and requires an explicit new budget slice (`~$65` ceiling) and registration `sha256` approval.
+
+### 5.3 Proposed `D-C` Registration Defaults (Prepared on `origin/feat/v10-dc-registration-defaults` at `85698e6c9`)
+
+- **Token & Partition Limits**: `worker_output_tokens = 64,000`, `omission_output_tokens = 32,000`, `integration_output_tokens = 32,000`, `aggregate_output_tokens = 320,000`, `max_paths = 80`, `max_inventory_bytes = 12,288` (`max_workers = 4`).
+  - *Why*: Eliminates the `25,000`-token `audit_worker` truncation ceiling hit on `CHORUS` (`w2` reached `22,571` tokens in `2026-10-22a`) and the `16,000`-token `reconcile_full` truncation failure that caused the `$1.98` abandoned call in `2026-10-22a` (`reconcile_full` needed `18,412` output tokens).
+- **Numeric Coverage Floor**: `coverage_floor = {"metric": "required_recommended_20", "minimum": 0.85, "minimum_numerator": 17, "denominator": 20}` (`--coverage-floor 17/20`).
+  - *Why*: Replaces `{"state": "pending", "mode": "diagnostic_pilot"}` so `gate.verdict` evaluates to a determinate `pass`/`fail` instead of `unmeasurable`. Both `2026-10-20a` (`58` receipted slots) and `2026-10-22a` (`64` receipted slots) clear `17/20` (`0.85`) on `required_recommended_20`.
+
+### 5.4 Owner Options for `D-C` and `2026-10-22b`
+
+1. **Option 1 — Launch `2026-10-22b` (`CHORUS` × 3 API replicates) Now Under New `D-C` Defaults**:
+   - **Action**: Merge `origin/feat/v10-dc-registration-defaults` (`85698e6c9`), register `CHORUS` `rep1..rep3` with `64k/32k/32k/320k` limits, `80` paths / `12,288` B, and `coverage_floor = 17/20`, authorize an explicit `$65` `D07` budget slice, and launch after owner word on the 3 registration `sha256` digests.
+   - **What it would show**: 3-replicate within-condition variance (`rep1..rep3`) for `claudecode_api` `generic_v10` on `CHORUS` under a determinate gate (`gate.verdict: pass`/`fail`) and uniform token caps (`2026-10-20a` and `2026-10-22a` differed in worker/reconcile caps and had `gate.verdict: unmeasurable`).
+2. **Option 2 — Defer `2026-10-22b` Until After the Native Agentic Canary (`D-A`)**:
+   - **Action**: Merge the `D-C` defaults (`85698e6c9`) for future registrations, keep `2026-10-22b` on hold, and run the 1-replicate Track N native agentic canary (`D-A`, `notes/coordination/2026-10-23-codex-n1-assessment.md`) on `CHORUS` first; decide afterward whether a 3-replicate matched pair (API × 3 vs native × 3) is worth `$45–$64`.
+   - **What it would show**: A direct 1-rep cross-transport comparison (`claudecode_api` `2026-10-22a` vs `claudecode_agent` `D-A`) before committing `$45–$64` to replicate expansion on `CHORUS`.
+3. **Option 3 — Drop `2026-10-22b` and Use `2026-10-20a` + `2026-10-22a` as the `CHORUS` API Baseline**:
+   - **Action**: Merge the `D-C` defaults (`85698e6c9`), cancel `2026-10-22b`, treat the two completed 1-rep `CHORUS` API runs in `#5096` as the `CHORUS` API pilot baseline, and reserve the remaining `$61.41–$64.24` of the `$100` `D07` pilot envelope for the `AI_READI` pilot (`$35 + $35`) once `D02` is chosen.
+   - **What it would show**: Preserves the `$100` `D07` pilot budget ceiling while advancing to the larger multi-worker `AI_READI` testbed under the validated `64k/32k/32k/320k` + `17/20` registration defaults.
