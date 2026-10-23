@@ -37,7 +37,33 @@ def _isolate_run_lock(test: unittest.TestCase) -> None:
     test.addCleanup(patcher.stop)
 
 
-class ApiBatchCostValidationTest(unittest.TestCase):
+#: The batch label prefix every run in this module starts from. Each test
+#: adds its own suffix (`_prefix_for`): the classes below inherit one
+#: another's tests, so a class-level prefix would still be shared by the
+#: copies, and two tests sharing a prefix share label-keyed state such as the
+#: run lock (#5092).
+PREFIX_BASE = "2026-10-17_claude-opus-5-api-generic-testcost9"
+
+
+def _prefix_for(test: unittest.TestCase) -> str:
+    import hashlib
+    return f"{PREFIX_BASE}-{hashlib.sha256(test.id().encode()).hexdigest()[:10]}"
+
+
+class BatchRunCase(unittest.TestCase):
+    """A test that runs `d4d api batch` as far as the run lock: an isolated
+    lock directory and a label prefix no other test uses (#5092)."""
+
+    def setUp(self):
+        _isolate_run_lock(self)
+        self.PREFIX = _prefix_for(self)
+
+    @property
+    def LABEL(self):
+        return f"{self.PREFIX}_rep1"
+
+
+class ApiBatchCostValidationTest(BatchRunCase):
     """CLI option registration and argument validation."""
 
     def test_max_cost_dollars_option_exists_on_batch_cmd(self):
@@ -52,7 +78,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
             [
                 "api",
                 "batch",
-                "--label-prefix", "2026-10-11_claude-opus-5-api-generic-test",
+                "--label-prefix", self.PREFIX,
                 "--max-cost-dollars", "-1.50",
             ],
         )
@@ -66,7 +92,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
             [
                 "api",
                 "batch",
-                "--label-prefix", "2026-10-11_claude-opus-5-api-generic-test",
+                "--label-prefix", self.PREFIX,
                 "--max-cost-dollars", "-0.01",
             ],
         )
@@ -82,7 +108,7 @@ class ApiBatchCostValidationTest(unittest.TestCase):
                     [
                         "api",
                         "batch",
-                        "--label-prefix", "2026-10-11_claude-opus-5-api-generic-test",
+                        "--label-prefix", self.PREFIX,
                         "--max-cost-dollars", bad,
                     ],
                 )
@@ -90,11 +116,8 @@ class ApiBatchCostValidationTest(unittest.TestCase):
                 self.assertIn("--max-cost-dollars must be positive", result.output)
 
 
-class ApiBatchCostStopTest(unittest.TestCase):
+class ApiBatchCostStopTest(BatchRunCase):
     """Stopping behavior between runs when the cumulative cap is met."""
-
-    def setUp(self):
-        _isolate_run_lock(self)
 
     def _dummy_plan(self, spec):
         return {
@@ -159,7 +182,7 @@ class ApiBatchCostStopTest(unittest.TestCase):
                     "--replicates", "3",
                     "--arm", "baseline",
                     "--condition", "generic",
-                    "--label-prefix", "2026-10-11_claude-opus-5-api-generic-testcost1",
+                    "--label-prefix", self.PREFIX,
                     "--allow-condition-mismatch",
                     "--yes",
                     "--no-branch-guard",
@@ -201,7 +224,7 @@ class ApiBatchCostStopTest(unittest.TestCase):
                     "--replicates", "2",
                     "--arm", "baseline",
                     "--condition", "generic",
-                    "--label-prefix", "2026-10-11_claude-opus-5-api-generic-testcost2",
+                    "--label-prefix", self.PREFIX,
                     "--allow-condition-mismatch",
                     "--yes",
                     "--no-branch-guard",
@@ -236,7 +259,7 @@ class ApiBatchCostStopTest(unittest.TestCase):
                     "--replicates", "3",
                     "--arm", "baseline",
                     "--condition", "generic",
-                    "--label-prefix", "2026-10-11_claude-opus-5-api-generic-testcost3",
+                    "--label-prefix", self.PREFIX,
                     "--allow-condition-mismatch",
                     "--yes",
                     "--no-branch-guard",
@@ -272,7 +295,7 @@ class ApiBatchCostStopTest(unittest.TestCase):
                     "--replicates", "3",
                     "--arm", "baseline",
                     "--condition", "generic",
-                    "--label-prefix", "2026-10-11_claude-opus-5-api-generic-testcost4",
+                    "--label-prefix", self.PREFIX,
                     "--allow-condition-mismatch",
                     "--yes",
                     "--no-branch-guard",
@@ -322,12 +345,9 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class ApiBatchCostAccountingTest(unittest.TestCase):
+class ApiBatchCostAccountingTest(BatchRunCase):
     """#5045 review: what the cap counts — this invocation's billed attempts,
     including those of a run that raised, and none of a run's history."""
-
-    def setUp(self):
-        _isolate_run_lock(self)
 
     ROW = {"phase": "full", "input_tokens": 100_000, "output_tokens": 20_000,
            "cache_read": 0, "cache_write": 0}               # $1.00
@@ -340,7 +360,7 @@ class ApiBatchCostAccountingTest(unittest.TestCase):
              patch("data_sheets_schema.api_runner.execute", mock_exec):
             return CliRunner().invoke(cli, [
                 "api", "batch", "--projects", "AI_READI", "--replicates", reps, "--arm", "baseline",
-                "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
+                "--condition", "generic", "--label-prefix", self.PREFIX,
                 "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate", *extra])
 
     def test_zero_cap_is_refused(self):
@@ -569,10 +589,9 @@ class ApiBatchRealBilledRowsTest(ApiBatchCostAccountingTest):
              patch("data_sheets_schema.api_runner.execute", side_effect=execute):
             return CliRunner(mix_stderr=False).invoke(cli, [
                 "api", "batch", "--projects", "AI_READI", "--replicates", reps, "--arm", "baseline",
-                "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
+                "--condition", "generic", "--label-prefix", self.PREFIX,
                 "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate", *extra])
 
-    LABEL = "2026-10-17_claude-opus-5-api-generic-testcost9_rep1"
 
     def test_a_pending_call_settled_on_resume_is_counted_by_this_invocation(self):
         """#5073 F1: the call an earlier invocation left pending is settled
@@ -666,14 +685,11 @@ LEGACY_ROW = {"phase": "full", "attempt": 1, "started_at": "2026-09-04T01:25:10+
               "max_tokens": 128000, "stop_reason": "end_turn"}                       # $1.00
 
 
-class ApiBatchLegacyRowsTest(unittest.TestCase):
+class ApiBatchLegacyRowsTest(BatchRunCase):
     """#5085 L1: rows with no usage id, as records written before ids carry
     them, are matched against the pre-run record by canonical text: a
     re-invoked completed legacy label adds $0, and only a row that matches
     nothing is counted, with a warning that the count may be over."""
-
-    def setUp(self):
-        _isolate_run_lock(self)
 
     def _invoke(self, recorded, returned):
         import tempfile
@@ -695,7 +711,7 @@ class ApiBatchLegacyRowsTest(unittest.TestCase):
              patch("data_sheets_schema.api_runner.execute", MagicMock(side_effect=finished)):
             return CliRunner(mix_stderr=False).invoke(cli, [
                 "api", "batch", "--projects", "AI_READI", "--replicates", "1", "--arm", "baseline",
-                "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
+                "--condition", "generic", "--label-prefix", self.PREFIX,
                 "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate"])
 
     def test_a_reinvoked_completed_legacy_label_adds_nothing(self):
@@ -714,16 +730,15 @@ class ApiBatchLegacyRowsTest(unittest.TestCase):
         self.assertIn("the cost is overcounted", result.stderr)
 
 
-class ApiBatchPricingTest(unittest.TestCase):
+class ApiBatchPricingTest(BatchRunCase):
     """#5062: the cap is priced at one model's posted rates, and a dry run
     shows the cap without inventing an estimate."""
 
-    def setUp(self):
-        _isolate_run_lock(self)
-
-    ARGS = ["api", "batch", "--projects", "AI_READI", "--replicates", "1", "--arm", "baseline",
-            "--condition", "generic", "--label-prefix", "2026-10-17_claude-opus-5-api-generic-testcost9",
-            "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate"]
+    @property
+    def ARGS(self):
+        return ["api", "batch", "--projects", "AI_READI", "--replicates", "1", "--arm", "baseline",
+                "--condition", "generic", "--label-prefix", self.PREFIX,
+                "--allow-condition-mismatch", "--yes", "--no-branch-guard", "--no-canary-gate"]
 
     def _invoke(self, extra, model=None):
         from data_sheets_schema import api_runner
@@ -757,3 +772,76 @@ class ApiBatchPricingTest(unittest.TestCase):
         self.assertEqual(result.exit_code, 0, result.output)
         self.assertIn("cost cap $15.00, checked between runs; no dollar estimate", result.output)
         mock_exec.assert_not_called()
+
+
+class BatchRunIsolationTest(unittest.TestCase):
+    """#5092: two tests here once raced on one run lock under pytest-xdist,
+    because they shared a label prefix and the repository's lock directory.
+    Every test that runs the batch as far as the lock now has its own lock
+    directory and its own prefix; these checks keep a new class from
+    reintroducing either."""
+
+    #: Refused at argument validation, before `run_lock.acquire`, or never run the batch.
+    BEFORE_THE_LOCK = ("ApiBatchCostValidationTest", "ApiBatchCostStructureTest", "BilledRowsReadTest")
+
+    def _classes(self):
+        import sys
+        module = sys.modules[__name__]
+        return [cls for _, cls in inspect.getmembers(module, inspect.isclass)
+                if issubclass(cls, unittest.TestCase) and cls.__module__ == __name__
+                and cls not in (BatchRunCase, BatchRunIsolationTest)]
+
+    def _runs_the_batch(self, cls):
+        source = "".join(inspect.getsource(k) for k in cls.__mro__ if k.__module__ == __name__)
+        return '"batch"' in source
+
+    def _tests(self):
+        loader = unittest.TestLoader()
+        return [cls(name) for cls in self._classes() if issubclass(cls, BatchRunCase)
+                for name in loader.getTestCaseNames(cls)]
+
+    def test_every_class_that_runs_the_batch_isolates_its_lock_and_prefix(self):
+        for cls in self._classes():
+            if self._runs_the_batch(cls) and cls.__name__ not in self.BEFORE_THE_LOCK:
+                self.assertTrue(issubclass(cls, BatchRunCase), f"{cls.__name__} runs the batch without BatchRunCase")
+
+    def test_no_two_tests_share_a_label_prefix(self):
+        tests = self._tests()
+        prefixes = [_prefix_for(test) for test in tests]
+        self.assertGreater(len(tests), 20)
+        self.assertEqual(len(prefixes), len(set(prefixes)))
+        # Inherited copies of one test method still differ.
+        inherited = [t for t in tests if t._testMethodName == "test_zero_cap_is_refused"]
+        self.assertGreater(len(inherited), 1)
+        self.assertEqual(len({_prefix_for(t) for t in inherited}), len(inherited))
+
+    def test_each_test_locks_in_its_own_directory_outside_the_repository(self):
+        from pathlib import Path
+        from data_sheets_schema import run_lock
+        paths = []
+        for test in (ApiBatchCostAccountingTest("test_zero_cap_is_refused"),
+                     ApiBatchTotalsWithoutCapTest("test_zero_cap_is_refused")):
+            test.setUp()
+            try:
+                paths.append(Path(run_lock._path_for(test.PREFIX)))
+            finally:
+                test.doCleanups()
+        self.assertNotEqual(paths[0], paths[1])
+        self.assertNotEqual(paths[0].parent, paths[1].parent)
+        for path in paths:
+            self.assertNotEqual(path.parent.resolve(), Path(run_lock.LOCK_DIR).resolve())
+            self.assertFalse(path.parent.exists(), "the per-test lock directory is removed at cleanup")
+
+    def test_every_label_prefix_a_test_passes_is_its_own(self):
+        """The prefixes actually passed to `api batch`, read from this module:
+        each is `self.PREFIX` or a literal used once. Restoring a shared label
+        (the #5092 shape) fails here, whatever `_prefix_for` returns."""
+        import re
+        import sys
+        flag = '"--label-' + 'prefix",'          # split so this line is not itself a match
+        source = inspect.getsource(sys.modules[__name__])
+        passed = [a.strip() for a in re.findall(re.escape(flag) + r"\s*([^,\]\)\n]+)", source)]
+        self.assertGreater(len(passed), 6)
+        literals = [a for a in passed if a != "self.PREFIX"]
+        self.assertEqual(len(literals), len(set(literals)), f"a literal label prefix is shared: {literals}")
+        self.assertEqual(literals, ['"x"'], "only the zero-cap refusal, before the lock, passes a literal")
