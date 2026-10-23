@@ -68,19 +68,25 @@ DEFAULT_VOCABULARIES_PATH = (
 )
 
 DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
-    "max_paths": 384,
-    "max_inventory_bytes": 65536,
+    "max_paths": 80,
+    "max_inventory_bytes": 12288,
     "max_workers": 4,
     "max_request_bytes": 32000000,
     "max_input_tokens_per_call": 1000000,
-    "worker_output_tokens": 25000,
-    "omission_output_tokens": 16000,
-    "integration_output_tokens": 16000,
+    "worker_output_tokens": 64000,
+    "omission_output_tokens": 32000,
+    "integration_output_tokens": 32000,
     "aggregate_input_tokens": 4000000,
-    "aggregate_output_tokens": 150000,
+    "aggregate_output_tokens": 320000,
     "max_calls": 18,
     "context_limit_tokens": 1000000,
     "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+}
+
+REGISTERED_COVERAGE_FLOOR: dict[str, Any] = {
+    "state": "registered",
+    "numerator": 17,
+    "denominator": 20,
 }
 
 DEFAULT_RECEIPT_LIMITS: dict[str, Any] = {
@@ -92,7 +98,7 @@ DEFAULT_RECEIPT_LIMITS: dict[str, Any] = {
     "max_request_bytes": 32000000,
     "context_limit_tokens": 1000000,
     "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
-    "coverage_floor": {"state": "pending", "mode": "diagnostic_pilot"},
+    "coverage_floor": copy.deepcopy(REGISTERED_COVERAGE_FLOOR),
 }
 
 DEFAULT_AUDIT_TRANSPORT: dict[str, int] = {
@@ -106,13 +112,14 @@ def parse_coverage_floor(value: str | dict[str, Any] | None) -> dict[str, Any]:
     """Parse a coverage floor specification into receipt_completion_registration_v2 format.
 
     Accepts:
-      - None, "pending", or "diagnostic_pilot" -> {"state": "pending", "mode": "diagnostic_pilot"}
-      - "NUM/DEN" (e.g. "13/20") -> {"state": "registered", "numerator": NUM, "denominator": DEN}
-      - Decimal multiple of 0.05 in (0, 1] (e.g. "0.65") -> {"state": "registered", "numerator": 13, "denominator": 20}
+      - None -> copy of REGISTERED_COVERAGE_FLOOR ({"state": "registered", "numerator": 17, "denominator": 20})
+      - "pending" or "diagnostic_pilot" -> {"state": "pending", "mode": "diagnostic_pilot"}
+      - "NUM/DEN" (e.g. "17/20") -> {"state": "registered", "numerator": NUM, "denominator": DEN}
+      - Decimal multiple of 0.05 in (0, 1] (e.g. "0.85") -> {"state": "registered", "numerator": 17, "denominator": 20}
       - An existing dict.
     """
     if value is None:
-        return {"state": "pending", "mode": "diagnostic_pilot"}
+        return copy.deepcopy(REGISTERED_COVERAGE_FLOOR)
     if isinstance(value, dict):
         return copy.deepcopy(value)
     text = str(value).strip()
@@ -645,9 +652,9 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
 )
 @click.option(
     "--coverage-floor",
-    default="pending",
+    default="17/20",
     show_default=True,
-    help="Receipt coverage floor: 'pending' or 'NUM/DEN' (e.g. '13/20') or decimal in (0, 1] (e.g. '0.65').",
+    help="Receipt coverage floor: 'NUM/DEN' (default '17/20'), decimal in (0, 1] (e.g. '0.85'), or 'pending'.",
 )
 @click.option(
     "--max-paths",

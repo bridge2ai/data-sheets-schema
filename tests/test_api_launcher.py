@@ -12,6 +12,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -172,6 +173,13 @@ class TestCommandValidation:
     def test_reject_api_batch_without_max_cost_dollars(self):
         with pytest.raises(LauncherError, match="requires '--max-cost-dollars"):
             validate_command(["d4d", "api", "batch", "--manifest", "data/preprocessed/source_manifest.yaml"])
+
+    def test_reject_python_cli_api_batch_without_max_cost_dollars(self):
+        with pytest.raises(LauncherError, match="requires '--max-cost-dollars"):
+            validate_command([
+                "python", "-m", "data_sheets_schema.cli",
+                "api", "batch", "--manifest", "data/preprocessed/source_manifest.yaml",
+            ])
 
     def test_accept_api_batch_dry_run_without_max_cost_dollars(self):
         validate_command(
@@ -388,6 +396,57 @@ class TestLauncherCLI:
         captured = capsys.readouterr()
         assert "Background detached" in captured.out
         assert str(external_log.resolve()) in captured.out
+
+    def test_background_launch_redirects_stdin_and_survives_closed_fd0(self, tmp_path: Path):
+        """Regression test: --launch must pass stdin=DEVNULL so detached children do not fail in init_sys_streams."""
+        external_log = tmp_path / "logs" / "detached_run.log"
+        script = REPO_ROOT / "scripts" / "api_launcher.py"
+        wrapper_code = (
+            "import os, subprocess, sys\n"
+            "os.close(0)\n"
+            "sys.argv = [sys.argv[1]] + sys.argv[2:]\n"
+            "import runpy\n"
+            "runpy.run_path(sys.argv[0], run_name='__main__')\n"
+        )
+        env = dict(os.environ)
+        env["CBORG_API_KEY"] = "dummy-test-key"
+        res = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                wrapper_code,
+                str(script),
+                "--worktree",
+                str(REPO_ROOT),
+                *_default_venv_arg(),
+                "--launch",
+                "--log",
+                str(external_log),
+                "--",
+                "python",
+                "-c",
+                "import sys; print('DETACHED_STDIN_EOF', sys.stdin.read() == '')",
+            ],
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert res.returncode == 0, f"Launcher failed: {res.stderr}\n{res.stdout}"
+        assert "[LAUNCHED] Background process PID" in res.stdout
+
+        deadline = time.monotonic() + 10.0
+        log_text = ""
+        while time.monotonic() < deadline:
+            if external_log.is_file():
+                log_text = external_log.read_text(encoding="utf-8", errors="replace")
+                if "DETACHED_STDIN_EOF True" in log_text or "Fatal Python error" in log_text:
+                    break
+            time.sleep(0.1)
+
+        assert "Fatal Python error" not in log_text
+        assert "Bad file descriptor" not in log_text
+        assert "DETACHED_STDIN_EOF True" in log_text
 
     def test_scripts_api_launcher_executable(self):
         script = REPO_ROOT / "scripts" / "api_launcher.py"

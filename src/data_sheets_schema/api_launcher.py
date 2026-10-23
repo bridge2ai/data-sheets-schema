@@ -18,7 +18,7 @@ Key safeguards:
    - required modules (api_runner, shared_generation, typed_audit_runtime, receipt_completion, cli.api)
      must resolve to files under <worktree>/src
 7. Supports dry-run, check-only, and detached background launch under caffeinate -ims with nohup logging
-   outside the worktree.
+   outside the worktree and stdin redirected to /dev/null so detached children never fail in init_sys_streams.
 """
 
 from __future__ import annotations
@@ -56,6 +56,15 @@ ALLOWED_API_SUBCOMMANDS = frozenset({
 
 class LauncherError(Exception):
     """Raised when launcher validation or execution checks fail."""
+
+
+def _stdin_is_valid() -> bool:
+    """Return True if file descriptor 0 is an open valid file descriptor."""
+    try:
+        os.fstat(0)
+        return True
+    except OSError:
+        return False
 
 
 IMPORT_CHECK_SNIPPET = """
@@ -193,7 +202,7 @@ def validate_command(cmd_args: Sequence[str], *, dry_run: bool = False) -> None:
     api_subcmd: str | None = None
     if first == "api" and len(words) >= 2:
         api_subcmd = words[1]
-    elif first == "d4d":
+    elif first in ("d4d", "python", "python3"):
         for i in range(len(tokens) - 1):
             if tokens[i] == "api":
                 for nxt in tokens[i + 1:]:
@@ -304,6 +313,7 @@ def run_import_check(
             cmd,
             cwd=str(worktree_dir),
             env=env,
+            stdin=subprocess.DEVNULL,
             capture_output=True,
             text=True,
             check=False,
@@ -446,6 +456,7 @@ def launch(
                 launch_cmd,
                 cwd=str(worktree_dir),
                 env=clean_env,
+                stdin=subprocess.DEVNULL,
                 stdout=out,
                 stderr=subprocess.STDOUT,
                 start_new_session=True,
@@ -466,7 +477,12 @@ def launch(
         print(f"  Unset keys:  ANTHROPIC_API_KEY, D4D_RECEIPT_FULL_MAX_TOKENS, D4D_PHASE_WALL_CLOCK_SECONDS")
         return 0
 
-    res = subprocess.run(final_cmd, cwd=str(worktree_dir), env=clean_env)
+    res = subprocess.run(
+        final_cmd,
+        cwd=str(worktree_dir),
+        env=clean_env,
+        stdin=None if _stdin_is_valid() else subprocess.DEVNULL,
+    )
     return res.returncode
 
 
