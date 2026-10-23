@@ -2170,7 +2170,7 @@ def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_on
         "linewrap-joined": 5, "artifact-line-elided": 0, "joined-elided": 0}
     assert sum(t["located_by_form"].values()) == t["located"]
     # #3822: every snippet is accounted for, per project and in the totals;
-    # the 472 not located were skipped before their context was read, and
+    # the 473 not located were skipped before their context was read, and
     # they are counted, not dropped (figures in the committed note).
     for tally in [t, *out["projects"].values()]:
         assert _conserved(tally), tally
