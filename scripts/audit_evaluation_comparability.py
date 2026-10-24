@@ -2,15 +2,16 @@
 """Audit historical evaluation identity/condition gaps without rewriting evidence.
 
 Purpose: deterministic Step E0/E4 inventory for #2911, #2912 and #1077.
-Inputs: selected checkout's generation provenance/artifacts and the two direct
-label_aware JSON stores; optional independently selected model/context pins.
+Inputs: selected checkout's generation provenance/artifacts, two direct
+label_aware stores and explicit registered-rating directories; selected targets.
 Outputs: JSON or Markdown on stdout only. No scoring, provider calls or writes.
-Date: 2026-10-20. Retained ratings elsewhere require separate ingestion review;
+Date: 2026-10-23; registered ingestion serves #5125. Other retained ratings need review;
 an absent qualifying rating here does not prove no such rating exists elsewhere.
 """
 from __future__ import annotations
 
 import argparse
+from decimal import Decimal, ROUND_DOWN
 import hashlib
 import json
 import math
@@ -42,6 +43,7 @@ ARMS = {
 }
 RUBRICS = ("rubric10", "rubric20")
 MAX_BYTES = 32 * 1024 * 1024
+MAX_REGISTERED_BYTES = 256 * 1024 * 1024
 HEX = re.compile(r"[0-9a-fA-F]{64}\Z")
 
 
@@ -245,6 +247,407 @@ def instrument(rubric, version):
     return selected, resources
 
 
+class RegisteredRefusal(ValueError):
+    """Stable inventory reason, without exposing arbitrary parser exception text."""
+
+
+def require(condition, reason):
+    if not condition:
+        raise RegisteredRefusal(reason)
+
+
+def checked_pin(value):
+    require(isinstance(value, dict) and set(value) == {"path", "sha256", "bytes"}
+            and isinstance(value["path"], str) and Path(value["path"]).is_absolute()
+            and ".." not in Path(value["path"]).parts
+            and isinstance(value["sha256"], str) and HEX.fullmatch(value["sha256"])
+            and type(value["bytes"]) is int and 0 < value["bytes"] <= MAX_BYTES,
+            "registered_pin_invalid")
+    return value
+
+
+class RegisteredCapture:
+    """One bounded read snapshot; never follows a manifest outside --root."""
+
+    def __init__(self, root, directory):
+        self.root = root
+        self.logical_directory = root / directory
+        self.directory = local_path(root, str(self.logical_directory))
+        require(self.directory is not None and self.directory.is_dir(),
+                "registered_directory_missing_or_external")
+        info = self.directory.stat()
+        self.directory_identity = (info.st_dev, info.st_ino)
+        self.logical_paths = {}
+        self.files = {}
+        self.total = 0
+
+    def read_inside(self, path):
+        """Hold directory descriptors, refusing a parent-symlink replacement."""
+        parts = path.relative_to(self.root).parts
+        require(bool(parts) and ".." not in parts, "registered_authority_missing_or_external")
+        directories = [os.open(self.root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)]
+        try:
+            for part in parts[:-1]:
+                directories.append(os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                                           dir_fd=directories[-1]))
+            fd = os.open(parts[-1], os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW, dir_fd=directories[-1])
+            with os.fdopen(fd, "rb") as stream:
+                before = os.fstat(stream.fileno())
+                require(stat.S_ISREG(before.st_mode) and 0 < before.st_size <= MAX_BYTES,
+                        "registered_file_not_bounded_regular")
+                raw = stream.read(MAX_BYTES + 1)
+                after = os.fstat(stream.fileno())
+            require(len(raw) <= MAX_BYTES and all(getattr(before, key) == getattr(after, key)
+                    for key in ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")),
+                    "registered_evidence_changed")
+            return raw
+        finally:
+            for fd in reversed(directories):
+                os.close(fd)
+
+    def take(self, name):
+        logical = self.logical_directory / name
+        path = local_path(self.root, str(logical))
+        require(path is not None, "registered_authority_missing_or_external")
+        require(logical not in self.logical_paths or self.logical_paths[logical] == path,
+                "registered_evidence_changed")
+        raw = self.read_inside(path)
+        require(local_path(self.root, str(logical)) == path, "registered_evidence_changed")
+        if path in self.files:
+            require(self.files[path] == raw, "registered_evidence_changed")
+        else:
+            self.total += len(raw)
+            require(self.total <= MAX_REGISTERED_BYTES, "registered_evidence_byte_limit")
+            self.files[path] = raw
+        self.logical_paths[logical] = path
+        return raw
+
+    def pinned(self, pin):
+        pin = checked_pin(pin)
+        raw = self.take(pin["path"])
+        require(len(raw) == pin["bytes"] and sha(raw) == pin["sha256"],
+                "registered_authority_pin_mismatch")
+        return raw
+
+    def unchanged(self):
+        def bindings_current():
+            require(local_path(self.root, str(self.logical_directory)) == self.directory,
+                    "registered_evidence_changed")
+            info = self.directory.stat()
+            require((info.st_dev, info.st_ino) == self.directory_identity,
+                    "registered_evidence_changed")
+            for logical, path in self.logical_paths.items():
+                require(local_path(self.root, str(logical)) == path, "registered_evidence_changed")
+
+        bindings_current()
+        for path, raw in self.files.items():
+            require(local_path(self.root, str(path)) == path and self.read_inside(path) == raw,
+                    "registered_evidence_changed")
+        bindings_current()
+
+
+def registered_attempt_names(directory, count):
+    """Enumerate the small package root without materializing an unbounded glob."""
+    names = []
+    with os.scandir(directory) as entries:
+        for position, entry in enumerate(entries, 1):
+            require(position <= 128, "registered_directory_entry_limit")
+            if entry.name.startswith("rating-"):
+                require(re.fullmatch(r"rating-\d{3}", entry.name) is not None
+                        and entry.is_dir(follow_symlinks=False), "registered_attempt_directory_invalid")
+                names.append(entry.name)
+                require(len(names) <= count, "registered_attempt_directories_mismatch")
+    return sorted(names)
+
+
+def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts):
+    """Read saved E1 evidence, then reuse its actual offline acceptance validator.
+
+    This does not call prepare/assert_current, execute historical code, read a
+    runtime binary, recertify generation, or treat receipt claims as signatures.
+    """
+    from data_sheets_schema.evaluation import registered_eval_runner as runner
+    from data_sheets_schema.evaluation import blind_review_pack as blind
+    from data_sheets_schema.provenance import resolve_record_input
+
+    capture = RegisteredCapture(root, directory)
+    package = {"arm": arm, "path": relative(root, capture.directory), "reasons": [],
+               "attempts": [], "record": None, "rows": [], "generation_acceptance_verified": False}
+    try:
+        manifest_raw = capture.take("registration.json")
+        plan = document(manifest_raw, json_only=True)
+        receipt_raw = capture.take("receipt.json")
+        receipt = document(receipt_raw, json_only=True)
+        package.update(manifest_sha256=sha(manifest_raw), receipt_sha256=sha(receipt_raw))
+        require(plan.get("format") == runner.FORMAT and runner.shared.canonical(plan) == manifest_raw,
+                "registered_manifest_format_or_encoding")
+        require(plan.get("execution_mode") == "isolated_no_tools_controller_validation",
+                "registered_execution_mode_unsupported")
+        require(receipt.get("plan_sha256") == sha(manifest_raw) and receipt.get("plan") == plan,
+                "registered_receipt_plan_mismatch")
+        require(receipt.get("status") in {"validated", "incomplete"}, "registered_receipt_status")
+        declared_rubric = str(mapping(plan.get("instrument")).get("rubric", "")).removesuffix("-semantic")
+        package["rubric"] = declared_rubric if declared_rubric in RUBRICS else None
+        run = mapping(plan.get("generation_run"))
+        require(set(run) == {"arm", "project", "label", "method"}
+                and all(isinstance(value, str) and value.strip() and len(value) <= 4096
+                        for value in run.values()), "registered_run_identity_invalid")
+        package["generation_run"] = run
+        record = {"arm": arm, "project": run["project"], "label": run["label"],
+            "replicate": None, "canonical": False, "provenance_files": [], "record_path": None,
+            "record_sha256": None, "validation_passed": None, "generation_method": run["method"],
+            "record_role": plan.get("record_role"), "registered_run": run, "reasons": []}
+        require(plan.get("record_role") == "full", "unsupported_for_full_audit")
+        require(type(plan.get("repeat_count")) is int and 1 <= plan["repeat_count"] <= 100,
+                "registered_repeat_count_invalid")
+        authority_list = plan.get("authorities")
+        require(isinstance(authority_list, list) and 0 < len(authority_list) <= 1024,
+                "registered_authorities_invalid")
+        authorities = {}
+        for entry in authority_list:
+            entry = checked_pin(entry)
+            require(entry["path"] not in authorities, "registered_authorities_ambiguous")
+            authorities[entry["path"]] = entry
+
+        def original_pin(key):
+            pin = checked_pin(plan.get(key))
+            require(authorities.get(pin["path"]) == pin, "registered_authority_not_captured")
+            return capture.pinned(pin)
+
+        generation_raw = original_pin("generation_registration")
+        generation = document(generation_raw, json_only=True)
+        require(generation.get("format") == runner.shared.FORMAT
+                and generation.get("registration_path") == plan["generation_registration"]["path"]
+                and generation.get("run") == run, "registered_generation_identity_mismatch")
+        # The supported shared-v1 parser checks its immutable descriptor and
+        # structural contracts, not equality to a historical executable tree.
+        try:
+            runner.shared.parse_registration(generation_raw)
+        except (ValueError, RuntimeError, OSError):
+            raise RegisteredRefusal("registered_generation_registration_unsupported") from None
+        provenance_raw = original_pin("generation_provenance")
+        provenance = document(provenance_raw)
+        require(provenance.get("record_type") == "d4d_generation_provenance"
+                and isinstance(provenance.get("run"), dict)
+                and {key: provenance["run"].get(key) for key in run} == run,
+                "registered_provenance_identity_mismatch")
+        prior = mapping(mapping(provenance.get("shared_generation")).get("authority"))
+        require(prior.get("registration") == {"sha256": sha(generation_raw),
+                "raw_json": generation_raw.decode()}, "registered_provenance_registration_mismatch")
+        inputs = mapping(generation.get("inputs"))
+        pins = [inputs[key] for key in ("bundle", "chunk_manifest", "source_manifest", "context")
+                if inputs.get(key) is not None]
+        for name in ("full_schema", "core_schema"):
+            sources = mapping(inputs.get(name)).get("sources")
+            require(isinstance(sources, list) and 0 < len(sources) <= 256,
+                    "registered_generation_sources_invalid")
+            pins.extend(sources)
+        pins.extend(pin for pin in (mapping(inputs.get("profile")).get("vocabulary"),
+                                    mapping(generation.get("runtime")).get("config")) if pin)
+        pins.append(plan["generation_registration"])
+        expected = {}
+        for pin in pins:
+            checked_pin(pin)
+            require(pin["path"] not in expected or expected[pin["path"]] == pin,
+                    "registered_generation_sources_conflict")
+            require(authorities.get(pin["path"]) == pin, "registered_generation_source_not_captured")
+            expected[pin["path"]] = pin
+        require(prior.get("files") == [expected[key] for key in sorted(expected)]
+                and plan.get("omission_context") == inputs.get("context"),
+                "registered_provenance_capture_mismatch")
+        original = original_pin("record")
+        require(capture.take("original.yaml") == original, "registered_original_copy_mismatch")
+        artifact = mapping(mapping(mapping(provenance.get("validation")).get("artifacts")).get("full"))
+        resolved = (resolve_record_input(Path(artifact["path"]), Path(plan["generation_provenance"]["path"]))
+                    if isinstance(artifact.get("path"), str) else None)
+        require(resolved is not None and local_path(root, str(resolved)) == local_path(root, plan["record"]["path"]),
+                "registered_provenance_full_path_mismatch")
+        hashes = {key: artifact[key] for key in ("md5", "sha256") if key in artifact}
+        require(hashes and all(isinstance(value, str) and hashlib.new(key, original).hexdigest() == value
+                              for key, value in hashes.items()), "registered_provenance_full_hash_mismatch")
+        record.update(record_path=relative(root, local_path(root, plan["record"]["path"])),
+            record_sha256=sha(original), provenance_sha256=sha(provenance_raw),
+            provenance_files=[relative(root, local_path(root, plan["generation_provenance"]["path"]))],
+            validation_passed=mapping(provenance.get("validation")).get("passed"))
+        require(record["validation_passed"] is not False, "generation_record_declared_invalid")
+        require(record["validation_passed"] is None or type(record["validation_passed"]) is bool,
+                "registered_generation_validation_invalid")
+        # Only this fully joined generation identity may participate in record
+        # merging. Later package failures belong to the package, not the record.
+        package["record"] = record
+        blinding = plan.get("blinding")
+        require(blinding == {"version": blind.BLINDING_VERSION,
+                            **{key: run[key] for key in ("arm", "project", "label")}},
+                "registered_blinding_unsupported_or_mismatched")
+        blinded = blind.blind_input(original, blind.Record(run["arm"], run["project"], run["label"],
+            Path(plan["record"]["path"]), sha(original)), forbidden=(
+                plan["generation_registration"]["path"], plan["generation_provenance"]["path"]))
+        require(capture.take("record.yaml") == blinded and plan.get("blinded_input_sha256") == sha(blinded),
+                "registered_blinded_input_mismatch")
+        context_raw = original_pin("applicability_context")
+        context = normalize_context(document(context_raw))
+        saved_context = capture.take("context.json")
+        require(document(saved_context, json_only=True) == context
+                and saved_context == runner.shared.canonical(context)
+                and context_digest(context) == plan.get("context_sha256"), "registered_context_mismatch")
+        selected_instrument = mapping(plan.get("instrument"))
+        rubric = str(selected_instrument.get("rubric", "")).removesuffix("-semantic")
+        require(rubric in RUBRICS, "registered_rubric_unsupported")
+        selected, current_resources = snapshots[rubric]
+        require(selected_instrument.get("version") == selected.version
+                and selected_instrument.get("agent") == selected.agent,
+                "registered_instrument_version_unsupported")
+        resources = {}
+        for name, current in current_resources.items():
+            raw = capture.take("instrument/" + name)
+            matches = [entry for path, entry in authorities.items() if path.endswith("/" + name)]
+            require(len(matches) == 1 and matches[0]["sha256"] == sha(raw)
+                    and matches[0]["bytes"] == len(raw) and raw == current,
+                    "registered_instrument_resource_unsupported_or_mismatched")
+            resources[name] = raw
+        for key, name in (("definition_sha256", selected.definition_path),
+                          ("rubric_sha256", selected.rubric_path),
+                          ("evidence_authority_sha256", selected.evidence_authority_path)):
+            require(selected_instrument.get(key) == sha(resources[name]), "registered_instrument_pin_mismatch")
+        predecessor_raw = capture.take("predecessor.md")
+        require(selected_instrument.get("predecessor_sha256") == sha(predecessor_raw),
+                "registered_predecessor_pin_mismatch")
+        known_predecessor = (read(ROOT / select_semantic_instrument("rubric20", "3.0").definition_path).decode()
+                             if selected.version == "4.0" else agent_pin._previous_text(selected.agent))
+        require(known_predecessor is not None and predecessor_raw.decode() == known_predecessor,
+                "registered_predecessor_unsupported")
+        preamble = agent_pin.spawn_preamble(selected.agent, predecessor_text=predecessor_raw.decode())
+        require(selected_instrument.get("preamble_sha256") == sha(preamble.encode()),
+                "registered_challenge_unsupported_or_mismatched")
+        adapter_raw, system_raw = capture.take("execution_adapter.txt"), capture.take("effective_system.txt")
+        adapter = mapping(plan.get("execution_adapter"))
+        require(adapter.get("name") == "no_tools_controller_validation_v1"
+                and adapter_raw == runner.EXECUTION_ADAPTER.encode()
+                and adapter.get("sha256") == sha(adapter_raw)
+                and system_raw == resources[selected.definition_path] + b"\n\n" + adapter_raw
+                and adapter.get("effective_system_sha256") == sha(system_raw),
+                "registered_adapter_unsupported_or_mismatched")
+        runtime = mapping(plan.get("runtime"))
+        require(runtime.get("provider") == "LBL CBORG" and runtime.get("base_url") == runner.CBORG_BASE_URL
+                and runtime.get("api_key_source") == "ANTHROPIC_API_KEY"
+                and runtime.get("credential_source") == "CBORG_API_KEY"
+                and runtime.get("binary_pin_supplied") is True
+                and runtime.get("effort") in {"low", "medium", "high", "max"}
+                and all(isinstance(runtime.get(key), str) and runtime[key].strip()
+                        for key in ("model", "canonical_model"))
+                and type(runtime.get("context_window")) is int and runtime["context_window"] > 0
+                and isinstance(runtime.get("version"), str)
+                and re.fullmatch(r"\d+\.\d+\.\d+", runtime["version"]), "registered_runtime_unsupported")
+        # Binary bytes are never opened/executed during retrospective ingestion.
+        binary = runtime.get("binary")
+        require(isinstance(binary, dict) and set(binary) == {"path", "sha256", "bytes"}
+                and isinstance(binary["path"], str) and Path(binary["path"]).is_absolute()
+                and type(binary["bytes"]) is int and 0 < binary["bytes"] <= 512_000_000
+                and isinstance(binary["sha256"], str) and HEX.fullmatch(binary["sha256"]),
+                "registered_runtime_pin_missing")
+        require(runtime["model"] == runtime["canonical_model"] or (
+            runtime["model"] == runtime["canonical_model"] + "[1m]" and runtime["context_window"] == 1_000_000),
+            "registered_runtime_selector_mismatch")
+        cap = runner._money(plan.get("max_cost_dollars"), "max_cost_dollars")
+        reserved = runner._money(plan.get("reserved_cost_dollars_per_attempt"), "reserved_cost_dollars_per_attempt")
+        require(reserved == (cap / plan["repeat_count"]).quantize(Decimal("0.000001"), rounding=ROUND_DOWN),
+                "registered_cost_reservation_mismatch")
+        prepared = runner.PreparedEvaluation(manifest_raw, (), tuple(resources.items()), original, blinded,
+            saved_context, resources[selected.definition_path], system_raw, predecessor_raw.decode(), preamble)
+        require(capture.take("prompt.txt") == runner.rating_prompt(prepared).encode(),
+                "registered_prompt_unsupported_or_mismatched")
+        implementation_pins = [entry for path, entry in sorted(authorities.items()) if path.endswith(".py")]
+        for name in ("evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py"):
+            require(sum(entry["path"].endswith("/" + name) for entry in implementation_pins) == 1,
+                    "registered_blinding_implementation_pin_missing")
+        condition = {"source": "registered_blinded", "record_role": "full", "original_sha256": sha(original),
+            "blinded_sha256": sha(blinded), "blinding": blinding, "adapter": adapter,
+            "instrument": selected_instrument, "runtime": runtime, "implementation_pins": implementation_pins}
+        ratings, attempts = receipt.get("ratings"), receipt.get("attempts")
+        require(isinstance(ratings, list) and isinstance(attempts, list)
+                and len(ratings) <= len(attempts) <= plan["repeat_count"], "registered_attempt_roster_invalid")
+        by_index = {}
+        for attempt in attempts:
+            require(isinstance(attempt, dict) and type(attempt.get("rating")) is int
+                    and 1 <= attempt["rating"] <= plan["repeat_count"] and attempt["rating"] not in by_index,
+                    "registered_attempt_identity_invalid")
+            by_index[attempt["rating"]] = attempt
+        require(list(by_index) == list(range(1, len(attempts) + 1)), "registered_attempt_order_invalid")
+        seen_ratings, sessions = set(), set()
+        for rating in ratings:
+            require(isinstance(rating, dict) and type(rating.get("rating")) is int
+                    and rating["rating"] in by_index and rating["rating"] not in seen_ratings,
+                    "registered_rating_identity_invalid")
+            index = rating["rating"]
+            seen_ratings.add(index)
+            attempt = by_index[index]
+            require(rating.get("status") == attempt.get("status") == "validated"
+                    and type(attempt.get("exit_code")) is int and attempt["exit_code"] == 0,
+                    "registered_rating_not_validated")
+            prefix = f"rating-{index:03d}/"
+            evaluation_raw, trace_raw = capture.take(prefix + "evaluation.json"), capture.take(prefix + "transcript.jsonl")
+            doc = document(evaluation_raw, json_only=True)
+            require(sha(evaluation_raw) == rating.get("evaluation_sha256")
+                    and runner.shared.canonical(doc) == evaluation_raw,
+                    "registered_evaluation_pin_mismatch")
+            require(rating.get("transcript_sha256", sha(trace_raw)) == sha(trace_raw),
+                    "registered_transcript_pin_mismatch")
+            events = [document(line, json_only=True) for line in trace_raw.splitlines() if line.strip()]
+            accepted, cost = runner._accept(prepared, events)
+            require(accepted == doc, "registered_transcript_evaluation_mismatch")
+            session = next(event["session_id"] for event in events if event.get("type") == "result")
+            require(rating.get("session_id") == session and session not in sessions,
+                    "registered_session_reused_or_mismatched")
+            sessions.add(session)
+            require(rating.get("check_echo") == "passed" and rating.get("instrument_version") == selected.version
+                    and str(cost) == str(rating.get("estimated_cost_usd"))
+                    and str(cost) == str(attempt.get("estimated_cost_usd")), "registered_rating_receipt_mismatch")
+            reasons = []
+            pending = []
+            if evaluator_model is None:
+                pending.append("target_evaluator_not_selected")
+            elif runtime.get("canonical_model") != evaluator_model:
+                reasons.append("evaluator_differs_from_target")
+            if run["project"] not in contexts:
+                pending.append("target_context_not_selected")
+            elif context != contexts[run["project"]]:
+                reasons.append("applicability_context_differs_from_target")
+            package["rows"].append({"path": relative(root, capture.directory / prefix / "evaluation.json"),
+                "sha256": sha(evaluation_raw), "rubric": rubric, "version": selected.version,
+                "evaluator": runtime["canonical_model"], "model_name": runtime["canonical_model"],
+                "context_block_present": True, "context_hash": plan["context_sha256"],
+                "input_hashes": {"input_sha256": sha(blinded)}, "session_id": session,
+                "declared_repeat_n": plan["repeat_count"], "reasons": reasons, "pending": pending,
+                "contract_checked": True, "eligible_for_condition_review": not reasons and not pending,
+                "source": "registered_blinded", "input_condition": condition,
+                "manifest_sha256": sha(manifest_raw), "receipt_sha256": sha(receipt_raw),
+                "transcript_sha256": sha(trace_raw), "transcript_pin_supplied": "transcript_sha256" in rating,
+                "rating_index": index, "original_sha256": sha(original), "record_role": "full"})
+        require([row["rating"] for row in ratings] == list(range(1, len(ratings) + 1)),
+                "registered_rating_order_invalid")
+        for index, attempt in by_index.items():
+            require((attempt.get("status") == "validated") == (index in seen_ratings),
+                    "registered_attempt_rating_mismatch")
+            package["attempts"].append({"rating": index, "status": attempt.get("status"),
+                "reason": None if index in seen_ratings else "registered_attempt_failed_or_incomplete"})
+        if receipt["status"] == "validated":
+            require(len(ratings) == plan["repeat_count"], "registered_validated_panel_incomplete")
+        actual = registered_attempt_names(capture.directory, len(attempts))
+        require(actual == [f"rating-{index:03d}" for index in by_index], "registered_attempt_directories_mismatch")
+        capture.unchanged()
+        require(registered_attempt_names(capture.directory, len(attempts)) == actual,
+                "registered_attempt_directories_changed")
+        package["status"] = "bound_ratings" if package["rows"] else "no_validated_ratings"
+        package["receipt_status"] = receipt["status"]
+    except (OSError, ValueError, TypeError, KeyError, UnicodeError, yaml.YAMLError, RecursionError,
+            agent_pin.StaleAgentDefinition, agent_pin.NoDiscriminatingChallenge) as exc:
+        reason = str(exc) if isinstance(exc, RegisteredRefusal) else "registered_evidence_invalid_or_unavailable"
+        package["reasons"] = [reason]
+        package["rows"] = []
+        package["status"] = "refused"
+    return package
+
+
 def association(root, evaluation, record):
     """Content labels or exact recorded artifact paths only; filenames never join."""
     doc = evaluation["doc"]
@@ -269,7 +672,10 @@ def inspect_evaluation(root, evaluation, record, full_raw, *, version, evaluator
         context_hash=metadata.get("context_sha256"), input_hashes={},
         session_id=metadata.get("session_id") or doc.get("session_id"),
         declared_repeat_n=mapping(doc.get("repeat_panel")).get("n"),
-        reasons=reasons, pending=pending)
+        reasons=reasons, pending=pending, source="legacy_label_aware",
+        input_condition={"source": "legacy_label_aware", "record_role": "full",
+                         "original_sha256": record["record_sha256"],
+                         "blinding": "unblinded_or_unrecorded", "execution_adapter": "unrecorded"})
     if doc.get("rubric") != rubric + "-semantic":
         reasons.append("rubric_disagrees_with_store")
     if doc.get("version") != version:
@@ -349,13 +755,14 @@ def repeat_panel(rows):
     for row in rows:
         if row["reasons"]:
             continue
-        key = (row["version"], row["evaluator"], row["context_hash"])
+        key = (row["version"], row["evaluator"], row["context_hash"],
+               json.dumps(row.get("input_condition"), sort_keys=True, allow_nan=False))
         groups.setdefault(key, []).append(row)
     best = max(groups.values(), key=lambda group: len({row["session_id"] for row in group
         if isinstance(row["session_id"], str) and row["session_id"].strip()}), default=[])
     sessions = {row["session_id"] for row in best if isinstance(row["session_id"], str) and row["session_id"].strip()}
-    identities = {row["sha256"] for row in best}
-    distinct = min(len(sessions), len(identities))
+    # Independent sessions can legitimately return byte-identical score JSON.
+    distinct = len(sessions)
     return {"declared_n": sorted({row["declared_repeat_n"] for row in rows
             if type(row["declared_repeat_n"]) is int and row["declared_repeat_n"] >= 0}),
         "contract_valid_rating_files": len(best), "distinct_reported_sessions": distinct,
@@ -363,16 +770,20 @@ def repeat_panel(rows):
         "reported_n_at_least_three": any(type(row["declared_repeat_n"]) is int and row["declared_repeat_n"] >= 3 for row in rows),
         "three_distinct_session_claims_present": distinct >= 3,
         "independence_verified": False,
-        "basis": "Content-bound files and distinct recorded session identities; no retained transcript/receipt authentication in this store audit."}
+        "condition_groups": len(groups),
+        "basis": "Distinct reported sessions of one fixed input/condition; registered rows additionally join retained transcripts and receipts. Neither proves independent evaluators or human approval."}
 
 
-def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, contexts=None):
+def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, contexts=None,
+          registered_evaluations=()):
     root = Path(root).resolve()
     arms = ARMS if arms is None else arms
     if rubric20_version not in ("3.0", "4.0"):
         raise ValueError("rubric20 target must be 3.0 or 4.0")
     contexts = {} if contexts is None else contexts
     normalized_contexts = {project: normalize_context(value) for project, value in contexts.items()}
+    registered_evaluations = tuple(registered_evaluations)
+    require(len(registered_evaluations) <= 1000, "too many explicit registered directories")
     snapshots = {rubric: instrument(rubric, "3.0" if rubric == "rubric10" else rubric20_version)
                  for rubric in RUBRICS}
     evaluations_found, problems, stores = evaluations(root)
@@ -425,6 +836,59 @@ def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, cont
                 excluded.append({"arm": arm, "project": project, "label": path.parent.name,
                     "provenance": relative(root, path), "validation_passed": declared_valid,
                     "reason": exclusion})
+    packages, seen_directories, seen_attempts = [], set(), {}
+    for arm, directory in sorted(registered_evaluations, key=lambda item: (str(item[0]), str(item[1]))):
+        require(isinstance(arm, str) and arm.strip() and len(arm) <= 4096,
+                "registered audit arm requires a bounded nonempty string")
+        selected_dir = local_path(root, str(directory))
+        try:
+            if selected_dir is not None:
+                identity = selected_dir.stat()
+                identity = (identity.st_dev, identity.st_ino)
+                require(identity not in seen_directories, "registered_directory_duplicate")
+                seen_directories.add(identity)
+            package = registered_run(root, arm, directory, snapshots=snapshots,
+                                     evaluator_model=evaluator_model, contexts=normalized_contexts)
+        except (OSError, ValueError) as exc:
+            package = {"arm": arm, "path": str(directory), "status": "refused", "record": None,
+                "rows": [], "attempts": [], "reasons": [str(exc) if isinstance(exc, RegisteredRefusal)
+                    else "registered_directory_missing_or_external"]}
+        packages.append(package)
+        candidate = package["record"]
+        if candidate is None or candidate.get("record_role") != "full":
+            continue
+        matches = [record for record in records if all(record[key] == candidate[key]
+                    for key in ("arm", "project", "label"))]
+        if matches:
+            record = matches[0]
+            same = (len(matches) == 1 and all(record.get(key) == candidate.get(key)
+                    for key in ("record_sha256", "record_path", "provenance_sha256", "generation_method")))
+            if not same:
+                package["reasons"] = sorted(set(package["reasons"]) | {"registered_record_linkage_conflict"})
+                record["reasons"] = sorted(set(record["reasons"]) | {"registered_record_linkage_conflict"})
+                package["rows"] = []
+        else:
+            record = candidate
+            record["evaluations"] = {rubric: {"files": []} for rubric in RUBRICS}
+            records.append(record)
+        if package["reasons"]:
+            record.setdefault("registered_input_problems", []).append({"path": package["path"],
+                "rubric": package.get("rubric"), "reasons": package["reasons"]})
+        for row in package["rows"]:
+            identity = (row["manifest_sha256"], row["rating_index"])
+            previous = seen_attempts.get(identity)
+            if previous is not None:
+                reason = ("registered_attempt_duplicate" if all(previous[key] == row[key] for key in
+                    ("sha256", "transcript_sha256", "session_id")) else "registered_attempt_conflict")
+                row["reasons"] = sorted(set(row["reasons"]) | {reason})
+                row["eligible_for_condition_review"] = False
+                if reason.endswith("conflict"):
+                    previous["reasons"] = sorted(set(previous["reasons"]) | {reason})
+                    previous["eligible_for_condition_review"] = False
+            else:
+                seen_attempts[identity] = row
+            record["evaluations"][row["rubric"]]["files"].append(row)
+    records.sort(key=lambda row: tuple(row[key] for key in ("arm", "project", "label")))
     # An artifact path can be reused by more than one provenance identity.
     # A label/path disagreement is therefore visible in every candidate record;
     # never resolve it by selecting the first or by trusting a filename.
@@ -439,27 +903,33 @@ def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, cont
         for record, rubric, block, row in candidates:
             row["reasons"] = sorted(set(row["reasons"]) | {"evaluation_linkage_ambiguous"})
             row["eligible_for_condition_review"] = False
+    rescore = []
     for record in records:
         for rubric, block in record["evaluations"].items():
-            if block["files"] and not any(not row["reasons"] for row in block["files"]):
-                block["reasons"] = sorted(set(block["reasons"]) |
-                    {reason for row in block["files"] for reason in row["reasons"]})
-                block["status"] = "rescore_or_ingestion_required"
-            if rubric == "rubric20":
-                block["repeat_panel"] = repeat_panel(block["files"])
-            if block["reasons"]:
-                existing = next((item for item in rescore if all(item[key] == record[key]
-                    for key in ("arm", "project", "label")) and item["rubric"] == rubric), None)
-                if existing is not None:
-                    existing["reasons"] = block["reasons"]
-                else:
-                    rescore.append({**{key: record[key] for key in ("arm", "project", "label")},
-                        "rubric": rubric, "target_version": "3.0" if rubric == "rubric10" else rubric20_version,
-                        "reasons": block["reasons"], "action": "ingest_bound_current_rating_or_rescore"})
+            rows = block["files"]
+            for row in rows:
+                row["eligible_for_condition_review"] = not row["reasons"] and not row["pending"] and not record["reasons"]
+            reasons = set(record["reasons"])
+            if not rows:
+                reasons.add("evaluation_missing_from_selected_stores")
+            elif not any(not row["reasons"] for row in rows):
+                reasons.update(reason for row in rows for reason in row["reasons"])
+            if not any(not row["reasons"] for row in rows):
+                reasons.update(reason for problem in record.get("registered_input_problems", [])
+                               if problem["rubric"] in (None, rubric) for reason in problem["reasons"])
+            block.update(file_count=len(rows), reasons=sorted(reasons),
+                pending=sorted({reason for row in rows for reason in row["pending"]}),
+                repeat_panel=repeat_panel(rows) if rubric == "rubric20" else None,
+                comparable_for_final_v10=False,
+                status="rescore_or_ingestion_required" if reasons else "condition_review_pending")
+            if reasons:
+                rescore.append({**{key: record[key] for key in ("arm", "project", "label")},
+                    "rubric": rubric, "target_version": "3.0" if rubric == "rubric10" else rubric20_version,
+                    "reasons": sorted(reasons), "action": "ingest_bound_current_rating_or_rescore"})
     rescore.sort(key=lambda item: tuple(item[key] for key in ("arm", "project", "label", "rubric")))
     summary = []
-    for arm, (_, projects) in sorted(arms.items()):
-        for project in sorted(set(projects)):
+    for arm in sorted({row["arm"] for row in records}):
+        for project in sorted({row["project"] for row in records if row["arm"] == arm}):
             group = [row for row in records if row["arm"] == arm and row["project"] == project]
             summary.append({"arm": arm, "project": project, "expected_records": len(group),
                 "canonical_labels": [row["label"] for row in group if row["canonical"]],
@@ -478,8 +948,8 @@ def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, cont
                             "independence_verified": False})
     return {"format": "historical_evaluation_comparability_audit_v1",
         "scope": {"stores": stores, "filesystem_globs_include_ignored_and_hidden": True,
-            "other_evaluation_directories_audited": False, "historical_files_mutated": False,
-            "absence_basis": "Only the explicitly listed nonrecursive label_aware stores and selected provenance paths.",
+            "other_evaluation_directories_audited": bool(registered_evaluations), "historical_files_mutated": False,
+            "absence_basis": "Only named nonrecursive label_aware stores, selected provenance paths and explicitly supplied registered directories.",
             "repeat_policy": "At least three independent ratings of one fixed selected record per project; no requirement to repeat every generation replicate."},
         "targets": {"rubric10": "3.0", "rubric20": rubric20_version,
             "evaluator_model": evaluator_model, "context_digests": {key: context_digest(value) for key, value in sorted(normalized_contexts.items())},
@@ -488,8 +958,12 @@ def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, cont
             "associated_evaluation_files": len(associated), "rescore_or_ingestion_tuples": len(rescore),
             "excluded_records": len(excluded), "unreadable_evaluation_files": len(problems),
             "unassociated_evaluation_files": len(evaluations_found) - len(associated),
+            "registered_directories": len(packages),
+            "bound_registered_rating_files": sum(not row["reasons"] for package in packages for row in package["rows"]),
             "projects_with_repeat_actions": len(repeat_gaps)},
         "summary": summary, "records": records, "rescore_tuples": rescore,
+        "registered_evaluations": [{key: value for key, value in package.items() if key not in {"record", "rows"}}
+                                   for package in packages],
         "repeat_panel_actions": repeat_gaps,
         "excluded_records": excluded, "unreadable_evaluations": problems,
         "unassociated_evaluations": [{key: row[key] for key in ("path", "store", "sha256")}
@@ -535,6 +1009,12 @@ def markdown(result):
         lines.append(f"- {row['arm']} / {row['project']}: canonical labels: {', '.join(row['canonical_labels']) or 'none recorded'}.")
     for row in result["excluded_records"]:
         lines.append(f"- Excluded: {row['arm']} / {row['project']} / {row['label']}: {row['reason']}.")
+    if result.get("registered_evaluations"):
+        lines += ["", "## Explicit registered evaluation inputs", "",
+                  "Captured transcript hashes and joins are audit evidence, not producer signatures or human approval.", ""]
+        for row in result["registered_evaluations"]:
+            lines.append(f"- {esc(row['arm'])} / {esc(row['path'])}: {esc(row['status'])}; "
+                         f"{esc('; '.join(row['reasons']) or 'no package-level refusal')}")
     lines.append("")
     return "\n".join(lines)
 
@@ -547,16 +1027,29 @@ def main(argv=None):
     parser.add_argument("--evaluator-model", help="Explicit final-condition evaluator; no alias equivalence inferred")
     parser.add_argument("--context", action="append", default=[], metavar="PROJECT=PATH",
                         help="Independently selected context to compare, not a human-approval attestation")
+    parser.add_argument("--registered-evaluation", action="append", default=[], metavar="ARM=DIR",
+                        help="Explicit retained E1 directory inside --root; does not select a campaign comparator")
     args = parser.parse_args(argv)
     root, contexts = args.root.resolve(), {}
     for item in args.context:
         project, separator, name = item.partition("=")
         path = local_path(root, name)
-        if not separator or project in contexts or project not in PROJECTS or path is None:
-            parser.error("--context requires unique PROJECT=PATH inside the selected checkout")
+        explicit_project = (bool(args.registered_evaluation) and bool(project.strip())
+                            and len(project) <= 4096
+                            and all(ord(char) >= 32 and ord(char) != 127 for char in project))
+        if (not separator or project in contexts or path is None
+                or not (project in PROJECTS or explicit_project)):
+            parser.error("--context requires unique PROJECT=PATH inside the selected checkout; "
+                         "non-legacy project names require an explicit registered input")
         contexts[project] = document(read(path))
+    registered = []
+    for item in args.registered_evaluation:
+        arm, separator, name = item.partition("=")
+        if not separator or not arm.strip() or not name or local_path(root, name) is None:
+            parser.error("--registered-evaluation requires ARM=DIR inside the selected checkout")
+        registered.append((arm, name))
     result = audit(root, rubric20_version=args.rubric20_version,
-                   evaluator_model=args.evaluator_model, contexts=contexts)
+                   evaluator_model=args.evaluator_model, contexts=contexts, registered_evaluations=registered)
     print(json.dumps(result, sort_keys=True, indent=2, allow_nan=False) if args.format == "json" else markdown(result), end="\n")
     return 0
 
