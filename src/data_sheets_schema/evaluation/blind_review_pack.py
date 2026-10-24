@@ -35,6 +35,14 @@ from data_sheets_schema.evaluation import registered_eval_runner as registered
 from data_sheets_schema.evaluation_context import unwrap_document
 
 FORMAT = "blind_source_review_pack_v1"
+BLINDING_VERSION = "identity_aware_sorted_v1"
+FINGERPRINT_NOTICE = (
+    "Reviewer copies preserve scientific wording. Spelling, process prose, content origin, "
+    "and matching against public source text can still reveal a generation arm. Counts are "
+    "textual hints, not arm attribution or proof of blinding; zero is not assurance. Keep "
+    "new outputs unpublished until blinded review completes. Historical public records "
+    "cannot be made secret by this pack."
+)
 PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE")
 ARMS = ("v8", "v10")
 REVIEW_COLUMNS = (
@@ -62,6 +70,7 @@ _MODEL_LITERAL = re.compile(
     r"\b(?:claude-[\w.\[\]-]+|gpt-[\w.-]+|gemini-[\w.-]+|"
     r"(?:meta-)?llama[- ][\w.-]+|deepseek-[\w.-]+)\b", re.IGNORECASE,
 )
+_CRATE_WORD = re.compile(r"\b(?:ro[- ]?)?crates?\b", re.IGNORECASE)
 
 
 def _canonical(value) -> bytes:
@@ -270,8 +279,26 @@ def _strip(raw: bytes, record: Record) -> tuple[bytes, set[str]]:
                 inspect_nested(item)
 
     inspect_nested(document)
-    blinded = registered.blind_record(yaml.safe_dump(document, sort_keys=False, allow_unicode=True).encode())
+    blinded = registered.blind_record(yaml.safe_dump(document, sort_keys=True, allow_unicode=True).encode())
     return blinded, identifiers
+
+
+def _fingerprints(blinded: bytes) -> dict:
+    """Count hints in each decoded scientific string, never across strings."""
+    from data_sheets_schema.grounding import BRITISH_INSTRUMENT, BRITISH_PATTERNS
+
+    strings = list(_strings(registered._yaml(blinded)))
+    return {
+        "british_form_occurrences": sum(
+            len(pattern.findall(text.lower())) for text in strings for pattern in BRITISH_PATTERNS
+        ),
+        "british_instrument": BRITISH_INSTRUMENT,
+        "british_patterns_sha256": _sha(_canonical([pattern.pattern for pattern in BRITISH_PATTERNS])),
+        "crate_word_occurrences": sum(len(_CRATE_WORD.findall(text)) for text in strings),
+        "counting_basis": "decoded scientific string keys and values, separately; repeated occurrences count",
+        "british_basis": "BRITISH_PATTERNS applied to lowercase strings, including quoted scientific text",
+        "crate_basis": "case-insensitive Unicode word-boundary matches for crate/crates, RO-Crate, RO Crate, ROCrate",
+    }
 
 
 def _identifier_leaked(ident_folded: str, text_folded: str) -> bool:
@@ -407,12 +434,16 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
             "blind_id": blind_id, "arm": record.arm, "project": record.project,
             "label": record.label, "source_path": str(path),
             "source_sha256": digest, "blinded_sha256": _sha(blinded),
+            "fingerprint_diagnostics": _fingerprints(blinded),
         })
         files[filename] = blinded
     files["review_sheet.tsv"] = review.getvalue().encode()
     _leakage(files["review_sheet.tsv"], forbidden)
     key = {
         "format": FORMAT, "seed": seed, "generated_at": generated_at,
+        "blinding_version": BLINDING_VERSION,
+        "normalization": "sorted mapping keys; scientific scalar values and list order preserved",
+        "residual_fingerprint_notice": FINGERPRINT_NOTICE,
         "timestamp_basis": "caller_supplied_unverified" if generated_at else "omitted_for_reproducibility",
         "cohort": cohort, "generator": {
             "algorithm": "sha256_seed_identity_order_v1",

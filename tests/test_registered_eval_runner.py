@@ -27,6 +27,15 @@ def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def test_low_level_blinding_sorts_mappings_without_changing_scientific_values():
+    first = b'id: example:record\nvalues: [null, false, 0, "005", {z: last, a: first}]\nnested: {z: 2, a: 1}\n'
+    reordered = b'nested: {a: 1, z: 2}\nvalues: [null, false, 0, "005", {a: first, z: last}]\nid: example:record\n'
+    assert runner.blind_record(first) == runner.blind_record(reordered)
+    assert yaml.safe_load(runner.blind_record(first)) == yaml.safe_load(first)
+    changed = reordered.replace(b"[null, false", b"[false, null")
+    assert runner.blind_record(changed) != runner.blind_record(first)
+
+
 @pytest.fixture(autouse=True)
 def no_provider(monkeypatch):
     monkeypatch.setattr(socket.socket, "connect", lambda *a, **kw: pytest.fail("network forbidden"))

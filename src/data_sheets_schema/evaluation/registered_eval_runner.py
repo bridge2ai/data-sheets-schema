@@ -144,7 +144,7 @@ def blind_record(raw: bytes, *, forbidden: tuple[str, ...] = ()) -> bytes:
         raise ValueError("a rating requires a Dataset mapping")
     value = {key: item for key, item in value.items() if key not in _ENVELOPE_KEYS}
     unwrap_document(value)
-    blinded = yaml.safe_dump(value, sort_keys=False, allow_unicode=True).encode()
+    blinded = yaml.safe_dump(value, sort_keys=True, allow_unicode=True).encode()
     text = blinded.decode()
     if any(identifier and identifier in text for identifier in forbidden):
         raise ValueError("run identity remains in scientific content; explicit blinding review required")

@@ -601,3 +601,59 @@ def test_long_identifiers_models_and_paths_keep_substring_refusal():
     with pytest.raises(ValueError, match="model identifier"):
         pack._leakage(b"Generated with claude-opus-5", set())
 
+
+def test_sorted_review_mapping_preserves_every_scientific_value_and_list_order(tmp_path):
+    document = {
+        "id": "example:sorted", "z_text": "Colour remains intact.\nRO-Crate remains intact.",
+        "a_values": [None, False, 0, 1.5, "005", "2026-09-07", {"z": "last", "a": "first"}],
+        "nested": {"z": ["second", "first"], "a": {"z": "end", "a": "start"}},
+    }
+    path = tmp_path / "record.yaml"
+    record = pack.Record("candidate-arm", "CHORUS", "secret-label-01", path)
+    path.write_text(yaml.safe_dump(document, sort_keys=False, allow_unicode=True))
+    first, key = build(tmp_path, [record])
+    original = (first / "blind_01.yaml").read_bytes()
+    reordered = dict(reversed(list(document.items())))
+    reordered["nested"] = {"a": {"a": "start", "z": "end"}, "z": ["second", "first"]}
+    reordered["a_values"] = [None, False, 0, 1.5, "005", "2026-09-07", {"a": "first", "z": "last"}]
+    path.write_text(yaml.safe_dump(reordered, sort_keys=False, allow_unicode=True))
+    second, _ = build(tmp_path, [record], name="reordered")
+    assert (second / "blind_01.yaml").read_bytes() == original
+    assert yaml.safe_load(original) == document
+    assert key["blinding_version"] == pack.BLINDING_VERSION
+    changed = dict(document, a_values=list(reversed(document["a_values"])))
+    path.write_text(yaml.safe_dump(changed, sort_keys=False, allow_unicode=True))
+    third, _ = build(tmp_path, [record], name="changed")
+    assert (third / "blind_01.yaml").read_bytes() != original
+    assert yaml.safe_load((third / "blind_01.yaml").read_bytes()) == changed
+
+
+def test_fingerprint_counts_are_private_defined_hints_not_rewrites(tmp_path):
+    document = {
+        "id": "example:hints", "Colour": "COLOUR coloured analyses analysed colouration",
+        "description": 'RO-Crate rocrate RO Crate crates cratecraft "organised"',
+        "separate": ["ro", "crate", "colour", "colour"],
+    }
+    records = selection(tmp_path, 1, raw=yaml.safe_dump(document, allow_unicode=True).encode())
+    output, key = build(tmp_path, records)
+    hints = key["records"][0]["fingerprint_diagnostics"]
+    assert hints["british_form_occurrences"] == 7
+    assert hints["crate_word_occurrences"] == 5
+    assert hints["british_instrument"].startswith("v4")
+    assert len(hints["british_patterns_sha256"]) == 64
+    assert "zero is not assurance" in key["residual_fingerprint_notice"]
+    assert yaml.safe_load((output / "blind_01.yaml").read_bytes()) == document
+    for name, raw in files(output).items():
+        if name == "sealed_blind_key.json":
+            continue
+        for private in ("british_form_occurrences", "crate_word_occurrences", "residual_fingerprint_notice",
+                        "british_patterns_sha256", key["seed"]):
+            assert private.encode() not in raw
+    assert pack._fingerprints(b"id: example:plain\nname: Ordinary source text\n")["british_form_occurrences"] == 0
+
+
+def test_fingerprint_patterns_do_not_span_scientific_strings():
+    hints = pack._fingerprints(b"id: example:split\nvalues: [ro, crate, orga, nised]\n")
+    assert hints["crate_word_occurrences"] == 1
+    assert hints["british_form_occurrences"] == 0
+
