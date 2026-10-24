@@ -1,9 +1,11 @@
 # Uniform decision rules — selected shared-generation v2
 
-This immutable successor is selected only by shared_generation_v1. Read it with
-`.claude/commands/d4d-full-core-v2.md` and `.claude/commands/d4d-agent-v2.md`.
-The registered API executor sends these rules inline. Native/direct execution
-requires a separately reviewed adapter. Unversioned commands remain unchanged.
+This pinned v2 successor is selected only by shared_generation_v1 (updated
+2026-10-23 for R9 criteria-defined enumerations: #5048, #5097–#5099, #5102).
+Read it with `.claude/commands/d4d-full-core-v2.md` and
+`.claude/commands/d4d-agent-v2.md`. The registered API executor sends these
+rules inline. Native/direct execution requires a separately reviewed adapter.
+Unversioned commands remain unchanged.
 
 These are part of the method rather than tuning, because each applies identically
 to every project:
@@ -298,20 +300,66 @@ to every project:
   labels a part of that entity, not of this one.
 
 - **A slot whose declared range is an enumeration is populated only from a
-  passage that states the category** (v9, R9, #830), in the source's own
-  words or a plain restatement of them — never from what a value's name,
-  unit or position suggests. A variable's `data_type` and a collection's
-  `collection_type` are claims about how a thing is classified, and a
-  passage that names the thing without classifying it supports the name
-  and not the class. Where no passage states the category the slot stays
-  empty — an empty enumeration slot is a gap the reader can see, a guessed
-  one an error the reader cannot — except where the schema requires the
-  slot, in which case the entry itself is what the evidence must support: a
-  related dataset (`relationship_type`) is recorded only where a passage
-  states what the relation is. A file's `format`, `file_type`, `media_type`
-  and `encoding`, and a file's or collection's `compression`, are read from
-  the file the bundle names — its name and extension are the passage for
-  them — and this rule does not reach those.
+  passage that states the category** (v9, R9, #830; v10, #5048, #5097–#5099,
+  #5102), in the source's own words or a plain restatement of them — never
+  from what a value's name, unit or position suggests. A variable's
+  `data_type` and a collection's `collection_type` are claims about how a
+  thing is classified, and a passage that names the thing without
+  classifying it supports the name and not the class. Two enumeration slots,
+  `confidentiality_level` and `hipaa_compliant`, are also populated from a
+  passage that states the facts below: such a passage is a plain restatement
+  of the value those facts support, and it is the slot's coverage receipt.
+  `confidentiality_level` (ConfidentialityLevelEnum) records who can obtain
+  this dataset's data, and how. A passage stating that the data are publicly
+  available to download, that anyone can download them, or that downloading
+  them needs no account, registration, approval or signed agreement supports
+  `unrestricted`, unless a passage states a condition below for the same
+  data. A public licence such as Creative Commons, a download page asking
+  the user to confirm that licence, a request to cite, or a form asking who
+  is downloading is not such a condition. A passage stating that access
+  requires registration or an account, verified identity or credentials,
+  approval of the request, sign-off by the requester's institution, or a
+  data use agreement or dataset-specific licence that the requester or their
+  institution signs or accepts supports `restricted`. A passage stating that
+  each request is reviewed before access is granted, by a data access
+  committee or office or by an institutional review board or ethics
+  committee approving the requester's own use, supports `confidential`; a
+  study's own ethics or IRB approval of collecting its data is not such
+  review. A route that requires such review is `confidential` whatever else
+  it requires; one that requires only conditions supporting `restricted` is
+  `restricted`. A gated tier's name, such as "registered access",
+  "controlled access" or "credentialed access", states no conditions: it is
+  recorded as prose and is never the receipt, and where no passage states
+  the conditions of the tier the slot would record, the slot stays empty.
+  Where the documents describe several access tiers for this dataset, the
+  slot records the least restrictive tier through which any of this
+  dataset's own data can be obtained; a tier offering only metadata,
+  documentation, code, a sample or a synthetic copy does not count. Each
+  tier, with its conditions and the data it covers, is described in
+  `data_governance.access_review_process`. A statement of how sensitive the
+  data are describes the data, not how access works, and does not decide
+  `confidentiality_level`. In `hipaa_compliant` (ComplianceStatusEnum), a
+  passage stating that the dataset holds no data about human participants —
+  for example, only cell lines, model organisms or simulated data — supports
+  `not_applicable`. A passage stating that the data were de-identified under
+  HIPAA, whether it names HIPAA or its Safe Harbor or Expert Determination
+  method, supports `compliant`; a passage stating only that the data contain
+  no protected health information, or that they were de-identified without
+  naming HIPAA or either method, supports neither value. No other
+  enumeration slot is read this way: `data_type`, `collection_type` and
+  every other enumeration slot remain under the rest of this rule. A label
+  from another classification scheme — an institution's data-security level
+  such as "Level 3", an HL7 confidentiality code such as "HL7:2N" — is
+  recorded as prose where relevant and is never mapped to an enumeration
+  value or used as the receipt for one. Where no passage states the category
+  the slot stays empty — an empty enumeration slot is a gap the reader can
+  see, a guessed one an error the reader cannot — except where the schema
+  requires the slot, in which case the entry itself is what the evidence
+  must support: a related dataset (`relationship_type`) is recorded only
+  where a passage states what the relation is. A file's `format`,
+  `file_type`, `media_type` and `encoding`, and a file's or collection's
+  `compression`, are read from the file the bundle names — its name and
+  extension are the passage for them — and this rule does not reach those.
 
 - **`raw_data_format` names the form the data took before any processing
   this dataset applied, and only where a passage states that form** (v9,
