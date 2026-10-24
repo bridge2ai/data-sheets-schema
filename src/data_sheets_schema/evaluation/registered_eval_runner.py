@@ -321,8 +321,20 @@ def prepare(
         raise ValueError("an independent applicability context SHA256 is required")
     context_raw = take(context, context_sha256)
     normalized = normalize_context(_yaml(context_raw))
-    forbidden = (reg["run"]["label"], str(Path(record).absolute()), str(registration))
-    blinded = blind_record(original, forbidden=forbidden)
+    # The high-level gate lives in the pack module, which calls this module's
+    # low-level blind_record normalizer. Import lazily to keep that dependency
+    # non-recursive and bind both implementations before the gate runs.
+    from . import blind_review_pack as blind
+    pack_source = Path(__file__).with_name("blind_review_pack.py")
+    if Path(blind.__file__).resolve() != pack_source.resolve():
+        raise ValueError("blinding implementation has an unexpected source path")
+    take(Path(__file__))
+    take(pack_source)
+    blinding = {"version": blind.BLINDING_VERSION,
+                **{key: reg["run"][key] for key in ("arm", "project", "label")}}
+    blinded = blind.blind_input(original, blind.Record(
+        reg["run"]["arm"], reg["run"]["project"], reg["run"]["label"],
+        Path(record).absolute(), _sha(original)), forbidden=(str(registration), str(Path(provenance).absolute())))
     selected = select_semantic_instrument(rubric, instrument_version)
     resources = {}
     for rel in (selected.definition_path, selected.rubric_path,
@@ -350,7 +362,7 @@ def prepare(
     # Bind executable validator code too; no current scientific approval is
     # inferred from selecting these versioned instruments or captured bytes.
     for module in (
-        "evaluation/registered_eval_runner.py", "evaluation/validate.py",
+        "evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py", "evaluation/validate.py",
         "evaluation_context.py", "semantic_scope.py", "semantic_instrument.py",
         "semantic_evidence.py", "semantic_evidence_authority.py", "judge_contract.py",
         "agent_pin.py", "provenance.py",
@@ -365,6 +377,7 @@ def prepare(
         "record_role": record_role,
         "generation_provenance": shared.file_pin(Path(provenance), provenance_raw),
         "record_registration_binding": "provenance authority and validation artifact identity checked",
+        "blinding": blinding,
         "blinded_input_sha256": _sha(blinded),
         "applicability_context": shared.file_pin(Path(context), context_raw),
         "context_sha256": context_digest(normalized),

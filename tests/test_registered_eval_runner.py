@@ -184,6 +184,110 @@ def test_preparation_validates_real_registration_and_separate_context(prepared, 
     assert dict(prepared.authorities)[str(registration["record"])] == prepared.original
 
 
+def rebind_record(registration, directory, raw):
+    """Keep the real generation authority while pinning this selected output."""
+    record = directory / "selected-record.yaml"
+    record.write_bytes(raw)
+    prior = yaml.safe_load(registration["provenance"].read_bytes())
+    prior["validation"]["artifacts"]["full"] = {
+        "path": str(record), "md5": hashlib.md5(raw).hexdigest(),
+    }
+    provenance = directory / "selected-provenance.yaml"
+    provenance.write_text(yaml.safe_dump(prior))
+    return {**registration, "record": record, "record_sha256": sha(raw), "provenance": provenance,
+            "provenance_sha256": sha(provenance.read_bytes())}
+
+
+@pytest.mark.parametrize("wrapper", [False, True])
+def test_runner_uses_actual_registered_arm_and_same_public_gate(registration, tmp_path, wrapper):
+    from data_sheets_schema.evaluation import blind_review_pack as blind
+
+    run = json.loads(registration["registration"].read_bytes())["run"]
+    assert run["arm"] == "BASELINE (input documents only)"
+    scientific = {"id": "example:identity", "values": [None, False, "005"],
+                  "description": "Keep original scientific wording."}
+    with_metadata = {**scientific, "arm": run["arm"], "label": run["label"]}
+    raw = yaml.safe_dump({"Dataset": with_metadata} if wrapper else with_metadata).encode()
+    options = rebind_record(registration, tmp_path, raw)
+    selected = runner.prepare(**options)
+    assert selected.document()["blinding"] == {"version": blind.BLINDING_VERSION,
+                                                **{key: run[key] for key in ("arm", "project", "label")}}
+    record = blind.Record(run["arm"], run["project"], run["label"], options["record"], sha(raw))
+    assert selected.blinded == blind.blind_input(raw, record, forbidden=(
+        str(options["registration"]), str(options["provenance"])))
+    assert yaml.safe_load(selected.blinded) == ({"Dataset": scientific} if wrapper else scientific)
+    assert dict(selected.authorities)[str(Path(blind.__file__))] == Path(blind.__file__).read_bytes()
+
+
+@pytest.mark.parametrize("raw, reason", [
+    (b"arm: v10\nid: example:record\n", "ambiguous root arm"),
+    (b"Dataset:\n  id: example:record\n  arm: v10\n", "ambiguous root arm"),
+    (b"id: example:record\nresources:\n- arm: v10\n", "nested provenance"),
+    (b"id: example:record\nmodel: opaque-generator\n", "ambiguous root model"),
+    (b"id: example:record\ndescription: claude-opus-5\n", "model identifier"),
+    (b"# Model: opaque-generator\nid: example:record\ndescription: opaque-generator\n", "identity remains"),
+    (b"id: example:record\ndescription: opaque-generator\n# Model: opaque-generator\n", "identity remains"),
+])
+def test_runner_refuses_ambiguous_or_leaking_source_instead_of_guessing_arm(registration, tmp_path, raw, reason):
+    options = rebind_record(registration, tmp_path, raw)
+    with pytest.raises(ValueError, match=reason):
+        runner.prepare(**options)
+
+
+def test_runner_preserves_scientific_scalar_that_resembles_metadata_comment(registration, tmp_path):
+    raw = b'id: example:record\ndescription: |\n  # Model: source quotation\n  Literal scientific words.\n'
+    selected = runner.prepare(**rebind_record(registration, tmp_path, raw))
+    assert yaml.safe_load(selected.blinded) == yaml.safe_load(raw)
+
+
+@pytest.mark.parametrize("module", ["blind_review_pack.py", "registered_eval_runner.py"])
+def test_blinding_implementation_is_captured_before_gate_and_rechecked_during_prepare(registration, monkeypatch, module):
+    from data_sheets_schema.evaluation import blind_review_pack as blind
+
+    read, gate = runner._read, blind.blind_input
+    calls = []
+    changed = False
+    source = Path(runner.__file__).with_name(module)
+
+    def observed_read(path, *args, **kwargs):
+        raw = read(path, *args, **kwargs)
+        if path == source:
+            calls.append(changed)
+            if changed:
+                return raw + b"\n# simulated source mutation\n"
+        return raw
+
+    def mutate_after_gate(*args, **kwargs):
+        nonlocal changed
+        assert calls == [False], "source must be captured before the gate"
+        result = gate(*args, **kwargs)
+        changed = True
+        return result
+
+    monkeypatch.setattr(runner, "_read", observed_read)
+    monkeypatch.setattr(blind, "blind_input", mutate_after_gate)
+    with pytest.raises(ValueError, match="authority changed during preparation"):
+        runner.prepare(**registration)
+    assert calls == [False, True]
+
+
+@pytest.mark.parametrize("module", ["blind_review_pack.py", "registered_eval_runner.py"])
+def test_changed_blinding_implementation_refuses_before_mocked_dispatch(prepared, tmp_path, monkeypatch, module):
+    source = Path(runner.__file__).with_name(module)
+    read = runner._read
+
+    def changed(path, *args, **kwargs):
+        raw = read(path, *args, **kwargs)
+        return raw + b"\n# changed blinding source\n" if path == source else raw
+
+    monkeypatch.setattr(runner, "_read", changed)
+    monkeypatch.setattr(runner.subprocess, "run", lambda *args, **kwargs: pytest.fail("dispatch must not occur"))
+    output = tmp_path / "refused-output"
+    with pytest.raises(ValueError, match="prepared authority changed"):
+        runner.execute(prepared, output, plan_sha256=prepared.digest, environ={"CBORG_API_KEY": "synthetic"})
+    assert not output.exists()
+
+
 def test_blinding_removes_headers_without_dropping_scientific_content(prepared):
     text = runner.rating_prompt(prepared)
     assert "concealed-v10-rep17" not in text

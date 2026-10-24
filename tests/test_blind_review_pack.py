@@ -881,3 +881,42 @@ def test_cleanup_diagnostic_without_add_note_preserves_original_exception(tmp_pa
     if not broken_stderr:
         assert "cleanup failed" in capsys.readouterr().err
 
+
+def test_public_gate_is_the_pack_gate_and_reads_no_source_path(tmp_path, monkeypatch):
+    raw = b'id: example:record\nvalues: [null, false, "005"]\ndescription: |\n  # Model: quoted scientific words\n'
+    record = pack.Record("registered-actual-arm", "CHORUS", "actual-label", tmp_path / "not-created.yaml", sha(raw))
+    read = pack.registered._read
+    monkeypatch.setattr(pack.registered, "_read", lambda *args: pytest.fail("public gate must use captured bytes"))
+    blinded = pack.blind_input(raw, record)
+    monkeypatch.setattr(pack.registered, "_read", read)
+    record.source_path.write_bytes(raw)
+    output, _ = build(tmp_path, [record])
+    assert (output / "blind_01.yaml").read_bytes() == blinded
+    assert yaml.safe_load(blinded) == yaml.safe_load(raw)
+    with pytest.raises(ValueError, match="source_sha256"):
+        pack.blind_input(raw + b"\n", record)
+
+
+def test_later_record_metadata_is_checked_against_earlier_scientific_text(tmp_path):
+    records = selection(tmp_path, 2, b"id: example:record\n")
+    records[0].source_path.write_text("id: example:first\ndescription: opaque-later-generator\n")
+    records[1].source_path.write_text("id: example:second\n# Model: opaque-later-generator\n")
+    with pytest.raises(ValueError, match="identity"):
+        build(tmp_path, records)
+    assert not (tmp_path / "pack").exists()
+    assert not key_path(tmp_path / "pack").exists()
+
+
+def test_public_gate_uses_low_level_normalizer_once_without_recursion(tmp_path, monkeypatch):
+    calls = []
+    normalize = pack.registered.blind_record
+
+    def observed(raw, **kwargs):
+        calls.append(raw)
+        return normalize(raw, **kwargs)
+
+    monkeypatch.setattr(pack.registered, "blind_record", observed)
+    record = pack.Record("actual-arm", "CHORUS", "actual-label", tmp_path / "source.yaml")
+    assert yaml.safe_load(pack.blind_input(b"id: example:record\n", record)) == {"id": "example:record"}
+    assert len(calls) == 1
+

@@ -339,6 +339,31 @@ def _leakage(raw: bytes, forbidden: set[str], *, yaml_document: bool = False):
         raise ValueError("generator model identifier remains in reviewer content; explicit blinding review required")
 
 
+def _identity_blind(raw: bytes, record: Record, forbidden=()) -> tuple[bytes, set[str]]:
+    if not isinstance(record, Record) or not isinstance(raw, bytes):
+        raise ValueError("blinding requires captured bytes and an explicit Record identity")
+    if record.source_sha256 is not None and _sha(raw) != record.source_sha256:
+        raise ValueError("selected source_sha256 does not match input")
+    identifiers = set(forbidden)
+    if any(not isinstance(item, str) for item in identifiers):
+        raise ValueError("forbidden blinding identifiers must be strings")
+    blinded, metadata_ids = _strip(raw, record)
+    identifiers.update((record.arm, record.label, str(record.source_path)))
+    identifiers.update(metadata_ids)
+    _leakage(blinded, identifiers, yaml_document=True)
+    return blinded, metadata_ids
+
+
+def blind_input(raw: bytes, record: Record, *, forbidden=()) -> bytes:
+    """Apply the pack's identity-aware gate without reading any source path.
+
+    The caller supplies the actual registered or selected identity. Campaign
+    labels are never inferred from models, conditions, filenames or source
+    metadata; an inconsistent root/wrapper arm requires explicit review.
+    """
+    return _identity_blind(raw, record, forbidden)[0]
+
+
 def _timestamp(value: str | None) -> str | None:
     if value is None:
         return None
@@ -447,7 +472,7 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
                         rec_hash = recorded_hash(full_art)
                         if rec_hash is not None and hashlib.new(rec_hash[0], raw).hexdigest() != rec_hash[1]:
                             raise ValueError("campaign record bytes do not match sibling provenance validation.artifacts.full")
-        blinded, metadata_ids = _strip(raw, record)
+        blinded, metadata_ids = _identity_blind(raw, record, forbidden)
         forbidden.update(metadata_ids)
         forbidden.update((str(path), str(record.source_path.absolute())))
         captured.append((record, path, digest, blinded))
