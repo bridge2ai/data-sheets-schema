@@ -14,12 +14,16 @@ BLOCK_KEY = "receipt_completion_policy"
 #: A registered floor may name what it divides by (D-C, owner decision
 #: 2026-10-23; v2 registrations only). Without a basis a floor keeps its v2
 #: meaning, `with_receipt / receiptable` over the final record. With
-#: `receipted_part` the values reconciliation added after the receipt are
-#: reported beside the gate and not gated (#742): `with_receipt /
-#: (receiptable - added_after_receipt)`. In both CHORUS v10 canaries every
-#: miss was such an addition (never_receipted 0), so the v2 meaning measured
-#: how much the audit found. Readers that predate the basis refuse it rather
-#: than read it as the v2 meaning.
+#: `receipted_part` the values a later phase added are reported beside the
+#: gate and not gated (#742): `with_receipt / (receiptable -
+#: added_after_receipt_unmatched)`, the uncovered leaves whose path *and*
+#: value the phase-1 snapshot lacks. The path-only `added_after_receipt`
+#: also counts a never-receipted value that was renamed, moved or shifted
+#: (A13 review F1; owner's option (a), 2026-10-24), so it is reported, not
+#: subtracted. In both CHORUS v10 canaries every miss was a new value
+#: (never_receipted 0), so the v2 meaning measured how much the audit found.
+#: Readers that predate the basis refuse it rather than read it as the v2
+#: meaning.
 FLOOR_BASES = ("receipted_part",)
 
 
@@ -245,11 +249,15 @@ def evaluate_floor(coverage: dict, policy: dict) -> dict:
         truncated = 0 if truncated is None else truncated
         if not isinstance(paths, list) or any(not isinstance(p, str) for p in paths) or len(set(paths)) != len(paths) or len(paths) + truncated != missing:
             raise ValueError("coverage missing paths/counters disagree")
-    for key in ("never_receipted", "added_after_receipt"):
+    for key in ("never_receipted", "added_after_receipt", "added_after_receipt_unmatched"):
         if coverage.get(key) is not None:
             _integer(coverage[key], key)
             if coverage[key] > missing:
                 raise ValueError(f"coverage {key} exceeds uncovered leaves")
+    if coverage.get("added_after_receipt_unmatched") is not None and (
+            coverage.get("added_after_receipt") is None
+            or coverage["added_after_receipt_unmatched"] > coverage["added_after_receipt"]):
+        raise ValueError("coverage added_after_receipt_unmatched exceeds added_after_receipt")
     if all(coverage.get(k) is not None for k in ("never_receipted", "added_after_receipt")):
         if coverage["never_receipted"] + coverage["added_after_receipt"] != missing:
             raise ValueError("coverage phase-1 missing counters disagree")
@@ -262,16 +270,19 @@ def evaluate_floor(coverage: dict, policy: dict) -> dict:
     if floor["state"] == "pending":
         return {**result, "state": "pending", "reason": "diagnostic pilot; coverage floor not registered"}
     if floor.get("basis") == "receipted_part":
-        # The block keeps its v2 keys; these three exist only under a basis.
+        # The block keeps its v2 keys; these four exist only under a basis.
         added = coverage.get("added_after_receipt")
-        result.update(basis="receipted_part", added_after_receipt=added)
-        if added is None:
+        unmatched = coverage.get("added_after_receipt_unmatched")
+        result.update(basis="receipted_part", added_after_receipt=added,
+                      added_after_receipt_unmatched=unmatched)
+        if added is None or unmatched is None:
             return {**result, "eligible": None, "state": "unmeasurable",
-                    "reason": "receipted-part floor needs the phase-1 split (added_after_receipt)"}
-        added = _integer(added, "added_after_receipt")
-        if added > eligible - covered:
-            raise ValueError("added_after_receipt exceeds the leaves without a receipt")
-        eligible -= added
+                    "reason": "receipted-part floor needs the phase-1 split by path and value "
+                              "(added_after_receipt_unmatched)"}
+        unmatched = _integer(unmatched, "added_after_receipt_unmatched")
+        if unmatched > eligible - covered:
+            raise ValueError("added_after_receipt_unmatched exceeds the leaves without a receipt")
+        eligible -= unmatched
         result["eligible"] = eligible
     if eligible == 0:
         return {**result, "state": "not_applicable", "reason": "no eligible leaves; coverage unmeasurable"}

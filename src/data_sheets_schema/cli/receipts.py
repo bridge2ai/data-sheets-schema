@@ -155,10 +155,12 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         if "coverage_floor" in block:
             floor = block["coverage_floor"]
             if floor.get("basis") == "receipted_part" and floor.get("eligible") is None:
-                gated = "receipted part unmeasurable: no phase-1 split"
+                gated = "receipted part unmeasurable: no phase-1 split by path and value"
             elif floor.get("basis") == "receipted_part":
+                kept = floor["added_after_receipt"] - floor["added_after_receipt_unmatched"]
                 gated = (f"{floor['with_receipt']}/{floor['eligible']} of the receipted part; "
-                         f"{floor['added_after_receipt']} added after the receipt, not gated")
+                         f"{floor['added_after_receipt_unmatched']} added after the receipt, not gated"
+                         + (f"; {kept} at a new path with a value the snapshot had, gated" if kept else ""))
             else:
                 gated = f"{floor['with_receipt']}/{floor['receiptable']}"
             click.echo(f"   · registered receipt coverage: {floor['state']} "

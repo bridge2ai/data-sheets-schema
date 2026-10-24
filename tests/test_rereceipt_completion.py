@@ -142,6 +142,7 @@ def test_all_diagnostic_splits_sum_to_legacy_and_unknown_markers_stay_visible():
     new = rc.check(receipt, manifest, texts, full, manifest["bundle_md5"], instrument_version=4)
     origins = new["snippets"].pop("by_origin")
     assert new.pop("rereceipt")["unusable_prior_count"] == 1
+    assert new["slots"].pop("added_after_receipt_unmatched") is None   # no snapshot
     assert new.pop("instrument").startswith("v4 ")
     old.pop("instrument")
     assert new == old
@@ -347,6 +348,10 @@ def test_real_corpus_v4_retains_all_legacy_counts_and_floors(receipt, monkeypatc
         for metric in origins["phase1"]:
             assert sum(row[metric] for row in origins.values()) == old["snippets"][metric]
         new.pop("rereceipt")
+        # The receipted-part gate input (A13 F1): a subset of the path-only split.
+        unmatched = new["slots"].pop("added_after_receipt_unmatched")
+        added = old["slots"]["added_after_receipt"]
+        assert unmatched is None if added is None else 0 <= unmatched <= added
         new["instrument"] = old["instrument"]
         assert new == old
         calls.append(old)

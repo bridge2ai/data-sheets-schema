@@ -233,7 +233,10 @@ def test_disk_rebuild_selects_registration_instrument_and_retains_legacy(disk):
     assert legacy["checked"] and legacy["instrument"] == receipts.RECEIPTS_INSTRUMENT
     assert cp.BLOCK_KEY not in legacy and "coverage_floor" not in legacy
     assert selected["checked"] and selected["instrument"] == receipts.RERECEIPTS_INSTRUMENT
-    assert selected["slots"] == legacy["slots"]
+    # v3 coverage unchanged; instrument 4 adds only the receipted-part gate input (A13 F1).
+    v4_only = {"added_after_receipt_unmatched"}
+    assert set(selected["slots"]) - set(legacy["slots"]) == v4_only
+    assert {k: v for k, v in selected["slots"].items() if k not in v4_only} == legacy["slots"]
     assert selected["coverage_floor"]["registration_sha256"] == declaration()["receipt_completion_registration"]["sha256"]
     rec = {"run": {"project": "P"}, "prompts": {"request": {"spec": declaration()}}}
     recorded = receipts.block_for(**disk, snapshot_record=rec)
