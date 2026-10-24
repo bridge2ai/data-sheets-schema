@@ -1,0 +1,6 @@
+# CHORUS generic_v10 API canary `2026-10-20a_claude-opus-5-api-generic-v10_rep1` (archived 2026-10-23, Owner Decision D-F)
+
+**Status:** Not a generated record — kept as **evidence only, declared invalid** per Owner Decision D-F (2026-10-23). See [`../../claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/README.md`](../../claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/README.md) for the full provenance record:
+- The committed report in `claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/` is the rejected response `72ac7d9a77bb438798e7d8d55ff1bf0f`, with 4 `source_status` values changed by hand by the **agy (Antigravity) session** at 19:23 PDT on 2026-10-21 and the `## Evidence assertions` JSON flattened by hand by **agy** at 21:43 PDT on 2026-10-21, after no model call (`#5138`).
+- The regate response `a42e7689897e4ab3abfb1b99442e9e23` was not saved.
+- The registration changed mid-run (rebuilt in place by **agy** at 00:37 PDT on 2026-10-21), from `57d5c8429004968c3249411572bb06f2b38c6d8e1a6661f244720d975153ce60` (384 paths, 65,536 bytes, 25k worker cap) to `4f94102c50455476561b299b08866c5577f80964442b87928209d2c56614331d` (80 paths, 12,288 bytes, 64k worker cap) (`#5115`, `#5142`).
