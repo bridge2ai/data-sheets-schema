@@ -44,11 +44,12 @@ def _make_v10g_audit() -> str:
 class TestReportAuditTotalsUnit(unittest.TestCase):
     def test_parse_number(self):
         self.assertEqual(parse_number("0"), 0)
+        self.assertEqual(parse_number("zero"), 0)
         self.assertEqual(parse_number("12"), 12)
         self.assertEqual(parse_number("twelve"), 12)
         self.assertEqual(parse_number("twenty-three"), 23)
-        self.assertEqual(parse_number("none"), 0)
-        self.assertEqual(parse_number("no"), 0)
+        self.assertIsNone(parse_number("none"))
+        self.assertIsNone(parse_number("no"))
         self.assertIsNone(parse_number("unknown"))
 
     def test_synthetic_v10g_shape_with_mismatches(self):
@@ -133,22 +134,23 @@ class TestReportAuditTotalsUnit(unittest.TestCase):
         self.assertEqual(res["findings"], [])
 
     def test_malformed_or_missing_audit(self):
-        """Malformed audit -> checked: False, reason: 'missing or malformed audit'."""
+        """Malformed audit -> checked: False, with specific reason from _audit_shape_problem."""
         report = "# Reconciliation Report\n\nThe audit identified 12 findings.\n"
         res_none = check_report_audit_totals(report, None)
         self.assertFalse(res_none["checked"])
-        self.assertEqual(res_none["reason"], "missing or malformed audit")
+        self.assertEqual(res_none["reason"], "missing audit")
         self.assertEqual(res_none["status"], "not_checked")
 
         res_invalid = check_report_audit_totals(report, "{not valid json}")
         self.assertFalse(res_invalid["checked"])
-        self.assertEqual(res_invalid["reason"], "missing or malformed audit")
+        self.assertEqual(res_invalid["reason"], "malformed audit JSON")
         self.assertEqual(res_invalid["status"], "not_checked")
 
         # Audit missing summary
         res_no_sum = check_report_audit_totals(report, json.dumps({"findings": []}))
         self.assertFalse(res_no_sum["checked"])
-        self.assertEqual(res_no_sum["reason"], "missing or malformed audit")
+        self.assertEqual(res_no_sum["reason"], "audit.summary must be a non-empty JSON string")
+        self.assertEqual(res_no_sum["status"], "not_checked")
 
     def test_report_stating_no_total_recorded_as_no_total_stated(self):
         """Reports stating no total recorded as status: 'no_total_stated' with stated_total: None (never as consistent)."""
@@ -168,15 +170,66 @@ class TestReportAuditTotalsUnit(unittest.TestCase):
         self.assertEqual(res["mismatches"], [])
         self.assertEqual(res["findings"], [])
 
-    def test_subset_counts_rejected(self):
-        """Subset counts such as 'Six findings were deliberately left as-is' are ignored."""
+    def test_severity_mismatch_detected_even_when_no_total_stated(self):
+        """Per-severity subtotals are checked even when no overall finding total is stated."""
+        audit_json = _make_v10g_audit()
+        report = (
+            "# Reconciliation Report\n\n"
+            "The reconciliation addressed 2 high-severity findings, 4 medium-severity findings, and 10 low-severity findings.\n\n"
+            "## Dispositions\n"
+            "| slot | disposition | record | reason |\n"
+            "|---|---|---|---|\n"
+            "| `keywords` | retained | full | kept |\n"
+        )
+        res = check_report_audit_totals(report, audit_json)
+        self.assertTrue(res["checked"])
+        self.assertIsNone(res["stated_total"])
+        self.assertEqual(res["stated_by_severity"], {"high": 2, "medium": 4, "low": 10})
+        self.assertEqual(res["status"], "mismatch")
+        self.assertEqual(len(res["mismatches"]), 1)
+        self.assertEqual(res["mismatches"][0]["kind"], "finding_severity_mismatch")
+        self.assertEqual(res["mismatches"][0]["severity"], "low")
+        self.assertEqual(res["mismatches"][0]["stated"], 10)
+        self.assertEqual(res["mismatches"][0]["computed"], 7)
+
+    def test_subset_counts_and_historical_false_positives_rejected(self):
+        """Subset counts, combined severity buckets, and section numbers are not misparsed."""
         text = (
             "# Reconciliation\n\n"
             "Six findings were deliberately left as-is because the core record is immutable. "
-            "Fourteen findings produced edits to the full record.\n"
+            "Fourteen findings produced edits to the full record. "
+            "Three findings were raised for the record without recommending change. "
+            "No findings were raised against the core record.\n\n"
+            "### 2.1 High severity\n"
+            "## 6. Additional changes not driven by audit findings\n"
+            "1. First item\n"
         )
-        stated_total, _ = extract_report_audit_totals(text)
+        stated_total, sevs = extract_report_audit_totals(text)
         self.assertIsNone(stated_total)
+        self.assertEqual(sevs, {})
+
+        # Combined buckets and 'N high-severity pairs'
+        combined = (
+            "**Audit findings addressed:** 23 (2 high/medium-severity structural, 21 medium and low)\n"
+            "We grouped 2 high-severity pairs into one section.\n"
+        )
+        total2, sevs2 = extract_report_audit_totals(combined)
+        self.assertEqual(total2, 23)
+        self.assertEqual(sevs2, {})
+
+    def test_v10_chorus_canary_phrasing_supported(self):
+        """Supports inline bold 'N findings: M medium, L low' phrasing from v10 CHORUS canaries."""
+        t1, s1 = extract_report_audit_totals(
+            "The computed audit counts record **14 findings: 2 medium, 12 low** (no high)."
+        )
+        self.assertEqual(t1, 14)
+        self.assertEqual(s1, {"medium": 2, "low": 12, "high": 0})
+
+        t2, s2 = extract_report_audit_totals(
+            "The computed audit counts give **12 findings: 6 medium, 6 low** (no high)."
+        )
+        self.assertEqual(t2, 12)
+        self.assertEqual(s2, {"medium": 6, "low": 6, "high": 0})
 
 
 class _ReportTotalsFake(FakeMessages):
@@ -242,6 +295,7 @@ class TestReportAuditTotalsGate(unittest.TestCase):
                          ["full", "audit", "reconcile_full", "report", "report_regate"])
         g = d["report_gate"]
         self.assertTrue(g["regenerated"])
+        self.assertTrue(g["findings_include_report_audit_totals"])
         self.assertEqual(g["findings_before"], 1)
         self.assertEqual(g["findings_after"], 0)
         self.assertEqual(g["report_audit_totals_before"]["status"], "mismatch")
@@ -259,6 +313,35 @@ class TestReportAuditTotalsGate(unittest.TestCase):
         blob = " ".join(p.get("text", "") for p in regate["messages"][0]["content"])
         self.assertIn("finding_total_mismatch", blob)
         self.assertIn("report states 12 findings; structured audit has 13", blob)
+
+    def test_regate_rollback_when_core_report_claims_contradictions_increase(self):
+        """A rewrite that fixes 2 audit-totals mismatches but introduces 1 disposition contradiction
+        is rolled back even though combined findings dropped from 2 to 1."""
+        audit_json = _make_v10g_audit()
+        initial_report = (
+            "# Reconciliation\n\n"
+            "The audit identified twelve findings: 2 high, 4 medium, and six low.\n\n"
+            "## Dispositions\n"
+            "| slot | disposition | record | reason |\n"
+            "|---|---|---|---|\n"
+            "| `keywords` | retained | full | kept |\n"
+        )
+        worse_core_report = (
+            "# Reconciliation\n\n"
+            "The audit identified 13 findings: 2 high, 4 medium, and 7 low.\n\n"
+            "## Dispositions\n"
+            "| slot | disposition | record | reason |\n"
+            "|---|---|---|---|\n"
+            "| `keywords` | removed | full | gone |\n"
+        )
+        fake = _ReportTotalsFake(initial_report, worse_core_report, audit_json)
+        s, res, d = self._run(fake)
+        g = d["report_gate"]
+        self.assertFalse(g["regenerated"])
+        self.assertIn("worse", g["reason"])
+        self.assertEqual(g["findings_before"], 2)
+        self.assertEqual(g["findings_after"], 2)
+        self.assertIn("| `keywords` | retained | full |", s.report_path.read_text())
 
 
 if __name__ == "__main__":

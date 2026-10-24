@@ -21,7 +21,7 @@ from typing import Any
 INSTRUMENT_VERSION = 1
 
 NUM_WORDS = {
-    "zero": 0, "no": 0, "none": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+    "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
     "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
     "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
@@ -44,7 +44,7 @@ WORD_OR_DIGIT = r"(?:\d+|[a-zA-Z]+(?:-[a-zA-Z]+)?)"
 TOTAL_PATTERNS = [
     # 1. Header/table: **Findings received:** 31 or | Audit findings | 38 or **Audit findings addressed:** 16
     re.compile(
-        r"(?:\bfindings\s+received\b|\baudit\s+findings(?:\s+addressed)?\b)[^:\d|]*[:|][*\s]*(" + WORD_OR_DIGIT + r")\b",
+        r"(?:\bfindings\s+received\b|\baudit\s+findings(?:\s+addressed)?\b)[^:\d|\n]*[:|][*\s]*(" + WORD_OR_DIGIT + r")\b",
         re.I,
     ),
     # 2. Scope: against the 24 audit findings / against the 24 findings
@@ -69,12 +69,13 @@ TOTAL_PATTERNS = [
     ),
     # 6. Sentence or clause: N findings were returned / raised / received / produced / identified
     re.compile(
-        r"\b(" + WORD_OR_DIGIT + r")\s+findings\s+were\s+(?:returned|raised|produced|identified|received)\b",
+        r"\b(" + WORD_OR_DIGIT + r")\s+findings\s+were\s+(?:returned|raised|produced|identified|received)\b"
+        r"(?!\s+(?:for\s+the\s+record\s+without|against\s+the\s+core\s+record|on\s+|about\s+|concerning\s+|specifically\b|without\s+recommending|left\b|addressed\b|withdrawn\b|rejected\b))",
         re.I,
     ),
-    # 7. Sentence at start of line/sentence: N findings: H high, M medium...
+    # 7. Inline or sentence: N findings: H high, M medium... (supports bolding around N findings or severity list)
     re.compile(
-        r"(?:^|[.!?]\s+)(?:\*\*)?(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings\s*:\s*(?:(?:\d+|[a-zA-Z]+)\s+(?:high|medium|moderate|low|major|minor))",
+        r"\b(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings(?:\*\*)?\s*:\s*(?:\*\*)?(?:(?:\d+|[a-zA-Z]+)(?:\*\*)?\s+(?:high|medium|moderate|low|major|minor|critical|info|informational))",
         re.I | re.M,
     ),
     # 8. N findings against the (full|core|paired) record
@@ -90,7 +91,7 @@ TOTAL_PATTERNS = [
     # 10. Synthetic/simple fallback: report stating "twelve findings" or "N findings" as isolated phrase,
     # ignoring subset counts (e.g., "Six findings were deliberately left as-is").
     re.compile(
-        r"(?:^|[.!?]\s+|report\s+saying\s+[\"']?)(?:\*\*)?(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings\b(?!\s+(?:were\s+(?:\w+\s+)?(?:left|acted|addressed|remediated|withdrawn|rejected|accepted|retained)|produced\s+(?:edits|changes)|cluster|fall|concerned|apply|relate))",
+        r"(?:^|[.!?]\s+|report\s+saying\s+[\"']?)(?:\*\*)?(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings\b(?!\s+(?:were\s+(?:\w+\s+)?(?:left|acted|addressed|remediated|withdrawn|rejected|accepted|retained|raised\s+(?:for\s+the\s+record\s+without|against\s+the\s+core\s+record|on\s+|about\s+|concerning\s+|specifically\b|without\s+recommending))|produced\s+(?:edits|changes)|cluster|fall|concerned|apply|relate))",
         re.I | re.M,
     ),
 ]
@@ -99,7 +100,10 @@ EXPLICIT_TOTAL_PATTERNS = TOTAL_PATTERNS[:-1]
 FALLBACK_TOTAL_PATTERNS = TOTAL_PATTERNS[-1:]
 
 SEV_PATTERN = re.compile(
-    r"\b(" + WORD_OR_DIGIT + r")\s+(?:severity\s+)?(high|critical|major|medium|moderate|low|minor|info|informational|confirmations?)\b",
+    r"(?<![.\d])\b(" + WORD_OR_DIGIT + r")\s+(?:severity\s+)?(high|critical|major|medium|moderate|low|minor|info|informational|confirmations?)\b"
+    r"(?!\s*/\s*(?:high|critical|major|medium|moderate|low|minor|info|informational)\b)"
+    r"(?!\s+(?:and|or)\s+(?:high|critical|major|medium|moderate|low|minor|info|informational)\b)"
+    r"(?!(?:[-\s]+severity)?\s+pairs?\b)",
     re.I,
 )
 
@@ -160,12 +164,13 @@ def _extract_totals_detailed(
     distinct_totals: list[int] = []
 
     if matches:
-        # Primary match is the first match by pattern specificity then position
-        primary = matches[0]
+        # Primary match is the earliest statement in document order (tie-broken by pattern specificity)
+        ordered_matches = sorted(matches, key=lambda item: (item[0], item[2]))
+        primary = ordered_matches[0]
         stated_total = primary[3]
         matched_pos = (primary[0], primary[1])
         # Distinct totals in document order
-        for _, _, _, val in sorted(matches, key=lambda item: item[0]):
+        for _, _, _, val in ordered_matches:
             if val not in distinct_totals:
                 distinct_totals.append(val)
 
@@ -214,8 +219,6 @@ def extract_report_audit_totals(report_text: str) -> tuple[int | None, dict[str,
 def check_report_audit_totals(
     report: str | Path | None,
     audit: str | Path | dict[str, Any] | None,
-    *,
-    instrument_version: int = INSTRUMENT_VERSION,
 ) -> dict[str, Any]:
     """Compare written report's stated finding totals against structured audit counts.
 
@@ -232,13 +235,13 @@ def check_report_audit_totals(
       status: 'consistent' | 'mismatch' | 'no_total_stated' | 'not_checked'
       reason: str | None
     """
-    from data_sheets_schema.api_runner import audit_counts
+    from data_sheets_schema.api_runner import _audit_shape_problem, audit_counts
 
     # 1. Resolve report text
     if report is None:
         return {
             "checked": False,
-            "instrument_version": instrument_version,
+            "instrument_version": INSTRUMENT_VERSION,
             "reason": "no reconciliation report",
             "stated_total": None,
             "stated_totals": [],
@@ -254,7 +257,7 @@ def check_report_audit_totals(
         if not report.exists():
             return {
                 "checked": False,
-                "instrument_version": instrument_version,
+                "instrument_version": INSTRUMENT_VERSION,
                 "reason": f"report file {report} does not exist",
                 "stated_total": None,
                 "stated_totals": [],
@@ -275,8 +278,8 @@ def check_report_audit_totals(
     if audit is None:
         return {
             "checked": False,
-            "instrument_version": instrument_version,
-            "reason": "missing or malformed audit",
+            "instrument_version": INSTRUMENT_VERSION,
+            "reason": "missing audit",
             "stated_total": stated_total,
             "stated_totals": stated_totals,
             "stated_by_severity": stated_by_severity,
@@ -291,8 +294,8 @@ def check_report_audit_totals(
         if not audit.exists():
             return {
                 "checked": False,
-                "instrument_version": instrument_version,
-                "reason": "missing or malformed audit",
+                "instrument_version": INSTRUMENT_VERSION,
+                "reason": f"audit file {audit} does not exist",
                 "stated_total": stated_total,
                 "stated_totals": stated_totals,
                 "stated_by_severity": stated_by_severity,
@@ -310,10 +313,23 @@ def check_report_audit_totals(
 
     computed = audit_counts(audit_str)
     if computed is None:
+        raw_audit = audit_str.strip() if audit_str else ""
+        if not raw_audit:
+            audit_reason = "missing audit"
+        else:
+            try:
+                parsed_audit = json.loads(raw_audit)
+            except (ValueError, TypeError):
+                audit_reason = "malformed audit JSON"
+            else:
+                if not isinstance(parsed_audit, dict):
+                    audit_reason = "audit JSON must be an object"
+                else:
+                    audit_reason = _audit_shape_problem(parsed_audit) or "malformed audit"
         return {
             "checked": False,
-            "instrument_version": instrument_version,
-            "reason": "missing or malformed audit",
+            "instrument_version": INSTRUMENT_VERSION,
+            "reason": audit_reason,
             "stated_total": stated_total,
             "stated_totals": stated_totals,
             "stated_by_severity": stated_by_severity,
@@ -327,25 +343,9 @@ def check_report_audit_totals(
     computed_total = computed["total"]
     computed_by_severity = computed["by_severity"]
 
-    # 3. Check if no total was stated
-    if stated_total is None:
-        return {
-            "checked": True,
-            "instrument_version": instrument_version,
-            "reason": None,
-            "stated_total": None,
-            "stated_totals": [],
-            "stated_by_severity": stated_by_severity,
-            "computed_total": computed_total,
-            "computed_by_severity": computed_by_severity,
-            "mismatches": [],
-            "findings": [],
-            "status": "no_total_stated",
-        }
-
-    # 4. Compare stated numbers against computed counts
+    # 3. Compare stated numbers (total and per-severity subtotals) against computed counts
     mismatches: list[dict[str, Any]] = []
-    if stated_total != computed_total:
+    if stated_total is not None and stated_total != computed_total:
         mismatches.append({
             "kind": "finding_total_mismatch",
             "record": "report",
@@ -384,10 +384,16 @@ def check_report_audit_totals(
                 "computed": c_count,
             })
 
-    status = "mismatch" if mismatches else "consistent"
+    if mismatches:
+        status = "mismatch"
+    elif stated_total is None:
+        status = "no_total_stated"
+    else:
+        status = "consistent"
+
     return {
         "checked": True,
-        "instrument_version": instrument_version,
+        "instrument_version": INSTRUMENT_VERSION,
         "reason": None,
         "stated_total": stated_total,
         "stated_totals": stated_totals,
