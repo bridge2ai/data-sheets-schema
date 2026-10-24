@@ -9,6 +9,7 @@ from pathlib import Path
 import socket
 import stat
 import subprocess
+import traceback
 
 import pytest
 import yaml
@@ -56,17 +57,26 @@ def files(directory):
     return {path.name: path.read_bytes() for path in directory.iterdir()}
 
 
+def key_path(output):
+    return output.with_name(output.name + "-key.json")
+
+
 def build(tmp_path, records, *, name="pack", **kwargs):
     output = tmp_path / name
     cohort = kwargs.pop("cohort", "synthetic")
     default_seed = "registered-seed-0123456789abcdef0123456789" if cohort == "campaign" else "registered-seed"
-    key = pack.build_blind_review_pack(records, output, seed=kwargs.pop("seed", default_seed),
+    key = pack.build_blind_review_pack(records, output, key_output=kwargs.pop("key_output", key_path(output)),
+                                      seed=kwargs.pop("seed", default_seed),
                                       cohort=cohort, **kwargs)
     return output, key
 
 
 def test_bytes_order_and_metadata_deterministic_with_reordered_selection(tmp_path):
     records = selection(tmp_path)
+    # Reviewer order is observable only when scientific contents differ;
+    # private arm/label/seed metadata is no longer in the reviewer directory.
+    for index, record in enumerate(records):
+        record.source_path.write_bytes(record.source_path.read_bytes() + f"scientific_count: {index}\n".encode())
     before = {r.source_path: r.source_path.read_bytes() for r in records}
     first, key = build(tmp_path, records)
     second, other = build(tmp_path, reversed(records), name="second")
@@ -81,15 +91,24 @@ def test_bytes_order_and_metadata_deterministic_with_reordered_selection(tmp_pat
     assert files(first) != files(third)
 
 
+def test_identical_scientific_records_can_keep_reviewer_bytes_when_seed_changes(tmp_path):
+    records = selection(tmp_path)
+    first, first_key = build(tmp_path, records)
+    second, second_key = build(tmp_path, records, name="changed-seed", seed="different-seed")
+    assert files(first) == files(second)
+    assert [row["label"] for row in first_key["records"]] != [row["label"] for row in second_key["records"]]
+    assert key_path(first).read_bytes() != key_path(second).read_bytes()
+
+
 def test_key_hashes_blinding_review_sheet_and_permissions(tmp_path):
     records = selection(tmp_path)
     output, key = build(tmp_path, records, generated_at="2026-10-20T12:34:56Z")
-    assert json.loads((output / "sealed_blind_key.json").read_bytes()) == key
+    assert json.loads(key_path(output).read_bytes()) == key
     assert key["generated_at"] == "2026-10-20T12:34:56Z"
     assert key["timestamp_basis"] == "caller_supplied_unverified"
     assert stat.S_IMODE(output.stat().st_mode) == 0o700
-    assert stat.S_IMODE((output / "sealed_blind_key.json").stat().st_mode) == 0o600
-    assert set(files(output)) == {"sealed_blind_key.json", "review_sheet.tsv"} | {
+    assert stat.S_IMODE(key_path(output).stat().st_mode) == 0o600
+    assert set(files(output)) == {"review_sheet.tsv"} | {
         f"blind_{i:02d}.yaml" for i in range(1, 7)}
     with (output / "review_sheet.tsv").open(newline="") as stream:
         reader = csv.DictReader(stream, delimiter="\t")
@@ -126,8 +145,7 @@ def test_seed_integer_matches_cli_string_and_timestamp_changes_only_key(tmp_path
     first, _ = build(tmp_path, records, seed=42)
     second, _ = build(tmp_path, records, name="second", seed="42",
                       generated_at="2026-10-20T00:00:00Z")
-    assert {k: v for k, v in files(first).items() if k != "sealed_blind_key.json"} == {
-        k: v for k, v in files(second).items() if k != "sealed_blind_key.json"}
+    assert files(first) == files(second)
 
 
 def campaign(tmp_path):
@@ -396,6 +414,8 @@ def test_atomic_publish_refuses_concurrent_destination_without_replacing_it(tmp_
     real = pack._rename_new
 
     def race(source, destination):
+        if destination != tmp_path / "pack":
+            return real(source, destination)
         destination.mkdir()
         (destination / "other-owner").write_text("keep")
         return real(source, destination)
@@ -404,6 +424,7 @@ def test_atomic_publish_refuses_concurrent_destination_without_replacing_it(tmp_
     with pytest.raises(OSError):
         build(tmp_path, records)
     assert files(tmp_path / "pack") == {"other-owner": b"keep"}
+    assert key_path(tmp_path / "pack").is_file()
     assert not list(tmp_path.glob(".blind-review-pack-*"))
 
 
@@ -478,8 +499,9 @@ def test_cli_record_selection_and_manifest_exclusive(tmp_path, capsys):
     entry = f"{record.arm}:{record.project}:{record.label}={record.source_path}"
     assert pack.parse_record(entry) == record
     assert pack.main(["--record", entry, "--seed", "42", "--cohort", "synthetic",
-                      "--output-dir", str(tmp_path / "pack")]) == 0
-    assert "never the sealed key" in capsys.readouterr().out
+                      "--output-dir", str(tmp_path / "pack"),
+                      "--key-output", str(tmp_path / "private-key.json")]) == 0
+    assert "never share the sealed key" in capsys.readouterr().out
     with pytest.raises(SystemExit) as exc:
         pack.main(["--record", entry, "--manifest", "elsewhere", "--seed", "42",
                    "--output-dir", str(tmp_path / "other")])
@@ -493,7 +515,8 @@ def test_cli_missing_seed_and_default_campaign_refusal(tmp_path):
     entry = f"{record.arm}:{record.project}:{record.label}={record.source_path}"
     for arguments in ([], ["--seed", "explicit"]):
         with pytest.raises(SystemExit) as exc:
-            pack.main(["--record", entry, "--output-dir", str(tmp_path / "pack"), *arguments])
+            pack.main(["--record", entry, "--output-dir", str(tmp_path / "pack"),
+                       "--key-output", str(tmp_path / "private.json"), *arguments])
         assert exc.value.code == 2
     assert not (tmp_path / "pack").exists()
 
@@ -506,8 +529,9 @@ def test_campaign_seed_minimum_length_and_cli_default_seed(tmp_path):
     record = selection(tmp_path, 1)[0]
     entry = f"{record.arm}:{record.project}:{record.label}={record.source_path}"
     out_dir = tmp_path / "cli_auto_seed"
-    assert pack.main(["--record", entry, "--cohort", "synthetic", "--output-dir", str(out_dir)]) == 0
-    key = json.loads((out_dir / "sealed_blind_key.json").read_text(encoding="utf-8"))
+    assert pack.main(["--record", entry, "--cohort", "synthetic", "--output-dir", str(out_dir),
+                      "--key-output", str(key_path(out_dir))]) == 0
+    key = json.loads(key_path(out_dir).read_text(encoding="utf-8"))
     assert len(key["seed"]) == 64
 
 
@@ -644,8 +668,6 @@ def test_fingerprint_counts_are_private_defined_hints_not_rewrites(tmp_path):
     assert "zero is not assurance" in key["residual_fingerprint_notice"]
     assert yaml.safe_load((output / "blind_01.yaml").read_bytes()) == document
     for name, raw in files(output).items():
-        if name == "sealed_blind_key.json":
-            continue
         for private in ("british_form_occurrences", "crate_word_occurrences", "residual_fingerprint_notice",
                         "british_patterns_sha256", key["seed"]):
             assert private.encode() not in raw
@@ -656,4 +678,206 @@ def test_fingerprint_patterns_do_not_span_scientific_strings():
     hints = pack._fingerprints(b"id: example:split\nvalues: [ro, crate, orga, nised]\n")
     assert hints["crate_word_occurrences"] == 1
     assert hints["british_form_occurrences"] == 0
+
+
+def test_external_key_is_required_by_api_and_cli(tmp_path):
+    records = selection(tmp_path, 1)
+    with pytest.raises(TypeError, match="key_output"):
+        pack.build_blind_review_pack(records, tmp_path / "review", seed="seed", cohort="synthetic")
+    record = records[0]
+    with pytest.raises(SystemExit) as exc:
+        pack.main(["--record", f"{record.arm}:{record.project}:{record.label}={record.source_path}",
+                   "--cohort", "synthetic", "--output-dir", str(tmp_path / "review")])
+    assert exc.value.code == 2
+    assert not (tmp_path / "review").exists()
+
+
+@pytest.mark.parametrize("kind", ["file", "directory", "dangling-symlink", "source-symlink", "source-hardlink"])
+def test_existing_private_key_is_never_replaced(tmp_path, kind):
+    records = selection(tmp_path, 1)
+    source = records[0].source_path
+    before = source.read_bytes()
+    destination = tmp_path / "private.json"
+    if kind == "file":
+        destination.write_bytes(b"other owner's key")
+    elif kind == "directory":
+        destination.mkdir()
+    elif kind == "dangling-symlink":
+        destination.symlink_to(tmp_path / "missing")
+    elif kind == "source-symlink":
+        destination.symlink_to(source)
+    else:
+        destination.hardlink_to(source)
+    identity = destination.lstat()
+    with pytest.raises(ValueError, match="already exists"):
+        build(tmp_path, records, key_output=destination)
+    assert destination.lstat() == identity
+    assert source.read_bytes() == before
+    assert not (tmp_path / "pack").exists()
+
+
+@pytest.mark.parametrize("kind", ["same", "nested", "parent-symlink-alias"])
+def test_key_cannot_resolve_inside_reviewer_directory(tmp_path, kind):
+    records = selection(tmp_path, 1)
+    destination = tmp_path / "pack"
+    if kind == "nested":
+        destination /= "key.json"
+    elif kind == "parent-symlink-alias":
+        alias = tmp_path / "parent-alias"
+        alias.symlink_to(tmp_path, target_is_directory=True)
+        destination = alias / "pack"
+    with pytest.raises(ValueError, match="outside"):
+        build(tmp_path, records, key_output=destination)
+    assert not (tmp_path / "pack").exists()
+
+
+def test_private_key_published_and_read_back_before_reviewer_directory(tmp_path, monkeypatch):
+    records = selection(tmp_path, 1)
+    destination = key_path(tmp_path / "pack")
+    rename, read = pack._rename_new, pack.registered._read
+    events = []
+
+    def observed_read(path, *args, **kwargs):
+        if path == destination:
+            events.append("key-read")
+        return read(path, *args, **kwargs)
+
+    def observed_rename(source, target):
+        if target == destination:
+            assert stat.S_IMODE(source.stat().st_mode) == 0o600
+            assert not (tmp_path / "pack").exists()
+            events.append("key-publish")
+        else:
+            assert events == ["key-publish", "key-read"]
+            assert set(files(source)) == {"blind_01.yaml", "review_sheet.tsv"}
+            events.append("review-publish")
+        return rename(source, target)
+
+    monkeypatch.setattr(pack, "_rename_new", observed_rename)
+    monkeypatch.setattr(pack.registered, "_read", observed_read)
+    output, key = build(tmp_path, records)
+    assert events == ["key-publish", "key-read", "review-publish"]
+    assert json.loads(destination.read_bytes()) == key
+    assert set(files(output)) == {"blind_01.yaml", "review_sheet.tsv"}
+    assert not list(tmp_path.glob(".blind-review-*-*"))
+
+
+def test_key_publication_race_preserves_foreign_file_and_no_reviewer_output(tmp_path, monkeypatch):
+    real = pack._rename_new
+    destination = key_path(tmp_path / "pack")
+
+    def race(source, target):
+        assert target == destination
+        target.write_bytes(b"concurrent owner")
+        return real(source, target)
+
+    monkeypatch.setattr(pack, "_rename_new", race)
+    with pytest.raises(OSError):
+        build(tmp_path, selection(tmp_path, 1))
+    assert destination.read_bytes() == b"concurrent owner"
+    assert not (tmp_path / "pack").exists()
+    assert not list(tmp_path.glob(".blind-review-*-*"))
+
+
+@pytest.mark.parametrize("phase", ["key-parent", "reviewer-parent"])
+def test_late_sync_failure_truthfully_retains_published_outputs(tmp_path, monkeypatch, phase):
+    private = tmp_path / "private"
+    private.mkdir()
+    destination = private / "key.json"
+    original = pack._sync_directory
+
+    def fail(path):
+        if path == (private if phase == "key-parent" else tmp_path):
+            raise OSError("parent sync failed")
+        return original(path)
+
+    monkeypatch.setattr(pack, "_sync_directory", fail)
+    with pytest.raises(OSError, match="parent sync failed"):
+        build(tmp_path, selection(tmp_path, 1), key_output=destination)
+    key = json.loads(destination.read_bytes())
+    assert key["records"]
+    assert (tmp_path / "pack").exists() == (phase == "reviewer-parent")
+    if phase == "reviewer-parent":
+        assert sha((tmp_path / "pack" / "blind_01.yaml").read_bytes()) == key["records"][0]["blinded_sha256"]
+    assert not list(tmp_path.glob(".blind-review-*-*"))
+    assert not list(private.glob(".blind-review-*-*"))
+
+
+@pytest.mark.parametrize("change", ["bytes", "replace", "symlink", "permissions", "missing", "source", "extra-review-file"])
+def test_key_and_review_are_rechecked_after_external_key_publication(tmp_path, monkeypatch, change):
+    records = selection(tmp_path, 1)
+    private = tmp_path / "private"
+    private.mkdir()
+    destination = private / "key.json"
+    original = pack._sync_directory
+
+    def change_after_publish(path):
+        if path == private:
+            if change == "bytes":
+                destination.write_bytes(b"corrupted key")
+            elif change in {"replace", "symlink"}:
+                replacement = private / "replacement.json"
+                replacement.write_bytes(destination.read_bytes())
+                replacement.chmod(0o600)
+                if change == "replace":
+                    os.replace(replacement, destination)
+                else:
+                    destination.unlink()
+                    destination.symlink_to(replacement)
+            elif change == "permissions":
+                destination.chmod(0o644)
+            elif change == "missing":
+                destination.unlink()
+            elif change == "source":
+                records[0].source_path.write_bytes(b"id: changed\n")
+            else:
+                stage = next(tmp_path.glob(".blind-review-pack-*"))
+                (stage / "unexpected-key.json").write_bytes(b"private data")
+        return original(path)
+
+    monkeypatch.setattr(pack, "_sync_directory", change_after_publish)
+    with pytest.raises((ValueError, FileNotFoundError)):
+        build(tmp_path, records, key_output=destination)
+    assert not (tmp_path / "pack").exists()
+    assert destination.exists() == (change != "missing")
+    assert not list(tmp_path.glob(".blind-review-pack-*"))
+
+
+def test_cleanup_failure_preserves_original_error_and_external_destinations(tmp_path, monkeypatch):
+    failure = OSError("original write failure")
+    monkeypatch.setattr(pack, "_write", lambda *args: (_ for _ in ()).throw(failure))
+    monkeypatch.setattr(pack.shutil, "rmtree", lambda *args: (_ for _ in ()).throw(OSError("cleanup failed")))
+    with pytest.raises(OSError) as exc:
+        build(tmp_path, selection(tmp_path, 1))
+    assert exc.value is failure
+    assert any("cleanup failed" in note for note in exc.value.__notes__)
+    assert not (tmp_path / "pack").exists()
+    assert not key_path(tmp_path / "pack").exists()
+
+
+@pytest.mark.parametrize("broken_stderr", [False, True])
+def test_cleanup_diagnostic_without_add_note_preserves_original_exception(tmp_path, monkeypatch, capsys, broken_stderr):
+    class LegacyOSError(OSError):
+        add_note = None
+
+    failure = LegacyOSError("original legacy write failure")
+
+    def fail_write(*args):
+        raise failure
+
+    class BrokenStderr:
+        def write(self, text):
+            raise OSError("stderr unavailable")
+
+    monkeypatch.setattr(pack, "_write", fail_write)
+    monkeypatch.setattr(pack.shutil, "rmtree", lambda *args: (_ for _ in ()).throw(OSError("cleanup failed")))
+    if broken_stderr:
+        monkeypatch.setattr(pack.sys, "stderr", BrokenStderr())
+    with pytest.raises(LegacyOSError) as exc:
+        build(tmp_path, selection(tmp_path, 1))
+    assert exc.value is failure
+    assert traceback.extract_tb(exc.value.__traceback__)[-1].name == "fail_write"
+    assert any("cleanup failed" in note for note in exc.value.__notes__)
+    if not broken_stderr:
+        assert "cleanup failed" in capsys.readouterr().err
 

@@ -1,8 +1,8 @@
 """Deterministic, offline source-review packs (E2; #3280/#1782/#1801/#1815).
 
-The output is an OPERATOR-ONLY package: distribute only ``blind_*.yaml`` and
-``review_sheet.tsv`` to reviewers, never the directory or sealed key. File
-permissions are local access controls, not encryption or reviewer separation.
+The reviewer directory contains only ``blind_*.yaml`` and ``review_sheet.tsv``.
+Its separate private key must be written outside that directory and never
+distributed. File permissions are local access controls, not encryption.
 
 Selection is explicit. This prepares review materials, not scientific approval,
 generation acceptance, or proof that source content cannot reveal its origin.
@@ -24,6 +24,8 @@ from pathlib import Path
 import re
 import secrets
 import shutil
+import stat
+import sys
 import tempfile
 from typing import Iterable
 import unicodedata
@@ -354,15 +356,42 @@ def _write(path: Path, raw: bytes):
         os.fsync(stream.fileno())
 
 
-def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed: str | int,
+def _new_destination(path: Path, label: str) -> Path:
+    if path.exists() or path.is_symlink():
+        raise ValueError(f"{label} already exists; never overwrite a review package or key")
+    if not path.parent.is_dir() or path.name in {"", ".", ".."}:
+        raise ValueError(f"{label} requires an existing parent and a new name")
+    destination = path.parent.resolve(strict=True) / path.name
+    if destination.exists() or destination.is_symlink():
+        raise ValueError(f"{label} already exists; never overwrite a review package or key")
+    return destination
+
+
+def _verify_private_key(path: Path, raw: bytes, identity: tuple[int, int]):
+    info = path.lstat()
+    if (not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o600
+            or (info.st_dev, info.st_ino) != identity):
+        raise ValueError("private key identity or permissions changed")
+    if registered._read(path) != raw:
+        raise ValueError("written private key does not match captured bytes")
+    info = path.lstat()
+    if (not stat.S_ISREG(info.st_mode) or stat.S_IMODE(info.st_mode) != 0o600
+            or (info.st_dev, info.st_ino) != identity):
+        raise ValueError("private key identity or permissions changed")
+
+
+def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_output: Path, seed: str | int,
                             cohort: str = "campaign", generated_at: str | None = None) -> dict:
-    """Publish a new operator-only package, refusing leaks and any overwrite.
+    """Publish reviewer files and an external private key without overwrites.
 
     Seeded order is SHA256(seed, arm, project, label), independent of selection
     order and filesystem location. A missing generated_at stays null, avoiding
     wall-clock nondeterminism. Supplying a timestamp does not authenticate it.
-    Share only reviewer YAML files and review_sheet.tsv, NEVER the full output
-    directory/sealed_blind_key.json. This is not an authorization to score.
+    The private key is published and synced before the reviewer directory.
+    A later failure can leave an orphan private key, or both outputs if the
+    reviewer-parent sync fails; external destinations are never cleaned up.
+    This process's ordering cannot prevent later changes by another writer.
+    Share only the reviewer directory, never the key. No scoring is authorized.
     """
     if isinstance(seed, bool) or not isinstance(seed, (str, int)):
         raise ValueError("seed must be a nonempty string or integer")
@@ -372,11 +401,13 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
     if cohort == "campaign" and len(seed) < 32:
         raise ValueError("campaign blind review pack requires a seed of at least 32 characters (128 bits)")
     output = Path(output_dir)
-    if output.exists() or output.is_symlink():
-        raise ValueError("output directory already exists; never overwrite a review package")
-    if not output.parent.is_dir() or output.name in {"", ".", ".."}:
-        raise ValueError("output requires an existing parent and a new directory name")
-    destination = output.parent.resolve() / output.name
+    key_path = Path(key_output)
+    if key_path.absolute() == output.absolute() or output.absolute() in key_path.absolute().parents:
+        raise ValueError("private key must be outside the reviewer directory")
+    destination = _new_destination(output, "output directory")
+    key_destination = _new_destination(key_path, "private key")
+    if key_destination == destination or destination in key_destination.parents:
+        raise ValueError("private key must be outside the reviewer directory")
     captured, paths, inodes, total = [], set(), set(), 0
     forbidden = {identifier for record in records for identifier in (record.arm, record.label, str(record.source_path))}
     for record in records:
@@ -451,31 +482,82 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
             "stripper_module_sha256": _sha(registered._read(Path(registered.__file__))),
             "pyyaml_version": yaml.__version__,
         },
-        "distribution": "operator_only; share blind_*.yaml and review_sheet.tsv only, never the sealed key or directory",
+        "distribution": "reviewer directory contains YAML/TSV only; never share the separate private key",
+        "publication": "private key first; late failure may retain orphan key or both outputs; neither is overwritten or removed",
         "scientific_approval": False, "records": entries,
     }
-    files["sealed_blind_key.json"] = _canonical(key)
-    stage = Path(tempfile.mkdtemp(prefix=".blind-review-pack-", dir=destination.parent))
+    key_raw = _canonical(key)
+    owned = []
+
+    def private_stage(parent, prefix):
+        path = Path(tempfile.mkdtemp(prefix=prefix, dir=parent))
+        info = path.lstat()
+        owned.append((path, (info.st_dev, info.st_ino)))
+        os.chmod(path, 0o700)
+        return path
+
     try:
-        os.chmod(stage, 0o700)
+        stage = private_stage(destination.parent, ".blind-review-pack-")
+        key_stage = private_stage(key_destination.parent, ".blind-review-key-")
         for name, raw in files.items():
             _write(stage / name, raw)
-        # Re-read actual files after writing; no parser/cache can hide changes.
-        for name, expected in files.items():
-            actual = registered._read(stage / name)
-            if actual != expected:
-                raise ValueError("written review package does not match captured bytes")
-            if name != "sealed_blind_key.json":
+        key_file = key_stage / "sealed_blind_key.json"
+        _write(key_file, key_raw)
+        key_info = key_file.lstat()
+        key_identity = (key_info.st_dev, key_info.st_ino)
+
+        def verify_review():
+            if {path.name for path in stage.iterdir()} != set(files):
+                raise ValueError("reviewer directory contains unexpected files")
+            for name, expected in files.items():
+                actual = registered._read(stage / name)
+                if actual != expected:
+                    raise ValueError("written review package does not match captured bytes")
                 _leakage(actual, forbidden, yaml_document=name.endswith(".yaml"))
-        for _, path, digest, _ in captured:
-            if _sha(registered._read(path)) != digest:
-                raise ValueError("source changed during review pack preparation")
+            for _, path, digest, _ in captured:
+                if _sha(registered._read(path)) != digest:
+                    raise ValueError("source changed during review pack preparation")
+
+        verify_review()
+        _verify_private_key(key_file, key_raw, key_identity)
         _sync_directory(stage)
+        _sync_directory(key_stage)
+        _rename_new(key_file, key_destination)
+        _sync_directory(key_destination.parent)
+        _verify_private_key(key_destination, key_raw, key_identity)
+        verify_review()
         _rename_new(stage, destination)
         _sync_directory(destination.parent)
     finally:
-        if stage.exists():
-            shutil.rmtree(stage)
+        original_error = sys.exc_info()[1]
+        cleanup_errors = []
+        for path, identity in owned:
+            try:
+                try:
+                    info = path.lstat()
+                except FileNotFoundError:
+                    continue
+                if not stat.S_ISDIR(info.st_mode) or (info.st_dev, info.st_ino) != identity:
+                    raise OSError(f"owned staging directory was replaced; refusing cleanup: {path}")
+                shutil.rmtree(path)
+            except OSError as exc:
+                cleanup_errors.append(exc)
+        if cleanup_errors:
+            note = "Temporary staging cleanup failed; external outputs were retained: " + "; ".join(map(str, cleanup_errors))
+            if original_error is not None:
+                add_note = getattr(original_error, "add_note", None)
+                if callable(add_note):
+                    add_note(note)
+                else:
+                    # Python 3.9/3.10 do not render exception notes. Preserve
+                    # the error and attached diagnostic even if stderr fails.
+                    original_error.__notes__ = [*getattr(original_error, "__notes__", ()), note]
+                    try:
+                        print(note, file=sys.stderr)
+                    except (OSError, ValueError):
+                        pass
+            else:
+                raise OSError(note) from cleanup_errors[0]
     return key
 
 
@@ -493,15 +575,18 @@ def main(argv=None) -> int:
                         help="Default: 24 records, v8 04f/04g + v10, 3 per project/arm; synthetic accepts other sizes")
     parser.add_argument("--generated-at", help="Optional explicit UTC YYYY-MM-DDTHH:MM:SSZ; otherwise null, not current time")
     parser.add_argument("--output-dir", type=Path, required=True,
-                        help="New operator-only 0700 directory. Share only YAML+review_sheet, NEVER key/full directory")
+                        help="New 0700 reviewer directory containing only YAML and review_sheet.tsv")
+    parser.add_argument("--key-output", type=Path, required=True,
+                        help="New private 0600 key file outside the reviewer directory; never distribute it")
     args = parser.parse_args(argv)
     seed_val = args.seed if args.seed is not None else secrets.token_hex(32)
     try:
         records = read_manifest(args.manifest) if args.manifest else [parse_record(item) for item in args.record]
-        result = build_blind_review_pack(records, args.output_dir, seed=seed_val, cohort=args.cohort,
+        result = build_blind_review_pack(records, args.output_dir, key_output=args.key_output,
+                                         seed=seed_val, cohort=args.cohort,
                                          generated_at=args.generated_at)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
-    print(f"Prepared {len(result['records'])} blinded records. Operator-only package: {args.output_dir}")
-    print("Share only blind_*.yaml and review_sheet.tsv; never the sealed key or full directory.")
+    print(f"Prepared {len(result['records'])} blinded records. Reviewer directory: {args.output_dir}")
+    print(f"Private key: {args.key_output}; never share the sealed key.")
     return 0
