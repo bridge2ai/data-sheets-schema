@@ -113,17 +113,22 @@ class Inputs:
                 "requested_paths": self.paths(), "policy": POLICY}
 
 
+#: The one enclosing code fence an answer may arrive in (74d1351a9).
+ANSWER_FENCE = r"\A\s*```(?:ya?ml)?[ \t]*\r?\n(.*?)\r?\n[ \t]*```\s*\Z"
 #: What the answer parser accepts, recorded on every completion result
-#: (#5116). Version 2 (74d1351a9) also accepts one enclosing YAML code
-#: fence; version 1 accepted only bare YAML. A result saved before this was
-#: recorded carries neither field and could come from either version.
-ANSWER_PARSER = {"version": 2, "envelopes": ["bare", "yaml_fence"]}
+#: (#5116). Version 2 also accepts one enclosing YAML code fence; version 1
+#: accepted only bare YAML. The fence pattern's hash ties the record to the
+#: parser that read it, so an edit to the pattern changes what is recorded.
+#: A result saved before this was recorded carries neither field and could
+#: come from either version.
+ANSWER_PARSER = {"version": 2, "envelopes": ["bare", "yaml_fence"],
+                 "fence_pattern_sha256": hashlib.sha256(ANSWER_FENCE.encode("utf-8")).hexdigest()}
 
 
 def parse_answers_envelope(raw: bytes) -> tuple[list[Any], str]:
     """Answers plus the envelope they arrived in: `bare` or `yaml_fence`."""
     text = raw.decode("utf-8")
-    fenced = re.match(r"\A\s*```(?:ya?ml)?[ \t]*\r?\n(.*?)\r?\n[ \t]*```\s*\Z", text, re.S | re.I)
+    fenced = re.match(ANSWER_FENCE, text, re.S | re.I)
     parsed = _mapping(fenced.group(1).encode("utf-8") if fenced else raw, "answers")
     if set(parsed) != {"rereceipt"} or not isinstance(parsed["rereceipt"], list):
         raise ValueError("answers must contain only a rereceipt list")

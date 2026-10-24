@@ -399,7 +399,7 @@ def _receipt_publish(spec, inputs, result) -> None:
 _ENVELOPE_KEYS = frozenset({'answer_envelope', 'answer_parser'})
 
 
-def _result(inputs, raw: bytes, *, truncated=False) -> dict:
+def _result(inputs, raw: bytes, *, truncated=False, no_work=False) -> dict:
     import yaml
     from data_sheets_schema.rereceipt import ANSWER_PARSER, parse_answers_envelope, complete
     problem = 'response truncated' if truncated else None
@@ -408,6 +408,8 @@ def _result(inputs, raw: bytes, *, truncated=False) -> dict:
         answers, envelope = ([], None) if problem else parse_answers_envelope(raw)
     except (ValueError, TypeError, UnicodeError, yaml.YAMLError) as exc:
         answers, problem = [], f'unusable response: {exc}'
+    if no_work:
+        envelope = None  # no model answered; the empty answer is synthetic
     value = complete(_prepared(inputs), answers)
     # Offline helper identity is internal accounting, not this runtime identity.
     value.pop('input_identity')
@@ -477,7 +479,8 @@ def _check_accounted_response(state, response, rows):
 
 def _checked_result(inputs, response, result):
     from .usage_ledger import UsageLedgerError
-    expected = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
+    expected = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens',
+                       no_work=response['stop_reason'] == 'no_work')
     if result != expected and not (_ENVELOPE_KEYS.isdisjoint(result)
                                    and result == {k: v for k, v in expected.items() if k not in _ENVELOPE_KEYS}):
         raise UsageLedgerError('receipt completion saved result differs from checked response')
@@ -514,7 +517,8 @@ def recover(spec, *, allow_unfinished=False) -> dict | None:
     if row is not None:
         _recover_reasoning(spec, response, row, payload)
     if state['state'] == 'response':
-        result = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
+        result = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens',
+                         no_work=response['stop_reason'] == 'no_work')
         state.update(state='result', result=_save(spec, 'receipt_completion_result.json', result,
                                                 usage_id=response['usage_id']))
         _set_state(spec, state)

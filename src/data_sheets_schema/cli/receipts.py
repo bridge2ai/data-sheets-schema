@@ -154,10 +154,13 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             click.echo(f"   {text}")
         if "coverage_floor" in block:
             floor = block["coverage_floor"]
-            gated = (f"{floor['with_receipt']}/{floor['eligible']} of the receipted part; "
-                     f"{floor['added_after_receipt']} added after the receipt, not gated"
-                     if floor.get("basis") == "receipted_part" and floor.get("eligible") is not None
-                     else f"{floor['with_receipt']}/{floor['receiptable']}")
+            if floor.get("basis") == "receipted_part" and floor.get("eligible") is None:
+                gated = "receipted part unmeasurable: no phase-1 split"
+            elif floor.get("basis") == "receipted_part":
+                gated = (f"{floor['with_receipt']}/{floor['eligible']} of the receipted part; "
+                         f"{floor['added_after_receipt']} added after the receipt, not gated")
+            else:
+                gated = f"{floor['with_receipt']}/{floor['receiptable']}"
             click.echo(f"   · registered receipt coverage: {floor['state']} "
                        f"({gated}); registration {floor['registration_sha256']}")
         for f in block["findings"]:

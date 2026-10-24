@@ -105,7 +105,7 @@ def test_prose_around_a_fence_is_still_refused():
 def test_a_result_saved_before_the_envelope_fields_still_verifies(monkeypatch):
     current = {"state": "answers_complete", "counts": {"requested": 1}, "answer_envelope": "yaml_fence",
                "answer_parser": dict(rereceipt.ANSWER_PARSER)}
-    monkeypatch.setattr(rc, "_result", lambda inputs, raw, truncated=False: json.loads(json.dumps(current)))
+    monkeypatch.setattr(rc, "_result", lambda inputs, raw, **kw: json.loads(json.dumps(current)))
     response = {"text": "```yaml\nrereceipt: []\n```", "stop_reason": "end_turn"}
     legacy = {k: v for k, v in current.items() if k not in ("answer_envelope", "answer_parser")}
     assert rc._checked_result(None, response, legacy) == legacy
@@ -115,3 +115,25 @@ def test_a_result_saved_before_the_envelope_fields_still_verifies(monkeypatch):
         rc._checked_result(None, response, {**legacy, "state": "answers_incomplete"})
     with pytest.raises(UsageLedgerError):
         rc._checked_result(None, response, {**current, "answer_envelope": "bare"})
+
+
+def test_a_basis_is_refused_outside_v2_registrations():
+    """Only generic_v10's v2 registration may name a basis; v1 keeps the exact numerator/denominator form."""
+    def v1(floor):
+        return json.dumps({
+            "format": "receipt_completion_registration_v1", "registration_id": "v1-basis-test",
+            "condition": "generic_v8", "runtime_policy_sha256": rc.policy_identity(version=1)["sha256"],
+            "receipt_instrument_version": 4, "max_output_tokens": 4000, "max_request_bytes": 32000000,
+            "context_limit_tokens": 1000000, "context_limit_basis": "test", "coverage_floor": floor,
+        }, sort_keys=True).encode("utf-8")
+    plain = {"state": "registered", "numerator": 19, "denominator": 20}
+    with pytest.raises(ValueError, match="exact numerator/denominator$"):
+        cp.parse_registration(v1({**plain, "basis": "receipted_part"}), version=1)
+    # The same floor without the basis is still a valid v1 registration.
+    assert cp.parse_registration(v1(plain), version=1)["coverage_floor"] == plain
+
+
+def test_the_recorded_parser_identity_follows_the_fence_pattern():
+    import hashlib as _h
+    assert rereceipt.ANSWER_PARSER["fence_pattern_sha256"] == _h.sha256(rereceipt.ANSWER_FENCE.encode()).hexdigest()
+
