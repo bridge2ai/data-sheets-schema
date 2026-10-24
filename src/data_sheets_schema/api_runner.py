@@ -405,6 +405,17 @@ DERIVED_PHASES = frozenset({"core", "reconcile_core"})
 #: the record carries whatever value a run used, clamped to the route.
 RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 
+#: generic_v10 (shared generation 1) report and reconcile room (D-C, owner
+#: decision 2026-10-23). The 2026-10-22a CHORUS canary's report used 83,367
+#: of 96,000 tokens (87%), the tightest margin of the run, and the regate
+#: shares the report budget; a report cut off at its ceiling costs a billed
+#: regate. Raised to the route's ceiling for shared generation 1 only: every
+#: earlier renderer and condition keeps its recorded budget, and the value a
+#: run used is in its api_usage rows and `max_tokens_by_phase`.
+#: `dollar_readout.SHARED_V1_PHASE_OUTPUT_CAPS` mirrors this; a test keeps
+#: them equal.
+SHARED_PHASE_MAX_TOKENS = {"report": 128000, "reconcile_full": 128000}
+
 
 def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
                      model: str | None = None) -> int:
@@ -414,6 +425,8 @@ def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
     # finding-only response. Keep earlier renderers' recorded limits intact.
     if spec.render_version >= 12 and ph in {"audit", "report"}:
         value = 96000
+    if getattr(spec, "shared_generation_version", 0) == 1 and ph in SHARED_PHASE_MAX_TOKENS:
+        value = SHARED_PHASE_MAX_TOKENS[ph]
     if spec.condition in RECEIPT_CONDITIONS and ph in RECEIPT_PHASE_MAX_TOKENS:
         # Env-overridable (#777): three consecutive full-phase stalls on the
         # AI_READI v7 re-canary followed the raise to 128k, where two runs at
