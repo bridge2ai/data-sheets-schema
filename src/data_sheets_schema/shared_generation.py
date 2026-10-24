@@ -137,6 +137,33 @@ def captured_assets(*, version=1) -> dict[str, bytes]:
     return captured
 
 
+def _contracts_digest(version: int) -> dict:
+    from . import api_runner as api
+    from . import audit_batch_format, rereceipt, typed_audit_runtime
+    render_ver = 25 if version == 1 else 27
+    phases = {p: sha(api.phase_instruction(p, render_ver).encode('utf-8'))
+              for p in sorted(api.PHASE_INSTRUCTIONS)}
+    return {
+        'phase_system_sha256': sha(api.PHASE_SYSTEM.encode('utf-8')),
+        'phase_instructions_sha256': phases,
+        'regate_headers_sha256': sha(canonical(api.REGATE_HEADERS)),
+        'shared_evidence_contract_sha256': sha(api.shared_evidence_contract().encode('utf-8')),
+        'typed_audit_system_sha256': sha(typed_audit_runtime.SYSTEM.encode('utf-8')),
+        'typed_audit_worker_format_sha256': sha(audit_batch_format.render('worker', version=2).encode('utf-8')),
+        'typed_audit_integration_format_sha256': sha(audit_batch_format.render('integration', version=2).encode('utf-8')),
+        'rereceipt_instruction_sha256': sha(rereceipt.INSTRUCTION.encode('utf-8')),
+    }
+
+
+def _schema_trim_descriptor() -> dict:
+    return {
+        'generation_dropped_slot_keys': list(_TRIMMED_SLOT_KEYS),
+        'worker_non_assigned_dropped_slot_keys': list(_WORKER_NON_ASSIGNED_TRIMMED_SLOT_KEYS),
+        'omission_schema_dropped_slot_keys': list(_TRIMMED_SLOT_KEYS),
+        'omission_all_reachable_classes': True,
+    }
+
+
 def descriptor(*, version=1, condition=None) -> dict:
     captured_assets(version=version)
     if version == 2:
@@ -154,13 +181,17 @@ def descriptor(*, version=1, condition=None) -> dict:
             "routing_code": {name: sha(resource_path(name).read_bytes()) for name in ROUTING_CODE},
             "reader_runtime": {"python": list(sys.version_info[:2]), "packages": {name: package_version(name)
                 for name in ("linkml", "linkml-runtime", "PyYAML", "jsonschema", "referencing")}},
+            "schema_context_trim": _schema_trim_descriptor(),
+            "stage_contracts": _contracts_digest(version),
             "scientific_readiness": "draft/unreviewed"}
     if condition not in (None, "generic_v10"):
         raise ValueError("shared v1 descriptor requires generic_v10")
     return {"protocol": NAME, "version": 1, "condition": "generic_v10",
             "renderer": 25, "runtime": "Claude API (direct)",
             "typed_protocol": "typed_audit_protocol_v1", "api_playbook_version": 2,
-            "receipt_completion_version": 2, "assets": dict(ASSET_HASHES)}
+            "receipt_completion_version": 2, "assets": dict(ASSET_HASHES),
+            "schema_context_trim": _schema_trim_descriptor(),
+            "stage_contracts": _contracts_digest(version)}
 
 
 def policy_text(*, version=1) -> str:
@@ -640,25 +671,64 @@ def require_generation_context(spec, messages) -> None:
         raise UsageLedgerError('actual shared request omits, changes or duplicates captured generation scope')
 
 
-def schema_context(spec, record: str | None = None) -> str:
+def schema_context(spec, record: str | None = None, *, retain_description_paths: tuple[str, ...] | list[str] | None = None) -> str:
     """Actual induced keys plus complete occupied owners; no role inference.
 
     All mapping-valued schema owners are supplied, not a hand-maintained list
     of role names. The instruction asks for scientific relationship review.
     Software's induced keys are included for generation before values exist.
+    When retain_description_paths is None (generation, integration, omission,
+    report), all induced slots retain their descriptions and comments. When
+    retain_description_paths is a sequence of JSON-Pointer paths (typed_audit
+    worker stage), only slots belonging to those assigned paths retain their
+    descriptions and comments.
     """
     captured = _context_capture(spec)
+    retain = None if retain_description_paths is None else tuple(sorted({str(p) for p in retain_description_paths}))
     return memo(spec, 'schema_context', [canonical(schema_pin(captured.full_schema)),
         *[raw for _name, _path, raw in captured.full_schema.sources],
-        canonical(record)], lambda: _schema_context(captured, record))
+        canonical(record), canonical(retain)], lambda: _schema_context(captured, record, retain))
 
 
 _TRIMMED_SLOT_KEYS = ('domain_of', 'from_schema', 'alias', 'owner', '@type',
-                      'slot_uri', 'annotations', 'exact_mappings', 'description',
-                      'broad_mappings', 'comments')
+                      'slot_uri', 'annotations', 'exact_mappings', 'broad_mappings')
+_WORKER_NON_ASSIGNED_TRIMMED_SLOT_KEYS = _TRIMMED_SLOT_KEYS + ('description', 'comments')
 
 
-def _schema_context(captured, record):
+def trim_omission_schema(schema: dict) -> dict:
+    """Keep all reachable classes and slot descriptions/comments while dropping LinkML bookkeeping keys."""
+    raw_classes = schema.get('classes') or {}
+    trimmed_classes = {}
+    for cls_name, cls_entry in raw_classes.items():
+        if not isinstance(cls_entry, dict):
+            trimmed_classes[cls_name] = cls_entry
+            continue
+        entry = dict(cls_entry)
+        if isinstance(entry.get('definition'), dict):
+            entry['definition'] = {k: v for k, v in entry['definition'].items()
+                                   if k not in _TRIMMED_SLOT_KEYS}
+        if isinstance(entry.get('slots'), dict):
+            trimmed_slots = {}
+            for sname, sdef in entry['slots'].items():
+                if isinstance(sdef, dict) and isinstance(sdef.get('definition'), dict):
+                    trimmed_slots[sname] = {
+                        **sdef,
+                        'definition': {k: v for k, v in sdef['definition'].items()
+                                       if k not in _TRIMMED_SLOT_KEYS},
+                    }
+                elif isinstance(sdef, dict):
+                    trimmed_slots[sname] = {k: v for k, v in sdef.items()
+                                            if k not in _TRIMMED_SLOT_KEYS}
+                else:
+                    trimmed_slots[sname] = sdef
+            entry['slots'] = trimmed_slots
+        trimmed_classes[cls_name] = entry
+    out = {k: v for k, v in schema.items() if k != 'slots'}
+    out['classes'] = trimmed_classes
+    return out
+
+
+def _schema_context(captured, record, retain=None):
     from .schema_view import captured_view
     from .audit_omissions import _mapping
     from linkml_runtime.dumpers import json_dumper
@@ -699,6 +769,29 @@ def _schema_context(captured, record):
                                        for k, v in child.items())
                     else:
                         pending.append((child, target, child_pointer))
+    if retain is not None:
+        retained_slots: set[tuple[str, str]] = set()
+        for row in owners:
+            owner_path = row['path']
+            owner_cls = row['class']
+            prefix = owner_path + '/'
+            for p in retain:
+                if p.startswith(prefix):
+                    seg = p[len(prefix):].split('/', 1)[0].replace('~1', '/').replace('~0', '~')
+                    if seg in classes.get(owner_cls, {}):
+                        retained_slots.add((owner_cls, seg))
+        if not owners:
+            for p in retain:
+                if p.startswith('/'):
+                    seg = p[1:].split('/', 1)[0].replace('~1', '/').replace('~0', '~')
+                    for cls_name, cls_slots in classes.items():
+                        if seg in cls_slots:
+                            retained_slots.add((cls_name, seg))
+        for cls_name, cls_slots in classes.items():
+            for sname, sdef in list(cls_slots.items()):
+                if (cls_name, sname) not in retained_slots:
+                    cls_slots[sname] = {k: v for k, v in sdef.items()
+                                        if k not in _WORKER_NON_ASSIGNED_TRIMMED_SLOT_KEYS}
     return SCHEMA_CONTEXT_HEADER + canonical({'schema': schema_pin(captured.full_schema),
         'classes': classes, 'owners': owners,
         'scope': 'Actual schema structure and complete values; relationship support is an evaluator declaration.'}).decode('utf-8')

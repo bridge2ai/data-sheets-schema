@@ -140,16 +140,19 @@ def _build_request_bytes(spec, captured, packet, stage, workers, omission, setti
     label = {WORKER_PHASE: 'worker', OMISSION_PHASE: 'omission', INTEGRATION_PHASE: 'integration'}[stage['phase']]
     limit = reg['audit_limits'][label + '_output_tokens']
     full = typed._unblob(packet['inputs']['original_full']).decode('utf-8')
+    wire_inner = ({**inner, 'payload': {**inner['payload'], 'schema': sg.trim_omission_schema(inner['payload']['schema'])}}
+                  if stage['phase'] == OMISSION_PHASE else inner)
     binding = {'protocol': reg['selection']['protocol'], 'generation_id': ledger.generation_id(spec) if _live else generation,
                'registration_sha256': sg.sha(captured.registration), 'packet_sha256': packet['sha256'],
-               'stage': stage, 'inner_request_sha256': sg.sha(sg.canonical(inner)),
+               'stage': stage, 'inner_request_sha256': sg.sha(sg.canonical(wire_inner)),
+               **({'packet_inner_request_sha256': sg.sha(sg.canonical(inner))} if stage['phase'] == OMISSION_PHASE else {}),
                'scope': 'Declared response association, not provider authentication or scientific approval.'}
-    wire_inner = ({**inner, 'payload': {**inner['payload'], 'schema': {k: v for k, v in inner['payload']['schema'].items()
-                   if k not in ('classes', 'slots')}}} if stage['phase'] == OMISSION_PHASE else inner)
+    worker_paths = (tuple(json.loads(inner['payload']['stage'])['assignment']['paths'])
+                    if stage['phase'] == WORKER_PHASE else None)
     parts = [{'type': 'text', 'text': sg.policy_text(version=spec.shared_generation_version)},
              {'type': 'text', 'text': api.shared_evidence_contract()},
              {'type': 'text', 'text': receipts.audit_carry(spec) if _live else receipt_carry},
-             {'type': 'text', 'text': sg.schema_context(spec, full)},
+             {'type': 'text', 'text': sg.schema_context(spec, full, retain_description_paths=worker_paths)},
              {'type': 'text', 'text': sg.generation_context(spec)},
              {'type': 'text', 'text': '# Registered audit request identity\n\n' + sg.canonical(binding).decode()},
              {'type': 'text', 'text': '# Exact typed stage request\n\n' + sg.canonical(wire_inner).decode()}]

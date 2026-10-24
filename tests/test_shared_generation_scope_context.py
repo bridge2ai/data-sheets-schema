@@ -243,6 +243,21 @@ def test_actual_cli_scope_delivery_regate_and_completed_replay(tmp_path, monkeyp
     for phase, call in zip(phases, peer.calls):
         sg.require_generation_context(spec, call['messages'])
         assert _blocks(call['messages']).count(expected) == 1
+        if phase == runtime.OMISSION_PHASE:
+            wire_blocks = _blocks(call['messages'])
+            binding_json = next(s for s in wire_blocks if s.startswith('# Registered audit request identity\n\n')).split('\n\n', 1)[1]
+            exact_stage_json = next(s for s in wire_blocks if s.startswith('# Exact typed stage request\n\n')).split('\n\n', 1)[1]
+            binding_doc = json.loads(binding_json)
+            wire_inner_doc = json.loads(exact_stage_json)
+            assert binding_doc['inner_request_sha256'] == sg.sha(exact_stage_json.encode('utf-8'))
+            assert 'packet_inner_request_sha256' in binding_doc
+            assert binding_doc['packet_inner_request_sha256'] != binding_doc['inner_request_sha256']
+            assert 'classes' in wire_inner_doc['payload']['schema']
+            assert 'DataSubset' in wire_inner_doc['payload']['schema']['classes']
+            id_slot_def = wire_inner_doc['payload']['schema']['classes']['Dataset']['slots']['id']['definition']
+            assert 'description' in id_slot_def
+            assert 'domain_of' not in id_slot_def
+            assert 'from_schema' not in id_slot_def
         calls.append({'phase': phase, 'sha256': sg.sha(sg.canonical(call)),
                       'scope_sha256': sg.sha(expected.encode())})
     assert spec.provenance_path.exists()
@@ -273,3 +288,89 @@ def test_actual_cli_scope_delivery_regate_and_completed_replay(tmp_path, monkeyp
         'completed_replay_no_calls': True, 'cli_reuse_refused_without_calls': True,
         'all_originals_preserved': True, 'provider_calls': False,
         'scientific_approval': False}, indent=2) + '\n')
+
+
+def test_s7_trim_retains_descriptions_by_stage_and_binds_wire_identity(selected, monkeypatch):
+    """D-C5 (A14): S7 keeps descriptions in generation/omission/integration/report,
+    trims non-assigned worker slot descriptions, keeps all reachable classes in
+    omission wire schema, hashes wire_inner in inner_request_sha256 (#5148), and
+    binds S7 trim + stage contract digests in descriptor() (#5113, #5114, #5143).
+    """
+    from data_sheets_schema import audit_batch_format, rereceipt
+    # 1. Generation / integration / omission / report schema_context retains descriptions.
+    full_ctx_block = sg.schema_context(selected, RECORD)
+    full_ctx = json.loads(full_ctx_block[len(sg.SCHEMA_CONTEXT_HEADER):])
+    dataset_slots = full_ctx['classes']['Dataset']
+    assert 'description' in dataset_slots['id']
+    assert 'description' in dataset_slots['name']
+    assert 'description' in dataset_slots['description']
+    for k in sg._TRIMMED_SLOT_KEYS:
+        assert k not in dataset_slots['id']
+
+    # 2. Worker schema_context retains description only on the worker batch's assigned paths.
+    worker_ctx_block = sg.schema_context(selected, RECORD, retain_description_paths=('/id',))
+    worker_ctx = json.loads(worker_ctx_block[len(sg.SCHEMA_CONTEXT_HEADER):])
+    w_dataset_slots = worker_ctx['classes']['Dataset']
+    assert 'description' in w_dataset_slots['id']
+    assert 'description' not in w_dataset_slots['name']
+    assert 'comments' not in w_dataset_slots['name']
+    assert 'description' not in w_dataset_slots['description']
+    if 'Software' in worker_ctx['classes']:
+        assert all('description' not in sdef for sdef in worker_ctx['classes']['Software'].values())
+
+    # 3. trim_omission_schema keeps all reachable classes and slot descriptions, dropping bookkeeping keys.
+    sample_omission_schema = {
+        'root_class': 'Dataset',
+        'slots': {'id': {'name': 'id', 'description': 'top-level slot table dropped'}},
+        'classes': {
+            'Dataset': {
+                'definition': {'name': 'Dataset', 'description': 'A dataset.', 'from_schema': 'x', 'annotations': {}},
+                'slots': {
+                    'id': {
+                        'definition': {'name': 'id', 'description': 'Identifier.', 'domain_of': ['Dataset'], 'slot_uri': 'dcterms:identifier'},
+                        'inline': False,
+                        'range_class': False,
+                    },
+                },
+            },
+            'DataSubset': {
+                'definition': {'name': 'DataSubset', 'description': 'A subset.', 'exact_mappings': ['x:Subset']},
+                'slots': {
+                    'is_data_split': {
+                        'definition': {'name': 'is_data_split', 'description': 'Split flag.', 'owner': 'DataSubset'},
+                        'inline': False,
+                        'range_class': False,
+                    },
+                },
+            },
+        },
+    }
+    trimmed_omission = sg.trim_omission_schema(sample_omission_schema)
+    assert 'slots' not in trimmed_omission
+    assert set(trimmed_omission['classes']) == {'Dataset', 'DataSubset'}
+    assert trimmed_omission['classes']['Dataset']['definition']['description'] == 'A dataset.'
+    assert 'from_schema' not in trimmed_omission['classes']['Dataset']['definition']
+    assert trimmed_omission['classes']['Dataset']['slots']['id']['definition']['description'] == 'Identifier.'
+    assert 'domain_of' not in trimmed_omission['classes']['Dataset']['slots']['id']['definition']
+    assert trimmed_omission['classes']['DataSubset']['slots']['is_data_split']['definition']['description'] == 'Split flag.'
+    assert 'owner' not in trimmed_omission['classes']['DataSubset']['slots']['is_data_split']['definition']
+
+    # 4. descriptor() binds S7 trim and stage contract digests (#5113, #5114, #5143).
+    base_desc = sg.descriptor()
+    assert base_desc['schema_context_trim']['omission_all_reachable_classes'] is True
+    assert 'description' not in base_desc['schema_context_trim']['generation_dropped_slot_keys']
+    assert 'description' in base_desc['schema_context_trim']['worker_non_assigned_dropped_slot_keys']
+    assert set(base_desc['stage_contracts']) == {
+        'phase_system_sha256',
+        'phase_instructions_sha256',
+        'regate_headers_sha256',
+        'shared_evidence_contract_sha256',
+        'typed_audit_system_sha256',
+        'typed_audit_worker_format_sha256',
+        'typed_audit_integration_format_sha256',
+        'rereceipt_instruction_sha256',
+    }
+    monkeypatch.setattr(rereceipt, 'INSTRUCTION', rereceipt.INSTRUCTION + '\nChanged contract.')
+    assert sg.descriptor()['stage_contracts']['rereceipt_instruction_sha256'] != base_desc['stage_contracts']['rereceipt_instruction_sha256']
+    monkeypatch.setattr(runtime, 'SYSTEM', runtime.SYSTEM + '\nChanged system.')
+    assert sg.descriptor()['stage_contracts']['typed_audit_system_sha256'] != base_desc['stage_contracts']['typed_audit_system_sha256']
