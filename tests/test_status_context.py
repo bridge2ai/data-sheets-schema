@@ -2170,13 +2170,13 @@ def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_on
         "linewrap-joined": 5, "artifact-line-elided": 0, "joined-elided": 0}
     assert sum(t["located_by_form"].values()) == t["located"]
     # #3822: every snippet is accounted for, per project and in the totals;
-    # the 473 not located were skipped before their context was read, and
+    # the 472 not located were skipped before their context was read, and
     # they are counted, not dropped (figures in the committed note).
     for tally in [t, *out["projects"].values()]:
         assert _conserved(tally), tally
         assert tally["verified"] + tally["not_verified"] == tally["snippets"]
     assert (t["snippets"], t["located"], t["not_verified"], t["value_unresolved"], t["malformed_entries"]) == (
-        10018, 9545, 467, 6, 0)
+        9903, 9431, 466, 6, 0)
     joined = sorted((u["receipt"].split("/")[0][:-len("_core")], u["receipt"].split("/")[1],
                      u["receipt"].split("/")[2][:-len("_coverage_receipt.yaml")])
                     for p in out["projects"].values() for u in p["form_located_snippets"])

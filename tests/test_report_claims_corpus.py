@@ -222,11 +222,12 @@ def test_all_report_measurements_reproduce_with_the_registered_aggregate():
     assert sum(b["prose_retention_claims"] for b in blocks) == 165
     assert sum(b.get("removals_unrecorded_count") or 0 for b in blocks) == 41
     assert sum(b["snapshot_checked"] for b in blocks) == 87
-    # October 2026 v10 CHORUS canaries (2026-10-20a and 2026-10-22a) sit beside
-    # the frozen v7 corpus under the v8 instrument (#1808, #1810).
-    assert len(v8_blocks) == 2
+    # October 2026 v10 CHORUS canary (2026-10-22a; 2026-10-20a archived to ATTIC
+    # under Owner Decision D-F, #5138) sits beside the frozen v7 corpus under
+    # the v8 instrument (#1808, #1810).
+    assert len(v8_blocks) == 1
     assert Counter(f["kind"] for b in v8_blocks for f in b["findings"]) == {}
-    assert sum(b["claims_checked"] for b in v8_blocks) == 33
+    assert sum(b["claims_checked"] for b in v8_blocks) == 19
     assert sum(b["prose_retention_claims"] for b in v8_blocks) == 1
     assert sum(b.get("removals_unrecorded_count") or 0 for b in v8_blocks) == 0
-    assert sum(b["snapshot_checked"] for b in v8_blocks) == 2
+    assert sum(b["snapshot_checked"] for b in v8_blocks) == 1
