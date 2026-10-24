@@ -36,6 +36,12 @@ from data_sheets_schema.run_telemetry import (
 CAP_FULL = 128000
 CAP_FULL_READDRESS = 8000
 CAP_REPORT_FAMILY = 96000  # reconcile_full, report, report_regate, repair_full, report_after_repair
+#: generic_v10 registrations (shared generation 1) raise the report family to
+#: the route ceiling (D-C, 2026-10-23); mirrors
+#: `api_runner.SHARED_PHASE_MAX_TOKENS`, where the regate shares the report
+#: budget. A test keeps the two equal.
+SHARED_V1_FORMAT = "shared_generation_registration_v1"
+SHARED_V1_PHASE_OUTPUT_CAPS: dict[str, int] = {"reconcile_full": 128000, "report": 128000, "report_regate": 128000}
 CAP_DEFAULT_ORDINARY = 128000
 CAP_DEFAULT_TYPED = 24000
 
@@ -185,6 +191,10 @@ def get_phase_output_cap(
     # If a saved request payload with max_tokens exists, it takes precedence (e.g. typed / receipt)
     if saved_request and isinstance(saved_request.get("max_tokens"), int):
         return saved_request["max_tokens"]
+
+    # A generic_v10 registration selects the raised report-family caps
+    if registration and registration.get("format") == SHARED_V1_FORMAT and phase in SHARED_V1_PHASE_OUTPUT_CAPS:
+        return SHARED_V1_PHASE_OUTPUT_CAPS[phase]
 
     # Known ordinary phase caps
     if phase in PHASE_OUTPUT_CAPS:

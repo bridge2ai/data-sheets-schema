@@ -10,14 +10,15 @@ Modelled on `tests/test_shared_generation_selection.py:17-52`.
 Kept outside `src/` so registrations remain project inputs.
 
 Usage examples:
-    # Build single-project registration for CHORUS baseline:
-    python scripts/build_api_registrations.py -p CHORUS -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10
+    # Build single-project registration for CHORUS baseline (partition bounds are
+    # never defaulted; the chorus profile is validated for CHORUS only):
+    python scripts/build_api_registrations.py -p CHORUS --partition chorus -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10
 
-    # Build batch registrations and roster for all 4 study projects:
-    python scripts/build_api_registrations.py --all -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10 -r data/registrations/generic_v10/roster.json
+    # Any other project names bounds sized for it (see PARTITION_PROFILES):
+    python scripts/build_api_registrations.py -p AI_READI --max-paths N --max-inventory-bytes B --max-workers W -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10
 
     # Dry-run validation without writing to disk:
-    python scripts/build_api_registrations.py --all -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 --dry-run
+    python scripts/build_api_registrations.py -p CHORUS --partition chorus -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 --dry-run
 """
 
 from __future__ import annotations
@@ -68,20 +69,37 @@ DEFAULT_VOCABULARIES_PATH = (
     ROOT / "src" / "data_sheets_schema" / "b2ai_registry_vocabularies.yaml"
 )
 
+# Stage output caps follow the CHORUS canaries (D-C, owner decision
+# 2026-10-23): at 25,000 the first 2026-10-20a worker spent its whole budget
+# thinking and wrote nothing; under 64,000/32,000/32,000 the most any stage
+# used was 53,204 (83%), 23,997 (75%) and 23,347 (73%). The aggregate output
+# allowance and the call allowance are derived from these and the partition
+# bounds in `resolve_audit_limits`, never stated separately.
 DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
-    "max_paths": 384,
-    "max_inventory_bytes": 65536,
-    "max_workers": 4,
     "max_request_bytes": 32000000,
     "max_input_tokens_per_call": 1000000,
-    "worker_output_tokens": 25000,
-    "omission_output_tokens": 16000,
-    "integration_output_tokens": 16000,
+    "worker_output_tokens": 64000,
+    "omission_output_tokens": 32000,
+    "integration_output_tokens": 32000,
     "aggregate_input_tokens": 4000000,
-    "aggregate_output_tokens": 150000,
-    "max_calls": 18,
     "context_limit_tokens": 1000000,
     "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+}
+
+# Partition bounds have no default (D-C, owner decision 2026-10-23): no one
+# setting plans every project. 80 paths / 12,288 bytes / 4 workers refuses
+# every v8 AI_READI, CM4AI, VOICE and CHORUS full record (a single /creators
+# or /file_collections field outgrows a worker, or the plan needs more than
+# four), and the refusal comes after `full` and receipt completion are
+# billed. 384 / 65,536 / 4 plans them but hands one worker about five times
+# the inventory a CHORUS worker filled 64k of output with. A registration
+# names its bounds, or a profile validated for its project.
+PARTITION_KEYS = ("max_paths", "max_inventory_bytes", "max_workers")
+PARTITION_PROFILES: dict[str, dict[str, Any]] = {
+    # What 2026-10-22a ran: 98 paths in three workers (35/54/9), the fullest
+    # 39 bytes under the inventory bound, each using 14k-50k of its 64k.
+    "chorus": {"projects": ("CHORUS",),
+               "limits": {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4}},
 }
 
 DEFAULT_RECEIPT_LIMITS: dict[str, Any] = {
@@ -101,6 +119,58 @@ DEFAULT_AUDIT_TRANSPORT: dict[str, int] = {
     "sdk_max_retries": 0,
     "malformed_response_retries": 0,
 }
+
+
+def resolve_audit_limits(
+    project: str,
+    partition: str | None = None,
+    overrides: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Defaults, then a named partition profile, then explicit overrides.
+
+    The aggregate output allowance is the sum of every stage cap for the
+    largest plan (``max_workers`` workers, omission, integration): the typed
+    runtime admits each call only while settled output plus that call's cap
+    fits, so anything less refuses a full plan midway and anything more is
+    an allowance no plan can use. A supplied value that disagrees is refused.
+    ``max_calls`` defaults to that roster's length and may not be smaller.
+    """
+    limits = copy.deepcopy(DEFAULT_AUDIT_LIMITS)
+    if partition is not None:
+        if partition not in PARTITION_PROFILES:
+            raise ValueError(f"unknown partition profile {partition!r}; known: {sorted(PARTITION_PROFILES)}")
+        profile = PARTITION_PROFILES[partition]
+        if project not in profile["projects"]:
+            raise ValueError(
+                f"partition profile {partition!r} is validated only for {', '.join(profile['projects'])}; "
+                f"pass --max-paths, --max-inventory-bytes and --max-workers sized for {project}"
+            )
+        limits.update(profile["limits"])
+    limits.update(overrides or {})
+    missing = [key for key in PARTITION_KEYS if limits.get(key) is None]
+    if missing:
+        raise ValueError(
+            "audit partition bounds have no default (D-C): pass --partition, or "
+            + ", ".join(f"--{key.replace('_', '-')}" for key in missing)
+        )
+    roster = limits["max_workers"] + 2
+    aggregate = (limits["max_workers"] * limits["worker_output_tokens"]
+                 + limits["omission_output_tokens"] + limits["integration_output_tokens"])
+    if limits.get("aggregate_output_tokens") is not None and limits["aggregate_output_tokens"] != aggregate:
+        raise ValueError(
+            f"aggregate_output_tokens {limits['aggregate_output_tokens']} disagrees with the stage caps: "
+            f"{limits['max_workers']} x {limits['worker_output_tokens']} + {limits['omission_output_tokens']}"
+            f" + {limits['integration_output_tokens']} = {aggregate}"
+        )
+    limits["aggregate_output_tokens"] = aggregate
+    if limits.get("max_calls") is None:
+        limits["max_calls"] = roster
+    if limits["max_calls"] < roster:
+        raise ValueError(
+            f"max_calls {limits['max_calls']} cannot cover {limits['max_workers']} workers"
+            f" plus omission and integration ({roster})"
+        )
+    return limits
 
 
 def parse_coverage_floor(value: str | dict[str, Any] | None) -> dict[str, Any]:
@@ -260,6 +330,7 @@ def build_registration(
     chunk_manifest_path: Path | str | None = None,
     profile_name: str | None = None,
     coverage_floor: str | dict[str, Any] | None = None,
+    partition: str | None = None,
     audit_limits: dict[str, Any] | None = None,
     receipt_limits: dict[str, Any] | None = None,
     synthesize_draft_context: bool = False,
@@ -431,9 +502,7 @@ def build_registration(
     }
 
     # Resolve limits
-    active_audit_limits = copy.deepcopy(DEFAULT_AUDIT_LIMITS)
-    if audit_limits:
-        active_audit_limits.update(audit_limits)
+    active_audit_limits = resolve_audit_limits(project, partition, audit_limits)
 
     active_receipt = copy.deepcopy(DEFAULT_RECEIPT_LIMITS)
     if coverage_floor is not None:
@@ -662,6 +731,13 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     help="Receipt coverage floor: 'pending' or 'NUM/DEN' (e.g. '13/20') or decimal in (0, 1] (e.g. '0.65').",
 )
 @click.option(
+    "--partition", "partition",
+    type=click.Choice(sorted(PARTITION_PROFILES)),
+    help="Named audit partition bounds validated for a project (chorus: 80 paths, 12,288 bytes, "
+         "4 workers; CHORUS only). Without it --max-paths, --max-inventory-bytes and --max-workers "
+         "are required: partition bounds have no default.",
+)
+@click.option(
     "--max-paths",
     type=int,
     help="Override audit_limits.max_paths.",
@@ -762,6 +838,7 @@ def cli(
     chunk_manifest: Path | None,
     profile_name: str | None,
     coverage_floor: str,
+    partition: str | None,
     max_paths: int | None,
     max_workers: int | None,
     max_calls: int | None,
@@ -854,6 +931,12 @@ def cli(
         click.echo("All checks passed.")
         return
 
+    if partition is None and any(audit_overrides.get(key) is None for key in PARTITION_KEYS):
+        raise click.UsageError(
+            "audit partition bounds have no default (D-C, 2026-10-23): pass --partition chorus for "
+            "CHORUS, or --max-paths, --max-inventory-bytes and --max-workers sized for the project"
+        )
+
     registrations: list[dict[str, Any]] = []
     click.echo(f"Building registrations for {target_projects} (arm: {arm}, labels: {target_labels})...")
 
@@ -873,6 +956,7 @@ def cli(
                 chunk_manifest_path=chunk_manifest,
                 profile_name=profile_name,
                 coverage_floor=coverage_floor,
+                partition=partition,
                 audit_limits=audit_overrides or None,
                 synthesize_draft_context=synthesize_draft_context,
                 write_to_disk=not dry_run,
