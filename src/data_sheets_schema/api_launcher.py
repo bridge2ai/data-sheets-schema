@@ -12,6 +12,8 @@ Key safeguards:
 3. Enforces PYTHONUNBUFFERED=1 and PYTHONPATH=<worktree>/src.
 4. Requires CBORG_API_KEY to be set in process environment (unless explicitly bypassed for --check-only or --dry-run).
 5. Refuses the unbudgeted single-run command 'd4d api run' (D20 requirement) and non-D4D shell commands.
+   Note: '--max-cost-dollars' on 'd4d api batch' is checked between runs (not mid-run), so a single run or
+   single-run canary is not stopped mid-execution by '--max-cost-dollars'; mid-run monitoring uses dollar_readout.
 6. Enforces strict worktree import isolation check:
    - data_sheets_schema.__file__ must be None (namespace package)
    - every entry of list(data_sheets_schema.__path__) must resolve to <worktree>/src/data_sheets_schema
@@ -24,7 +26,9 @@ Key safeguards:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -158,7 +162,13 @@ def check_cborg_key(env: dict[str, str], allow_missing: bool = False) -> None:
         )
 
 
-def validate_command(cmd_args: Sequence[str], *, dry_run: bool = False) -> None:
+def validate_command(
+    cmd_args: Sequence[str],
+    *,
+    dry_run: bool = False,
+    expect_sha256: str | None = None,
+    worktree_dir: Path | None = None,
+) -> None:
     """Reject forbidden subcommands ('d4d api run' per D20), unbudgeted batch runs, and non-allowlisted entry points."""
     import math
 
@@ -173,6 +183,24 @@ def validate_command(cmd_args: Sequence[str], *, dry_run: bool = False) -> None:
         raise LauncherError(
             f"Command entry point {first!r} is not allowed; must be one of {sorted(ALLOWED_TOP_COMMANDS)}."
         )
+
+    if first in ("python", "python3"):
+        allowed_cli_subcommands = {"api", "bundle", "download", "runs", "evaluate", "utils"}
+        valid_py = (
+            len(tokens) >= 4
+            and tokens[1] == "-m"
+            and tokens[2] == "data_sheets_schema.cli"
+            and tokens[3] in allowed_cli_subcommands
+        ) or (
+            len(tokens) >= 3
+            and tokens[1] == "-m"
+            and tokens[2] == "data_sheets_schema.api_launcher"
+        )
+        if not valid_py:
+            raise LauncherError(
+                "python/python3 entry point requires '-m data_sheets_schema.cli <subcommand>'; "
+                "arbitrary scripts or '-c' are not allowed."
+            )
 
     is_dry = dry_run or ("--dry-run" in tokens)
     if any(arg == "--skip-credential-check" or arg.startswith("--skip-credential-check=") for arg in tokens):
@@ -232,7 +260,8 @@ def validate_command(cmd_args: Sequence[str], *, dry_run: bool = False) -> None:
                 break
         if cap_raw is None:
             raise LauncherError(
-                "Live 'd4d api batch' launch requires '--max-cost-dollars <positive_amount>'."
+                "Live 'd4d api batch' launch requires '--max-cost-dollars <positive_amount>' "
+                "(checked between runs; single-run mid-call spend is monitored via dollar_readout)."
             )
         try:
             cap_val = float(cap_raw)
@@ -243,6 +272,40 @@ def validate_command(cmd_args: Sequence[str], *, dry_run: bool = False) -> None:
         if not math.isfinite(cap_val) or cap_val <= 0:
             raise LauncherError(
                 f"--max-cost-dollars value {cap_raw!r} must be positive and finite."
+            )
+
+    if expect_sha256 is not None:
+        normalized_expected = expect_sha256.strip().lower()
+        if not re.fullmatch(r"[0-9a-f]{64}", normalized_expected):
+            raise LauncherError(
+                f"--expect-sha256 value {expect_sha256!r} must be a 64-character hex SHA-256 digest."
+            )
+        reg_raw: str | None = None
+        for idx, tok in enumerate(tokens):
+            if tok == "--shared-generation-registration" and idx + 1 < len(tokens):
+                reg_raw = tokens[idx + 1]
+                break
+            if tok.startswith("--shared-generation-registration="):
+                reg_raw = tok.split("=", 1)[1]
+                break
+        if not reg_raw:
+            raise LauncherError(
+                "--expect-sha256 requires '--shared-generation-registration <path>' in the command."
+            )
+        reg_path = Path(reg_raw)
+        if not reg_path.is_absolute() and worktree_dir is not None:
+            wt_candidate = (Path(worktree_dir).resolve() / reg_path).resolve()
+            if wt_candidate.is_file():
+                reg_path = wt_candidate
+        reg_path = reg_path.resolve()
+        if not reg_path.is_file():
+            raise LauncherError(
+                f"Registration file for --expect-sha256 does not exist: {reg_path}"
+            )
+        actual_sha = hashlib.sha256(reg_path.read_bytes()).hexdigest().lower()
+        if actual_sha != normalized_expected:
+            raise LauncherError(
+                f"Registration SHA-256 mismatch for {reg_path}: expected {normalized_expected}, got {actual_sha}"
             )
 
 
@@ -395,6 +458,7 @@ def launch(
     background: bool = False,
     log_file: str | Path | None = None,
     allow_missing_key: bool = False,
+    expect_sha256: str | None = None,
 ) -> int:
     """Main launcher entry point with validation, import verification, and process launch."""
     if allow_missing_key and not (check_only or dry_run):
@@ -428,7 +492,7 @@ def launch(
             "or use --check-only."
         )
 
-    validate_command(tokens, dry_run=dry_run)
+    validate_command(tokens, dry_run=dry_run, expect_sha256=expect_sha256, worktree_dir=worktree_dir)
     final_cmd = resolve_execution_command(tokens, python_bin, d4d_bin)
 
     if background:
@@ -531,6 +595,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Allow missing CBORG_API_KEY (for offline tests and gates).",
     )
     parser.add_argument(
+        "--expect-sha256",
+        default=None,
+        help="Require --shared-generation-registration in the command and verify its SHA-256 digest before launch.",
+    )
+    parser.add_argument(
         "command",
         nargs=argparse.REMAINDER,
         help="Command to run in worktree (e.g. 'd4d api batch ...' or 'api prompts check --strict').",
@@ -553,6 +622,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             background=args.background,
             log_file=args.log,
             allow_missing_key=args.allow_missing_key,
+            expect_sha256=args.expect_sha256,
         )
     except LauncherError as err:
         sys.stderr.write(f"api_launcher: error: {err}\n")

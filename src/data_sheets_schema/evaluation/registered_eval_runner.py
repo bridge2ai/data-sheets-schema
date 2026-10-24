@@ -591,6 +591,7 @@ def _accept(prepared: PreparedEvaluation, events: list[dict]) -> tuple[dict, Dec
 def execute(
     prepared: PreparedEvaluation, destination: Path, *, plan_sha256: str | None = None,
     dry_run: bool = False, environ: Mapping[str, str] | None = None,
+    prior_receipt: Path | str | None = None, authorization_basis: str | None = None,
 ) -> dict:
     """No automatic retries; refuse an existing destination, retain failures.
 
@@ -614,11 +615,42 @@ def execute(
     # Refuse missing credentials before reserving any output.
     cborg_environment(source_env, Path("/unused"), runtime["model"])
     destination = Path(destination).absolute()
+    if destination.exists() or destination.is_symlink():
+        raise FileExistsError(f"output directory already exists: {destination}")
     for path in [path for path, _ in prepared.authorities] + [runtime["binary"]["path"]]:
         authority = Path(path).resolve()
         if destination.resolve() == authority or destination.resolve() in authority.parents:
             raise ValueError("output overlaps a captured authority")
+    prior_receipt_resolved: str | None = None
+    if prior_receipt is not None:
+        pr_path = Path(prior_receipt).resolve()
+        if not pr_path.is_file():
+            raise ValueError(f"prior_receipt file not found: {pr_path}")
+        pr_doc = _json(_read(pr_path))
+        if not isinstance(pr_doc, dict) or pr_doc.get("plan_sha256") != prepared.digest:
+            raise ValueError("prior_receipt does not match this plan_sha256")
+        prior_receipt_resolved = str(pr_path)
+    lock_dir = destination.parent / ".registered_eval_locks"
+    lock_file = lock_dir / f"{prepared.digest}.json"
+    if lock_file.exists() and prior_receipt_resolved is None:
+        raise FileExistsError(
+            f"plan {prepared.digest} was already executed in {destination.parent}; "
+            "pass --prior-receipt to authorize re-execution"
+        )
     destination.mkdir(parents=True, exist_ok=False)
+    lock_dir.mkdir(parents=True, exist_ok=True)
+    lock_payload = shared.canonical({
+        "plan_sha256": prepared.digest,
+        "destination": str(destination),
+        "prior_receipt": prior_receipt_resolved,
+        "authorization_basis": authorization_basis,
+    })
+    if prior_receipt_resolved is None:
+        fd = os.open(lock_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "wb") as lf:
+            lf.write(lock_payload)
+    else:
+        lock_file.write_bytes(lock_payload)
     (destination / "registration.json").write_bytes(prepared.manifest)
     (destination / "original.yaml").write_bytes(prepared.original)
     (destination / "record.yaml").write_bytes(prepared.blinded)
@@ -633,9 +665,14 @@ def execute(
     (destination / "execution_adapter.txt").write_text(EXECUTION_ADAPTER)
     (destination / "effective_system.txt").write_bytes(prepared.system_prompt)
     (destination / "prompt.txt").write_text(rating_prompt(prepared))
-    receipt = {**summary, "status": "incomplete", "ratings": [], "attempts": [], "total_cost_usd": "0",
-               "cost_accounting_complete": False, "runtime_attempts": 0, "model_calls": None}
+    receipt = {
+        **summary, "status": "incomplete", "ratings": [], "attempts": [], "total_cost_usd": "0",
+        "unaccounted_reserved_usd": "0", "cost_accounting_complete": False, "runtime_attempts": 0,
+        "model_calls": None, "max_overshoot_calls": 1,
+        "prior_receipt": prior_receipt_resolved, "authorization_basis": authorization_basis,
+    }
     total = Decimal(0)
+    per_attempt_cap = Decimal(plan["reserved_cost_dollars_per_attempt"])
     try:
         for index in range(1, plan["repeat_count"] + 1):
             prepared.assert_current()
@@ -709,6 +746,10 @@ def execute(
         if receipt["attempts"]:
             receipt["attempts"][-1]["status"] = "failed"
     finally:
+        unaccounted_count = sum(1 for a in receipt["attempts"] if a.get("estimated_cost_usd") is None)
+        receipt["unaccounted_reserved_usd"] = (
+            "0" if unaccounted_count == 0 else str(per_attempt_cap * unaccounted_count)
+        )
         (destination / "receipt.json").write_bytes(shared.canonical(receipt))
     return receipt
 
@@ -738,11 +779,20 @@ def main(argv=None) -> int:
     parser.add_argument("--max-cost-dollars", required=True, help="Aggregate CLI estimate cap, e.g. 5")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--plan-sha256", help="Exact plan SHA256 returned by the offline dry-run")
+    parser.add_argument("--prior-receipt", type=Path, default=None,
+                        help="Prior receipt path required to authorize re-execution of the same plan_sha256")
+    parser.add_argument("--authorization-basis", default=None,
+                        help="Optional owner authorization reference recorded in receipt.json")
     parser.add_argument("--dry-run", action="store_true")
     args = vars(parser.parse_args(argv))
-    output, plan_sha256, dry_run = (args.pop(key) for key in ("output", "plan_sha256", "dry_run"))
+    output, plan_sha256, dry_run, prior_receipt, authorization_basis = (
+        args.pop(key) for key in ("output", "plan_sha256", "dry_run", "prior_receipt", "authorization_basis")
+    )
     try:
-        result = execute(prepare(**args), output, plan_sha256=plan_sha256, dry_run=dry_run)
+        result = execute(
+            prepare(**args), output, plan_sha256=plan_sha256, dry_run=dry_run,
+            prior_receipt=prior_receipt, authorization_basis=authorization_basis,
+        )
     except (ValueError, OSError, agent_pin.StaleAgentDefinition, agent_pin.NoDiscriminatingChallenge) as exc:
         parser.exit(2, f"registered evaluation refused: {exc}\n")
     print(json.dumps(result, indent=2, sort_keys=True))

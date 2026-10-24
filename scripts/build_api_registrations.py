@@ -23,6 +23,7 @@ Usage examples:
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -263,6 +264,7 @@ def build_registration(
     receipt_limits: dict[str, Any] | None = None,
     synthesize_draft_context: bool = False,
     write_to_disk: bool = True,
+    replace: bool = False,
 ) -> dict[str, Any]:
     """Build a complete shared_generation_registration_v1 document.
 
@@ -482,6 +484,10 @@ def build_registration(
     sg.parse_registration(canonical_bytes)
 
     if write_to_disk:
+        if resolved_reg_path.exists() and not replace and resolved_reg_path.read_bytes() != canonical_bytes:
+            raise FileExistsError(
+                f"{resolved_reg_path} already exists with different bytes; pass --replace to overwrite"
+            )
         resolved_reg_path.parent.mkdir(parents=True, exist_ok=True)
         resolved_reg_path.write_bytes(canonical_bytes)
 
@@ -492,6 +498,7 @@ def build_roster(
     registrations: list[dict[str, Any]],
     roster_path: Path | str | None = None,
     write_to_disk: bool = True,
+    replace: bool = False,
 ) -> dict[str, Any]:
     """Build a shared_generation_batch_roster_v1 document from registration dicts.
 
@@ -540,8 +547,13 @@ def build_roster(
 
     if write_to_disk and roster_path is not None:
         target = Path(roster_path).resolve()
+        roster_bytes = sg.canonical(roster)
+        if target.exists() and not replace and target.read_bytes() != roster_bytes:
+            raise FileExistsError(
+                f"{target} already exists with different bytes; pass --replace to overwrite"
+            )
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(sg.canonical(roster))
+        target.write_bytes(roster_bytes)
 
     return roster
 
@@ -729,6 +741,11 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     is_flag=True,
     help="Validate existing registrations and roster on disk without rebuilding.",
 )
+@click.option(
+    "--replace",
+    is_flag=True,
+    help="Allow overwriting an existing registration or roster file with different bytes.",
+)
 def cli(
     projects: tuple[str, ...],
     all_projects: bool,
@@ -761,6 +778,7 @@ def cli(
     synthesize_draft_context: bool,
     dry_run: bool,
     check: bool,
+    replace: bool = False,
 ) -> None:
     """Build shared generation registrations and batch rosters for D4D Messages-API generic_v10."""
     target_projects: list[str] = []
@@ -858,16 +876,20 @@ def cli(
                 audit_limits=audit_overrides or None,
                 synthesize_draft_context=synthesize_draft_context,
                 write_to_disk=not dry_run,
+                replace=replace,
             )
             registrations.append(reg)
-            click.echo(f"  ✓ {proj}: registration_id={reg['registration_id']}")
+            reg_sha = hashlib.sha256(sg.canonical(reg)).hexdigest()
+            click.echo(f"  ✓ {proj}: registration_id={reg['registration_id']} sha256={reg_sha}")
 
     roster = build_roster(
         registrations=registrations,
         roster_path=target_roster_path,
         write_to_disk=not dry_run,
+        replace=replace,
     )
-    click.echo(f"  ✓ Roster with {len(roster['registrations'])} rows: {target_roster_path}")
+    roster_sha = hashlib.sha256(sg.canonical(roster)).hexdigest()
+    click.echo(f"  ✓ Roster with {len(roster['registrations'])} rows: {target_roster_path} (sha256={roster_sha})")
 
     if dry_run:
         click.echo("[dry-run] Validated registrations and roster in memory without writing to disk.")

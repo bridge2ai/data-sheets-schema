@@ -1177,3 +1177,27 @@ def test_the_nested_walk_reproduces_the_top_level_alignment_on_v7_production():
                 key += sum(cell.get("key", {}).values())
                 pos += sum(cell.get("position", {}).values())
     assert (key, pos) == (135, 1048)
+
+
+def test_worktree_absolute_preprocessed_tail_resolves_against_repo_root(tmp_path):
+    """Worktree-prefixed paths under data/preprocessed/... resolve against the active repo root."""
+    import hashlib
+    from data_sheets_schema.chunking import DEFAULT_RULE
+    from data_sheets_schema.provenance import resolve_record_input
+    fake_wt_bundle = Path("/private/tmp/ephemeral-wt-123/data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+    fake_record = ROOT / "data/d4d_concatenated/claude_api_core/2026-10-20a/CHORUS_provenance.yaml"
+    resolved = resolve_record_input(fake_wt_bundle, fake_record)
+    assert resolved == ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+    assert resolved.is_file()
+
+    expected_sha = hashlib.sha256(resolved.read_bytes()).hexdigest()
+    inputs = {
+        "bundle_path": str(fake_wt_bundle),
+        "bundle_sha256": expected_sha,
+        "chunks": {"rule": dict(DEFAULT_RULE)},
+    }
+    texts, basis = record_chunk_texts(inputs, ROOT)
+    assert texts is not None
+    assert basis == "bundle on disk"
+
+

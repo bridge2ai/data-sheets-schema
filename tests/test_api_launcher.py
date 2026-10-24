@@ -424,8 +424,11 @@ class TestLauncherCLI:
                 str(external_log),
                 "--",
                 "python",
-                "-c",
-                "import sys; print('DETACHED_STDIN_EOF', sys.stdin.read() == '')",
+                "-m",
+                "data_sheets_schema.cli",
+                "api",
+                "prompts",
+                "check",
             ],
             env=env,
             capture_output=True,
@@ -440,13 +443,47 @@ class TestLauncherCLI:
         while time.monotonic() < deadline:
             if external_log.is_file():
                 log_text = external_log.read_text(encoding="utf-8", errors="replace")
-                if "DETACHED_STDIN_EOF True" in log_text or "Fatal Python error" in log_text:
+                if "0 not at their pin" in log_text or "Fatal Python error" in log_text:
                     break
             time.sleep(0.1)
 
         assert "Fatal Python error" not in log_text
         assert "Bad file descriptor" not in log_text
-        assert "DETACHED_STDIN_EOF True" in log_text
+        assert "0 not at their pin" in log_text
+
+    def test_validate_command_restricts_python_entrypoint(self, tmp_path: Path):
+        with pytest.raises(LauncherError, match="requires '-m data_sheets_schema.cli <subcommand>'"):
+            validate_command(["python", "-c", "print(1)"])
+        with pytest.raises(LauncherError, match="requires '-m data_sheets_schema.cli <subcommand>'"):
+            validate_command(["python", "some_script.py"])
+        validate_command(["python", "-m", "data_sheets_schema.cli", "api", "prompts", "check"])
+
+    def test_expect_sha256_verifies_shared_generation_registration(self, tmp_path: Path):
+        import hashlib
+        reg_file = tmp_path / "reg.json"
+        reg_file.write_text('{"format": "shared_generation_registration_v1"}\n', encoding="utf-8")
+        digest = hashlib.sha256(reg_file.read_bytes()).hexdigest()
+
+        cmd = [
+            "python",
+            "-m",
+            "data_sheets_schema.cli",
+            "api",
+            "batch",
+            "--max-cost-dollars",
+            "10.0",
+            f"--shared-generation-registration={reg_file}",
+        ]
+        validate_command(cmd, expect_sha256=digest)
+
+        with pytest.raises(LauncherError, match="Registration SHA-256 mismatch"):
+            validate_command(cmd, expect_sha256="0" * 64)
+
+        with pytest.raises(LauncherError, match="requires '--shared-generation-registration <path>'"):
+            validate_command(
+                ["python", "-m", "data_sheets_schema.cli", "api", "prompts", "check"],
+                expect_sha256=digest,
+            )
 
     def test_scripts_api_launcher_executable(self):
         script = REPO_ROOT / "scripts" / "api_launcher.py"

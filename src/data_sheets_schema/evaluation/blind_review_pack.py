@@ -22,6 +22,7 @@ import json
 import os
 from pathlib import Path
 import re
+import secrets
 import shutil
 import tempfile
 from typing import Iterable
@@ -92,6 +93,8 @@ class Record:
     def __post_init__(self):
         for name in ("arm", "project", "label"):
             _text(getattr(self, name), name)
+        if len(self.arm.strip()) < 2:
+            raise ValueError("arm requires at least 2 non-whitespace characters")
         if not isinstance(self.source_path, (str, os.PathLike)):
             raise ValueError("source_path must be a filesystem path")
         object.__setattr__(self, "source_path", Path(_text(str(self.source_path), "source_path")))
@@ -156,6 +159,12 @@ def validate_cohort(records: Iterable[Record], *, cohort: str = "campaign") -> l
                 labels = {f"2026-09-{suffix}_claude-opus-5-api-generic-v8_rep{i}" for i in (1, 2, 3)}
                 if record.label not in labels:
                     raise ValueError(f"campaign v8 comparator for {record.project} requires {suffix} rep1–3")
+            elif record.arm == "v10":
+                lbl_lower = record.label.lower()
+                if "v10" not in lbl_lower and not record.label.startswith("registered-final-"):
+                    raise ValueError(
+                        f"campaign v10 record for {record.project} requires a v10 or registered-final label, got {record.label!r}"
+                    )
     return sorted(records, key=lambda record: record.identity)
 
 
@@ -264,13 +273,24 @@ def _strip(raw: bytes, record: Record) -> tuple[bytes, set[str]]:
     return blinded, identifiers
 
 
+def _identifier_leaked(ident_folded: str, text_folded: str) -> bool:
+    if len(ident_folded) < 4:
+        return bool(re.search(rf"(?<![0-9a-z]){re.escape(ident_folded)}(?![0-9a-z])", text_folded))
+    return ident_folded in text_folded
+
+
 def _leakage(raw: bytes, forbidden: set[str], *, yaml_document: bool = False):
     text = raw.decode("utf-8")
     strings = [text]
     if yaml_document:
         strings.extend(_strings(registered._yaml(raw)))
     folded = [item.casefold() for item in strings]
-    if any(identifier.casefold() in item for identifier in forbidden if identifier for item in folded):
+    if any(
+        _identifier_leaked(identifier.casefold(), item)
+        for identifier in forbidden
+        if identifier
+        for item in folded
+    ):
         raise ValueError("generation identity remains in reviewer content; explicit blinding review required")
     if any(_MODEL_LITERAL.search(item) for item in strings):
         raise ValueError("generator model identifier remains in reviewer content; explicit blinding review required")
@@ -308,6 +328,8 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
     seed = _text(str(seed), "seed")
     generated_at = _timestamp(generated_at)
     records = validate_cohort(records, cohort=cohort)
+    if cohort == "campaign" and len(seed) < 32:
+        raise ValueError("campaign blind review pack requires a seed of at least 32 characters (128 bits)")
     output = Path(output_dir)
     if output.exists() or output.is_symlink():
         raise ValueError("output directory already exists; never overwrite a review package")
@@ -331,6 +353,28 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
         digest = _sha(raw)
         if record.source_sha256 is not None and record.source_sha256 != digest:
             raise ValueError("selected source_sha256 does not match input")
+        if cohort == "campaign":
+            prov_candidate = path.parent / f"{record.project}_provenance.yaml"
+            if prov_candidate.is_file():
+                from data_sheets_schema.provenance import recorded_hash
+                prov_doc = registered._yaml(registered._read(prov_candidate))
+                if isinstance(prov_doc, dict):
+                    run_block = prov_doc.get("run") or {}
+                    if isinstance(run_block, dict):
+                        if run_block.get("label") and run_block.get("label") != record.label:
+                            raise ValueError("campaign record label does not match sibling provenance run.label")
+                        cond = str(run_block.get("condition") or "")
+                        if record.arm == "v10" and cond and not cond.startswith("generic_v10"):
+                            raise ValueError(f"campaign v10 record provenance condition {cond!r} is not generic_v10")
+                        if record.arm == "v8" and cond and not cond.startswith("generic_v8"):
+                            raise ValueError(f"campaign v8 record provenance condition {cond!r} is not generic_v8")
+                    val_block = prov_doc.get("validation") or {}
+                    artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
+                    full_art = artifacts.get("full") if isinstance(artifacts, dict) else None
+                    if isinstance(full_art, dict):
+                        rec_hash = recorded_hash(full_art)
+                        if rec_hash is not None and hashlib.new(rec_hash[0], raw).hexdigest() != rec_hash[1]:
+                            raise ValueError("campaign record bytes do not match sibling provenance validation.artifacts.full")
         blinded, metadata_ids = _strip(raw, record)
         forbidden.update(metadata_ids)
         forbidden.update((str(path), str(record.source_path.absolute())))
@@ -395,17 +439,22 @@ def main(argv=None) -> int:
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument("--manifest", type=Path, help="Strict YAML/JSON records manifest; paths relative to manifest")
     selection.add_argument("--record", action="append", help="Repeat ARM:PROJECT:LABEL=PATH; paths relative to cwd")
-    parser.add_argument("--seed", required=True, help="Deterministic nonempty seed (never chosen automatically)")
+    parser.add_argument(
+        "--seed",
+        default=None,
+        help="Cryptographic seed (at least 32 characters in campaign mode; auto-generated via secrets.token_hex(32) if omitted)",
+    )
     parser.add_argument("--cohort", choices=("campaign", "synthetic"), default="campaign",
                         help="Default: 24 records, v8 04f/04g + v10, 3 per project/arm; synthetic accepts other sizes")
     parser.add_argument("--generated-at", help="Optional explicit UTC YYYY-MM-DDTHH:MM:SSZ; otherwise null, not current time")
     parser.add_argument("--output-dir", type=Path, required=True,
                         help="New operator-only 0700 directory. Share only YAML+review_sheet, NEVER key/full directory")
     args = parser.parse_args(argv)
+    seed_val = args.seed if args.seed is not None else secrets.token_hex(32)
     try:
         records = read_manifest(args.manifest) if args.manifest else [parse_record(item) for item in args.record]
-        result = build_blind_review_pack(records, args.output_dir, seed=args.seed, cohort=args.cohort,
-                                        generated_at=args.generated_at)
+        result = build_blind_review_pack(records, args.output_dir, seed=seed_val, cohort=args.cohort,
+                                         generated_at=args.generated_at)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     print(f"Prepared {len(result['records'])} blinded records. Operator-only package: {args.output_dir}")

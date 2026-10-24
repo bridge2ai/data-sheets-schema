@@ -446,3 +446,58 @@ def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
         ],
     )
     assert check_res.exit_code == 0, check_res.output
+
+
+def test_overwrite_guard_requires_replace_on_changed_content(tmp_path: Path) -> None:
+    """Rebuilding at an existing path with different parameters refuses unless replace=True / --replace."""
+    reg_path = tmp_path / "reg_guard.json"
+    build_registration(
+        project="CHORUS",
+        label="test_guard",
+        registration_path=reg_path,
+        coverage_floor="pending",
+        write_to_disk=True,
+    )
+    # Identical rebuild succeeds without replace
+    build_registration(
+        project="CHORUS",
+        label="test_guard",
+        registration_path=reg_path,
+        coverage_floor="pending",
+        write_to_disk=True,
+    )
+    # Changed parameter refuses without replace
+    with pytest.raises(FileExistsError, match="already exists with different bytes; pass --replace to overwrite"):
+        build_registration(
+            project="CHORUS",
+            label="test_guard",
+            registration_path=reg_path,
+            coverage_floor="13/20",
+            write_to_disk=True,
+        )
+    # Succeeds with replace=True
+    updated = build_registration(
+        project="CHORUS",
+        label="test_guard",
+        registration_path=reg_path,
+        coverage_floor="13/20",
+        write_to_disk=True,
+        replace=True,
+    )
+    assert updated["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
+
+    # CLI outputs sha256= and honors --replace
+    runner = CliRunner()
+    cli_dir = tmp_path / "cli_guard"
+    res1 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--max-calls", "18"])
+    assert res1.exit_code == 0
+    assert "sha256=" in res1.output
+
+    res2 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--max-calls", "20"])
+    assert res2.exit_code != 0
+    assert "already exists with different bytes; pass --replace to overwrite" in str(res2.exception)
+
+    res3 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--max-calls", "20", "--replace"])
+    assert res3.exit_code == 0
+    assert "sha256=" in res3.output
+

@@ -126,7 +126,30 @@ def price_input_bound(bound: Any, *, worst_case_cache: bool = False) -> float:
     return 0.0
 
 
-def extract_saved_snapshot(pin: Any) -> dict[str, Any] | None:
+def _resolve_pin_path(target: Path, metadata_dir: Path | None = None) -> Path:
+    """Resolve a pin path relative to CWD, metadata_dir, metadata_dir/intermediate, or repo root."""
+    if target.is_file():
+        return target
+    if metadata_dir is not None:
+        meta_resolved = metadata_dir.resolve()
+        if not target.is_absolute():
+            for parent in (meta_resolved, *meta_resolved.parents):
+                if (parent / "src" / "data_sheets_schema").is_dir() or (parent / "data" / "d4d_concatenated").is_dir():
+                    cand = parent / target
+                    if cand.is_file():
+                        return cand
+            for base in (meta_resolved, meta_resolved / "intermediate"):
+                cand = base / target
+                if cand.is_file():
+                    return cand
+        for base in (meta_resolved, meta_resolved / "intermediate"):
+            cand = base / target.name
+            if cand.is_file():
+                return cand
+    return target
+
+
+def extract_saved_snapshot(pin: Any, *, metadata_dir: Path | None = None) -> dict[str, Any] | None:
     """Attempt to load and hash-verify a snapshot JSON dict from a pin dict or file path."""
     expected_sha: str | None = None
     if isinstance(pin, Mapping) and "path" in pin:
@@ -138,6 +161,7 @@ def extract_saved_snapshot(pin: Any) -> dict[str, Any] | None:
         target = Path(pin)
     else:
         return None
+    target = _resolve_pin_path(target, metadata_dir=metadata_dir)
     if target.is_file():
         try:
             raw_bytes = target.read_bytes()
@@ -219,15 +243,17 @@ def resolve_pending_input_bound(
         if ledger_data:
             rc_state = ledger_data.get("receipt_completion")
             if isinstance(rc_state, Mapping):
-                context_data = extract_saved_snapshot(rc_state.get("context"))
+                context_data = extract_saved_snapshot(rc_state.get("context"), metadata_dir=metadata_dir)
                 if context_data and isinstance(context_data.get("input_tokens"), int):
                     return context_data["input_tokens"], "receipt_completion_context.json"
-        # Search metadata_dir if available
+        # Search metadata_dir and intermediate/ if available
         if metadata_dir and metadata_dir.is_dir():
-            for p in metadata_dir.glob("*receipt_completion_context*.json"):
-                data = extract_saved_snapshot(p)
-                if data and isinstance(data.get("input_tokens"), int):
-                    return data["input_tokens"], p.name
+            for search_dir in (metadata_dir, metadata_dir / "intermediate"):
+                if search_dir.is_dir():
+                    for p in sorted(search_dir.glob("*receipt_completion_context*.json")):
+                        data = extract_saved_snapshot(p, metadata_dir=metadata_dir)
+                        if data and isinstance(data.get("input_tokens"), int):
+                            return data["input_tokens"], p.name
 
     # 3. Typed audit stages: inspect saved stage context
     if "typed_audit" in phase or phase in {"typed_audit_worker", "typed_audit_omission", "typed_audit_integration"}:
@@ -236,21 +262,65 @@ def resolve_pending_input_bound(
             if isinstance(ta_state, Mapping) and "stages" in ta_state:
                 stages = ta_state.get("stages", [])
                 if stages and isinstance(stages[-1], Mapping):
-                    context_data = extract_saved_snapshot(stages[-1].get("context"))
+                    context_data = extract_saved_snapshot(stages[-1].get("context"), metadata_dir=metadata_dir)
                     if context_data and isinstance(context_data.get("input_tokens"), int):
                         return context_data["input_tokens"], "typed_audit_stage_context.json"
         if metadata_dir and metadata_dir.is_dir():
-            candidates = sorted(metadata_dir.glob("*typed_audit*context*.json"))
+            candidates: list[Path] = []
+            for search_dir in (metadata_dir, metadata_dir / "intermediate"):
+                if search_dir.is_dir():
+                    candidates.extend(sorted(search_dir.glob("*typed_audit*context*.json")))
             if candidates:
-                data = extract_saved_snapshot(candidates[-1])
+                data = extract_saved_snapshot(candidates[-1], metadata_dir=metadata_dir)
                 if data and isinstance(data.get("input_tokens"), int):
                     return data["input_tokens"], candidates[-1].name
 
-    # 4. Project-specific empirical baseline bounds
+    # 3b. Explicit approx_input_tokens on pending_call in ledger_data
+    if ledger_data and isinstance(ledger_data.get("pending_call"), Mapping):
+        pending_obj = ledger_data["pending_call"]
+        for key in ("approx_input_tokens", "input_tokens"):
+            val = pending_obj.get(key)
+            if isinstance(val, int) and val > 0:
+                return val, f"pending_call.{key}"
+
+    # 4. Project-specific empirical baseline bounds (augmented by dynamic upstream artifacts if larger)
     if project and project in PROJECT_BASELINE_INPUT_BOUNDS:
         proj_bounds = PROJECT_BASELINE_INPUT_BOUNDS[project]
         if phase in proj_bounds:
-            return proj_bounds[phase], f"baseline[{project}][{phase}]"
+            base_bound = proj_bounds[phase]
+            if phase != "full" and metadata_dir and metadata_dir.is_dir():
+                upstream_files: list[Path] = []
+                for search_dir in (metadata_dir, metadata_dir / "intermediate"):
+                    if search_dir.is_dir():
+                        for pat in (
+                            f"{project}_full_response.txt",
+                            f"{project}_audit_response.txt",
+                            f"{project}_reconcile_full_response.txt",
+                            f"{project}_report_response.txt",
+                            f"{project}_d4d.yaml",
+                        ):
+                            cand = search_dir / pat
+                            if cand.is_file() and cand not in upstream_files:
+                                upstream_files.append(cand)
+                if upstream_files:
+                    artifact_tokens = sum(p.stat().st_size // 4 for p in upstream_files)
+                    full_bound = proj_bounds.get("full", {})
+                    full_tokens = (
+                        sum(int(full_bound.get(k) or 0) for k in ("input_tokens", "cache_write", "cache_read"))
+                        if isinstance(full_bound, Mapping)
+                        else int(full_bound or 0)
+                    )
+                    static_tokens = (
+                        sum(int(base_bound.get(k) or 0) for k in ("input_tokens", "cache_write", "cache_read"))
+                        if isinstance(base_bound, Mapping)
+                        else int(base_bound or 0)
+                    )
+                    if full_tokens + artifact_tokens > static_tokens:
+                        return (
+                            {"input_tokens": full_tokens + artifact_tokens, "cache_write": 0, "cache_read": 0},
+                            f"dynamic_artifacts[{project}][{phase}]",
+                        )
+            return base_bound, f"baseline[{project}][{phase}]"
 
     # 5. Unresolved input bound: return None so caller fails closed rather than pricing as $0.00
     return None, "unknown"
@@ -277,13 +347,13 @@ def price_pending_call(
     if phase in {"receipt_completion", "full_receipt_completion"} and ledger_data:
         rc_state = ledger_data.get("receipt_completion")
         if isinstance(rc_state, Mapping):
-            saved_request = extract_saved_snapshot(rc_state.get("request"))
+            saved_request = extract_saved_snapshot(rc_state.get("request"), metadata_dir=metadata_dir)
     elif "typed_audit" in phase and ledger_data:
         ta_state = ledger_data.get("typed_audit")
         if isinstance(ta_state, Mapping) and "stages" in ta_state:
             stages = ta_state.get("stages", [])
             if stages and isinstance(stages[-1], Mapping):
-                saved_request = extract_saved_snapshot(stages[-1].get("request"))
+                saved_request = extract_saved_snapshot(stages[-1].get("request"), metadata_dir=metadata_dir)
 
     output_cap = get_phase_output_cap(phase, saved_request=saved_request, registration=registration)
     output_cost = output_cap * RATE_OUTPUT
@@ -327,15 +397,16 @@ def compute_readout(
     project: str | None = None,
     custom_bounds: Mapping[str, Any] | None = None,
     registration: Mapping[str, Any] | None = None,
+    metadata_dir: Path | None = None,
     worst_case_cache: bool = False,
 ) -> dict[str, Any]:
     """Compute the complete live dollar readout for an API run ledger."""
-    metadata_dir = None
     if isinstance(ledger_source, (str, Path)):
         path = Path(ledger_source)
         if not path.is_file():
             raise FileNotFoundError(f"Ledger file not found: {path}")
-        metadata_dir = path.parent
+        if metadata_dir is None:
+            metadata_dir = path.parent
         ledger_data = json.loads(path.read_text(encoding="utf-8"))
         ledger_file_str = str(path)
     else:
@@ -367,6 +438,119 @@ def compute_readout(
 
     settled_cost = price_settled_rows(rows)
     settled_call_count = len(rows)
+    seen_usage_ids: set[str] = {
+        str(r["usage_id"])
+        for r in rows
+        if isinstance(r, Mapping) and isinstance(r.get("usage_id"), str) and r["usage_id"]
+    }
+    prior_gen_ids: set[str] = {
+        str(gid) for gid in (ledger_data.get("prior_generation_ids") or []) if isinstance(gid, str) and gid
+    }
+    valid_gen_ids: set[str] = set(prior_gen_ids)
+    if isinstance(ledger_data.get("generation_id"), str) and ledger_data["generation_id"]:
+        valid_gen_ids.add(ledger_data["generation_id"])
+
+    if metadata_dir and metadata_dir.is_dir() and resolved_project:
+        # 1. Include archived sibling ledgers from prior_generation_ids if present
+        if prior_gen_ids:
+            for search_dir in (metadata_dir, metadata_dir / "intermediate"):
+                if search_dir.is_dir():
+                    for sib in sorted(search_dir.glob(f"*{resolved_project}*api_usage*.json")):
+                        if ledger_file_str and sib.resolve() == Path(ledger_file_str).resolve():
+                            continue
+                        try:
+                            sib_data = json.loads(sib.read_text(encoding="utf-8"))
+                        except (OSError, ValueError):
+                            continue
+                        if not isinstance(sib_data, Mapping):
+                            continue
+                        if sib_data.get("generation_id") not in prior_gen_ids:
+                            continue
+                        for sib_row in sib_data.get("rows") or []:
+                            if not isinstance(sib_row, Mapping):
+                                continue
+                            uid = sib_row.get("usage_id")
+                            if isinstance(uid, str) and uid in seen_usage_ids:
+                                continue
+                            if isinstance(uid, str) and uid:
+                                seen_usage_ids.add(uid)
+                            settled_cost += price_settled_row(sib_row)
+                            settled_call_count += 1
+
+        # 2. Include abandoned attempts journal entries not already in rows
+        abandoned_offset = int(ledger_data.get("abandoned_journal_offset") or 0)
+        for search_dir in (metadata_dir, metadata_dir / "intermediate"):
+            journal_path = search_dir / f"{resolved_project}_abandoned_attempts.jsonl"
+            if journal_path.is_file():
+                try:
+                    raw_journal = journal_path.read_bytes()
+                    slice_bytes = raw_journal[abandoned_offset:] if 0 < abandoned_offset <= len(raw_journal) else raw_journal
+                    for line in slice_bytes.decode("utf-8", errors="replace").splitlines():
+                        if not line.strip():
+                            continue
+                        entry = json.loads(line)
+                        if not isinstance(entry, Mapping):
+                            continue
+                        uid = entry.get("usage_id")
+                        if isinstance(uid, str) and uid in seen_usage_ids:
+                            continue
+                        entry_gen = entry.get("generation_id")
+                        if valid_gen_ids and isinstance(entry_gen, str) and entry_gen and entry_gen not in valid_gen_ids:
+                            continue
+                        if isinstance(uid, str) and uid:
+                            seen_usage_ids.add(uid)
+                        usage_src = entry.get("usage") if isinstance(entry.get("usage"), Mapping) else entry
+                        has_usage = any(
+                            isinstance(usage_src.get(k), (int, float)) and usage_src.get(k, 0) > 0
+                            for k in ("input_tokens", "output_tokens", "cache_write", "cache_read")
+                        )
+                        if has_usage:
+                            settled_cost += price_settled_row(usage_src)
+                        else:
+                            ab_phase = str(entry.get("phase") or "unknown")
+                            ab_cap = get_phase_output_cap(ab_phase, registration=registration)
+                            ab_bound, _ = resolve_pending_input_bound(
+                                ab_phase,
+                                project=resolved_project,
+                                ledger_data=ledger_data,
+                                custom_bounds=custom_bounds,
+                                metadata_dir=metadata_dir,
+                            )
+                            settled_cost += ab_cap * RATE_OUTPUT + (
+                                price_input_bound(ab_bound, worst_case_cache=worst_case_cache)
+                                if ab_bound is not None
+                                else 0.0
+                            )
+                except (OSError, ValueError):
+                    pass
+                break
+
+        # 3. Include unrecorded reasoning JSONL entries whose usage_id is not in seen_usage_ids
+        for search_dir in (metadata_dir, metadata_dir.parent):
+            reasoning_path = search_dir / f"{resolved_project}_reasoning.jsonl"
+            if reasoning_path.is_file():
+                try:
+                    for line in reasoning_path.read_text(encoding="utf-8", errors="replace").splitlines():
+                        if not line.strip():
+                            continue
+                        entry = json.loads(line)
+                        if not isinstance(entry, Mapping):
+                            continue
+                        uid = entry.get("usage_id")
+                        if isinstance(uid, str) and uid in seen_usage_ids:
+                            continue
+                        entry_gen = entry.get("generation_id")
+                        if valid_gen_ids and isinstance(entry_gen, str) and entry_gen and entry_gen not in valid_gen_ids:
+                            continue
+                        usage_src = entry.get("usage") if isinstance(entry.get("usage"), Mapping) else entry
+                        out_toks = usage_src.get("output_tokens")
+                        if isinstance(out_toks, (int, float)) and out_toks > 0:
+                            if isinstance(uid, str) and uid:
+                                seen_usage_ids.add(uid)
+                            settled_cost += float(out_toks) * RATE_OUTPUT
+                except (OSError, ValueError):
+                    pass
+                break
 
     pending_raw = ledger_data.get("pending_call")
     pending_info = None
