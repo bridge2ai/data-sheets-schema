@@ -243,6 +243,138 @@ def test_bundle_drift_cli_reads_explicit_cohort_without_writing(tmp_path, capsys
         main(["--root", str(tmp_path), "--arm", "v6=record.yaml", "--arm", "v6=record.yaml"])
 
 
+def test_cross_arm_recorded_identity_is_independent_of_current_disk_drift(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift, render_bundle_drift
+
+    record, _, _ = _bundle_record(tmp_path, current=b"new")
+    result = compare_bundle_drift({"v8": [record], "v10": [record, record]}, tmp_path)
+    digest = record["inputs"]["bundle_md5"]
+    for arm, count in (("v8", 1), ("v10", 2)):
+        cell = result[arm]["recorded_bundles_by_project"]["AI_READI"]
+        assert cell == {"record_count": count, "md5_counts": {digest: count},
+                        "missing_count": 0, "malformed_count": 0,
+                        "cross_arm_status": "unique_shared_recorded_identity"}
+        assert result[arm]["disk"] == {"match": 0, "drift": count, "unknown": 0}
+        assert result[arm]["manifest"] == {"match": count, "drift": 0, "unknown": 0}
+    text = "\n".join(render_bundle_drift(result))
+    assert f"{digest} × 2" in text and "unique shared recorded identity" in text
+    assert "not proof that historical bytes were recovered" in text
+    assert "Different source inputs can confound" in text
+
+
+def test_cross_arm_different_recorded_bundles_can_each_match_their_manifest(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift
+
+    records = []
+    for directory, value in (("old", b"old input"), ("new", b"new input")):
+        root = tmp_path / directory
+        root.mkdir()
+        record, _, _ = _bundle_record(root, old=value)
+        record["inputs"]["bundle_path"] = directory + "/" + record["inputs"]["bundle_path"]
+        record["inputs"]["chunks"]["path"] = directory + "/" + record["inputs"]["chunks"]["path"]
+        records.append(record)
+    result = compare_bundle_drift({"v8": [records[0]], "v10": [records[1]]}, tmp_path)
+    for block in result.values():
+        assert block["manifest"] == {"match": 1, "drift": 0, "unknown": 0}
+        assert block["recorded_bundles_by_project"]["AI_READI"]["cross_arm_status"] == "different_recorded_identities"
+
+
+@pytest.mark.parametrize("case,status", [
+    ("mixed", "heterogeneous_evidence"), ("missing", "insufficient_evidence"),
+    ("malformed", "insufficient_evidence"), ("empty", "insufficient_evidence"),
+    ("one_arm", "insufficient_evidence"),
+])
+def test_cross_arm_identity_never_chooses_a_representative_or_fills_unknowns(tmp_path, case, status):
+    from copy import deepcopy
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift
+
+    record, _, _ = _bundle_record(tmp_path)
+    second = deepcopy(record)
+    second["run"]["label"] = "rep2"
+    if case == "mixed":
+        second["inputs"]["bundle_md5"] = "a" * 32
+    elif case == "missing":
+        second["inputs"].pop("bundle_md5")
+    elif case == "malformed":
+        second["inputs"]["bundle_md5"] = "bad pin"
+    arms = {"v8": [record, second], "v10": [] if case == "empty" else [record]}
+    if case == "one_arm":
+        arms.pop("v10")
+    result = compare_bundle_drift(arms, tmp_path)
+    cell = result["v8"]["recorded_bundles_by_project"]["AI_READI"]
+    assert cell["cross_arm_status"] == status
+    assert sum(cell["md5_counts"].values()) + cell["missing_count"] + cell["malformed_count"] == cell["record_count"] == 2
+    assert cell["missing_count"] == int(case == "missing")
+    assert cell["malformed_count"] == int(case == "malformed")
+    if case == "mixed":
+        assert cell["md5_counts"] == dict(sorted({record["inputs"]["bundle_md5"]: 1, "a" * 32: 1}.items()))
+    if case == "empty":
+        assert result["v10"]["recorded_bundles_by_project"]["AI_READI"] == {
+            "record_count": 0, "md5_counts": {}, "missing_count": 0, "malformed_count": 0,
+            "cross_arm_status": status}
+
+
+def test_cross_arm_summaries_and_table_are_invariant_to_input_order(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import compare_bundle_drift, recorded_bundle_identity, render_bundle_drift
+
+    first, _, _ = _bundle_record(tmp_path, "CHORUS")
+    second, _, _ = _bundle_record(tmp_path, "VOICE")
+    a = compare_bundle_drift({"v8": [first, second], "v10": [second, first]}, tmp_path)
+    b = compare_bundle_drift({"v10": [first, second], "v8": [second, first]}, tmp_path)
+    assert recorded_bundle_identity(a) == recorded_bundle_identity(b)
+    assert list(recorded_bundle_identity(a)) == ["CHORUS", "VOICE"]
+    assert "\n".join(render_bundle_drift(a)).split("Each record is compared separately")[0] == "\n".join(render_bundle_drift(b)).split("Each record is compared separately")[0]
+    for arm in a:
+        assert a[arm]["recorded_bundles_by_project"] == b[arm]["recorded_bundles_by_project"]
+
+
+def test_cross_arm_absolute_paths_are_bounded_and_unsupported_relocation_stays_unknown(tmp_path, monkeypatch):
+    from copy import deepcopy
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+
+    root = tmp_path / "checkout"
+    root.mkdir()
+    record, manifest, _ = _bundle_record(root)
+    record["inputs"]["bundle_path"] = str(root / "AI_READI.txt")
+    record["inputs"]["chunks"]["path"] = str(manifest)
+    assert bundle_drift(record, root)["manifest_status"] == "match"
+    assert bundle_drift(record, root)["disk_status"] == "match"
+    local = root / "data" / "preprocessed" / "AI_READI.txt"
+    local.parent.mkdir(parents=True)
+    local.write_bytes(b"original")
+    read_bytes = Path.read_bytes
+    def bounded_read(path):
+        assert path.is_relative_to(root), "external live input read"
+        return read_bytes(path)
+    monkeypatch.setattr(Path, "read_bytes", bounded_read)
+    # A matching suffix (including ambiguous repeated suffixes) is not an owner.
+    for outside in (tmp_path / "elsewhere" / "data" / "preprocessed" / local.name,
+                    tmp_path / "data" / "preprocessed" / "old" / "data" / "preprocessed" / local.name):
+        moved = deepcopy(record)
+        moved["inputs"]["bundle_path"] = str(outside)
+        result = bundle_drift(moved, root)
+        assert result["disk_status"] == result["manifest_status"] == "unknown"
+        assert result["disk_md5"] is None
+        assert "external absolute-path relocation is unsupported" in result["disk_reason"]
+
+
+def test_cross_arm_cli_json_and_markdown_expose_same_pins(tmp_path, capsys):
+    import json
+    import yaml
+    from data_sheets_schema.evaluation.arm_comparison import main
+
+    record, _, _ = _bundle_record(tmp_path)
+    (tmp_path / "record.yaml").write_text(yaml.safe_dump(record))
+    args = ["--root", str(tmp_path), "--arm", "v8=record.yaml", "--arm", "v10=record.yaml"]
+    assert main(args + ["--format", "json"]) == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["v8"]["recorded_bundles_by_project"]["AI_READI"]["cross_arm_status"] == "unique_shared_recorded_identity"
+    assert main(args + ["--format", "markdown"]) == 0
+    text = capsys.readouterr().out
+    assert f"{record['inputs']['bundle_md5']} × 1" in text
+    assert "| project | v10 | v8 | cross-arm recorded identity |" in text
+
+
 class Rate(unittest.TestCase):
     def setUp(self):
         self.m = _module()
