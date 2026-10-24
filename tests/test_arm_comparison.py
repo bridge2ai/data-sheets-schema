@@ -396,7 +396,7 @@ def test_report_cells_keep_unmeasured_zeros_out_of_the_mean():
     assert m.cell([{"report": None}], "report", "reps") == "– [–]"
 
 
-def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, monkeypatch):
+def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, monkeypatch, capsys):
     m = _module()
     data = {k: {p: [] for p in m.PROJECTS} for k, *_ in m.ARMS}
     data["v8prod"]["CHORUS"] = [{"report": 0, "claims_checked": 5}]
@@ -412,6 +412,8 @@ def test_check_detects_report_changes_without_overwriting_any_output(tmp_path, m
     assert m.main() == 0
     data["v8prod"]["CHORUS"][0]["report"] = 2
     assert m.main() == 1
+    message = capsys.readouterr().err
+    assert "GitUnavailable" in message and "--no-figures" in message
     assert m.OUT_MD.read_text() == original
     m.OUT_MD.unlink()
     assert m.main() == 1
@@ -463,21 +465,79 @@ def test_bundle_drift_survives_real_metrics_collection(tmp_path, monkeypatch):
     assert result["records"][0]["label"] == "fixture_rep1"
 
 
+def _assert_selected_bundle_invariants(m, data, comparisons):
+    """Every selected provenance identity survives; observations may change."""
+    assert list(comparisons) == [arm for arm, *_ in m.ARMS]
+    states = {"match", "drift", "unknown"}
+    for arm, block in comparisons.items():
+        selected = sorted(((project, row["label"], row["rec"])
+            for project in m.PROJECTS for row in data[arm][project]),
+            key=lambda row: (row[0], row[1]))
+        expected = [(record["run"]["project"], record["run"]["label"], record.get("inputs", {}).get("bundle_path"))
+            for _, _, record in selected]
+        rows = block["records"]
+        assert block["count"] == len(selected) == len(rows)
+        assert [(row["project"], row["label"], row["bundle_path"]) for row in rows] == expected
+        for basis in ("disk", "manifest"):
+            assert set(block[basis]) == states
+            assert sum(block[basis].values()) == len(selected)
+            assert all(type(value) is int and value >= 0 for value in block[basis].values())
+            for state in states:
+                assert block[basis][state] == sum(row[basis + "_status"] == state for row in rows)
+            for row in rows:
+                assert row[basis + "_status"] in states
+                if row["recorded_md5"] is None or row[basis + "_md5"] is None:
+                    assert row[basis + "_status"] == "unknown"
+
+
+def test_bundle_invariants_survive_legitimate_revision_and_replicate_reordering(tmp_path, monkeypatch):
+    m = _module()
+    monkeypatch.setattr(m, "ROOT", tmp_path)
+    data = {arm: {project: [] for project in m.PROJECTS} for arm, *_ in m.ARMS}
+    record, _, _ = _bundle_record(tmp_path, "CHORUS")
+    for label in ("rep2", "rep1"):
+        rec = {**record, "run": {**record["run"], "label": label}}
+        data["v6agentic"]["CHORUS"].append({"label": label, "rec": rec})
+    unknown = {"run": {"project": "CHORUS", "label": "unknown"}, "inputs": {}}
+    data["v8prod"]["CHORUS"].append({"label": "unknown", "rec": unknown})
+    before = m.bundle_drift_by_arm(data)
+    _assert_selected_bundle_invariants(m, data, before)
+    assert [row["label"] for row in before["v6agentic"]["records"]] == ["rep1", "rep2"]
+    (tmp_path / "CHORUS.txt").write_bytes(b"legitimate source revision")
+    data["v6agentic"]["CHORUS"].reverse()
+    after = m.bundle_drift_by_arm(data)
+    _assert_selected_bundle_invariants(m, data, after)
+    assert before["v6agentic"]["disk"] == {"match": 2, "drift": 0, "unknown": 0}
+    assert after["v6agentic"]["disk"] == {"match": 0, "drift": 2, "unknown": 0}
+    assert before["v8prod"]["disk"] == after["v8prod"]["disk"] == {"match": 0, "drift": 0, "unknown": 1}
+
+
+def test_bundle_history_unavailable_remains_unknown(tmp_path):
+    from data_sheets_schema.evaluation.arm_comparison import bundle_drift
+    from data_sheets_schema.provenance import GitUnavailable
+    record, manifest, _ = _bundle_record(tmp_path)
+    manifest.write_bytes(b"replaced manifest")
+    def unavailable(*args, **kwargs):
+        raise GitUnavailable("shallow clone")
+    result = bundle_drift(record, tmp_path, recover=unavailable)
+    assert result["manifest_status"] == "unknown" and result["manifest_md5"] is None
+    assert result["manifest_reason"] == "manifest recovery unavailable: GitUnavailable"
+
+
 @pytest.mark.corpus
 def test_committed_comparison_matches_current_records():
-    """Catch changed report measurements that leave the published rows stale."""
+    """Catch stale measurements without fixing current bundle contents in tests."""
     m = _module()
     data = m.collect()
-    drift = m.bundle_drift_by_arm(data)["v6agentic"]
-    assert drift["disk"] == {"match": 3, "drift": 9, "unknown": 0}
-    assert {row["project"]: row["disk_status"] for row in drift["records"]} == {
-        "AI_READI": "drift", "CHORUS": "match", "CM4AI": "drift", "VOICE": "drift"}
+    _assert_selected_bundle_invariants(m, data, m.bundle_drift_by_arm(data))
     scores = {rubric: {key: {p: m.rubric_scores(prefix, p, rubric) for p in m.PROJECTS}
                       for key, _display, prefix, *_ in m.ARMS} for rubric in m.EVAL_DIRS}
     rendered = m.render_markdown(data, scores)
     assert "## Bundle identity by arm" in rendered
     assert m.OUT_MD.read_text(encoding="utf-8") == rendered, (
-        "Run scripts/arm_comparison.py to refresh the committed table and figures")
+        "Inspect unavailable evidence (including GitUnavailable or shallow history) first; "
+        "restore required history when available. After reviewing input changes, run "
+        "scripts/arm_comparison.py --no-figures to refresh the committed Markdown.")
 
 
 class RemovalRows(unittest.TestCase):
