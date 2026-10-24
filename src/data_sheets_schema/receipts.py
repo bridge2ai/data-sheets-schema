@@ -272,12 +272,60 @@ RERECEIPTS_INSTRUMENT = (
     "reversals counted separately. Origin markers are accounting metadata, not "
     "proof of authorship or semantic support. " + RECEIPTS_INSTRUMENT)
 
+#: Closed polarity vocabulary for v5 receipt entries (Slides 7–8).
+SUPPORTS_VALUES = ("SUPPORT", "PARTIAL", "REFUTE", "NO_EVIDENCE", "NEUTRAL")
+
+#: Closed evidence-source vocabulary for v5 receipt entries (Slides 7–8).
+EVIDENCE_SOURCE_VALUES = (
+    "BUNDLE_TEXT",
+    "MANIFEST_METADATA",
+    "SCHEMA_INSPECTION",
+    "TOOL_COMPUTATION",
+    "EXTERNAL_ONTOLOGY",
+    "HUMAN_CURATOR",
+    "PUBLICATION",
+    "HUMAN",
+    "HUMAN_CLINICAL",
+    "MODEL_ORGANISM",
+)
+
+#: Closed deterministic tool-receipt vocabulary for v5 non-text / computed
+#: receipts (Slides 7 & 14).
+TOOL_RECEIPT_NAMES = (
+    "md5",
+    "sha256",
+    "byte_length",
+    "line_count",
+    "regex_count",
+    "manifest_chunk_count",
+    "manifest_total_bytes",
+    "record_count",
+    "record_sum",
+    "unit_convert",
+)
+
+RECEIPTS_V5_INSTRUMENT = (
+    "v5 (supports/explanation/tool receipts): receipt entries accept structured "
+    "polarity (supports: SUPPORT|PARTIAL|REFUTE|NO_EVIDENCE|NEUTRAL), "
+    "evidence_source, explanation (deterministic fast-entailment screen "
+    "distinguishing entailed_non_literal from no_value_overlap), and "
+    "deterministic tool-computed receipts (md5, sha256, byte_length, "
+    "line_count, regex_count, manifest_chunk_count, manifest_total_bytes, "
+    "record_count, record_sum, unit_convert); REFUTE/NO_EVIDENCE entries do "
+    "not grant positive coverage credit and populated slots with only refuting "
+    "receipts emit populated_slot_refuted_by_receipt. " + RERECEIPTS_INSTRUMENT
+)
+
 
 def receipt_instrument(version: int = 3) -> str:
     """Explicit opt-in: historical/default consumers keep their v3 instrument."""
-    if type(version) is not int or version not in (3, 4):
+    if type(version) is not int or version not in (3, 4, 5):
         raise ValueError("unsupported receipt instrument version")
-    return RECEIPTS_INSTRUMENT if version == 3 else RERECEIPTS_INSTRUMENT
+    if version == 3:
+        return RECEIPTS_INSTRUMENT
+    if version == 4:
+        return RERECEIPTS_INSTRUMENT
+    return RECEIPTS_V5_INSTRUMENT
 
 
 _DOI_RESOLVERS = ("https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/")
@@ -987,8 +1035,14 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None,
             continue
         for pair in entry.get("extracted") or []:
             slot = str(pair.get("slot", ""))
-            slots.setdefault(slot, []).append({"chunk": entry.get("id"),
-                                               "snippet": pair.get("snippet")})
+            rec_entry: dict[str, Any] = {
+                "chunk": entry.get("id"),
+                "snippet": pair.get("snippet"),
+            }
+            for opt_key in ("supports", "evidence_source", "explanation", "tool", "origin"):
+                if opt_key in pair and pair[opt_key] is not None:
+                    rec_entry[opt_key] = copy.deepcopy(pair[opt_key])
+            slots.setdefault(slot, []).append(rec_entry)
     out: dict[str, Any] = {"bundle_md5": receipt.get("bundle_md5"), "slots": {}}
     for slot in sorted(slots):
         item: dict[str, Any] = {"receipts": slots[slot]}
@@ -1024,6 +1078,323 @@ def _value_tokens(node: Any) -> set[str]:
     else:
         text = str(node)
     return {t for t in normalise(text.replace("_", " ")).split() if len(t) >= 4}
+
+
+_BYTE_UNITS_FACTORS: dict[str, tuple[float, float]] = {
+    "b": (1.0, 1.0),
+    "byte": (1.0, 1.0),
+    "bytes": (1.0, 1.0),
+    "kb": (1e3, 1024.0),
+    "kilobyte": (1e3, 1024.0),
+    "kilobytes": (1e3, 1024.0),
+    "kib": (1024.0, 1024.0),
+    "mb": (1e6, 1024.0 ** 2),
+    "megabyte": (1e6, 1024.0 ** 2),
+    "megabytes": (1e6, 1024.0 ** 2),
+    "mib": (1024.0 ** 2, 1024.0 ** 2),
+    "gb": (1e9, 1024.0 ** 3),
+    "gigabyte": (1e9, 1024.0 ** 3),
+    "gigabytes": (1e9, 1024.0 ** 3),
+    "gib": (1024.0 ** 3, 1024.0 ** 3),
+    "tb": (1e12, 1024.0 ** 4),
+    "terabyte": (1e12, 1024.0 ** 4),
+    "terabytes": (1e12, 1024.0 ** 4),
+    "tib": (1024.0 ** 4, 1024.0 ** 4),
+}
+
+_NUMBER_WORDS: dict[str, int] = {
+    "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+    "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+    "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
+    "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
+    "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60,
+    "seventy": 70, "eighty": 80, "ninety": 90, "hundred": 100, "thousand": 1000,
+}
+
+_QTY_UNIT_RE = re.compile(
+    r"(?P<num>\d[\d,]*(?:\.\d+)?)\s*(?P<unit>bytes?|b|kb|kib|kilobytes?|mb|mib|megabytes?|gb|gib|gigabytes?|tb|tib|terabytes?|%)",
+    re.I,
+)
+
+
+def _extract_byte_quantities(text: str) -> list[tuple[float, float, int]]:
+    """Extract `(decimal_bytes, binary_bytes, decimals)` from `text`."""
+    out: list[tuple[float, float, int]] = []
+    for m in _QTY_UNIT_RE.finditer(text):
+        u = m.group("unit").lower()
+        if u == "%":
+            continue
+        raw_num = m.group("num").replace(",", "")
+        try:
+            val = float(raw_num)
+        except ValueError:
+            continue
+        decimals = len(raw_num.split(".")[1]) if "." in raw_num else 0
+        dec_f, bin_f = _BYTE_UNITS_FACTORS[u]
+        out.append((val * dec_f, val * bin_f, decimals))
+    return out
+
+
+def check_fast_entailment(
+    value: Any,
+    snippet: str,
+    *,
+    explanation: str | None = None,
+    slot: str | None = None,
+) -> tuple[bool, str | None]:
+    """Deterministic fast-entailment screen for v5 receipt entries (Slides 7–8).
+
+    Distinguishes legitimate non-literal mappings (unit conversions, number/word
+    or percentage equivalence, and token-anchored `explanation` bridges) from
+    ungrounded `no_value_overlap` quotes.
+    """
+    val_str = yaml.safe_dump(value, allow_unicode=True) if isinstance(value, (dict, list)) else str(value)
+
+    # 1. Byte/unit conversion equivalence (e.g., 3.82 TB <-> 3820000000000)
+    snip_bytes = _extract_byte_quantities(snippet)
+    val_bytes = _extract_byte_quantities(val_str)
+    if snip_bytes:
+        # Value might be a bare integer/float of bytes or another unit string
+        raw_nums = [float(x.replace(",", "")) for x in re.findall(r"\b\d[\d,]*(?:\.\d+)?\b", val_str)]
+        for dec_b, bin_b, decimals in snip_bytes:
+            tol_rel = 0.5 * (10 ** (-max(1, decimals))) + 1e-4
+            for target_b in [b[0] for b in val_bytes] + [b[1] for b in val_bytes] + raw_nums:
+                if target_b > 0 and (
+                    abs(dec_b - target_b) / max(dec_b, target_b) <= tol_rel
+                    or abs(bin_b - target_b) / max(bin_b, target_b) <= tol_rel
+                ):
+                    return True, "unit_conversion"
+
+    # 2. Percentage <-> decimal ratio, comma-formatted number, or number words equivalence
+    snip_nums = {float(x.replace(",", "")) for x in re.findall(r"\b\d[\d,]*(?:\.\d+)?\b", snippet)}
+    val_nums = {float(x.replace(",", "")) for x in re.findall(r"\b\d[\d,]*(?:\.\d+)?\b", val_str)}
+    if snip_nums and val_nums and (snip_nums & val_nums):
+        return True, "numeric_equivalence"
+    snip_norm_words = set(normalise(snippet).split())
+    val_norm_words = set(normalise(val_str.replace("_", " ")).split())
+    for word, num in _NUMBER_WORDS.items():
+        if (word in snip_norm_words and str(num) in val_norm_words) or (
+            word in val_norm_words and str(num) in snip_norm_words
+        ):
+            return True, "numeric_equivalence"
+    for m_pct in re.finditer(r"(\d+(?:\.\d+)?)\s*%", snippet):
+        pct_val = float(m_pct.group(1)) / 100.0
+        for raw_v in re.findall(r"\b0?\.\d+\b", val_str):
+            if abs(float(raw_v) - pct_val) <= 0.005:
+                return True, "numeric_equivalence"
+
+    # 3. Token-anchored explanation bridge
+    if explanation is not None:
+        if not isinstance(explanation, str) or not explanation.strip():
+            return False, "empty_explanation"
+        exp_tokens = {
+            t for t in normalise(explanation.replace("_", " ")).split()
+            if len(t) >= 3 or t.isdigit()
+        }
+        snip_tokens = {
+            t for t in normalise(snippet.replace("_", " ")).split()
+            if len(t) >= 3 or t.isdigit()
+        }
+        slot_leaf = (slot or "").rsplit(".", 1)[-1].split("[", 1)[0]
+        val_anchor_tokens = {
+            t for t in normalise((val_str + " " + slot_leaf).replace("_", " ")).split()
+            if len(t) >= 3 or t.isdigit()
+        }
+        if (exp_tokens & snip_tokens) and (exp_tokens & val_anchor_tokens):
+            return True, "explained_bridge"
+        return False, "ungrounded_explanation"
+
+    return False, None
+
+
+_UNSAFE_REGEX_RE = re.compile(r"\([^)]*[+*][^)]*\)[+*?]")
+
+
+def _resolve_wildcard_values(record: Any, path: str) -> list[Any]:
+    """Resolve a slot path (supporting `[*]` or `*`) to a list of values."""
+    parts = re.findall(r"[\w]+|\[\d+\]|\[\*\]|\*", path.strip("/").replace("/", "."))
+    if not parts:
+        return []
+
+    def _walk(cur: Any, idx: int) -> list[Any]:
+        if idx == len(parts):
+            return [cur]
+        part = parts[idx]
+        if part in ("[*]", "*"):
+            if isinstance(cur, list):
+                out: list[Any] = []
+                for item in cur:
+                    out.extend(_walk(item, idx + 1))
+                return out
+            return []
+        if part.startswith("["):
+            i = int(part[1:-1])
+            if isinstance(cur, list) and 0 <= i < len(cur):
+                return _walk(cur[i], idx + 1)
+            return []
+        if isinstance(cur, list):
+            out = []
+            for item in cur:
+                out.extend(_walk(item, idx))
+            return out
+        if isinstance(cur, dict) and part in cur:
+            return _walk(cur[part], idx + 1)
+        return []
+
+    return _walk(record, 0)
+
+
+def verify_tool_receipt(
+    pair: dict[str, Any],
+    chunk_id: str,
+    chunk_texts: dict[str, str],
+    manifest: dict[str, Any],
+    full: dict[str, Any],
+    original: dict[str, Any] | None = None,
+) -> tuple[bool, str, Any]:
+    """Deterministically execute and verify a v5 `tool` receipt entry (Slides 7 & 14).
+
+    Returns `(verified, reason, computed_result)`.
+    """
+    import hashlib
+    import math
+
+    tool = pair.get("tool")
+    if not isinstance(tool, dict):
+        return False, "tool is not a mapping", None
+    name = tool.get("name")
+    if not isinstance(name, str) or name not in TOOL_RECEIPT_NAMES:
+        return False, f"unknown tool {name!r}", None
+    if "result" not in tool:
+        return False, "tool missing required `result` field", None
+    declared_result = tool["result"]
+    args = tool.get("args") if isinstance(tool.get("args"), dict) else {}
+
+    target = str(args.get("target") or "chunk")
+    chunk_text = chunk_texts.get(chunk_id)
+
+    computed: Any = None
+    if name == "md5":
+        if target == "bundle":
+            computed = manifest.get("bundle_md5")
+        else:
+            if chunk_text is None:
+                return False, f"chunk {chunk_id!r} text unavailable for md5", None
+            computed = hashlib.md5(chunk_text.encode("utf-8")).hexdigest()
+    elif name == "sha256":
+        if target == "bundle":
+            computed = manifest.get("bundle_sha256")
+        else:
+            if chunk_text is None:
+                return False, f"chunk {chunk_id!r} text unavailable for sha256", None
+            computed = hashlib.sha256(chunk_text.encode("utf-8")).hexdigest()
+    elif name == "byte_length":
+        if chunk_text is None:
+            return False, f"chunk {chunk_id!r} text unavailable for byte_length", None
+        computed = len(chunk_text.encode("utf-8"))
+    elif name == "line_count":
+        if chunk_text is None:
+            return False, f"chunk {chunk_id!r} text unavailable for line_count", None
+        computed = len(chunk_text.splitlines())
+    elif name == "regex_count":
+        pattern = args.get("pattern")
+        if not isinstance(pattern, str) or not pattern or len(pattern) > 200:
+            return False, "regex_count requires a non-empty string pattern (<= 200 chars)", None
+        if _UNSAFE_REGEX_RE.search(pattern):
+            return False, "regex_count pattern rejected due to nested quantifiers", None
+        if chunk_text is None:
+            return False, f"chunk {chunk_id!r} text unavailable for regex_count", None
+        try:
+            computed = len(re.findall(pattern, chunk_text))
+        except re.error as exc:
+            return False, f"invalid regex pattern: {exc}", None
+    elif name == "manifest_chunk_count":
+        computed = int(manifest.get("chunk_count") or len(manifest.get("chunks") or []))
+    elif name == "manifest_total_bytes":
+        computed = sum(
+            int(c.get("bytes") or 0)
+            for c in (manifest.get("chunks") or [])
+            if isinstance(c, dict)
+        )
+    elif name in ("record_count", "record_sum"):
+        raw_target = str(
+            args.get("path")
+            or tool.get("path")
+            or tool.get("target")
+            or pair.get("slot")
+            or ""
+        )
+        for prefix in ("record:", "full:"):
+            if raw_target.startswith(prefix):
+                raw_target = raw_target[len(prefix):]
+        target_path = raw_target.lstrip("/")
+        field_arg = args.get("field")
+        if name == "record_sum" and isinstance(field_arg, str) and field_arg:
+            if not target_path.endswith(f".{field_arg}"):
+                target_path = f"{target_path}.{field_arg}" if target_path else field_arg
+        if not target_path:
+            return False, f"{name} requires args.path or target", None
+        vals = _resolve_wildcard_values(full, target_path)
+        if not vals and original is not None:
+            vals = _resolve_wildcard_values(original, target_path)
+        if name == "record_count":
+            if len(vals) == 1 and isinstance(vals[0], (list, dict)):
+                computed = len(vals[0])
+            else:
+                computed = len(vals)
+        else:
+            flat: list[int | float] = []
+            for v in vals:
+                items = v if isinstance(v, list) else [v]
+                for item in items:
+                    if isinstance(item, bool) or not isinstance(item, (int, float)):
+                        return False, f"non-numeric value {item!r} at {target_path}", None
+                    flat.append(item)
+            computed = sum(flat)
+    elif name == "unit_convert":
+        raw_val = args.get("value")
+        from_unit = str(args.get("from_unit") or "").lower()
+        to_unit = str(args.get("to_unit") or "b").lower()
+        if not isinstance(raw_val, (int, float)) or isinstance(raw_val, bool):
+            return False, "unit_convert requires numeric args.value", None
+        if from_unit not in _BYTE_UNITS_FACTORS or to_unit not in _BYTE_UNITS_FACTORS:
+            return False, f"unsupported unit_convert units: {from_unit!r} -> {to_unit!r}", None
+        binary = bool(args.get("binary", from_unit.endswith("ib") or to_unit.endswith("ib")))
+        idx = 1 if binary else 0
+        factor = _BYTE_UNITS_FACTORS[from_unit][idx] / _BYTE_UNITS_FACTORS[to_unit][idx]
+        raw_computed = float(raw_val) * factor
+        computed = int(round(raw_computed)) if to_unit in ("b", "byte", "bytes") else round(raw_computed, 6)
+
+    # Compare computed result with declared tool.result
+    if isinstance(computed, (int, float)) and isinstance(declared_result, (int, float)):
+        if not math.isclose(float(computed), float(declared_result), rel_tol=1e-6, abs_tol=1e-6):
+            return False, f"computed {computed!r} != declared result {declared_result!r}", computed
+    elif computed != declared_result:
+        return False, f"computed {computed!r} != declared result {declared_result!r}", computed
+
+    # Also verify that the declared result agrees with the slot's value in the record when resolved
+    spath = str(pair.get("slot") or "")
+    resolved, slot_val = (_resolve_value(original, spath) if original is not None else (False, None))
+    if not resolved:
+        resolved, slot_val = _resolve_value(full, spath)
+    if resolved and _populated(slot_val) and not isinstance(slot_val, (dict, list)):
+        if isinstance(slot_val, (int, float)) and not isinstance(slot_val, bool) and isinstance(declared_result, (int, float)):
+            if not math.isclose(float(slot_val), float(declared_result), rel_tol=1e-4, abs_tol=1.0):
+                return (
+                    False,
+                    f"tool result {declared_result!r} disagrees with record slot value {slot_val!r}",
+                    computed,
+                )
+        elif isinstance(slot_val, str) and str(declared_result) not in slot_val:
+            ent_ok, _ = check_fast_entailment(slot_val, str(declared_result), explanation=pair.get("explanation"), slot=spath)
+            if not ent_ok and normalise(str(declared_result)) not in normalise(slot_val):
+                return (
+                    False,
+                    f"tool result {declared_result!r} not reflected in record slot value {slot_val!r}",
+                    computed,
+                )
+
+    return True, f"verified:{name}", computed
 
 
 def _resolve_value(record: Any, path: str) -> tuple[bool, Any]:
@@ -1072,13 +1443,15 @@ def _receipt_entries(receipt: dict[str, Any]) -> tuple[list[dict[str, Any]], lis
 
 def _receipt_paths(entries: list[dict[str, Any]], unattesting_pairs: set) -> tuple[list[str], set[str]]:
     """(every receipt path, the paths an attesting snippet receipts). A pair
-    in `unattesting_pairs` — (chunk, slot, snippet) below the #720 floors —
-    keeps its path for the resolution checks and earns no coverage (#891)."""
+    in `unattesting_pairs` — (chunk, slot, snippet) below the #720 floors, or
+    id(pair) for v5 non-supporting / failed-tool pairs — keeps its path for the
+    resolution checks and earns no coverage (#891)."""
     all_paths = sorted({str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
                         for p in (e.get("extracted") or [])})
     attesting = {str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
                  for p in (e.get("extracted") or [])
-                 if (e.get("id"), str(p.get("slot") or ""), p.get("snippet")) not in unattesting_pairs}
+                 if (e.get("id"), str(p.get("slot") or ""), p.get("snippet")) not in unattesting_pairs
+                 and id(p) not in unattesting_pairs}
     return all_paths, attesting
 
 
@@ -1233,7 +1606,8 @@ def _rereceipt_action(a: Any) -> tuple[str | None, str | None]:
 
 def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: list[Any],
                     chunk_texts: dict[str, str], *, listed: list[str],
-                    instrument_version: int = 3) -> dict[str, Any]:
+                    instrument_version: int = 3,
+                    manifest: dict[str, Any] | None = None) -> dict[str, Any]:
     """Validate a slot-driven re-receipt's answers and merge the verified ones
     into a copy of `receipt` (#2926). Pure: neither `receipt` nor `record`
     is modified; the merged receipt is returned under `receipt`.
@@ -1302,10 +1676,12 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
             counts["unsupported"] += 1
             unsupported.append({"path": path, "reason": a["reason"].strip()})
             continue
-        chunk, snippet = a["receipt"].get("chunk"), a["receipt"].get("snippet")
+        rec_obj = a["receipt"]
+        chunk, snippet = rec_obj.get("chunk"), rec_obj.get("snippet")
+        has_tool = instrument_version == 5 and isinstance(rec_obj.get("tool"), dict)
         if not isinstance(chunk, str) or chunk not in chunk_texts:
             reject(n, path, f"unknown chunk {chunk!r}"); continue
-        if not isinstance(snippet, str) or not snippet.strip():
+        if not has_tool and (not isinstance(snippet, str) or not snippet.strip()):
             reject(n, path, "empty snippet"); continue
         entries = by_id.get(chunk) or []
         if len(entries) != 1:
@@ -1314,7 +1690,7 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
         status = entry.get("status")
         if status not in RERECEIPT_TARGET_STATUSES:
             reject(n, path, f"chunk {chunk} is {status!r}"); continue
-        if instrument_version == 4 and status != "extracted":
+        if instrument_version in (4, 5) and status != "extracted":
             conflicts = [key for key in ("extracted", "rereceipt_prior") if key in entry]
             if conflicts:
                 reject(n, path, f"chunk {chunk} is {status!r} but carries "
@@ -1325,13 +1701,41 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
             pairs = []
         if not (isinstance(pairs, list) and all(isinstance(x, dict) for x in pairs)):
             reject(n, path, f"chunk {chunk}'s extracted is not a list of {{slot, snippet}} mappings"); continue
-        ok, reason = snippet_in(snippet, chunk_texts[chunk])
-        if not ok:
-            reject(n, path, f"snippet not verified in {chunk}: {reason}"); continue
-        pair = {"slot": path, "snippet": snippet}
-        if instrument_version == 4:
+        pair: dict[str, Any] = {"slot": path}
+        if isinstance(snippet, str) and snippet.strip():
+            ok, reason = snippet_in(snippet, chunk_texts[chunk])
+            if not ok:
+                reject(n, path, f"snippet not verified in {chunk}: {reason}"); continue
+            pair["snippet"] = snippet
+        if has_tool:
+            temp_pair = {"slot": path, "tool": rec_obj["tool"]}
+            t_ok, t_reason, _ = verify_tool_receipt(
+                temp_pair, chunk, chunk_texts, manifest or {}, record
+            )
+            if not t_ok:
+                reject(n, path, f"tool receipt not verified in {chunk}: {t_reason}"); continue
+            pair["tool"] = copy.deepcopy(rec_obj["tool"])
+        if instrument_version in (4, 5):
             pair["origin"] = "rereceipt"
-        if any(str(x.get("slot") or "") == path and x.get("snippet") == snippet for x in pairs):
+        if instrument_version == 5:
+            if "supports" in rec_obj:
+                if rec_obj["supports"] not in SUPPORTS_VALUES:
+                    reject(n, path, f"invalid supports value {rec_obj['supports']!r}"); continue
+                pair["supports"] = rec_obj["supports"]
+            if "evidence_source" in rec_obj:
+                if rec_obj["evidence_source"] not in EVIDENCE_SOURCE_VALUES:
+                    reject(n, path, f"invalid evidence_source {rec_obj['evidence_source']!r}"); continue
+                pair["evidence_source"] = rec_obj["evidence_source"]
+            if "explanation" in rec_obj:
+                if not isinstance(rec_obj["explanation"], str) or not rec_obj["explanation"].strip():
+                    reject(n, path, "empty explanation"); continue
+                pair["explanation"] = rec_obj["explanation"].strip()
+        if any(
+            str(x.get("slot") or "") == path
+            and x.get("snippet") == pair.get("snippet")
+            and x.get("tool") == pair.get("tool")
+            for x in pairs
+        ):
             counts["already_present"] += 1
             continue
         if status != "extracted":
@@ -1446,6 +1850,15 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 # findings and a screen must not gate (#839, #840).
                 "no_value_overlap": 0, "no_value_overlap_sample": [],
                 "entry_single_leaf": 0, "entry_single_leaf_sample": []}
+    if instrument_version == 5:
+        snippets["entailed_non_literal"] = 0
+        snippets["entailed_non_literal_sample"] = []
+        snippets["ungrounded_explanation"] = 0
+        snippets["ungrounded_explanation_sample"] = []
+    by_polarity = {p: 0 for p in SUPPORTS_VALUES}
+    by_evidence_source = {s: 0 for s in EVIDENCE_SOURCE_VALUES}
+    tool_receipts: dict[str, Any] = {"total": 0, "verified": 0, "mismatched": 0, "mismatched_sample": []}
+    refuting_paths: set[str] = set()
     origins = {origin: {key: 0 for key in
                        ("total", "no_value_overlap", "entry_single_leaf", "unattesting")}
                for origin in ("phase1", "rereceipt", "unknown")}
@@ -1460,11 +1873,53 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
             continue
         text = chunk_texts.get(e.get("id"))
         for pair in e.get("extracted") or []:
+            origin = ("phase1" if "origin" not in pair else
+                      "rereceipt" if pair["origin"] == "rereceipt" else "unknown")
+            if instrument_version == 5:
+                pol = pair.get("supports", "SUPPORT")
+                if not isinstance(pol, str) or pol not in SUPPORTS_VALUES:
+                    findings.append({"kind": "invalid_supports_value", "chunk": e.get("id"),
+                                     "slot": pair.get("slot"), "supports": pol})
+                    pol = "SUPPORT"
+                else:
+                    by_polarity[pol] += 1
+                default_src = "TOOL_COMPUTATION" if "tool" in pair else "BUNDLE_TEXT"
+                ev_src = pair.get("evidence_source", default_src)
+                if not isinstance(ev_src, str) or ev_src not in EVIDENCE_SOURCE_VALUES:
+                    findings.append({"kind": "invalid_evidence_source", "chunk": e.get("id"),
+                                     "slot": pair.get("slot"), "evidence_source": ev_src})
+                else:
+                    by_evidence_source[ev_src] += 1
+                if "explanation" in pair:
+                    expl = pair.get("explanation")
+                    if not isinstance(expl, str) or not expl.strip():
+                        findings.append({"kind": "empty_explanation", "chunk": e.get("id"),
+                                         "slot": pair.get("slot")})
+                if pol in ("REFUTE", "NO_EVIDENCE"):
+                    unattesting_pairs.add(id(pair))
+                    if pol == "REFUTE":
+                        refuting_paths.add(str(pair.get("slot") or ""))
+                if "tool" in pair:
+                    tool_receipts["total"] += 1
+                    t_ok, t_why, _t_comp = verify_tool_receipt(
+                        pair, e.get("id"), chunk_texts, manifest, full, original
+                    )
+                    if t_ok:
+                        tool_receipts["verified"] += 1
+                    else:
+                        tool_receipts["mismatched"] += 1
+                        tool_receipts["mismatched_sample"].append(
+                            {"chunk": e.get("id"), "slot": pair.get("slot"), "reason": t_why}
+                        )
+                        findings.append({"kind": "tool_receipt_mismatch", "chunk": e.get("id"),
+                                         "slot": pair.get("slot"), "reason": t_why})
+                        unattesting_pairs.add(id(pair))
+                    if "snippet" not in pair or pair.get("snippet") is None:
+                        origins[origin]["total"] += 1
+                        continue
             snippets["total"] += 1
             # Only an absent marker means the historical phase-1 convention.
             # Null, containers and unrecognized values remain visible, not trusted.
-            origin = ("phase1" if "origin" not in pair else
-                      "rereceipt" if pair["origin"] == "rereceipt" else "unknown")
             origins[origin]["total"] += 1
             snippet = pair.get("snippet")
             if not isinstance(snippet, str) or not snippet.strip():
@@ -1522,10 +1977,43 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                     else:
                         vtoks = _value_tokens(value)
                         if stoks and vtoks and not (stoks & vtoks):
+                            if instrument_version == 5:
+                                ent_ok, ent_why = check_fast_entailment(
+                                    value, snippet, explanation=pair.get("explanation"), slot=spath
+                                )
+                                if ent_ok:
+                                    snippets["entailed_non_literal"] += 1
+                                    snippets["entailed_non_literal_sample"].append(
+                                        {"chunk": e.get("id"), "slot": spath, "reason": ent_why}
+                                    )
+                                    continue
+                                if ent_why == "ungrounded_explanation":
+                                    snippets["ungrounded_explanation"] += 1
+                                    snippets["ungrounded_explanation_sample"].append(
+                                        {"chunk": e.get("id"), "slot": spath,
+                                         "explanation": str(pair.get("explanation") or "")[:60]}
+                                    )
                             snippets["no_value_overlap"] += 1
                             origins[origin]["no_value_overlap"] += 1
                             snippets["no_value_overlap_sample"].append(
                                 {"chunk": e.get("id"), "slot": spath, "snippet": snippet[:60]})
+                elif (instrument_version == 5 and resolved and spath != "id"
+                      and not exempt(spath, value, record_id_flag, carried_ids)
+                      and isinstance(value, (int, float)) and not isinstance(value, bool)):
+                    ent_ok, ent_why = check_fast_entailment(
+                        value, snippet, explanation=pair.get("explanation"), slot=spath
+                    )
+                    if ent_ok and ent_why != "literal_overlap":
+                        snippets["entailed_non_literal"] += 1
+                        snippets["entailed_non_literal_sample"].append(
+                            {"chunk": e.get("id"), "slot": spath, "reason": ent_why}
+                        )
+                    elif ent_why == "ungrounded_explanation":
+                        snippets["ungrounded_explanation"] += 1
+                        snippets["ungrounded_explanation_sample"].append(
+                            {"chunk": e.get("id"), "slot": spath,
+                             "explanation": str(pair.get("explanation") or "")[:60]}
+                        )
                 continue
             if why.startswith("too short"):
                 snippets["unattesting"] += 1
@@ -1654,6 +2142,17 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
         findings.append({"kind": "slot_not_in_record" if p else "slot_empty", "slot": p})
     coverage = _slot_coverage(full, attesting, effective, gone)
     leaves, receiptable, without = coverage["leaves"], coverage["receiptable"], coverage["without"]
+    if instrument_version == 5 and refuting_paths:
+        attesting_at = {effective.get(r, r) for r in attesting if r not in gone}
+        refuting_at = {effective.get(r, r) for r in refuting_paths if r not in gone}
+        for lp, _lv in receiptable:
+            if any(
+                _covers(r, lp) or _covers(lp, r) or r.startswith(lp + "[")
+                for r in refuting_at
+            ) and not any(
+                _covers(r, lp) or r.startswith(lp + "[") for r in attesting_at
+            ):
+                findings.append({"kind": "populated_slot_refuted_by_receipt", "slot": lp})
     record_id = full.get("id") if isinstance(full.get("id"), str) else None
     carried = carried_ids                                               # one set, computed once above
     # #1123: how many `id` leaves this revision exempts that v1 receipted —
@@ -1699,6 +2198,10 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     snippets["no_value_overlap_sample"] = snippets["no_value_overlap_sample"][:10]
     snippets["unattesting_sample"] = snippets["unattesting_sample"][:10]
     snippets["entry_single_leaf_sample"] = snippets["entry_single_leaf_sample"][:10]
+    if instrument_version == 5:
+        snippets["entailed_non_literal_sample"] = snippets["entailed_non_literal_sample"][:10]
+        snippets["ungrounded_explanation_sample"] = snippets["ungrounded_explanation_sample"][:10]
+        tool_receipts["mismatched_sample"] = tool_receipts["mismatched_sample"][:10]
     chunks = {"total": len(manifest_ids), "reviewed": reviewed, "unreviewed": missing[:50],
               "by_status": by_status}
     # The gated-findings count, computed before the [:100] cap: a block whose
@@ -1708,7 +2211,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                       "snippet_elsewhere_chunk", "snippet_spans_boundary"}
     findings_gated = sum(1 for f in findings if f.get("kind") not in reported_kinds)
     extra = {}
-    if instrument_version == 4:
+    if instrument_version in (4, 5):
         snippets["by_origin"] = origins
         reversals = []
         malformed = []
@@ -1726,6 +2229,10 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                               "status_reversals": reversals,
                               "unusable_prior_count": len(malformed),
                               "unusable_prior_chunks": malformed}
+    if instrument_version == 5:
+        extra["by_polarity"] = by_polarity
+        extra["by_evidence_source"] = by_evidence_source
+        extra["tool_receipts"] = tool_receipts
     return {"checked": True, "instrument": instrument, **extra,
             "chunks": chunks, "snippets": snippets, "slots": slots,
             "findings": findings[:100], "findings_truncated": max(0, len(findings) - 100) or None,
