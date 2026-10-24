@@ -148,6 +148,22 @@ def test_anchors_distinguish_content_from_representation_and_supporting_metadata
     assert 'meaningful' in text.lower()
 
 
+def test_q19_neutrality_anchors_contain_no_graph_requirement():
+    questions = yaml.safe_load((ROOT / INSTRUMENT.rubric_path).read_bytes())['d4d_evaluation_rubric']['rubric']
+    q = questions[18]
+    assert q['id'] == 19
+    assert 'graph' not in q['name'].lower()
+    assert q['name'] == 'Data Integrity, Provenance, and Quality'
+    for score in (0, 3, 5):
+        anchor_text = q['scoring'][score].lower()
+        assert 'provenance graph' not in anchor_text
+        assert 'prov-o' not in anchor_text
+    assert 'in any representation' in q['scoring'][5]
+    agent = (ROOT / INSTRUMENT.definition_path).read_text()
+    assert '#### Question 19: Data Integrity, Provenance, and Quality' in agent
+    assert '- **5:** At the declared dataset or release scope, source and resulting entities, collection or processing activities, responsible agents or roles, and the relationships forming derivation paths are identifiable and mutually consistent, in any representation.' in agent
+
+
 @pytest.mark.parametrize('value', [True, False, None])
 def test_q19_always_applies_even_without_processing(value):
     specification = yaml.safe_load((ROOT / INSTRUMENT.rubric_path).read_bytes())

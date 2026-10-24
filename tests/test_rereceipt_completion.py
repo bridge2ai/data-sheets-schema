@@ -221,6 +221,7 @@ def test_forged_chunk_manifest_is_refused_even_with_matching_bundle_hash():
 
 def test_parser_does_not_silently_drop_malformed_answers():
     assert rr.parse_answers(b"rereceipt: [3, null]\n") == [3, None]
+    assert rr.parse_answers(b"```yaml\nrereceipt: [3, null]\n```\n") == [3, None]
     for value in (b"rereceipt: []\nrecord: {}", b"rereceipt: {}", b"rereceipt: []\nrereceipt: []"):
         with pytest.raises(ValueError):
             rr.parse_answers(value)

@@ -247,7 +247,8 @@ def build_request(inputs):
     inventory = {'requested_paths': prepared.paths(), 'record_yaml': inputs['record'],
                  'receipt_yaml': inputs['receipt'], 'registration': inputs['registration'],
                  'input_sha256': {k: sha(inputs[k].encode()) for k in ('record', 'receipt', 'manifest', 'bundle')},
-                 'schema': {k: v for k, v in inputs['schema'].items()},
+                 'schema': {'sources': [{k: v for k, v in s.items() if k != 'text'}
+                                        for s in inputs['schema']['sources']]},
                  'policy': inputs['policy']}
     req = api.PhaseRequest(phase=PHASE, system=prior['system'],
         cached_blocks=copy.deepcopy(prior['cached_blocks']),

@@ -937,7 +937,9 @@ def _rows_cost(rows) -> float:
 @click.option("--max-cost-dollars", type=float, default=None,
               help="stop the batch before starting another run once this invocation's billed attempts reach "
                    "this many dollars at run_telemetry's opus-5 rates; checked between runs, so the run "
-                   "that crosses the cap finishes and spend can exceed it by up to one run. Usage a "
+                   "that crosses the cap finishes and spend can exceed it by up to one run (a single run "
+                   "or single-run canary cannot be stopped mid-run by --max-cost-dollars; use dollar_readout "
+                   "and 'd4d api stop' for mid-run monitoring). Usage a "
                    "resumed run spent before this invocation is not counted (#5045)")
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,

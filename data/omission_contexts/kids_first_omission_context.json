@@ -1,0 +1,22 @@
+{
+  "format": "omission_context_v1",
+  "root_class": "Dataset",
+  "scopes": [
+    {
+      "owner": "",
+      "referent": "the Kids First Data Resource as a collection of pediatric genomic and clinical studies",
+      "release": "https://kidsfirstdrc.org/",
+      "scope": "Resource-level documentation. The captured DRC catalogue enumerates 36 distinct dbGaP studies. Keep study-specific populations, eligibility, releases, consent/access and data issues distinct. NIH award-abstract pages also describe funded projects; funding alone does not establish release. The nominated AJHG article is represented by its metadata and abstract; full text was unavailable."
+    }
+  ],
+  "source_policy": {
+    "basis": "Declared source types from project manifest (no tier hierarchy declared).",
+    "priority": [
+      "publication abstract",
+      "documentation",
+      "data resource",
+      "data resource catalogue"
+    ]
+  },
+  "vocabulary": {}
+}

@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -114,7 +115,9 @@ class Inputs:
 
 def parse_answers(raw: bytes) -> list[Any]:
     """Keep malformed list items for rejection accounting; never filter them out."""
-    parsed = _mapping(raw, "answers")
+    text = raw.decode("utf-8")
+    fenced = re.match(r"\A\s*```(?:ya?ml)?[ \t]*\r?\n(.*?)\r?\n[ \t]*```\s*\Z", text, re.S | re.I)
+    parsed = _mapping(fenced.group(1).encode("utf-8") if fenced else raw, "answers")
     if set(parsed) != {"rereceipt"} or not isinstance(parsed["rereceipt"], list):
         raise ValueError("answers must contain only a rereceipt list")
     return parsed["rereceipt"]
