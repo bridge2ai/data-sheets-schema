@@ -26,6 +26,7 @@ import secrets
 import shutil
 import tempfile
 from typing import Iterable
+import unicodedata
 
 import yaml
 
@@ -274,8 +275,21 @@ def _strip(raw: bytes, record: Record) -> tuple[bytes, set[str]]:
 
 
 def _identifier_leaked(ident_folded: str, text_folded: str) -> bool:
+    """Short IDs require boundaries outside Unicode letters/numbers/marks.
+
+    Punctuation and underscores remain delimiters. Longer identifiers retain
+    exact case-folded substring matching; no source text is normalized away.
+    """
     if len(ident_folded) < 4:
-        return bool(re.search(rf"(?<![0-9a-z]){re.escape(ident_folded)}(?![0-9a-z])", text_folded))
+        def word_character(char):
+            return char.isalnum() or unicodedata.category(char).startswith("M")
+
+        for match in re.finditer(re.escape(ident_folded), text_folded):
+            start, end = match.span()
+            if ((start == 0 or not word_character(text_folded[start - 1]))
+                    and (end == len(text_folded) or not word_character(text_folded[end]))):
+                return True
+        return False
     return ident_folded in text_folded
 
 

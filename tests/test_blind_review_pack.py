@@ -549,3 +549,55 @@ def test_short_arm_minimum_length_and_word_boundary_leakage(tmp_path):
     with pytest.raises(ValueError, match="identity"):
         build(tmp_path, [pack.Record("v8", "CHORUS", "secret-label-01", path)], name="pack_v8_leak")
 
+
+@pytest.mark.parametrize("arm, token", [
+    ("v8", "éV8"), ("v8", "V8β"), ("v8", "字V8字"),
+    ("v8", "e\u0301V8"), ("v8", "V8\u0301e"),
+    ("v10", "éV10β"), ("v10", "armV10a"),
+])
+@pytest.mark.parametrize("position", ["key", "value"])
+def test_short_arm_inside_unicode_word_preserves_scientific_text(tmp_path, arm, token, position):
+    document = {"id": "example:test", token: "Source value"} if position == "key" else {
+        "id": "example:test", "description": token,
+    }
+    path = tmp_path / "record.yaml"
+    path.write_text(yaml.safe_dump(document, allow_unicode=True))
+    output, _ = build(tmp_path, [pack.Record(arm, "CHORUS", "secret-label-01", path)])
+    assert yaml.safe_load((output / "blind_01.yaml").read_bytes()) == document
+
+
+@pytest.mark.parametrize("arm, token", [
+    ("v8", "V8"), ("v8", "(V8)"), ("v8", "prefix_V8_suffix"),
+    ("v10", "V10"), ("v10", "[V10]"), ("äb", "ÄB"),
+])
+@pytest.mark.parametrize("position", ["key", "value"])
+def test_short_casefolded_arm_at_existing_boundaries_still_refuses(tmp_path, arm, token, position):
+    document = {"id": "example:test", token: "Source value"} if position == "key" else {
+        "id": "example:test", "description": token,
+    }
+    path = tmp_path / "record.yaml"
+    # Escaped Unicode must be checked after parsing as well as in raw YAML.
+    path.write_text(json.dumps(document, ensure_ascii=True))
+    with pytest.raises(ValueError, match="identity"):
+        build(tmp_path, [pack.Record(arm, "CHORUS", "secret-label-01", path)])
+
+
+def test_short_arm_gate_checks_other_records_and_review_sheet(tmp_path):
+    records = selection(tmp_path, 2, raw=b"id: example:test\nname: Scientific dataset\n")
+    records[0] = replace(records[0], arm="v8")
+    records[1].source_path.write_text('id: example:second\ndescription: "Generated under V8."\n')
+    with pytest.raises(ValueError, match="identity"):
+        build(tmp_path, records)
+    records[1].source_path.write_text('id: example:second\ndescription: "Preserve éV8β."\n')
+    records[1] = replace(records[1], project="V8")
+    with pytest.raises(ValueError, match="identity"):
+        build(tmp_path, records)
+
+
+def test_long_identifiers_models_and_paths_keep_substring_refusal():
+    for identifier, text in (("long-arm", "élong-armβ"), ("/tmp/source", "prefix/tmp/source-suffix")):
+        with pytest.raises(ValueError, match="identity"):
+            pack._leakage(text.encode(), {identifier})
+    with pytest.raises(ValueError, match="model identifier"):
+        pack._leakage(b"Generated with claude-opus-5", set())
+
