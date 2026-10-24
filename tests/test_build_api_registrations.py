@@ -23,11 +23,16 @@ from scripts.build_api_registrations import (
     build_roster,
     cli,
     parse_coverage_floor,
+    resolve_audit_limits,
     validate_registration_document,
     validate_roster_file,
 )
 from data_sheets_schema import audit_omissions, shared_generation as sg
 from data_sheets_schema.cli.api import ARMS
+
+# Partition bounds have no default (D-C, 2026-10-23); projects without a
+# validated profile name theirs explicitly.
+EXPLICIT_BOUNDS = {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4}
 
 
 def test_build_draft_context_valid_schema(tmp_path: Path) -> None:
@@ -82,6 +87,7 @@ def test_build_registration_chorus_baseline(tmp_path: Path) -> None:
     """Build a complete registration for CHORUS baseline and parse strictly."""
     reg_path = tmp_path / "reg_chorus.json"
     reg = build_registration(
+        partition="chorus",
         project="CHORUS",
         label="2026-10-test_chorus",
         registration_path=reg_path,
@@ -134,6 +140,7 @@ def test_build_registration_arms(tmp_path: Path) -> None:
     for arm_key in ("de_novo", "crate_only"):
         reg_path = tmp_path / f"reg_{arm_key}.json"
         reg = build_registration(
+            audit_limits=dict(EXPLICIT_BOUNDS),
             project="CHORUS",
             label=f"2026-10-test_{arm_key}",
             arm=arm_key,
@@ -153,6 +160,7 @@ def test_build_registration_custom_limits_and_prefix(tmp_path: Path) -> None:
     custom_receipt = {"context_limit_basis": "Empirical run"}
 
     reg = build_registration(
+        partition="chorus",
         project="CHORUS",
         label="custom_label",
         registration_path=reg_path,
@@ -230,12 +238,14 @@ def test_build_roster_success_and_validation(tmp_path: Path) -> None:
     roster_path = tmp_path / "roster.json"
 
     reg1 = build_registration(
+        partition="chorus",
         project="CHORUS",
         label="test_batch",
         registration_path=reg1_path,
         write_to_disk=True,
     )
     reg2 = build_registration(
+        audit_limits=dict(EXPLICIT_BOUNDS),
         project="AI_READI",
         label="test_batch",
         registration_path=reg2_path,
@@ -255,6 +265,7 @@ def test_build_roster_duplicate_rejection(tmp_path: Path) -> None:
     """Ensure duplicate (project, label), paths, or registration_ids raise ValueError."""
     reg1_path = tmp_path / "reg1.json"
     reg1 = build_registration(
+        partition="chorus",
         project="CHORUS",
         label="test_dup",
         registration_path=reg1_path,
@@ -284,13 +295,14 @@ def test_cli_dry_run_single_and_all() -> None:
     runner = CliRunner()
 
     # Single project
-    result = runner.invoke(cli, ["-p", "CHORUS", "-l", "test_dry_single", "--dry-run"])
+    result = runner.invoke(cli, ["-p", "CHORUS", "--partition", "chorus", "-l", "test_dry_single", "--dry-run"])
     assert result.exit_code == 0
     assert "✓ CHORUS: registration_id=" in result.output
     assert "[dry-run]" in result.output
 
     # All projects
-    result_all = runner.invoke(cli, ["--all", "-l", "test_dry_all", "--dry-run"])
+    result_all = runner.invoke(cli, ["--all", "-l", "test_dry_all", "--dry-run",
+                                     "--max-paths", "384", "--max-inventory-bytes", "65536", "--max-workers", "4"])
     assert result_all.exit_code == 0
     for proj in DEFAULT_PROJECTS:
         assert f"✓ {proj}:" in result_all.output
@@ -311,6 +323,7 @@ def test_cli_file_generation_and_check(tmp_path: Path) -> None:
             "-l", "test_check",
             "-o", str(out_dir),
             "-r", str(roster_file),
+            "--max-paths", "80", "--max-inventory-bytes", "12288", "--max-workers", "4",
         ],
     )
     assert res.exit_code == 0
@@ -385,6 +398,7 @@ def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
     """Build registration for KIDS_FIRST with neutral profile and registered coverage floor (Step A19-reg)."""
     reg_path = tmp_path / "reg_kids_first.json"
     reg = build_registration(
+        audit_limits=dict(EXPLICIT_BOUNDS),
         project="KIDS_FIRST",
         label="2026-10-kfa_claude-opus-5-api-generic-v10_rep1",
         registration_path=reg_path,
@@ -414,6 +428,7 @@ def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
             "--label-prefix", prefix,
             "--replicates", "3",
             "--coverage-floor", "13/20",
+            "--partition", "chorus",
             "--max-paths", "144",
             "--max-workers", "18",
             "--max-calls", "20",
@@ -432,6 +447,7 @@ def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
     assert reg1["audit_limits"]["max_paths"] == 144
     assert reg1["audit_limits"]["max_workers"] == 18
     assert reg1["audit_limits"]["max_calls"] == 20
+    assert reg1["audit_limits"]["aggregate_output_tokens"] == 18 * 64000 + 32000 + 32000
     assert reg1["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
 
     # Check mode succeeds for multi-replicate roster
@@ -452,6 +468,7 @@ def test_overwrite_guard_requires_replace_on_changed_content(tmp_path: Path) -> 
     """Rebuilding at an existing path with different parameters refuses unless replace=True / --replace."""
     reg_path = tmp_path / "reg_guard.json"
     build_registration(
+        partition="chorus",
         project="CHORUS",
         label="test_guard",
         registration_path=reg_path,
@@ -460,6 +477,7 @@ def test_overwrite_guard_requires_replace_on_changed_content(tmp_path: Path) -> 
     )
     # Identical rebuild succeeds without replace
     build_registration(
+        partition="chorus",
         project="CHORUS",
         label="test_guard",
         registration_path=reg_path,
@@ -469,6 +487,7 @@ def test_overwrite_guard_requires_replace_on_changed_content(tmp_path: Path) -> 
     # Changed parameter refuses without replace
     with pytest.raises(FileExistsError, match="already exists with different bytes; pass --replace to overwrite"):
         build_registration(
+            partition="chorus",
             project="CHORUS",
             label="test_guard",
             registration_path=reg_path,
@@ -477,6 +496,7 @@ def test_overwrite_guard_requires_replace_on_changed_content(tmp_path: Path) -> 
         )
     # Succeeds with replace=True
     updated = build_registration(
+        partition="chorus",
         project="CHORUS",
         label="test_guard",
         registration_path=reg_path,
@@ -489,15 +509,77 @@ def test_overwrite_guard_requires_replace_on_changed_content(tmp_path: Path) -> 
     # CLI outputs sha256= and honors --replace
     runner = CliRunner()
     cli_dir = tmp_path / "cli_guard"
-    res1 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--max-calls", "18"])
+    res1 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--partition", "chorus", "--max-calls", "18"])
     assert res1.exit_code == 0
     assert "sha256=" in res1.output
 
-    res2 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--max-calls", "20"])
+    res2 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--partition", "chorus", "--max-calls", "20"])
     assert res2.exit_code != 0
     assert "already exists with different bytes; pass --replace to overwrite" in str(res2.exception)
 
-    res3 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--max-calls", "20", "--replace"])
+    res3 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--partition", "chorus", "--max-calls", "20", "--replace"])
     assert res3.exit_code == 0
     assert "sha256=" in res3.output
+
+
+def test_partition_bounds_have_no_default(tmp_path: Path) -> None:
+    """D-C (2026-10-23): a registration names its partition bounds or a profile validated for it."""
+    with pytest.raises(ValueError, match="audit partition bounds have no default"):
+        build_registration(project="CHORUS", label="no_bounds",
+                           registration_path=tmp_path / "r.json", write_to_disk=False)
+    # Two of three explicit bounds still refuse, naming the missing one.
+    with pytest.raises(ValueError, match="--max-workers"):
+        build_registration(project="CHORUS", label="no_bounds",
+                           audit_limits={"max_paths": 80, "max_inventory_bytes": 12288},
+                           registration_path=tmp_path / "r.json", write_to_disk=False)
+    res = CliRunner().invoke(cli, ["-p", "CHORUS", "-l", "no_bounds", "--dry-run"])
+    assert res.exit_code != 0
+    assert "audit partition bounds have no default" in res.output
+
+
+def test_chorus_partition_is_validated_for_chorus_only(tmp_path: Path) -> None:
+    """The chorus profile refuses other projects before anything is written or billed."""
+    with pytest.raises(ValueError, match="validated only for CHORUS"):
+        build_registration(project="AI_READI", label="wrong_profile", partition="chorus",
+                           registration_path=tmp_path / "r.json", write_to_disk=False)
+    with pytest.raises(ValueError, match="baseline arm"):
+        build_registration(project="CHORUS", arm="crate_only", label="wrong_arm", partition="chorus",
+                           registration_path=tmp_path / "r.json", write_to_disk=False)
+    # The CLI refuses before writing anything, including the CHORUS registration it could build.
+    out_dir = tmp_path / "regs"
+    res = CliRunner().invoke(cli, ["--all", "-l", "wrong_profile", "--partition", "chorus", "-o", str(out_dir)])
+    assert res.exit_code != 0
+    assert "validated only for CHORUS" in res.output
+    assert not out_dir.exists() or not any(out_dir.iterdir())
+
+
+def test_aggregate_and_calls_are_derived_from_the_stage_caps() -> None:
+    """Aggregate output = workers x worker cap + omission + integration; calls cover that roster."""
+    limits = resolve_audit_limits("CHORUS", "chorus")
+    assert (limits["max_paths"], limits["max_inventory_bytes"], limits["max_workers"]) == (80, 12288, 4)
+    assert (limits["worker_output_tokens"], limits["omission_output_tokens"],
+            limits["integration_output_tokens"]) == (64000, 32000, 32000)
+    assert limits["aggregate_output_tokens"] == 4 * 64000 + 32000 + 32000 == 320000
+    assert limits["max_calls"] == 6
+    # A stated aggregate must agree with the caps it is the sum of.
+    with pytest.raises(ValueError, match="disagrees with the stage caps"):
+        resolve_audit_limits("CHORUS", "chorus", {"aggregate_output_tokens": 150000})
+    assert resolve_audit_limits("CHORUS", "chorus", {"aggregate_output_tokens": 320000})["max_calls"] == 6
+    # A call allowance below the roster would refuse the plan midway.
+    with pytest.raises(ValueError, match="cannot cover 4 workers"):
+        resolve_audit_limits("CHORUS", "chorus", {"max_calls": 5})
+    # Explicit bounds for a project without a profile.
+    other = resolve_audit_limits("VOICE", None, {"max_paths": 120, "max_inventory_bytes": 12288, "max_workers": 9})
+    assert other["aggregate_output_tokens"] == 9 * 64000 + 64000
+    assert other["max_calls"] == 11
+
+
+def test_cli_floor_default_stays_pending(tmp_path: Path) -> None:
+    """The builder default keeps the pending floor, which keeps fan-out blocked (cli/api.py)."""
+    out_dir = tmp_path / "regs"
+    res = CliRunner().invoke(cli, ["-p", "CHORUS", "--partition", "chorus", "-l", "floor_default", "-o", str(out_dir)])
+    assert res.exit_code == 0, res.output
+    reg = json.loads((out_dir / "registration_chorus_floor_default.json").read_text(encoding="utf-8"))
+    assert reg["receipt"]["coverage_floor"] == {"state": "pending", "mode": "diagnostic_pilot"}
+    assert reg["audit_limits"]["aggregate_output_tokens"] == 320000
 
