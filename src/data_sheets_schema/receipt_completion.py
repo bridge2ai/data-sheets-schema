@@ -394,12 +394,18 @@ def _receipt_publish(spec, inputs, result) -> None:
     os.replace(temporary, path)
 
 
+#: Result fields added with the answer-parser record (#5116). A result saved
+#: before them still verifies if everything else matches exactly.
+_ENVELOPE_KEYS = frozenset({'answer_envelope', 'answer_parser'})
+
+
 def _result(inputs, raw: bytes, *, truncated=False) -> dict:
     import yaml
-    from data_sheets_schema.rereceipt import parse_answers, complete
+    from data_sheets_schema.rereceipt import ANSWER_PARSER, parse_answers_envelope, complete
     problem = 'response truncated' if truncated else None
+    envelope = None
     try:
-        answers = [] if problem else parse_answers(raw)
+        answers, envelope = ([], None) if problem else parse_answers_envelope(raw)
     except (ValueError, TypeError, UnicodeError, yaml.YAMLError) as exc:
         answers, problem = [], f'unusable response: {exc}'
     value = complete(_prepared(inputs), answers)
@@ -408,7 +414,8 @@ def _result(inputs, raw: bytes, *, truncated=False) -> dict:
     value.pop('policy')
     value['schema_validation'] = 'captured schema and dependency closure validated before admission'
     value.update(policy=inputs['policy'], registration=inputs['registration'],
-                 input_identity=inputs['input_identity'], semantic_support='not mechanically established')
+                 input_identity=inputs['input_identity'], semantic_support='not mechanically established',
+                 answer_envelope=envelope, answer_parser=copy.deepcopy(ANSWER_PARSER))
     if problem:
         value['state'] = 'answers_incomplete'
         value['response_problem'] = problem
@@ -471,7 +478,8 @@ def _check_accounted_response(state, response, rows):
 def _checked_result(inputs, response, result):
     from .usage_ledger import UsageLedgerError
     expected = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
-    if result != expected:
+    if result != expected and not (_ENVELOPE_KEYS.isdisjoint(result)
+                                   and result == {k: v for k, v in expected.items() if k not in _ENVELOPE_KEYS}):
         raise UsageLedgerError('receipt completion saved result differs from checked response')
     return result
 

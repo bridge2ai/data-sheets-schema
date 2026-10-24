@@ -113,14 +113,26 @@ class Inputs:
                 "requested_paths": self.paths(), "policy": POLICY}
 
 
-def parse_answers(raw: bytes) -> list[Any]:
-    """Keep malformed list items for rejection accounting; never filter them out."""
+#: What the answer parser accepts, recorded on every completion result
+#: (#5116). Version 2 (74d1351a9) also accepts one enclosing YAML code
+#: fence; version 1 accepted only bare YAML. A result saved before this was
+#: recorded carries neither field and could come from either version.
+ANSWER_PARSER = {"version": 2, "envelopes": ["bare", "yaml_fence"]}
+
+
+def parse_answers_envelope(raw: bytes) -> tuple[list[Any], str]:
+    """Answers plus the envelope they arrived in: `bare` or `yaml_fence`."""
     text = raw.decode("utf-8")
     fenced = re.match(r"\A\s*```(?:ya?ml)?[ \t]*\r?\n(.*?)\r?\n[ \t]*```\s*\Z", text, re.S | re.I)
     parsed = _mapping(fenced.group(1).encode("utf-8") if fenced else raw, "answers")
     if set(parsed) != {"rereceipt"} or not isinstance(parsed["rereceipt"], list):
         raise ValueError("answers must contain only a rereceipt list")
-    return parsed["rereceipt"]
+    return parsed["rereceipt"], ("yaml_fence" if fenced else "bare")
+
+
+def parse_answers(raw: bytes) -> list[Any]:
+    """Keep malformed list items for rejection accounting; never filter them out."""
+    return parse_answers_envelope(raw)[0]
 
 
 def complete(inputs: Inputs, answers: list[Any], *, expected_identity: dict | None = None) -> dict[str, Any]:

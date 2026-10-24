@@ -11,6 +11,16 @@ FORMAT = "receipt_completion_registration_v1"
 SPEC_KEYS = {"receipt_completion_version", "receipt_completion_policy_sha256",
              "receipt_completion_registration"}
 BLOCK_KEY = "receipt_completion_policy"
+#: A registered floor may name what it divides by (D-C, owner decision
+#: 2026-10-23; v2 registrations only). Without a basis a floor keeps its v2
+#: meaning, `with_receipt / receiptable` over the final record. With
+#: `receipted_part` the values reconciliation added after the receipt are
+#: reported beside the gate and not gated (#742): `with_receipt /
+#: (receiptable - added_after_receipt)`. In both CHORUS v10 canaries every
+#: miss was such an addition (never_receipted 0), so the v2 meaning measured
+#: how much the audit found. Readers that predate the basis refuse it rather
+#: than read it as the v2 meaning.
+FLOOR_BASES = ("receipted_part",)
 
 
 def _integer(value, name, minimum=0):
@@ -74,8 +84,14 @@ def parse_registration(raw: bytes, *, version: int = 1) -> dict:
         if floor != {"state": "pending", "mode": "diagnostic_pilot"}:
             raise ValueError("pending floor requires an explicit diagnostic_pilot")
     elif floor.get("state") == "registered":
-        if set(floor) != {"state", "numerator", "denominator"}:
-            raise ValueError("registered floor needs only an exact numerator/denominator")
+        allowed = ({"state", "numerator", "denominator"},)
+        if version == 2:
+            allowed += ({"state", "numerator", "denominator", "basis"},)
+        if set(floor) not in allowed:
+            raise ValueError("registered floor needs only an exact numerator/denominator"
+                             + (" and an optional basis" if version == 2 else ""))
+        if "basis" in floor and floor["basis"] not in FLOOR_BASES:
+            raise ValueError(f"coverage floor basis must be one of {FLOOR_BASES}")
         numerator = _integer(floor["numerator"], "floor numerator")
         denominator = _integer(floor["denominator"], "floor denominator", 1)
         if numerator > denominator:
@@ -245,6 +261,18 @@ def evaluate_floor(coverage: dict, policy: dict) -> dict:
               "passed": False, "registration_sha256": policy["identity"]["sha256"]}
     if floor["state"] == "pending":
         return {**result, "state": "pending", "reason": "diagnostic pilot; coverage floor not registered"}
+    if floor.get("basis") == "receipted_part":
+        # The block keeps its v2 keys; these three exist only under a basis.
+        added = coverage.get("added_after_receipt")
+        result.update(basis="receipted_part", added_after_receipt=added)
+        if added is None:
+            return {**result, "eligible": None, "state": "unmeasurable",
+                    "reason": "receipted-part floor needs the phase-1 split (added_after_receipt)"}
+        added = _integer(added, "added_after_receipt")
+        if added > eligible - covered:
+            raise ValueError("added_after_receipt exceeds the leaves without a receipt")
+        eligible -= added
+        result["eligible"] = eligible
     if eligible == 0:
         return {**result, "state": "not_applicable", "reason": "no eligible leaves; coverage unmeasurable"}
     passed = covered * floor["denominator"] >= eligible * floor["numerator"]

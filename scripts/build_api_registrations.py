@@ -178,19 +178,37 @@ def resolve_audit_limits(
     return limits
 
 
-def parse_coverage_floor(value: str | dict[str, Any] | None) -> dict[str, Any]:
+FLOOR_BASIS_CHOICES = ("receipted_part", "all_receiptable")
+
+
+def parse_coverage_floor(value: str | dict[str, Any] | None, *,
+                         basis: str = "receipted_part") -> dict[str, Any]:
     """Parse a coverage floor specification into receipt_completion_registration_v2 format.
 
     Accepts:
       - None, "pending", or "diagnostic_pilot" -> {"state": "pending", "mode": "diagnostic_pilot"}
-      - "NUM/DEN" (e.g. "13/20") -> {"state": "registered", "numerator": NUM, "denominator": DEN}
-      - Decimal multiple of 0.05 in (0, 1] (e.g. "0.65") -> {"state": "registered", "numerator": 13, "denominator": 20}
-      - An existing dict.
+      - "NUM/DEN" (e.g. "13/20") -> {"state": "registered", "numerator": NUM, "denominator": DEN, "basis": ...}
+      - Decimal multiple of 0.05 in (0, 1] (e.g. "0.65") -> {"state": "registered", "numerator": 13, "denominator": 20, ...}
+      - An existing dict, unchanged.
+
+    A registered floor gates the receipted part by default (D-C, 2026-10-23):
+    values reconciliation added after the receipt are reported, not gated.
+    ``basis="all_receiptable"`` writes the v2 floor with no basis key, the
+    form every registration before the decision carries.
     """
+    if basis not in FLOOR_BASIS_CHOICES:
+        raise ValueError(f"invalid coverage floor basis {basis!r}; expected one of {FLOOR_BASIS_CHOICES}")
     if value is None:
         return {"state": "pending", "mode": "diagnostic_pilot"}
     if isinstance(value, dict):
         return copy.deepcopy(value)
+    floor = _parse_floor_fraction(value)
+    if floor["state"] == "registered" and basis == "receipted_part":
+        floor["basis"] = "receipted_part"
+    return floor
+
+
+def _parse_floor_fraction(value: str) -> dict[str, Any]:
     text = str(value).strip()
     if text.lower() in ("pending", "diagnostic_pilot"):
         return {"state": "pending", "mode": "diagnostic_pilot"}
@@ -335,6 +353,7 @@ def build_registration(
     chunk_manifest_path: Path | str | None = None,
     profile_name: str | None = None,
     coverage_floor: str | dict[str, Any] | None = None,
+    floor_basis: str = "receipted_part",
     partition: str | None = None,
     audit_limits: dict[str, Any] | None = None,
     receipt_limits: dict[str, Any] | None = None,
@@ -511,7 +530,7 @@ def build_registration(
 
     active_receipt = copy.deepcopy(DEFAULT_RECEIPT_LIMITS)
     if coverage_floor is not None:
-        active_receipt["coverage_floor"] = parse_coverage_floor(coverage_floor)
+        active_receipt["coverage_floor"] = parse_coverage_floor(coverage_floor, basis=floor_basis)
     if "context_limit_tokens" in (audit_limits or {}) and "context_limit_tokens" not in (receipt_limits or {}):
         active_receipt["context_limit_tokens"] = active_audit_limits["context_limit_tokens"]
     if "context_limit_basis" in (audit_limits or {}) and "context_limit_basis" not in (receipt_limits or {}):
@@ -736,6 +755,14 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     help="Receipt coverage floor: 'pending' or 'NUM/DEN' (e.g. '13/20') or decimal in (0, 1] (e.g. '0.65').",
 )
 @click.option(
+    "--floor-basis",
+    type=click.Choice(FLOOR_BASIS_CHOICES),
+    default="receipted_part",
+    show_default=True,
+    help="What a registered floor divides by: the receipted part (values added after the receipt are "
+         "reported, not gated; D-C 2026-10-23) or all receiptable leaves (the v2 form, no basis key).",
+)
+@click.option(
     "--partition", "partition",
     type=click.Choice(sorted(PARTITION_PROFILES)),
     help="Named audit partition bounds validated for a project (chorus: 80 paths, 12,288 bytes, "
@@ -843,6 +870,7 @@ def cli(
     chunk_manifest: Path | None,
     profile_name: str | None,
     coverage_floor: str,
+    floor_basis: str,
     partition: str | None,
     max_paths: int | None,
     max_workers: int | None,
@@ -967,6 +995,7 @@ def cli(
                 chunk_manifest_path=chunk_manifest,
                 profile_name=profile_name,
                 coverage_floor=coverage_floor,
+                floor_basis=floor_basis,
                 partition=partition,
                 audit_limits=audit_overrides or None,
                 synthesize_draft_context=synthesize_draft_context,
