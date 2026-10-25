@@ -59,3 +59,49 @@ def test_context_templates_load_cleanly(template_name: str) -> None:
     assert path.is_file()
     ctx = load_context(path)
     assert set(ctx) == PREDICATES
+
+
+PROJECT_CHUNK_MANIFESTS = (
+    ("cm4ai_context.yaml", "data/preprocessed/chunks/CM4AI_chunks.yaml"),
+    ("ai_readi_context.yaml", "data/preprocessed/chunks/AI_READI_chunks.yaml"),
+    ("chorus_context.yaml", "data/preprocessed/chunks/CHORUS_chunks.yaml"),
+    ("voice_context.yaml", "data/preprocessed/chunks/VOICE_chunks.yaml"),
+    ("voice_pediatric_context.yaml", "data/preprocessed/chunks/VOICE_PEDIATRIC_chunks.yaml"),
+    ("kids_first_context.yaml", "notes/matched_cborg_2026-09-13/kids_first/chunks.yaml"),
+)
+
+
+@pytest.mark.parametrize("filename,chunk_manifest_rel", PROJECT_CHUNK_MANIFESTS)
+def test_project_context_evidence_chunk_grounding(
+    filename: str,
+    chunk_manifest_rel: str,
+) -> None:
+    """Verify every predicate evidence string cites valid v2 bundle chunk IDs or curator_assertion (#5121)."""
+    import re
+
+    ctx = load_context(CONTEXT_DIR / filename)
+    chunks_doc = yaml.safe_load((ROOT / chunk_manifest_rel).read_text(encoding="utf-8"))
+    valid_chunk_ids = {c["id"] for c in chunks_doc["chunks"]}
+
+    chunk_tag_re = re.compile(r"\[chunks:\s*([c0-9,\s]+)\]")
+    for pred, entry in ctx.items():
+        ev = entry["evidence"]
+        m = chunk_tag_re.search(ev)
+        has_curator = "curator_assertion: true" in ev
+        assert m is not None or has_curator, (
+            f"{filename}:{pred} must cite [chunks: cNNN, ...] or [curator_assertion: true]"
+        )
+        if m is not None:
+            cited = [tok.strip() for tok in m.group(1).split(",") if tok.strip()]
+            assert cited, f"{filename}:{pred} has empty [chunks: ...] tag"
+            for cid in cited:
+                assert cid in valid_chunk_ids, (
+                    f"{filename}:{pred} cites unknown chunk {cid!r} not in {chunk_manifest_rel}"
+                )
+
+    if filename == "cm4ai_context.yaml":
+        assert "HeLa" not in ctx["human_subjects"]["evidence"]
+    if filename == "chorus_context.yaml":
+        assert "PhysioNet" not in ctx["regulated_access"]["evidence"]
+        assert "CITI" not in ctx["regulated_access"]["evidence"]
+

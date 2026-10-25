@@ -113,6 +113,83 @@ def extract_source_policy(
     }
 
 
+def _format_related_but_distinct(declared: dict[str, Any] | None) -> str:
+    """Render declared related_but_distinct entries into scope text (#5120)."""
+    if not isinstance(declared, dict):
+        return ""
+    from data_sheets_schema.scope import aliases_of, malformed_in
+
+    rows = malformed_in(declared)
+    skipped = {r["index"] for r in rows if r["skipped"]}
+    related = [
+        e
+        for i, e in enumerate(declared.get("related_but_distinct") or [])
+        if i not in skipped and isinstance(e, dict)
+    ]
+    if not related:
+        return ""
+    lines = ["The declared bundle also documents datasets that are NOT this one:"]
+    for entry in related:
+        name = str(entry.get("name") or entry.get("id") or "").strip()
+        ids = aliases_of(entry)
+        head = f"- {name}" + (f" — {', '.join(ids)}" if ids else "")
+        lines.append(head)
+        why = str(entry.get("why") or "").strip()
+        if why:
+            lines.append(f"  Why distinct: {why}")
+        express = str(entry.get("express_as") or "").strip()
+        if express:
+            lines.append(
+                f"  Facts about it belong in `{express}`, never in this dataset's own slots."
+            )
+        in_bundle = entry.get("in_bundle")
+        if in_bundle:
+            names = (
+                list(in_bundle)
+                if isinstance(in_bundle, (list, tuple))
+                else [in_bundle]
+            )
+            lines.append(
+                "  Its documentation is legitimately in this bundle, under source "
+                + ", ".join(str(n) for n in names)
+                + "."
+            )
+    return "\n".join(lines)
+
+
+def serialize_draft_context(doc: dict[str, Any]) -> bytes:
+    """Serialize an omission_context_v1 document to canonical indented UTF-8 JSON bytes."""
+    return json.dumps(doc, indent=2, sort_keys=True).encode("utf-8") + b"\n"
+
+
+def load_project_manifest_data(
+    project: str,
+    source_manifest_path: Path | str | None = None,
+) -> dict[str, Any]:
+    """Load manifest data for a project, resolving KIDS_FIRST neutral manifest when appropriate."""
+    norm_project = project.strip()
+    manifest_data: dict[str, Any] = {}
+    if source_manifest_path is not None:
+        sm = Path(source_manifest_path)
+        if sm.is_file():
+            manifest_data = yaml.safe_load(sm.read_text(encoding="utf-8")) or {}
+    elif norm_project.upper() == "KIDS_FIRST" and KIDS_FIRST_MANIFEST_PATH.is_file():
+        manifest_data = yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
+    elif DEFAULT_MANIFEST_PATH.is_file():
+        manifest_data = yaml.safe_load(DEFAULT_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
+
+    scope_map = manifest_data.get("scope", {}) if isinstance(manifest_data, dict) else {}
+    if (
+        norm_project.upper() == "KIDS_FIRST"
+        and not any(k.upper() == "KIDS_FIRST" for k in (scope_map or {}))
+        and KIDS_FIRST_MANIFEST_PATH.is_file()
+    ):
+        manifest_data = (
+            yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
+        )
+    return manifest_data if isinstance(manifest_data, dict) else {}
+
+
 def build_draft_scope_context(
     project: str,
     manifest_data: dict[str, Any],
@@ -136,14 +213,18 @@ def build_draft_scope_context(
 
     if matched_entry and isinstance(matched_entry, dict):
         referent = matched_entry.get("referent") or referent
-        # Under D04: CHORUS release is null
-        if norm_project.upper() == "CHORUS":
-            referent_id = None
+        if "release" in matched_entry:
+            raw_release = matched_entry.get("release")
+            referent_id = str(raw_release).strip() if raw_release is not None else None
         else:
-            referent_id = matched_entry.get("referent_id")
+            raw_ref_id = matched_entry.get("referent_id")
+            referent_id = str(raw_ref_id).strip() if raw_ref_id is not None else None
         referent_note = matched_entry.get("referent_note") or referent_note
-    elif norm_project.upper() == "CHORUS":
-        referent_id = None
+
+    scope_text = referent_note.strip()
+    related_text = _format_related_but_distinct(matched_entry)
+    if related_text:
+        scope_text = f"{scope_text}\n\n{related_text}"
 
     source_policy = extract_source_policy(manifest_data, project=norm_project)
 
@@ -160,8 +241,8 @@ def build_draft_scope_context(
             {
                 "owner": "",
                 "referent": referent.strip(),
-                "release": referent_id.strip() if referent_id else None,
-                "scope": referent_note.strip(),
+                "release": referent_id if referent_id else None,
+                "scope": scope_text,
             }
         ],
         "source_policy": source_policy,
@@ -214,29 +295,19 @@ def generate_draft_contexts(
         out_dir.mkdir(parents=True, exist_ok=True)
 
     for proj in projects:
-        proj_manifest_data = manifest_data
-        scope_map = manifest_data.get("scope", {}) if isinstance(manifest_data, dict) else {}
-        if (
-            proj.strip().upper() == "KIDS_FIRST"
-            and not any(k.upper() == "KIDS_FIRST" for k in (scope_map or {}))
-            and KIDS_FIRST_MANIFEST_PATH.is_file()
-        ):
-            proj_manifest_data = (
-                yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
-            )
-
+        proj_manifest_data = load_project_manifest_data(proj, manifest_path)
         doc = build_draft_scope_context(proj, proj_manifest_data)
         out_file = out_dir / f"{proj.lower()}_omission_context.json"
         out_paths[proj] = out_file
 
-        canonical_bytes = json.dumps(doc, indent=2, sort_keys=True).encode("utf-8") + b"\n"
+        canonical_bytes = serialize_draft_context(doc)
 
         if check_only:
             if not out_file.is_file():
                 raise FileNotFoundError(f"Missing draft context file for {proj}: {out_file}")
             existing_bytes = out_file.read_bytes()
             existing_doc = json.loads(existing_bytes)
-            if existing_doc != doc:
+            if existing_doc != doc or existing_bytes != canonical_bytes:
                 raise ValueError(
                     f"Existing draft context at {out_file} differs from generated context for {proj}"
                 )

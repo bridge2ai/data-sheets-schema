@@ -31,6 +31,8 @@ from typing import Any
 
 # Ensure repository root and src/ are importable
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 if (ROOT / "src").is_dir() and str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
@@ -158,89 +160,22 @@ def build_draft_context(
 ) -> dict[str, Any]:
     """Synthesize a compliant root-only omission_context_v1 draft document.
 
-    Extracts referent and note from source_manifest.yaml scope metadata when available,
-    satisfying context.schema.json and shared_generation.py root scope requirements.
+    Delegates to scripts/build_draft_contexts.py so both synthesizers share one
+    implementation, profile/vocabulary policy, and canonical byte serialization (#5120).
     """
-    referent = f"{project} dataset"
-    referent_id = None
-    referent_note = f"Scope authority for {project} dataset."
-    source_policy_priority = [
-        "RO-Crate, structured metadata, data resource",
-        "documentation, license, DUA, IRB",
-        "publication, preprint, white paper",
-        "NIH project page, tutorial",
-        "historical data release, historical documentation",
-    ]
-    source_policy_basis = "Declared source_manifest.yaml tier hierarchy."
-    manifest_profile: str | None = None
+    from scripts.build_draft_contexts import (
+        build_draft_scope_context,
+        load_project_manifest_data,
+        serialize_draft_context,
+    )
 
-    if source_manifest_path:
-        sm = Path(source_manifest_path)
-        if sm.is_file():
-            try:
-                data = yaml.safe_load(sm.read_text(encoding="utf-8")) or {}
-                if isinstance(data.get("profile"), str):
-                    manifest_profile = data["profile"].strip()
-                scope_map = data.get("scope", {})
-                if isinstance(scope_map, dict) and project in scope_map:
-                    entry = scope_map[project]
-                    if isinstance(entry, dict):
-                        referent = entry.get("referent") or referent
-                        referent_id = entry.get("referent_id")
-                        # Under D04, CHORUS release is null (not the website URL)
-                        if project.upper() == "CHORUS" and referent_id == "https://chorus4ai.org/":
-                            referent_id = None
-                        referent_note = entry.get("referent_note") or referent_note
-                if "source_priority" in data and isinstance(data["source_priority"], dict):
-                    sp = data["source_priority"]
-                    source_policy_priority = [
-                        ", ".join(str(x) for x in sp[k]) if isinstance(sp[k], list) else str(sp[k])
-                        for k in sorted(sp.keys())
-                    ]
-                elif isinstance(data.get("projects"), dict) and project in data["projects"]:
-                    proj_entry = data["projects"][project]
-                    sources = proj_entry.get("sources", []) if isinstance(proj_entry, dict) else []
-                    seen_types: list[str] = []
-                    for src in sources:
-                        if isinstance(src, dict):
-                            st = str(src.get("source_type") or "").strip()
-                            if st and st not in seen_types:
-                                seen_types.append(st)
-                    if seen_types:
-                        source_policy_priority = seen_types
-                        source_policy_basis = (
-                            "Declared source types from project manifest (no tier hierarchy declared)."
-                        )
-            except Exception:
-                pass
-
-    vocabulary: dict[str, Any] = {}
-    if DEFAULT_VOCABULARIES_PATH.is_file():
-        vocab_data = yaml.safe_load(DEFAULT_VOCABULARIES_PATH.read_text(encoding="utf-8")) or {}
-        vocabulary = vocab_data.get("vocabularies", {})
-
-    doc: dict[str, Any] = {
-        "format": "omission_context_v1",
-        "root_class": "Dataset",
-        "scopes": [
-            {
-                "owner": "",
-                "referent": referent,
-                "release": referent_id,
-                "scope": referent_note,
-            }
-        ],
-        "source_policy": {
-            "priority": source_policy_priority,
-            "basis": source_policy_basis,
-        },
-        "vocabulary": vocabulary,
-    }
+    manifest_data = load_project_manifest_data(project, source_manifest_path)
+    doc = build_draft_scope_context(project, manifest_data)
 
     if write_to_disk and context_path is not None:
         target = Path(context_path).resolve()
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(sg.canonical(doc))
+        target.write_bytes(serialize_draft_context(doc))
 
     return doc
 
@@ -377,6 +312,8 @@ def build_registration(
                 if context_dir is not None
                 else resolved_reg_path.parent / f"{project.lower()}_omission_context.json"
             )
+            from scripts.build_draft_contexts import serialize_draft_context
+
             draft_doc = build_draft_context(
                 project=project,
                 source_manifest_path=sm_resolved,
@@ -384,7 +321,7 @@ def build_registration(
                 write_to_disk=write_to_disk,
             )
             resolved_context = target_context.resolve()
-            resolved_context_raw = sg.canonical(draft_doc)
+            resolved_context_raw = serialize_draft_context(draft_doc)
         else:
             raise FileNotFoundError(
                 f"no omission context file found for {project!r} (searched {[str(c) for c in candidates]}); "

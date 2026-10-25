@@ -1,31 +1,40 @@
 # Evaluation applicability context for CHORUS
 # Bridge2AI Data Generation Project: multimodal intensive care unit (ICU) clinical benchmark data
 # Format: d4d-evaluation-context-1
+# Bundle chunks: data/preprocessed/chunks/CHORUS_chunks.yaml (rule.version: 2, 8 chunks)
 
 human_subjects:
   value: true
-  evidence: "CHORUS acquires multimodal clinical data from critically ill intensive care unit (ICU) patients across multiple hospital healthcare systems."
+  # chunks: [c002, c003, c006]
+  evidence: "[chunks: c002, c003, c006] CHoRUS acquires retrospective multi-center acute and critical care clinical data from human hospital patients across 14 contributing hospitals (over 45,000 unique admissions as of August 2025 in c003; 50,000 ICU, PICU, and NICU patient admissions in the current released dataset and 100,000 anticipated final patient admissions in c002, c006)."
 
 regulated_access:
   value: true
-  evidence: "CHORUS data distribution is governed via PhysioNet credentialed access requiring human subjects research training (e.g., CITI), Data Use Agreement (DUA) execution, and institutional credentialing."
+  # chunks: [c002, c003, c004, c005, c006]
+  # curator_assertion: true
+  evidence: "[chunks: c002, c003, c004, c005, c006] [curator_assertion: true; pending human E3 review] The CHoRUS dataset is held under controlled access inside a secure cloud enclave (OMOP EHR, DICOM imaging, WFDB telemetry, EDF+/Persyst EEG, and OHNLP clinical note tokens all marked 'Controlled' in c003; cloud enclave in c003, c006); data access requires registration with a .edu email address (c005) and signing a licensing agreement before compute is provisioned (c003, c004), alongside HIPAA/GDPR compliance and privacy/de-identification controls (c002, c004)."
 
 shared_dataset:
   value: true
-  evidence: "CHORUS disseminates curated ICU benchmark datasets through credentialed data repository infrastructure."
+  # chunks: [c002, c003, c004, c006]
+  evidence: "[chunks: c002, c003, c004, c006] CHoRUS provisions a shared multi-center clinical care dataset (50,000 ICU/PICU/NICU admissions, 1.6 billion OMOP EHR rows, 7,642 radiology admissions, and 23 TB waveform data in c006; over 45K admissions across 14 hospitals in c003) in the Bridge2AI Clinical Care Collaborative Cloud enclave for credentialed researchers and AIM-AHEAD Bridge2AI trainees (c002, c003, c004)."
 
 data_collection:
   value: true
-  evidence: "CHORUS collects high-frequency physiological waveforms, bedside monitor data, EHR entries, clinical narratives, and medical imaging from hospital ICU bedsides."
+  # chunks: [c002, c003, c006]
+  evidence: "[chunks: c002, c003, c006] CHoRUS acquires multi-modal clinical care data across 14 data-contributing hospital sites, including structured EHR data (demographics, medications, procedures, nursing flowsheets, diagnoses), unstructured clinical notes, PACS radiology imaging, bedside monitor telemetry waveforms, EEG waveforms, and social determinants of health (c002, c003, c006)."
 
 data_processing:
   value: true
-  evidence: "CHORUS clinical data undergoes extensive de-identification (HIPAA Safe Harbor), waveform time-alignment, unit conversion, and multimodal feature synchronization."
+  # chunks: [c002, c003, c007, c008]
+  evidence: "[chunks: c002, c003, c007, c008] Collected hospital data are standardized to the OMOP Common Data Model, clinical notes are extracted and tokenized using the OHNLP toolkit, imaging and waveforms are converted to DICOM, WFDB, and EDF+/Persyst formats with de-identification in process, and SDOH location entities are geocoded via DeGauss (c002, c003, c007, c008)."
 
 processing_software:
   value: true
-  evidence: "CHORUS develops and utilizes open reproducible preprocessing, waveform extraction, and clinical data harmonization code pipelines."
+  # chunks: [c002, c003, c007, c008]
+  evidence: "[chunks: c002, c003, c007, c008] CHoRUS develops and documents open-source software and processing toolchains in the chorus-ai GitHub organization and cloud enclave, including privacy_scan_tool, CTP-deid, UF-Geocoding (DeGauss), chorus_waveform conversion scripts, chorus-mapping semantic mappings, OHNLP toolkit, and the OHDSI/OMOP tool stack (c002, c003, c007, c008)."
 
 ml_training_dataset:
   value: true
-  evidence: "CHORUS datasets are engineered specifically to train and validate AI/ML algorithms for acute illness detection and critical care decision support."
+  # chunks: [c002, c003, c006]
+  evidence: "[chunks: c002, c003, c006] CHoRUS is an NIH Bridge2AI Data Generation Project (1OT2OD032701-01, c002, c006) explicitly designed to generate an AI-ready critical care dataset and sequestered holdout test set for training, validating, and benchmarking ML/AI models characterizing acute illness, predicting complications, and measuring treatment response (c002, c003, c006)."

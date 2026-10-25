@@ -1,31 +1,39 @@
 # Evaluation applicability context for AI-READI
 # Bridge2AI Data Generation Project: prospective multimodal cohort investigating type 2 diabetes
 # Format: d4d-evaluation-context-1
+# Bundle chunks: data/preprocessed/chunks/AI_READI_chunks.yaml (rule.version: 2, 25 chunks)
 
 human_subjects:
   value: true
-  evidence: "AI-READI collects exhaustive prospective multimodal health data from human participants stratified by type 2 diabetes status across diverse demographic groups."
+  # chunks: [c002, c010, c011, c015, c019]
+  evidence: "[chunks: c002, c010, c011, c015, c019] AI-READI recruits and collects multi-domain human participant data from adults with and without Type 2 Diabetes Mellitus (T2DM) across three clinical sites (2,280 participants collected between 2023-07-19 and 2025-05-01 in v3.0.0, doi:10.60775/fairhub.3, c015, c019; protocol and IRB-approved human cohort described in c002, c010, c011)."
 
 regulated_access:
   value: true
-  evidence: "AI-READI datasets require controlled data access governance, data access agreement execution, and compliance with ethical and participant consent restrictions for human genomic and clinical data."
+  # chunks: [c010, c011, c012, c015]
+  evidence: "[chunks: c010, c011, c012, c015] Access to the AI-READI dataset is governed by the AI-READI Data License Agreement v2.0 (doi:10.5281/zenodo.17555036, c012, c015), requiring verified identity login, self-attestation limiting public-tier use to T2DM research, HIPAA Business Associate Agreement requirements for cloud storage, and a separate controlled-access data use agreement for sensitive variables (5-digit zip code, sex, race/ethnicity, genetics, medications; c010, c011, c012, c015)."
 
 shared_dataset:
   value: true
-  evidence: "AI-READI releases public and controlled-tier datasets to qualified biomedical researchers following Bridge2AI standards."
+  # chunks: [c011, c013, c014, c015]
+  evidence: "[chunks: c011, c013, c014, c015] The Flagship Dataset of Type 2 Diabetes from the AI-READI Project is publicly shared via the FAIRhub data portal across multiple versioned releases, with v3.0.0 (doi:10.60775/fairhub.3, released 2025-11-17) comprising 356,343 files (3.82 TB) from 2,280 participants (c011, c013, c014, c015)."
 
 data_collection:
   value: true
-  evidence: "AI-READI conducts prospective multi-site data collection including retinal imaging, continuous glucose monitoring, physical activity telemetry, clinical lab assays, and surveys."
+  # chunks: [c002, c004, c010, c011, c015]
+  evidence: "[chunks: c002, c004, c010, c011, c015] AI-READI executes a harmonized multi-site clinical data acquisition protocol across three sites capturing survey responses (REDCap), physical measurements, blood and urine laboratory panels, retinal imaging, 12-lead ECG, continuous glucose monitoring (Dexcom G6), wearable fitness activity (Garmin Vivosmart 5), cognitive and monofilament testing, and home environmental monitoring (c002, c004, c010, c011, c015)."
 
 data_processing:
   value: true
-  evidence: "AI-READI applies rigorous quality control, image standardization, time-series harmonization, and HIPAA Safe Harbor de-identification protocols."
+  # chunks: [c004, c005, c010, c011, c015, c018, c019]
+  evidence: "[chunks: c004, c005, c010, c011, c015, c018, c019] Acquired clinical, wearable, and imaging streams are harmonized into standardized formats — OMOP CDM tables for clinical/survey data, DICOM for retinal imaging and ECG waveforms, WFDB/structured time-series for continuous glucose and activity monitors — and checked to ensure no HIPAA direct identifiers or PHI remain in the public release (c004, c005, c010, c011, c015, c018, c019)."
 
 processing_software:
   value: true
-  evidence: "AI-READI develops and deploys standardized data ingestion workflows, automated imaging quality pipelines, and schema-validation tooling."
+  # chunks: [c002, c004, c005, c015, c018, c019]
+  evidence: "[chunks: c002, c004, c005, c015, c018, c019] The AI-READI corpus documents data capture, conversion, harmonization, and portal packaging software used to produce the dataset, including REDCap survey export and OMOP mapping workflows, DICOM conversion across imaging/waveform devices, and FAIRhub dataset metadata/packaging infrastructure (c002, c004, c005, c015, c018, c019)."
 
 ml_training_dataset:
   value: true
-  evidence: "AI-READI provides multimodal, AI-ready datasets tailored for machine learning models investigating type 2 diabetes etiology and complications."
+  # chunks: [c002, c007, c009, c010, c011, c015]
+  evidence: "[chunks: c002, c007, c009, c010, c011, c015] AI-READI is an NIH Bridge2AI flagship Data Generation Project (1OT2OD032644-01, c009) explicitly designed with balanced recruitment across diabetes severity and multi-modal clinical/wearable/imaging capture to train and evaluate AI/ML models studying salutogenesis in Type 2 Diabetes Mellitus (c002, c007, c009, c010, c011, c015)."
