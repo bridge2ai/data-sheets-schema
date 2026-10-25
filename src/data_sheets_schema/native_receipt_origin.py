@@ -17,6 +17,7 @@ SCOPE = 'Reported history only; no semantic support, scientific acceptance or ga
 FAMILIES = {
     'd4d_native_attribution_execution_registration': 'native_attribution',
     'd4d_native_neutral_attempt_supervisor': 'neutral_supervisor',
+    'd4d_native_shared_execution_registration': 'native_shared',
 }
 
 
@@ -82,7 +83,11 @@ def required_paths(value, gate, aliases):
     if not version(value):
         return ()
     declared = value[KEY]
-    paths = (declared[key] for key in ('transcript_path', 'receipt_path', 'full_path'))
+    paths = [declared[key] for key in ('transcript_path', 'receipt_path', 'full_path')]
+    if FAMILIES[value['kind']] == 'native_shared':
+        effective = gate.get('effective_receipt')
+        if type(effective) is dict and type(effective.get('path')) is str:
+            paths.append(effective['path'])
     return tuple(sorted({target for path in paths
                          if type(target := aliases.get(path, path)) is str}))
 
@@ -117,11 +122,24 @@ def report(value, gate, *, raw, aliases, metadata):
                 aliases=identities)
         except (ValueError, TypeError, UnicodeError) as exc:
             original = unknown('Captured history could not be classified: ' + type(exc).__name__)
-    return {
+    result = {
         'version': 1, 'family': FAMILIES[value['kind']], 'scope': SCOPE,
         'declaration': deepcopy(declared), 'inputs': inputs,
         'original_receipt': original,
     }
+    if result['family'] == 'native_shared':
+        expected = gate.get('effective_receipt')
+        effective = None
+        if type(expected) is dict and type(expected.get('path')) is str:
+            candidate, _ = _member(expected['path'], raw, aliases, metadata)
+            if candidate is not None and all(candidate[key] == expected.get(key)
+                                              for key in ('bytes', 'sha256')):
+                effective = candidate
+        result['inputs']['effective_receipt'] = effective
+        result['effective_receipt'] = unknown(
+            'Helper-reconstructed effective receipt history is not classified by this instrument; '
+            'original-receipt classification does not describe effective counts.')
+    return result
 
 
 def attach(value, gate, *, raw, aliases, metadata):

@@ -138,6 +138,33 @@ def for_record(prior: Any, receipt: Path, full: Path, *, transcripts: Sequence[P
                    prior=deepcopy(last))
 
 
+def for_assessment(assessment: dict[str, Any], prior: Any, receipt: Path, full: Path, *,
+                   transcripts: Sequence[Path] = (), receipt_at_run: Path | None = None,
+                   full_at_run: Path | None = None, api_path: bool = False,
+                   recorded_by: str | None = None) -> dict[str, Any]:
+    """Attach origin metadata without confusing original and effective receipts.
+
+    Native final counts assess helper-reconstructed effective bytes. The path
+    supplied to this CLI/backfill instrument remains the selected original;
+    equal byte hashes do not turn its history into effective-receipt history.
+    The owner assessment is never modified or passed through this instrument.
+    """
+    original = for_record(prior, receipt, full, transcripts=transcripts,
+                          receipt_at_run=receipt_at_run, full_at_run=full_at_run,
+                          api_path=api_path, recorded_by=recorded_by)
+    if (assessment.get("native_receipt_stage") != "final"
+            and "native_receipt_inputs" not in assessment):
+        return original
+    last = _last_measurement(original)
+    out = unknown("native final counts assess a reconstructed effective receipt; "
+                  "this instrument classifies only the selected original receipt, "
+                  "so effective-receipt origin is unknown", prior=deepcopy(last))
+    out["original_receipt_origin"] = original
+    out["prior_basis"] = "selected original receipt; not the effective receipt assessed"
+    out["native_receipt_inputs"] = deepcopy(assessment.get("native_receipt_inputs"))
+    return out
+
+
 def _other_bytes(receipts: dict[str, Any], origin: dict[str, Any]) -> bool:
     """Whether the origin was measured on a receipt other than the one the
     receipts block pins (where it pins one)."""
