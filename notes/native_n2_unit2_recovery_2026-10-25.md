@@ -77,3 +77,11 @@ coordination changes are included. The helper and JSON manifest
 `native_n2_permission_preparation_2026-10-25.json` preserve exact patch/source
 identities. The inherited projection and lexical oracle tests remain intact.
 Final frozen-head tests follow this separate performance commit.
+
+Final source head `f719de581`: **267 passed** in 67.86 seconds. This covers
+the restored 13-view / 25-classification pure projection oracles, lexical
+ancestry parity, permission encoding/digest scope, target parser mutations,
+bounded typed cache (including the unchanged four-attribute assertion), and
+default controller/prompt/stage behavior. Exact module rosters and logs are in
+`native_n2_validation_2026-10-25/README.md`. The 900-second acceptance remains
+pending in unit 4. Unit 2 introduces no provider calls or launch authorization.
