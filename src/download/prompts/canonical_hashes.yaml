@@ -41,7 +41,7 @@ files:
     pinned_blob_path: .claude/commands/d4d-uniform-rules-v2.md
     pinned_in_repository: /private/tmp/d4d-pr5093
     pinned_on: '2026-10-23'
-    reason: "D-E, issues #5097\u2013#5099, #5102"
+    reason: "R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23): closed to confidentiality_level and hipaa_compliant, criteria inline, precedence, tier and tier-name rules, HIPAA de-identification (#5048, #5097\u2013#5099, #5102)."
     sha256: cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f
     superseded:
     - pinned_on: '2026-10-03'
@@ -139,7 +139,7 @@ files:
     pinned_blob_path: src/download/prompts/d4d_generic_arm_prompt_v10.md
     pinned_in_repository: /private/tmp/d4d-pr5093
     pinned_on: '2026-10-23'
-    reason: "D-E, issues #5097\u2013#5099, #5102"
+    reason: "R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23): closed to confidentiality_level and hipaa_compliant, criteria inline, precedence, tier and tier-name rules, HIPAA de-identification (#5048, #5097\u2013#5099, #5102)."
     sha256: 95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99
     superseded:
     - pinned_on: '2026-10-03'

@@ -174,14 +174,21 @@ class TestR9ConditionBoundaryAndParity:
         )
 
 
+@pytest.mark.parametrize(
+    "prompt_path",
+    [PROMPT_V10, RULES_V2],
+    ids=["generic_v10", "uniform_rules_v2"],
+)
 class TestR9MutationMetaTests:
-    """Mutation meta-tests: each of the 5 specified mutations on the R9 text must fail."""
+    """Mutation meta-tests: each of the 5 specified mutations on the R9 text must fail
+    on both d4d_generic_arm_prompt_v10.md and d4d-uniform-rules-v2.md."""
 
-    def _base_text(self) -> str:
-        return _norm(PROMPT_V10.read_text(encoding="utf-8"))
+    @staticmethod
+    def _base_text(prompt_path: Path) -> str:
+        return _norm(prompt_path.read_text(encoding="utf-8"))
 
-    def test_mutation_swap_restricted_and_confidential_fails(self) -> None:
-        text = self._base_text()
+    def test_mutation_swap_restricted_and_confidential_fails(self, prompt_path: Path) -> None:
+        text = self._base_text(prompt_path)
         placeholder = "__SWAP_TEMP_TOKEN__"
         mutated = (
             text.replace("`restricted`", placeholder)
@@ -190,8 +197,8 @@ class TestR9MutationMetaTests:
         )
         assert check_r9_text_units(mutated) != []
 
-    def test_mutation_swap_unrestricted_and_restricted_fails(self) -> None:
-        text = self._base_text()
+    def test_mutation_swap_unrestricted_and_restricted_fails(self, prompt_path: Path) -> None:
+        text = self._base_text(prompt_path)
         placeholder = "__SWAP_TEMP_TOKEN__"
         mutated = (
             text.replace("`unrestricted`", placeholder)
@@ -200,16 +207,16 @@ class TestR9MutationMetaTests:
         )
         assert check_r9_text_units(mutated) != []
 
-    def test_mutation_replace_least_with_most_fails(self) -> None:
-        text = self._base_text()
+    def test_mutation_replace_least_with_most_fails(self, prompt_path: Path) -> None:
+        text = self._base_text(prompt_path)
         mutated = text.replace(
             "the slot records the least restrictive tier",
             "the slot records the most restrictive tier",
         )
         assert "missing:tier_sentence_least_restrictive" in check_r9_text_units(mutated)
 
-    def test_mutation_swap_compliant_and_not_applicable_fails(self) -> None:
-        text = self._base_text()
+    def test_mutation_swap_compliant_and_not_applicable_fails(self, prompt_path: Path) -> None:
+        text = self._base_text(prompt_path)
         placeholder = "__SWAP_TEMP_TOKEN__"
         mutated = (
             text.replace("`compliant`", placeholder)
@@ -218,14 +225,16 @@ class TestR9MutationMetaTests:
         )
         assert check_r9_text_units(mutated) != []
 
-    def test_mutation_delete_scope_sentence_fails(self) -> None:
-        text = self._base_text()
+    def test_mutation_delete_scope_sentence_fails(self, prompt_path: Path) -> None:
+        text = self._base_text(prompt_path)
         mutated = text.replace(_norm(R9_TEXT_UNITS["scope_sentence"]), "")
         assert "missing:scope_sentence" in check_r9_text_units(mutated)
 
 
 # Expectation fixtures for the canary and review pack (labelled as expectations for the
-# canary and review pack because they do not read the prompt at runtime).
+# canary and review pack because they do not read the prompt at runtime; nothing in
+# canary or review-pack code consumes this table yet — the test below checks only that
+# each expected value is accepted by the LinkML datamodel).
 CANARY_AND_REVIEW_PACK_EXPECTATION_FIXTURES: tuple[dict[str, Any], ...] = (
     {
         "id": "cc_guestbook_dataverse",
@@ -298,7 +307,7 @@ CANARY_AND_REVIEW_PACK_EXPECTATION_FIXTURES: tuple[dict[str, Any], ...] = (
         "id": "participant_app_no_login_required",
         "passage": 'A participant app with "no login required"',
         "slot": "regulatory_restrictions.confidentiality_level",
-        "expected": None,
+        "expected": "unchanged",
         "effect": "no effect on confidentiality_level",
     },
     {
@@ -317,7 +326,9 @@ CANARY_AND_REVIEW_PACK_EXPECTATION_FIXTURES: tuple[dict[str, Any], ...] = (
 
 
 class TestR9CanaryAndReviewPackExpectationFixtures:
-    """Expectation fixtures for the canary and review pack (they do not read the prompt).
+    """Expectation fixtures for the canary and review pack (they do not read the prompt;
+    nothing in canary or review-pack code consumes CANARY_AND_REVIEW_PACK_EXPECTATION_FIXTURES
+    yet).
 
     Also verifies LinkML datamodel validation and ``receipts.check()`` coverage-receipt
     verification for records populated under the D-E R9 rules.
@@ -334,6 +345,20 @@ class TestR9CanaryAndReviewPackExpectationFixtures:
         slot = fixture["slot"]
         expected = fixture["expected"]
         if slot == "regulatory_restrictions.confidentiality_level":
+            if expected == "unchanged":
+                # Passage about participant app login has no effect on dataset-release
+                # confidentiality_level: whatever value was established by release-access
+                # facts (including None) remains unchanged.
+                for prior in (None, "unrestricted", "restricted", "confidential"):
+                    reg = ExportControlRegulatoryRestrictions(
+                        id="https://example.org/ds#reg",
+                        confidentiality_level=prior,
+                    )
+                    if prior is None:
+                        assert reg.confidentiality_level is None
+                    else:
+                        assert reg.confidentiality_level.code == ConfidentialityLevelEnum[prior]
+                return
             reg = ExportControlRegulatoryRestrictions(
                 id="https://example.org/ds#reg",
                 confidentiality_level=expected,
@@ -441,8 +466,8 @@ class TestR9CanaryAndReviewPackExpectationFixtures:
         assert block["snippets"]["verified"] == block["snippets"]["total"] == 5
 
     def test_negative_fixture_external_classification_label_without_access_facts(self) -> None:
-        """A source passage stating only an external scheme label ('HL7:2N', 'Level 3')
-        without observable access facts must leave confidentiality_level omitted."""
+        """Datamodel check: external scheme tokens ('HL7:2N', 'Level 3') are not members
+        of ConfidentialityLevelEnum and are rejected by ExportControlRegulatoryRestrictions."""
         with pytest.raises(ValueError):
             ExportControlRegulatoryRestrictions(
                 id="https://example.org/waveform#reg",
