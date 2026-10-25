@@ -413,7 +413,8 @@ RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 #: earlier renderer and condition keeps its recorded budget, and the value a
 #: run used is in its api_usage rows and `max_tokens_by_phase`.
 #: `dollar_readout.SHARED_V1_PHASE_OUTPUT_CAPS` mirrors this; a test keeps
-#: them equal.
+#: them equal. Every request sent at these caps is counted and admitted
+#: before dispatch (`SHARED_ADMITTED_PHASES`, #5157).
 SHARED_PHASE_MAX_TOKENS = {"report": 128000, "reconcile_full": 128000}
 
 
@@ -5593,11 +5594,54 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
             extra["output_tokens_details"] = details
 
 
+#: The phases shared generation 1 sends at its raised caps: the two in
+#: `SHARED_PHASE_MAX_TOKENS`, and the regate and the refresh after repair,
+#: which share the report budget (#5157, owner decision D33). At 128k of
+#: output a 1M window leaves 872k of input, and the regate also carries the
+#: report it rejected, so each request is counted and admitted before it is
+#: sent, as the receipt completion and the typed audit stages are.
+SHARED_ADMITTED_PHASES = frozenset({"reconcile_full", "report", "report_regate", "report_after_repair"})
+
+
+def _admit_shared_context(spec: RunSpec, phase: str, attempt: int, client, kwargs: dict[str, Any]) -> None:
+    """Count the request `_call_with_retry` will send; refuse it if it cannot fit.
+
+    The receipt completion's count and window check: `messages.count_tokens`
+    on a single-attempt client, against the window the registration's
+    `audit_limits` assert, as the typed audit stages use it. Raised before the
+    usage call begins, a refusal sends nothing, leaves no pending call or
+    usage row, consumes no regate allowance and is not retried; a resume
+    recounts the same request. An admitted count is kept beside the run.
+    """
+    from . import receipt_completion as receipts
+    from .shared_generation import assert_current
+    limits = assert_current(spec).document()["audit_limits"]
+    request = PhaseRequest(phase=phase, system=kwargs["system"], messages=kwargs["messages"])
+    # The body `_call_with_retry` builds, its route clamp included.
+    payload = receipts.request_payload(request, {
+        "name": kwargs["model"], "temperature": kwargs["temperature"],
+        "thinking": kwargs.get("thinking"), "effort": kwargs.get("effort")},
+        {"max_output_tokens": min(kwargs["max_tokens"], output_limit(kwargs["model"]))})
+    count = receipts._measure_context(receipts._single_attempt_client(client), payload, limits, label=phase)
+    tokens, limit = count["input_tokens"], limits["context_limit_tokens"]
+    if type(tokens) is int and tokens >= 0 and tokens + payload["max_tokens"] > limit:
+        raise UsageLedgerError(
+            f"{phase} not admitted: the endpoint counted {tokens:,} input tokens and max_tokens is "
+            f"{payload['max_tokens']:,}, {tokens + payload['max_tokens']:,} in all, over the registered "
+            f"context limit of {limit:,} tokens ({limits['context_limit_basis']}); refused before "
+            "dispatch and not retried")
+    receipts._context_check(count, payload, limits, label=phase)
+    receipts._save(spec, f"{phase}_context.json",
+                   {**count, "phase": phase, "attempt": attempt, "max_tokens": payload["max_tokens"]})
+
+
 def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, client, **kwargs):
     _require_surviving_accounting(spec)
     if spec.shared_generation_version:
         from .typed_audit_runtime import require_request
         require_request(spec, phase, kwargs)
+    if spec.shared_generation_version == 1 and phase in SHARED_ADMITTED_PHASES:
+        _admit_shared_context(spec, phase, attempt, client, kwargs)
     if spec.shared_generation_version == 2:
         from . import source_heading_admission as routing_admission
         client, kwargs = routing_admission.prepare(spec, phase, attempt, client, kwargs)
