@@ -221,6 +221,21 @@ Rows1–14 are selected-owner failures. **N2's default-profile cut leaves each d
 | 14 | `tests/test_native_owner_stage_helper_adversarial.py::test_main_acknowledges_only_after_cleanup_and_preserves_body_error[body_and_cleanup]` | Pre-admission owner deadline; intended body/cleanup precedence masked. | Profile1 deferred/unfixed |
 | 15 | `tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion` | Recorder subprocess exceeded the synthetic peer's 180-second helper timeout; result had incomplete evidence and no terminal. | Default-path acceptance failure; **unresolved until a fresh unchanged-900-second series-head test and saved-result evidence establish completion** |
 
+**Current N2 outcome addendum — 2026-10-25.** Frozen source
+`01969cbed8eed93f420c640c1f1c306e5f58b033` passed all **445 scanner/acceptance-utility
+tests**, with zero failures/errors/skips. The separate neutral public fixture
+**failed again**: its provenance recorder subprocess exceeded the unchanged
+**180-second helper timeout**; pytest reported **732.42 seconds** for the failed
+test run. That wall time does not establish expiry of the enclosing 900-second
+runtime deadline. The omission counterpart was **not run** because neutral did
+not pass. Source-preservation/finalization checks passed; preservation is not
+runtime acceptance. Thus row15 remains a current default-path blocker, and all
+14 owner-profile failures remain deferred and unfixed. See the retained
+[current failure analysis](native_n2_acceptance_failure_2026-10-25.md) and
+[unit4 validation/handoff](native_n2_unit4_validation_2026-10-25.md).
+This addendum leaves the historical r1 comparison and original failure evidence
+unchanged; scientific acceptance remains unassessed.
+
 The [owner classification][owner-failures] and [non-owner classification][nonowner-failures] retain the traces and history. Row15's JUnit duration was **888.565 seconds**, which includes fixture/test accounting and does not prove expiry of the enclosing 900-second runtime limit. The journal reached `assembly_checked` sequence22 and initial provenance existed; no completed inline check blocks or recorder tool result were retained. The [recorder triage][recorder-triage] leaves the internal blocked operation unresolved. Contention, cache cost and a particular recorder function are not established causes.
 
 The omission counterpart passed in that same run in **703.810 seconds**; it does not waive row15. Earlier default-path passes also do not override the later failed gate. The cache repair and scanner suites passed in the N1c full run (44 cache tests and 451 scanner/specificity tests); those narrower passes do not establish complete-path acceptance. N2's fresh results must name their own source heads, fixture outcomes and remaining failures.

@@ -1,0 +1,12 @@
+{
+  "error": "ValueError: neutral must pass exactly one unchanged test without skips",
+  "omission_not_run": "neutral completion and source/JUnit checks did not pass",
+  "scientific_acceptance": "not_assessed",
+  "stages": {
+    "neutral": {
+      "node": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+      "returncode": 1
+    }
+  },
+  "status": "failed"
+}

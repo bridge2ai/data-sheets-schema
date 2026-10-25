@@ -97,3 +97,41 @@ Logs and XML are retained in `notes/native_n2_validation_2026-10-25/` as
 No full scanner pass, final unit4 suite pass or 900-second runtime acceptance is
 claimed by these focused results. The orchestrator owns those subsequent runs
 after integrating this local repair; this note does not close a GitHub issue.
+
+## N2-R3: neutral recorder exceeds its unchanged helper deadline
+
+**Priority:** P1 default-profile completion / performance. **Found on:**
+`01969cbed8eed93f420c640c1f1c306e5f58b033`.
+
+The fresh public neutral acceptance test reaches typed stage assembly and
+settled final checks, including the intended failed-then-corrected report
+draft. Its final `provenance record` helper writes an initial provenance YAML
+but exceeds the fake peer's unchanged 180-second subprocess limit before a
+settled result. The enclosing native child limit remains 900 seconds; the
+observed exception is the helper timeout. The record has no deterministic
+inline-check blocks and is not successful receipt-to-record acceptance.
+
+**Reproduction:** unchanged
+`tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion`
+via `utils/native_shared_acceptance.py` at the head above. Console: **1 failed,
+12 warnings, 732.42 seconds**. Driver exit 1; omission was not run. The final
+result is `failed`, with first stop `native control session ended without
+complete evidence`, recorder completion false and no terminal result. Shutdown
+completed with zero unfinished control workers. The first assertion fails,
+so the test's subsequent successful saved-readback and reuse-refusal checks
+are not reached.
+
+**Disposition:** unresolved. The finalizer preserved the attempt successfully;
+all source-preservation booleans are true. See the
+[failure addendum](native_n2_acceptance_failure_2026-10-25.md) for all 15 gate
+outcomes, artifact paths/pins, the registered synthetic floor 0/1, and the
+distinction between successful individual checks and failed completed history.
+Scientific acceptance remains `not_assessed`.
+
+**Next:** profile the post-write recorder phases and catalog eligibility before
+patching. The source review suggests possible repeated registration and
+permission/source validation, but does not measure its cost or prove that the
+failed attempt reached that particular readback. Keep the current source,
+freshness, runtime and scientific guards. Review a bounded correction, then
+run fresh unchanged neutral and, only if it passes, omission. Do not reuse the
+consumed attempt, increase the deadline, or retry without a change.
