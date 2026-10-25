@@ -1,0 +1,742 @@
+{
+  "scope": "Read-only structural comparison; no scientific equivalence or execution certification.",
+  "inputs": {
+    "historical-current-target-api25-instruction.txt": {
+      "path": "/private/tmp/d4d-native-n2-parity-20261025-r1/historical-current-target-api25-instruction.txt",
+      "bytes": 84736,
+      "sha256": "489a4b59f675990bf2b37921be1a234bdac9dbe05f6ea3c031ed2c5b06dfcc78"
+    },
+    "historical-hypothetical-native26-instruction.txt": {
+      "path": "/private/tmp/d4d-native-n2-parity-20261025-r1/historical-hypothetical-native26-instruction.txt",
+      "bytes": 136697,
+      "sha256": "0b693a535bdccfb6d8f5f49410fc84b82c8af396cb2d82b68a3c84257f344ca4"
+    },
+    "current-api25-instruction.txt": {
+      "path": "/private/tmp/d4d-native-n2-parity-20261025-r1/current-api25-instruction.txt",
+      "bytes": 87577,
+      "sha256": "2e8efbeb608959740cd80ecdcddee35e965928525fe4564046c68bb0d3314083"
+    },
+    "current-native26-instruction.txt": {
+      "path": "/private/tmp/d4d-native-n2-parity-20261025-r1/current-native26-instruction.txt",
+      "bytes": 131395,
+      "sha256": "cc503fd057e73ccef748f3f3d4926011d4b7eb1738a6d68bca3160846d5d9241"
+    },
+    "instructions.diff": {
+      "path": "/private/tmp/d4d-native-n2-parity-20261025-r1/instructions.diff",
+      "bytes": 103909,
+      "sha256": "00001a136c7277cbed96f56ed27aec0a543a0f4ff94c3b8a6c33fa3f2e2c8094"
+    },
+    "historical-to-current-api.diff": {
+      "path": "/private/tmp/d4d-native-n2-parity-20261025-r1/historical-to-current-api.diff",
+      "bytes": 10045,
+      "sha256": "305bfe1ac460818260680281cd3becaa6c5ab7c2a21d5f0c60cd4dd7668f15a0"
+    },
+    "historical-to-current-native.diff": {
+      "path": "/private/tmp/d4d-native-n2-parity-20261025-r1/historical-to-current-native.diff",
+      "bytes": 106560,
+      "sha256": "06d6c6624605ad4191403f9ef339d1f49043cd3b0fa27c84f335e3fb12df76f2"
+    }
+  },
+  "helper": {
+    "path": "/private/tmp/d4d-codex-n2-4-20261025/scripts/adhoc/native_n2_review_parity_deltas_20261025.py",
+    "sha256": "f021e5bcdac5c400d1c51135926eec285382020705e95787dc1defa76a5eda45"
+  },
+  "native_command_rosters": {
+    "before": [
+      "chunk_check",
+      "source_scope",
+      "full_schema",
+      "full_terms",
+      "phase1_receipts",
+      "advance",
+      "derive_core",
+      "core_schema",
+      "pair",
+      "original_source_inventory",
+      "final_source_inventory",
+      "draft",
+      "audit_evidence",
+      "final_evidence",
+      "derive_final_core",
+      "final_scope",
+      "recorder"
+    ],
+    "after": [
+      "chunk_check",
+      "source_scope",
+      "full_schema",
+      "full_terms",
+      "phase1_receipts",
+      "advance",
+      "derive_core",
+      "core_schema",
+      "pair",
+      "original_source_inventory",
+      "final_source_inventory",
+      "draft",
+      "audit_evidence",
+      "final_evidence",
+      "derive_final_core",
+      "final_scope",
+      "recorder"
+    ]
+  },
+  "native_command_token_changes": [
+    {
+      "path": "/advance/5",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/selection.json",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/selection.json"
+    },
+    {
+      "path": "/audit_evidence/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/audit.json",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/stages/outputs/audit.json"
+    },
+    {
+      "path": "/audit_evidence/10",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/full.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/stages/sealed/full.yaml"
+    },
+    {
+      "path": "/audit_evidence/12",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/stages/sealed/core.yaml"
+    },
+    {
+      "path": "/core_schema/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+    },
+    {
+      "path": "/core_schema/7",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+    },
+    {
+      "path": "/derive_core/6",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/derive_core/8",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+    },
+    {
+      "path": "/derive_core/10",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    },
+    {
+      "path": "/derive_core/12",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+    },
+    {
+      "path": "/derive_final_core/6",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/derive_final_core/8",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+    },
+    {
+      "path": "/derive_final_core/10",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    },
+    {
+      "path": "/derive_final_core/12",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+    },
+    {
+      "path": "/draft/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_reconciliation.md",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_reconciliation.md"
+    },
+    {
+      "path": "/draft/6",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/final_evidence/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/audit.json",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/stages/outputs/audit.json"
+    },
+    {
+      "path": "/final_evidence/10",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/full.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/stages/sealed/full.yaml"
+    },
+    {
+      "path": "/final_evidence/12",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/stages/sealed/core.yaml"
+    },
+    {
+      "path": "/final_evidence/20",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/final_evidence/22",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+    },
+    {
+      "path": "/final_evidence/24",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_reconciliation.md",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_reconciliation.md"
+    },
+    {
+      "path": "/final_scope/11",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/final_scope/13",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+    },
+    {
+      "path": "/final_source_inventory/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/full_schema/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    },
+    {
+      "path": "/full_schema/7",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/full_terms/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/full_terms/6",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    },
+    {
+      "path": "/original_source_inventory/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/full.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/stages/sealed/full.yaml"
+    },
+    {
+      "path": "/pair/4",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/pair/6",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+    },
+    {
+      "path": "/pair/8",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    },
+    {
+      "path": "/pair/10",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+    },
+    {
+      "path": "/phase1_receipts/10",
+      "before": "hypothetical-native26-sizing",
+      "after": "hypothetical-n2-render-20261025-native"
+    },
+    {
+      "path": "/phase1_receipts/18",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/selection.json",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/selection.json"
+    },
+    {
+      "path": "/recorder/10",
+      "before": "hypothetical-native26-sizing",
+      "after": "hypothetical-n2-render-20261025-native"
+    }
+  ],
+  "native_recorder_metadata_changes": [
+    {
+      "path": "/agentic_artifact_paths/core",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+    },
+    {
+      "path": "/agentic_artifact_paths/full",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+    },
+    {
+      "path": "/agentic_artifact_paths/receipt",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_coverage_receipt.yaml",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_coverage_receipt.yaml"
+    },
+    {
+      "path": "/agentic_artifact_paths/report",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_reconciliation.md",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/CHORUS_reconciliation.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-description-reviewer.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-description-reviewer.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-description-reviewer.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-mapper.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-mapper.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-mapper.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-provenance-guard.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-provenance-guard.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-provenance-guard.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-review-record.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-review-record.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-review-record.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rocrate.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rocrate.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rocrate.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric10-semantic.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric10-semantic.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric10-semantic.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric10.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric10.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric10.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20-semantic-v4.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric20-semantic-v4.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20-semantic-v4.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20-semantic.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric20-semantic.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20-semantic.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric20.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-schema-expert.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-schema-expert.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-schema-expert.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-validator.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-validator.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-validator.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1agents~1schema-stats.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/schema-stats.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/schema-stats.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1commands~1README.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/README.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/README.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-add-mapping.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-add-mapping.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-add-mapping.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-agent.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-agent.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-agent.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-assistant.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-assistant.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-assistant.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-full-core.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-full-core.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-full-core.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-input-deep-research.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-input-deep-research.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-input-deep-research.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-uniform-rules.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-uniform-rules.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-uniform-rules.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-webfetch.md",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-webfetch.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-webfetch.md"
+    },
+    {
+      "path": "/agentic_toolchain/resources/src~1data_sheets_schema~1schema~1data_sheets_schema_all.yaml",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    },
+    {
+      "path": "/agentic_toolchain/resources/src~1data_sheets_schema~1schema~1data_sheets_schema_core_all.yaml",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+    },
+    {
+      "path": "/native_shared_generation_context/profile/vocabulary/identity/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+    },
+    {
+      "path": "/native_shared_generation_descriptor/assets/.claude~1commands~1d4d-uniform-rules-v2.md",
+      "before": "5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129",
+      "after": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f"
+    },
+    {
+      "path": "/native_shared_generation_descriptor/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md",
+      "before": "7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb",
+      "after": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/inputs/core_schema/root",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/inputs/core_schema/sources/0/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/inputs/full_schema/root",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/inputs/full_schema/sources/0/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/inputs/profile/vocabulary/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/receipt_policy/bytes",
+      "before": 313,
+      "after": 308
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/receipt_policy/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/receipt-policy.json",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/receipt-policy.json"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/receipt_policy/sha256",
+      "before": "1a355be234c92b128bd7a7a92bae44e16527f0fdba2dfdd0b5e0b131be1f52e2",
+      "after": "b3119c25ecb921d64e7806075dd6a186d8ad5603112970452c8a19d69cdfc580"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/registration_id",
+      "before": "hypothetical-not-registered",
+      "after": "OFFLINE-NOT-REGISTERED-native26-render"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/registration_path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/selection.json",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/selection.json"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/run/label",
+      "before": "hypothetical-native26-sizing",
+      "after": "hypothetical-n2-render-20261025-native"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1agents~1d4d-provenance-guard-v2.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-provenance-guard-v2.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-provenance-guard-v2.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-agent-v2.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-agent-v2.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-agent-v2.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-full-core-v2.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-full-core-v2.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-full-core-v2.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-uniform-rules-v2.md/bytes",
+      "before": 27544,
+      "after": 29867
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-uniform-rules-v2.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-uniform-rules-v2.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-uniform-rules-v2.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-uniform-rules-v2.md/sha256",
+      "before": "5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129",
+      "after": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1context.schema.json/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/omission_inventory_v1/context.schema.json",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/context.schema.json"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1policy.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/omission_inventory_v1/policy.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/policy.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1response.schema.json/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/omission_inventory_v1/response.schema.json",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/response.schema.json"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md/bytes",
+      "before": 30186,
+      "after": 32568
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/d4d_generic_arm_prompt_v10.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md/sha256",
+      "before": "7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb",
+      "after": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1evidence_protocol_v7.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/evidence_protocol_v7.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/evidence_protocol_v7.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_shared_generation_v1.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/native_shared_generation_v1.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_shared_generation_v1.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_shared_receipt_policy_v1.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/native_shared_receipt_policy_v1.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_shared_receipt_policy_v1.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_source_attribution_v1.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/native_source_attribution_v1.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_source_attribution_v1.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1shared_generation_v1.md/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/shared_generation_v1.md",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/shared_generation_v1.md"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/selection/descriptor_sha256",
+      "before": "82ba5b274eace2aa646255fcb4ca0576782f7eebe9ec1d31e28eb9eb4d354a93",
+      "after": "5c99da01f32403ffdb7c67e554a9df4b49b7cf26dad4df95ad8d3f77816b8ab2"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/decoded/stage_root",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/stages"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/sha256",
+      "before": "bbdfc666c49a6d29c8f933c78e982d1e80bebd9deff4f1d5c5555ba391f5970a",
+      "after": "3c986d02f3c466bf6e1630d40ee618dea691b857b8b764cf2034ddcb55000f08"
+    },
+    {
+      "path": "/native_shared_generation_registration/raw_json/utf8_bytes",
+      "before": 7704,
+      "after": 6577
+    },
+    {
+      "path": "/native_shared_generation_registration/sha256",
+      "before": "bbdfc666c49a6d29c8f933c78e982d1e80bebd9deff4f1d5c5555ba391f5970a",
+      "after": "3c986d02f3c466bf6e1630d40ee618dea691b857b8b764cf2034ddcb55000f08"
+    },
+    {
+      "path": "/native_shared_receipt_policy/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/receipt-policy.json",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/receipt-policy.json"
+    },
+    {
+      "path": "/native_shared_receipt_policy/raw_json/decoded/registration_id",
+      "before": "hypothetical-pending-floor",
+      "after": "OFFLINE-pending-floor"
+    },
+    {
+      "path": "/native_shared_receipt_policy/raw_json/sha256",
+      "before": "1a355be234c92b128bd7a7a92bae44e16527f0fdba2dfdd0b5e0b131be1f52e2",
+      "after": "b3119c25ecb921d64e7806075dd6a186d8ad5603112970452c8a19d69cdfc580"
+    },
+    {
+      "path": "/native_shared_receipt_policy/raw_json/utf8_bytes",
+      "before": 313,
+      "after": 308
+    },
+    {
+      "path": "/native_shared_receipt_policy/sha256",
+      "before": "1a355be234c92b128bd7a7a92bae44e16527f0fdba2dfdd0b5e0b131be1f52e2",
+      "after": "b3119c25ecb921d64e7806075dd6a186d8ad5603112970452c8a19d69cdfc580"
+    },
+    {
+      "path": "/native_shared_runtime_declaration/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/runtime.json",
+      "after": "/private/tmp/d4d-native-n2-parity-20261025-r1/hypothetical-unwritten/native/runtime.json"
+    },
+    {
+      "path": "/native_shared_runtime_declaration/raw_json/decoded/limits_basis",
+      "before": "hypothetical sizing assumption only; native capacity not observed",
+      "after": "Offline render fixture only; not a selected or observed capacity"
+    },
+    {
+      "path": "/native_shared_runtime_declaration/raw_json/sha256",
+      "before": "cf20044364d7ddeff3e9d43fefbeccccb3abbfd30d552a0b556c518cb14e2bcb",
+      "after": "6a639a7be5c802b5b60f6d128f106a252094527c8b54b39b3ddfd5477173bcc6"
+    },
+    {
+      "path": "/native_shared_runtime_declaration/raw_json/utf8_bytes",
+      "before": 508,
+      "after": 507
+    },
+    {
+      "path": "/native_shared_runtime_declaration/sha256",
+      "before": "cf20044364d7ddeff3e9d43fefbeccccb3abbfd30d552a0b556c518cb14e2bcb",
+      "after": "6a639a7be5c802b5b60f6d128f106a252094527c8b54b39b3ddfd5477173bcc6"
+    },
+    {
+      "path": "/run_date",
+      "before": "2026-10-23",
+      "after": "2026-10-25"
+    }
+  ],
+  "native_generation_context_changes": [
+    {
+      "path": "/profile/vocabulary/identity/path",
+      "before": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+      "after": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+    }
+  ],
+  "api_receipt_registration_changes": [
+    {
+      "path": "/raw_json/decoded/registration_id",
+      "before": "generic-v10-receipt",
+      "after": "OFFLINE-NOT-REGISTERED-receipt"
+    },
+    {
+      "path": "/raw_json/sha256",
+      "before": "7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a",
+      "after": "0439c56feca564b6bfeeabe472cf87cee135aaabfd1620d1593edd8000f65f66"
+    },
+    {
+      "path": "/raw_json/utf8_bytes",
+      "before": 471,
+      "after": 482
+    },
+    {
+      "path": "/sha256",
+      "before": "7ad04a03e1cb5fa1f7a7e6d284e8831a96759267360b8685e79bab4a2528415a",
+      "after": "0439c56feca564b6bfeeabe472cf87cee135aaabfd1620d1593edd8000f65f66"
+    }
+  ],
+  "hunk_headers": {
+    "instructions.diff": [
+      "@@ -1,95 +1,40 @@",
+      "@@ -481,7 +426,6 @@",
+      "@@ -522,152 +466,134 @@",
+      "@@ -694,7 +620,7 @@",
+      "@@ -961,7 +887,7 @@",
+      "@@ -1048,130 +974,131 @@",
+      "@@ -1256,50 +1183,108 @@"
+    ],
+    "historical-to-current-api.diff": [
+      "@@ -62,7 +62,7 @@",
+      "@@ -79,7 +79,7 @@",
+      "@@ -89,7 +89,7 @@",
+      "@@ -373,31 +373,62 @@",
+      "@@ -1140,6 +1171,8 @@",
+      "@@ -1269,4 +1302,4 @@"
+    ],
+    "historical-to-current-native.diff": [
+      "@@ -1,4 +1,4 @@",
+      "@@ -318,31 +318,62 @@",
+      "@@ -967,7 +998,7 @@",
+      "@@ -985,35 +1016,35 @@",
+      "@@ -1032,10 +1063,10 @@",
+      "@@ -1169,91 +1200,91 @@"
+    ]
+  },
+  "rules": {
+    "old_api": {
+      "r9": {
+        "bytes": 2213,
+        "sha256": "debc8c4b03c616bed942eb9623f2f9a469e82cf0f5106d65bebeb551461e861a"
+      },
+      "uniform": {
+        "bytes": 23369,
+        "sha256": "99ca630daa6fd80fe79bc074e95dbc0401249d9c9f654d60bf8f25206c16be42"
+      }
+    },
+    "old_native": {
+      "r9": {
+        "bytes": 2213,
+        "sha256": "debc8c4b03c616bed942eb9623f2f9a469e82cf0f5106d65bebeb551461e861a"
+      },
+      "uniform": {
+        "bytes": 23369,
+        "sha256": "99ca630daa6fd80fe79bc074e95dbc0401249d9c9f654d60bf8f25206c16be42"
+      }
+    },
+    "new_api": {
+      "r9": {
+        "bytes": 4433,
+        "sha256": "2ae71e83e11a096764b63bc4037786d756d5e31523e3fe71701505b976eaf765"
+      },
+      "uniform": {
+        "bytes": 25589,
+        "sha256": "c5c5b36189ee163f5669d514955a20ce6345b02fc839a39221d05afe0f56d0ee"
+      }
+    },
+    "new_native": {
+      "r9": {
+        "bytes": 4433,
+        "sha256": "2ae71e83e11a096764b63bc4037786d756d5e31523e3fe71701505b976eaf765"
+      },
+      "uniform": {
+        "bytes": 25589,
+        "sha256": "c5c5b36189ee163f5669d514955a20ce6345b02fc839a39221d05afe0f56d0ee"
+      }
+    }
+  },
+  "interpretation": "Every changed leaf is retained; path/hash changes are not automatically judged harmless."
+}
