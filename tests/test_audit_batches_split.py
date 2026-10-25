@@ -114,21 +114,59 @@ def test_chorus_v10_phase1_plans_exactly_as_its_registered_run():
         assert digest(b.make_plan(raw, version=version, **bounds(workers, paths, size))) == value
 
 
+# The one sentence of the typed worker contract reworded after 2026-10-22a ran
+# (owner decision under D35): the run's wording, and today's.
+RUN_REMOVAL_RULE = "Every removal's top-level owner belongs to this worker's assigned roots."
+REMOVAL_RULE = ("Every removal's owning root (its top-level field, or its list entry when the plan splits that list) "
+                "belongs to this worker's assigned roots.")
+
+
 @pytest.mark.skipif(not V10_RUN, reason="set D4D_CHORUS_V10_TYPED_RUN to the 2026-10-22a intermediate directory")
-def test_chorus_v10_saved_packet_worker_wires_and_assembly_rederive_unchanged():
+def test_chorus_v10_saved_run_differs_only_by_the_reworded_worker_sentence():
     run = Path(V10_RUN)
     packet = json.loads((run / "CHORUS_typed_audit_packet.json").read_bytes())
-    cache = ta.DerivationCache()
-    ta._open(packet, derivations=cache)  # re-derives plan, worker requests and contracts, compared byte for byte
+    derived, _, _ = ta._derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"])
+    rebuilt = ta._seal({**{key: packet[key] for key in ("kind", "protocol", "inputs", "schema_sources", "project", "limits")},
+                        **derived, "limitations": list(ta.LIMITATIONS)})
     fixture = (FIXTURES / "chorus_v10_2026-10-22a" / "CHORUS_full.yaml").read_text(encoding="utf-8")
-    assert packet["plan"] == b.make_plan(fixture, version=2, **CHORUS)
+    assert packet["plan"] == rebuilt["plan"] == b.make_plan(fixture, version=2, **CHORUS)
+    # Everything the worker contract does not reach is the run's, byte for byte.
+    for key in ("omission_request", "registered_provenance"):
+        assert rebuilt[key] == packet[key], key
+    assert rebuilt["requests"]["shared_context"] == packet["requests"]["shared_context"]
+    assert rebuilt["contracts"]["integration"] == packet["contracts"]["integration"]
+
+    def as_run(value):
+        return json.loads(json.dumps(value).replace(REMOVAL_RULE, RUN_REMOVAL_RULE))
+
+    assert rebuilt["contracts"]["worker"] != packet["contracts"]["worker"]
+    assert as_run(rebuilt["contracts"]["worker"]) == packet["contracts"]["worker"]
+    header = "# Exact typed stage request\n\n"
     for i, worker in enumerate(packet["plan"]["workers"]):
-        request = ta.worker_request(packet, worker["id"], derivations=cache)
         wire = json.loads((run / f"CHORUS_typed_audit_{i}_request.json").read_bytes())
         texts = [part["text"] for message in wire["messages"] for part in message["content"] if part.get("type") == "text"]
-        assert texts.count("# Exact typed stage request\n\n" + sg.canonical(request).decode()) == 1
-    checked = ta.check(json.loads((run / "CHORUS_typed_audit_assembly.json").read_bytes()), derivations=ta.DerivationCache())
-    assert checked["passed"] and checked["independently_reconstructed"]
+        saved = json.loads(next(text for text in texts if text.startswith(header))[len(header):])
+        request = ta.worker_request(rebuilt, worker["id"])
+        # The sentence occurs twice (the rules and their rendering); the two
+        # digests over it are the only other bytes that move.
+        assert request["payload"]["stage"].count(REMOVAL_RULE) == 2
+        assert {**request, "request_sha256": saved["request_sha256"],
+                "payload": {**request["payload"], "packet_sha256": saved["payload"]["packet_sha256"],
+                            "stage": request["payload"]["stage"].replace(REMOVAL_RULE, RUN_REMOVAL_RULE)}} == saved
+        assert len(sg.canonical(request)) - len(sg.canonical(saved)) == 2 * (len(REMOVAL_RULE) - len(RUN_REMOVAL_RULE))
+    # The run's own worker and integration responses still check and assemble to its audit.
+    assembly = json.loads((run / "CHORUS_typed_audit_assembly.json").read_bytes())
+
+    def response(blob):
+        envelope = json.loads(ta._unblob(blob, ta.MAX_SAVED_RESPONSE_BYTES))
+        return ta._unblob(envelope["response"], ta.audit_grammar.MAX_BYTES)
+
+    workers = {key: response(blob) for key, blob in assembly["workers"].items()}
+    for key, raw in workers.items():
+        assert b.check_worker(raw, packet["plan"], key, version=2)["passed"]
+    audit, lineage = b.assemble(packet["plan"], workers, response(assembly["integration_response"]), version=2)
+    assert audit == ta._unblob(assembly["audit"], ta.audit_grammar.MAX_BYTES)
+    assert {key: assembly["lineage"][key] for key in lineage} == lineage
 
 
 @pytest.mark.parametrize("path,eight,sixteen", [

@@ -256,7 +256,10 @@ def test_rendering_reproduces_the_chorus_v10_wire():
     actual = [sum(len(text.encode()) for text in parts) for parts in wires]
     allowance = rendered["carry_allowance_bytes"] - len(carry.encode())
     assert allowance >= 0
-    assert rendered["worker_bytes"] - max(actual[:3]) == allowance
+    # Since that run, one worker-contract sentence was reworded (D35); it occurs twice in each worker request.
+    reworded = 2 * (len("Every removal's owning root (its top-level field, or its list entry when the plan splits that list) belongs")
+                    - len("Every removal's top-level owner belongs"))
+    assert rendered["worker_bytes"] - max(actual[:3]) == allowance + reworded
     owners = (len(sg.canonical(rendered["requests"]["omission"]["payload"]["owner_classes"]))
               - len(sg.canonical(packet["omission_request"]["payload"]["owner_classes"])))
     assert owners >= 0

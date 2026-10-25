@@ -37,6 +37,18 @@ def test_full_v2_contract_example_matches_schema_real_parser_and_assembly(stage)
         assert any("never quote a neighboring or parent slot's value as the claim text for row.path" in r for r in contract["additional_rules"])
 
 
+def test_v2_worker_removal_owner_includes_split_list_entries_and_v1_is_unchanged():
+    old = "Every removal's top-level owner belongs to this worker's assigned roots."
+    new = ("Every removal's owning root (its top-level field, or its list entry when the plan splits that list) "
+           "belongs to this worker's assigned roots.")
+    typed = output.contract("worker", version=2)["additional_rules"]
+    released = output.contract("worker")["additional_rules"]
+    assert [rule.replace(new, old) for rule in typed][:len(released)] == released
+    assert sum(new in rule for rule in typed) == 1 and not any(old in rule for rule in typed)
+    assert new in output.render("worker", version=2) and old not in output.render("worker", version=2)
+    assert old in output.render("worker") and new not in output.render("worker")
+
+
 def multiworker():
     example = output.synthetic_examples(version=2)
     plan = batches.make_plan(example["original_full"], max_paths=1, version=2)

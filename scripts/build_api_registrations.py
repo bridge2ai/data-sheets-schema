@@ -226,7 +226,9 @@ def profile_sized(partition: str | None, limits: dict[str, Any]) -> bool:
 # - Rendered as below from that run's own inputs, its worker and omission
 #   requests come out byte for byte, apart from two allowances: the receipt
 #   carry (2,931 bytes over) and the omission request's owner classes
-#   (padded). The integration request is rendered without its responses.
+#   (padded). Worker requests are also 136 bytes longer since one contract
+#   sentence was reworded (D35). The integration request is rendered without
+#   its responses.
 # - Its worker, omission and integration requests counted 2.25, 2.35 and
 #   1.75 bytes per token.
 # - The responses its integration call carried cost about 3 input tokens per
