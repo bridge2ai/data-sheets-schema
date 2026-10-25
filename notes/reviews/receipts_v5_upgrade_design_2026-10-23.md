@@ -27,7 +27,7 @@ Per `CLAUDE.md` and `notes/coordination/2026-10-23-agy-receipts-upgrade-guardrai
   - `RECEIPTS_INSTRUMENT` (`instrument_version=3`) and `RERECEIPTS_INSTRUMENT` (`instrument_version=4`) retain their exact behavior, output keys, and pin hashes across all 280+ committed records.
   - Neither the `generic_v10` CHORUS API re-canary (`A16`) nor the Track N native agentic canary (`C2`/`N2`) selects `instrument_version=5` unless the owner explicitly decides to bump both arms together.
 - **New instrument (`instrument_version=5`):**
-  - `RECEIPTS_V5_INSTRUMENT = "d4d_receipt_verification v5 (populated_leaves + exact_substring + 8_char_alnum_floor + no_value_overlap + never_receipted + added_after_receipt + added_after_receipt_unmatched + structured_polarity + fast_entailment + tool_receipts)"`
+  - `RECEIPTS_V5_INSTRUMENT = "v5 (supports/explanation/tool receipts; slots.added_after_receipt_unmatched): names \`slots.added_after_receipt_unmatched\` (uncovered leaves that the phase-1 snapshot lacks by path and by normalized leaf value, added to v4 blocks without changing RERECEIPTS_INSTRUMENT); ..." + RERECEIPTS_INSTRUMENT`
   - Activated only when `instrument_version=5` is explicitly passed or when a receipt document declares `receipt_format_version: 5`.
 - **Non-collision with `A13` (and A13 F1 / D32):**
   - `A13` (versioned fence unwrap `#5116` in `rereceipt.parse_answers` and `coverage_floor.basis: receipted_part` gating `with_receipt / (receiptable - added_after_receipt_unmatched)`) is orthogonal to `v5`.

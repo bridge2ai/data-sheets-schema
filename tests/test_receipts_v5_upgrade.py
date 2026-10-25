@@ -522,3 +522,61 @@ def test_declarative_derivation_parity_on_corpus_records():
         t_rec = tr.emit_transformation_receipt(full_doc, dec)
         v_res = tr.verify_transformation_receipt(full_doc, dec, t_rec)
         assert v_res["mismatched"] == 0, f"Transformation receipt failed on {p}: {v_res}"
+
+
+def test_v5_instrument_names_added_after_receipt_unmatched_and_preserves_v4_string():
+    """Verify RERECEIPTS_INSTRUMENT (v4) stays unchanged while RECEIPTS_V5_INSTRUMENT (v5)
+    explicitly names `slots.added_after_receipt_unmatched`, and both v4 and v5 compute
+    `slots["added_after_receipt_unmatched"]` against the phase-1 snapshot (D32 / A13 F1)."""
+    # 1. RERECEIPTS_INSTRUMENT (v4) is unchanged so v4 rereceipt-policy and
+    #    receipt-completion hashes are preserved.
+    assert "added_after_receipt_unmatched" not in rc.RERECEIPTS_INSTRUMENT
+    assert rc.receipt_instrument(4) == rc.RERECEIPTS_INSTRUMENT
+
+    # 2. RECEIPTS_V5_INSTRUMENT (v5) explicitly names `slots.added_after_receipt_unmatched`.
+    assert "slots.added_after_receipt_unmatched" in rc.RECEIPTS_V5_INSTRUMENT
+    assert rc.receipt_instrument(5) == rc.RECEIPTS_V5_INSTRUMENT
+
+    # 3. Both v4 and v5 compute `slots["added_after_receipt_unmatched"]` (distinguishing
+    #    a moved/renamed Phase-1 unreceipted value from a genuinely new post-receipt value),
+    #    while v3 omits the key.
+    manifest, chunk_texts, b_md5 = _sample_bundle()
+    original = {
+        "id": "bridge2ai:voice-v1",
+        "title": "Bridge2AI Voice Cohort Release 1.0",
+        "old_slot": "Unreceipted Phase-1 Value",
+    }
+    final = {
+        "id": "bridge2ai:voice-v1",
+        "title": "Bridge2AI Voice Cohort Release 1.0",
+        "renamed_slot": "Unreceipted Phase-1 Value",  # moved/renamed from original -> matched value!
+        "genuinely_new_slot": "Added In Phase 3 Only",  # new by path AND by value -> unmatched!
+    }
+    receipt = {
+        "bundle_md5": b_md5,
+        "chunks": [
+            {
+                "id": "c001",
+                "status": "extracted",
+                "extracted": [
+                    {
+                        "slot": "title",
+                        "snippet": "Dataset Title: Bridge2AI Voice Cohort Release 1.0 (grant OT2OD032701).",
+                    }
+                ],
+            },
+            {"id": "c002", "status": "nothing_relevant", "reason": "No extra fields."},
+        ],
+    }
+
+    block_v3 = rc.check(receipt, manifest, chunk_texts, final, b_md5, original=original, instrument_version=3)
+    assert "added_after_receipt_unmatched" not in block_v3["slots"]
+
+    block_v4 = rc.check(receipt, manifest, chunk_texts, final, b_md5, original=original, instrument_version=4)
+    assert block_v4["slots"]["added_after_receipt"] == 2
+    assert block_v4["slots"]["added_after_receipt_unmatched"] == 1
+
+    block_v5 = rc.check(receipt, manifest, chunk_texts, final, b_md5, original=original, instrument_version=5)
+    assert block_v5["slots"]["added_after_receipt"] == 2
+    assert block_v5["slots"]["added_after_receipt_unmatched"] == 1
+

@@ -305,8 +305,11 @@ TOOL_RECEIPT_NAMES = (
 )
 
 RECEIPTS_V5_INSTRUMENT = (
-    "v5 (supports/explanation/tool receipts): receipt entries accept structured "
-    "polarity (supports: SUPPORT|PARTIAL|REFUTE|NO_EVIDENCE|NEUTRAL), "
+    "v5 (supports/explanation/tool receipts; slots.added_after_receipt_unmatched): "
+    "names `slots.added_after_receipt_unmatched` (uncovered leaves that the "
+    "phase-1 snapshot lacks by path and by normalized leaf value, added to v4 "
+    "blocks without changing RERECEIPTS_INSTRUMENT); receipt entries accept "
+    "structured polarity (supports: SUPPORT|PARTIAL|REFUTE|NO_EVIDENCE|NEUTRAL), "
     "evidence_source, explanation (deterministic fast-entailment screen "
     "distinguishing entailed_non_literal from no_value_overlap), and "
     "deterministic tool-computed receipts (md5, sha256, byte_length, "
@@ -450,6 +453,16 @@ def exempt_on_carried_identifier(path: str, value: Any, record_id: str | None,
     leaf = path.rsplit(".", 1)[-1]
     return (leaf == "id" and _minted(value, record_id, carried)
             and not _minted_v1(value, record_id) and not exempt(path, value, None))
+
+
+def _leaf_value_key(value: Any) -> str:
+    """A populated leaf's value, comparable across records. A one-item list is
+    its item: `str` → `[str]` is normalisation, not a new value (#899)."""
+    import json
+
+    if isinstance(value, list) and len(value) == 1:
+        value = value[0]
+    return json.dumps(value, sort_keys=True, default=str)
 
 
 def resolve(record: Any, path: str) -> bool:
@@ -2165,12 +2178,21 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # there is no snapshot to split against — the agentic path re-receipts.
     # The split is by *path resolution* in the snapshot, not value identity
     # (#843): a reordered list entry counts as never_receipted, and a repair
-    # that rewrote an existing index does too — `added_after_receipt` is a
-    # floor on later-phase additions, not the whole of them.
-    never_receipted = added_after_receipt = None
+    # that rewrote an existing index does too. It errs the other way as well:
+    # a never-receipted value a later phase renamed, moved or shifted to a
+    # path the snapshot lacks counts as added (A13 review F1).
+    never_receipted = added_after_receipt = added_unmatched = None
     if original is not None:
         never_receipted = sum(1 for p in without if resolve(original, p))
         added_after_receipt = len(without) - never_receipted
+        # What the receipted-part floor subtracts (D-C; instrument 4 and 5 only,
+        # so v3 blocks recompute unchanged): leaves the snapshot lacks by path
+        # *and* by value. A moved never-receipted value stays gated; an
+        # addition that repeats a snapshot value is gated too.
+        at_receipt = {_leaf_value_key(v) for _p, v in populated_leaves(original)}
+        value_at = dict(receiptable)
+        added_unmatched = sum(1 for p in without if not resolve(original, p)
+                              and _leaf_value_key(value_at[p]) not in at_receipt)
     slots = {"populated": len(leaves), "exempt": len(leaves) - len(receiptable),
              "exempt_on_carried_identifier": exempt_on_carried,
              "receiptable": len(receiptable), "with_receipt": len(receiptable) - len(without),
@@ -2194,6 +2216,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "path_not_in_snapshot_count": len(not_in_snapshot) if original is not None else None,
              "reshaped_by_reconcile": reshaped,
              "receipts_to_removed_values": len(reshaped)}
+    if instrument_version in (4, 5):
+        slots["added_after_receipt_unmatched"] = added_unmatched
 
     snippets["no_value_overlap_sample"] = snippets["no_value_overlap_sample"][:10]
     snippets["unattesting_sample"] = snippets["unattesting_sample"][:10]
