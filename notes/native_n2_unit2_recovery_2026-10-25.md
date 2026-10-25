@@ -66,3 +66,14 @@ Its new mutation test failed before the correction; the corrected schema-event
 guard and broader dependency/native typed-catalog tests passed 73 tests.
 The frozen 310-test run precedes that narrow cache correction; later focused
 cache results cover the changed boundary explicitly.
+
+The later permission preparation recovery is deliberately limited to
+`13d4c6077`'s `_view_factory` / `_view` / `projection`, `87dfe8208`'s
+per-trace view factory and fresh classifier calls, and `6f016c25f`'s permission
+isolation-root / default registration lexical ancestry calls. Unit 1 already
+supplies the exact lexical helper. No owner reconstruction or stream
+coordination changes are included. The helper and JSON manifest
+`recover_native_permission_preparation_20261025.py` /
+`native_n2_permission_preparation_2026-10-25.json` preserve exact patch/source
+identities. The inherited projection and lexical oracle tests remain intact.
+Final frozen-head tests follow this separate performance commit.

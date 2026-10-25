@@ -428,40 +428,67 @@ def _recipe_data(expected, selection, launch, session, *, roots_checked=False):
     return basis, fixed, requests, responses
 
 
-def _view(expected, selection, launch, session, context, *, state='awaiting_response', read=False, policy=None, recipe=None):
-    contract, _ = _dependencies()
-    basis, fixed, requests, responses = _recipe_data(expected, selection, launch, session) if recipe is None else recipe
-    root = _path(launch['effect_root'])
-    if policy is None:
-        policy = projected_policy(expected, selection, str(root))
-    active = state == 'awaiting_response' and context in CONTEXTS
-    ordinal = CONTEXTS.index(context) + 1 if context in CONTEXTS else 1
-    cursor = contract.StageCursor(ordinal=ordinal, kind=context,
-                                 target_id='worker-000001' if context == 'worker' else context) if active else None
-    request_path = str(root / 'requests' / ('%06d.json' % ordinal))
-    request = contract.ArtifactPin(**_artifact('stage_request:' + str(ordinal), request_path,
-                                               requests[context])) if active else None
-    response = contract.ResponseDestination(role='stage_response:' + str(ordinal),
-        path=str(root / 'responses' / ('%06d.bin' % ordinal)), media_type='application/json',
-        max_bytes=min(selection['bounds']['max_response_bytes'], 2_097_152)) if active else None
-    protected = [contract.RolePath(role=role, path=str(root / relative))
-                 for role, relative in sorted(contract.ROLE_RELATIVE_PATHS.items())]
-    protected.extend([contract.RolePath(role='stage_root', path=str(root)),
-                      contract.RolePath(role='selection', path=expected['selection']['path']),
-                      contract.RolePath(role='source', path=expected['source']['path'])])
-    sealed = tuple(contract.ArtifactPin(**_artifact('probe_sealed', path, raw)) for path, raw in sorted(fixed.items()))
-    return contract.NativeEffectView(protocol='native_shared_generation_v1',
-        selection_sha256=expected['selection']['sha256'],
-        execution_binding_sha256=_sha(_encoded({**basis, 'identity': 'synthetic-execution-binding'})),
-        static_policy_sha256=_sha(_encoded(policy)), stage_root=str(root),
-        working_directory=expected['policy']['readonly_lookups']['repository'],
-        stage_command=expected['commands']['stage'], state=state, cursor=cursor, request=request,
-        response=response, sealed=sealed, protected_roles=tuple(protected),
-        correction_window=False, pending_advance_tool_use_id=None,
-        history_sha256=_sha(_encoded({**basis, 'identity': 'synthetic-history', 'context': context, 'state': state})),
-        request_read_observation_sha256=(_sha(_encoded({**basis, 'identity': 'synthetic-read',
-                                                       'context': context})) if read and active else None),
-        response_intent_observation_sha256=None)
+def _view_factory(expected, selection, launch, session, *, policy=None, recipe=None):
+    """One local pure derivation; every result still validates a fresh full view."""
+    prepared = None
+
+    def build(context, *, state='awaiting_response', read=False):
+        nonlocal prepared
+        contract, _ = _dependencies()
+        if prepared is None:
+            basis, fixed, requests, _ = (_recipe_data(expected, selection, launch, session)
+                                         if recipe is None else recipe)
+            root = _path(launch['effect_root'])
+            current_policy = (projected_policy(expected, selection, str(root))
+                              if policy is None else policy)
+        else:
+            basis_raw, request_rows, root, common_rows = prepared
+            basis, requests = json.loads(basis_raw), dict(request_rows)
+        active = state == 'awaiting_response' and context in CONTEXTS
+        ordinal = CONTEXTS.index(context) + 1 if context in CONTEXTS else 1
+        cursor = contract.StageCursor(ordinal=ordinal, kind=context,
+            target_id='worker-000001' if context == 'worker' else context) if active else None
+        request_path = str(root / 'requests' / ('%06d.json' % ordinal))
+        request = contract.ArtifactPin(**_artifact('stage_request:' + str(ordinal), request_path,
+                                                   requests[context])) if active else None
+        response = contract.ResponseDestination(role='stage_response:' + str(ordinal),
+            path=str(root / 'responses' / ('%06d.bin' % ordinal)), media_type='application/json',
+            max_bytes=min(selection['bounds']['max_response_bytes'], 2_097_152)) if active else None
+        if prepared is None:
+            # Preserve first-build failure order and inactive views' lack of a
+            # response-bound read. Never retain partial preparation after error.
+            protected = [contract.RolePath(role=role, path=str(root / relative))
+                         for role, relative in sorted(contract.ROLE_RELATIVE_PATHS.items())]
+            protected.extend([contract.RolePath(role='stage_root', path=str(root)),
+                              contract.RolePath(role='selection', path=expected['selection']['path']),
+                              contract.RolePath(role='source', path=expected['source']['path'])])
+            sealed = tuple(contract.ArtifactPin(**_artifact('probe_sealed', path, raw))
+                           for path, raw in sorted(fixed.items()))
+            common_rows = tuple({'protocol': 'native_shared_generation_v1',
+                'selection_sha256': expected['selection']['sha256'],
+                'execution_binding_sha256': _sha(_encoded({**basis, 'identity': 'synthetic-execution-binding'})),
+                'static_policy_sha256': _sha(_encoded(current_policy)), 'stage_root': str(root),
+                'working_directory': expected['policy']['readonly_lookups']['repository'],
+                'stage_command': expected['commands']['stage'], 'sealed': sealed,
+                'protected_roles': tuple(protected)}.items())
+        view = contract.NativeEffectView(**dict(common_rows), state=state, cursor=cursor, request=request,
+            response=response, correction_window=False, pending_advance_tool_use_id=None,
+            history_sha256=_sha(_encoded({**basis, 'identity': 'synthetic-history',
+                                         'context': context, 'state': state})),
+            request_read_observation_sha256=(_sha(_encoded({**basis, 'identity': 'synthetic-read',
+                                                           'context': context})) if read and active else None),
+            response_intent_observation_sha256=None)
+        if prepared is None:
+            prepared = (_encoded(basis), tuple(requests.items()), root, common_rows)
+        return view
+
+    return build
+
+
+def _view(expected, selection, launch, session, context, *, state='awaiting_response', read=False,
+          policy=None, recipe=None):
+    return _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)(
+        context, state=state, read=read)
 
 
 def projection(expected, selection, launch, session_id, *, policy=None, recipe=None):
@@ -470,15 +497,14 @@ def projection(expected, selection, launch, session_id, *, policy=None, recipe=N
         policy = projected_policy(expected, selection, launch['effect_root'])
     if recipe is None:
         recipe = _recipe_data(expected, selection, launch, session_id)
+    build = _view_factory(expected, selection, launch, session_id, policy=policy, recipe=recipe)
     states = []
     for context in CONTEXTS:
         for read in (False, True):
             states.append({'name': context + ('-read' if read else '-unread'),
-                           'view': asdict(_view(expected, selection, launch, session_id, context, read=read,
-                                                policy=policy, recipe=recipe))})
+                           'view': asdict(build(context, read=read))})
     for state in NONRESPONSE:
-        states.append({'name': state, 'view': asdict(_view(expected, selection, launch, session_id,
-                                                         'worker', state=state, policy=policy, recipe=recipe))})
+        states.append({'name': state, 'view': asdict(build('worker', state=state))})
     return {'kind': 'native_shared_permission_projection', 'version': VERSION,
             'effect_root': launch['effect_root'], 'session_id': session_id, 'states': states,
             'production_policy_sha256': _sha(_encoded(expected['policy'])), 'probe_policy': policy,
@@ -575,12 +601,17 @@ def _file_classification(policy, case):
 
 
 def _classification(expected, selection, launch, session, case, controls, *, policy=None, recipe=None):
-    _, effects = _dependencies()
     context = case['context'] if case['context'] in CONTEXTS else 'worker'
     if policy is None:
         policy = projected_policy(expected, selection, launch['effect_root'])
     view = _view(expected, selection, launch, session, context, read=case['tool'] == 'Write',
                  policy=policy, recipe=recipe)
+    return _classify_view(case, controls, policy, view)
+
+
+def _classify_view(case, controls, policy, view):
+    """Classify one fresh strict carrier with the fixed local classifiers."""
+    _, effects = _dependencies()
     governed = command_policy.stage_overlay_governs(view, tool_name=case['tool'],
         tool_input=case['input'], policy=policy)
     _need(type(governed) is bool, 'effect routing is not a strict boolean')
@@ -819,6 +850,7 @@ def _trace_body(expected, selection, trace, raw, controls):
         c for c in all_cases if c['id'] == trace[5:]]
     _need(len(clean) == (len(cases) + 2 if trace == 'settled' else 2), 'control has missing/extra grants')
     offset, request_ids, outcomes = 2, set(), []
+    build_view = _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)
     for number, case in enumerate(cases):
         offset = _settled_text(events, offset, session, model)
         call, callback = events[offset:offset+2]; offset += 2
@@ -836,8 +868,9 @@ def _trace_body(expected, selection, trace, raw, controls):
         if 'effort' in (callback.get('request') or {}).get('input', {}):
             wanted['request']['input']['effort'] = expected['runtime']['effort']
         _need(_same(callback, wanted), 'callback differs from observed call/selected authority')
-        classification, view = _classification(expected, selection, launch, session, case, controls,
-                                               policy=policy, recipe=recipe)
+        context = case['context'] if case['context'] in CONTEXTS else 'worker'
+        view = build_view(context, read=case['tool'] == 'Write')
+        classification, view = _classify_view(case, controls, policy, view)
         stop_sha, result_sha = None, None
         if case['mode'] == 'observer_stopped':
             _need(offset == len(events), 'stopped file case contains a result or continuation')
@@ -904,8 +937,9 @@ def _derived_controls(expected, selection, launch, session, *, policy=None, reci
     if recipe is None:
         recipe = _recipe_data(expected, selection, launch, session)
     checks = []
+    build_view = _view_factory(expected, selection, launch, session, policy=policy, recipe=recipe)
     for state in NONRESPONSE:
-        view = _view(expected, selection, launch, session, 'worker', state=state, policy=policy, recipe=recipe)
+        view = build_view('worker', state=state)
         command = {'command': expected['commands']['stage']}
         _need(effects.governs_stage_effect(view, tool_name='Bash', tool_input=command) is True,
               'fixed stage helper is outside the selected effect router')
@@ -923,7 +957,7 @@ def _derived_controls(expected, selection, launch, session, *, policy=None, reci
         checks.append({'state': state, 'stage_helper_classification': helper[0],
                        'response_is_none': True, 'denied_response_paths': paths})
     for context in CONTEXTS:
-        view = _view(expected, selection, launch, session, context, read=True, policy=policy, recipe=recipe)
+        view = build_view(context, read=True)
         for ordinal in range(1, 6):
             path = str(_path(launch['effect_root']) / 'responses' / ('%06d.bin' % ordinal))
             if path == view.response.path:
@@ -985,7 +1019,9 @@ def _verify(raw_manifest, expected):
         sessions.add(summary['session_id'])
         roots = [_path(launch[key]) for key in ('config_root','stub_root','effect_root','evidence_root')]
         for root in roots:
-            _need(all(root != previous and root not in previous.parents and previous not in root.parents
+            _need(all(root != previous
+                      and not contract._strict_path_ancestor(root, previous)
+                      and not contract._strict_path_ancestor(previous, root)
                       for previous in all_roots), 'probe traces reuse or overlap isolation roots')
         all_roots.extend(roots)
         if name == 'settled':

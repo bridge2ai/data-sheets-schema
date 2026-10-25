@@ -1,0 +1,56 @@
+{
+  "omitted": [
+    "13d registration/capture changes",
+    "87 stream coordination changes"
+  ],
+  "rows": [
+    {
+      "patch_sha256": "89b092604c4bab7084f7d222a8229fb4d3b3f1817b44f125314ac5ef073d40a5",
+      "paths": [
+        "src/data_sheets_schema/native_shared_permissions.py"
+      ],
+      "selected_functions": [
+        "_view_factory",
+        "_view",
+        "projection"
+      ],
+      "source_commit": "13d4c607753b85b34b08661a1c9c3e645d30b339"
+    },
+    {
+      "patch_sha256": "a373a2c8f5173d3abf55edf37dc0ba191c0a907a281966f0f8fc533955773809",
+      "paths": [
+        "src/data_sheets_schema/native_shared_permissions.py"
+      ],
+      "selected_functions": [
+        "_classification",
+        "_classify_view",
+        "_trace_body",
+        "_derived_controls"
+      ],
+      "source_commit": "87dfe82088f4a73090abceb6c630d4f5da26d38c"
+    },
+    {
+      "patch_sha256": "e2d5bf8ba6208db12c92b9dd6fa78dcfcdd64af5f382070be176074a315c2daa",
+      "paths": [
+        "src/data_sheets_schema/native_shared_permissions.py",
+        "src/data_sheets_schema/native_shared_registration.py"
+      ],
+      "selected_functions": [
+        "_verify isolation roots",
+        "_paths lexical ancestry"
+      ],
+      "source_commit": "6f016c25f048e56276ad03752e122d43dec0e989"
+    },
+    {
+      "path": "tests/test_native_permission_projection_derivation.py",
+      "sha256": "cade18363721554bdc6e1e494d619609cc494899a4a9bb97cdd6f5a1c8f335e2",
+      "source_commit": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a"
+    },
+    {
+      "path": "tests/test_native_lexical_ancestry.py",
+      "sha256": "58358af0be1ae5983fd87353675ceb601b4000f3be0ad21e4cb84366ddefa76a",
+      "source_commit": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a"
+    }
+  ],
+  "scope": "default-only pure preparation; no owner hooks"
+}
