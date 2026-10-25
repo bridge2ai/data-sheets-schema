@@ -1,0 +1,3548 @@
+{
+  "complete": true,
+  "format": "k1_request_sizing_v1",
+  "network_attempts": [],
+  "root_head": "41b90911c23fce1e5a8633444a6cbc9a09746e23",
+  "rows": [
+    {
+      "arm": "with_crate",
+      "conditional_decision": "D04 B only",
+      "future_output_basis": "Unknown v10 output; one historical crate-final record scenario.",
+      "generation_arm": "de_novo",
+      "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+      "measurements": {
+        "audit_floor_bytes": 74058,
+        "audit_floor_terminal_check": {
+          "findings": 184,
+          "other_kinds": [
+            "evidence_contract"
+          ],
+          "quote_or_coverage": 0,
+          "quote_or_coverage_examples": []
+        },
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 1088000,
+          "integration_output_tokens": 32000,
+          "max_calls": 18,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 3895,
+          "max_paths": 18,
+          "max_workers": 16,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "bundle_bytes": 65749,
+        "findings_basis": "this run's worker count",
+        "inputs": {
+          "completed_core": "notes/k1_cost_model_2026-10-25/crate-proxy-scratch/1/source_records/completed_core.yaml",
+          "original_core": "notes/k1_cost_model_2026-10-25/crate-proxy-scratch/1/source_records/original_core.yaml",
+          "original_full": "notes/k1_cost_model_2026-10-25/crate-proxy-scratch/1/source_records/original_full.yaml",
+          "receipt": "notes/k1_cost_model_2026-10-25/crate-proxy-scratch/1/source_records/receipt.yaml",
+          "reconciled_full": "notes/k1_cost_model_2026-10-25/crate-proxy-scratch/1/source_records/reconciled_full.yaml",
+          "report": null
+        },
+        "label": "2026-07-31_claude-opus-5-api-generic_rep1",
+        "original_full_bytes": 42628,
+        "record_project": "CHORUS",
+        "stages": {
+          "full": {
+            "ceiling_tokens": 1000000,
+            "estimated_clearance_tokens": 778434,
+            "estimated_in_flight_range": [
+              216231,
+              221566
+            ],
+            "estimated_in_flight_tokens": 221566,
+            "estimated_input_tokens": 93566,
+            "max_output_tokens": 128000,
+            "payload_bytes": 258916,
+            "placeholder_tokens": 0,
+            "ratio": 0.3614,
+            "ratio_basis": "A1b CHORUS full",
+            "ratio_range": [
+              0.3408,
+              0.3614
+            ],
+            "verdict": "estimate_fits"
+          },
+          "full_readdress": {
+            "ceiling_tokens": 1000000,
+            "estimated_clearance_tokens": 882348,
+            "estimated_in_flight_range": [
+              111688,
+              117652
+            ],
+            "estimated_in_flight_tokens": 117652,
+            "estimated_input_tokens": 109652,
+            "max_output_tokens": 8000,
+            "payload_bytes": 304430,
+            "placeholder_tokens": 0,
+            "ratio": 0.3602,
+            "ratio_basis": "A1b CHORUS full_readdress",
+            "ratio_range": [
+              0.3406,
+              0.3602
+            ],
+            "verdict": "estimate_fits"
+          },
+          "full_receipt_completion": {
+            "ceiling_tokens": 1000000,
+            "estimated_clearance_tokens": 862535,
+            "estimated_in_flight_range": [
+              134028,
+              137465
+            ],
+            "estimated_in_flight_tokens": 137465,
+            "estimated_input_tokens": 133465,
+            "max_output_tokens": 4000,
+            "payload_bytes": 360444,
+            "placeholder_tokens": 0,
+            "ratio": 0.3703,
+            "ratio_basis": "A1b CHORUS full_receipt_completion",
+            "ratio_range": [
+              0.3607,
+              0.3703
+            ],
+            "verdict": "estimate_fits"
+          },
+          "full_receipt_completion_after_readdress": {
+            "ceiling_tokens": 1000000,
+            "estimated_clearance_tokens": 854179,
+            "estimated_in_flight_range": [
+              142375,
+              145821
+            ],
+            "estimated_in_flight_tokens": 145821,
+            "estimated_input_tokens": 141821,
+            "max_output_tokens": 4000,
+            "payload_bytes": 361406,
+            "placeholder_tokens": 8000,
+            "ratio": 0.3703,
+            "ratio_basis": "A1b CHORUS full_receipt_completion",
+            "ratio_range": [
+              0.3607,
+              0.3703
+            ],
+            "verdict": "estimate_fits"
+          },
+          "reconcile_full": {
+            "carry_basis": "registered output caps",
+            "ceiling_tokens": 1000000,
+            "estimated_clearance_tokens": -379703,
+            "estimated_in_flight_range": [
+              1372479,
+              1379703
+            ],
+            "estimated_in_flight_tokens": 1379703,
+            "estimated_input_tokens": 1251703,
+            "max_output_tokens": 128000,
+            "payload_bytes": 527529,
+            "placeholder_tokens": 1056000,
+            "ratio": 0.371,
+            "ratio_basis": "A1b CHORUS reconcile_full",
+            "ratio_range": [
+              0.3573,
+              0.371
+            ],
+            "verdict": "estimate_exceeds"
+          },
+          "repair_full": {
+            "ceiling_tokens": 1000000,
+            "estimated_clearance_tokens": 861057,
+            "estimated_in_flight_range": [
+              135652,
+              138943
+            ],
+            "estimated_in_flight_tokens": 138943,
+            "estimated_input_tokens": 42943,
+            "max_output_tokens": 96000,
+            "payload_bytes": 106085,
+            "placeholder_tokens": 0,
+            "ratio": 0.4048,
+            "ratio_basis": "A1b CHORUS repair_full",
+            "ratio_range": [
+              0.3738,
+              0.4048
+            ],
+            "verdict": "estimate_fits"
+          },
+          "report": {
+            "carry_basis": "registered output caps",
+            "ceiling_tokens": 850000,
+            "estimated_clearance_tokens": -597980,
+            "estimated_in_flight_range": [
+              1437939,
+              1447980
+            ],
+            "estimated_in_flight_tokens": 1447980,
+            "estimated_input_tokens": 1319980,
+            "max_output_tokens": 128000,
+            "payload_bytes": 716362,
+            "placeholder_tokens": 1056000,
+            "ratio": 0.3685,
+            "ratio_basis": "A1b CHORUS report",
+            "ratio_range": [
+              0.3545,
+              0.3685
+            ],
+            "verdict": "estimate_exceeds"
+          },
+          "report_after_repair": {
+            "carry_basis": "registered output caps",
+            "ceiling_tokens": 850000,
+            "estimated_clearance_tokens": -597980,
+            "estimated_in_flight_range": [
+              1437939,
+              1447980
+            ],
+            "estimated_in_flight_tokens": 1447980,
+            "estimated_input_tokens": 1319980,
+            "max_output_tokens": 128000,
+            "note": "same request as report, built from the repaired records; sized here from the reconciled records",
+            "payload_bytes": 716362,
+            "placeholder_tokens": 1056000,
+            "ratio": 0.3685,
+            "ratio_basis": "A1b CHORUS report",
+            "ratio_range": [
+              0.3545,
+              0.3685
+            ],
+            "verdict": "estimate_exceeds"
+          },
+          "report_regate": {
+            "carry_basis": "registered output caps",
+            "ceiling_tokens": 850000,
+            "estimated_clearance_tokens": -725397,
+            "estimated_in_flight_range": [
+              1565321,
+              1575397
+            ],
+            "estimated_in_flight_tokens": 1575397,
+            "estimated_input_tokens": 1447397,
+            "max_output_tokens": 128000,
+            "payload_bytes": 714535,
+            "placeholder_tokens": 1184000,
+            "ratio": 0.3686,
+            "ratio_basis": "A1b CHORUS report_regate",
+            "ratio_range": [
+              0.3545,
+              0.3686
+            ],
+            "verdict": "estimate_exceeds"
+          },
+          "report_regate_with_v8_report": {
+            "carry_basis": "registered output caps",
+            "ceiling_tokens": 850000,
+            "estimated_clearance_tokens": -597397,
+            "estimated_in_flight_range": [
+              1437321,
+              1447397
+            ],
+            "estimated_in_flight_tokens": 1447397,
+            "estimated_input_tokens": 1319397,
+            "max_output_tokens": 128000,
+            "payload_bytes": 714535,
+            "phase": "report_regate",
+            "placeholder_tokens": 1056000,
+            "ratio": 0.3686,
+            "ratio_basis": "A1b CHORUS report_regate",
+            "ratio_range": [
+              0.3545,
+              0.3686
+            ],
+            "verdict": "estimate_exceeds"
+          },
+          "typed_audit_integration": {
+            "carry_basis": "registered output caps",
+            "ceiling_tokens": 1000000,
+            "estimated_clearance_tokens": -330070,
+            "estimated_in_flight_range": [
+              1318665,
+              1330070
+            ],
+            "estimated_in_flight_tokens": 1330070,
+            "estimated_input_tokens": 1298070,
+            "max_output_tokens": 32000,
+            "payload_bytes": 590069,
+            "placeholder_tokens": 1056000,
+            "ratio": 0.4102,
+            "ratio_basis": "A1b CHORUS typed_audit_worker",
+            "ratio_range": [
+              0.3909,
+              0.4102
+            ],
+            "verdict": "estimate_exceeds"
+          },
+          "typed_audit_omission": {
+            "ceiling_tokens": 1000000,
+            "estimated_clearance_tokens": 670144,
+            "estimated_in_flight_range": [
+              322099,
+              329856
+            ],
+            "estimated_in_flight_tokens": 329856,
+            "estimated_input_tokens": 297856,
+            "max_output_tokens": 32000,
+            "payload_bytes": 782966,
+            "placeholder_tokens": 0,
+            "ratio": 0.3804,
+            "ratio_basis": "A1b CHORUS typed_audit_omission",
+            "ratio_range": [
+              0.3705,
+              0.3804
+            ],
+            "verdict": "estimate_fits"
+          }
+        },
+        "staging": {
+          "original_core": {
+            "conformance_edits": [],
+            "source_bytes": 41425,
+            "staged_bytes": 41413,
+            "unfixable": []
+          },
+          "original_full": {
+            "conformance_edits": [],
+            "source_bytes": 42628,
+            "staged_bytes": 42616,
+            "unfixable": []
+          },
+          "receipt": {
+            "carried": "minimal receipt: proxy record, another bundle",
+            "source_bytes": 16825,
+            "staged_bytes": 1093
+          }
+        },
+        "status": "MEASURED",
+        "thinking": {
+          "display": "summarized",
+          "type": "adaptive"
+        },
+        "typed": {
+          "status": "MEASURED",
+          "worker_count": 16,
+          "workers": [
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 717013,
+              "estimated_in_flight_range": [
+                272670,
+                282987
+              ],
+              "estimated_in_flight_tokens": 282987,
+              "estimated_input_tokens": 218987,
+              "inventory_bytes": 3617,
+              "max_output_tokens": 64000,
+              "paths": 13,
+              "payload_bytes": 533802,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 5115,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2968,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0001"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 716687,
+              "estimated_in_flight_range": [
+                272981,
+                283313
+              ],
+              "estimated_in_flight_tokens": 283313,
+              "estimated_input_tokens": 219313,
+              "inventory_bytes": 3612,
+              "max_output_tokens": 64000,
+              "paths": 10,
+              "payload_bytes": 534597,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 4378,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2163,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0002"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 717209,
+              "estimated_in_flight_range": [
+                272484,
+                282791
+              ],
+              "estimated_in_flight_tokens": 282791,
+              "estimated_input_tokens": 218791,
+              "inventory_bytes": 3561,
+              "max_output_tokens": 64000,
+              "paths": 11,
+              "payload_bytes": 533326,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 4853,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2492,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0003"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 717071,
+              "estimated_in_flight_range": [
+                272615,
+                282929
+              ],
+              "estimated_in_flight_tokens": 282929,
+              "estimated_input_tokens": 218929,
+              "inventory_bytes": 3664,
+              "max_output_tokens": 64000,
+              "paths": 6,
+              "payload_bytes": 533661,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 4441,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 1458,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0004"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 716564,
+              "estimated_in_flight_range": [
+                273098,
+                283436
+              ],
+              "estimated_in_flight_tokens": 283436,
+              "estimated_input_tokens": 219436,
+              "inventory_bytes": 3884,
+              "max_output_tokens": 64000,
+              "paths": 10,
+              "payload_bytes": 534897,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 5073,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2316,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0005"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 716975,
+              "estimated_in_flight_range": [
+                272706,
+                283025
+              ],
+              "estimated_in_flight_tokens": 283025,
+              "estimated_input_tokens": 219025,
+              "inventory_bytes": 3536,
+              "max_output_tokens": 64000,
+              "paths": 12,
+              "payload_bytes": 533895,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 4931,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2764,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0006"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 717000,
+              "estimated_in_flight_range": [
+                272683,
+                283000
+              ],
+              "estimated_in_flight_tokens": 283000,
+              "estimated_input_tokens": 219000,
+              "inventory_bytes": 2777,
+              "max_output_tokens": 64000,
+              "paths": 7,
+              "payload_bytes": 533835,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 3657,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 1662,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0007"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 716839,
+              "estimated_in_flight_range": [
+                272836,
+                283161
+              ],
+              "estimated_in_flight_tokens": 283161,
+              "estimated_input_tokens": 219161,
+              "inventory_bytes": 3672,
+              "max_output_tokens": 64000,
+              "paths": 18,
+              "payload_bytes": 534227,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 5628,
+                "passed": true,
+                "variant": "revised",
+                "worker_check_minimum": {
+                  "bytes": 3868,
+                  "passed": true,
+                  "variant": "revised"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0008"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 716940,
+              "estimated_in_flight_range": [
+                272739,
+                283060
+              ],
+              "estimated_in_flight_tokens": 283060,
+              "estimated_input_tokens": 219060,
+              "inventory_bytes": 3890,
+              "max_output_tokens": 64000,
+              "paths": 17,
+              "payload_bytes": 533980,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 5800,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 3853,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0009"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 717165,
+              "estimated_in_flight_range": [
+                272525,
+                282835
+              ],
+              "estimated_in_flight_tokens": 282835,
+              "estimated_input_tokens": 218835,
+              "inventory_bytes": 3050,
+              "max_output_tokens": 64000,
+              "paths": 9,
+              "payload_bytes": 533432,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 4136,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2159,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0010"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 716914,
+              "estimated_in_flight_range": [
+                272765,
+                283086
+              ],
+              "estimated_in_flight_tokens": 283086,
+              "estimated_input_tokens": 219086,
+              "inventory_bytes": 3215,
+              "max_output_tokens": 64000,
+              "paths": 12,
+              "payload_bytes": 534045,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 4610,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2714,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0011"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 717200,
+              "estimated_in_flight_range": [
+                272492,
+                282800
+              ],
+              "estimated_in_flight_tokens": 282800,
+              "estimated_input_tokens": 218800,
+              "inventory_bytes": 2425,
+              "max_output_tokens": 64000,
+              "paths": 9,
+              "payload_bytes": 533346,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 3511,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2159,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0012"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 717052,
+              "estimated_in_flight_range": [
+                272633,
+                282948
+              ],
+              "estimated_in_flight_tokens": 282948,
+              "estimated_input_tokens": 218948,
+              "inventory_bytes": 3275,
+              "max_output_tokens": 64000,
+              "paths": 11,
+              "payload_bytes": 533708,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 4567,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2549,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0013"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 716747,
+              "estimated_in_flight_range": [
+                272924,
+                283253
+              ],
+              "estimated_in_flight_tokens": 283253,
+              "estimated_input_tokens": 219253,
+              "inventory_bytes": 3851,
+              "max_output_tokens": 64000,
+              "paths": 10,
+              "payload_bytes": 534451,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 5040,
+                "passed": true,
+                "variant": "supported",
+                "worker_check_minimum": {
+                  "bytes": 2315,
+                  "passed": true,
+                  "variant": "supported"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0014"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 717245,
+              "estimated_in_flight_range": [
+                272449,
+                282755
+              ],
+              "estimated_in_flight_tokens": 282755,
+              "estimated_input_tokens": 218755,
+              "inventory_bytes": 3895,
+              "max_output_tokens": 64000,
+              "paths": 18,
+              "payload_bytes": 533237,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 5768,
+                "passed": true,
+                "variant": "revised",
+                "worker_check_minimum": {
+                  "bytes": 3702,
+                  "passed": true,
+                  "variant": "revised"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0015"
+            },
+            {
+              "ceiling_tokens": 1000000,
+              "estimated_clearance_tokens": 716775,
+              "estimated_in_flight_range": [
+                272897,
+                283225
+              ],
+              "estimated_in_flight_tokens": 283225,
+              "estimated_input_tokens": 219225,
+              "inventory_bytes": 3371,
+              "max_output_tokens": 64000,
+              "paths": 12,
+              "payload_bytes": 534384,
+              "placeholder_tokens": 0,
+              "ratio": 0.4102,
+              "ratio_basis": "A1b CHORUS typed_audit_worker",
+              "ratio_range": [
+                0.3909,
+                0.4102
+              ],
+              "response_floor": {
+                "bytes": 4745,
+                "passed": true,
+                "variant": "revised",
+                "worker_check_minimum": {
+                  "bytes": 2612,
+                  "passed": true,
+                  "variant": "revised"
+                }
+              },
+              "verdict": "estimate_fits",
+              "worker_id": "worker_0016"
+            }
+          ]
+        }
+      },
+      "planning": {
+        "componentwise_minimum": {
+          "max_inventory_bytes": 3895,
+          "max_paths": 18,
+          "max_workers": 16
+        },
+        "four_worker_lexicographic_point": {
+          "actual_workers": 4,
+          "limits": {
+            "max_inventory_bytes": 16929,
+            "max_paths": 47,
+            "max_workers": 4
+          },
+          "plan_sha256": "a838734c7c92126d934cd4ce1bfeefb7ebf1fd2235dd9862044f7da3e3701483"
+        },
+        "indivisible_roots": [
+          {
+            "inventory_bytes": 1065,
+            "paths": 4,
+            "root": "/acquisition_methods"
+          },
+          {
+            "inventory_bytes": 1340,
+            "paths": 4,
+            "root": "/addressing_gaps"
+          },
+          {
+            "inventory_bytes": 1216,
+            "paths": 5,
+            "root": "/anomalies"
+          },
+          {
+            "inventory_bytes": 301,
+            "paths": 1,
+            "root": "/citation"
+          },
+          {
+            "inventory_bytes": 905,
+            "paths": 3,
+            "root": "/cleaning_strategies"
+          },
+          {
+            "inventory_bytes": 889,
+            "paths": 2,
+            "root": "/collection_mechanisms"
+          },
+          {
+            "inventory_bytes": 503,
+            "paths": 1,
+            "root": "/collection_timeframes"
+          },
+          {
+            "inventory_bytes": 323,
+            "paths": 1,
+            "root": "/confidential_elements"
+          },
+          {
+            "inventory_bytes": 375,
+            "paths": 1,
+            "root": "/conforms_to_schema"
+          },
+          {
+            "inventory_bytes": 328,
+            "paths": 1,
+            "root": "/created_by"
+          },
+          {
+            "inventory_bytes": 2517,
+            "paths": 8,
+            "root": "/creators"
+          },
+          {
+            "inventory_bytes": 1046,
+            "paths": 3,
+            "root": "/data_collectors"
+          },
+          {
+            "inventory_bytes": 439,
+            "paths": 1,
+            "root": "/data_protection_impacts"
+          },
+          {
+            "inventory_bytes": 2126,
+            "paths": 1,
+            "root": "/description"
+          },
+          {
+            "inventory_bytes": 419,
+            "paths": 1,
+            "root": "/direct_collection"
+          },
+          {
+            "inventory_bytes": 686,
+            "paths": 3,
+            "root": "/discouraged_uses"
+          },
+          {
+            "inventory_bytes": 322,
+            "paths": 1,
+            "root": "/distribution_dates"
+          },
+          {
+            "inventory_bytes": 900,
+            "paths": 2,
+            "root": "/distribution_formats"
+          },
+          {
+            "inventory_bytes": 107,
+            "paths": 1,
+            "root": "/doi"
+          },
+          {
+            "inventory_bytes": 1160,
+            "paths": 3,
+            "root": "/ethical_reviews"
+          },
+          {
+            "inventory_bytes": 700,
+            "paths": 2,
+            "root": "/existing_uses"
+          },
+          {
+            "inventory_bytes": 705,
+            "paths": 1,
+            "root": "/extension_mechanism"
+          },
+          {
+            "inventory_bytes": 1830,
+            "paths": 7,
+            "root": "/external_resources"
+          },
+          {
+            "inventory_bytes": 1049,
+            "paths": 4,
+            "root": "/file_collections"
+          },
+          {
+            "inventory_bytes": 661,
+            "paths": 1,
+            "root": "/funders"
+          },
+          {
+            "inventory_bytes": 1109,
+            "paths": 3,
+            "root": "/future_use_impacts"
+          },
+          {
+            "inventory_bytes": 459,
+            "paths": 1,
+            "root": "/human_subject_research"
+          },
+          {
+            "inventory_bytes": 110,
+            "paths": 1,
+            "root": "/id"
+          },
+          {
+            "inventory_bytes": 379,
+            "paths": 1,
+            "root": "/informed_consent"
+          },
+          {
+            "inventory_bytes": 728,
+            "paths": 1,
+            "root": "/instances"
+          },
+          {
+            "inventory_bytes": 1713,
+            "paths": 10,
+            "root": "/intended_uses"
+          },
+          {
+            "inventory_bytes": 566,
+            "paths": 1,
+            "root": "/ip_restrictions"
+          },
+          {
+            "inventory_bytes": 745,
+            "paths": 1,
+            "root": "/is_deidentified"
+          },
+          {
+            "inventory_bytes": 112,
+            "paths": 1,
+            "root": "/issued"
+          },
+          {
+            "inventory_bytes": 544,
+            "paths": 5,
+            "root": "/keywords"
+          },
+          {
+            "inventory_bytes": 1455,
+            "paths": 7,
+            "root": "/known_biases"
+          },
+          {
+            "inventory_bytes": 1792,
+            "paths": 8,
+            "root": "/known_limitations"
+          },
+          {
+            "inventory_bytes": 647,
+            "paths": 2,
+            "root": "/labeling_strategies"
+          },
+          {
+            "inventory_bytes": 157,
+            "paths": 1,
+            "root": "/license"
+          },
+          {
+            "inventory_bytes": 1273,
+            "paths": 1,
+            "root": "/license_and_use_terms"
+          },
+          {
+            "inventory_bytes": 1624,
+            "paths": 7,
+            "root": "/machine_annotation_tools"
+          },
+          {
+            "inventory_bytes": 956,
+            "paths": 4,
+            "root": "/maintainers"
+          },
+          {
+            "inventory_bytes": 448,
+            "paths": 1,
+            "root": "/missing_data_documentation"
+          },
+          {
+            "inventory_bytes": 125,
+            "paths": 1,
+            "root": "/name"
+          },
+          {
+            "inventory_bytes": 537,
+            "paths": 2,
+            "root": "/other_tasks"
+          },
+          {
+            "inventory_bytes": 120,
+            "paths": 1,
+            "root": "/page"
+          },
+          {
+            "inventory_bytes": 1039,
+            "paths": 3,
+            "root": "/participant_privacy"
+          },
+          {
+            "inventory_bytes": 1323,
+            "paths": 5,
+            "root": "/preprocessing_strategies"
+          },
+          {
+            "inventory_bytes": 1104,
+            "paths": 4,
+            "root": "/prohibited_uses"
+          },
+          {
+            "inventory_bytes": 1691,
+            "paths": 5,
+            "root": "/purposes"
+          },
+          {
+            "inventory_bytes": 1171,
+            "paths": 5,
+            "root": "/raw_data_sources"
+          },
+          {
+            "inventory_bytes": 417,
+            "paths": 1,
+            "root": "/raw_sources"
+          },
+          {
+            "inventory_bytes": 624,
+            "paths": 1,
+            "root": "/regulatory_restrictions"
+          },
+          {
+            "inventory_bytes": 468,
+            "paths": 1,
+            "root": "/sampling_strategies"
+          },
+          {
+            "inventory_bytes": 1011,
+            "paths": 3,
+            "root": "/sensitive_elements"
+          },
+          {
+            "inventory_bytes": 321,
+            "paths": 1,
+            "root": "/splits"
+          },
+          {
+            "inventory_bytes": 471,
+            "paths": 1,
+            "root": "/status"
+          },
+          {
+            "inventory_bytes": 966,
+            "paths": 3,
+            "root": "/subpopulations"
+          },
+          {
+            "inventory_bytes": 3895,
+            "paths": 18,
+            "root": "/subsets"
+          },
+          {
+            "inventory_bytes": 987,
+            "paths": 5,
+            "root": "/tasks"
+          },
+          {
+            "inventory_bytes": 620,
+            "paths": 1,
+            "root": "/third_party_sharing"
+          },
+          {
+            "inventory_bytes": 208,
+            "paths": 1,
+            "root": "/title"
+          },
+          {
+            "inventory_bytes": 114,
+            "paths": 1,
+            "root": "/total_size_bytes"
+          },
+          {
+            "inventory_bytes": 639,
+            "paths": 1,
+            "root": "/updates"
+          },
+          {
+            "inventory_bytes": 101,
+            "paths": 1,
+            "root": "/version"
+          },
+          {
+            "inventory_bytes": 369,
+            "paths": 1,
+            "root": "/version_access"
+          },
+          {
+            "inventory_bytes": 347,
+            "paths": 1,
+            "root": "/was_derived_from"
+          }
+        ],
+        "inventory_bytes": 55265,
+        "inventory_path_count": 185,
+        "limits_scope": "Exact for this staged record only; future output is unknown.",
+        "minimum_plan": {
+          "field_roots": [
+            "/acquisition_methods",
+            "/addressing_gaps",
+            "/anomalies",
+            "/citation",
+            "/cleaning_strategies",
+            "/collection_mechanisms",
+            "/collection_timeframes",
+            "/confidential_elements",
+            "/conforms_to_schema",
+            "/created_by",
+            "/creators",
+            "/data_collectors",
+            "/data_protection_impacts",
+            "/description",
+            "/direct_collection",
+            "/discouraged_uses",
+            "/distribution_dates",
+            "/distribution_formats",
+            "/doi",
+            "/ethical_reviews",
+            "/existing_uses",
+            "/extension_mechanism",
+            "/external_resources",
+            "/file_collections",
+            "/funders",
+            "/future_use_impacts",
+            "/human_subject_research",
+            "/id",
+            "/informed_consent",
+            "/instances",
+            "/intended_uses",
+            "/ip_restrictions",
+            "/is_deidentified",
+            "/issued",
+            "/keywords",
+            "/known_biases",
+            "/known_limitations",
+            "/labeling_strategies",
+            "/license",
+            "/license_and_use_terms",
+            "/machine_annotation_tools",
+            "/maintainers",
+            "/missing_data_documentation",
+            "/name",
+            "/other_tasks",
+            "/page",
+            "/participant_privacy",
+            "/preprocessing_strategies",
+            "/prohibited_uses",
+            "/purposes",
+            "/raw_data_sources",
+            "/raw_sources",
+            "/regulatory_restrictions",
+            "/sampling_strategies",
+            "/sensitive_elements",
+            "/splits",
+            "/status",
+            "/subpopulations",
+            "/subsets",
+            "/tasks",
+            "/third_party_sharing",
+            "/title",
+            "/total_size_bytes",
+            "/updates",
+            "/version",
+            "/version_access",
+            "/was_derived_from"
+          ],
+          "inventory": {
+            "artifact": "original_full",
+            "sha256": "4d5b06876218e4cd1128dba910691cf257caefeec7d03829db685ee180a6bb86",
+            "values": [
+              {
+                "path": "/id",
+                "record_metadata_allowed": false,
+                "text": "doi:10.18130/V3/XNBOPG",
+                "whole_value_required": false
+              },
+              {
+                "path": "/name",
+                "record_metadata_allowed": false,
+                "text": "CHoRUS for Clinical Care AI Dataset",
+                "whole_value_required": false
+              },
+              {
+                "path": "/title",
+                "record_metadata_allowed": false,
+                "text": "The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset",
+                "whole_value_required": false
+              },
+              {
+                "path": "/description",
+                "record_metadata_allowed": false,
+                "text": "The Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI is a clinical data network developing a flagship multi-hospital, multimodal, high-resolution dataset under the NIH Bridge2AI program. CHoRUS harmonizes electronic health record (EHR) data, imaging, high-resolution physiologic signals (including telemetry data and EEG where available), and tokenized note and report text (via OHNLP toolkit) with raw text retained locally across participating institutions using standardized data models and governance frameworks. The repository is designed to enable secure, auditable, and reproducible artificial intelligence (AI) research to improve recovery from acute illness. Data are curated within a NIST 800-53-aligned secure enclave architecture with role-based access controls, audit logging, and controlled-access governance review. CHoRUS supports AI model development, validation, benchmarking, and translational research while maintaining compliance with HIPAA and NIH data-sharing policies. The referent of this record is the released CHoRUS dataset as packaged and described by the RO-Crate evidence; the packaged artifact itself is named \"CHoRUS RO-Crate Package\" in that metadata and is composed of an EHR sub-crate (18.136671 mb) and a waveforms sub-crate (1.201567472832 tb), with a stated top-level content size of 1.2 tb. The stated publisher of the package is \"B2AI CHoRUS\". Reported scale differs by source and reporting date: the NIH RePORTER abstract describes an intended AI-ready data set from more than 100,000 critically ill patients; the project website reports an anticipated final dataset of 100,000 patient admissions, 9 data modalities and 14 contributing hospitals, and a current released dataset of 50,000 ICU, PICU and NICU admissions, 1.6 billion rows of EHR OMOP data, 7,642 admissions with radiology data and 23 Tb of waveform data; the September 2025 training webinar states that as of August 2025 the dataset covered 14 hospitals with over 45K unique admissions.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/version",
+                "record_metadata_allowed": false,
+                "text": "1.0 Beta",
+                "whole_value_required": false
+              },
+              {
+                "path": "/doi",
+                "record_metadata_allowed": false,
+                "text": "10.18130/V3/XNBOPG",
+                "whole_value_required": false
+              },
+              {
+                "path": "/citation",
+                "record_metadata_allowed": false,
+                "text": "The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Clinical Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset, version 1.0 Beta. Harvard Dataverse, Apr. 2026.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/license",
+                "record_metadata_allowed": false,
+                "text": "Data Use Agreement available at 'https://chorus4ai.org/dataset/'",
+                "whole_value_required": false
+              },
+              {
+                "path": "/page",
+                "record_metadata_allowed": false,
+                "text": "https://chorus4ai.org/dataset/",
+                "whole_value_required": false
+              },
+              {
+                "path": "/issued",
+                "record_metadata_allowed": false,
+                "text": "2026-04-03T00:00:00Z",
+                "whole_value_required": false
+              },
+              {
+                "path": "/created_by",
+                "record_metadata_allowed": false,
+                "text": "The CHoRUS for Clinical Care AI Network (B2AI CHoRUS), led from Massachusetts General Hospital; principal investigator Eric S. Rosenthal (EROSENTHAL@mgh.harvard.edu). The publisher recorded in the source metadata is \"B2AI CHoRUS\".",
+                "whole_value_required": false
+              },
+              {
+                "path": "/status",
+                "record_metadata_allowed": false,
+                "text": "Version 1.0 Beta interim release with partial data; the RO-Crate completeness statement notes that not all patients in the CHoRUS full cohort are included and that no DICOM images are included in this package. The project website carries the notice, quoted verbatim, that \"This repoitory is under review for potential modification in compliance with Administration directives.\"",
+                "whole_value_required": false
+              },
+              {
+                "path": "/conforms_to_schema",
+                "record_metadata_allowed": true,
+                "text": "OMOP Common Data Model for structured electronic health record data, with modality-specific standards for other components (OHNLP for tokenized clinical notes, DICOM for imaging, WFDB with an extended PhysioNet schema for waveform telemetry, and EDF+ and Persyst for EEG).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/was_derived_from",
+                "record_metadata_allowed": false,
+                "text": "Routine clinical care data repurposed from electronic health record systems, PACS imaging archives, bedside monitor/gateway middleware and hospital EEG databases at 14 data acquisition hospitals within the 20-institution CHoRUS academic network.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/total_size_bytes",
+                "record_metadata_allowed": false,
+                "text": "1201585609503",
+                "whole_value_required": true
+              },
+              {
+                "path": "/keywords/0",
+                "record_metadata_allowed": false,
+                "text": "Bridge2AI",
+                "whole_value_required": false
+              },
+              {
+                "path": "/keywords/1",
+                "record_metadata_allowed": false,
+                "text": "CHoRUS",
+                "whole_value_required": false
+              },
+              {
+                "path": "/keywords/2",
+                "record_metadata_allowed": false,
+                "text": "Electronic health records",
+                "whole_value_required": false
+              },
+              {
+                "path": "/keywords/3",
+                "record_metadata_allowed": false,
+                "text": "physiological data",
+                "whole_value_required": false
+              },
+              {
+                "path": "/keywords/4",
+                "record_metadata_allowed": false,
+                "text": "medical images",
+                "whole_value_required": false
+              },
+              {
+                "path": "/creators/0/description",
+                "record_metadata_allowed": false,
+                "text": "Eric S. Rosenthal, Massachusetts General Hospital and Harvard Medical School, Boston, Massachusetts, USA; principal investigator of the CHoRUS data generation project (EROSENTHAL@mgh.harvard.edu) and listed first author of the dataset.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/creators/1/description",
+                "record_metadata_allowed": false,
+                "text": "The CHoRUS Investigators / The CHoRUS for Clinical Care AI Network, the collective author credited in the dataset citation, comprising approximately 40 named investigators across Massachusetts General Hospital, Duke University, University of Florida, Tufts CTSI / Tufts Medical Center, University of Oregon, University of Virginia, Columbia University Irving Medical Center, University of California San Francisco, David Geffen School of Medicine at UCLA, UTHealth Houston, Mayo Clinic, Seattle Children's Hospital, Nationwide Children's Hospital / The Ohio State University, Emory University and the Massachusetts Institute of Technology.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/creators/2/description",
+                "record_metadata_allowed": false,
+                "text": "Azra Bihorac, University of Florida, Gainesville, Florida, USA; named author and member of the Bridge2AI CHoRUS leadership team.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/creators/3/description",
+                "record_metadata_allowed": false,
+                "text": "Xiaoqian Jiang, McWilliams School of Biomedical Informatics, UTHealth Houston, Texas, USA; named author and member of the Bridge2AI CHoRUS leadership team.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/creators/4/description",
+                "record_metadata_allowed": false,
+                "text": "Yulia Levites Strekalova, University of Florida, Gainesville, Florida, USA; named author and member of the Bridge2AI CHoRUS leadership team.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/creators/5/description",
+                "record_metadata_allowed": false,
+                "text": "Parisa Rashidi, University of Florida, Gainesville, Florida, USA; named author and member of the Bridge2AI CHoRUS leadership team.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/creators/6/description",
+                "record_metadata_allowed": false,
+                "text": "Manlik Kwong, Tufts CTSI / Tufts Medical Center, Boston, Massachusetts, USA; named author and member of the Bridge2AI CHoRUS leadership team.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/creators/7/description",
+                "record_metadata_allowed": false,
+                "text": "Rishikesan Kamaleswaran, Duke University, Durham, North Carolina, USA; named author of the dataset.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/funders/0/description",
+                "record_metadata_allowed": false,
+                "text": "NIH Common Fund, Bridge2AI program, award OT2OD032701 (project number 1OT2OD032701-01, application ID 10472824), titled \"Bridge2AI: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI\", awarded to Massachusetts General Hospital with principal investigator Eric S. Rosenthal. Fiscal year 2022 award amount 5,880,300 USD; project period 2022-09-01 to 2026-11-30. The project website states that content is solely the responsibility of the authors and does not necessarily represent the official views of the NIH.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/maintainers/0/description",
+                "record_metadata_allowed": false,
+                "text": "Primary maintainers are the CHoRUS Data Pillar in collaboration with institutional data stewards, as stated in the RO-Crate maintenance plan.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/maintainers/1/description",
+                "record_metadata_allowed": false,
+                "text": "Data governance committee contact: Eric Rosenthal, EROSENTHAL@mgh.harvard.edu.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/maintainers/2/description",
+                "record_metadata_allowed": false,
+                "text": "Program contact: Ciera McCrary, MGH Program Manager (listed as cmccrary@mgh.harvard.edu in the RO-Crate and as cmccrary@mgh.havard.edu on the project website contact page).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/maintainers/3/description",
+                "record_metadata_allowed": false,
+                "text": "Data access requests via the CHoRUS GitHub organization are directed to dbold@emory.edu or jared.houghtaling@tuftsmedicine.org.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/purposes/0/description",
+                "record_metadata_allowed": false,
+                "text": "To meet the urgent need for infrastructure supporting artificial intelligence and machine learning in critical care by generating high-resolution, multi-center data for ML/AI applications aimed at characterizing acute and critical care illness, predicting complications, and measuring treatment response among patients with acute or critical illness.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/purposes/1/description",
+                "record_metadata_allowed": false,
+                "text": "To develop a publicly available, AI-ready critical care dataset while ensuring the methods promote privacy, accountability and clinical benefit, and while promoting a new generation of AI clinicians and scientists.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/purposes/2/description",
+                "record_metadata_allowed": false,
+                "text": "To provision a holdout test set accessible for external model validation, in order to aid marketplace adoption of AI-developed models for implementation in acute and critical care.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/purposes/3/description",
+                "record_metadata_allowed": false,
+                "text": "To develop the most diverse, high-resolution, ethically sourced, AI-ready data set to answer the grand challenge of improving recovery from acute illness, as one of four data generation projects in the NIH Bridge2AI consortium.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/purposes/4/description",
+                "record_metadata_allowed": false,
+                "text": "To enable secure, auditable and reproducible AI research through a NIST 800-53-aligned secure enclave with role-based access control, audit logging and controlled-access governance review.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/addressing_gaps/0/description",
+                "record_metadata_allowed": false,
+                "text": "Lack of high-resolution multi-center datasets for critical care AI/ML; the project states that developing such data sets is a critical first step towards actionable and trustworthy AI.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/addressing_gaps/1/description",
+                "record_metadata_allowed": false,
+                "text": "Absence of unified standards across multi-modal EHR, waveform, imaging and text data; CHoRUS develops validated semantic mappings and standard operating procedures to harmonize these modalities.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/addressing_gaps/2/description",
+                "record_metadata_allowed": false,
+                "text": "Absence of an ethical and legal framework for collecting critical care data at scale; CHoRUS establishes a legal framework, performs community-facing ethics focus groups to determine what data is appropriate for public sharing, and analyses the existing legal and regulatory landscape.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/addressing_gaps/3/description",
+                "record_metadata_allowed": false,
+                "text": "Shortage of workforce and AI literacy in clinical care AI; CHoRUS cultivates expertise in the lay and scientific community through multimodal educational approaches and training of engineers, data scientists and clinicians.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/tasks/0/description",
+                "record_metadata_allowed": false,
+                "text": "Characterizing acute and critical care illness among patients with acute or critical illness.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/tasks/1/description",
+                "record_metadata_allowed": false,
+                "text": "Predicting complications and clinical deterioration in critically ill patients.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/tasks/2/description",
+                "record_metadata_allowed": false,
+                "text": "Measuring treatment response in acute and critical care populations.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/tasks/3/description",
+                "record_metadata_allowed": false,
+                "text": "External validation of AI models against a sequestered holdout dataset to support marketplace adoption of AI-developed models.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/tasks/4/description",
+                "record_metadata_allowed": false,
+                "text": "Labeling of data with targets important for prediction using a visualization and annotation environment.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/instances/0/description",
+                "record_metadata_allowed": false,
+                "text": "Instances are hospital admissions of critically ill patients (ICU, PICU and NICU). The dataset comprises multiple harmonized modalities contributed by participating sites: OMOP-standardized structured EHR data (demographics, diagnoses, procedures, medication administration with dosing time-stamped at each infusion change or dose administration, nursing flowsheets), tokenized clinical note text, DICOM imaging from PACS, WFDB waveform telemetry from bedside monitors and gateway/middleware, and EDF+/Persyst EEG waveforms. The project website reports 1.6 billion rows of EHR OMOP data in the current released dataset.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/0/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:demographics",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/0/description",
+                "record_metadata_allowed": false,
+                "text": "Demographics, represented in the OMOP data standard, controlled access, published metadata schema OMOP.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/1/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:medication-administration",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/1/description",
+                "record_metadata_allowed": false,
+                "text": "Medication administration, with dosing time-stamped upon each infusion change or dose administration; OMOP data standard, controlled access, published metadata schema OMOP.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/2/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:procedures",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/2/description",
+                "record_metadata_allowed": false,
+                "text": "Procedures as documented by providers; OMOP data standard, controlled access, published metadata schema OMOP.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/3/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:nursing-flowsheets",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/3/description",
+                "record_metadata_allowed": false,
+                "text": "Nursing flowsheets (high-frequency documentation); OMOP data standard, controlled access, published metadata under the OMOP schema with extensions.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/4/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:diagnoses",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/4/description",
+                "record_metadata_allowed": false,
+                "text": "Diagnoses as documented by providers; OMOP data standard, controlled access, published metadata schema OMOP.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/5/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:clinical-notes",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/5/description",
+                "record_metadata_allowed": false,
+                "text": "Clinical notes extracted and tokenized using the OHNLP toolkit; OHNLP data standard, controlled access, published under the OHNLP open source schema. Raw clinical notes are stored locally at contributing sites; only tokens are held centrally.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/6/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:imaging",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/6/description",
+                "record_metadata_allowed": false,
+                "text": "Imaging from PACS in DICOM format, controlled access, DICOM schema. As of the September 2025 webinar, 1000 images were available with de-identification in process for a larger cohort; the project website reports 7,642 admissions with radiology data in the current released dataset; the RO-Crate completeness statement for version 1.0 Beta states that no DICOM images are included in that package.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/7/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:waveform-telemetry",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/7/description",
+                "record_metadata_allowed": false,
+                "text": "Waveform telemetry from bedside monitors and gateway/middleware, in the WFDB standard, controlled access, published under an extended PhysioNet schema. The RO-Crate waveforms sub-crate reports a content size of 1.201567472832 tb; the project website reports 23 Tb of waveform data in the current released dataset.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/8/id",
+                "record_metadata_allowed": false,
+                "text": "urn:chorus:subset:waveform-eeg",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subsets/8/description",
+                "record_metadata_allowed": false,
+                "text": "Waveform EEG from hospital databases in EDF+ and Persyst formats, controlled access, published under the open source EDF+ and Persyst schemas. As of the September 2025 webinar, EEG extraction was in process.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/splits/0/description",
+                "record_metadata_allowed": false,
+                "text": "A sequestered holdout test set is provisioned for external model validation. Hold-out splits are available for testing; training and validation in development splits require internal mechanisms to avoid overfitting.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subpopulations/0/description",
+                "record_metadata_allowed": false,
+                "text": "Adult, pediatric and neonatal intensive care populations: the project website reports that the current released dataset comprises 50,000 patient admissions from ICU, PICU and NICU.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subpopulations/1/description",
+                "record_metadata_allowed": false,
+                "text": "Patients at 14 data acquisition hospitals drawn from a 20-institution academic network, predominantly tertiary and quaternary academic medical centers; socioeconomic and demographic distribution is reflective of participating institutions.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/subpopulations/2/description",
+                "record_metadata_allowed": false,
+                "text": "Federated access is intended to enable sampling methods that ensure a balanced and diverse cohort, and sampling is designed to ensure comprehensive sets of patient conditions and clinical treatment strategies.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/anomalies/0/description",
+                "record_metadata_allowed": false,
+                "text": "Variable sampling rates across real-world data from hospital waveform systems and middleware.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/anomalies/1/description",
+                "record_metadata_allowed": false,
+                "text": "Institutional heterogeneity in coding and clinical data collection practices across contributing sites.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/anomalies/2/description",
+                "record_metadata_allowed": false,
+                "text": "Documentation quality is dependent on routine clinical workflows and on which data elements are collected in clinical practice; documentation bias is present in clinical notes.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/anomalies/3/description",
+                "record_metadata_allowed": false,
+                "text": "Interim release with partial data: not all patients in the CHoRUS full cohort are included, and no DICOM images are included in the version 1.0 Beta RO-Crate package.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/anomalies/4/description",
+                "record_metadata_allowed": false,
+                "text": "Checksum coverage in the packaged release is incomplete: the AI-readiness assessment reports that 99% of files have checksums (1469 of 1477).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/missing_data_documentation/0/description",
+                "record_metadata_allowed": false,
+                "text": "Missingness is not at random (MNAR) in laboratory, waveform and imaging acquisition, reflecting differential clinical ordering and capture practices. The RO-Crate identifies variable sampling rates across real-world data from hospital waveform systems and middleware as the principal collection-related missing data issue.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_biases/0/description",
+                "record_metadata_allowed": false,
+                "text": "Referral bias from tertiary and quaternary academic centers.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_biases/1/description",
+                "record_metadata_allowed": false,
+                "text": "Socioeconomic and demographic distribution reflective of participating institutions rather than of a general population.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_biases/2/description",
+                "record_metadata_allowed": false,
+                "text": "Documentation bias in clinical notes.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_biases/3/description",
+                "record_metadata_allowed": false,
+                "text": "Missingness not at random (MNAR) in laboratory, waveform and imaging acquisition.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_biases/4/description",
+                "record_metadata_allowed": false,
+                "text": "Differential care pathways affecting label assignment (for example, ICU versus non-ICU populations).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_biases/5/description",
+                "record_metadata_allowed": false,
+                "text": "Temporal trends related to evolving clinical practice.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_biases/6/description",
+                "record_metadata_allowed": false,
+                "text": "Bias assessment is ongoing and is documented in dataset release notes. Patient-focused efforts within the project determine ethical and legal approaches to manage privacy and bias while accounting for social determinants of health.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_limitations/0/description",
+                "record_metadata_allowed": false,
+                "text": "Observational data, not randomized; collected as real-world clinical data rather than through prospective research interactions with patients.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_limitations/1/description",
+                "record_metadata_allowed": false,
+                "text": "Documentation quality is dependent on routine clinical workflows and on the data elements being collected in clinical practice.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_limitations/2/description",
+                "record_metadata_allowed": false,
+                "text": "Variable sampling rates across real-world data from hospital waveform systems and middleware.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_limitations/3/description",
+                "record_metadata_allowed": false,
+                "text": "Institutional heterogeneity in coding and clinical data collection practices.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_limitations/4/description",
+                "record_metadata_allowed": false,
+                "text": "Limited generalizability beyond participating hospitals.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_limitations/5/description",
+                "record_metadata_allowed": false,
+                "text": "Not appropriate for re-identification, contact tracing, or patient-level intervention.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_limitations/6/description",
+                "record_metadata_allowed": false,
+                "text": "Hold-out splits are available for testing; training and validation in development splits require internal mechanisms to avoid overfitting.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/known_limitations/7/description",
+                "record_metadata_allowed": false,
+                "text": "Statistical characterization of the packaged release is incomplete: the AI-readiness self-assessment reports no statistical characterization available.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/acquisition_methods/0/description",
+                "record_metadata_allowed": false,
+                "text": "Retrospective data collection: data are derived from routine clinical care at participating hospitals under IRB oversight and are repurposed from clinical workflows rather than collected solely for research.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/acquisition_methods/1/description",
+                "record_metadata_allowed": false,
+                "text": "Electronic health record extraction at each contributing site and transformation to the OMOP common data model.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/acquisition_methods/2/description",
+                "record_metadata_allowed": false,
+                "text": "Imaging acquisition from hospital PACS, with metadata de-identification and pixel-level de-identification prior to contribution.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/acquisition_methods/3/description",
+                "record_metadata_allowed": false,
+                "text": "High-resolution physiologic waveform capture and extraction from bedside monitors and gateway/middleware, and EEG extraction from hospital databases.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/collection_mechanisms/0/description",
+                "record_metadata_allowed": false,
+                "text": "Site-level data extracts created and uploaded using CHoRUS tooling; the chorus-ai GitHub organization hosts the chorus-extract-upload repository with tools to create and upload a CHoRUS Data Extract, dockerized container applications deployed to support CHoRUS services on Azure, and centralized standard operating procedure documentation (Chorus_SOP) describing the step-by-step process for extracting and contributing clinical data.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/collection_mechanisms/1/description",
+                "record_metadata_allowed": false,
+                "text": "Bedside monitors and gateway/middleware systems for waveform telemetry; hospital EEG databases for EDF+ and Persyst EEG waveforms; PACS for DICOM imaging; hospital EHR systems for structured data and clinical notes.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/collection_timeframes/0/description",
+                "record_metadata_allowed": false,
+                "text": "Collection is retrospective, drawing on routine clinical care data at participating hospitals. The sources do not state the clinical encounter date range covered, and date shifting or limited date fields are applied where required. Reported coverage as of August 2025 was 14 different hospitals with over 45K unique admissions; the version 1.0 Beta package was published 2026-04-03.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/data_collectors/0/description",
+                "record_metadata_allowed": false,
+                "text": "Data acquisition centers: 14 of the 20 academic centers in the CHoRUS collaboration contribute as data acquisition sites, with data site managers at each contributing site following validated CHoRUS standard operating procedures and providing regular status updates tracked through the chorus-ai GitHub Standards and Data Acquisition projects.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/data_collectors/1/description",
+                "record_metadata_allowed": false,
+                "text": "The CHoRUS Data Pillar (Standards, Data Acquisition and Tooling sub-teams) coordinates acquisition, standardization, tokenization, storage, visualization and labeling of data across the multi-center network.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/data_collectors/2/description",
+                "record_metadata_allowed": false,
+                "text": "Clinical collaborators contribute semantic mapping and clinical validation through the chorus-mapping repository and an associated clinical validation SOP.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/direct_collection/0/description",
+                "record_metadata_allowed": false,
+                "text": "Data are not collected directly from individuals for research purposes; they are repurposed from routine clinical workflows at participating hospitals under ethical oversight, and are described as observational real-world clinical data collected without prospective research interactions with patients.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/sampling_strategies/0/description",
+                "record_metadata_allowed": false,
+                "text": "Sampling is designed to ensure comprehensive sets of patient conditions and clinical treatment strategies across the network, with federated access enabling sampling methods to ensure a balanced and diverse cohort. The project targets an anticipated final dataset of 100,000 patient admissions across 14 contributing hospitals and 9 data modalities.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/raw_sources/0/description",
+                "record_metadata_allowed": false,
+                "text": "Source electronic health record systems, PACS imaging archives, bedside monitor and gateway/middleware waveform systems, and hospital EEG databases at contributing medical centers. Raw clinical note text is retained locally at each institution; only tokenized note and report text is contributed centrally.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/raw_data_sources/0/source_description",
+                "record_metadata_allowed": false,
+                "text": "Routine-care electronic health record data at 14 contributing hospitals, extracted at the site and transformed to the OMOP common data model.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/raw_data_sources/1/source_description",
+                "record_metadata_allowed": false,
+                "text": "Hospital PACS imaging archives supplying DICOM studies, de-identified before contribution.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/raw_data_sources/2/source_description",
+                "record_metadata_allowed": false,
+                "text": "Bedside monitors and gateway/middleware supplying high-resolution physiologic waveform telemetry, transformed to the WFDB standard.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/raw_data_sources/3/source_description",
+                "record_metadata_allowed": false,
+                "text": "Hospital EEG databases supplying EDF+ and Persyst waveform recordings.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/raw_data_sources/4/source_description",
+                "record_metadata_allowed": false,
+                "text": "Clinical notes held in site EHR systems; raw text is stored locally and only tokens produced with the OHNLP toolkit are contributed.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/preprocessing_strategies/0/description",
+                "record_metadata_allowed": false,
+                "text": "Transformation of extracted EHR data to the OMOP common data model and standardized harmonization to the common data model across all contributing sites.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/preprocessing_strategies/1/description",
+                "record_metadata_allowed": false,
+                "text": "Transformation of high-resolution physiologic waveform captures to the WFDB standard.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/preprocessing_strategies/2/description",
+                "record_metadata_allowed": false,
+                "text": "Extraction and tokenization of clinical notes using the OHNLP toolkit, with raw text retained locally.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/preprocessing_strategies/3/description",
+                "record_metadata_allowed": false,
+                "text": "Transformation of data using approaches that limit re-identification, including tokenization of direct identifiers and date shifting or limited date fields where required.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/preprocessing_strategies/4/description",
+                "record_metadata_allowed": false,
+                "text": "Geocoding of OMOP Location entities to add contextual factors such as geographic distance to the nearest hospital, using open source code that geocodes via DeGauss (chorus-ai UF-Geocoding repository).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/cleaning_strategies/0/description",
+                "record_metadata_allowed": false,
+                "text": "Validated semantic mappings connect clinical data in various source formats to international standards; mappings are pooled in the chorus-mapping repository and undergo clinical validation under an associated SOP.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/cleaning_strategies/1/description",
+                "record_metadata_allowed": false,
+                "text": "Standard operating procedures instruct data contributing sites on best practices for curating and delivering interoperable datasets, and undergo internal validation and review within the Chorus_SOP repository.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/cleaning_strategies/2/description",
+                "record_metadata_allowed": false,
+                "text": "Characterization reports are produced and returned to sites following their data submissions (chorus-ai CHoRUSReports repository).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/labeling_strategies/0/description",
+                "record_metadata_allowed": false,
+                "text": "A visualization and annotation environment labels data with targets important for prediction; the project develops capabilities across the multi-center network to acquire, standardize, tokenize, store, visualize and label data.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/labeling_strategies/1/description",
+                "record_metadata_allowed": false,
+                "text": "Clinical expertise is applied to semantic mapping and validation; clinical collaborators contribute to pooled tabular mappings under a clinical validation standard operating procedure.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/machine_annotation_tools/0/description",
+                "record_metadata_allowed": false,
+                "text": "OHNLP toolkit, used to extract and tokenize clinical notes into the OHNLP open source schema.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/machine_annotation_tools/1/description",
+                "record_metadata_allowed": false,
+                "text": "RSNA Clinical Trial Processor, used for imaging metadata de-identification.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/machine_annotation_tools/2/description",
+                "record_metadata_allowed": false,
+                "text": "IbisWorks EICON, used for pixel-level de-identification of imaging.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/machine_annotation_tools/3/description",
+                "record_metadata_allowed": false,
+                "text": "DeGauss-based geocoding of OMOP Location entities (chorus-ai UF-Geocoding, forked from bihorac-LAB/Exposome).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/machine_annotation_tools/4/description",
+                "record_metadata_allowed": false,
+                "text": "privacy_scan_tool, described as a privacy scan tool for medical records, maintained in the chorus-ai GitHub organization.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/machine_annotation_tools/5/description",
+                "record_metadata_allowed": false,
+                "text": "chorus_waveform, CHoRUS waveform documentation and various waveform conversion scripts, maintained in the chorus-ai GitHub organization.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/machine_annotation_tools/6/description",
+                "record_metadata_allowed": false,
+                "text": "CTP-deid, a repository listed in the chorus-ai GitHub organization; the sources list the repository name without a description or a stated role in dataset preparation.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/is_deidentified/description",
+                "record_metadata_allowed": false,
+                "text": "The dataset is de-identified. De-identification is consistent with HIPAA Safe Harbor and includes removal or tokenization of direct identifiers and date shifting or limited date fields when required. Imaging is de-identified at the metadata level using the RSNA Clinical Trial Processor and at the pixel level using IbisWorks EICON. Data are transformed using approaches that limit re-identification. Re-identification risk is periodically assessed and mitigation strategies are updated as needed; re-identification attempts are prohibited, and export restrictions and output review procedures further reduce re-identification risk.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/sensitive_elements/0/description",
+                "record_metadata_allowed": false,
+                "text": "The dataset consists of patient-level clinical data (demographics, diagnoses, procedures, medications, nursing flowsheets, tokenized notes, imaging, telemetry and EEG) derived from protected health information, handled under HIPAA compliance within a secure enclave.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/sensitive_elements/1/description",
+                "record_metadata_allowed": false,
+                "text": "Social determinants of health and geographic context variables (for example distance to the nearest hospital, derived by geocoding OMOP Location entities) are included and require careful handling to avoid re-identification or stigmatization.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/sensitive_elements/2/description",
+                "record_metadata_allowed": false,
+                "text": "Raw unstructured clinical note text is treated as too sensitive to centralize and is stored locally at contributing sites; only tokenized text is shared.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/confidential_elements/0/description",
+                "record_metadata_allowed": false,
+                "text": "The RO-Crate assigns the package a confidentiality level of HL7:2V (very restricted). Access is restricted to a secure enclave environment and no raw data export is permitted unless explicitly approved.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/ethical_reviews/0/description",
+                "record_metadata_allowed": false,
+                "text": "Ethical review was conducted by Eric S. Rosenthal, Michael J. Young, Ishan Williams, Ashley Cordes and Barbara J. Evans in collaboration with the Mass General Brigham IRB, with local context review by IRBs, HIPAA Privacy Officers and institutional counsels at contributing medical centers.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/ethical_reviews/1/description",
+                "record_metadata_allowed": false,
+                "text": "Reviewing body: Mass General Brigham Institutional Review Board (MGB IRB), IRB Reliance and Compliance, 399 Revolution Drive, Suite 710, Somerville, MA 02145, US; irbreliance@mgb.org; +1-857-282-1900. IRB protocol identifier #2022P000707.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/ethical_reviews/2/description",
+                "record_metadata_allowed": false,
+                "text": "The project performs community-facing ethics focus groups to determine what data is appropriate for public sharing, and evaluates community perspectives on clinical care AI to increase trustworthiness of provenance and privacy in AI as the existing legal and regulatory landscape is analyzed.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/human_subject_research/description",
+                "record_metadata_allowed": false,
+                "text": "Human subject research: Yes. The RO-Crate records human subject exemption category \"HIPAA exemption 4 (45 CFR 46.104(d)(4))\", IRB protocol #2022P000707 under the Mass General Brigham IRB, that the data are de-identified, and that the resource is FDA-regulated. IRB approval or waiver is obtained as appropriate at each contributing site.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/informed_consent/0/description",
+                "record_metadata_allowed": false,
+                "text": "Data are repurposed from routine clinical care rather than collected through prospective research interactions with patients; collection proceeds under IRB approval or waiver as appropriate together with the recorded human subject exemption (45 CFR 46.104(d)(4)).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/participant_privacy/0/description",
+                "record_metadata_allowed": false,
+                "text": "Layered privacy protection comprising de-identification, a data use agreement, and a controlled-access data repository adhering to NIST 800-53 principles, with audit-level protection, registration, role-based access controls and protection against data exfiltration.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/participant_privacy/1/description",
+                "record_metadata_allowed": false,
+                "text": "Enclave controls include role-based access control (RBAC), multi-factor authentication, full audit logging of data access and queries, prohibition of re-identification attempts, and data export restrictions with output review procedures to reduce re-identification risk.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/participant_privacy/2/description",
+                "record_metadata_allowed": false,
+                "text": "Patient-focused efforts determine the ethical and legal approaches used to manage privacy and bias while accounting for social determinants of health.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/data_protection_impacts/0/description",
+                "record_metadata_allowed": false,
+                "text": "Re-identification risk is periodically assessed and mitigation strategies are updated as needed. CHoRUS operates within a secure enclave environment aligned with NIST 800-53 controls, and the project establishes a legal framework for collecting data at scale and analyses the existing legal and regulatory landscape.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/license_and_use_terms/description",
+                "record_metadata_allowed": false,
+                "text": "Use is governed by a CHoRUS Data Use Agreement available at https://chorus4ai.org/dataset/ (agreement document: https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx). Access to CHoRUS data is governed through a controlled-access framework and requires: institutional affiliation and credentials; an approved research proposal reviewed by the CHoRUS governance committee; an executed Data Use Agreement between the requesting institution and CHoRUS; IRB approval or exemption documentation as applicable; compliance with NIH Bridge2AI OT terms and applicable federal regulations; and access restricted to the secure enclave environment with no raw data export permitted unless explicitly approved. Data may not be used for commercial purposes unless specifically authorized through a separate agreement consistent with governing award and consortium terms. In the AIM-AHEAD Bridge2AI for Clinical Care training program, participants register with name, email and institution, must sign a licensing agreement included in the registration form before gaining access, and need a \".edu\" email address to gain access to the dataset.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/ip_restrictions/description",
+                "record_metadata_allowed": false,
+                "text": "Copyright notice: \"\u00a9 2026 THE GENERAL HOSPITAL CORPORATION D/B/A MASSACHUSETTS GENERAL HOSPITAL. Copyrights are owned by each subaward site for curation performed locally. Copyrights are jointly held for software jointly developed. All rights reserved.\" Software in the chorus-ai GitHub organization is separately licensed (the organization README states the project is licensed under the MIT License; individual repositories list MIT or Apache-2.0).",
+                "whole_value_required": false
+              },
+              {
+                "path": "/regulatory_restrictions/description",
+                "record_metadata_allowed": false,
+                "text": "The resource is recorded as FDA-regulated. Use must comply with HIPAA, with NIH Bridge2AI Other Transaction award terms and with applicable federal regulations; IRB approval or exemption documentation is required as applicable. The dataset is curated within a NIST 800-53-aligned secure enclave, and the RO-Crate records a confidentiality level of HL7:2V (very restricted). The project website notes the repository is under review for potential modification in compliance with Administration directives.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/0/description",
+                "record_metadata_allowed": false,
+                "text": "AI model training within the secure enclave.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/1/description",
+                "record_metadata_allowed": false,
+                "text": "Model validation and benchmarking.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/2/description",
+                "record_metadata_allowed": false,
+                "text": "Algorithm development and feature engineering.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/3/description",
+                "record_metadata_allowed": false,
+                "text": "Retrospective hypothesis testing.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/4/description",
+                "record_metadata_allowed": false,
+                "text": "Fine-tuning of multimodal models.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/5/description",
+                "record_metadata_allowed": false,
+                "text": "Comparative effectiveness research.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/6/description",
+                "record_metadata_allowed": false,
+                "text": "Reinforcement learning and development of expert AI.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/7/description",
+                "record_metadata_allowed": false,
+                "text": "Methodological research in trustworthy AI.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/8/description",
+                "record_metadata_allowed": false,
+                "text": "Clinical trial emulation or powering.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/intended_uses/9/description",
+                "record_metadata_allowed": false,
+                "text": "Hands-on AI/ML training and education, including use in the AIM-AHEAD Bridge2AI for Clinical Care Training Program, with canonical Jupyter Notebooks, the OHDSI/OMOP common data model and the Bridge2AI AI/ML for Clinical Care Collaborative Cloud.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/discouraged_uses/0/description",
+                "record_metadata_allowed": false,
+                "text": "Direct translation of trained algorithms to real-time clinical deployment without validation or regulatory clearance is not recommended.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/discouraged_uses/1/description",
+                "record_metadata_allowed": false,
+                "text": "Use as sole evidence for clinical decision-making is not recommended.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/discouraged_uses/2/description",
+                "record_metadata_allowed": false,
+                "text": "Population inference beyond participating institutions is not recommended, given limited generalizability beyond participating hospitals.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/prohibited_uses/0/description",
+                "record_metadata_allowed": false,
+                "text": "Attempts to re-identify individuals are prohibited; the dataset is explicitly not appropriate for re-identification, contact tracing or patient-level intervention.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/prohibited_uses/1/description",
+                "record_metadata_allowed": false,
+                "text": "Export of raw data outside the secure enclave is not permitted unless explicitly approved, and data export restrictions with output review procedures are enforced.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/prohibited_uses/2/description",
+                "record_metadata_allowed": false,
+                "text": "Commercial use is not permitted unless specifically authorized through a separate agreement consistent with governing award and consortium terms.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/prohibited_uses/3/description",
+                "record_metadata_allowed": false,
+                "text": "Use outside the approved research scope and governance policies is not permitted; usage must align with the approved research proposal reviewed by the CHoRUS governance committee.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/existing_uses/0/description",
+                "record_metadata_allowed": false,
+                "text": "As of the September 2025 informational webinar, the datasets are being used for training activities and publications.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/existing_uses/1/description",
+                "record_metadata_allowed": false,
+                "text": "The AIM-AHEAD Bridge2AI for Clinical Care Training Program (Cohort 2, November 2025 to July 2026, up to 30 trainees) expands access to Bridge2AI CHoRUS data for hands-on AI/ML training, use-case development, and collaborative research on the Bridge2AI Clinical Care Cloud platform, with trainee outputs including posters, conference abstracts and manuscripts.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/other_tasks/0/description",
+                "record_metadata_allowed": false,
+                "text": "Downstream analytics on the mapped and assembled dataset by clinical collaborators, as invited through the chorus-ai GitHub organization.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/other_tasks/1/description",
+                "record_metadata_allowed": false,
+                "text": "Development and evaluation of data engineering, semantic mapping and de-identification tooling for multi-modal clinical data, supported by the open-source CHoRUS software packages.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/future_use_impacts/0/description",
+                "record_metadata_allowed": false,
+                "text": "Anticipated benefit: catalysing biomedical research and expertise necessary to promote the patient-focused deployment of AI in acute and critical care, and improving the care and outcomes of patients requiring critical care.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/future_use_impacts/1/description",
+                "record_metadata_allowed": false,
+                "text": "Anticipated risk: models trained on data from tertiary and quaternary academic centers may not generalize to other settings, and differential care pathways and documentation bias may propagate into label assignment and model behavior; bias assessment is ongoing and documented in dataset release notes.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/future_use_impacts/2/description",
+                "record_metadata_allowed": false,
+                "text": "Anticipated risk: deployment of derived algorithms without independent validation or regulatory clearance could lead to unsafe clinical decision support; the holdout test set is provisioned specifically to enable external validation.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/distribution_formats/0/description",
+                "record_metadata_allowed": false,
+                "text": "Controlled-access distribution within a secure cloud enclave. Formats reported for the packaged release are .ipynb notebooks, text/tab-separated-values and WFDB. Modality standards are OMOP for structured EHR data, OHNLP for tokenized clinical notes, DICOM for imaging, WFDB for waveform telemetry (PhysioNet schema extended), and EDF+ and Persyst for EEG.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/distribution_formats/1/description",
+                "record_metadata_allowed": false,
+                "text": "The dataset is packaged as an RO-Crate whose metadata descriptor conforms to RO-Crate 1.2, with machine-readable JSON-LD metadata and Croissant RAI properties; the top-level package reports a content size of 1.2 tb comprising an EHR sub-crate of 18.136671 mb and a waveforms sub-crate of 1.201567472832 tb.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/distribution_dates/0/description",
+                "record_metadata_allowed": false,
+                "text": "Version 1.0 Beta published 2026-04-03 (recorded in the RO-Crate as datePublished 2026-04-03 and releaseDate 03/04/2026); the citation gives Harvard Dataverse, April 2026 as the publication venue and date.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/third_party_sharing/0/description",
+                "record_metadata_allowed": false,
+                "text": "Distribution to third parties is by controlled access only. Requestors must supply institutional affiliation and credentials, an approved research proposal reviewed by the CHoRUS governance committee, an executed institutional Data Use Agreement, and IRB approval or exemption documentation as applicable; access is restricted to the secure enclave and raw data export is not permitted unless explicitly approved. Access requests are directed to dbold@emory.edu or jared.houghtaling@tuftsmedicine.org.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/updates/description",
+                "record_metadata_allowed": false,
+                "text": "Versioned dataset releases (for example CHoRUS vX.Y) with release notes documenting schema changes, harmonization updates and known issues; governance committee oversight for structural modifications; continuing data upload. The deprecation policy includes advance notice of schema changes, a backward compatibility window where feasible, and an archive of prior versions within the enclave where possible or incremental change records. Primary maintainers are the CHoRUS Data Pillar in collaboration with institutional data stewards.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/version_access/description",
+                "record_metadata_allowed": false,
+                "text": "Prior versions are archived within the enclave where possible, or preserved through incremental change records; schema changes are announced in advance with a backward compatibility window where feasible, and release notes document changes between versions.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/extension_mechanism/description",
+                "record_metadata_allowed": false,
+                "text": "Contributions are coordinated through the public chorus-ai GitHub organization, which hosts open repositories, discussions (Standards Discussions and Data Acquisition Discussions), pooled tabular semantic mappings in the chorus-mapping repository with an associated clinical validation SOP, standard operating procedures in Chorus_SOP, and a contributor and user guide in the chorus-developer repository. Data contributing sites submit regular status updates through the GitHub interface or a Google Form that triggers updates to the Standards Project and Data Acquisition Project boards.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/file_collections/0/id",
+                "record_metadata_allowed": false,
+                "text": "urn:uuid:08cf7419-b94d-4508-8f64-c99c557351d7",
+                "whole_value_required": false
+              },
+              {
+                "path": "/file_collections/0/description",
+                "record_metadata_allowed": false,
+                "text": "CHoRUS RO-Crate EHR SubRoCrate \u2014 electronic health records sub-crate of the Bridge2AI CHoRUS RO-Crate Package, version 1.0 Beta, content size 18.136671 mb, published 2026-04-03, distributed at https://chorus4ai.org/dataset/ under the CHoRUS Data Use Agreement.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/file_collections/1/id",
+                "record_metadata_allowed": false,
+                "text": "urn:uuid:b9b41c72-0895-4ec2-9e39-8de2a83abcd6",
+                "whole_value_required": false
+              },
+              {
+                "path": "/file_collections/1/description",
+                "record_metadata_allowed": false,
+                "text": "CHoRUS RO-Crate Waveforms SubRoCrate \u2014 waveforms sub-crate of the Bridge2AI CHoRUS RO-Crate Package, version 1.0 Beta, content size 1.201567472832 tb, published 2026-04-03, distributed at https://chorus4ai.org/dataset/ under the CHoRUS Data Use Agreement.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/external_resources/0/description",
+                "record_metadata_allowed": false,
+                "text": "CHoRUS project website and dataset page: https://chorus4ai.org/ and https://chorus4ai.org/dataset/.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/external_resources/1/description",
+                "record_metadata_allowed": false,
+                "text": "CHoRUS Data Use Agreement document: https://chorus4ai.org/wp-content/uploads/2025/10/Data-Agreement-9.30.2025.docx.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/external_resources/2/description",
+                "record_metadata_allowed": false,
+                "text": "CHoRUS for Equitable AI GitHub organization: https://github.com/chorus-ai, hosting 28 repositories including chorus-container-apps, Chorus_SOP, chorus_waveform, chorus-extract-upload, privacy_scan_tool, CTP-deid, UF-Geocoding and CHoRUSReports.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/external_resources/3/description",
+                "record_metadata_allowed": false,
+                "text": "CHoRUS software documentation and package status page, compiled in the chorus-developer repository, recording versions, maintainers and other metadata about CHoRUS software packages.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/external_resources/4/description",
+                "record_metadata_allowed": false,
+                "text": "Bridge2AI program page for CHoRUS: www.bridge2ai.org/chorus.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/external_resources/5/description",
+                "record_metadata_allowed": false,
+                "text": "NIH RePORTER project record for award 1OT2OD032701-01: https://reporter.nih.gov/project-details/10472824.",
+                "whole_value_required": false
+              },
+              {
+                "path": "/external_resources/6/description",
+                "record_metadata_allowed": false,
+                "text": "AIM-AHEAD Bridge2AI for Clinical Care Training Program Cohort 2 informational webinar (September 9, 2025): https://www.aim-ahead.net/media/jnzdnid3/bridge2ai-for-clinical-care-informational-webinar-cohort-2.pdf.",
+                "whole_value_required": false
+              }
+            ]
+          },
+          "kind": "audit_batch_plan_v2",
+          "limits": {
+            "max_inventory_bytes": 3895,
+            "max_paths": 18,
+            "max_workers": 16
+          },
+          "original_full_sha256": "4d5b06876218e4cd1128dba910691cf257caefeec7d03829db685ee180a6bb86",
+          "schema_version": 2,
+          "sha256": "26df52c222e6130e33a449382aee62280d75e7db522ff78875281354159b84f2",
+          "workers": [
+            {
+              "id": "worker_0001",
+              "inventory_bytes": 3617,
+              "paths": [
+                "/acquisition_methods/0/description",
+                "/acquisition_methods/1/description",
+                "/acquisition_methods/2/description",
+                "/acquisition_methods/3/description",
+                "/addressing_gaps/0/description",
+                "/addressing_gaps/1/description",
+                "/addressing_gaps/2/description",
+                "/addressing_gaps/3/description",
+                "/anomalies/0/description",
+                "/anomalies/1/description",
+                "/anomalies/2/description",
+                "/anomalies/3/description",
+                "/anomalies/4/description"
+              ],
+              "roots": [
+                "/acquisition_methods",
+                "/addressing_gaps",
+                "/anomalies"
+              ]
+            },
+            {
+              "id": "worker_0002",
+              "inventory_bytes": 3612,
+              "paths": [
+                "/citation",
+                "/cleaning_strategies/0/description",
+                "/cleaning_strategies/1/description",
+                "/cleaning_strategies/2/description",
+                "/collection_mechanisms/0/description",
+                "/collection_mechanisms/1/description",
+                "/collection_timeframes/0/description",
+                "/confidential_elements/0/description",
+                "/conforms_to_schema",
+                "/created_by"
+              ],
+              "roots": [
+                "/citation",
+                "/cleaning_strategies",
+                "/collection_mechanisms",
+                "/collection_timeframes",
+                "/confidential_elements",
+                "/conforms_to_schema",
+                "/created_by"
+              ]
+            },
+            {
+              "id": "worker_0003",
+              "inventory_bytes": 3561,
+              "paths": [
+                "/creators/0/description",
+                "/creators/1/description",
+                "/creators/2/description",
+                "/creators/3/description",
+                "/creators/4/description",
+                "/creators/5/description",
+                "/creators/6/description",
+                "/creators/7/description",
+                "/data_collectors/0/description",
+                "/data_collectors/1/description",
+                "/data_collectors/2/description"
+              ],
+              "roots": [
+                "/creators",
+                "/data_collectors"
+              ]
+            },
+            {
+              "id": "worker_0004",
+              "inventory_bytes": 3664,
+              "paths": [
+                "/data_protection_impacts/0/description",
+                "/description",
+                "/direct_collection/0/description",
+                "/discouraged_uses/0/description",
+                "/discouraged_uses/1/description",
+                "/discouraged_uses/2/description"
+              ],
+              "roots": [
+                "/data_protection_impacts",
+                "/description",
+                "/direct_collection",
+                "/discouraged_uses"
+              ]
+            },
+            {
+              "id": "worker_0005",
+              "inventory_bytes": 3884,
+              "paths": [
+                "/distribution_dates/0/description",
+                "/distribution_formats/0/description",
+                "/distribution_formats/1/description",
+                "/doi",
+                "/ethical_reviews/0/description",
+                "/ethical_reviews/1/description",
+                "/ethical_reviews/2/description",
+                "/existing_uses/0/description",
+                "/existing_uses/1/description",
+                "/extension_mechanism/description"
+              ],
+              "roots": [
+                "/distribution_dates",
+                "/distribution_formats",
+                "/doi",
+                "/ethical_reviews",
+                "/existing_uses",
+                "/extension_mechanism"
+              ]
+            },
+            {
+              "id": "worker_0006",
+              "inventory_bytes": 3536,
+              "paths": [
+                "/external_resources/0/description",
+                "/external_resources/1/description",
+                "/external_resources/2/description",
+                "/external_resources/3/description",
+                "/external_resources/4/description",
+                "/external_resources/5/description",
+                "/external_resources/6/description",
+                "/file_collections/0/description",
+                "/file_collections/0/id",
+                "/file_collections/1/description",
+                "/file_collections/1/id",
+                "/funders/0/description"
+              ],
+              "roots": [
+                "/external_resources",
+                "/file_collections",
+                "/funders"
+              ]
+            },
+            {
+              "id": "worker_0007",
+              "inventory_bytes": 2777,
+              "paths": [
+                "/future_use_impacts/0/description",
+                "/future_use_impacts/1/description",
+                "/future_use_impacts/2/description",
+                "/human_subject_research/description",
+                "/id",
+                "/informed_consent/0/description",
+                "/instances/0/description"
+              ],
+              "roots": [
+                "/future_use_impacts",
+                "/human_subject_research",
+                "/id",
+                "/informed_consent",
+                "/instances"
+              ]
+            },
+            {
+              "id": "worker_0008",
+              "inventory_bytes": 3672,
+              "paths": [
+                "/intended_uses/0/description",
+                "/intended_uses/1/description",
+                "/intended_uses/2/description",
+                "/intended_uses/3/description",
+                "/intended_uses/4/description",
+                "/intended_uses/5/description",
+                "/intended_uses/6/description",
+                "/intended_uses/7/description",
+                "/intended_uses/8/description",
+                "/intended_uses/9/description",
+                "/ip_restrictions/description",
+                "/is_deidentified/description",
+                "/issued",
+                "/keywords/0",
+                "/keywords/1",
+                "/keywords/2",
+                "/keywords/3",
+                "/keywords/4"
+              ],
+              "roots": [
+                "/intended_uses",
+                "/ip_restrictions",
+                "/is_deidentified",
+                "/issued",
+                "/keywords"
+              ]
+            },
+            {
+              "id": "worker_0009",
+              "inventory_bytes": 3890,
+              "paths": [
+                "/known_biases/0/description",
+                "/known_biases/1/description",
+                "/known_biases/2/description",
+                "/known_biases/3/description",
+                "/known_biases/4/description",
+                "/known_biases/5/description",
+                "/known_biases/6/description",
+                "/known_limitations/0/description",
+                "/known_limitations/1/description",
+                "/known_limitations/2/description",
+                "/known_limitations/3/description",
+                "/known_limitations/4/description",
+                "/known_limitations/5/description",
+                "/known_limitations/6/description",
+                "/known_limitations/7/description",
+                "/labeling_strategies/0/description",
+                "/labeling_strategies/1/description"
+              ],
+              "roots": [
+                "/known_biases",
+                "/known_limitations",
+                "/labeling_strategies"
+              ]
+            },
+            {
+              "id": "worker_0010",
+              "inventory_bytes": 3050,
+              "paths": [
+                "/license",
+                "/license_and_use_terms/description",
+                "/machine_annotation_tools/0/description",
+                "/machine_annotation_tools/1/description",
+                "/machine_annotation_tools/2/description",
+                "/machine_annotation_tools/3/description",
+                "/machine_annotation_tools/4/description",
+                "/machine_annotation_tools/5/description",
+                "/machine_annotation_tools/6/description"
+              ],
+              "roots": [
+                "/license",
+                "/license_and_use_terms",
+                "/machine_annotation_tools"
+              ]
+            },
+            {
+              "id": "worker_0011",
+              "inventory_bytes": 3215,
+              "paths": [
+                "/maintainers/0/description",
+                "/maintainers/1/description",
+                "/maintainers/2/description",
+                "/maintainers/3/description",
+                "/missing_data_documentation/0/description",
+                "/name",
+                "/other_tasks/0/description",
+                "/other_tasks/1/description",
+                "/page",
+                "/participant_privacy/0/description",
+                "/participant_privacy/1/description",
+                "/participant_privacy/2/description"
+              ],
+              "roots": [
+                "/maintainers",
+                "/missing_data_documentation",
+                "/name",
+                "/other_tasks",
+                "/page",
+                "/participant_privacy"
+              ]
+            },
+            {
+              "id": "worker_0012",
+              "inventory_bytes": 2425,
+              "paths": [
+                "/preprocessing_strategies/0/description",
+                "/preprocessing_strategies/1/description",
+                "/preprocessing_strategies/2/description",
+                "/preprocessing_strategies/3/description",
+                "/preprocessing_strategies/4/description",
+                "/prohibited_uses/0/description",
+                "/prohibited_uses/1/description",
+                "/prohibited_uses/2/description",
+                "/prohibited_uses/3/description"
+              ],
+              "roots": [
+                "/preprocessing_strategies",
+                "/prohibited_uses"
+              ]
+            },
+            {
+              "id": "worker_0013",
+              "inventory_bytes": 3275,
+              "paths": [
+                "/purposes/0/description",
+                "/purposes/1/description",
+                "/purposes/2/description",
+                "/purposes/3/description",
+                "/purposes/4/description",
+                "/raw_data_sources/0/source_description",
+                "/raw_data_sources/1/source_description",
+                "/raw_data_sources/2/source_description",
+                "/raw_data_sources/3/source_description",
+                "/raw_data_sources/4/source_description",
+                "/raw_sources/0/description"
+              ],
+              "roots": [
+                "/purposes",
+                "/raw_data_sources",
+                "/raw_sources"
+              ]
+            },
+            {
+              "id": "worker_0014",
+              "inventory_bytes": 3851,
+              "paths": [
+                "/regulatory_restrictions/description",
+                "/sampling_strategies/0/description",
+                "/sensitive_elements/0/description",
+                "/sensitive_elements/1/description",
+                "/sensitive_elements/2/description",
+                "/splits/0/description",
+                "/status",
+                "/subpopulations/0/description",
+                "/subpopulations/1/description",
+                "/subpopulations/2/description"
+              ],
+              "roots": [
+                "/regulatory_restrictions",
+                "/sampling_strategies",
+                "/sensitive_elements",
+                "/splits",
+                "/status",
+                "/subpopulations"
+              ]
+            },
+            {
+              "id": "worker_0015",
+              "inventory_bytes": 3895,
+              "paths": [
+                "/subsets/0/description",
+                "/subsets/0/id",
+                "/subsets/1/description",
+                "/subsets/1/id",
+                "/subsets/2/description",
+                "/subsets/2/id",
+                "/subsets/3/description",
+                "/subsets/3/id",
+                "/subsets/4/description",
+                "/subsets/4/id",
+                "/subsets/5/description",
+                "/subsets/5/id",
+                "/subsets/6/description",
+                "/subsets/6/id",
+                "/subsets/7/description",
+                "/subsets/7/id",
+                "/subsets/8/description",
+                "/subsets/8/id"
+              ],
+              "roots": [
+                "/subsets"
+              ]
+            },
+            {
+              "id": "worker_0016",
+              "inventory_bytes": 3371,
+              "paths": [
+                "/tasks/0/description",
+                "/tasks/1/description",
+                "/tasks/2/description",
+                "/tasks/3/description",
+                "/tasks/4/description",
+                "/third_party_sharing/0/description",
+                "/title",
+                "/total_size_bytes",
+                "/updates/description",
+                "/version",
+                "/version_access/description",
+                "/was_derived_from"
+              ],
+              "roots": [
+                "/tasks",
+                "/third_party_sharing",
+                "/title",
+                "/total_size_bytes",
+                "/updates",
+                "/version",
+                "/version_access",
+                "/was_derived_from"
+              ]
+            }
+          ]
+        }
+      },
+      "project": "CHORUS",
+      "proxy": true,
+      "proxy_basis": "July31 final full/core used as phase1 originals; no original phase1/receipt evidence.",
+      "receipt_basis": "Synthetic nothing_relevant receipt for all target chunks; understates real receipt.",
+      "record_proxy_for": null,
+      "registration_input_authority": {
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 1088000,
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "integration_output_tokens": 32000,
+          "max_calls": 18,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 3895,
+          "max_paths": 18,
+          "max_request_bytes": 32000000,
+          "max_workers": 16,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "audit_transport": {
+          "malformed_response_retries": 0,
+          "sdk_max_retries": 0,
+          "transport_attempts": 1
+        },
+        "format": "shared_generation_registration_v1",
+        "inputs": {
+          "bundle": {
+            "bytes": 65749,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CHORUS_preprocessed_with_crate.txt",
+            "sha256": "433e7cb6c9e9b109a4b6e810ab07b400c987420d6acecb7fd5dcbc5d8732c77a"
+          },
+          "chunk_manifest": {
+            "bytes": 2288,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CHORUS_preprocessed_with_crate_chunks.yaml",
+            "sha256": "0864cc6061a7f10e703c6969135ffe145340469837e40828cfd8b70d631dd5ec"
+          },
+          "context": {
+            "bytes": 6476,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/chorus_omission_context.json",
+            "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+          },
+          "core_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+            "sources": [
+              {
+                "bytes": 1299200,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+                "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+              }
+            ]
+          },
+          "full_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "sources": [
+              {
+                "bytes": 1442513,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+              }
+            ]
+          },
+          "profile": {
+            "basis": "manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81",
+            "name": "bridge2ai",
+            "vocabulary": {
+              "bytes": 6115,
+              "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+              "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+            }
+          },
+          "project": "CHORUS",
+          "source_manifest": {
+            "bytes": 40612,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml",
+            "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+          }
+        },
+        "receipt": {
+          "condition": "generic_v10",
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "coverage_floor": {
+            "mode": "diagnostic_pilot",
+            "state": "pending"
+          },
+          "format": "receipt_completion_registration_v2",
+          "max_output_tokens": 4000,
+          "max_request_bytes": 32000000,
+          "receipt_instrument_version": 4,
+          "registration_id": "generic-v10-receipt",
+          "runtime_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+        },
+        "registration_id": "generic-v10-chorus-2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "registration_path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/crate-proxy-scratch/1/sizing/CHORUS_registration.json",
+        "run": {
+          "arm": "DE NOVO WITH CRATE (documents + RO-Crate evidence)",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_agent_crate",
+          "project": "CHORUS"
+        },
+        "runtime": {
+          "base_url": "https://api.cborg.lbl.gov",
+          "config": {
+            "bytes": 6250,
+            "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+            "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+          },
+          "effort": null,
+          "model": "claude-opus-5",
+          "provider": "LBL CBORG (proxy to Anthropic)",
+          "temperature": null,
+          "thinking": {
+            "display": "summarized",
+            "type": "adaptive"
+          }
+        },
+        "selection": {
+          "api_playbook_version": 2,
+          "assets": {
+            ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+            ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+            ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+            ".claude/commands/d4d-uniform-rules-v2.md": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+            "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+            "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+            "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+          },
+          "condition": "generic_v10",
+          "protocol": "shared_generation_v1",
+          "receipt_completion_version": 2,
+          "renderer": 25,
+          "runtime": "Claude API (direct)",
+          "schema_context_trim": {
+            "generation_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "omission_all_reachable_classes": true,
+            "omission_schema_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "worker_non_assigned_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings",
+              "description",
+              "comments"
+            ]
+          },
+          "stage_contracts": {
+            "phase_instructions_sha256": {
+              "audit": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+              "core": "77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986",
+              "full": "2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283",
+              "full_readdress": "59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27",
+              "full_receipt": "849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a",
+              "reconcile_core": "6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6",
+              "reconcile_full": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+              "report": "1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853",
+              "report_regate": "bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"
+            },
+            "phase_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+            "regate_headers_sha256": "81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d",
+            "rereceipt_instruction_sha256": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401",
+            "shared_evidence_contract_sha256": "a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c",
+            "typed_audit_integration_format_sha256": "de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496",
+            "typed_audit_system_sha256": "37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b",
+            "typed_audit_worker_format_sha256": "f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336"
+          },
+          "typed_protocol": "typed_audit_protocol_v1",
+          "version": 1
+        }
+      },
+      "runtime_module_files_after": {
+        "data_sheets_schema.agent_pin": {
+          "bytes": 20563,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/agent_pin.py",
+          "sha256": "0cc6e0a341efbd7c34675fe71819d017df59a22987e65e40e2b94941946c5f4a"
+        },
+        "data_sheets_schema.american_spelling": {
+          "bytes": 18281,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/american_spelling.py",
+          "sha256": "cce0940a957dd6dd25ed47919aa9f3a1bbf00b02dd5e71ad562e60de6a225dba"
+        },
+        "data_sheets_schema.anonymous_removals": {
+          "bytes": 10795,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/anonymous_removals.py",
+          "sha256": "7a33288b481cf76b7cfeea1fbee99ac605660560b382a191119ca4d0768b80b0"
+        },
+        "data_sheets_schema.api_playbook": {
+          "bytes": 3751,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/api_playbook.py",
+          "sha256": "3678b690deb288bb9b2eeea3ef6b3b29399573214ab145fd4710f4e51aa1ad46"
+        },
+        "data_sheets_schema.api_runner": {
+          "bytes": 442136,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/api_runner.py",
+          "sha256": "76f055fd89e48b87a64daa5afde107c06df7280fab745fa0899410c535458419"
+        },
+        "data_sheets_schema.audit_batch_format": {
+          "bytes": 22239,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/audit_batch_format.py",
+          "sha256": "5bff6225905f3c1f40f9e32dfae6de9f374742b2ee66dfe5804cdc148b77046f"
+        },
+        "data_sheets_schema.audit_batches": {
+          "bytes": 28145,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/audit_batches.py",
+          "sha256": "c95ec83f2f730df8c9766173f4d71367dfe705b08ec4acc4a17f8ef002da4414"
+        },
+        "data_sheets_schema.audit_grammar": {
+          "bytes": 15089,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/audit_grammar.py",
+          "sha256": "234eb188c0d7938b2f7f79f8a0282deaa5b5ef3963917d0a745ccbe4d53e451d"
+        },
+        "data_sheets_schema.audit_omissions": {
+          "bytes": 24295,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/audit_omissions.py",
+          "sha256": "807f5bfbd7355d0c6b801f79ff7e2f4a969bf717b71c7234e7837df1ba45e285"
+        },
+        "data_sheets_schema.audit_protocol": {
+          "bytes": 1307,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/audit_protocol.py",
+          "sha256": "384cca650e8cbcdefb18b27a65883b081c79fdf0ba9e7863c2ca8ffcfaf5fc19"
+        },
+        "data_sheets_schema.backfill_checks": {
+          "bytes": 27080,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/backfill_checks.py",
+          "sha256": "539340fbc9d67dcd97e39f8094650ce4edcd05e93491e8bd21e37d031c3e0e41"
+        },
+        "data_sheets_schema.chunking": {
+          "bytes": 20633,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/chunking.py",
+          "sha256": "8d10582971cd4139dbca50a4ab465488ca4604ab7d692dcf31e5963a8b11b9fc"
+        },
+        "data_sheets_schema.cli": {
+          "bytes": 1583,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/__init__.py",
+          "sha256": "c11d423a8fb948ca860226d4b793042e5127777d2129c6bebfe12d09dd006ac4"
+        },
+        "data_sheets_schema.cli._repo_utils": {
+          "bytes": 2877,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/_repo_utils.py",
+          "sha256": "f9dcde34cf5c929047ca9dab3f5983312df30071419156345cb9b703b81c405a"
+        },
+        "data_sheets_schema.cli.agents": {
+          "bytes": 3055,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/agents.py",
+          "sha256": "958bbfab19faac7dd23f0ddcbb48150bffedf865fcc8cdf76e562fa08122e12b"
+        },
+        "data_sheets_schema.cli.api": {
+          "bytes": 90881,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/api.py",
+          "sha256": "889b5e1d8b288151dbe72eb5317fe4850f21a2172772f94d85a25d1b1540c59c"
+        },
+        "data_sheets_schema.cli.bundle": {
+          "bytes": 7056,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/bundle.py",
+          "sha256": "09e687ece64da5d79506e02c931ee3f163c9c20cd4bc59502b324c04716494e3"
+        },
+        "data_sheets_schema.cli.cross_family_judges": {
+          "bytes": 5094,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/cross_family_judges.py",
+          "sha256": "358c40ffb6cc514c2f616a93a44c6225bb916db7dd98bc981041e777a24c7c6f"
+        },
+        "data_sheets_schema.cli.cross_family_panel": {
+          "bytes": 5075,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/cross_family_panel.py",
+          "sha256": "1c76be87a0526cd0b79fea5840dde36bec758480ec577d8787c237f0b2dc308e"
+        },
+        "data_sheets_schema.cli.derive": {
+          "bytes": 2710,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/derive.py",
+          "sha256": "e7e69710439bff768b367f02bbec9ea5c13f007eba7f114b8ce765af1448eba1"
+        },
+        "data_sheets_schema.cli.download": {
+          "bytes": 34217,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/download.py",
+          "sha256": "78f2ef3f0ee0c5456248c043f8724a38441747f0f2f0d71ea85c904446f6a7e6"
+        },
+        "data_sheets_schema.cli.enrich": {
+          "bytes": 2146,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/enrich.py",
+          "sha256": "e5e4c47da289f39259bf540c9b4b4a939e4992b0aeb1bc78f026dcdaf5f8265b"
+        },
+        "data_sheets_schema.cli.evaluate": {
+          "bytes": 41158,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/evaluate.py",
+          "sha256": "46f6b9aa6098e61dddbfc088f329949f516f98bec99760ffe5f828e6259ec050"
+        },
+        "data_sheets_schema.cli.fitness_results": {
+          "bytes": 4292,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/fitness_results.py",
+          "sha256": "633f2663bfa727ef8c566167ac07bdec74eaceeae38c7b2e3ac81d9af2ed6215"
+        },
+        "data_sheets_schema.cli.healthsheet": {
+          "bytes": 2615,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/healthsheet.py",
+          "sha256": "779579265bddc0c82ce1fc2377e79550c934c06f2f186fc696566744b34f609a"
+        },
+        "data_sheets_schema.cli.prompt": {
+          "bytes": 1364,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/prompt.py",
+          "sha256": "e9bfd7aa56691715c1d9ee44394ce3eb59e91153eaa50300d15717aa6c03ab9b"
+        },
+        "data_sheets_schema.cli.provenance": {
+          "bytes": 176421,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/provenance.py",
+          "sha256": "dc718545f0f53d4291f2beacf2827a956a149498cb6af3f6f0395aadd92b2e04"
+        },
+        "data_sheets_schema.cli.receipts": {
+          "bytes": 39368,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/receipts.py",
+          "sha256": "f575d1292065f4e7d0364c064bf619205f113ced69f0976bd2586fdb8806350c"
+        },
+        "data_sheets_schema.cli.render": {
+          "bytes": 11107,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/render.py",
+          "sha256": "e8304b2d6b99e951ca35dee57d9c84c5ee6fb32ed9a6ffa5f0baa473c225f418"
+        },
+        "data_sheets_schema.cli.review": {
+          "bytes": 39717,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/review.py",
+          "sha256": "c12f6fdd85d2e6a2af2989c8a76cd0af6fce82d87cef87d69b8ce7af304ed34c"
+        },
+        "data_sheets_schema.cli.rocrate": {
+          "bytes": 19375,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/rocrate.py",
+          "sha256": "371a32df2dd466e9bbc74ac35ebaaa175a06b2c8f7685a37157f07350b083e80"
+        },
+        "data_sheets_schema.cli.runs": {
+          "bytes": 113975,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/runs.py",
+          "sha256": "24418f3d128fca9bc3938da49e9dca2a3ececdec3feed60b64a4e653c4602412"
+        },
+        "data_sheets_schema.cli.schema": {
+          "bytes": 7562,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/schema.py",
+          "sha256": "5c3dba2fdbbb756ae3df97c6a8545cf17a78430bbf23bbcbe648890bf6eb7c8c"
+        },
+        "data_sheets_schema.cli.support_calibration": {
+          "bytes": 2450,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/support_calibration.py",
+          "sha256": "09027c777dcb6336b735abcefa644beac79c90250d79e5fe1b256b9904407b42"
+        },
+        "data_sheets_schema.cli.support_execution": {
+          "bytes": 2488,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/support_execution.py",
+          "sha256": "424528e8308ede5308b316c54c813a29cf54d8a79011321d94ad3a9082907929"
+        },
+        "data_sheets_schema.cli.support_results": {
+          "bytes": 3521,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/support_results.py",
+          "sha256": "6e509009d5d7c1f0640a60c7b0b06cf9cbec9559757321d902b362753fc5b382"
+        },
+        "data_sheets_schema.cli.utils": {
+          "bytes": 5305,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/utils.py",
+          "sha256": "150b631211b2a6f204c998bd03f2602d9a8365f159fff39e8d0031e2f107e171"
+        },
+        "data_sheets_schema.cli.validate": {
+          "bytes": 4935,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cli/validate.py",
+          "sha256": "dff8dff82eee94e3f0adb2494ad1eb5019e731bba3834f596109b916dc56231e"
+        },
+        "data_sheets_schema.constants": {
+          "bytes": 2148,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/constants/__init__.py",
+          "sha256": "30d1d76722fa5e592fe0158cedb98e1a1a926031d99e988c2b26a537b8ad39c1"
+        },
+        "data_sheets_schema.constants.evaluation": {
+          "bytes": 1558,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/constants/evaluation.py",
+          "sha256": "8c0508bfc24f6c40676ce4c2667e3c2398dd21fde3c7239190ce5b31cb0e2b8c"
+        },
+        "data_sheets_schema.constants.methods": {
+          "bytes": 7193,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/constants/methods.py",
+          "sha256": "3e6614fc2723452ff1dfe8f22462b9d49eb8bf8b15b64649d3083f95da77d85f"
+        },
+        "data_sheets_schema.constants.projects": {
+          "bytes": 3148,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/constants/projects.py",
+          "sha256": "c34c17348d47ab8de9f490988ebf5f0cab9b10ae44e1d95768f69fc9dc3684e1"
+        },
+        "data_sheets_schema.constants.schemas": {
+          "bytes": 1344,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/constants/schemas.py",
+          "sha256": "e7caf19588488d551392b69db47b74562b18dba292537944517d8314a8d90215"
+        },
+        "data_sheets_schema.corpus": {
+          "bytes": 3469,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/corpus.py",
+          "sha256": "16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089"
+        },
+        "data_sheets_schema.cross_family_judge_panel": {
+          "bytes": 35694,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cross_family_judge_panel.py",
+          "sha256": "9dc7f9b90b1779f470b4c3a69f99c3fa5fd0f8afaf2ce1bd523be2662b8d0765"
+        },
+        "data_sheets_schema.cross_family_panel": {
+          "bytes": 23418,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cross_family_panel.py",
+          "sha256": "cc21763e5c136817a06633c1999139e70a772b58453a9e43ea413108fa3dadbf"
+        },
+        "data_sheets_schema.cross_family_panel_analysis": {
+          "bytes": 42049,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cross_family_panel_analysis.py",
+          "sha256": "ddd44884c95b3574a55d3edf9d2b5c186b7337a345783b072b128807be8d313e"
+        },
+        "data_sheets_schema.cross_family_panel_results": {
+          "bytes": 15489,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/cross_family_panel_results.py",
+          "sha256": "9713c89d70a1ae16818e10f1b9b7d6cb0e47ee36bc7d163c066bf00774dc8854"
+        },
+        "data_sheets_schema.duplicate_keys": {
+          "bytes": 15690,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/duplicate_keys.py",
+          "sha256": "22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2"
+        },
+        "data_sheets_schema.evaluation_context": {
+          "bytes": 9204,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/evaluation_context.py",
+          "sha256": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e"
+        },
+        "data_sheets_schema.evaluation_model": {
+          "bytes": 7254,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/evaluation_model.py",
+          "sha256": "b0821c5a33d549e895c2de6c1232d4cd9e1c7e167425ec53a0ccdcecb7cd3718"
+        },
+        "data_sheets_schema.evidence_assertions": {
+          "bytes": 34760,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/evidence_assertions.py",
+          "sha256": "da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583"
+        },
+        "data_sheets_schema.evidence_score": {
+          "bytes": 53835,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/evidence_score.py",
+          "sha256": "6b7f4496fc3efdd0272610f76178cf750d7a82144a930f5334dc0b55c14b3b02"
+        },
+        "data_sheets_schema.grounding": {
+          "bytes": 36544,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/grounding.py",
+          "sha256": "701c43041f2f6aa28e889a0165fe20bf0ed33c52e4cfe5b937db4f84f606c8fe"
+        },
+        "data_sheets_schema.identifiers": {
+          "bytes": 14403,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/identifiers.py",
+          "sha256": "31a581fa946cec0ceffa28ec641dd0d12135ebac201d3750609982349214b0a6"
+        },
+        "data_sheets_schema.judge_contract": {
+          "bytes": 9232,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/judge_contract.py",
+          "sha256": "7905b7e942eb87c4c79418680e3ff697a70ca45102f41d4c349d3a785e24ee6a"
+        },
+        "data_sheets_schema.native_source_attribution": {
+          "bytes": 3068,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/native_source_attribution.py",
+          "sha256": "8d2322b4b0c366a00eab5fda9dba3073acf640825d0a2f6fae353eb2ebaa6d0d"
+        },
+        "data_sheets_schema.nested_support_execution": {
+          "bytes": 34416,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/nested_support_execution.py",
+          "sha256": "8b5c20e1fef3e88c9846040fab99e53e63cf00164962c44ec318f4e609398750"
+        },
+        "data_sheets_schema.nested_support_results": {
+          "bytes": 44336,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/nested_support_results.py",
+          "sha256": "cc3b19d664aca1af5ce79273f4e9eb91fbe488cbb70b63a6850b05130baa3ed1"
+        },
+        "data_sheets_schema.profiles": {
+          "bytes": 14513,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/profiles.py",
+          "sha256": "f461414f7e035c5502c4312ea819fcc2b45c4eabb8fef18de8e791fe27061909"
+        },
+        "data_sheets_schema.prompt_registry": {
+          "bytes": 20591,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/prompt_registry.py",
+          "sha256": "1363f04bec3aa2bdc757782a23a6e7f8bd59bf2c9ee6df24ad8445e7f1b54b19"
+        },
+        "data_sheets_schema.provenance": {
+          "bytes": 123346,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/provenance.py",
+          "sha256": "6f031b583745692268593868ad7091ff488a1d2c5add9ca943054f929734c6ca"
+        },
+        "data_sheets_schema.reasoning": {
+          "bytes": 21243,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/reasoning.py",
+          "sha256": "bd3d55c4d87dcbe05fe1b329870dc84116aa878c61888d4f352b2161d043c293"
+        },
+        "data_sheets_schema.receipt_completion": {
+          "bytes": 39085,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/receipt_completion.py",
+          "sha256": "e4f0025611d0b6143bfa1734bcfa03123a99c1bc93c6f865780793e6e6d5f2c4"
+        },
+        "data_sheets_schema.receipt_completion_policy": {
+          "bytes": 16141,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/receipt_completion_policy.py",
+          "sha256": "ae369c822cc2b2e7a20982dc8b7dc21a784207c9d3d5f6f13d25091b7b602e4c"
+        },
+        "data_sheets_schema.receipts": {
+          "bytes": 114628,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/receipts.py",
+          "sha256": "7bfb84709b2e91983eae2b6dbaf8f67e13ef06b68473ad61947ebf6dd7542c9f"
+        },
+        "data_sheets_schema.registry": {
+          "bytes": 19704,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/registry.py",
+          "sha256": "04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3"
+        },
+        "data_sheets_schema.rereceipt": {
+          "bytes": 10868,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/rereceipt.py",
+          "sha256": "50cd6c35746e379fbe51168e90d04410a9ac771e032cb4b33d9dd44c72ff1527"
+        },
+        "data_sheets_schema.resources": {
+          "bytes": 15272,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/resources.py",
+          "sha256": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435"
+        },
+        "data_sheets_schema.runs": {
+          "bytes": 134591,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/runs.py",
+          "sha256": "00ca01dc728276bc068732a83f17ca3a1dbb7a0086407e90c35c22b268893ebb"
+        },
+        "data_sheets_schema.schema_cache": {
+          "bytes": 5277,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema_cache.py",
+          "sha256": "0c5a99b735f295e164ec300cc44fdd37e39321290baf610f518c9503a8e32183"
+        },
+        "data_sheets_schema.schema_digest": {
+          "bytes": 41908,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema_digest.py",
+          "sha256": "150a5f005ab1ed5fdf73f927559f15a3c7dbf34a0915ff2b83896991c1fcc095"
+        },
+        "data_sheets_schema.schema_snapshot": {
+          "bytes": 6802,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema_snapshot.py",
+          "sha256": "fca5a4ed354418a5828df661df76f535a743bed3a8e156a8aff24d01e79eff32"
+        },
+        "data_sheets_schema.schema_sync": {
+          "bytes": 29871,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema_sync.py",
+          "sha256": "28aaefb527d00f7ceb470c6e54863929928b89da369b54b750badc6ac7f9b0e2"
+        },
+        "data_sheets_schema.schema_view": {
+          "bytes": 12420,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema_view.py",
+          "sha256": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff"
+        },
+        "data_sheets_schema.scope": {
+          "bytes": 25356,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/scope.py",
+          "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199"
+        },
+        "data_sheets_schema.semantic_instrument": {
+          "bytes": 2065,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/semantic_instrument.py",
+          "sha256": "b77f2a957a7accbb17d00e39d5d03ff095c5f4cc93925dffdf3eef854685a0a7"
+        },
+        "data_sheets_schema.shared_generation": {
+          "bytes": 53756,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/shared_generation.py",
+          "sha256": "ea4bd0dc827362819f3698229a0b8d3a12d9e496c3d0e045e6ac49fff896c191"
+        },
+        "data_sheets_schema.shared_generation_resources": {
+          "bytes": 7908,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/shared_generation_resources.py",
+          "sha256": "13f84a7a227532bc8c424af8737626a5ad40d2c898100299541f9ca215de70b5"
+        },
+        "data_sheets_schema.shared_write_footprint": {
+          "bytes": 5279,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/shared_write_footprint.py",
+          "sha256": "8522be189c935b8f6c83fc4163535d9ca9b634a36bde115388dedbeb9cda7624"
+        },
+        "data_sheets_schema.snapshot_store": {
+          "bytes": 22999,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/snapshot_store.py",
+          "sha256": "a149403187a9c4a487740960708429e6f74c7095fb1dde456101efd31d4d9df0"
+        },
+        "data_sheets_schema.source_heading_completed": {
+          "bytes": 60378,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/source_heading_completed.py",
+          "sha256": "978292400c3bdbc0340c4e14aa32e27e4bad06106ca91cb1f9f5f6b80adbbabb"
+        },
+        "data_sheets_schema.source_heading_routing": {
+          "bytes": 35521,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/source_heading_routing.py",
+          "sha256": "72827fdefe6bcc5fe9b56660d448afe1c6e4edbc0cd4327af2855a9c1592890d"
+        },
+        "data_sheets_schema.source_heading_runtime": {
+          "bytes": 16819,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/source_heading_runtime.py",
+          "sha256": "651c0ee3dfd4017793b95bea91dbd46718afd1092bb02dbb0e539bef0d0ba16e"
+        },
+        "data_sheets_schema.source_metadata": {
+          "bytes": 8042,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/source_metadata.py",
+          "sha256": "a4cb403bc56462cf22a4aa39338b7fffa27206f2d9e73f6e1369000ea68a56ae"
+        },
+        "data_sheets_schema.source_priority": {
+          "bytes": 8738,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/source_priority.py",
+          "sha256": "ae2b8bb514e110e5bc78200dc3dc2917abd9522d512a384467ca151f28768eb5"
+        },
+        "data_sheets_schema.source_review": {
+          "bytes": 12198,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/source_review.py",
+          "sha256": "855115983efb9b0c5f653d7195bbf47901b4303725103e07d9a45fd33e940775"
+        },
+        "data_sheets_schema.stream_evidence": {
+          "bytes": 5433,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/stream_evidence.py",
+          "sha256": "3f196fe08fff41b5a6faf73b4f0a24c6cc751c50b946c5e20ea5d00145cb583d"
+        },
+        "data_sheets_schema.support_calibration": {
+          "bytes": 18416,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/support_calibration.py",
+          "sha256": "9bb27765d17d8088f0e6f081fda20429eefbe743c1026c503b74e3208f33cc94"
+        },
+        "data_sheets_schema.support_judge": {
+          "bytes": 25032,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/support_judge.py",
+          "sha256": "ed463973104b81c4dca8e693cb22b40189543683fdadacf849d50a6f79d8f63b"
+        },
+        "data_sheets_schema.support_plan": {
+          "bytes": 29609,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/support_plan.py",
+          "sha256": "eafbc0885d4390b738bd8fd9f951780c4935f99c669e2dc1a9c62ea2dd4fac04"
+        },
+        "data_sheets_schema.support_targets": {
+          "bytes": 33033,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/support_targets.py",
+          "sha256": "7465f93c7b146d6858a43ff23b565b445d2a0523df7432f197c59544537dd432"
+        },
+        "data_sheets_schema.top_level_fitness_results": {
+          "bytes": 47531,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/top_level_fitness_results.py",
+          "sha256": "d59f3a6eb24b438c27eaa7c293cdc2da0139e1eccb729a50a7a44e9745ced78f"
+        },
+        "data_sheets_schema.typed_audit": {
+          "bytes": 35173,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/typed_audit.py",
+          "sha256": "e366e2d6cabda3e28c6a410fd801437ddcdf4e70aa0791527bf1ba11c9844227"
+        },
+        "data_sheets_schema.typed_audit_runtime": {
+          "bytes": 33259,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/typed_audit_runtime.py",
+          "sha256": "e0c892e7ab53478606c32a2f45094b676ecdcae073a6982a21ff4954da7eabe8"
+        },
+        "data_sheets_schema.usage_ledger": {
+          "bytes": 30797,
+          "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/usage_ledger.py",
+          "sha256": "8be0172cce952cd4c95ca23c4d9b8bc95f903faa77b5f3828ca295adf3f7e04f"
+        },
+        "scripts.adhoc.k1_size_requests_20261025": {
+          "bytes": 11087,
+          "path": "/private/tmp/d4d-codex-k1-20261025/scripts/adhoc/k1_size_requests_20261025.py",
+          "sha256": "c41309e61d73e50c673ec813066dadd478707017b032c24e16676904743876de"
+        },
+        "scripts.build_api_registrations": {
+          "bytes": 41148,
+          "path": "/private/tmp/d4d-codex-k1-20261025/scripts/build_api_registrations.py",
+          "sha256": "fc8f0162bc8c3d90385ecda2103dd759008baa7238f733c6a61954f4ac82b50b"
+        },
+        "scripts.offline_sizing": {
+          "bytes": 98618,
+          "path": "/private/tmp/d4d-codex-k1-20261025/scripts/offline_sizing.py",
+          "sha256": "87bdebcf47c4e6f9bec837d9b68bd6b82d7eaa929f9ca635222d4b6a58b190cd"
+        }
+      },
+      "runtime_pin_scope": "Source-byte snapshot after sizing; production preflight supplies input freshness guards.",
+      "selected_limits": {
+        "max_inventory_bytes": 3895,
+        "max_paths": 18,
+        "max_workers": 16
+      },
+      "source_files": {
+        "completed_core": {
+          "bytes": 41425,
+          "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml",
+          "sha256": "eed1b4196984b096be523a8b25ca41eafe8dcc348276c691c8888aea290ae0d5"
+        },
+        "original_core": {
+          "bytes": 41425,
+          "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_agent_crate_core/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d_core.yaml",
+          "sha256": "eed1b4196984b096be523a8b25ca41eafe8dcc348276c691c8888aea290ae0d5"
+        },
+        "original_full": {
+          "bytes": 42628,
+          "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml",
+          "sha256": "b6449c88b2387bc3e2865704a1f9606796f2192b7bf809b2087b74db6143f561"
+        },
+        "receipt": {
+          "bytes": 16825,
+          "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_coverage_receipt.yaml",
+          "sha256": "5829b77841b837f5d30b12e55db6b1e22bb701d7fe71036d7225a7a2db3693db"
+        },
+        "reconciled_full": {
+          "bytes": 42628,
+          "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml",
+          "sha256": "b6449c88b2387bc3e2865704a1f9606796f2192b7bf809b2087b74db6143f561"
+        }
+      },
+      "source_files_unchanged": true,
+      "staged_record_bytes": 42616,
+      "staged_record_conformance_edits": [],
+      "staged_record_sha256": "4d5b06876218e4cd1128dba910691cf257caefeec7d03829db685ee180a6bb86",
+      "staged_record_unfixable": [],
+      "target_inputs": {
+        "bundle": {
+          "bytes": 65749,
+          "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CHORUS_preprocessed_with_crate.txt",
+          "sha256": "433e7cb6c9e9b109a4b6e810ab07b400c987420d6acecb7fd5dcbc5d8732c77a"
+        },
+        "chunks": {
+          "bytes": 2288,
+          "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CHORUS_preprocessed_with_crate_chunks.yaml",
+          "sha256": "0864cc6061a7f10e703c6969135ffe145340469837e40828cfd8b70d631dd5ec"
+        },
+        "omission_context": {
+          "bytes": 6476,
+          "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/chorus_omission_context.json",
+          "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+        }
+      }
+    }
+  ],
+  "scope": "Conditional D04 B historical-proxy estimates; not counts or launch clearance.",
+  "script": {
+    "bytes": 4496,
+    "path": "/private/tmp/d4d-codex-k1-20261025/scripts/adhoc/k1_size_crate_proxy_20261025.py",
+    "sha256": "f4e3f59ed8162eb91325d2199399b367971f080698b9e524a8e26cb2d6bf3729"
+  }
+}

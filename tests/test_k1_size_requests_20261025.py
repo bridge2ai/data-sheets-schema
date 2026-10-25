@@ -36,3 +36,14 @@ def test_empty_and_escaped_roots_are_preserved():
     result = planning_bounds(batches, "'a/b':\n  '~x': 0\nempty: []\nflag: false\n")
     assert [row["root"] for row in result["indivisible_roots"]] == ["/a~1b", "/empty", "/flag"]
     assert result["inventory_path_count"] == 2
+
+
+def test_measure_refuses_scratch_outside_source_tree(tmp_path):
+    from types import SimpleNamespace
+    from scripts.adhoc.k1_size_requests_20261025 import measure
+    root = tmp_path / "root"
+    root.mkdir()
+    outside = tmp_path / "outside"
+    with pytest.raises(ValueError, match="within the selected root"):
+        measure(None, SimpleNamespace(root=root), "CHORUS", "label", {}, outside)
+    assert not outside.exists()

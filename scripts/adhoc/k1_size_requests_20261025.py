@@ -102,6 +102,13 @@ def chorus_files(base, label):
 
 
 def measure(sizing, modules, project, label, source_files, workdir, *, required_chorus=False):
+    root = Path(modules.root).resolve()
+    workdir = Path(workdir).resolve()
+    if not workdir.is_relative_to(root):
+        raise ValueError("measurement scratch must be within the selected root")
+    from data_sheets_schema import resources
+    if Path(resources.resource_root()[0]).resolve() != root:
+        raise RuntimeError("resources did not resolve from the selected root")
     workdir.mkdir(parents=True, exist_ok=False)
     copied = workdir / "source_records"
     copied.mkdir()
@@ -133,12 +140,23 @@ def measure(sizing, modules, project, label, source_files, workdir, *, required_
     unchanged = all(pin(Path(value["path"])) == value for value in pins.values())
     if not unchanged:
         raise RuntimeError("a source artifact changed during sizing")
+    registration_path = workdir / "sizing" / f"{project}_registration.json"
+    registration = (json.loads(registration_path.read_bytes()) if registration_path.is_file() else None)
+    runtime_sources = {name: pin(module.__file__)
+                       for name, module in list(sys.modules.items())
+                       if name.split(".")[0] in ("data_sheets_schema", "scripts")
+                       and getattr(module, "__file__", None)}
+    if any(not Path(value["path"]).is_relative_to(root) for value in runtime_sources.values()):
+        raise RuntimeError("runtime source loaded outside the selected root")
     return {"project": project, "label": label, "record_proxy_for": sizing.PROXY.get(project),
             "source_files": pins, "source_files_unchanged": unchanged,
             "staged_record_bytes": len(text.encode("utf-8")),
             "staged_record_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
             "staged_record_conformance_edits": edits, "staged_record_unfixable": unfixable,
-            "planning": bounds, "selected_limits": limits, "measurements": measured}
+            "planning": bounds, "selected_limits": limits, "measurements": measured,
+            "registration_input_authority": registration,
+            "runtime_module_files_after": runtime_sources,
+            "runtime_pin_scope": "Source-byte snapshot after sizing; production preflight supplies input freshness guards."}
 
 
 def main(argv=None):
