@@ -12075,7 +12075,32 @@ def derive_native_shared_procedure(root: Path) -> dict:
     cache_init = function('typed_audit', '__init__', 'DerivationCache')
     empty = statement(cache_init, 'self._rows, self._bytes = {}, 0')
     unchanged(cache_init, 'self._rows', [empty.targets[0]])
+    unchanged(cache_init, 'self._store', [])
+    store = function('typed_audit', '_store', 'DerivationCache')
+    if ast.unparse(store.args) != 'self, key, encoded':
+        raise fail('unsupported shared cache insertion signature')
+    exact_body(store, '''if len(encoded) > self.max_bytes:
+        return
+    previous = self._rows.pop(key, None)
+    if previous is not None:
+        self._bytes -= len(previous)
+    while self._rows and (len(self._rows) >= self.max_entries
+                          or self._bytes + len(encoded) > self.max_bytes):
+        self._bytes -= len(self._rows.pop(next(iter(self._rows))))
+    self._rows[key] = encoded
+    self._bytes += len(encoded)''')
+    # Product namespaces must stay distinct inside the one accounted store.
+    # _open's full validation contract remains covered by its own runtime tests;
+    # this source proof establishes only the fixed producer/cache transport.
+    opened = function('typed_audit', '_open')
+    open_keys = [n for n in ast.walk(opened) if isinstance(n, ast.Assign)
+                 and any(isinstance(target, ast.Name) and target.id == 'key'
+                         for target in n.targets)]
+    if len(open_keys) != 1 or not same(open_keys[0],
+            "key = ('open', len(raw_packet), _sha(raw_packet), captured_assets is not None, assets)"):
+        raise fail('open cache product lacks its distinct complete key')
     cache = function('typed_audit', '_derive', 'DerivationCache')
+    key = statement(cache, "key = ('derive', len(identity), _sha(identity))")
     lookup = statement(cache, 'encoded = self._rows.get(key)')
     misses = [n for n in cache.body if isinstance(n, ast.If) and ast.unparse(n.test) == 'encoded is None']
     if len(misses) != 1:
@@ -12085,11 +12110,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
         derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
         encoded = _json({'derived': derived, 'raw': {name: _blob(value) for name, value in raw.items()},
                          'prepared_payload_json': prepared.payload_json})
-        if len(encoded) <= self.max_bytes:
-            while self._rows and (len(self._rows) >= self.max_entries or self._bytes + len(encoded) > self.max_bytes):
-                self._bytes -= len(self._rows.pop(next(iter(self._rows))))
-            self._rows[key] = encoded
-            self._bytes += len(encoded)''').body[0]
+        self._store(key, encoded)''').body[0]
     if dump(miss) != dump(expected_miss):
         raise fail('cache miss does not transport the complete fixed derivation')
     decoded = statement(cache, 'value = json.loads(encoded)')
@@ -12101,7 +12122,9 @@ def derive_native_shared_procedure(root: Path) -> dict:
                        ('derived', [miss.body[0], miss.body[1]]),
                        ('self._rows', [lookup, miss])):
         unchanged(cache, name, uses, after=None if name == 'self._rows' else lookup)
-    if not (cache.body.index(lookup) < cache.body.index(miss)
+    unchanged(cache, 'key', [key.targets[0], lookup, miss], after=key)
+    unchanged(cache, 'self._store', [miss])
+    if not (cache.body.index(key) < cache.body.index(lookup) < cache.body.index(miss)
             < cache.body.index(decoded) < cache.body.index(cache_return)):
         raise fail('cache product lookup/producer/return order changed')
     derived = function('typed_audit', '_derive_uncached')
@@ -12134,8 +12157,14 @@ def derive_native_shared_procedure(root: Path) -> dict:
         raise fail('typed shared context lacks the fixed payload')
     shared_fields = shared.func.value.args[0]
     prepared_reads = [field(shared_fields, key) for key in ('context', 'schema')]
-    if [ast.unparse(n) for n in prepared_reads] != [
-            "prepared.request()['payload']['context']", "prepared.request()['payload']['schema']"]:
+    # Target S7 intentionally compacts only the worker's shared-context schema.
+    # Prove that exact projection, including its source and excluded key set;
+    # an arbitrary comprehension/filter is not a supported producer shape.
+    expected_reads = [ast.parse(expression, mode='eval').body for expression in (
+        "prepared.request()['payload']['context']",
+        "{k: v for k, v in prepared.request()['payload']['schema'].items() "
+        "if k not in ('classes', 'slots')}")]
+    if [dump(n) for n in prepared_reads] != [dump(n) for n in expected_reads]:
         raise fail('typed context does not read its actual omission request')
     unchanged(derived, 'prepared', [assignment(derived, 'prepared').targets[0], *prepared_reads,
         field(result[0].value.elts[0], 'omission_request'), result[0].value.elts[2]])
@@ -12220,7 +12249,14 @@ def derive_native_shared_procedure(root: Path) -> dict:
                                'unit': 'required response-bearing stage roster, not model calls or observed answers'},
         'helper_commands': keys, 'helper_kind_count': len(keys),
         'model_calls_minimum': None, 'evidence': evidence,
+        'typed_worker_schema_projection': {
+            'excluded_keys': ['classes', 'slots'],
+            'scope': 'Exact inner shared-context projection only; not equality of complete native/API model inputs.'},
         'procedure_notes': [
+            {'description': 'Native outer requests separately carry the complete omission schema catalog and owner_classes. API S7 omission wires remove classes/slots and supply a separately trimmed occupied-owner context. These source-linked exposures differ; the roster derivation does not establish scientific equivalence or runtime delivery.',
+             'source': prefix + 'native_shared_stage.py:_Replay._request; '
+                       + prefix + 'typed_audit_runtime.py:_build_request_bytes; '
+                       + prefix + 'shared_generation.py:_schema_context'},
             {'description': 'The selected renderer describes initial validation/sealing, genuine core derivation, reconciliation after checked assembly, final validations, report draft and recorder-last. These are runtime obligations, not scanner-verified execution.',
              'source': paths['native_shared_render'] + ':instruction'},
             {'description': 'The phase observer owns ordered helper and protected-artifact admission; this scanner does not duplicate those checks.',

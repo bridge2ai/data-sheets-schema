@@ -1304,8 +1304,16 @@ class TestDiscovery(unittest.TestCase):
         through the directory setup_repo_imports puts on sys.path (#4054)."""
         self.assertEqual(set(self.facts["deterministic_commands"]),
                          {"src/data_sheets_schema/cli/healthsheet.py", "src/data_sheets_schema/cli/rocrate.py"})
-        self.assertEqual(self.facts["deterministic_sys_path"], [".claude/agents/scripts"])
+        # The selected native renderer now imports the explicit runtime schema.
+        # Its controller/authority dependencies add their actual frozen lookup
+        # roots to this static closure, without running a native controller.
+        self.assertEqual(self.facts["deterministic_sys_path"], [".claude/agents/scripts",
+            "notes/claudecode_direct", "notes/matched_cborg_2026-09-13",
+            "notes/matched_cborg_2026-09-13/native_controls"])
         closure = set(self.facts["deterministic_closure"])
+        for module in ('native_shared_render', 'native_execution_registration',
+                       'native_execution_authority', 'native_attribution_controller'):
+            self.assertIn(f'src/data_sheets_schema/{module}.py', closure)
         for rel in ("src/data_sheets_schema/healthsheet.py", "src/data_sheets_schema/rocrate_normalize.py",
                     ".claude/agents/scripts/rocrate_to_d4d.py", ".claude/agents/scripts/field_prioritizer.py"):
             self.assertIn(rel, closure)
@@ -5837,6 +5845,427 @@ class TestSelectedTemplateDerivation(unittest.TestCase):
                                         {'cases': [{'values': {'guide_version': 0}}]}, body)
 
 
+class TestNativeSharedRouteDerivation(unittest.TestCase):
+    """Native rendering is separately selected; it is never an API25 case."""
+    RENDER = 'src/data_sheets_schema/native_shared_render.py'
+    CONTRACT = 'src/data_sheets_schema/native_shared_contract.py'
+    CLI = 'src/data_sheets_schema/cli/prompt.py'
+
+    def fixture(self, directory):
+        root = Path(directory)
+        for path in (scan.RUNNER, self.RENDER, self.CONTRACT, self.CLI):
+            _write(root / path, (ROOT / path).read_text())
+        return root
+
+    def derive(self, root):
+        return scan.derive_native_shared_route(root, scan._tree(root / scan.RUNNER))
+
+    def test_actual_native_route_and_api_cases_are_distinct(self):
+        selected = self.derive(ROOT)
+        self.assertEqual((selected['field'], selected['default'], selected['enabled_values']),
+                         ('native_shared_generation_version', 0, [1]))
+        self.assertEqual((selected['condition'], selected['renderer'], selected['runtime']),
+                         ('generic_v10', 26, 'Claude Code (direct)'))
+        self.assertEqual(selected['companion_axes'], dict.fromkeys((
+            'native_source_attribution_version', 'shared_generation_version',
+            'api_playbook_version', 'receipt_completion_version', 'removal_repair_version'), 0))
+        self.assertIsNone(selected['model_calls_minimum'])
+        self.assertIn('not established', selected['scope'])
+        tree = scan._tree(ROOT / scan.RUNNER)
+        consts = scan._module_constants(ROOT / scan.RUNNER)
+        turns = scan.derive_followups(tree, consts['PHASES'], consts, root=ROOT)
+        receipt = turns['full_receipt_completion']['selection']['cases']
+        actual = {(row['values']['receipt_completion_version'], row['values']['shared_generation_version'],
+                   tuple(row['renderers']), tuple(row['conditions'])) for row in receipt}
+        self.assertEqual(actual, {(1, 0, (8,), ('generic_v7', 'generic_v8', 'generic_v9')),
+                                 (2, 1, (25,), ('generic_v10',)),
+                                 (3, 2, (27,), ('generic_v10_source_heading_routing_v1',
+                                                'generic_v10_source_heading_span_v1'))})
+        self.assertTrue(all(row['values'].get('native_shared_generation_version', 0) == 0
+                            and 26 not in row['renderers'] and row['runtime'] == 'api'
+                            for row in receipt))
+
+    def test_guard_and_delegate_mutations_cannot_claim_native_api_admission(self):
+        guard = "if getattr(spec, 'native_shared_generation_version', 0) or spec.render_version == 26:"
+        mutations = [
+            (scan.RUNNER, guard, guard.replace(' or ', ' and ')),
+            (scan.RUNNER, guard, guard.replace(', 0)', ', 1)')),
+            (scan.RUNNER, guard, guard.replace(', 0)', ', False)')),
+            (scan.RUNNER, "raise ValueError('native shared generation requires its separate native execution registration')", 'pass'),
+            (scan.RUNNER, "    " + guard + "\n        raise ValueError('native shared generation requires its separate native execution registration')",
+             "    dispatch(spec)\n    " + guard + "\n        raise ValueError('native shared generation requires its separate native execution registration')"),
+            (scan.RUNNER, 'validate_native_shared(self)', 'validate_native_shared(other)'),
+            (scan.RUNNER, 'validate_native_shared(self)', 'validate_native_shared = foreign\n        validate_native_shared(self)'),
+            (scan.RUNNER, 'return instruction(spec)', 'return instruction(other)'),
+            (scan.RUNNER, '24, 25, 26, 27)', '24, 25, 27)'),
+            (self.RENDER, "version not in (0, 1)", 'version not in (0, 1, 2)'),
+            (self.RENDER, 'spec.runtime != c.RUNTIME', 'spec.runtime == c.RUNTIME'),
+            (self.RENDER, "'api_playbook_version', 'receipt_completion_version',", "'api_playbook_version',"),
+            (self.RENDER, 'getattr(spec, key) != 0', 'getattr(spec, key) != 1'),
+            (self.RENDER, 'def validate_spec(spec):', '@foreign\ndef validate_spec(spec):'),
+            (self.RENDER, 'version = getattr(spec,', "spec.runtime = 'foreign'\n    version = getattr(spec,"),
+            (self.CONTRACT, 'RENDERER = 26', 'RENDERER = 25'),
+            (self.CLI, 'render_version=contract.RENDERER', 'render_version=25'),
+            (self.CLI, 'native_shared_generation_version=1', 'native_shared_generation_version=0'),
+            (self.CLI, 'bind_runtime(spec, runtime_declaration, max_draft_checks)', 'bind_runtime(other, runtime_declaration, max_draft_checks)'),
+            (self.CLI, 'bind_runtime(spec, runtime_declaration, max_draft_checks)', 'bind_runtime(spec, runtime_declaration, 1)'),
+            (self.CLI, 'text = spec.instruction', 'execute(spec)\n        text = spec.instruction'),
+            (self.CLI, "    raw = text.encode('utf-8')", "    execute(spec)\n    raw = text.encode('utf-8')"),
+            (self.CLI, 'captured = capture(selection)', 'captured = capture(other)'),
+            (self.CLI, '@prompt.command("render-native-shared")', '@prompt.command("other")'),
+        ]
+        for path, before, after in mutations:
+            with self.subTest(path=path, after=after), tempfile.TemporaryDirectory() as directory:
+                root = self.fixture(directory)
+                target = root / path; source = target.read_text(); self.assertIn(before, source)
+                _write(target, source.replace(before, after))
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    self.derive(root)
+
+    def test_native_disabled_api_invariant_is_guard_derived_not_name_based(self):
+        # Exercise the same reciprocal reduction with synthetic renamed fields
+        # and renderer values; no project or phase/version allowlist is used.
+        fixture = TestCorrelatedFollowupDerivation()
+        with tempfile.TemporaryDirectory() as directory:
+            root = fixture.root(directory); path = root / scan.RUNNER
+            source = path.read_text().replace('flow_version: int = 0',
+                'flow_version: int = 0\n    separate_version: int = 0')
+            source = source.replace("self.condition == 'generic_v3' and self.flow_version != 1",
+                "self.condition == 'generic_v3' and self.flow_version != 1 and self.separate_version != 1")
+            source = source.replace('def execute(spec, *, dry_run=False):', '''def execute(spec, *, dry_run=False):
+    if getattr(spec, 'separate_version', 0) or spec.render_version == 20:
+        raise ValueError('separate runtime')''')
+            _write(path, source)
+            actual = fixture.derive(root)['restore_full']['selection']['cases']
+            self.assertEqual({tuple(row['renderers']) for row in actual}, {(8,), (9,)})
+            _write(path, source.replace("getattr(spec, 'separate_version', 0) or", "getattr(spec, 'separate_version', 0) and"))
+            with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                fixture.derive(root)
+
+    def test_api_template_only_skips_a_proven_unreachable_native_delegate(self):
+        tree = scan._tree(ROOT / scan.RUNNER)
+        consts = scan._module_constants(ROOT / scan.RUNNER)
+        turns = scan.derive_followups(tree, consts['PHASES'], consts, root=ROOT)
+        selected = next(row['selection'] for row in turns.values()
+                        if row.get('selection', {}).get('field') == 'shared_generation_version')
+        # Match api_meaning's condition-specific adaptation. The union also
+        # includes API3/source-heading conditions with a different playbook.
+        selected = {**selected, 'cases': [case for case in selected['cases']
+                                         if 'generic_v10' in case['conditions']]}
+        self.assertTrue(selected['cases'])
+        prompt = consts['CONDITION_PROMPTS']['generic_v10']
+        body = (ROOT / prompt).read_text().split('## Prompt body', 1)[1]
+        from data_sheets_schema.api_playbook import adapt_template
+        adapted, _ = scan._selected_template(ROOT, tree, selected, body)
+        self.assertEqual(adapted, adapt_template(body, version=2))
+        source = (ROOT / scan.RUNNER).read_text()
+        guard = "getattr(spec, 'native_shared_generation_version', 0) or spec.render_version == 26"
+        for before, after in ((guard, guard.replace(' or ', ' and ')),
+                              (guard, guard.replace('== 26', '== 25')),
+                              ('return instruction(spec)', 'return instruction(other)')):
+            with self.subTest(after=after), self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                scan._selected_template(ROOT, ast.parse(source.replace(before, after)), selected, body)
+
+    def test_runtime_binding_presence_is_not_controller_acceptance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory)
+            row = self.derive(root)
+            self.assertFalse(row['runtime_binding']['source_present'])
+            self.assertIn('not established', row['runtime_binding']['basis'])
+            path = root / row['runtime_binding']['path']
+            _write(path, 'def bind_runtime(*args):\n    raise ValueError("unavailable")\n')
+            row = self.derive(root)
+            self.assertTrue(row['runtime_binding']['source_present'])
+            self.assertIn('not executed', row['runtime_binding']['basis'])
+            self.assertIn('not established', row['scope'])
+            _write(path, 'def invalid syntax')
+            with self.assertRaises(scan.ConfigError):
+                self.derive(root)
+
+
+class TestNativeSharedProcedure:
+    """Computed response-roster facts are distinct from runtime descriptions."""
+    MODULES = ('native_shared_stage', 'native_shared_receipts', 'typed_audit',
+               'audit_omissions', 'native_shared_render')
+
+    @staticmethod
+    def fixture(root):
+        for name in TestNativeSharedProcedure.MODULES:
+            relative = 'src/data_sheets_schema/' + name + '.py'
+            _write(root / relative, (ROOT / relative).read_text())
+        return root
+
+    def test_actual_roster_has_unknown_observed_and_model_counts(self):
+        row = scan.derive_native_shared_procedure(ROOT)
+        assert [stage['kind'] for stage in row['stages']] == ['receipt', 'worker', 'omission', 'integration']
+        assert [stage['cardinality'] for stage in row['stages']] == [
+            'R = 0 or 1', 'W, unknown until the original record is partitioned', '1', '1']
+        assert row['protocol_responses'] == {'formula': 'R + W + 2', 'minimum': None, 'actual_count': None,
+            'unit': 'required response-bearing stage roster, not model calls or observed answers'}
+        assert row['model_calls_minimum'] is None
+        assert 'every worker' in row['stages'][1]['requirement']
+        assert 'negative/redundant' in row['stages'][2]['requirement']
+        assert row['helper_kind_count'] == 17
+        assert row['helper_commands'] == ['chunk_check', 'source_scope', 'full_schema', 'full_terms',
+            'phase1_receipts', 'advance', 'derive_core', 'core_schema', 'pair', 'original_source_inventory',
+            'final_source_inventory', 'draft', 'audit_evidence', 'final_evidence', 'derive_final_core',
+            'final_scope', 'recorder']
+        assert 'no observed execution' in row['basis']
+        assert len(row['evidence']) == 6
+        assert all((ROOT / e.rsplit(':', 1)[0]).is_file() for e in row['evidence'])
+        assert row['typed_worker_schema_projection']['excluded_keys'] == ['classes', 'slots']
+        assert 'not equality' in row['typed_worker_schema_projection']['scope']
+        assert any('exposures differ' in note['description'] for note in row['procedure_notes'])
+
+    def test_exact_s7_schema_projection_and_mutations(self, tmp_path):
+        root = self.fixture(tmp_path / 'valid')
+        assert scan.derive_native_shared_procedure(root)['typed_worker_schema_projection']['excluded_keys'] == ['classes', 'slots']
+        mutations = (
+            ('if k not in ("classes", "slots")', 'if k not in ("classes", "slots", "enums")'),
+            ('if k not in ("classes", "slots")', 'if k in ("classes", "slots")'),
+            ('prepared.request()["payload"]["schema"].items()', 'foreign.request()["payload"]["schema"].items()'),
+            ('{k: v for k, v in prepared.request()["payload"]["schema"].items()\n                   if k not in ("classes", "slots")}',
+             'prepared.request()["payload"]["schema"]'),
+        )
+        for index, (before, after) in enumerate(mutations):
+            changed = self.fixture(tmp_path / str(index))
+            target = changed / 'src/data_sheets_schema/typed_audit.py'
+            raw = target.read_text()
+            assert raw.count(before) == 1, before
+            target.write_text(raw.replace(before, after))
+            with unittest.TestCase().assertRaisesRegex(scan.ConfigError, 'not derived'):
+                scan.derive_native_shared_procedure(changed)
+
+    def test_cardinality_and_input_mutations_fail_closed(self, tmp_path):
+        # Every private mutation fixture is retained below pytest's basetemp.
+        cases = [
+            ('native_shared_stage', 'if requested:', 'if not requested:'),
+            ('native_shared_stage', "kind='receipt', target_id='receipt'", "kind='worker', target_id='receipt'"),
+            ('native_shared_stage', 'self.p, None, self.catalogs)', 'self.p, b"answer", self.catalogs)'),
+            ('native_shared_stage', "nr._prepare(self.s, self.e, self.p, self.catalogs)['requested_paths']",
+             "foreign(self.s, self.e, self.p)['requested_paths']"),
+            ('native_shared_stage', "for worker in self.packet['plan']['workers']]",
+             "for worker in self.packet['plan']['workers'][:1]]"),
+            ('native_shared_stage', "for worker in self.packet['plan']['workers']]",
+             "for worker in self.packet['plan']['workers'] if worker['id'] == 'worker_0001']"),
+            ('native_shared_stage', "roster += [('omission', 'omission'), ('integration', 'integration')]",
+             "roster += [('integration', 'integration'), ('omission', 'omission')]"),
+            ('native_shared_stage', "roster += [('omission', 'omission'), ('integration', 'integration')]",
+             "roster += [('integration', 'integration')]"),
+            ('native_shared_stage', 'for kind, target in roster:', 'for kind, target in roster[:1]:'),
+            ('native_shared_stage', 'for kind, target in roster:', "roster.pop()\n        for kind, target in roster:"),
+            ('native_shared_stage', "raise ValueError('complete native stage roster exceeds declared submissions; no truncation')",
+             'roster = roster[:1]'),
+            ('native_shared_stage', 'original_full=self.p.full.raw,', 'original_full=other.raw,'),
+            ('native_shared_stage', "max_workers=limits['max_workers']", 'max_workers=1'),
+            ('native_shared_stage', 'from . import typed_audit as typed', 'from . import foreign as typed'),
+            ('native_shared_receipts', "'requested_paths': paths", "'requested_paths': paths[:1]"),
+            ('native_shared_receipts', 'paths = receipts.uncovered_receiptable_leaves(', 'paths = foreign('),
+            ('typed_audit', "batches.make_plan(raw[\"original_full\"].decode(\"utf-8\")", 'batches.make_plan("{}"'),
+            ('typed_audit', 'prepared = omissions._prepare(', 'prepared = foreign('),
+            ('typed_audit', '"omission_request": prepared.request()', '"omission_request": {}'),
+            ('audit_omissions', 'evidence.source_chunks_from_bytes(bundle, manifest)',
+             'evidence.source_chunks_from_bytes(bundle, other)'),
+            ('audit_omissions', 'for key, value in chunks.items()],',
+             'for key, value in chunks.items() if prior.get(key) == "extracted"],'),
+            ('audit_omissions', 'payload = {"policy": policy,',
+             'chunks = {}\n    payload = {"policy": policy,'),
+            ('native_shared_render', "result['recorder'] =", "result[spec.project] ="),
+            ('native_shared_render', "result['recorder'] =", "result['draft'] ="),
+        ]
+        for index, (module, before, after) in enumerate(cases):
+            root = self.fixture(tmp_path / str(index))
+            target = root / 'src/data_sheets_schema' / (module + '.py')
+            raw = target.read_text()
+            assert before in raw, (module, before)
+            target.write_text(raw.replace(before, after))
+            with unittest.TestCase().assertRaisesRegex(scan.ConfigError, 'not derived'):
+                scan.derive_native_shared_procedure(root)
+
+    def test_helper_kinds_come_from_actual_mapping(self, tmp_path):
+        root = self.fixture(tmp_path)
+        target = root / 'src/data_sheets_schema/native_shared_render.py'
+        target.write_text(target.read_text().replace("'chunk_check': (*cli", "'neutral_chunk_check': (*cli"))
+        row = scan.derive_native_shared_procedure(root)
+        assert row['helper_kind_count'] == 17
+        assert row['helper_commands'][0] == 'neutral_chunk_check'
+        assert 'chunk_check' not in row['helper_commands']
+
+    def refuse_producer_mutation(self, root, module, before, after):
+        self.fixture(root)
+        target = root / 'src/data_sheets_schema' / (module + '.py')
+        raw = target.read_text()
+        assert raw.count(before) == 1, (module, before)
+        target.write_text(raw.replace(before, after))
+        with unittest.TestCase().assertRaisesRegex(scan.ConfigError, 'not derived'):
+            scan.derive_native_shared_procedure(root)
+
+    def test_original_receipt_paths_overwritten_witness(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'native_shared_receipts',
+            "    return {'protocol': contract.NAME, 'stage': 'receipt',",
+            "    paths = []\n    return {'protocol': contract.NAME, 'stage': 'receipt',")
+
+    def test_original_native_packet_workers_filtered_witness(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'native_shared_stage', '        return packet\n',
+            "        packet['plan']['workers'] = packet['plan']['workers'][:1]\n        return packet\n")
+
+    def test_original_typed_producer_detached_witness(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'typed_audit',
+            'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)',
+            'derived, _, _ = foreign(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)')
+
+    def test_return_unpack_cannot_override_counted_receipt_field(self, tmp_path):
+        # Exact independent #4403 witness, preserving the original literal
+        # field and its otherwise unchanged local producer/use pair.
+        self.refuse_producer_mutation(tmp_path, 'native_shared_receipts',
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths,",
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths, **{'requested_paths': []},")
+
+    def test_return_dynamic_key_cannot_override_counted_receipt_field(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'native_shared_receipts',
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths,",
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths, 'requested_' + 'paths': [],")
+
+    def test_return_duplicate_literal_key_is_not_counted_authority(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'native_shared_receipts',
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths,",
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths, 'requested_paths': [],")
+
+    def test_counted_values_and_fixed_producer_delegates_cannot_escape(self, tmp_path):
+        # Source-only witnesses for the finite local-use/return joins. No
+        # mutated producer or runtime is imported or executed.
+        cases = [
+            ('native_shared_receipts', "    return {'protocol': contract.NAME, 'stage': 'receipt',",
+             "    paths.clear()\n    return {'protocol': contract.NAME, 'stage': 'receipt',"),
+            ('native_shared_receipts', "    return {'protocol': contract.NAME, 'stage': 'receipt',",
+             "    alias = paths\n    return {'protocol': contract.NAME, 'stage': 'receipt',"),
+            ('native_shared_stage', '        return packet\n', '        packet = foreign(packet)\n        return packet\n'),
+            ('native_shared_stage', '        return packet\n', '        foreign(packet)\n        return packet\n'),
+            ('native_shared_stage', '        return packet\n',
+             '        if selected:\n            return foreign()\n        return packet\n'),
+            ('native_shared_stage', "        roster = [('worker', worker['id']) for worker in self.packet['plan']['workers']]",
+             "        self.packet['plan']['workers'].clear()\n        roster = [('worker', worker['id']) for worker in self.packet['plan']['workers']]"),
+            ('typed_audit', 'project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))',
+             'project=project, limits=limits, **foreign(derived), limitations=list(LIMITATIONS)))'),
+            ('typed_audit', '    packet = _seal(dict(kind=PACKET,',
+             "    derived['plan']['workers'].clear()\n    packet = _seal(dict(kind=PACKET,"),
+            ('typed_audit', '    packet = _seal(dict(kind=PACKET,',
+             "    inputs['original_full'] = foreign()\n    packet = _seal(dict(kind=PACKET,"),
+            ('typed_audit', 'return _derive_uncached(inputs, schema_rows, project, limits)',
+             'return foreign(inputs, schema_rows, project, limits)'),
+            ('typed_audit', 'return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)',
+             'return derivations.foreign(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)'),
+            ('typed_audit', 'derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)',
+             'derived, raw, prepared = foreign(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)'),
+            ('typed_audit', "encoded = _json({'derived': derived, 'raw':",
+             "encoded = _json({'derived': foreign(derived), 'raw':"),
+            ('typed_audit', "return value['derived'], {name: _unblob(blob)",
+             "return foreign(value['derived']), {name: _unblob(blob)"),
+            ('typed_audit', '        value = json.loads(encoded)\n',
+             "        encoded = foreign(encoded)\n        value = json.loads(encoded)\n"),
+            ('typed_audit', '        encoded = self._rows.get(key)\n',
+             '        self._rows[key] = foreign()\n        encoded = self._rows.get(key)\n'),
+            ('typed_audit', '    return {"plan": plan, "omission_request": prepared.request(),',
+             '    plan["workers"] = plan["workers"][:1]\n    return {"plan": plan, "omission_request": prepared.request(),'),
+            ('typed_audit', '    return {"plan": plan, "omission_request": prepared.request(),',
+             '    prepared = foreign(prepared)\n    return {"plan": plan, "omission_request": prepared.request(),'),
+            ('typed_audit', 'def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):',
+             '_derive = foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):'),
+            ('typed_audit', 'def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):',
+             'DerivationCache = Foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):'),
+            ('audit_omissions', '    encoded = _json(payload)\n',
+             '    payload["chunks"] = payload["chunks"][:1]\n    encoded = _json(payload)\n'),
+            ('audit_omissions', '    return Prepared(encoded)\n',
+             '    encoded = foreign(encoded)\n    return Prepared(encoded)\n'),
+            ('audit_omissions', '                "payload": payload, "limitations": list(LIMITATIONS)}',
+             '                "payload": foreign(payload), "limitations": list(LIMITATIONS)}'),
+        ]
+        assert scan.derive_native_shared_procedure(ROOT)['protocol_responses']['formula'] == 'R + W + 2'
+        for index, (module, before, after) in enumerate(cases):
+            self.refuse_producer_mutation(tmp_path / str(index), module, before, after)
+
+    def test_unified_cache_store_and_product_keys_are_source_derived(self, tmp_path):
+        # The same copied implementation must be admitted before each causal
+        # source mutation. No cache implementation is imported or executed.
+        root = self.fixture(tmp_path / 'positive')
+        assert scan.derive_native_shared_procedure(root)['protocol_responses']['formula'] == 'R + W + 2'
+        cases = [
+            ("key = ('derive', len(identity), _sha(identity))",
+             "key = ('open', len(identity), _sha(identity))"),
+            ("key = ('open', len(raw_packet), _sha(raw_packet), captured_assets is not None, assets)",
+             "key = ('derive', len(raw_packet), _sha(raw_packet), captured_assets is not None, assets)"),
+            ("key = ('derive', len(identity), _sha(identity))",
+             "key = ('derive', len(identity), 'fixed')"),
+            ("key = ('open', len(raw_packet), _sha(raw_packet), captured_assets is not None, assets)",
+             "key = ('open', len(raw_packet), _sha(raw_packet), captured_assets is not None, ())"),
+            ('def _store(self, key, encoded):', 'def _store(self, encoded, key):'),
+            ('def _store(self, key, encoded):', '@foreign\n    def _store(self, key, encoded):'),
+            ('if len(encoded) > self.max_bytes:', 'if len(encoded) < self.max_bytes:'),
+            ('self._bytes -= len(previous)', 'self._bytes -= 0'),
+            ('self._rows[key] = encoded', 'self._rows[key] = foreign(encoded)'),
+            ('self._store(key, encoded)', 'self._store(key, b"{}")'),
+            ('self._store(key, encoded)', 'self._store(other, encoded)'),
+            ('        encoded = self._rows.get(key)\n',
+             '        self._store = foreign\n        encoded = self._rows.get(key)\n'),
+            ('        self._rows, self._bytes = {}, 0\n',
+             '        self._rows, self._bytes = {}, 0\n        self._store = foreign\n'),
+            ('def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):',
+             'DerivationCache._store = foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):'),
+        ]
+        for index, (before, after) in enumerate(cases):
+            self.refuse_producer_mutation(tmp_path / ('unified-' + str(index)),
+                                         'typed_audit', before, after)
+
+    def test_private_omission_route_still_uses_complete_public_constructor(self, tmp_path):
+        cases = [
+            ('audit_omissions', '    return _prepare(record=record,', '    return foreign(record=record,'),
+            ('audit_omissions', '    return _prepare(record=record, bundle=bundle, manifest=manifest, receipt=receipt,',
+             '    return _prepare(record=record, bundle=other, manifest=manifest, receipt=receipt,'),
+            ('audit_omissions', 'def _prepare(*, record: bytes,', '_prepare = foreign\n\ndef _prepare(*, record: bytes,'),
+            ('typed_audit', '_catalog=(_schema_reuse.for_snapshot(snapshot)', '_catalog=(foreign(snapshot)'),
+        ]
+        for index, (module, before, after) in enumerate(cases):
+            self.refuse_producer_mutation(tmp_path / str(index), module, before, after)
+
+    def test_producer_comments_and_descriptions_do_not_change_semantic_disclosure(self, tmp_path):
+        root = self.fixture(tmp_path)
+        path = root / 'src/data_sheets_schema/typed_audit.py'
+        path.write_text(path.read_text().replace(
+            '    """Capture a new packet; no saved response or self-reported success is trusted."""',
+            '    """An equivalent descriptive docstring."""\n    # A harmless source annotation.'))
+        assert scan.derive_native_shared_procedure(root) == scan.derive_native_shared_procedure(ROOT)
+
+    def test_description_is_not_an_inherited_phase_or_launch_validator(self, tmp_path):
+        root = self.fixture(tmp_path)
+        # No phase, attribution or execution modules in this structural fixture.
+        # Their linked obligations cannot be mislabeled checked runtime facts.
+        row = scan.derive_native_shared_procedure(root)
+        notes = ' '.join(note['description'] for note in row['procedure_notes'])
+        assert 'not scanner-verified execution' in notes
+        assert 'not a rewrite count' in notes
+        assert 'do not establish completion' in notes
+        assert row['model_calls_minimum'] is None
+
+    def test_four_actual_native_text_builders_are_model_facing(self):
+        surfaces, _ = _discovered()
+        for module in ('native_shared_render', 'native_shared_stage', 'native_shared_receipts', 'native_shared_contract'):
+            relative = 'src/data_sheets_schema/' + module + '.py'
+            assert surfaces.files[relative].role == 'model_facing'
+            planted, _ = _plant(relative, 'NATIVE_POLICY_TEST = "Always prefer CHORUS."')
+            assert any(h['match'] == 'CHORUS' and h['violation'] for h in planted), module
+
+    def test_report_adds_selected_roster_without_native_call_count(self):
+        result = _full_run()
+        row = result['api_meaning']['native_shared_route']['procedure']
+        assert row == scan.derive_native_shared_procedure(ROOT)
+        text = scan.render_markdown(result)
+        assert 'R + W + 2' in text
+        assert 'Actual count and model-call count: unknown' in text
+        assert '17 helper command kinds (not invocation counts)' in text
+        assert 'runtime enforcement is not proved by this scanner' in text
+        assert 'API phase construction: refused' in text
+
+
 class TestApiMeaning(unittest.TestCase):
     """The "api" section agrees with what the runtime does (#4022, #4025,
     #4055, #4057, #4058)."""
@@ -5947,10 +6376,13 @@ class TestApiMeaning(unittest.TestCase):
         (#4055). Nothing here reaches a provider: the run stops at the lock."""
         from data_sheets_schema import api_runner
         ex = self.meaning["audit_continuations"]["execute_refuses"]
-        self.assertEqual(ex["refused"], [19, 20, 21, 22, 23, 24])
-        for n in ex["refused"]:
+        self.assertEqual(ex["refused"], [19, 20, 21, 22, 23, 24, 26])
+        for n in (19, 20, 21, 22, 23, 24):
             with self.subTest(renderer=n), self.assertRaisesRegex(ValueError, "separately registered"):
                 api_runner.execute(self._spec_at(n))
+        from types import SimpleNamespace
+        with self.assertRaisesRegex(ValueError, 'separate native execution registration'):
+            api_runner.execute(SimpleNamespace(render_version=26, native_shared_generation_version=0))
         selected = {r for procedure in self.meaning.get('selected_procedures', {}).values()
                     for r in procedure['selection']['renderers']}
         allowed = max(r for r in self.meaning["audit_continuations"]["admitted_renderers"]
