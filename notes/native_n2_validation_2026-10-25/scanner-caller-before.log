@@ -1,0 +1,48 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ TestTheExitStatus.test_violations_are_exit_1 _________________
+.claude/skills/d4d-generation-specificity-audit/scan.py:13622: in _optional_turn_selection
+    return _simple_optional_turn_selection(tree, test)
+.claude/skills/d4d-generation-specificity-audit/scan.py:12870: in _simple_optional_turn_selection
+    raise fail()
+E   d4d_specificity_scan.ConfigError: api meaning not derived: which conditions make a follow-up turn (unvalidated optional gate `spec.receipt_completion_version`). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)
+
+During handling of the above exception, another exception occurred:
+.claude/skills/d4d-generation-specificity-audit/scan.py:13625: in _optional_turn_selection
+    return _correlated_turn_selection(tree, test)
+.claude/skills/d4d-generation-specificity-audit/scan.py:12979: in _correlated_turn_selection
+    raise fail('unsupported optional selector shape')
+E   d4d_specificity_scan.ConfigError: api meaning not derived: which conditions make a follow-up turn (unsupported optional selector shape). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)
+
+During handling of the above exception, another exception occurred:
+tests/test_generation_specificity_skill.py:440: in test_violations_are_exit_1
+    result = _full_run()
+tests/test_generation_specificity_skill.py:125: in _full_run
+    return scan.run(ROOT)
+.claude/skills/d4d-generation-specificity-audit/scan.py:14645: in run
+    meaning = api_meaning(root, facts)
+.claude/skills/d4d-generation-specificity-audit/scan.py:14357: in api_meaning
+    followups = derive_followups(tree, phases, consts, root=root)
+.claude/skills/d4d-generation-specificity-audit/scan.py:14059: in derive_followups
+    scopes = _plan_scopes(tree, consts, root=root)
+.claude/skills/d4d-generation-specificity-audit/scan.py:13798: in _plan_scopes
+    scopes = _local_plan_scopes(tree, consts, root=root)
+.claude/skills/d4d-generation-specificity-audit/scan.py:13686: in _local_plan_scopes
+    visit(value, None)
+.claude/skills/d4d-generation-specificity-audit/scan.py:13680: in visit
+    visit(node.left, gate)
+.claude/skills/d4d-generation-specificity-audit/scan.py:13681: in visit
+    visit(node.right, gate)
+.claude/skills/d4d-generation-specificity-audit/scan.py:13666: in visit
+    visit(node.body, gate_of(node.test))
+.claude/skills/d4d-generation-specificity-audit/scan.py:13659: in gate_of
+    selection = _optional_turn_selection(tree, test, root=root)
+.claude/skills/d4d-generation-specificity-audit/scan.py:13632: in _optional_turn_selection
+    return _delegated_turn_selection(tree, test, root)
+.claude/skills/d4d-generation-specificity-audit/scan.py:13406: in _delegated_turn_selection
+    raise fail('shared selector call guards/order changed')
+E   d4d_specificity_scan.ConfigError: api meaning not derived: which conditions make a follow-up turn (shared selector call guards/order changed). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)
+=========================== short test summary info ============================
+FAILED tests/test_generation_specificity_skill.py::TestTheExitStatus::test_violations_are_exit_1
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 57.26s

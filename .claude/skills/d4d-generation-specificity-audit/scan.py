@@ -13130,6 +13130,8 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
 
     This deliberately does not execute a validator, interpret arbitrary Python,
     or use a known renderer/condition table as a fallback.
+    Its receiver proof covers closed source shapes and finite read-only
+    adapters/getters, not arbitrary injected runtime objects or metaprogramming.
     """
     from itertools import product
     fail = lambda detail: _not_derived('which conditions make a follow-up turn', detail)
@@ -13300,11 +13302,38 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
     zero_body = zero.body[:-1]
     native_evidence = []
     native_domain = None
-    if len(zero_body) == 2:
+    native_axis = 'native_shared_generation_version'
+    caller_native = [n for n in init.body if isinstance(n, ast.If)
+                     and ast.unparse(n.test) == 'not self.' + native_axis]
+    helper_native = len(zero_body) == 2
+    if helper_native:
         native = zero_body.pop(0)
         expected = ast.parse("if getattr(spec, 'native_shared_generation_version', 0):\n    from .native_shared_render import validate_spec\n    validate_spec(spec)\n    return None").body[0]
         if dump(native) != dump(expected):
             raise fail('unsupported separate native dispatch')
+        if caller_native:
+            raise fail('native bypass placement is ambiguous')
+    if helper_native or caller_native:
+        magic = {'__getattribute__', '__getattr__', '__setattr__', '__delattr__'}
+        if (cls.bases or cls.keywords or [ast.unparse(d) for d in cls.decorator_list] != ['dataclass']
+                or any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                       and n.name in magic or isinstance(n, ast.Name) and n.id in magic
+                       and isinstance(n.ctx, (ast.Store, ast.Del)) for n in ast.walk(cls))):
+            raise fail('native receiver has unproved class or attribute-access behavior')
+        dataclass_imports = [n for n in tree.body if isinstance(n, ast.ImportFrom)
+            and n.level == 0 and n.module == 'dataclasses'
+            and any(a.name == 'dataclass' and (a.asname or a.name) == 'dataclass' for a in n.names)]
+        if len(dataclass_imports) != 1 or dataclass_imports[0].lineno >= cls.lineno:
+            raise fail('native receiver lacks its preceding stdlib dataclass import')
+        _require_followup_binding(RUNNER, tree, init, cls.decorator_list[0])
+        if (ast.unparse(init.args) != 'self' or init.decorator_list
+                or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                       and n.name == '__post_init__' for n in cls.body) != 1
+                or any(isinstance(n, ast.Name) and n.id == '__post_init__'
+                       and isinstance(n.ctx, (ast.Store, ast.Del)) for n in ast.walk(cls))):
+            raise fail('native caller lacks one effective instance initializer')
+        if any(isinstance(n, ast.Raise) for n in init.body):
+            raise fail('native caller raises before completing admission')
         native_path = root / 'src/data_sheets_schema/native_shared_render.py'
         native_tree = _tree(native_path)
         native_fn = _function(native_tree, 'validate_spec')
@@ -13314,7 +13343,6 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
                     or isinstance(n, ast.Name) and n.id == builtin and isinstance(n.ctx, (ast.Store, ast.Del))
                     for n in ast.walk(native_tree)):
                 raise fail('native selector builtin identity is shadowed')
-        native_axis = 'native_shared_generation_version'
         prefix = native_fn.body[:6]
         if (_params(native_fn) != ['spec'] or len(prefix) != 6
                 or not same(prefix[0], f'version = getattr(spec, {native_axis!r}, 0)')
@@ -13356,6 +13384,76 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
                or isinstance(n, ast.Name) and n.id == 'spec' and isinstance(n.ctx, (ast.Store, ast.Del))
                or _rebinding(n, 'spec', native_fn) for n in ast.walk(native_fn)):
             raise fail('native selector mutates its validated spec')
+        # The zero-companion fact must survive the rest of the validator.
+        # A receiver alias, reflective setter or exposed __dict__ is not a
+        # read-only use merely because it lacks a direct Attribute Store.
+        native_parents = _parents(native_fn)
+        declared_fields = {n.target.id for n in cls.body if isinstance(n, ast.AnnAssign)
+                           and isinstance(n.target, ast.Name)}
+        if any(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+               and n.name in declared_fields for n in cls.body):
+            raise fail('native selector field is shadowed by a descriptor or method')
+        if any(isinstance(n, (ast.Assign, ast.AugAssign))
+               and any(isinstance(t, ast.Name) and t.id in declared_fields
+                       for target in (n.targets if isinstance(n, ast.Assign) else [n.target])
+                       for t in ast.walk(target)) for n in cls.body):
+            raise fail('native selector field has a second class binding')
+
+        def literal_key_scope(call):
+            child = call
+            while id(child) in native_parents:
+                enclosing = native_parents[id(child)]
+                if isinstance(enclosing, ast.For):
+                    target, iterable = enclosing.target, enclosing.iter
+                    if not any(call is n for stmt in enclosing.body for n in ast.walk(stmt)):
+                        return False
+                elif isinstance(enclosing, (ast.DictComp, ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+                    if len(enclosing.generators) != 1 or enclosing.generators[0].is_async:
+                        return False
+                    target, iterable = enclosing.generators[0].target, enclosing.generators[0].iter
+                else:
+                    child = enclosing
+                    continue
+                if not isinstance(target, ast.Name) or target.id != 'key':
+                    return False
+                try:
+                    keys = ast.literal_eval(iterable)
+                except (ValueError, TypeError):
+                    return False
+                return (type(keys) is tuple and bool(keys)
+                    and all(type(key) is str and key in declared_fields for key in keys)
+                    and not any(isinstance(n, ast.Name) and n.id == 'key'
+                                and isinstance(n.ctx, (ast.Store, ast.Del)) and n is not target
+                                for n in ast.walk(enclosing)))
+            return False
+
+        for node in ast.walk(native_fn):
+            if not (isinstance(node, ast.Name) and node.id == 'spec' and isinstance(node.ctx, ast.Load)):
+                continue
+            parent = native_parents.get(id(node))
+            attribute_read = (isinstance(parent, ast.Attribute) and parent.value is node
+                and isinstance(parent.ctx, ast.Load) and parent.attr in declared_fields
+                and (isinstance(native_parents.get(id(parent)), (ast.Compare, ast.UnaryOp))
+                     or isinstance(native_parents.get(id(parent)), ast.Call)
+                        and ast.unparse(native_parents[id(parent)].func) in {'type', 'isinstance'}))
+            getattr_read = (isinstance(parent, ast.Call) and ast.unparse(parent.func) == 'getattr'
+                and len(parent.args) in (2, 3) and parent.args[0] is node and not parent.keywords
+                and (isinstance(parent.args[1], ast.Name) and parent.args[1].id == 'key' and literal_key_scope(parent)
+                     or isinstance(parent.args[1], ast.Constant) and type(parent.args[1].value) is str
+                        and parent.args[1].value in declared_fields))
+            if getattr_read:
+                outer = native_parents.get(id(parent))
+                # Captured scalar values may feed the checked comparisons,
+                # type tests and local bindings; never invoke/expose a bound
+                # method or obtain a mutable receiver view via the result.
+                getattr_read = (isinstance(outer, (ast.Compare, ast.DictComp))
+                    or isinstance(outer, ast.Call) and ast.unparse(outer.func) == 'type'
+                       and parent in outer.args
+                    or isinstance(outer, ast.Assign) and len(outer.targets) == 1
+                       and isinstance(outer.targets[0], ast.Name)
+                       and outer.targets[0].id in {'version', 'registration', 'value'})
+            if not (attribute_read or getattr_read):
+                raise fail('native selector exposes or indirectly mutates its spec')
         native_evidence = [f'{_rel(root, native_path)}:{native_fn.lineno}',
                            f'{_rel(root, native_path)}:{loop.lineno}']
     if len(zero_body) != 1 or not raising(zero_body[0]) or not isinstance(zero_body[0].test, ast.BoolOp) \
@@ -13400,8 +13498,20 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
     guarded = [call for call in calls if any(isinstance(n, ast.If) and ast.unparse(n.test) == 'self.' + axis
         and len(n.body) == 2 and n.body[0] in imports and isinstance(n.body[1], ast.Expr)
         and n.body[1].value is call and not n.orelse for n in init.body)]
-    final = [call for call in calls if isinstance(parent_map.get(id(call)), ast.Expr)
+    direct_final = [call for call in calls if isinstance(parent_map.get(id(call)), ast.Expr)
         and parent_map.get(id(parent_map[id(call)])) is init]
+    final = direct_final
+    if caller_native:
+        # N2 preserves the API-only selector: its final call is skipped at
+        # the caller only for the separately validated native domain. This
+        # exact two-statement branch is not arbitrary conditional admission.
+        if len(caller_native) != 1 or direct_final:
+            raise fail('native caller bypass lacks one exact final selector branch')
+        guard = caller_native[0]
+        final = [call for call in calls if not guard.orelse and len(guard.body) == 2
+                 and guard.body[0] in imports and isinstance(guard.body[1], ast.Expr)
+                 and guard.body[1].value is call]
+        native_evidence.append(f'api_runner.py:{guard.lineno}')
     if len(guarded) != 1 or len(final) != 1 or final[0].lineno <= guarded[0].lineno:
         raise fail('shared selector call guards/order changed')
 
@@ -13430,6 +13540,150 @@ def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
         if any(isinstance(n, ast.Attribute) and native_axis in attrs(n) and isinstance(n.ctx, (ast.Store, ast.Del))
                 and n.lineno > following.lineno for n in ast.walk(init)):
             raise fail('native selector changes after its domain validation')
+        if any(isinstance(n, ast.Name) and n.id == 'self' and isinstance(n.ctx, (ast.Store, ast.Del))
+               or _rebinding(n, 'self', init) for n in ast.walk(init)):
+            raise fail('constructor rebinds its validated receiver')
+        safe_methods = {}
+        receiver_methods = {n.name for n in cls.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                            and not any(isinstance(d, ast.Name) and d.id == 'property'
+                                        for d in n.decorator_list)}
+        receiver_properties = {n.name for n in cls.body if isinstance(n, ast.FunctionDef)
+            and any(isinstance(d, ast.Name) and d.id == 'property' for d in n.decorator_list)}
+        receiver_fields = set(declared_fields)
+        receiver_fields |= {n.attr for n in ast.walk(init) if isinstance(n, ast.Attribute)
+                            and isinstance(n.value, ast.Name) and n.value.id == 'self'
+                            and isinstance(n.ctx, ast.Store)}
+        method_templates = {
+            '_select_profile': '''def _select_profile(self) -> None:
+    from data_sheets_schema.profiles import select_profile
+    sel = select_profile(self.manifest)
+    self.profile, self.profile_basis = sel.name, sel.basis''',
+            'header_for_manifest': '''@staticmethod
+def header_for_manifest(manifest: Path | None) -> str:
+    if manifest is None:
+        return ('# Source manifest: not used (no manifest selected; '
+                'the bundle was passed explicitly)')
+    return f'# Source manifest: {manifest}' '''}
+        property_templates = {
+            'is_agentic': 'return self.runtime in AGENTIC_RUNTIMES',
+            'output_root': '''if self.shared_generation_version == 2:
+    return self._corpus_root / CONCAT_DIR
+from data_sheets_schema.corpus import relative_to_root
+return relative_to_root(CONCAT_DIR, self._corpus_root) if self._corpus_root is not None else CONCAT_DIR''',
+            'full_path': '''if self.out_dir:
+    return self.out_dir / f'{self.project}_d4d.yaml'
+return self.output_root / self.method / self.label / f'{self.project}_d4d.yaml' ''',
+            'core_path': '''if self.out_dir:
+    return self.out_dir / f'{self.project}_d4d_core.yaml'
+return self.output_root / f'{self.method}_core' / self.label / f'{self.project}_d4d_core.yaml' ''',
+            'report_path': '''if self.out_dir:
+    return self.out_dir / f'{self.project}_reconciliation.md'
+return self.output_root / f'{self.method}_core' / self.label / f'{self.project}_reconciliation.md' '''}
+        safe_properties = set()
+
+        def safe_property(name):
+            if name in safe_properties:
+                return True
+            if name not in property_templates:
+                return False
+            definitions = [n for n in cls.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                           and n.name == name]
+            if (len(definitions) != 1 or ast.unparse(definitions[0].args) != 'self'
+                    or [ast.unparse(d) for d in definitions[0].decorator_list] != ['property']):
+                raise fail('constructor property lacks one exact getter')
+            actual = definitions[0].body
+            if actual and isinstance(actual[0], ast.Expr) and isinstance(actual[0].value, ast.Constant) \
+                    and type(actual[0].value.value) is str:
+                actual = actual[1:]
+            if [dump(n) for n in actual] != [dump(n) for n in ast.parse(property_templates[name]).body]:
+                raise fail('constructor property lacks its exact harmless body')
+            if any(isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                   or isinstance(n, ast.alias) and (n.asname or n.name) == name
+                   or isinstance(n, ast.Attribute) and n.attr == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                   for n in ast.walk(cls)):
+                raise fail('constructor property is rebound')
+            safe_properties.add(name)
+            if name in {'full_path', 'core_path', 'report_path'}:
+                safe_property('output_root')
+            return True
+
+        for builtin in ('property', 'staticmethod'):
+            if any(_rebinding(n, builtin, init) or isinstance(n, ast.Name) and n.id == builtin
+                   and isinstance(n.ctx, (ast.Store, ast.Del)) for n in ast.walk(tree)):
+                raise fail('constructor descriptor builtin is rebound')
+
+        def safe_method_call(call):
+            name = call.func.attr
+            expected_calls = {'_select_profile': 'self._select_profile()',
+                              'header_for_manifest': 'self.header_for_manifest(self.manifest)'}
+            if name not in expected_calls or ast.unparse(call) != expected_calls[name]:
+                return False
+            if name not in safe_methods:
+                definitions = [n for n in cls.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                               and n.name == name]
+                expected = ast.parse(method_templates[name]).body[0]
+                if len(definitions) != 1 or dump(definitions[0]) != dump(expected):
+                    raise fail('constructor receiver method lacks its exact harmless body')
+                if any(isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                       or isinstance(n, ast.alias) and (n.asname or n.name) == name
+                       or isinstance(n, ast.Attribute) and n.attr == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                       for n in ast.walk(cls)):
+                    raise fail('constructor receiver method is rebound')
+                safe_methods[name] = True
+            return True
+
+        receipt_calls = [n for n in ast.walk(init) if isinstance(n, ast.Call)
+                         and ast.unparse(n) == 'registration(self)']
+        for call in receipt_calls:
+            _require_followup_binding(RUNNER, tree, init, call)
+            imported = ast.parse('from data_sheets_schema.receipt_completion import registration').body[0]
+            matches = [n for n in ast.walk(init) if dump(n) == dump(imported)]
+            if len(matches) != 1:
+                raise fail('constructor receipt validation lacks its exact import')
+            path = root / 'src/data_sheets_schema/receipt_completion.py'
+            receipt_tree = _tree(path)
+            adapter = _function(receipt_tree, 'registration')
+            effective_definition(receipt_tree, adapter, 'registration')
+            expected = ast.parse('''def registration(spec) -> dict:
+    from data_sheets_schema.receipt_completion_policy import parse_registration
+    if not isinstance(spec.receipt_completion_registration, str):
+        raise ValueError('receipt completion requires immutable registration JSON')
+    value = parse_registration(spec.receipt_completion_registration.encode('utf-8'), version=spec.receipt_completion_version)
+    if value['condition'] != spec.condition:
+        raise ValueError('receipt completion registration condition differs from RunSpec')
+    return value''').body[0]
+            if dump(adapter) != dump(expected):
+                raise fail('constructor receipt validator lacks its exact read-only adapter')
+            native_evidence.append(f'{_rel(root, path)}:{adapter.lineno}')
+
+        # Before final admission, the receiver may be inspected through
+        # attributes/type or handed to the proven validator/selectors only.
+        # Reject aliasing, __dict__ access and reflective mutation/escape.
+        for node in ast.walk(init):
+            if not (isinstance(node, ast.Name) and node.id == 'self' and isinstance(node.ctx, ast.Load)
+                    and node.lineno <= final[0].lineno):
+                continue
+            parent = parent_map.get(id(node))
+            attribute_read = (isinstance(parent, ast.Attribute) and parent.value is node
+                              and not parent.attr.startswith('__'))
+            if attribute_read:
+                outer = parent_map.get(id(parent))
+                if isinstance(outer, ast.Call) and outer.func is parent:
+                    attribute_read = safe_method_call(outer)
+                elif isinstance(parent.ctx, ast.Load):
+                    attribute_read = (safe_property(parent.attr) if parent.attr in receiver_properties
+                                      else parent.attr in receiver_fields and parent.attr not in receiver_methods)
+            type_read = False
+            if isinstance(parent, ast.Call) and ast.unparse(parent) == 'type(self)':
+                ancestor = parent
+                while id(ancestor) in parent_map and parent_map[id(ancestor)] is not init:
+                    ancestor = parent_map[id(ancestor)]
+                type_read = same(ancestor,
+                    "default_line = type(self).__dataclass_fields__['manifest_line'].default")
+            known_call = (isinstance(parent, ast.Call)
+                and (parent in calls or parent is following.value or parent in receipt_calls or type_read))
+            if not (attribute_read or known_call):
+                raise fail(f'constructor exposes or indirectly mutates its validated receiver at line {node.lineno}')
         # The reached validator rejects every positive native choice when
         # this requested API axis is positive. Its only surviving value is0.
         inactive_native[native_axis] = 0

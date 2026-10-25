@@ -1,0 +1,23 @@
+.F..F.                                                                   [100%]
+=================================== FAILURES ===================================
+_ TestNativeCallerSharedSelectorProof.test_legacy_helper_bypass_and_direct_final_call_remain_supported _
+tests/test_generation_specificity_skill.py:6043: in test_legacy_helper_bypass_and_direct_final_call_remain_supported
+    self.assert_api_cases(self.derive(root), native=True)
+tests/test_generation_specificity_skill.py:6006: in derive
+    return scan._delegated_turn_selection(scan._tree(root / scan.RUNNER),
+.claude/skills/d4d-generation-specificity-audit/scan.py:13570: in _delegated_turn_selection
+    raise fail('constructor exposes or indirectly mutates its validated receiver')
+E   d4d_specificity_scan.ConfigError: api meaning not derived: which conditions make a follow-up turn (constructor exposes or indirectly mutates its validated receiver). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)
+_ TestNativeCallerSharedSelectorProof.test_real_caller_cut_preserves_all_api_receipt_tuples _
+tests/test_generation_specificity_skill.py:6026: in test_real_caller_cut_preserves_all_api_receipt_tuples
+    self.assert_api_cases(self.derive(self.fixture(directory)), native=True)
+tests/test_generation_specificity_skill.py:6006: in derive
+    return scan._delegated_turn_selection(scan._tree(root / scan.RUNNER),
+.claude/skills/d4d-generation-specificity-audit/scan.py:13570: in _delegated_turn_selection
+    raise fail('constructor exposes or indirectly mutates its validated receiver')
+E   d4d_specificity_scan.ConfigError: api meaning not derived: which conditions make a follow-up turn (constructor exposes or indirectly mutates its validated receiver). The code that decides it changed shape; update the derivation in scan.py rather than reporting a fallback (#4025)
+------ generated xml file: /private/tmp/d4d-n2-scanner-repair-focused.xml ------
+=========================== short test summary info ============================
+FAILED tests/test_generation_specificity_skill.py::TestNativeCallerSharedSelectorProof::test_legacy_helper_bypass_and_direct_final_call_remain_supported
+FAILED tests/test_generation_specificity_skill.py::TestNativeCallerSharedSelectorProof::test_real_caller_cut_preserves_all_api_receipt_tuples
+2 failed, 4 passed in 31.77s

@@ -5983,6 +5983,277 @@ class TestNativeSharedRouteDerivation(unittest.TestCase):
                 self.derive(root)
 
 
+class TestNativeCallerSharedSelectorProof(unittest.TestCase):
+    """N2-R2: prove the caller cut without importing/running generation code."""
+    RENDER = 'src/data_sheets_schema/native_shared_render.py'
+    SHARED = 'src/data_sheets_schema/shared_generation.py'
+    MODES = 'src/data_sheets_schema/source_heading_runtime.py'
+    RECEIPTS = 'src/data_sheets_schema/receipt_completion.py'
+    FINAL = ('        if not self.native_shared_generation_version:\n'
+             '            from .shared_generation import select as select_shared\n'
+             '            select_shared(self)')
+    DIRECT = ('        from .shared_generation import select as select_shared\n'
+              '        select_shared(self)')
+    VALIDATE = ('        from .native_shared_render import validate_spec as validate_native_shared\n'
+                '        validate_native_shared(self)')
+
+    def fixture(self, directory):
+        root = Path(directory)
+        for path in (scan.RUNNER, self.RENDER, self.SHARED, self.MODES, self.RECEIPTS):
+            _write(root / path, (ROOT / path).read_text())
+        return root
+
+    def derive(self, root):
+        return scan._delegated_turn_selection(scan._tree(root / scan.RUNNER),
+            ast.parse('spec.receipt_completion_version', mode='eval').body, root)
+
+    def assert_api_cases(self, result, *, native):
+        actual = {(row['values']['receipt_completion_version'], row['values']['shared_generation_version'],
+                   tuple(row['renderers']), tuple(row['conditions'])) for row in result['cases']}
+        self.assertEqual(actual, {(1, 0, (8,), ('generic_v7', 'generic_v8', 'generic_v9')),
+                                 (2, 1, (25,), ('generic_v10',)),
+                                 (3, 2, (27,), ('generic_v10_source_heading_routing_v1',
+                                                'generic_v10_source_heading_span_v1'))})
+        self.assertTrue(all(row['runtime'] == 'api' and 26 not in row['renderers'] for row in result['cases']))
+        if native:
+            self.assertTrue(all(row['values']['native_shared_generation_version'] == 0
+                                for row in result['cases']))
+        else:
+            self.assertTrue(all('native_shared_generation_version' not in row['values']
+                                for row in result['cases']))
+
+    def test_real_caller_cut_preserves_all_api_receipt_tuples(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.assert_api_cases(self.derive(self.fixture(directory)), native=True)
+
+    def test_legacy_helper_bypass_and_direct_final_call_remain_supported(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory)
+            source = (root / scan.RUNNER).read_text()
+            self.assertIn(self.FINAL, source)
+            _write(root / scan.RUNNER, source.replace(self.FINAL, self.DIRECT))
+            helper = (root / self.SHARED).read_text()
+            original = '    if not version:\n'
+            self.assertIn(original, helper)
+            helper = helper.replace(original, original +
+                "        if getattr(spec, 'native_shared_generation_version', 0):\n"
+                '            from .native_shared_render import validate_spec\n'
+                '            validate_spec(spec)\n'
+                '            return None\n', 1)
+            _write(root / self.SHARED, helper)
+            self.assert_api_cases(self.derive(root), native=True)
+
+    def test_no_native_constructor_retains_direct_api_selection(self):
+        # A standalone API constructor, with the actual shared selector and
+        # its finite condition/domain declarations, needs no native proof.
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory)
+            source = (root / scan.RUNNER).read_text()
+            tree = ast.parse(source)
+            names = {'AGENTIC_RUNTIMES', 'SOURCE_HEADING_CONDITIONS',
+                     'RECEIPT_CONDITIONS', 'CONDITION_PROMPTS'}
+            constants = '\n'.join(ast.unparse(n) for n in tree.body if isinstance(n, ast.Assign)
+                and any(isinstance(t, ast.Name) and t.id in names for t in n.targets))
+            start = source.index('        if type(self.shared_generation_version)')
+            end = source.index('        self._chunk_check_uses_manifest', start)
+            guards = source[start:end].replace(' and self.native_shared_generation_version != 1', '')
+            minimal = constants + '''
+class RunSpec:
+    shared_generation_version: int = 0
+    api_playbook_version: int = 0
+    receipt_completion_version: int = 0
+    removal_repair_version: int = 0
+    native_source_attribution_version: int = 0
+    def __post_init__(self):
+        if self.render_version not in (8, 25, 27):
+            raise ValueError('unsupported renderer')
+''' + guards + self.DIRECT + '''
+    @property
+    def is_agentic(self):
+        return self.runtime in AGENTIC_RUNTIMES
+def execute(spec):
+    pass
+'''
+            self.assertNotIn('native_shared_generation_version', minimal)
+            _write(root / scan.RUNNER, minimal)
+            self.assert_api_cases(self.derive(root), native=False)
+
+    def test_caller_guard_shape_order_and_binding_mutations_refuse(self):
+        replacements = [
+            (self.FINAL, self.FINAL.replace('if not self.', 'if self.')),
+            (self.FINAL, self.FINAL.replace('if not self.native_shared_generation_version:',
+                                           'if not self.native_shared_generation_version or extra:')),
+            (self.FINAL, self.FINAL.replace('if not self.native_shared_generation_version:',
+                                           'if self.native_shared_generation_version == 0:')),
+            (self.FINAL, self.FINAL.replace('if not self.native_shared_generation_version:',
+                                           'if not self.shared_generation_version:')),
+            (self.FINAL, self.FINAL + '\n        else:\n            pass'),
+            (self.FINAL, self.FINAL.replace('            select_shared(self)',
+                                           '            foreign()\n            select_shared(self)')),
+            (self.FINAL, self.FINAL.replace('select_shared(self)', 'select_shared(other)')),
+            (self.FINAL, self.FINAL.replace('select_shared(self)',
+                                           'select_shared = foreign\n            select_shared(self)')),
+            (self.FINAL, self.FINAL + '\n' + self.FINAL),
+            (self.VALIDATE, self.VALIDATE.replace('validate_native_shared(self)', 'validate_native_shared(other)')),
+            (self.VALIDATE, self.VALIDATE.replace('validate_native_shared(self)',
+                                               'validate_native_shared = foreign\n        validate_native_shared(self)')),
+            (self.VALIDATE, '        pass'),
+            (self.VALIDATE, '        if False:\n' + '\n'.join('    ' + line for line in self.VALIDATE.splitlines())),
+            (self.VALIDATE, '        try:\n' + '\n'.join('    ' + line for line in self.VALIDATE.splitlines())
+                 + '\n        except ValueError:\n            pass'),
+            ('native_shared_generation_version: int = 0', 'native_shared_generation_version: bool = False'),
+            ('native_shared_generation_version: int = 0', 'native_shared_generation_version: int = 1'),
+            ('def __post_init__(self)', 'def __post_init__(other)'),
+            ('    def __post_init__(self)', '    @foreign\n    def __post_init__(self)'),
+            ('    def _select_profile(self)', '    def __post_init__(self):\n        pass\n\n    def _select_profile(self)'),
+            ('    def _select_profile(self)', '    __post_init__ = foreign\n\n    def _select_profile(self)'),
+            ('        sel = select_profile(self.manifest)',
+             '        self.native_shared_generation_version = 1\n        sel = select_profile(self.manifest)'),
+            ('    @staticmethod\n    def header_for_manifest', '    @foreign\n    def header_for_manifest'),
+            ('        return self.runtime in AGENTIC_RUNTIMES',
+             "        setattr(self, 'native_shared_generation_version', 1)\n        return self.runtime in AGENTIC_RUNTIMES"),
+        ]
+        for before, after in replacements:
+            with self.subTest(after=after), tempfile.TemporaryDirectory() as directory:
+                root = self.fixture(directory); source = (root / scan.RUNNER).read_text()
+                self.assertIn(before, source)
+                _write(root / scan.RUNNER, source.replace(before, after))
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    self.derive(root)
+
+    def test_properties_and_receipt_adapter_cannot_invalidate_receiver_facts(self):
+        mutations = [
+            (scan.RUNNER, self.FINAL, '        self.evil\n' + self.FINAL),
+            (scan.RUNNER, '        return self.output_root / self.method / self.label /',
+             "        self.native_shared_generation_version = 1\n        return self.output_root / self.method / self.label /"),
+            (self.RECEIPTS, "    value = parse_registration(spec.receipt_completion_registration.encode('utf-8'),",
+             "    spec.native_shared_generation_version = 1\n    value = parse_registration(spec.receipt_completion_registration.encode('utf-8'),"),
+            (self.RECEIPTS, 'def registration(spec) -> dict:', '@foreign\ndef registration(spec) -> dict:'),
+        ]
+        evil = ("\n    @property\n    def evil(self):\n"
+                "        self.native_shared_generation_version = 1\n        return 0\n")
+        for path, before, after in mutations:
+            with self.subTest(after=after), tempfile.TemporaryDirectory() as directory:
+                root = self.fixture(directory); source = (root / path).read_text()
+                self.assertIn(before, source)
+                source = source.replace(before, after)
+                if after.startswith('        self.evil'):
+                    source = source.replace('    def _select_profile(self)', evil + '\n    def _select_profile(self)')
+                _write(root / path, source)
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    self.derive(root)
+
+    def test_native_receiver_class_cannot_replace_attribute_access(self):
+        replacements = [
+            ('class RunSpec:', 'class RunSpec(Foreign):'),
+            ('class RunSpec:', 'class RunSpec(metaclass=Foreign):'),
+            ('@dataclass\nclass RunSpec:', '@foreign\nclass RunSpec:'),
+            ('from dataclasses import dataclass, field', 'from foreign import dataclass, field'),
+            ('@dataclass\nclass RunSpec:', 'dataclass = foreign\n@dataclass\nclass RunSpec:'),
+            ('    def _select_profile(self)',
+             '    native_shared_generation_version = property(foreign)\n\n    def _select_profile(self)'),
+        ]
+        for name in ('__getattribute__', '__getattr__', '__setattr__', '__delattr__'):
+            replacements.append(('    def _select_profile(self)',
+                f'    def {name}(self, *args):\n        return foreign(self, *args)\n\n    def _select_profile(self)'))
+        for before, after in replacements:
+            with self.subTest(after=after), tempfile.TemporaryDirectory() as directory:
+                root = self.fixture(directory); source = (root / scan.RUNNER).read_text()
+                self.assertIn(before, source)
+                _write(root / scan.RUNNER, source.replace(before, after))
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    self.derive(root)
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory); source = (root / scan.RUNNER).read_text()
+            line = 'from dataclasses import dataclass, field\n'
+            self.assertIn(line, source)
+            _write(root / scan.RUNNER, source.replace(line, '') + '\n' + line)
+            with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                self.derive(root)
+
+    def test_native_validator_cannot_read_an_unproved_property(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory)
+            self.assert_api_cases(self.derive(root), native=True)
+            source = (root / scan.RUNNER).read_text()
+            evil = ("    @property\n    def evil(self):\n"
+                    "        self.receipt_completion_version = 2\n        return False\n\n")
+            _write(root / scan.RUNNER, source.replace('    def _select_profile(self)',
+                                                    evil + '    def _select_profile(self)'))
+            native = (root / self.RENDER).read_text()
+            _write(root / self.RENDER, native.replace('    return doc\n',
+                "    if spec.evil != False:\n        raise ValueError('extra restriction')\n    return doc\n"))
+            with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                self.derive(root)
+        for field in ('native_shared_generation_version', 'receipt_completion_version', 'runtime'):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                root = self.fixture(directory); source = (root / scan.RUNNER).read_text()
+                shadow = f'    @property\n    def {field}(self):\n        return 0\n\n'
+                _write(root / scan.RUNNER, source.replace('    def _select_profile(self)',
+                                                        shadow + '    def _select_profile(self)'))
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    self.derive(root)
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory); source = (root / scan.RUNNER).read_text()
+            source = source.replace(self.VALIDATE + '\n', '')
+            source = source.replace(self.FINAL, self.VALIDATE + '\n' + self.FINAL)
+            _write(root / scan.RUNNER, source)
+            with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                self.derive(root)
+
+    def test_validated_receiver_cannot_change_or_escape_before_final_call(self):
+        mutations = [
+            'self = other', 'self.native_shared_generation_version = 1',
+            "setattr(self, 'native_shared_generation_version', 1)",
+            "delattr(self, 'native_shared_generation_version')",
+            "self.__dict__['native_shared_generation_version'] = 1",
+            "vars(self)['native_shared_generation_version'] = 1",
+            "getattr(self, '__dict__')['native_shared_generation_version'] = 1",
+            'alias = self\n        alias.native_shared_generation_version = 1',
+            'foreign(self)', 'self.mutate()', 'alias = self._select_profile\n        alias()',
+            'self._select_profile.__self__.native_shared_generation_version = 1',
+            'foreign(self._select_profile)', 'self.foreign_mutator.__call__()',
+            'alias = self.__class__\n        alias.__getattribute__ = foreign',
+            'alias = type(self)\n        alias.__getattribute__ = foreign',
+            'self._select_profile = foreign', 'return', "raise ValueError('stopped')",
+        ]
+        for statement in mutations:
+            with self.subTest(statement=statement), tempfile.TemporaryDirectory() as directory:
+                root = self.fixture(directory); source = (root / scan.RUNNER).read_text()
+                _write(root / scan.RUNNER, source.replace(self.FINAL, '        ' + statement + '\n' + self.FINAL))
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    self.derive(root)
+
+    def test_native_zero_companion_proof_cannot_be_weakened_or_invalidated(self):
+        replacements = [
+            ('version not in (0, 1)', 'version not in (0, 1, 2)'),
+            ("'api_playbook_version', 'receipt_completion_version',", "'api_playbook_version',"),
+            ("'shared_generation_version',", ''),
+            ('getattr(spec, key) != 0', 'getattr(spec, key) != 1'),
+            ('    for key in (\'native_source_attribution_version\'',
+             "    if False:\n        return None\n    for key in ('native_source_attribution_version'"),
+        ]
+        for statement in ('spec = other', 'spec.receipt_completion_version = 2',
+                          "setattr(spec, 'receipt_completion_version', 2)",
+                          "spec.__dict__['receipt_completion_version'] = 2",
+                          "getattr(spec, '__dict__')['receipt_completion_version'] = 2",
+                          "key = '__dict__'\n    getattr(spec, key)['receipt_completion_version'] = 2",
+                          'alias = spec.__class__\n    alias.__getattribute__ = foreign',
+                          'alias = spec.mutate\n    alias()',
+                          "getattr(spec, 'foreign_mutator')()",
+                          "getattr(spec, 'project')()",
+                          "foreign(getattr(spec, 'project'))",
+                          'alias = spec\n    alias.receipt_completion_version = 2', 'foreign(spec)'):
+            replacements.append(('    return doc\n', '    ' + statement + '\n    return doc\n'))
+        for before, after in replacements:
+            with self.subTest(after=after), tempfile.TemporaryDirectory() as directory:
+                root = self.fixture(directory); source = (root / self.RENDER).read_text()
+                self.assertIn(before, source)
+                _write(root / self.RENDER, source.replace(before, after))
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    self.derive(root)
+
+
 class TestNativeSharedProcedure:
     """Computed response-roster facts are distinct from runtime descriptions."""
     MODULES = ('native_shared_stage', 'native_shared_receipts', 'typed_audit',
