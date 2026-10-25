@@ -37,12 +37,13 @@ files:
   .claude/commands/d4d-uniform-rules-v2.md:
     body_sha256: null
     bytes: 29867
-    pinned_at_commit: dfe54586e3988e83079dcbb1d5deda01dc4861c9
+    pinned_at_commit: 6a0f8acfed6d58fac8747d891b8a05975534a5c5
     pinned_blob_path: .claude/commands/d4d-uniform-rules-v2.md
     pinned_in_repository: /private/tmp/d4d-pr5093
-    pinned_on: '2026-10-23'
-    reason: "R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23): closed to confidentiality_level and hipaa_compliant, criteria inline, precedence, tier and tier-name rules, HIPAA de-identification (#5048, #5097\u2013#5099, #5102)."
-    sha256: cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f
+    pinned_on: '2026-10-25'
+    reason: "D30 R9 criteria-defined enumerations (#5048, #5097\u2013#5099, #5102), D38 American\
+      \ spelling"
+    sha256: 22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e
     superseded:
     - pinned_on: '2026-10-03'
       reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
@@ -54,6 +55,12 @@ files:
         at the generic_v10 boundary (#5048); preserve v8/v9 prompt digests unchanged.
       retired_on: '2026-10-23'
       sha256: 5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129
+    - pinned_on: '2026-10-23'
+      reason: "R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23):\
+        \ closed to confidentiality_level and hipaa_compliant, criteria inline, precedence,\
+        \ tier and tier-name rules, HIPAA de-identification (#5048, #5097\u2013#5099, #5102)."
+      retired_on: '2026-10-25'
+      sha256: cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f
   src/download/prompts/api_playbook_v1.md:
     body_sha256: ce2f644cad14496c2cb4684fc371fca4a2409268f793061c47e00087069038f6
     bytes: 4558
@@ -133,14 +140,15 @@ files:
       retired_on: '2026-08-13'
       sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
   src/download/prompts/d4d_generic_arm_prompt_v10.md:
-    body_sha256: 3bf4cebcaa0509db0b4a84a5d88cd8a140902dcfb33f3d1400108ca12ef73744
+    body_sha256: d2987be77291daa724f671a0b35622211f00365916ba24eda4bba366c95b27e0
     bytes: 32568
-    pinned_at_commit: dfe54586e3988e83079dcbb1d5deda01dc4861c9
+    pinned_at_commit: 6a0f8acfed6d58fac8747d891b8a05975534a5c5
     pinned_blob_path: src/download/prompts/d4d_generic_arm_prompt_v10.md
     pinned_in_repository: /private/tmp/d4d-pr5093
-    pinned_on: '2026-10-23'
-    reason: "R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23): closed to confidentiality_level and hipaa_compliant, criteria inline, precedence, tier and tier-name rules, HIPAA de-identification (#5048, #5097\u2013#5099, #5102)."
-    sha256: 95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99
+    pinned_on: '2026-10-25'
+    reason: "D30 R9 criteria-defined enumerations (#5048, #5097\u2013#5099, #5102), D38 American\
+      \ spelling"
+    sha256: ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db
     superseded:
     - pinned_on: '2026-10-03'
       reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
@@ -152,6 +160,12 @@ files:
         at the generic_v10 boundary (#5048); preserve v8/v9 prompt digests unchanged.
       retired_on: '2026-10-23'
       sha256: 7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb
+    - pinned_on: '2026-10-23'
+      reason: "R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23):\
+        \ closed to confidentiality_level and hipaa_compliant, criteria inline, precedence,\
+        \ tier and tier-name rules, HIPAA de-identification (#5048, #5097\u2013#5099, #5102)."
+      retired_on: '2026-10-25'
+      sha256: 95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99
   src/download/prompts/d4d_generic_arm_prompt_v2.md:
     body_sha256: 6b639abb906c44af91a5b3a7f6391da3fc6dd8f039de9e7d6544858e1fb17410
     bytes: 10099
