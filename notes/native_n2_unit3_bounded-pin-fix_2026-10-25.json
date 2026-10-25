@@ -1,0 +1,34 @@
+{
+  "archived_source": "a33d80d84c70cc9ee557f15d6e34fa73fc14f153",
+  "bounded_pin_fix": "e81da8b9852ce49a3af4e377b7b1cef91b4d1ee0",
+  "files": [
+    {
+      "bytes": 32469,
+      "path": "src/data_sheets_schema/native_permission_probe.py",
+      "sha256": "831fc50ab37100bdc32a9fab67de5a50c6d1a29d7888231acc44f9da07fed282"
+    },
+    {
+      "bytes": 6853,
+      "path": "src/data_sheets_schema/native_probe_provider.py",
+      "sha256": "6078a530e699e6b3d0fd75218fbf8f622be24add1b0f99c2d0297ec2b8d1ee6f"
+    },
+    {
+      "bytes": 4258,
+      "path": "src/data_sheets_schema/native_generation.py",
+      "sha256": "f56631e2b819db18da577de4dcf0eafd8f6b01ce4e7f3e9b9f1689d601dacad2"
+    },
+    {
+      "bytes": 22713,
+      "path": "tests/test_native_permission_probe.py",
+      "sha256": "67b5770b1149e2ab541e0726ced13f597f5dd65d9fd2bb2f41fd18bff2e647be"
+    },
+    {
+      "bytes": 14386,
+      "path": "tests/test_native_subscription_guard.py",
+      "sha256": "c43e3edfa14e396cb9ba307a6b7914b673a83c75428f7f822fe359306e1e188b"
+    }
+  ],
+  "kind": "offline_native_n2_unit3_recovery",
+  "scope": "source recovery only; no executable, account, provider or launch validation",
+  "stage": "bounded-pin-fix"
+}

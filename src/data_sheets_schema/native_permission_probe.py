@@ -1,6 +1,7 @@
 """Produce existing native permission manifests from actual process evidence.
 
-#4760, 2026-10-20. No simulator, executable discovery or provider fallback.
+#4760/#4759, 2026-10-20. Includes offline retained-binary verification.
+No simulator, executable discovery or provider fallback.
 Calling produce_saved_probe is an explicit live-binary action; offline tests
 must mock its process boundary and must not call the registered native binary.
 """
@@ -11,9 +12,11 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import selectors
 import signal
 import subprocess
+import tempfile
 import time
 
 from .native_subscription_guard import canonical, read_regular, sha, strict_json
@@ -21,6 +24,156 @@ from .native_probe_provider import local_provider
 
 MAX_STREAM = 8 * 1024 * 1024
 MAX_PROBE_SECONDS = 600
+
+
+def _bounded_binary_check(argv, *, stdin, capture_output, timeout, check, env, cwd):
+    """Concurrent bounded capture and process-group cleanup for offline checks."""
+    if stdin != subprocess.DEVNULL or capture_output is not True or check is not False:
+        raise ValueError("binary checks require closed stdin and explicit result inspection")
+    deadline = time.monotonic() + timeout
+    process = None
+    output = {"stdout": bytearray(), "stderr": bytearray()}
+    try:
+        with selectors.DefaultSelector() as selector:
+            process = subprocess.Popen(
+                argv, stdin=stdin, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env=env, cwd=cwd, start_new_session=True)
+            for name in output:
+                stream = getattr(process, name)
+                os.set_blocking(stream.fileno(), False)
+                selector.register(stream, selectors.EVENT_READ, name)
+            while selector.get_map() or process.poll() is None:
+                if time.monotonic() >= deadline:
+                    raise subprocess.TimeoutExpired(argv, timeout)
+                for key, _ in selector.select(timeout=min(0.02, max(0, deadline - time.monotonic()))):
+                    raw = os.read(key.fd, 4097 - len(output[key.data]))
+                    if not raw:
+                        selector.unregister(key.fileobj)
+                    else:
+                        if len(output[key.data]) + len(raw) > 4096:
+                            raise ValueError("binary check output exceeds its byte bound")
+                        output[key.data].extend(raw)
+            return subprocess.CompletedProcess(
+                argv, process.returncode, bytes(output["stdout"]), bytes(output["stderr"]))
+    finally:
+        try:
+            _terminate(process)
+        finally:
+            if process is not None:
+                for stream in (process.stdout, process.stderr):
+                    if stream is not None:
+                        stream.close()
+
+
+def verify_retained_binary(pins, *, allow_resolved_symlink=False,
+                           require_macho=True, check_version=False,
+                           check_codesign=False, runner=None, timeout_seconds=10):
+    """Verify #4759 retained executable pins without launching by default.
+
+    ``pins`` is a registration's runtime.executable block. Static verification
+    never discovers a binary or invokes one. Explicit version/signature flags
+    enable a bounded process-group runner; offline unit tests inject mocks.
+    A supplied runner replaces that boundary and must enforce equivalent limits.
+    Only ``--version`` and the system codesign verifier are allowed.
+    A Mach-O magic check identifies a format, not executable compatibility.
+    No result grants permission to run a generation or replaces its registration.
+    """
+    from .native_execution_registration import executable_identity
+
+    if (not isinstance(pins, dict)
+            or not {"path", "sha256", "version"} <= set(pins)
+            or set(pins) - {"path", "sha256", "version", "init_version"}):
+        raise ValueError("binary pins require path, sha256 and version")
+    if (not isinstance(pins["sha256"], str)
+            or re.fullmatch(r"[a-f0-9]{64}", pins["sha256"]) is None):
+        raise ValueError("binary SHA256 must be an exact lowercase digest")
+    if (not isinstance(pins["version"], str) or not pins["version"].strip()
+            or any(ord(char) < 32 or ord(char) == 127 for char in pins["version"])):
+        raise ValueError("binary version must be a nonempty single-line pin")
+    for flag in (allow_resolved_symlink, require_macho, check_version, check_codesign):
+        if type(flag) is not bool:
+            raise ValueError("binary verification options must be booleans")
+    if (type(timeout_seconds) not in (int, float)
+            or not 0 < timeout_seconds <= 60):
+        raise ValueError("binary check timeout must be within (0, 60] seconds")
+    if runner is None:
+        runner = _bounded_binary_check
+    if not isinstance(pins["path"], str) or not pins["path"]:
+        raise ValueError("binary path must be an absolute path")
+    selected = Path(pins["path"])
+    if not selected.is_absolute() or ".." in selected.parts:
+        raise ValueError("binary path must be absolute without parent traversal")
+    resolved = selected.resolve(strict=True)
+    if resolved != selected and not allow_resolved_symlink:
+        raise ValueError("binary symlink requires explicit resolved-path permission")
+    if not resolved.is_file():
+        raise ValueError("retained binary must be a regular executable file")
+
+    def capture():
+        if selected.resolve(strict=True) != resolved:
+            raise ValueError("retained binary path changed during verification")
+        value = executable_identity(resolved)
+        if value["sha256"] != pins["sha256"]:
+            raise ValueError("retained binary differs from registered SHA256")
+        return value
+
+    observed = capture()
+    with resolved.open("rb") as stream:
+        magic = stream.read(4)
+    macho = magic in {
+        b"\xfe\xed\xfa\xce", b"\xce\xfa\xed\xfe",
+        b"\xfe\xed\xfa\xcf", b"\xcf\xfa\xed\xfe",
+        b"\xca\xfe\xba\xbe", b"\xbe\xba\xfe\xca",
+        b"\xca\xfe\xba\xbf", b"\xbf\xba\xfe\xca",
+    }
+    if require_macho and (not macho or observed["bytes"] < 28):
+        raise ValueError("retained binary does not have a Mach-O header")
+    result = {
+        "path": pins["path"], "resolved_path": str(resolved),
+        "sha256": observed["sha256"], "bytes": observed["bytes"],
+        "macho_magic": macho, "expected_version": pins["version"],
+        "observed_version": None, "version_verified": False,
+        "codesign_verified": False,
+    }
+    if check_version or check_codesign:
+        # Never inherit account credentials, config or provider route. This is
+        # an offline version check, not an account or permission probe.
+        with tempfile.TemporaryDirectory(prefix="d4d-binary-verify-") as directory:
+            environment = {
+                "PATH": "/usr/bin:/bin", "HOME": directory,
+                "CLAUDE_CONFIG_DIR": directory,
+                "ANTHROPIC_BASE_URL": "http://127.0.0.1:1",
+                "ANTHROPIC_API_KEY": "d4d-offline-version-only",
+                "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+                "DISABLE_AUTOUPDATER": "1",
+            }
+            commands = []
+            if check_version:
+                commands.append(("version", [str(resolved), "--version"]))
+            if check_codesign:
+                commands.append(("codesign", [
+                    "/usr/bin/codesign", "--verify", "--strict", str(resolved)]))
+            for kind, argv in commands:
+                capture()
+                completed = runner(
+                    argv, stdin=subprocess.DEVNULL, capture_output=True,
+                    timeout=timeout_seconds, check=False, env=environment,
+                    cwd=directory)
+                capture()
+                if (type(completed.stdout) is not bytes or type(completed.stderr) is not bytes
+                        or max(len(completed.stdout), len(completed.stderr)) > 4096):
+                    raise ValueError("binary check requires bounded byte output")
+                if completed.returncode != 0:
+                    raise ValueError(f"retained binary {kind} check failed")
+                if kind == "version":
+                    if (completed.stderr
+                            or completed.stdout != (pins["version"] + "\n").encode()):
+                        raise ValueError("observed binary version differs from registration")
+                    result.update(observed_version=pins["version"], version_verified=True)
+                else:
+                    result["codesign_verified"] = True
+    capture()
+    return result
 
 
 def _remaining(deadline):

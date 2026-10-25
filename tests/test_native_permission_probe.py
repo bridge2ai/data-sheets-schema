@@ -3,7 +3,10 @@ from contextlib import contextmanager
 from copy import deepcopy
 import io
 import json
+import os
 from pathlib import Path
+import sys
+import time
 from types import SimpleNamespace
 
 import pytest
@@ -14,6 +17,232 @@ from data_sheets_schema import native_subscription_guard as guard
 from tests.test_native_execution_permissions import fixture as legacy_fixture
 from tests.test_native_shared_permissions import fixture as shared_fixture
 from tests.test_native_shared_permissions import fabricated_manifest
+
+
+def retained_binary(tmp_path):
+    """Invented Mach-O-format bytes; tests never execute this file."""
+    target = tmp_path / "claude-retained"
+    target.write_bytes(b"\xcf\xfa\xed\xfe" + b"\0" * 60)
+    target.chmod(0o700)
+    return target, {"path": str(target), "sha256": guard.sha(target.read_bytes()),
+                    "version": "2.1.269 (Claude Code)"}
+
+
+def test_retained_binary_static_default_never_launches(tmp_path, monkeypatch):
+    target, pins = retained_binary(tmp_path)
+    monkeypatch.setattr(probe.subprocess, "Popen", lambda *a, **k: pytest.fail("no execution"))
+    result = probe.verify_retained_binary(pins)
+    assert result["sha256"] == guard.sha(target.read_bytes())
+    assert result["resolved_path"] == str(target)
+    assert result["macho_magic"]
+    assert result["observed_version"] is None
+    assert not result["version_verified"] and not result["codesign_verified"]
+
+
+@pytest.mark.parametrize("fault", ["missing", "directory", "not_executable", "digest",
+                                 "script", "short_macho", "version", "relative"])
+def test_retained_binary_refuses_bad_pins_or_file_before_any_execution(tmp_path, fault):
+    target, pins = retained_binary(tmp_path)
+    if fault == "missing":
+        target.unlink()
+    elif fault == "directory":
+        target.unlink()
+        target.mkdir()
+    elif fault == "not_executable":
+        target.chmod(0o600)
+    elif fault == "digest":
+        pins["sha256"] = "a" * 64
+    elif fault in ("script", "short_macho"):
+        target.write_bytes(b"#!/bin/sh\nexit 0\n" if fault == "script" else b"\xcf\xfa\xed\xfe")
+        pins["sha256"] = guard.sha(target.read_bytes())
+    elif fault == "version":
+        pins["version"] = "v1\nv2"
+    else:
+        pins["path"] = "claude"
+    with pytest.raises((ValueError, FileNotFoundError)):
+        probe.verify_retained_binary(
+            pins, check_version=True, runner=lambda *a, **k: pytest.fail("invalid dispatched"))
+
+
+def test_retained_binary_symlink_requires_explicit_resolution_and_rechecks_pin(tmp_path):
+    target, pins = retained_binary(tmp_path)
+    link = tmp_path / "latest"
+    link.symlink_to(target)
+    pins["path"] = str(link)
+    with pytest.raises(ValueError, match="symlink"):
+        probe.verify_retained_binary(pins)
+    assert probe.verify_retained_binary(pins, allow_resolved_symlink=True)["resolved_path"] == str(target)
+    target.write_bytes(b"updated")
+    with pytest.raises(ValueError, match="SHA256"):
+        probe.verify_retained_binary(pins, allow_resolved_symlink=True)
+
+
+def test_retained_binary_other_platform_requires_explicit_format_opt_out(tmp_path):
+    target, pins = retained_binary(tmp_path)
+    target.write_bytes(b"\x7fELF" + b"\0" * 60)
+    pins["sha256"] = guard.sha(target.read_bytes())
+    with pytest.raises(ValueError, match="Mach-O"):
+        probe.verify_retained_binary(pins)
+    result = probe.verify_retained_binary(pins, require_macho=False)
+    assert not result["macho_magic"] and not result["version_verified"]
+
+
+def test_retained_binary_optional_checks_use_exact_pins_and_isolated_environment(tmp_path, monkeypatch):
+    target, pins = retained_binary(tmp_path)
+    calls = []
+    monkeypatch.setenv("ANTHROPIC_AUTH_TOKEN", "must-not-pass-to-runner")
+
+    def run(argv, **kwargs):
+        calls.append((argv, kwargs))
+        return SimpleNamespace(returncode=0, stderr=b"",
+            stdout=(pins["version"] + "\n").encode() if "--version" in argv else b"")
+
+    result = probe.verify_retained_binary(pins, check_version=True, check_codesign=True, runner=run)
+    assert result["observed_version"] == pins["version"]
+    assert result["version_verified"] and result["codesign_verified"]
+    assert [row[0] for row in calls] == [
+        [str(target), "--version"],
+        ["/usr/bin/codesign", "--verify", "--strict", str(target)]]
+    for _, kwargs in calls:
+        assert kwargs["timeout"] == 10 and kwargs["stdin"] == probe.subprocess.DEVNULL
+        assert kwargs["env"]["ANTHROPIC_BASE_URL"] == "http://127.0.0.1:1"
+        assert "ANTHROPIC_AUTH_TOKEN" not in kwargs["env"]
+        assert not Path(kwargs["cwd"]).exists()
+
+
+@pytest.mark.parametrize("fault", ["wrong_version", "stderr", "exit", "overflow",
+                                 "timeout", "changed_bytes", "changed_symlink"])
+def test_retained_binary_optional_checks_fail_closed(tmp_path, fault):
+    target, pins = retained_binary(tmp_path)
+    link = tmp_path / "latest"
+    link.symlink_to(target)
+    pins["path"] = str(link)
+
+    def run(*args, **kwargs):
+        if fault == "timeout":
+            raise probe.subprocess.TimeoutExpired(args[0], kwargs["timeout"])
+        if fault == "changed_bytes":
+            target.write_bytes(b"mutated")
+        if fault == "changed_symlink":
+            other = tmp_path / "other"
+            other.write_bytes(target.read_bytes())
+            other.chmod(0o700)
+            link.unlink()
+            link.symlink_to(other)
+        return SimpleNamespace(
+            returncode=1 if fault == "exit" else 0,
+            stderr=b"warning" if fault == "stderr" else b"",
+            stdout=(b"wrong\n" if fault == "wrong_version" else
+                    b"x" * 4097 if fault == "overflow" else (pins["version"] + "\n").encode()))
+
+    with pytest.raises((ValueError, probe.subprocess.TimeoutExpired)):
+        probe.verify_retained_binary(pins, allow_resolved_symlink=True, check_version=True, runner=run)
+
+
+@pytest.mark.parametrize("options", [
+    {"timeout_seconds": float("nan")}, {"timeout_seconds": 61},
+    {"timeout_seconds": True}, {"check_version": 1},
+])
+def test_retained_binary_execution_is_explicit_and_bounded(tmp_path, options):
+    _, pins = retained_binary(tmp_path)
+    with pytest.raises(ValueError):
+        probe.verify_retained_binary(pins, **options)
+
+
+def test_retained_binary_explicit_version_flag_uses_bounded_default(tmp_path, monkeypatch):
+    _, pins = retained_binary(tmp_path)
+    calls = []
+
+    def bounded(argv, **kwargs):
+        calls.append(argv)
+        return SimpleNamespace(returncode=0, stdout=(pins["version"] + "\n").encode(), stderr=b"")
+
+    monkeypatch.setattr(probe, "_bounded_binary_check", bounded)
+    assert probe.verify_retained_binary(pins, check_version=True)["version_verified"]
+    assert calls == [[pins["path"], "--version"]]
+
+
+@pytest.mark.parametrize("case", ["success", "stdout_overflow", "stderr_overflow", "timeout"])
+def test_binary_runner_bounded_software_peer_cleanup(tmp_path, monkeypatch, case):
+    """Ordinary Python peers exercise pipe cleanup; no retained native binary."""
+    processes = []
+    actual = probe.subprocess.Popen
+
+    def spawn(*args, **kwargs):
+        child = actual(*args, **kwargs)
+        processes.append(child)
+        return child
+
+    monkeypatch.setattr(probe.subprocess, "Popen", spawn)
+    snippets = {
+        "success": "import sys; print('version'); print('diagnostic', file=sys.stderr)",
+        "stdout_overflow": "import sys; sys.stdout.write('x'*8192); sys.stdout.flush()",
+        "stderr_overflow": "import sys; sys.stderr.write('x'*8192); sys.stderr.flush()",
+        "timeout": "import time; time.sleep(30)",
+    }
+    started = time.monotonic()
+    kwargs = dict(stdin=probe.subprocess.DEVNULL, capture_output=True, check=False,
+                  timeout=0.5, env={"PATH": "/usr/bin:/bin"}, cwd=tmp_path)
+    if case == "success":
+        result = probe._bounded_binary_check([sys.executable, "-c", snippets[case]], **kwargs)
+        assert (result.returncode, result.stdout, result.stderr) == (0, b"version\n", b"diagnostic\n")
+    else:
+        exception = ValueError if case.endswith("overflow") else probe.subprocess.TimeoutExpired
+        with pytest.raises(exception):
+            probe._bounded_binary_check([sys.executable, "-c", snippets[case]], **kwargs)
+    assert time.monotonic() - started < 5
+    assert len(processes) == 1 and processes[0].poll() is not None
+    assert processes[0].stdout.closed and processes[0].stderr.closed
+
+
+@pytest.mark.parametrize("denied", [False, True])
+def test_binary_runner_exited_leader_with_open_pipes_still_attempts_group_cleanup(
+        tmp_path, monkeypatch, denied):
+    """Mock an inherited pipe holder: host policy may deny orphan-group signals."""
+    signals, writers = [], []
+
+    class ExitedLeader:
+        pid, returncode = 999999999, 0
+
+        def __init__(self):
+            for name in ("stdout", "stderr"):
+                read_fd, write_fd = os.pipe()
+                setattr(self, name, os.fdopen(read_fd, "rb"))
+                writers.append(write_fd)
+
+        def poll(self):
+            return 0
+
+        def wait(self, timeout):
+            return 0
+
+    process = ExitedLeader()
+
+    def killpg(pid, sig):
+        signals.append((pid, sig))
+        if denied:
+            raise PermissionError("host denied cleanup; cannot attest success")
+
+    monkeypatch.setattr(probe.subprocess, "Popen", lambda *a, **k: process)
+    monkeypatch.setattr(probe.os, "killpg", killpg)
+    try:
+        with pytest.raises(PermissionError if denied else probe.subprocess.TimeoutExpired):
+            probe._bounded_binary_check(
+                ["invented-native", "--version"], stdin=probe.subprocess.DEVNULL,
+                capture_output=True, timeout=0.05, check=False, env={}, cwd=tmp_path)
+        assert signals == [(process.pid, probe.signal.SIGTERM)] + (
+            [] if denied else [(process.pid, probe.signal.SIGKILL)])
+        assert process.stdout.closed and process.stderr.closed
+    finally:
+        for descriptor in writers:
+            os.close(descriptor)
+
+
+def test_retained_binary_codesign_failure_is_not_verified(tmp_path):
+    _, pins = retained_binary(tmp_path)
+    with pytest.raises(ValueError, match="codesign check failed"):
+        probe.verify_retained_binary(pins, check_codesign=True, runner=lambda *a, **k:
+            SimpleNamespace(returncode=1, stdout=b"", stderr=b"invalid signature"))
 
 
 def test_scripted_provider_is_exact_sequence_and_has_no_model_answer():
