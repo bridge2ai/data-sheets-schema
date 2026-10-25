@@ -1,0 +1,1746 @@
+{
+  "current_validated_pins": {
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_coverage_receipt.yaml": {
+      "bytes": 13175,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_coverage_receipt.yaml",
+      "sha256": "8e0d774f73c6bc7267cb9338c25410c58beff8157ffb43760a33fe176ca548af"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_core.yaml": {
+      "bytes": 18442,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_core.yaml",
+      "sha256": "b98be2d4fd5670d015c1842de74ff69d3f120cf416dc09431f68aed4fa93eddc"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full.yaml": {
+      "bytes": 18794,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full.yaml",
+      "sha256": "d3b91e60e7a61c65fc7771c4f6bc419a3861f89881b36e5b13b7d0b928fddbd7"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_core.yaml": {
+      "bytes": 24815,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_core.yaml",
+      "sha256": "404067469161cfac71bd60a98ba93b975afbfc0d8ee5be51740b255607581e7b"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_full.yaml": {
+      "bytes": 25178,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_full.yaml",
+      "sha256": "ac182648cf2921e8eeda117879c3c8021cac14b35943b3b24ddfdccb55e75aba"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report.md": {
+      "bytes": 162181,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report.md",
+      "sha256": "543511e998fad8b8e5e8759f3df1106b1c35b7c10d2dc21313547c1b53835e5c"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_coverage_receipt.yaml": {
+      "bytes": 16825,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_coverage_receipt.yaml",
+      "sha256": "5829b77841b837f5d30b12e55db6b1e22bb701d7fe71036d7225a7a2db3693db"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_core.yaml": {
+      "bytes": 18663,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_core.yaml",
+      "sha256": "473d3b94296f1cb2aec491b1bba77c64aced2f4803e8361b96b520e7f50e6f38"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full.yaml": {
+      "bytes": 19165,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full.yaml",
+      "sha256": "440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_core.yaml": {
+      "bytes": 25073,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_core.yaml",
+      "sha256": "97750af2b94cb5958674e63f007cebff529de74121dda48325b46544af1a8927"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_full.yaml": {
+      "bytes": 25700,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_full.yaml",
+      "sha256": "b1716e8235d9dbb389504e07cd70ee0c94247154e287ce4adae6ba7ac728bc08"
+    },
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report.md": {
+      "bytes": 152404,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report.md",
+      "sha256": "91220fd54a0a43e48937740aed4bfdfdafed35372cfe88719e227e61281064d0"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/.claude/agents/d4d-provenance-guard-v2.md": {
+      "bytes": 6912,
+      "path": "/private/tmp/d4d-codex-k1-20261025/.claude/agents/d4d-provenance-guard-v2.md",
+      "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/.claude/commands/d4d-agent-v2.md": {
+      "bytes": 12698,
+      "path": "/private/tmp/d4d-codex-k1-20261025/.claude/commands/d4d-agent-v2.md",
+      "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/.claude/commands/d4d-full-core-v2.md": {
+      "bytes": 58267,
+      "path": "/private/tmp/d4d-codex-k1-20261025/.claude/commands/d4d-full-core-v2.md",
+      "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/.claude/commands/d4d-uniform-rules-v2.md": {
+      "bytes": 29867,
+      "path": "/private/tmp/d4d-codex-k1-20261025/.claude/commands/d4d-uniform-rules-v2.md",
+      "sha256": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config": {
+      "bytes": 6250,
+      "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+      "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml": {
+      "bytes": 38091,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml",
+      "sha256": "9ffe181580be46bc8eb1475c63ccb66c49c859e1dee3542f08c33647b09aed89"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_core.yaml": {
+      "bytes": 54941,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_core.yaml",
+      "sha256": "d856e7d419837fe46cd81ac85ad4ce8817b148ed090e701145cbff0b87772f10"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_full.yaml": {
+      "bytes": 62431,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_full.yaml",
+      "sha256": "1670797ec8565ef8f666f99ce1bb244ee5396ee9cd0034fd040d2a727c97f1a3"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_reconcile_core.yaml": {
+      "bytes": 57326,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_reconcile_core.yaml",
+      "sha256": "6609c73dd04d3f9067d7e2c5790c0b82ea6a9a9d89ea81018f6f8f3795538cd5"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_reconcile_full.yaml": {
+      "bytes": 64790,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_reconcile_full.yaml",
+      "sha256": "983fad53478e2df536ffa7de1727df66e13ebafb4fd8b2f7db7837147482a620"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_report.md": {
+      "bytes": 15667,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_report.md",
+      "sha256": "98719bb576f7e3102ec6bbe063fd8757030b96c9c60019c31a2a706a8e7c93c7"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_coverage_receipt.yaml": {
+      "bytes": 26249,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_coverage_receipt.yaml",
+      "sha256": "09a51cae6cd21a4b561e4c1d53ceae8474278cecb1b6d089b458381ef3f7b6d7"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_core.yaml": {
+      "bytes": 38412,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_core.yaml",
+      "sha256": "9f4648b0ad2c45801cc748e8bfe83cb1d0688450d343c3f8c99fcf679f03ccab"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml": {
+      "bytes": 41316,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml",
+      "sha256": "7b2e57949317d2bffb43ed283b288a99ab663133bd00e2f192cc4db49d275593"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_reconcile_core.yaml": {
+      "bytes": 39431,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_reconcile_core.yaml",
+      "sha256": "82c8f3723a73ea7b4b393888a2b524c2042f208e6720dce2d7cfe0ebdfaa7e42"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_reconcile_full.yaml": {
+      "bytes": 42303,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_reconcile_full.yaml",
+      "sha256": "1391c485d84f9bfc1e6c1db71e88f24e35dd4b18ed5950f010d8774fc8ad4774"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_report.md": {
+      "bytes": 10514,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_report.md",
+      "sha256": "3a31657747397641e5d0772a878feeefd1d1eb0f95b0a92ee6362c1e5e41d13d"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_coverage_receipt.yaml": {
+      "bytes": 40009,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_coverage_receipt.yaml",
+      "sha256": "eb9c2737178609f642dd5db98965c864860bd7d562d047fc201e22c8636bb0a7"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_core.yaml": {
+      "bytes": 79062,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_core.yaml",
+      "sha256": "1d6c594f1515d3b04a6358c9a93f8c195c89912515d51ba8a4587c8e3bf32c60"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_full.yaml": {
+      "bytes": 94536,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_full.yaml",
+      "sha256": "bdcc90bb7f9ad66e6100dcaa8a1ff31e574e294b6f7a257f02e4e6b75d169c3f"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_reconcile_core.yaml": {
+      "bytes": 85244,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_reconcile_core.yaml",
+      "sha256": "64477b9ae0cdec9d2e8f22fb247eefe707f701c997a5d5a6a9335881f033f20a"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_reconcile_full.yaml": {
+      "bytes": 100759,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_reconcile_full.yaml",
+      "sha256": "d4662dca5dd95943d0a2d472d5cc682f1ffece19a87ee335ead7e326b643bf6f"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_report.md": {
+      "bytes": 18167,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_report.md",
+      "sha256": "e1a926c353dec57d61e71b24f2175b621ec094d2db6878209783c18228d18bab"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/ai_readi_omission_context.json": {
+      "bytes": 6513,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/ai_readi_omission_context.json",
+      "sha256": "15a12c02f569a22d2139e5123acc7e19f7fa650bcd03081a10f34e1a32709926"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/chorus_omission_context.json": {
+      "bytes": 6476,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/chorus_omission_context.json",
+      "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/cm4ai_omission_context.json": {
+      "bytes": 6560,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/cm4ai_omission_context.json",
+      "sha256": "ef102ac9277928713c2d283874894cb3f9a7bd58eeec41d3448592f4a9a798f6"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/voice_omission_context.json": {
+      "bytes": 6610,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/voice_omission_context.json",
+      "sha256": "2925d442752e728868414b149ccd55991136ae82da56d79882842bf16443a21e"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/voice_pediatric_omission_context.json": {
+      "bytes": 6476,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/voice_pediatric_omission_context.json",
+      "sha256": "f5d54a6abf7ddf8172ac2ebfdcb910d323bb5e1ac60e840e7334076bcc8650bc"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/AI_READI_chunks.yaml": {
+      "bytes": 5082,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/AI_READI_chunks.yaml",
+      "sha256": "fc3631ad7e8de36c93d1ea5b299deff859c0ce20835c550d6f67280c6ec2e6c4"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CHORUS_chunks.yaml": {
+      "bytes": 1945,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CHORUS_chunks.yaml",
+      "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CM4AI_chunks.yaml": {
+      "bytes": 5864,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CM4AI_chunks.yaml",
+      "sha256": "3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/VOICE_PEDIATRIC_chunks.yaml": {
+      "bytes": 2912,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/VOICE_PEDIATRIC_chunks.yaml",
+      "sha256": "a1fa4cf8d86c9feb79b8466f4f3af75c552a3bf0b76ae48b1b67955f28fba43a"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/VOICE_chunks.yaml": {
+      "bytes": 4680,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/VOICE_chunks.yaml",
+      "sha256": "f55de43646d5c4a6d61d6339f4d6f6adb3e50cef86d5dad1cb46a43a91fb38bc"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/AI_READI_preprocessed.txt": {
+      "bytes": 430393,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "sha256": "b4a282fd5c44bc93a3bcd71a4c3ee53b36a0de31d105656b70c3e296cc02a956"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CHORUS_preprocessed.txt": {
+      "bytes": 35920,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CM4AI_preprocessed.txt": {
+      "bytes": 320799,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "sha256": "5f81bb53f43f9ec6debc3ab7297bb3897d30c675888eefeaf840ebbbaca9ecc4"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt": {
+      "bytes": 206008,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "sha256": "eb823708a16342a3b12cc1dabb57529cea4f95fd596abf9cbecd657a17d61e47"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/VOICE_preprocessed.txt": {
+      "bytes": 376446,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "sha256": "7c4f71ab2e85d70396e479d39cb5db9454bd9f13c7274b51b4418fc2d452518c"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml": {
+      "bytes": 40612,
+      "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml",
+      "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/KIDS_FIRST_0/sizing/kids_first_draft_omission_context.json": {
+      "bytes": 5509,
+      "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/KIDS_FIRST_0/sizing/kids_first_draft_omission_context.json",
+      "sha256": "5a4efc9cc067c46dd56b94c8a8fbfbfb6741a0d9b4e570a7b66e5c2252adeba8"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt": {
+      "bytes": 541184,
+      "path": "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt",
+      "sha256": "cc45c89548158a7a909699fbf1f75e6cc88c32ac8486d5518c5d4e46cdc9447c"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/chunks.yaml": {
+      "bytes": 9496,
+      "path": "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/chunks.yaml",
+      "sha256": "8e9cfb869aabb8720275c43d5d448ff5462527b82b4f50d4d7f713c99bcb6c06"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml": {
+      "bytes": 14640,
+      "path": "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml",
+      "sha256": "aa00b62d689aa33d4d6c15d106e620321b295563b14401536e4dc77430d045fd"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml": {
+      "bytes": 6115,
+      "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+      "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml": {
+      "bytes": 1442513,
+      "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml": {
+      "bytes": 1299200,
+      "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+      "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/src/download/prompts/api_playbook_v2.md": {
+      "bytes": 4492,
+      "path": "/private/tmp/d4d-codex-k1-20261025/src/download/prompts/api_playbook_v2.md",
+      "sha256": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/src/download/prompts/d4d_generic_arm_prompt_v10.md": {
+      "bytes": 32568,
+      "path": "/private/tmp/d4d-codex-k1-20261025/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+      "sha256": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/src/download/prompts/receipt_completion_runtime_v2.md": {
+      "bytes": 3158,
+      "path": "/private/tmp/d4d-codex-k1-20261025/src/download/prompts/receipt_completion_runtime_v2.md",
+      "sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+    },
+    "/private/tmp/d4d-codex-k1-20261025/src/download/prompts/shared_generation_v1.md": {
+      "bytes": 3569,
+      "path": "/private/tmp/d4d-codex-k1-20261025/src/download/prompts/shared_generation_v1.md",
+      "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+    }
+  },
+  "format": "k1_primary_authorities_v1",
+  "guarded_git_paths": [
+    "src/data_sheets_schema",
+    "scripts/build_api_registrations.py",
+    "data/omission_contexts",
+    "src/download/prompts",
+    ".claude/commands",
+    ".claude/agents",
+    "data/preprocessed",
+    "notes/matched_cborg_2026-09-13/kids_first"
+  ],
+  "initial_helper_commit": "41b90911c",
+  "measurement_pin": {
+    "bytes": 1290928,
+    "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/request-sizing-primary.json",
+    "sha256": "c85d5eab1e7f9c6394719be0e8e46573c7f2f00a7d14415782a81fb28ec85df3"
+  },
+  "registrations": [
+    {
+      "project": "CHORUS",
+      "registration": {
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 320000,
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "integration_output_tokens": 32000,
+          "max_calls": 6,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 12288,
+          "max_paths": 80,
+          "max_request_bytes": 32000000,
+          "max_workers": 4,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "audit_transport": {
+          "malformed_response_retries": 0,
+          "sdk_max_retries": 0,
+          "transport_attempts": 1
+        },
+        "format": "shared_generation_registration_v1",
+        "inputs": {
+          "bundle": {
+            "bytes": 35920,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+            "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"
+          },
+          "chunk_manifest": {
+            "bytes": 1945,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CHORUS_chunks.yaml",
+            "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"
+          },
+          "context": {
+            "bytes": 6476,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/chorus_omission_context.json",
+            "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+          },
+          "core_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+            "sources": [
+              {
+                "bytes": 1299200,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+                "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+              }
+            ]
+          },
+          "full_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "sources": [
+              {
+                "bytes": 1442513,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+              }
+            ]
+          },
+          "profile": {
+            "basis": "manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81",
+            "name": "bridge2ai",
+            "vocabulary": {
+              "bytes": 6115,
+              "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+              "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+            }
+          },
+          "project": "CHORUS",
+          "source_manifest": {
+            "bytes": 40612,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml",
+            "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+          }
+        },
+        "receipt": {
+          "condition": "generic_v10",
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "coverage_floor": {
+            "mode": "diagnostic_pilot",
+            "state": "pending"
+          },
+          "format": "receipt_completion_registration_v2",
+          "max_output_tokens": 4000,
+          "max_request_bytes": 32000000,
+          "receipt_instrument_version": 4,
+          "registration_id": "generic-v10-receipt",
+          "runtime_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+        },
+        "registration_id": "generic-v10-chorus-2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "registration_path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/CHORUS_0/sizing/CHORUS_registration.json",
+        "run": {
+          "arm": "BASELINE (input documents only)",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "project": "CHORUS"
+        },
+        "runtime": {
+          "base_url": "https://api.cborg.lbl.gov",
+          "config": {
+            "bytes": 6250,
+            "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+            "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+          },
+          "effort": null,
+          "model": "claude-opus-5",
+          "provider": "LBL CBORG (proxy to Anthropic)",
+          "temperature": null,
+          "thinking": {
+            "display": "summarized",
+            "type": "adaptive"
+          }
+        },
+        "selection": {
+          "api_playbook_version": 2,
+          "assets": {
+            ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+            ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+            ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+            ".claude/commands/d4d-uniform-rules-v2.md": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+            "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+            "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+            "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+          },
+          "condition": "generic_v10",
+          "protocol": "shared_generation_v1",
+          "receipt_completion_version": 2,
+          "renderer": 25,
+          "runtime": "Claude API (direct)",
+          "schema_context_trim": {
+            "generation_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "omission_all_reachable_classes": true,
+            "omission_schema_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "worker_non_assigned_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings",
+              "description",
+              "comments"
+            ]
+          },
+          "stage_contracts": {
+            "phase_instructions_sha256": {
+              "audit": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+              "core": "77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986",
+              "full": "2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283",
+              "full_readdress": "59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27",
+              "full_receipt": "849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a",
+              "reconcile_core": "6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6",
+              "reconcile_full": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+              "report": "1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853",
+              "report_regate": "bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"
+            },
+            "phase_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+            "regate_headers_sha256": "81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d",
+            "rereceipt_instruction_sha256": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401",
+            "shared_evidence_contract_sha256": "a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c",
+            "typed_audit_integration_format_sha256": "de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496",
+            "typed_audit_system_sha256": "37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b",
+            "typed_audit_worker_format_sha256": "f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336"
+          },
+          "typed_protocol": "typed_audit_protocol_v1",
+          "version": 1
+        }
+      },
+      "registration_pin": {
+        "bytes": 6736,
+        "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/CHORUS_0/sizing/CHORUS_registration.json",
+        "sha256": "67f0da471bb94d4b3f09f155edf2618103c8b84cf6b9e5e1d576d107982827b1"
+      },
+      "source_label": "2026-10-22a_claude-opus-5-api-generic-v10_rep1"
+    },
+    {
+      "project": "CHORUS",
+      "registration": {
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 320000,
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "integration_output_tokens": 32000,
+          "max_calls": 6,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 12288,
+          "max_paths": 80,
+          "max_request_bytes": 32000000,
+          "max_workers": 4,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "audit_transport": {
+          "malformed_response_retries": 0,
+          "sdk_max_retries": 0,
+          "transport_attempts": 1
+        },
+        "format": "shared_generation_registration_v1",
+        "inputs": {
+          "bundle": {
+            "bytes": 35920,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+            "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"
+          },
+          "chunk_manifest": {
+            "bytes": 1945,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CHORUS_chunks.yaml",
+            "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"
+          },
+          "context": {
+            "bytes": 6476,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/chorus_omission_context.json",
+            "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+          },
+          "core_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+            "sources": [
+              {
+                "bytes": 1299200,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+                "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+              }
+            ]
+          },
+          "full_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "sources": [
+              {
+                "bytes": 1442513,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+              }
+            ]
+          },
+          "profile": {
+            "basis": "manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81",
+            "name": "bridge2ai",
+            "vocabulary": {
+              "bytes": 6115,
+              "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+              "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+            }
+          },
+          "project": "CHORUS",
+          "source_manifest": {
+            "bytes": 40612,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml",
+            "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+          }
+        },
+        "receipt": {
+          "condition": "generic_v10",
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "coverage_floor": {
+            "mode": "diagnostic_pilot",
+            "state": "pending"
+          },
+          "format": "receipt_completion_registration_v2",
+          "max_output_tokens": 4000,
+          "max_request_bytes": 32000000,
+          "receipt_instrument_version": 4,
+          "registration_id": "generic-v10-receipt",
+          "runtime_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+        },
+        "registration_id": "generic-v10-chorus-2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "registration_path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/CHORUS_1/sizing/CHORUS_registration.json",
+        "run": {
+          "arm": "BASELINE (input documents only)",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "project": "CHORUS"
+        },
+        "runtime": {
+          "base_url": "https://api.cborg.lbl.gov",
+          "config": {
+            "bytes": 6250,
+            "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+            "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+          },
+          "effort": null,
+          "model": "claude-opus-5",
+          "provider": "LBL CBORG (proxy to Anthropic)",
+          "temperature": null,
+          "thinking": {
+            "display": "summarized",
+            "type": "adaptive"
+          }
+        },
+        "selection": {
+          "api_playbook_version": 2,
+          "assets": {
+            ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+            ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+            ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+            ".claude/commands/d4d-uniform-rules-v2.md": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+            "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+            "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+            "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+          },
+          "condition": "generic_v10",
+          "protocol": "shared_generation_v1",
+          "receipt_completion_version": 2,
+          "renderer": 25,
+          "runtime": "Claude API (direct)",
+          "schema_context_trim": {
+            "generation_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "omission_all_reachable_classes": true,
+            "omission_schema_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "worker_non_assigned_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings",
+              "description",
+              "comments"
+            ]
+          },
+          "stage_contracts": {
+            "phase_instructions_sha256": {
+              "audit": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+              "core": "77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986",
+              "full": "2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283",
+              "full_readdress": "59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27",
+              "full_receipt": "849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a",
+              "reconcile_core": "6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6",
+              "reconcile_full": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+              "report": "1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853",
+              "report_regate": "bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"
+            },
+            "phase_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+            "regate_headers_sha256": "81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d",
+            "rereceipt_instruction_sha256": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401",
+            "shared_evidence_contract_sha256": "a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c",
+            "typed_audit_integration_format_sha256": "de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496",
+            "typed_audit_system_sha256": "37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b",
+            "typed_audit_worker_format_sha256": "f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336"
+          },
+          "typed_protocol": "typed_audit_protocol_v1",
+          "version": 1
+        }
+      },
+      "registration_pin": {
+        "bytes": 6736,
+        "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/CHORUS_1/sizing/CHORUS_registration.json",
+        "sha256": "8bba9078b26337d53c374b5e6356a2a596640ef264484fe1c76a7b4f0aef5a21"
+      },
+      "source_label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1"
+    },
+    {
+      "project": "AI_READI",
+      "registration": {
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 512000,
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "integration_output_tokens": 32000,
+          "max_calls": 9,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 23876,
+          "max_paths": 144,
+          "max_request_bytes": 32000000,
+          "max_workers": 7,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "audit_transport": {
+          "malformed_response_retries": 0,
+          "sdk_max_retries": 0,
+          "transport_attempts": 1
+        },
+        "format": "shared_generation_registration_v1",
+        "inputs": {
+          "bundle": {
+            "bytes": 430393,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+            "sha256": "b4a282fd5c44bc93a3bcd71a4c3ee53b36a0de31d105656b70c3e296cc02a956"
+          },
+          "chunk_manifest": {
+            "bytes": 5082,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/AI_READI_chunks.yaml",
+            "sha256": "fc3631ad7e8de36c93d1ea5b299deff859c0ce20835c550d6f67280c6ec2e6c4"
+          },
+          "context": {
+            "bytes": 6513,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/ai_readi_omission_context.json",
+            "sha256": "15a12c02f569a22d2139e5123acc7e19f7fa650bcd03081a10f34e1a32709926"
+          },
+          "core_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+            "sources": [
+              {
+                "bytes": 1299200,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+                "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+              }
+            ]
+          },
+          "full_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "sources": [
+              {
+                "bytes": 1442513,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+              }
+            ]
+          },
+          "profile": {
+            "basis": "manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81",
+            "name": "bridge2ai",
+            "vocabulary": {
+              "bytes": 6115,
+              "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+              "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+            }
+          },
+          "project": "AI_READI",
+          "source_manifest": {
+            "bytes": 40612,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml",
+            "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+          }
+        },
+        "receipt": {
+          "condition": "generic_v10",
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "coverage_floor": {
+            "mode": "diagnostic_pilot",
+            "state": "pending"
+          },
+          "format": "receipt_completion_registration_v2",
+          "max_output_tokens": 4000,
+          "max_request_bytes": 32000000,
+          "receipt_instrument_version": 4,
+          "registration_id": "generic-v10-receipt",
+          "runtime_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+        },
+        "registration_id": "generic-v10-ai_readi-2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "registration_path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/AI_READI_0/sizing/AI_READI_registration.json",
+        "run": {
+          "arm": "BASELINE (input documents only)",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "project": "AI_READI"
+        },
+        "runtime": {
+          "base_url": "https://api.cborg.lbl.gov",
+          "config": {
+            "bytes": 6250,
+            "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+            "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+          },
+          "effort": null,
+          "model": "claude-opus-5",
+          "provider": "LBL CBORG (proxy to Anthropic)",
+          "temperature": null,
+          "thinking": {
+            "display": "summarized",
+            "type": "adaptive"
+          }
+        },
+        "selection": {
+          "api_playbook_version": 2,
+          "assets": {
+            ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+            ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+            ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+            ".claude/commands/d4d-uniform-rules-v2.md": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+            "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+            "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+            "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+          },
+          "condition": "generic_v10",
+          "protocol": "shared_generation_v1",
+          "receipt_completion_version": 2,
+          "renderer": 25,
+          "runtime": "Claude API (direct)",
+          "schema_context_trim": {
+            "generation_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "omission_all_reachable_classes": true,
+            "omission_schema_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "worker_non_assigned_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings",
+              "description",
+              "comments"
+            ]
+          },
+          "stage_contracts": {
+            "phase_instructions_sha256": {
+              "audit": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+              "core": "77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986",
+              "full": "2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283",
+              "full_readdress": "59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27",
+              "full_receipt": "849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a",
+              "reconcile_core": "6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6",
+              "reconcile_full": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+              "report": "1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853",
+              "report_regate": "bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"
+            },
+            "phase_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+            "regate_headers_sha256": "81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d",
+            "rereceipt_instruction_sha256": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401",
+            "shared_evidence_contract_sha256": "a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c",
+            "typed_audit_integration_format_sha256": "de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496",
+            "typed_audit_system_sha256": "37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b",
+            "typed_audit_worker_format_sha256": "f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336"
+          },
+          "typed_protocol": "typed_audit_protocol_v1",
+          "version": 1
+        }
+      },
+      "registration_pin": {
+        "bytes": 6754,
+        "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/AI_READI_0/sizing/AI_READI_registration.json",
+        "sha256": "45793709c73fdf3f88845d4fedf5ba4d984c6df651979d514ae5811f268d2f62"
+      },
+      "source_label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2"
+    },
+    {
+      "project": "CM4AI",
+      "registration": {
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 448000,
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "integration_output_tokens": 32000,
+          "max_calls": 8,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 16800,
+          "max_paths": 133,
+          "max_request_bytes": 32000000,
+          "max_workers": 6,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "audit_transport": {
+          "malformed_response_retries": 0,
+          "sdk_max_retries": 0,
+          "transport_attempts": 1
+        },
+        "format": "shared_generation_registration_v1",
+        "inputs": {
+          "bundle": {
+            "bytes": 320799,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+            "sha256": "5f81bb53f43f9ec6debc3ab7297bb3897d30c675888eefeaf840ebbbaca9ecc4"
+          },
+          "chunk_manifest": {
+            "bytes": 5864,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/CM4AI_chunks.yaml",
+            "sha256": "3d2d86bac4e9f89d2c6cfb6b5f5361c237995d899ecb6ae41382f82359aedde4"
+          },
+          "context": {
+            "bytes": 6560,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/cm4ai_omission_context.json",
+            "sha256": "ef102ac9277928713c2d283874894cb3f9a7bd58eeec41d3448592f4a9a798f6"
+          },
+          "core_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+            "sources": [
+              {
+                "bytes": 1299200,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+                "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+              }
+            ]
+          },
+          "full_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "sources": [
+              {
+                "bytes": 1442513,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+              }
+            ]
+          },
+          "profile": {
+            "basis": "manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81",
+            "name": "bridge2ai",
+            "vocabulary": {
+              "bytes": 6115,
+              "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+              "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+            }
+          },
+          "project": "CM4AI",
+          "source_manifest": {
+            "bytes": 40612,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml",
+            "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+          }
+        },
+        "receipt": {
+          "condition": "generic_v10",
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "coverage_floor": {
+            "mode": "diagnostic_pilot",
+            "state": "pending"
+          },
+          "format": "receipt_completion_registration_v2",
+          "max_output_tokens": 4000,
+          "max_request_bytes": 32000000,
+          "receipt_instrument_version": 4,
+          "registration_id": "generic-v10-receipt",
+          "runtime_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+        },
+        "registration_id": "generic-v10-cm4ai-2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "registration_path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/CM4AI_0/sizing/CM4AI_registration.json",
+        "run": {
+          "arm": "BASELINE (input documents only)",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "project": "CM4AI"
+        },
+        "runtime": {
+          "base_url": "https://api.cborg.lbl.gov",
+          "config": {
+            "bytes": 6250,
+            "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+            "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+          },
+          "effort": null,
+          "model": "claude-opus-5",
+          "provider": "LBL CBORG (proxy to Anthropic)",
+          "temperature": null,
+          "thinking": {
+            "display": "summarized",
+            "type": "adaptive"
+          }
+        },
+        "selection": {
+          "api_playbook_version": 2,
+          "assets": {
+            ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+            ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+            ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+            ".claude/commands/d4d-uniform-rules-v2.md": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+            "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+            "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+            "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+          },
+          "condition": "generic_v10",
+          "protocol": "shared_generation_v1",
+          "receipt_completion_version": 2,
+          "renderer": 25,
+          "runtime": "Claude API (direct)",
+          "schema_context_trim": {
+            "generation_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "omission_all_reachable_classes": true,
+            "omission_schema_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "worker_non_assigned_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings",
+              "description",
+              "comments"
+            ]
+          },
+          "stage_contracts": {
+            "phase_instructions_sha256": {
+              "audit": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+              "core": "77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986",
+              "full": "2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283",
+              "full_readdress": "59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27",
+              "full_receipt": "849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a",
+              "reconcile_core": "6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6",
+              "reconcile_full": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+              "report": "1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853",
+              "report_regate": "bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"
+            },
+            "phase_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+            "regate_headers_sha256": "81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d",
+            "rereceipt_instruction_sha256": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401",
+            "shared_evidence_contract_sha256": "a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c",
+            "typed_audit_integration_format_sha256": "de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496",
+            "typed_audit_system_sha256": "37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b",
+            "typed_audit_worker_format_sha256": "f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336"
+          },
+          "typed_protocol": "typed_audit_protocol_v1",
+          "version": 1
+        }
+      },
+      "registration_pin": {
+        "bytes": 6730,
+        "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/CM4AI_0/sizing/CM4AI_registration.json",
+        "sha256": "0650ea18e8f4e2e315606bec9d12965a7cf4e853c3cf61598683c428653ad321"
+      },
+      "source_label": "2026-09-04g_claude-opus-5-api-generic-v8_rep1"
+    },
+    {
+      "project": "VOICE",
+      "registration": {
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 704000,
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "integration_output_tokens": 32000,
+          "max_calls": 12,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 11652,
+          "max_paths": 63,
+          "max_request_bytes": 32000000,
+          "max_workers": 10,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "audit_transport": {
+          "malformed_response_retries": 0,
+          "sdk_max_retries": 0,
+          "transport_attempts": 1
+        },
+        "format": "shared_generation_registration_v1",
+        "inputs": {
+          "bundle": {
+            "bytes": 376446,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/VOICE_preprocessed.txt",
+            "sha256": "7c4f71ab2e85d70396e479d39cb5db9454bd9f13c7274b51b4418fc2d452518c"
+          },
+          "chunk_manifest": {
+            "bytes": 4680,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/VOICE_chunks.yaml",
+            "sha256": "f55de43646d5c4a6d61d6339f4d6f6adb3e50cef86d5dad1cb46a43a91fb38bc"
+          },
+          "context": {
+            "bytes": 6610,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/voice_omission_context.json",
+            "sha256": "2925d442752e728868414b149ccd55991136ae82da56d79882842bf16443a21e"
+          },
+          "core_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+            "sources": [
+              {
+                "bytes": 1299200,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+                "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+              }
+            ]
+          },
+          "full_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "sources": [
+              {
+                "bytes": 1442513,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+              }
+            ]
+          },
+          "profile": {
+            "basis": "manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81",
+            "name": "bridge2ai",
+            "vocabulary": {
+              "bytes": 6115,
+              "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+              "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+            }
+          },
+          "project": "VOICE",
+          "source_manifest": {
+            "bytes": 40612,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml",
+            "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+          }
+        },
+        "receipt": {
+          "condition": "generic_v10",
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "coverage_floor": {
+            "mode": "diagnostic_pilot",
+            "state": "pending"
+          },
+          "format": "receipt_completion_registration_v2",
+          "max_output_tokens": 4000,
+          "max_request_bytes": 32000000,
+          "receipt_instrument_version": 4,
+          "registration_id": "generic-v10-receipt",
+          "runtime_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+        },
+        "registration_id": "generic-v10-voice-2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "registration_path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/VOICE_0/sizing/VOICE_registration.json",
+        "run": {
+          "arm": "BASELINE (input documents only)",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "project": "VOICE"
+        },
+        "runtime": {
+          "base_url": "https://api.cborg.lbl.gov",
+          "config": {
+            "bytes": 6250,
+            "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+            "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+          },
+          "effort": null,
+          "model": "claude-opus-5",
+          "provider": "LBL CBORG (proxy to Anthropic)",
+          "temperature": null,
+          "thinking": {
+            "display": "summarized",
+            "type": "adaptive"
+          }
+        },
+        "selection": {
+          "api_playbook_version": 2,
+          "assets": {
+            ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+            ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+            ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+            ".claude/commands/d4d-uniform-rules-v2.md": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+            "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+            "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+            "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+          },
+          "condition": "generic_v10",
+          "protocol": "shared_generation_v1",
+          "receipt_completion_version": 2,
+          "renderer": 25,
+          "runtime": "Claude API (direct)",
+          "schema_context_trim": {
+            "generation_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "omission_all_reachable_classes": true,
+            "omission_schema_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "worker_non_assigned_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings",
+              "description",
+              "comments"
+            ]
+          },
+          "stage_contracts": {
+            "phase_instructions_sha256": {
+              "audit": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+              "core": "77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986",
+              "full": "2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283",
+              "full_readdress": "59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27",
+              "full_receipt": "849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a",
+              "reconcile_core": "6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6",
+              "reconcile_full": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+              "report": "1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853",
+              "report_regate": "bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"
+            },
+            "phase_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+            "regate_headers_sha256": "81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d",
+            "rereceipt_instruction_sha256": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401",
+            "shared_evidence_contract_sha256": "a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c",
+            "typed_audit_integration_format_sha256": "de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496",
+            "typed_audit_system_sha256": "37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b",
+            "typed_audit_worker_format_sha256": "f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336"
+          },
+          "typed_protocol": "typed_audit_protocol_v1",
+          "version": 1
+        }
+      },
+      "registration_pin": {
+        "bytes": 6731,
+        "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/VOICE_0/sizing/VOICE_registration.json",
+        "sha256": "b2bdb73ecfcf55ebc648e462296a8b0bba6c25c94a48c6e8ee6e07e26bf150df"
+      },
+      "source_label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1"
+    },
+    {
+      "project": "VOICE_PEDIATRIC",
+      "registration": {
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 704000,
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "integration_output_tokens": 32000,
+          "max_calls": 12,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 11652,
+          "max_paths": 63,
+          "max_request_bytes": 32000000,
+          "max_workers": 10,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "audit_transport": {
+          "malformed_response_retries": 0,
+          "sdk_max_retries": 0,
+          "transport_attempts": 1
+        },
+        "format": "shared_generation_registration_v1",
+        "inputs": {
+          "bundle": {
+            "bytes": 206008,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+            "sha256": "eb823708a16342a3b12cc1dabb57529cea4f95fd596abf9cbecd657a17d61e47"
+          },
+          "chunk_manifest": {
+            "bytes": 2912,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/chunks/VOICE_PEDIATRIC_chunks.yaml",
+            "sha256": "a1fa4cf8d86c9feb79b8466f4f3af75c552a3bf0b76ae48b1b67955f28fba43a"
+          },
+          "context": {
+            "bytes": 6476,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/omission_contexts/voice_pediatric_omission_context.json",
+            "sha256": "f5d54a6abf7ddf8172ac2ebfdcb910d323bb5e1ac60e840e7334076bcc8650bc"
+          },
+          "core_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+            "sources": [
+              {
+                "bytes": 1299200,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+                "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+              }
+            ]
+          },
+          "full_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "sources": [
+              {
+                "bytes": 1442513,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+              }
+            ]
+          },
+          "profile": {
+            "basis": "manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81",
+            "name": "bridge2ai",
+            "vocabulary": {
+              "bytes": 6115,
+              "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+              "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+            }
+          },
+          "project": "VOICE_PEDIATRIC",
+          "source_manifest": {
+            "bytes": 40612,
+            "path": "/private/tmp/d4d-codex-k1-20261025/data/preprocessed/source_manifest.yaml",
+            "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+          }
+        },
+        "receipt": {
+          "condition": "generic_v10",
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "coverage_floor": {
+            "mode": "diagnostic_pilot",
+            "state": "pending"
+          },
+          "format": "receipt_completion_registration_v2",
+          "max_output_tokens": 4000,
+          "max_request_bytes": 32000000,
+          "receipt_instrument_version": 4,
+          "registration_id": "generic-v10-receipt",
+          "runtime_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+        },
+        "registration_id": "generic-v10-voice_pediatric-2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "registration_path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/VOICE_PEDIATRIC_0/sizing/VOICE_PEDIATRIC_registration.json",
+        "run": {
+          "arm": "BASELINE (input documents only)",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "project": "VOICE_PEDIATRIC"
+        },
+        "runtime": {
+          "base_url": "https://api.cborg.lbl.gov",
+          "config": {
+            "bytes": 6250,
+            "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+            "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+          },
+          "effort": null,
+          "model": "claude-opus-5",
+          "provider": "LBL CBORG (proxy to Anthropic)",
+          "temperature": null,
+          "thinking": {
+            "display": "summarized",
+            "type": "adaptive"
+          }
+        },
+        "selection": {
+          "api_playbook_version": 2,
+          "assets": {
+            ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+            ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+            ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+            ".claude/commands/d4d-uniform-rules-v2.md": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+            "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+            "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+            "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+          },
+          "condition": "generic_v10",
+          "protocol": "shared_generation_v1",
+          "receipt_completion_version": 2,
+          "renderer": 25,
+          "runtime": "Claude API (direct)",
+          "schema_context_trim": {
+            "generation_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "omission_all_reachable_classes": true,
+            "omission_schema_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "worker_non_assigned_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings",
+              "description",
+              "comments"
+            ]
+          },
+          "stage_contracts": {
+            "phase_instructions_sha256": {
+              "audit": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+              "core": "77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986",
+              "full": "2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283",
+              "full_readdress": "59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27",
+              "full_receipt": "849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a",
+              "reconcile_core": "6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6",
+              "reconcile_full": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+              "report": "1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853",
+              "report_regate": "bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"
+            },
+            "phase_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+            "regate_headers_sha256": "81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d",
+            "rereceipt_instruction_sha256": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401",
+            "shared_evidence_contract_sha256": "a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c",
+            "typed_audit_integration_format_sha256": "de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496",
+            "typed_audit_system_sha256": "37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b",
+            "typed_audit_worker_format_sha256": "f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336"
+          },
+          "typed_protocol": "typed_audit_protocol_v1",
+          "version": 1
+        }
+      },
+      "registration_pin": {
+        "bytes": 6811,
+        "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/VOICE_PEDIATRIC_0/sizing/VOICE_PEDIATRIC_registration.json",
+        "sha256": "7d706512c2b4561f70b994aab7869b7622219a9b6de18ba91aa2372718effbca"
+      },
+      "source_label": "2026-09-04f_claude-opus-5-api-generic-v8_rep1"
+    },
+    {
+      "project": "KIDS_FIRST",
+      "registration": {
+        "audit_limits": {
+          "aggregate_input_tokens": 4000000,
+          "aggregate_output_tokens": 512000,
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "integration_output_tokens": 32000,
+          "max_calls": 9,
+          "max_input_tokens_per_call": 1000000,
+          "max_inventory_bytes": 23876,
+          "max_paths": 144,
+          "max_request_bytes": 32000000,
+          "max_workers": 7,
+          "omission_output_tokens": 32000,
+          "worker_output_tokens": 64000
+        },
+        "audit_transport": {
+          "malformed_response_retries": 0,
+          "sdk_max_retries": 0,
+          "transport_attempts": 1
+        },
+        "format": "shared_generation_registration_v1",
+        "inputs": {
+          "bundle": {
+            "bytes": 541184,
+            "path": "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/KIDS_FIRST_preprocessed.txt",
+            "sha256": "cc45c89548158a7a909699fbf1f75e6cc88c32ac8486d5518c5d4e46cdc9447c"
+          },
+          "chunk_manifest": {
+            "bytes": 9496,
+            "path": "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/chunks.yaml",
+            "sha256": "8e9cfb869aabb8720275c43d5d448ff5462527b82b4f50d4d7f713c99bcb6c06"
+          },
+          "context": {
+            "bytes": 5509,
+            "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/KIDS_FIRST_0/sizing/kids_first_draft_omission_context.json",
+            "sha256": "5a4efc9cc067c46dd56b94c8a8fbfbfb6741a0d9b4e570a7b66e5c2252adeba8"
+          },
+          "core_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+            "sources": [
+              {
+                "bytes": 1299200,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+                "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+              }
+            ]
+          },
+          "full_schema": {
+            "root": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+            "sources": [
+              {
+                "bytes": 1442513,
+                "path": "/private/tmp/d4d-codex-k1-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+                "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+              }
+            ]
+          },
+          "profile": {
+            "basis": "stated by the caller",
+            "name": "neutral",
+            "vocabulary": null
+          },
+          "project": "KIDS_FIRST",
+          "source_manifest": {
+            "bytes": 14640,
+            "path": "/private/tmp/d4d-codex-k1-20261025/notes/matched_cborg_2026-09-13/kids_first/manifest.yaml",
+            "sha256": "aa00b62d689aa33d4d6c15d106e620321b295563b14401536e4dc77430d045fd"
+          }
+        },
+        "receipt": {
+          "condition": "generic_v10",
+          "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+          "context_limit_tokens": 1000000,
+          "coverage_floor": {
+            "mode": "diagnostic_pilot",
+            "state": "pending"
+          },
+          "format": "receipt_completion_registration_v2",
+          "max_output_tokens": 4000,
+          "max_request_bytes": 32000000,
+          "receipt_instrument_version": 4,
+          "registration_id": "generic-v10-receipt",
+          "runtime_policy_sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+        },
+        "registration_id": "generic-v10-kids_first-2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+        "registration_path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/KIDS_FIRST_0/sizing/KIDS_FIRST_registration.json",
+        "run": {
+          "arm": "BASELINE (input documents only)",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "project": "KIDS_FIRST"
+        },
+        "runtime": {
+          "base_url": "https://api.cborg.lbl.gov",
+          "config": {
+            "bytes": 6250,
+            "path": "/private/tmp/d4d-codex-k1-20261025/.github/workflows/d4d_assistant_deterministic.config",
+            "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+          },
+          "effort": null,
+          "model": "claude-opus-5",
+          "provider": "LBL CBORG (proxy to Anthropic)",
+          "temperature": null,
+          "thinking": {
+            "display": "summarized",
+            "type": "adaptive"
+          }
+        },
+        "selection": {
+          "api_playbook_version": 2,
+          "assets": {
+            ".claude/agents/d4d-provenance-guard-v2.md": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",
+            ".claude/commands/d4d-agent-v2.md": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",
+            ".claude/commands/d4d-full-core-v2.md": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",
+            ".claude/commands/d4d-uniform-rules-v2.md": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+            "src/download/prompts/api_playbook_v2.md": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719",
+            "src/download/prompts/d4d_generic_arm_prompt_v10.md": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+            "src/download/prompts/receipt_completion_runtime_v2.md": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c",
+            "src/download/prompts/shared_generation_v1.md": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+          },
+          "condition": "generic_v10",
+          "protocol": "shared_generation_v1",
+          "receipt_completion_version": 2,
+          "renderer": 25,
+          "runtime": "Claude API (direct)",
+          "schema_context_trim": {
+            "generation_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "omission_all_reachable_classes": true,
+            "omission_schema_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings"
+            ],
+            "worker_non_assigned_dropped_slot_keys": [
+              "domain_of",
+              "from_schema",
+              "alias",
+              "owner",
+              "@type",
+              "slot_uri",
+              "annotations",
+              "exact_mappings",
+              "broad_mappings",
+              "description",
+              "comments"
+            ]
+          },
+          "stage_contracts": {
+            "phase_instructions_sha256": {
+              "audit": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+              "core": "77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986",
+              "full": "2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283",
+              "full_readdress": "59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27",
+              "full_receipt": "849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a",
+              "reconcile_core": "6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6",
+              "reconcile_full": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+              "report": "1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853",
+              "report_regate": "bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"
+            },
+            "phase_system_sha256": "badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88",
+            "regate_headers_sha256": "81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d",
+            "rereceipt_instruction_sha256": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401",
+            "shared_evidence_contract_sha256": "a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c",
+            "typed_audit_integration_format_sha256": "de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496",
+            "typed_audit_system_sha256": "37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b",
+            "typed_audit_worker_format_sha256": "f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336"
+          },
+          "typed_protocol": "typed_audit_protocol_v1",
+          "version": 1
+        }
+      },
+      "registration_pin": {
+        "bytes": 6627,
+        "path": "/private/tmp/d4d-codex-k1-20261025/notes/k1_cost_model_2026-10-25/primary-scratch/KIDS_FIRST_0/sizing/KIDS_FIRST_registration.json",
+        "sha256": "f753289e4be57b218ad1836f967aedd50a159172a8b37aa784322fb7d0d2c4ca"
+      },
+      "source_label": "2026-09-04g_claude-opus-5-api-generic-v8_rep2"
+    }
+  ],
+  "scope": "Post-run retained authority preservation and freshness check; not retroactive loaded-code proof.",
+  "script": {
+    "bytes": 3843,
+    "path": "/private/tmp/d4d-codex-k1-20261025/scripts/adhoc/k1_collect_primary_authorities_20261025.py",
+    "sha256": "d0e03e56300335b035f73fa34aace550fd8533c8f718ff23a93c8f2e25549a7b"
+  },
+  "source_base": "56c41163f8b64119656b8aa2edef9c97707a3826",
+  "source_delta": [
+    "A\tsrc/data_sheets_schema/offline_sizing.py"
+  ]
+}
