@@ -89,58 +89,97 @@ Six draft `omission_context_v1` files have been generated in `data/omission_cont
 
 ---
 
-## 4. Owner Decisions Status (`D01`–`D25`)
+## 4. Owner Decisions Status (`D01`–`D31`)
 
-| Decision ID | Status | Summary / Required Owner Action |
+| Decision ID | Status | Summary / Owner Ruling |
 | --- | --- | --- |
 | **`D06`** (`#1849`) | **DECIDED (2026-10-19)** | Every `generic_v10` API registration declares `{"type": "adaptive", "display": "summarized"}`; no typed-stage cache breakpoint. |
 | **`D07`** (`#1763`) | **DECIDED (2026-10-19)** | Option 1: `$100` named `generic_v10` API pilot allocation (`CHORUS` pilot `$15`, contingency `$15`; `AI_READI` pilot `$35` provisional ceiling, contingency `$35`); at most 2 billed attempts per cell; explicit registration `sha256` word required per launch. |
 | **`D10`** (`#4761`) | **DECIDED (2026-10-20)** | **Retire** the `v10z`/`audit_controls` native lineage and `audit28` (recorded in `notes/reviews/v10z_retirement_2026-10-20.md`). |
 | **`D22`** (`#1763`, `#4761`) | **DECIDED (2026-10-20)** | **Withdraw** all `v10z` standing authorizations; every `generic_v10` generation and evaluation requires its own explicit owner word. |
-| **`S7` / `G5` / `A6` (`#5072`)** | **`PENDING OWNER`** | Approve `S7` prompt/schema-carry compaction, `G5` partition (`384` paths / `65,536` B / `4` workers), report-family carry trim, and raised `A6` worker/aggregate output limits before `Step A1b` token-count verification. |
+| **`D26` (`D-A`)** (`#1763`) | **DECIDED (2026-10-23T23:35Z)** | **Track N is the native agentic path** (`"focus the canary on the native agentic approach not api"`, `"next address these based on current recommendations"`). Uses the **default runtime profile** (not `profile1`), aligns scientific prompt bytes with the API arm after `D30` (`D-E`), and declares procedure differences before comparison. |
+| **`D27` (`D-B`)** (`#1763`) | **DECIDED (2026-10-23T23:35Z)** | **Direct-arm directory and prose naming** (follows from `D26`/`D-A`): Track N writes `claudecode_direct{,_core}/<label>/`; in prose the route is called `"native agentic (direct arm)"` (not `claudecode_agent`). |
+| **`D28` (`D-C`, `S7`/`G5`/`A6`)** (`#5072`, `#5095`, `#5096`, `#5112`–`#5116`, `#5148`) | **DECIDED (2026-10-23T23:35Z)** | **Void `2026-10-22b` (`CHORUS` × 3); run 1 clean `CHORUS` API re-canary after fixes** (`"next address these based on current recommendations"`). Stage output caps `64k/32k/32k` with derived aggregate (`max_workers × worker + omission + integration`) and `128k` `report`/`report_regate`/`reconcile_full` cap; no global partition default (`--partition chorus` sets `80 / 12,288 / 4` for `CHORUS` only); coverage floor gates the receipted part `with_receipt / (receiptable − added_after_receipt)` (`coverage_floor.basis: receipted_part`, `19/20` on the re-canary, builder default `pending`, `added_after_receipt` reported and ungated per `#742`, fence unwrap versioned per `#5116`); `S7` reworked so generation gets full descriptions, typed-audit workers keep their own slot descriptions, omission gets slot definitions, wire bytes are hashed (`#5148`), and registration identity covers trim, code-side contracts, and wire format (`#5113`, `#5114`). |
+| **`D29` (`D-D`)** | **`PENDING OWNER` (at native launch)** | Effort level and first-party `claude.ai` subscription/login account for the Claude Code native canary (Track N requires a first-party `claude.ai` login and no API key). |
+| **`D30` (`D-E`)** (`#5048`, `#5093`, `#5097`–`#5099`, `#5102`, `#5103`) | **DECIDED (2026-10-23T23:35Z; J3′/J5/J6 confirmed 2026-10-24T00:48Z)** | **Fix `generic_v10` R9 criteria-defined enumeration rule text with a new pin rotation on `#5093`** (`"next address these based on current recommendations"`, `"confirm"` on J3′ tier names as prose, J5 access facts only, J6 open licence/guestbook not restricting access). Scope R9 criteria clause strictly to `confidentiality_level` and `hipaa_compliant`. |
+| **`D31` (`D-F`)** (`#5096`, `#5115`, `#5138`, `#5142`) | **DECIDED (2026-10-23T23:35Z)** | **`2026-10-20a` is kept as evidence only, marked invalid** (`"next address these based on current recommendations"`). Archived via `d4d runs archive` under `data/ATTIC/d4d_concatenated_archived/` with a `README.md` and removed from corpus inventories; `2026-10-22a` lands as a generated record after its fixes and disclosures. |
 | **`D02` (`#5042`, `P2`)** | **`PENDING OWNER`** | Choose Option `(a)`, `(b)`, `(c)`, or `(d)` for the `AI_READI` `v8` comparator and canary baseline. |
 | **`D04` (`#2914`)** | **`PENDING OWNER`** | Confirm `CHORUS` corpus policy (`Path B` frozen 17-file bundle `9b2ef4b6` for `v10` comparability vs `Path A` prune). |
-| **`D-C` (`#5095`, `#5096`)** | **`PENDING OWNER`** | Approve API registration defaults (`64k/32k/32k/320k` tokens, `80` paths / `12,288` B, numeric `coverage_floor` `17/20 = 0.85`) and choose Option 1, 2, or 3 for `2026-10-22b` (`CHORUS` × 3) below. |
 | **`D01`, `D03`, `D05`, `D08`, `D09`, `D11`–`D21`, `D23`–`D25`** | **`PENDING OWNER`** | Documented with recommendations and `[proposed; owner fixes at P4]` rules in `notes/generic_v10_analysis_plan.md`. |
 
 ---
 
-## 5. Decision `D-C`: API Registration Limits, Numeric Coverage Floor, and `2026-10-22b` (`CHORUS` × 3) — `PENDING OWNER`
+## 5. Decided Rulings of 2026-10-23 (`D26`/`D-A`, `D27`/`D-B`, `D28`/`D-C`, `D30`/`D-E`, `D31`/`D-F`)
 
-Following the two 1-replicate `CHORUS` `generic_v10` API canaries (`2026-10-20a` and `2026-10-22a`, PR `#5096`, full readout in `notes/reviews/chorus_v10_api_canaries_2026-10-22_outcome.md`), the owner must decide the production API registration defaults and whether to run `2026-10-22b` (`CHORUS` × 3 replicates).
+On **2026-10-23T23:35Z**, the owner directed `"next address these based on current recommendations"` across `D-A`, `D-B`, `D-C`, `D-E`, and `D-F` (supplementing the earlier 2026-10-23 direction `"focus the canary on the native agentic approach not api"`, and followed on **2026-10-24T00:48Z** by `"confirm"` on the three R9 judgement calls `J3′`, `J5`, and `J6`). Because the `notes/coordination/` directory is untracked, the authoritative record of each decision is preserved here under `D26`–`D31`.
 
-### 5.1 D07 Budget Accounting & Money Left After `2026-10-20a` and `2026-10-22a`
+### 5.1 `D28` (`D-C`): Void `2026-10-22b` (`CHORUS` × 3), Run One Clean `CHORUS` API Re-Canary After Fixes, and Update Registration/Runtime Rules
+
+#### 5.1.1 D07 Budget Accounting & Why `2026-10-22b` Is Voided
 
 | Budget Slice / Run | Allocation / Limit | Settled Spend | Total Spend (incl. Abandoned Calls) | Remaining Balance / Status |
 | --- | --- | --- | --- | --- |
-| **`2026-10-20a`** (`CHORUS` rep1, `25k/16k/16k/150k`) | Attempt 1 of 2 (`$15.00` pilot) | `$20.59` (11 rows) | `$21.44` (`+$0.85` abandoned `report`) | Completed (`gate.verdict: unmeasurable`, `58/63` slot receipts, `1` unverified snippet) |
-| **`2026-10-22a`** (`CHORUS` rep1, `64k/32k/32k/320k`) | Attempt 2 of 2 (`$15.00` contingency) | `$15.17` (9 rows) | `$17.15` (`+$1.98` abandoned `reconcile_full`) | Completed (`gate.verdict: unmeasurable`, `64/75` slot receipts, `0` unverified snippets) |
+| **`2026-10-20a`** (`CHORUS` rep1, mid-run `25k` → `64k`) | Attempt 1 of 2 (`$15.00` pilot) | `$20.59` (11 rows) | `$21.44` (`+$0.85` abandoned `report`) | **Archived to `data/ATTIC/` as invalid evidence only (`D31`/`D-F`, `#5138`, `#5115`, `#5142`)** |
+| **`2026-10-22a`** (`CHORUS` rep1, `64k/32k/32k/320k`) | Attempt 2 of 2 (`$15.00` contingency) | `$15.17` (9 rows) | `$17.15` (`+$1.98` abandoned `reconcile_full`) | **Retained generated canary (`gate.verdict: unmeasurable`, `64/75` slot receipts, `0` unverified snippets; ran under `S7` as implemented and undeclared fence unwrap `#5116`)** |
 | **`D07` `CHORUS` API Canary Slice** | **`$30.00`** (`$15 + $15`, max 2 attempts) | **`$35.76`** | **`$38.59`** | **`$0.00` left** (`-$5.76` settled / `-$8.59` total over `$30.00`; **2 of 2 allowed attempts used**) |
-| **`D07` Option 1 Total API Pilot Envelope** | **`$100.00`** (`$30` `CHORUS` + `$70` `AI_READI`) | `$35.76` | `$38.59` | **`$64.24` settled / `$61.41` total** unspent (earmarked for `AI_READI` `$35 + $35` pilot slice) |
-| **`D07` Overall Campaign Ceiling** | **`$420.00`** | `$35.76` | `$38.59` | **`$384.24` settled / `$381.41` total** unspent (requires explicit per-run owner word under `D22`) |
+| **`D07` Option 1 Total API Pilot Envelope** | **`$100.00`** (`$30` `CHORUS` + `$70` `AI_READI`) | `$35.76` | `$38.59` | **`$64.24` settled / `$61.41` total** unspent (**AI_READI's `$70` stays whole**) |
+| **`D07` Overall Campaign Ceiling** | **`$420.00`** | `$35.76` | `$38.59` | **`$384.24` settled / `$381.41` total** unspent (**`~$25` slice allocated for 1 clean `CHORUS` API re-canary; launch still requires explicit owner word naming the registration `sha256` per `D07`/`D22`**) |
 
-### 5.2 Projected Cost of `2026-10-22b` (`CHORUS` × 3 Replicates)
+- **Why `2026-10-22b` (`CHORUS` × 3) is voided and never launched**:
+  1. Neither `2026-10-20a` nor `2026-10-22a` was a clean, measured-pass run of a fixed registration (`2026-10-20a` changed registration mid-run and had hand-edited report files; `2026-10-22a` ran `77b94e457` code-side contract text not captured in its v1 registration identity, ran under `S7` as implemented, and relied on an undeclared YAML-fence unwrap in `rereceipt.parse_answers`).
+  2. Per the owner's canary rule (*"If the canary needed a fix, re-canary; do not fix and fan out in the same step"*), the three `2026-10-22b` registration files (`f11fea22…`, `0b9e1a94…`, `6d5ae9fc…`) and roster (`7e946b33…`) in `d4d-executions/caller-inputs/` are left byte-for-byte untouched alongside `VOID.md` (`"voided by the owner's D-C decision, 2026-10-23; never launched"`).
+  3. Instead, after `D30` (`D-E` R9 fix) and `D28` (`D-C` floor, caps, and `S7` fixes) land on one pushed head, **one** clean `CHORUS` API re-canary registration will be built on the exact same R9 scientific bytes as the Track N native canary (`D26`/`D-A`), budgeted at at most `$25` from the `$420` ceiling while leaving `AI_READI`'s `$70` untouched. Launching that re-canary still requires an explicit owner word naming its registration `sha256` (`D07`, `D22`).
 
-- Based on measured `CHORUS` API canary costs (`$15.17` settled on the clean 9-call `64k/32k/32k/320k` run `2026-10-22a`, up to `$20.59` settled when `report_regate` triggers as in `2026-10-20a`), running **3 replicates (`rep1..rep3`)** in `2026-10-22b` has a projected cost of:
-  - **Settled ledger cost (0–1 regate/run)**: **`$45.51 – $61.77`** (`3 × $15.17` to `3 × $20.59`).
-  - **Total cost including typical abandoned-call overhead**: **`$51.45 – $64.32`** (`3 × $17.15` to `3 × $21.44`).
-- Because the `$30.00` `CHORUS` canary slice and its 2-attempt cap are exhausted, `2026-10-22b` cannot launch under the existing `D07` `CHORUS` pilot authorization and requires an explicit new budget slice (`~$65` ceiling) and registration `sha256` approval.
+#### 5.1.2 Decided `D28` (`D-C`) Technical Specifications (Replacing the Superseded Draft of `bb47ac648`)
 
-### 5.3 Proposed `D-C` Registration Defaults (Prepared on `origin/feat/v10-dc-registration-defaults` at `85698e6c9`)
+1. **Output Token Caps (`A12`)**:
+   - Keep typed-audit stage caps at `worker_output_tokens = 64,000`, `omission_output_tokens = 32,000`, `integration_output_tokens = 32,000`.
+   - Derive `aggregate_output_tokens` mechanically as `max_workers × worker_output_tokens + omission_output_tokens + integration_output_tokens` (`320,000` for 4 workers), and `max_calls` from the worker count (`max_workers + 2`).
+   - Raise the runner cap (`api_runner.py`) for `report`, `report_regate`, and `reconcile_full` from `96,000` to **`128,000`** tokens (`2026-10-22a` used `83,367 / 96,000` tokens on `report`, 87% of cap).
+2. **Partition Bounds (`A12` & `A17`) — Correction to `bb47ac648`**:
+   - *Correction*: `max_paths = 80, max_inventory_bytes = 12,288, max_workers = 4` is **not a valid global default**. It refuses every `AI_READI`, `CM4AI`, `VOICE`, and `v8` `CHORUS` full record on `indivisible_field_bound` (`/creators` has 133–184 paths; `/file_collections` has 99–144 paths) and `worker_count_bound`. Conversely, `384 / 65,536 / 4` plans all projects but can assign a single worker an inventory requiring `230k–300k` output tokens (exceeding the `64k` cap and `128k` model ceiling).
+   - **Ruling**: `scripts/build_api_registrations.py` has **no global partition default** and refuses to build unless explicit bounds (`--max-paths`, `--max-inventory-bytes`, `--max-workers`) or the CHORUS-only `--partition chorus` profile (`80 / 12,288 / 4`, valid only for `--project CHORUS`) are supplied. Before any non-CHORUS `v10` run (`A17`), `make_plan` will split large top-level lists across workers and scale `max_workers`, `aggregate_output_tokens`, and `max_calls` so each worker's inventory stays at ~12 KB or less.
+3. **Receipt Coverage Floor Basis & Versioned Fence Unwrap (`A13`, `#5116`, `#742`) — Correction to `bb47ac648`**:
+   - *Correction*: The metric name `required_recommended_20` cited in `bb47ac648` **does not exist in the codebase**. In `receipt_completion.py`, `evaluate_floor` compares `minimum_numerator / denominator` against `with_receipt / receiptable`. In both `2026-10-20a` and `2026-10-22a`, `never_receipted == 0` (100% of slots present at receipt time received a receipt); all unreceipted slots (`5` in `10-20a`, `11` in `10-22a`) were `added_after_receipt` during reconciliation, which `#742` specifies are reported under `slots.without_receipt` and never gated.
+   - **Ruling**:
+     - First (`#5116`), record `answer_envelope` (`bare` or `yaml_fence`) and `answer_parser` (`v2`) in receipt-completion results so fence unwrapping is explicitly declared and versioned.
+     - Second, add `coverage_floor.basis: receipted_part` to gate **`with_receipt / (receiptable − added_after_receipt)`** (on which `2026-10-20a` is `58/58` and `2026-10-22a` is `64/64`), while reporting `added_after_receipt` beside it ungated. Existing v2 floors without `basis` keep their exact `all_receiptable` meaning byte-for-byte.
+     - Keep the builder default `coverage_floor` as `pending` (`diagnostic_pilot`) so fan-out stays blocked by default (`cli/api.py`), and register `19/20` (`basis: receipted_part`) specifically on the `CHORUS` re-canary registration.
+4. **`S7` Schema-Context Rework & Registration Identity Coverage (`A14`, `#5113`, `#5114`, `#5148`)**:
+   - **Generation phases** (`full`, `reconcile_full`, `report`, repair) send the untrimmed schema context with slot `description` and `comments` restored (~`+$0.30`/run).
+   - **Typed-audit workers** keep the `S7` trim on non-assigned classes/slots, but retain `description` for the slots in each worker's own assigned inventory.
+   - **Omission stage** receives the induced slot definitions (`classes` with slot `description`) required by the frozen omission policy.
+   - **Wire-byte hashing (`#5148`)**: Every declared request hash (`inner_request_sha256` and stage request digests) hashes the exact wire bytes sent.
+   - **Registration identity (`#5113`, `#5114`)**: Registration identity covers the schema-context trim parameters, code-side instruction text (`77b94e457` contract paragraphs), and wire format, under a bumped shared-generation renderer/protocol version so older registrations cannot validate against new bytes.
+   - Both `2026-10-20a` and `2026-10-22a` are explicitly labelled `"run under S7 as implemented (descriptions trimmed in every phase)"`.
 
-- **Token & Partition Limits**: `worker_output_tokens = 64,000`, `omission_output_tokens = 32,000`, `integration_output_tokens = 32,000`, `aggregate_output_tokens = 320,000`, `max_paths = 80`, `max_inventory_bytes = 12,288` (`max_workers = 4`).
-  - *Why*: Eliminates the `25,000`-token `audit_worker` truncation ceiling hit on `CHORUS` (`w2` reached `22,571` tokens in `2026-10-22a`) and the `16,000`-token `reconcile_full` truncation failure that caused the `$1.98` abandoned call in `2026-10-22a` (`reconcile_full` needed `18,412` output tokens).
-- **Numeric Coverage Floor**: `coverage_floor = {"metric": "required_recommended_20", "minimum": 0.85, "minimum_numerator": 17, "denominator": 20}` (`--coverage-floor 17/20`).
-  - *Why*: Replaces `{"state": "pending", "mode": "diagnostic_pilot"}` so `gate.verdict` evaluates to a determinate `pass`/`fail` instead of `unmeasurable`. Both `2026-10-20a` (`58` receipted slots) and `2026-10-22a` (`64` receipted slots) clear `17/20` (`0.85`) on `required_recommended_20`.
+---
 
-### 5.4 Owner Options for `D-C` and `2026-10-22b`
+### 5.2 `D26` (`D-A`) & `D27` (`D-B`): Native Agentic (Direct Arm) Path via Track N
 
-1. **Option 1 — Launch `2026-10-22b` (`CHORUS` × 3 API replicates) Now Under New `D-C` Defaults**:
-   - **Action**: Merge `origin/feat/v10-dc-registration-defaults` (`85698e6c9`), register `CHORUS` `rep1..rep3` with `64k/32k/32k/320k` limits, `80` paths / `12,288` B, and `coverage_floor = 17/20`, authorize an explicit `$65` `D07` budget slice, and launch after owner word on the 3 registration `sha256` digests.
-   - **What it would show**: 3-replicate within-condition variance (`rep1..rep3`) for `claudecode_api` `generic_v10` on `CHORUS` under a determinate gate (`gate.verdict: pass`/`fail`) and uniform token caps (`2026-10-20a` and `2026-10-22a` differed in worker/reconcile caps and had `gate.verdict: unmeasurable`).
-2. **Option 2 — Defer `2026-10-22b` Until After the Native Agentic Canary (`D-A`)**:
-   - **Action**: Merge the `D-C` defaults (`85698e6c9`) for future registrations, keep `2026-10-22b` on hold, and run the 1-replicate Track N native agentic canary (`D-A`, `notes/coordination/2026-10-23-codex-n1-assessment.md`) on `CHORUS` first; decide afterward whether a 3-replicate matched pair (API × 3 vs native × 3) is worth `$45–$64`.
-   - **What it would show**: A direct 1-rep cross-transport comparison (`claudecode_api` `2026-10-22a` vs `claudecode_agent` `D-A`) before committing `$45–$64` to replicate expansion on `CHORUS`.
-3. **Option 3 — Drop `2026-10-22b` and Use `2026-10-20a` + `2026-10-22a` as the `CHORUS` API Baseline**:
-   - **Action**: Merge the `D-C` defaults (`85698e6c9`), cancel `2026-10-22b`, treat the two completed 1-rep `CHORUS` API runs in `#5096` as the `CHORUS` API pilot baseline, and reserve the remaining `$61.41–$64.24` of the `$100` `D07` pilot envelope for the `AI_READI` pilot (`$35 + $35`) once `D02` is chosen.
-   - **What it would show**: Preserves the `$100` `D07` pilot budget ceiling while advancing to the larger multi-worker `AI_READI` testbed under the validated `64k/32k/32k/320k` + `17/20` registration defaults.
+- **Ruling (`D26` / `D-A`, 2026-10-23T23:35Z)**: Track N (`codex/track-n-direct-adapter`) is the chosen path for the `generic_v10` native agentic canary on `CHORUS`, running under the **supported default runtime profile** (not `profile1`), aligned to the post-`D30` (`D-E`) R9 prompt pins, with all runtime and procedure differences between the API package and the native package explicitly declared before comparison (`notes/coordination/2026-10-23-codex-n1-assessment.md` §§5.1–5.2).
+- **Ruling (`D27` / `D-B`, 2026-10-23T23:35Z)**: Track N writes to `data/d4d_concatenated/claudecode_direct{,_core}/<label>/` (per `D09` and `native_shared_contract.py`), and in prose the route is referred to as **"native agentic (direct arm)"** (correcting the earlier reference to `claudecode_agent` in `bb47ac648`).
+
+---
+
+### 5.3 `D30` (`D-E`): Corrected `generic_v10` R9 Criteria-Defined Enumeration Rule Text (`#5048`, `#5093`, `#5097`–`#5099`, `#5102`, `#5103`)
+
+- **Ruling (`D30` / `D-E`, 2026-10-23T23:35Z; `J3′`, `J5`, `J6` confirmed 2026-10-24T00:48Z)**: Replace the R9 criteria-defined enumeration paragraph in `src/download/prompts/d4d_generic_arm_prompt_v10.md` and `.claude/commands/d4d-uniform-rules-v2.md` on PR `#5093` and rotate both prompt pins (`canonical_hashes.yaml` and `shared_generation.ASSET_HASHES`):
+  1. **Closed scope (`#5099`)**: Only two enumeration slots — `confidentiality_level` (`ConfidentialityLevelEnum`) and `hipaa_compliant` (`ComplianceStatusEnum`) — use the criteria-defined passage rule; `data_type`, `collection_type`, and all other enumerations remain under standard literal/normalized token matching.
+  2. **`confidentiality_level` criteria & precedence (`#5098`, `J1`, `J2`, `J3′`, `J5`, `J6`)**:
+     - Public download without account/registration/approval/signed agreement supports `unrestricted`; Creative Commons licences, licence confirmations, citation requests, and download guestbooks are not access restrictions (`J6`, preserving `CM4AI` as `unrestricted`).
+     - Registration/account, verified identity/credentials, request approval, institutional sign-off, or a signed/accepted DUA or dataset-specific licence supports `restricted` (`J1`).
+     - Individual request review before access is granted by a DAC/office or an IRB/ethics committee approving the requester's own use (not the study's own data-collection IRB) supports `confidential`, taking precedence over `restricted` conditions on the same route (`J1`).
+     - Multi-tier datasets record the **least restrictive tier** through which any of the dataset's own data (excluding metadata, documentation, code, samples, or synthetic copies) can be obtained, with all tiers described in `data_governance.access_review_process` (`J2`).
+     - Tier names (`"controlled access"`, `"registered access"`, `"credentialed access"`) state no conditions, are recorded as prose, and are never the coverage receipt (`J3′`, `#5102`). Statements of data sensitivity do not decide `confidentiality_level` (`J5`).
+  3. **`hipaa_compliant` criteria (`#5097`, `J4`)**:
+     - Passages stating the dataset holds no data about human participants (e.g., cell lines, model organisms, simulated data) support `not_applicable`.
+     - Passages stating the data were de-identified under HIPAA (naming HIPAA, Safe Harbor, or Expert Determination) support `compliant`; `"no PHI"` or `"de-identified"` without naming HIPAA or either method supports neither value.
+
+---
+
+### 5.4 `D31` (`D-F`): Archive `2026-10-20a` to `data/ATTIC/` as Invalid Evidence Only (`#5096`, `#5115`, `#5138`, `#5142`)
+
+- **Ruling (`D31` / `D-F`, 2026-10-23T23:35Z)**:
+  1. `2026-10-20a_claude-opus-5-api-generic-v10_rep1` (`CHORUS`) is archived via `d4d runs archive` to `data/ATTIC/d4d_concatenated_archived/claudecode_api{,_core}/2026-10-20a_claude-opus-5-api-generic-v10_rep1/` with a companion `README.md` declaring it **evidence-only and invalid as a generated D4D record** (documenting the `agy` session's 19:23 PDT and 21:43 PDT hand edits to the rejected `72ac7d9a…` report response after unsaved regate `a42e7689…`, and the mid-run registration overwrite `57d5c842…` → `4f94102c…`), and is removed from all active corpus inventories (`tests/data/report_claims_origins.json`, `tests/test_report_claims_corpus.py`, `tests/test_status_context.py`).
+  2. `2026-10-22a_claude-opus-5-api-generic-v10_rep1` (`CHORUS`) remains in `data/d4d_concatenated/` on PR `#5096` with explicit outcome-note disclosures that its receipt completion relied on the then-undeclared YAML-fence unwrap (`#5116`) and that it ran under `S7` as implemented (`#5113`, `#5114`, `#5148`).

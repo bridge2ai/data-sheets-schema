@@ -6048,8 +6048,10 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
             evidence = evidence_checks_block(spec, carry, report=True)
             block["evidence_assertions"] = evidence
             block["findings"] = list(block.get("findings") or []) + evidence["findings"]
+        core_findings_count = len(block.get("findings") or [])
         audit_totals = report_audit_totals_block(spec, carry=carry)
         block["report_audit_totals"] = audit_totals
+        block["_core_findings_count"] = core_findings_count
         block["findings"] = list(block.get("findings") or []) + list(audit_totals.get("findings") or [])
         return block
 
@@ -6087,6 +6089,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         out["findings_include_evidence_assertions"] = True
     if "report_audit_totals" in before:
         out["report_audit_totals_before"] = before["report_audit_totals"]
+        out["findings_include_report_audit_totals"] = True
     if not before.get("checked"):
         out["reason"] = before.get("reason")
         return out
@@ -6119,7 +6122,8 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     require_source_reviews(spec, carry, evidence=after.get("evidence_assertions"))
     worse = (out["regenerated"] and (
         (before.get("disposition_rows") and not after.get("disposition_rows"))
-        or len(after.get("findings") or []) > len(before.get("findings") or [])))
+        or len(after.get("findings") or []) > len(before.get("findings") or [])
+        or after.get("_core_findings_count", 0) > before.get("_core_findings_count", 0)))
     if worse:
         # A prose reply that drops the table, or a rewrite with more
         # contradictions than before, is not an improvement (#965/#967). The
