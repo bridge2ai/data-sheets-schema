@@ -252,6 +252,7 @@ def _state():
     functions = tuple(_FUNCTIONS.key(fn) for fn in (
         omissions._schema, omissions._schema_product, omissions._schema_with_root_bases,
         omissions._mapping, omissions._read, omissions._load_yaml, omissions._legacy_yaml,
+        omissions._schema_yaml,
         omissions._event_text_bytes, omissions._sha, omissions._json,
         omissions.nesting_exceeds, omissions._validate_json,
         duplicate_keys.nesting_exceeds, support_targets._validate_json,
@@ -303,7 +304,8 @@ def _state():
     settings = setting_key({
         'limits': tuple(getattr(omissions, name) for name in (
             'MAX_INPUT_BYTES', 'MAX_SCHEMA_BYTES', 'MAX_NODES', 'MAX_DEPTH',
-            '_YAML_REPLAY_MAX_EVENTS', '_YAML_REPLAY_MAX_TEXT_BYTES')),
+            '_YAML_REPLAY_MAX_EVENTS', '_YAML_REPLAY_MAX_TEXT_BYTES',
+            'MAX_SCHEMA_EVENTS', 'MAX_SCHEMA_EVENT_CHARS')),
         'uri_to_local': snapshots.URI_TO_LOCAL,
         'schema_directory': str(snapshots.SCHEMA_DIRECTORY),
         'contract_limits': dict(contract.HARD_LIMITS),
@@ -313,7 +315,8 @@ def _state():
     _loader_handlers()
     return (functions, _explicit_loader_parse(), _schema_state(_FUNCTIONS), _metadata(),
             tuple(_loader(cls) for cls in (yaml.SafeLoader, yamlutils.SafeLoader,
-                                          omissions._UniqueLoader, omissions._EventReplayLoader)),
+                                          omissions._UniqueLoader, omissions._EventReplayLoader,
+                                          omissions._SchemaEventLoader)),
             constructor_key(snapshots.SchemaSnapshot, _FUNCTIONS),
             constructor_key(snapshots.SchemaDefinition, _FUNCTIONS),
             constructor_key(Namespaces, _FUNCTIONS), namespaces,

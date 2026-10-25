@@ -54,3 +54,15 @@ The cached base has D32 documentation, not the later A12/A13 implementations.
 Their subsequent integration/rebase remains explicit work for the orchestrator.
 Scanner compatibility, probe producer/front door and 900-second acceptance
 belong to later units in the series.
+
+Frozen head `0d5bddbc0`: **310 passed** in 422.26 seconds across the 14-module
+receipt, derivation, provenance and origin regression group. This includes the
+existing API receipt/floor, backfill and core-derivation tests, plus actual
+offline legacy/direct/native registration and pure stage-to-origin joins.
+The log is `native_n2_validation_2026-10-25/receipts-0d5bddbc0.log`.
+
+Review finding N2-R1 is recorded in `native_n2_review_issues_2026-10-25.md`.
+Its new mutation test failed before the correction; the corrected schema-event
+guard and broader dependency/native typed-catalog tests passed 73 tests.
+The frozen 310-test run precedes that narrow cache correction; later focused
+cache results cover the changed boundary explicitly.
