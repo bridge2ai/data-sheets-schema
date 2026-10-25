@@ -307,7 +307,8 @@ TOOL_RECEIPT_NAMES = (
 RECEIPTS_V5_INSTRUMENT = (
     "v5 (supports/explanation/tool receipts; slots.added_after_receipt_unmatched): "
     "names `slots.added_after_receipt_unmatched` (uncovered leaves that the "
-    "phase-1 snapshot lacks by path and by normalized leaf value, added to v4 "
+    "phase-1 snapshot lacks by path and by JSON-canonical leaf value with "
+    "single-element list collapse, added to v4 "
     "blocks without changing RERECEIPTS_INSTRUMENT); receipt entries accept "
     "structured polarity (supports: SUPPORT|PARTIAL|REFUTE|NO_EVIDENCE|NEUTRAL), "
     "evidence_source, explanation (deterministic fast-entailment screen "
