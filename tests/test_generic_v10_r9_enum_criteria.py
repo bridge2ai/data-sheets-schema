@@ -45,14 +45,14 @@ R9_TEXT_UNITS: dict[str, str] = {
         "for the same data."
     ),
     "criterion_public_licence_carveout": (
-        "A public licence such as Creative Commons, a download page asking the user to confirm "
-        "that licence, a request to cite, or a form asking who is downloading is not such a "
+        "A public license such as Creative Commons, a download page asking the user to confirm "
+        "that license, a request to cite, or a form asking who is downloading is not such a "
         "condition."
     ),
     "criterion_restricted": (
         "A passage stating that access requires registration or an account, verified identity "
         "or credentials, approval of the request, sign-off by the requester's institution, or "
-        "a data use agreement or dataset-specific licence that the requester or their "
+        "a data use agreement or dataset-specific license that the requester or their "
         "institution signs or accepts supports `restricted`."
     ),
     "criterion_confidential": (
@@ -164,6 +164,11 @@ class TestR9ConditionBoundaryAndParity:
         assert "Two enumeration slots, `confidentiality_level` and `hipaa_compliant`" in _norm(v10_raw)
         assert "No other enumeration slot is read this way" in _norm(v10_raw)
 
+        # D38: American English "license" in the R9 span (no British "licence" in v10 body)
+        v10_body = v10_raw.split("## Prompt body", 1)[1]
+        assert "licence" not in v10_body.lower()
+        assert "  those.\n" not in v10_raw
+
         assert (
             hashlib.sha256(PROMPT_V10.read_bytes()).hexdigest()
             == ASSET_HASHES["src/download/prompts/d4d_generic_arm_prompt_v10.md"]
@@ -181,7 +186,8 @@ class TestR9ConditionBoundaryAndParity:
 )
 class TestR9MutationMetaTests:
     """Mutation meta-tests: each of the 5 specified mutations on the R9 text must fail
-    on both d4d_generic_arm_prompt_v10.md and d4d-uniform-rules-v2.md."""
+    on both d4d_generic_arm_prompt_v10.md and d4d-uniform-rules-v2.md without referencing
+    the target unit string from R9_TEXT_UNITS."""
 
     @staticmethod
     def _base_text(prompt_path: Path) -> str:
@@ -209,10 +215,7 @@ class TestR9MutationMetaTests:
 
     def test_mutation_replace_least_with_most_fails(self, prompt_path: Path) -> None:
         text = self._base_text(prompt_path)
-        mutated = text.replace(
-            "the slot records the least restrictive tier",
-            "the slot records the most restrictive tier",
-        )
+        mutated = text.replace(" least ", " most ")
         assert "missing:tier_sentence_least_restrictive" in check_r9_text_units(mutated)
 
     def test_mutation_swap_compliant_and_not_applicable_fails(self, prompt_path: Path) -> None:
@@ -227,7 +230,11 @@ class TestR9MutationMetaTests:
 
     def test_mutation_delete_scope_sentence_fails(self, prompt_path: Path) -> None:
         text = self._base_text(prompt_path)
-        mutated = text.replace(_norm(R9_TEXT_UNITS["scope_sentence"]), "")
+        before_anchor = "supports neither value. "
+        after_anchor = " A label from another classification scheme"
+        start = text.index(before_anchor) + len(before_anchor)
+        end = text.index(after_anchor, start)
+        mutated = text[:start] + text[end:]
         assert "missing:scope_sentence" in check_r9_text_units(mutated)
 
 
