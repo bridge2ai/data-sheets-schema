@@ -87,19 +87,24 @@ DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
 }
 
 # Partition bounds have no default (D-C, owner decision 2026-10-23): no one
-# setting plans every project. 80 paths / 12,288 bytes / 4 workers refuses
-# every v8 AI_READI, CM4AI, VOICE and CHORUS full record (a single /creators
-# or /file_collections field outgrows a worker, or the plan needs more than
-# four), and the refusal comes after `full` and receipt completion are
-# billed. 384 / 65,536 / 4 plans them but hands one worker about five times
-# the inventory a CHORUS worker filled 64k of output with. A registration
-# names its bounds, or a profile validated for its project.
+# setting plans every project. A top-level list too large for one worker is
+# split between whole entries (A17, #5112), so at 80 paths / 12,288 bytes
+# what refuses a record is the worker count: the v8 API full records need
+# 5-6 workers (CHORUS), 8-9 (CM4AI), 9-11 (VOICE) and 12-15 (AI_READI). Four
+# refuses every one of them, and the refusal comes after `full` and receipt
+# completion are billed. 384 / 65,536 / 4 plans them but hands one worker
+# about five times the inventory a CHORUS worker filled 64k of output with.
+# `resolve_audit_limits` derives the aggregate output and call allowances
+# from `max_workers`; the aggregate input allowance is not derived, and each
+# worker call carries the complete bundle and record. A registration names
+# its bounds, or a profile validated for its project.
 PARTITION_KEYS = ("max_paths", "max_inventory_bytes", "max_workers")
 PARTITION_PROFILES: dict[str, dict[str, Any]] = {
     # What 2026-10-22a ran: 98 paths in three workers (35/54/9), the fullest
     # 39 bytes under the inventory bound, each using 14k-50k of its 64k.
-    # Baseline arm only: 16 of the 18 CHORUS crate-arm records fail planning
-    # under these bounds, and the de novo arm has no v10 evidence.
+    # Baseline arm only: 15 of the 18 CHORUS crate-arm records fail planning
+    # under these bounds, all on the worker count (16 before A17), and the de
+    # novo arm has no v10 evidence.
     "chorus": {"projects": ("CHORUS",), "arms": ("baseline",),
                "limits": {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4}},
 }
