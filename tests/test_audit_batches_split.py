@@ -99,7 +99,7 @@ def assert_partition(plan, limits):
 # --- byte identity where every field fits -----------------------------------------------
 
 def test_chorus_v10_phase1_plans_exactly_as_its_registered_run():
-    raw = (FIXTURES / "chorus_v10_2026-10-22a_full.yaml").read_text(encoding="utf-8")
+    raw = (FIXTURES / "chorus_v10_2026-10-22a" / "CHORUS_full.yaml").read_text(encoding="utf-8")
     plan = b.make_plan(raw, version=2, **CHORUS)
     # The plan sha256 the 2026-10-22a typed packet recorded; canonical bytes at f8c5ac73c.
     assert plan["sha256"] == "c0ed88e1380e2602b86faa7e39c1ad645bc91b7e0885d750dcbc7d39db9e676d"
@@ -120,7 +120,7 @@ def test_chorus_v10_saved_packet_worker_wires_and_assembly_rederive_unchanged():
     packet = json.loads((run / "CHORUS_typed_audit_packet.json").read_bytes())
     cache = ta.DerivationCache()
     ta._open(packet, derivations=cache)  # re-derives plan, worker requests and contracts, compared byte for byte
-    fixture = (FIXTURES / "chorus_v10_2026-10-22a_full.yaml").read_text(encoding="utf-8")
+    fixture = (FIXTURES / "chorus_v10_2026-10-22a" / "CHORUS_full.yaml").read_text(encoding="utf-8")
     assert packet["plan"] == b.make_plan(fixture, version=2, **CHORUS)
     for i, worker in enumerate(packet["plan"]["workers"]):
         request = ta.worker_request(packet, worker["id"], derivations=cache)
