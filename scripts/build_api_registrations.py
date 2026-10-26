@@ -125,7 +125,8 @@ PARTITION_PROFILES: dict[str, dict[str, Any]] = {
     # (10-20a, with a worker that hit the then 25k cap) and 1,148,972 (10-22a,
     # with an integration attempt that timed out) of the 4,000,000 allowance.
     # Sized on 10-22a's own record, the largest plan these bounds admit needs
-    # about 1.34M, and every call fits its window.
+    # about 1.92M at worst. Its expected integration call fits the window;
+    # the worst case, every response at its cap, does not and is warned.
     "chorus": {"projects": ("CHORUS",), "arms": ("baseline",),
                "limits": {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4,
                           "aggregate_input_tokens": 4000000}},
@@ -244,16 +245,29 @@ def profile_covered(project: str, arm: str | None, limits: dict[str, Any]) -> bo
 # - Its worker, omission and integration requests counted 2.25, 2.35 and
 #   1.75 bytes per token.
 # - Its integration request carried four responses, the workers' as base64
-#   envelopes: 131,507 output tokens, thinking included, that cost 155k-187k of
-#   its 316,914 input tokens (by the density taken for the rest). Each response
-#   is sized at its stage's cap, at 1.5 input tokens per output token. A
-#   response written all as text, with no thinking, could cost more.
+#   envelopes: 131,507 output tokens, thinking included. Over the rendered base
+#   (163,447 at 2.0 bytes per token) they cost 153,467 of its 316,914 counted
+#   input tokens: 1.167 per output token.
 # - The runtime admits a call only if its count plus its output cap fits
 #   context_limit_tokens and the count fits max_input_tokens_per_call, and
 #   counts each stage only on reaching it: every earlier stage is billed first.
-SIZING_INSTRUMENT = "typed_audit_input_sizing_v2"
+#
+# The integration request is sized two ways:
+# - Expected, which refuses the registration when it cannot fit: the sizing
+#   record's own plan, each response at the mean fraction of its cap that
+#   10-22a's usage ledger shows, at 1.2 input tokens per output token.
+# - Worst, which is warned and recorded and sizes the aggregate allowance:
+#   max_workers responses and the omission's, each at its whole cap, at 3.5
+#   input tokens per output token. That is the ~3 per text token 10-22a's
+#   envelopes cost, for a response written as text with no thinking.
+SIZING_INSTRUMENT = "typed_audit_input_sizing_v3"
 SIZING_BYTES_PER_TOKEN = 2.0
-SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN = 1.5
+SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN = 3.5
+SIZING_EXPECTED_INPUT_TOKENS_PER_RESPONSE_TOKEN = 1.2
+# 10-22a's typed workers used 50,130, 43,348 and 14,032 of 64,000 (mean
+# 0.55995); its omission call 23,997 of 32,000 (0.7499).
+SIZING_WORKER_RESPONSE_CAP_FRACTION = 0.56
+SIZING_OMISSION_RESPONSE_CAP_FRACTION = 0.75
 SIZING_STAGES = ("worker", "omission", "integration")
 # F2 of the A17 review: the cap's only evidence is six CHORUS workers.
 SIZING_WORKER_CAP_NOTE = ("worker_output_tokens is calibrated on six CHORUS workers of 3-12 KB inventory, "
@@ -348,10 +362,11 @@ def render_typed_audit_inputs(
     The inner requests follow typed_audit, the outer parts typed_audit_runtime.
     Digests and identifiers are stand-ins of the same width; the receipt carry
     is an allowance; owner classes are counted for every mapping in the record.
-    The integration request carries no worker or omission response here:
-    `size_typed_audit_input` bounds those by the stage caps. A record that
-    does not plan under the bounds raises AuditBatchError. The inner requests
-    are returned too, for comparison with the typed packet's.
+    The integration request is rendered without its worker and omission
+    responses, at the plan's worker count and at ``max_workers``;
+    `size_typed_audit_input` adds the responses. A record that does not plan
+    under the bounds raises AuditBatchError. The inner requests are returned
+    too, for comparison with the typed packet's.
     """
     from data_sheets_schema import (audit_batches, audit_omissions as omissions, audit_protocol,
                                     evidence_assertions as evidence, typed_audit as typed,
@@ -446,23 +461,27 @@ def render_typed_audit_inputs(
                                "max_nodes": omissions.MAX_NODES, "max_depth": omissions.MAX_DEPTH}}}
     omission = call({"phase": runtime.OMISSION_PHASE}, requests["omission"])
 
-    ids = [f"worker_{i + 1:04d}" for i in range(limits["max_workers"])]
     owner_of = {path: worker["id"] for worker in plan["workers"] for path in worker["paths"]}
-    index = {"schema_version": 2, "kind": "audit_batch_index_v2", "plan_sha256": _STAND_IN_DIGEST,
-             "original_full_sha256": _STAND_IN_DIGEST, "sha256": _STAND_IN_DIGEST, "findings": [],
-             "workers": [{"id": key, "sha256": _STAND_IN_DIGEST, "bytes": 0} for key in ids],
-             "rows": [{"path": path, "worker_id": owner_of[path], "sha256": _STAND_IN_DIGEST} for path in paths]}
-    requests["integration"] = {
-        "kind": "typed_audit_index_v1", "packet_sha256": _STAND_IN_DIGEST, "sha256": _STAND_IN_DIGEST,
-        "index": index, "omission_check": {},
-        "integration_request": {"kind": "typed_audit_integration_request_v1", "request_sha256": _STAND_IN_DIGEST,
-            "payload": {"stage": "integration", "packet_sha256": _STAND_IN_DIGEST, "shared_context": shared,
-                        "proposal_index": index, "workers": {key: "" for key in ids}, "omission_response": "",
-                        "omission_check": {}, "output_contract": contracts["integration"]}}}
-    integration = call({"phase": runtime.INTEGRATION_PHASE}, requests["integration"])
+
+    def integration_request(count):
+        ids = [f"worker_{i + 1:04d}" for i in range(count)]
+        index = {"schema_version": 2, "kind": "audit_batch_index_v2", "plan_sha256": _STAND_IN_DIGEST,
+                 "original_full_sha256": _STAND_IN_DIGEST, "sha256": _STAND_IN_DIGEST, "findings": [],
+                 "workers": [{"id": key, "sha256": _STAND_IN_DIGEST, "bytes": 0} for key in ids],
+                 "rows": [{"path": path, "worker_id": owner_of[path], "sha256": _STAND_IN_DIGEST} for path in paths]}
+        return {"kind": "typed_audit_index_v1", "packet_sha256": _STAND_IN_DIGEST, "sha256": _STAND_IN_DIGEST,
+                "index": index, "omission_check": {},
+                "integration_request": {"kind": "typed_audit_integration_request_v1", "request_sha256": _STAND_IN_DIGEST,
+                    "payload": {"stage": "integration", "packet_sha256": _STAND_IN_DIGEST, "shared_context": shared,
+                                "proposal_index": index, "workers": {key: "" for key in ids}, "omission_response": "",
+                                "omission_check": {}, "output_contract": contracts["integration"]}}}
+
+    requests["integration"] = integration_request(len(plan["workers"]))
     return {"plan_workers": len(plan["workers"]), "worker_bytes": max(workers), "omission_bytes": omission,
-            "integration_base_bytes": integration, "carry_allowance_bytes": carry, "shared_context": shared,
-            "requests": requests}
+            "integration_base_bytes": call({"phase": runtime.INTEGRATION_PHASE}, requests["integration"]),
+            "integration_largest_base_bytes": call({"phase": runtime.INTEGRATION_PHASE},
+                                                   integration_request(limits["max_workers"])),
+            "carry_allowance_bytes": carry, "shared_context": shared, "requests": requests}
 
 
 def size_typed_audit_input(
@@ -479,11 +498,13 @@ def size_typed_audit_input(
 
     Every call carries the complete record, core, receipt, inventory and
     bundle, so each of ``max_workers`` workers is sized at the record plan's
-    largest worker. The integration call is sized with every worker's and the
-    omission's response at its stage cap. Bytes become tokens at
-    SIZING_BYTES_PER_TOKEN. Also returns the input each stage's call may take,
-    by the runtime's admission rule. This is an estimate for the record
-    supplied, not a bound on a later record.
+    largest worker. The integration call is sized as expected, for the
+    record's own plan with each response at 10-22a's mean use of its cap,
+    and at worst, for ``max_workers`` with every response at its cap; the
+    aggregate takes the worst. Bytes become tokens at SIZING_BYTES_PER_TOKEN.
+    Also returns the input each stage's call may take, by the runtime's
+    admission rule, and warns when the worst case would not fit. This is an
+    estimate for the record supplied, not a bound on a later record.
 
     The record must declare the registration's project and arm in its
     generator header (``# D4D Datasheet for PROJECT Dataset`` and ``# Arm:
@@ -518,22 +539,36 @@ def size_typed_audit_input(
     def tokens(size):
         return math.ceil(size / SIZING_BYTES_PER_TOKEN)
 
-    workers = limits["max_workers"]
-    worker, omission, base = (tokens(rendered[key]) for key in ("worker_bytes", "omission_bytes", "integration_base_bytes"))
-    responses = math.ceil(SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN
-                          * (workers * limits["worker_output_tokens"] + limits["omission_output_tokens"]))
+    planned, workers = rendered["plan_workers"], limits["max_workers"]
+    worker, omission = tokens(rendered["worker_bytes"]), tokens(rendered["omission_bytes"])
+    expected_responses = math.ceil(SIZING_EXPECTED_INPUT_TOKENS_PER_RESPONSE_TOKEN * (
+        planned * SIZING_WORKER_RESPONSE_CAP_FRACTION * limits["worker_output_tokens"]
+        + SIZING_OMISSION_RESPONSE_CAP_FRACTION * limits["omission_output_tokens"]))
+    worst_responses = math.ceil(SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN * (
+        workers * limits["worker_output_tokens"] + limits["omission_output_tokens"]))
+    expected = tokens(rendered["integration_base_bytes"]) + expected_responses
+    worst = tokens(rendered["integration_largest_base_bytes"]) + worst_responses
+    admissible = {stage: min(limits["max_input_tokens_per_call"],
+                             limits["context_limit_tokens"] - limits[f"{stage}_output_tokens"])
+                  for stage in SIZING_STAGES}
+    warnings = []
+    if worst > admissible["integration"]:
+        warnings.append(f"at worst, {workers} worker responses and the omission's at their caps, the integration "
+                        f"call would need {worst:,} input tokens, over the {admissible['integration']:,} it may take")
     return {"instrument": SIZING_INSTRUMENT, "sizing_record": {name: sg.file_pin(path) for name, path in files.items()},
             "stand_in": not own,
             "bytes_per_token": SIZING_BYTES_PER_TOKEN,
-            "input_tokens_per_response_token": SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN,
-            "plan_workers": rendered["plan_workers"], "max_workers": workers, "worker_input_tokens": worker,
-            "omission_input_tokens": omission, "integration_base_input_tokens": base,
-            "integration_response_input_tokens": responses, "integration_input_tokens": base + responses,
-            "aggregate_input_tokens": workers * worker + omission + base + responses,
-            "admissible_input_tokens": {stage: min(limits["max_input_tokens_per_call"],
-                                                   limits["context_limit_tokens"] - limits[f"{stage}_output_tokens"])
-                                        for stage in SIZING_STAGES},
-            "notes": [SIZING_WORKER_CAP_NOTE]}
+            "expected_responses": {"input_tokens_per_response_token": SIZING_EXPECTED_INPUT_TOKENS_PER_RESPONSE_TOKEN,
+                                   "worker_cap_fraction": SIZING_WORKER_RESPONSE_CAP_FRACTION,
+                                   "omission_cap_fraction": SIZING_OMISSION_RESPONSE_CAP_FRACTION},
+            "worst_responses": {"input_tokens_per_response_token": SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN,
+                                "cap_fraction": 1.0},
+            "plan_workers": planned, "max_workers": workers, "worker_input_tokens": worker,
+            "omission_input_tokens": omission, "integration_base_input_tokens": tokens(rendered["integration_base_bytes"]),
+            "integration_response_input_tokens": expected_responses, "integration_input_tokens": expected,
+            "integration_worst_response_input_tokens": worst_responses, "integration_worst_input_tokens": worst,
+            "aggregate_input_tokens": workers * worker + omission + worst,
+            "admissible_input_tokens": admissible, "warnings": warnings, "notes": [SIZING_WORKER_CAP_NOTE]}
 
 
 FLOOR_BASIS_CHOICES = ("receipted_part", "all_receiptable")
@@ -982,11 +1017,14 @@ def prepare_registration(
                                         context=context_raw, schema_snapshot=full_schema, stand_in=sizing_stand_in)
         # The runtime counts and admits each stage only on reaching it, so a
         # call that cannot fit is refused after every earlier stage is billed.
+        # Integration is judged at the record's own plan with responses at
+        # 10-22a's mean use of their caps; its worst case is only warned.
         for stage in SIZING_STAGES:
             need, room = sizing[f"{stage}_input_tokens"], sizing["admissible_input_tokens"][stage]
             if need > room:
-                detail = (f" ({sizing['max_workers']} worker responses and the omission response at their caps; "
-                          f"{sizing['integration_base_input_tokens']:,} without them)" if stage == "integration" else "")
+                detail = (f" for its own plan ({sizing['plan_workers']} worker responses and the omission's at "
+                          f"10-22a's mean use of their caps; {sizing['integration_base_input_tokens']:,} without them)"
+                          if stage == "integration" else "")
                 raise ValueError(
                     f"{project}: the typed-audit {stage} call sized on {sizing_record.full} needs {need:,} input "
                     f"tokens{detail}, over the {room:,} it may take: context_limit_tokens "
@@ -1000,8 +1038,8 @@ def prepare_registration(
                 f"{project}: aggregate_input_tokens {active_audit_limits['aggregate_input_tokens']:,} is below the "
                 f"typed-audit input sized on {sizing_record.full}: {sizing['max_workers']} workers x "
                 f"{sizing['worker_input_tokens']:,} + omission {sizing['omission_input_tokens']:,} + integration "
-                f"{sizing['integration_input_tokens']:,} = {sizing['aggregate_input_tokens']:,}. A plan that size "
-                f"could be refused midway, after its first stages are billed (#5155)"
+                f"at worst {sizing['integration_worst_input_tokens']:,} = {sizing['aggregate_input_tokens']:,}. A "
+                f"plan that size could be refused midway, after its first stages are billed (#5155)"
             )
 
     outputs = []
@@ -1539,12 +1577,14 @@ def cli(
                     f"{' (stand-in)' if sizing['stand_in'] else ''}: {sizing['plan_workers']} of "
                     f"{sizing['max_workers']} workers; per call worker {sizing['worker_input_tokens']:,} of "
                     f"{room['worker']:,}, omission {sizing['omission_input_tokens']:,} of {room['omission']:,}, "
-                    f"integration {sizing['integration_input_tokens']:,} of {room['integration']:,} (responses at "
-                    f"their caps); aggregate {sizing['aggregate_input_tokens']:,} of "
-                    f"{limits['aggregate_input_tokens']:,}"
+                    f"integration {sizing['integration_input_tokens']:,} of {room['integration']:,} expected "
+                    f"({sizing['integration_worst_input_tokens']:,} at worst); aggregate "
+                    f"{sizing['aggregate_input_tokens']:,} of {limits['aggregate_input_tokens']:,}"
                 )
                 click.echo(f"    sizing record {Path(sizing['sidecar']['path']).name} "
                            f"sha256={sizing['sidecar']['sha256']}")
+                for warning in sizing["warnings"]:
+                    click.echo(f"    warning: {warning}")
                 for note in sizing["notes"]:
                     click.echo(f"    note: {note}")
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 from copy import deepcopy
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -23,8 +24,11 @@ if str(ROOT) not in sys.path:
 from scripts.build_api_registrations import (
     DEFAULT_AUDIT_LIMITS,
     PARTITION_PROFILES,
+    SIZING_EXPECTED_INPUT_TOKENS_PER_RESPONSE_TOKEN,
     SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN,
+    SIZING_OMISSION_RESPONSE_CAP_FRACTION,
     SIZING_RECORD_FORMAT,
+    SIZING_WORKER_RESPONSE_CAP_FRACTION,
     SizingRecord,
     build_registration,
     check_registration_sizing,
@@ -104,42 +108,60 @@ def test_chorus_sizing_covers_its_canary_and_the_profile_allowance(tmp_path):
     assert three["omission_input_tokens"] >= MEASURED["omission"]
     assert three["integration_input_tokens"] >= MEASURED["integration"]
     assert three["aggregate_input_tokens"] >= MEASURED["aggregate"]
-    # The profile's largest plan, four workers, fits its 4,000,000 with room, and every call its window.
+    # The profile's largest plan, four workers, fits its 4,000,000 with room. Every call fits its
+    # window as expected; the worst case for integration does not, and is warned and recorded.
     _, _, profile = prepare("CHORUS", tmp_path, partition="chorus", sizing_record=CHORUS_SIZING)
     assert profile["max_workers"] == 4
     assert profile["aggregate_input_tokens"] == (4 * profile["worker_input_tokens"] + profile["omission_input_tokens"]
-                                                 + profile["integration_input_tokens"])
+                                                 + profile["integration_worst_input_tokens"])
     assert MEASURED["aggregate"] < profile["aggregate_input_tokens"] < PARTITION_PROFILES["chorus"]["limits"]["aggregate_input_tokens"]
     assert profile["admissible_input_tokens"] == {"worker": 936000, "omission": 968000, "integration": 968000}
     assert all(profile[f"{stage}_input_tokens"] <= room for stage, room in profile["admissible_input_tokens"].items())
+    assert profile["integration_worst_input_tokens"] > 968000
+    assert len(profile["warnings"]) == 1 and "at worst, 4 worker responses" in profile["warnings"][0]
     assert profile["sizing_record"]["full"]["sha256"] == hashlib.sha256((CHORUS_SIZING / "CHORUS_full.yaml").read_bytes()).hexdigest()
     assert profile["stand_in"] is False and "53,204 of 64,000" in profile["notes"][0]
 
 
-def test_the_response_factor_is_pinned_and_covers_10_22a_integration(tmp_path):
-    """F7: the factor that decides whether a large project fits is calibrated, not free."""
-    assert SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN == 1.5
+def test_the_response_constants_are_pinned_to_10_22a(tmp_path):
+    """F7: the constants that decide whether a project fits are calibrated, not free."""
+    assert SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN == 3.5
+    assert SIZING_EXPECTED_INPUT_TOKENS_PER_RESPONSE_TOKEN == 1.2
+    # 10-22a's usage ledger: its typed workers used 50,130, 43,348 and 14,032 of 64,000, its omission 23,997 of 32,000.
+    workers, omission = (50130 / 64000 + 43348 / 64000 + 14032 / 64000) / 3, 23997 / 32000
+    assert 0 <= SIZING_WORKER_RESPONSE_CAP_FRACTION - workers < 0.001
+    assert 0 <= SIZING_OMISSION_RESPONSE_CAP_FRACTION - omission < 0.001
     _, _, three = prepare("CHORUS", tmp_path, audit_limits={**BOUNDS, "max_workers": 3, "aggregate_input_tokens": 4000000},
                           sizing_record=CHORUS_SIZING)
-    assert three["integration_response_input_tokens"] == 1.5 * (3 * 64000 + 32000)
-    # 10-22a's four responses used 50,130, 43,348, 14,032 and 23,997 output tokens. Sized at
-    # what they actually used, the integration call covers what the endpoint counted for it.
-    used = 50130 + 43348 + 14032 + 23997
-    assert three["integration_base_input_tokens"] + SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN * used >= MEASURED["integration"]
-    assert three["integration_base_input_tokens"] + 1.0 * used < MEASURED["integration"]  # a factor of 1 would not
+    used = 3 * 0.56 * 64000 + 0.75 * 32000
+    assert three["integration_response_input_tokens"] == math.ceil(1.2 * used)
+    assert three["integration_worst_response_input_tokens"] == 3.5 * (3 * 64000 + 32000)
+    # Sized for 10-22a's own plan, its integration call covers what the endpoint counted for it;
+    # at one input token per output token it would not.
+    assert three["integration_input_tokens"] >= MEASURED["integration"]
+    assert three["integration_base_input_tokens"] + 1.0 * used < MEASURED["integration"]
 
 
 @pytest.mark.parametrize("project,run", [("AI_READI", "2026-09-04g_claude-opus-5-api-generic-v8_rep2"),
-                                         ("CM4AI", "2026-09-04g_claude-opus-5-api-generic-v8_rep1"),
                                          ("VOICE", "2026-09-04f_claude-opus-5-api-generic-v8_rep3")])
-def test_large_projects_are_refused_when_their_integration_call_cannot_fit(tmp_path, project, run):
+def test_large_projects_are_refused_when_their_expected_integration_cannot_fit(tmp_path, project, run):
     limits = {**BOUNDS, "max_workers": 16, "aggregate_input_tokens": 99000000}
     with pytest.raises(ValueError, match=f"^{project}: the typed-audit integration call sized on .*{project}_full.yaml "
-                                         r"needs [\d,]+ input tokens \(16 worker responses") as refused:
+                                         r"needs [\d,]+ input tokens for its own plan \(1[15] worker responses") as refused:
         prepare(project, tmp_path, audit_limits=limits, sizing_record=RUNS / run / "intermediate")
     assert "over the 968,000 it may take" in str(refused.value)
     assert "after billing every earlier stage" in str(refused.value)
     assert not list(tmp_path.iterdir())
+
+
+def test_a_large_project_whose_expected_integration_fits_is_built_with_its_worst_case_warned(tmp_path):
+    limits = {**BOUNDS, "max_workers": 16, "aggregate_input_tokens": 12000000}
+    _, outputs, sizing = prepare("CM4AI", tmp_path, audit_limits=limits,
+                                 sizing_record=RUNS / "2026-09-04g_claude-opus-5-api-generic-v8_rep1" / "intermediate")
+    assert sizing["plan_workers"] == 8 and sizing["integration_input_tokens"] <= 968000
+    assert sizing["integration_worst_input_tokens"] > 968000
+    recorded = json.loads(outputs[-1][1])["sizing"]
+    assert recorded["warnings"] == sizing["warnings"] and "at worst, 16 worker responses" in recorded["warnings"][0]
 
 
 def test_a_worker_call_that_cannot_fit_is_refused_too(tmp_path):
@@ -159,7 +181,7 @@ def test_large_project_allowance_is_refused_below_its_sizing_before_anything_is_
     assert sizing["plan_workers"] == 2 and sizing["max_workers"] == 2
     assert 2000000 < sizing["aggregate_input_tokens"] <= 4000000
     assert sizing["aggregate_input_tokens"] == (2 * sizing["worker_input_tokens"] + sizing["omission_input_tokens"]
-                                                + sizing["integration_input_tokens"])
+                                                + sizing["integration_worst_input_tokens"])
     registration = (tmp_path / "registration.json").resolve()
     assert [path for path, _ in outputs] == [registration, sizing_path(registration)]
     assert not list(tmp_path.iterdir())
@@ -246,6 +268,7 @@ def test_cli_builds_each_project_with_its_own_limits_or_writes_nothing(tmp_path)
     assert not sizing_path(out / "registration_chorus_per_project.json").exists()
     assert "sizing record registration_ai_readi_per_project.sizing.json sha256=" in built.output
     assert "note: worker_output_tokens is calibrated on six CHORUS workers" in built.output
+    assert "warning: at worst, 2 worker responses and the omission's at their caps" in built.output
     check = CliRunner().invoke(cli, ["-p", "CHORUS,AI_READI", "-l", "per_project", "-o", str(out), "--check"])
     assert check.exit_code == 0, check.output
     assert "(sized: registration_ai_readi_per_project.sizing.json)" in check.output
@@ -360,3 +383,10 @@ def test_rendering_reproduces_the_chorus_v10_wire():
     assert owners >= 0
     assert rendered["omission_bytes"] - actual[3] == allowance + owners
     assert rendered["integration_base_bytes"] < actual[4]
+    # The expected-response constants are this run's own usage ledger.
+    ledger = json.loads(next(run.parent.glob("CHORUS_api_usage_*.json")).read_bytes())
+    used = {phase: [row["output_tokens"] / row["max_tokens"] for row in ledger["rows"] if row.get("phase") == phase]
+            for phase in ("typed_audit_worker", "typed_audit_omission")}
+    assert len(used["typed_audit_worker"]) == 3 and len(used["typed_audit_omission"]) == 1
+    assert 0 <= SIZING_WORKER_RESPONSE_CAP_FRACTION - sum(used["typed_audit_worker"]) / 3 < 0.001
+    assert 0 <= SIZING_OMISSION_RESPONSE_CAP_FRACTION - used["typed_audit_omission"][0] < 0.001
