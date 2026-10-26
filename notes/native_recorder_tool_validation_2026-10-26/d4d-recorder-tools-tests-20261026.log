@@ -1,0 +1,53 @@
+..F....F.......FFFFFF.....                                               [100%]
+=================================== FAILURES ===================================
+_ DriverSafetyTests.test_exclusive_trial_path_refuses_reuse_and_source_output __
+tests/test_native_recorder_measure_helper.py:86: in test_exclusive_trial_path_refuses_reuse_and_source_output
+    with self.assertRaises(ValueError):
+E   AssertionError: ValueError not raised
+_ DriverSafetyTests.test_origin_proof_refuses_foreign_namespace_and_unpinned_module _
+tests/test_native_recorder_measure_helper.py:130: in test_origin_proof_refuses_foreign_namespace_and_unpinned_module
+    proof = driver.origins(tree, inventory, {'data_sheets_schema': namespace,
+scripts/adhoc/native_recorder_measure_20261026.py:140: in origins
+    raise ValueError('foreign or malformed namespace origin: ' + name)
+E   ValueError: foreign or malformed namespace origin: data_sheets_schema
+______ test_real_monitoring_frames_return_unwind_identity_and_not_reached ______
+tests/test_native_recorder_observer_20261026.py:73: in test_real_monitoring_frames_return_unwind_identity_and_not_reached
+    assert seen.valid
+E   assert False
+E    +  where False = <native_recorder_observer_fixture.Observer object at 0x106f5a900>.valid
+_____________ test_actual_warm_decode_hits_and_confirmed_evictions _____________
+tests/test_native_recorder_observer_20261026.py:134: in test_actual_warm_decode_hits_and_confirmed_evictions
+    assert seen.valid and not seen.active
+E   assert (False)
+E    +  where False = <native_recorder_observer_fixture.Observer object at 0x107d24910>.valid
+________ test_original_inline_eviction_source_is_observed_without_store ________
+tests/test_native_recorder_observer_20261026.py:162: in test_original_inline_eviction_source_is_observed_without_store
+    assert seen.valid
+E   assert False
+E    +  where False = <native_recorder_observer_fixture.Observer object at 0x107d24190>.valid
+_ test_open_distinguishes_serialized_shared_cache_from_original_raw_cache[False] _
+tests/test_native_recorder_observer_20261026.py:207: in test_open_distinguishes_serialized_shared_cache_from_original_raw_cache
+    assert seen.valid and not seen.active
+E   assert (False)
+E    +  where False = <native_recorder_observer_fixture.Observer object at 0x1079e7a80>.valid
+_ test_open_distinguishes_serialized_shared_cache_from_original_raw_cache[True] _
+tests/test_native_recorder_observer_20261026.py:207: in test_open_distinguishes_serialized_shared_cache_from_original_raw_cache
+    assert seen.valid and not seen.active
+E   assert (False)
+E    +  where False = <native_recorder_observer_fixture.Observer object at 0x1079e7bb0>.valid
+__________ test_shared_memo_eviction_and_natural_runtime_token_return __________
+tests/test_native_recorder_observer_20261026.py:261: in test_shared_memo_eviction_and_natural_runtime_token_return
+    assert seen.valid and token["calls"] == 2  # Observer never invokes token itself.
+E   assert (False)
+E    +  where False = <native_recorder_observer_fixture.Observer object at 0x107d1b530>.valid
+---- generated xml file: /private/tmp/d4d-recorder-tools-tests-20261026.xml ----
+=========================== short test summary info ============================
+FAILED tests/test_native_recorder_measure_helper.py::DriverSafetyTests::test_exclusive_trial_path_refuses_reuse_and_source_output
+FAILED tests/test_native_recorder_measure_helper.py::DriverSafetyTests::test_origin_proof_refuses_foreign_namespace_and_unpinned_module
+FAILED tests/test_native_recorder_observer_20261026.py::test_real_monitoring_frames_return_unwind_identity_and_not_reached
+FAILED tests/test_native_recorder_observer_20261026.py::test_actual_warm_decode_hits_and_confirmed_evictions
+FAILED tests/test_native_recorder_observer_20261026.py::test_original_inline_eviction_source_is_observed_without_store
+FAILED tests/test_native_recorder_observer_20261026.py::test_open_distinguishes_serialized_shared_cache_from_original_raw_cache[False]
+FAILED tests/test_native_recorder_observer_20261026.py::test_open_distinguishes_serialized_shared_cache_from_original_raw_cache[True]
+FAILED tests/test_native_recorder_observer_20261026.py::test_shared_memo_eviction_and_natural_runtime_token_return
+8 failed, 18 passed in 0.86s
