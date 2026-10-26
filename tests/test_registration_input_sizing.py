@@ -1,4 +1,4 @@
-"""The typed-audit aggregate input allowance is sized before anything is built or billed (#5155).
+"""Typed-audit input is sized before anything is written or billed (#5155, A17 review F1/F3).
 
 CHORUS_SIZING holds the 2026-10-22a run's own phase-1 record, core and
 effective receipt; the counts below are that run's endpoint counts.
@@ -23,13 +23,20 @@ if str(ROOT) not in sys.path:
 from scripts.build_api_registrations import (
     DEFAULT_AUDIT_LIMITS,
     PARTITION_PROFILES,
+    SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN,
+    SIZING_RECORD_FORMAT,
+    SizingRecord,
+    build_registration,
+    check_registration_sizing,
     cli,
     parse_project_limits,
     parse_sizing_records,
     prepare_registration,
+    profile_covered,
     profile_sized,
     render_typed_audit_inputs,
     resolve_audit_limits,
+    sizing_path,
 )
 from data_sheets_schema import audit_batches as b, shared_generation as sg, typed_audit as ta
 from data_sheets_schema.chunking import manifest_from_bytes
@@ -39,8 +46,10 @@ CHORUS_SIZING = ROOT / "tests" / "fixtures" / "audit_batches" / "chorus_v10_2026
 RUNS = ROOT / "data" / "d4d_concatenated" / "claudecode_api_core"
 AI_READI_SIZING = RUNS / "2026-09-04g_claude-opus-5-api-generic-v8_rep2" / "intermediate"
 BOUNDS = {"max_paths": 80, "max_inventory_bytes": 12288}
-# 2026-10-22a's typed-audit stages, counted by the endpoint before admission.
-MEASURED = {"workers": (138859, 139001, 138283), "omission": 98527, "integration": 316914, "aggregate": 831979}
+# Bounds whose integration call fits today's protocol for AI_READI (two workers of up to 96 KB).
+AI_READI_FITS = {"max_paths": 512, "max_inventory_bytes": 98304, "max_workers": 2}
+# 2026-10-22a's typed-audit stages, counted by the endpoint before admission, and their sum.
+MEASURED = {"workers": (138859, 139001, 138283), "omission": 98527, "integration": 316914, "aggregate": 831584}
 V10_RUN = os.environ.get("D4D_CHORUS_V10_TYPED_RUN")
 
 
@@ -67,6 +76,9 @@ def test_profile_covers_only_its_own_bounds_caps_and_larger_allowances():
     for change in ({"max_workers": 16}, {"max_paths": 81}, {"worker_output_tokens": 96000},
                    {"aggregate_input_tokens": 3999999}):
         assert not profile_sized("chorus", {**limits, **change}), change
+    # Limits equal to a profile's are that profile's, named or not, for its own project and arm only.
+    assert profile_covered("CHORUS", "baseline", limits)
+    assert not profile_covered("CHORUS", "crate_only", limits) and not profile_covered("AI_READI", "baseline", limits)
 
 
 def test_an_allowance_no_profile_covers_needs_a_sizing_record(tmp_path):
@@ -92,29 +104,104 @@ def test_chorus_sizing_covers_its_canary_and_the_profile_allowance(tmp_path):
     assert three["omission_input_tokens"] >= MEASURED["omission"]
     assert three["integration_input_tokens"] >= MEASURED["integration"]
     assert three["aggregate_input_tokens"] >= MEASURED["aggregate"]
-    # The profile's largest plan, four workers, fits its 4,000,000 with room.
+    # The profile's largest plan, four workers, fits its 4,000,000 with room, and every call its window.
     _, _, profile = prepare("CHORUS", tmp_path, partition="chorus", sizing_record=CHORUS_SIZING)
     assert profile["max_workers"] == 4
     assert profile["aggregate_input_tokens"] == (4 * profile["worker_input_tokens"] + profile["omission_input_tokens"]
                                                  + profile["integration_input_tokens"])
     assert MEASURED["aggregate"] < profile["aggregate_input_tokens"] < PARTITION_PROFILES["chorus"]["limits"]["aggregate_input_tokens"]
+    assert profile["admissible_input_tokens"] == {"worker": 936000, "omission": 968000, "integration": 968000}
+    assert all(profile[f"{stage}_input_tokens"] <= room for stage, room in profile["admissible_input_tokens"].items())
     assert profile["sizing_record"]["full"]["sha256"] == hashlib.sha256((CHORUS_SIZING / "CHORUS_full.yaml").read_bytes()).hexdigest()
+    assert profile["stand_in"] is False and "53,204 of 64,000" in profile["notes"][0]
+
+
+def test_the_response_factor_is_pinned_and_covers_10_22a_integration(tmp_path):
+    """F7: the factor that decides whether a large project fits is calibrated, not free."""
+    assert SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN == 1.5
+    _, _, three = prepare("CHORUS", tmp_path, audit_limits={**BOUNDS, "max_workers": 3, "aggregate_input_tokens": 4000000},
+                          sizing_record=CHORUS_SIZING)
+    assert three["integration_response_input_tokens"] == 1.5 * (3 * 64000 + 32000)
+    # 10-22a's four responses used 50,130, 43,348, 14,032 and 23,997 output tokens. Sized at
+    # what they actually used, the integration call covers what the endpoint counted for it.
+    used = 50130 + 43348 + 14032 + 23997
+    assert three["integration_base_input_tokens"] + SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN * used >= MEASURED["integration"]
+    assert three["integration_base_input_tokens"] + 1.0 * used < MEASURED["integration"]  # a factor of 1 would not
+
+
+@pytest.mark.parametrize("project,run", [("AI_READI", "2026-09-04g_claude-opus-5-api-generic-v8_rep2"),
+                                         ("CM4AI", "2026-09-04g_claude-opus-5-api-generic-v8_rep1"),
+                                         ("VOICE", "2026-09-04f_claude-opus-5-api-generic-v8_rep3")])
+def test_large_projects_are_refused_when_their_integration_call_cannot_fit(tmp_path, project, run):
+    limits = {**BOUNDS, "max_workers": 16, "aggregate_input_tokens": 99000000}
+    with pytest.raises(ValueError, match=f"^{project}: the typed-audit integration call sized on .*{project}_full.yaml "
+                                         r"needs [\d,]+ input tokens \(16 worker responses") as refused:
+        prepare(project, tmp_path, audit_limits=limits, sizing_record=RUNS / run / "intermediate")
+    assert "over the 968,000 it may take" in str(refused.value)
+    assert "after billing every earlier stage" in str(refused.value)
+    assert not list(tmp_path.iterdir())
+
+
+def test_a_worker_call_that_cannot_fit_is_refused_too(tmp_path):
+    limits = {**BOUNDS, "max_workers": 4, "aggregate_input_tokens": 4000000, "context_limit_tokens": 200000}
+    with pytest.raises(ValueError, match=r"CHORUS: the typed-audit worker call .* over the 136,000 it may take"):
+        prepare("CHORUS", tmp_path, audit_limits=limits, sizing_record=CHORUS_SIZING)
 
 
 def test_large_project_allowance_is_refused_below_its_sizing_before_anything_is_written(tmp_path):
-    limits = {**BOUNDS, "max_workers": 16, "aggregate_input_tokens": 4000000}
-    with pytest.raises(ValueError, match="aggregate_input_tokens 4,000,000 is below the typed-audit input") as refused:
+    limits = {**AI_READI_FITS, "aggregate_input_tokens": 2000000}
+    with pytest.raises(ValueError, match="aggregate_input_tokens 2,000,000 is below the typed-audit input") as refused:
         prepare("AI_READI", tmp_path, audit_limits=limits, sizing_record=AI_READI_SIZING)
     assert "refused midway, after its first stages are billed" in str(refused.value)
-    reg, outputs, sizing = prepare("AI_READI", tmp_path, audit_limits={**limits, "aggregate_input_tokens": 16000000},
+    reg, outputs, sizing = prepare("AI_READI", tmp_path, audit_limits={**limits, "aggregate_input_tokens": 4000000},
                                    sizing_record=AI_READI_SIZING)
-    assert reg["audit_limits"]["max_workers"] == 16 and reg["audit_limits"]["max_calls"] == 18
-    assert sizing["plan_workers"] == 15 and sizing["max_workers"] == 16
-    assert 4000000 < sizing["aggregate_input_tokens"] <= 16000000
-    assert sizing["aggregate_input_tokens"] == (16 * sizing["worker_input_tokens"] + sizing["omission_input_tokens"]
+    assert reg["audit_limits"]["max_workers"] == 2 and reg["audit_limits"]["max_calls"] == 4
+    assert sizing["plan_workers"] == 2 and sizing["max_workers"] == 2
+    assert 2000000 < sizing["aggregate_input_tokens"] <= 4000000
+    assert sizing["aggregate_input_tokens"] == (2 * sizing["worker_input_tokens"] + sizing["omission_input_tokens"]
                                                 + sizing["integration_input_tokens"])
-    assert [path for path, _ in outputs] == [(tmp_path / "registration.json").resolve()]
+    registration = (tmp_path / "registration.json").resolve()
+    assert [path for path, _ in outputs] == [registration, sizing_path(registration)]
     assert not list(tmp_path.iterdir())
+
+
+def test_a_sizing_record_is_bound_to_its_project_and_arm(tmp_path):
+    chorus = SizingRecord.in_directory(CHORUS_SIZING, "CHORUS")
+    limits = {**AI_READI_FITS, "aggregate_input_tokens": 4000000}
+    with pytest.raises(ValueError, match="is not a AI_READI record of this arm: .*D4D Datasheet for CHORUS Dataset"):
+        prepare("AI_READI", tmp_path, audit_limits=limits, sizing_record=chorus)
+    with pytest.raises(ValueError, match="is not a CHORUS record of this arm: .*'# Arm: BASELINE .*CRATE-ONLY"):
+        prepare("CHORUS", tmp_path, arm="crate_only", sizing_record=chorus,
+                audit_limits={**BOUNDS, "max_workers": 4, "aggregate_input_tokens": 4000000})
+    # A stand-in is sized only when asked for, and the record says so.
+    _, outputs, sizing = prepare("AI_READI", tmp_path, audit_limits=limits, sizing_record=chorus, sizing_stand_in=True)
+    assert sizing["stand_in"] is True
+    assert json.loads(dict(outputs)[sizing_path((tmp_path / "registration.json").resolve())])["sizing"]["stand_in"] is True
+    _, _, own = prepare("AI_READI", tmp_path, audit_limits=limits, sizing_record=AI_READI_SIZING, sizing_stand_in=True)
+    assert own["stand_in"] is False
+
+
+def test_the_sizing_is_recorded_beside_the_registration_and_checked_against_its_bytes(tmp_path):
+    path = tmp_path / "registration.json"
+    reg = build_registration("CHORUS", "sizing_test", registration_path=path, sizing_record=CHORUS_SIZING,
+                             audit_limits={**BOUNDS, "max_workers": 3, "aggregate_input_tokens": 4000000})
+    raw = path.read_bytes()
+    record = json.loads(sizing_path(path).read_bytes())
+    assert record["format"] == SIZING_RECORD_FORMAT
+    assert record["registration_sha256"] == hashlib.sha256(raw).hexdigest() == hashlib.sha256(sg.canonical(reg)).hexdigest()
+    assert record["sizing"]["aggregate_input_tokens"] <= reg["audit_limits"]["aggregate_input_tokens"]
+    assert check_registration_sizing(path, raw) == record
+    # Changed registration bytes no longer match the record; without one, an unprofiled allowance fails.
+    with pytest.raises(ValueError, match="is not the sizing record of these registration bytes"):
+        check_registration_sizing(path, raw.replace(b'"aggregate_input_tokens":4000000', b'"aggregate_input_tokens":4000001'))
+    sizing_path(path).unlink()
+    with pytest.raises(ValueError, match="no partition profile covers its aggregate_input_tokens"):
+        check_registration_sizing(path, raw)
+    # A profile registration needs none.
+    profiled = tmp_path / "profiled.json"
+    build_registration("CHORUS", "sizing_test", registration_path=profiled, partition="chorus")
+    assert check_registration_sizing(profiled, profiled.read_bytes()) is None
+    assert not sizing_path(profiled).exists()
 
 
 def test_a_sizing_record_the_bounds_cannot_plan_is_refused(tmp_path):
@@ -143,17 +230,25 @@ def test_cli_builds_each_project_with_its_own_limits_or_writes_nothing(tmp_path)
     out = tmp_path / "regs"
     args = ["-p", "CHORUS,AI_READI", "-l", "per_project", "-o", str(out), "--project-limits", "CHORUS:partition=chorus",
             "--sizing-record", f"AI_READI={AI_READI_SIZING}"]
-    ai_readi = "AI_READI:max_paths=80,max_inventory_bytes=12288,max_workers=16,aggregate_input_tokens="
-    refused = CliRunner().invoke(cli, args + ["--project-limits", ai_readi + "4000000"])
-    assert refused.exit_code != 0
-    assert "is below the typed-audit input" in refused.output
-    assert not out.exists() or not any(out.iterdir())  # not even the CHORUS registration built first
-    built = CliRunner().invoke(cli, args + ["--project-limits", ai_readi + "16000000"])
+    for bounds, reason in (("max_paths=80,max_inventory_bytes=12288,max_workers=16,aggregate_input_tokens=99000000",
+                            "the typed-audit integration call"),
+                           ("max_paths=512,max_inventory_bytes=98304,max_workers=2,aggregate_input_tokens=2000000",
+                            "is below the typed-audit input")):
+        refused = CliRunner().invoke(cli, args + ["--project-limits", f"AI_READI:{bounds}"])
+        assert refused.exit_code != 0 and reason in refused.output
+        assert not out.exists() or not any(out.iterdir())  # not even the CHORUS registration built first
+    built = CliRunner().invoke(cli, args + ["--project-limits", "AI_READI:max_paths=512,max_inventory_bytes=98304,"
+                                                              "max_workers=2,aggregate_input_tokens=4000000"])
     assert built.exit_code == 0, built.output
     regs = {p: json.loads((out / f"registration_{p.lower()}_per_project.json").read_text()) for p in ("CHORUS", "AI_READI")}
     assert regs["CHORUS"]["audit_limits"] == resolve_audit_limits("CHORUS", "chorus")
-    assert (regs["AI_READI"]["audit_limits"]["max_workers"], regs["AI_READI"]["audit_limits"]["aggregate_input_tokens"]) == (16, 16000000)
-    assert "integration could exceed max_input_tokens_per_call" in built.output
+    assert (regs["AI_READI"]["audit_limits"]["max_workers"], regs["AI_READI"]["audit_limits"]["aggregate_input_tokens"]) == (2, 4000000)
+    assert not sizing_path(out / "registration_chorus_per_project.json").exists()
+    assert "sizing record registration_ai_readi_per_project.sizing.json sha256=" in built.output
+    assert "note: worker_output_tokens is calibrated on six CHORUS workers" in built.output
+    check = CliRunner().invoke(cli, ["-p", "CHORUS,AI_READI", "-l", "per_project", "-o", str(out), "--check"])
+    assert check.exit_code == 0, check.output
+    assert "(sized: registration_ai_readi_per_project.sizing.json)" in check.output
     stray = CliRunner().invoke(cli, args + ["--project-limits", "VOICE:partition=none"])
     assert stray.exit_code != 0 and "VOICE, which this build does not target" in stray.output
 

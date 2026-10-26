@@ -190,7 +190,11 @@ def _split(inventory, roots, lists, limits):
 
 
 def _check_roots(roots, inventory, limits):
-    """Whole fields, or every entry of a list too large for one worker, in canonical order."""
+    """Whole fields, or contiguous index roots of a field too large for one worker, in canonical order.
+
+    Structure only: whether the field is a list, with exactly those entries,
+    shows only in the original, which validate_plan re-plans.
+    """
     if type(roots) is not list or len(roots) > MAX_FIELD_ROOTS:
         raise AuditBatchError("plan_roots")
     split = {}

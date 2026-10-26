@@ -38,8 +38,10 @@ from data_sheets_schema.cli.api import ARMS
 EXPLICIT_BOUNDS = {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4,
                    "aggregate_input_tokens": 4000000}
 CHORUS_SIZING = ROOT / "tests" / "fixtures" / "audit_batches" / "chorus_v10_2026-10-22a"
-AI_READI_LIMITS = {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 16,
-                   "aggregate_input_tokens": 16000000}
+# Bounds whose integration call fits today's protocol for AI_READI; not a
+# partition policy (at 80 / 12,288 the builder refuses the large projects).
+AI_READI_LIMITS = {"max_paths": 512, "max_inventory_bytes": 98304, "max_workers": 2,
+                   "aggregate_input_tokens": 4000000}
 AI_READI_SIZING = (ROOT / "data" / "d4d_concatenated" / "claudecode_api_core"
                    / "2026-09-04g_claude-opus-5-api-generic-v8_rep2" / "intermediate")
 
@@ -154,7 +156,9 @@ def test_build_registration_arms(tmp_path: Path) -> None:
             label=f"2026-10-test_{arm_key}",
             arm=arm_key,
             registration_path=reg_path,
+            # No v10 record of these arms exists; the baseline record stands in.
             sizing_record=CHORUS_SIZING,
+            sizing_stand_in=True,
             write_to_disk=True,
         )
         assert reg_path.is_file()
@@ -311,14 +315,17 @@ def test_cli_dry_run_single_and_all() -> None:
     assert "✓ CHORUS: registration_id=" in result.output
     assert "[dry-run]" in result.output
 
-    # All projects, each with its own limits (#5155 F4)
-    sizing = {"AI_READI": AI_READI_SIZING,
-              "CM4AI": AI_READI_SIZING.parent.parent / "2026-09-04g_claude-opus-5-api-generic-v8_rep3" / "intermediate",
-              "VOICE": AI_READI_SIZING.parent.parent / "2026-09-04f_claude-opus-5-api-generic-v8_rep3" / "intermediate"}
+    # All projects, each with its own limits (#5155 F4); the large projects'
+    # bounds are ones whose integration call fits today's protocol.
+    runs = AI_READI_SIZING.parent.parent
+    sizing = {"AI_READI": (AI_READI_SIZING, "max_paths=512,max_inventory_bytes=98304,max_workers=2"),
+              "CM4AI": (runs / "2026-09-04g_claude-opus-5-api-generic-v8_rep3" / "intermediate",
+                        "max_paths=384,max_inventory_bytes=65536,max_workers=2"),
+              "VOICE": (runs / "2026-09-04f_claude-opus-5-api-generic-v8_rep3" / "intermediate",
+                        "max_paths=384,max_inventory_bytes=65536,max_workers=2")}
     args = ["--all", "-l", "test_dry_all", "--dry-run", "--project-limits", "CHORUS:partition=chorus"]
-    for proj, directory in sizing.items():
-        args += ["--project-limits", f"{proj}:max_paths=80,max_inventory_bytes=12288,max_workers=16,"
-                                     "aggregate_input_tokens=16000000",
+    for proj, (directory, bounds) in sizing.items():
+        args += ["--project-limits", f"{proj}:{bounds},aggregate_input_tokens=4000000",
                  "--sizing-record", f"{proj}={directory}"]
     result_all = runner.invoke(cli, args)
     assert result_all.exit_code == 0, result_all.output
@@ -344,15 +351,17 @@ def test_cli_file_generation_and_check(tmp_path: Path) -> None:
             "-r", str(roster_file),
             "--max-paths", "80", "--max-inventory-bytes", "12288", "--max-workers", "4",
             "--aggregate-input-tokens", "4000000", "--sizing-record", f"CHORUS={CHORUS_SIZING}",
-            "--project-limits", "AI_READI:max_workers=16,aggregate_input_tokens=16000000",
+            "--project-limits", "AI_READI:max_paths=512,max_inventory_bytes=98304,max_workers=2",
             "--sizing-record", f"AI_READI={AI_READI_SIZING}",
         ],
     )
     assert res.exit_code == 0, res.output
     regs = {p: json.loads((out_dir / f"registration_{p.lower()}_test_check.json").read_text()) for p in ("CHORUS", "AI_READI")}
     assert regs["CHORUS"]["audit_limits"]["max_workers"] == 4
-    assert regs["AI_READI"]["audit_limits"]["max_workers"] == 16
-    assert regs["AI_READI"]["audit_limits"]["aggregate_input_tokens"] == 16000000
+    assert regs["AI_READI"]["audit_limits"]["max_workers"] == 2
+    assert regs["AI_READI"]["audit_limits"]["aggregate_input_tokens"] == 4000000
+    for p in ("chorus", "ai_readi"):  # each sizing is recorded beside its registration
+        assert (out_dir / f"registration_{p}_test_check.sizing.json").is_file()
     assert (out_dir / "registration_chorus_test_check.json").is_file()
     assert (out_dir / "registration_ai_readi_test_check.json").is_file()
     assert roster_file.is_file()
@@ -432,7 +441,8 @@ def test_parse_coverage_floor() -> None:
 def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
     """Build registration for KIDS_FIRST with neutral profile and registered coverage floor (Step A19-reg)."""
     reg_path = tmp_path / "reg_kids_first.json"
-    # No KIDS_FIRST phase-1 record exists; CHORUS's stands in for the sizing.
+    # No KIDS_FIRST phase-1 record exists; CHORUS's stands in for the sizing,
+    # which must be said explicitly and is recorded.
     reg = build_registration(
         audit_limits=dict(EXPLICIT_BOUNDS),
         project="KIDS_FIRST",
@@ -440,9 +450,11 @@ def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
         registration_path=reg_path,
         coverage_floor="13/20",
         sizing_record=SizingRecord.in_directory(CHORUS_SIZING, "CHORUS"),
+        sizing_stand_in=True,
         write_to_disk=True,
     )
     assert reg_path.is_file()
+    assert json.loads((tmp_path / "reg_kids_first.sizing.json").read_text())["sizing"]["stand_in"] is True
     assert reg["inputs"]["project"] == "KIDS_FIRST"
     assert reg["inputs"]["bundle"]["path"].endswith("KIDS_FIRST_preprocessed.txt")
     assert reg["inputs"]["chunk_manifest"]["path"].endswith("kids_first/chunks.yaml")
@@ -468,10 +480,10 @@ def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
             "--coverage-floor", "13/20",
             "--partition", "chorus",
             "--max-paths", "144",
-            "--max-workers", "18",
+            "--max-workers", "5",
             "--max-calls", "20",
             # Bounds other than the profile's need their own allowance and sizing.
-            "--aggregate-input-tokens", "8000000",
+            "--aggregate-input-tokens", "4000000",
             "--sizing-record", f"CHORUS={CHORUS_SIZING}",
             "-o", str(out_dir),
         ],
@@ -486,9 +498,9 @@ def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
 
     reg1 = json.loads((out_dir / f"registration_chorus_{prefix}_rep1.json").read_text(encoding="utf-8"))
     assert reg1["audit_limits"]["max_paths"] == 144
-    assert reg1["audit_limits"]["max_workers"] == 18
+    assert reg1["audit_limits"]["max_workers"] == 5
     assert reg1["audit_limits"]["max_calls"] == 20
-    assert reg1["audit_limits"]["aggregate_output_tokens"] == 18 * 64000 + 32000 + 32000
+    assert reg1["audit_limits"]["aggregate_output_tokens"] == 5 * 64000 + 32000 + 32000
     assert reg1["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20,
                                                  "basis": "receipted_part"}
 

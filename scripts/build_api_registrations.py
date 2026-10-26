@@ -121,9 +121,11 @@ PARTITION_PROFILES: dict[str, dict[str, Any]] = {
     # 39 bytes under the inventory bound, each using 14k-50k of its 64k.
     # Baseline arm only: 15 of the 18 CHORUS crate-arm records fail planning
     # under these bounds, all on the worker count (16 before A17), and the de
-    # novo arm has no v10 evidence. Typed-audit input was 1,002,650 (10-20a)
-    # and 831,979 (10-22a) of the 4,000,000 allowance; sized on 10-22a's own
-    # record, the largest plan these bounds admit needs about 1.92M.
+    # novo arm has no v10 evidence. Billed typed-audit input was 1,002,650
+    # (10-20a, with a worker that hit the then 25k cap) and 1,148,972 (10-22a,
+    # with an integration attempt that timed out) of the 4,000,000 allowance.
+    # Sized on 10-22a's own record, the largest plan these bounds admit needs
+    # about 1.34M, and every call fits its window.
     "chorus": {"projects": ("CHORUS",), "arms": ("baseline",),
                "limits": {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4,
                           "aggregate_input_tokens": 4000000}},
@@ -222,21 +224,41 @@ def profile_sized(partition: str | None, limits: dict[str, Any]) -> bool:
             and limits["aggregate_input_tokens"] >= expected["aggregate_input_tokens"])
 
 
+def profile_covered(project: str, arm: str | None, limits: dict[str, Any]) -> bool:
+    """A profile validated for this project and arm covers these limits, named or not.
+
+    A registration does not record how its limits were chosen, so limits equal
+    to a profile's are that profile's.
+    """
+    return any(project in profile["projects"] and arm in profile["arms"] and profile_sized(name, limits)
+               for name, profile in PARTITION_PROFILES.items())
+
+
 # Typed-audit input sizing (#5155), calibrated on CHORUS 2026-10-22a.
 # - Rendered as below from that run's own inputs, its worker and omission
-#   requests come out byte for byte, apart from two allowances: the receipt
-#   carry (2,931 bytes over) and the omission request's owner classes
-#   (padded). Worker requests are also 136 bytes longer since one contract
-#   sentence was reworded (D35). The integration request is rendered without
-#   its responses.
+#   requests match their saved text in byte count (digests are stand-ins),
+#   apart from two allowances: the receipt carry (2,931 bytes over) and the
+#   omission request's owner classes (padded). Worker requests are also 136
+#   bytes longer since one contract sentence was reworded (D35). The
+#   integration request is rendered without its responses.
 # - Its worker, omission and integration requests counted 2.25, 2.35 and
 #   1.75 bytes per token.
-# - The responses its integration call carried cost about 3 input tokens per
-#   output text token (2.9-3.5, by the density taken for the rest of that
-#   request). No response's text can pass its stage's cap.
-SIZING_INSTRUMENT = "typed_audit_input_sizing_v1"
+# - Its integration request carried four responses, the workers' as base64
+#   envelopes: 131,507 output tokens, thinking included, that cost 155k-187k of
+#   its 316,914 input tokens (by the density taken for the rest). Each response
+#   is sized at its stage's cap, at 1.5 input tokens per output token. A
+#   response written all as text, with no thinking, could cost more.
+# - The runtime admits a call only if its count plus its output cap fits
+#   context_limit_tokens and the count fits max_input_tokens_per_call, and
+#   counts each stage only on reaching it: every earlier stage is billed first.
+SIZING_INSTRUMENT = "typed_audit_input_sizing_v2"
 SIZING_BYTES_PER_TOKEN = 2.0
-SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN = 3.5
+SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN = 1.5
+SIZING_STAGES = ("worker", "omission", "integration")
+# F2 of the A17 review: the cap's only evidence is six CHORUS workers.
+SIZING_WORKER_CAP_NOTE = ("worker_output_tokens is calibrated on six CHORUS workers of 3-12 KB inventory, "
+                          "the largest using 53,204 of 64,000; a worker that reaches its cap ends the audit "
+                          "after the earlier stages are billed")
 _STAND_IN_DIGEST = "0" * 64
 _SIZING_CATALOGS: dict[bytes, dict[str, Any]] = {}
 # Literals of typed_audit_runtime's binding and shared_generation's generation context.
@@ -258,6 +280,43 @@ class SizingRecord:
         """An API run's intermediate directory: {P}_full.yaml, {P}_core.yaml, {P}_coverage_receipt.yaml."""
         root = Path(directory)
         return cls(*(root / f"{project}_{name}.yaml" for name in ("full", "core", "coverage_receipt")))
+
+
+SIZING_RECORD_FORMAT = "typed_audit_input_sizing_record_v1"
+
+
+def sizing_path(registration_path: Path | str) -> Path:
+    """Where a registration's input sizing is written: beside it, as <stem>.sizing.json."""
+    path = Path(registration_path)
+    return path.with_name(path.stem + ".sizing.json")
+
+
+def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict[str, Any] | None:
+    """The sizing record beside a registration, checked against its bytes.
+
+    Returns None when a partition profile covers the registration's limits.
+    Otherwise a sizing record must name these exact registration bytes and
+    admit its limits, or ValueError is raised.
+    """
+    reg = json.loads(raw)
+    limits = reg["audit_limits"]
+    arm = next((key for key, value in ARMS.items() if value[0] == reg["run"]["arm"]), None)
+    covered = profile_covered(reg["run"]["project"], arm, limits)
+    path = sizing_path(registration_path)
+    if not path.is_file():
+        if covered:
+            return None
+        raise ValueError(f"{registration_path}: no partition profile covers its aggregate_input_tokens "
+                         f"and no sizing record is beside it ({path.name})")
+    record = json.loads(path.read_bytes())
+    sizing = record.get("sizing") if isinstance(record, dict) else None
+    if (not isinstance(sizing, dict) or record.get("format") != SIZING_RECORD_FORMAT
+            or record.get("registration_sha256") != hashlib.sha256(raw).hexdigest()):
+        raise ValueError(f"{path}: is not the sizing record of these registration bytes")
+    if (sizing["aggregate_input_tokens"] > limits["aggregate_input_tokens"]
+            or any(sizing[f"{stage}_input_tokens"] > sizing["admissible_input_tokens"][stage] for stage in SIZING_STAGES)):
+        raise ValueError(f"{path}: its sizing does not admit the registered limits")
+    return record
 
 
 def _typed_contracts() -> dict[str, Any]:
@@ -414,14 +473,22 @@ def size_typed_audit_input(
     sizing_record: SizingRecord,
     context: bytes,
     schema_snapshot,
+    stand_in: bool = False,
 ) -> dict[str, Any]:
     """Input tokens of the largest typed-audit plan these limits admit, sized on an earlier record.
 
     Every call carries the complete record, core, receipt, inventory and
     bundle, so each of ``max_workers`` workers is sized at the record plan's
-    largest worker. The integration call is sized with every response at its
-    stage cap. Bytes become tokens at SIZING_BYTES_PER_TOKEN. This is an
-    estimate for the record supplied, not a bound on a later record.
+    largest worker. The integration call is sized with every worker's and the
+    omission's response at its stage cap. Bytes become tokens at
+    SIZING_BYTES_PER_TOKEN. Also returns the input each stage's call may take,
+    by the runtime's admission rule. This is an estimate for the record
+    supplied, not a bound on a later record.
+
+    The record must declare the registration's project and arm in its
+    generator header (``# D4D Datasheet for PROJECT Dataset`` and ``# Arm:
+    ...``); ``stand_in`` sizes on another project's or arm's record anyway,
+    and says so in the result.
     """
     from data_sheets_schema.audit_batches import AuditBatchError
     files = {name: Path(getattr(sizing_record, name)) for name in ("full", "core", "receipt")}
@@ -429,6 +496,17 @@ def size_typed_audit_input(
     if missing:
         raise FileNotFoundError(f"sizing record for {project} is incomplete: missing {', '.join(missing)}")
     raw = {name: path.read_bytes() for name, path in files.items()}
+    header = []
+    for line in raw["full"].decode("utf-8", "replace").splitlines():
+        if not line.startswith("#"):
+            break
+        header.append(line.strip())
+    expected = [f"# D4D Datasheet for {project} Dataset", f"# Arm: {registration['run']['arm']}"]
+    own = header[:1] == expected[:1] and expected[1] in header
+    if not own and not stand_in:
+        raise ValueError(f"sizing record {files['full']} is not a {project} record of this arm: its header "
+                         f"reads {(header[:1] or [''])[0]!r} and {next((h for h in header if h.startswith('# Arm:')), '')!r}, "
+                         f"not {expected[0]!r} and {expected[1]!r}; size on the project's own record")
     try:
         rendered = render_typed_audit_inputs(project, limits, registration, record=raw["full"], core=raw["core"],
                                              receipt=raw["receipt"], context=context, schema_snapshot=schema_snapshot)
@@ -445,12 +523,17 @@ def size_typed_audit_input(
     responses = math.ceil(SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN
                           * (workers * limits["worker_output_tokens"] + limits["omission_output_tokens"]))
     return {"instrument": SIZING_INSTRUMENT, "sizing_record": {name: sg.file_pin(path) for name, path in files.items()},
+            "stand_in": not own,
             "bytes_per_token": SIZING_BYTES_PER_TOKEN,
             "input_tokens_per_response_token": SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN,
             "plan_workers": rendered["plan_workers"], "max_workers": workers, "worker_input_tokens": worker,
             "omission_input_tokens": omission, "integration_base_input_tokens": base,
             "integration_response_input_tokens": responses, "integration_input_tokens": base + responses,
-            "aggregate_input_tokens": workers * worker + omission + base + responses}
+            "aggregate_input_tokens": workers * worker + omission + base + responses,
+            "admissible_input_tokens": {stage: min(limits["max_input_tokens_per_call"],
+                                                   limits["context_limit_tokens"] - limits[f"{stage}_output_tokens"])
+                                        for stage in SIZING_STAGES},
+            "notes": [SIZING_WORKER_CAP_NOTE]}
 
 
 FLOOR_BASIS_CHOICES = ("receipted_part", "all_receiptable")
@@ -657,17 +740,21 @@ def prepare_registration(
     receipt_limits: dict[str, Any] | None = None,
     synthesize_draft_context: bool = False,
     sizing_record: SizingRecord | Path | str | None = None,
+    sizing_stand_in: bool = False,
 ) -> tuple[dict[str, Any], list[tuple[Path, bytes]], dict[str, Any] | None]:
     """Build a complete shared_generation_registration_v1 document without writing it.
 
     Modelled on `tests/test_shared_generation_selection.py:17-52`.
     Validates output via `shared_generation.parse_registration`. Returns the
-    registration, the files to write (a synthesized draft context, then the
-    registration) and the input sizing, if one ran.
+    registration, the files to write (a synthesized draft context, the
+    registration, and its sizing record) and the input sizing, if one ran.
 
     An aggregate_input_tokens not covered by a partition profile is sized on
     ``sizing_record`` (a `SizingRecord`, or an API run's intermediate
-    directory) and refused when below that sizing (#5155).
+    directory), which must be the project's own, of the same arm, unless
+    ``sizing_stand_in``.
+    It is refused when a typed-audit call cannot fit its window or the
+    allowance is below the sizing (#5155).
     """
     if arm not in ARMS:
         raise ValueError(f"unknown arm '{arm}'; must be one of {sorted(ARMS.keys())}")
@@ -882,7 +969,7 @@ def prepare_registration(
     sg.parse_registration(canonical_bytes)
 
     sizing = None
-    if sizing_record is not None or not profile_sized(partition, active_audit_limits):
+    if sizing_record is not None or not profile_covered(project, arm, active_audit_limits):
         if sizing_record is None:
             raise ValueError(
                 f"{project}: an aggregate_input_tokens no partition profile covers needs a sizing record (#5155); "
@@ -892,7 +979,22 @@ def prepare_registration(
             sizing_record = SizingRecord.in_directory(sizing_record, project)
         context_raw = resolved_context_raw if resolved_context_raw is not None else resolved_context.read_bytes()
         sizing = size_typed_audit_input(project, active_audit_limits, reg, sizing_record=sizing_record,
-                                        context=context_raw, schema_snapshot=full_schema)
+                                        context=context_raw, schema_snapshot=full_schema, stand_in=sizing_stand_in)
+        # The runtime counts and admits each stage only on reaching it, so a
+        # call that cannot fit is refused after every earlier stage is billed.
+        for stage in SIZING_STAGES:
+            need, room = sizing[f"{stage}_input_tokens"], sizing["admissible_input_tokens"][stage]
+            if need > room:
+                detail = (f" ({sizing['max_workers']} worker responses and the omission response at their caps; "
+                          f"{sizing['integration_base_input_tokens']:,} without them)" if stage == "integration" else "")
+                raise ValueError(
+                    f"{project}: the typed-audit {stage} call sized on {sizing_record.full} needs {need:,} input "
+                    f"tokens{detail}, over the {room:,} it may take: context_limit_tokens "
+                    f"{active_audit_limits['context_limit_tokens']:,} less {stage}_output_tokens "
+                    f"{active_audit_limits[stage + '_output_tokens']:,}, and no more than max_input_tokens_per_call "
+                    f"{active_audit_limits['max_input_tokens_per_call']:,}. The runtime would refuse it only on "
+                    f"reaching it, after billing every earlier stage (#5155)"
+                )
         if active_audit_limits["aggregate_input_tokens"] < sizing["aggregate_input_tokens"]:
             raise ValueError(
                 f"{project}: aggregate_input_tokens {active_audit_limits['aggregate_input_tokens']:,} is below the "
@@ -906,6 +1008,15 @@ def prepare_registration(
     if resolved_context_raw is not None:
         outputs.append((resolved_context, resolved_context_raw))
     outputs.append((resolved_reg_path, canonical_bytes))
+    if sizing is not None:
+        # The registration format is closed (shared_generation.parse_registration),
+        # so the sizing goes beside it, bound to the registration's bytes.
+        sidecar = sizing_path(resolved_reg_path)
+        sidecar_bytes = sg.canonical({"format": SIZING_RECORD_FORMAT, "registration_path": str(resolved_reg_path),
+                                      "registration_sha256": hashlib.sha256(canonical_bytes).hexdigest(),
+                                      "sizing": sizing})
+        outputs.append((sidecar, sidecar_bytes))
+        sizing = {**sizing, "sidecar": {"path": str(sidecar), "sha256": hashlib.sha256(sidecar_bytes).hexdigest()}}
     return reg, outputs, sizing
 
 
@@ -1211,8 +1322,10 @@ def parse_sizing_records(values: tuple[str, ...] | list[str]) -> dict[str, Path]
     multiple=True,
     metavar="PROJECT=DIRECTORY",
     help="Intermediate directory of an earlier API run of PROJECT ({P}_full.yaml, {P}_core.yaml, "
-         "{P}_coverage_receipt.yaml). Required for an aggregate_input_tokens no partition profile covers; "
-         "a value below the typed-audit input sized on that record is refused (#5155).",
+         "{P}_coverage_receipt.yaml), whose record must declare PROJECT and the arm. Required for an aggregate_input_tokens "
+         "no partition profile covers. The build is refused when a typed-audit call sized on that record cannot "
+         "fit its window, or the allowance is below the sizing; otherwise the sizing is written beside the "
+         "registration (#5155).",
 )
 @click.option(
     "--id-prefix",
@@ -1343,7 +1456,11 @@ def cli(
                     raise click.ClickException(f"Missing registration file: {reg_file}")
                 raw = reg_file.read_bytes()
                 sg.parse_registration(raw)
-                click.echo(f"  ✓ {proj}: {reg_file.name}")
+                try:
+                    sized = check_registration_sizing(reg_file, raw)
+                except ValueError as exc:
+                    raise click.ClickException(str(exc)) from exc
+                click.echo(f"  ✓ {proj}: {reg_file.name}" + (f" (sized: {sizing_path(reg_file).name})" if sized else ""))
         if not target_roster_path.is_file():
             raise click.ClickException(f"Missing roster file: {target_roster_path}")
         pairs = [(p, lbl) for p in target_projects for lbl in target_labels]
@@ -1416,20 +1533,20 @@ def cli(
             reg_sha = hashlib.sha256(sg.canonical(reg)).hexdigest()
             click.echo(f"  ✓ {proj}: registration_id={reg['registration_id']} sha256={reg_sha}")
             if sizing is not None:
-                limits = reg["audit_limits"]
+                limits, room = reg["audit_limits"], sizing["admissible_input_tokens"]
                 click.echo(
-                    f"    input sized on {sizing['sizing_record']['full']['path']}: {sizing['plan_workers']} of "
-                    f"{sizing['max_workers']} workers; per call worker {sizing['worker_input_tokens']:,}, omission "
-                    f"{sizing['omission_input_tokens']:,}, integration {sizing['integration_input_tokens']:,} "
-                    f"(responses at their caps); aggregate {sizing['aggregate_input_tokens']:,} of "
+                    f"    input sized on {sizing['sizing_record']['full']['path']}"
+                    f"{' (stand-in)' if sizing['stand_in'] else ''}: {sizing['plan_workers']} of "
+                    f"{sizing['max_workers']} workers; per call worker {sizing['worker_input_tokens']:,} of "
+                    f"{room['worker']:,}, omission {sizing['omission_input_tokens']:,} of {room['omission']:,}, "
+                    f"integration {sizing['integration_input_tokens']:,} of {room['integration']:,} (responses at "
+                    f"their caps); aggregate {sizing['aggregate_input_tokens']:,} of "
                     f"{limits['aggregate_input_tokens']:,}"
                 )
-                if sizing["integration_input_tokens"] > limits["max_input_tokens_per_call"]:
-                    click.echo(
-                        f"    ! integration could exceed max_input_tokens_per_call "
-                        f"({limits['max_input_tokens_per_call']:,}) if every stage writes its whole cap; "
-                        f"without responses it is {sizing['integration_base_input_tokens']:,}"
-                    )
+                click.echo(f"    sizing record {Path(sizing['sidecar']['path']).name} "
+                           f"sha256={sizing['sidecar']['sha256']}")
+                for note in sizing["notes"]:
+                    click.echo(f"    note: {note}")
 
     roster = build_roster(registrations=registrations, write_to_disk=False)
     roster_sha = hashlib.sha256(sg.canonical(roster)).hexdigest()
