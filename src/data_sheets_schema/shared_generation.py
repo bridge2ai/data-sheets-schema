@@ -32,24 +32,13 @@ ASSET_HASHES = {'.claude/agents/d4d-provenance-guard-v2.md': '10dc4689e1855096ef
  '.claude/commands/d4d-uniform-rules-v2.md': '22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e',
  'src/download/prompts/api_playbook_v2.md': '5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719',
  'src/download/prompts/d4d_generic_arm_prompt_v10.md': 'ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db',
+ 'src/download/prompts/evidence_protocol_v7.md': '72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6',
  'src/download/prompts/receipt_completion_runtime_v2.md': 'c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c',
  'src/download/prompts/shared_generation_v1.md': '34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450'}
 
 
 ROUTING_FORMAT = "shared_generation_registration_v2"
 SCHEMA_CONTEXT_VERSION = 2
-REQUEST_CODE = ("src/data_sheets_schema/shared_generation.py",
-                "src/data_sheets_schema/api_runner.py",
-                "src/data_sheets_schema/receipt_completion.py",
-                "src/data_sheets_schema/receipt_completion_policy.py",
-                "src/data_sheets_schema/typed_audit_runtime.py",
-                "src/data_sheets_schema/typed_audit.py",
-                "src/data_sheets_schema/audit_omissions.py",
-                "src/data_sheets_schema/audit_batches.py",
-                "src/data_sheets_schema/audit_batch_format.py",
-                "src/data_sheets_schema/schema_digest.py",
-                "src/data_sheets_schema/receipts.py",
-                "src/data_sheets_schema/source_review.py")
 ROUTING_ASSET_HASHES = {'src/download/prompts/shared_generation_v2.md': '1e444c4b7f099fc1f35ecf52d78ff7bf4a9ca874697ae7252d452aee40c2d2e9', 'src/download/prompts/api_playbook_v3.md': 'cd4c4880f1ce50370718d604b6eb2a438e87b3b7b6a2df91b04662c6865397c4', 'src/download/prompts/receipt_completion_runtime_v3.md': '1246095f7e6366e58a78be4c9f5be2afd80dcc057d090a31d28068b49f12be84'}
 ROUTING_POLICY = "src/download/prompts/shared_generation_v2.md"
 ROUTING_API_POLICY = "src/download/prompts/api_playbook_v3.md"
@@ -104,6 +93,9 @@ ROUTING_CODE = ("src/data_sheets_schema/source_heading_runtime.py",
                 "src/data_sheets_schema/cache_dependencies.py",
                 "src/data_sheets_schema/historical_digest.py",
                 "src/data_sheets_schema/run_schema.py")
+REQUEST_CODE = (*ROUTING_CODE,
+                "src/data_sheets_schema/corpus.py",
+                "src/data_sheets_schema/shared_write_footprint.py")
 
 
 def sha(raw: bytes) -> str:
@@ -151,7 +143,8 @@ def captured_assets(*, version=1) -> dict[str, bytes]:
 
 
 def _contracts_digest(version: int) -> dict:
-    from . import api_runner as api
+    import os
+    from . import api_playbook, api_runner as api, chunking, evidence_assertions
     from . import audit_batch_format, audit_omissions, receipt_completion as rc, typed_audit_runtime
     from .resources import resource_path
     render_ver = 25 if version == 1 else 27
@@ -165,7 +158,12 @@ def _contracts_digest(version: int) -> dict:
         'phase_max_tokens': api.PHASE_MAX_TOKENS,
         'receipt_phase_max_tokens': api.RECEIPT_PHASE_MAX_TOKENS,
         'default_max_tokens': api.DEFAULT_MAX_TOKENS,
+        'shared_phase_max_tokens': getattr(api, 'SHARED_PHASE_MAX_TOKENS', None),
+        'env_receipt_full_max_tokens': os.environ.get('D4D_RECEIPT_FULL_MAX_TOKENS', '').strip() or None,
     }
+    chunk_manifest_probe = canonical(chunking.manifest_from_bytes(b'line\n', 'probe'))
+    chunk_probe = evidence_assertions.source_chunks_from_bytes(b'line\n', chunk_manifest_probe)[0]
+    protocol_ver = evidence_assertions.protocol_for_renderer(render_ver)
     return {
         'phase_system_sha256': sha(api.PHASE_SYSTEM.encode('utf-8')),
         'phase_instructions_sha256': phases,
@@ -174,6 +172,9 @@ def _contracts_digest(version: int) -> dict:
         'repair_instruction_sha256': sha(api.REPAIR_INSTRUCTION.encode('utf-8')),
         'readdress_header_sha256': sha(api.READDRESS_HEADER.encode('utf-8')),
         'shared_evidence_contract_sha256': sha(api.shared_evidence_contract().encode('utf-8')),
+        'evidence_protocol_sha256': sha(resource_path(f'src/download/prompts/evidence_protocol_v{protocol_ver}.md').read_bytes()),
+        'api_playbook_probe_sha256': sha(api_playbook.adapt_template(api.prompt_body(api.GENERIC_PROMPT_V10), version=2 if version == 1 else 3).encode('utf-8')),
+        'chunk_projection_probe_sha256': sha(canonical(chunk_probe)),
         'schema_context_header_sha256': sha(SCHEMA_CONTEXT_HEADER.encode('utf-8')),
         'generation_context_header_sha256': sha(GENERATION_CONTEXT_HEADER.encode('utf-8')),
         'typed_audit_system_sha256': sha(typed_audit_runtime.SYSTEM.encode('utf-8')),
@@ -189,6 +190,8 @@ def _contracts_digest(version: int) -> dict:
 
 
 def _schema_trim_descriptor() -> dict:
+    from linkml_runtime.dumpers import json_dumper
+    from linkml_runtime.linkml_model.meta import ClassDefinition, EnumDefinition, SlotDefinition
     probe = trim_omission_schema({
         'classes': {'Dataset': {'definition': {'description': 'd'}, 'slots': {'id': {'definition': {'description': 'd'}}}}},
         'enums': {'E': {}},
@@ -196,22 +199,30 @@ def _schema_trim_descriptor() -> dict:
         'sources': [],
         'slots': {'id': {}},
     })
+    dumped_slot = {k: v for k, v in json.loads(json_dumper.dumps(SlotDefinition(name='id', description='d'))).items()
+                   if k not in _TRIMMED_SLOT_KEYS}
+    dumped_class = {k: v for k, v in json.loads(json_dumper.dumps(ClassDefinition(name='Dataset', description='d'))).items()
+                    if k not in _TRIMMED_SLOT_KEYS and k not in {'attributes', 'slot_usage', 'slots'}}
+    dumped_enum = json.loads(json_dumper.dumps(EnumDefinition(name='E', description='d')))
     return {
         'generation_dropped_slot_keys': list(_TRIMMED_SLOT_KEYS),
         'worker_non_assigned_dropped_slot_keys': list(_WORKER_NON_ASSIGNED_TRIMMED_SLOT_KEYS),
         'omission_schema_dropped_slot_keys': list(_TRIMMED_SLOT_KEYS),
         'omission_retained_top_keys': sorted(probe),
         'omission_all_reachable_classes': 'classes' in probe and 'Dataset' in probe.get('classes', {}),
+        'linkml_dumper_probe_sha256': sha(canonical({'slot': dumped_slot, 'class': dumped_class, 'enum': dumped_enum})),
     }
 
 
 def descriptor(*, version=1, condition=None) -> dict:
+    from importlib.metadata import version as package_version
+    import sys
     captured_assets(version=version)
+    reader_runtime = {"python": list(sys.version_info[:2]), "packages": {name: package_version(name)
+        for name in ("linkml", "linkml-runtime", "PyYAML", "jsonschema", "referencing")}}
     if version == 2:
         from .source_heading_runtime import MODES
         from .resources import resource_path
-        from importlib.metadata import version as package_version
-        import sys
         if condition not in MODES.values():
             raise ValueError("routing descriptor requires its explicit condition")
         return {"protocol": "shared_generation_v2", "version": 2,
@@ -221,8 +232,7 @@ def descriptor(*, version=1, condition=None) -> dict:
             "receipt_completion_version": 3,
             "assets": {**ASSET_HASHES, **ROUTING_ASSET_HASHES},
             "routing_code": {name: sha(resource_path(name).read_bytes()) for name in ROUTING_CODE},
-            "reader_runtime": {"python": list(sys.version_info[:2]), "packages": {name: package_version(name)
-                for name in ("linkml", "linkml-runtime", "PyYAML", "jsonschema", "referencing")}},
+            "reader_runtime": reader_runtime,
             "schema_context_trim": _schema_trim_descriptor(),
             "stage_contracts": _contracts_digest(version),
             "scientific_readiness": "draft/unreviewed"}
@@ -233,6 +243,7 @@ def descriptor(*, version=1, condition=None) -> dict:
             "renderer": 25, "runtime": "Claude API (direct)",
             "typed_protocol": "typed_audit_protocol_v1", "api_playbook_version": 2,
             "receipt_completion_version": 2, "assets": dict(ASSET_HASHES),
+            "reader_runtime": reader_runtime,
             "schema_context_trim": _schema_trim_descriptor(),
             "stage_contracts": _contracts_digest(version)}
 
@@ -628,6 +639,9 @@ def _request_settings(settings):
 
 
 def preflight(spec, settings) -> Capture:
+    import os
+    if os.environ.get("D4D_RECEIPT_FULL_MAX_TOKENS", "").strip():
+        raise ValueError("D4D_RECEIPT_FULL_MAX_TOKENS is not permitted for shared-generation runs")
     captured = assert_current(spec)
     reg = captured.document()
     expected = reg["runtime"]

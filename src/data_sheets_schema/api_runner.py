@@ -414,6 +414,9 @@ def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
     # finding-only response. Keep earlier renderers' recorded limits intact.
     if spec.render_version >= 12 and ph in {"audit", "report"}:
         value = 96000
+    if getattr(spec, "shared_generation_version", 0) in (1, 2):
+        if os.environ.get("D4D_RECEIPT_FULL_MAX_TOKENS", "").strip():
+            raise ValueError("D4D_RECEIPT_FULL_MAX_TOKENS is not permitted for shared-generation runs")
     if spec.condition in RECEIPT_CONDITIONS and ph in RECEIPT_PHASE_MAX_TOKENS:
         # Env-overridable (#777): three consecutive full-phase stalls on the
         # AI_READI v7 re-canary followed the raise to 128k, where two runs at

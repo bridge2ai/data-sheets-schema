@@ -398,6 +398,9 @@ def test_s7_trim_retains_descriptions_by_stage_and_binds_wire_identity(selected,
         'repair_instruction_sha256',
         'readdress_header_sha256',
         'shared_evidence_contract_sha256',
+        'evidence_protocol_sha256',
+        'api_playbook_probe_sha256',
+        'chunk_projection_probe_sha256',
         'schema_context_header_sha256',
         'generation_context_header_sha256',
         'typed_audit_system_sha256',
@@ -409,6 +412,8 @@ def test_s7_trim_retains_descriptions_by_stage_and_binds_wire_identity(selected,
         'receipt_completion_audit_carry_sha256',
         'request_code_sha256',
     }
+    assert 'reader_runtime' in base_desc
+    assert 'linkml_dumper_probe_sha256' in base_desc['schema_context_trim']
     assert base_desc['stage_contracts']['phase_instructions_sha256'] == {
         p: sg.sha(api.phase_instruction(p, 25).encode('utf-8'))
         for p in sorted(api.PHASE_INSTRUCTIONS)
@@ -427,3 +432,61 @@ def test_s7_trim_retains_descriptions_by_stage_and_binds_wire_identity(selected,
     assert sg.descriptor()['stage_contracts']['receipt_completion_policy_sha256'] != base_desc['stage_contracts']['receipt_completion_policy_sha256']
     monkeypatch.setattr(runtime, 'SYSTEM', runtime.SYSTEM + '\nChanged system.')
     assert sg.descriptor()['stage_contracts']['typed_audit_system_sha256'] != base_desc['stage_contracts']['typed_audit_system_sha256']
+
+
+
+def test_a14_r2_f1_probes_move_descriptor_or_refuse(selected, monkeypatch, tmp_path):
+    """A14 R2 F1 (n01-n05): evidence_protocol_v7.md, api_playbook, evidence_assertions,
+    linkml_runtime json_dumper, reader_runtime, and D4D_RECEIPT_FULL_MAX_TOKENS
+    are all bound in v1 descriptor() or refused before admission.
+    """
+    from data_sheets_schema import api_playbook, evidence_assertions, prompt_registry, resources
+    from linkml_runtime.dumpers import json_dumper
+
+    base_desc = sg.descriptor()
+    assert 'src/download/prompts/evidence_protocol_v7.md' in sg.ASSET_HASHES
+    assert 'src/download/prompts/evidence_protocol_v7.md' in prompt_registry.pins()
+
+    # n01: evidence_protocol_v7.md drift refuses in captured_assets() / descriptor()
+    orig_res = resources.resource_path
+    edited_ep = tmp_path / 'evidence_protocol_v7.md'
+    edited_ep.write_bytes(orig_res('src/download/prompts/evidence_protocol_v7.md').read_bytes() + b'\nChanged rule.\n')
+    with monkeypatch.context() as mp:
+        mp.setattr(resources, 'resource_path',
+                   lambda name: edited_ep if str(name) == 'src/download/prompts/evidence_protocol_v7.md' else orig_res(name))
+        with pytest.raises(ValueError, match='shared-generation selected asset changed'):
+            sg.descriptor()
+
+    # n02: api_playbook.adapt_template change moves stage_contracts
+    with monkeypatch.context() as mp:
+        orig_adapt = api_playbook.adapt_template
+        mp.setattr(api_playbook, 'adapt_template', lambda text, version=2: orig_adapt(text, version=version) + '\nExtra.')
+        assert sg.descriptor()['stage_contracts']['api_playbook_probe_sha256'] != base_desc['stage_contracts']['api_playbook_probe_sha256']
+
+    # n03: evidence_assertions.source_chunks_from_bytes change moves stage_contracts
+    with monkeypatch.context() as mp:
+        orig_chunks = evidence_assertions.source_chunks_from_bytes
+        def altered_chunks(bundle, manifest):
+            chunks, pins = orig_chunks(bundle, manifest)
+            return ({k: {**v, 'text': v['text'] + 'x'} for k, v in chunks.items()}, pins)
+        mp.setattr(evidence_assertions, 'source_chunks_from_bytes', altered_chunks)
+        assert sg.descriptor()['stage_contracts']['chunk_projection_probe_sha256'] != base_desc['stage_contracts']['chunk_projection_probe_sha256']
+
+    # n04: linkml-runtime json_dumper emitting an extra slot field moves schema_context_trim
+    with monkeypatch.context() as mp:
+        orig_dumps = json_dumper.dumps
+        def altered_dumps(element, *a, **k):
+            data = json.loads(orig_dumps(element, *a, **k))
+            data['simulated_extra_linkml_field'] = 'v'
+            return json.dumps(data)
+        mp.setattr(json_dumper, 'dumps', altered_dumps)
+        assert sg.descriptor()['schema_context_trim']['linkml_dumper_probe_sha256'] != base_desc['schema_context_trim']['linkml_dumper_probe_sha256']
+
+    # n05: D4D_RECEIPT_FULL_MAX_TOKENS is refused in phase_max_tokens and preflight for shared runs, and moves stage_contracts
+    with monkeypatch.context() as mp:
+        mp.setenv('D4D_RECEIPT_FULL_MAX_TOKENS', '77777')
+        assert sg.descriptor()['stage_contracts']['phase_max_tokens_sha256'] != base_desc['stage_contracts']['phase_max_tokens_sha256']
+        with pytest.raises(ValueError, match='D4D_RECEIPT_FULL_MAX_TOKENS is not permitted'):
+            api.phase_max_tokens(selected, 'full', api.DEFAULT_MAX_TOKENS)
+        with pytest.raises(ValueError, match='D4D_RECEIPT_FULL_MAX_TOKENS is not permitted'):
+            sg.preflight(selected, api._model_settings(selected.condition))
