@@ -1,0 +1,3788 @@
+{
+  "format": "d4d_k1_v2_original_ledger_audit_v1",
+  "calibration": {
+    "path": "/private/tmp/d4d-codex-k1-v2-20261026/notes/k1_cost_model_2026-10-25/ledger_calibration.json",
+    "bytes": 44926,
+    "sha256": "928d4f2dae73ab9d94a1d6552c4e31651c43aef2ab7f12be5ea2c327a2fadadd"
+  },
+  "review_n1_n2": {
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5096_3a292504f_review_2026-10-24.md",
+    "bytes": 30873,
+    "sha256": "dfe660b88ed6d784ffca3f27752040c44c96c78b8e04fe73b4e0a7fe14c5dd11"
+  },
+  "archive_verification": {
+    "manifest": {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/MANIFEST.sha256",
+      "bytes": 16522,
+      "sha256": "9649668da24c27f185975ed5f72704766422e4b30955d3137775f7a97a229655"
+    },
+    "verified_archive_files": [
+      {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_progress.json",
+        "bytes": 23364,
+        "sha256": "679aab514fb672586e234f4218a81397dd9d9e4ac1b9a8eb7c235bd471e963a6"
+      },
+      {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_progress_phase5.json",
+        "bytes": 193190,
+        "sha256": "83b43bee511a2b8d12f65409ba69c50af1131db6236eb81fb704484eb153f4c4"
+      },
+      {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2.json",
+        "bytes": 39629,
+        "sha256": "d2ccbec319f41f8f641593b136c1b192779ee033cabeedcd272918d16c4f98c1"
+      },
+      {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2_phase5.json",
+        "bytes": 43718,
+        "sha256": "3d794652b590b4b88c5cb4330f65a533c5a92972f455e58d752d623dd93b7e5e"
+      },
+      {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_report_rejected_response_72ac7d9a77bb438798e7d8d55ff1bf0f_phase5.txt",
+        "bytes": 163798,
+        "sha256": "d1df3ae1cec6402955efee391b898a01c688955b2180dce69344bbb70a829834"
+      },
+      {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_snapshot_index.json",
+        "bytes": 27572,
+        "sha256": "d6ea6ef775bb5719f075ec6b1a120ce43e483bb6bd161e26d81757f361510494"
+      },
+      {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_snapshot_index_phase5.json",
+        "bytes": 30135,
+        "sha256": "90d28501b91f6b9c6ccf2da871b17a63d9b7ce1a3dbc8580444a915b38e6996a"
+      },
+      {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_typed_audit_4_response.json",
+        "bytes": 43426,
+        "sha256": "b439364f6ac8b2a9ea21a406bb4088a699f2c41e2837be3fbbf6ac3c4f1ec506"
+      }
+    ],
+    "scope": "Every regular file in chorus_rep1_unmodified_archive; no claim to validate unrelated preserved scratch files against the manifest."
+  },
+  "bounded_original_search": {
+    "scope": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25",
+    "method": "os.walk without ignore rules, includes hidden names; read and SHA256 every regular file, search all bytes for 10-22 identifiers, parse standalone JSON objects for ledger identity/rows",
+    "ignored_and_hidden_included": true,
+    "files": [
+      {
+        "relative_path": "CHORUS_report_normalized.md",
+        "bytes": 162181,
+        "sha256": "543511e998fad8b8e5e8759f3df1106b1c35b7c10d2dc21313547c1b53835e5c"
+      },
+      {
+        "relative_path": "MANIFEST.sha256",
+        "bytes": 16522,
+        "sha256": "9649668da24c27f185975ed5f72704766422e4b30955d3137775f7a97a229655"
+      },
+      {
+        "relative_path": "all_test_sources.txt",
+        "bytes": 999788,
+        "sha256": "40317ca8bdaf1bfbec499f498435ea6128abe33f11ac03c15b08b3849ed6b664"
+      },
+      {
+        "relative_path": "analyze_snapshots.py",
+        "bytes": 3023,
+        "sha256": "535e8cbf0cc0632bac065eab95c54d0f6c1d0d650636637845cd2baa0b5f0f69"
+      },
+      {
+        "relative_path": "apply_report_patch.py",
+        "bytes": 4507,
+        "sha256": "6410fa48ef7935bc050c10f38e1dfc85ee8fd802831c30cd087c1d5b207c9e4a"
+      },
+      {
+        "relative_path": "assemble_test_file.py",
+        "bytes": 2084,
+        "sha256": "ea9c72847cb052ae1dc73cdd71e0f3d66497bdb259383781172d090bb90a0036"
+      },
+      {
+        "relative_path": "before_10946.txt",
+        "bytes": 48952,
+        "sha256": "afa6e9895f903aeef8c747f381a3a0fe22bfab7ae2fa965eff1ef699f3aef72f"
+      },
+      {
+        "relative_path": "build_complete_test_file.py",
+        "bytes": 54737,
+        "sha256": "4e184d739835d4a5a5488d4c1d50a179f6ee4738de3f8fe40a340f4983cb228d"
+      },
+      {
+        "relative_path": "build_final_all.py",
+        "bytes": 8922,
+        "sha256": "fa16f50cde0ef85b589fb5fdb5624389bc7c309d746595d577da38597fad2584"
+      },
+      {
+        "relative_path": "build_final_all_out.txt",
+        "bytes": 98244,
+        "sha256": "a1927575938298d41915a923f967a71efe29f9b589f0acebfa253ca5e8882f20"
+      },
+      {
+        "relative_path": "build_reconstructed_files.py",
+        "bytes": 11235,
+        "sha256": "3d3e90ec963c4a48d4e46c597dc22898bccce28622b7c3abaa8fdd428609ddcd"
+      },
+      {
+        "relative_path": "build_step1_out.txt",
+        "bytes": 13785,
+        "sha256": "051f3c17663572f1848f70f685dab3719e92eb240ac5fd66eabcd4ac3ec3e3a1"
+      },
+      {
+        "relative_path": "build_step2_out.txt",
+        "bytes": 19879,
+        "sha256": "ec60a9b60ee8e5da0e2a160e902e51ef5b0a1137080cd8e5e70d8db92ac25fe9"
+      },
+      {
+        "relative_path": "check_10.py",
+        "bytes": 1134,
+        "sha256": "280d5316303aa4e38efa7d86fab69929a461f89db03d16857c06835414b80b14"
+      },
+      {
+        "relative_path": "check_all_brain_and_steps.py",
+        "bytes": 4278,
+        "sha256": "501e19113f6a4e8921d829440dcefeb992089b0bd87c52ebbda696f46a6a7670"
+      },
+      {
+        "relative_path": "check_all_brain_and_steps_out.txt",
+        "bytes": 9818,
+        "sha256": "77953d4b81d83d15cccbf537edb12e2c6134bdcd0a9663cdf420cdfb5ed55ea0"
+      },
+      {
+        "relative_path": "check_all_sources.py",
+        "bytes": 1615,
+        "sha256": "28eac47f95d7d0c9675bfca4e368fb6fcb7655de5feb36a21270fc36aaca267f"
+      },
+      {
+        "relative_path": "check_before_10946.py",
+        "bytes": 785,
+        "sha256": "15b5414ea7dad4d094322dbc207503d4019c9ba8d18eebcb2746b00d51fe6796"
+      },
+      {
+        "relative_path": "check_commits.py",
+        "bytes": 1572,
+        "sha256": "8552d74b00091560a13745d0885ab0dd82de2a9fa0846af714a0bc0393645c5b"
+      },
+      {
+        "relative_path": "check_commits_out.txt",
+        "bytes": 441697,
+        "sha256": "db28b8f1ada819d2b8f2c620d360d6dd650b229f2e5abba3a40df5bfec97d9e8"
+      },
+      {
+        "relative_path": "check_diff.py",
+        "bytes": 1760,
+        "sha256": "fdeae730082382aa7b122dd4a36053763a893c958867da921ad0619433c2aac0"
+      },
+      {
+        "relative_path": "check_disk_and_transcript.py",
+        "bytes": 1493,
+        "sha256": "58ea0d5451194d67356b879a4ce9fa213cb84efc0f8f3fd742af646edf94fd0e"
+      },
+      {
+        "relative_path": "check_early_steps.py",
+        "bytes": 930,
+        "sha256": "46995ed4d61fb00f0d14e2a3100f61b513769b8e1280bf8fc4b3fa44a670a83c"
+      },
+      {
+        "relative_path": "check_file_coverage_in_transcript.py",
+        "bytes": 3088,
+        "sha256": "14ce289beb38b05ab5178a2c9260548c9c83c6f1e7ce8a5c3d92106de29d54b6"
+      },
+      {
+        "relative_path": "check_full_plus_blocks.py",
+        "bytes": 26851,
+        "sha256": "6249eaf621db57458c4c874173cfef04d1bda86c70ec1f755041930475095799"
+      },
+      {
+        "relative_path": "check_full_plus_blocks_out.txt",
+        "bytes": 44034,
+        "sha256": "59f82824b6d9bc4b34c8917b76e1bc331a466ddc56e4fe3fc0d516b94f3f1770"
+      },
+      {
+        "relative_path": "check_guidance.py",
+        "bytes": 929,
+        "sha256": "05b69290a21f76d4eecbe8f84a663f44a2cf13bab4a0ae99f850399374c8f85d"
+      },
+      {
+        "relative_path": "check_helpers.py",
+        "bytes": 768,
+        "sha256": "8635c9e4995c1a5bfd0ef1536bd35de389c83698bb169cfcca3e44e817963577"
+      },
+      {
+        "relative_path": "check_reconstruct.py",
+        "bytes": 2791,
+        "sha256": "f1974bf370ce3f1ecfb7f9c72478a81f4155d106e483ea03cbd19951bb496f53"
+      },
+      {
+        "relative_path": "check_skill_784_799.py",
+        "bytes": 3572,
+        "sha256": "b2a6c8ddc42c5e2da1daa1d31b6b5051d3bdbe322a0c4d95aa8c81516d73867c"
+      },
+      {
+        "relative_path": "check_skill_784_out.txt",
+        "bytes": 112517,
+        "sha256": "401fac30a3be6a9f4c4fb39dad091be163377c3b59afbae4bf1eb78e8c7062e9"
+      },
+      {
+        "relative_path": "check_skill_and_tests.py",
+        "bytes": 1718,
+        "sha256": "ea4c6dec898044efb83af1e30fcd27fe6573311b54def3611e576a04d0aa7909"
+      },
+      {
+        "relative_path": "check_sources.py",
+        "bytes": 1283,
+        "sha256": "2a4f3c488a8fa4f1a28eaad12108b6fb24ac2ff4d36a9bfe623132f1c9c31926"
+      },
+      {
+        "relative_path": "check_view_stats.py",
+        "bytes": 1538,
+        "sha256": "33ec5cf1e1c3002a2b9bba7261e9b144e03090de2d57e3cbea81c9a893deeb7f"
+      },
+      {
+        "relative_path": "check_viewed_files.py",
+        "bytes": 1674,
+        "sha256": "c9f9b11e57f97f2dce6341c000221492c0a2ce789b2056f60388f20b25a436cb"
+      },
+      {
+        "relative_path": "check_walk.py",
+        "bytes": 552,
+        "sha256": "ab55ff6c849cc2c191475784676363fd26b01d9f6658c7226fad01b354331bac"
+      },
+      {
+        "relative_path": "chorus_canaries_pr_body.md",
+        "bytes": 1631,
+        "sha256": "247081c6df851f600319ee14781b9bd5fa0c31a3f00224f601f6589cd7521e7d"
+      },
+      {
+        "relative_path": "chorus_full.yaml",
+        "bytes": 18794,
+        "sha256": "d3b91e60e7a61c65fc7771c4f6bc419a3861f89881b36e5b13b7d0b928fddbd7"
+      },
+      {
+        "relative_path": "cmd_test_outputs_dump.txt",
+        "bytes": 340326,
+        "sha256": "b45c9fcb827de2f9609a2b1718650544a141c893e7fa84a44e05b5cb6b631f86"
+      },
+      {
+        "relative_path": "compare_audit.py",
+        "bytes": 2394,
+        "sha256": "f369997987e6c03ea042c257e54e84247d0148d2d9298d7809286513ca1d80c7"
+      },
+      {
+        "relative_path": "compute_hashes.py",
+        "bytes": 5865,
+        "sha256": "aac841a3895c9ac422f9887bc602f3e9ce07b5fe009aac4dc4f128bc54863e6b"
+      },
+      {
+        "relative_path": "coverage_report.txt",
+        "bytes": 1664162,
+        "sha256": "e50051dd7fb7637fa05f93fa4d4fe56351f776eb35f8d0344f799a9e25769639"
+      },
+      {
+        "relative_path": "debug_1949.py",
+        "bytes": 873,
+        "sha256": "25497d4fc6503b1dd76e55cda12210b9861ed42ba8082fa749961ca54a1df3d1"
+      },
+      {
+        "relative_path": "debug_1966.py",
+        "bytes": 1187,
+        "sha256": "177b962b49ab3aa0888f293c6150b79e9ab83426659ddef6b92c8daf4a8dfc54"
+      },
+      {
+        "relative_path": "debug_caveats.py",
+        "bytes": 925,
+        "sha256": "afd119d477f0c1c3610f1b8422bb95645c050d61292bf672c770f4e500e79f48"
+      },
+      {
+        "relative_path": "debug_concat.py",
+        "bytes": 1266,
+        "sha256": "99bc5b61be1fd38fa0da60b2bd1dc3e78117e091e7962296d5a0c729c1a2b9b8"
+      },
+      {
+        "relative_path": "debug_container.py",
+        "bytes": 570,
+        "sha256": "ab00020fffab949104190566c8bb1cc8d4bf82a2facfe8d63723750d217ecff5"
+      },
+      {
+        "relative_path": "debug_effects.py",
+        "bytes": 916,
+        "sha256": "3c2d4dfc4f60d2423dde7410fe6d6306d307594781eca8573ce5505001d7d62b"
+      },
+      {
+        "relative_path": "debug_effects_522.py",
+        "bytes": 1340,
+        "sha256": "760cb8eb43d6d88731dc2689e7648b259bdbba05124bb44439e0e7c9a88b370f"
+      },
+      {
+        "relative_path": "debug_execute_child.py",
+        "bytes": 845,
+        "sha256": "a6ac32de027214a776d4aec628ba5d641729090b6cf6f75ef40f82024a8761f7"
+      },
+      {
+        "relative_path": "debug_gate1.py",
+        "bytes": 372,
+        "sha256": "cbc6736289996234bb380939cf66355ac5df37ed2572e8948001d56fbe1e7155"
+      },
+      {
+        "relative_path": "debug_healthsheet.py",
+        "bytes": 3407,
+        "sha256": "d2974503b7a1fe19b44dfe6a775eae0321c101ebd7dbfc1e9d66f9a68fea4345"
+      },
+      {
+        "relative_path": "debug_identity_differs.py",
+        "bytes": 1328,
+        "sha256": "db6ac476f363c9ea79bdb168541d82631f28ae9c4e7a39499863b8be546113a2"
+      },
+      {
+        "relative_path": "debug_inspect.py",
+        "bytes": 4198,
+        "sha256": "ccb481093df0c37fee02bf88ffa49025758e1d6c7192cfe73db1e6a7846897d2"
+      },
+      {
+        "relative_path": "debug_preprocess_sinks.py",
+        "bytes": 1992,
+        "sha256": "eb1b0d0e6e49fb83fe0b0295a6cafdb48a74a7225b0396ab7cffafc35ba1f1a1"
+      },
+      {
+        "relative_path": "debug_repeated_record.py",
+        "bytes": 1569,
+        "sha256": "4be3cf3796252567474a42057628a795018ccd35122a5162654f636b27e187a1"
+      },
+      {
+        "relative_path": "debug_scan.py",
+        "bytes": 1003,
+        "sha256": "4217c13885c509af870f8a9f37d13aa63f57df75128458f9430dd26549c0415a"
+      },
+      {
+        "relative_path": "diagnose_failure.py",
+        "bytes": 404,
+        "sha256": "beed415a919a9c99c8afff1aa2b3a5fbdd6ec1351ed0694965fbf2a0e5418d26"
+      },
+      {
+        "relative_path": "diagnose_remap_path.py",
+        "bytes": 1357,
+        "sha256": "34823981a5f0c3a1867154ae3d9ccebc66f239c9846c22e4406050535e5e37df"
+      },
+      {
+        "relative_path": "dump_step_and_transcript_hits.py",
+        "bytes": 4838,
+        "sha256": "c5f1e7e200320dc357711b9323f62a8e527c75c58c76893a6d2a6224fe840acb"
+      },
+      {
+        "relative_path": "dump_step_and_transcript_hits_out.txt",
+        "bytes": 451699,
+        "sha256": "3d3d3defbca71a23e10443a5bea6104f4d37bb7b0053c3ad5d38720304e3dbe5"
+      },
+      {
+        "relative_path": "early_steps.txt",
+        "bytes": 9721,
+        "sha256": "de10f38fa1a4eb3f87c274bbedd98924923fb7dad83783936fd966329739b9a7"
+      },
+      {
+        "relative_path": "edit_target_replacement.json",
+        "bytes": 65276,
+        "sha256": "051c82c5f633a4e487993200acdaa6ad31dcf37aabdd46e72c599e747bdc8d6b"
+      },
+      {
+        "relative_path": "extract_all_test_pieces.py",
+        "bytes": 1438,
+        "sha256": "d2f4ffd4c4d591fa99b0191c3e45e06f9b73b6c5f138119672e64ca59b9bbef4"
+      },
+      {
+        "relative_path": "extract_git_outputs.py",
+        "bytes": 1871,
+        "sha256": "25bc5680ea35ddb8542b5d2f04e48f352b17a520f89f20beafcd308a68738f15"
+      },
+      {
+        "relative_path": "fill_13_gaps.py",
+        "bytes": 26608,
+        "sha256": "3e0015e783d183a8d63ec1bd48588d0d2330bd86f964552694ec56b3fb7191f1"
+      },
+      {
+        "relative_path": "fill_13_gaps_out.txt",
+        "bytes": 71904,
+        "sha256": "cb967b767181f540d97ef21abe30beec8f222b69b7e6600c4bae6398d16da40e"
+      },
+      {
+        "relative_path": "final_SKILL.md",
+        "bytes": 74293,
+        "sha256": "8ee7ea2206ed772e7341caf9919477162089813f6c0c39ca09490688b2c92aba"
+      },
+      {
+        "relative_path": "final_scan.py",
+        "bytes": 699605,
+        "sha256": "8131bae8a36bf212a5d3f2b3183e6b7a28d0320374c1705bf4b2b96a8914a4f3"
+      },
+      {
+        "relative_path": "final_test_generation_specificity_skill.py",
+        "bytes": 483033,
+        "sha256": "03cffa771ec9598b611bf9d8bb95b4798479571f2bf95b001dd23bd96271c54a"
+      },
+      {
+        "relative_path": "find_culprit.py",
+        "bytes": 864,
+        "sha256": "f1a5a1219c2c9b9cac035f244de5bda0a435c5c1da8401cb8c65badb96deea1d"
+      },
+      {
+        "relative_path": "find_origin.py",
+        "bytes": 2575,
+        "sha256": "fc5f5c8b46d93f562fb9286c53c0395368e0726c612a396e85361360d51d379d"
+      },
+      {
+        "relative_path": "find_origin_out.txt",
+        "bytes": 24590,
+        "sha256": "84f2cb01d8c601ceba63a2d998485d8df6f588ce52c33ca72c29c989c7ba0d0d"
+      },
+      {
+        "relative_path": "find_test_patches.py",
+        "bytes": 5628,
+        "sha256": "7ed9ba0ee54cf876de2814b86e2b541e35505873b9cdedd469bbade74badac1c"
+      },
+      {
+        "relative_path": "find_test_patches_out.txt",
+        "bytes": 268645,
+        "sha256": "ece6c6a597bb2b2a52aa5e3076c95c2854d844f702b4041ebad1085edaa11e0d"
+      },
+      {
+        "relative_path": "finish_skill_and_tests.py",
+        "bytes": 3689,
+        "sha256": "f42e5703de31be69900ca6980e2709a0f4bf4d77d413c1fd69787e5349a74129"
+      },
+      {
+        "relative_path": "finish_skill_out.txt",
+        "bytes": 182050,
+        "sha256": "6d466b7c294b12eb053e5397c0724e41213c798de00f3da335e5ba563d7da5aa"
+      },
+      {
+        "relative_path": "git_history_in_transcript.txt",
+        "bytes": 2524641,
+        "sha256": "0508e9fc6dc2b62b8d83a686f435db4bfb3e12bc38c7f2cc09e38bcb11a6ea75"
+      },
+      {
+        "relative_path": "goal_resume_dump.txt",
+        "bytes": 28025,
+        "sha256": "ac919ac9531e11f2065208133baffeec99d5f06bfecf9cdab52190fffeb05dba"
+      },
+      {
+        "relative_path": "inspect_all_vf_and_steps.py",
+        "bytes": 4619,
+        "sha256": "0dd978c206e2940dfb237e500b031b51c240645015d54cf615e153de157fd37e"
+      },
+      {
+        "relative_path": "inspect_cmd_test_outputs.py",
+        "bytes": 1146,
+        "sha256": "2d73e222ca4d4c8d6f3e5cc76fab5f6e0f079e990584670785b1213ce0ebf276"
+      },
+      {
+        "relative_path": "inspect_coverage.py",
+        "bytes": 2714,
+        "sha256": "c5e91510ea7ce366ff5368060455fb3c7132a489fa0cf03bd34224e88c3c75a1"
+      },
+      {
+        "relative_path": "inspect_deid.py",
+        "bytes": 733,
+        "sha256": "f302eddff86ae60bc1e44bb7544da2f4b6c148f1a8cd02aa39de0e3260199892"
+      },
+      {
+        "relative_path": "inspect_effects.py",
+        "bytes": 787,
+        "sha256": "a850d7e37c7d095f4b5f14733eca9ce63113e68994aa0c90b78fb384caf15048"
+      },
+      {
+        "relative_path": "inspect_formal.py",
+        "bytes": 731,
+        "sha256": "8e235c6341723b28e5a3e3cb5a62e0d56be55b209ffb7a45961577534b3c8440"
+      },
+      {
+        "relative_path": "inspect_hits.py",
+        "bytes": 3205,
+        "sha256": "83c7393b5a31ea35f4f195706ba7d2bafe81fa681b7ece66d27e2cfc5b58aebe"
+      },
+      {
+        "relative_path": "inspect_hits_out.txt",
+        "bytes": 123154,
+        "sha256": "b0a8cd076462bb97de402974d09e81ca4cef147fa267bd7ac4879bc3feb2fc4a"
+      },
+      {
+        "relative_path": "inspect_missing_hits.py",
+        "bytes": 1635,
+        "sha256": "bd11a3a53ebb4e81800f70b4f0c0be5254ab9febedca92c9a2a638908e22c6a7"
+      },
+      {
+        "relative_path": "inspect_missing_hits_out.txt",
+        "bytes": 153192,
+        "sha256": "afb3a3b2a54e66a28f07df8a4b663f2f26a210f0f05d07de9c0c6c0aa9c33ffc"
+      },
+      {
+        "relative_path": "inspect_output.txt",
+        "bytes": 13412825,
+        "sha256": "43b66f65c700a72036acbd1b5039436700be3b044524354c9aac152e28eed645"
+      },
+      {
+        "relative_path": "inspect_policy.py",
+        "bytes": 758,
+        "sha256": "691e8265ec1a4572f068f1aaf4e6d48854e2c4e1a66ed3d7ff5511528d92772a"
+      },
+      {
+        "relative_path": "inspect_receiving.py",
+        "bytes": 584,
+        "sha256": "ecf955040ee382fcc95513894d3505418ed392eadf73b5ca1419c20a0e2657b8"
+      },
+      {
+        "relative_path": "inspect_schema_semantics.py",
+        "bytes": 674,
+        "sha256": "3b0b8515c4dc5bdb785b5fe272bde0859f7ca52eb6d6904cf0a70e7a5cc83ec7"
+      },
+      {
+        "relative_path": "inspect_tasks_and_steps.py",
+        "bytes": 2846,
+        "sha256": "ce5860066f4687a36eafd04d194ea2a786fa84ab245695eb45c905e823b9eac1"
+      },
+      {
+        "relative_path": "inspect_tasks_and_steps_out.txt",
+        "bytes": 247717,
+        "sha256": "74830fd8ff7a96b99120e3ed31eaefe32d0e1dbd7796f937800fa8fd3915e666"
+      },
+      {
+        "relative_path": "inspect_test_4588.py",
+        "bytes": 1631,
+        "sha256": "5721544d5c61bd93e25b7e4ca3eda064966643b6f8dff4404ceac5a6d096d4a1"
+      },
+      {
+        "relative_path": "inspect_test_file_history.py",
+        "bytes": 17960,
+        "sha256": "8a1a822c67e4e8f7277022428d1b7645a9f76f1d6388e95e20876b9d588d52c2"
+      },
+      {
+        "relative_path": "inspect_transcript.py",
+        "bytes": 1774,
+        "sha256": "12e2688867282a1e86637fe42fb296006ee7057c21fd047c679c135176e66532"
+      },
+      {
+        "relative_path": "inspect_transcript_lines.py",
+        "bytes": 1187,
+        "sha256": "0d13c421258c70b1ecc4bf9bd0aeeffb753845e0348e3669d77e9ee4ca09260f"
+      },
+      {
+        "relative_path": "inspect_transcript_lines_out.txt",
+        "bytes": 109132,
+        "sha256": "9d6bb04461364ed289f6e40251cc2db90ebd8a0361b0fd59438d09ed8832e09e"
+      },
+      {
+        "relative_path": "install_pr4405_files.py",
+        "bytes": 1091,
+        "sha256": "c579313f92a00562f3f9353fde390578b419a09a69f8475c7e789f82f2c71f08"
+      },
+      {
+        "relative_path": "inventory_sources.py",
+        "bytes": 4084,
+        "sha256": "de328a93b91051c22d064da7b4942da0be0c77a378ad8dd1453b1d5e8d4b30af"
+      },
+      {
+        "relative_path": "inventory_sources_out.txt",
+        "bytes": 10,
+        "sha256": "d5f479edc8118ca0d8d8f9a78fa09a8dc62e6c457c97e454fcf513514f08f07c"
+      },
+      {
+        "relative_path": "inventory_sources_summary.txt",
+        "bytes": 113092,
+        "sha256": "7b04d6b64bd945fe412af0472e46c5cac6f686ae91f09415dca13e216bc06be3"
+      },
+      {
+        "relative_path": "issue_5072_close_comment.md",
+        "bytes": 1959,
+        "sha256": "3765c3301209441791e0c02da6f12ac6a87472d42cdb4af39e272b411b24b013"
+      },
+      {
+        "relative_path": "l10945_11050.txt",
+        "bytes": 84524,
+        "sha256": "07d0a0597097ef1d255204438d443774b4c4ce199b5d7c58e7bea9756d699d8c"
+      },
+      {
+        "relative_path": "needle_steps_dump.txt",
+        "bytes": 218709,
+        "sha256": "2b75034b37c96d8c24fabd7791102eb0a49e1396936989997dc16599d95d00f3"
+      },
+      {
+        "relative_path": "origins_and_tasks.txt",
+        "bytes": 29859,
+        "sha256": "13387ac8712e2f3ec5c8a9f4a3d53a747eff5f5a3c7dfe5598f1fd91dabb0183"
+      },
+      {
+        "relative_path": "patch_rep1.py",
+        "bytes": 6172,
+        "sha256": "c30cddb2ef210724aa1890bb9517cc063702bd888f28bec3fdeefcd9f1c2ffa6"
+      },
+      {
+        "relative_path": "patched_CHORUS_typed_audit_4_response.json",
+        "bytes": 45532,
+        "sha256": "236761f38f82b2dc9f28f2a4c6ee5891173d4fad137b0199f5bfe61b245fa25c"
+      },
+      {
+        "relative_path": "pr_4766_body.md",
+        "bytes": 778,
+        "sha256": "fa18a4a88c1f47146bafcc8e2d515288cc3dd66dc4a7a53d46330ee296480b6b"
+      },
+      {
+        "relative_path": "pr_5048_body.md",
+        "bytes": 1066,
+        "sha256": "ead38af3bd9675dd13194fd7be3d4b3a1ea3bfcfedd139c7b2ccd3cd4eb14a21"
+      },
+      {
+        "relative_path": "pr_v10_preflight_body.md",
+        "bytes": 1701,
+        "sha256": "94dabb35d5274ed750563c16da67875bf7bc3a119a094952d7f3422728193df4"
+      },
+      {
+        "relative_path": "profile_native26.py",
+        "bytes": 3035,
+        "sha256": "9db68ae8c56f52f53c50dc40360826ccea0cd1db7ecb61cc8cb859b1c20b7ba0"
+      },
+      {
+        "relative_path": "profile_native26.py.metadata.json",
+        "bytes": 169,
+        "sha256": "742799f8ec161b1e10c6dd4628463513cb9dbc865018e7b06baddf957644e758"
+      },
+      {
+        "relative_path": "reconstruct_all.py",
+        "bytes": 6456,
+        "sha256": "4018de6cbbb21624da75025f3078413e98e72afea865d03c833a5b5943b27ec8"
+      },
+      {
+        "relative_path": "reconstruct_all_out.txt",
+        "bytes": 5988,
+        "sha256": "f7acbf1260d2362eea155375b59fb02c86ed5bc27dac23710b8005f9e585690b"
+      },
+      {
+        "relative_path": "reconstruct_info.txt",
+        "bytes": 59494,
+        "sha256": "2844e61243120c99ed48cfece7603e5977870c5aa30bacccc0680fbd0c3786c0"
+      },
+      {
+        "relative_path": "reconstruct_skill_and_tests.py",
+        "bytes": 5919,
+        "sha256": "dadac29798491a8675605979b43be540c45c6f441d3d0a2b9c0fe81b27f52052"
+      },
+      {
+        "relative_path": "reconstruct_skill_out.txt",
+        "bytes": 9994,
+        "sha256": "affb18c5dcfa1440ab5524d0b6082ef4c8a4dbc5bedc63a87f992a1f8bb2dedb"
+      },
+      {
+        "relative_path": "reconstruct_tests_complete.py",
+        "bytes": 3707,
+        "sha256": "dd8e65e337d4707fecf503537279ce531b1090b044101b4406306aad206863ff"
+      },
+      {
+        "relative_path": "reconstruct_tests_complete_out.txt",
+        "bytes": 1066470,
+        "sha256": "cfe11e883afcab7b06f9c54dccaab7834999d8f6f1dfd4b89c6242b619a172af"
+      },
+      {
+        "relative_path": "reconstructed_scan.py",
+        "bytes": 698210,
+        "sha256": "f5f88425272a73b5be206a81cd7f3cd6cf080101712b49a3e510251607a79ba6"
+      },
+      {
+        "relative_path": "review_5086.md",
+        "bytes": 1510,
+        "sha256": "abece1d3f36d7b91419e0a1ad70b28c4a444fea1a2e246c0ba5405390d52b101"
+      },
+      {
+        "relative_path": "run_acceptance_timing.py",
+        "bytes": 2723,
+        "sha256": "22efd9cd184443713d2cf3c1efdb292dfeeccd29a622d75854db35b52ccf0e07"
+      },
+      {
+        "relative_path": "run_acceptance_timing.py.metadata.json",
+        "bytes": 172,
+        "sha256": "77cbee110955a39f4b3efc4eb7f5a9ddc0616e8305873f5aa33e8244966bfed1"
+      },
+      {
+        "relative_path": "run_discover.py",
+        "bytes": 534,
+        "sha256": "24b1345022f29dcb41bdc75ae81fffd6fd929ae0b0f26c3c5c71513913f74a14"
+      },
+      {
+        "relative_path": "run_full_pass.py",
+        "bytes": 8278,
+        "sha256": "3c261591d6ca67da7ba2c786e1251dbce6526079ffb7eeb128afc6aba952c5e1"
+      },
+      {
+        "relative_path": "scan_all_brain_and_early_log.py",
+        "bytes": 3950,
+        "sha256": "e36ff79a0bee76cc46b8a45d3c2b70dce48ba065c5cd21ae68a0a5cbec7b500b"
+      },
+      {
+        "relative_path": "scan_all_brain_out.txt",
+        "bytes": 44723,
+        "sha256": "56cdc97b55ac90dad0639987eafa72cb27dbae0a58b3e9c8511c164caa1271c6"
+      },
+      {
+        "relative_path": "scan_all_test_sources.py",
+        "bytes": 4140,
+        "sha256": "dd299070ebfa059e4ccc1eeac0e1045105597011df00fef761b1357ec2646e7f"
+      },
+      {
+        "relative_path": "scan_all_test_sources_out.txt",
+        "bytes": 53362,
+        "sha256": "d883b5534d0784f496aad19f5e66fa357a7dac39e62e1b15113f3caf67176da1"
+      },
+      {
+        "relative_path": "search_all_brains.py",
+        "bytes": 5497,
+        "sha256": "f96723b4b3011eae0f360228a506ae28df6e38490e5078142a7eacefa87f748b"
+      },
+      {
+        "relative_path": "search_early_out.txt",
+        "bytes": 2121,
+        "sha256": "31f67dffdf40dad206bed9bbf4500197ea7a052600654d8dcb12a53d2ad3cab5"
+      },
+      {
+        "relative_path": "search_early_transcript.py",
+        "bytes": 3239,
+        "sha256": "6cecaef8e8b389252b59b2844f2650acbf3298543f8f127fd597644b36d74d7e"
+      },
+      {
+        "relative_path": "skeleton_regions.txt",
+        "bytes": 90013,
+        "sha256": "196bc871f30d330620d97c8cd588e3cac4d3bfbe50b73763537e9703b1e13511"
+      },
+      {
+        "relative_path": "snapshots_summary.txt",
+        "bytes": 196367,
+        "sha256": "d82d3116b1736ccc3e8f8e3a0337486c793058994995d819f014b76990e6f22a"
+      },
+      {
+        "relative_path": "solve_exact_files.py",
+        "bytes": 2688,
+        "sha256": "60576b4e5a40b574a69b69f8bad32a129daed6c4f203eb9b4ce9629edc6546f2"
+      },
+      {
+        "relative_path": "solve_exact_out.txt",
+        "bytes": 41650,
+        "sha256": "7890637c43dd131c3e26635f88682f1619cf6f5ddc940e949b58a8d516dfa684"
+      },
+      {
+        "relative_path": "solve_skill_exact.py",
+        "bytes": 1806,
+        "sha256": "e09f95563afa7c7b23d740632d029b2922528760822214b6cfb3ac743cae4d13"
+      },
+      {
+        "relative_path": "solve_skill_exact_out.txt",
+        "bytes": 92245,
+        "sha256": "32fabef93dc7dc8a2e3262368ba1d579b5ed8699a07477305c5933dac44bdba7"
+      },
+      {
+        "relative_path": "t7749_base_cache.json",
+        "bytes": 599108,
+        "sha256": "8d6cf272f2c439bf1a6002ae88b28c90d57bfa2db6ab84fbfc34761c042b92d5"
+      },
+      {
+        "relative_path": "test_callee.py",
+        "bytes": 1099,
+        "sha256": "087b5084b8209a196a3ee106ee3abd98a8ae0cba2eb3e11e52ff4249f4580002"
+      },
+      {
+        "relative_path": "test_concat_sinks.py",
+        "bytes": 1034,
+        "sha256": "61f98ebe36851522f7254fc9642ab0da18ca3a6136a963eb4b9e716204f16b06"
+      },
+      {
+        "relative_path": "test_differs.py",
+        "bytes": 851,
+        "sha256": "aa8ec204b4b3d64b608d69e27709426aa0548edbfad1205f4644192f20cf045d"
+      },
+      {
+        "relative_path": "test_edit.json",
+        "bytes": 45532,
+        "sha256": "236761f38f82b2dc9f28f2a4c6ee5891173d4fad137b0199f5bfe61b245fa25c"
+      },
+      {
+        "relative_path": "test_extractor.py",
+        "bytes": 3884,
+        "sha256": "d1b39b5b72211c5bc1f6c0d80083dff355157d434254a5bd38adc17f7189af6b"
+      },
+      {
+        "relative_path": "test_file_history.txt",
+        "bytes": 66057,
+        "sha256": "cd217028a683cc26639ece1b92e2007da0d406d72e71820cb0f1aaf36774ab7b"
+      },
+      {
+        "relative_path": "test_file_reconstruction.py",
+        "bytes": 3383,
+        "sha256": "10388d6f17c87f20e93d7bc47e63e4b7cc4adf95f687fb5dfbced0ba2d8529a4"
+      },
+      {
+        "relative_path": "test_formal_effects.py",
+        "bytes": 722,
+        "sha256": "e21f0c03108d14f709709f6208f475eefdd2db3a335d25172e2907c480823820"
+      },
+      {
+        "relative_path": "test_harness_prep.py",
+        "bytes": 3807,
+        "sha256": "06f0b60137d0be61cef68a2e03c02d1656b155a2d97e287641a1697042098f87"
+      },
+      {
+        "relative_path": "test_local_helper.py",
+        "bytes": 1434,
+        "sha256": "39bda983444a07990b5d5ea1cc3862e20372bbb8e4d478873930a57ef9c09c2b"
+      },
+      {
+        "relative_path": "test_preprocess_sinks.py",
+        "bytes": 1785,
+        "sha256": "c3328f10b36a3cb22237681900f84b167df85825720831bfa2e59a7fc630f704"
+      },
+      {
+        "relative_path": "test_probe_scratch.py",
+        "bytes": 25924,
+        "sha256": "fe57d56ef53d1589c8f7ba9c4c9ae58307a716b1d6b83891bae4f0071ed8c41c"
+      },
+      {
+        "relative_path": "test_records_index.txt",
+        "bytes": 31960,
+        "sha256": "c3bf89c20815aa2f65e860348a776bde6a09164705a19bbae983ba03147a0ae8"
+      },
+      {
+        "relative_path": "test_removal_repair.py",
+        "bytes": 1510,
+        "sha256": "a8acefc76d752c266b483ca51835094292181e067d034b9ecb2badf9a7bf4b78"
+      },
+      {
+        "relative_path": "test_schema_semantics.py",
+        "bytes": 761,
+        "sha256": "8419081f5b8ac10f042a407cf4fa5a04497d353fbef25c0804408c03ee34a493"
+      },
+      {
+        "relative_path": "test_sevs.py",
+        "bytes": 2936,
+        "sha256": "7da2ff01f1d8d8a767f4eb92c10447614f9763e74daa4390973e0b8d7664ecfa"
+      },
+      {
+        "relative_path": "test_sizing.py",
+        "bytes": 5442,
+        "sha256": "28070fc7d95a5ce9244b4e0377434d786153e52eb55db3c4766f14c58f8a73ba"
+      },
+      {
+        "relative_path": "test_walk.py",
+        "bytes": 2619,
+        "sha256": "b43cf6f508e610ce00a6b2ed6001f12dd112ec0f3c05ec4dbc4ce1727b179b1a"
+      },
+      {
+        "relative_path": "trace_extractor.py",
+        "bytes": 1406,
+        "sha256": "b2c1e49ef62b14d47b244eeb01f73ab2147ab2a8f49063cc3be6f95ddb50438b"
+      },
+      {
+        "relative_path": "trace_scan_ops.txt",
+        "bytes": 359,
+        "sha256": "133c3a5b2c4d464da249e1d2bde00d4a60472a94360516fe45a4c763e3b5544b"
+      },
+      {
+        "relative_path": "trace_sink_231.py",
+        "bytes": 1081,
+        "sha256": "ef26121d3d6cc5c8ce3675679cb5fd6465724599d6d8a6c5621fe69e56e3c3b5"
+      },
+      {
+        "relative_path": "unique_viewed_files.txt",
+        "bytes": 50339,
+        "sha256": "cb4e1473898399465f81a31963e7704d6318086e3800bc4809cec36a3cd62c22"
+      },
+      {
+        "relative_path": "verify_report_assertions.py",
+        "bytes": 2153,
+        "sha256": "b0e04da331079e2fcdcacf65cf1e6333ed69d822d4bc346323fde6fc0abeea76"
+      },
+      {
+        "relative_path": "__pycache__/finish_skill_and_tests.cpython-313.pyc",
+        "bytes": 5948,
+        "sha256": "f306b311229f258b052cb7ff4c41ef6f533c32212e28e9ad996cd5e3125b8afa"
+      },
+      {
+        "relative_path": "__pycache__/test_file_reconstruction.cpython-313.pyc",
+        "bytes": 4795,
+        "sha256": "47d3dcf688a2c73a2fb961501504fa3788d2b90187cdc9fd7fe702d1d7f63bf3"
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_api_progress.json",
+        "bytes": 23364,
+        "sha256": "679aab514fb672586e234f4218a81397dd9d9e4ac1b9a8eb7c235bd471e963a6"
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_api_progress_phase5.json",
+        "bytes": 193190,
+        "sha256": "83b43bee511a2b8d12f65409ba69c50af1131db6236eb81fb704484eb153f4c4"
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2.json",
+        "bytes": 39629,
+        "sha256": "d2ccbec319f41f8f641593b136c1b192779ee033cabeedcd272918d16c4f98c1"
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2_phase5.json",
+        "bytes": 43718,
+        "sha256": "3d794652b590b4b88c5cb4330f65a533c5a92972f455e58d752d623dd93b7e5e"
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_report_rejected_response_72ac7d9a77bb438798e7d8d55ff1bf0f_phase5.txt",
+        "bytes": 163798,
+        "sha256": "d1df3ae1cec6402955efee391b898a01c688955b2180dce69344bbb70a829834"
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_snapshot_index.json",
+        "bytes": 27572,
+        "sha256": "d6ea6ef775bb5719f075ec6b1a120ce43e483bb6bd161e26d81757f361510494"
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_snapshot_index_phase5.json",
+        "bytes": 30135,
+        "sha256": "90d28501b91f6b9c6ccf2da871b17a63d9b7ce1a3dbc8580444a915b38e6996a"
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_typed_audit_4_response.json",
+        "bytes": 43426,
+        "sha256": "b439364f6ac8b2a9ea21a406bb4088a699f2c41e2837be3fbbf6ac3c4f1ec506"
+      },
+      {
+        "relative_path": "harness_test/inputs/chorus_omission_context.json",
+        "bytes": 6476,
+        "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+      },
+      {
+        "relative_path": "harness_test/inputs/chorus_reg.yaml",
+        "bytes": 4986,
+        "sha256": "b51cc4398aab4efa7ced27f2c6f295a96d69913a5264b6ed559ac15aad95093d"
+      },
+      {
+        "relative_path": "harness_test/outputs/CHORUS_coverage_receipt.yaml",
+        "bytes": 13091,
+        "sha256": "5619e50e6720194b1cd837efa38caaa60da8f72495ae460a8bcad6b0041b3950"
+      }
+    ],
+    "nonregular_not_followed": [],
+    "standalone_ledger_candidates": [
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2.json",
+        "identity": {
+          "project": "CHORUS",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "condition": "generic_v10"
+        },
+        "generation_id": "d4b09f0816e04ca3a8f2ee8abdfc034e",
+        "row_count": 8
+      },
+      {
+        "relative_path": "chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2_phase5.json",
+        "identity": {
+          "project": "CHORUS",
+          "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+          "method": "claudecode_api",
+          "condition": "generic_v10"
+        },
+        "generation_id": "d4b09f0816e04ca3a8f2ee8abdfc034e",
+        "row_count": 10
+      }
+    ],
+    "ten22_identifier_mentions": [
+      "chorus_canaries_pr_body.md"
+    ],
+    "ten22_standalone_ledger_count": 0,
+    "conclusion": "No standalone 10-22 ledger found in this preserved subtree.",
+    "limit": "Bounded to this subtree. Does not prove absence from every worktree, Git history, private transcript, encoded blob or remote storage; no 10-22 pre-edit ledger is independently verified."
+  },
+  "runs": [
+    {
+      "date": "2026-10-20a",
+      "edited_ledger": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_api_usage_8d1427f7e332bdc2.json",
+        "bytes": 41295,
+        "sha256": "f60eee9e08838e60d5f01dff665d026e9efe9f6728ebde18f6dfdc6e307f92e8"
+      },
+      "k1_recorded_ledger_pin": {
+        "bytes": 41295,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_api_usage_8d1427f7e332bdc2.json",
+        "sha256": "f60eee9e08838e60d5f01dff665d026e9efe9f6728ebde18f6dfdc6e307f92e8"
+      },
+      "k1_source_bytes_still_match": true,
+      "edited_to_k1_rows": {
+        "before_count": 11,
+        "after_count": 11,
+        "matched_count": 11,
+        "matched_rows": [
+          {
+            "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+            "phase_before": "full_receipt_completion",
+            "phase_after": "full_receipt_completion",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+            "phase_before": "typed_audit_omission",
+            "phase_after": "typed_audit_omission",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+            "phase_before": "typed_audit_worker",
+            "phase_after": "typed_audit_worker",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "51ed3b8231984bce989c70062a9403be",
+            "phase_before": "typed_audit_integration",
+            "phase_after": "typed_audit_integration",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+            "phase_before": "report",
+            "phase_after": "report",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "7a1a9a2a0cfe499f996d3145281b4c13",
+            "phase_before": "reconcile_full",
+            "phase_after": "reconcile_full",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+            "phase_before": "typed_audit_worker",
+            "phase_after": "typed_audit_worker",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "a42e7689e27b4780a36670d9998f95bb",
+            "phase_before": "report_regate",
+            "phase_after": "report_regate",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+            "phase_before": "typed_audit_worker",
+            "phase_after": "typed_audit_worker",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "dd63564c51c6489aa90c25b08a91fdcc",
+            "phase_before": "full",
+            "phase_after": "full",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+            "phase_before": "typed_audit_worker",
+            "phase_after": "typed_audit_worker",
+            "identical": true,
+            "differences": []
+          }
+        ],
+        "changed_matched_row_count": 0,
+        "removed_rows": [],
+        "added_rows": [],
+        "added_row_limit": "Absent from the earlier snapshot; addition alone does not establish an improper edit."
+      },
+      "original_comparisons": [
+        {
+          "original": {
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2.json",
+            "bytes": 39629,
+            "sha256": "d2ccbec319f41f8f641593b136c1b192779ee033cabeedcd272918d16c4f98c1"
+          },
+          "original_to_edited_rows": {
+            "before_count": 8,
+            "after_count": 11,
+            "matched_count": 8,
+            "matched_rows": [
+              {
+                "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+                "phase_before": "full_receipt_completion",
+                "phase_after": "full_receipt_completion",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+                "phase_before": "typed_audit_omission",
+                "phase_after": "typed_audit_omission",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "51ed3b8231984bce989c70062a9403be",
+                "phase_before": "typed_audit_integration",
+                "phase_after": "typed_audit_integration",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "dd63564c51c6489aa90c25b08a91fdcc",
+                "phase_before": "full",
+                "phase_after": "full",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              }
+            ],
+            "changed_matched_row_count": 0,
+            "removed_rows": [],
+            "added_rows": [
+              {
+                "source_review_admission": {
+                  "state": "accepted",
+                  "response_sha256": "1fe397926ba14fde7d3474ec6ab0afcffa2e359c116b3feb13184061dbc4e1b6"
+                },
+                "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+                "phase": "report",
+                "attempt": 1,
+                "started_at": "2026-10-22T00:12:01+00:00",
+                "seconds": 1141.513,
+                "input_tokens": 167639,
+                "output_tokens": 78928,
+                "thinking_tokens": 13150,
+                "cache_read": 0,
+                "cache_write": 32869,
+                "max_tokens": 96000,
+                "stop_reason": "end_turn"
+              },
+              {
+                "usage_id": "7a1a9a2a0cfe499f996d3145281b4c13",
+                "phase": "reconcile_full",
+                "attempt": 1,
+                "started_at": "2026-10-22T00:09:48+00:00",
+                "seconds": 115.748,
+                "input_tokens": 125866,
+                "output_tokens": 10861,
+                "thinking_tokens": 2167,
+                "cache_read": 0,
+                "cache_write": 32869,
+                "max_tokens": 96000,
+                "stop_reason": "end_turn"
+              },
+              {
+                "usage_id": "a42e7689e27b4780a36670d9998f95bb",
+                "phase": "report_regate",
+                "attempt": 1,
+                "started_at": "2026-10-22T04:12:51+00:00",
+                "source_review_admission": {
+                  "state": "accepted",
+                  "response_sha256": "65f97ad6c15384123680751cdb6819a3db7e053f3a0a3c04d0c19fa296307ed2"
+                },
+                "seconds": 659.838,
+                "input_tokens": 233425,
+                "output_tokens": 74038,
+                "thinking_tokens": 7766,
+                "max_tokens": 96000,
+                "cache_read": 0,
+                "cache_write": 32869,
+                "stop_reason": "end_turn"
+              }
+            ],
+            "added_row_limit": "Absent from the earlier snapshot; addition alone does not establish an improper edit."
+          },
+          "original_to_k1_rows": {
+            "before_count": 8,
+            "after_count": 11,
+            "matched_count": 8,
+            "matched_rows": [
+              {
+                "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+                "phase_before": "full_receipt_completion",
+                "phase_after": "full_receipt_completion",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+                "phase_before": "typed_audit_omission",
+                "phase_after": "typed_audit_omission",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "51ed3b8231984bce989c70062a9403be",
+                "phase_before": "typed_audit_integration",
+                "phase_after": "typed_audit_integration",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "dd63564c51c6489aa90c25b08a91fdcc",
+                "phase_before": "full",
+                "phase_after": "full",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              }
+            ],
+            "changed_matched_row_count": 0,
+            "removed_rows": [],
+            "added_rows": [
+              {
+                "accounting_class": "completed accounted response",
+                "attempt": 1,
+                "cache_read": 0,
+                "cache_write": 32869,
+                "cost_usd": 3.0168262500000003,
+                "date": "2026-10-20a",
+                "input_tokens": 167639,
+                "leave_other_canary_out": null,
+                "max_tokens": 96000,
+                "output_tokens": 78928,
+                "payload_bytes": null,
+                "phase": "report",
+                "raw_a1_error_percent": null,
+                "raw_a1_error_tokens": null,
+                "raw_a1_estimate": null,
+                "request_basis": "unjoined: no retained logical request identified",
+                "seconds": 1141.513,
+                "source_review_admission": {
+                  "response_sha256": "1fe397926ba14fde7d3474ec6ab0afcffa2e359c116b3feb13184061dbc4e1b6",
+                  "state": "accepted"
+                },
+                "started_at": "2026-10-22T00:12:01+00:00",
+                "stop_reason": "end_turn",
+                "thinking_tokens": 13150,
+                "total_input_tokens": 200508,
+                "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f"
+              },
+              {
+                "accounting_class": "completed accounted response",
+                "attempt": 1,
+                "cache_read": 0,
+                "cache_write": 32869,
+                "cost_usd": 1.1062862500000001,
+                "date": "2026-10-20a",
+                "input_tokens": 125866,
+                "leave_other_canary_out": null,
+                "max_tokens": 96000,
+                "output_tokens": 10861,
+                "payload_bytes": null,
+                "phase": "reconcile_full",
+                "raw_a1_error_percent": null,
+                "raw_a1_error_tokens": null,
+                "raw_a1_estimate": null,
+                "request_basis": "unjoined: no retained logical request identified",
+                "seconds": 115.748,
+                "started_at": "2026-10-22T00:09:48+00:00",
+                "stop_reason": "end_turn",
+                "thinking_tokens": 2167,
+                "total_input_tokens": 158735,
+                "usage_id": "7a1a9a2a0cfe499f996d3145281b4c13"
+              },
+              {
+                "accounting_class": "completed accounted response",
+                "attempt": 1,
+                "cache_read": 0,
+                "cache_write": 32869,
+                "cost_usd": 3.2235062500000002,
+                "date": "2026-10-20a",
+                "input_tokens": 233425,
+                "leave_other_canary_out": null,
+                "max_tokens": 96000,
+                "output_tokens": 74038,
+                "payload_bytes": null,
+                "phase": "report_regate",
+                "raw_a1_error_percent": null,
+                "raw_a1_error_tokens": null,
+                "raw_a1_estimate": null,
+                "request_basis": "unjoined: no retained logical request identified",
+                "seconds": 659.838,
+                "source_review_admission": {
+                  "response_sha256": "65f97ad6c15384123680751cdb6819a3db7e053f3a0a3c04d0c19fa296307ed2",
+                  "state": "accepted"
+                },
+                "started_at": "2026-10-22T04:12:51+00:00",
+                "stop_reason": "end_turn",
+                "thinking_tokens": 7766,
+                "total_input_tokens": 266294,
+                "usage_id": "a42e7689e27b4780a36670d9998f95bb"
+              }
+            ],
+            "added_row_limit": "Absent from the earlier snapshot; addition alone does not establish an improper edit."
+          },
+          "all_nonrow_ledger_differences": [
+            {
+              "path": "/report_regate_attempted",
+              "before": {
+                "present": false
+              },
+              "after": {
+                "present": true,
+                "value": true
+              }
+            },
+            {
+              "path": "/typed_audit/assembly",
+              "before": {
+                "present": false
+              },
+              "after": {
+                "present": true,
+                "value": {
+                  "path": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_assembly.json",
+                  "sha256": "80cd7c58cc630aff67565e49b153a6d39e426ea066b2c05bd711a6996e6021e6"
+                }
+              }
+            },
+            {
+              "path": "/typed_audit/failure_detail",
+              "before": {
+                "present": true,
+                "value": "source-evidence acceptance failed; use check-integration for bounded diagnostics"
+              },
+              "after": {
+                "present": false
+              }
+            },
+            {
+              "path": "/typed_audit/failure_type",
+              "before": {
+                "present": true,
+                "value": "ValueError"
+              },
+              "after": {
+                "present": false
+              }
+            },
+            {
+              "path": "/typed_audit/stages/4/response/sha256",
+              "before": {
+                "present": true,
+                "value": "b439364f6ac8b2a9ea21a406bb4088a699f2c41e2837be3fbbf6ac3c4f1ec506"
+              },
+              "after": {
+                "present": true,
+                "value": "236761f38f82b2dc9f28f2a4c6ee5891173d4fad137b0199f5bfe61b245fa25c"
+              }
+            },
+            {
+              "path": "/typed_audit/stages/4/state",
+              "before": {
+                "present": true,
+                "value": "response_saved"
+              },
+              "after": {
+                "present": true,
+                "value": "checked"
+              }
+            },
+            {
+              "path": "/typed_audit/state",
+              "before": {
+                "present": true,
+                "value": "failed"
+              },
+              "after": {
+                "present": true,
+                "value": "accepted"
+              }
+            }
+          ]
+        },
+        {
+          "original": {
+            "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2_phase5.json",
+            "bytes": 43718,
+            "sha256": "3d794652b590b4b88c5cb4330f65a533c5a92972f455e58d752d623dd93b7e5e"
+          },
+          "original_to_edited_rows": {
+            "before_count": 10,
+            "after_count": 11,
+            "matched_count": 10,
+            "matched_rows": [
+              {
+                "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+                "phase_before": "full_receipt_completion",
+                "phase_after": "full_receipt_completion",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+                "phase_before": "typed_audit_omission",
+                "phase_after": "typed_audit_omission",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "51ed3b8231984bce989c70062a9403be",
+                "phase_before": "typed_audit_integration",
+                "phase_after": "typed_audit_integration",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+                "phase_before": "report",
+                "phase_after": "report",
+                "identical": false,
+                "differences": [
+                  {
+                    "path": "/source_review_admission/response_sha256",
+                    "before": {
+                      "present": true,
+                      "value": "d1df3ae1cec6402955efee391b898a01c688955b2180dce69344bbb70a829834"
+                    },
+                    "after": {
+                      "present": true,
+                      "value": "1fe397926ba14fde7d3474ec6ab0afcffa2e359c116b3feb13184061dbc4e1b6"
+                    }
+                  },
+                  {
+                    "path": "/source_review_admission/state",
+                    "before": {
+                      "present": true,
+                      "value": "pending"
+                    },
+                    "after": {
+                      "present": true,
+                      "value": "accepted"
+                    }
+                  }
+                ]
+              },
+              {
+                "usage_id": "7a1a9a2a0cfe499f996d3145281b4c13",
+                "phase_before": "reconcile_full",
+                "phase_after": "reconcile_full",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "dd63564c51c6489aa90c25b08a91fdcc",
+                "phase_before": "full",
+                "phase_after": "full",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              }
+            ],
+            "changed_matched_row_count": 1,
+            "removed_rows": [],
+            "added_rows": [
+              {
+                "usage_id": "a42e7689e27b4780a36670d9998f95bb",
+                "phase": "report_regate",
+                "attempt": 1,
+                "started_at": "2026-10-22T04:12:51+00:00",
+                "source_review_admission": {
+                  "state": "accepted",
+                  "response_sha256": "65f97ad6c15384123680751cdb6819a3db7e053f3a0a3c04d0c19fa296307ed2"
+                },
+                "seconds": 659.838,
+                "input_tokens": 233425,
+                "output_tokens": 74038,
+                "thinking_tokens": 7766,
+                "max_tokens": 96000,
+                "cache_read": 0,
+                "cache_write": 32869,
+                "stop_reason": "end_turn"
+              }
+            ],
+            "added_row_limit": "Absent from the earlier snapshot; addition alone does not establish an improper edit."
+          },
+          "original_to_k1_rows": {
+            "before_count": 10,
+            "after_count": 11,
+            "matched_count": 10,
+            "matched_rows": [
+              {
+                "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+                "phase_before": "full_receipt_completion",
+                "phase_after": "full_receipt_completion",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+                "phase_before": "typed_audit_omission",
+                "phase_after": "typed_audit_omission",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "51ed3b8231984bce989c70062a9403be",
+                "phase_before": "typed_audit_integration",
+                "phase_after": "typed_audit_integration",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+                "phase_before": "report",
+                "phase_after": "report",
+                "identical": false,
+                "differences": [
+                  {
+                    "path": "/source_review_admission/response_sha256",
+                    "before": {
+                      "present": true,
+                      "value": "d1df3ae1cec6402955efee391b898a01c688955b2180dce69344bbb70a829834"
+                    },
+                    "after": {
+                      "present": true,
+                      "value": "1fe397926ba14fde7d3474ec6ab0afcffa2e359c116b3feb13184061dbc4e1b6"
+                    }
+                  },
+                  {
+                    "path": "/source_review_admission/state",
+                    "before": {
+                      "present": true,
+                      "value": "pending"
+                    },
+                    "after": {
+                      "present": true,
+                      "value": "accepted"
+                    }
+                  }
+                ]
+              },
+              {
+                "usage_id": "7a1a9a2a0cfe499f996d3145281b4c13",
+                "phase_before": "reconcile_full",
+                "phase_after": "reconcile_full",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "dd63564c51c6489aa90c25b08a91fdcc",
+                "phase_before": "full",
+                "phase_after": "full",
+                "identical": true,
+                "differences": []
+              },
+              {
+                "usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+                "phase_before": "typed_audit_worker",
+                "phase_after": "typed_audit_worker",
+                "identical": true,
+                "differences": []
+              }
+            ],
+            "changed_matched_row_count": 1,
+            "removed_rows": [],
+            "added_rows": [
+              {
+                "accounting_class": "completed accounted response",
+                "attempt": 1,
+                "cache_read": 0,
+                "cache_write": 32869,
+                "cost_usd": 3.2235062500000002,
+                "date": "2026-10-20a",
+                "input_tokens": 233425,
+                "leave_other_canary_out": null,
+                "max_tokens": 96000,
+                "output_tokens": 74038,
+                "payload_bytes": null,
+                "phase": "report_regate",
+                "raw_a1_error_percent": null,
+                "raw_a1_error_tokens": null,
+                "raw_a1_estimate": null,
+                "request_basis": "unjoined: no retained logical request identified",
+                "seconds": 659.838,
+                "source_review_admission": {
+                  "response_sha256": "65f97ad6c15384123680751cdb6819a3db7e053f3a0a3c04d0c19fa296307ed2",
+                  "state": "accepted"
+                },
+                "started_at": "2026-10-22T04:12:51+00:00",
+                "stop_reason": "end_turn",
+                "thinking_tokens": 7766,
+                "total_input_tokens": 266294,
+                "usage_id": "a42e7689e27b4780a36670d9998f95bb"
+              }
+            ],
+            "added_row_limit": "Absent from the earlier snapshot; addition alone does not establish an improper edit."
+          },
+          "all_nonrow_ledger_differences": [
+            {
+              "path": "/evidence_refusal",
+              "before": {
+                "present": true,
+                "value": {
+                  "stage": "report",
+                  "reading": {
+                    "instrument": "evidence_assertions v7 / source_review v2 (#2192)",
+                    "checked": true,
+                    "source_review_final": {
+                      "instrument": "source_review v2 (#2169)",
+                      "artifact": "final_full",
+                      "sha256": "ac182648cf2921e8eeda117879c3c8021cac14b35943b3b24ddfdccb55e75aba",
+                      "values_required": 152,
+                      "values_reviewed": 152,
+                      "claims_checked": 219,
+                      "findings": [
+                        {
+                          "kind": "source_review_contract",
+                          "detail": "declared source status does not support the claim's status",
+                          "path": "/preprocessing_strategies/3/preprocessing_details",
+                          "claim": 2
+                        },
+                        {
+                          "kind": "source_review_contract",
+                          "detail": "declared source status does not support the claim's status",
+                          "path": "/external_resources/3/external_resources/0",
+                          "claim": 1
+                        },
+                        {
+                          "kind": "source_review_contract",
+                          "detail": "declared source status does not support the claim's status",
+                          "path": "/external_resources/4/external_resources/0",
+                          "claim": 1
+                        },
+                        {
+                          "kind": "source_review_contract",
+                          "detail": "declared source status does not support the claim's status",
+                          "path": "/source_caveats",
+                          "claim": 8
+                        }
+                      ],
+                      "scope": "Coverage and declared evidence/scope consistency only; semantic classifications and entailment require independent review."
+                    },
+                    "findings": [
+                      {
+                        "kind": "source_review_contract",
+                        "detail": "declared source status does not support the claim's status",
+                        "path": "/preprocessing_strategies/3/preprocessing_details",
+                        "claim": 2
+                      },
+                      {
+                        "kind": "source_review_contract",
+                        "detail": "declared source status does not support the claim's status",
+                        "path": "/external_resources/3/external_resources/0",
+                        "claim": 1
+                      },
+                      {
+                        "kind": "source_review_contract",
+                        "detail": "declared source status does not support the claim's status",
+                        "path": "/external_resources/4/external_resources/0",
+                        "claim": 1
+                      },
+                      {
+                        "kind": "source_review_contract",
+                        "detail": "declared source status does not support the claim's status",
+                        "path": "/source_caveats",
+                        "claim": 8
+                      }
+                    ],
+                    "source_sha256": {
+                      "bundle": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+                      "chunk_manifest": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a",
+                      "source_manifest": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+                    },
+                    "phase": "report",
+                    "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+                    "response_sha256": "d1df3ae1cec6402955efee391b898a01c688955b2180dce69344bbb70a829834"
+                  }
+                }
+              },
+              "after": {
+                "present": false
+              }
+            },
+            {
+              "path": "/report_regate_attempted",
+              "before": {
+                "present": false
+              },
+              "after": {
+                "present": true,
+                "value": true
+              }
+            }
+          ]
+        }
+      ],
+      "abandoned_journal": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_abandoned_attempts.jsonl",
+        "bytes": 2340,
+        "sha256": "ecf27d680b0db0607105d238dae67f21532b52ff1bfc7930d18ae2d36a4f8eed"
+      },
+      "abandoned_rows": [
+        {
+          "phase": "report",
+          "attempt": 1,
+          "transport_attempt": 1,
+          "usage_id": "540cf4a00375499e8676d6ec59888f95",
+          "run_identity": {
+            "project": "CHORUS",
+            "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+            "method": "claudecode_api",
+            "condition": "generic_v10"
+          },
+          "ladder_attempt": 1,
+          "started_at": "2026-10-22T00:12:01+00:00",
+          "seconds": 400.1,
+          "outcome": "transport error: RemoteProtocolError (#1017)",
+          "max_tokens": 96000,
+          "events": 7914,
+          "content_chars": 41055,
+          "content_sha256": "98190544c87d14cca1207a2f2b9cae96a750006d3cb5238d7357c116a4e272f3",
+          "input_tokens": 167639,
+          "output_tokens": 3,
+          "cache_read": 32869,
+          "cache_write": 0,
+          "snapshot": "data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report_incomplete_attempt1_1.txt",
+          "stream_trace": {
+            "version": 1,
+            "observation": "sdk_events_not_wire_sse",
+            "iterable": true,
+            "http_status": 200,
+            "correlation_headers": {
+              "x-litellm-call-id": "643a5a66-1dad-4e78-8626-ef8f167a14a8",
+              "cf-ray": "a4e44a130f4df97f-SJC"
+            },
+            "headers_seconds": 5.48,
+            "events": 7914,
+            "event_counts": {
+              "message_start": 1,
+              "content_block_start": 2,
+              "content_block_delta": 3955,
+              "thinking": 1643,
+              "signature": 1,
+              "content_block_stop": 1,
+              "text": 2311
+            },
+            "content_block_counts": {
+              "thinking": 1,
+              "text": 1
+            },
+            "recent_events": [
+              {
+                "type": "content_block_delta",
+                "seconds": 399.354
+              },
+              {
+                "type": "text",
+                "seconds": 399.354
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 399.419
+              },
+              {
+                "type": "text",
+                "seconds": 399.419
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 399.483
+              },
+              {
+                "type": "text",
+                "seconds": 399.483
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 399.578
+              },
+              {
+                "type": "text",
+                "seconds": 399.578
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 399.612
+              },
+              {
+                "type": "text",
+                "seconds": 399.612
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 399.668
+              },
+              {
+                "type": "text",
+                "seconds": 399.668
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 399.731
+              },
+              {
+                "type": "text",
+                "seconds": 399.731
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 399.793
+              },
+              {
+                "type": "text",
+                "seconds": 399.793
+              }
+            ],
+            "earlier_events": 7898,
+            "first_event_seconds": 5.481,
+            "last_event_seconds": 399.793,
+            "message_start_seen": true,
+            "message_delta_seen": false,
+            "message_stop_seen": false,
+            "stop_reason": null,
+            "exception_type": "RemoteProtocolError",
+            "provider_error_type": null
+          },
+          "generation_id": "d4b09f0816e04ca3a8f2ee8abdfc034e"
+        }
+      ],
+      "abandoned_to_k1_rows": {
+        "before_count": 1,
+        "after_count": 1,
+        "matched_count": 1,
+        "matched_rows": [
+          {
+            "usage_id": "540cf4a00375499e8676d6ec59888f95",
+            "phase_before": "report",
+            "phase_after": "report",
+            "identical": true,
+            "differences": []
+          }
+        ],
+        "changed_matched_row_count": 0,
+        "removed_rows": [],
+        "added_rows": [],
+        "added_row_limit": "Absent from the earlier snapshot; addition alone does not establish an improper edit."
+      },
+      "original_evidence_limit": "Archive is a partial later snapshot, not a pre-run provenance authority; it already contains registration/receipt re-pinning documented by N2."
+    },
+    {
+      "date": "2026-10-22a",
+      "edited_ledger": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_api_usage_90e59e50c9d423fe.json",
+        "bytes": 40487,
+        "sha256": "0bf3e4db99ffa506bad4b6e2d433383577ea85bbe92bc5eb161e81273a6f9d28"
+      },
+      "k1_recorded_ledger_pin": {
+        "bytes": 40487,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_api_usage_90e59e50c9d423fe.json",
+        "sha256": "0bf3e4db99ffa506bad4b6e2d433383577ea85bbe92bc5eb161e81273a6f9d28"
+      },
+      "k1_source_bytes_still_match": true,
+      "edited_to_k1_rows": {
+        "before_count": 9,
+        "after_count": 9,
+        "matched_count": 9,
+        "matched_rows": [
+          {
+            "usage_id": "1fcc7eab500a45d1b7754fa25488790f",
+            "phase_before": "typed_audit_integration",
+            "phase_after": "typed_audit_integration",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "2494777897ee4d79ac96e70dde7bb1e7",
+            "phase_before": "full",
+            "phase_after": "full",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "3cff194dce1843749e4c376a369d2624",
+            "phase_before": "typed_audit_worker",
+            "phase_after": "typed_audit_worker",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "69389d7899fb4705b76edab1559b5dbc",
+            "phase_before": "report",
+            "phase_after": "report",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "a5cc763e58ff48b08df90e5ebe4c4f80",
+            "phase_before": "typed_audit_worker",
+            "phase_after": "typed_audit_worker",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "c93d399370e54bf784c934c89762395c",
+            "phase_before": "typed_audit_worker",
+            "phase_after": "typed_audit_worker",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "db0edf8cc0ff456ab65e1d9cceda8f63",
+            "phase_before": "typed_audit_omission",
+            "phase_after": "typed_audit_omission",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "f53bc1c53a0f4087ad71851f99ec91fa",
+            "phase_before": "reconcile_full",
+            "phase_after": "reconcile_full",
+            "identical": true,
+            "differences": []
+          },
+          {
+            "usage_id": "f5b2622933e44744be3cc809fc30669d",
+            "phase_before": "full_receipt_completion",
+            "phase_after": "full_receipt_completion",
+            "identical": true,
+            "differences": []
+          }
+        ],
+        "changed_matched_row_count": 0,
+        "removed_rows": [],
+        "added_rows": [],
+        "added_row_limit": "Absent from the earlier snapshot; addition alone does not establish an improper edit."
+      },
+      "original_comparisons": [],
+      "abandoned_journal": {
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_abandoned_attempts.jsonl",
+        "bytes": 2235,
+        "sha256": "bc91c1633bf45c9bb614a37b1e4997540027dfb6063c92b944189c0fe758a9d4"
+      },
+      "abandoned_rows": [
+        {
+          "phase": "typed_audit_integration",
+          "attempt": 1,
+          "transport_attempt": 1,
+          "usage_id": "c839eda0a3c446e3bc960a2af75798b7",
+          "run_identity": {
+            "project": "CHORUS",
+            "label": "2026-10-22a_claude-opus-5-api-generic-v10_rep1",
+            "method": "claudecode_api",
+            "condition": "generic_v10"
+          },
+          "ladder_attempt": 1,
+          "started_at": "2026-10-22T15:00:02+00:00",
+          "seconds": 631.1,
+          "outcome": "transport error: ReadTimeout (#1017)",
+          "max_tokens": 32000,
+          "events": 286,
+          "content_chars": 0,
+          "content_sha256": null,
+          "input_tokens": 2,
+          "output_tokens": 7,
+          "cache_read": 0,
+          "cache_write": 316991,
+          "snapshot": "data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_integration_incomplete_attempt1_1.txt",
+          "stream_trace": {
+            "version": 1,
+            "observation": "sdk_events_not_wire_sse",
+            "iterable": true,
+            "http_status": 200,
+            "correlation_headers": {
+              "x-litellm-call-id": "7ba2d682-ec37-4aec-a809-cc1c8e35343c",
+              "cf-ray": "a4e95e8fdc961d41-SJC"
+            },
+            "headers_seconds": 10.078,
+            "events": 286,
+            "event_counts": {
+              "message_start": 1,
+              "content_block_start": 1,
+              "content_block_delta": 142,
+              "thinking": 142
+            },
+            "content_block_counts": {
+              "thinking": 1
+            },
+            "recent_events": [
+              {
+                "type": "content_block_delta",
+                "seconds": 30.678
+              },
+              {
+                "type": "thinking",
+                "seconds": 30.678
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 30.678
+              },
+              {
+                "type": "thinking",
+                "seconds": 30.678
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 30.678
+              },
+              {
+                "type": "thinking",
+                "seconds": 30.678
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 30.678
+              },
+              {
+                "type": "thinking",
+                "seconds": 30.678
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 30.679
+              },
+              {
+                "type": "thinking",
+                "seconds": 30.679
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 30.679
+              },
+              {
+                "type": "thinking",
+                "seconds": 30.679
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 30.679
+              },
+              {
+                "type": "thinking",
+                "seconds": 30.679
+              },
+              {
+                "type": "content_block_delta",
+                "seconds": 31.068
+              },
+              {
+                "type": "thinking",
+                "seconds": 31.068
+              }
+            ],
+            "earlier_events": 270,
+            "first_event_seconds": 10.078,
+            "last_event_seconds": 31.068,
+            "message_start_seen": true,
+            "message_delta_seen": false,
+            "message_stop_seen": false,
+            "stop_reason": null,
+            "exception_type": "ReadTimeout",
+            "provider_error_type": null
+          },
+          "generation_id": "77aec593797d45d9a83cd474a70cff0f"
+        }
+      ],
+      "abandoned_to_k1_rows": {
+        "before_count": 1,
+        "after_count": 1,
+        "matched_count": 1,
+        "matched_rows": [
+          {
+            "usage_id": "c839eda0a3c446e3bc960a2af75798b7",
+            "phase_before": "typed_audit_integration",
+            "phase_after": "typed_audit_integration",
+            "identical": true,
+            "differences": []
+          }
+        ],
+        "changed_matched_row_count": 0,
+        "removed_rows": [],
+        "added_rows": [],
+        "added_row_limit": "Absent from the earlier snapshot; addition alone does not establish an improper edit."
+      },
+      "original_evidence_limit": "UNKNOWN: no pre-edit ledger verified. N1 documents state/stage/failure edits and deleted usage-ID reference; those statements do not independently prove every usage counter survived unchanged."
+    }
+  ],
+  "worker_timing": {
+    "selected_completed_workers": [
+      {
+        "date": "2026-10-20a",
+        "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+        "phase": "typed_audit_worker",
+        "attempt": 1,
+        "started_at": "2026-10-21T08:05:08+00:00",
+        "seconds": 541.771,
+        "max_tokens": 64000,
+        "input_tokens": 2,
+        "output_tokens": 53204,
+        "cache_read": 0,
+        "cache_write": 138000,
+        "thinking_tokens": 30294,
+        "stop_reason": "end_turn",
+        "timing_matches_preserved_original": true
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+        "phase": "typed_audit_worker",
+        "attempt": 1,
+        "started_at": "2026-10-21T08:14:13+00:00",
+        "seconds": 235.708,
+        "max_tokens": 64000,
+        "input_tokens": 2,
+        "output_tokens": 25946,
+        "cache_read": 0,
+        "cache_write": 138084,
+        "thinking_tokens": 6947,
+        "stop_reason": "end_turn",
+        "timing_matches_preserved_original": true
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+        "phase": "typed_audit_worker",
+        "attempt": 1,
+        "started_at": "2026-10-21T08:18:14+00:00",
+        "seconds": 490.518,
+        "max_tokens": 64000,
+        "input_tokens": 2,
+        "output_tokens": 44230,
+        "cache_read": 0,
+        "cache_write": 137758,
+        "thinking_tokens": 29909,
+        "stop_reason": "end_turn",
+        "timing_matches_preserved_original": true
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "3cff194dce1843749e4c376a369d2624",
+        "phase": "typed_audit_worker",
+        "attempt": 1,
+        "started_at": "2026-10-22T14:36:48+00:00",
+        "seconds": 515.309,
+        "max_tokens": 64000,
+        "input_tokens": 2,
+        "output_tokens": 50130,
+        "cache_read": 0,
+        "cache_write": 138936,
+        "thinking_tokens": 32231,
+        "stop_reason": "end_turn",
+        "timing_matches_preserved_original": false
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "c93d399370e54bf784c934c89762395c",
+        "phase": "typed_audit_worker",
+        "attempt": 1,
+        "started_at": "2026-10-22T14:45:27+00:00",
+        "seconds": 436.318,
+        "max_tokens": 64000,
+        "input_tokens": 2,
+        "output_tokens": 43348,
+        "cache_read": 0,
+        "cache_write": 139078,
+        "thinking_tokens": 22218,
+        "stop_reason": "end_turn",
+        "timing_matches_preserved_original": false
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "a5cc763e58ff48b08df90e5ebe4c4f80",
+        "phase": "typed_audit_worker",
+        "attempt": 1,
+        "started_at": "2026-10-22T14:52:47+00:00",
+        "seconds": 153.741,
+        "max_tokens": 64000,
+        "input_tokens": 2,
+        "output_tokens": 14032,
+        "cache_read": 0,
+        "cache_write": 138360,
+        "thinking_tokens": 9601,
+        "stop_reason": "end_turn",
+        "timing_matches_preserved_original": false
+      }
+    ],
+    "excluded_workers": [
+      {
+        "date": "2026-10-20a",
+        "usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+        "phase": "typed_audit_worker",
+        "attempt": 1,
+        "started_at": "2026-10-21T07:00:25+00:00",
+        "seconds": 299.189,
+        "max_tokens": 25000,
+        "input_tokens": 2,
+        "output_tokens": 25000,
+        "cache_read": 0,
+        "cache_write": 139353,
+        "thinking_tokens": 25000,
+        "stop_reason": "max_tokens",
+        "timing_matches_preserved_original": true,
+        "reason": "Different cap or incomplete response; not a routine successful worker/retry-rate sample."
+      }
+    ],
+    "all_settled_durations": [
+      {
+        "date": "2026-10-20a",
+        "usage_id": "dd63564c51c6489aa90c25b08a91fdcc",
+        "phase": "full",
+        "started_at": "2026-10-21T06:14:10+00:00",
+        "seconds": 509.489,
+        "max_tokens": 128000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+        "phase": "full_receipt_completion",
+        "started_at": "2026-10-21T06:44:27+00:00",
+        "seconds": 14.188,
+        "max_tokens": 4000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+        "phase": "typed_audit_worker",
+        "started_at": "2026-10-21T07:00:25+00:00",
+        "seconds": 299.189,
+        "max_tokens": 25000,
+        "stop_reason": "max_tokens"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+        "phase": "typed_audit_worker",
+        "started_at": "2026-10-21T08:05:08+00:00",
+        "seconds": 541.771,
+        "max_tokens": 64000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+        "phase": "typed_audit_worker",
+        "started_at": "2026-10-21T08:14:13+00:00",
+        "seconds": 235.708,
+        "max_tokens": 64000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+        "phase": "typed_audit_worker",
+        "started_at": "2026-10-21T08:18:14+00:00",
+        "seconds": 490.518,
+        "max_tokens": 64000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+        "phase": "typed_audit_omission",
+        "started_at": "2026-10-21T08:26:30+00:00",
+        "seconds": 240.578,
+        "max_tokens": 32000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "51ed3b8231984bce989c70062a9403be",
+        "phase": "typed_audit_integration",
+        "started_at": "2026-10-21T08:30:38+00:00",
+        "seconds": 271.199,
+        "max_tokens": 32000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "7a1a9a2a0cfe499f996d3145281b4c13",
+        "phase": "reconcile_full",
+        "started_at": "2026-10-22T00:09:48+00:00",
+        "seconds": 115.748,
+        "max_tokens": 96000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+        "phase": "report",
+        "started_at": "2026-10-22T00:12:01+00:00",
+        "seconds": 1141.513,
+        "max_tokens": 96000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-20a",
+        "usage_id": "a42e7689e27b4780a36670d9998f95bb",
+        "phase": "report_regate",
+        "started_at": "2026-10-22T04:12:51+00:00",
+        "seconds": 659.838,
+        "max_tokens": 96000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "2494777897ee4d79ac96e70dde7bb1e7",
+        "phase": "full",
+        "started_at": "2026-10-22T14:28:22+00:00",
+        "seconds": 463.702,
+        "max_tokens": 128000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "f5b2622933e44744be3cc809fc30669d",
+        "phase": "full_receipt_completion",
+        "started_at": "2026-10-22T14:36:15+00:00",
+        "seconds": 21.368,
+        "max_tokens": 4000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "3cff194dce1843749e4c376a369d2624",
+        "phase": "typed_audit_worker",
+        "started_at": "2026-10-22T14:36:48+00:00",
+        "seconds": 515.309,
+        "max_tokens": 64000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "c93d399370e54bf784c934c89762395c",
+        "phase": "typed_audit_worker",
+        "started_at": "2026-10-22T14:45:27+00:00",
+        "seconds": 436.318,
+        "max_tokens": 64000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "a5cc763e58ff48b08df90e5ebe4c4f80",
+        "phase": "typed_audit_worker",
+        "started_at": "2026-10-22T14:52:47+00:00",
+        "seconds": 153.741,
+        "max_tokens": 64000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "db0edf8cc0ff456ab65e1d9cceda8f63",
+        "phase": "typed_audit_omission",
+        "started_at": "2026-10-22T14:55:26+00:00",
+        "seconds": 269.549,
+        "max_tokens": 32000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "1fcc7eab500a45d1b7754fa25488790f",
+        "phase": "typed_audit_integration",
+        "started_at": "2026-10-22T20:51:39+00:00",
+        "seconds": 264.124,
+        "max_tokens": 32000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "f53bc1c53a0f4087ad71851f99ec91fa",
+        "phase": "reconcile_full",
+        "started_at": "2026-10-22T20:56:36+00:00",
+        "seconds": 146.247,
+        "max_tokens": 96000,
+        "stop_reason": "end_turn"
+      },
+      {
+        "date": "2026-10-22a",
+        "usage_id": "69389d7899fb4705b76edab1559b5dbc",
+        "phase": "report",
+        "started_at": "2026-10-22T20:59:20+00:00",
+        "seconds": 789.381,
+        "max_tokens": 96000,
+        "stop_reason": "end_turn"
+      }
+    ],
+    "all_adjacent_settled_transitions": [
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "dd63564c51c6489aa90c25b08a91fdcc",
+        "to_usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+        "from_phase": "full",
+        "to_phase": "full_receipt_completion",
+        "start_to_start_seconds": 1817.0,
+        "previous_end_to_start_seconds": 1307.511,
+        "previous_seconds": 509.489
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "223cf6484a6d47d0b1a69ba408e7c76c",
+        "to_usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+        "from_phase": "full_receipt_completion",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 958.0,
+        "previous_end_to_start_seconds": 943.812,
+        "previous_seconds": 14.188
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "eb3330ce02be47eaa985a4edbf2ce976",
+        "to_usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 3883.0,
+        "previous_end_to_start_seconds": 3583.811,
+        "previous_seconds": 299.189
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+        "to_usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 545.0,
+        "previous_end_to_start_seconds": 3.229,
+        "previous_seconds": 541.771
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+        "to_usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 241.0,
+        "previous_end_to_start_seconds": 5.292,
+        "previous_seconds": 235.708
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+        "to_usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_omission",
+        "start_to_start_seconds": 496.0,
+        "previous_end_to_start_seconds": 5.482,
+        "previous_seconds": 490.518
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "30cbdaeefed54ff4b0bad11b03e81658",
+        "to_usage_id": "51ed3b8231984bce989c70062a9403be",
+        "from_phase": "typed_audit_omission",
+        "to_phase": "typed_audit_integration",
+        "start_to_start_seconds": 248.0,
+        "previous_end_to_start_seconds": 7.422,
+        "previous_seconds": 240.578
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "51ed3b8231984bce989c70062a9403be",
+        "to_usage_id": "7a1a9a2a0cfe499f996d3145281b4c13",
+        "from_phase": "typed_audit_integration",
+        "to_phase": "reconcile_full",
+        "start_to_start_seconds": 56350.0,
+        "previous_end_to_start_seconds": 56078.801,
+        "previous_seconds": 271.199
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "7a1a9a2a0cfe499f996d3145281b4c13",
+        "to_usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+        "from_phase": "reconcile_full",
+        "to_phase": "report",
+        "start_to_start_seconds": 133.0,
+        "previous_end_to_start_seconds": 17.252,
+        "previous_seconds": 115.748
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f",
+        "to_usage_id": "a42e7689e27b4780a36670d9998f95bb",
+        "from_phase": "report",
+        "to_phase": "report_regate",
+        "start_to_start_seconds": 14450.0,
+        "previous_end_to_start_seconds": 13308.487,
+        "previous_seconds": 1141.513
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "2494777897ee4d79ac96e70dde7bb1e7",
+        "to_usage_id": "f5b2622933e44744be3cc809fc30669d",
+        "from_phase": "full",
+        "to_phase": "full_receipt_completion",
+        "start_to_start_seconds": 473.0,
+        "previous_end_to_start_seconds": 9.298,
+        "previous_seconds": 463.702
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "f5b2622933e44744be3cc809fc30669d",
+        "to_usage_id": "3cff194dce1843749e4c376a369d2624",
+        "from_phase": "full_receipt_completion",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 33.0,
+        "previous_end_to_start_seconds": 11.632,
+        "previous_seconds": 21.368
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "3cff194dce1843749e4c376a369d2624",
+        "to_usage_id": "c93d399370e54bf784c934c89762395c",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 519.0,
+        "previous_end_to_start_seconds": 3.691,
+        "previous_seconds": 515.309
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "c93d399370e54bf784c934c89762395c",
+        "to_usage_id": "a5cc763e58ff48b08df90e5ebe4c4f80",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 440.0,
+        "previous_end_to_start_seconds": 3.682,
+        "previous_seconds": 436.318
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "a5cc763e58ff48b08df90e5ebe4c4f80",
+        "to_usage_id": "db0edf8cc0ff456ab65e1d9cceda8f63",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_omission",
+        "start_to_start_seconds": 159.0,
+        "previous_end_to_start_seconds": 5.259,
+        "previous_seconds": 153.741
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "db0edf8cc0ff456ab65e1d9cceda8f63",
+        "to_usage_id": "1fcc7eab500a45d1b7754fa25488790f",
+        "from_phase": "typed_audit_omission",
+        "to_phase": "typed_audit_integration",
+        "start_to_start_seconds": 21373.0,
+        "previous_end_to_start_seconds": 21103.451,
+        "previous_seconds": 269.549
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "1fcc7eab500a45d1b7754fa25488790f",
+        "to_usage_id": "f53bc1c53a0f4087ad71851f99ec91fa",
+        "from_phase": "typed_audit_integration",
+        "to_phase": "reconcile_full",
+        "start_to_start_seconds": 297.0,
+        "previous_end_to_start_seconds": 32.876,
+        "previous_seconds": 264.124
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "f53bc1c53a0f4087ad71851f99ec91fa",
+        "to_usage_id": "69389d7899fb4705b76edab1559b5dbc",
+        "from_phase": "reconcile_full",
+        "to_phase": "report",
+        "start_to_start_seconds": 164.0,
+        "previous_end_to_start_seconds": 17.753,
+        "previous_seconds": 146.247
+      }
+    ],
+    "adjacent_completed_worker_transitions": [
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+        "to_usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 545.0,
+        "previous_end_to_start_seconds": 3.229,
+        "previous_seconds": 541.771
+      },
+      {
+        "date": "2026-10-20a",
+        "from_usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+        "to_usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 241.0,
+        "previous_end_to_start_seconds": 5.292,
+        "previous_seconds": 235.708
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "3cff194dce1843749e4c376a369d2624",
+        "to_usage_id": "c93d399370e54bf784c934c89762395c",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 519.0,
+        "previous_end_to_start_seconds": 3.691,
+        "previous_seconds": 515.309
+      },
+      {
+        "date": "2026-10-22a",
+        "from_usage_id": "c93d399370e54bf784c934c89762395c",
+        "to_usage_id": "a5cc763e58ff48b08df90e5ebe4c4f80",
+        "from_phase": "typed_audit_worker",
+        "to_phase": "typed_audit_worker",
+        "start_to_start_seconds": 440.0,
+        "previous_end_to_start_seconds": 3.682,
+        "previous_seconds": 436.318
+      }
+    ],
+    "completed_worker_seconds": {
+      "count": 6,
+      "minimum": 153.741,
+      "maximum": 541.771,
+      "mean": 395.56083333333333,
+      "median": 463.418
+    },
+    "end_to_next_start_seconds": {
+      "count": 4,
+      "minimum": 3.229,
+      "maximum": 5.292
+    },
+    "observed_worker_cache_tokens": {
+      "input_tokens": 12,
+      "cache_write": 830216,
+      "cache_read": 0
+    },
+    "ttl_scenarios": [
+      {
+        "assumed_ttl_seconds": 300,
+        "transitions": [
+          {
+            "date": "2026-10-20a",
+            "from_usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+            "to_usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+            "from_phase": "typed_audit_worker",
+            "to_phase": "typed_audit_worker",
+            "start_to_start_seconds": 545.0,
+            "previous_end_to_start_seconds": 3.229,
+            "previous_seconds": 541.771,
+            "classification": "depends_on_cache_write_or_refresh_time"
+          },
+          {
+            "date": "2026-10-20a",
+            "from_usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+            "to_usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+            "from_phase": "typed_audit_worker",
+            "to_phase": "typed_audit_worker",
+            "start_to_start_seconds": 241.0,
+            "previous_end_to_start_seconds": 5.292,
+            "previous_seconds": 235.708,
+            "classification": "within_ttl_for_both_timestamp_endpoints"
+          },
+          {
+            "date": "2026-10-22a",
+            "from_usage_id": "3cff194dce1843749e4c376a369d2624",
+            "to_usage_id": "c93d399370e54bf784c934c89762395c",
+            "from_phase": "typed_audit_worker",
+            "to_phase": "typed_audit_worker",
+            "start_to_start_seconds": 519.0,
+            "previous_end_to_start_seconds": 3.691,
+            "previous_seconds": 515.309,
+            "classification": "depends_on_cache_write_or_refresh_time"
+          },
+          {
+            "date": "2026-10-22a",
+            "from_usage_id": "c93d399370e54bf784c934c89762395c",
+            "to_usage_id": "a5cc763e58ff48b08df90e5ebe4c4f80",
+            "from_phase": "typed_audit_worker",
+            "to_phase": "typed_audit_worker",
+            "start_to_start_seconds": 440.0,
+            "previous_end_to_start_seconds": 3.682,
+            "previous_seconds": 436.318,
+            "classification": "depends_on_cache_write_or_refresh_time"
+          }
+        ],
+        "assumed_cold_calls_one_per_run": 2,
+        "possible_hits_min": 1,
+        "possible_hits_max": 4,
+        "worker_calls": 6,
+        "possible_hit_share_min": 0.16666666666666666,
+        "possible_hit_share_max": 0.6666666666666666,
+        "assumptions": "Identical shared prefix implemented and accepted for caching; one cold start per canary; cache created/refreshed during each preceding call; no eviction, route change or intervening activity. Bounds concern timing only, not provider availability or measured hit probability."
+      },
+      {
+        "assumed_ttl_seconds": 3600,
+        "transitions": [
+          {
+            "date": "2026-10-20a",
+            "from_usage_id": "d2b5eed070e44b1ab99fd399dda6de1f",
+            "to_usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+            "from_phase": "typed_audit_worker",
+            "to_phase": "typed_audit_worker",
+            "start_to_start_seconds": 545.0,
+            "previous_end_to_start_seconds": 3.229,
+            "previous_seconds": 541.771,
+            "classification": "within_ttl_for_both_timestamp_endpoints"
+          },
+          {
+            "date": "2026-10-20a",
+            "from_usage_id": "4b4aaf0f017246ddbca3a614e24de8e9",
+            "to_usage_id": "8ff30d9469e943a48916b15bd561a3a0",
+            "from_phase": "typed_audit_worker",
+            "to_phase": "typed_audit_worker",
+            "start_to_start_seconds": 241.0,
+            "previous_end_to_start_seconds": 5.292,
+            "previous_seconds": 235.708,
+            "classification": "within_ttl_for_both_timestamp_endpoints"
+          },
+          {
+            "date": "2026-10-22a",
+            "from_usage_id": "3cff194dce1843749e4c376a369d2624",
+            "to_usage_id": "c93d399370e54bf784c934c89762395c",
+            "from_phase": "typed_audit_worker",
+            "to_phase": "typed_audit_worker",
+            "start_to_start_seconds": 519.0,
+            "previous_end_to_start_seconds": 3.691,
+            "previous_seconds": 515.309,
+            "classification": "within_ttl_for_both_timestamp_endpoints"
+          },
+          {
+            "date": "2026-10-22a",
+            "from_usage_id": "c93d399370e54bf784c934c89762395c",
+            "to_usage_id": "a5cc763e58ff48b08df90e5ebe4c4f80",
+            "from_phase": "typed_audit_worker",
+            "to_phase": "typed_audit_worker",
+            "start_to_start_seconds": 440.0,
+            "previous_end_to_start_seconds": 3.682,
+            "previous_seconds": 436.318,
+            "classification": "within_ttl_for_both_timestamp_endpoints"
+          }
+        ],
+        "assumed_cold_calls_one_per_run": 2,
+        "possible_hits_min": 4,
+        "possible_hits_max": 4,
+        "worker_calls": 6,
+        "possible_hit_share_min": 0.6666666666666666,
+        "possible_hit_share_max": 0.6666666666666666,
+        "assumptions": "Identical shared prefix implemented and accepted for caching; one cold start per canary; cache created/refreshed during each preceding call; no eviction, route change or intervening activity. Bounds concern timing only, not provider availability or measured hit probability."
+      }
+    ],
+    "limits": [
+      "No provider/cache API was queried. 300s and 3600s are hypothetical TTL scenarios, not confirmed current route settings or prices.",
+      "Timestamps are second-resolution ledger values, durations have millisecond precision; boundary classifications are conditional on those recorded values.",
+      "Cache publication/refresh instant, prefix eligibility and actual eviction are unobserved. No assumed hit is an observed saving.",
+      "All six selected worker rows have zero observed cache-read tokens. Only the 10-20 worker rows are independently matched to the preserved original.",
+      "Both canaries are evidence-only; 10-22 was manually resumed and has no verified pre-edit ledger. Do not infer permitted production retries or accepted-run outcomes."
+    ]
+  },
+  "interpretation": [
+    "Compare raw accounting fields separately from source_review_admission, typed-stage state and response hashes; end_turn is a transport/model completion, not scientific acceptance.",
+    "Both canaries remain evidence-only (D31/D40). Historical spend/timing may inform conditional estimates; do not rehabilitate outcomes, infer ordinary retry permission, or use them for scoring.",
+    "No 10-22 pre-edit original was verified. The documented edit targeted state/stage/failure metadata and a usage-ID reference; usage-row invariance cannot be certified from the edited ledger alone.",
+    "Every matched raw-row difference and every non-row ledger difference against each available original is retained below; new rows absent from an earlier snapshot are listed separately."
+  ],
+  "input_pins": [
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/CHORUS_report_normalized.md",
+      "bytes": 162181,
+      "sha256": "543511e998fad8b8e5e8759f3df1106b1c35b7c10d2dc21313547c1b53835e5c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/MANIFEST.sha256",
+      "bytes": 16522,
+      "sha256": "9649668da24c27f185975ed5f72704766422e4b30955d3137775f7a97a229655"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/__pycache__/finish_skill_and_tests.cpython-313.pyc",
+      "bytes": 5948,
+      "sha256": "f306b311229f258b052cb7ff4c41ef6f533c32212e28e9ad996cd5e3125b8afa"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/__pycache__/test_file_reconstruction.cpython-313.pyc",
+      "bytes": 4795,
+      "sha256": "47d3dcf688a2c73a2fb961501504fa3788d2b90187cdc9fd7fe702d1d7f63bf3"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/all_test_sources.txt",
+      "bytes": 999788,
+      "sha256": "40317ca8bdaf1bfbec499f498435ea6128abe33f11ac03c15b08b3849ed6b664"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/analyze_snapshots.py",
+      "bytes": 3023,
+      "sha256": "535e8cbf0cc0632bac065eab95c54d0f6c1d0d650636637845cd2baa0b5f0f69"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/apply_report_patch.py",
+      "bytes": 4507,
+      "sha256": "6410fa48ef7935bc050c10f38e1dfc85ee8fd802831c30cd087c1d5b207c9e4a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/assemble_test_file.py",
+      "bytes": 2084,
+      "sha256": "ea9c72847cb052ae1dc73cdd71e0f3d66497bdb259383781172d090bb90a0036"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/before_10946.txt",
+      "bytes": 48952,
+      "sha256": "afa6e9895f903aeef8c747f381a3a0fe22bfab7ae2fa965eff1ef699f3aef72f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/build_complete_test_file.py",
+      "bytes": 54737,
+      "sha256": "4e184d739835d4a5a5488d4c1d50a179f6ee4738de3f8fe40a340f4983cb228d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/build_final_all.py",
+      "bytes": 8922,
+      "sha256": "fa16f50cde0ef85b589fb5fdb5624389bc7c309d746595d577da38597fad2584"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/build_final_all_out.txt",
+      "bytes": 98244,
+      "sha256": "a1927575938298d41915a923f967a71efe29f9b589f0acebfa253ca5e8882f20"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/build_reconstructed_files.py",
+      "bytes": 11235,
+      "sha256": "3d3e90ec963c4a48d4e46c597dc22898bccce28622b7c3abaa8fdd428609ddcd"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/build_step1_out.txt",
+      "bytes": 13785,
+      "sha256": "051f3c17663572f1848f70f685dab3719e92eb240ac5fd66eabcd4ac3ec3e3a1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/build_step2_out.txt",
+      "bytes": 19879,
+      "sha256": "ec60a9b60ee8e5da0e2a160e902e51ef5b0a1137080cd8e5e70d8db92ac25fe9"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_10.py",
+      "bytes": 1134,
+      "sha256": "280d5316303aa4e38efa7d86fab69929a461f89db03d16857c06835414b80b14"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_all_brain_and_steps.py",
+      "bytes": 4278,
+      "sha256": "501e19113f6a4e8921d829440dcefeb992089b0bd87c52ebbda696f46a6a7670"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_all_brain_and_steps_out.txt",
+      "bytes": 9818,
+      "sha256": "77953d4b81d83d15cccbf537edb12e2c6134bdcd0a9663cdf420cdfb5ed55ea0"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_all_sources.py",
+      "bytes": 1615,
+      "sha256": "28eac47f95d7d0c9675bfca4e368fb6fcb7655de5feb36a21270fc36aaca267f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_before_10946.py",
+      "bytes": 785,
+      "sha256": "15b5414ea7dad4d094322dbc207503d4019c9ba8d18eebcb2746b00d51fe6796"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_commits.py",
+      "bytes": 1572,
+      "sha256": "8552d74b00091560a13745d0885ab0dd82de2a9fa0846af714a0bc0393645c5b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_commits_out.txt",
+      "bytes": 441697,
+      "sha256": "db28b8f1ada819d2b8f2c620d360d6dd650b229f2e5abba3a40df5bfec97d9e8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_diff.py",
+      "bytes": 1760,
+      "sha256": "fdeae730082382aa7b122dd4a36053763a893c958867da921ad0619433c2aac0"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_disk_and_transcript.py",
+      "bytes": 1493,
+      "sha256": "58ea0d5451194d67356b879a4ce9fa213cb84efc0f8f3fd742af646edf94fd0e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_early_steps.py",
+      "bytes": 930,
+      "sha256": "46995ed4d61fb00f0d14e2a3100f61b513769b8e1280bf8fc4b3fa44a670a83c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_file_coverage_in_transcript.py",
+      "bytes": 3088,
+      "sha256": "14ce289beb38b05ab5178a2c9260548c9c83c6f1e7ce8a5c3d92106de29d54b6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_full_plus_blocks.py",
+      "bytes": 26851,
+      "sha256": "6249eaf621db57458c4c874173cfef04d1bda86c70ec1f755041930475095799"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_full_plus_blocks_out.txt",
+      "bytes": 44034,
+      "sha256": "59f82824b6d9bc4b34c8917b76e1bc331a466ddc56e4fe3fc0d516b94f3f1770"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_guidance.py",
+      "bytes": 929,
+      "sha256": "05b69290a21f76d4eecbe8f84a663f44a2cf13bab4a0ae99f850399374c8f85d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_helpers.py",
+      "bytes": 768,
+      "sha256": "8635c9e4995c1a5bfd0ef1536bd35de389c83698bb169cfcca3e44e817963577"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_reconstruct.py",
+      "bytes": 2791,
+      "sha256": "f1974bf370ce3f1ecfb7f9c72478a81f4155d106e483ea03cbd19951bb496f53"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_skill_784_799.py",
+      "bytes": 3572,
+      "sha256": "b2a6c8ddc42c5e2da1daa1d31b6b5051d3bdbe322a0c4d95aa8c81516d73867c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_skill_784_out.txt",
+      "bytes": 112517,
+      "sha256": "401fac30a3be6a9f4c4fb39dad091be163377c3b59afbae4bf1eb78e8c7062e9"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_skill_and_tests.py",
+      "bytes": 1718,
+      "sha256": "ea4c6dec898044efb83af1e30fcd27fe6573311b54def3611e576a04d0aa7909"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_sources.py",
+      "bytes": 1283,
+      "sha256": "2a4f3c488a8fa4f1a28eaad12108b6fb24ac2ff4d36a9bfe623132f1c9c31926"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_view_stats.py",
+      "bytes": 1538,
+      "sha256": "33ec5cf1e1c3002a2b9bba7261e9b144e03090de2d57e3cbea81c9a893deeb7f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_viewed_files.py",
+      "bytes": 1674,
+      "sha256": "c9f9b11e57f97f2dce6341c000221492c0a2ce789b2056f60388f20b25a436cb"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/check_walk.py",
+      "bytes": 552,
+      "sha256": "ab55ff6c849cc2c191475784676363fd26b01d9f6658c7226fad01b354331bac"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_canaries_pr_body.md",
+      "bytes": 1631,
+      "sha256": "247081c6df851f600319ee14781b9bd5fa0c31a3f00224f601f6589cd7521e7d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_full.yaml",
+      "bytes": 18794,
+      "sha256": "d3b91e60e7a61c65fc7771c4f6bc419a3861f89881b36e5b13b7d0b928fddbd7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_progress.json",
+      "bytes": 23364,
+      "sha256": "679aab514fb672586e234f4218a81397dd9d9e4ac1b9a8eb7c235bd471e963a6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_progress_phase5.json",
+      "bytes": 193190,
+      "sha256": "83b43bee511a2b8d12f65409ba69c50af1131db6236eb81fb704484eb153f4c4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2.json",
+      "bytes": 39629,
+      "sha256": "d2ccbec319f41f8f641593b136c1b192779ee033cabeedcd272918d16c4f98c1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_api_usage_8d1427f7e332bdc2_phase5.json",
+      "bytes": 43718,
+      "sha256": "3d794652b590b4b88c5cb4330f65a533c5a92972f455e58d752d623dd93b7e5e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_report_rejected_response_72ac7d9a77bb438798e7d8d55ff1bf0f_phase5.txt",
+      "bytes": 163798,
+      "sha256": "d1df3ae1cec6402955efee391b898a01c688955b2180dce69344bbb70a829834"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_snapshot_index.json",
+      "bytes": 27572,
+      "sha256": "d6ea6ef775bb5719f075ec6b1a120ce43e483bb6bd161e26d81757f361510494"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_snapshot_index_phase5.json",
+      "bytes": 30135,
+      "sha256": "90d28501b91f6b9c6ccf2da871b17a63d9b7ce1a3dbc8580444a915b38e6996a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/chorus_rep1_unmodified_archive/CHORUS_typed_audit_4_response.json",
+      "bytes": 43426,
+      "sha256": "b439364f6ac8b2a9ea21a406bb4088a699f2c41e2837be3fbbf6ac3c4f1ec506"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/cmd_test_outputs_dump.txt",
+      "bytes": 340326,
+      "sha256": "b45c9fcb827de2f9609a2b1718650544a141c893e7fa84a44e05b5cb6b631f86"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/compare_audit.py",
+      "bytes": 2394,
+      "sha256": "f369997987e6c03ea042c257e54e84247d0148d2d9298d7809286513ca1d80c7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/compute_hashes.py",
+      "bytes": 5865,
+      "sha256": "aac841a3895c9ac422f9887bc602f3e9ce07b5fe009aac4dc4f128bc54863e6b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/coverage_report.txt",
+      "bytes": 1664162,
+      "sha256": "e50051dd7fb7637fa05f93fa4d4fe56351f776eb35f8d0344f799a9e25769639"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_1949.py",
+      "bytes": 873,
+      "sha256": "25497d4fc6503b1dd76e55cda12210b9861ed42ba8082fa749961ca54a1df3d1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_1966.py",
+      "bytes": 1187,
+      "sha256": "177b962b49ab3aa0888f293c6150b79e9ab83426659ddef6b92c8daf4a8dfc54"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_caveats.py",
+      "bytes": 925,
+      "sha256": "afd119d477f0c1c3610f1b8422bb95645c050d61292bf672c770f4e500e79f48"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_concat.py",
+      "bytes": 1266,
+      "sha256": "99bc5b61be1fd38fa0da60b2bd1dc3e78117e091e7962296d5a0c729c1a2b9b8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_container.py",
+      "bytes": 570,
+      "sha256": "ab00020fffab949104190566c8bb1cc8d4bf82a2facfe8d63723750d217ecff5"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_effects.py",
+      "bytes": 916,
+      "sha256": "3c2d4dfc4f60d2423dde7410fe6d6306d307594781eca8573ce5505001d7d62b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_effects_522.py",
+      "bytes": 1340,
+      "sha256": "760cb8eb43d6d88731dc2689e7648b259bdbba05124bb44439e0e7c9a88b370f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_execute_child.py",
+      "bytes": 845,
+      "sha256": "a6ac32de027214a776d4aec628ba5d641729090b6cf6f75ef40f82024a8761f7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_gate1.py",
+      "bytes": 372,
+      "sha256": "cbc6736289996234bb380939cf66355ac5df37ed2572e8948001d56fbe1e7155"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_healthsheet.py",
+      "bytes": 3407,
+      "sha256": "d2974503b7a1fe19b44dfe6a775eae0321c101ebd7dbfc1e9d66f9a68fea4345"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_identity_differs.py",
+      "bytes": 1328,
+      "sha256": "db6ac476f363c9ea79bdb168541d82631f28ae9c4e7a39499863b8be546113a2"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_inspect.py",
+      "bytes": 4198,
+      "sha256": "ccb481093df0c37fee02bf88ffa49025758e1d6c7192cfe73db1e6a7846897d2"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_preprocess_sinks.py",
+      "bytes": 1992,
+      "sha256": "eb1b0d0e6e49fb83fe0b0295a6cafdb48a74a7225b0396ab7cffafc35ba1f1a1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_repeated_record.py",
+      "bytes": 1569,
+      "sha256": "4be3cf3796252567474a42057628a795018ccd35122a5162654f636b27e187a1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/debug_scan.py",
+      "bytes": 1003,
+      "sha256": "4217c13885c509af870f8a9f37d13aa63f57df75128458f9430dd26549c0415a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/diagnose_failure.py",
+      "bytes": 404,
+      "sha256": "beed415a919a9c99c8afff1aa2b3a5fbdd6ec1351ed0694965fbf2a0e5418d26"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/diagnose_remap_path.py",
+      "bytes": 1357,
+      "sha256": "34823981a5f0c3a1867154ae3d9ccebc66f239c9846c22e4406050535e5e37df"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/dump_step_and_transcript_hits.py",
+      "bytes": 4838,
+      "sha256": "c5f1e7e200320dc357711b9323f62a8e527c75c58c76893a6d2a6224fe840acb"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/dump_step_and_transcript_hits_out.txt",
+      "bytes": 451699,
+      "sha256": "3d3d3defbca71a23e10443a5bea6104f4d37bb7b0053c3ad5d38720304e3dbe5"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/early_steps.txt",
+      "bytes": 9721,
+      "sha256": "de10f38fa1a4eb3f87c274bbedd98924923fb7dad83783936fd966329739b9a7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/edit_target_replacement.json",
+      "bytes": 65276,
+      "sha256": "051c82c5f633a4e487993200acdaa6ad31dcf37aabdd46e72c599e747bdc8d6b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/extract_all_test_pieces.py",
+      "bytes": 1438,
+      "sha256": "d2f4ffd4c4d591fa99b0191c3e45e06f9b73b6c5f138119672e64ca59b9bbef4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/extract_git_outputs.py",
+      "bytes": 1871,
+      "sha256": "25bc5680ea35ddb8542b5d2f04e48f352b17a520f89f20beafcd308a68738f15"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/fill_13_gaps.py",
+      "bytes": 26608,
+      "sha256": "3e0015e783d183a8d63ec1bd48588d0d2330bd86f964552694ec56b3fb7191f1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/fill_13_gaps_out.txt",
+      "bytes": 71904,
+      "sha256": "cb967b767181f540d97ef21abe30beec8f222b69b7e6600c4bae6398d16da40e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/final_SKILL.md",
+      "bytes": 74293,
+      "sha256": "8ee7ea2206ed772e7341caf9919477162089813f6c0c39ca09490688b2c92aba"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/final_scan.py",
+      "bytes": 699605,
+      "sha256": "8131bae8a36bf212a5d3f2b3183e6b7a28d0320374c1705bf4b2b96a8914a4f3"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/final_test_generation_specificity_skill.py",
+      "bytes": 483033,
+      "sha256": "03cffa771ec9598b611bf9d8bb95b4798479571f2bf95b001dd23bd96271c54a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/find_culprit.py",
+      "bytes": 864,
+      "sha256": "f1a5a1219c2c9b9cac035f244de5bda0a435c5c1da8401cb8c65badb96deea1d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/find_origin.py",
+      "bytes": 2575,
+      "sha256": "fc5f5c8b46d93f562fb9286c53c0395368e0726c612a396e85361360d51d379d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/find_origin_out.txt",
+      "bytes": 24590,
+      "sha256": "84f2cb01d8c601ceba63a2d998485d8df6f588ce52c33ca72c29c989c7ba0d0d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/find_test_patches.py",
+      "bytes": 5628,
+      "sha256": "7ed9ba0ee54cf876de2814b86e2b541e35505873b9cdedd469bbade74badac1c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/find_test_patches_out.txt",
+      "bytes": 268645,
+      "sha256": "ece6c6a597bb2b2a52aa5e3076c95c2854d844f702b4041ebad1085edaa11e0d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/finish_skill_and_tests.py",
+      "bytes": 3689,
+      "sha256": "f42e5703de31be69900ca6980e2709a0f4bf4d77d413c1fd69787e5349a74129"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/finish_skill_out.txt",
+      "bytes": 182050,
+      "sha256": "6d466b7c294b12eb053e5397c0724e41213c798de00f3da335e5ba563d7da5aa"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/git_history_in_transcript.txt",
+      "bytes": 2524641,
+      "sha256": "0508e9fc6dc2b62b8d83a686f435db4bfb3e12bc38c7f2cc09e38bcb11a6ea75"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/goal_resume_dump.txt",
+      "bytes": 28025,
+      "sha256": "ac919ac9531e11f2065208133baffeec99d5f06bfecf9cdab52190fffeb05dba"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/harness_test/inputs/chorus_omission_context.json",
+      "bytes": 6476,
+      "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/harness_test/inputs/chorus_reg.yaml",
+      "bytes": 4986,
+      "sha256": "b51cc4398aab4efa7ced27f2c6f295a96d69913a5264b6ed559ac15aad95093d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/harness_test/outputs/CHORUS_coverage_receipt.yaml",
+      "bytes": 13091,
+      "sha256": "5619e50e6720194b1cd837efa38caaa60da8f72495ae460a8bcad6b0041b3950"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_all_vf_and_steps.py",
+      "bytes": 4619,
+      "sha256": "0dd978c206e2940dfb237e500b031b51c240645015d54cf615e153de157fd37e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_cmd_test_outputs.py",
+      "bytes": 1146,
+      "sha256": "2d73e222ca4d4c8d6f3e5cc76fab5f6e0f079e990584670785b1213ce0ebf276"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_coverage.py",
+      "bytes": 2714,
+      "sha256": "c5e91510ea7ce366ff5368060455fb3c7132a489fa0cf03bd34224e88c3c75a1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_deid.py",
+      "bytes": 733,
+      "sha256": "f302eddff86ae60bc1e44bb7544da2f4b6c148f1a8cd02aa39de0e3260199892"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_effects.py",
+      "bytes": 787,
+      "sha256": "a850d7e37c7d095f4b5f14733eca9ce63113e68994aa0c90b78fb384caf15048"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_formal.py",
+      "bytes": 731,
+      "sha256": "8e235c6341723b28e5a3e3cb5a62e0d56be55b209ffb7a45961577534b3c8440"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_hits.py",
+      "bytes": 3205,
+      "sha256": "83c7393b5a31ea35f4f195706ba7d2bafe81fa681b7ece66d27e2cfc5b58aebe"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_hits_out.txt",
+      "bytes": 123154,
+      "sha256": "b0a8cd076462bb97de402974d09e81ca4cef147fa267bd7ac4879bc3feb2fc4a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_missing_hits.py",
+      "bytes": 1635,
+      "sha256": "bd11a3a53ebb4e81800f70b4f0c0be5254ab9febedca92c9a2a638908e22c6a7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_missing_hits_out.txt",
+      "bytes": 153192,
+      "sha256": "afb3a3b2a54e66a28f07df8a4b663f2f26a210f0f05d07de9c0c6c0aa9c33ffc"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_output.txt",
+      "bytes": 13412825,
+      "sha256": "43b66f65c700a72036acbd1b5039436700be3b044524354c9aac152e28eed645"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_policy.py",
+      "bytes": 758,
+      "sha256": "691e8265ec1a4572f068f1aaf4e6d48854e2c4e1a66ed3d7ff5511528d92772a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_receiving.py",
+      "bytes": 584,
+      "sha256": "ecf955040ee382fcc95513894d3505418ed392eadf73b5ca1419c20a0e2657b8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_schema_semantics.py",
+      "bytes": 674,
+      "sha256": "3b0b8515c4dc5bdb785b5fe272bde0859f7ca52eb6d6904cf0a70e7a5cc83ec7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_tasks_and_steps.py",
+      "bytes": 2846,
+      "sha256": "ce5860066f4687a36eafd04d194ea2a786fa84ab245695eb45c905e823b9eac1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_tasks_and_steps_out.txt",
+      "bytes": 247717,
+      "sha256": "74830fd8ff7a96b99120e3ed31eaefe32d0e1dbd7796f937800fa8fd3915e666"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_test_4588.py",
+      "bytes": 1631,
+      "sha256": "5721544d5c61bd93e25b7e4ca3eda064966643b6f8dff4404ceac5a6d096d4a1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_test_file_history.py",
+      "bytes": 17960,
+      "sha256": "8a1a822c67e4e8f7277022428d1b7645a9f76f1d6388e95e20876b9d588d52c2"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_transcript.py",
+      "bytes": 1774,
+      "sha256": "12e2688867282a1e86637fe42fb296006ee7057c21fd047c679c135176e66532"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_transcript_lines.py",
+      "bytes": 1187,
+      "sha256": "0d13c421258c70b1ecc4bf9bd0aeeffb753845e0348e3669d77e9ee4ca09260f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inspect_transcript_lines_out.txt",
+      "bytes": 109132,
+      "sha256": "9d6bb04461364ed289f6e40251cc2db90ebd8a0361b0fd59438d09ed8832e09e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/install_pr4405_files.py",
+      "bytes": 1091,
+      "sha256": "c579313f92a00562f3f9353fde390578b419a09a69f8475c7e789f82f2c71f08"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inventory_sources.py",
+      "bytes": 4084,
+      "sha256": "de328a93b91051c22d064da7b4942da0be0c77a378ad8dd1453b1d5e8d4b30af"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inventory_sources_out.txt",
+      "bytes": 10,
+      "sha256": "d5f479edc8118ca0d8d8f9a78fa09a8dc62e6c457c97e454fcf513514f08f07c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/inventory_sources_summary.txt",
+      "bytes": 113092,
+      "sha256": "7b04d6b64bd945fe412af0472e46c5cac6f686ae91f09415dca13e216bc06be3"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/issue_5072_close_comment.md",
+      "bytes": 1959,
+      "sha256": "3765c3301209441791e0c02da6f12ac6a87472d42cdb4af39e272b411b24b013"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/l10945_11050.txt",
+      "bytes": 84524,
+      "sha256": "07d0a0597097ef1d255204438d443774b4c4ce199b5d7c58e7bea9756d699d8c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/needle_steps_dump.txt",
+      "bytes": 218709,
+      "sha256": "2b75034b37c96d8c24fabd7791102eb0a49e1396936989997dc16599d95d00f3"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/origins_and_tasks.txt",
+      "bytes": 29859,
+      "sha256": "13387ac8712e2f3ec5c8a9f4a3d53a747eff5f5a3c7dfe5598f1fd91dabb0183"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/patch_rep1.py",
+      "bytes": 6172,
+      "sha256": "c30cddb2ef210724aa1890bb9517cc063702bd888f28bec3fdeefcd9f1c2ffa6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/patched_CHORUS_typed_audit_4_response.json",
+      "bytes": 45532,
+      "sha256": "236761f38f82b2dc9f28f2a4c6ee5891173d4fad137b0199f5bfe61b245fa25c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/pr_4766_body.md",
+      "bytes": 778,
+      "sha256": "fa18a4a88c1f47146bafcc8e2d515288cc3dd66dc4a7a53d46330ee296480b6b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/pr_5048_body.md",
+      "bytes": 1066,
+      "sha256": "ead38af3bd9675dd13194fd7be3d4b3a1ea3bfcfedd139c7b2ccd3cd4eb14a21"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/pr_v10_preflight_body.md",
+      "bytes": 1701,
+      "sha256": "94dabb35d5274ed750563c16da67875bf7bc3a119a094952d7f3422728193df4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/profile_native26.py",
+      "bytes": 3035,
+      "sha256": "9db68ae8c56f52f53c50dc40360826ccea0cd1db7ecb61cc8cb859b1c20b7ba0"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/profile_native26.py.metadata.json",
+      "bytes": 169,
+      "sha256": "742799f8ec161b1e10c6dd4628463513cb9dbc865018e7b06baddf957644e758"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/reconstruct_all.py",
+      "bytes": 6456,
+      "sha256": "4018de6cbbb21624da75025f3078413e98e72afea865d03c833a5b5943b27ec8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/reconstruct_all_out.txt",
+      "bytes": 5988,
+      "sha256": "f7acbf1260d2362eea155375b59fb02c86ed5bc27dac23710b8005f9e585690b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/reconstruct_info.txt",
+      "bytes": 59494,
+      "sha256": "2844e61243120c99ed48cfece7603e5977870c5aa30bacccc0680fbd0c3786c0"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/reconstruct_skill_and_tests.py",
+      "bytes": 5919,
+      "sha256": "dadac29798491a8675605979b43be540c45c6f441d3d0a2b9c0fe81b27f52052"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/reconstruct_skill_out.txt",
+      "bytes": 9994,
+      "sha256": "affb18c5dcfa1440ab5524d0b6082ef4c8a4dbc5bedc63a87f992a1f8bb2dedb"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/reconstruct_tests_complete.py",
+      "bytes": 3707,
+      "sha256": "dd8e65e337d4707fecf503537279ce531b1090b044101b4406306aad206863ff"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/reconstruct_tests_complete_out.txt",
+      "bytes": 1066470,
+      "sha256": "cfe11e883afcab7b06f9c54dccaab7834999d8f6f1dfd4b89c6242b619a172af"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/reconstructed_scan.py",
+      "bytes": 698210,
+      "sha256": "f5f88425272a73b5be206a81cd7f3cd6cf080101712b49a3e510251607a79ba6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/review_5086.md",
+      "bytes": 1510,
+      "sha256": "abece1d3f36d7b91419e0a1ad70b28c4a444fea1a2e246c0ba5405390d52b101"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/run_acceptance_timing.py",
+      "bytes": 2723,
+      "sha256": "22efd9cd184443713d2cf3c1efdb292dfeeccd29a622d75854db35b52ccf0e07"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/run_acceptance_timing.py.metadata.json",
+      "bytes": 172,
+      "sha256": "77cbee110955a39f4b3efc4eb7f5a9ddc0616e8305873f5aa33e8244966bfed1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/run_discover.py",
+      "bytes": 534,
+      "sha256": "24b1345022f29dcb41bdc75ae81fffd6fd929ae0b0f26c3c5c71513913f74a14"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/run_full_pass.py",
+      "bytes": 8278,
+      "sha256": "3c261591d6ca67da7ba2c786e1251dbce6526079ffb7eeb128afc6aba952c5e1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/scan_all_brain_and_early_log.py",
+      "bytes": 3950,
+      "sha256": "e36ff79a0bee76cc46b8a45d3c2b70dce48ba065c5cd21ae68a0a5cbec7b500b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/scan_all_brain_out.txt",
+      "bytes": 44723,
+      "sha256": "56cdc97b55ac90dad0639987eafa72cb27dbae0a58b3e9c8511c164caa1271c6"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/scan_all_test_sources.py",
+      "bytes": 4140,
+      "sha256": "dd299070ebfa059e4ccc1eeac0e1045105597011df00fef761b1357ec2646e7f"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/scan_all_test_sources_out.txt",
+      "bytes": 53362,
+      "sha256": "d883b5534d0784f496aad19f5e66fa357a7dac39e62e1b15113f3caf67176da1"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/search_all_brains.py",
+      "bytes": 5497,
+      "sha256": "f96723b4b3011eae0f360228a506ae28df6e38490e5078142a7eacefa87f748b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/search_early_out.txt",
+      "bytes": 2121,
+      "sha256": "31f67dffdf40dad206bed9bbf4500197ea7a052600654d8dcb12a53d2ad3cab5"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/search_early_transcript.py",
+      "bytes": 3239,
+      "sha256": "6cecaef8e8b389252b59b2844f2650acbf3298543f8f127fd597644b36d74d7e"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/skeleton_regions.txt",
+      "bytes": 90013,
+      "sha256": "196bc871f30d330620d97c8cd588e3cac4d3bfbe50b73763537e9703b1e13511"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/snapshots_summary.txt",
+      "bytes": 196367,
+      "sha256": "d82d3116b1736ccc3e8f8e3a0337486c793058994995d819f014b76990e6f22a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/solve_exact_files.py",
+      "bytes": 2688,
+      "sha256": "60576b4e5a40b574a69b69f8bad32a129daed6c4f203eb9b4ce9629edc6546f2"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/solve_exact_out.txt",
+      "bytes": 41650,
+      "sha256": "7890637c43dd131c3e26635f88682f1619cf6f5ddc940e949b58a8d516dfa684"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/solve_skill_exact.py",
+      "bytes": 1806,
+      "sha256": "e09f95563afa7c7b23d740632d029b2922528760822214b6cfb3ac743cae4d13"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/solve_skill_exact_out.txt",
+      "bytes": 92245,
+      "sha256": "32fabef93dc7dc8a2e3262368ba1d579b5ed8699a07477305c5933dac44bdba7"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/t7749_base_cache.json",
+      "bytes": 599108,
+      "sha256": "8d6cf272f2c439bf1a6002ae88b28c90d57bfa2db6ab84fbfc34761c042b92d5"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_callee.py",
+      "bytes": 1099,
+      "sha256": "087b5084b8209a196a3ee106ee3abd98a8ae0cba2eb3e11e52ff4249f4580002"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_concat_sinks.py",
+      "bytes": 1034,
+      "sha256": "61f98ebe36851522f7254fc9642ab0da18ca3a6136a963eb4b9e716204f16b06"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_differs.py",
+      "bytes": 851,
+      "sha256": "aa8ec204b4b3d64b608d69e27709426aa0548edbfad1205f4644192f20cf045d"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_edit.json",
+      "bytes": 45532,
+      "sha256": "236761f38f82b2dc9f28f2a4c6ee5891173d4fad137b0199f5bfe61b245fa25c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_extractor.py",
+      "bytes": 3884,
+      "sha256": "d1b39b5b72211c5bc1f6c0d80083dff355157d434254a5bd38adc17f7189af6b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_file_history.txt",
+      "bytes": 66057,
+      "sha256": "cd217028a683cc26639ece1b92e2007da0d406d72e71820cb0f1aaf36774ab7b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_file_reconstruction.py",
+      "bytes": 3383,
+      "sha256": "10388d6f17c87f20e93d7bc47e63e4b7cc4adf95f687fb5dfbced0ba2d8529a4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_formal_effects.py",
+      "bytes": 722,
+      "sha256": "e21f0c03108d14f709709f6208f475eefdd2db3a335d25172e2907c480823820"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_harness_prep.py",
+      "bytes": 3807,
+      "sha256": "06f0b60137d0be61cef68a2e03c02d1656b155a2d97e287641a1697042098f87"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_local_helper.py",
+      "bytes": 1434,
+      "sha256": "39bda983444a07990b5d5ea1cc3862e20372bbb8e4d478873930a57ef9c09c2b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_preprocess_sinks.py",
+      "bytes": 1785,
+      "sha256": "c3328f10b36a3cb22237681900f84b167df85825720831bfa2e59a7fc630f704"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_probe_scratch.py",
+      "bytes": 25924,
+      "sha256": "fe57d56ef53d1589c8f7ba9c4c9ae58307a716b1d6b83891bae4f0071ed8c41c"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_records_index.txt",
+      "bytes": 31960,
+      "sha256": "c3bf89c20815aa2f65e860348a776bde6a09164705a19bbae983ba03147a0ae8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_removal_repair.py",
+      "bytes": 1510,
+      "sha256": "a8acefc76d752c266b483ca51835094292181e067d034b9ecb2badf9a7bf4b78"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_schema_semantics.py",
+      "bytes": 761,
+      "sha256": "8419081f5b8ac10f042a407cf4fa5a04497d353fbef25c0804408c03ee34a493"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_sevs.py",
+      "bytes": 2936,
+      "sha256": "7da2ff01f1d8d8a767f4eb92c10447614f9763e74daa4390973e0b8d7664ecfa"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_sizing.py",
+      "bytes": 5442,
+      "sha256": "28070fc7d95a5ce9244b4e0377434d786153e52eb55db3c4766f14c58f8a73ba"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/test_walk.py",
+      "bytes": 2619,
+      "sha256": "b43cf6f508e610ce00a6b2ed6001f12dd112ec0f3c05ec4dbc4ce1727b179b1a"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/trace_extractor.py",
+      "bytes": 1406,
+      "sha256": "b2c1e49ef62b14d47b244eeb01f73ab2147ab2a8f49063cc3be6f95ddb50438b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/trace_scan_ops.txt",
+      "bytes": 359,
+      "sha256": "133c3a5b2c4d464da249e1d2bde00d4a60472a94360516fe45a4c763e3b5544b"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/trace_sink_231.py",
+      "bytes": 1081,
+      "sha256": "ef26121d3d6cc5c8ce3675679cb5fd6465724599d6d8a6c5621fe69e56e3c3b5"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/unique_viewed_files.txt",
+      "bytes": 50339,
+      "sha256": "cb4e1473898399465f81a31963e7704d6318086e3800bc4809cec36a3cd62c22"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/evidence/agy-scratch-preserved-2026-10-25/verify_report_assertions.py",
+      "bytes": 2153,
+      "sha256": "b0e04da331079e2fcdcacf65cf1e6333ed69d822d4bc346323fde6fc0abeea76"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_abandoned_attempts.jsonl",
+      "bytes": 2340,
+      "sha256": "ecf27d680b0db0607105d238dae67f21532b52ff1bfc7930d18ae2d36a4f8eed"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/CHORUS_api_usage_8d1427f7e332bdc2.json",
+      "bytes": 41295,
+      "sha256": "f60eee9e08838e60d5f01dff665d026e9efe9f6728ebde18f6dfdc6e307f92e8"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_abandoned_attempts.jsonl",
+      "bytes": 2235,
+      "sha256": "bc91c1633bf45c9bb614a37b1e4997540027dfb6063c92b944189c0fe758a9d4"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_api_usage_90e59e50c9d423fe.json",
+      "bytes": 40487,
+      "sha256": "0bf3e4db99ffa506bad4b6e2d433383577ea85bbe92bc5eb161e81273a6f9d28"
+    },
+    {
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5096_3a292504f_review_2026-10-24.md",
+      "bytes": 30873,
+      "sha256": "dfe660b88ed6d784ffca3f27752040c44c96c78b8e04fe73b4e0a7fe14c5dd11"
+    },
+    {
+      "path": "/private/tmp/d4d-codex-k1-v2-20261026/notes/k1_cost_model_2026-10-25/ledger_calibration.json",
+      "bytes": 44926,
+      "sha256": "928d4f2dae73ab9d94a1d6552c4e31651c43aef2ab7f12be5ea2c327a2fadadd"
+    }
+  ]
+}

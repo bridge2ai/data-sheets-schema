@@ -45,6 +45,7 @@ MAX_DEPTH = 64
 MAX_FIELD_ROOTS = 4096
 MAX_ERRORS = 20
 _DIGEST = re.compile(r"[0-9a-f]{64}\Z")
+_INDEX = re.compile(r"(?:0|[1-9][0-9]*)\Z")
 
 
 class AuditBatchError(ValueError):
@@ -140,7 +141,8 @@ def _inventory(raw):
     if len(roots) > MAX_FIELD_ROOTS:
         raise AuditBatchError("field_count_bound")
     canonical_bytes(roots)
-    return inventory, sorted(roots, key=lambda x: x.encode("utf-8"))
+    lists = {_pointer((key,)): len(value) for key, value in record.items() if type(value) is list}
+    return inventory, sorted(roots, key=lambda x: x.encode("utf-8")), lists
 
 
 def _limits(value):
@@ -150,19 +152,72 @@ def _limits(value):
     return value
 
 
+def _fits(rows, limits):
+    return len(rows) <= limits["max_paths"] and len(canonical_bytes(rows)) <= limits["max_inventory_bytes"]
+
+
+def _owner(tokens, roots):
+    """The registered root owning a pointer: its list entry where that list is split, else its field."""
+    for size in (2, 1):
+        if len(tokens) >= size and _pointer(tokens[:size]) in roots:
+            return _pointer(tokens[:size])
+    return None
+
+
+def _root_key(root):
+    tokens = _tokens(root)
+    return _pointer(tokens[:1]).encode("utf-8"), int(tokens[1]) if len(tokens) == 2 else -1
+
+
+def _split(inventory, roots, lists, limits):
+    """Replace a top-level list too large for one worker by its entries, in index order.
+
+    Entries stay whole: a worker sees every leaf of each entry it owns. Every
+    other field is left whole, so a record whose fields all fit plans as before.
+    """
+    groups = {}
+    for row in inventory["values"]:
+        groups.setdefault(_pointer(_tokens(row["path"])[:1]), []).append(row)
+    result = []
+    for root in roots:
+        if root in lists and not _fits(groups.get(root, []), limits):
+            result.extend(_pointer((*_tokens(root), str(i))) for i in range(lists[root]))
+        else:
+            result.append(root)
+    if len(result) > MAX_FIELD_ROOTS:
+        raise AuditBatchError("field_count_bound")
+    return result
+
+
+def _check_roots(roots, inventory, limits):
+    """Whole fields, or every entry of a list too large for one worker, in canonical order."""
+    if type(roots) is not list or len(roots) > MAX_FIELD_ROOTS:
+        raise AuditBatchError("plan_roots")
+    split = {}
+    for root in roots:
+        tokens = _tokens(root)
+        if len(tokens) == 2 and _INDEX.match(tokens[1]):
+            split.setdefault(_pointer(tokens[:1]), []).append(int(tokens[1]))
+        elif len(tokens) != 1:
+            raise AuditBatchError("plan_roots")
+    if roots != sorted(set(roots), key=_root_key):
+        raise AuditBatchError("plan_roots")
+    for field, indices in split.items():
+        rows = [row for row in inventory["values"] if _pointer(_tokens(row["path"])[:1]) == field]
+        if field in roots or indices != list(range(len(indices))) or _fits(rows, limits):
+            raise AuditBatchError("plan_roots")
+
+
 def _pack(inventory, roots, limits):
     groups = {root: [] for root in roots}
     for row in inventory["values"]:
-        root = _pointer(_tokens(row["path"])[:1])
-        if root not in groups:
+        root = _owner(_tokens(row["path"]), groups)
+        if root is None:
             raise AuditBatchError("plan_path_owner_missing")
         groups[root].append(row)
     for rows in groups.values():
         rows.sort(key=lambda row: row["path"].encode("utf-8"))
     workers, current_roots, current_rows = [], [], []
-
-    def fits(rows):
-        return len(rows) <= limits["max_paths"] and len(canonical_bytes(rows)) <= limits["max_inventory_bytes"]
 
     def flush():
         workers.append({"id": f"worker_{len(workers) + 1:04d}", "roots": list(current_roots),
@@ -173,15 +228,17 @@ def _pack(inventory, roots, limits):
 
     for root in roots:
         rows = groups[root]
-        if not fits(rows):
-            raise AuditBatchError("indivisible_field_bound")
-        if current_roots and not fits(current_rows + rows):
+        if not _fits(rows, limits):
+            # A list entry is one object: it is reviewed whole or not planned.
+            raise AuditBatchError("indivisible_list_entry_bound" if len(_tokens(root)) == 2
+                                  else "indivisible_field_bound")
+        if current_roots and not _fits(current_rows + rows, limits):
             flush()
             current_roots, current_rows = [], []
         current_roots.append(root)
         current_rows.extend(rows)
     if current_roots or not workers:
-        if not fits(current_rows):
+        if not _fits(current_rows, limits):
             raise AuditBatchError("empty_inventory_bound")
         flush()
     return workers
@@ -191,12 +248,17 @@ def make_plan(original_full: str, *, max_paths: int = 96, max_inventory_bytes: i
               max_workers: int = 16, version: int = 1) -> dict:
     """Pack whole top-level fields; an empty record gets one explicit empty worker.
 
-    Bytes bound the canonical assigned inventory rows, not the rendered prompt.
-    The caller must separately bound complete sources, schema and runtime context.
+    A top-level list whose rows exceed one worker's bounds is planned as one
+    root per entry (``/creators/0``, ``/creators/1``, ...), packed in index
+    order; an entry is never divided. A record whose fields all fit gets the
+    plan it always had. Bytes bound the canonical assigned inventory rows, not
+    the rendered prompt. The caller must separately bound complete sources,
+    schema and runtime context.
     """
     audit_protocol.check_version(version)
     limits = _limits(dict(max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers))
-    inventory, roots = _inventory(original_full)
+    inventory, roots, lists = _inventory(original_full)
+    roots = _split(inventory, roots, lists, limits)
     return _bound({"schema_version": version, "kind": f"audit_batch_plan_v{version}", "original_full_sha256": inventory["sha256"],
                    "limits": limits, "inventory": inventory, "field_roots": roots,
                    "workers": _pack(inventory, roots, limits)})
@@ -238,10 +300,9 @@ def _plan(plan, *, version=1):
             if row["path"] in seen or type(row["text"]) is not str or not row["text"] or type(row["record_metadata_allowed"]) is not bool or type(row["whole_value_required"]) is not bool:
                 raise AuditBatchError("plan_inventory")
             seen.add(row["path"])
-        roots = plan["field_roots"]
-        if type(roots) is not list or len(roots) > MAX_FIELD_ROOTS or any(len(_tokens(x)) != 1 for x in roots) or roots != sorted(set(roots), key=lambda x: x.encode("utf-8")):
-            raise AuditBatchError("plan_roots")
-        workers = _pack(inv, roots, _limits(plan["limits"]))
+        roots, limits = plan["field_roots"], _limits(plan["limits"])
+        _check_roots(roots, inv, limits)
+        workers = _pack(inv, roots, limits)
         if canonical_bytes(workers) != canonical_bytes(plan["workers"]):
             raise AuditBatchError("plan_workers")
         return plan
@@ -290,7 +351,7 @@ def check_worker(raw: bytes, plan, worker_id, *, version: int = 1) -> dict:
                 return _failure("worker_metadata_disallowed", f"/source_review/values/{i}/metadata_reason", version=version)
         for i, finding in enumerate(audit["findings"]):
             removal = finding.get("remove_relationship")
-            if removal and _pointer(_tokens(removal["path"])[:1]) not in worker["roots"]:
+            if removal and _owner(_tokens(removal["path"]), plan["field_roots"]) not in worker["roots"]:
                 return _failure("worker_removal_owner", f"/findings/{i}/remove_relationship/path", version=version)
         return _report(version=version)
     except AuditBatchError as exc:
@@ -489,13 +550,14 @@ def _materialize(plan, proposals, value, index, *, version=1):
 
 def _removal_errors(audit, plan):
     paths, errors = [], []
-    roots = set(plan["field_roots"])
+    # Integration is global: a split list's field is still a field of the plan.
+    fields = {_pointer(_tokens(root)[:1]) for root in plan["field_roots"]}
     for i, finding in enumerate(audit["findings"]):
         if "remove_relationship" not in finding:
             continue
         tokens = _tokens(finding["remove_relationship"]["path"])
         at = f"/assembled/findings/{i}/remove_relationship/path"
-        if _pointer(tokens[:1]) not in roots:
+        if _pointer(tokens[:1]) not in fields:
             errors.append({"code": "removal_root_unknown", "path": at})
         if any(tokens[:len(other)] == other or other[:len(tokens)] == tokens for other in paths):
             errors.append({"code": "removal_overlap", "path": at})

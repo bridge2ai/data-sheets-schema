@@ -1,8 +1,23 @@
-"""Exact-bound checks for K1's offline planner study (2026-10-25)."""
+"""Exact-bound checks for K1's historical whole-root instrument (2026-10-25).
+
+2026-10-26: isolate the exact A16 source fixture after A17 changed both the
+inventory interface and indivisible-unit semantics. Assertions stay unchanged.
+"""
+import hashlib
+from pathlib import Path
+import types
 import pytest
 
-from data_sheets_schema import audit_batches as batches
 from scripts.adhoc.k1_size_requests_20261025 import planning_bounds
+
+
+_fixture = Path(__file__).parent / "fixtures/k1/audit_batches_56c41163f.py.txt"
+_raw = _fixture.read_bytes()
+assert hashlib.sha256(_raw).hexdigest() == "c95ec83f2f730df8c9766173f4d71367dfe705b08ec4acc4a17f8ef002da4414"
+batches = types.ModuleType("data_sheets_schema._k1_historical_audit_batches_56c41163f")
+batches.__package__ = "data_sheets_schema"
+batches.__file__ = str(_fixture)
+exec(compile(_raw, str(_fixture), "exec"), batches.__dict__)
 
 
 def test_root_minima_refuse_one_less_and_actual_worker_bound():
