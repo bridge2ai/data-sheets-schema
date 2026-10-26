@@ -19,10 +19,12 @@ from pathlib import Path
 from typing import Any
 
 # Version 1: initial deterministic extraction and comparison (#4766).
-# Version 2: anchor inline 'N findings: ...' pattern to sentence-start or explicit
-# count phrasing; count 'major'/'minor' only directly before 'finding(s)' or 'severity';
-# when no overall total is stated, extract per-severity subtotals only from a single
-# sentence/line stating two or more per-severity counts (#5094 R4 F9, F10).
+# Version 2: accept inline/parenthetical/bullet/labelled/table 'N findings: ...'
+# total statements unless introduced by a subset marker (deferred, retained,
+# rejected, resolved, applied, left, withdrawn, of which, including); count
+# 'major'/'minor' only directly before 'finding(s)' or 'severity'; when no overall
+# total is stated, extract per-severity subtotals only from a non-subset audit/finding
+# summary clause (#5094 R4 F9, F10, Round 2 N2).
 INSTRUMENT_VERSION = 2
 
 NUM_WORDS = {
@@ -78,10 +80,13 @@ TOTAL_PATTERNS = [
         r"(?!\s+(?:for\s+the\s+record\s+without|against\s+the\s+core\s+record|on\s+|about\s+|concerning\s+|specifically\b|without\s+recommending|left\b|addressed\b|withdrawn\b|rejected\b))",
         re.I,
     ),
-    # 7. Sentence-start or explicit counts phrasing: N findings: H high, M medium... (supports bolding around N findings or severity list)
+    # 7. Inline, parenthetical, bullet, labelled, em-dash, or table-cell count with severity
+    # breakdown: N findings: H high, M medium... (supports bolding around N findings or
+    # severity list; subset prefixes like 'Deferred items (3 findings: ...)' are filtered out
+    # in _collect_pattern_matches via SUBSET_PREFIX_RE).
     re.compile(
-        r"(?:(?:^|[.!?]\s+)|(?:\b(?:audit(?:\s+counts|\s+findings|\s+summary)?|counts\s+(?:record|give|show|state|report|are)|has|had|identified|returned|produced|yielded|raised|found|totals?|there\s+(?:are|were))\s+))"
-        r"(?:\*\*)?(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings(?:\*\*)?\s*:\s*(?:\*\*)?(?:(?:\d+|[a-zA-Z]+)(?:\*\*)?\s+(?:high|medium|moderate|low|major|minor|critical|info|informational))",
+        r"(?:\*\*)?\b(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+(?:audit\s+)?findings(?:\*\*)?\s*:\s*(?:\*\*)?"
+        r"(?:(?:\d+|[a-zA-Z]+)(?:\*\*)?\s+(?:high|medium|moderate|low|major|minor|critical|info|informational))",
         re.I | re.M,
     ),
     # 8. N findings against the (full|core|paired) record
@@ -149,6 +154,19 @@ def parse_number(text: str) -> int | None:
     return None
 
 
+SUBSET_PREFIX_RE = re.compile(
+    r"\b(?:deferred|retained|rejected|resolved|applied|left|withdrawn|of\s+which|including|subset)\b"
+    r"(?![^(\n]*\b(?:audit|summary|totals?)\b)"
+    r"(?:\s+[\w*-]+){0,4}\s*(?:[:(\[—–|-]\s*)?$",
+    re.I,
+)
+
+SUBSET_CLAUSE_RE = re.compile(
+    r"\b(?:deferred|retained|rejected|resolved|applied|left|withdrawn|of\s+which|including|subset)\b",
+    re.I,
+)
+
+
 def _collect_pattern_matches(
     report_text: str, patterns: list[re.Pattern[str]]
 ) -> list[tuple[int, int, int, int]]:
@@ -160,6 +178,18 @@ def _collect_pattern_matches(
             if n is None:
                 continue
             s, e = m.start(), m.end()
+            line_start = report_text.rfind("\n", 0, s)
+            sent_start = max(
+                report_text.rfind(". ", 0, s),
+                report_text.rfind(".\n", 0, s),
+            )
+            prefix_start = max(
+                line_start + 1 if line_start != -1 else 0,
+                sent_start + 2 if sent_start != -1 else 0,
+            )
+            prefix = report_text[prefix_start:s]
+            if SUBSET_PREFIX_RE.search(prefix):
+                continue
             if any(not (e <= cs or s >= ce) for cs, ce, _, _ in collected):
                 continue
             collected.append((s, e, pat_idx, n))
@@ -238,8 +268,15 @@ def _extract_totals_detailed(
         sevs = _extract_sevs_from_snippet(report_text[start:end])
     else:
         for clause in re.split(r"(?:[.!?\n]+)", report_text[:1500]):
+            if SUBSET_CLAUSE_RE.search(clause):
+                continue
+            if not re.search(r"\b(?:findings?|audit|summary|totals?)\b", clause, re.I):
+                continue
             clause_sevs = _extract_sevs_from_snippet(clause)
-            if len(clause_sevs) >= 2:
+            if len(clause_sevs) >= 3 or (
+                len(clause_sevs) >= 2
+                and re.search(r"\b(?:audit|summary|totals?)\b|\bfindings\s*:", clause, re.I)
+            ):
                 sevs = clause_sevs
                 break
 

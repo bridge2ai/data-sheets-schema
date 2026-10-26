@@ -268,6 +268,47 @@ class TestReportAuditTotalsUnit(unittest.TestCase):
         self.assertEqual(r3["stated_by_severity"], {"high": 2, "medium": 4, "low": 7})
         self.assertEqual(r3["mismatches"], [])
 
+    def test_n2_non_sentence_start_totals_and_no_total_subsets(self):
+        """Round 2 N2: parenthetical, bullet, labelled, bold-label, em-dash, and table-cell
+        totals are extracted, while standalone no-total subset clauses are not flagged."""
+        audit_14 = json.dumps({
+            "summary": "14 findings.",
+            "findings": (
+                [{"severity": "high", "record": "full", "slot": f"h{i}", "issue": "x"} for i in range(2)]
+                + [{"severity": "medium", "record": "full", "slot": f"m{i}", "issue": "x"} for i in range(4)]
+                + [{"severity": "low", "record": "full", "slot": f"l{i}", "issue": "x"} for i in range(7)]
+                + [{"severity": "info", "record": "full", "slot": "i0", "issue": "x"}]
+            ),
+        })
+        total_shapes = [
+            "Source of findings: Phase 3 source/provenance audit (13 findings: 2 high, 4 medium, 7 low)",
+            "This report reconciles the Phase 3 audit (13 findings: 2 high, 4 medium, 7 low).",
+            "## Audit summary\n- 13 findings: 2 high, 4 medium, 7 low",
+            "Audit summary: 13 findings: 2 high, 4 medium, 7 low",
+            "**Audit totals:** 13 findings: 2 high, 4 medium, 7 low",
+            "Phase 3 audit — 13 findings: 2 high, 4 medium, 7 low",
+            "| Audit | 13 findings: 2 high, 4 medium, 7 low |",
+            "The structured audit has 13 findings: 2 high, 4 medium, 7 low",
+        ]
+        for line in total_shapes:
+            res = check_report_audit_totals(line, audit_14)
+            self.assertEqual(res["status"], "mismatch", msg=line)
+            self.assertEqual(res["stated_total"], 13, msg=line)
+            self.assertEqual(res["computed_total"], 14, msg=line)
+            self.assertEqual(len(res["mismatches"]), 1, msg=line)
+            self.assertEqual(res["mismatches"][0]["kind"], "finding_total_mismatch", msg=line)
+
+        no_total_subsets = [
+            "Deferred items (3 findings: 2 medium, 1 low) are listed at the end.",
+            "Two high-severity and three medium-severity issues were resolved in reconciliation.",
+            "We applied 2 high and 1 low priority fixes to the record.",
+        ]
+        for line in no_total_subsets:
+            res = check_report_audit_totals(line, audit_14)
+            self.assertEqual(res["status"], "no_total_stated", msg=line)
+            self.assertIsNone(res["stated_total"], msg=line)
+            self.assertEqual(res["mismatches"], [], msg=line)
+
     def test_string_file_path_and_findings_copy(self):
         """Passing a string file path reads the file, and findings does not alias mismatches."""
         audit_json = _make_v10g_audit()
