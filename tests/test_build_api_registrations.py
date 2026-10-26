@@ -254,11 +254,21 @@ def test_build_roster_success_and_validation(tmp_path: Path) -> None:
 
     roster = build_roster([reg1, reg2], roster_path=roster_path, write_to_disk=True)
     assert roster_path.is_file()
-    assert roster["format"] == "shared_generation_batch_roster_v1"
+    assert roster["format"] == "shared_generation_batch_roster_v2"
     assert len(roster["registrations"]) == 2
+    for row, reg_file in zip(roster["registrations"], (reg1_path, reg2_path)):
+        import hashlib
+        assert row["registration_sha256"] == hashlib.sha256(reg_file.read_bytes()).hexdigest()
 
     validated_roster = validate_roster_file(roster_path)
     assert len(validated_roster["registrations"]) == 2
+
+    # Tampering with a registration file after building the v2 roster is refused by _shared_roster
+    orig_bytes = reg1_path.read_bytes()
+    reg1_path.write_bytes(orig_bytes + b"\n")
+    with pytest.raises( Exception, match="shared registration sha256 mismatch"):
+        validate_roster_file(roster_path)
+    reg1_path.write_bytes(orig_bytes)
 
 
 def test_build_roster_duplicate_rejection(tmp_path: Path) -> None:

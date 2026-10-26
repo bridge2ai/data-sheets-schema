@@ -5,11 +5,11 @@ projects worst-case costs for in-flight pending calls across all generation phas
 - ``full`` (128,000 output cap)
 - ``full_readdress`` (8,000 output cap / READDRESS_MAX_TOKENS)
 - ``receipt_completion`` (cap and input from saved request and counted context)
-- ``reconcile_full`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report_regate`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``repair_full`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report_after_repair`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
+- ``reconcile_full`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``report`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``report_regate`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``repair_full`` (96,000 output cap)
+- ``report_after_repair`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
 - typed audit stages (cap and input from saved stage request and context)
 
 A pending call's input is bounded, in order, by an operator's custom bound; the
@@ -203,6 +203,7 @@ def price_abandoned_row(
         "final_usage": final,
         "output_tokens_priced": output_tokens,
         "input_source": input_source,
+        "input_bound_static": input_source.startswith("baseline["),
         "dollars": input_dollars + output_tokens * RATE_OUTPUT,
     }
 
@@ -227,27 +228,39 @@ def price_input_bound(bound: Any, *, worst_case_cache: bool = False) -> float:
     return 0.0
 
 
-def _resolve_pin_path(target: Path, metadata_dir: Path | None = None) -> Path:
-    """Resolve a pin path relative to CWD, metadata_dir, metadata_dir/intermediate, or repo root."""
-    if target.is_file():
-        return target
+def _candidate_pin_paths(target: Path, metadata_dir: Path | None = None) -> list[Path]:
+    """Return candidate paths for a pin relative to metadata_dir, repo root, or CWD."""
+    candidates: list[Path] = []
+    seen: set[Path] = set()
+
+    def _add(cand: Path) -> None:
+        if cand.is_file():
+            resolved = cand.resolve()
+            if resolved not in seen:
+                seen.add(resolved)
+                candidates.append(cand)
+
+    if target.is_absolute():
+        _add(target)
     if metadata_dir is not None:
         meta_resolved = metadata_dir.resolve()
         if not target.is_absolute():
             for parent in (meta_resolved, *meta_resolved.parents):
                 if (parent / "src" / "data_sheets_schema").is_dir() or (parent / "data" / "d4d_concatenated").is_dir():
-                    cand = parent / target
-                    if cand.is_file():
-                        return cand
+                    _add(parent / target)
             for base in (meta_resolved, meta_resolved / "intermediate"):
-                cand = base / target
-                if cand.is_file():
-                    return cand
+                _add(base / target)
         for base in (meta_resolved, meta_resolved / "intermediate"):
-            cand = base / target.name
-            if cand.is_file():
-                return cand
-    return target
+            _add(base / target.name)
+    if not target.is_absolute():
+        _add(target)
+    return candidates
+
+
+def _resolve_pin_path(target: Path, metadata_dir: Path | None = None) -> Path:
+    """Resolve a pin path relative to metadata_dir, metadata_dir/intermediate, repo root, or CWD."""
+    candidates = _candidate_pin_paths(target, metadata_dir=metadata_dir)
+    return candidates[0] if candidates else target
 
 
 def extract_saved_snapshot(pin: Any, *, metadata_dir: Path | None = None) -> dict[str, Any] | None:
@@ -262,17 +275,18 @@ def extract_saved_snapshot(pin: Any, *, metadata_dir: Path | None = None) -> dic
         target = Path(pin)
     else:
         return None
-    target = _resolve_pin_path(target, metadata_dir=metadata_dir)
-    if target.is_file():
+    for candidate in _candidate_pin_paths(target, metadata_dir=metadata_dir):
         try:
-            raw_bytes = target.read_bytes()
+            raw_bytes = candidate.read_bytes()
             if expected_sha is not None:
                 actual_sha = hashlib.sha256(raw_bytes).hexdigest().lower()
                 if actual_sha != expected_sha:
-                    return None
-            return json.loads(raw_bytes.decode("utf-8"))
+                    continue
+            parsed = json.loads(raw_bytes.decode("utf-8"))
+            if isinstance(parsed, dict):
+                return parsed
         except (OSError, ValueError):
-            return None
+            continue
     return None
 
 
@@ -935,6 +949,7 @@ def compute_readout(
         # Included in settled_dollars; listed so each price can be read.
         "abandoned_calls": len(abandoned),
         "abandoned_dollars": sum(row["dollars"] for row in abandoned),
+        "abandoned_input_bound_static": any(bool(row.get("input_bound_static")) for row in abandoned),
         "abandoned_attempts": abandoned,
         "has_pending_call": pending_info is not None,
         "pending_input_bound_unknown": pending_unknown,
@@ -969,6 +984,12 @@ def format_readout(summary: Mapping[str, Any]) -> str:
             f"  of which abandoned attempts: {len(abandoned):3d} | ${summary['abandoned_dollars']:10.8f}"
             f" ({open_ended} without final usage, output priced at max_tokens)"
         )
+        for row in abandoned:
+            if row.get("input_bound_static"):
+                lines.append(
+                    f"WARNING: abandoned {row['phase']} input is a static baseline from earlier runs "
+                    f"({row['input_source']}); it may be low for this run"
+                )
 
     if summary.get("has_pending_call"):
         p = summary["pending_call"]

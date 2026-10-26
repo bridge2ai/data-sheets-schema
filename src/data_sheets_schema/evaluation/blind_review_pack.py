@@ -329,7 +329,7 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, seed
     generated_at = _timestamp(generated_at)
     records = validate_cohort(records, cohort=cohort)
     if cohort == "campaign" and (not _SHA.fullmatch(seed) or len(set(seed)) < 8):
-        raise ValueError("campaign blind review pack requires a 64-character hex seed with non-trivial entropy (at least 8 distinct hex digits)")
+        raise ValueError("campaign blind review pack requires a 64-character hex seed with at least 8 distinct hex digits")
     output = Path(output_dir)
     if output.exists() or output.is_symlink():
         raise ValueError("output directory already exists; never overwrite a review package")
