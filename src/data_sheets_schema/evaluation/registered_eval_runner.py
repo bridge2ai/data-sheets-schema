@@ -37,7 +37,25 @@ CBORG_BASE_URL = "https://api.cborg.lbl.gov"
 FORMAT = "registered_semantic_evaluation_v1"
 MAX_FILE_BYTES = shared.MAX_AUTHORITY_BYTES
 MAX_TRACE_BYTES = 32_000_000
-LOCK_DIR = Path(__file__).resolve().parents[3] / ".registered_eval_locks"
+
+
+def _default_lock_dir(checkout_root: Path | None = None) -> Path:
+    root = (checkout_root or Path(__file__).resolve().parents[3]).resolve()
+    try:
+        res = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=5,
+        )
+        common_dir = Path(res.stdout.strip()).resolve()
+        return common_dir.parent / ".registered_eval_locks"
+    except Exception:
+        return root / ".registered_eval_locks"
+
+
+LOCK_DIR = _default_lock_dir()
 EXECUTION_ADAPTER = """# Registered evaluation execution adapter v1
 
 The frozen scientific instrument above remains the scoring authority, including
@@ -680,6 +698,7 @@ def execute(
         tmp_lock.write_bytes(lock_payload)
         os.replace(tmp_lock, lock_file)
 
+    owns_lock = False
     try:
         initial_receipt_bytes = shared.canonical(receipt)
         initial_lock_payload = shared.canonical({
@@ -694,6 +713,7 @@ def execute(
             fd = os.open(lock_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             with os.fdopen(fd, "wb") as lf:
                 lf.write(initial_lock_payload)
+            owns_lock = True
         else:
             guard_fd = os.open(reexec_guard, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             os.close(guard_fd)
@@ -708,6 +728,7 @@ def execute(
                 tmp_lock = lock_dir / f".{prepared.digest}.{os.getpid()}.tmp"
                 tmp_lock.write_bytes(initial_lock_payload)
                 os.replace(tmp_lock, lock_file)
+                owns_lock = True
             finally:
                 reexec_guard.unlink(missing_ok=True)
         (destination / "receipt.json").write_bytes(initial_receipt_bytes)
@@ -801,7 +822,10 @@ def execute(
         receipt["unaccounted_reserved_usd"] = (
             "0" if unaccounted_count == 0 else str(per_attempt_cap * unaccounted_count)
         )
-        _write_receipt_and_lock()
+        if owns_lock:
+            _write_receipt_and_lock()
+        else:
+            (destination / "receipt.json").write_bytes(shared.canonical(receipt))
     return receipt
 
 

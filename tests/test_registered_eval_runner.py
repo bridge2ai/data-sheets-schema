@@ -732,3 +732,53 @@ def test_timeout_records_unaccounted_reserved_usd(registration, tmp_path, monkey
     assert receipt["total_cost_usd"] == "0"
     assert receipt["unaccounted_reserved_usd"] == "1.666666"
 
+
+def test_lock_race_loser_does_not_overwrite_winner_lock_file(prepared, tmp_path, monkeypatch):
+    """N4: a concurrent run losing the O_EXCL lock race writes its own incomplete receipt without clobbering the winner's lock."""
+    install_cli(monkeypatch, prepared)
+    winner_dir = tmp_path / "winner_run"
+    winner_receipt = runner.execute(
+        prepared,
+        winner_dir,
+        plan_sha256=prepared.digest,
+        environ={"CBORG_API_KEY": "fake"},
+    )
+    assert winner_receipt["status"] == "validated"
+    lock_file = Path(runner.LOCK_DIR) / f"{prepared.digest}.json"
+    assert lock_file.is_file()
+    winner_lock_bytes = lock_file.read_bytes()
+
+    # Simulate a concurrent run that passed the pre-check before lock_file existed
+    # and then hit FileExistsError at os.open(lock_file, O_CREAT | O_EXCL).
+    orig_exists = Path.exists
+
+    def _hide_lock_once(self: Path) -> bool:
+        if self == lock_file:
+            monkeypatch.setattr(Path, "exists", orig_exists)
+            return False
+        return orig_exists(self)
+
+    monkeypatch.setattr(Path, "exists", _hide_lock_once)
+    loser_dir = tmp_path / "loser_run"
+    loser_receipt = runner.execute(
+        prepared,
+        loser_dir,
+        plan_sha256=prepared.digest,
+        environ={"CBORG_API_KEY": "fake"},
+    )
+    assert loser_receipt["status"] == "incomplete"
+    assert "FileExistsError" in loser_receipt["error"]
+    assert (loser_dir / "receipt.json").is_file()
+    # Winner's lock file MUST remain intact and point to winner_dir!
+    assert lock_file.read_bytes() == winner_lock_bytes
+
+
+def test_default_lock_dir_uses_git_common_dir_and_is_gitignored():
+    """N4: _default_lock_dir resolves via git-common-dir and .registered_eval_locks/ is in .gitignore."""
+    repo_root = Path(__file__).resolve().parents[1]
+    gitignore_lines = (repo_root / ".gitignore").read_text(encoding="utf-8").splitlines()
+    assert ".registered_eval_locks/" in gitignore_lines
+    resolved_lock_dir = runner._default_lock_dir(repo_root)
+    assert resolved_lock_dir.name == ".registered_eval_locks"
+
+
