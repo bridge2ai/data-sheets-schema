@@ -59,7 +59,7 @@ def files(directory):
 def build(tmp_path, records, *, name="pack", **kwargs):
     output = tmp_path / name
     cohort = kwargs.pop("cohort", "synthetic")
-    default_seed = "registered-seed-0123456789abcdef0123456789" if cohort == "campaign" else "registered-seed"
+    default_seed = "a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff00" if cohort == "campaign" else "registered-seed"
     key = pack.build_blind_review_pack(records, output, seed=kwargs.pop("seed", default_seed),
                                       cohort=cohort, **kwargs)
     return output, key
@@ -132,14 +132,36 @@ def test_seed_integer_matches_cli_string_and_timestamp_changes_only_key(tmp_path
 
 def campaign(tmp_path):
     records = []
+    concat_dir = tmp_path / "data" / "d4d_concatenated"
     for arm in pack.ARMS:
         for project in pack.PROJECTS:
             for replicate in (1, 2, 3):
                 prefix = "04f" if project in {"CHORUS", "VOICE"} else "04g"
                 label = (f"2026-09-{prefix}_claude-opus-5-api-generic-v8_rep{replicate}"
                          if arm == "v8" else f"registered-final-{project}-{replicate}")
-                path = tmp_path / f"{arm}-{project}-{replicate}.yaml"
-                path.write_text(f"# Label: {label}\nid: example:{project}\nname: Scientific record\n")
+                full_dir = concat_dir / "claudecode_api" / label
+                core_dir = concat_dir / "claudecode_api_core" / label
+                full_dir.mkdir(parents=True, exist_ok=True)
+                core_dir.mkdir(parents=True, exist_ok=True)
+                path = full_dir / f"{project}_d4d.yaml"
+                raw = f"# Label: {label}\nid: example:{project}:rep{replicate}\nname: Scientific record\n".encode("utf-8")
+                path.write_bytes(raw)
+                prov_path = core_dir / f"{project}_provenance.yaml"
+                prov_path.write_text(
+                    yaml.safe_dump({
+                        "run": {
+                            "project": project,
+                            "label": label,
+                            "condition": "generic_v8" if arm == "v8" else "generic_v10",
+                        },
+                        "validation": {
+                            "artifacts": {
+                                "full": {"path": str(path), "sha256": sha(raw)},
+                            },
+                        },
+                    }),
+                    encoding="utf-8",
+                )
                 records.append(pack.Record(arm, project, label, path))
     return records
 
@@ -500,8 +522,15 @@ def test_cli_missing_seed_and_default_campaign_refusal(tmp_path):
 
 def test_campaign_seed_minimum_length_and_cli_default_seed(tmp_path):
     records = campaign(tmp_path)
-    with pytest.raises(ValueError, match="at least 32 characters"):
-        build(tmp_path, records, cohort="campaign", seed="short-seed")
+    for bad_seed in (
+        "short-seed",
+        "00000000000000000000000000000007",
+        "a" * 64,
+        "2026-10-25-v10-campaign-seed-0001",
+        "registered-seed-0123456789abcdef0123456789",
+    ):
+        with pytest.raises(ValueError, match="64-character hex seed with non-trivial entropy"):
+            build(tmp_path, records, cohort="campaign", seed=bad_seed, name=f"pack_{bad_seed[:8]}")
 
     record = selection(tmp_path, 1)[0]
     entry = f"{record.arm}:{record.project}:{record.label}={record.source_path}"
@@ -520,10 +549,31 @@ def test_campaign_v10_label_and_sibling_provenance_validation(tmp_path):
     with pytest.raises(ValueError, match="requires a v10 or registered-final label"):
         build(tmp_path, bad_label, cohort="campaign", name="pack_bad_label")
 
-    # Sibling provenance with mismatched full hash refuses
+    # Swapping two replicates' full files on the corpus layout (claudecode_api vs claudecode_api_core) is refused (R4 F5)
+    swapped = list(records)
+    r1_idx = next(i for i, r in enumerate(swapped) if r.arm == "v8" and r.project == "AI_READI" and r.label.endswith("rep1"))
+    r2_idx = next(i for i, r in enumerate(swapped) if r.arm == "v8" and r.project == "AI_READI" and r.label.endswith("rep2"))
+    swapped[r1_idx] = replace(swapped[r1_idx], source_path=records[r2_idx].source_path)
+    swapped[r2_idx] = replace(swapped[r2_idx], source_path=records[r1_idx].source_path)
+    with pytest.raises(ValueError, match="do not match sibling provenance"):
+        build(tmp_path, swapped, cohort="campaign", name="pack_swapped_reps")
+
+    # Missing provenance in campaign mode is refused (R4 F5)
     v10_rec = records[v10_idx]
-    prov_path = v10_rec.source_path.parent / f"{v10_rec.project}_provenance.yaml"
-    prov_path.write_text(
+    core_prov = (
+        v10_rec.source_path.parent.parent.parent
+        / "claudecode_api_core"
+        / v10_rec.label
+        / f"{v10_rec.project}_provenance.yaml"
+    )
+    saved_prov = core_prov.read_bytes()
+    core_prov.unlink()
+    with pytest.raises(ValueError, match="has no provenance record"):
+        build(tmp_path, records, cohort="campaign", name="pack_missing_prov")
+    core_prov.write_bytes(saved_prov)
+
+    # Provenance with mismatched full hash refuses
+    core_prov.write_text(
         yaml.safe_dump({
             "run": {"project": v10_rec.project, "label": v10_rec.label, "condition": "generic_v10"},
             "validation": {"artifacts": {"full": {"sha256": "0" * 64}}},

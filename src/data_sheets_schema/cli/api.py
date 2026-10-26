@@ -86,16 +86,26 @@ def _bounded_registration_bytes(path):
         raise click.ClickException(str(exc)) from exc
 
 
-def _capture_shared_registration(path):
+def _capture_shared_registration(path, *, expect_sha256: str | None = None):
+    import hashlib
+    import re
     from data_sheets_schema import shared_generation as shared
     raw = _bounded_registration_bytes(path)
+    sha256 = hashlib.sha256(raw).hexdigest()
     try:
+        if expect_sha256 is not None:
+            if not re.fullmatch(r"[0-9a-f]{64}", expect_sha256):
+                raise ValueError("--expect-sha256 must be 64 lowercase hexadecimal characters")
+            if sha256 != expect_sha256:
+                raise ValueError(
+                    f"shared registration sha256 mismatch for {path}: expected {expect_sha256}, found {sha256}"
+                )
         document = shared.parse_registration(raw)
         if str(Path(path).absolute()) != document['registration_path']:
             raise ValueError('shared registration path differs from its declared authority')
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-    return {'path': Path(path).absolute(), 'raw': raw, 'document': document}
+    return {'path': Path(path).absolute(), 'raw': raw, 'sha256': sha256, 'document': document}
 
 
 def _shared_spec(project, arm, label, condition, bundle, out_dir, runtime, provider,
@@ -154,8 +164,10 @@ def _shared_spec(project, arm, label, condition, bundle, out_dir, runtime, provi
         raise click.ClickException(str(exc)) from exc
 
 
-def _shared_roster(path, pairs):
+def _shared_roster(path, pairs, *, expect_sha256: str | None = None):
     """Capture an explicit exact run roster; a single-run file is never a roster."""
+    import hashlib
+    import re
     def distinct(items):
         result = {}
         for key, value in items:
@@ -166,7 +178,10 @@ def _shared_roster(path, pairs):
     def nonfinite(_value):
         raise ValueError('nonfinite roster value')
     raw = _bounded_registration_bytes(path)
+    roster_sha256 = hashlib.sha256(raw).hexdigest()
     try:
+        if expect_sha256 is not None and not re.fullmatch(r"[0-9a-f]{64}", expect_sha256):
+            raise ValueError("--expect-sha256 must be 64 lowercase hexadecimal characters")
         value = json.loads(raw.decode('utf-8'), object_pairs_hook=distinct, parse_constant=nonfinite)
         if (type(value) is not dict or set(value) != {'format', 'registrations'}
                 or value['format'] != 'shared_generation_batch_roster_v1'
@@ -194,7 +209,13 @@ def _shared_roster(path, pairs):
             identities.add(identity)
         if len(pairs) != len(set(pairs)) or set(selected) != set(pairs):
             raise ValueError('shared roster must match every requested project/replicate label exactly once')
-        return {'path': Path(path).absolute(), 'raw': raw, 'registrations': selected}
+        if expect_sha256 is not None:
+            single_reg_sha = next(iter(selected.values()))['sha256'] if len(selected) == 1 else None
+            if expect_sha256 != roster_sha256 and expect_sha256 != single_reg_sha:
+                raise ValueError(
+                    f"shared registration sha256 mismatch for {path}: expected {expect_sha256}, found {roster_sha256}"
+                )
+        return {'path': Path(path).absolute(), 'raw': raw, 'sha256': roster_sha256, 'registrations': selected}
     except (ValueError, UnicodeError, RecursionError, OSError) as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -894,6 +915,8 @@ def _rows_cost(rows) -> float:
               help="explicit shared-generation API condition; requires its immutable registration")
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
+@click.option("--expect-sha256", default=None,
+              help="expected 64-hex SHA-256 of the --shared-generation-registration file (#5115)")
 @click.option("--receipt-completion-version", type=click.IntRange(0, 3), default=0,
               help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25; 3 requires shared generation 2 / API renderer 27")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
@@ -944,7 +967,7 @@ def _rows_cost(rows) -> float:
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, max_cost_dollars=None):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, expect_sha256=None, max_cost_dollars=None):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -979,13 +1002,15 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             "no projects: the selected manifest declares none and no --project-bundle "
             "was given; pass --projects, --project-bundle NAME=PATH, or --manifest")
     roster = None
+    if expect_sha256 is not None and shared_generation_registration is None:
+        raise click.ClickException('--expect-sha256 requires --shared-generation-registration')
     if shared_generation_version or shared_generation_registration is not None:
         if shared_generation_version not in (1, 2) or shared_generation_registration is None:
             raise click.ClickException('shared batch requires an explicit supported version and registration roster')
         if replicates < 1 or len(names) != len(set(names)) or set(bundles) - set(names):
             raise click.ClickException('shared batch requires positive replicates and distinct exact projects')
         pairs = [(p, f'{label_prefix}_rep{n}') for p in names for n in range(1, replicates + 1)]
-        roster = _shared_roster(shared_generation_registration, pairs)
+        roster = _shared_roster(shared_generation_registration, pairs, expect_sha256=expect_sha256)
     specs = []
     for p in names:
         for n in range(1, replicates + 1):

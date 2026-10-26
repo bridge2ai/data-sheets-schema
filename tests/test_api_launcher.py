@@ -397,10 +397,33 @@ class TestLauncherCLI:
         assert "Background detached" in captured.out
         assert str(external_log.resolve()) in captured.out
 
-    def test_background_launch_redirects_stdin_and_survives_closed_fd0(self, tmp_path: Path):
-        """Regression test: --launch must pass stdin=DEVNULL so detached children do not fail in init_sys_streams."""
+    def test_background_launch_redirects_stdin_and_survives_closed_fd0(self, tmp_path: Path, monkeypatch):
+        """Regression test (#5115, R4 F8): --launch must pass stdin=DEVNULL so detached children do not inherit fd 0 as the write-only log file."""
         external_log = tmp_path / "logs" / "detached_run.log"
         script = REPO_ROOT / "scripts" / "api_launcher.py"
+
+        # 1. Build a custom venv whose bin/d4d reads from sys.stdin before invoking CLI main().
+        # Without stdin=subprocess.DEVNULL on Popen, fd 0 after os.close(0) is the write-only
+        # external_log opened by launch(), so sys.stdin.read() raises UnsupportedOperation.
+        base_venv = _get_isolated_venv()
+        custom_venv = tmp_path / "stdin_check_venv"
+        (custom_venv / "bin").mkdir(parents=True)
+        (custom_venv / "bin" / "python").symlink_to(base_venv / "bin" / "python")
+        for lib_dir in base_venv.glob("lib"):
+            (custom_venv / "lib").symlink_to(lib_dir)
+        d4d_bin = custom_venv / "bin" / "d4d"
+        d4d_bin.write_text(
+            f"#!{custom_venv / 'bin' / 'python'}\n"
+            "import sys\n"
+            "stdin_bytes = sys.stdin.read()\n"
+            "print(f'DETACHED_STDIN_EOF={stdin_bytes == \"\"}', flush=True)\n"
+            "from data_sheets_schema.cli import cli\n"
+            "if __name__ == '__main__':\n"
+            "    cli()\n",
+            encoding="utf-8",
+        )
+        d4d_bin.chmod(d4d_bin.stat().st_mode | stat.S_IEXEC)
+
         wrapper_code = (
             "import os, subprocess, sys\n"
             "os.close(0)\n"
@@ -410,6 +433,7 @@ class TestLauncherCLI:
         )
         env = dict(os.environ)
         env["CBORG_API_KEY"] = "dummy-test-key"
+        env["PYSTOW_HOME"] = str(tmp_path / "pystow")
         res = subprocess.run(
             [
                 sys.executable,
@@ -418,14 +442,13 @@ class TestLauncherCLI:
                 str(script),
                 "--worktree",
                 str(REPO_ROOT),
-                *_default_venv_arg(),
+                "--venv",
+                str(custom_venv),
                 "--launch",
                 "--log",
                 str(external_log),
                 "--",
-                "python",
-                "-m",
-                "data_sheets_schema.cli",
+                "d4d",
                 "api",
                 "prompts",
                 "check",
@@ -443,13 +466,39 @@ class TestLauncherCLI:
         while time.monotonic() < deadline:
             if external_log.is_file():
                 log_text = external_log.read_text(encoding="utf-8", errors="replace")
-                if "0 not at their pin" in log_text or "Fatal Python error" in log_text:
+                if "0 not at their pin" in log_text or "UnsupportedOperation" in log_text or "Fatal Python error" in log_text:
                     break
             time.sleep(0.1)
 
         assert "Fatal Python error" not in log_text
         assert "Bad file descriptor" not in log_text
+        assert "UnsupportedOperation" not in log_text
+        assert "DETACHED_STDIN_EOF=True" in log_text
         assert "0 not at their pin" in log_text
+
+        # 2. Direct in-process check that Popen receives stdin=subprocess.DEVNULL
+        captured_popen: dict[str, object] = {}
+
+        class _DummyProc:
+            pid = 42424
+
+        def _fake_popen(cmd, **kwargs):
+            captured_popen["cmd"] = cmd
+            captured_popen.update(kwargs)
+            return _DummyProc()
+
+        monkeypatch.setattr(subprocess, "Popen", _fake_popen)
+        monkeypatch.setattr("data_sheets_schema.api_launcher.run_import_check", lambda *a, **k: None)
+        monkeypatch.setenv("CBORG_API_KEY", "dummy-test-key")
+        rc = launch(
+            worktree_arg=REPO_ROOT,
+            venv_arg=base_venv,
+            cmd_args=["d4d", "api", "prompts", "check"],
+            background=True,
+            log_file=tmp_path / "logs" / "unit_popen.log",
+        )
+        assert rc == 0
+        assert captured_popen.get("stdin") == subprocess.DEVNULL
 
     def test_validate_command_restricts_python_entrypoint(self, tmp_path: Path):
         with pytest.raises(LauncherError, match="requires '-m data_sheets_schema.cli <subcommand>'"):
@@ -476,6 +525,23 @@ class TestLauncherCLI:
         ]
         validate_command(cmd, expect_sha256=digest)
 
+        # Live shared-generation batch launch without --expect-sha256 is refused (R4 F3 / D07)
+        with pytest.raises(LauncherError, match="requires '--expect-sha256 <sha256>'"):
+            validate_command(cmd)
+
+        # Dry-run without --expect-sha256 is allowed
+        validate_command(cmd + ["--dry-run"])
+
+        # Duplicate --shared-generation-registration is refused (R4 F3)
+        decoy = tmp_path / "decoy.json"
+        decoy.write_text('{"format": "shared_generation_registration_v1", "decoy": 1}\n', encoding="utf-8")
+        decoy_sha = hashlib.sha256(decoy.read_bytes()).hexdigest()
+        with pytest.raises(LauncherError, match="Duplicate '--shared-generation-registration'"):
+            validate_command(
+                cmd + ["--shared-generation-registration", str(decoy)],
+                expect_sha256=decoy_sha,
+            )
+
         with pytest.raises(LauncherError, match="Registration SHA-256 mismatch"):
             validate_command(cmd, expect_sha256="0" * 64)
 
@@ -484,6 +550,37 @@ class TestLauncherCLI:
                 ["python", "-m", "data_sheets_schema.cli", "api", "prompts", "check"],
                 expect_sha256=digest,
             )
+
+    def test_canary_baseline_dry_run_value_does_not_enable_dry_run(self):
+        """R4 F15: '--canary-baseline --dry-run' passes '--dry-run' as option value, not flag."""
+        with pytest.raises(LauncherError, match="requires '--max-cost-dollars"):
+            validate_command([
+                "d4d", "api", "batch",
+                "--projects", "CHORUS",
+                "--label-prefix", "2026-10-25_test",
+                "--canary-baseline", "--dry-run",
+            ])
+
+    def test_launch_forwards_expect_sha256_to_batch_command(self, tmp_path: Path, capsys):
+        """R4 F3: launch forwards --expect-sha256 to d4d api batch."""
+        import hashlib
+        reg_file = tmp_path / "reg.json"
+        reg_file.write_text('{"format": "shared_generation_registration_v1"}\n', encoding="utf-8")
+        digest = hashlib.sha256(reg_file.read_bytes()).hexdigest()
+        ret = main([
+            "--dry-run",
+            "--allow-missing-key",
+            "--worktree", str(REPO_ROOT),
+            *_default_venv_arg(),
+            "--expect-sha256", digest,
+            "--",
+            "d4d", "api", "batch",
+            "--max-cost-dollars", "15.0",
+            "--shared-generation-registration", str(reg_file),
+        ])
+        assert ret == 0
+        out = capsys.readouterr().out
+        assert f"--expect-sha256 {digest}" in out
 
     def test_scripts_api_launcher_executable(self):
         script = REPO_ROOT / "scripts" / "api_launcher.py"

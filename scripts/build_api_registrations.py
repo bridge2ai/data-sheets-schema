@@ -802,7 +802,10 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
 @click.option(
     "--aggregate-output-tokens",
     type=int,
-    help="Override audit_limits.aggregate_output_tokens.",
+    help=(
+        "Explicit aggregate output token cap (must equal "
+        "max_workers * worker_output_tokens + omission_output_tokens + integration_output_tokens)."
+    ),
 )
 @click.option(
     "--worker-output-tokens",
