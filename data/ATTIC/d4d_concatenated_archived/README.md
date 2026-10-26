@@ -192,7 +192,7 @@ smoke-test record for a fake project written three minutes before
 `d4d provenance record --prompt` was committed. It is regenerable in one
 command and describes no real generation.
 
-## Archived 2026-10-23 — 54 file(s) in 3 run directories
+## Archived 2026-10-23 — 54 file(s) in 2 run directories
 
 Owner decision D-F (2026-10-23, #5138, #5115, #5142): not a generated record; kept as evidence only, declared invalid. Committed report was copied by agy (Antigravity session) from rejected response 72ac7d9a with 4 source_status values changed by hand at 19:23 PDT and Evidence assertions JSON flattened at 21:43 PDT with no model call; regate response a42e7689 was not saved; registration changed mid-run from 57d5c842 (384 paths, 65,536 bytes, 25k worker cap) to 4f94102c (80 paths, 12,288 bytes, 64k worker cap).
 
@@ -250,3 +250,52 @@ Owner decision D-F (2026-10-23, #5138, #5115, #5142): not a generated record; ke
 - `claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_assembly.json`
 - `claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_packet.json`
 - `claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_packet_2.json`
+
+## Archived 2026-10-25 — 44 file(s) in 2 run directories
+
+Owner decision D40 (2026-10-25, R5 N1, #5138, #5115, #5142): not an unassisted generated record; kept as evidence only, excluded from the evaluation corpus. Caller registration (6148925b835b6dea33e781b2cb7cd156c60e9e66f62f1ae2ad4a835a6c4888e5) was written by hand via write_file (step 60708, 07:23 PDT on 2026-10-22) rather than build_api_registrations.py, and usage ledger CHORUS_api_usage_90e59e50c9d423fe.json (0bf3e4db99ffa506bad4b6e2d433383577ea85bbe92bc5eb161e81273a6f9d28) was hand-edited via edit_file (step 60844, 13:49 PDT on 2026-10-22) to reset typed_audit.state from failed to running, reset stages.integration.state from admitted to prepared, and delete usage_id c576b0e9679b4448bfde34de1e8a2fdc and failure_type ReadTimeout before resuming.
+
+- `claudecode_api/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_abandoned_attempts.jsonl`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_api_usage_90e59e50c9d423fe.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_coverage_receipt.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_d4d_core.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_provenance.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_reasoning.jsonl`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_reconciliation.md`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_audit.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_audit_evidence.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_core.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_coverage_receipt.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_full_response_2494777897ee4d79ac96e70dde7bb1e7.txt`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_context.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_inputs.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_request.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_response.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_result.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_receipt_completion_transcript.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_core.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_evidence.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_reconcile_full.yaml`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report.md`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_report_evidence.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_snapshot_index.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_context.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_request.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_0_response.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_context.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_request.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_1_response.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_context.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_request.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_2_response.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_context.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_request.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_3_response.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_context.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_request.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_4_response.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_assembly.json`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_integration_incomplete_attempt1_1.txt`
+- `claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/intermediate/CHORUS_typed_audit_packet.json`

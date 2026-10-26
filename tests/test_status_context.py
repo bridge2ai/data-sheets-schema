@@ -2176,7 +2176,7 @@ def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_on
         assert _conserved(tally), tally
         assert tally["verified"] + tally["not_verified"] == tally["snippets"]
     assert (t["snippets"], t["located"], t["not_verified"], t["value_unresolved"], t["malformed_entries"]) == (
-        9903, 9431, 466, 6, 0)
+        9770, 9298, 466, 6, 0)
     joined = sorted((u["receipt"].split("/")[0][:-len("_core")], u["receipt"].split("/")[1],
                      u["receipt"].split("/")[2][:-len("_coverage_receipt.yaml")])
                     for p in out["projects"].values() for u in p["form_located_snippets"])

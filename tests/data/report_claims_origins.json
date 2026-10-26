@@ -281,7 +281,5 @@
     "data/d4d_concatenated/claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_provenance.yaml": "backfill_checks",
     "data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_provenance.yaml": null
   },
-  "v8_origins": {
-    "data/d4d_concatenated/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/CHORUS_provenance.yaml": null
-  }
+  "v8_origins": {}
 }

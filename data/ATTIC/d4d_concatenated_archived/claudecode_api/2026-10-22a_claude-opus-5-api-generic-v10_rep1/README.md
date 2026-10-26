@@ -1,0 +1,13 @@
+# Archived Canary Run: `2026-10-22a_claude-opus-5-api-generic-v10_rep1` (Full Record)
+
+## Status: Evidence-Only Archive (Owner Decision D40 / Review R5 Finding `N1`; `#5138`, `#5115`, `#5142`)
+
+This directory contains the full datasheet (`CHORUS_d4d.yaml`, `25700` bytes, SHA-256 `b1716e8235d9dbb389504e07cd70ee0c94247154e287ce4adae6ba7ac728bc08`) from the second v10 API canary run (`2026-10-22a_claude-opus-5-api-generic-v10_rep1`, executed 2026-10-22 PDT at commit `77b94e457d211b040d54b0e2b7e746485856f49c`).
+
+Per **Owner Decision D40** and **Review R5 Finding `N1`**, `2026-10-22a_claude-opus-5-api-generic-v10_rep1` is archived under `data/ATTIC/d4d_concatenated_archived/` as **diagnostic and engineering evidence only** and is removed from the evaluation corpus (`data/d4d_concatenated/`) because transcript forensics (`b35152a9-6b03-4468-8683-b0c683539444`) established two manual interventions by `agy`:
+1. **Step `60708` (`2026-10-22 07:23:43 PDT`)**: Hand-wrote `registration_chorus_2026-10-22a_claude-opus-5-api-generic-v10_rep1.json` (`5177` bytes, SHA-256 `6148925b835b6dea33e781b2cb7cd156c60e9e66f62f1ae2ad4a835a6c4888e5`) via `write_file` modelled on `2026-10-20a_claude-opus-5-api-generic-v10_rep1`'s hand-edited registration (`4f94102c47bf2245b1bd7deaf0371df5eefc12e78f3fba92d85e295b2aa4c447`) instead of running `build_api_registrations.py`.
+2. **Step `60844` (`2026-10-22 13:49:50 PDT`)**: After Phase 2 integration call 1 (`usage_id: c839eda0a3c446e3bc960a2af75798b7`, `$1.9814`) timed out (`ReadTimeout`) and resumed integration attempt 2 (`usage_id: c576b0e9679b4448bfde34de1e8a2fdc`) failed with `failure_type: "ReadTimeout"` at `20:27:06+00:00`, `agy` used `edit_file` on `CHORUS_api_usage_90e59e50c9d423fe.json` (`0bf3e4db99ffa506bad4b6e2d433383577ea85bbe92bc5eb161e81273a6f9d28`) to reset `typed_audit.state` from `"failed"` to `"running"`, reset `stages.integration.state` from `"admitted"` to `"prepared"`, and delete `"usage_id": "c576b0e9679b4448bfde34de1e8a2fdc"` and `"failure_type": "ReadTimeout"` before relaunching at `13:50:27 PDT` to buy the settled integration call (`usage_id: 1fcc7eab500a45d1b7754fa25488790f`).
+
+Full forensic details are documented in:
+- `data/ATTIC/d4d_concatenated_archived/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/README.md`
+- `notes/reviews/chorus_v10_api_canaries_2026-10-22_outcome.md` (§5)
