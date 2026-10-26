@@ -306,6 +306,151 @@ def require_resolved(spec) -> None:
     _finish_reasoning_archive(spec, data)
     from data_sheets_schema.snapshot_store import finish_activation
     finish_activation(spec)
+    require_latch_integrity(spec)
+
+
+def require_latch_integrity(spec, data: dict | None = None) -> None:
+    """Refuse local ledger edits that rewind one-shot or terminal failure latches."""
+    if data is None:
+        if not ledger_path(spec).exists():
+            return
+        data = _read(spec)
+    abandoned_rows: list[dict] = []
+    aj_path = abandoned_journal_path(spec)
+    offset = data.get("abandoned_journal_offset", 0)
+    if aj_path.is_file() and isinstance(offset, int) and offset >= 0:
+        try:
+            raw = aj_path.read_bytes()
+        except OSError:
+            raw = b""
+        if offset <= len(raw):
+            for line in raw[offset:].split(b"\n"):
+                if not line.strip():
+                    continue
+                try:
+                    row = json.loads(line.decode("utf-8"))
+                except (ValueError, UnicodeDecodeError, RecursionError):
+                    continue
+                if (isinstance(row, dict)
+                        and row.get("generation_id") == data["generation_id"]
+                        and not identity_is_foreign(spec, row.get("run_identity"))):
+                    abandoned_rows.append(row)
+
+    from data_sheets_schema import snapshot_store
+    idx = snapshot_store._load(spec.metadata_dir, spec.project)
+    snapshots: list[dict] = []
+    if (isinstance(idx, dict) and not idx.get("superseded")
+            and idx.get("generation_id") == data["generation_id"]
+            and idx.get("run_identity") == run_identity(spec)):
+        snapshots = [e for e in (idx.get("snapshots") or []) if isinstance(e, dict)]
+
+    ta = data.get("typed_audit")
+    ta_phases = {"typed_audit_worker", "typed_audit_omission", "typed_audit_integration"}
+    if isinstance(ta, dict):
+        stages = ta.get("stages") if isinstance(ta.get("stages"), list) else []
+        if ta.get("state") != "failed" and (
+                "failure_type" in ta or "failure_detail" in ta
+                or any(isinstance(s, dict) and ("failure_type" in s or "failure_detail" in s)
+                       for s in stages)):
+            raise UsageLedgerError("typed audit terminal failure latch was rewound")
+        for s in stages:
+            if not isinstance(s, dict):
+                continue
+            if s.get("state") == "prepared" and any(
+                    k in s for k in ("usage_id", "response", "failure_type", "failure_detail")):
+                raise UsageLedgerError(
+                    "prepared typed audit stage carries prior admission, response, or failure evidence")
+            if s.get("state") == "admitted" and any(k in s for k in ("failure_type", "failure_detail")):
+                raise UsageLedgerError("admitted typed audit stage carries failure evidence")
+
+    for r in data["rows"]:
+        if r.get("phase") in ta_phases:
+            stages = (ta.get("stages") or []) if isinstance(ta, dict) and isinstance(ta.get("stages"), list) else []
+            if not any(isinstance(s, dict) and s.get("usage_id") == r["usage_id"]
+                       and s.get("state") in ("response_saved", "checked") for s in stages):
+                raise UsageLedgerError("typed audit stage journal was rewound after settling usage")
+    if any(r.get("phase") in ta_phases for r in abandoned_rows):
+        if not isinstance(ta, dict) or ta.get("state") != "failed":
+            raise UsageLedgerError("typed audit failure latch was rewound after an abandoned attempt")
+
+    rc = data.get("receipt_completion")
+    if isinstance(rc, dict):
+        if rc.get("state") == "intent" and any(
+                k in rc for k in ("usage_id", "response", "result", "failure_type", "usage_problems")):
+            raise UsageLedgerError(
+                "receipt completion intent carries prior admission, response, or failure evidence")
+        if rc.get("state") != "failed" and ("failure_type" in rc or "usage_problems" in rc):
+            raise UsageLedgerError("receipt completion failure latch was rewound")
+    if any(r.get("phase") == "full_receipt_completion" for r in data["rows"]):
+        if not isinstance(rc, dict) or rc.get("state") in ("intent", "admitted"):
+            raise UsageLedgerError("receipt completion state was rewound after settling usage")
+    if any(r.get("phase") == "full_receipt_completion" for r in abandoned_rows):
+        if not isinstance(rc, dict) or rc.get("state") != "failed":
+            raise UsageLedgerError("receipt completion failure latch was rewound after an abandoned attempt")
+
+    if any(r.get("phase") == "report_regate" for r in abandoned_rows) and not report_regate_attempted(spec):
+        raise UsageLedgerError("report regate latch was rewound after an abandoned attempt")
+    if any(r.get("phase") == "removal_repair_full" for r in abandoned_rows) and not removal_repair_attempted(spec):
+        raise UsageLedgerError("removal repair latch was rewound after an abandoned attempt")
+
+    for entry in snapshots:
+        name = str(entry.get("name", ""))
+        m = re.fullmatch(re.escape(f"{spec.project}_typed_audit_") + r"(\d+)_response\.json", name)
+        if m:
+            stage_idx = int(m.group(1))
+            stages = (ta.get("stages") or []) if isinstance(ta, dict) and isinstance(ta.get("stages"), list) else []
+            if not isinstance(ta, dict) or (ta.get("state") != "failed" and (
+                    stage_idx >= len(stages) or not isinstance(stages[stage_idx], dict)
+                    or stages[stage_idx].get("state") in ("prepared", "admitted")
+                    or (entry.get("usage_id") and stages[stage_idx].get("usage_id") != entry.get("usage_id")))):
+                raise UsageLedgerError("typed audit stage was rewound after recording a response snapshot")
+        if any(name.startswith(f"{spec.project}_{ph}_incomplete_attempt") for ph in ta_phases):
+            if not isinstance(ta, dict) or ta.get("state") != "failed":
+                raise UsageLedgerError("typed audit failure latch was rewound after an incomplete stream snapshot")
+        if name in ("receipt_completion_response.json", "receipt_completion_result.json",
+                    f"{spec.project}_receipt_completion_response.json",
+                    f"{spec.project}_receipt_completion_result.json"):
+            if not isinstance(rc, dict) or rc.get("state") == "intent":
+                raise UsageLedgerError(
+                    "receipt completion state was rewound after recording response or result snapshots")
+            if name.endswith("receipt_completion_result.json") and rc.get("state") in ("intent", "admitted"):
+                raise UsageLedgerError("receipt completion state was rewound after recording a result snapshot")
+        if name.startswith(f"{spec.project}_full_receipt_completion_incomplete_attempt"):
+            if not isinstance(rc, dict) or rc.get("state") != "failed":
+                raise UsageLedgerError(
+                    "receipt completion failure latch was rewound after an incomplete stream snapshot")
+        if "_rejected_response_" in name:
+            if data.get("evidence_refusal") is None:
+                raise UsageLedgerError(
+                    "terminal evidence refusal latch was removed after a rejected source-review response")
+            uid = entry.get("usage_id")
+            if uid and any(r.get("usage_id") == uid
+                           and (r.get("source_review_admission") or {}).get("state") == "accepted"
+                           for r in data["rows"]):
+                raise UsageLedgerError("rejected source-review response cannot be marked accepted")
+        if (name in (f"{spec.project}_audit_evidence.json",
+                     f"{spec.project}_reconcile_evidence.json",
+                     f"{spec.project}_report_evidence.json")
+                and data.get("evidence_refusal") is None):
+            snap_path = Path(entry["path"])
+            if not snap_path.is_absolute():
+                snap_path = spec.metadata_dir / snap_path
+            if not snap_path.is_file():
+                snap_path = spec.metadata_dir / "intermediate" / Path(entry["path"]).name
+            if snap_path.is_file():
+                try:
+                    ev = json.loads(snap_path.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    ev = None
+                if isinstance(ev, dict) and (not ev.get("checked") or ev.get("findings")):
+                    raise UsageLedgerError(
+                        "terminal evidence refusal latch was removed after a failed evidence snapshot")
+        if (name == f"{spec.project}_report_before_regate.md"
+                or name.startswith(f"{spec.project}_report_regate")) and not report_regate_attempted(spec):
+            raise UsageLedgerError("report regate latch was rewound after a recorded regate snapshot")
+        if (name.startswith(f"{spec.project}_removal_repair")
+                or name.startswith(f"{spec.project}_report_after_repair")) and not removal_repair_attempted(spec):
+            raise UsageLedgerError("removal repair latch was rewound after a recorded repair snapshot")
 
 
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:

@@ -6023,6 +6023,7 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
         _refuse_unusable_source_review(spec, phase, str(exc), text, call_usage)
         return False
     spec.report_path.write_text(body, encoding="utf-8")
+    _snapshot(spec, f"{spec.project}_{phase}.md", body, usage_id=call_id)
     require_source_reviews(spec, carry)
     return True
 
