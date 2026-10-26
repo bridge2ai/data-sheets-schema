@@ -4351,6 +4351,18 @@ def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None
     return check_report_audit_totals(spec.report_path, audit_source)
 
 
+def _current_report_audit_totals(spec: RunSpec, existing: dict[str, Any]) -> dict[str, Any]:
+    """Return existing `report_audit_totals` if at current `INSTRUMENT_VERSION`, else recompute."""
+    from data_sheets_schema.report_audit_totals import INSTRUMENT_VERSION
+    prior = existing.get("report_audit_totals")
+    if isinstance(prior, dict) and (prior.get("instrument_version") or 0) >= INSTRUMENT_VERSION:
+        return prior
+    fresh = report_audit_totals_block(spec)
+    if isinstance(prior, dict) and prior.get("checked") is True and not fresh.get("checked"):
+        return prior
+    return fresh
+
+
 def source_metadata_authority(spec: RunSpec) -> dict[str, Any]:
     """Only the selected v5 instrument receives actual manifest-byte authority."""
     if spec.render_version < 16:
@@ -7110,8 +7122,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                "report": {**(report_claims_block(spec, record=existing) or {}),
                                           **({"dispositions_expected": True}
                                              if existing.get("report_gate") else {})},
-                               "report_audit_totals": (existing.get("report_audit_totals")
-                                                       or report_audit_totals_block(spec)),
+                               "report_audit_totals": _current_report_audit_totals(spec, existing),
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
                                "receipts": _receipts_block(spec, existing),
