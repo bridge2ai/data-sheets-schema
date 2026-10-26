@@ -64,7 +64,7 @@ def source_identity(tree):
     """Pin all tracked source/test/policy assets plus ignored/hidden Python."""
     tree = Path(tree).resolve(strict=True)
     root_python = sorted(path.name for path in tree.glob('*.py'))
-    committed = {}
+    committed, gitlinks = {}, {}
     for row in git(tree, 'ls-tree', '-r', '-z', 'HEAD').split(b'\0'):
         if not row:
             continue
@@ -72,7 +72,30 @@ def source_identity(tree):
         mode, kind, digest = metadata.decode().split()
         name = name.decode()
         if Path(name).parts[0] in SCOPE or len(Path(name).parts) == 1:
-            committed[name] = {'mode': mode, 'kind': kind, 'git_blob': digest}
+            if mode == '160000' and kind == 'commit':
+                # A gitlink identifies a submodule commit, never regular file
+                # bytes. Only an absent/empty uninitialized checkout is safe
+                # to exclude: populated contents need their own byte proof.
+                path = tree / name
+                current = tree
+                for component in Path(name).parts:
+                    current /= component
+                    if current.is_symlink():
+                        raise ValueError('symlink gitlink path: ' + name)
+                try:
+                    state = path.lstat()
+                except FileNotFoundError:
+                    worktree_state = 'absent'
+                else:
+                    if not stat.S_ISDIR(state.st_mode):
+                        raise ValueError('non-directory gitlink path: ' + name)
+                    if next(path.iterdir(), None) is not None:
+                        raise ValueError('populated gitlink requires a separate byte inventory: ' + name)
+                    worktree_state = 'empty_directory'
+                gitlinks[name] = {'mode': mode, 'kind': kind, 'git_commit': digest,
+                    'worktree_state': worktree_state, 'contents_in_byte_inventory': False}
+            else:
+                committed[name] = {'mode': mode, 'kind': kind, 'git_blob': digest}
     files = {tree / name for name in committed}
     files.update(tree / name for name in root_python)
     for relative in SCOPE:
@@ -84,6 +107,8 @@ def source_identity(tree):
             for name in children:
                 if (Path(directory) / name).is_symlink():
                     raise ValueError('symlink source directory: ' + str(Path(directory) / name))
+            children[:] = [name for name in children
+                          if (Path(directory) / name).relative_to(tree).as_posix() not in gitlinks]
             files.update(Path(directory) / name for name in names if name.endswith('.py'))
     if len(files) > 50_000:
         raise ValueError('source inventory exceeds 50,000 files')
@@ -114,9 +139,9 @@ def source_identity(tree):
     status = git(tree, 'status', '--porcelain=v1', '--untracked-files=no').decode()
     return {'head': git(tree, 'rev-parse', 'HEAD').decode().strip(),
             'tree': git(tree, 'rev-parse', 'HEAD^{tree}').decode().strip(),
-            'tracked_status': status, 'missing_python': missing, 'files': inventory,
+            'tracked_status': status, 'missing_python': missing, 'files': inventory, 'gitlinks': gitlinks,
             'pristine': not status and not missing and all(row['committed_exact'] for row in inventory.values()),
-            'inventory_scope': 'all tracked root files and src/scripts/tests/utils/.claude/notes assets; also ignored/hidden Python in those roots; other data/docs are outside this inventory'}
+            'inventory_scope': 'all tracked root files and src/scripts/tests/utils/.claude/notes assets; also ignored/hidden Python in those roots; gitlinks separately pin path/commit only and require absent/empty uninitialized directories; submodule contents and other data/docs are outside this byte inventory'}
 
 
 def require_source(identity, target):

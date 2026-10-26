@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/native_recorder_measure_20261026.py", line 471, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/native_recorder_measure_20261026.py", line 467, in main
+    return run(args)
+  File "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/native_recorder_measure_20261026.py", line 319, in run
+    before = source_identity(tree)
+  File "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/native_recorder_measure_20261026.py", line 97, in source_identity
+    raise ValueError('nonregular or oversized source/input: ' + str(path))
+ValueError: nonregular or oversized source/input: /private/tmp/d4d-codex-recorder-current-20261026/aurelian

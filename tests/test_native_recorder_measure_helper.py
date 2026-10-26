@@ -142,6 +142,57 @@ class DriverSafetyTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 driver.origins(tree, inventory, {'data_sheets_schema.fixture': selected})
 
+    def test_gitlinks_pin_commits_without_treating_uninitialized_directories_as_files(self):
+        for relative in ('aurelian', 'scripts/vendor'):
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as directory:
+                tree = Path(directory).resolve()
+                env = {**os.environ, 'GIT_CONFIG_GLOBAL': os.devnull, 'GIT_CONFIG_NOSYSTEM': '1'}
+
+                def git(*args):
+                    return subprocess.run(['git', '-C', str(tree), *args], check=True,
+                        capture_output=True, env=env).stdout.decode().strip()
+
+                git('init', '-q')
+                git('config', 'user.name', 'Offline fixture')
+                git('config', 'user.email', 'fixture@example.invalid')
+                (tree / 'src/pkg').mkdir(parents=True)
+                (tree / 'src/pkg/base.py').write_text('VALUE = 1\n')
+                git('add', '.')
+                git('commit', '-qm', 'local gitlink target')
+                target = git('rev-parse', 'HEAD')
+                # A real local commit object suffices; no submodule operation,
+                # remote URL, network access or object fetch is needed.
+                git('update-index', '--add', '--cacheinfo', f'160000,{target},{relative}')
+                git('commit', '-qm', 'record uninitialized gitlink')
+                observed = driver.source_identity(tree)
+                # Git reports a physically missing gitlink as deleted. Its
+                # identity can be inventoried, but the clean-tree gate stays.
+                self.assertFalse(observed['pristine'])
+                self.assertEqual(observed['tracked_status'], f' D {relative}\n')
+                self.assertNotIn(relative, observed['files'])
+                self.assertEqual(observed['gitlinks'][relative], {'mode': '160000', 'kind': 'commit',
+                    'git_commit': target, 'worktree_state': 'absent', 'contents_in_byte_inventory': False})
+                self.assertIn('submodule contents', observed['inventory_scope'])
+                link = tree / relative
+                link.mkdir(parents=True)
+                empty = driver.source_identity(tree)
+                self.assertTrue(empty['pristine'])
+                self.assertEqual(empty['gitlinks'][relative]['worktree_state'], 'empty_directory')
+                injected = link / 'untracked.sh'
+                injected.write_text('#!/bin/sh\nexit 0\n')
+                injected.chmod(0o755)
+                with self.assertRaisesRegex(ValueError, 'populated gitlink'):
+                    driver.source_identity(tree)
+                injected.unlink()
+                link.rmdir()
+                link.symlink_to(tree / 'src/pkg', target_is_directory=True)
+                with self.assertRaisesRegex(ValueError, 'symlink gitlink path'):
+                    driver.source_identity(tree)
+                link.unlink()
+                link.write_text('a gitlink cannot be replaced by a regular file\n')
+                with self.assertRaisesRegex(ValueError, 'non-directory gitlink path'):
+                    driver.source_identity(tree)
+
     def test_worker_environment_duplicates_import_one_selected_namespace(self):
         with tempfile.TemporaryDirectory() as directory:
             parent = Path(directory).resolve()

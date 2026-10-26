@@ -1,0 +1,10 @@
+.....F.....................                                              [100%]
+=================================== FAILURES ===================================
+_ DriverSafetyTests.test_gitlinks_pin_commits_without_treating_uninitialized_directories_as_files _
+tests/test_native_recorder_measure_helper.py:168: in test_gitlinks_pin_commits_without_treating_uninitialized_directories_as_files
+    self.assertTrue(observed['pristine'])
+E   AssertionError: False is not true
+-- generated xml file: /private/tmp/d4d-recorder-gitlinks-final-20261026.xml ---
+=========================== short test summary info ============================
+FAILED tests/test_native_recorder_measure_helper.py::DriverSafetyTests::test_gitlinks_pin_commits_without_treating_uninitialized_directories_as_files
+1 failed, 26 passed in 1.17s
