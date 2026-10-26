@@ -529,7 +529,7 @@ def test_campaign_seed_minimum_length_and_cli_default_seed(tmp_path):
         "2026-10-25-v10-campaign-seed-0001",
         "registered-seed-0123456789abcdef0123456789",
     ):
-        with pytest.raises(ValueError, match="64-character hex seed with non-trivial entropy"):
+        with pytest.raises(ValueError, match="64-character hex seed with at least 8 distinct hex digits"):
             build(tmp_path, records, cohort="campaign", seed=bad_seed, name=f"pack_{bad_seed[:8]}")
 
     record = selection(tmp_path, 1)[0]
