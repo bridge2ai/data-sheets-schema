@@ -37,6 +37,19 @@ ASSET_HASHES = {'.claude/agents/d4d-provenance-guard-v2.md': '10dc4689e1855096ef
 
 
 ROUTING_FORMAT = "shared_generation_registration_v2"
+SCHEMA_CONTEXT_VERSION = 2
+REQUEST_CODE = ("src/data_sheets_schema/shared_generation.py",
+                "src/data_sheets_schema/api_runner.py",
+                "src/data_sheets_schema/receipt_completion.py",
+                "src/data_sheets_schema/receipt_completion_policy.py",
+                "src/data_sheets_schema/typed_audit_runtime.py",
+                "src/data_sheets_schema/typed_audit.py",
+                "src/data_sheets_schema/audit_omissions.py",
+                "src/data_sheets_schema/audit_batches.py",
+                "src/data_sheets_schema/audit_batch_format.py",
+                "src/data_sheets_schema/schema_digest.py",
+                "src/data_sheets_schema/receipts.py",
+                "src/data_sheets_schema/source_review.py")
 ROUTING_ASSET_HASHES = {'src/download/prompts/shared_generation_v2.md': '1e444c4b7f099fc1f35ecf52d78ff7bf4a9ca874697ae7252d452aee40c2d2e9', 'src/download/prompts/api_playbook_v3.md': 'cd4c4880f1ce50370718d604b6eb2a438e87b3b7b6a2df91b04662c6865397c4', 'src/download/prompts/receipt_completion_runtime_v3.md': '1246095f7e6366e58a78be4c9f5be2afd80dcc057d090a31d28068b49f12be84'}
 ROUTING_POLICY = "src/download/prompts/shared_generation_v2.md"
 ROUTING_API_POLICY = "src/download/prompts/api_playbook_v3.md"
@@ -139,28 +152,56 @@ def captured_assets(*, version=1) -> dict[str, bytes]:
 
 def _contracts_digest(version: int) -> dict:
     from . import api_runner as api
-    from . import audit_batch_format, rereceipt, typed_audit_runtime
+    from . import audit_batch_format, audit_omissions, receipt_completion as rc, typed_audit_runtime
+    from .resources import resource_path
     render_ver = 25 if version == 1 else 27
     phases = {p: sha(api.phase_instruction(p, render_ver).encode('utf-8'))
               for p in sorted(api.PHASE_INSTRUCTIONS)}
+    carry_probe = rc._audit_carry({
+        'input_identity': {}, 'registration': {}, 'journal': {'result': {}},
+        'unsupported_audit_candidates': [],
+    })
+    max_tokens = {
+        'phase_max_tokens': api.PHASE_MAX_TOKENS,
+        'receipt_phase_max_tokens': api.RECEIPT_PHASE_MAX_TOKENS,
+        'default_max_tokens': api.DEFAULT_MAX_TOKENS,
+    }
     return {
         'phase_system_sha256': sha(api.PHASE_SYSTEM.encode('utf-8')),
         'phase_instructions_sha256': phases,
+        'phase_max_tokens_sha256': sha(canonical(max_tokens)),
         'regate_headers_sha256': sha(canonical(api.REGATE_HEADERS)),
+        'repair_instruction_sha256': sha(api.REPAIR_INSTRUCTION.encode('utf-8')),
+        'readdress_header_sha256': sha(api.READDRESS_HEADER.encode('utf-8')),
         'shared_evidence_contract_sha256': sha(api.shared_evidence_contract().encode('utf-8')),
+        'schema_context_header_sha256': sha(SCHEMA_CONTEXT_HEADER.encode('utf-8')),
+        'generation_context_header_sha256': sha(GENERATION_CONTEXT_HEADER.encode('utf-8')),
         'typed_audit_system_sha256': sha(typed_audit_runtime.SYSTEM.encode('utf-8')),
+        'typed_binding_header_sha256': sha(typed_audit_runtime.BINDING_HEADER.encode('utf-8')),
         'typed_audit_worker_format_sha256': sha(audit_batch_format.render('worker', version=2).encode('utf-8')),
         'typed_audit_integration_format_sha256': sha(audit_batch_format.render('integration', version=2).encode('utf-8')),
-        'rereceipt_instruction_sha256': sha(rereceipt.INSTRUCTION.encode('utf-8')),
+        'omission_assets_sha256': {name: sha((audit_omissions.ASSETS / name).read_bytes())
+                                   for name in sorted(audit_omissions.ASSET_SHA256)},
+        'receipt_completion_policy_sha256': sha(canonical(rc.policy_identity(version=version + 1))),
+        'receipt_completion_audit_carry_sha256': sha(carry_probe.encode('utf-8')),
+        'request_code_sha256': {name: sha(resource_path(name).read_bytes()) for name in REQUEST_CODE},
     }
 
 
 def _schema_trim_descriptor() -> dict:
+    probe = trim_omission_schema({
+        'classes': {'Dataset': {'definition': {'description': 'd'}, 'slots': {'id': {'definition': {'description': 'd'}}}}},
+        'enums': {'E': {}},
+        'root_class': 'Dataset',
+        'sources': [],
+        'slots': {'id': {}},
+    })
     return {
         'generation_dropped_slot_keys': list(_TRIMMED_SLOT_KEYS),
         'worker_non_assigned_dropped_slot_keys': list(_WORKER_NON_ASSIGNED_TRIMMED_SLOT_KEYS),
         'omission_schema_dropped_slot_keys': list(_TRIMMED_SLOT_KEYS),
-        'omission_all_reachable_classes': True,
+        'omission_retained_top_keys': sorted(probe),
+        'omission_all_reachable_classes': 'classes' in probe and 'Dataset' in probe.get('classes', {}),
     }
 
 
@@ -174,6 +215,7 @@ def descriptor(*, version=1, condition=None) -> dict:
         if condition not in MODES.values():
             raise ValueError("routing descriptor requires its explicit condition")
         return {"protocol": "shared_generation_v2", "version": 2,
+            "schema_context_version": SCHEMA_CONTEXT_VERSION,
             "condition": condition, "renderer": 27, "runtime": "Claude API (direct)",
             "typed_protocol": "typed_audit_protocol_v1", "api_playbook_version": 3,
             "receipt_completion_version": 3,
@@ -186,7 +228,8 @@ def descriptor(*, version=1, condition=None) -> dict:
             "scientific_readiness": "draft/unreviewed"}
     if condition not in (None, "generic_v10"):
         raise ValueError("shared v1 descriptor requires generic_v10")
-    return {"protocol": NAME, "version": 1, "condition": "generic_v10",
+    return {"protocol": NAME, "version": 1, "schema_context_version": SCHEMA_CONTEXT_VERSION,
+            "condition": "generic_v10",
             "renderer": 25, "runtime": "Claude API (direct)",
             "typed_protocol": "typed_audit_protocol_v1", "api_playbook_version": 2,
             "receipt_completion_version": 2, "assets": dict(ASSET_HASHES),
@@ -700,28 +743,14 @@ def trim_omission_schema(schema: dict) -> dict:
     raw_classes = schema.get('classes') or {}
     trimmed_classes = {}
     for cls_name, cls_entry in raw_classes.items():
-        if not isinstance(cls_entry, dict):
-            trimmed_classes[cls_name] = cls_entry
-            continue
         entry = dict(cls_entry)
-        if isinstance(entry.get('definition'), dict):
-            entry['definition'] = {k: v for k, v in entry['definition'].items()
-                                   if k not in _TRIMMED_SLOT_KEYS}
-        if isinstance(entry.get('slots'), dict):
-            trimmed_slots = {}
-            for sname, sdef in entry['slots'].items():
-                if isinstance(sdef, dict) and isinstance(sdef.get('definition'), dict):
-                    trimmed_slots[sname] = {
-                        **sdef,
-                        'definition': {k: v for k, v in sdef['definition'].items()
-                                       if k not in _TRIMMED_SLOT_KEYS},
-                    }
-                elif isinstance(sdef, dict):
-                    trimmed_slots[sname] = {k: v for k, v in sdef.items()
-                                            if k not in _TRIMMED_SLOT_KEYS}
-                else:
-                    trimmed_slots[sname] = sdef
-            entry['slots'] = trimmed_slots
+        entry['definition'] = {k: v for k, v in entry['definition'].items()
+                               if k not in _TRIMMED_SLOT_KEYS}
+        entry['slots'] = {
+            sname: {**sdef, 'definition': {k: v for k, v in sdef['definition'].items()
+                                           if k not in _TRIMMED_SLOT_KEYS}}
+            for sname, sdef in entry['slots'].items()
+        }
         trimmed_classes[cls_name] = entry
     out = {k: v for k, v in schema.items() if k != 'slots'}
     out['classes'] = trimmed_classes

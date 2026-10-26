@@ -344,7 +344,9 @@ class Prepared:
         for error in errors:
             problem("response_shape", "/".join(map(str, error.absolute_path)), str(error.validator))
         if not errors:
-            if parsed["request_sha256"] != request["request_sha256"]:
+            from .shared_generation import trim_omission_schema
+            trimmed_sha = _sha(_json({**payload, "schema": trim_omission_schema(payload["schema"])}).encode())
+            if parsed["request_sha256"] not in {request["request_sha256"], trimmed_sha}:
                 problem("request_identity", "request_sha256", "Response names a different request")
             for index, row in enumerate(parsed["chunks"]):
                 at = f"chunks/{index}"
