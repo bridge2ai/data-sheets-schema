@@ -665,6 +665,17 @@ class RunSpec:
                 self.manifest = self.manifest.absolute()
             if self.chunk_manifest is not None:
                 self.chunk_manifest = Path(self.chunk_manifest).absolute()
+        else:
+            for _attr in ("bundle", "manifest", "chunk_manifest"):
+                _val = getattr(self, _attr)
+                if _val is not None and Path(_val).is_absolute():
+                    try:
+                        _lex = Path(os.path.abspath(_val))
+                        _rel = _lex.relative_to(self._corpus_root)
+                        _lex.resolve().relative_to(self._corpus_root)
+                        setattr(self, _attr, _rel)
+                    except (OSError, RuntimeError, ValueError):
+                        pass
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
         elif ((self.render_version >= 4 and self.is_agentic)
