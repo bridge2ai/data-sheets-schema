@@ -1,0 +1,3532 @@
+{
+  "competing_process_observations": [
+    {
+      "at": "2026-10-26T05:13:58.401853+00:00",
+      "processes": [
+        {
+          "cpu_percent": 14.5,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.5,
+          "name": "/usr/libexec/runningboardd",
+          "pid": 436,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.1,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.0,
+          "name": "/System/Library/Frameworks/ApplicationServices.framework/Frameworks/ATS.framework/Support/fontd",
+          "pid": 716,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 55.1,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.0,
+          "name": "/Users/marcin/.codex/packages/app-server-daemon/releases/0.164.0-aarch64-apple-darwin/bin/codex",
+          "pid": 31789,
+          "ppid": 31787
+        },
+        {
+          "cpu_percent": 37.9,
+          "name": "/usr/libexec/PerfPowerServices",
+          "pid": 36407,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 53.3,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        },
+        {
+          "cpu_percent": 75.2,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        },
+        {
+          "cpu_percent": 7.1,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:13:59.471891+00:00",
+      "processes": [
+        {
+          "cpu_percent": 14.7,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.0,
+          "name": "/usr/libexec/runningboardd",
+          "pid": 436,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 30.1,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.9,
+          "name": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+          "pid": 33055,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.2,
+          "name": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.47/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          "pid": 33093,
+          "ppid": 33055
+        },
+        {
+          "cpu_percent": 24.7,
+          "name": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.47/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+          "pid": 33156,
+          "ppid": 33055
+        },
+        {
+          "cpu_percent": 49.7,
+          "name": "/usr/libexec/PerfPowerServices",
+          "pid": 36407,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 97.9,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 96.3,
+          "name": "/usr/bin/log",
+          "pid": 84920,
+          "ppid": 37818
+        },
+        {
+          "cpu_percent": 96.0,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:00.539472+00:00",
+      "processes": [
+        {
+          "cpu_percent": 19.4,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.9,
+          "name": "/System/Library/CoreServices/loginwindow.app/Contents/MacOS/loginwindow",
+          "pid": 433,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.1,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.7,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 69.4,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.3,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/usr/bin/log",
+          "pid": 84920,
+          "ppid": 37818
+        },
+        {
+          "cpu_percent": 100.3,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        },
+        {
+          "cpu_percent": 10.6,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:01.604814+00:00",
+      "processes": [
+        {
+          "cpu_percent": 23.6,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.9,
+          "name": "/System/Library/CoreServices/loginwindow.app/Contents/MacOS/loginwindow",
+          "pid": 433,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.2,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 74.6,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.6,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.3,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:02.671767+00:00",
+      "processes": [
+        {
+          "cpu_percent": 20.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.1,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 70.2,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.4,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 99.9,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        },
+        {
+          "cpu_percent": 7.8,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:03.737157+00:00",
+      "processes": [
+        {
+          "cpu_percent": 19.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.9,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 31.9,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 80.0,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 105.9,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        },
+        {
+          "cpu_percent": 100.3,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:04.800001+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.1,
+          "name": "/sbin/launchd",
+          "pid": 1,
+          "ppid": 0
+        },
+        {
+          "cpu_percent": 17.6,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.9,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.7,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 69.8,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.3,
+          "name": "claude",
+          "pid": 31705,
+          "ppid": 3684
+        },
+        {
+          "cpu_percent": 97.9,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        },
+        {
+          "cpu_percent": 8.8,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:05.867989+00:00",
+      "processes": [
+        {
+          "cpu_percent": 16.6,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.6,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 13.3,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 59.7,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.7,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.0,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.4,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:06.934053+00:00",
+      "processes": [
+        {
+          "cpu_percent": 6.9,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/FSEvents.framework/Versions/A/Support/fseventsd",
+          "pid": 358,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 20.8,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 11.7,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 44.8,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 61.2,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.9,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 11.8,
+          "name": "claude",
+          "pid": 54721,
+          "ppid": 3669
+        },
+        {
+          "cpu_percent": 99.6,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        },
+        {
+          "cpu_percent": 23.8,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:07.998154+00:00",
+      "processes": [
+        {
+          "cpu_percent": 20.2,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.2,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.4,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 68.4,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 17.3,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 100.2,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:09.061104+00:00",
+      "processes": [
+        {
+          "cpu_percent": 21.9,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.5,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 74.6,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.1,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.0,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 93.2,
+          "name": "/usr/bin/log",
+          "pid": 85002,
+          "ppid": 37818
+        },
+        {
+          "cpu_percent": 6.0,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 24635,
+          "ppid": 3680
+        },
+        {
+          "cpu_percent": 99.9,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:10.127507+00:00",
+      "processes": [
+        {
+          "cpu_percent": 20.2,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 19.7,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 73.4,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 99.7,
+          "name": "/usr/bin/log",
+          "pid": 85002,
+          "ppid": 37818
+        },
+        {
+          "cpu_percent": 100.3,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        },
+        {
+          "cpu_percent": 8.8,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:11.185040+00:00",
+      "processes": [
+        {
+          "cpu_percent": 18.9,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.5,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 28.9,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.1,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 75.6,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 16.8,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 24635,
+          "ppid": 3680
+        },
+        {
+          "cpu_percent": 100.3,
+          "name": "/usr/sbin/system_profiler",
+          "pid": 84904,
+          "ppid": 84902
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:12.252549+00:00",
+      "processes": [
+        {
+          "cpu_percent": 18.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.2,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.7,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.6,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 74.3,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.3,
+          "name": "/Users/marcin/.codex/packages/app-server-daemon/releases/0.164.0-aarch64-apple-darwin/bin/codex",
+          "pid": 31789,
+          "ppid": 31787
+        },
+        {
+          "cpu_percent": 96.4,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 161.4,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 24635,
+          "ppid": 3680
+        },
+        {
+          "cpu_percent": 12.7,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        },
+        {
+          "cpu_percent": 40.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 84885,
+          "ppid": 24635
+        },
+        {
+          "cpu_percent": 8.6,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:13.311918+00:00",
+      "processes": [
+        {
+          "cpu_percent": 18.3,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.2,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.5,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 72.0,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.2,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.8,
+          "name": "claude",
+          "pid": 48127,
+          "ppid": 3652
+        },
+        {
+          "cpu_percent": 5.7,
+          "name": "claude",
+          "pid": 31705,
+          "ppid": 3684
+        },
+        {
+          "cpu_percent": 9.7,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        },
+        {
+          "cpu_percent": 22.5,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 84885,
+          "ppid": 24635
+        },
+        {
+          "cpu_percent": 7.7,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:14.381702+00:00",
+      "processes": [
+        {
+          "cpu_percent": 18.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.7,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.4,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 67.4,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.4,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 10.6,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:15.489542+00:00",
+      "processes": [
+        {
+          "cpu_percent": 20.5,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 13.5,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.2,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.8,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 65.0,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.1,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 21.1,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 90.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85327,
+          "ppid": 85324
+        },
+        {
+          "cpu_percent": 10.8,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:16.557920+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 18.0,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.6,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 80.3,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 7.1,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 11076,
+          "ppid": 3711
+        },
+        {
+          "cpu_percent": 77.5,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85378,
+          "ppid": 85372
+        },
+        {
+          "cpu_percent": 10.0,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:17.614987+00:00",
+      "processes": [
+        {
+          "cpu_percent": 19.9,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.0,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 63.9,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.3,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.4,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 73171,
+          "ppid": 3831
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:18.686007+00:00",
+      "processes": [
+        {
+          "cpu_percent": 5.6,
+          "name": "/usr/libexec/opendirectoryd",
+          "pid": 396,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 18.8,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 20.4,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 67.9,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 18.5,
+          "name": "uv",
+          "pid": 85438,
+          "ppid": 85411
+        },
+        {
+          "cpu_percent": 19.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85439,
+          "ppid": 85438
+        },
+        {
+          "cpu_percent": 6.2,
+          "name": "claude",
+          "pid": 33566,
+          "ppid": 3662
+        },
+        {
+          "cpu_percent": 97.5,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85410,
+          "ppid": 85406
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:19.759528+00:00",
+      "processes": [
+        {
+          "cpu_percent": 41.6,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/FSEvents.framework/Versions/A/Support/fseventsd",
+          "pid": 358,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.8,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 29.2,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 36.3,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.5,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 78.4,
+          "name": "uv",
+          "pid": 85438,
+          "ppid": 85411
+        },
+        {
+          "cpu_percent": 74.9,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85475,
+          "ppid": 85471
+        },
+        {
+          "cpu_percent": 8.0,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:20.825185+00:00",
+      "processes": [
+        {
+          "cpu_percent": 18.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.2,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.4,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 68.8,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.4,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 39.8,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 16.3,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        },
+        {
+          "cpu_percent": 10.3,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:21.894092+00:00",
+      "processes": [
+        {
+          "cpu_percent": 20.0,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.5,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.7,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 68.4,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.2,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 93.9,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85508,
+          "ppid": 85501
+        },
+        {
+          "cpu_percent": 8.5,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:22.957973+00:00",
+      "processes": [
+        {
+          "cpu_percent": 20.2,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.0,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 26.9,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.4,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 83.5,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.1,
+          "name": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent",
+          "pid": 33054,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.9,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 15.0,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 24635,
+          "ppid": 3680
+        },
+        {
+          "cpu_percent": 5.0,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:24.018392+00:00",
+      "processes": [
+        {
+          "cpu_percent": 11.6,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.8,
+          "name": "/usr/libexec/searchpartyd",
+          "pid": 604,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.3,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.1,
+          "name": "/System/Library/PrivateFrameworks/TCC.framework/Support/tccd",
+          "pid": 26701,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.7,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.3,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 11.6,
+          "name": "/usr/libexec/biomesyncd",
+          "pid": 85521,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.2,
+          "name": "/System/Library/PrivateFrameworks/MapsSync.framework/mapssyncd",
+          "pid": 85526,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.9,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:25.081584+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.5,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.1,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.6,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 68.4,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 29.8,
+          "name": "(system_profiler)",
+          "pid": 85530,
+          "ppid": 85529
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 20.5,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:26.152115+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.9,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.7,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 65.9,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.6,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:27.216951+00:00",
+      "processes": [
+        {
+          "cpu_percent": 12.4,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.7,
+          "name": "/usr/sbin/coreaudiod",
+          "pid": 438,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 43.4,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 62.2,
+          "name": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent",
+          "pid": 33181,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:28.279646+00:00",
+      "processes": [
+        {
+          "cpu_percent": 7.2,
+          "name": "/usr/libexec/opendirectoryd",
+          "pid": 396,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.8,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.5,
+          "name": "/usr/libexec/syspolicyd",
+          "pid": 531,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.5,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 80.2,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.0,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:29.351258+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.9,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 95.1,
+          "name": "/Applications/NinjaRMMAgent/programfiles/ninjarmm-macagent",
+          "pid": 554,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.4,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.2,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 78.3,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.5,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.1,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 5.7,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 24635,
+          "ppid": 3680
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:30.413300+00:00",
+      "processes": [
+        {
+          "cpu_percent": 19.8,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.1,
+          "name": "/Applications/NinjaRMMAgent/programfiles/ninjarmm-macagent",
+          "pid": 554,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.7,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.0,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 79.7,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.2,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 7.1,
+          "name": "claude",
+          "pid": 31705,
+          "ppid": 3684
+        },
+        {
+          "cpu_percent": 6.8,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 7.7,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:31.477435+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.3,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.4,
+          "name": "/Applications/NinjaRMMAgent/programfiles/ninjarmm-macagent",
+          "pid": 554,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 13.1,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.0,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 72.9,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.7,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 72.7,
+          "name": "/usr/bin/top",
+          "pid": 85611,
+          "ppid": 554
+        },
+        {
+          "cpu_percent": 6.3,
+          "name": "claude",
+          "pid": 48127,
+          "ppid": 3652
+        },
+        {
+          "cpu_percent": 27.0,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 27.0,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:32.542196+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.9,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.0,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.5,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 76.1,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.3,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 41.8,
+          "name": "/usr/bin/top",
+          "pid": 85611,
+          "ppid": 554
+        },
+        {
+          "cpu_percent": 5.9,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:33.610658+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.7,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.6,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.2,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 79.9,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 97.3,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.5,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 11.4,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 7.8,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:34.673477+00:00",
+      "processes": [
+        {
+          "cpu_percent": 35.3,
+          "name": "/sbin/launchd",
+          "pid": 1,
+          "ppid": 0
+        },
+        {
+          "cpu_percent": 14.6,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.4,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 61.8,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.3,
+          "name": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+          "pid": 33055,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.6,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        },
+        {
+          "cpu_percent": 13.6,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:35.737734+00:00",
+      "processes": [
+        {
+          "cpu_percent": 18.5,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.8,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.7,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 79.7,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.7,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.7,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.2,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 9.3,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:36.805390+00:00",
+      "processes": [
+        {
+          "cpu_percent": 16.7,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 18.3,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 75.6,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 13.0,
+          "name": "gh",
+          "pid": 85627,
+          "ppid": 85624
+        },
+        {
+          "cpu_percent": 12.0,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:37.864414+00:00",
+      "processes": [
+        {
+          "cpu_percent": 16.4,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 13.5,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.4,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 78.8,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.5,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 44.8,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 24635,
+          "ppid": 3680
+        },
+        {
+          "cpu_percent": 14.4,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:38.924783+00:00",
+      "processes": [
+        {
+          "cpu_percent": 5.6,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/FSEvents.framework/Versions/A/Support/fseventsd",
+          "pid": 358,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.4,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.7,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.0,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 82.5,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 79.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 14.0,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:39.991437+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.6,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 11.4,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 27.4,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.7,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 64.0,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.9,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 85.5,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.1,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 9.3,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:41.053997+00:00",
+      "processes": [
+        {
+          "cpu_percent": 20.7,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.3,
+          "name": "/usr/libexec/syspolicyd",
+          "pid": 531,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.0,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 20.8,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.6,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 82.5,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.0,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.9,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.4,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:42.122964+00:00",
+      "processes": [
+        {
+          "cpu_percent": 16.7,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 11.1,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 82.6,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.4,
+          "name": "/Users/marcin/.codex/packages/app-server-daemon/releases/0.164.0-aarch64-apple-darwin/bin/codex",
+          "pid": 31789,
+          "ppid": 31787
+        },
+        {
+          "cpu_percent": 95.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.1,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 94.7,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.1,
+          "name": "gh",
+          "pid": 85714,
+          "ppid": 85713
+        },
+        {
+          "cpu_percent": 5.6,
+          "name": "/Users/marcin/.nvm/versions/node/v22.16.0/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+          "pid": 25539,
+          "ppid": 25510
+        },
+        {
+          "cpu_percent": 8.8,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 49.3,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 63813,
+          "ppid": 3880
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:43.183812+00:00",
+      "processes": [
+        {
+          "cpu_percent": 15.2,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.8,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.2,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 82.3,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.6,
+          "name": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.47/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+          "pid": 33210,
+          "ppid": 33055
+        },
+        {
+          "cpu_percent": 99.2,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.0,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 96.8,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.1,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 24.9,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:44.244308+00:00",
+      "processes": [
+        {
+          "cpu_percent": 19.3,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.9,
+          "name": "/usr/libexec/syspolicyd",
+          "pid": 531,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 18.4,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.6,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 69.2,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.3,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 97.6,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 15.0,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:45.312424+00:00",
+      "processes": [
+        {
+          "cpu_percent": 18.4,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.9,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 70.0,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.7,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 82.0,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 25.7,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 21.2,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:46.372983+00:00",
+      "processes": [
+        {
+          "cpu_percent": 20.0,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.9,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 73.2,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.5,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.8,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 85.8,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 18.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 13.5,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:47.437144+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.3,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.8,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 79.1,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 75.7,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 24.3,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 65.4,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 37.7,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 24635,
+          "ppid": 3680
+        },
+        {
+          "cpu_percent": 9.9,
+          "name": "sandbox-exec",
+          "pid": 85742,
+          "ppid": 24635
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:48.503695+00:00",
+      "processes": [
+        {
+          "cpu_percent": 6.6,
+          "name": "/usr/libexec/logd",
+          "pid": 354,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.2,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.2,
+          "name": "/usr/libexec/syspolicyd",
+          "pid": 531,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.4,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.0,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.0,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 77.6,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.0,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 76.6,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 21.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 23.5,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 25.3,
+          "name": "/usr/bin/log",
+          "pid": 85744,
+          "ppid": 24635
+        },
+        {
+          "cpu_percent": 5.0,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:49.584748+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.3,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.6,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.2,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 94.8,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 95.1,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 91.3,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 23.9,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 28.8,
+          "name": "/usr/bin/log",
+          "pid": 85744,
+          "ppid": 24635
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:50.647902+00:00",
+      "processes": [
+        {
+          "cpu_percent": 19.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.1,
+          "name": "/usr/libexec/syspolicyd",
+          "pid": 531,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.8,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.1,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 83.2,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.2,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.6,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 24.6,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 5.1,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:51.723342+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.8,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 15.3,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.8,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 81.8,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 100.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.3,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 97.0,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 88.5,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 37818,
+          "ppid": 3704
+        },
+        {
+          "cpu_percent": 6.7,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:52.783143+00:00",
+      "processes": [
+        {
+          "cpu_percent": 17.3,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.3,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.9,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 11.8,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 60.5,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.7,
+          "name": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU",
+          "pid": 33010,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 26.9,
+          "name": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent",
+          "pid": 33054,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.1,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.2,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 87.3,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 16.8,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:53.852630+00:00",
+      "processes": [
+        {
+          "cpu_percent": 16.2,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.3,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 66.0,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 95.4,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 97.7,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 58.7,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        },
+        {
+          "cpu_percent": 13.0,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:54.917118+00:00",
+      "processes": [
+        {
+          "cpu_percent": 16.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.8,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.3,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 70.1,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 96.9,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 91.8,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.3,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 111.4,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:55.992699+00:00",
+      "processes": [
+        {
+          "cpu_percent": 19.2,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.0,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 19.2,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 73.6,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 99.9,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.2,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 97.5,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.7,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 5.5,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:57.056328+00:00",
+      "processes": [
+        {
+          "cpu_percent": 15.3,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.5,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 54.8,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 46.6,
+          "name": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent",
+          "pid": 33181,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.4,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 96.4,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.5,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:58.121955+00:00",
+      "processes": [
+        {
+          "cpu_percent": 18.9,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 17.6,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 69.7,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.2,
+          "name": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent",
+          "pid": 33181,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 98.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.6,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 96.3,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 12.1,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 8.9,
+          "name": "claude",
+          "pid": 48127,
+          "ppid": 3652
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:14:59.185955+00:00",
+      "processes": [
+        {
+          "cpu_percent": 14.2,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.8,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.6,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 34.8,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.3,
+          "name": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+          "pid": 33055,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 10.7,
+          "name": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.47/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+          "pid": 33102,
+          "ppid": 33055
+        },
+        {
+          "cpu_percent": 43.0,
+          "name": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.47/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+          "pid": 33156,
+          "ppid": 33055
+        },
+        {
+          "cpu_percent": 96.4,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 95.7,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 6.0,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 6.5,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:15:00.252016+00:00",
+      "processes": [
+        {
+          "cpu_percent": 16.9,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 8.9,
+          "name": "/System/Library/CoreServices/loginwindow.app/Contents/MacOS/loginwindow",
+          "pid": 433,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 5.1,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 14.4,
+          "name": "/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder",
+          "pid": 751,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 9.7,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 47.6,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 56.6,
+          "name": "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.47/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)",
+          "pid": 33156,
+          "ppid": 33055
+        },
+        {
+          "cpu_percent": 99.1,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 6.5,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 91.9,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 13.8,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 5.8,
+          "name": "rsync",
+          "pid": 47878,
+          "ppid": 47877
+        }
+      ]
+    },
+    {
+      "at": "2026-10-26T05:15:01.325653+00:00",
+      "processes": [
+        {
+          "cpu_percent": 21.1,
+          "name": "/System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "pid": 429,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 11.4,
+          "name": "/System/Library/CoreServices/loginwindow.app/Contents/MacOS/loginwindow",
+          "pid": 433,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 16.8,
+          "name": "/System/Library/CoreServices/WindowManager.app/Contents/MacOS/WindowManager",
+          "pid": 684,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 7.8,
+          "name": "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/corespotlightd",
+          "pid": 784,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 71.1,
+          "name": "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal",
+          "pid": 3231,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 97.3,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 63651,
+          "ppid": 63649
+        },
+        {
+          "cpu_percent": 5.4,
+          "name": "/System/Library/ExtensionKit/Extensions/NeptuneOneWallpaper.appex/Contents/MacOS/NeptuneOneWallpaper",
+          "pid": 64948,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 45.7,
+          "name": "/System/Library/PrivateFrameworks/XprotectFramework.framework/Versions/A/XPCServices/XprotectService.xpc/Contents/MacOS/XprotectService",
+          "pid": 79197,
+          "ppid": 1
+        },
+        {
+          "cpu_percent": 50.1,
+          "name": "/opt/local/Library/Frameworks/Python.framework/Versions/3.11/Resources/Python.app/Contents/MacOS/Python",
+          "pid": 85688,
+          "ppid": 85682
+        },
+        {
+          "cpu_percent": 27.1,
+          "name": "/Users/marcin/.local/bin/agy",
+          "pid": 65074,
+          "ppid": 64397
+        }
+      ]
+    }
+  ],
+  "idle": false,
+  "max_one_minute_load_per_cpu": 0.85146484375,
+  "mean_cpu_percent": 45.62833333333333,
+  "peak_cpu_percent": 66.2,
+  "samples": 60,
+  "scope": "declared host-idleness gate; not proof of absence of every competing process",
+  "thresholds": {
+    "foreign_process_cpu_percent": 5,
+    "mean_cpu_percent": 15,
+    "one_minute_load_per_cpu": 0.5,
+    "peak_cpu_percent": 35
+  }
+}

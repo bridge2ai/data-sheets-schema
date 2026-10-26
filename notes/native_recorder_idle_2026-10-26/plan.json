@@ -1,0 +1,51 @@
+{
+  "PYTEST_DISABLE_PLUGIN_AUTOLOAD": null,
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-P",
+    "-B",
+    "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/native_recorder_measure_20261026.py",
+    "--worker",
+    "--tree",
+    "/private/tmp/d4d-codex-recorder-current-20261026",
+    "--target",
+    "current",
+    "--output",
+    "/private/tmp/d4d-recorder-measurements-20261026/idle-check-2"
+  ],
+  "cwd": "/private/tmp/d4d-codex-recorder-current-20261026",
+  "environment_overrides": {
+    "GIT_NO_LAZY_FETCH": "1",
+    "HF_HUB_OFFLINE": "1",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PIP_NO_INDEX": "1",
+    "PYTEST_ADDOPTS": "",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": "/private/tmp/d4d-codex-recorder-current-20261026/src:/private/tmp/d4d-codex-recorder-current-20261026/scripts:/private/tmp/d4d-codex-recorder-current-20261026",
+    "PYTHONPYCACHEPREFIX": "/private/tmp/d4d-recorder-measurements-20261026/idle-check-2/pycache",
+    "TRANSFORMERS_OFFLINE": "1",
+    "UV_OFFLINE": "1"
+  },
+  "format": "d4d_recorder_baseline_v1",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/native_recorder_measure_20261026.py",
+    "sha256": "2f77329c51fc27f8f7e5f7157643f47c43b6e7a94872e3e5e292bb1817806169"
+  },
+  "idle_only": true,
+  "idle_window_seconds": 60,
+  "mode": "idle",
+  "network_scope": "offline fake-client test; named credential variables removed, no installation; other ambient config is not authenticated and this is not a network sandbox",
+  "node": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+  "outer_driver_watchdog_seconds": null,
+  "pytest_plugin_autoload": "enabled",
+  "removed_environment_names": [
+    "CBORG_API_KEY",
+    "KB_AUTH_TOKEN",
+    "OPENSCIENTIST_API_KEY"
+  ],
+  "scientific_acceptance": "not_assessed",
+  "started_at": "2026-10-26T05:13:57.309413+00:00",
+  "target": "current",
+  "trial": "idle-check-2",
+  "watchdog_scope": "separate measurement censoring; never changes helper 180 s or registered test 900 s"
+}
