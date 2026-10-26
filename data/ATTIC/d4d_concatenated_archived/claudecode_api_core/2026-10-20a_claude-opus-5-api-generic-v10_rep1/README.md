@@ -53,3 +53,5 @@ All 8 unmodified backup files preserved before Edit 3 (`09:44–09:50 PDT`) and 
 ## References
 - Outcome & Root-Cause Analysis: `notes/reviews/chorus_v10_api_canaries_2026-10-22_outcome.md`
 - Tracking Issues: `#5072`, `#5115`, `#5116`, `#5138`, `#5142`
+
+> **Re-check commit note (`R7 F4`)**: Any re-check of this archived record must run at the record's own commits (`9abe907b7973b20ac749fea6d1d76f721e60c0f5`, `8074af4099e88c49de8061d296e03262ac94931d`, `723c8ac20ab320995cf2e345adcd904c7a19995f`). Under later `A17` list-splitting and `D39` worker-contract code, the saved typed-audit packets no longer re-derive, which is expected because the record names its own commits.

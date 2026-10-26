@@ -12,3 +12,5 @@ The complete 6-edit forensic table, owner authorization context, recoverability 
 - `data/ATTIC/d4d_concatenated_archived/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/README.md`
 - `data/ATTIC/d4d_concatenated_archived/claudecode_api_core/2026-10-20a_claude-opus-5-api-generic-v10_rep1/evidence_unmodified/`
 - `notes/reviews/chorus_v10_api_canaries_2026-10-22_outcome.md` (§5)
+
+> **Re-check commit note (`R7 F4`)**: Any re-check of this archived record must run at the record's own commits (`9abe907b7973b20ac749fea6d1d76f721e60c0f5`, `8074af4099e88c49de8061d296e03262ac94931d`, `723c8ac20ab320995cf2e345adcd904c7a19995f`). Under later `A17` list-splitting and `D39` worker-contract code, the saved typed-audit packets no longer re-derive, which is expected because the record names its own commits.

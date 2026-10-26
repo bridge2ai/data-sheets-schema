@@ -11,3 +11,5 @@ Per **Owner Decision D40** and **Review R5 Finding `N1`**, `2026-10-22a_claude-o
 Full forensic details are documented in:
 - `data/ATTIC/d4d_concatenated_archived/claudecode_api_core/2026-10-22a_claude-opus-5-api-generic-v10_rep1/README.md`
 - `notes/reviews/chorus_v10_api_canaries_2026-10-22_outcome.md` (§5)
+
+> **Re-check commit & archival maintenance note (`R7 F4`, `D43`)**: Any re-check of this archived record must run at the record's own commit (`77b94e457d211b040d54b0e2b7e746485856f49c`). Under later `A17` list-splitting and `D39` worker-contract code, the saved typed-audit packets no longer re-derive, which is expected because the record names its own commit. Per `D43` (`"Accept H1 (Recommended)"`, 2026-10-26T00:46Z), the recovery/archival commits (`3a292504f`, `8b9dc5798`) stand as documented here and no run artifact inside `data/ATTIC/` is modified thereafter.

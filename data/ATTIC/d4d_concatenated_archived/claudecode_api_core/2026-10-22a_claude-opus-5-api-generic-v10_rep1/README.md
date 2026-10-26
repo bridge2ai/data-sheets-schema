@@ -35,3 +35,5 @@ The companion full datasheet (`CHORUS_d4d.yaml`, `25700` bytes, SHA-256 `b1716e8
 ## References
 - Outcome & Root-Cause Analysis: `notes/reviews/chorus_v10_api_canaries_2026-10-22_outcome.md`
 - Tracking Issues: `#5072`, `#5115`, `#5116`, `#5138`, `#5142`
+
+> **Re-check commit & archival maintenance note (`R7 F4`, `D43`)**: Any re-check of this archived record must run at the record's own commit (`77b94e457d211b040d54b0e2b7e746485856f49c`). Under later `A17` list-splitting and `D39` worker-contract code, the saved typed-audit packets no longer re-derive, which is expected because the record names its own commit. Per `D43` (`"Accept H1 (Recommended)"`, 2026-10-26T00:46Z), the recovery/archival commits (`3a292504f`, `8b9dc5798`) stand as documented here and no run artifact inside `data/ATTIC/` is modified thereafter.
