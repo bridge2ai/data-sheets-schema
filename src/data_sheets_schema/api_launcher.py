@@ -168,6 +168,12 @@ def _parse_batch_options(batch_args: Sequence[str]) -> dict[str, Any]:
     import click
     from data_sheets_schema.cli.api import batch_cmd
 
+    for arg in batch_args:
+        if arg == "--":
+            break
+        if arg in ("-h", "--help"):
+            raise LauncherError("'-h' / '--help' is not permitted inside 'd4d api batch' launch arguments.")
+
     params: list[click.Parameter] = []
     for param in batch_cmd.params:
         p = copy.copy(param)
@@ -189,6 +195,7 @@ def _parse_batch_options(batch_args: Sequence[str]) -> dict[str, Any]:
     parser_cmd = click.Command(
         "batch",
         params=params,
+        add_help_option=False,
         context_settings={"ignore_unknown_options": True, "allow_extra_args": True},
     )
     try:
@@ -354,10 +361,16 @@ def validate_command(
         )
 
     if effective_expect is not None:
-        normalized_expected = effective_expect.strip().lower()
-        if not re.fullmatch(r"[0-9a-f]{64}", normalized_expected):
+        import json
+
+        expected_hashes = [h.strip().lower() for h in effective_expect.split(",") if h.strip()]
+        if (
+            not expected_hashes
+            or len(expected_hashes) != len(set(expected_hashes))
+            or any(not re.fullmatch(r"[0-9a-f]{64}", h) for h in expected_hashes)
+        ):
             raise LauncherError(
-                f"--expect-sha256 value {effective_expect!r} must be a 64-character hex SHA-256 digest."
+                f"--expect-sha256 value {effective_expect!r} must be one or more distinct 64-character hex SHA-256 digests."
             )
         reg_raw: str | None = reg_values[0] if reg_values else None
         if not reg_raw:
@@ -374,11 +387,70 @@ def validate_command(
             raise LauncherError(
                 f"Registration file for --expect-sha256 does not exist: {reg_path}"
             )
-        actual_sha = hashlib.sha256(reg_path.read_bytes()).hexdigest().lower()
-        if actual_sha != normalized_expected:
-            raise LauncherError(
-                f"Registration SHA-256 mismatch for {reg_path}: expected {normalized_expected}, got {actual_sha}"
-            )
+        raw_bytes = reg_path.read_bytes()
+        actual_sha = hashlib.sha256(raw_bytes).hexdigest().lower()
+        try:
+            doc = json.loads(raw_bytes.decode("utf-8"))
+        except Exception:
+            doc = None
+
+        if (
+            isinstance(doc, dict)
+            and doc.get("format") in ("shared_generation_batch_roster_v1", "shared_generation_batch_roster_v2")
+            and isinstance(doc.get("registrations"), list)
+            and doc["registrations"]
+        ):
+            roster_format = doc["format"]
+            reg_shas: set[str] = set()
+            roster_has_all_pins = True
+            for row in doc["registrations"]:
+                if not isinstance(row, dict) or not isinstance(row.get("registration_path"), str):
+                    raise LauncherError(f"Invalid registration row in batch roster {reg_path}")
+                row_reg_path = Path(row["registration_path"])
+                if not row_reg_path.is_absolute() and worktree_dir is not None:
+                    wt_row = (Path(worktree_dir).resolve() / row_reg_path).resolve()
+                    if wt_row.is_file():
+                        row_reg_path = wt_row
+                row_reg_path = row_reg_path.resolve()
+                if not row_reg_path.is_file():
+                    raise LauncherError(
+                        f"Registration file referenced by roster {reg_path} does not exist: {row_reg_path}"
+                    )
+                row_sha = hashlib.sha256(row_reg_path.read_bytes()).hexdigest().lower()
+                if roster_format == "shared_generation_batch_roster_v2" and "registration_sha256" not in row:
+                    raise LauncherError(
+                        f"Roster {reg_path} (shared_generation_batch_roster_v2) is missing registration_sha256 for {row_reg_path}"
+                    )
+                if "registration_sha256" in row:
+                    pinned_sha = str(row["registration_sha256"]).strip().lower()
+                    if not re.fullmatch(r"[0-9a-f]{64}", pinned_sha) or pinned_sha != row_sha:
+                        raise LauncherError(
+                            f"Registration SHA-256 mismatch for {row_reg_path} in roster {reg_path}: "
+                            f"roster pinned {pinned_sha!r}, got {row_sha}"
+                        )
+                else:
+                    roster_has_all_pins = False
+                reg_shas.add(row_sha)
+
+            expected_set = set(expected_hashes)
+            valid_direct = (reg_shas <= expected_set) and (expected_set <= (reg_shas | {actual_sha}))
+            valid_pinned_roster = roster_has_all_pins and (expected_set == {actual_sha})
+            if not (valid_direct or valid_pinned_roster):
+                if expected_set == {actual_sha} and not roster_has_all_pins:
+                    raise LauncherError(
+                        f"Registration SHA-256 mismatch for {reg_path}: unpinned v1 roster SHA-256 ({actual_sha}) "
+                        "does not verify underlying registration files; pass the registration SHA-256 digest(s) "
+                        "or use shared_generation_batch_roster_v2."
+                    )
+                raise LauncherError(
+                    f"Registration SHA-256 mismatch for {reg_path}: expected {','.join(expected_hashes)}, "
+                    f"got roster={actual_sha} registrations={sorted(reg_shas)}"
+                )
+        else:
+            if expected_hashes != [actual_sha]:
+                raise LauncherError(
+                    f"Registration SHA-256 mismatch for {reg_path}: expected {','.join(expected_hashes)}, got {actual_sha}"
+                )
 
 
 def find_worktree_root(worktree_arg: str | Path | None = None) -> Path:
@@ -565,13 +637,21 @@ def launch(
         )
 
     validate_command(tokens, dry_run=dry_run, expect_sha256=expect_sha256, worktree_dir=worktree_dir)
-    final_cmd = resolve_execution_command(tokens, python_bin, d4d_bin)
+    final_cmd = list(resolve_execution_command(tokens, python_bin, d4d_bin))
+    for idx, tok in enumerate(final_cmd):
+        if tok == "--expect-sha256" and idx + 1 < len(final_cmd):
+            final_cmd[idx + 1] = ",".join(h.strip().lower() for h in final_cmd[idx + 1].split(",") if h.strip())
+        elif tok.startswith("--expect-sha256="):
+             raw_val = tok.split("=", 1)[1]
+             norm_val = ",".join(h.strip().lower() for h in raw_val.split(",") if h.strip())
+             final_cmd[idx] = f"--expect-sha256={norm_val}"
     if (
         expect_sha256 is not None
         and "batch" in tokens
         and not any(tok == "--expect-sha256" or tok.startswith("--expect-sha256=") for tok in final_cmd)
     ):
-        final_cmd = list(final_cmd) + ["--expect-sha256", expect_sha256.strip().lower()]
+        norm_expect = ",".join(h.strip().lower() for h in expect_sha256.split(",") if h.strip())
+        final_cmd = list(final_cmd) + ["--expect-sha256", norm_expect]
 
     if background:
         resolved_log = validate_log_path(log_file, worktree_dir)

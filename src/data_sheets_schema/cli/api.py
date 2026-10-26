@@ -180,22 +180,54 @@ def _shared_roster(path, pairs, *, expect_sha256: str | None = None):
     raw = _bounded_registration_bytes(path)
     roster_sha256 = hashlib.sha256(raw).hexdigest()
     try:
-        if expect_sha256 is not None and not re.fullmatch(r"[0-9a-f]{64}", expect_sha256):
-            raise ValueError("--expect-sha256 must be 64 lowercase hexadecimal characters")
+        expected_hashes: list[str] = []
+        if expect_sha256 is not None:
+            expected_hashes = [h.strip().lower() for h in expect_sha256.split(",") if h.strip()]
+            if (
+                not expected_hashes
+                or len(expected_hashes) != len(set(expected_hashes))
+                or any(not re.fullmatch(r"[0-9a-f]{64}", h) for h in expected_hashes)
+            ):
+                raise ValueError(
+                    "--expect-sha256 must be one or more distinct comma-separated 64-character hexadecimal SHA-256 digests"
+                )
         value = json.loads(raw.decode('utf-8'), object_pairs_hook=distinct, parse_constant=nonfinite)
         if (type(value) is not dict or set(value) != {'format', 'registrations'}
-                or value['format'] != 'shared_generation_batch_roster_v1'
+                or value['format'] not in ('shared_generation_batch_roster_v1', 'shared_generation_batch_roster_v2')
                 or type(value['registrations']) is not list or not value['registrations']):
-            raise ValueError('batch requires a closed shared_generation_batch_roster_v1 roster')
+            raise ValueError('batch requires a closed shared_generation_batch_roster_v1 or shared_generation_batch_roster_v2 roster')
+        roster_format = value['format']
         selected, paths, identities = {}, set(), set()
+        roster_has_all_pins = True
         for row in value['registrations']:
-            if (type(row) is not dict or set(row) != {'project', 'label', 'registration_path'}
-                    or any(type(v) is not str or not v.strip() for v in row.values())):
+            if type(row) is not dict:
                 raise ValueError('invalid batch registration row')
+            row_keys = set(row)
+            if roster_format == 'shared_generation_batch_roster_v2':
+                valid_keys = row_keys == {'project', 'label', 'registration_path', 'registration_sha256'}
+            else:
+                valid_keys = row_keys in (
+                    {'project', 'label', 'registration_path'},
+                    {'project', 'label', 'registration_path', 'registration_sha256'},
+                )
+            if not valid_keys or any(type(v) is not str or not v.strip() for v in row.values()):
+                raise ValueError('invalid batch registration row')
+            pinned_sha = None
+            if 'registration_sha256' in row:
+                pinned_sha = row['registration_sha256'].strip().lower()
+                if not re.fullmatch(r"[0-9a-f]{64}", pinned_sha):
+                    raise ValueError('invalid batch registration row')
+            else:
+                roster_has_all_pins = False
             key = (row['project'], row['label'])
             if key in selected:
                 raise ValueError('duplicate project/label in shared batch roster')
             captured = _capture_shared_registration(row['registration_path'])
+            if pinned_sha is not None and captured['sha256'] != pinned_sha:
+                raise ValueError(
+                    f"shared registration sha256 mismatch for {row['registration_path']}: "
+                    f"roster pinned {pinned_sha}, found {captured['sha256']}"
+                )
             reg = captured['document']
             identity = reg['registration_id']
             resolved = captured['path'].resolve()
@@ -209,11 +241,21 @@ def _shared_roster(path, pairs, *, expect_sha256: str | None = None):
             identities.add(identity)
         if len(pairs) != len(set(pairs)) or set(selected) != set(pairs):
             raise ValueError('shared roster must match every requested project/replicate label exactly once')
-        if expect_sha256 is not None:
-            single_reg_sha = next(iter(selected.values()))['sha256'] if len(selected) == 1 else None
-            if expect_sha256 != roster_sha256 and expect_sha256 != single_reg_sha:
+        if expected_hashes:
+            expected_set = set(expected_hashes)
+            reg_shas = {c['sha256'] for c in selected.values()}
+            valid_direct = (reg_shas <= expected_set) and (expected_set <= (reg_shas | {roster_sha256}))
+            valid_pinned_roster = roster_has_all_pins and (expected_set == {roster_sha256})
+            if not (valid_direct or valid_pinned_roster):
+                if expected_set == {roster_sha256} and not roster_has_all_pins:
+                    raise ValueError(
+                        f"shared registration sha256 mismatch for {path}: roster {roster_sha256} does not pin "
+                        "registration_sha256 on every row; pass the registration sha256 digest(s) to --expect-sha256 "
+                        "or use shared_generation_batch_roster_v2"
+                    )
                 raise ValueError(
-                    f"shared registration sha256 mismatch for {path}: expected {expect_sha256}, found {roster_sha256}"
+                    f"shared registration sha256 mismatch for {path}: expected {','.join(expected_hashes)}, "
+                    f"found roster={roster_sha256} registrations={sorted(reg_shas)}"
                 )
         return {'path': Path(path).absolute(), 'raw': raw, 'sha256': roster_sha256, 'registrations': selected}
     except (ValueError, UnicodeError, RecursionError, OSError) as exc:
