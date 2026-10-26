@@ -12,7 +12,7 @@ from tests.test_generation_recovery_review import client_named
 from tests.test_generation_manifest_identity import external, offline  # noqa: F401
 
 
-def test_partial_resume_recovers_newer_phase_history_from_progress(external):
+def test_partial_resume_requires_intact_index_then_keeps_newer_phase_history(external):
     api.execute(external, client=client_named('FIRST_PHASE'))
     index = store.index_path(external.metadata_dir, external.project)
     old_index = index.read_bytes()
@@ -20,7 +20,17 @@ def test_partial_resume_recovers_newer_phase_history_from_progress(external):
     api._save_progress(external, ['full', 'core'], None)
     with pytest.raises(RuntimeError, match='boom'):
         api.execute(external, client=client_named('LATER_PHASE', fail_on='audit'))
+    current_index = index.read_bytes()
     index.write_bytes(old_index)
+    before = {str(p): p.read_bytes() for p in external.metadata_dir.rglob('*') if p.is_file()}
+    refused = client_named('MUST_NOT_CALL')
+    # D41 preserves the missing suffix as an integrity discrepancy; progress
+    # cannot silently replace a journaled live index before another API call.
+    with pytest.raises(ledger.UsageLedgerError, match='latch journal'):
+        api.execute(external, client=refused)
+    assert refused.messages.calls == []
+    assert {str(p): p.read_bytes() for p in external.metadata_dir.rglob('*') if p.is_file()} == before
+    index.write_bytes(current_index)
     client = client_named('MUST_KEEP_LATER_PHASE')
     result = api.execute(external, client=client)
     assert {'full', 'core'} <= set(result['skipped'])

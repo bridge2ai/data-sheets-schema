@@ -175,6 +175,21 @@ def test_preparation_validates_real_registration_and_separate_context(prepared, 
     assert dict(prepared.authorities)[str(registration["record"])] == prepared.original
 
 
+@pytest.mark.parametrize("integrity", [None, {}, {
+    "format": "d4d_latch_guard_v1", "verified": True, "assisted": True,
+    "evidence_only": True, "overrides": [{"authorization": "synthetic acknowledgement"}],
+    "journal": {"path": "journal.jsonl", "sha256": "a" * 64,
+                "head_sha256": "b" * 64, "line_count": 1}}])
+def test_d41_ineligible_record_refuses_before_rating_preparation(registration, tmp_path, integrity):
+    prior = yaml.safe_load(registration["provenance"].read_bytes())
+    prior["model"] = {"runtime_integrity": integrity}
+    path = tmp_path / "d41-provenance.yaml"
+    path.write_text(yaml.safe_dump(prior))
+    with pytest.raises(ValueError, match="runtime integrity is ineligible"):
+        runner.prepare(**{**registration, "provenance": path,
+                          "provenance_sha256": sha(path.read_bytes())})
+
+
 def test_blinding_removes_headers_without_dropping_scientific_content(prepared):
     text = runner.rating_prompt(prepared)
     assert "concealed-v10-rep17" not in text

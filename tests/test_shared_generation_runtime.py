@@ -426,12 +426,10 @@ def assert_snapshot_attribution_checks_without_calls(spec):
         before = files(spec)
         retry = client(spec)
         try:
-            if change == 'index-only-worker':
-                checked = api.execute(replace(spec), client=retry)
-                assert checked['already_complete'] and checked['validation_problems'] == []
-            else:
-                with pytest.raises(ledger.UsageLedgerError):
-                    api.execute(replace(spec), client=retry)
+            # A portable record can remain readable while the live index is
+            # altered; D41 requires that discrepancy to stop API resume too.
+            with pytest.raises(ledger.UsageLedgerError):
+                api.execute(replace(spec), client=retry)
             assert not retry.messages.calls and not retry.messages.count_calls
             assert files(spec) == before
             if change == 'index-only-worker':
@@ -441,16 +439,17 @@ def assert_snapshot_attribution_checks_without_calls(spec):
                     runtime.completion_check(spec)
         finally:
             for path, raw in baseline.items(): Path(path).write_bytes(raw)
-    # A genuine missing-index fallback works without transport or publication:
-    # the existing completed shortcut leaves that optional index absent.
+    # The portable reader retains its missing-index fallback. API resume must
+    # instead refuse removal of the index pinned by this generation's journal.
     index_path.unlink()
     absent = files(spec)
     try:
         assert runtime.completion_check(spec) == original_record['shared_generation']
         assert files(spec) == absent
         retry = client(spec)
-        restored = api.execute(replace(spec), client=retry)
-        assert restored['already_complete'] and not retry.messages.calls and not retry.messages.count_calls
+        with pytest.raises(ledger.UsageLedgerError, match='latch journal'):
+            api.execute(replace(spec), client=retry)
+        assert not retry.messages.calls and not retry.messages.count_calls
         assert files(spec) == absent
     finally:
         for path, raw in baseline.items(): Path(path).write_bytes(raw)

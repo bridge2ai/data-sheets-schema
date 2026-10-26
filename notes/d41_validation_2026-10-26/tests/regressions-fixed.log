@@ -1,0 +1,154 @@
+........................................................................ [ 17%]
+........................................................F............... [ 34%]
+........................................................................ [ 51%]
+..F............................F..F..................................... [ 68%]
+..............................................FFF..F
+=================================== FAILURES ===================================
+___ TestTheRunnerGate.test_a_prior_invocations_regeneration_is_not_repeated ____
+tests/test_report_gate.py:391: in test_a_prior_invocations_regeneration_is_not_repeated
+    self.assertIn("prior invocation", out["reason"])
+E   AssertionError: 'prior invocation' not found in 'identified run has no attested phase snapshot; restore its evidence'
+__________ test_actual_readdress_exchange_is_preserved_for_completion __________
+tests/test_receipt_completion_runtime.py:339: in test_actual_readdress_exchange_is_preserved_for_completion
+    api.execute(selected, client=c)
+src/data_sheets_schema/api_runner.py:6687: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:7350: in _execute
+    body = _generate_phase(spec, ph, needed, client, settings, usage)
+src/data_sheets_schema/api_runner.py:6608: in _generate_phase
+    receipt_body, _ = _readdress_receipt(
+src/data_sheets_schema/api_runner.py:3498: in _readdress_receipt
+    remember_exchange(spec, rreq, text, entry["usage_id"])
+src/data_sheets_schema/receipt_completion.py:151: in remember_exchange
+    ledger._write(spec, data)
+src/data_sheets_schema/usage_ledger.py:620: in _write
+    latch_journal.before_ledger_write(spec, data)
+src/data_sheets_schema/latch_journal.py:452: in before_ledger_write
+    _fail(f"attempted removal or rewrite of immutable latch: {key}")
+src/data_sheets_schema/latch_journal.py:35: in _fail
+    raise ledger.UsageLedgerError(f"latch journal: {message}")
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: response:receipt_completion_transcript
+__ test_new_axis_does_not_reopen_terminal_generation_admission[full-evidence] __
+tests/test_receipt_completion_runtime.py:626: in test_new_axis_does_not_reopen_terminal_generation_admission
+    ledger.begin_call(selected, phase, 1, 'synthetic')
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+src/data_sheets_schema/latch_journal.py:35: in _fail
+    raise ledger.UsageLedgerError(f"latch journal: {message}")
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+During handling of the above exception, another exception occurred:
+tests/test_receipt_completion_runtime.py:625: in test_new_axis_does_not_reopen_terminal_generation_admission
+    with pytest.raises(ledger.UsageLedgerError, match='evidence refusal|source-review admission|after removal repair'):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'evidence refusal|source-review admission|after removal repair'
+E    Input: 'latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+_ test_new_axis_does_not_reopen_terminal_generation_admission[full_receipt_completion-evidence] _
+tests/test_receipt_completion_runtime.py:626: in test_new_axis_does_not_reopen_terminal_generation_admission
+    ledger.begin_call(selected, phase, 1, 'synthetic')
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+src/data_sheets_schema/latch_journal.py:35: in _fail
+    raise ledger.UsageLedgerError(f"latch journal: {message}")
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+During handling of the above exception, another exception occurred:
+tests/test_receipt_completion_runtime.py:625: in test_new_axis_does_not_reopen_terminal_generation_admission
+    with pytest.raises(ledger.UsageLedgerError, match='evidence refusal|source-review admission|after removal repair'):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'evidence refusal|source-review admission|after removal repair'
+E    Input: 'latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+_ TestValidatorDrivenRepair.test_repair_rewrites_the_failing_artifact_and_stops_when_clean _
+tests/test_download/test_api_runner.py:829: in test_repair_rewrites_the_failing_artifact_and_stops_when_clean
+    log = self.api._repair_invalid(s, FakeClient(), self.settings,
+src/data_sheets_schema/api_runner.py:5408: in _repair_invalid
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+src/data_sheets_schema/latch_journal.py:35: in _fail
+    raise ledger.UsageLedgerError(f"latch journal: {message}")
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+_ TestValidatorDrivenRepair.test_repair_stops_when_an_applied_round_makes_no_progress _
+tests/test_download/test_api_runner.py:877: in test_repair_stops_when_an_applied_round_makes_no_progress
+    log = self.api._repair_invalid(s, FakeClient(), self.settings, [])
+src/data_sheets_schema/api_runner.py:5408: in _repair_invalid
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+src/data_sheets_schema/latch_journal.py:35: in _fail
+    raise ledger.UsageLedgerError(f"latch journal: {message}")
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+_ TestValidatorDrivenRepair.test_repair_usage_uses_the_model_passed_to_the_request _
+tests/test_download/test_api_runner.py:802: in test_repair_usage_uses_the_model_passed_to_the_request
+    self.api._repair_invalid(s, client, settings, usage)
+src/data_sheets_schema/api_runner.py:5408: in _repair_invalid
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+src/data_sheets_schema/latch_journal.py:35: in _fail
+    raise ledger.UsageLedgerError(f"latch journal: {message}")
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+__ TestValidatorDrivenRepair.test_unusable_repair_leaves_the_record_untouched __
+tests/test_download/test_api_runner.py:861: in test_unusable_repair_leaves_the_record_untouched
+    log = self.api._repair_invalid(s, ProseClient(), self.settings, [])
+src/data_sheets_schema/api_runner.py:5408: in _repair_invalid
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+src/data_sheets_schema/latch_journal.py:35: in _fail
+    raise ledger.UsageLedgerError(f"latch journal: {message}")
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_usage_ledger.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+---- generated xml file: /private/tmp/d4d-h3-regressions-fixed-20261026.xml ----
+=========================== short test summary info ============================
+FAILED tests/test_report_gate.py::TestTheRunnerGate::test_a_prior_invocations_regeneration_is_not_repeated
+FAILED tests/test_receipt_completion_runtime.py::test_actual_readdress_exchange_is_preserved_for_completion
+FAILED tests/test_receipt_completion_runtime.py::test_new_axis_does_not_reopen_terminal_generation_admission[full-evidence]
+FAILED tests/test_receipt_completion_runtime.py::test_new_axis_does_not_reopen_terminal_generation_admission[full_receipt_completion-evidence]
+FAILED tests/test_download/test_api_runner.py::TestValidatorDrivenRepair::test_repair_rewrites_the_failing_artifact_and_stops_when_clean
+FAILED tests/test_download/test_api_runner.py::TestValidatorDrivenRepair::test_repair_stops_when_an_applied_round_makes_no_progress
+FAILED tests/test_download/test_api_runner.py::TestValidatorDrivenRepair::test_repair_usage_uses_the_model_passed_to_the_request
+FAILED tests/test_download/test_api_runner.py::TestValidatorDrivenRepair::test_unusable_repair_leaves_the_record_untouched
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 8 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+8 failed, 332 passed, 13 warnings in 1563.88s (0:26:03)

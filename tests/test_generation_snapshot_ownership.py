@@ -240,7 +240,7 @@ def test_completed_record_phase_wins_over_a_same_generation_old_index(external):
     assert report == doc and pin['path'] == str(latest)
 
 
-def test_completed_api_shortcut_checks_the_portable_phase_after_rerun(external):
+def test_completed_api_shortcut_requires_intact_index_then_checks_portable_phase(external):
     from tests.test_generation_recovery_review import client_named
     api.execute(external, client=client_named('FIRST_PHASE'))
     index = store.index_path(external.metadata_dir, external.project)
@@ -252,7 +252,21 @@ def test_completed_api_shortcut_checks_the_portable_phase_after_rerun(external):
     prior = yaml.safe_load(prior_bytes)
     snapshot = next(e for e in reversed(prior['intermediates']) if e.get('phase') == 'EXTERNAL_full.yaml')
     assert 'LATER_PHASE' in Path(snapshot['path']).read_text()
+    current_index = index.read_bytes()
     index.write_bytes(old_index)
+    before = {str(p): p.read_bytes() for p in external.metadata_dir.rglob('*') if p.is_file()}
+    refused = client_named('MUST_NOT_CALL')
+    # Portable evidence remains readable, but D41 does not silently repair an
+    # altered live index during API resume, even for a completed generation.
+    state, path, _, why = receipts.phase1_snapshot_state(
+        api._receipt_path(external), spec=external, record=prior)
+    assert state == 'usable' and str(path) == snapshot['path'], why
+    with pytest.raises(ledger.UsageLedgerError, match='latch journal'):
+        api.execute(external, client=refused)
+    assert refused.messages.calls == []
+    assert {str(p): p.read_bytes() for p in external.metadata_dir.rglob('*') if p.is_file()} == before
+    # Restoring the exact journaled index preserves ordinary completed replay.
+    index.write_bytes(current_index)
     client = client_named('MUST_NOT_CALL')
     resumed = api.execute(external, client=client)
     assert resumed['already_complete'] and client.messages.calls == []

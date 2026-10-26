@@ -63,6 +63,10 @@ def recovery_files(directory: Path, project: str) -> list[Path]:
     """API journals that generic provenance reconstruction cannot replace."""
     progress = directory / f"{project}_api_progress.json"
     found = [progress] if progress.exists() or progress.is_symlink() else []
+    for suffix in ("latch_journal.jsonl", "latch_override.json"):
+        path = directory / f"{project}_{suffix}"
+        if path.exists() or path.is_symlink():
+            found.append(path)
     if directory.is_dir():
         pattern = re.compile(re.escape(project) + r"_api_usage_[0-9a-f]{16}\.json")
         found.extend(path for path in directory.iterdir() if pattern.fullmatch(path.name))
@@ -310,6 +314,8 @@ def require_resolved(spec) -> None:
 
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     """Commit intent before a request so response persistence can fail safely."""
+    from data_sheets_schema import latch_journal
+    latch_journal.check(spec)
     require_resolved(spec)
     require_source_review_admission(spec)
     data = _read(spec)
@@ -448,6 +454,24 @@ def record_evidence_refusal(spec, stage: str, reading: dict) -> None:
     if data.get("evidence_refusal") is None:
         data["evidence_refusal"] = {"stage": stage, "reading": reading}
         _write(spec, data)
+
+
+def record_report_rejection(spec, stage: str, report_sha256: str, reading: dict,
+                            usage_id: str | None = None, reason: str | None = None) -> None:
+    """Retain every report rejection without consuming or expanding regate allowance."""
+    if not re.fullmatch(r"[a-f0-9]{64}", str(report_sha256)):
+        raise UsageLedgerError("report rejection requires the exact rejected report hash")
+    if not ledger_path(spec).exists():
+        raise UsageLedgerError("cannot record report rejection without the generation ledger")
+    data = _read(spec)
+    rejection = {"rejection_id": uuid.uuid4().hex, "stage": stage,
+                 "report_sha256": report_sha256, "reading": reading}
+    if usage_id is not None:
+        rejection["usage_id"] = usage_id
+    if reason is not None:
+        rejection["reason"] = reason
+    data.setdefault("report_rejections", []).append(rejection)
+    _write(spec, data)
 
 
 def require_source_review_admission(spec) -> None:
@@ -592,6 +616,13 @@ def persist_usage(spec, row: dict) -> None:
 
 
 def _write(spec, data: dict) -> None:
+    from data_sheets_schema import latch_journal
+    latch_journal.before_ledger_write(spec, data)
+    _write_unlatched(spec, data)
+
+
+def _write_unlatched(spec, data: dict) -> None:
+    """Atomic storage primitive, also used to persist journal acknowledgements."""
     path = ledger_path(spec)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
