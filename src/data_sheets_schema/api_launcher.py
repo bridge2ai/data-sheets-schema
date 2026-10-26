@@ -162,6 +162,42 @@ def check_cborg_key(env: dict[str, str], allow_missing: bool = False) -> None:
         )
 
 
+def _parse_batch_options(batch_args: Sequence[str]) -> dict[str, Any]:
+    """Parse ``d4d api batch`` options using Click's option definitions from ``batch_cmd``."""
+    import copy
+    import click
+    from data_sheets_schema.cli.api import batch_cmd
+
+    params: list[click.Parameter] = []
+    for param in batch_cmd.params:
+        p = copy.copy(param)
+        p.required = False
+        p.callback = None
+        if isinstance(p, click.Option) and p.name in {
+            "shared_generation_registration",
+            "shared_generation_version",
+            "expect_sha256",
+            "max_cost_dollars",
+        }:
+            p.multiple = True
+            p.default = ()
+            p.type = click.UNPROCESSED
+        elif isinstance(p, click.Option) and not p.is_flag:
+            p.type = click.UNPROCESSED
+        params.append(p)
+    params.append(click.Option(["--skip-credential-check"], is_flag=True, default=False))
+    parser_cmd = click.Command(
+        "batch",
+        params=params,
+        context_settings={"ignore_unknown_options": True, "allow_extra_args": True},
+    )
+    try:
+        ctx = parser_cmd.make_context("batch", list(batch_args), resilient_parsing=False)
+    except click.ClickException as exc:
+        raise LauncherError(f"Invalid 'd4d api batch' arguments: {exc.format_message()}") from exc
+    return ctx.params
+
+
 def validate_command(
     cmd_args: Sequence[str],
     *,
@@ -202,14 +238,7 @@ def validate_command(
                 "arbitrary scripts or '-c' are not allowed."
             )
 
-    is_dry = dry_run or ("--dry-run" in tokens)
-    if any(arg == "--skip-credential-check" or arg.startswith("--skip-credential-check=") for arg in tokens):
-        if not is_dry:
-            raise LauncherError(
-                "--skip-credential-check is only permitted when --dry-run is active."
-            )
-
-    # Extract non-flag arguments (skipping values attached to known value-taking options)
+    # Extract non-flag arguments
     words = [arg for arg in tokens if not arg.startswith("-")]
     for i in range(len(words) - 1):
         if words[i] == "api" and words[i + 1] == "run":
@@ -226,16 +255,22 @@ def validate_command(
                     "Subcommand 'd4d api run' is forbidden by D20; use 'd4d api batch' instead."
                 )
 
-    # Identify api subcommand if present
+    # Identify api subcommand and its argument slice if present
     api_subcmd: str | None = None
-    if first == "api" and len(words) >= 2:
-        api_subcmd = words[1]
+    api_subcmd_idx: int | None = None
+    if first == "api" and len(tokens) >= 2:
+        for j in range(1, len(tokens)):
+            if not tokens[j].startswith("-"):
+                api_subcmd = tokens[j]
+                api_subcmd_idx = j
+                break
     elif first in ("d4d", "python", "python3"):
         for i in range(len(tokens) - 1):
             if tokens[i] == "api":
-                for nxt in tokens[i + 1:]:
-                    if not nxt.startswith("-"):
-                        api_subcmd = nxt
+                for j in range(i + 1, len(tokens)):
+                    if not tokens[j].startswith("-"):
+                        api_subcmd = tokens[j]
+                        api_subcmd_idx = j
                         break
                 break
 
@@ -249,15 +284,43 @@ def validate_command(
                 f"API subcommand {api_subcmd!r} is not allowed; must be one of {sorted(ALLOWED_API_SUBCOMMANDS)}."
             )
 
+    batch_params: dict[str, Any] = {}
+    if api_subcmd == "batch" and api_subcmd_idx is not None:
+        batch_params = _parse_batch_options(tokens[api_subcmd_idx + 1 :])
+        is_dry = dry_run or bool(batch_params.get("dry_run"))
+    else:
+        is_dry = dry_run or ("--dry-run" in tokens)
+
+    if any(arg == "--skip-credential-check" or arg.startswith("--skip-credential-check=") for arg in tokens):
+        if not is_dry:
+            raise LauncherError(
+                "--skip-credential-check is only permitted when --dry-run is active."
+            )
+
+    reg_values: tuple[str, ...] = tuple(str(v) for v in batch_params.get("shared_generation_registration", ()))
+    ver_values: tuple[str, ...] = tuple(str(v) for v in batch_params.get("shared_generation_version", ()))
+    cmd_expect_values: tuple[str, ...] = tuple(str(v) for v in batch_params.get("expect_sha256", ()))
+    cost_values: tuple[str, ...] = tuple(str(v) for v in batch_params.get("max_cost_dollars", ()))
+
+    if len(reg_values) > 1:
+        raise LauncherError(
+            "Duplicate '--shared-generation-registration' options are not allowed."
+        )
+    if len(ver_values) > 1:
+        raise LauncherError(
+            "Duplicate '--shared-generation-version' options are not allowed."
+        )
+    if len(cmd_expect_values) > 1:
+        raise LauncherError(
+            "Duplicate '--expect-sha256' options are not allowed."
+        )
+    if len(cost_values) > 1:
+        raise LauncherError(
+            "Duplicate '--max-cost-dollars' options are not allowed."
+        )
+
     if api_subcmd == "batch" and not is_dry:
-        cap_raw: str | None = None
-        for idx, tok in enumerate(tokens):
-            if tok == "--max-cost-dollars" and idx + 1 < len(tokens):
-                cap_raw = tokens[idx + 1]
-                break
-            if tok.startswith("--max-cost-dollars="):
-                cap_raw = tok.split("=", 1)[1]
-                break
+        cap_raw: str | None = cost_values[0] if cost_values else None
         if cap_raw is None:
             raise LauncherError(
                 "Live 'd4d api batch' launch requires '--max-cost-dollars <positive_amount>' "
@@ -274,20 +337,29 @@ def validate_command(
                 f"--max-cost-dollars value {cap_raw!r} must be positive and finite."
             )
 
-    if expect_sha256 is not None:
-        normalized_expected = expect_sha256.strip().lower()
+    effective_expect = expect_sha256
+    if cmd_expect_values:
+        if effective_expect is not None and effective_expect.strip().lower() != cmd_expect_values[0].strip().lower():
+            raise LauncherError(
+                "Conflicting '--expect-sha256' values between launcher and batch command."
+            )
+        effective_expect = cmd_expect_values[0]
+
+    has_shared_reg = bool(reg_values) or any(
+        v not in ("0", "") for v in ver_values
+    )
+    if api_subcmd == "batch" and not is_dry and has_shared_reg and effective_expect is None:
+        raise LauncherError(
+            "Live shared-generation 'd4d api batch' launch requires '--expect-sha256 <sha256>' (D07)."
+        )
+
+    if effective_expect is not None:
+        normalized_expected = effective_expect.strip().lower()
         if not re.fullmatch(r"[0-9a-f]{64}", normalized_expected):
             raise LauncherError(
-                f"--expect-sha256 value {expect_sha256!r} must be a 64-character hex SHA-256 digest."
+                f"--expect-sha256 value {effective_expect!r} must be a 64-character hex SHA-256 digest."
             )
-        reg_raw: str | None = None
-        for idx, tok in enumerate(tokens):
-            if tok == "--shared-generation-registration" and idx + 1 < len(tokens):
-                reg_raw = tokens[idx + 1]
-                break
-            if tok.startswith("--shared-generation-registration="):
-                reg_raw = tok.split("=", 1)[1]
-                break
+        reg_raw: str | None = reg_values[0] if reg_values else None
         if not reg_raw:
             raise LauncherError(
                 "--expect-sha256 requires '--shared-generation-registration <path>' in the command."
@@ -494,6 +566,12 @@ def launch(
 
     validate_command(tokens, dry_run=dry_run, expect_sha256=expect_sha256, worktree_dir=worktree_dir)
     final_cmd = resolve_execution_command(tokens, python_bin, d4d_bin)
+    if (
+        expect_sha256 is not None
+        and "batch" in tokens
+        and not any(tok == "--expect-sha256" or tok.startswith("--expect-sha256=") for tok in final_cmd)
+    ):
+        final_cmd = list(final_cmd) + ["--expect-sha256", expect_sha256.strip().lower()]
 
     if background:
         resolved_log = validate_log_path(log_file, worktree_dir)

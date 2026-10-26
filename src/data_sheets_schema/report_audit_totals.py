@@ -18,7 +18,12 @@ import re
 from pathlib import Path
 from typing import Any
 
-INSTRUMENT_VERSION = 1
+# Version 1: initial deterministic extraction and comparison (#4766).
+# Version 2: anchor inline 'N findings: ...' pattern to sentence-start or explicit
+# count phrasing; count 'major'/'minor' only directly before 'finding(s)' or 'severity';
+# when no overall total is stated, extract per-severity subtotals only from a single
+# sentence/line stating two or more per-severity counts (#5094 R4 F9, F10).
+INSTRUMENT_VERSION = 2
 
 NUM_WORDS = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
@@ -73,9 +78,10 @@ TOTAL_PATTERNS = [
         r"(?!\s+(?:for\s+the\s+record\s+without|against\s+the\s+core\s+record|on\s+|about\s+|concerning\s+|specifically\b|without\s+recommending|left\b|addressed\b|withdrawn\b|rejected\b))",
         re.I,
     ),
-    # 7. Inline or sentence: N findings: H high, M medium... (supports bolding around N findings or severity list)
+    # 7. Sentence-start or explicit counts phrasing: N findings: H high, M medium... (supports bolding around N findings or severity list)
     re.compile(
-        r"\b(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings(?:\*\*)?\s*:\s*(?:\*\*)?(?:(?:\d+|[a-zA-Z]+)(?:\*\*)?\s+(?:high|medium|moderate|low|major|minor|critical|info|informational))",
+        r"(?:(?:^|[.!?]\s+)|(?:\b(?:audit(?:\s+counts|\s+findings|\s+summary)?|counts\s+(?:record|give|show|state|report|are)|has|had|identified|returned|produced|yielded|raised|found|totals?|there\s+(?:are|were))\s+))"
+        r"(?:\*\*)?(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings(?:\*\*)?\s*:\s*(?:\*\*)?(?:(?:\d+|[a-zA-Z]+)(?:\*\*)?\s+(?:high|medium|moderate|low|major|minor|critical|info|informational))",
         re.I | re.M,
     ),
     # 8. N findings against the (full|core|paired) record
@@ -100,7 +106,10 @@ EXPLICIT_TOTAL_PATTERNS = TOTAL_PATTERNS[:-1]
 FALLBACK_TOTAL_PATTERNS = TOTAL_PATTERNS[-1:]
 
 SEV_PATTERN = re.compile(
-    r"(?<![.\d])\b(" + WORD_OR_DIGIT + r")\s+(?:severity\s+)?(high|critical|major|medium|moderate|low|minor|info|informational|confirmations?)\b"
+    r"(?<![.\d])\b(" + WORD_OR_DIGIT + r")\s+"
+    r"(?:severity\s+(high|critical|major|medium|moderate|low|minor|info|informational|confirmations?)"
+    r"|(high|critical|medium|moderate|low|info|informational|confirmations?)"
+    r"|(major|minor)(?=[-\s]+severity\b|\s+findings?\b|\s*(?:[,.;:()]|\band\b|\bor\b|$)))\b"
     r"(?!\s*/\s*(?:high|critical|major|medium|moderate|low|minor|info|informational)\b)"
     r"(?!\s+(?:and|or)\s+(?:high|critical|major|medium|moderate|low|minor|info|informational)\b)"
     r"(?!(?:[-\s]+severity)?\s+pairs?\b)",
@@ -108,9 +117,15 @@ SEV_PATTERN = re.compile(
 )
 
 ZERO_SEV_PATTERNS = [
-    re.compile(r"\b(?:no|none\s+of\s+them|none\s+at|none)\s+(?:severity\s+)?(high|critical|major|medium|moderate|low|minor)\b", re.I),
+    re.compile(
+        r"\b(?:no|none\s+of\s+them|none\s+at|none)\s+"
+        r"(?:severity\s+(high|critical|major|medium|moderate|low|minor)"
+        r"|(high|critical|medium|moderate|low)"
+        r"|(major|minor)(?=[-\s]+severity\b|\s+findings?\b))\b",
+        re.I,
+    ),
     re.compile(r"\b(high|critical|major|medium|moderate|low|minor)\s*:\s*0\b", re.I),
-    re.compile(r"\bno\s+(?:high-severity|critical|major|medium-severity|low-severity)\s+defects?\b", re.I),
+    re.compile(r"\bno\s+(?:high-severity|critical|major-severity|medium-severity|low-severity)\s+defects?\b", re.I),
 ]
 
 
@@ -151,6 +166,36 @@ def _collect_pattern_matches(
     return collected
 
 
+def _extract_sevs_from_snippet(snippet: str) -> dict[str, int]:
+    """Extract per-severity subtotals from a text snippet."""
+    sevs: dict[str, int] = {}
+    for m in SEV_PATTERN.finditer(snippet):
+        # Ignore individual finding citations like 'finding 1, high'
+        prefix = snippet[max(0, m.start() - 15):m.start()]
+        if re.search(r"\bfinding\s*$", prefix, re.I):
+            continue
+        n = parse_number(m.group(1))
+        sev_raw = (m.group(2) or m.group(3) or m.group(4) or "").lower()
+        sev = CANONICAL_SEVERITY.get(sev_raw, sev_raw)
+        if n is not None and sev and sev not in sevs:
+            sevs[sev] = n
+
+    for zpat in ZERO_SEV_PATTERNS:
+        for m in zpat.finditer(snippet):
+            raw = next((g for g in m.groups() if g), "") if m.groups() else ""
+            if not raw:
+                matched_text = m.group(0).lower()
+                for k in ["high", "critical", "major", "medium", "moderate", "low", "minor"]:
+                    if k in matched_text:
+                        raw = k
+                        break
+            sev = CANONICAL_SEVERITY.get(raw.lower(), raw.lower())
+            if sev and sev not in sevs:
+                sevs[sev] = 0
+
+    return sevs
+
+
 def _extract_totals_detailed(
     report_text: str,
 ) -> tuple[int | None, list[int], dict[str, int]]:
@@ -174,38 +219,29 @@ def _extract_totals_detailed(
             if val not in distinct_totals:
                 distinct_totals.append(val)
 
-    # Look for severity statements near the total statement if found, or in the first 1500 chars
-    if matched_pos:
-        start = max(0, matched_pos[0] - 100)
-        end = min(len(report_text), matched_pos[1] + 300)
-        snippet = report_text[start:end]
-    else:
-        snippet = report_text[:1500]
-
+    # Look for severity statements near the total statement if found.
+    # When no overall total is stated, extract subtotals only from a single sentence/line
+    # that states two or more per-severity counts together (never isolated prose mentions).
     sevs: dict[str, int] = {}
-    for m in SEV_PATTERN.finditer(snippet):
-        # Ignore individual finding citations like 'finding 1, high'
-        prefix = snippet[max(0, m.start() - 15):m.start()]
-        if re.search(r"\bfinding\s*$", prefix, re.I):
-            continue
-        n = parse_number(m.group(1))
-        sev_raw = m.group(2).lower()
-        sev = CANONICAL_SEVERITY.get(sev_raw, sev_raw)
-        if n is not None and sev not in sevs:
-            sevs[sev] = n
-
-    for zpat in ZERO_SEV_PATTERNS:
-        for m in zpat.finditer(snippet):
-            raw = m.group(1) if m.groups() else ""
-            if not raw:
-                matched_text = m.group(0).lower()
-                for k in ["high", "critical", "major", "medium", "moderate", "low", "minor"]:
-                    if k in matched_text:
-                        raw = k
-                        break
-            sev = CANONICAL_SEVERITY.get(raw.lower(), raw.lower())
-            if sev and sev not in sevs:
-                sevs[sev] = 0
+    if matched_pos:
+        line_start = report_text.rfind("\n", 0, matched_pos[0])
+        sent_start = max(
+            report_text.rfind(". ", 0, matched_pos[0]),
+            report_text.rfind(".\n", 0, matched_pos[0]),
+        )
+        boundary = max(
+            line_start + 1 if line_start != -1 else 0,
+            sent_start + 2 if sent_start != -1 else 0,
+        )
+        start = max(boundary, matched_pos[0] - 100)
+        end = min(len(report_text), matched_pos[1] + 300)
+        sevs = _extract_sevs_from_snippet(report_text[start:end])
+    else:
+        for clause in re.split(r"(?:[.!?\n]+)", report_text[:1500]):
+            clause_sevs = _extract_sevs_from_snippet(clause)
+            if len(clause_sevs) >= 2:
+                sevs = clause_sevs
+                break
 
     return stated_total, distinct_totals, sevs
 
@@ -270,7 +306,11 @@ def check_report_audit_totals(
             }
         report_text = report.read_text(encoding="utf-8")
     else:
-        report_text = str(report)
+        report_str = str(report)
+        if "\n" not in report_str and len(report_str) < 260 and Path(report_str).is_file():
+            report_text = Path(report_str).read_text(encoding="utf-8")
+        else:
+            report_text = report_str
 
     stated_total, stated_totals, stated_by_severity = _extract_totals_detailed(report_text)
 
@@ -401,6 +441,6 @@ def check_report_audit_totals(
         "computed_total": computed_total,
         "computed_by_severity": computed_by_severity,
         "mismatches": mismatches,
-        "findings": mismatches,
+        "findings": list(mismatches),
         "status": status,
     }

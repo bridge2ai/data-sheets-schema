@@ -37,6 +37,7 @@ CBORG_BASE_URL = "https://api.cborg.lbl.gov"
 FORMAT = "registered_semantic_evaluation_v1"
 MAX_FILE_BYTES = shared.MAX_AUTHORITY_BYTES
 MAX_TRACE_BYTES = 32_000_000
+LOCK_DIR = Path(__file__).resolve().parents[3] / ".registered_eval_locks"
 EXECUTION_ADAPTER = """# Registered evaluation execution adapter v1
 
 The frozen scientific instrument above remains the scoring authority, including
@@ -622,49 +623,39 @@ def execute(
         if destination.resolve() == authority or destination.resolve() in authority.parents:
             raise ValueError("output overlaps a captured authority")
     prior_receipt_resolved: str | None = None
+    lock_dir = Path(LOCK_DIR)
+    lock_file = lock_dir / f"{prepared.digest}.json"
+    reexec_guard = lock_dir / f"{prepared.digest}.reexec.lock"
     if prior_receipt is not None:
+        if not isinstance(authorization_basis, str) or not authorization_basis.strip():
+            raise ValueError("prior_receipt re-execution requires a non-empty authorization_basis")
         pr_path = Path(prior_receipt).resolve()
         if not pr_path.is_file():
             raise ValueError(f"prior_receipt file not found: {pr_path}")
-        pr_doc = _json(_read(pr_path))
+        pr_raw = _read(pr_path)
+        pr_doc = _json(pr_raw)
         if not isinstance(pr_doc, dict) or pr_doc.get("plan_sha256") != prepared.digest:
             raise ValueError("prior_receipt does not match this plan_sha256")
+        if not lock_file.is_file():
+            raise ValueError("prior_receipt does not match any existing execution lock for this plan_sha256")
+        existing_lock = _json(_read(lock_file))
+        expected_receipt_path = existing_lock.get("receipt_path") if isinstance(existing_lock, dict) else None
+        expected_receipt_sha = existing_lock.get("receipt_sha256") if isinstance(existing_lock, dict) else None
+        if (
+            not expected_receipt_path
+            or Path(expected_receipt_path).resolve() != pr_path
+            or expected_receipt_sha != _sha(pr_raw)
+        ):
+            raise ValueError("prior_receipt does not match the receipt path and sha256 named by the execution lock")
         prior_receipt_resolved = str(pr_path)
-    lock_dir = destination.parent / ".registered_eval_locks"
-    lock_file = lock_dir / f"{prepared.digest}.json"
-    if lock_file.exists() and prior_receipt_resolved is None:
+    elif lock_file.exists():
         raise FileExistsError(
-            f"plan {prepared.digest} was already executed in {destination.parent}; "
-            "pass --prior-receipt to authorize re-execution"
+            f"plan {prepared.digest} was already executed; "
+            "pass --prior-receipt and --authorization-basis to authorize re-execution"
         )
     destination.mkdir(parents=True, exist_ok=False)
     lock_dir.mkdir(parents=True, exist_ok=True)
-    lock_payload = shared.canonical({
-        "plan_sha256": prepared.digest,
-        "destination": str(destination),
-        "prior_receipt": prior_receipt_resolved,
-        "authorization_basis": authorization_basis,
-    })
-    if prior_receipt_resolved is None:
-        fd = os.open(lock_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        with os.fdopen(fd, "wb") as lf:
-            lf.write(lock_payload)
-    else:
-        lock_file.write_bytes(lock_payload)
-    (destination / "registration.json").write_bytes(prepared.manifest)
-    (destination / "original.yaml").write_bytes(prepared.original)
-    (destination / "record.yaml").write_bytes(prepared.blinded)
-    (destination / "context.json").write_bytes(prepared.context)
-    # Capture all prompt resources locally for reproducibility, outside any
-    # evaluator workspace, with path identities retained in registration.json.
-    for rel, raw in prepared.resources:
-        target = destination / "instrument" / rel
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(raw)
-    (destination / "predecessor.md").write_text(prepared.predecessor)
-    (destination / "execution_adapter.txt").write_text(EXECUTION_ADAPTER)
-    (destination / "effective_system.txt").write_bytes(prepared.system_prompt)
-    (destination / "prompt.txt").write_text(rating_prompt(prepared))
+    receipt_path = (destination / "receipt.json").resolve()
     receipt = {
         **summary, "status": "incomplete", "ratings": [], "attempts": [], "total_cost_usd": "0",
         "unaccounted_reserved_usd": "0", "cost_accounting_complete": False, "runtime_attempts": 0,
@@ -673,7 +664,67 @@ def execute(
     }
     total = Decimal(0)
     per_attempt_cap = Decimal(plan["reserved_cost_dollars_per_attempt"])
+
+    def _write_receipt_and_lock() -> None:
+        receipt_bytes = shared.canonical(receipt)
+        (destination / "receipt.json").write_bytes(receipt_bytes)
+        lock_payload = shared.canonical({
+            "plan_sha256": prepared.digest,
+            "destination": str(destination),
+            "receipt_path": str(receipt_path),
+            "receipt_sha256": _sha(receipt_bytes),
+            "prior_receipt": prior_receipt_resolved,
+            "authorization_basis": authorization_basis,
+        })
+        tmp_lock = lock_dir / f".{prepared.digest}.{os.getpid()}.tmp"
+        tmp_lock.write_bytes(lock_payload)
+        os.replace(tmp_lock, lock_file)
+
     try:
+        initial_receipt_bytes = shared.canonical(receipt)
+        initial_lock_payload = shared.canonical({
+            "plan_sha256": prepared.digest,
+            "destination": str(destination),
+            "receipt_path": str(receipt_path),
+            "receipt_sha256": _sha(initial_receipt_bytes),
+            "prior_receipt": prior_receipt_resolved,
+            "authorization_basis": authorization_basis,
+        })
+        if prior_receipt_resolved is None:
+            fd = os.open(lock_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, "wb") as lf:
+                lf.write(initial_lock_payload)
+        else:
+            guard_fd = os.open(reexec_guard, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            os.close(guard_fd)
+            try:
+                current_lock = _json(_read(lock_file))
+                if (
+                    not isinstance(current_lock, dict)
+                    or Path(str(current_lock.get("receipt_path", ""))).resolve() != Path(prior_receipt_resolved)
+                    or current_lock.get("receipt_sha256") != _sha(_read(Path(prior_receipt_resolved)))
+                ):
+                    raise FileExistsError("prior_receipt was already consumed by another re-execution")
+                tmp_lock = lock_dir / f".{prepared.digest}.{os.getpid()}.tmp"
+                tmp_lock.write_bytes(initial_lock_payload)
+                os.replace(tmp_lock, lock_file)
+            finally:
+                reexec_guard.unlink(missing_ok=True)
+        (destination / "receipt.json").write_bytes(initial_receipt_bytes)
+        (destination / "registration.json").write_bytes(prepared.manifest)
+        (destination / "original.yaml").write_bytes(prepared.original)
+        (destination / "record.yaml").write_bytes(prepared.blinded)
+        (destination / "context.json").write_bytes(prepared.context)
+        # Capture all prompt resources locally for reproducibility, outside any
+        # evaluator workspace, with path identities retained in registration.json.
+        for rel, raw in prepared.resources:
+            target = destination / "instrument" / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+        (destination / "predecessor.md").write_text(prepared.predecessor)
+        (destination / "execution_adapter.txt").write_text(EXECUTION_ADAPTER)
+        (destination / "effective_system.txt").write_bytes(prepared.system_prompt)
+        (destination / "prompt.txt").write_text(rating_prompt(prepared))
         for index in range(1, plan["repeat_count"] + 1):
             prepared.assert_current()
             attempt = destination / f"rating-{index:03d}"
@@ -737,7 +788,7 @@ def execute(
             })
             attempt_receipt["status"] = "validated"
             receipt["total_cost_usd"] = str(total)
-            (destination / "receipt.json").write_bytes(shared.canonical(receipt))
+            _write_receipt_and_lock()
         receipt["status"] = "validated"
         receipt["cost_accounting_complete"] = True
     except (OSError, ValueError, subprocess.SubprocessError,
@@ -750,7 +801,7 @@ def execute(
         receipt["unaccounted_reserved_usd"] = (
             "0" if unaccounted_count == 0 else str(per_attempt_cap * unaccounted_count)
         )
-        (destination / "receipt.json").write_bytes(shared.canonical(receipt))
+        _write_receipt_and_lock()
     return receipt
 
 
