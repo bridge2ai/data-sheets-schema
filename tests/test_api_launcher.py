@@ -561,6 +561,117 @@ class TestLauncherCLI:
                 "--canary-baseline", "--dry-run",
             ])
 
+    def test_reject_help_flag_in_batch_args(self):
+        """N9: -h / --help inside d4d api batch raises LauncherError instead of Click Exit(0)."""
+        for flag in ("-h", "--help"):
+            with pytest.raises(LauncherError, match="not permitted inside 'd4d api batch'"):
+                validate_command(["d4d", "api", "batch", flag])
+
+    def test_expect_sha256_roster_and_underlying_registration_verification(self, tmp_path: Path):
+        """N1: validate_command verifies underlying registration files on batch rosters and rejects modified registrations."""
+        import hashlib
+        import json
+
+        reg1 = tmp_path / "registration_chorus_rep1.json"
+        reg2 = tmp_path / "registration_chorus_rep2.json"
+        reg1.write_text('{"format": "shared_generation_registration_v1", "id": 1}\n', encoding="utf-8")
+        reg2.write_text('{"format": "shared_generation_registration_v1", "id": 2}\n', encoding="utf-8")
+        reg1_sha = hashlib.sha256(reg1.read_bytes()).hexdigest()
+        reg2_sha = hashlib.sha256(reg2.read_bytes()).hexdigest()
+
+        # 1. Single-run v2 roster: accepts either reg1_sha or roster_sha, and rejects modified reg1
+        roster_v2 = tmp_path / "roster_v2.json"
+        roster_v2.write_text(
+            json.dumps({
+                "format": "shared_generation_batch_roster_v2",
+                "registrations": [
+                    {
+                        "project": "CHORUS",
+                        "label": "rep1",
+                        "registration_path": str(reg1),
+                        "registration_sha256": reg1_sha,
+                    }
+                ],
+            }),
+            encoding="utf-8",
+        )
+        roster_v2_sha = hashlib.sha256(roster_v2.read_bytes()).hexdigest()
+        cmd_v2 = [
+            "d4d", "api", "batch",
+            "--max-cost-dollars", "25.0",
+            "--shared-generation-registration", str(roster_v2),
+        ]
+        validate_command(cmd_v2, expect_sha256=reg1_sha)
+        validate_command(cmd_v2, expect_sha256=reg1_sha.upper())
+        validate_command(cmd_v2, expect_sha256=roster_v2_sha)
+
+        # Modify reg1 in place after roster creation -> both reg1_sha and roster_v2_sha must fail!
+        orig_reg1 = reg1.read_bytes()
+        reg1.write_bytes(orig_reg1 + b" ")
+        with pytest.raises(LauncherError, match="Registration SHA-256 mismatch"):
+            validate_command(cmd_v2, expect_sha256=reg1_sha)
+        with pytest.raises(LauncherError, match="Registration SHA-256 mismatch"):
+            validate_command(cmd_v2, expect_sha256=roster_v2_sha)
+        reg1.write_bytes(orig_reg1)
+
+        # 2. Unpinned v1 roster: accepts reg1_sha directly, but refuses unpinned roster_v1_sha alone
+        roster_v1 = tmp_path / "roster_v1.json"
+        roster_v1.write_text(
+            json.dumps({
+                "format": "shared_generation_batch_roster_v1",
+                "registrations": [
+                    {
+                        "project": "CHORUS",
+                        "label": "rep1",
+                        "registration_path": str(reg1),
+                    }
+                ],
+            }),
+            encoding="utf-8",
+        )
+        roster_v1_sha = hashlib.sha256(roster_v1.read_bytes()).hexdigest()
+        cmd_v1 = [
+            "d4d", "api", "batch",
+            "--max-cost-dollars", "25.0",
+            "--shared-generation-registration", str(roster_v1),
+        ]
+        validate_command(cmd_v1, expect_sha256=reg1_sha)
+        with pytest.raises(LauncherError, match="unpinned v1 roster SHA-256"):
+            validate_command(cmd_v1, expect_sha256=roster_v1_sha)
+
+        # 3. Multi-run v2 roster: accepts comma-separated reg1_sha,reg2_sha or pinned roster_sha
+        roster_multi = tmp_path / "roster_multi.json"
+        roster_multi.write_text(
+            json.dumps({
+                "format": "shared_generation_batch_roster_v2",
+                "registrations": [
+                    {
+                        "project": "CHORUS",
+                        "label": "rep1",
+                        "registration_path": str(reg1),
+                        "registration_sha256": reg1_sha,
+                    },
+                    {
+                        "project": "CHORUS",
+                        "label": "rep2",
+                        "registration_path": str(reg2),
+                        "registration_sha256": reg2_sha,
+                    },
+                ],
+            }),
+            encoding="utf-8",
+        )
+        roster_multi_sha = hashlib.sha256(roster_multi.read_bytes()).hexdigest()
+        cmd_multi = [
+            "d4d", "api", "batch",
+            "--max-cost-dollars", "50.0",
+            "--shared-generation-registration", str(roster_multi),
+        ]
+        validate_command(cmd_multi, expect_sha256=f"{reg1_sha},{reg2_sha}")
+        validate_command(cmd_multi, expect_sha256=roster_multi_sha)
+        with pytest.raises(LauncherError, match="Registration SHA-256 mismatch"):
+            validate_command(cmd_multi, expect_sha256=reg1_sha)
+
     def test_launch_forwards_expect_sha256_to_batch_command(self, tmp_path: Path, capsys):
         """R4 F3: launch forwards --expect-sha256 to d4d api batch."""
         import hashlib

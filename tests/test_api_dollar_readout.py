@@ -655,7 +655,7 @@ def test_a_completed_call_known_only_from_its_reasoning_entry_is_priced(tmp_path
         price_settled_rows(settled) + 2.78120375 + report["output_tokens"] * 25e-6, abs=1e-8)
 
 
-def test_shared_generation_2_routing_request_count_pin_is_used(tmp_path):
+def test_shared_generation_2_routing_request_count_pin_is_used(tmp_path, monkeypatch):
     """Shared generation 2 journals each admitted ordinary request under
     `source_heading_admissions.rows`, carrying both `count.input_tokens` and
     `payload.max_tokens` before dispatch."""
@@ -664,16 +664,33 @@ def test_shared_generation_2_routing_request_count_pin_is_used(tmp_path):
     inter.mkdir(parents=True)
     req_path = inter / "CHORUS_full_routing_request.json"
     req_bytes = json.dumps({
+        "generation_id": "c" * 32,
+        "registration_sha256": "d" * 64,
+        "phase": "full",
+        "attempt": 1,
+        "prior_usage_ids": [],
         "count": {
             "input_tokens": 74185,
             "context_limit_tokens": 1000000,
         },
         "payload": {
+            "model": "anthropic/claude-opus-4-7",
             "max_tokens": 128000,
+            "messages": [{"role": "user", "content": "..."}],
         },
     }, sort_keys=True).encode("utf-8")
     req_path.write_bytes(req_bytes)
     req_sha = hashlib.sha256(req_bytes).hexdigest()
+
+    # Also verify that a stale file of the same relative path in CWD does not
+    # shadow the hash-verified file under metadata_dir (R4 gen F6 / N8).
+    cwd_dir = tmp_path / "other_cwd"
+    (cwd_dir / "intermediate").mkdir(parents=True)
+    (cwd_dir / "intermediate" / "CHORUS_full_routing_request.json").write_text(
+        json.dumps({"count": {"input_tokens": 999}, "payload": {"max_tokens": 1000}}),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(cwd_dir)
 
     ledger_file = meta / "CHORUS_api_usage_sg2.json"
     ledger_file.write_text(json.dumps({
@@ -685,7 +702,10 @@ def test_shared_generation_2_routing_request_count_pin_is_used(tmp_path):
             "rows": [
                 {
                     "phase": "full",
-                    "request": {"path": str(req_path), "sha256": req_sha},
+                    "attempt": 1,
+                    "request": {"path": "intermediate/CHORUS_full_routing_request.json", "sha256": req_sha},
+                    "usage_id": None,
+                    "response": None,
                 }
             ]
         },
@@ -755,7 +775,7 @@ def test_derived_bound_is_capped_at_the_context_window_less_max_tokens(tmp_path)
     )
 
 
-def test_static_baseline_bound_is_flagged_with_warning():
+def test_static_baseline_bound_is_flagged_with_warning(tmp_path):
     """When no count pin or measured request exists yet, the static project baseline
     is flagged with `input_bound_static = True` and a display warning (#5117)."""
     ledger = {
@@ -772,4 +792,29 @@ def test_static_baseline_bound_is_flagged_with_warning():
         "WARNING: pending full input is a static baseline from earlier runs "
         "(baseline[CHORUS][full]); it may be low for this run"
     ) in formatted
+
+    # An unmeasured abandoned attempt that falls back to baseline[CHORUS][full] also warns (N8).
+    meta = tmp_path / "run_abandoned_static"
+    meta.mkdir()
+    (meta / "CHORUS_abandoned_attempts.jsonl").write_text(
+        json.dumps({"phase": "full", "usage_id": "u_aband_1", "generation_id": "g1"}) + "\n",
+        encoding="utf-8",
+    )
+    ledger_file = meta / "CHORUS_api_usage.json"
+    ledger_file.write_text(
+        json.dumps({
+            "version": 1,
+            "generation_id": "g1",
+            "identity": {"project": "CHORUS", "label": "test_static_warn", "condition": "generic_v10"},
+            "rows": [],
+        }),
+        encoding="utf-8",
+    )
+    aband_summary = compute_readout(ledger_file)
+    assert aband_summary["abandoned_input_bound_static"] is True
+    assert aband_summary["abandoned_attempts"][0]["input_bound_static"] is True
+    assert (
+        "WARNING: abandoned full input is a static baseline from earlier runs "
+        "(baseline[CHORUS][full]); it may be low for this run"
+    ) in format_readout(aband_summary)
 
