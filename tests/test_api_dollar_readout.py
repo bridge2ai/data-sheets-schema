@@ -653,3 +653,123 @@ def test_a_completed_call_known_only_from_its_reasoning_entry_is_priced(tmp_path
     summary = compute_readout(ledger_path)
     assert summary["settled_dollars"] == pytest.approx(
         price_settled_rows(settled) + 2.78120375 + report["output_tokens"] * 25e-6, abs=1e-8)
+
+
+def test_shared_generation_2_routing_request_count_pin_is_used(tmp_path):
+    """Shared generation 2 journals each admitted ordinary request under
+    `source_heading_admissions.rows`, carrying both `count.input_tokens` and
+    `payload.max_tokens` before dispatch."""
+    meta = tmp_path / "run_sg2"
+    inter = meta / "intermediate"
+    inter.mkdir(parents=True)
+    req_path = inter / "CHORUS_full_routing_request.json"
+    req_bytes = json.dumps({
+        "count": {
+            "input_tokens": 74185,
+            "context_limit_tokens": 1000000,
+        },
+        "payload": {
+            "max_tokens": 128000,
+        },
+    }, sort_keys=True).encode("utf-8")
+    req_path.write_bytes(req_bytes)
+    req_sha = hashlib.sha256(req_bytes).hexdigest()
+
+    ledger_file = meta / "CHORUS_api_usage_sg2.json"
+    ledger_file.write_text(json.dumps({
+        "version": 1,
+        "identity": {"project": "CHORUS", "label": "sg2_test", "condition": "generic_v10"},
+        "generation_id": "c" * 32,
+        "rows": [],
+        "source_heading_admissions": {
+            "rows": [
+                {
+                    "phase": "full",
+                    "request": {"path": str(req_path), "sha256": req_sha},
+                }
+            ]
+        },
+        "pending_call": {"phase": "full", "attempt": 1, "started_at": "2026-10-25T00:00:00Z"},
+    }), encoding="utf-8")
+
+    summary = compute_readout(ledger_file)
+    pending = summary["pending_call"]
+    assert pending["input_bound"] == 74185
+    assert pending["input_bound_source"] == "CHORUS_full_routing_request.json"
+    assert pending["output_cap_tokens"] == 128000
+    assert pending["input_bound_static"] is False
+    assert summary["pending_input_bound_static"] is False
+    assert "WARNING:" not in format_readout(summary)
+
+
+def test_derived_bound_is_capped_at_the_context_window_less_max_tokens(tmp_path):
+    """A derived input bound (`measured[full] + carried bytes`) cannot exceed the
+    room the context window leaves beside `max_tokens` (`window - max_tokens`)."""
+    _, ledger = _fixture_ledger(RUN_22A)
+    *settled, report = ledger["rows"]
+    ledger_path = _lay_out_run(tmp_path, RUN_22A, rows=settled, pending=_call(report),
+                               through="CHORUS_reconcile_core.yaml")
+    # Uncapped derived report bound on 10-22a is 336,135 tokens (303,266 uncached + 32,869 cache_write),
+    # with report fallback output_cap_tokens = 96,000.
+    # Under a 350,000-token window, window - max_tokens = 254,000 (cutting uncached input_tokens by 82,135).
+    reg_350k = {"audit_limits": {"context_limit_tokens": 350000}}
+    summary = compute_readout(ledger_path, registration=reg_350k)
+    pending = summary["pending_call"]
+    assert sum(pending["input_bound"].values()) == 350000 - 96000 == 254000
+    assert pending["input_bound"] == {
+        "input_tokens": 254000 - 32869,
+        "cache_write": 32869,
+        "cache_read": 0,
+    }
+    assert pending["input_bound_source"].endswith("; capped at the 350,000-token window less 96,000 max_tokens")
+
+    # When window - max_tokens is smaller than cache_write alone (e.g. window = 116,000 -> cap = 20,000),
+    # input_tokens is reduced to 0 and cache_write is clamped to 20,000 (R11-F2).
+    reg_116k = {"routing": {"generation_limits": {"context_limit_tokens": 116000}}}
+    summary_tight = compute_readout(ledger_path, registration=reg_116k)
+    pending_tight = summary_tight["pending_call"]
+    assert pending_tight["input_bound"] == {"input_tokens": 0, "cache_write": 20000, "cache_read": 0}
+    assert sum(pending_tight["input_bound"].values()) == 20000
+
+    # Without a registration, the window recorded in this generation's typed_audit stage context is used.
+    raw_ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    stage_ctx_path = ledger_path.parent / "intermediate" / "CHORUS_typed_audit_worker_context.json"
+    stage_bytes = json.dumps({"input_tokens": 1000, "context_limit_tokens": 350000}).encode("utf-8")
+    stage_ctx_path.write_bytes(stage_bytes)
+    raw_ledger["typed_audit"] = {
+        "stages": [
+            {
+                "context": {
+                    "path": str(stage_ctx_path),
+                    "sha256": hashlib.sha256(stage_bytes).hexdigest(),
+                }
+            }
+        ]
+    }
+    ledger_path.write_text(json.dumps(raw_ledger, indent=2) + "\n", encoding="utf-8")
+
+    summary_from_pin = compute_readout(ledger_path)
+    assert sum(summary_from_pin["pending_call"]["input_bound"].values()) == 254000
+    assert summary_from_pin["pending_call"]["input_bound_source"].endswith(
+        "; capped at the 350,000-token window less 96,000 max_tokens"
+    )
+
+
+def test_static_baseline_bound_is_flagged_with_warning():
+    """When no count pin or measured request exists yet, the static project baseline
+    is flagged with `input_bound_static = True` and a display warning (#5117)."""
+    ledger = {
+        "version": 1,
+        "identity": {"project": "CHORUS", "label": "test_static_warn", "condition": "generic_v10"},
+        "rows": [],
+        "pending_call": {"phase": "full", "attempt": 1},
+    }
+    summary = compute_readout(ledger, project="CHORUS")
+    assert summary["pending_input_bound_static"] is True
+    assert summary["pending_call"]["input_bound_static"] is True
+    formatted = format_readout(summary)
+    assert (
+        "WARNING: pending full input is a static baseline from earlier runs "
+        "(baseline[CHORUS][full]); it may be low for this run"
+    ) in formatted
+

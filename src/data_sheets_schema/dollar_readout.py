@@ -5,19 +5,21 @@ projects worst-case costs for in-flight pending calls across all generation phas
 - ``full`` (128,000 output cap)
 - ``full_readdress`` (8,000 output cap / READDRESS_MAX_TOKENS)
 - ``receipt_completion`` (cap and input from saved request and counted context)
-- ``reconcile_full`` (96,000 output cap)
-- ``report`` (96,000 output cap)
-- ``report_regate`` (96,000 output cap)
-- ``repair_full`` (96,000 output cap)
-- ``report_after_repair`` (96,000 output cap)
+- ``reconcile_full`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
+- ``report`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
+- ``report_regate`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
+- ``repair_full`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
+- ``report_after_repair`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
 - typed audit stages (cap and input from saved stage request and context)
 
 A pending call's input is bounded, in order, by an operator's custom bound; the
 runner's own count of the request (the receipt completion and typed audit stage
-contexts, and `{project}_{phase}_context.json` where the runner pins one, #5157);
-a measured attempt of the same request in this generation; the generation's
-measured `full` request plus the files the phase carries, at one token per byte;
-and the static project baseline (#5117).
+contexts, `{project}_{phase}_context.json` where the runner pins one, #5157, and
+shared generation 2's counted requests); a measured attempt of the same request
+in this generation; the generation's measured `full` request plus the files the
+phase carries, at one token per byte, within the room the context window leaves
+beside max_tokens; and the static project baseline, which the display flags as
+possibly low (#5117).
 
 Abandoned attempts are priced from the journal: this generation's from its
 boundary and a prior generation's wherever it lies. Without the stream's final
@@ -174,16 +176,17 @@ def price_abandoned_row(
     phase = str(entry.get("phase") or "unknown")
     final = has_final_usage(entry)
     output_tokens = _tokens(entry.get("output_tokens"))
+    sent = entry.get("max_tokens")
+    cap = sent if type(sent) is int and sent > 0 else get_phase_output_cap(phase, registration=registration)
     if not final:
-        sent = entry.get("max_tokens")
-        cap = sent if type(sent) is int and sent > 0 else get_phase_output_cap(phase, registration=registration)
         output_tokens = max(cap, output_tokens)
     recorded = {key: _tokens(entry.get(key)) for key in ("input_tokens", "cache_write", "cache_read")}
     if any(recorded.values()):
         input_dollars, input_source = price_tokens(**recorded), "recorded"
     else:
         bound, input_source = resolve_pending_input_bound(
-            phase, project, ledger_data=ledger_data, custom_bounds=custom_bounds, metadata_dir=metadata_dir
+            phase, project, ledger_data=ledger_data, custom_bounds=custom_bounds, metadata_dir=metadata_dir,
+            registration=registration, max_tokens=cap,
         )
         input_dollars = price_input_bound(bound, worst_case_cache=worst_case_cache) if bound is not None else 0.0
     return {
@@ -410,18 +413,67 @@ def _live_records(metadata_dir: Path, project: str, identity: Any) -> tuple[Path
     return full_dir / f"{project}_d4d.yaml", metadata_dir / f"{project}_d4d_core.yaml"
 
 
+def _routing_requests(ledger_data: Mapping[str, Any] | None) -> list[Mapping[str, Any]]:
+    """Shared generation 2's admitted ordinary requests, newest first: each is
+    counted and saved with its payload before dispatch, and journalled under
+    `source_heading_admissions` (`source_heading_admission.prepare`)."""
+    state = (ledger_data or {}).get("source_heading_admissions")
+    rows = state.get("rows") if isinstance(state, Mapping) else None
+    return [row for row in reversed(rows) if isinstance(row, Mapping)] if isinstance(rows, list) else []
+
+
 def _phase_count_pin(
-    phase: str, project: str | None, metadata_dir: Path | None, generation: Any
+    phase: str, project: str | None, metadata_dir: Path | None, ledger_data: Mapping[str, Any] | None
 ) -> tuple[dict[str, Any], Path] | None:
-    """The runner's count of this phase's request, pinned before dispatch as
-    `{project}_{phase}_context.json` (#5157), with its path, or None."""
+    """The runner's count of this phase's request before dispatch, with its path:
+    `{project}_{phase}_context.json` (#5157), or shared generation 2's saved
+    request, whose payload carries the max_tokens sent. None without one."""
     if not project or metadata_dir is None:
         return None
-    path = _latest_snapshot(metadata_dir, project, f"{project}_{phase}_context.json", generation)
+    path = _latest_snapshot(metadata_dir, project, f"{project}_{phase}_context.json",
+                            (ledger_data or {}).get("generation_id"))
     pin = extract_saved_snapshot(path) if path is not None else None
     if (isinstance(pin, dict) and pin.get("phase", phase) == phase
             and type(pin.get("input_tokens")) is int and pin["input_tokens"] >= 0):
         return pin, path
+    for row in _routing_requests(ledger_data):
+        if row.get("phase") != phase:
+            continue
+        saved = extract_saved_snapshot(row.get("request"), metadata_dir=metadata_dir)
+        count = saved.get("count") if isinstance(saved, dict) else None
+        if isinstance(count, Mapping) and type(count.get("input_tokens")) is int and count["input_tokens"] >= 0:
+            payload = saved.get("payload") if isinstance(saved.get("payload"), Mapping) else {}
+            return {"input_tokens": count["input_tokens"], "max_tokens": payload.get("max_tokens")}, Path(
+                row["request"]["path"])
+    return None
+
+
+def _context_window(
+    registration: Mapping[str, Any] | None, ledger_data: Mapping[str, Any] | None, metadata_dir: Path | None
+) -> int | None:
+    """The context window the runner's admission checks hold a request's input
+    plus max_tokens to: the registration's routing limits under shared
+    generation 2, else its `audit_limits` (#5157 and the typed audit stages).
+    Without a registration, the window this generation's own counts recorded
+    against those same limits. None when neither is available."""
+    if isinstance(registration, Mapping):
+        routing = registration.get("routing")
+        for limits in (routing.get("generation_limits") if isinstance(routing, Mapping) else None,
+                       registration.get("audit_limits")):
+            window = limits.get("context_limit_tokens") if isinstance(limits, Mapping) else None
+            if type(window) is int and window > 0:
+                return window
+    pins = [row.get("request") for row in _routing_requests(ledger_data)]
+    typed = (ledger_data or {}).get("typed_audit")
+    stages = typed.get("stages") if isinstance(typed, Mapping) else None
+    if isinstance(stages, list):
+        pins += [stage.get("context") for stage in reversed(stages) if isinstance(stage, Mapping)]
+    for pin in pins:
+        saved = extract_saved_snapshot(pin, metadata_dir=metadata_dir) if pin is not None else None
+        count = saved.get("count", saved) if isinstance(saved, dict) else None
+        window = count.get("context_limit_tokens") if isinstance(count, Mapping) else None
+        if type(window) is int and window > 0:
+            return window
     return None
 
 
@@ -492,8 +544,13 @@ def resolve_pending_input_bound(
     ledger_data: Mapping[str, Any] | None = None,
     custom_bounds: Mapping[str, Any] | None = None,
     metadata_dir: Path | None = None,
+    registration: Mapping[str, Any] | None = None,
+    max_tokens: int | None = None,
 ) -> tuple[Any, str]:
     """Resolve the input bound and source attribution for a pending phase call.
+
+    `max_tokens` is the cap the call sends; with the context window it caps a
+    bound derived from files.
 
     Returns:
         (bound, source_description) where bound is None if unresolved.
@@ -543,21 +600,32 @@ def resolve_pending_input_bound(
                 if data and isinstance(data.get("input_tokens"), int):
                     return data["input_tokens"], candidates[-1].name
 
-    # 4. The runner's count of this request, pinned before dispatch (#5157)
-    generation = ledger_data.get("generation_id") if ledger_data else None
+    # 4. The runner's count of this request before dispatch (#5157; shared generation 2)
     if metadata_dir is not None and metadata_dir.is_dir():
-        counted = _phase_count_pin(phase, project, metadata_dir, generation)
+        counted = _phase_count_pin(phase, project, metadata_dir, ledger_data)
         if counted is not None:
             return counted[0]["input_tokens"], counted[1].name
 
     # 5. A measured attempt of the same request, or the generation's measured
-    #    request plus the files this phase carries (#5117)
+    #    request plus the files this phase carries (#5117), no larger than the
+    #    room the context window leaves beside max_tokens: no larger request
+    #    is dispatched
     if project and ledger_data:
-        derived = _derived_input_bound(
-            phase, project, ledger_data, metadata_dir if metadata_dir is not None and metadata_dir.is_dir() else None
-        )
+        directory = metadata_dir if metadata_dir is not None and metadata_dir.is_dir() else None
+        derived = _derived_input_bound(phase, project, ledger_data, directory)
         if derived is not None:
-            return derived
+            bound, source = derived
+            window = _context_window(registration, ledger_data, directory) if type(max_tokens) is int else None
+            if window is not None and window > max_tokens and sum(bound.values()) > window - max_tokens:
+                excess = sum(bound.values()) - (window - max_tokens)
+                uncached_cut = min(bound["input_tokens"], excess)
+                bound = {
+                    **bound,
+                    "input_tokens": bound["input_tokens"] - uncached_cut,
+                    "cache_write": max(0, bound["cache_write"] - (excess - uncached_cut)),
+                }
+                source += f"; capped at the {window:,}-token window less {max_tokens:,} max_tokens"
+            return bound, source
 
     # 6. Project-specific empirical baseline bounds
     if project and project in PROJECT_BASELINE_INPUT_BOUNDS:
@@ -598,8 +666,8 @@ def price_pending_call(
             if stages and isinstance(stages[-1], Mapping):
                 saved_request = extract_saved_snapshot(stages[-1].get("request"), metadata_dir=metadata_dir)
     if saved_request is None and metadata_dir is not None and metadata_dir.is_dir():
-        # A count pin records the max_tokens its request was counted with (#5157).
-        counted = _phase_count_pin(phase, project, metadata_dir, (ledger_data or {}).get("generation_id"))
+        # A count records the max_tokens its request was counted with (#5157; shared generation 2).
+        counted = _phase_count_pin(phase, project, metadata_dir, ledger_data)
         saved_request = counted[0] if counted is not None else None
 
     output_cap = get_phase_output_cap(phase, saved_request=saved_request, registration=registration)
@@ -611,6 +679,8 @@ def price_pending_call(
         ledger_data=ledger_data,
         custom_bounds=custom_bounds,
         metadata_dir=metadata_dir,
+        registration=registration,
+        max_tokens=output_cap,
     )
     if input_bound is None:
         input_bound_unknown = True
@@ -631,6 +701,9 @@ def price_pending_call(
         "input_bound": input_bound,
         "input_bound_source": input_source,
         "input_bound_unknown": input_bound_unknown,
+        # Sized from earlier runs, not this one: the v10 CHORUS full request is
+        # about 33k tokens over its baseline (#5117).
+        "input_bound_static": input_source.startswith("baseline["),
         "input_worst_case_dollars": input_cost,
         "pending_worst_case_dollars": total_pending_worst_case,
     }
@@ -832,6 +905,7 @@ def compute_readout(
         "abandoned_attempts": abandoned,
         "has_pending_call": pending_info is not None,
         "pending_input_bound_unknown": pending_unknown,
+        "pending_input_bound_static": bool(pending_info and pending_info.get("input_bound_static")),
         "pending_call": pending_info,
         "total_projected_dollars": total_projected_worst_case,
         "cap_dollars": cap,
@@ -879,6 +953,11 @@ def format_readout(summary: Mapping[str, Any]) -> str:
                 f"worst_case=+${p['pending_worst_case_dollars']:.4f}"
             )
         lines.append(f"Pending input bound: {p['input_bound_source']}")
+        if p.get("input_bound_static"):
+            lines.append(
+                f"WARNING: pending {p['phase']} input is a static baseline from earlier runs "
+                f"({p['input_bound_source']}); it may be low for this run"
+            )
     else:
         lines.append("Pending call : (none in-flight)")
 
