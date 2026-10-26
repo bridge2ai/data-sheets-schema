@@ -1,0 +1,5 @@
+# Preserve exact generated evidence bytes, including standard CSV CRLF and
+# pytest's whitespace in failure tracebacks. Source code retains normal checks.
+*.tsv -text whitespace=cr-at-eol
+*.xml -text -whitespace
+*.log -text -whitespace

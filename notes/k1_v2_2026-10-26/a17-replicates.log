@@ -1,0 +1,6 @@
+AI_READI 2026-09-04g_claude-opus-5-api-generic-v8_rep1 a17: 12 workers, largest 1,204,832 B ~534,984 tok in flight (estimate_fits)
+AI_READI 2026-09-04g_claude-opus-5-api-generic-v8_rep3 a17: 12 workers, largest 1,230,356 B ~544,961 tok in flight (estimate_fits)
+CM4AI 2026-09-04g_claude-opus-5-api-generic-v8_rep2 a17: 8 workers, largest 887,731 B ~428,182 tok in flight (estimate_fits)
+CM4AI 2026-09-04g_claude-opus-5-api-generic-v8_rep3 a17: 8 workers, largest 907,452 B ~436,273 tok in flight (estimate_fits)
+VOICE 2026-09-04f_claude-opus-5-api-generic-v8_rep2 a17: 9 workers, largest 1,050,063 B ~494,777 tok in flight (estimate_fits)
+VOICE 2026-09-04f_claude-opus-5-api-generic-v8_rep3 a17: 11 workers, largest 1,120,619 B ~523,722 tok in flight (estimate_fits)

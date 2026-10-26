@@ -1,0 +1,79 @@
+......................................FFF..........                      [100%]
+=================================== FAILURES ===================================
+___________ test_root_minima_refuse_one_less_and_actual_worker_bound ___________
+
+    def test_root_minima_refuse_one_less_and_actual_worker_bound():
+        raw = "a:\n- alpha\n- beta\nb:\n- gamma\n- delta\nc: " + "x" * 300 + "\n"
+>       result = planning_bounds(batches, raw)
+
+tests/test_k1_size_requests_20261025.py:10: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+batches = <module 'data_sheets_schema.audit_batches' from '/private/tmp/d4d-codex-k1-v2-20261026/src/data_sheets_schema/audit_batches.py'>
+text = 'a:\n- alpha\n- beta\nb:\n- gamma\n- delta\nc: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n'
+
+    def planning_bounds(batches, text):
+        """Exact minima for whole-root packing, then lexicographic four-worker fit.
+    
+        There is no single joint minimum across paths, bytes and workers. First
+        minimize each per-worker bound independently over indivisible roots, then
+        use the worker count that greedy production packing actually needs. The
+        separate four-worker point minimizes paths, then bytes, for that worker cap.
+        """
+>       inventory, roots = batches._inventory(text)
+E       ValueError: too many values to unpack (expected 2)
+
+scripts/adhoc/k1_size_requests_20261025.py:36: ValueError
+________________ test_four_worker_lexicographic_point_is_tight _________________
+
+    def test_four_worker_lexicographic_point_is_tight():
+        raw = "\n".join(f"field{i}: value{i}" for i in range(11)) + "\n"
+>       result = planning_bounds(batches, raw)
+
+tests/test_k1_size_requests_20261025.py:24: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+batches = <module 'data_sheets_schema.audit_batches' from '/private/tmp/d4d-codex-k1-v2-20261026/src/data_sheets_schema/audit_batches.py'>
+text = 'field0: value0\nfield1: value1\nfield2: value2\nfield3: value3\nfield4: value4\nfield5: value5\nfield6: value6\nfield7: value7\nfield8: value8\nfield9: value9\nfield10: value10\n'
+
+    def planning_bounds(batches, text):
+        """Exact minima for whole-root packing, then lexicographic four-worker fit.
+    
+        There is no single joint minimum across paths, bytes and workers. First
+        minimize each per-worker bound independently over indivisible roots, then
+        use the worker count that greedy production packing actually needs. The
+        separate four-worker point minimizes paths, then bytes, for that worker cap.
+        """
+>       inventory, roots = batches._inventory(text)
+E       ValueError: too many values to unpack (expected 2)
+
+scripts/adhoc/k1_size_requests_20261025.py:36: ValueError
+__________________ test_empty_and_escaped_roots_are_preserved __________________
+
+    def test_empty_and_escaped_roots_are_preserved():
+>       assert planning_bounds(batches, "{}\n")["minimum_plan"]["workers"][0]["paths"] == []
+
+tests/test_k1_size_requests_20261025.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+batches = <module 'data_sheets_schema.audit_batches' from '/private/tmp/d4d-codex-k1-v2-20261026/src/data_sheets_schema/audit_batches.py'>
+text = '{}\n'
+
+    def planning_bounds(batches, text):
+        """Exact minima for whole-root packing, then lexicographic four-worker fit.
+    
+        There is no single joint minimum across paths, bytes and workers. First
+        minimize each per-worker bound independently over indivisible roots, then
+        use the worker count that greedy production packing actually needs. The
+        separate four-worker point minimizes paths, then bytes, for that worker cap.
+        """
+>       inventory, roots = batches._inventory(text)
+E       ValueError: too many values to unpack (expected 2)
+
+scripts/adhoc/k1_size_requests_20261025.py:36: ValueError
+-------- generated xml file: /private/tmp/d4d-k1-v2-tests-20261026.xml ---------
+=========================== short test summary info ============================
+FAILED tests/test_k1_size_requests_20261025.py::test_root_minima_refuse_one_less_and_actual_worker_bound
+FAILED tests/test_k1_size_requests_20261025.py::test_four_worker_lexicographic_point_is_tight
+FAILED tests/test_k1_size_requests_20261025.py::test_empty_and_escaped_roots_are_preserved
+3 failed, 48 passed in 0.19s

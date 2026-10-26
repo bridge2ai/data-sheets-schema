@@ -1,0 +1,7 @@
+CHORUS 2026-10-22a_claude-opus-5-api-generic-v10_rep1 k1_minimum: 3 workers, largest 356,173 B ~210,116 tok in flight (estimate_fits)
+CHORUS 2026-10-20a_claude-opus-5-api-generic-v10_rep1 k1_minimum: 3 workers, largest 353,153 B ~208,877 tok in flight (estimate_fits)
+AI_READI 2026-09-04g_claude-opus-5-api-generic-v8_rep2 k1_minimum: 7 workers, largest 1,318,753 B ~579,517 tok in flight (estimate_fits)
+CM4AI 2026-09-04g_claude-opus-5-api-generic-v8_rep1 k1_minimum: 6 workers, largest 881,386 B ~425,579 tok in flight (estimate_fits)
+VOICE 2026-09-04f_claude-opus-5-api-generic-v8_rep1 k1_minimum: 10 workers, largest 1,049,519 B ~494,554 tok in flight (estimate_fits)
+VOICE_PEDIATRIC 2026-09-04f_claude-opus-5-api-generic-v8_rep1 k1_minimum: 10 workers, largest 821,489 B ~401,007 tok in flight (estimate_fits)
+KIDS_FIRST 2026-09-04g_claude-opus-5-api-generic-v8_rep2 k1_minimum: typed REFUSED: ValueError: missing explicitly supplied vocabulary
