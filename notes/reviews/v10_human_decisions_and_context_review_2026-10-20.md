@@ -136,6 +136,8 @@ On **2026-10-23T23:35Z**, the owner directed `"next address these based on curre
 
 #### 5.1.1 D07 Budget Accounting & Why `2026-10-22b` Is Voided
 
+Recomputed via `PYTHONPATH=src python3 scripts/api_dollar_readout.py --json <archived_run_dir>` (`compute_readout` at `b3699be4f` / `1a2f10b89`) against the archived run directories at `8b9dc5798` (`data/ATTIC/d4d_concatenated_archived/claudecode_api/2026-10-20a_claude-opus-5-api-generic-v10_rep1` and `2026-10-22a_claude-opus-5-api-generic-v10_rep1`):
+
 | Budget Slice / Run | Allocation / Limit | Settled Spend | Total Spend (incl. Abandoned Calls) | Remaining Balance / Status |
 | --- | --- | --- | --- | --- |
 | **`2026-10-20a`** (`CHORUS` rep1, mid-run `25k` → `64k`) | Attempt 1 of 2 (`$15.00` pilot) | `$20.59` (`$20.5875` across 11 `usage.jsonl` rows) | `$23.84` worst-case reserved (`$23.8421`: `+$3.25` / `$3.2546` abandoned `report` attempt 1 at `96,000` `max_tokens` cap, journal row `540cf4a0…`; `$21.44` input-only `+$0.85`) | **Archived to `data/ATTIC/` as invalid evidence only (`D31`/`D-F`, `#5138`, `#5115`, `#5142`)** |
