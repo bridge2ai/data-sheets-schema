@@ -5,11 +5,11 @@ projects worst-case costs for in-flight pending calls across all generation phas
 - ``full`` (128,000 output cap)
 - ``full_readdress`` (8,000 output cap / READDRESS_MAX_TOKENS)
 - ``receipt_completion`` (cap and input from saved request and counted context)
-- ``reconcile_full`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report_regate`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``repair_full`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report_after_repair`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
+- ``reconcile_full`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``report`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``report_regate`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``repair_full`` (96,000 output cap)
+- ``report_after_repair`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
 - typed audit stages (cap and input from saved stage request and context)
 
 A pending call's input is bounded, in order, by an operator's custom bound; the
