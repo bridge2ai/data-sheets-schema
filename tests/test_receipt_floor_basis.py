@@ -8,8 +8,11 @@ basis; a floor without a basis keeps its v2 meaning, byte for byte. Since D37
 (2026-10-25, replacing D32) the receipted part is the phase-1 snapshot itself:
 the floor gates `with_receipt_at_receipt / receiptable_at_receipt`.
 """
+import copy
+import functools
 import hashlib
 import json
+from pathlib import Path
 
 import pytest
 import yaml
@@ -349,6 +352,95 @@ def test_a_result_saved_before_the_envelope_fields_still_verifies(monkeypatch):
         rc._checked_result(None, response, {**legacy, "state": "answers_incomplete"})
     with pytest.raises(UsageLedgerError):
         rc._checked_result(None, response, {**current, "answer_envelope": "bare"})
+
+
+# Both CHORUS v10 canaries' saved receipt completions, copied from their run
+# directories (each fixture names its source files and their sha256): the
+# inputs as `_result` reads them, the response and the result as saved. The
+# results predate the envelope fields and D37's snapshot counters.
+SAVED = Path(__file__).with_name("fixtures") / "receipt_completion_saved"
+SNAPSHOT_COUNTERS = ("receiptable_at_receipt", "with_receipt_at_receipt")
+
+
+@functools.lru_cache(maxsize=None)
+def _saved_completion(name):
+    fixture = json.loads((SAVED / f"CHORUS_{name}.json").read_text(encoding="utf-8"))
+    response = fixture["response"]
+    expected = rc._result(fixture["inputs"], response["text"].encode(),
+                          truncated=response["stop_reason"] == "max_tokens",
+                          no_work=response["stop_reason"] == "no_work")
+    return json.dumps(fixture), json.dumps(expected)
+
+
+def _saved(name):
+    """(inputs, response, saved result, the result recomputed today), as fresh copies."""
+    fixture, expected = (json.loads(text) for text in _saved_completion(name))
+    return fixture["inputs"], fixture["response"], fixture["result"], expected
+
+
+@pytest.mark.parametrize("name", ["2026-10-20a", "2026-10-22a"])
+def test_a_completion_saved_before_the_snapshot_counters_still_verifies(name):
+    """Recomputed today, each canary's `before` and `after` blocks carry D37's
+    two counters, which the saved result lacks. It verifies, and comes back
+    as saved."""
+    fixture = json.loads((SAVED / f"CHORUS_{name}.json").read_text(encoding="utf-8"))
+    result = fixture["result"]
+    saved = json.dumps(result, sort_keys=True)
+    assert not any(set(SNAPSHOT_COUNTERS) & set(result[block]["slots"]) for block in ("before", "after"))
+    assert rc._checked_result(fixture["inputs"], fixture["response"], result) is result
+    assert json.dumps(result, sort_keys=True) == saved
+
+
+def test_without_the_projection_a_canary_is_refused(monkeypatch):
+    from data_sheets_schema.usage_ledger import UsageLedgerError
+    inputs, response, result, expected = _saved("2026-10-22a")
+    monkeypatch.setattr(rc, "_result", lambda *args, **kwargs: copy.deepcopy(expected))
+    assert rc._checked_result(inputs, response, result) is result
+    monkeypatch.setattr(rc, "_SNAPSHOT_SLOT_KEYS", frozenset())
+    with pytest.raises(UsageLedgerError, match="saved result differs"):
+        rc._checked_result(inputs, response, result)
+
+
+def _counters(result, expected, blocks, keys, shift=0):
+    """Give the saved result's check blocks the recomputed counters, shifted."""
+    for block in blocks:
+        result[block]["slots"].update({k: expected[block]["slots"][k] + shift for k in keys})
+
+
+CHANGES = {
+    # Anything else that differs is still refused.
+    "count": lambda r, e: r["counts"].update(requested=r["counts"]["requested"] + 1),
+    "slot-counter": lambda r, e: r["before"]["slots"].update(with_receipt=r["before"]["slots"]["with_receipt"] + 1),
+    "receipt-yaml": lambda r, e: r.update(receipt_yaml=r["receipt_yaml"] + "# edited\n"),
+    "extra-field": lambda r, e: r.update(note="a field no result has"),
+    "d32-counter": lambda r, e: r["after"]["slots"].update(added_after_receipt_unmatched=0),
+    "dropped-counter": lambda r, e: r["after"]["slots"].pop("never_receipted"),
+    "one-envelope-key": lambda r, e: r.update(answer_envelope=e["answer_envelope"]),
+    # The counters cannot be supplied to match: values other than the
+    # recomputed ones, one counter without the other, one block without them.
+    "forged-counters": lambda r, e: _counters(r, e, ("before", "after"), SNAPSHOT_COUNTERS, shift=1),
+    "one-counter": lambda r, e: _counters(r, e, ("before", "after"), SNAPSHOT_COUNTERS[:1]),
+    "one-block": lambda r, e: _counters(r, e, ("before",), SNAPSHOT_COUNTERS),
+}
+
+
+@pytest.mark.parametrize("change", list(CHANGES))
+def test_a_saved_completion_that_differs_anywhere_else_is_refused(monkeypatch, change):
+    from data_sheets_schema.usage_ledger import UsageLedgerError
+    inputs, response, result, expected = _saved("2026-10-22a")
+    monkeypatch.setattr(rc, "_result", lambda *args, **kwargs: copy.deepcopy(expected))
+    CHANGES[change](result, expected)
+    with pytest.raises(UsageLedgerError, match="saved result differs"):
+        rc._checked_result(inputs, response, result)
+
+
+def test_a_completion_saved_with_the_counters_compares_them_exactly(monkeypatch):
+    """A result saved after D37 carries the recomputed counters in both blocks
+    and verifies by exact comparison."""
+    inputs, response, result, expected = _saved("2026-10-22a")
+    monkeypatch.setattr(rc, "_result", lambda *args, **kwargs: copy.deepcopy(expected))
+    _counters(result, expected, ("before", "after"), SNAPSHOT_COUNTERS)
+    assert rc._checked_result(inputs, response, result) is result
 
 
 def test_a_basis_is_refused_outside_v2_registrations():
