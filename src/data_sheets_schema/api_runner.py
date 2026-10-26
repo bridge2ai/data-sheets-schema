@@ -5518,6 +5518,46 @@ def _declared_error_type(exc: Exception) -> str | None:
     return None
 
 
+def _transient(exc: BaseException) -> bool:
+    """Whether a provider error is one `_call_with_retry` retries.
+
+    The dispatch's watchdog and incomplete-stream cases are its own; this is
+    the classification it shares with the admission count (#5157).
+    """
+    import anthropic          # imported here, not at module load
+    transient = isinstance(exc, (
+        getattr(anthropic, "RateLimitError", ()),
+        getattr(anthropic, "APIConnectionError", ()),
+        getattr(anthropic, "InternalServerError", ()),
+    ))
+    # Raw httpx transport errors are not wrapped in an anthropic class
+    # when they occur mid-stream, so classifying only on anthropic types
+    # misses them. A 64k-token streamed response through a proxy is a
+    # long-lived connection; `RemoteProtocolError: peer closed
+    # connection without sending complete message body` killed the
+    # second live CHORUS run in phase 1 without a single retry.
+    # TransportError is the base for connect/read/write/protocol/timeout.
+    try:
+        import httpx
+        if isinstance(exc, httpx.TransportError):
+            transient = True
+    except ImportError:          # pragma: no cover - httpx ships with the SDK
+        pass
+    status = getattr(exc, "status_code", None)
+    if status is not None and 500 <= status < 600:
+        transient = True
+    # Mid-stream errors carry the *stream's* status, which is 200: the
+    # connection opened fine and the failure arrived later as an SSE
+    # `error` event. So an `overloaded_error` reaches here as a plain
+    # APIStatusError with status_code 200, matches none of the checks
+    # above, and kills the run on the first attempt — which is what
+    # happened to the first fitness sweep. Classify on the error body's
+    # own type, which is where the transience is actually stated.
+    if not transient and _transient_error_type(exc):
+        transient = True
+    return transient
+
+
 #: How many clean early closes one call tolerates before the phase fails
 #: (#1016): a retry costs a whole phase, and a connection that drops twice
 #: within one call will drop a third time. Per call, not consecutive: a
@@ -5603,15 +5643,36 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
 SHARED_ADMITTED_PHASES = frozenset({"reconcile_full", "report", "report_regate", "report_after_repair"})
 
 
+class ContextNotAdmitted(UsageLedgerError):
+    """A shared-generation request refused before dispatch (#5157).
+
+    `facts` is what the refusal rests on, as the record states it: the phase,
+    why, the output cap, the registered window and, where the endpoint gave
+    one, its count. A UsageLedgerError, so reconcile_full or the report,
+    which the run cannot complete without, stops the run before dispatch.
+    The report regate catches it and keeps the report as written, as for any
+    regate that fails (#967), and the run goes on to its record. The refresh
+    after repair catches it and latches a terminal evidence refusal that
+    names it (#1820): the report as written no longer describes the records.
+    """
+
+    def __init__(self, message: str, facts: dict[str, Any]):
+        super().__init__(message)
+        self.facts = facts
+
+
 def _admit_shared_context(spec: RunSpec, phase: str, attempt: int, client, kwargs: dict[str, Any]) -> None:
     """Count the request `_call_with_retry` will send; refuse it if it cannot fit.
 
     The receipt completion's count and window check: `messages.count_tokens`
-    on a single-attempt client, against the window the registration's
-    `audit_limits` assert, as the typed audit stages use it. Raised before the
-    usage call begins, a refusal sends nothing, leaves no pending call or
-    usage row, consumes no regate allowance and is not retried; a resume
-    recounts the same request. An admitted count is kept beside the run.
+    against the window the registration's `audit_limits` assert, as the typed
+    audit stages use it. The count takes the transport of the call it admits:
+    the same client, and the transient errors `_call_with_retry` retries are
+    retried up to MAX_ATTEMPTS. A refusal raises `ContextNotAdmitted` before
+    the usage call begins, so it sends nothing, leaves no pending call or
+    usage row, consumes no regate allowance and is not retried. The refused
+    count is kept as `{phase}_context_refused.json`, an admitted one as
+    `{phase}_context.json`.
     """
     from . import receipt_completion as receipts
     from .shared_generation import assert_current
@@ -5622,15 +5683,38 @@ def _admit_shared_context(spec: RunSpec, phase: str, attempt: int, client, kwarg
         "name": kwargs["model"], "temperature": kwargs["temperature"],
         "thinking": kwargs.get("thinking"), "effort": kwargs.get("effort")},
         {"max_output_tokens": min(kwargs["max_tokens"], output_limit(kwargs["model"]))})
-    count = receipts._measure_context(receipts._single_attempt_client(client), payload, limits, label=phase)
+    facts: dict[str, Any] = {
+        "phase": phase, "attempt": attempt, "max_tokens": payload["max_tokens"],
+        "context_limit_tokens": limits["context_limit_tokens"],
+        "context_limit_basis": limits["context_limit_basis"],
+        "request_sha256": receipts.sha(receipts.canonical(payload))}
+
+    def refuse(reason: str, detail: str, **found: Any) -> ContextNotAdmitted:
+        facts.update(reason=reason, **found)
+        receipts._save(spec, f"{phase}_context_refused.json", facts)
+        return ContextNotAdmitted(f"{phase} not admitted: {detail}", dict(facts))
+
+    for tries in range(1, MAX_ATTEMPTS + 1):
+        try:
+            count = receipts._measure_context(client, payload, limits, label=phase)
+            break
+        except UsageLedgerError as exc:
+            cause = exc.__cause__
+            if tries == MAX_ATTEMPTS or cause is None or not _transient(cause):
+                raise refuse("count_unavailable", str(exc), error=str(exc)[:500]) from exc
+            print(f"   {phase} count attempt {tries} {type(cause).__name__}; retrying")
+            time.sleep(_rate_limit_pause(cause) or BACKOFF_BASE_SECONDS ** tries)
     tokens, limit = count["input_tokens"], limits["context_limit_tokens"]
     if type(tokens) is int and tokens >= 0 and tokens + payload["max_tokens"] > limit:
-        raise UsageLedgerError(
-            f"{phase} not admitted: the endpoint counted {tokens:,} input tokens and max_tokens is "
+        raise refuse("over_window",
+            f"the endpoint counted {tokens:,} input tokens and max_tokens is "
             f"{payload['max_tokens']:,}, {tokens + payload['max_tokens']:,} in all, over the registered "
             f"context limit of {limit:,} tokens ({limits['context_limit_basis']}); refused before "
-            "dispatch and not retried")
-    receipts._context_check(count, payload, limits, label=phase)
+            "dispatch and not retried", input_tokens=tokens)
+    try:
+        receipts._context_check(count, payload, limits, label=phase)
+    except UsageLedgerError as exc:
+        raise refuse("count_unusable", str(exc), input_tokens=receipts._counter_evidence(tokens)) from exc
     receipts._save(spec, f"{phase}_context.json",
                    {**count, "phase": phase, "attempt": attempt, "max_tokens": payload["max_tokens"]})
 
@@ -5688,7 +5772,6 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     every attempt, and retrying only multiplies the delay before the operator
     sees the real problem.
     """
-    import anthropic
     limit = MAX_ATTEMPTS if transport_attempts is None else transport_attempts
     if type(limit) is not int or limit < 1:
         raise ValueError("transport_attempts must be a positive integer")
@@ -5832,36 +5915,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             # abandoned worker may still deliver events after this point.
             trace.response(getattr(exc, "response", None))
             stream_trace = trace.snapshot(exception=exc, provider_error_type=_declared_error_type(exc))
-            transient = isinstance(exc, (
-                getattr(anthropic, "RateLimitError", ()),
-                getattr(anthropic, "APIConnectionError", ()),
-                getattr(anthropic, "InternalServerError", ()),
-            ))
-            # Raw httpx transport errors are not wrapped in an anthropic class
-            # when they occur mid-stream, so classifying only on anthropic types
-            # misses them. A 64k-token streamed response through a proxy is a
-            # long-lived connection; `RemoteProtocolError: peer closed
-            # connection without sending complete message body` killed the
-            # second live CHORUS run in phase 1 without a single retry.
-            # TransportError is the base for connect/read/write/protocol/timeout.
-            try:
-                import httpx
-                if isinstance(exc, httpx.TransportError):
-                    transient = True
-            except ImportError:          # pragma: no cover - httpx ships with the SDK
-                pass
-            status = getattr(exc, "status_code", None)
-            if status is not None and 500 <= status < 600:
-                transient = True
-            # Mid-stream errors carry the *stream's* status, which is 200: the
-            # connection opened fine and the failure arrived later as an SSE
-            # `error` event. So an `overloaded_error` reaches here as a plain
-            # APIStatusError with status_code 200, matches none of the checks
-            # above, and kills the run on the first attempt — which is what
-            # happened to the first fitness sweep. Classify on the error body's
-            # own type, which is where the transience is actually stated.
-            if not transient and _transient_error_type(exc):
-                transient = True
+            transient = _transient(exc)
             # A watchdog abandonment is transient by definition: the point of
             # leaving a stalled call is to try again — and it is said, because
             # a silent retry made a stalled phase look like a slow one (#779).
@@ -5957,7 +6011,7 @@ def _rate_limit_pause(exc: Exception, *, now: datetime | None = None) -> float |
     dies: the reset can be ten minutes out, and the ordinary backoff ladder is
     thirty seconds long.
     """
-    import anthropic          # imported here, as in `_call_with_retry`
+    import anthropic          # imported here, as in `_transient`
     if not isinstance(exc, getattr(anthropic, "RateLimitError", ())):
         return None
     m = re.search(r"resets at:\s*([\d]{4}-[\d]{2}-[\d]{2}[ T][\d]{2}:[\d]{2}:[\d]{2})",
@@ -6158,9 +6212,16 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         return out
     as_written = spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else ""
     _snapshot(spec, f"{spec.project}_report_before_regate.md", as_written)
-    out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
-                                            phase="report_regate",
-                                            contradictions=contradictions)
+    try:
+        out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
+                                                phase="report_regate",
+                                                contradictions=contradictions)
+    except ContextNotAdmitted as refused:
+        # Refused before dispatch (#5157): the report as written stands, as
+        # for a regate that fails (#967), and the gate says why. Nothing was
+        # admitted, so the one regeneration stays unspent.
+        out.update({"regenerated": False, "regate_refused": refused.facts,
+                    "reason": "the regate was not admitted before dispatch; the report as written was kept"})
     out["regeneration_attempted"] = report_regate_attempted(spec)
     after = reading()
     require_source_reviews(spec, carry, evidence=after.get("evidence_assertions"))
@@ -7577,7 +7638,19 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                         "artifact a reviewer reads instead of the diff"),
             }
             if not spec.removal_repair_version:
-                _regenerate_report(spec, client, settings, usage, carry)
+                try:
+                    refreshed = _regenerate_report(spec, client, settings, usage, carry)
+                except ContextNotAdmitted as refused:
+                    # Refused before dispatch (#5157). The report as written
+                    # describes the records before repair, which the gate's
+                    # source review refuses in any case. Latch the refusal
+                    # under its own cause, so a resume re-raises it before
+                    # any drift logic (#1820) rather than walking into it.
+                    _assert_evidence_clean({"checked": False, "findings": [
+                        {"kind": "report_refresh_not_admitted", **refused.facts}]}, "report", spec=spec)
+                # Whether the report was rewritten, not only why it should
+                # have been: a refresh that failed keeps the report as written.
+                rec.data["report_regenerated_after_repair"]["refreshed"] = refreshed
     else:
         rec.data["repair"] = prior_repair or None
     removal_check = None
