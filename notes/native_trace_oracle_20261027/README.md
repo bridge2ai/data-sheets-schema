@@ -50,10 +50,13 @@ oracle. Unknown attributes, including private ones, are never filtered out.
 Three causal mutations exercise a missing cache, a foreign cache entry and
 an unexpected private field.
 
-Focused validation is pending review and the orchestrator's serial test slot.
-The retained 41 setup errors remain historical failures; they are not converted
-into passes by this source repair. Any newly exposed behavioral mismatch must
-be investigated rather than absorbed into the oracle or skipped.
+Independent static review cleared the exact fixture and explicit cache checks.
+At `9e1ac52272ded77eb73f1656ff1b88e6d073439e`, all 56 cases across the three
+repaired modules passed, including the 41 original oracle cases and three new
+causal mutations. Source and project-import checks passed. The retained 41
+setup errors remain historical failures; the new targeted run does not rewrite
+that record or establish a fresh whole-suite pass. Full evidence is linked in
+[the restack handoff](../native_n2_restack_2026-10-26.md).
 
 Reproduction of fixture/provenance creation requires fresh output paths:
 
