@@ -1,0 +1,100 @@
+{
+  "aggregate_pass_claim": "not_made",
+  "excluded_case_and_cache_directories": "retained externally; contents not read or attested",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-n2-public-driver-20261027/scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "inputs_declared_completed_by_caller": true,
+  "metadata": "file bytes/modes preserved; archive timestamps normalized; directory metadata omitted",
+  "runs": [
+    {
+      "archive": {
+        "bytes": 309,
+        "file": "run-01.tar.gz",
+        "sha256": "5efa9a9c54dcd913fd148b6c3c666d2a650dfb5b11827f3d3565a44a3e4b216b"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 19,
+          "mode": 420,
+          "path": "neutral/outcome.json",
+          "sha256": "759315d5ae8c31136d2a7bc803e591554894987559325cdf7e0b5965bec0eaca"
+        },
+        {
+          "bytes": 64,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "f49265b19b1c8de812c637302403b8fb9b9f235bdd60e9bf57227251b0c8bc80"
+        },
+        {
+          "bytes": 30,
+          "mode": 416,
+          "path": "pytest.log",
+          "sha256": "649b1c9f46e300b684586bd6c37502ee5c96a9b3587a74723fea46c78a12c449"
+        },
+        {
+          "bytes": 59,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "812745eb9be896cc1b9f40603bd9cae536567177bbc8de2c1249f4f486d53ee6"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "__pycache__",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        },
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        },
+        {
+          "kind": "directory",
+          "path": "neutral/cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 0,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 1,
+            "unmarked_identified_entries": 0,
+            "unnamed_or_unclassified_entries": 1
+          }
+        },
+        "outcomes": {
+          "neutral/outcome.json": {
+            "classification": "reported_failed",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": null,
+            "reported_source_unchanged": null,
+            "reported_status": "failed"
+          },
+          "outcome.json": {
+            "classification": "nonzero_exit",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 2,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-n2-archive-tests-20261027/test_archive_preserves_interru0/source",
+      "selected_original_bytes_and_modes_unchanged": true
+    }
+  ],
+  "scope": "selected_result_files_only_not_complete_synthetic_case_archive",
+  "selection": "top-level and neutral/omission stage JSON/log/XML files; ignored files included"
+}
