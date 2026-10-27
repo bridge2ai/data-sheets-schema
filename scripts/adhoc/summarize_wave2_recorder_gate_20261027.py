@@ -10,6 +10,7 @@ import importlib.util
 import json
 import math
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[2]
 HEAD = '01969cbed8eed93f420c640c1f1c306e5f58b033'
@@ -35,9 +36,9 @@ def archiver():
     return module
 
 
-def snapshot(module):
-    module.physical(GATE)
-    paths = sorted(GATE.iterdir())  # Includes hidden/ignored entries, with no gitignore filtering.
+def snapshot(module, gate):
+    module.physical(gate)
+    paths = sorted(gate.iterdir())  # Includes hidden/ignored entries, with no gitignore filtering.
     if {path.name for path in paths} != ROSTER:
         raise ValueError('gate evidence roster differs from the seven reviewed original files')
     return {path.name: module.read_file(path) for path in paths}
@@ -47,7 +48,7 @@ def numeric(value):
     return type(value) in (int, float) and math.isfinite(value)
 
 
-def build_summary(files):
+def build_summary(files, gate):
     def load(name):
         return json.loads(files[name]['raw'])
     before, after = load('source-before.json'), load('source-after.json')
@@ -130,7 +131,7 @@ def build_summary(files):
     for row in ranked:
         row['mean_cpu_percent_when_reported_above_threshold'] = row['sum_observed_cpu_percent'] / row['observed_above_threshold_samples']
     return {'format': 'd4d_wave2_recorder_gate_summary_v1', 'refs': ['#5149', '#5212', '#4354'],
-        'original_directory': str(GATE), 'status': outcome['status'],
+        'original_directory': str(gate), 'status': outcome['status'],
         'started_at': plan['started_at'], 'finished_at': outcome['finished_at'],
         'driver_wall_seconds': outcome['driver_wall_seconds'], 'samples': len(samples),
         'sample_interval_seconds': samples[-1]['monotonic'] - samples[0]['monotonic'],
@@ -155,18 +156,24 @@ def build_summary(files):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--gate', type=Path, default=GATE,
+                        help='Physical completed idle-only gate directory; defaults to the first Wave2 gate.')
+    parser.add_argument('--label', default='gate1', help='Safe basename for fresh summary and archive outputs.')
     args = parser.parse_args()
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]*', args.label):
+        raise ValueError('label must be a safe basename')
     output = args.output
     if (not output.is_absolute() or output.resolve() != output or output.exists() or output.is_symlink()
             or not output.is_relative_to(ROOT / 'notes')):
         raise ValueError('fresh physical output under this repository notes required')
     module = archiver()
-    files = snapshot(module)
-    summary = build_summary(files)
+    files = snapshot(module, args.gate)
+    summary = build_summary(files, args.gate)
+    summary['label'] = args.label
     output.mkdir(parents=True, exist_ok=False)
-    archive = output / 'gate1_originals.tar.gz'
+    archive = output / (args.label + '_originals.tar.gz')
     module.write_archive(archive, files)
-    if snapshot(module) != files:
+    if snapshot(module, args.gate) != files:
         raise ValueError('original gate evidence changed during preservation')
     helper = Path(__file__).resolve()
     summary.update(helper={'path': str(helper.relative_to(ROOT)), 'sha256': sha(helper.read_bytes())},
@@ -175,10 +182,11 @@ def main():
                  'every_original_file_archived': True, 'all_member_bytes_and_modes_verified': True},
         files={name: {'bytes': len(item['raw']), 'mode': item['mode'], 'sha256': sha(item['raw'])}
                for name, item in sorted(files.items())}, original_inputs_rechecked_unchanged=True)
-    with (output / 'gate1_summary.json').open('x') as stream:
+    summary_path = output / (args.label + '_summary.json')
+    with summary_path.open('x') as stream:
         json.dump(summary, stream, indent=2, sort_keys=True, allow_nan=False)
         stream.write('\n')
-    print(json.dumps({'summary': str(output / 'gate1_summary.json'), 'status': summary['status'],
+    print(json.dumps({'summary': str(summary_path), 'status': summary['status'],
                       'samples': summary['samples'], 'measured': summary['measured'],
                       'top_competitors': summary['top_competitors'], 'archive_sha256': summary['archive']['sha256']}, sort_keys=True))
 

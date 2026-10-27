@@ -1,0 +1,192 @@
+{
+  "archive": {
+    "all_member_bytes_and_modes_verified": true,
+    "bytes": 1415992,
+    "every_original_file_archived": true,
+    "path": "gate2_originals.tar.gz",
+    "sha256": "aea63ad52cbcd292c3aa402bacdcaa8f2f385c6fb115d10098f7ca95dae56b06"
+  },
+  "archive_helper": {
+    "path": "scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "competing_observation_samples": 60,
+  "competitor_scope": "Recorded driver classification; each entry joined to its raw sample and checked against threshold. Ownership exclusions are not independently recomputed.",
+  "distinct_reported_competitors": 59,
+  "driver_wall_seconds": 68.42132383299759,
+  "failed_conditions": [
+    "mean_cpu_percent",
+    "peak_cpu_percent",
+    "max_one_minute_load_per_cpu",
+    "above_threshold_competing_processes"
+  ],
+  "files": {
+    "host.jsonl": {
+      "bytes": 7257548,
+      "mode": 420,
+      "sha256": "9e426f1588ef18bb094baf6b37107844ab777338283e1fcf9e2fce1fca71cd2f"
+    },
+    "idle-decision.json": {
+      "bytes": 118326,
+      "mode": 420,
+      "sha256": "4c9bc562b5e2dece0818607bf9840aa63e308cccc15c4ad9d571607a545e26ea"
+    },
+    "outcome.json": {
+      "bytes": 226,
+      "mode": 420,
+      "sha256": "76a3198c84a7e27b7c371540f437fc71120c912925d4fb62a3c73f734fe17bf6"
+    },
+    "plan.json": {
+      "bytes": 2198,
+      "mode": 420,
+      "sha256": "7e10221a26abb1dcdf7355737197543d55b716b394e6d16ad634a0eed18674f5"
+    },
+    "source-after.json": {
+      "bytes": 1319745,
+      "mode": 420,
+      "sha256": "80d306d4768a311959c807229d838c7f2f9c7929925271ed9bd21047e9e5788b"
+    },
+    "source-before.json": {
+      "bytes": 1319745,
+      "mode": 420,
+      "sha256": "80d306d4768a311959c807229d838c7f2f9c7929925271ed9bd21047e9e5788b"
+    },
+    "uptime-before-tests.txt": {
+      "bytes": 50,
+      "mode": 420,
+      "sha256": "b2346a5af9afb1be55d1cafc50c61383dccfffe13f90b000bdea45bf2425ea33"
+    }
+  },
+  "finished_at": "2026-10-27T19:01:49.907422+00:00",
+  "format": "d4d_wave2_recorder_gate_summary_v1",
+  "helper": {
+    "path": "scripts/adhoc/summarize_wave2_recorder_gate_20261027.py",
+    "sha256": "8213bd43372911ad54adbaf3b0b5bc9cefac5547532dd1ceeb034814dec54c49"
+  },
+  "label": "gate2",
+  "limits": [
+    "No assertion that pytest, uv, Claude or AGY test processes were absent.",
+    "Executable names do not establish process role or earlier-timeout causality.",
+    "Three unchanged trials and any paired diagnosis remain pending a qualifying host gate.",
+    "No recorder timing was measured and no production timeout was altered."
+  ],
+  "measured": {
+    "max_one_minute_load_per_cpu": 1.93857421875,
+    "mean_cpu_percent": 65.83166666666666,
+    "peak_cpu_percent": 100.0
+  },
+  "measurement_driver_sha256": "2f77329c51fc27f8f7e5f7157643f47c43b6e7a94872e3e5e292bb1817806169",
+  "original_directory": "/private/tmp/d4d-recorder-measurements-20261026/idle-check-wave2-20261027-r2",
+  "original_inputs_rechecked_unchanged": true,
+  "privacy": "Summary retains executable basename and PID only; no argv, environment values or executable directory paths. Original names-only raw files are preserved unchanged in the archive.",
+  "ranking_scope": "Descending sum of reported above-threshold CPU percentages; this is a ranking statistic, not elapsed CPU time or host-CPU attribution. Unreported intervals are not assumed idle.",
+  "recorder_trials_launched": 0,
+  "refs": [
+    "#5149",
+    "#5212",
+    "#4354"
+  ],
+  "sample_first_at": "2026-10-27T19:00:42.559069+00:00",
+  "sample_interval_seconds": 65.14837170799728,
+  "sample_last_at": "2026-10-27T19:01:47.708075+00:00",
+  "samples": 60,
+  "scientific_acceptance": "not_assessed",
+  "source": {
+    "head": "01969cbed8eed93f420c640c1f1c306e5f58b033",
+    "inventory_scope": "all tracked root files and src/scripts/tests/utils/.claude/notes assets; also ignored/hidden Python in those roots; gitlinks separately pin path/commit only and require absent/empty uninitialized directories; submodule contents and other data/docs are outside this byte inventory",
+    "new_target_source_inspection_performed": false,
+    "saved_inventories_byte_identical": true,
+    "saved_pristine_source": true,
+    "tree": "d92f24c84aad9161457930a4b191564868ac0676"
+  },
+  "started_at": "2026-10-27T19:00:41.452837+00:00",
+  "status": "blocked_host_busy",
+  "thresholds": {
+    "foreign_process_cpu_percent": 5.0,
+    "mean_cpu_percent": 15.0,
+    "one_minute_load_per_cpu": 0.5,
+    "peak_cpu_percent": 35.0
+  },
+  "top_competitors": [
+    {
+      "executable": "rg",
+      "mean_cpu_percent_when_reported_above_threshold": 315.12307692307695,
+      "observed_above_threshold_samples": 26,
+      "peak_observed_cpu_percent": 398.2,
+      "pid": 51543,
+      "sum_observed_cpu_percent": 8193.2
+    },
+    {
+      "executable": "Microsoft Word",
+      "mean_cpu_percent_when_reported_above_threshold": 99.27333333333333,
+      "observed_above_threshold_samples": 60,
+      "peak_observed_cpu_percent": 100.0,
+      "pid": 13131,
+      "sum_observed_cpu_percent": 5956.4
+    },
+    {
+      "executable": "WindowServer",
+      "mean_cpu_percent_when_reported_above_threshold": 27.806666666666665,
+      "observed_above_threshold_samples": 60,
+      "peak_observed_cpu_percent": 43.2,
+      "pid": 429,
+      "sum_observed_cpu_percent": 1668.3999999999999
+    },
+    {
+      "executable": "Terminal",
+      "mean_cpu_percent_when_reported_above_threshold": 23.965,
+      "observed_above_threshold_samples": 60,
+      "peak_observed_cpu_percent": 84.6,
+      "pid": 3231,
+      "sum_observed_cpu_percent": 1437.9
+    },
+    {
+      "executable": "System Events",
+      "mean_cpu_percent_when_reported_above_threshold": 45.71923076923077,
+      "observed_above_threshold_samples": 26,
+      "peak_observed_cpu_percent": 51.8,
+      "pid": 47955,
+      "sum_observed_cpu_percent": 1188.7
+    },
+    {
+      "executable": "Safari",
+      "mean_cpu_percent_when_reported_above_threshold": 27.843749999999996,
+      "observed_above_threshold_samples": 32,
+      "peak_observed_cpu_percent": 53.6,
+      "pid": 33000,
+      "sum_observed_cpu_percent": 890.9999999999999
+    },
+    {
+      "executable": "WindowManager",
+      "mean_cpu_percent_when_reported_above_threshold": 12.441666666666666,
+      "observed_above_threshold_samples": 60,
+      "peak_observed_cpu_percent": 25.1,
+      "pid": 684,
+      "sum_observed_cpu_percent": 746.5
+    },
+    {
+      "executable": "ninjarmm-macagent",
+      "mean_cpu_percent_when_reported_above_threshold": 80.64444444444445,
+      "observed_above_threshold_samples": 9,
+      "peak_observed_cpu_percent": 99.4,
+      "pid": 554,
+      "sum_observed_cpu_percent": 725.8
+    },
+    {
+      "executable": "com.apple.WebKit.WebContent",
+      "mean_cpu_percent_when_reported_above_threshold": 20.28484848484849,
+      "observed_above_threshold_samples": 33,
+      "peak_observed_cpu_percent": 54.0,
+      "pid": 43057,
+      "sum_observed_cpu_percent": 669.4000000000001
+    },
+    {
+      "executable": "corespotlightd",
+      "mean_cpu_percent_when_reported_above_threshold": 11.814893617021278,
+      "observed_above_threshold_samples": 47,
+      "peak_observed_cpu_percent": 32.3,
+      "pid": 784,
+      "sum_observed_cpu_percent": 555.3000000000001
+    }
+  ]
+}
