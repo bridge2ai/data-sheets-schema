@@ -150,10 +150,19 @@ class TestValidatorRepairRefreshCheckpoint:
                 path.unlink()
             else:
                 path.write_bytes(changed)
+            before_attempt = {p: p.read_bytes() if p.exists() else None for p in original}
             again = Counted(selected)
-            with pytest.raises(ledger.UsageLedgerError, match="validator repair report refresh"):
+            # The existing selected-output ownership guard parses declarations
+            # before controller recovery. Preserve its earlier strict refusals.
+            error, message = ledger.UsageLedgerError, "validator repair report refresh"
+            if path == progress_path and changed == b"{broken":
+                error, message = ValueError, "^unreadable selected ownership declaration:"
+            elif path == progress_path and changed == b"[]":
+                error, message = ValueError, "^selected ownership declaration must be a mapping:"
+            with pytest.raises(error, match=message):
                 api.execute(replace(selected), client=client_for(again))
             assert not again.calls and not again.count_calls
+            assert {p: p.read_bytes() if p.exists() else None for p in original} == before_attempt
             for saved, raw in original.items():
                 saved.write_bytes(raw)
         again = Counted(selected)

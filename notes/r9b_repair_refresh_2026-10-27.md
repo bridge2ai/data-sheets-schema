@@ -59,5 +59,25 @@ distribution metadata. That metadata is not a dependency-byte attestation.
 External logs, JUnit and fresh fixture outputs are retained; test timings are
 functional evidence, not idle-host benchmarks.
 
-Validation results will be recorded after the frozen checks finish. This work
-does not establish scientific acceptance or authorize a live generation campaign.
+Initial frozen validation at `1a63bcae2f6140559edca973cf80cf6db2d959ea`:
+six passed, one failed, zero errors/skips, 12 deprecation warnings, 1039.23 seconds.
+Source was unchanged and import-origin checks completed. The failure was a
+test expectation: malformed JSON was refused by the existing selected-output
+ownership guard before the new refresh guard. No production change was needed.
+The corrected test recognizes exactly the two earlier ownership exceptions for
+malformed JSON and a non-mapping JSON value; other mutations retain their
+controller-specific refusal expectations. Every mutation also asserts zero
+calls/counts and unchanged artifact/accounting evidence, followed by successful
+resume after exact restoration.
+
+The initial causal log/JUnit and source evidence are retained under
+`/private/tmp/d4d-r9b-wave2-1a63bcae2/causal/` (stdout log alongside that directory).
+Only the corrected corruption method will be rerun. A separate frozen mirror
+at `c16b88c7be9ae411f622dfffe5c3e266a1c15388` runs the three affected compatibility
+modules with identical production/test bytes; its sole initial difference is
+removal of an unjustified `not Live` name filter. No provider-enabled test is
+selected: the live-named cases use mocks. Final results remain pending.
+
+This work does not establish scientific acceptance or authorize a live generation
+campaign. The new end-to-end causal fixtures select shared generation v1; they
+do not independently establish every shared-generation v2 integration path.

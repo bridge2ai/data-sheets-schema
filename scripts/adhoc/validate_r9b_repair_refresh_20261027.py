@@ -24,6 +24,7 @@ PROTECTED = ("src/data_sheets_schema/shared_generation.py", "src/data_sheets_sch
 SCOPES = ("src", "scripts", "tests", "utils", ".claude", ".github", "pyproject.toml", "poetry.lock")
 ROSTER = {
     "causal": ("tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint",),
+    "corruption": ("tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint::test_missing_corrupt_or_stale_checkpoint_refuses_before_calls",),
     "regression": ("tests/test_download/test_api_runner.py", "tests/test_usage_ledger.py", "tests/test_report_admission.py"),
 }
 
