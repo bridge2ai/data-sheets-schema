@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 import sys
 import pytest
@@ -30,6 +31,7 @@ from scripts.build_api_registrations import (
 )
 from data_sheets_schema import audit_omissions, shared_generation as sg
 from data_sheets_schema.cli.api import ARMS
+from scripts import build_api_registrations as builder
 
 # Partition bounds have no default (D-C, 2026-10-23); projects without a
 # validated profile name theirs explicitly, with an aggregate input allowance
@@ -44,6 +46,87 @@ AI_READI_LIMITS = {"max_paths": 512, "max_inventory_bytes": 98304, "max_workers"
                    "aggregate_input_tokens": 4000000}
 AI_READI_SIZING = (ROOT / "data" / "d4d_concatenated" / "claudecode_api_core"
                    / "2026-09-04g_claude-opus-5-api-generic-v8_rep2" / "intermediate")
+
+
+# R7b/#5211: four original review cases, copied without changing their assertions.
+@pytest.mark.parametrize("ceiling", [
+    {"context_limit_tokens": 200000},
+    {"max_input_tokens_per_call": 100000},
+])
+def test_stricter_profile_ceiling_does_not_inherit_the_original_calibration(ceiling):
+    limits = builder.resolve_audit_limits("CHORUS", "chorus", ceiling)
+    assert not builder.profile_covered("CHORUS", "baseline", limits)
+
+
+@pytest.mark.parametrize("ceiling", [
+    {"context_limit_tokens": 200000},
+    {"max_input_tokens_per_call": 100000},
+])
+def test_explicitly_sized_refusal_cannot_be_bypassed_by_omitting_the_record(tmp_path, ceiling):
+    fixture = Path(builder.__file__).resolve().parents[1] / "tests/fixtures/audit_batches/chorus_v10_2026-10-22a"
+    options = dict(project="CHORUS", label="r7b_reduced_ceiling", partition="chorus",
+                   audit_limits=ceiling, registration_path=tmp_path / "registration.json")
+    with pytest.raises(ValueError, match="typed-audit worker call"):
+        builder.prepare_registration(**options, sizing_record=fixture)
+    assert not list(tmp_path.iterdir())
+    with pytest.raises(ValueError, match="sizing|typed-audit"):
+        builder.prepare_registration(**options)
+    assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize("ceiling", builder.ADMISSION_CEILING_KEYS)
+def test_profile_covers_equal_or_larger_admission_ceilings_only(ceiling):
+    limits = builder.resolve_audit_limits("CHORUS", "chorus")
+    assert builder.profile_sized("chorus", limits)
+    assert not builder.profile_sized("chorus", {**limits, ceiling: limits[ceiling] - 1})
+    assert builder.profile_sized("chorus", {**limits, ceiling: limits[ceiling] + 1})
+    assert builder.profile_covered("CHORUS", "baseline", {**limits, ceiling: limits[ceiling] + 1})
+
+
+@pytest.mark.parametrize("sizing_record", [None, CHORUS_SIZING])
+def test_lower_request_byte_ceiling_requires_complete_wire_calibration(tmp_path, sizing_record):
+    with pytest.raises(ValueError, match="max_request_bytes .* complete wire-byte calibration"):
+        builder.prepare_registration("CHORUS", "r7b_bytes", partition="chorus",
+            audit_limits={"max_request_bytes": builder.CALIBRATED_REQUEST_BYTE_CEILING - 1},
+            registration_path=tmp_path / "registration.json", sizing_record=sizing_record)
+    assert not list(tmp_path.iterdir())
+
+
+def test_explicit_record_can_resize_fitting_context_and_input_ceilings(tmp_path):
+    options = dict(project="CHORUS", label="r7b_resized", partition="chorus",
+        audit_limits={"context_limit_tokens": 800000, "max_input_tokens_per_call": 600000},
+        registration_path=tmp_path / "registration.json")
+    with pytest.raises(ValueError, match="needs a sizing record"):
+        builder.prepare_registration(**options)
+    reg, outputs, sizing = builder.prepare_registration(**options, sizing_record=CHORUS_SIZING)
+    assert not builder.profile_covered("CHORUS", "baseline", reg["audit_limits"])
+    assert all(sizing[f"{stage}_input_tokens"] <= min(600000, 800000 - reg["audit_limits"][stage + "_output_tokens"])
+               for stage in builder.SIZING_STAGES)
+    assert sizing["integration_worst_input_tokens"] > sizing["admissible_input_tokens"]["integration"]
+    assert any("at worst" in warning for warning in sizing["warnings"])
+    # Preparation still stages outputs only; no registration, context or sidecar is written.
+    assert outputs and not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize("ceiling", [
+    {"context_limit_tokens": 200000},
+    {"max_input_tokens_per_call": 100000},
+    {"max_request_bytes": 31999999},
+])
+def test_sidecar_cannot_reuse_old_admissible_room_for_tighter_limits(tmp_path, ceiling):
+    path = tmp_path / "registration.json"
+    reg, outputs, _ = builder.prepare_registration("CHORUS", "r7b_sidecar", partition="chorus",
+        registration_path=path, sizing_record=CHORUS_SIZING)
+    sidecar = json.loads(dict(outputs)[builder.sizing_path(path)])
+    reg["audit_limits"].update(ceiling)
+    # Rebind only the declared registration hash: the old room is now stale.
+    # This is not an authenticated sidecar, so admission must use current limits.
+    raw = sg.canonical(reg)
+    sidecar["registration_sha256"] = hashlib.sha256(raw).hexdigest()
+    builder.sizing_path(path).write_bytes(sg.canonical(sidecar))
+    expected = "complete wire-byte calibration" if "max_request_bytes" in ceiling else "does not admit the registered limits"
+    with pytest.raises(ValueError, match=expected):
+        builder.check_registration_sizing(path, raw)
 
 
 def test_build_draft_context_valid_schema(tmp_path: Path) -> None:

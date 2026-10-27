@@ -136,6 +136,11 @@ PARTITION_PROFILES: dict[str, dict[str, Any]] = {
 # response the integration call carries, and the allowance under test.
 SIZING_KEYS = (*PARTITION_KEYS, "worker_output_tokens", "omission_output_tokens",
                "integration_output_tokens", "aggregate_input_tokens")
+ADMISSION_CEILING_KEYS = ("context_limit_tokens", "max_input_tokens_per_call", "max_request_bytes")
+# The retained sizing instrument counts text components and a carry allowance,
+# not the complete canonical provider body. A supplied record can re-estimate
+# token admission, but cannot establish a smaller wire-byte ceiling (#5211).
+CALIBRATED_REQUEST_BYTE_CEILING = 32000000
 
 DEFAULT_RECEIPT_LIMITS: dict[str, Any] = {
     "format": "receipt_completion_registration_v2",
@@ -217,19 +222,21 @@ def resolve_audit_limits(
 
 
 def profile_sized(partition: str | None, limits: dict[str, Any]) -> bool:
-    """The profile's allowance covers these limits: its bounds and caps, and no smaller allowance."""
+    """Keep calibrated bounds/caps, with no smaller allowance or admission ceiling."""
     if partition is None:
         return False
     expected = {**DEFAULT_AUDIT_LIMITS, **PARTITION_PROFILES[partition]["limits"]}
     return (all(limits[key] == expected[key] for key in SIZING_KEYS if key != "aggregate_input_tokens")
-            and limits["aggregate_input_tokens"] >= expected["aggregate_input_tokens"])
+            and limits["aggregate_input_tokens"] >= expected["aggregate_input_tokens"]
+            and all(limits[key] >= expected[key] for key in ADMISSION_CEILING_KEYS))
 
 
 def profile_covered(project: str, arm: str | None, limits: dict[str, Any]) -> bool:
     """A profile validated for this project and arm covers these limits, named or not.
 
-    A registration does not record how its limits were chosen, so limits equal
-    to a profile's are that profile's.
+    A registration does not record how its limits were chosen. Equal partition
+    bounds and output caps may inherit calibration only when aggregate input
+    and every per-call admission ceiling are at least as permissive.
     """
     return any(project in profile["projects"] and arm in profile["arms"] and profile_sized(name, limits)
                for name, profile in PARTITION_PROFILES.items())
@@ -305,6 +312,21 @@ def sizing_path(registration_path: Path | str) -> Path:
     return path.with_name(path.stem + ".sizing.json")
 
 
+def _require_request_byte_calibration(limits: dict[str, Any]) -> None:
+    if limits["max_request_bytes"] < CALIBRATED_REQUEST_BYTE_CEILING:
+        raise ValueError(
+            f"max_request_bytes {limits['max_request_bytes']:,} is below the calibrated byte ceiling "
+            f"{CALIBRATED_REQUEST_BYTE_CEILING:,}; a sizing record estimates text/token demand, not "
+            "complete canonical request bytes. A lower byte ceiling needs complete wire-byte calibration (#5211)"
+        )
+
+
+def _admissible_input_tokens(limits: dict[str, Any]) -> dict[str, int]:
+    return {stage: min(limits["max_input_tokens_per_call"],
+                       limits["context_limit_tokens"] - limits[f"{stage}_output_tokens"])
+            for stage in SIZING_STAGES}
+
+
 def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict[str, Any] | None:
     """The sizing record beside a registration, checked against its bytes.
 
@@ -314,6 +336,7 @@ def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict
     """
     reg = json.loads(raw)
     limits = reg["audit_limits"]
+    _require_request_byte_calibration(limits)
     arm = next((key for key, value in ARMS.items() if value[0] == reg["run"]["arm"]), None)
     covered = profile_covered(reg["run"]["project"], arm, limits)
     path = sizing_path(registration_path)
@@ -328,7 +351,8 @@ def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict
             or record.get("registration_sha256") != hashlib.sha256(raw).hexdigest()):
         raise ValueError(f"{path}: is not the sizing record of these registration bytes")
     if (sizing["aggregate_input_tokens"] > limits["aggregate_input_tokens"]
-            or any(sizing[f"{stage}_input_tokens"] > sizing["admissible_input_tokens"][stage] for stage in SIZING_STAGES)):
+            or any(sizing[f"{stage}_input_tokens"] > room
+                   for stage, room in _admissible_input_tokens(limits).items())):
         raise ValueError(f"{path}: its sizing does not admit the registered limits")
     return record
 
@@ -548,9 +572,7 @@ def size_typed_audit_input(
         workers * limits["worker_output_tokens"] + limits["omission_output_tokens"]))
     expected = tokens(rendered["integration_base_bytes"]) + expected_responses
     worst = tokens(rendered["integration_largest_base_bytes"]) + worst_responses
-    admissible = {stage: min(limits["max_input_tokens_per_call"],
-                             limits["context_limit_tokens"] - limits[f"{stage}_output_tokens"])
-                  for stage in SIZING_STAGES}
+    admissible = _admissible_input_tokens(limits)
     warnings = []
     if worst > admissible["integration"]:
         warnings.append(f"at worst, {workers} worker responses and the omission's at their caps, the integration "
@@ -1002,12 +1024,13 @@ def prepare_registration(
 
     # Validate strictly with shared_generation.parse_registration
     sg.parse_registration(canonical_bytes)
+    _require_request_byte_calibration(active_audit_limits)
 
     sizing = None
     if sizing_record is not None or not profile_covered(project, arm, active_audit_limits):
         if sizing_record is None:
             raise ValueError(
-                f"{project}: an aggregate_input_tokens no partition profile covers needs a sizing record (#5155); "
+                f"{project}: an audit-limit combination no partition profile covers needs a sizing record (#5155, #5211); "
                 f"pass --sizing-record {project}=<intermediate directory of an earlier {project} API run>"
             )
         if not isinstance(sizing_record, SizingRecord):
