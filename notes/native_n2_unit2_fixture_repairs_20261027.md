@@ -46,7 +46,50 @@ imports, normal virtual-environment prefixes restored without `.pth` execution,
 source/blob checks before and after, and retained logs/JUnit. It does not run a
 real native binary, provider call, full-unit suite or scientific acceptance.
 
-Unit 2 validation is pending. The later stack's 56 passing cases are prior
-evidence only; they are not claimed as this branch's result. After this unit
-passes its focused check, downstream fresh units must carry this repair before
-being treated as independently reviewable PRs.
+The repair was committed as `1c620ce96570f46f990aa416201ee87e235cc61c`;
+the bounded helper's tracked-origin and unique-JUnit-identity checks followed
+in `7265a8d7c3b373ce049b5ebb4eba22c5091b7e98`. The fresh unit 2 run at that
+exact latter head passed **56 cases** (5 response-identity, 7 stream-binding,
+44 literal-oracle/cache cases), with no failures, errors or skips. Pytest
+reported 18.43 seconds; the enclosing driver reported 21.02 seconds.
+All tracked source bytes/modes were unchanged, protected files matched the
+cached target, and project/test imports before and after matched the current
+tree's tracked source hashes. The explicit dependency bootstrap restored the
+physical venv prefixes without executing `.pth` files. Installed dependency
+versions were recorded; their bytes were not independently attested.
+
+The first invocation mistakenly supplied the abbreviated expected head
+`7265a8d7c`. The exact-head guard refused before creating a test child or
+collecting tests. Its external directory contains only `source-before.json`;
+there is **no saved raw stderr, driver outcome or JUnit** for that invocation.
+The refusal and its exit 1 were observed in the tool session. We preserve the
+available file without manufacturing a retrospective raw log. The second run
+used the full 40-character head and a fresh output directory, with identical
+source and no relaxed guard.
+
+The [archive manifest](native_n2_unit2_fixture_repairs_20261027/manifest.json)
+pins both retained result bundles and records byte/mode round-trip checks,
+followed by rereading all selected originals. `run-01.tar.gz` preserves the
+first attempt's sole source inventory; `run-02.tar.gz` preserves the completed
+second run's source/origin/bootstrap records, command, outcome, log and JUnit.
+The [archive helper](../scripts/adhoc/archive_n2_restack_validation_20261027.py)
+is copied exactly from the already reviewed final delivery; its existing eight
+tests were not rerun. Its selection includes ignored files at the named result
+boundaries but deliberately excludes the `cases/` tree, which remains in the
+original external run directory. It neither recalculates nor endorses pass totals.
+
+Reproduction on the tested clean head uses:
+
+```sh
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python \
+  scripts/adhoc/validate_n2_unit2_repairs_20261027.py \
+  --expect-head 7265a8d7c3b373ce049b5ebb4eba22c5091b7e98 \
+  --output /private/tmp/d4d-n2-unit2-repairs-20261027-r2
+```
+
+The output path must be fresh; the retained directory is never overwritten.
+The later stack's separate 56-case run is prior evidence and is not added to
+this unit's count. This bounded result does not establish a complete unit 2
+suite pass, validation of units 1/3/4, scientific acceptance or a real native
+run. Downstream fresh units must carry the repair through their dependencies;
+no downstream merge was performed during this unit 2 task.
