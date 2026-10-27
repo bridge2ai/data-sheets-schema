@@ -8,10 +8,13 @@ remains the historical implementation and BC1 selection refuses without hooks.
 
 Branch: `codex/bc1-production-impl-20261027`, isolated worktree
 `/private/tmp/d4d-codex-bc1-production-20261027`.
-Frozen implementation/test head:
+Runtime and initial full-suite head:
 `c9feaedc36a4bf77d9cf604f783748e29b9c1a21`, tested in the separate
-`/private/tmp/d4d-codex-bc1-derivation-cache-20261027` checkout. Final evidence and
-documentation commits on the delivery branch are recorded in the primary
+`/private/tmp/d4d-codex-bc1-derivation-cache-20261027` checkout. Final provenance
+schema and passing public-pipeline head:
+`bd94ed84642bdeddd1c1a0361a92b438aaf0e028`, tested in the delivery checkout.
+The only production difference between these heads is the generation-record
+schema. Final evidence/documentation commit SHAs are recorded in the primary
 `notes/coordination/STATUS.md`; they do not change tested source.
 Dependencies: reviewed R9b repair and final evidence
 `aaa6f5bec2a0c7832d36143c4c7470d51cb8cee4`, plus reviewed A17
@@ -151,9 +154,19 @@ replay was not reached. Outcome SHA-256
 `05fc56bc55d2ed0235a39636b0fcebfadb91175b9f8568dcaa78f518f6ee7d84`;
 [full-run archive](bc1_validation_2026-10-27_full_initial/manifest.json), manifest
 SHA-256 `66c9dca788597a6eb710f2257a4fda2b7f09ec61193606f63b7aa62c10b7c2da`.
-The remaining correction adds a dedicated closed BC1 provenance shape; it does
-not change the runtime, compiler, dataset schema or conformance gate. Its focused
-tests and public completed replay remain pending.
+The correction adds a dedicated closed BC1 provenance shape; it does not change
+the runtime, compiler, dataset schema or conformance gate. At bd94ed846,
+**41 provenance controls passed** (2.05s pytest / 4.13s driver), followed by the
+unchanged **public pipeline passing** (507.36s pytest / 512.56s driver). Both runs
+had zero failures/errors/skips, unchanged source and complete origin checks.
+The public case reaches all eleven scripted deliveries, final validation and
+provenance conformance, then completed replay with zero new calls, zero new
+counts, and unchanged accounting/artifact bytes.
+
+This establishes **163 distinct BC1 passing cases across the two frozen heads**
+(162 plus the corrected public case), with 41 separate provenance controls.
+It is not one fresh all-green full-suite run. All failed/interrupted evidence
+remains retained. [Final verification archive](bc1_validation_2026-10-27_final/README.md).
 These cross-head results do not claim one fresh green repository-wide suite.
 
 ### Bounded pure derivation cache
@@ -161,7 +174,7 @@ These cross-head results do not claim one fresh green repository-wide suite.
 Code review identifies repeated pure schema/packet derivations in
 `bc1_audit._open/_derive`, plus repeated full/core schema-context rendering
 during saved-stage replay. Legacy already memoizes analogous pure derivations.
-This is a concrete optimization candidate, not proof of an algorithmic hang,
+This justified the implemented optimization, not a claim of an algorithmic hang,
 host-contention cause or measured speedup. Functional-test timings overlapped
 other authorized work and are not idle-host performance measurements.
 
@@ -180,8 +193,8 @@ terminal replay starts with a new cache; no acceptance verdict is cached.
 Closed parser/function dependencies and current constants are rechecked before
 reuse; unfamiliar changes bypass and clear both stores. Ordinary pure-check
 interfaces remain uncached by default. Added tests cover byte parity,
-invalidation, mutation isolation, retention and fresh terminal replay. All28
-cache cases and all30 controller cases passed in the c9 full run.
+invalidation, mutation isolation, retention and fresh terminal replay. All 28
+cache cases and all 30 controller cases passed in the c9 full run.
 No measured speedup or campaign-scale performance claim is made here.
 
 The first cache verification at `c477590018bf192410a52635d603ffff5ab4c417`
@@ -213,6 +226,8 @@ legacy run; do not add them into a unique-case total.
 | Final positive gate 3P | `60fd13fc4548d14e48f06de84883ac4fab351b198f253d21b5cea2a0761d98fd` |
 | Constructor diagnosis after fix | `fa8b3116aaa1b8aba61908f59d19ed51bdc67be1e14dc33a66e395aecb7d9ff7` |
 | Final legacy subset 118P | `508f6f11a1b547ba77783f80c99ed1aca720384465c79f97751c27e189ce850f` |
+| Final provenance controls 41P | `d0acb6b2cab4e9d6d74757998281b76ce324f66500720c888bc6ac583fead894` |
+| Final public pipeline 1P | `e23403f974494bb3bb8fda1a037ee59e7ef4003bd3a2db28a933138901b9b9ce` |
 
 Lossless selected-result archives retain [initial failures](bc1_validation_2026-10-27_cache_initial/manifest.json),
 [the first positive attempt](bc1_validation_2026-10-27_cache_positive_initial/manifest.json),
