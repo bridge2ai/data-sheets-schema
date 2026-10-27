@@ -10,6 +10,57 @@
 # declaration that it is the new canonical text are two acts, and the second
 # one is small enough to read.
 files:
+  .claude/agents/d4d-provenance-guard-v2.md:
+    bytes: 6912
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: .claude/agents/d4d-provenance-guard-v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every released
+      condition.
+    sha256: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
+  .claude/commands/d4d-agent-v2.md:
+    bytes: 12698
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: .claude/commands/d4d-agent-v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every released
+      condition.
+    sha256: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
+  .claude/commands/d4d-full-core-v2.md:
+    bytes: 58267
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: .claude/commands/d4d-full-core-v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every released
+      condition.
+    sha256: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
+  .claude/commands/d4d-uniform-rules-v2.md:
+    body_sha256: null
+    bytes: 29867
+    pinned_at_commit: 6a0f8acfed6d58fac8747d891b8a05975534a5c5
+    pinned_blob_path: .claude/commands/d4d-uniform-rules-v2.md
+    pinned_in_repository: /private/tmp/d4d-pr5093
+    pinned_on: '2026-10-25'
+    reason: "D30 R9 criteria-defined enumerations (#5048, #5097\u2013#5099, #5102), D38 American\
+      \ spelling"
+    sha256: 22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e
+    superseded:
+    - pinned_on: '2026-10-03'
+      reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+        released condition.
+      retired_on: '2026-10-19'
+      sha256: 7b511b1ef15d6fb56d47dc58b367196ed9c7269a61406ed19127481f719c885a
+    - pinned_on: '2026-10-19'
+      reason: Clarify R9 criteria-defined enumerations (ConfidentialityLevelEnum and ComplianceStatusEnum)
+        at the generic_v10 boundary (#5048); preserve v8/v9 prompt digests unchanged.
+      retired_on: '2026-10-23'
+      sha256: 5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129
+    - pinned_on: '2026-10-23'
+      reason: "R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23):\
+        \ closed to confidentiality_level and hipaa_compliant, criteria inline, precedence,\
+        \ tier and tier-name rules, HIPAA de-identification (#5048, #5097\u2013#5099, #5102)."
+      retired_on: '2026-10-25'
+      sha256: cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f
   src/download/prompts/api_playbook_v1.md:
     body_sha256: ce2f644cad14496c2cb4684fc371fca4a2409268f793061c47e00087069038f6
     bytes: 4558
@@ -20,6 +71,15 @@ files:
     reason: Freeze explicit API playbook v1 instruction axis (#4014); historical and agentic
       conditions unchanged.
     sha256: 6870fd69c6ca377b6f6a349b0161f503ef742176228074db57325b7368db6015
+  src/download/prompts/api_playbook_v2.md:
+    body_sha256: 0a559d17c802f68a3e349185399e1d6255d14cb10303f1ed6e58f03a010813b3
+    bytes: 4492
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: src/download/prompts/api_playbook_v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every released
+      condition.
+    sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
   src/download/prompts/components/AI_READI.md:
     bytes: 1203
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866
@@ -79,6 +139,33 @@ files:
         retroactively.'
       retired_on: '2026-08-13'
       sha256: 0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc
+  src/download/prompts/d4d_generic_arm_prompt_v10.md:
+    body_sha256: d2987be77291daa724f671a0b35622211f00365916ba24eda4bba366c95b27e0
+    bytes: 32568
+    pinned_at_commit: 6a0f8acfed6d58fac8747d891b8a05975534a5c5
+    pinned_blob_path: src/download/prompts/d4d_generic_arm_prompt_v10.md
+    pinned_in_repository: /private/tmp/d4d-pr5093
+    pinned_on: '2026-10-25'
+    reason: "D30 R9 criteria-defined enumerations (#5048, #5097\u2013#5099, #5102), D38 American\
+      \ spelling"
+    sha256: ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db
+    superseded:
+    - pinned_on: '2026-10-03'
+      reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+        released condition.
+      retired_on: '2026-10-19'
+      sha256: a3a2004cef2147b3351613cb38a67abde1d58c91c19ee0c72c66ff476d0722ec
+    - pinned_on: '2026-10-19'
+      reason: Clarify R9 criteria-defined enumerations (ConfidentialityLevelEnum and ComplianceStatusEnum)
+        at the generic_v10 boundary (#5048); preserve v8/v9 prompt digests unchanged.
+      retired_on: '2026-10-23'
+      sha256: 7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb
+    - pinned_on: '2026-10-23'
+      reason: "R9 criteria-defined enums replaced per owner decision D-E/D30 (2026-10-23):\
+        \ closed to confidentiality_level and hipaa_compliant, criteria inline, precedence,\
+        \ tier and tier-name rules, HIPAA de-identification (#5048, #5097\u2013#5099, #5102)."
+      retired_on: '2026-10-25'
+      sha256: 95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99
   src/download/prompts/d4d_generic_arm_prompt_v2.md:
     body_sha256: 6b639abb906c44af91a5b3a7f6391da3fc6dd8f039de9e7d6544858e1fb17410
     bytes: 10099
@@ -461,19 +548,6 @@ files:
       recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
       retroactively.'
     sha256: 41dd2fd7e970abb0c54419b067d36bd77fdf1360dc17888ccb09f79f0d4f32c0
-  src/download/prompts/removal_repair_v1.md:
-    bytes: 1512
-    pinned_at_commit: 05ffe921385ece56003356be03e1f040c7e7910e
-    pinned_on: '2026-10-02'
-    reason: New opt-in restore-only API removal repair policy v1 (#2923); no historical
-      prompt changes.
-    sha256: cd21a27d1b2ac9ac8893d0d0537811a0bac563811a2a879296d262091b1f0f81
-  src/download/prompts/receipt_completion_runtime_v1.md:
-    bytes: 3075
-    pinned_at_commit: 0a2313d56f225ebced642598a25a08c8aa36bedf
-    pinned_on: '2026-10-02'
-    reason: New separately registered receipt-only runtime policy v1 (#4266); no empirical floor or historical change.
-    sha256: 9a2b553bb9f14a3a431469a39469f5492a3f8c3d9718dccb3b07b311b2504765
   src/download/prompts/native_source_attribution_v1.md:
     body_sha256: 88bd24829813e0970b1a95ee85f9e86495b8898ff4c7efc39042abf21e63932a
     bytes: 2047
@@ -484,85 +558,35 @@ files:
     reason: Freeze native-only source-attribution draft preflight v1 for offline registration
       (#4304); preserve historical renderer requests.
     sha256: e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761
-  .claude/agents/d4d-provenance-guard-v2.md:
-    bytes: 6912
-    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
-    pinned_blob_path: .claude/agents/d4d-provenance-guard-v2.md
-    pinned_on: '2026-10-03'
-    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-      released condition.
-    sha256: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
-  .claude/commands/d4d-agent-v2.md:
-    bytes: 12698
-    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
-    pinned_blob_path: .claude/commands/d4d-agent-v2.md
-    pinned_on: '2026-10-03'
-    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-      released condition.
-    sha256: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
-  .claude/commands/d4d-full-core-v2.md:
-    bytes: 58267
-    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
-    pinned_blob_path: .claude/commands/d4d-full-core-v2.md
-    pinned_on: '2026-10-03'
-    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-      released condition.
-    sha256: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
-  .claude/commands/d4d-uniform-rules-v2.md:
-    bytes: 27544
-    pinned_at_commit: a40ea01d119fea06165afc3dcab241f273b084f8
-    pinned_blob_path: .claude/commands/d4d-uniform-rules-v2.md
-    pinned_on: '2026-10-19'
-    reason: Clarify R9 criteria-defined enumerations (ConfidentialityLevelEnum and
-      ComplianceStatusEnum) at the generic_v10 boundary (#5048); preserve v8/v9
-      prompt digests unchanged.
-    sha256: 5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129
-    superseded:
-    - pinned_on: '2026-10-03'
-      reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-        released condition.
-      retired_on: '2026-10-19'
-      sha256: 7b511b1ef15d6fb56d47dc58b367196ed9c7269a61406ed19127481f719c885a
-  src/download/prompts/api_playbook_v2.md:
-    body_sha256: 0a559d17c802f68a3e349185399e1d6255d14cb10303f1ed6e58f03a010813b3
-    bytes: 4492
-    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
-    pinned_blob_path: src/download/prompts/api_playbook_v2.md
-    pinned_on: '2026-10-03'
-    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-      released condition.
-    sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
-  src/download/prompts/d4d_generic_arm_prompt_v10.md:
-    body_sha256: 398559e0050492a728085992a1cd14534b860780dda94ce63330855359afcca9
-    bytes: 30186
-    pinned_at_commit: a40ea01d119fea06165afc3dcab241f273b084f8
-    pinned_blob_path: src/download/prompts/d4d_generic_arm_prompt_v10.md
-    pinned_on: '2026-10-19'
-    reason: Clarify R9 criteria-defined enumerations (ConfidentialityLevelEnum and
-      ComplianceStatusEnum) at the generic_v10 boundary (#5048); preserve v8/v9
-      prompt digests unchanged.
-    sha256: 7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb
-    superseded:
-    - pinned_on: '2026-10-03'
-      reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-        released condition.
-      retired_on: '2026-10-19'
-      sha256: a3a2004cef2147b3351613cb38a67abde1d58c91c19ee0c72c66ff476d0722ec
+  src/download/prompts/receipt_completion_runtime_v1.md:
+    bytes: 3075
+    pinned_at_commit: 0a2313d56f225ebced642598a25a08c8aa36bedf
+    pinned_on: '2026-10-02'
+    reason: New separately registered receipt-only runtime policy v1 (#4266); no empirical
+      floor or historical change.
+    sha256: 9a2b553bb9f14a3a431469a39469f5492a3f8c3d9718dccb3b07b311b2504765
   src/download/prompts/receipt_completion_runtime_v2.md:
     bytes: 3158
     pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
     pinned_blob_path: src/download/prompts/receipt_completion_runtime_v2.md
     pinned_on: '2026-10-03'
-    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-      released condition.
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every released
+      condition.
     sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+  src/download/prompts/removal_repair_v1.md:
+    bytes: 1512
+    pinned_at_commit: 05ffe921385ece56003356be03e1f040c7e7910e
+    pinned_on: '2026-10-02'
+    reason: New opt-in restore-only API removal repair policy v1 (#2923); no historical prompt
+      changes.
+    sha256: cd21a27d1b2ac9ac8893d0d0537811a0bac563811a2a879296d262091b1f0f81
   src/download/prompts/shared_generation_v1.md:
     body_sha256: 2e407d1cebb92c8c5d4568d82b9f658b2e369c70d864be21034d06430e8ddac0
     bytes: 3569
     pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
     pinned_blob_path: src/download/prompts/shared_generation_v1.md
     pinned_on: '2026-10-03'
-    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
-      released condition.
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every released
+      condition.
     sha256: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
 hash_algorithm: sha256

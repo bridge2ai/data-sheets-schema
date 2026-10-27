@@ -37,7 +37,8 @@ def test_low_level_blinding_sorts_mappings_without_changing_scientific_values():
 
 
 @pytest.fixture(autouse=True)
-def no_provider(monkeypatch):
+def no_provider(monkeypatch, tmp_path):
+    monkeypatch.setattr(runner, "LOCK_DIR", tmp_path / ".registered_eval_locks")
     monkeypatch.setattr(socket.socket, "connect", lambda *a, **kw: pytest.fail("network forbidden"))
     actual = subprocess.run
 
@@ -748,17 +749,41 @@ def test_repeat_cannot_reuse_a_previous_session(registration, tmp_path, monkeypa
 
 def test_reexecution_lock_refuses_without_prior_receipt_and_records_overshoot(prepared, tmp_path, monkeypatch):
     install_cli(monkeypatch, prepared)
-    first_dir = tmp_path / "run1"
+    first_dir = tmp_path / "parent_a" / "run1"
     receipt1 = runner.execute(prepared, first_dir, plan_sha256=prepared.digest,
                               environ={"CBORG_API_KEY": "fake"})
     assert receipt1["status"] == "validated"
     assert receipt1["max_overshoot_calls"] == 1
     assert receipt1["unaccounted_reserved_usd"] == "0"
 
-    second_dir = tmp_path / "run2"
+    # Different output parent directory still hits the fixed plan lock (R4 F7)
+    second_dir = tmp_path / "parent_b" / "run2"
     with pytest.raises(FileExistsError, match="was already executed"):
         runner.execute(prepared, second_dir, plan_sha256=prepared.digest,
                        environ={"CBORG_API_KEY": "fake"})
+
+    # Fake JSON with matching plan_sha256 is refused (R4 F7)
+    fake_receipt = tmp_path / "fake_receipt.json"
+    fake_receipt.write_text(json.dumps({"plan_sha256": prepared.digest}), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match the receipt path and sha256"):
+        runner.execute(
+            prepared,
+            second_dir,
+            plan_sha256=prepared.digest,
+            environ={"CBORG_API_KEY": "fake"},
+            prior_receipt=fake_receipt,
+            authorization_basis="owner-reauth-test",
+        )
+
+    # Real prior receipt without authorization_basis is refused (R4 F7, D22)
+    with pytest.raises(ValueError, match="requires a non-empty authorization_basis"):
+        runner.execute(
+            prepared,
+            second_dir,
+            plan_sha256=prepared.digest,
+            environ={"CBORG_API_KEY": "fake"},
+            prior_receipt=first_dir / "receipt.json",
+        )
 
     receipt2 = runner.execute(
         prepared,
@@ -772,6 +797,44 @@ def test_reexecution_lock_refuses_without_prior_receipt_and_records_overshoot(pr
     assert receipt2["prior_receipt"] == str((first_dir / "receipt.json").resolve())
     assert receipt2["authorization_basis"] == "owner-reauth-test"
 
+    # Consumed prior receipt cannot authorize a second re-run (R4 F7)
+    third_dir = tmp_path / "parent_c" / "run3"
+    with pytest.raises(ValueError, match="does not match the receipt path and sha256"):
+        runner.execute(
+            prepared,
+            third_dir,
+            plan_sha256=prepared.digest,
+            environ={"CBORG_API_KEY": "fake"},
+            prior_receipt=first_dir / "receipt.json",
+            authorization_basis="owner-reauth-test-2",
+        )
+
+
+def test_pre_attempt_failure_still_writes_receipt_and_allows_recovery(prepared, tmp_path, monkeypatch):
+    """R4 F7: failure during rating_prompt writes an incomplete receipt and updates the lock."""
+    install_cli(monkeypatch, prepared)
+    crash_dir = tmp_path / "crash_run"
+    real_prompt = runner.rating_prompt
+    monkeypatch.setattr(runner, "rating_prompt", lambda _p: (_ for _ in ()).throw(ValueError("simulated prompt failure")))
+    receipt1 = runner.execute(prepared, crash_dir, plan_sha256=prepared.digest,
+                              environ={"CBORG_API_KEY": "fake"})
+    assert receipt1["status"] == "incomplete"
+    assert "simulated prompt failure" in receipt1["error"]
+    assert (crash_dir / "receipt.json").is_file()
+
+    # Recover using the incomplete receipt written by the crashed run
+    monkeypatch.setattr(runner, "rating_prompt", real_prompt)
+    recover_dir = tmp_path / "recover_run"
+    receipt2 = runner.execute(
+        prepared,
+        recover_dir,
+        plan_sha256=prepared.digest,
+        environ={"CBORG_API_KEY": "fake"},
+        prior_receipt=crash_dir / "receipt.json",
+        authorization_basis="owner-crash-recovery",
+    )
+    assert receipt2["status"] == "validated"
+
 
 def test_timeout_records_unaccounted_reserved_usd(registration, tmp_path, monkeypatch):
     selected = runner.prepare(**{**registration, "repeat_count": 3, "max_cost_dollars": "5"})
@@ -781,4 +844,54 @@ def test_timeout_records_unaccounted_reserved_usd(registration, tmp_path, monkey
     assert receipt["status"] == "incomplete"
     assert receipt["total_cost_usd"] == "0"
     assert receipt["unaccounted_reserved_usd"] == "1.666666"
+
+
+def test_lock_race_loser_does_not_overwrite_winner_lock_file(prepared, tmp_path, monkeypatch):
+    """N4: a concurrent run losing the O_EXCL lock race writes its own incomplete receipt without clobbering the winner's lock."""
+    install_cli(monkeypatch, prepared)
+    winner_dir = tmp_path / "winner_run"
+    winner_receipt = runner.execute(
+        prepared,
+        winner_dir,
+        plan_sha256=prepared.digest,
+        environ={"CBORG_API_KEY": "fake"},
+    )
+    assert winner_receipt["status"] == "validated"
+    lock_file = Path(runner.LOCK_DIR) / f"{prepared.digest}.json"
+    assert lock_file.is_file()
+    winner_lock_bytes = lock_file.read_bytes()
+
+    # Simulate a concurrent run that passed the pre-check before lock_file existed
+    # and then hit FileExistsError at os.open(lock_file, O_CREAT | O_EXCL).
+    orig_exists = Path.exists
+
+    def _hide_lock_once(self: Path) -> bool:
+        if self == lock_file:
+            monkeypatch.setattr(Path, "exists", orig_exists)
+            return False
+        return orig_exists(self)
+
+    monkeypatch.setattr(Path, "exists", _hide_lock_once)
+    loser_dir = tmp_path / "loser_run"
+    loser_receipt = runner.execute(
+        prepared,
+        loser_dir,
+        plan_sha256=prepared.digest,
+        environ={"CBORG_API_KEY": "fake"},
+    )
+    assert loser_receipt["status"] == "incomplete"
+    assert "FileExistsError" in loser_receipt["error"]
+    assert (loser_dir / "receipt.json").is_file()
+    # Winner's lock file MUST remain intact and point to winner_dir!
+    assert lock_file.read_bytes() == winner_lock_bytes
+
+
+def test_default_lock_dir_uses_git_common_dir_and_is_gitignored():
+    """N4: _default_lock_dir resolves via git-common-dir and .registered_eval_locks/ is in .gitignore."""
+    repo_root = Path(__file__).resolve().parents[1]
+    gitignore_lines = (repo_root / ".gitignore").read_text(encoding="utf-8").splitlines()
+    assert ".registered_eval_locks/" in gitignore_lines
+    resolved_lock_dir = runner._default_lock_dir(repo_root)
+    assert resolved_lock_dir.name == ".registered_eval_locks"
+
 

@@ -31,6 +31,15 @@ def no_network(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def isolated_execution_locks(monkeypatch, tmp_path):
+    # Imported registration helpers do not inherit their source module's
+    # autouse fixtures. Keep fake executions off the shared Git-common-dir
+    # lock store while preserving the production per-plan lock semantics.
+    from data_sheets_schema.evaluation import registered_eval_runner as runner
+    monkeypatch.setattr(runner, "LOCK_DIR", tmp_path / ".registered_eval_locks")
+
+
+@pytest.fixture(autouse=True)
 def no_unmocked_runtime(monkeypatch):
     actual = subprocess.run
     def local_git_only(command, **kwargs):

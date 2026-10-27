@@ -423,8 +423,8 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
     seed = _text(str(seed), "seed")
     generated_at = _timestamp(generated_at)
     records = validate_cohort(records, cohort=cohort)
-    if cohort == "campaign" and len(seed) < 32:
-        raise ValueError("campaign blind review pack requires a seed of at least 32 characters (128 bits)")
+    if cohort == "campaign" and (not _SHA.fullmatch(seed) or len(set(seed)) < 8):
+        raise ValueError("campaign blind review pack requires a 64-character hex seed with at least 8 distinct hex digits")
     output = Path(output_dir)
     key_path = Path(key_output)
     if key_path.absolute() == output.absolute() or output.absolute() in key_path.absolute().parents:
@@ -451,27 +451,42 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
         if record.source_sha256 is not None and record.source_sha256 != digest:
             raise ValueError("selected source_sha256 does not match input")
         if cohort == "campaign":
+            from data_sheets_schema.provenance import record_path_for, recorded_hash
             prov_candidate = path.parent / f"{record.project}_provenance.yaml"
-            if prov_candidate.is_file():
-                from data_sheets_schema.provenance import recorded_hash
-                prov_doc = registered._yaml(registered._read(prov_candidate))
-                if isinstance(prov_doc, dict):
-                    run_block = prov_doc.get("run") or {}
-                    if isinstance(run_block, dict):
-                        if run_block.get("label") and run_block.get("label") != record.label:
-                            raise ValueError("campaign record label does not match sibling provenance run.label")
-                        cond = str(run_block.get("condition") or "")
-                        if record.arm == "v10" and cond and not cond.startswith("generic_v10"):
-                            raise ValueError(f"campaign v10 record provenance condition {cond!r} is not generic_v10")
-                        if record.arm == "v8" and cond and not cond.startswith("generic_v8"):
-                            raise ValueError(f"campaign v8 record provenance condition {cond!r} is not generic_v8")
-                    val_block = prov_doc.get("validation") or {}
-                    artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
-                    full_art = artifacts.get("full") if isinstance(artifacts, dict) else None
-                    if isinstance(full_art, dict):
-                        rec_hash = recorded_hash(full_art)
-                        if rec_hash is not None and hashlib.new(rec_hash[0], raw).hexdigest() != rec_hash[1]:
-                            raise ValueError("campaign record bytes do not match sibling provenance validation.artifacts.full")
+            if not prov_candidate.is_file() and path.parent.parent != path.parent:
+                method_dir = path.parent.parent.name
+                concat_dir = path.parent.parent.parent
+                corpus_prov = record_path_for(record.project, method_dir, record.label, concat_dir=concat_dir)
+                if corpus_prov.is_file():
+                    prov_candidate = corpus_prov
+                else:
+                    default_prov = record_path_for(record.project, method_dir, record.label)
+                    if default_prov.is_file():
+                        prov_candidate = default_prov
+            if not prov_candidate.is_file():
+                raise ValueError(
+                    f"campaign record {record.project}:{record.label} has no provenance record at {prov_candidate}"
+                )
+            prov_doc = registered._yaml(registered._read(prov_candidate))
+            if not isinstance(prov_doc, dict):
+                raise ValueError(f"campaign record provenance at {prov_candidate} is not a YAML mapping")
+            run_block = prov_doc.get("run") or {}
+            if isinstance(run_block, dict):
+                if run_block.get("label") and run_block.get("label") != record.label:
+                    raise ValueError("campaign record label does not match sibling provenance run.label")
+                cond = str(run_block.get("condition") or "")
+                if record.arm == "v10" and cond and not cond.startswith("generic_v10"):
+                    raise ValueError(f"campaign v10 record provenance condition {cond!r} is not generic_v10")
+                if record.arm == "v8" and cond and not cond.startswith("generic_v8"):
+                    raise ValueError(f"campaign v8 record provenance condition {cond!r} is not generic_v8")
+            val_block = prov_doc.get("validation") or {}
+            artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
+            full_art = artifacts.get("full") if isinstance(artifacts, dict) else None
+            if not isinstance(full_art, dict) or recorded_hash(full_art) is None:
+                raise ValueError("campaign record provenance is missing validation.artifacts.full hash")
+            rec_hash = recorded_hash(full_art)
+            if hashlib.new(rec_hash[0], raw).hexdigest() != rec_hash[1]:
+                raise ValueError("campaign record bytes do not match sibling provenance validation.artifacts.full")
         blinded, metadata_ids = _identity_blind(raw, record, forbidden)
         forbidden.update(metadata_ids)
         forbidden.update((str(path), str(record.source_path.absolute())))

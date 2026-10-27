@@ -29,9 +29,9 @@ SELECTED_PLAYBOOKS = (
 ASSET_HASHES = {'.claude/agents/d4d-provenance-guard-v2.md': '10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085',
  '.claude/commands/d4d-agent-v2.md': 'dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299',
  '.claude/commands/d4d-full-core-v2.md': '2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124',
- '.claude/commands/d4d-uniform-rules-v2.md': '5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129',
+ '.claude/commands/d4d-uniform-rules-v2.md': '22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e',
  'src/download/prompts/api_playbook_v2.md': '5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719',
- 'src/download/prompts/d4d_generic_arm_prompt_v10.md': '7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb',
+ 'src/download/prompts/d4d_generic_arm_prompt_v10.md': 'ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db',
  'src/download/prompts/receipt_completion_runtime_v2.md': 'c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c',
  'src/download/prompts/shared_generation_v1.md': '34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450'}
 
