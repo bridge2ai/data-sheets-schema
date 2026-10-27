@@ -14,10 +14,10 @@ retain both original histories; no old ref was reset or force-moved:
 | Fresh branch (`codex/` prefix) | Integration checkpoint | Preserved old head |
 | --- | --- | --- |
 | `n2-1-restack-20261026` | `5d87ea676` | `44deb5220` |
-| `n2-2-restack-20261026` | `8f4c3e328` | `ec9ebf240` |
-| `n2-3-restack-20261026` | `e94a33cbd` | `3098aa6d7` |
-| `n2-4-restack-20261026` | `fb5d50734` | `fbf885213` |
-| `n2-d38-restack-20261026` | `9ea9b70a3` before reviewed fixture repairs/evidence | `8b1daa80f` |
+| `n2-2-restack-20261026` | `142d090bb` | `ec9ebf240` |
+| `n2-3-restack-20261026` | `f60903154` | `3098aa6d7` |
+| `n2-4-restack-20261026` | `10f0d1a58` | `fbf885213` |
+| `n2-d38-restack-20261026` | `92e09ca45` convergence; final evidence head in primary STATUS | `8b1daa80f` |
 | `e3x-restack-20261026` | `2bbb0dfff` (separate E3x tree) | `d6eed9274` |
 
 The N2/D38 merges were text-conflict-free. Unit 1 also carries the two native selector
@@ -26,13 +26,23 @@ uniform-v2 `22a55369…`, matching the installed target. The D38 merge converges
 the same pin values. Protected `shared_generation.py` and `canonical_hashes.yaml`
 remain byte-identical to the target. Inherited evidence/log whitespace is retained.
 
-The final delivery head will be recorded under `### codex` in the primary
-`notes/coordination/STATUS.md` after the remaining frozen checks finish. The
+The final delivery head is recorded under `### codex` in the primary
+`notes/coordination/STATUS.md`. All frozen checks have finished. The
 auxiliary `codex/n2-public-driver-20261027` at `9e1ac5227` contains reviewed
-test-only repairs and the gated public-test driver. Neither active test tree is
-changed while its checks run. Separate `codex/n2-delivery-20261027` stages the
-completed evidence without invalidating those checks; it will be integrated
-into the fresh D38 branch after its legacy batch ends.
+test-only repairs and the gated public-test driver. Neither test tree was
+changed while its checks ran. Separate `codex/n2-delivery-20261027` staged the
+completed evidence without invalidating those checks; the fresh D38 branch
+receives that delivery only after its legacy batch and source checks finish.
+
+The reviewed fixture repairs originate in unit 2. Fresh unit 2 independently
+passed all 56 affected cases at `7265a8d7c`, with exact tracked imports, unique
+JUnit identities and unchanged source. Its evidence-only delivery `142d090bb`
+was merged forward into unit 3 (`f60903154`) and unit 4 (`10f0d1a58`). The
+delivery branch then converged at `92e09ca45`: its `src/`, `tests/` and `utils/`
+trees are identical to the tested final stack `9e1ac5227`. Only the three
+reviewed tests, their pinned inert fixture, standalone validation/provenance
+helpers and evidence were added to the earlier units; production is unchanged.
+See the [unit-2 result and preserved command refusal](native_n2_unit2_fixture_repairs_20261027.md).
 
 The validation roster consists of 72 native modules, two separately gated full
 public completion modules, and 18 affected legacy modules. The helper
@@ -108,6 +118,13 @@ causation. The 180-second helper and 900-second registered deadlines stay intact
   and blinding changes, test-local lock isolation, exact evidence manifest and
   preservation proof are documented in that branch's
   `notes/e3x_restack_2026-10-26.md`. Historical evaluations were not regenerated.
+- The complete 18-module legacy batch at `9ea9b70a3` passed **659 cases**,
+  zero failures/errors/skips, in 2,477.79s pytest / 2,496.06s guarded driver.
+  All cases were identified; all tracked bytes and project import origins
+  passed their checks. Twelve Pydantic deprecation warnings were retained.
+  The [legacy evidence](native_n2_restack_2026-10-26/legacy_evidence/manifest.json)
+  preserves all ten selected result files, verified byte-for-byte with modes.
+  Its production and legacy test bytes remain unchanged in the final delivery.
 
 These groups are deliberately not summed: focused checks can overlap broader
 coverage. Driver/archive helper tests (15 and eight passes) are separate utility
@@ -117,12 +134,16 @@ the archive helper verifies bytes/modes without reclassifying any original
 outcome. Synthetic case/cache directories remain outside the archive at their
 original external paths, explicitly listed as excluded.
 
-## Pending validation and acceptance
+## Remaining acceptance obligations
 
-The separate 18-module legacy suite is still running on its frozen head.
-Its terminal results, the fixture repairs propagated through fresh units 2–4,
-and final integration byte checks must be recorded before this delivery is
-complete. Both public completion cases have passed.
+Restack software verification is complete within the stated scopes. Both public
+completion cases, legacy regression, installed D38 alignment and the independent
+unit-2 fixture check passed; all earlier native nonpasses passed their targeted
+rerun. The repairs are carried through fresh units 2–4 and the final delivery.
+Final `src/`, `tests/` and `utils/` trees match the tested `9e1ac5227`; protected
+files match the cached target. Later commits add only standalone verification
+helpers, documentation and retained evidence. No aggregate fresh full-suite or
+whole-repository test claim is made.
 
 Priority 4's three controlled recorder trials, conditional load replay, paired
 diagnosis and a causally justified fix remain blocked by the formal host gate.
