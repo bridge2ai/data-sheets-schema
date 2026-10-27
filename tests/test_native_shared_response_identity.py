@@ -92,8 +92,15 @@ class SettledResponse:
     def extend(self, native, parent):
         self.native.extend(native)
         self.parent.extend(parent)
-        self.run.transcript = prefix('transcript', self.native)
-        self.run.control = prefix('control', self.parent)
+        # Match the controller's fresh captured snapshot for each new prefix.
+        # Its per-snapshot trace starts empty; shared verification caches persist.
+        previous = self.run
+        self.run = replace(previous, transcript=prefix('transcript', self.native),
+                           control=prefix('control', self.parent))
+        self.run._catalogs = previous._catalogs
+        self.run._prefixes = previous._prefixes
+        self.run._chronology_cache = previous._chronology_cache
+        self.run._callback_state_cache = previous._callback_state_cache
 
     def whole_read(self, identity):
         self.extend(*self.frames('Read', identity, self.request))

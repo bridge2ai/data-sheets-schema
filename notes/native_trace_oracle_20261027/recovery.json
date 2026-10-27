@@ -1,0 +1,54 @@
+{
+  "delta": {
+    "bytes": 6026,
+    "path": "later-cache-change.diff",
+    "sha256": "f041155b2a2f84f77ed3d365866f5dabea2c9b80c3a5c58c8aca06ce316b8e2e"
+  },
+  "fixture": {
+    "bytes": 17785,
+    "bytes_equal_original_git_blob": true,
+    "path": "tests/fixtures/native_trace/native_shared_observations_0125eebbc.py.txt",
+    "sha256": "3bc93c2d1720d4e41ee83e7be7d8758a56836062c316f75ecc4b505e80b6d3ab"
+  },
+  "helper": {
+    "path": "/private/tmp/d4d-codex-n2-public-driver-20261027/scripts/adhoc/recover_native_trace_oracle_20261027.py",
+    "sha256": "545107808721052fe2a02cd0b0e146e2727ce2b2a30cf5e69d6fc7ac3a246f9c"
+  },
+  "historical_modules": [
+    {
+      "bytes": 17785,
+      "commit": "0125eebbc214d0907c3b69d23758cd9441911a78",
+      "git_blob": "32b4d2a0ee150d3b67661bf9a4827c29b3a3c3df",
+      "path": "src/data_sheets_schema/native_shared_observations.py",
+      "sha256": "3bc93c2d1720d4e41ee83e7be7d8758a56836062c316f75ecc4b505e80b6d3ab"
+    },
+    {
+      "bytes": 18263,
+      "commit": "a8c11973da120cc0f792eef2d574dab7d910b09d",
+      "git_blob": "c3cee904f06a9c5a9dad6697d91d8a964255c378",
+      "path": "src/data_sheets_schema/native_shared_observations.py",
+      "sha256": "4dc91259ecb079e8efe3067b0eeb01e584b575bdda813fcc6e7494bf39bcbba4"
+    },
+    {
+      "bytes": 19939,
+      "commit": "a462dcfecb55503f6f8227e4908b56133b2c7572",
+      "git_blob": "36dffa53a2a8b5de1f54c5bdcee57309c5e39d93",
+      "path": "src/data_sheets_schema/native_shared_observations.py",
+      "sha256": "41459563575a0c9e0c396c488cb25afbd0f8421896b904ecfc290972ca1b3ae2"
+    }
+  ],
+  "historical_test": {
+    "commit": "a8c11973da120cc0f792eef2d574dab7d910b09d",
+    "path": "tests/test_native_trace_single_decode.py",
+    "recovered_bytes_equal_original": true,
+    "recovery_commit": "0d5bddbc03b02cfa3efdea312c10aca002f6d85c",
+    "sha256": "8bfdc119517b4799419f318acd93148723b59633f7ac62576a139040cf83f0e7"
+  },
+  "later_cache_source_reversal_is_original_oracle": false,
+  "later_cache_source_reversal_sha256": "2be668cf81eb0ede4d733e683bd435e4e101ed7c6327403ea529cea5aaa6d92a",
+  "original_a8_reversal_equals_0125_bytes": true,
+  "pytest_dependency_scope": "Canonical module name and current production dependencies, as in original test; no Git needed at test time.",
+  "recovered_and_current_module_equal_later_cache_commit": true,
+  "scope": "Exact historical module oracle; not a reconstructed whole historical runtime.",
+  "source_head_at_recovery": "63b515c64fe9da5d317515651b613f1cf78d8993"
+}

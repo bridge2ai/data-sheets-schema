@@ -80,8 +80,9 @@ def test_anchor_shape_has_no_legacy_or_boolean_fallback(bad):
 def test_final_results_capture_calls_strict_load_first(started, monkeypatch):
     selection, value, composition, raw, _ = started
     class StrictWitness(Exception): pass
-    def strict(path):
+    def strict(path, *, _catalogs):
         assert path == selection.registration.pin.path
+        assert _catalogs is capture._LAST_VERIFIED_CATALOGS
         raise StrictWitness
     monkeypatch.setattr(capture, '_load', strict)
     monkeypatch.setattr(capture, '_load_live', lambda *a, **k: pytest.fail('final capture used live route'))
