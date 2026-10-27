@@ -7,6 +7,7 @@ from copy import deepcopy
 import sys
 
 import pytest
+import yaml
 
 from data_sheets_schema import bc1_audit as bc
 from data_sheets_schema import audit_omissions as om, bc1_context
@@ -87,6 +88,15 @@ def test_warm_lookup_avoids_uncached_work_without_replacing_functions(supplied):
         sys.setprofile(previous)
 
 
+def test_known_parser_loader_default_is_identity_only_and_cacheable():
+    assert bc._CACHE_DEPENDENCIES is not None
+    assert bc.DerivationCache().refresh()
+    assert bc._cache_default_state(yaml.parse.__defaults__) == (
+        tuple, ((type(yaml.Loader), yaml.Loader),))
+    with pytest.raises(TypeError):
+        bc._cache_default_state(object())
+
+
 @pytest.mark.parametrize('change', ['record', 'schema', 'selection', 'limits', 'context'])
 def test_exact_captured_inputs_invalidate_or_refuse(supplied, change):
     cache = bc.DerivationCache()
@@ -137,7 +147,8 @@ def test_current_contract_change_refuses_a_warmed_selection(supplied, monkeypatc
         bc.roster(packet, derivations=cache)
 
 
-@pytest.mark.parametrize('change', ['schema_parser', 'schema_budget', 'code', 'defaults', 'loader_table'])
+@pytest.mark.parametrize('change', ['schema_parser', 'schema_budget', 'schema_file_count',
+                                  'code', 'defaults', 'loader_default', 'loader_table'])
 def test_dependency_change_bypasses_and_clears_both_pure_caches(supplied, monkeypatch, change):
     cache = bc.DerivationCache()
     packet = bc.prepare(**supplied, derivations=cache)
@@ -149,12 +160,16 @@ def test_dependency_change_bypasses_and_clears_both_pure_caches(supplied, monkey
         monkeypatch.setattr(om, '_schema', refuse)
     elif change == 'schema_budget':
         monkeypatch.setattr(om, 'MAX_SCHEMA_BYTES', 1)
+    elif change == 'schema_file_count':
+        monkeypatch.setattr(bc.typed, 'MAX_SCHEMA_FILES', 0)
     elif change == 'code':
         def replacement(value):
             return 'changed code'
         monkeypatch.setattr(om._sha, '__code__', replacement.__code__)
     elif change == 'defaults':
         monkeypatch.setattr(om._read, '__kwdefaults__', {**om._read.__kwdefaults__, 'limit': 1})
+    elif change == 'loader_default':
+        monkeypatch.setattr(yaml.parse, '__defaults__', (yaml.SafeLoader,))
     else:
         table = dict(om._UniqueLoader.yaml_constructors)
         table['tag:yaml.org,2002:str'] = lambda loader, node: 'changed parsed string'
@@ -162,7 +177,7 @@ def test_dependency_change_bypasses_and_clears_both_pure_caches(supplied, monkey
     assert not cache.refresh()
     assert not cache._rows and cache._bytes == 0
     assert not hasattr(cache, '_shared_generation_derivations')
-    if change in ('schema_parser', 'schema_budget', 'defaults'):
+    if change in ('schema_parser', 'schema_budget', 'schema_file_count', 'defaults'):
         with pytest.raises(ValueError):
             bc.roster(packet, derivations=cache)
         assert not cache._rows

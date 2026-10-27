@@ -785,6 +785,23 @@ def project_bytes(assembly, *, derivations=None):
                                   max_bytes=codec.CARRY_BYTES)
 
 
+def _cache_default_state(value, seen=frozenset()):
+    """Signature defaults may name a loader class, never a loader instance."""
+    from .cache_dependencies import setting_key
+    if isinstance(value, type):
+        return type(value), value
+    if type(value) in (tuple, list, dict, set, frozenset):
+        if id(value) in seen or len(seen) > 32:
+            raise TypeError('cyclic or excessive callable defaults')
+        nested = seen | {id(value)}
+        if type(value) is dict:
+            return dict, tuple((_cache_default_state(key, nested), _cache_default_state(item, nested))
+                               for key, item in value.items())
+        values = (_cache_default_state(item, nested) for item in value)
+        return type(value), frozenset(values) if type(value) in (set, frozenset) else tuple(values)
+    return setting_key(value)
+
+
 def _cache_function_state(function, seen=frozenset()):
     """Finite signature snapshot, not arbitrary replacement-global analysis."""
     from .cache_dependencies import setting_key
@@ -807,8 +824,8 @@ def _cache_function_state(function, seen=frozenset()):
             closure.append((type(value), value))
         else:
             closure.append(setting_key(value))
-    return (function, function.__code__, setting_key(function.__defaults__),
-            setting_key(function.__kwdefaults__), tuple(closure))
+    return (function, function.__code__, _cache_default_state(function.__defaults__),
+            _cache_default_state(function.__kwdefaults__), tuple(closure))
 
 
 def _cache_dependency_token():
@@ -843,6 +860,7 @@ def _cache_dependency_token():
             for module, names in (
                 (omissions, 'MAX_INPUT_BYTES MAX_SCHEMA_BYTES MAX_RESPONSE_BYTES MAX_NODES MAX_DEPTH MAX_SCHEMA_EVENTS MAX_SCHEMA_EVENT_CHARS ASSET_SHA256'),
                 (batches, 'MAX_ORIGINAL_BYTES MAX_NODES MAX_DEPTH MAX_FIELD_ROOTS'),
+                (typed, 'MAX_SCHEMA_FILES MAX_PACKET_BYTES'),
                 (codec, 'MAX_DEPTH MAX_NODES MAX_DICTIONARY_BYTES'),
                 (bc1_context, 'FALLBACK _IRI FORMAT SCHEMA_HEADER'),
                 (duplicate_keys, 'LIBYAML_MAX_DEPTH'),
