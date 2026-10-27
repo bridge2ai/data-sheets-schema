@@ -25,6 +25,9 @@ POSITIVE_NODES = (
 )
 POSITIVE_MODULES = tuple('data_sheets_schema.' + name for name in (
     'native_shared_selection', 'native_shared_receipts', 'native_shared_capture', 'native_shared_execution'))
+REPAIR = ('tests/test_native_shared_response_identity.py',
+          'tests/test_native_shared_stream_bindings.py',
+          'tests/test_native_trace_single_decode.py')
 LEGACY = tuple('tests/' + name + '.py' for name in (
     'test_schema_snapshot_cache', 'test_schema_snapshot_compatibility',
     'test_shared_generation_selection', 'test_source_heading_runtime',
@@ -55,7 +58,7 @@ def roster():
         raise ValueError('preserved N2 test roster differs from reviewed 74-module scope')
     groups = {'native': [p for p in changed if p not in POSITIVE],
               'legacy': [p for p in LEGACY if p not in changed],
-              'positive': list(POSITIVE)}
+              'positive': list(POSITIVE), 'repair': list(REPAIR)}
     for paths in groups.values():
         for path in paths:
             if not (ROOT / path).is_file():
@@ -294,7 +297,7 @@ def run_positive(output, expected):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--group', choices=('native', 'legacy', 'positive'), required=True)
+    parser.add_argument('--group', choices=('native', 'legacy', 'positive', 'repair'), required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--expected-head')
     parser.add_argument('--child', action='store_true')
