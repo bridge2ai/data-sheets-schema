@@ -1,0 +1,132 @@
+..F....                                                                  [100%]
+=================================== FAILURES ===================================
+_ TestValidatorRepairRefreshCheckpoint.test_missing_corrupt_or_stale_checkpoint_refuses_before_calls _
+
+path = PosixPath('/private/tmp/d4d-r9b-wave2-1a63bcae2/causal/cases/test_missing_corrupt_or_stale_0/output/EXAMPLE_api_progress.json')
+
+    def _read_declaration(path, *, yaml_format=False):
+        if _inode(path) is None:
+            return None
+        with path.open('rb') as stream:
+            raw = stream.read(MAX_STATE_BYTES + 1)
+        if len(raw) > MAX_STATE_BYTES:
+            raise ValueError(f'selected ownership declaration exceeds byte limit: {path}')
+        try:
+            text = raw.decode('utf-8')
+            if yaml_format:
+                from .duplicate_keys import find_duplicate_keys
+                if find_duplicate_keys(text, strict=True):
+                    raise ValueError('duplicate selected ownership key')
+                value = yaml.safe_load(text)
+            else:
+                def invalid_constant(value):
+                    raise ValueError(f'invalid JSON constant: {value}')
+>               value = json.loads(text, object_pairs_hook=_json_pairs, parse_constant=invalid_constant)
+
+src/data_sheets_schema/output_ownership.py:272: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/__init__.py:365: in loads
+    return cls(**kw).decode(s)
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <json.decoder.JSONDecoder object at 0x171374e10>, s = '{broken', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+    
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+    
+        """
+        try:
+>           obj, end = self.scan_once(s, idx)
+E           json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/json/decoder.py:361: JSONDecodeError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.test_download.test_api_runner.TestValidatorRepairRefreshCheckpoint object at 0x113c9b6f0>
+tmp_path = PosixPath('/private/tmp/d4d-r9b-wave2-1a63bcae2/causal/cases/test_missing_corrupt_or_stale_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x115e22c30>
+
+    def test_missing_corrupt_or_stale_checkpoint_refuses_before_calls(self, tmp_path, monkeypatch):
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for
+        selected, _ = self.pending(tmp_path, monkeypatch)
+        progress_path, ledger_path = api._progress_path(selected), ledger.ledger_path(selected)
+        original = {p: p.read_bytes() for p in (progress_path, ledger_path, selected.full_path,
+                                               selected.core_path, selected.report_path)}
+        progress = json.loads(original[progress_path])
+        data = json.loads(original[ledger_path])
+        mutations = [
+            (progress_path, None), (progress_path, b"{broken"), (progress_path, b"[]"),
+            (progress_path, json.dumps({k: v for k, v in progress.items() if k != api.VALIDATOR_REFRESH_KEY}).encode()),
+            (progress_path, json.dumps({**progress, "completed": ["full"]}).encode()),
+            (progress_path, json.dumps({**progress, "artifact_md5": {"full": "0" * 32}}).encode()),
+            (progress_path, json.dumps({**progress, "Audit findings": "{}"}).encode()),
+            (selected.full_path, original[selected.full_path] + b"\n# external change\n"),
+            (selected.core_path, original[selected.core_path] + b"\n# external change\n"),
+            (selected.report_path, original[selected.report_path] + b"\nChanged report.\n"),
+            (ledger_path, json.dumps({**data, api.VALIDATOR_REFRESH_KEY: None}).encode()),
+            (ledger_path, json.dumps({**data, api.VALIDATOR_REFRESH_KEY: {
+                **data[api.VALIDATOR_REFRESH_KEY], "state": "unknown"}}).encode()),
+            (ledger_path, json.dumps({k: v for k, v in data.items() if k != api.VALIDATOR_REFRESH_KEY}).encode()),
+        ]
+        for path, changed in mutations:
+            if changed is None:
+                path.unlink()
+            else:
+                path.write_bytes(changed)
+            again = Counted(selected)
+            with pytest.raises(ledger.UsageLedgerError, match="validator repair report refresh"):
+>               api.execute(replace(selected), client=client_for(again))
+
+tests/test_download/test_api_runner.py:155: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6863: in execute
+    require_selected_resume_owner(spec, resume=resume)
+src/data_sheets_schema/output_ownership.py:300: in require_selected_resume_owner
+    value = _read_declaration(path, yaml_format=kind == 'provenance')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('/private/tmp/d4d-r9b-wave2-1a63bcae2/causal/cases/test_missing_corrupt_or_stale_0/output/EXAMPLE_api_progress.json')
+
+    def _read_declaration(path, *, yaml_format=False):
+        if _inode(path) is None:
+            return None
+        with path.open('rb') as stream:
+            raw = stream.read(MAX_STATE_BYTES + 1)
+        if len(raw) > MAX_STATE_BYTES:
+            raise ValueError(f'selected ownership declaration exceeds byte limit: {path}')
+        try:
+            text = raw.decode('utf-8')
+            if yaml_format:
+                from .duplicate_keys import find_duplicate_keys
+                if find_duplicate_keys(text, strict=True):
+                    raise ValueError('duplicate selected ownership key')
+                value = yaml.safe_load(text)
+            else:
+                def invalid_constant(value):
+                    raise ValueError(f'invalid JSON constant: {value}')
+                value = json.loads(text, object_pairs_hook=_json_pairs, parse_constant=invalid_constant)
+        except (ValueError, yaml.YAMLError, RecursionError) as exc:
+>           raise ValueError(f'unreadable selected ownership declaration: {path}: {exc}') from exc
+E           ValueError: unreadable selected ownership declaration: /private/tmp/d4d-r9b-wave2-1a63bcae2/causal/cases/test_missing_corrupt_or_stale_0/output/EXAMPLE_api_progress.json: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+src/data_sheets_schema/output_ownership.py:274: ValueError
+=============================== warnings summary ===============================
+tests/test_download/test_api_runner.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+-- generated xml file: /private/tmp/d4d-r9b-wave2-1a63bcae2/causal/pytest.xml --
+=========================== short test summary info ============================
+FAILED tests/test_download/test_api_runner.py::TestValidatorRepairRefreshCheckpoint::test_missing_corrupt_or_stale_checkpoint_refuses_before_calls
+1 failed, 6 passed, 12 warnings in 1039.23s (0:17:19)
