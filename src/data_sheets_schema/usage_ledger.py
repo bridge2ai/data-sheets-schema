@@ -315,6 +315,10 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     data = _read(spec)
     if data.get("evidence_refusal") is not None:
         raise UsageLedgerError("this generation has a terminal evidence refusal; no further calls are allowed")
+    refresh = validator_refresh(spec)
+    if refresh is not None and refresh["state"] != "accepted":
+        if refresh["state"] != "pending" or phase != "report_after_repair":
+            raise UsageLedgerError("validator repair requires its pending report refresh; other calls cannot restart")
     require_removal_repair_admission(spec, phase=phase)
     if getattr(spec, "receipt_completion_version", 0):
         from data_sheets_schema.receipt_completion import require_admission, PHASE as RECEIPT_PHASE
@@ -343,10 +347,71 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     if getattr(spec, "shared_generation_version", 0) == 2:
         from .source_heading_admission import bind_admission
         bind_admission(spec, phase, attempt, data=data, usage_id=identifier)
+    if refresh is not None and refresh["state"] == "pending":
+        data["validator_repair_refresh"] = {**refresh, "state": "in_flight", "usage_id": identifier}
     data["pending_call"] = {"usage_id": identifier, "phase": phase,
                             "attempt": attempt, "started_at": started_at}
     _write(spec, data)
     return identifier
+
+
+def validator_refresh(spec) -> dict | None:
+    """A validator repair's report obligation, distinct from a report regate.
+
+    The obligation survives absent/corrupt progress. Admission is consumed at
+    begin_call, so an interruption before call admission remains pending; a delivery
+    whose accepted report checkpoint is missing cannot silently be billed again.
+    """
+    if not ledger_path(spec).exists():
+        return None
+    data = _read(spec)
+    if "validator_repair_refresh" not in data:
+        return None
+    value = data["validator_repair_refresh"]
+    if not isinstance(value, dict) or value.get("state") not in {"pending", "in_flight", "accepted"}:
+        raise UsageLedgerError("invalid validator repair report refresh state; restore its evidence")
+    fields = {"state", "checkpoint"}
+    if value["state"] != "pending":
+        fields.add("usage_id")
+        if not isinstance(value.get("usage_id"), str) or not value["usage_id"]:
+            raise UsageLedgerError("validator repair report refresh lost its call identity")
+    if value["state"] == "accepted":
+        fields.add("report_sha256")
+        if not re.fullmatch(r"[a-f0-9]{64}", str(value.get("report_sha256", ""))):
+            raise UsageLedgerError("validator repair report refresh lost its accepted report hash")
+        if not any(row["usage_id"] == value["usage_id"] and row.get("phase") == "report_after_repair"
+                   for row in data["rows"]):
+            raise UsageLedgerError("validator repair report refresh lost its completed usage")
+    if set(value) != fields or not isinstance(value.get("checkpoint"), dict):
+        raise UsageLedgerError("invalid validator repair report refresh checkpoint")
+    return value
+
+
+def prepare_validator_refresh(spec, checkpoint: dict) -> None:
+    require_resolved(spec)
+    if not ledger_path(spec).exists():
+        raise UsageLedgerError("validator repair needs its generation ledger")
+    previous = validator_refresh(spec)
+    data = _read(spec)
+    if data.get("evidence_refusal") is not None or previous is not None and previous["state"] != "accepted":
+        raise UsageLedgerError("cannot replace an unfinished validator repair report refresh")
+    data["validator_repair_refresh"] = {"state": "pending", "checkpoint": checkpoint}
+    _write(spec, data)
+
+
+def finish_validator_refresh(spec) -> None:
+    """Called only after the report write and normal source-review gates pass."""
+    value = validator_refresh(spec)
+    data = _read(spec)
+    if (value is None or value["state"] != "in_flight" or data.get("pending_call") is not None
+            or data.get("evidence_refusal") is not None or not spec.report_path.is_file()
+            or not any(row["usage_id"] == value["usage_id"] and row.get("phase") == "report_after_repair"
+                       for row in data["rows"])):
+        raise UsageLedgerError("cannot accept an unfinished validator repair report refresh")
+    require_source_review_admission(spec)
+    data["validator_repair_refresh"] = {**value, "state": "accepted",
+        "report_sha256": hashlib.sha256(spec.report_path.read_bytes()).hexdigest()}
+    _write(spec, data)
 
 
 def removal_repair_attempted(spec) -> bool:

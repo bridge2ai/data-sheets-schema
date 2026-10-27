@@ -32,6 +32,7 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -3799,6 +3800,7 @@ def normalise_temporal(text: str) -> str:
 
 
 PROGRESS_SUFFIX = "_api_progress.json"
+VALIDATOR_REFRESH_KEY = "validator_repair_refresh"
 
 
 def _progress_path(spec: RunSpec) -> Path:
@@ -3860,7 +3862,104 @@ def _save_progress(spec: RunSpec, completed: list[str],
         for artifact, path in (("full", spec.full_path),
                                ("core", spec.core_path))
         if path.exists()}
-    p.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    from data_sheets_schema.usage_ledger import validator_refresh
+    refresh = validator_refresh(spec)
+    if refresh is None:
+        p.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        return
+    data[VALIDATOR_REFRESH_KEY] = refresh["checkpoint"]
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=p.parent,
+                                         prefix=f".{p.stem}.", suffix=".tmp", delete=False) as out:
+            temporary = Path(out.name)
+            json.dump(data, out, indent=2)
+            out.flush()
+            os.fsync(out.fileno())
+        os.replace(temporary, p)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def _validator_refresh_resume(spec: RunSpec, progress: dict) -> dict | None:
+    """Validate a repaired pair before ordinary artifact-drift restart logic.
+
+    A report may legitimately be stale only while this exact pending obligation
+    exists. Missing/malformed checkpoints and ambiguous paid deliveries refuse;
+    they are never interpreted as a new generation or permission to bill again.
+    """
+    from data_sheets_schema.usage_ledger import validator_refresh
+    refresh = validator_refresh(spec)
+    if not isinstance(progress, dict):
+        if refresh is not None:
+            raise UsageLedgerError("validator repair report refresh needs mapping-shaped saved progress")
+        return None
+    if refresh is None:
+        if VALIDATOR_REFRESH_KEY in progress:
+            raise UsageLedgerError("validator repair report refresh lost its ledger evidence")
+        return None
+    checkpoint = refresh["checkpoint"]
+    if (set(checkpoint) != {"version", "id", "artifacts", "report_before_sha256", "audit_sha256",
+                           "repair", "changed", "why"}
+            or type(checkpoint.get("version")) is not int or checkpoint["version"] != 1
+            or not re.fullmatch(r"[a-f0-9]{32}", str(checkpoint.get("id", "")))
+            or not isinstance(checkpoint.get("repair"), list)
+            or any(not isinstance(row, dict) for row in checkpoint["repair"])
+            or not isinstance(checkpoint.get("changed"), list)
+            or any(not isinstance(name, str) for name in checkpoint["changed"])
+            or not checkpoint["changed"] or checkpoint["changed"] != sorted(set(checkpoint["changed"]))
+            or not set(checkpoint["changed"]).issubset({"full", "core"})
+            or not isinstance(checkpoint.get("why"), str)
+            or not isinstance(checkpoint.get("artifacts"), dict)
+            or set(checkpoint["artifacts"]) != {"full", "core"}
+            or any(not re.fullmatch(r"[a-f0-9]{64}", str(checkpoint.get(key, "")))
+                   for key in ("report_before_sha256", "audit_sha256"))):
+        raise UsageLedgerError("invalid validator repair report refresh checkpoint")
+    if refresh["state"] == "in_flight":
+        raise UsageLedgerError("validator repair report refresh was admitted without an accepted completion; "
+                               "restore its delivery evidence before resuming")
+    # Successful finalization removes progress. Its completed-provenance route
+    # below still verifies the final files, accounting, receipt and report.
+    if refresh["state"] == "accepted" and not _progress_path(spec).exists() and spec.provenance_path.is_file():
+        return None
+    if (progress.get(VALIDATOR_REFRESH_KEY) != checkpoint
+            or progress.get("completed") != list(PHASES)
+            or progress.get("generation_id") != _usage_generation(spec)
+            or progress.get("run_identity") != _usage_identity(spec)
+            or progress.get("label") != spec.label
+            or progress.get("input_identity") != spec.input_identity()
+            or not isinstance(progress.get("artifact_md5"), dict)
+            or not isinstance(progress.get("Audit findings"), str)
+            or hashlib.sha256(progress["Audit findings"].encode()).hexdigest() != checkpoint["audit_sha256"]):
+        raise UsageLedgerError("validator repair report refresh needs its exact saved progress; restore the checkpoint")
+    for name, path in (("full", spec.full_path), ("core", spec.core_path)):
+        pin = checkpoint["artifacts"][name]
+        if (not isinstance(pin, dict) or set(pin) != {"md5", "sha256"}
+                or not path.is_file()
+                or pin != {"md5": hashlib.md5(path.read_bytes()).hexdigest(),
+                           "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                or (progress.get("artifact_md5") or {}).get(name) != pin["md5"]):
+            raise UsageLedgerError("validator repair report refresh repaired artifact differs: " + name)
+    if refresh["state"] == "pending" and (not spec.report_path.is_file()
+            or hashlib.sha256(spec.report_path.read_bytes()).hexdigest() != checkpoint["report_before_sha256"]):
+        raise UsageLedgerError("validator repair report refresh previous report differs")
+    return refresh
+
+
+def _prepare_validator_refresh(spec: RunSpec, completed: list[str], carry: dict[str, str],
+                               repair: list[dict], description: dict) -> dict:
+    from data_sheets_schema.usage_ledger import prepare_validator_refresh, validator_refresh
+    checkpoint = {"version": 1, "id": uuid.uuid4().hex,
+        "artifacts": {name: {"md5": hashlib.md5(path.read_bytes()).hexdigest(),
+                              "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                      for name, path in (("full", spec.full_path), ("core", spec.core_path))},
+        "report_before_sha256": hashlib.sha256(spec.report_path.read_bytes()).hexdigest(),
+        "audit_sha256": hashlib.sha256(carry.get("Audit findings", "").encode()).hexdigest(),
+        "repair": repair, "changed": description["changed"], "why": description["why"]}
+    prepare_validator_refresh(spec, checkpoint)
+    _save_progress(spec, completed, carry.get("Audit findings"))
+    return validator_refresh(spec)
 
 
 def _artifact_path(spec: RunSpec, artifact: str) -> Path:
@@ -7033,6 +7132,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         require_source_review_admission(spec)
     if progress is None:
         progress = _load_progress(spec) if resume else {}
+    validator_refresh = _validator_refresh_resume(spec, progress) if resume else None
     if resume and spec.receipt_completion_version:
         from data_sheets_schema.receipt_completion import resume_guard
         resume_guard(spec, progress)
@@ -7069,6 +7169,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             usage.extend(prior_record.get("api_usage") or [])
             # Only this generation's repair history belongs here (#366, #1291).
             prior_repair = list(prior_record.get("repair") or [])
+        if validator_refresh is not None:
+            prior_repair = list(validator_refresh["checkpoint"]["repair"])
 
     if resume:
         merge_completed_rows(spec, usage)
@@ -7362,7 +7464,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         require_evidence_checks(spec, carry, stage="audit", preserve=False)
     if "reconcile_full" in done:
         require_evidence_checks(spec, carry, stage="reconcile", preserve=False)
-    if "report" in done:
+    if "report" in done and not (validator_refresh is not None and validator_refresh["state"] == "pending"):
         require_source_reviews(spec, carry)
 
     core_derivation: dict[str, Any] | None = None
@@ -7606,7 +7708,12 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # because it only checks that files exist. An invalid record that looks
     # finished is worse than a failed run.
     problems = validate_outputs(spec)
-    if problems:
+    if problems and validator_refresh is not None and validator_refresh["state"] == "accepted":
+        # Completed-but-invalid runs retain the existing bounded repair-on-
+        # resume behavior (#361). Only an outstanding report obligation blocks
+        # another repair; accepted refresh evidence does not waive validation.
+        validator_refresh = None
+    if problems and validator_refresh is None:
         # Validator-driven shape repair (#356): the validator's findings are
         # precise and the run is already fully billed, so a bounded repair is
         # cheaper than discarding the run. Hashing happens in
@@ -7638,21 +7745,38 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                         "artifact a reviewer reads instead of the diff"),
             }
             if not spec.removal_repair_version:
-                try:
-                    refreshed = _regenerate_report(spec, client, settings, usage, carry)
-                except ContextNotAdmitted as refused:
-                    # Refused before dispatch (#5157). The report as written
-                    # describes the records before repair, which the gate's
-                    # source review refuses in any case. Latch the refusal
-                    # under its own cause, so a resume re-raises it before
-                    # any drift logic (#1820) rather than walking into it.
-                    _assert_evidence_clean({"checked": False, "findings": [
-                        {"kind": "report_refresh_not_admitted", **refused.facts}]}, "report", spec=spec)
-                # Whether the report was rewritten, not only why it should
-                # have been: a refresh that failed keeps the report as written.
-                rec.data["report_regenerated_after_repair"]["refreshed"] = refreshed
+                if spec.shared_generation_version:
+                    validator_refresh = _prepare_validator_refresh(
+                        spec, [x for x in PHASES if x in done], carry, rec.data["repair"] or [],
+                        rec.data["report_regenerated_after_repair"])
+                else:
+                    # Preserve the historical unregistered renderer's explicit
+                    # stale-report fallback. The selected shared protocol has
+                    # stricter source-review/admission and restart authority.
+                    _save_progress(spec, [x for x in PHASES if x in done], carry.get("Audit findings"))
+                    rec.data["report_regenerated_after_repair"]["refreshed"] = _regenerate_report(
+                        spec, client, settings, usage, carry)
     else:
         rec.data["repair"] = prior_repair or None
+    if validator_refresh is not None:
+        checkpoint = validator_refresh["checkpoint"]
+        rec.data["repair"] = checkpoint["repair"]
+        rec.data["report_regenerated_after_repair"] = {
+            "changed": checkpoint["changed"], "why": checkpoint["why"], "refreshed": True}
+        if validator_refresh["state"] == "pending":
+            try:
+                refreshed = _regenerate_report(spec, client, settings, usage, carry)
+            except ContextNotAdmitted as refused:
+                # The durable repaired pair and refresh obligation precede
+                # the count. A refused count remains a terminal no-retry fact.
+                _assert_evidence_clean({"checked": False, "findings": [
+                    {"kind": "report_refresh_not_admitted", **refused.facts}]}, "report", spec=spec)
+            if not refreshed:
+                raise UsageLedgerError("validator repair report refresh did not complete; "
+                                       "preserve its checkpoint and delivery evidence before resuming")
+            from data_sheets_schema.usage_ledger import finish_validator_refresh
+            finish_validator_refresh(spec)
+            _save_progress(spec, [x for x in PHASES if x in done], carry.get("Audit findings"))
     removal_check = None
     if spec.removal_repair_version:
         from data_sheets_schema.removal_repair import run as repair_removals
