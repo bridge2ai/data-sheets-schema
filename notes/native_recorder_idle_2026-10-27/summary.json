@@ -1,0 +1,143 @@
+{
+  "archive_helper": {
+    "path": "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/archive_native_recorder_idle_20261027.py",
+    "sha256": "c5bd8895972f7d9da1cbfb5e649952a03be05c04c2911ec694325a84e317e6fc"
+  },
+  "attempts": [
+    {
+      "archive": {
+        "all_member_bytes_verified": true,
+        "bytes": 674733,
+        "path": "idle-check-20261027-queue.tar.gz",
+        "sha256": "d43539b48cc57e1d57ebddddaa9fbacf99a9118f498c6698969c3f2247433d7c"
+      },
+      "files": {
+        "host.jsonl": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "outcome.json": {
+          "bytes": 295,
+          "sha256": "b6a75feb00748fc6889d49d94a2d50c72c11919ad22f2525e0774c92a9646e99"
+        },
+        "plan.json": {
+          "bytes": 2189,
+          "sha256": "19a6ae68942aa43531a629e51f1ef4dc0be926c9fa186ec0a1a195be53b0038d"
+        },
+        "source-after.json": {
+          "bytes": 1319745,
+          "sha256": "80d306d4768a311959c807229d838c7f2f9c7929925271ed9bd21047e9e5788b"
+        },
+        "source-before.json": {
+          "bytes": 1319745,
+          "sha256": "80d306d4768a311959c807229d838c7f2f9c7929925271ed9bd21047e9e5788b"
+        }
+      },
+      "host_samples": 0,
+      "idle_only": true,
+      "measurement_driver": {
+        "path": "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/native_recorder_measure_20261026.py",
+        "sha256": "2f77329c51fc27f8f7e5f7157643f47c43b6e7a94872e3e5e292bb1817806169"
+      },
+      "original_directory": "/private/tmp/d4d-recorder-measurements-20261026/idle-check-20261027-queue",
+      "original_inputs_rechecked_unchanged": true,
+      "outcome": {
+        "driver_wall_seconds": 2.5012580420007,
+        "error": "PermissionError: [Errno 1] Operation not permitted: 'ps'",
+        "finished_at": "2026-10-27T05:50:42.070718+00:00",
+        "returncode": null,
+        "scientific_acceptance": "not_assessed",
+        "source_unchanged": true,
+        "status": "measurement_error"
+      },
+      "recorder_pytest_launched": false,
+      "source_before_after_byte_identical": true,
+      "source_head": "01969cbed8eed93f420c640c1f1c306e5f58b033",
+      "source_tree": "d92f24c84aad9161457930a4b191564868ac0676",
+      "started_at": "2026-10-27T05:50:39.544699+00:00"
+    },
+    {
+      "archive": {
+        "all_member_bytes_verified": true,
+        "bytes": 1370781,
+        "path": "idle-check-20261027-queue-ps.tar.gz",
+        "sha256": "9189136597c1848d3f1293ec852762324e59350e1190f902b38e28d47734fb59"
+      },
+      "decision": {
+        "competing_process_observation_count": 60,
+        "idle": false,
+        "max_one_minute_load_per_cpu": 0.913134765625,
+        "mean_cpu_percent": 51.776666666666664,
+        "peak_cpu_percent": 100.0,
+        "process_inventory_scope": "Full recorded observations remain in the archive; process identities are not causal attribution.",
+        "samples": 60,
+        "scope": "declared host-idleness gate; not proof of absence of every competing process",
+        "thresholds": {
+          "foreign_process_cpu_percent": 5,
+          "mean_cpu_percent": 15,
+          "one_minute_load_per_cpu": 0.5,
+          "peak_cpu_percent": 35
+        }
+      },
+      "files": {
+        "host.jsonl": {
+          "bytes": 6941944,
+          "sha256": "f7e06bac6941839d5c4379720b4bc65fb33ca1a03e85f79cd6eca68491b335d6"
+        },
+        "idle-decision.json": {
+          "bytes": 105304,
+          "sha256": "b80c368c0915e0b901e61f7385a82e80dbfc47cc5bab7face6ea9939dd02d1e8"
+        },
+        "outcome.json": {
+          "bytes": 226,
+          "sha256": "640e12686b965ffad1a19e10eca87ed0f2f04d3d989b1395d8663cbbc434add5"
+        },
+        "plan.json": {
+          "bytes": 2198,
+          "sha256": "259874928b22f4fb66b705094fdc94bc68a2a61ee766878c1a4f1d57e3ea1b8e"
+        },
+        "source-after.json": {
+          "bytes": 1319745,
+          "sha256": "80d306d4768a311959c807229d838c7f2f9c7929925271ed9bd21047e9e5788b"
+        },
+        "source-before.json": {
+          "bytes": 1319745,
+          "sha256": "80d306d4768a311959c807229d838c7f2f9c7929925271ed9bd21047e9e5788b"
+        }
+      },
+      "host_samples": 60,
+      "idle_only": true,
+      "measurement_driver": {
+        "path": "/private/tmp/d4d-codex-recorder-tools-20261026/scripts/adhoc/native_recorder_measure_20261026.py",
+        "sha256": "2f77329c51fc27f8f7e5f7157643f47c43b6e7a94872e3e5e292bb1817806169"
+      },
+      "original_directory": "/private/tmp/d4d-recorder-measurements-20261026/idle-check-20261027-queue-ps",
+      "original_inputs_rechecked_unchanged": true,
+      "outcome": {
+        "driver_wall_seconds": 66.73925437501748,
+        "finished_at": "2026-10-27T05:52:14.839802+00:00",
+        "returncode": null,
+        "scientific_acceptance": "not_assessed",
+        "source_unchanged": true,
+        "status": "blocked_host_busy"
+      },
+      "recorder_pytest_launched": false,
+      "source_before_after_byte_identical": true,
+      "source_head": "01969cbed8eed93f420c640c1f1c306e5f58b033",
+      "source_tree": "d92f24c84aad9161457930a4b191564868ac0676",
+      "started_at": "2026-10-27T05:51:08.067020+00:00"
+    }
+  ],
+  "date_utc": "2026-10-27",
+  "decision": "defer three uninstrumented trials and paired diagnosis until the declared quiet-host gate passes",
+  "format": "native_recorder_idle_archive_v1",
+  "limits": [
+    "No recorder runtime was measured.",
+    "No timeout causality is inferred.",
+    "The source comparison concerns the saved before/after inventories, not a new runtime attestation.",
+    "Process exclusion decisions are retained from the driver, not independently recomputed by this archiver.",
+    "Scientific acceptance was not assessed."
+  ],
+  "purpose": "P4/#4354 preservation of two idle-only gate attempts, not timeout diagnosis",
+  "recorder_trials_launched": 0
+}
