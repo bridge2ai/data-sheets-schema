@@ -18,6 +18,8 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 TARGET = '2172bdd591f64a1a9f0fdd3220a8ff8ce826a6b4'
 MODULES = ('test_build_api_registrations', 'test_registration_input_sizing')
+BOUNDARY_NODES = tuple('tests/test_build_api_registrations.py::test_profile_covers_equal_or_larger_admission_ceilings_only['
+                       + name + ']' for name in ('context_limit_tokens', 'max_input_tokens_per_call', 'max_request_bytes'))
 PROTECTED = ('src/data_sheets_schema/shared_generation.py', 'src/data_sheets_schema/api_Generation_v2.py',
              'src/download/prompts/canonical_hashes.yaml')
 
@@ -94,7 +96,7 @@ def origins(baseline):
     return result
 
 
-def child(output):
+def child(output, boundaries_only=False):
     if not sys.flags.no_site or not sys.flags.safe_path or not sys.dont_write_bytecode:
         raise ValueError('child requires -S -P -B')
     venv = Path(sys.executable).parent.parent
@@ -116,7 +118,8 @@ def child(output):
     save(output / 'origins-before.json', origins(baseline))
     import pytest
     args = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(output / 'cases'),
-            '--junitxml', str(output / 'pytest.xml'), *('tests/' + name + '.py' for name in MODULES)]
+            '--junitxml', str(output / 'pytest.xml'),
+            *(BOUNDARY_NODES if boundaries_only else ('tests/' + name + '.py' for name in MODULES))]
     save(output / 'pytest-command.json', {'args': args, 'cwd': str(ROOT)})
     try:
         return int(pytest.main(args))
@@ -124,7 +127,7 @@ def child(output):
         save(output / 'origins-after.json', origins(baseline))
 
 
-def run(output, expected):
+def run(output, expected, boundaries_only=False):
     if output.is_relative_to(ROOT):
         raise ValueError('evidence must be outside frozen source tree')
     output.mkdir(parents=True, exist_ok=False)
@@ -149,8 +152,11 @@ def run(output, expected):
                HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1', GIT_NO_LAZY_FETCH='1',
                PYTHONPATH=os.pathsep.join(str(ROOT / path) for path in ('src', 'scripts', '.')))
     command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()), '--child', '--output', str(output)]
+    if boundaries_only:
+        command.append('--boundaries-only')
     save(output / 'plan.json', {'command': command, 'head': expected, 'target': TARGET,
         'modules': MODULES, 'credential_names_removed': removed,
+        'selected_nodes': BOUNDARY_NODES if boundaries_only else None,
         'scope': 'Complete builder and affected sizing test modules; secret removal is not a network sandbox.'})
     started = time.monotonic()
     with (output / 'pytest.log').open('xb') as log:
@@ -176,7 +182,12 @@ def run(output, expected):
                 counts[name] += 1
     outcome.update(unmarked_identified_cases_by_module=counts, invalid_junit_cases=invalid, skipped=skipped)
     origin_complete = all((output / name).is_file() for name in ('origins-before.json', 'origins-after.json'))
-    outcome['passed'] = code == 0 and before == after and all(counts.values()) and not invalid and origin_complete
+    if boundaries_only:
+        expected_identities = {('tests.test_build_api_registrations', node.split('::')[1]) for node in BOUNDARY_NODES}
+        selection_complete = seen == expected_identities and counts == dict(zip(MODULES, (3, 0))) and not skipped
+    else:
+        selection_complete = all(counts.values())
+    outcome['passed'] = code == 0 and before == after and selection_complete and not invalid and origin_complete
     save(output / 'outcome.json', outcome)
     print(json.dumps(outcome, sort_keys=True), flush=True)
     return 0 if outcome['passed'] else 1
@@ -187,5 +198,7 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--expect-head')
     parser.add_argument('--child', action='store_true')
+    parser.add_argument('--boundaries-only', action='store_true', help='Rerun only the three exact ceiling-boundary cases.')
     options = parser.parse_args()
-    raise SystemExit(child(options.output.resolve()) if options.child else run(options.output.resolve(), options.expect_head))
+    raise SystemExit(child(options.output.resolve(), options.boundaries_only) if options.child
+                     else run(options.output.resolve(), options.expect_head, options.boundaries_only))

@@ -74,7 +74,7 @@ def test_explicitly_sized_refusal_cannot_be_bypassed_by_omitting_the_record(tmp_
     assert not list(tmp_path.iterdir())
 
 
-@pytest.mark.parametrize("ceiling", builder.ADMISSION_CEILING_KEYS)
+@pytest.mark.parametrize("ceiling", ("context_limit_tokens", "max_input_tokens_per_call", "max_request_bytes"))
 def test_profile_covers_equal_or_larger_admission_ceilings_only(ceiling):
     limits = builder.resolve_audit_limits("CHORUS", "chorus")
     assert builder.profile_sized("chorus", limits)
