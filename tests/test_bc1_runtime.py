@@ -29,7 +29,6 @@ def case(tmp_path, supplied, monkeypatch):
     spec = specification(tmp_path)
     spec.bounded_carry_version = 1
     spec.shared_generation_version = 1
-    monkeypatch.setattr(spec, 'input_identity', lambda: {'fixture': 'captured-BC1-controller-preconditions'})
     monkeypatch.setattr(bc1_selection, 'validate_spec_mode', lambda selected: None)
     reg = deepcopy(supplied['selection'])
     files = {}
@@ -63,6 +62,12 @@ classes:
         'context_limit_tokens': 900_000, 'context_limit_basis': 'Invented test ceiling.'}
     captured = SimpleNamespace(registration=shared.canonical(reg), full_schema=supplied['schema_snapshot'], core_schema=core_schema,
         document=lambda: deepcopy(reg), raw=lambda path: files[path], identity=lambda: {'fixture': 'captured'})
+    identity = {'fixture': 'captured-BC1-controller-preconditions',
+        'bundle': deepcopy(reg['inputs']['bundle']),
+        'chunks': deepcopy(reg['inputs']['chunk_manifest']), 'source_manifest': None,
+        'instruction': {'sha256': shared.sha(b'Explicit invented BC1 controller test instruction')},
+        'captured_registration_sha256': shared.sha(captured.registration)}
+    monkeypatch.setattr(spec, 'input_identity', lambda: deepcopy(identity))
     monkeypatch.setattr(shared, 'assert_current', lambda selected: captured)
     monkeypatch.setattr(shared, 'capture', lambda selected: captured)
     monkeypatch.setattr(shared, 'preflight', lambda selected, settings: captured)
@@ -105,10 +110,10 @@ class Messages:
             raise KeyboardInterrupt('invented admitted interruption')
         if self.oversize:
             raw = b' ' * (codec.WORKER_BYTES + 1)
-        elif inner['kind'] == 'bc1_worker_request_v1':
+        elif inner.get('kind') == 'bc1_worker_request_v1':
             saved = json.loads(self.case.workers[inner['payload']['worker_id']])
             raw = typed._unblob(saved['response'])
-        elif inner['kind'] == 'bc1_stage_request_v1':
+        elif inner.get('kind') == 'bc1_stage_request_v1':
             state = audit.start(self.case.packet, self.case.workers, self.case.omission)
             delta = stage_delta(self.case.packet, inner, quote=self.case.quote,
                                 omissions=state['omission_check']['declared_candidates'])

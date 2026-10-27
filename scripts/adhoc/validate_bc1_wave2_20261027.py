@@ -18,7 +18,8 @@ ROOT = Path(__file__).resolve().parents[2]
 TARGET = '0674193f6d4e1b42a6f3afe6d5475c8635cfbdf2'
 GROUPS = {
     'bc1': ('test_bc1_codec', 'test_bc1_audit', 'test_bc1_context',
-            'test_bc1_registration', 'test_bc1_selection', 'test_bc1_api_rendering', 'test_bc1_runtime'),
+            'test_bc1_registration', 'test_bc1_selection', 'test_bc1_api_rendering', 'test_bc1_runtime',
+            'test_bc1_pipeline', 'test_bc1_resources'),
     'legacy': ('test_audit_omissions', 'test_build_api_registrations',
                'test_registration_input_sizing', 'test_shared_generation_selection',
                'test_shared_generation_condition_compatibility', 'test_shared_generation_cli',
