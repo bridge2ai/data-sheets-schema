@@ -72,11 +72,27 @@ resume after exact restoration.
 
 The initial causal log/JUnit and source evidence are retained under
 `/private/tmp/d4d-r9b-wave2-1a63bcae2/causal/` (stdout log alongside that directory).
-Only the corrected corruption method will be rerun. A separate frozen mirror
+The corrected corruption method passed at
+`346919f1f9d648700bcf0b3ccfe578ceb1abe23a`: one passed, zero failures/errors/skips,
+12 deprecation warnings, 308.78 seconds (driver 309.9954 seconds). The driver
+exited zero, source was unchanged, and actual import-origin checks completed.
+Its log/JUnit/source evidence is retained under
+`/private/tmp/d4d-r9b-wave2-346919f1f/corruption/`, with stdout at
+`/private/tmp/d4d-r9b-wave2-346919f1f-corruption.log`.
+
+This gives **seven distinct passing causal cases**: the six unchanged cases from
+the initial batch plus the corrected method. The initial failed assertion is
+retained and is not counted as an additional pass. Production `src/` bytes are
+identical to `1a63bcae2` at both tested heads; the correction changed only test
+expectations, the one-node validation selector and this note. This is the targeted
+R9b implementation acceptance, not a full-suite claim.
+
+A separate frozen mirror
 at `c16b88c7be9ae411f622dfffe5c3e266a1c15388` runs the three affected compatibility
 modules with identical production/test bytes; its sole initial difference is
 removal of an unjustified `not Live` name filter. No provider-enabled test is
-selected: the live-named cases use mocks. Final results remain pending.
+selected: the live-named cases use mocks. Broader compatibility results and the
+final committed evidence archive remain pending while that independent run finishes.
 
 This work does not establish scientific acceptance or authorize a live generation
 campaign. The new end-to-end causal fixtures select shared generation v1; they
