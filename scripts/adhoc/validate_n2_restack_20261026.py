@@ -74,6 +74,20 @@ def origins():
 
 
 def child(group, output):
+    # Namespace packages otherwise inherit the primary editable install's .pth
+    # path even when our explicit PYTHONPATH precedes it. Disable site startup,
+    # then expose only the interpreter's physical dependency directory.
+    if not sys.flags.no_site or not sys.flags.safe_path or not sys.dont_write_bytecode:
+        raise ValueError('child requires -S -P -B isolation')
+    venv = Path(sys.executable).parent.parent
+    site = venv / 'lib' / ('python' + '.'.join(map(str, sys.version_info[:2]))) / 'site-packages'
+    if (not (venv / 'pyvenv.cfg').is_file() or not site.is_dir()
+            or site.resolve() != site or str(site) in sys.path):
+        raise ValueError('expected physical venv dependencies with site startup disabled')
+    sys.path.append(str(site))
+    save(output / 'dependency-bootstrap.json', {
+        'site_startup': 'disabled', 'pth_execution': 'disabled', 'site_packages': str(site),
+        'sys_path': list(sys.path), 'dependency_bytes_attested': False})
     for name in ('native_shared_selection', 'native_shared_receipts', 'native_shared_capture', 'native_shared_execution'):
         importlib.import_module('data_sheets_schema.' + name)
     save(output / 'origins-before.json', origins())
@@ -111,7 +125,7 @@ def run(group, output, expected):
                PIP_NO_INDEX='1', PIP_DISABLE_PIP_VERSION_CHECK='1', UV_OFFLINE='1',
                HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1', GIT_NO_LAZY_FETCH='1',
                PYTHONPATH=os.pathsep.join(str(ROOT / p) for p in ('src', 'scripts', '.')))
-    command = [sys.executable, '-P', '-B', str(Path(__file__).resolve()),
+    command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()),
                '--child', '--group', group, '--output', str(output)]
     save(output / 'plan.json', {'group': group, 'groups': roster(), 'head': expected, 'target': TARGET,
         'python': sys.version, 'executable': sys.executable, 'command': command,
