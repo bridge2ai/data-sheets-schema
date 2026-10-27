@@ -1,0 +1,126 @@
+--- 01969/native-prose
++++ installed-D38/native-prose
+@@ -1,4 +1,4 @@
+-Generate the full/core D4D pair for CHORUS, label hypothetical-n2-render-20261025-native.
++Generate the full/core D4D pair for CHORUS, label hypothetical-n2-installed-d38-20261026-native.
+ <!-- D4D prompt renderer version 26 -->
+ 
+ ## Governing Rule
+@@ -327,13 +327,13 @@
+   that the data are publicly available to download, that anyone can download
+   them, or that downloading them needs no account, registration, approval or
+   signed agreement supports `unrestricted`, unless a passage states a
+-  condition below for the same data. A public licence such as Creative
+-  Commons, a download page asking the user to confirm that licence, a
++  condition below for the same data. A public license such as Creative
++  Commons, a download page asking the user to confirm that license, a
+   request to cite, or a form asking who is downloading is not such a
+   condition. A passage stating that access requires registration or an
+   account, verified identity or credentials, approval of the request,
+   sign-off by the requester's institution, or a data use agreement or
+-  dataset-specific licence that the requester or their institution signs or
++  dataset-specific license that the requester or their institution signs or
+   accepts supports `restricted`. A passage stating that each request is
+   reviewed before access is granted, by a data access committee or office or
+   by an institutional review board or ethics committee approving the
+@@ -365,15 +365,15 @@
+   an institution's data-security level such as "Level 3", an HL7
+   confidentiality code such as "HL7:2N" — is recorded as prose where
+   relevant and is never mapped to an enumeration value or used as the
+-  receipt for one. Where no passage states the category the slot stays empty
+-  — an empty enumeration slot is a gap the reader can see, a guessed one an
+-  error the reader cannot — except where the schema requires the slot, in
+-  which case the entry itself is what the evidence must support: a related
+-  dataset is recorded only where a passage states what the relation is. A
+-  file's `format`, `file_type`, `media_type` and `encoding`, and a file's or
+-  collection's `compression`, are read from the file the bundle names — its
+-  name and extension are the passage for them — and this rule does not reach
+-  those.
++  receipt for one. Where no passage states the category the slot stays
++  empty — an empty enumeration slot is a gap the reader can see, a guessed
++  one an error the reader cannot — except where the schema requires the
++  slot, in which case the entry itself is what the evidence must support: a
++  related dataset is recorded only where a passage states what the relation
++  is. A file's `format`, `file_type`, `media_type` and `encoding`, and a
++  file's or collection's `compression`, are read from the file the bundle
++  names — its name and extension are the passage for them — and this rule
++  does not reach those.
+ - `raw_data_format` names the form the data took before any processing this
+   dataset applied, and only where a passage states that form. The standard
+   the release conforms to, the extension the distributed files carry and the
+@@ -989,35 +989,35 @@
+ 
+ {
+   "helper_owned": {
+-    "audit": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/audit.json",
+-    "completion": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/completion.json",
+-    "core_seal": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/core-seal.json",
+-    "effective_receipt": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/effective-receipt.yaml",
+-    "execution_capture": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/binding/execution.json",
+-    "journal": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/journal.json",
+-    "journal_records_root": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/records",
+-    "observations_root": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/observations",
+-    "packet": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/packet.json",
+-    "phase1_core": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/core.yaml",
+-    "phase1_full": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/full.yaml",
+-    "phase1_receipt": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/original-receipt.yaml",
+-    "phase1_seal": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/phase1.json",
+-    "receipt_carry": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/receipt-carry.json",
+-    "receipt_result": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/receipt-result.json",
+-    "requests_root": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/requests",
+-    "responses_root": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/responses",
+-    "selection": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/selection.json",
+-    "session_binding": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/binding/session.json",
+-    "stage_root": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages",
+-    "started_capture": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/binding/started.json",
+-    "typed_assembly": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/assembly.json",
+-    "typed_index": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/typed-index.json"
++    "audit": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/audit.json",
++    "completion": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/completion.json",
++    "core_seal": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/core-seal.json",
++    "effective_receipt": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/effective-receipt.yaml",
++    "execution_capture": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/binding/execution.json",
++    "journal": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/journal.json",
++    "journal_records_root": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/records",
++    "observations_root": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/observations",
++    "packet": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/packet.json",
++    "phase1_core": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/core.yaml",
++    "phase1_full": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/full.yaml",
++    "phase1_receipt": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/original-receipt.yaml",
++    "phase1_seal": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/phase1.json",
++    "receipt_carry": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/receipt-carry.json",
++    "receipt_result": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/receipt-result.json",
++    "requests_root": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/requests",
++    "responses_root": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/responses",
++    "selection": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/selection.json",
++    "session_binding": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/binding/session.json",
++    "stage_root": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages",
++    "started_capture": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/binding/started.json",
++    "typed_assembly": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/assembly.json",
++    "typed_index": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/typed-index.json"
+   },
+   "model_files": {
+-    "core": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+-    "full": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+-    "receipt": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_coverage_receipt.yaml",
+-    "report": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_reconciliation.md"
++    "core": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
++    "full": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml",
++    "receipt": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_coverage_receipt.yaml",
++    "report": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_reconciliation.md"
+   }
+ }
+ 
+@@ -1036,10 +1036,10 @@
+ # Arm: BASELINE (input documents only)
+ # Source bundle: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+ # Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml
+-# Schema: /private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
++# Schema: /private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+ # Prior D4D factual reuse: prohibited
+ # Temperature: unknown (not observed from the agent runtime)
+-# Generated: 2026-10-25
++# Generated: 2026-10-26
+ ```
+ 
+ The separate original receipt has this shape: `bundle_md5` as given with the bundle, and one `chunks` entry per `[cNNN]` marker in the bundle, in order, in exactly this shape (#738):

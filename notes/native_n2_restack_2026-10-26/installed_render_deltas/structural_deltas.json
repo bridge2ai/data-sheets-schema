@@ -1,0 +1,1125 @@
+{
+  "scope": "Complete same-arm text and structural comparison; no equivalence/acceptance inference.",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-n2-d38-restack-20261026/scripts/adhoc/review_native_n2_installed_render_20261026.py",
+    "sha256": "41ec0bb64c380da226432f0454758b27d046c294c30bcfcfbcfa228576ec6e08"
+  },
+  "parser": {
+    "path": "/private/tmp/d4d-codex-n2-d38-restack-20261026/scripts/adhoc/native_n2_review_parity_deltas_20261025.py",
+    "sha256": "f021e5bcdac5c400d1c51135926eec285382020705e95787dc1defa76a5eda45"
+  },
+  "inputs": [
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/api-render-spec.json",
+      "bytes": 8508,
+      "sha256": "f1c674b2f0c3cb9a6bd91b44adc26b33da40302ebc5ec6ded8e783fe358cc4f2"
+    },
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/api-uniform-rules.txt",
+      "bytes": 25589,
+      "sha256": "44a2a05b4e9d410d7628df57cfaeb9dedc532189199e6df85515569e33fec530"
+    },
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/current-api25-instruction.txt",
+      "bytes": 87584,
+      "sha256": "17de6599e503770e2a6e6a9ce4cf719c9db342f162d6f003df2efe53584c37a5"
+    },
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/current-native26-instruction.txt",
+      "bytes": 132263,
+      "sha256": "cbc9ed139a885274f1aa4c97aa5830ffcc314a48b2e2f263254cc647b250794f"
+    },
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/instructions.diff",
+      "bytes": 104775,
+      "sha256": "050ba5f34d112cb8c598c3eaa0ab3991c756060b2be0cba379b33d880a769411"
+    },
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/native-render-spec.json",
+      "bytes": 30665,
+      "sha256": "14503280d925390534c5fe4ab7bfdab72a1c4a01a61625025963ba617e00802c"
+    },
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/native-uniform-rules.txt",
+      "bytes": 25589,
+      "sha256": "44a2a05b4e9d410d7628df57cfaeb9dedc532189199e6df85515569e33fec530"
+    },
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/report.json",
+      "bytes": 133994,
+      "sha256": "c18485bc72e1ce659625781ca83f1ffc17213101cd51fd3d313454c91d370771"
+    },
+    {
+      "path": "/private/tmp/d4d-n2-restack-installed-d38-20261026/reviewed-r9.txt",
+      "bytes": 4433,
+      "sha256": "d9f7884a03f0480d1ab610118f32850e2d98008fcd67fb51a16a4b7b7ca79a4d"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/api-render-spec.json",
+      "bytes": 8434,
+      "sha256": "d688770d2d8937689ac21192d5cbaddca48313fe7eeb9129ad89858d4ff3f920"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/api-uniform-rules.txt",
+      "bytes": 25589,
+      "sha256": "c5c5b36189ee163f5669d514955a20ce6345b02fc839a39221d05afe0f56d0ee"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/current-api25-instruction.txt",
+      "bytes": 87577,
+      "sha256": "2e8efbeb608959740cd80ecdcddee35e965928525fe4564046c68bb0d3314083"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/current-native26-instruction.txt",
+      "bytes": 131271,
+      "sha256": "e730d9fb95c7206fbe82b5e2e771290f8fcd38151d0c275b1f0ba2353a9a8520"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/instructions.diff",
+      "bytes": 103785,
+      "sha256": "706d7057383a011794f65f8e2749281d94193d6c190a087de98cbc231554a176"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/native-render-spec.json",
+      "bytes": 30175,
+      "sha256": "e7a07c32fb79b2ecdcb5644bc0009c540a6efad21581c4b6c2c9163cb2b52448"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/native-uniform-rules.txt",
+      "bytes": 25589,
+      "sha256": "c5c5b36189ee163f5669d514955a20ce6345b02fc839a39221d05afe0f56d0ee"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/report.json",
+      "bytes": 112474,
+      "sha256": "4860510d6dc18f112e09309c1d065059aa295c58f39c91681007d28b04cca921"
+    },
+    {
+      "path": "/private/tmp/d4d-native-n2-parity-01969cbed/reviewed-r9.txt",
+      "bytes": 4433,
+      "sha256": "2ae71e83e11a096764b63bc4037786d756d5e31523e3fe71701505b976eaf765"
+    }
+  ],
+  "source_heads": {
+    "before": "01969cbed8eed93f420c640c1f1c306e5f58b033",
+    "after": "f2dca0dd1f16769a10f65df96cb96caa2498a7cd"
+  },
+  "render_statuses": {
+    "before": "completed_offline_render_parity",
+    "after": "verified_installed_assets_and_full_offline_render"
+  },
+  "same_arm_text_hunks": {
+    "current-api25-instruction.txt.diff": [
+      "@@ -62,7 +62,7 @@",
+      "@@ -89,7 +89,7 @@",
+      "@@ -382,13 +382,13 @@",
+      "@@ -420,15 +420,15 @@"
+    ],
+    "current-native26-instruction.txt.diff": [
+      "@@ -1,4 +1,4 @@",
+      "@@ -327,13 +327,13 @@",
+      "@@ -365,15 +365,15 @@",
+      "@@ -998,7 +998,7 @@",
+      "@@ -1016,35 +1016,35 @@",
+      "@@ -1063,10 +1063,10 @@",
+      "@@ -1200,91 +1200,91 @@"
+    ],
+    "instructions.diff.diff": [
+      "@@ -1,5 +1,5 @@",
+      "@@ -65,7 +65,7 @@",
+      "@@ -92,8 +92,8 @@",
+      "@@ -532,7 +532,7 @@",
+      "@@ -589,35 +589,35 @@",
+      "@@ -636,10 +636,10 @@",
+      "@@ -755,91 +755,91 @@"
+    ],
+    "api-uniform-rules.txt.diff": [
+      "@@ -289,13 +289,13 @@",
+      "@@ -327,15 +327,15 @@"
+    ],
+    "native-uniform-rules.txt.diff": [
+      "@@ -289,13 +289,13 @@",
+      "@@ -327,15 +327,15 @@"
+    ],
+    "reviewed-r9.txt.diff": [
+      "@@ -12,13 +12,13 @@",
+      "@@ -50,12 +50,12 @@"
+    ],
+    "api-render-spec.json.diff": [
+      "@@ -22,21 +22,21 @@"
+    ],
+    "native-render-spec.json.diff": [
+      "@@ -1,36 +1,36 @@",
+      "@@ -55,7 +55,7 @@",
+      "@@ -74,11 +74,11 @@",
+      "@@ -103,18 +103,18 @@",
+      "@@ -124,6 +124,6 @@"
+    ],
+    "native-prose-only.diff": [
+      "@@ -1,4 +1,4 @@",
+      "@@ -327,13 +327,13 @@",
+      "@@ -365,15 +365,15 @@",
+      "@@ -989,35 +989,35 @@",
+      "@@ -1036,10 +1036,10 @@"
+    ]
+  },
+  "current_between_arm_hunks": [
+    "@@ -1,95 +1,40 @@",
+    "@@ -481,7 +426,6 @@",
+    "@@ -522,152 +466,134 @@",
+    "@@ -694,7 +620,7 @@",
+    "@@ -961,7 +887,7 @@",
+    "@@ -1048,130 +974,131 @@",
+    "@@ -1256,50 +1183,108 @@"
+  ],
+  "previous_between_arm_hunks": [
+    "@@ -1,95 +1,40 @@",
+    "@@ -481,7 +426,6 @@",
+    "@@ -522,152 +466,134 @@",
+    "@@ -694,7 +620,7 @@",
+    "@@ -961,7 +887,7 @@",
+    "@@ -1048,130 +974,131 @@",
+    "@@ -1256,50 +1183,108 @@"
+  ],
+  "changes": {
+    "native_command_tokens": [
+      {
+        "path": "/advance/5",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/selection.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/selection.json"
+      },
+      {
+        "path": "/audit_evidence/4",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/audit.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/audit.json"
+      },
+      {
+        "path": "/audit_evidence/10",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/full.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/full.yaml"
+      },
+      {
+        "path": "/audit_evidence/12",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/core.yaml"
+      },
+      {
+        "path": "/core_schema/4",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/core_schema/7",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+      },
+      {
+        "path": "/derive_core/6",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/derive_core/8",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+      },
+      {
+        "path": "/derive_core/10",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/derive_core/12",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/derive_final_core/6",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/derive_final_core/8",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+      },
+      {
+        "path": "/derive_final_core/10",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/derive_final_core/12",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/draft/4",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_reconciliation.md",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_reconciliation.md"
+      },
+      {
+        "path": "/draft/6",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/final_evidence/4",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/outputs/audit.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/outputs/audit.json"
+      },
+      {
+        "path": "/final_evidence/10",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/full.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/full.yaml"
+      },
+      {
+        "path": "/final_evidence/12",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/core.yaml"
+      },
+      {
+        "path": "/final_evidence/20",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/final_evidence/22",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+      },
+      {
+        "path": "/final_evidence/24",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_reconciliation.md",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_reconciliation.md"
+      },
+      {
+        "path": "/final_scope/11",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/final_scope/13",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+      },
+      {
+        "path": "/final_source_inventory/4",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/full_schema/4",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/full_schema/7",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/full_terms/4",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/full_terms/6",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/original_source_inventory/4",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages/sealed/full.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages/sealed/full.yaml"
+      },
+      {
+        "path": "/pair/4",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/pair/6",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+      },
+      {
+        "path": "/pair/8",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/pair/10",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/phase1_receipts/10",
+        "before": "hypothetical-n2-render-20261025-native",
+        "after": "hypothetical-n2-installed-d38-20261026-native"
+      },
+      {
+        "path": "/phase1_receipts/18",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/selection.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/selection.json"
+      },
+      {
+        "path": "/recorder/10",
+        "before": "hypothetical-n2-render-20261025-native",
+        "after": "hypothetical-n2-installed-d38-20261026-native"
+      }
+    ],
+    "native_recorder_metadata": [
+      {
+        "path": "/agentic_artifact_paths/core",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+      },
+      {
+        "path": "/agentic_artifact_paths/full",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/agentic_artifact_paths/receipt",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_coverage_receipt.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_coverage_receipt.yaml"
+      },
+      {
+        "path": "/agentic_artifact_paths/report",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_reconciliation.md",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_reconciliation.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-description-reviewer.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-description-reviewer.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-description-reviewer.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-mapper.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-mapper.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-mapper.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-provenance-guard.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-provenance-guard.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-provenance-guard.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-review-record.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-review-record.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-review-record.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rocrate.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rocrate.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rocrate.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric10-semantic.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric10-semantic.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric10-semantic.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric10.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric10.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric10.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20-semantic-v4.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20-semantic-v4.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric20-semantic-v4.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20-semantic.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20-semantic.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric20-semantic.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric20.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-schema-expert.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-schema-expert.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-schema-expert.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-validator.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-validator.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-validator.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1schema-stats.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/schema-stats.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/schema-stats.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1README.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/README.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/README.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-add-mapping.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-add-mapping.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-add-mapping.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-agent.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-agent.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-agent.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-assistant.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-assistant.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-assistant.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-full-core.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-full-core.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-full-core.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-input-deep-research.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-input-deep-research.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-input-deep-research.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-uniform-rules.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-uniform-rules.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-uniform-rules.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-webfetch.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-webfetch.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-webfetch.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/src~1data_sheets_schema~1schema~1data_sheets_schema_all.yaml",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/agentic_toolchain/resources/src~1data_sheets_schema~1schema~1data_sheets_schema_core_all.yaml",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_context/profile/vocabulary/identity/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+      },
+      {
+        "path": "/native_shared_generation_descriptor/assets/.claude~1commands~1d4d-uniform-rules-v2.md",
+        "before": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+        "after": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+      },
+      {
+        "path": "/native_shared_generation_descriptor/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md",
+        "before": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+        "after": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/core_schema/root",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/core_schema/sources/0/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/full_schema/root",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/full_schema/sources/0/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/profile/vocabulary/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/receipt_policy/path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/receipt-policy.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/receipt-policy.json"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/registration_path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/selection.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/selection.json"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/run/label",
+        "before": "hypothetical-n2-render-20261025-native",
+        "after": "hypothetical-n2-installed-d38-20261026-native"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1agents~1d4d-provenance-guard-v2.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-provenance-guard-v2.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-provenance-guard-v2.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-agent-v2.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-agent-v2.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-agent-v2.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-full-core-v2.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-full-core-v2.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-full-core-v2.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-uniform-rules-v2.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-uniform-rules-v2.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-uniform-rules-v2.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-uniform-rules-v2.md/sha256",
+        "before": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+        "after": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1context.schema.json/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/context.schema.json",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/omission_inventory_v1/context.schema.json"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1policy.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/policy.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/omission_inventory_v1/policy.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1response.schema.json/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/response.schema.json",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/omission_inventory_v1/response.schema.json"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/d4d_generic_arm_prompt_v10.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md/sha256",
+        "before": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+        "after": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1evidence_protocol_v7.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/evidence_protocol_v7.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/evidence_protocol_v7.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_shared_generation_v1.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_shared_generation_v1.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/native_shared_generation_v1.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_shared_receipt_policy_v1.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_shared_receipt_policy_v1.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/native_shared_receipt_policy_v1.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_source_attribution_v1.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_source_attribution_v1.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/native_source_attribution_v1.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1shared_generation_v1.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/shared_generation_v1.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/shared_generation_v1.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/descriptor_sha256",
+        "before": "5c99da01f32403ffdb7c67e554a9df4b49b7cf26dad4df95ad8d3f77816b8ab2",
+        "after": "3084d3d95e244c1668cfd4761d38c96a0017564c4bf28a8d8a84484b72387068"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/stage_root",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/sha256",
+        "before": "ef62396faf018245ce7a110592e515008fa27d2f5ee6be73f22ec4429952846e",
+        "after": "b6f6026768539d79c7b1c8c37fd8a7a9c82aca45235a3c78c9019a8c643d40d5"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/utf8_bytes",
+        "before": 6571,
+        "after": 6779
+      },
+      {
+        "path": "/native_shared_generation_registration/sha256",
+        "before": "ef62396faf018245ce7a110592e515008fa27d2f5ee6be73f22ec4429952846e",
+        "after": "b6f6026768539d79c7b1c8c37fd8a7a9c82aca45235a3c78c9019a8c643d40d5"
+      },
+      {
+        "path": "/native_shared_receipt_policy/path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/receipt-policy.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/receipt-policy.json"
+      },
+      {
+        "path": "/native_shared_runtime_declaration/path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/runtime.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/runtime.json"
+      },
+      {
+        "path": "/run_date",
+        "before": "2026-10-25",
+        "after": "2026-10-26"
+      }
+    ],
+    "native_context": [
+      {
+        "path": "/profile/vocabulary/identity/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+      }
+    ],
+    "api_receipt": [],
+    "api-render-spec.json": [
+      {
+        "path": "/run_date",
+        "before": "2026-10-25",
+        "after": "2026-10-26"
+      },
+      {
+        "path": "/shared_generation_assets/.claude~1commands~1d4d-uniform-rules-v2.md",
+        "before": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+        "after": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+      },
+      {
+        "path": "/shared_generation_assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md",
+        "before": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+        "after": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/inputs/core_schema/root",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/inputs/core_schema/sources/0/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/inputs/full_schema/root",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/inputs/full_schema/sources/0/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/inputs/profile/vocabulary/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/registration_path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/api-registration-fixture.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/api-registration-fixture.json"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/run/label",
+        "before": "hypothetical-n2-render-20261025-api",
+        "after": "hypothetical-n2-installed-d38-20261026-api"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/runtime/config/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.github/workflows/d4d_assistant_deterministic.config",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.github/workflows/d4d_assistant_deterministic.config"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-uniform-rules-v2.md",
+        "before": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+        "after": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md",
+        "before": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+        "after": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/sha256",
+        "before": "b13687830967d7f8ed2f932215f6ab233aa7f3ccfca2f312f02bc9915442ec4a",
+        "after": "f64ec58da25a58c8a27a42b812b78ac7636e807493b2939bb5e3eeaa7cf6516e"
+      },
+      {
+        "path": "/shared_generation_registration/raw_json/utf8_bytes",
+        "before": 4844,
+        "after": 4918
+      },
+      {
+        "path": "/shared_generation_registration/sha256",
+        "before": "b13687830967d7f8ed2f932215f6ab233aa7f3ccfca2f312f02bc9915442ec4a",
+        "after": "f64ec58da25a58c8a27a42b812b78ac7636e807493b2939bb5e3eeaa7cf6516e"
+      }
+    ],
+    "native-render-spec.json": [
+      {
+        "path": "/agentic_artifact_paths/core",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d_core.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d_core.yaml"
+      },
+      {
+        "path": "/agentic_artifact_paths/full",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_d4d.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_d4d.yaml"
+      },
+      {
+        "path": "/agentic_artifact_paths/receipt",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_coverage_receipt.yaml",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_coverage_receipt.yaml"
+      },
+      {
+        "path": "/agentic_artifact_paths/report",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/CHORUS_reconciliation.md",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/CHORUS_reconciliation.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-description-reviewer.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-description-reviewer.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-description-reviewer.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-mapper.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-mapper.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-mapper.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-provenance-guard.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-provenance-guard.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-provenance-guard.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-review-record.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-review-record.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-review-record.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rocrate.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rocrate.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rocrate.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric10-semantic.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric10-semantic.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric10-semantic.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric10.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric10.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric10.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20-semantic-v4.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20-semantic-v4.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric20-semantic-v4.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20-semantic.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20-semantic.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric20-semantic.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-rubric20.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-rubric20.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-rubric20.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-schema-expert.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-schema-expert.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-schema-expert.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1d4d-validator.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-validator.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-validator.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1agents~1schema-stats.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/schema-stats.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/schema-stats.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1README.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/README.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/README.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-add-mapping.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-add-mapping.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-add-mapping.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-agent.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-agent.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-agent.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-assistant.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-assistant.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-assistant.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-full-core.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-full-core.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-full-core.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-input-deep-research.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-input-deep-research.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-input-deep-research.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-uniform-rules.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-uniform-rules.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-uniform-rules.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/.claude~1commands~1d4d-webfetch.md",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-webfetch.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-webfetch.md"
+      },
+      {
+        "path": "/agentic_toolchain/resources/src~1data_sheets_schema~1schema~1data_sheets_schema_all.yaml",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/agentic_toolchain/resources/src~1data_sheets_schema~1schema~1data_sheets_schema_core_all.yaml",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_context/profile/vocabulary/identity/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+      },
+      {
+        "path": "/native_shared_generation_descriptor/assets/.claude~1commands~1d4d-uniform-rules-v2.md",
+        "before": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+        "after": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+      },
+      {
+        "path": "/native_shared_generation_descriptor/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md",
+        "before": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+        "after": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/core_schema/root",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/core_schema/sources/0/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/full_schema/root",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/full_schema/sources/0/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/inputs/profile/vocabulary/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/receipt_policy/path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/receipt-policy.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/receipt-policy.json"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/registration_path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/selection.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/selection.json"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/run/label",
+        "before": "hypothetical-n2-render-20261025-native",
+        "after": "hypothetical-n2-installed-d38-20261026-native"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1agents~1d4d-provenance-guard-v2.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/agents/d4d-provenance-guard-v2.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/agents/d4d-provenance-guard-v2.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-agent-v2.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-agent-v2.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-agent-v2.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-full-core-v2.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-full-core-v2.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-full-core-v2.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-uniform-rules-v2.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/.claude/commands/d4d-uniform-rules-v2.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/.claude/commands/d4d-uniform-rules-v2.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/.claude~1commands~1d4d-uniform-rules-v2.md/sha256",
+        "before": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f",
+        "after": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1context.schema.json/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/context.schema.json",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/omission_inventory_v1/context.schema.json"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1policy.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/policy.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/omission_inventory_v1/policy.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1data_sheets_schema~1omission_inventory_v1~1response.schema.json/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/data_sheets_schema/omission_inventory_v1/response.schema.json",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/data_sheets_schema/omission_inventory_v1/response.schema.json"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/d4d_generic_arm_prompt_v10.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1d4d_generic_arm_prompt_v10.md/sha256",
+        "before": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99",
+        "after": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1evidence_protocol_v7.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/evidence_protocol_v7.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/evidence_protocol_v7.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_shared_generation_v1.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_shared_generation_v1.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/native_shared_generation_v1.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_shared_receipt_policy_v1.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_shared_receipt_policy_v1.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/native_shared_receipt_policy_v1.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1native_source_attribution_v1.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/native_source_attribution_v1.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/native_source_attribution_v1.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/assets/src~1download~1prompts~1shared_generation_v1.md/path",
+        "before": "/private/tmp/d4d-codex-n2-4-20261025/src/download/prompts/shared_generation_v1.md",
+        "after": "/private/tmp/d4d-codex-n2-d38-restack-20261026/src/download/prompts/shared_generation_v1.md"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/selection/descriptor_sha256",
+        "before": "5c99da01f32403ffdb7c67e554a9df4b49b7cf26dad4df95ad8d3f77816b8ab2",
+        "after": "3084d3d95e244c1668cfd4761d38c96a0017564c4bf28a8d8a84484b72387068"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/decoded/stage_root",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/stages",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/stages"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/sha256",
+        "before": "ef62396faf018245ce7a110592e515008fa27d2f5ee6be73f22ec4429952846e",
+        "after": "b6f6026768539d79c7b1c8c37fd8a7a9c82aca45235a3c78c9019a8c643d40d5"
+      },
+      {
+        "path": "/native_shared_generation_registration/raw_json/utf8_bytes",
+        "before": 6571,
+        "after": 6779
+      },
+      {
+        "path": "/native_shared_generation_registration/sha256",
+        "before": "ef62396faf018245ce7a110592e515008fa27d2f5ee6be73f22ec4429952846e",
+        "after": "b6f6026768539d79c7b1c8c37fd8a7a9c82aca45235a3c78c9019a8c643d40d5"
+      },
+      {
+        "path": "/native_shared_receipt_policy/path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/receipt-policy.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/receipt-policy.json"
+      },
+      {
+        "path": "/native_shared_runtime_declaration/path",
+        "before": "/private/tmp/d4d-native-n2-parity-01969cbed/hypothetical-unwritten/native/runtime.json",
+        "after": "/private/tmp/d4d-n2-restack-installed-d38-20261026/hypothetical-unwritten/native/runtime.json"
+      },
+      {
+        "path": "/run_date",
+        "before": "2026-10-25",
+        "after": "2026-10-26"
+      }
+    ]
+  },
+  "input_bytes_unchanged": true,
+  "outputs": [
+    {
+      "file": "api-render-spec.json.diff",
+      "bytes": 12175,
+      "sha256": "495e3797762c9f2d354f0cd7596d096b51f2c9358e338b9d6db24e6f9cc85df3"
+    },
+    {
+      "file": "api-uniform-rules.txt.diff",
+      "bytes": 2992,
+      "sha256": "47b17a932975af98b67c811714c87fc929a90635774968e26c14cfae83af217d"
+    },
+    {
+      "file": "current-api25-instruction.txt.diff",
+      "bytes": 3733,
+      "sha256": "7bf04c2621c0a8752ab4c8729a9b82c1c3458d07520534308bd6d1f373e02e23"
+    },
+    {
+      "file": "current-native26-instruction.txt.diff",
+      "bytes": 96277,
+      "sha256": "8cc0a8ad86c95421af24ddac2c3e5f8d9366e1a5d507eda82ddd600706c80002"
+    },
+    {
+      "file": "instructions.diff.diff",
+      "bytes": 94322,
+      "sha256": "bf30a50e995e70e220556863b81e169a077611b7f66aa02fdb98318547a02832"
+    },
+    {
+      "file": "native-prose-only.diff",
+      "bytes": 11030,
+      "sha256": "572dc160f6ac353d225babe3834064abefb9a37c6608d1378907c984ee47e7a7"
+    },
+    {
+      "file": "native-render-spec.json.diff",
+      "bytes": 32031,
+      "sha256": "682eb3bd232bb420cc95e75fbe216fbf0c5c9bc01ebb894e6f7584eaa86db345"
+    },
+    {
+      "file": "native-uniform-rules.txt.diff",
+      "bytes": 2998,
+      "sha256": "3e2d68b9e0514dc716398c7b779756174d0c1d11ce9e8a3a6cb410afd4831933"
+    },
+    {
+      "file": "reviewed-r9.txt.diff",
+      "bytes": 2743,
+      "sha256": "5af17e0c168bc5087aad3e2759a02e36363ef38489fd6c23e5cba643e1683f0a"
+    }
+  ]
+}

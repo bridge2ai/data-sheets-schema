@@ -1,0 +1,349 @@
+{
+  "archive": {
+    "bytes": 436304,
+    "file": "installed-render.tar.gz",
+    "sha256": "6c2cad8fde6d60cf52322725813c4af419e325fc152074485166684c58274e9e"
+  },
+  "archive_roundtrip_exact": true,
+  "argv": {
+    "destination": "/private/tmp/d4d-codex-n2-d38-restack-20261026/notes/native_n2_restack_2026-10-26/installed_d38_evidence",
+    "render": "/private/tmp/d4d-n2-restack-installed-d38-20261026",
+    "render_log": "/private/tmp/d4d-n2-restack-installed-d38-20261026.log",
+    "test_log": "/private/tmp/d4d-n2-restack-d38-focused-20261026.log",
+    "test_xml": "/private/tmp/d4d-n2-restack-d38-focused-20261026.xml",
+    "tested_head": "f2dca0dd1f16769a10f65df96cb96caa2498a7cd",
+    "tree": "/private/tmp/d4d-codex-n2-d38-restack-20261026"
+  },
+  "copies": [
+    {
+      "bytes": 63,
+      "file": "render.log",
+      "sha256": "12032ab2e99ed850a9a28a8c75e0c91ad860ef1f5fe6b7d3bfdaf3875408be1b"
+    },
+    {
+      "bytes": 867,
+      "file": "focused.log",
+      "sha256": "7645fa0662bdd85bdd7ee47c9814e6e5d8e1a7dcc0eda4c128f33abf3188276d"
+    },
+    {
+      "bytes": 4410,
+      "file": "focused.xml",
+      "sha256": "f3444f54a42e7c86132f6d0fdd709108d7ce9b99d0abbc02f7e156045ac7424d"
+    },
+    {
+      "bytes": 133994,
+      "file": "render-report.json",
+      "sha256": "c18485bc72e1ce659625781ca83f1ffc17213101cd51fd3d313454c91d370771"
+    }
+  ],
+  "entries": [
+    {
+      "bytes": 4918,
+      "mode": 384,
+      "path": "api-registration-fixture.json",
+      "sha256": "f64ec58da25a58c8a27a42b812b78ac7636e807493b2939bb5e3eeaa7cf6516e"
+    },
+    {
+      "bytes": 8508,
+      "mode": 384,
+      "path": "api-render-spec.json",
+      "sha256": "f1c674b2f0c3cb9a6bd91b44adc26b33da40302ebc5ec6ded8e783fe358cc4f2"
+    },
+    {
+      "bytes": 25589,
+      "mode": 384,
+      "path": "api-uniform-rules.txt",
+      "sha256": "44a2a05b4e9d410d7628df57cfaeb9dedc532189199e6df85515569e33fec530"
+    },
+    {
+      "bytes": 87584,
+      "mode": 384,
+      "path": "current-api25-instruction.txt",
+      "sha256": "17de6599e503770e2a6e6a9ce4cf719c9db342f162d6f003df2efe53584c37a5"
+    },
+    {
+      "bytes": 132263,
+      "mode": 384,
+      "path": "current-native26-instruction.txt",
+      "sha256": "cbc9ed139a885274f1aa4c97aa5830ffcc314a48b2e2f263254cc647b250794f"
+    },
+    {
+      "bytes": 84736,
+      "mode": 384,
+      "path": "historical-current-target-api25-instruction.txt",
+      "sha256": "489a4b59f675990bf2b37921be1a234bdac9dbe05f6ea3c031ed2c5b06dfcc78"
+    },
+    {
+      "bytes": 136697,
+      "mode": 384,
+      "path": "historical-hypothetical-native26-instruction.txt",
+      "sha256": "0b693a535bdccfb6d8f5f49410fc84b82c8af396cb2d82b68a3c84257f344ca4"
+    },
+    {
+      "bytes": 35920,
+      "mode": 384,
+      "path": "historical-input-bundle.txt",
+      "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"
+    },
+    {
+      "bytes": 1945,
+      "mode": 384,
+      "path": "historical-input-chunk_manifest.txt",
+      "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"
+    },
+    {
+      "bytes": 6476,
+      "mode": 384,
+      "path": "historical-input-context.txt",
+      "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+    },
+    {
+      "bytes": 40612,
+      "mode": 384,
+      "path": "historical-input-source_manifest.txt",
+      "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+    },
+    {
+      "bytes": 10054,
+      "mode": 384,
+      "path": "historical-to-current-api.diff",
+      "sha256": "169d399b2d6e942af5b3a4031c5be1faf870ddfa27ab4750a6b9351e4a6aeaa4"
+    },
+    {
+      "bytes": 107417,
+      "mode": 384,
+      "path": "historical-to-current-native.diff",
+      "sha256": "ceb06c12755f4209091b1f56ad12f1d1f04539b4fa9efc7420b6f2d8f987cc41"
+    },
+    {
+      "bytes": 104775,
+      "mode": 384,
+      "path": "instructions.diff",
+      "sha256": "050ba5f34d112cb8c598c3eaa0ab3991c756060b2be0cba379b33d880a769411"
+    },
+    {
+      "bytes": 30665,
+      "mode": 384,
+      "path": "native-render-spec.json",
+      "sha256": "14503280d925390534c5fe4ab7bfdab72a1c4a01a61625025963ba617e00802c"
+    },
+    {
+      "bytes": 25589,
+      "mode": 384,
+      "path": "native-uniform-rules.txt",
+      "sha256": "44a2a05b4e9d410d7628df57cfaeb9dedc532189199e6df85515569e33fec530"
+    },
+    {
+      "bytes": 6912,
+      "mode": 384,
+      "path": "negative-both_pre_d38/.claude/agents/d4d-provenance-guard-v2.md",
+      "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+    },
+    {
+      "bytes": 12698,
+      "mode": 384,
+      "path": "negative-both_pre_d38/.claude/commands/d4d-agent-v2.md",
+      "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+    },
+    {
+      "bytes": 58267,
+      "mode": 384,
+      "path": "negative-both_pre_d38/.claude/commands/d4d-full-core-v2.md",
+      "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+    },
+    {
+      "bytes": 29867,
+      "mode": 384,
+      "path": "negative-both_pre_d38/.claude/commands/d4d-uniform-rules-v2.md",
+      "sha256": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f"
+    },
+    {
+      "bytes": 32568,
+      "mode": 384,
+      "path": "negative-both_pre_d38/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+      "sha256": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99"
+    },
+    {
+      "bytes": 33464,
+      "mode": 384,
+      "path": "negative-both_pre_d38/src/download/prompts/evidence_protocol_v7.md",
+      "sha256": "72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6"
+    },
+    {
+      "bytes": 4084,
+      "mode": 384,
+      "path": "negative-both_pre_d38/src/download/prompts/native_shared_generation_v1.md",
+      "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+    },
+    {
+      "bytes": 2336,
+      "mode": 384,
+      "path": "negative-both_pre_d38/src/download/prompts/native_shared_receipt_policy_v1.md",
+      "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+    },
+    {
+      "bytes": 2047,
+      "mode": 384,
+      "path": "negative-both_pre_d38/src/download/prompts/native_source_attribution_v1.md",
+      "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+    },
+    {
+      "bytes": 3569,
+      "mode": 384,
+      "path": "negative-both_pre_d38/src/download/prompts/shared_generation_v1.md",
+      "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+    },
+    {
+      "bytes": 6912,
+      "mode": 384,
+      "path": "negative-old_generic_only/.claude/agents/d4d-provenance-guard-v2.md",
+      "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+    },
+    {
+      "bytes": 12698,
+      "mode": 384,
+      "path": "negative-old_generic_only/.claude/commands/d4d-agent-v2.md",
+      "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+    },
+    {
+      "bytes": 58267,
+      "mode": 384,
+      "path": "negative-old_generic_only/.claude/commands/d4d-full-core-v2.md",
+      "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+    },
+    {
+      "bytes": 29867,
+      "mode": 384,
+      "path": "negative-old_generic_only/.claude/commands/d4d-uniform-rules-v2.md",
+      "sha256": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+    },
+    {
+      "bytes": 32568,
+      "mode": 384,
+      "path": "negative-old_generic_only/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+      "sha256": "95511eeea60e5112c630c28bcc342f132d14efcf0d5485bbf26f3e81a0f4cc99"
+    },
+    {
+      "bytes": 33464,
+      "mode": 384,
+      "path": "negative-old_generic_only/src/download/prompts/evidence_protocol_v7.md",
+      "sha256": "72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6"
+    },
+    {
+      "bytes": 4084,
+      "mode": 384,
+      "path": "negative-old_generic_only/src/download/prompts/native_shared_generation_v1.md",
+      "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+    },
+    {
+      "bytes": 2336,
+      "mode": 384,
+      "path": "negative-old_generic_only/src/download/prompts/native_shared_receipt_policy_v1.md",
+      "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+    },
+    {
+      "bytes": 2047,
+      "mode": 384,
+      "path": "negative-old_generic_only/src/download/prompts/native_source_attribution_v1.md",
+      "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+    },
+    {
+      "bytes": 3569,
+      "mode": 384,
+      "path": "negative-old_generic_only/src/download/prompts/shared_generation_v1.md",
+      "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+    },
+    {
+      "bytes": 6912,
+      "mode": 384,
+      "path": "negative-old_uniform_only/.claude/agents/d4d-provenance-guard-v2.md",
+      "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+    },
+    {
+      "bytes": 12698,
+      "mode": 384,
+      "path": "negative-old_uniform_only/.claude/commands/d4d-agent-v2.md",
+      "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+    },
+    {
+      "bytes": 58267,
+      "mode": 384,
+      "path": "negative-old_uniform_only/.claude/commands/d4d-full-core-v2.md",
+      "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+    },
+    {
+      "bytes": 29867,
+      "mode": 384,
+      "path": "negative-old_uniform_only/.claude/commands/d4d-uniform-rules-v2.md",
+      "sha256": "cbf7e9f53e97a1d7dd953507308825e3c835daabcb8f6ee0a6a5dcd8bb9a048f"
+    },
+    {
+      "bytes": 32568,
+      "mode": 384,
+      "path": "negative-old_uniform_only/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+      "sha256": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+    },
+    {
+      "bytes": 33464,
+      "mode": 384,
+      "path": "negative-old_uniform_only/src/download/prompts/evidence_protocol_v7.md",
+      "sha256": "72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6"
+    },
+    {
+      "bytes": 4084,
+      "mode": 384,
+      "path": "negative-old_uniform_only/src/download/prompts/native_shared_generation_v1.md",
+      "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+    },
+    {
+      "bytes": 2336,
+      "mode": 384,
+      "path": "negative-old_uniform_only/src/download/prompts/native_shared_receipt_policy_v1.md",
+      "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+    },
+    {
+      "bytes": 2047,
+      "mode": 384,
+      "path": "negative-old_uniform_only/src/download/prompts/native_source_attribution_v1.md",
+      "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+    },
+    {
+      "bytes": 3569,
+      "mode": 384,
+      "path": "negative-old_uniform_only/src/download/prompts/shared_generation_v1.md",
+      "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+    },
+    {
+      "bytes": 133994,
+      "mode": 384,
+      "path": "report.json",
+      "sha256": "c18485bc72e1ce659625781ca83f1ffc17213101cd51fd3d313454c91d370771"
+    },
+    {
+      "bytes": 4433,
+      "mode": 384,
+      "path": "reviewed-r9.txt",
+      "sha256": "d9f7884a03f0480d1ab610118f32850e2d98008fcd67fb51a16a4b7b7ca79a4d"
+    }
+  ],
+  "focused_counts": {
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "tests": 27
+  },
+  "helper": {
+    "path": "/private/tmp/d4d-codex-n2-d38-restack-20261026/scripts/adhoc/preserve_native_n2_d38_evidence_20261026.py",
+    "sha256": "9829ebb77e202b561706bc7066635fb434ca85ac7ae63f683ac368151a48a30c"
+  },
+  "scope": "exact_evidence_preservation_not_new_test_or_runtime_acceptance",
+  "source_directory": "/private/tmp/d4d-n2-restack-installed-d38-20261026",
+  "source_unchanged": true,
+  "tested_head": "f2dca0dd1f16769a10f65df96cb96caa2498a7cd",
+  "tested_paths_unchanged": [
+    "src",
+    "tests",
+    "scripts/adhoc/native_n2_installed_d38_20261026.py",
+    "scripts/adhoc/native_n2_render_parity_20261025.py"
+  ]
+}
