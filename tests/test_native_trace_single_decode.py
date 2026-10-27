@@ -1,9 +1,11 @@
-"""#4537: complete constructor parity with the exact literal 0125 source.
+"""#4537: original constructor/public behavior and explicit later cache state.
 
-Reversing only the reviewed factoring reconstructs the complete original module.
-Its fixed SHA256 is checked before compilation, so the oracle neither requires
-Git/history at test time nor silently follows an unrelated production change.
-The oracle uses the canonical module name; no type-name normalization is needed.
+The inert fixture is the complete literal 0125 Git blob, with its original
+SHA256 checked before compilation. Later a462 caching cannot alter this oracle.
+Every original instance field and public outcome remains compared; only the
+three later cache fields are separately checked against successful results.
+Canonical module identity and current dependency imports match the original
+test. This does not reconstruct the complete historical runtime environment.
 """
 from copy import deepcopy
 from dataclasses import fields, is_dataclass, replace
@@ -18,32 +20,14 @@ from tests.test_native_shared_observations import POLICY, SESSION, events, initi
 
 
 PARENT_SHA256 = "3bc93c2d1720d4e41ee83e7be7d8758a56836062c316f75ecc4b505e80b6d3ab"
-CONSTRUCTOR_REUSE = '''        # Decode in initialization's original order, then reuse only this
-        # constructor's rows for indexing. No parsed state survives in a cache.
-        native=list(rows(transcript));parent=list(rows(control))
-        initialized,*_=_initialization_from_rows(transcript,control,native,parent,policy=policy,runtime=runtime)
-'''
-HELPER_SPLIT = '''    return _initialization_from_rows(transcript,control,native,parent,policy=policy,runtime=runtime)
-
-
-def _initialization_from_rows(transcript,control,native,parent,*,policy,runtime):
-    """Validate already decoded rows owned by this one caller."""
-'''
+PARENT_SOURCE = Path(__file__).parent / "fixtures/native_trace/native_shared_observations_0125eebbc.py.txt"
+CACHE_METHODS = {"_req_cache": "request", "_adm_cache": "admitted", "_set_cache": "settled"}
 
 
 @pytest.fixture(scope="module")
 def literal_parent():
-    source = Path(observed.__file__).read_text(encoding="utf-8")
-    substitutions = (
-        (CONSTRUCTOR_REUSE, "        initialized,*_=initialization(transcript,control,policy=policy,runtime=runtime)\n"),
-        ("        for number,raw,value in native:\n", "        for number,raw,value in rows(transcript):\n"),
-        ("        for number,raw,value in parent:\n", "        for number,raw,value in rows(control):\n"),
-        (HELPER_SPLIT, ""),
-    )
-    for candidate, original in substitutions:
-        assert source.count(candidate) == 1
-        source = source.replace(candidate, original)
-    assert hashlib.sha256(source.encode()).hexdigest() == PARENT_SHA256
+    source = PARENT_SOURCE.read_bytes()
+    assert hashlib.sha256(source).hexdigest() == PARENT_SHA256
     namespace = {"__name__": observed.__name__}
     exec(compile(source, "literal0125/native_shared_observations.py", "exec"), namespace)
     return SimpleNamespace(**namespace)
@@ -83,17 +67,34 @@ def outcome(call):
         return ("refused", exception_graph(error))
 
 
+def trace_state(trace, module, methods=(), *, completed=False):
+    """Check all new cache state before comparing every original instance field."""
+    state = dict(vars(trace))
+    if module is observed:
+        expected_fields = tuple(CACHE_METHODS) if completed or "frames" in state else ()
+        assert tuple(name for name in CACHE_METHODS if name in state) == expected_fields
+        for name in expected_fields:
+            method = CACHE_METHODS[name]
+            expected_rows = tuple((typed(key[0]), result[1]) for key, result in methods
+                                  if type(key) is tuple and key[1] == method and result[0] == "returned")
+            # This checks dictionary type, key/value types, order and all values.
+            # A refused constructor has no method outcomes, hence empty caches.
+            assert typed(state.pop(name)) == ("builtins.dict", expected_rows)
+    # Unknown attributes, including private ones, remain in the comparison.
+    return typed(state)
+
+
 def constructor(module, transcript, control, *, runtime, session=SESSION, policy=POLICY):
     trace = module.Trace.__new__(module.Trace)
     try:
         trace.__init__(transcript, control, session_id=session, policy=deepcopy(policy), runtime=deepcopy(runtime))
     except Exception as error:
-        return ("refused", exception_graph(error), typed(vars(trace)))
+        return ("refused", exception_graph(error), trace_state(trace, module))
     methods = [("pending", outcome(trace.pending))]
     for identity in (*trace.calls, "missing"):
         for method in ("request", "admitted", "settled"):
             methods.append(((identity, method), outcome(lambda: getattr(trace, method)(identity))))
-    return ("returned", typed(vars(trace)), tuple(methods))
+    return ("returned", trace_state(trace, module, methods, completed=True), tuple(methods))
 
 
 def inputs(tool="Read", raw=b'{"value":false,"missing":null,"list":[1,"x"]}\n'):
@@ -215,3 +216,25 @@ def test_pending_call_join_results_match(literal_parent, parent_decision):
     expected = constructor(literal_parent, *args, runtime=runtime)
     assert expected[0] == "returned"
     assert constructor(observed, *args, runtime=runtime) == expected
+
+
+@pytest.mark.parametrize("mutation", ["missing_cache", "foreign_cache_entry", "unexpected_private_field"])
+def test_later_cache_state_is_checked_without_hiding_other_fields(literal_parent, monkeypatch, mutation):
+    native, parent, runtime = inputs()
+    args = prefix("transcript", native), prefix("control", parent)
+    expected = constructor(literal_parent, *args, runtime=runtime)
+    original = observed.Trace.__init__
+    def changed(self, *args, **kwargs):
+        original(self, *args, **kwargs)
+        if mutation == "missing_cache":
+            del self._adm_cache
+        elif mutation == "foreign_cache_entry":
+            self._req_cache["foreign"] = None
+        else:
+            self._unexpected_private_field = True
+    monkeypatch.setattr(observed.Trace, "__init__", changed)
+    if mutation == "unexpected_private_field":
+        assert constructor(observed, *args, runtime=runtime) != expected
+    else:
+        with pytest.raises(AssertionError):
+            constructor(observed, *args, runtime=runtime)
