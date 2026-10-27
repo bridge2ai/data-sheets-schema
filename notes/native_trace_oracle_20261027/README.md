@@ -50,7 +50,7 @@ oracle. Unknown attributes, including private ones, are never filtered out.
 Three causal mutations exercise a missing cache, a foreign cache entry and
 an unexpected private field.
 
-Independent static review cleared the exact fixture and explicit cache checks.
+Separate Codex internal review cleared the exact fixture and explicit cache checks.
 At `9e1ac52272ded77eb73f1656ff1b88e6d073439e`, all 56 cases across the three
 repaired modules passed, including the 41 original oracle cases and three new
 causal mutations. Source and project-import checks passed. The retained 41

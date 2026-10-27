@@ -1,0 +1,245 @@
+{
+  "aggregate_pass_claim": "not_made",
+  "excluded_case_and_cache_directories": "retained externally; contents not read or attested",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-n2-delivery-20261027/scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "inputs_declared_completed_by_caller": true,
+  "metadata": "file bytes/modes preserved; archive timestamps normalized; directory metadata omitted",
+  "runs": [
+    {
+      "archive": {
+        "bytes": 6117052,
+        "file": "run-01.tar.gz",
+        "sha256": "cf5c4e8125dc089f1b82f3f449fe624a6f58d78d679ab28057d409088ca22dfe"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 1176,
+          "mode": 420,
+          "path": "neutral/dependency-bootstrap.json",
+          "sha256": "0a9e1166d86ad60928f336d54f6523f26a49253c951d9daa7acc5274f36dc28b"
+        },
+        {
+          "bytes": 12839,
+          "mode": 420,
+          "path": "neutral/origins-after.json",
+          "sha256": "87d939e84e54cbebceb8c376602a37f5f631b0dfcafb17e82814fcb4190442f0"
+        },
+        {
+          "bytes": 7722,
+          "mode": 420,
+          "path": "neutral/origins-before.json",
+          "sha256": "c8ce7b854fe6ea3b5fbb2022e546987b88c2b73bc63ee40067f9fef61af5d397"
+        },
+        {
+          "bytes": 302,
+          "mode": 420,
+          "path": "neutral/outcome.json",
+          "sha256": "abf5e7f1a2bc3d483425ae8918a02097216625382869e5a577e2f7312cfd687f"
+        },
+        {
+          "bytes": 19601,
+          "mode": 420,
+          "path": "neutral/plan.json",
+          "sha256": "cc8272a446464e3d21c202c1adef0cddd37083bcca7b16218098af42ff0b721e"
+        },
+        {
+          "bytes": 442,
+          "mode": 420,
+          "path": "neutral/pytest-command.json",
+          "sha256": "6aed4f80867368075e87a886b8b7a127a9d430e5d17146176113a460f4d370a3"
+        },
+        {
+          "bytes": 895,
+          "mode": 420,
+          "path": "neutral/pytest.log",
+          "sha256": "801ab33cccc8e5499ebe7d3f33e997829a5cfa0cac2fe4291abbf1763d216824"
+        },
+        {
+          "bytes": 383,
+          "mode": 420,
+          "path": "neutral/pytest.xml",
+          "sha256": "d95344a32af9dda4d38139cf87c3ac93ef7ee8c38f9481cc1a45aada5e63c246"
+        },
+        {
+          "bytes": 3038204,
+          "mode": 420,
+          "path": "neutral/source-after.json",
+          "sha256": "0c87595fb1228e16875631015528bd145211c2634deac1d06f8d105b2e0c9c4f"
+        },
+        {
+          "bytes": 3038204,
+          "mode": 420,
+          "path": "neutral/source-before.json",
+          "sha256": "0c87595fb1228e16875631015528bd145211c2634deac1d06f8d105b2e0c9c4f"
+        },
+        {
+          "bytes": 1176,
+          "mode": 420,
+          "path": "omission/dependency-bootstrap.json",
+          "sha256": "0a9e1166d86ad60928f336d54f6523f26a49253c951d9daa7acc5274f36dc28b"
+        },
+        {
+          "bytes": 12981,
+          "mode": 420,
+          "path": "omission/origins-after.json",
+          "sha256": "f070b63914c7ef53fa56bb49cf601ea1973fd023d010e167c29733ee863bf31c"
+        },
+        {
+          "bytes": 7722,
+          "mode": 420,
+          "path": "omission/origins-before.json",
+          "sha256": "c8ce7b854fe6ea3b5fbb2022e546987b88c2b73bc63ee40067f9fef61af5d397"
+        },
+        {
+          "bytes": 303,
+          "mode": 420,
+          "path": "omission/outcome.json",
+          "sha256": "9a9b3cadb2beaa6d72ac6184de01c84f83d7bda2fae367539a1007694f2cc2c3"
+        },
+        {
+          "bytes": 19603,
+          "mode": 420,
+          "path": "omission/plan.json",
+          "sha256": "eec6d85c06b2d15c224e440ed6e31f0a412bfaa1a40fd66482aa7374e8cbd97c"
+        },
+        {
+          "bytes": 446,
+          "mode": 420,
+          "path": "omission/pytest-command.json",
+          "sha256": "197f6c6287e63da23560c7a3190f68ac19d29ecd26d9b9226ce300fb31bc2cd9"
+        },
+        {
+          "bytes": 904,
+          "mode": 420,
+          "path": "omission/pytest.log",
+          "sha256": "6ae3218be48a036221b213d567538101b99449a3389829a47ffff18de9ea44f7"
+        },
+        {
+          "bytes": 385,
+          "mode": 420,
+          "path": "omission/pytest.xml",
+          "sha256": "9356eb0ee5f336f3ccda4f6ca17bfe9d5331bd000254e820acb98f85a22f5163"
+        },
+        {
+          "bytes": 3038204,
+          "mode": 420,
+          "path": "omission/source-after.json",
+          "sha256": "0c87595fb1228e16875631015528bd145211c2634deac1d06f8d105b2e0c9c4f"
+        },
+        {
+          "bytes": 3038204,
+          "mode": 420,
+          "path": "omission/source-before.json",
+          "sha256": "0c87595fb1228e16875631015528bd145211c2634deac1d06f8d105b2e0c9c4f"
+        },
+        {
+          "bytes": 787,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "2b08570ce05106eb6e1e9ce7caef48216cdc94df7842467fa449014124266f83"
+        },
+        {
+          "bytes": 674,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "890e4783da19e509814b88865350e7d485757f30efb1f1007cb2bd949a3bfb39"
+        },
+        {
+          "bytes": 3038204,
+          "mode": 420,
+          "path": "source-after-neutral.json",
+          "sha256": "0c87595fb1228e16875631015528bd145211c2634deac1d06f8d105b2e0c9c4f"
+        },
+        {
+          "bytes": 3038204,
+          "mode": 420,
+          "path": "source-after-omission.json",
+          "sha256": "0c87595fb1228e16875631015528bd145211c2634deac1d06f8d105b2e0c9c4f"
+        },
+        {
+          "bytes": 3038204,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "0c87595fb1228e16875631015528bd145211c2634deac1d06f8d105b2e0c9c4f"
+        },
+        {
+          "bytes": 3038204,
+          "mode": 420,
+          "path": "source-final.json",
+          "sha256": "0c87595fb1228e16875631015528bd145211c2634deac1d06f8d105b2e0c9c4f"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "neutral/cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        },
+        {
+          "kind": "directory",
+          "path": "omission/cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "neutral/pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 1,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 1,
+            "unmarked_identified_entries": 1,
+            "unnamed_or_unclassified_entries": 0
+          },
+          "omission/pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 1,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 1,
+            "unmarked_identified_entries": 1,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "neutral/outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          },
+          "omission/outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          },
+          "outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": null,
+            "reported_source_unchanged": true,
+            "reported_status": "passed"
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-n2-restack-tests-20261026/positive-9e1ac5227",
+      "selected_original_bytes_and_modes_unchanged": true
+    }
+  ],
+  "scope": "selected_result_files_only_not_complete_synthetic_case_archive",
+  "selection": "top-level and neutral/omission stage JSON/log/XML files; ignored files included"
+}

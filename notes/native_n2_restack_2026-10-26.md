@@ -20,7 +20,7 @@ retain both original histories; no old ref was reset or force-moved:
 | `n2-d38-restack-20261026` | `9ea9b70a3` before reviewed fixture repairs/evidence | `8b1daa80f` |
 | `e3x-restack-20261026` | `2bbb0dfff` (separate E3x tree) | `d6eed9274` |
 
-The merges were text-conflict-free. Unit 1 also carries the two native selector
+The N2/D38 merges were text-conflict-free. Unit 1 also carries the two native selector
 hash changes from preserved D38 commit `bea065c9a`: generic-v10 `ec081dbb…` and
 uniform-v2 `22a55369…`, matching the installed target. The D38 merge converges on
 the same pin values. Protected `shared_generation.py` and `canonical_hashes.yaml`
@@ -60,7 +60,7 @@ causation. The 180-second helper and 900-second registered deadlines stay intact
   API/native renders. The 4,433-byte current R9 passage appears once in each;
   the 25,589-byte uniform section is identical. Report SHA256
   `c18485bc72e1ce659625781ca83f1ffc17213101cd51fd3d313454c91d370771`.
-  Complete render evidence and independent full-text review are in
+  Complete render evidence and a separate Codex internal full-text review are in
   [the evidence folder](native_n2_restack_2026-10-26/). Existing scientific and
   procedural differences between arms remain disclosed; this is not equivalence
   or scientific approval. The unit-4 helper dependency was separately corrected
@@ -92,12 +92,17 @@ causation. The 180-second helper and 900-second registered deadlines stay intact
   [helper](../scripts/adhoc/compare_n2_repair_coverage_20261027.py) also checks
   literal fixture references with ignored files included; computed dynamic
   imports are outside that search's proof.
-- Neutral public completion at `9e1ac5227`: **one pass**, 661.71s pytest /
-  666.81s guarded driver, with source/import checks passing. The explicitly
+- Neutral and omission public completion at `9e1ac5227`: **one pass each**,
+  with exact expected case identities and all source/import checks passing.
+  Neutral took 661.71s pytest / 666.81s guarded driver; omission took 663.60s
+  pytest / 668.71s guarded driver. The explicitly
   synthetic CLI completed actual local stage, receipt, attribution, recorder,
   saved-record and spent-evidence checks. Omission is admitted only after this
-  exact successful case and its preservation/origin proof; its result remains
-  pending below. Neither case invokes a real native binary or provider.
+  exact successful case and its preservation/origin proof. The final driver
+  reports both stages passed, `runtime_gates_passed: true` and
+  `scientific_acceptance: not_assessed`. Neither case invokes a real native
+  binary or provider. Exact results and proof are in the
+  [public completion evidence](native_n2_restack_2026-10-26/public_completion_evidence/manifest.json).
 - E3x is complete separately: **475 local + one corpus = 476 distinct passes**
   at `2e74ad0ac`, delivered cleanly as `2bbb0dfff`. Its strict provenance/hash
   and blinding changes, test-local lock isolation, exact evidence manifest and
@@ -114,9 +119,10 @@ original external paths, explicitly listed as excluded.
 
 ## Pending validation and acceptance
 
-The separate 18-module legacy suite and omission public completion case are
-still running on their frozen heads. Their terminal results and final integration
-byte checks must be recorded before this delivery is complete.
+The separate 18-module legacy suite is still running on its frozen head.
+Its terminal results, the fixture repairs propagated through fresh units 2–4,
+and final integration byte checks must be recorded before this delivery is
+complete. Both public completion cases have passed.
 
 Priority 4's three controlled recorder trials, conditional load replay, paired
 diagnosis and a causally justified fix remain blocked by the formal host gate.
