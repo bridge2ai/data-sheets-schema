@@ -8,6 +8,11 @@ remains the historical implementation and BC1 selection refuses without hooks.
 
 Branch: `codex/bc1-production-impl-20261027`, isolated worktree
 `/private/tmp/d4d-codex-bc1-production-20261027`.
+Frozen implementation/test head:
+`c9feaedc36a4bf77d9cf604f783748e29b9c1a21`, tested in the separate
+`/private/tmp/d4d-codex-bc1-derivation-cache-20261027` checkout. Final evidence and
+documentation commits on the delivery branch are recorded in the primary
+`notes/coordination/STATUS.md`; they do not change tested source.
 Dependencies: reviewed R9b repair and final evidence
 `aaa6f5bec2a0c7832d36143c4c7470d51cb8cee4`, plus reviewed A17
 `fc9e1a5d89a7223d75fa1dc1c46f524fb51dea03`. Contrary to the delegation's ancestry
@@ -138,7 +143,17 @@ The public API pipeline did not complete and the four write-footprint cases were
 not reached. Source stayed unchanged; the driver retained both origin checks.
 The [interrupted-result archive](bc1_validation_2026-10-27_interrupted/README.md)
 preserves the original results and the differing driver timing field verbatim.
-Corrected complete BC1 verification remains pending.
+The c9 full run then completed **162 passed / 1 failed**, zero skips/errors,
+493.57s pytest / 498.59s driver, with unchanged source and both origin checks.
+All cache/controller/core cases passed. The public pipeline completed its report
+but final provenance conformance rejected its BC1 completion shape; completed
+replay was not reached. Outcome SHA-256
+`05fc56bc55d2ed0235a39636b0fcebfadb91175b9f8568dcaa78f518f6ee7d84`;
+[full-run archive](bc1_validation_2026-10-27_full_initial/manifest.json), manifest
+SHA-256 `66c9dca788597a6eb710f2257a4fda2b7f09ec61193606f63b7aa62c10b7c2da`.
+The remaining correction adds a dedicated closed BC1 provenance shape; it does
+not change the runtime, compiler, dataset schema or conformance gate. Its focused
+tests and public completed replay remain pending.
 These cross-head results do not claim one fresh green repository-wide suite.
 
 ### Bounded pure derivation cache
@@ -165,9 +180,49 @@ terminal replay starts with a new cache; no acceptance verdict is cached.
 Closed parser/function dependencies and current constants are rechecked before
 reuse; unfamiliar changes bypass and clear both stores. Ordinary pure-check
 interfaces remain uncached by default. Added tests cover byte parity,
-invalidation, mutation isolation, retention and fresh terminal replay. Their
-results will be recorded after the implementation is frozen and verified.
+invalidation, mutation isolation, retention and fresh terminal replay. All28
+cache cases and all30 controller cases passed in the c9 full run.
 No measured speedup or campaign-scale performance claim is made here.
+
+The first cache verification at `c477590018bf192410a52635d603ffff5ab4c417`
+reported **38 passed / 19 failed**. The default-value serializer rejected
+PyYAML's loader-class default, so reuse was safely disabled. The correction at
+`18f202dc3b29ee8557180e82009586c61a05a51a` then reported **1 passed / 1 failed**:
+the token was valid at import but changed after actual preparation. The committed
+diagnostic identified exactly LinkML's five first-use YAML constructor
+registrations. The final correction initializes/disposes that known empty loader
+once before capturing dependencies, never during refresh or from caller data.
+All original assertions and later-mutation invalidation checks remain.
+
+At c9, **3 positive cases passed** (0.43s pytest / 2.86s driver), including a
+real warm lookup that makes zero uncached derivation calls and a changed-key
+lookup that makes one. A separately retained diagnostic has zero token changes
+after fixture creation and preparation and preserves its single retained entry.
+This establishes the mechanism on the small fixture, not a measured speedup.
+
+The c9 omission/selection/condition compatibility check passed **118 cases**,
+zero failures/errors/skips, 36.29s pytest / 41.07s driver. Both runs confirmed
+unchanged source and import origins. The 118 cases overlap the earlier 317-case
+legacy run; do not add them into a unique-case total.
+
+| Preserved result | Outcome/report SHA-256 |
+| --- | --- |
+| Initial cache 38P/19F | `7a2d0a998fd441f285cd8255858b474f3946c208057b48ec2b4b5e42943e1bdd` |
+| First positive gate 1P/1F | `a593b440c9052543cfeb18a335594b5bd21e862862f5ac8940a61be0072024b9` |
+| Constructor diagnosis before fix | `e0cc98556f38b795d8ba273dc75b66e1047602e41e0d4120980c238f1f34f8cf` |
+| Final positive gate 3P | `60fd13fc4548d14e48f06de84883ac4fab351b198f253d21b5cea2a0761d98fd` |
+| Constructor diagnosis after fix | `fa8b3116aaa1b8aba61908f59d19ed51bdc67be1e14dc33a66e395aecb7d9ff7` |
+| Final legacy subset 118P | `508f6f11a1b547ba77783f80c99ed1aca720384465c79f97751c27e189ce850f` |
+
+Lossless selected-result archives retain [initial failures](bc1_validation_2026-10-27_cache_initial/manifest.json),
+[the first positive attempt](bc1_validation_2026-10-27_cache_positive_initial/manifest.json),
+[the causal diagnostic](bc1_validation_2026-10-27_cache_diagnostic_before/manifest.json)
+and [verified cache/legacy checks](bc1_validation_2026-10-27_cache_verified/manifest.json).
+These manifests identify original paths, bytes, modes and exclusions; complete
+synthetic run directories remain external. The diagnostic's bounded trace
+includes harmless `GeneratorExit` notifications; the causal evidence is the
+five constructor-token differences, not an inference that every traced event
+is an application failure.
 
 Remaining release work: owner review/application of the exact protected proposal,
 fresh installed-source registrations, actual six-project/arm sizing on selected

@@ -712,6 +712,41 @@ classes:
         range: AnyBlock
         required: true
 
+  SharedGenerationBoundedCarryExecution:
+    is_a: SharedGenerationExecution
+    description: >-
+      Explicitly selected BC1 bounded audit execution under shared-generation
+      v1. Its independently reconstructed staged assembly retains the complete
+      audit while later model calls consume the registered bounded projection.
+      This is a distinct completion shape from legacy v1 and routing v2.
+    attributes:
+      bounded_carry:
+        description: Exact registered BC1 version, grouping width and captured contract identity, independently rechecked by the selected runtime.
+        inlined: true
+        range: BoundedCarryExecutionIdentity
+        required: true
+
+  BoundedCarryExecutionIdentity:
+    description: >-
+      Closed BC1 selection wrapper. The runtime verifies the exact contract,
+      source and reader identities within contract; structural conformance
+      alone does not establish those identities or scientific support.
+    attributes:
+      version:
+        range: integer
+        minimum_value: 1
+        maximum_value: 1
+        required: true
+      fan_in:
+        range: integer
+        minimum_value: 1
+        maximum_value: 2
+        required: true
+      contract:
+        inlined: true
+        range: AnyBlock
+        required: true
+
   AnyBlock:
     description: >-
       A block whose interior varies legitimately across record modes and

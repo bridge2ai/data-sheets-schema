@@ -24,6 +24,7 @@ GROUPS = {
                'test_registration_input_sizing', 'test_shared_generation_selection',
                'test_shared_generation_condition_compatibility', 'test_shared_generation_cli',
                'test_shared_generation_runtime', 'test_receipt_completion_runtime'),
+    'provenance': ('test_shared_generation_provenance',),
 }
 helper = ROOT / 'scripts/adhoc/validate_a17_r7b_fix_20261027.py'
 descriptor = importlib.util.spec_from_file_location('bc1_validation_support', helper)

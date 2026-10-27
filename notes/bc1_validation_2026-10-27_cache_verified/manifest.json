@@ -1,0 +1,252 @@
+{
+  "aggregate_pass_claim": "not_made",
+  "excluded_case_and_cache_directories": "retained externally; contents not read or attested",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-bc1-production-20261027/scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "inputs_declared_completed_by_caller": true,
+  "metadata": "file bytes/modes preserved; archive timestamps normalized; directory metadata omitted",
+  "runs": [
+    {
+      "archive": {
+        "bytes": 1501709,
+        "file": "run-01.tar.gz",
+        "sha256": "9789428bcc6d52dad7bf63c561dbd0fdabad5b96b1b7d9376fa601b1fa61a53c"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 1346,
+          "mode": 420,
+          "path": "bootstrap.json",
+          "sha256": "277f538b66f304108121023a4aeaa3f7f106d3d0da1333c12c70870a394b0c0d"
+        },
+        {
+          "bytes": 3215,
+          "mode": 420,
+          "path": "origins-after.json",
+          "sha256": "66b8b21ef23f73e0a2013d30386712c7b421d1dce4966e762adaa7d515161bf1"
+        },
+        {
+          "bytes": 3111,
+          "mode": 420,
+          "path": "origins-before.json",
+          "sha256": "5cdf547e4470d0f5fc7cd1842453cbdf738b24a72bf159473b52f808ae87cdb8"
+        },
+        {
+          "bytes": 305,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "60fd13fc4548d14e48f06de84883ac4fab351b198f253d21b5cea2a0761d98fd"
+        },
+        {
+          "bytes": 1366,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "5934bd1124cfccaffb4ef9866a8aa6d7a31b9da633521607a4c08a759da2c1bc"
+        },
+        {
+          "bytes": 639,
+          "mode": 420,
+          "path": "pytest-command.json",
+          "sha256": "e532c9cb27ac2b8178722f0907b9524b1bf19dcc5e5bdd517153d63146ad3c55"
+        },
+        {
+          "bytes": 193,
+          "mode": 420,
+          "path": "pytest.log",
+          "sha256": "07b6113913f05787228bc01c21b3914a7b377b2cdacc5e4a468483157aea6830"
+        },
+        {
+          "bytes": 658,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "6508d13bf8c9e13f81114e59065dff01d6dd298b6647c76fd4e7c14a23433e9d"
+        },
+        {
+          "bytes": 2996220,
+          "mode": 420,
+          "path": "source-after.json",
+          "sha256": "1a4cab6cb655040a181925ac1bb40a6816cbd5a49056a73d9fa3b515fc72b642"
+        },
+        {
+          "bytes": 2996220,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "1a4cab6cb655040a181925ac1bb40a6816cbd5a49056a73d9fa3b515fc72b642"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 3,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 3,
+            "unmarked_identified_entries": 3,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-bc1-validation-20261027/c9feaedc3-positive",
+      "selected_original_bytes_and_modes_unchanged": true
+    },
+    {
+      "archive": {
+        "bytes": 1504373,
+        "file": "run-02.tar.gz",
+        "sha256": "c23027c5495c33a59217f1ca02b020dee3c0a42775b83f8bc6b27dadbe515098"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 1346,
+          "mode": 420,
+          "path": "bootstrap.json",
+          "sha256": "277f538b66f304108121023a4aeaa3f7f106d3d0da1333c12c70870a394b0c0d"
+        },
+        {
+          "bytes": 15378,
+          "mode": 420,
+          "path": "origins-after.json",
+          "sha256": "d4c7facf9944964a1fba60dcf6f8e700cb054af46961370354838811e239e6c9"
+        },
+        {
+          "bytes": 12168,
+          "mode": 420,
+          "path": "origins-before.json",
+          "sha256": "17ce40c56fc8a962892a18892164ecf5983ccb5bddec27f622d38760c65c8bd2"
+        },
+        {
+          "bytes": 403,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "508f6f11a1b547ba77783f80c99ed1aca720384465c79f97751c27e189ce850f"
+        },
+        {
+          "bytes": 1116,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "1142d51bd062fbbd33324a94ac0177a26fb5acbf43ee4132acb60b24b8895eba"
+        },
+        {
+          "bytes": 480,
+          "mode": 420,
+          "path": "pytest-command.json",
+          "sha256": "40a669a8e5d5a097b1c44e5ac35c052a5e6fb9da2575e76f7178ae268f1e696c"
+        },
+        {
+          "bytes": 284,
+          "mode": 420,
+          "path": "pytest.log",
+          "sha256": "b203dfabe07044b79b7b2e3363eeae0820f8bc77f343f5fcb5e798f396ae956b"
+        },
+        {
+          "bytes": 17313,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "13df016394b3e6f2212e4ca47254c5a5a6fb0d0b5a678e76e72beedaf9435213"
+        },
+        {
+          "bytes": 2996220,
+          "mode": 420,
+          "path": "source-after.json",
+          "sha256": "1a4cab6cb655040a181925ac1bb40a6816cbd5a49056a73d9fa3b515fc72b642"
+        },
+        {
+          "bytes": 2996220,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "1a4cab6cb655040a181925ac1bb40a6816cbd5a49056a73d9fa3b515fc72b642"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 118,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 118,
+            "unmarked_identified_entries": 118,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-bc1-validation-20261027/c9feaedc3-legacy-selection",
+      "selected_original_bytes_and_modes_unchanged": true
+    },
+    {
+      "archive": {
+        "bytes": 1935,
+        "file": "run-03.tar.gz",
+        "sha256": "21cb611cdc975ea212cf32d2078056b8c404b74e071237a19da9d8868c3dc131"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 18200,
+          "mode": 420,
+          "path": "report.json",
+          "sha256": "fa8b3116aaa1b8aba61908f59d19ed51bdc67be1e14dc33a66e395aecb7d9ff7"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "fixture",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {},
+        "outcomes": {}
+      },
+      "original_root": "/private/tmp/d4d-bc1-validation-20261027/cache-diagnostic-after",
+      "selected_original_bytes_and_modes_unchanged": true
+    }
+  ],
+  "scope": "selected_result_files_only_not_complete_synthetic_case_archive",
+  "selection": "top-level and neutral/omission stage JSON/log/XML files; ignored files included"
+}
