@@ -84,9 +84,15 @@ def child(group, output):
     if (not (venv / 'pyvenv.cfg').is_file() or not site.is_dir()
             or site.resolve() != site or str(site) in sys.path):
         raise ValueError('expected physical venv dependencies with site startup disabled')
+    prefix_before = {'prefix': sys.prefix, 'exec_prefix': sys.exec_prefix}
+    # Python 3.13's site.venv normally performs this assignment before loading
+    # .pth files. Preserve normal venv metadata without executing those hooks.
+    sys.prefix = sys.exec_prefix = str(venv)
     sys.path.append(str(site))
     save(output / 'dependency-bootstrap.json', {
         'site_startup': 'disabled', 'pth_execution': 'disabled', 'site_packages': str(site),
+        'prefix_before': prefix_before, 'prefix': sys.prefix, 'exec_prefix': sys.exec_prefix,
+        'base_prefix': sys.base_prefix, 'base_exec_prefix': sys.base_exec_prefix,
         'sys_path': list(sys.path), 'dependency_bytes_attested': False})
     for name in ('native_shared_selection', 'native_shared_receipts', 'native_shared_capture', 'native_shared_execution'):
         importlib.import_module('data_sheets_schema.' + name)
@@ -144,7 +150,14 @@ def run(group, output, expected):
         summary['junit'] = {key: sum(case.find(tag) is not None for case in cases)
                             for key, tag in (('failures', 'failure'), ('errors', 'error'), ('skipped', 'skipped'))}
         summary['junit']['cases'] = len(cases)
-        summary['junit']['passed'] = sum(not any(case.find(t) is not None for t in ('failure', 'error', 'skipped')) for case in cases)
+        # An interrupted pytest run can emit an anonymous unfinished testcase.
+        # Do not promote that unmarked XML entry (or an incomplete run) to a pass.
+        identified = [case for case in cases if case.get('name') and case.get('classname')]
+        unmarked = sum(not any(case.find(t) is not None for t in ('failure', 'error', 'skipped'))
+                       for case in identified)
+        summary['junit']['cases_without_identity'] = len(cases) - len(identified)
+        summary['junit']['unmarked_identified_cases'] = unmarked
+        summary['junit']['passed'] = unmarked if code in (0, 1) and len(identified) == len(cases) else None
     save(output / 'outcome.json', summary)
     print(json.dumps(summary, sort_keys=True), flush=True)
     return code if before == after else 1
