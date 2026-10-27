@@ -19,7 +19,7 @@ from data_sheets_schema import snapshot_store, typed_audit as typed, typed_audit
 from data_sheets_schema import usage_ledger as ledger
 from data_sheets_schema.schema_snapshot import capture_schema
 from tests.test_bc1_audit import supplied, deliveries, stage_delta  # noqa: F401
-from tests.test_download.test_api_runner import FakeResponse
+from tests.test_download.test_api_runner import FakeMessages, FakeResponse
 from tests.test_evidence_generation_gate import specification
 
 
@@ -93,7 +93,7 @@ classes:
         settings=settings, carry=carry, captured=captured, reg=reg, receipt_outcome=outcome)
 
 
-class Messages:
+class Messages(FakeMessages):
     def __init__(self, case, *, fail_before=None, oversize=False, bad_count=None):
         self.case, self.calls, self.counts = case, [], []
         self.fail_before, self.oversize, self.bad_count = fail_before, oversize, bad_count
