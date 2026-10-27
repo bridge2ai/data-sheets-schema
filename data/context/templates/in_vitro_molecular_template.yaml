@@ -1,0 +1,31 @@
+# Evaluation applicability template for In Vitro Molecular / Cell Line Studies
+# Template for non-human, laboratory, or synthetic biological datasets
+# Format: d4d-evaluation-context-1
+
+human_subjects:
+  value: false
+  evidence: "Study uses continuous cell lines, organoids, synthetic samples, or non-human molecular systems with no living human participants."
+
+regulated_access:
+  value: false
+  evidence: "Dataset is made publicly available under open access licenses without access committee review or credentialed restrictions."
+
+shared_dataset:
+  value: true
+  evidence: "Dataset is formatted, packaged, and published for external community reuse."
+
+data_collection:
+  value: true
+  evidence: "Dataset involves primary experimental data acquisition and measurement."
+
+data_processing:
+  value: true
+  evidence: "Dataset undergoes computational processing, filtering, normalization, or feature extraction."
+
+processing_software:
+  value: true
+  evidence: "Data generation or transformation workflows utilize and reference software pipelines."
+
+ml_training_dataset:
+  value: true
+  evidence: "Dataset is intended or structured for training, evaluating, or benchmarking computational models."

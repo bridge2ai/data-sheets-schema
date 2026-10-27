@@ -405,6 +405,17 @@ DERIVED_PHASES = frozenset({"core", "reconcile_core"})
 #: the record carries whatever value a run used, clamped to the route.
 RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 
+#: generic_v10 (shared generation 1) report and reconcile room (D-C, owner
+#: decision 2026-10-23). The 2026-10-22a CHORUS canary's report used 83,367
+#: of 96,000 tokens (87%), the tightest margin of the run, and the regate
+#: shares the report budget; a report cut off at its ceiling costs a billed
+#: regate. Raised to the route's ceiling for shared generation 1 only: every
+#: earlier renderer and condition keeps its recorded budget, and the value a
+#: run used is in its api_usage rows and `max_tokens_by_phase`.
+#: `dollar_readout.SHARED_V1_PHASE_OUTPUT_CAPS` mirrors this; a test keeps
+#: them equal.
+SHARED_PHASE_MAX_TOKENS = {"report": 128000, "reconcile_full": 128000}
+
 
 def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
                      model: str | None = None) -> int:
@@ -414,6 +425,8 @@ def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
     # finding-only response. Keep earlier renderers' recorded limits intact.
     if spec.render_version >= 12 and ph in {"audit", "report"}:
         value = 96000
+    if getattr(spec, "shared_generation_version", 0) == 1 and ph in SHARED_PHASE_MAX_TOKENS:
+        value = SHARED_PHASE_MAX_TOKENS[ph]
     if spec.condition in RECEIPT_CONDITIONS and ph in RECEIPT_PHASE_MAX_TOKENS:
         # Env-overridable (#777): three consecutive full-phase stalls on the
         # AI_READI v7 re-canary followed the raise to 128k, where two runs at
@@ -2332,6 +2345,16 @@ def evidence_phase_contract(phase: str, render_version: int, *, _include_shared:
         if render_version in (25, 27) and phase in {"report", "report_regate"}:
             from .shared_generation import role_instruction
             contract += "\n\n" + role_instruction()
+            contract += ("\n\nIn the final report's ## Evidence assertions JSON block, top-level "
+                         "claims must be a flat list of assertion objects (each either "
+                         "{\"source\", \"chunk\", \"quote\"} or {\"artifact\", \"path\", \"op\", "
+                         "\"quote\"}), never {\"text\", \"evidence\"} wrappers. In source_review, "
+                         "every supported claim requires claim_status == source_status "
+                         "(source_status: \"unstated\" is valid only with verdict: \"revise\"). "
+                         "Any scope-limiting or negative qualification clause cited to a source "
+                         "passage must use matching claim_status and source_status rather than "
+                         "pairing claim_status: \"fact\" with source_status: \"capability\", "
+                         "\"planned\", or \"in_progress\".")
         return contract
     return contract.replace("protocol v1", "protocol v2") if render_version >= 11 else contract
 
@@ -4330,6 +4353,29 @@ def report_claims_block(spec: RunSpec, *, record: dict | None = None) -> dict[st
     return out
 
 
+def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None) -> dict[str, Any]:
+    """Check written report's stated finding totals against structured audit (#4766)."""
+    from data_sheets_schema.report_audit_totals import check_report_audit_totals
+    audit_source = carry.get("Audit findings") if carry else None
+    if audit_source is None:
+        intermediate_audit = _intermediate_dir(spec) / f"{spec.project}_audit.json"
+        if intermediate_audit.exists():
+            audit_source = intermediate_audit
+    return check_report_audit_totals(spec.report_path, audit_source)
+
+
+def _current_report_audit_totals(spec: RunSpec, existing: dict[str, Any]) -> dict[str, Any]:
+    """Return existing `report_audit_totals` if at current `INSTRUMENT_VERSION`, else recompute."""
+    from data_sheets_schema.report_audit_totals import INSTRUMENT_VERSION
+    prior = existing.get("report_audit_totals")
+    if isinstance(prior, dict) and (prior.get("instrument_version") or 0) >= INSTRUMENT_VERSION:
+        return prior
+    fresh = report_audit_totals_block(spec)
+    if isinstance(prior, dict) and prior.get("checked") is True and not fresh.get("checked"):
+        return prior
+    return fresh
+
+
 def source_metadata_authority(spec: RunSpec) -> dict[str, Any]:
     """Only the selected v5 instrument receives actual manifest-byte authority."""
     if spec.render_version < 16:
@@ -6014,6 +6060,11 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
             evidence = evidence_checks_block(spec, carry, report=True)
             block["evidence_assertions"] = evidence
             block["findings"] = list(block.get("findings") or []) + evidence["findings"]
+        core_findings_count = len(block.get("findings") or [])
+        audit_totals = report_audit_totals_block(spec, carry=carry)
+        block["report_audit_totals"] = audit_totals
+        block["_core_findings_count"] = core_findings_count
+        block["findings"] = list(block.get("findings") or []) + list(audit_totals.get("findings") or [])
         return block
 
     before = reading()
@@ -6048,6 +6099,9 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     if spec.render_version >= 9:
         out["evidence_assertions_before"] = before["evidence_assertions"]
         out["findings_include_evidence_assertions"] = True
+    if "report_audit_totals" in before:
+        out["report_audit_totals_before"] = before["report_audit_totals"]
+        out["findings_include_report_audit_totals"] = True
     if not before.get("checked"):
         out["reason"] = before.get("reason")
         return out
@@ -6080,7 +6134,8 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     require_source_reviews(spec, carry, evidence=after.get("evidence_assertions"))
     worse = (out["regenerated"] and (
         (before.get("disposition_rows") and not after.get("disposition_rows"))
-        or len(after.get("findings") or []) > len(before.get("findings") or [])))
+        or len(after.get("findings") or []) > len(before.get("findings") or [])
+        or after.get("_core_findings_count", 0) > before.get("_core_findings_count", 0)))
     if worse:
         # A prose reply that drops the table, or a rewrite with more
         # contradictions than before, is not an improvement (#965/#967). The
@@ -6096,6 +6151,8 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     out["remaining"] = (after.get("findings") or [])[:20]
     if spec.render_version >= 9:
         out["evidence_assertions_after"] = after["evidence_assertions"]
+    if "report_audit_totals" in after:
+        out["report_audit_totals_after"] = after["report_audit_totals"]
     print(f"   report re-checked: {out['findings_before']} contradiction(s) before, "
           f"{out['findings_after']} after"
           + ("" if out["regenerated"] else " (report not regenerated)"))
@@ -7078,6 +7135,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                "report": {**(report_claims_block(spec, record=existing) or {}),
                                           **({"dispositions_expected": True}
                                              if existing.get("report_gate") else {})},
+                               "report_audit_totals": _current_report_audit_totals(spec, existing),
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
                                "receipts": _receipts_block(spec, existing),
@@ -7588,6 +7646,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # a report with no readable claim is blind at the gate (#684), not
     # unmeasured-and-tolerated as an earlier record's is.
     rec.data["report_claims"] = {**(report_claims_block(spec) or {}), "dispositions_expected": True}
+    rec.data["report_audit_totals"] = report_audit_totals_block(spec, carry=carry)
     # Also on `inputs`, beside `receipt_expected`: a backfill rebuilds the
     # report block from the report alone and would drop the flag (#961);
     # `backfill_checks` restores it from here.
@@ -7700,6 +7759,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             "checks": {"pair": rec.data.get("pair_consistency"),
                        "validation": rec.data.get("validation"),
                        "report": rec.data.get("report_claims"),
+                       "report_audit_totals": rec.data.get("report_audit_totals"),
                        "grounding": rec.data.get("grounding"),
                        "form": rec.data.get("form"),
                        "receipts": rec.data.get("receipts"),

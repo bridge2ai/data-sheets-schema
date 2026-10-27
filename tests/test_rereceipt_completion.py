@@ -142,6 +142,8 @@ def test_all_diagnostic_splits_sum_to_legacy_and_unknown_markers_stay_visible():
     new = rc.check(receipt, manifest, texts, full, manifest["bundle_md5"], instrument_version=4)
     origins = new["snippets"].pop("by_origin")
     assert new.pop("rereceipt")["unusable_prior_count"] == 1
+    # No snapshot: the receipted-part gate input (D37) is unmeasurable, not 0.
+    assert (new["slots"].pop("with_receipt_at_receipt"), new["slots"].pop("receiptable_at_receipt")) == (None, None)
     assert new.pop("instrument").startswith("v4 ")
     old.pop("instrument")
     assert new == old
@@ -221,6 +223,7 @@ def test_forged_chunk_manifest_is_refused_even_with_matching_bundle_hash():
 
 def test_parser_does_not_silently_drop_malformed_answers():
     assert rr.parse_answers(b"rereceipt: [3, null]\n") == [3, None]
+    assert rr.parse_answers(b"```yaml\nrereceipt: [3, null]\n```\n") == [3, None]
     for value in (b"rereceipt: []\nrecord: {}", b"rereceipt: {}", b"rereceipt: []\nrereceipt: []"):
         with pytest.raises(ValueError):
             rr.parse_answers(value)
@@ -327,6 +330,38 @@ def _corpus_receipts():
             for p in sorted(base.glob("*-generic-v8_rep*/*_coverage_receipt.yaml"))]
 
 
+#: (with_receipt_at_receipt, receiptable_at_receipt) of each record's phase-1
+#: snapshot (D37), recomputed read-only on 2026-10-25. Pinned so a change to
+#: what the receipted-part floor counts is a reviewed diff (A13 review F4).
+CORPUS_AT_RECEIPT = {
+    "2026-09-04_claude-opus-5-api-generic-v8_rep1/CM4AI": (241, 422),
+    "2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI": (358, 492),
+    "2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI": (292, 416),
+    "2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE": (219, 371),
+    "2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE": (7, 303),
+    "2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI": (156, 437),
+    "2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS": (54, 183),
+    "2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE": (231, 353),
+    "2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS": (86, 245),
+    "2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE": (149, 271),
+    "2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS": (80, 205),
+    "2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE": (227, 392),
+    "2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI": (286, 478),
+    "2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI": (278, 374),
+    "2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI": (165, 421),
+    "2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI": (315, 433),
+    "2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI": (253, 408),
+    "2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI": (260, 407),
+}
+
+
+@pytest.mark.corpus
+def test_the_pinned_corpus_is_the_corpus():
+    found = [f"{p.parent.name}/{p.name.split('_coverage_receipt')[0]}"
+             for p in (param.values[0] for param in _corpus_receipts())]
+    assert sorted(CORPUS_AT_RECEIPT) == sorted(found)
+
+
 @pytest.mark.corpus
 @pytest.mark.parametrize("receipt", _corpus_receipts())
 def test_real_corpus_v4_retains_all_legacy_counts_and_floors(receipt, monkeypatch):
@@ -346,6 +381,15 @@ def test_real_corpus_v4_retains_all_legacy_counts_and_floors(receipt, monkeypatc
         for metric in origins["phase1"]:
             assert sum(row[metric] for row in origins.values()) == old["snippets"][metric]
         new.pop("rereceipt")
+        # The receipted-part gate input (D37): the phase-1 snapshot's own
+        # coverage, as pinned, and as `check` counts it with the snapshot as
+        # the record (the A13 review's option (b)), where the receipt paths
+        # are followed by identity rather than credited as written.
+        at_receipt = (new["slots"].pop("with_receipt_at_receipt"), new["slots"].pop("receiptable_at_receipt"))
+        assert at_receipt == CORPUS_AT_RECEIPT[f"{receipt.parent.name}/{project}"]
+        receipt_, manifest, texts, _full, md5, original = args
+        whole = legacy_check(receipt_, manifest, texts, original, md5, original, **kwargs)["slots"]
+        assert at_receipt == (whole["with_receipt"], whole["receiptable"])
         new["instrument"] = old["instrument"]
         assert new == old
         calls.append(old)

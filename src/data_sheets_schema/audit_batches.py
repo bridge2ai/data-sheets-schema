@@ -284,6 +284,10 @@ def check_worker(raw: bytes, plan, worker_id, *, version: int = 1) -> dict:
             return _failure("worker_original_digest", "/source_review/sha256", version=version)
         if set(r["path"] for r in review["values"]) != set(worker["paths"]):
             return _failure("worker_path_roster", "/source_review/values", version=version)
+        by_path = {r["path"]: r for r in plan["inventory"]["values"]}
+        for i, row in enumerate(review["values"]):
+            if "metadata_reason" in row and not by_path[row["path"]]["record_metadata_allowed"]:
+                return _failure("worker_metadata_disallowed", f"/source_review/values/{i}/metadata_reason", version=version)
         for i, finding in enumerate(audit["findings"]):
             removal = finding.get("remove_relationship")
             if removal and _pointer(_tokens(removal["path"])[:1]) not in worker["roots"]:
@@ -361,6 +365,7 @@ def _integration(raw, plan, proposals, *, version=1):
         if value.get(key) != index["sha256"]:
             g.problem("integration_index_digest", "/" + key)
     row_index = {r["path"]: r for r in index["rows"]}
+    inv_by_path = {r["path"]: r for r in plan["inventory"]["values"]}
     seen_rows = set()
     replacements = value.get("row_replacements")
     if g.array(replacements, "/row_replacements"):
@@ -381,6 +386,8 @@ def _integration(raw, plan, proposals, *, version=1):
             g.review({"artifact": "original_full", "sha256": plan["original_full_sha256"], "values": [row]}, at + "/row_shape")
             if not isinstance(row, dict) or row.get("path") != path:
                 g.problem("replacement_row_path", at + "/row")
+            elif "metadata_reason" in row and isinstance(path, str) and path in inv_by_path and not inv_by_path[path]["record_metadata_allowed"]:
+                g.problem("replacement_metadata_disallowed", at + "/row/metadata_reason")
             g.text(item.get("reason"), at + "/reason")
             _assertions(g, item.get("evidence"), at + "/evidence", nonempty=True)
     finding_index = {f["id"]: f for f in index["findings"]}

@@ -29,9 +29,9 @@ SELECTED_PLAYBOOKS = (
 ASSET_HASHES = {'.claude/agents/d4d-provenance-guard-v2.md': '10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085',
  '.claude/commands/d4d-agent-v2.md': 'dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299',
  '.claude/commands/d4d-full-core-v2.md': '2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124',
- '.claude/commands/d4d-uniform-rules-v2.md': '7b511b1ef15d6fb56d47dc58b367196ed9c7269a61406ed19127481f719c885a',
+ '.claude/commands/d4d-uniform-rules-v2.md': '22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e',
  'src/download/prompts/api_playbook_v2.md': '5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719',
- 'src/download/prompts/d4d_generic_arm_prompt_v10.md': 'a3a2004cef2147b3351613cb38a67abde1d58c91c19ee0c72c66ff476d0722ec',
+ 'src/download/prompts/d4d_generic_arm_prompt_v10.md': 'ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db',
  'src/download/prompts/receipt_completion_runtime_v2.md': 'c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c',
  'src/download/prompts/shared_generation_v1.md': '34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450'}
 
@@ -653,11 +653,15 @@ def schema_context(spec, record: str | None = None) -> str:
         canonical(record)], lambda: _schema_context(captured, record))
 
 
+_TRIMMED_SLOT_KEYS = ('domain_of', 'from_schema', 'alias', 'owner', '@type',
+                      'slot_uri', 'annotations', 'exact_mappings', 'description',
+                      'broad_mappings', 'comments')
+
+
 def _schema_context(captured, record):
     from .schema_view import captured_view
     from .audit_omissions import _mapping
     from linkml_runtime.dumpers import json_dumper
-    from .support_targets import _typed
     import yaml
     owners, classes = [], {}
     value = _mapping(record.encode("utf-8"), "whole record for role review") if record is not None else None
@@ -666,7 +670,8 @@ def _schema_context(captured, record):
             if cls not in classes:
                 if view.get_class(cls) is None:
                     raise ValueError(f"occupied schema owner has no class: {cls}")
-                classes[cls] = {str(slot.name): json.loads(json_dumper.dumps(slot))
+                classes[cls] = {str(slot.name): {k: v for k, v in json.loads(json_dumper.dumps(slot)).items()
+                                                 if k not in _TRIMMED_SLOT_KEYS}
                                 for slot in view.class_induced_slots(cls)}
             return classes[cls]
         describe('Dataset')
@@ -679,8 +684,7 @@ def _schema_context(captured, record):
                 continue
             slots = describe(cls)
             owners.append({'path': pointer, 'class': cls,
-                'whole_value_yaml': yaml.safe_dump(item, sort_keys=False, allow_unicode=True),
-                'whole_value_identity': _typed(item)})
+                'whole_value_yaml': yaml.safe_dump(item, sort_keys=False, allow_unicode=True)})
             for name, child in item.items():
                 slot = slots.get(name)
                 if slot is None or view.get_class(slot.get('range')) is None:

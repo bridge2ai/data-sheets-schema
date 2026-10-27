@@ -247,7 +247,8 @@ def build_request(inputs):
     inventory = {'requested_paths': prepared.paths(), 'record_yaml': inputs['record'],
                  'receipt_yaml': inputs['receipt'], 'registration': inputs['registration'],
                  'input_sha256': {k: sha(inputs[k].encode()) for k in ('record', 'receipt', 'manifest', 'bundle')},
-                 'schema': {k: v for k, v in inputs['schema'].items()},
+                 'schema': {'sources': [{k: v for k, v in s.items() if k != 'text'}
+                                        for s in inputs['schema']['sources']]},
                  'policy': inputs['policy']}
     req = api.PhaseRequest(phase=PHASE, system=prior['system'],
         cached_blocks=copy.deepcopy(prior['cached_blocks']),
@@ -393,21 +394,58 @@ def _receipt_publish(spec, inputs, result) -> None:
     os.replace(temporary, path)
 
 
-def _result(inputs, raw: bytes, *, truncated=False) -> dict:
+#: Result fields added with the answer-parser record (#5116). A result saved
+#: before them still verifies if everything else matches exactly.
+_ENVELOPE_KEYS = frozenset({'answer_envelope', 'answer_parser'})
+#: Slot counters instrument 4 added to the `before` and `after` check blocks
+#: with D37, after d14613a46: the coverage of the phase-1 snapshot. A result
+#: saved before them, as both CHORUS v10 canaries' were, still verifies if
+#: everything else matches exactly. `complete` checks the record as its own
+#: snapshot, so in these blocks the counters restate `with_receipt` and
+#: `receiptable`. The saved result loses nothing by being returned as saved,
+#: and #5159's recompute-on-recovery has nothing to add for them.
+_SNAPSHOT_SLOT_KEYS = frozenset({'receiptable_at_receipt', 'with_receipt_at_receipt'})
+_RECEIPT_BLOCKS = ('before', 'after')
+
+
+def _as_saved_before(expected, result):
+    """`expected` without the fields `result` was saved before: both envelope
+    keys where the saved result has neither, and both snapshot counters where
+    no saved check block has either. A field the saved result carries is
+    compared as recomputed, so it cannot be supplied to match."""
+    view = dict(expected)
+    if _ENVELOPE_KEYS.isdisjoint(result):
+        view = {k: v for k, v in view.items() if k not in _ENVELOPE_KEYS}
+    saved = [result.get(name) for name in _RECEIPT_BLOCKS]
+    if all(isinstance(block, dict) and isinstance(block.get('slots'), dict)
+           and _SNAPSHOT_SLOT_KEYS.isdisjoint(block['slots']) for block in saved):
+        for name in _RECEIPT_BLOCKS:
+            block = view.get(name)
+            if isinstance(block, dict) and isinstance(block.get('slots'), dict):
+                view[name] = {**block, 'slots': {k: v for k, v in block['slots'].items()
+                                                 if k not in _SNAPSHOT_SLOT_KEYS}}
+    return view
+
+
+def _result(inputs, raw: bytes, *, truncated=False, no_work=False) -> dict:
     import yaml
-    from data_sheets_schema.rereceipt import parse_answers, complete
+    from data_sheets_schema.rereceipt import ANSWER_PARSER, parse_answers_envelope, complete
     problem = 'response truncated' if truncated else None
+    envelope = None
     try:
-        answers = [] if problem else parse_answers(raw)
+        answers, envelope = ([], None) if problem else parse_answers_envelope(raw)
     except (ValueError, TypeError, UnicodeError, yaml.YAMLError) as exc:
         answers, problem = [], f'unusable response: {exc}'
+    if no_work:
+        envelope = None  # no model answered; the empty answer is synthetic
     value = complete(_prepared(inputs), answers)
     # Offline helper identity is internal accounting, not this runtime identity.
     value.pop('input_identity')
     value.pop('policy')
     value['schema_validation'] = 'captured schema and dependency closure validated before admission'
     value.update(policy=inputs['policy'], registration=inputs['registration'],
-                 input_identity=inputs['input_identity'], semantic_support='not mechanically established')
+                 input_identity=inputs['input_identity'], semantic_support='not mechanically established',
+                 answer_envelope=envelope, answer_parser=copy.deepcopy(ANSWER_PARSER))
     if problem:
         value['state'] = 'answers_incomplete'
         value['response_problem'] = problem
@@ -469,8 +507,10 @@ def _check_accounted_response(state, response, rows):
 
 def _checked_result(inputs, response, result):
     from .usage_ledger import UsageLedgerError
-    expected = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
-    if result != expected:
+    expected = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens',
+                       no_work=response['stop_reason'] == 'no_work')
+    # Returned as saved, never rewritten: the result artifact is SHA-pinned.
+    if result != expected and not (isinstance(result, dict) and result == _as_saved_before(expected, result)):
         raise UsageLedgerError('receipt completion saved result differs from checked response')
     return result
 
@@ -505,7 +545,8 @@ def recover(spec, *, allow_unfinished=False) -> dict | None:
     if row is not None:
         _recover_reasoning(spec, response, row, payload)
     if state['state'] == 'response':
-        result = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
+        result = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens',
+                         no_work=response['stop_reason'] == 'no_work')
         state.update(state='result', result=_save(spec, 'receipt_completion_result.json', result,
                                                 usage_id=response['usage_id']))
         _set_state(spec, state)
