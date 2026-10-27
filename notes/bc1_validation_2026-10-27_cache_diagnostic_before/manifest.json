@@ -1,0 +1,44 @@
+{
+  "aggregate_pass_claim": "not_made",
+  "excluded_case_and_cache_directories": "retained externally; contents not read or attested",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-bc1-derivation-cache-20261027/scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "inputs_declared_completed_by_caller": true,
+  "metadata": "file bytes/modes preserved; archive timestamps normalized; directory metadata omitted",
+  "runs": [
+    {
+      "archive": {
+        "bytes": 2111,
+        "file": "run-01.tar.gz",
+        "sha256": "d754fbc532d3f4842f7ecf100847769265bf7d94997702570d4680668bac6557"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 19627,
+          "mode": 420,
+          "path": "report.json",
+          "sha256": "e0cc98556f38b795d8ba273dc75b66e1047602e41e0d4120980c238f1f34f8cf"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "fixture",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {},
+        "outcomes": {}
+      },
+      "original_root": "/private/tmp/d4d-bc1-validation-20261027/cache-diagnostic-before",
+      "selected_original_bytes_and_modes_unchanged": true
+    }
+  ],
+  "scope": "selected_result_files_only_not_complete_synthetic_case_archive",
+  "selection": "top-level and neutral/omission stage JSON/log/XML files; ignored files included"
+}

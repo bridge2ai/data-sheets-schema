@@ -885,6 +885,22 @@ def _cache_dependency_token():
 # Existing closed LinkML reader bindings also cover effective view methods and
 # YAML constructors. An unsupported installation simply uses uncached work.
 from .cache_dependencies import FunctionBindings as _CacheFunctionBindings, schema_key as _cache_schema_key
+
+
+def _cache_initialize_schema_loader():
+    # LinkML's shipped loader registers its five map/seq/str/int/float
+    # constructors in __init__. Initialize that exact dependency on empty input
+    # BEFORE closing the bindings. Never rebind from a first caller's packet.
+    from .schema_view import DupCheckYamlLoader
+    try:
+        loader = DupCheckYamlLoader('')
+        loader.dispose()
+    except Exception:
+        return False  # Optional reuse stays disabled on an unsupported reader.
+    return True
+
+
 _CACHE_SCHEMA_BINDINGS = _CacheFunctionBindings()
-_CACHE_SCHEMA_BINDINGS.bind(lambda: _cache_schema_key(_CACHE_SCHEMA_BINDINGS))
+if _cache_initialize_schema_loader():
+    _CACHE_SCHEMA_BINDINGS.bind(lambda: _cache_schema_key(_CACHE_SCHEMA_BINDINGS))
 _CACHE_DEPENDENCIES = _cache_dependency_token()

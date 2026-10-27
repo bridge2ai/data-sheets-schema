@@ -11,6 +11,7 @@ import yaml
 
 from data_sheets_schema import bc1_audit as bc
 from data_sheets_schema import audit_omissions as om, bc1_context
+from data_sheets_schema.schema_view import DupCheckYamlLoader
 from tests.test_bc1_audit import supplied, deliveries, stage_delta, save_delta
 
 
@@ -97,6 +98,18 @@ def test_known_parser_loader_default_is_identity_only_and_cacheable():
         bc._cache_default_state(object())
 
 
+def test_shipped_loader_first_use_tables_are_bound_before_any_packet(supplied):
+    assert bc._CACHE_DEPENDENCIES is not None
+    before = bc._cache_dependency_token()
+    loader = DupCheckYamlLoader('')
+    loader.dispose()
+    assert bool(bc._cache_dependency_token() == before)
+    cache = bc.DerivationCache()
+    bc.prepare(**supplied, derivations=cache)
+    assert cache.refresh() and len(cache._rows) == 1
+    assert bool(bc._cache_dependency_token() == before)
+
+
 @pytest.mark.parametrize('change', ['record', 'schema', 'selection', 'limits', 'context'])
 def test_exact_captured_inputs_invalidate_or_refuse(supplied, change):
     cache = bc.DerivationCache()
@@ -148,7 +161,7 @@ def test_current_contract_change_refuses_a_warmed_selection(supplied, monkeypatc
 
 
 @pytest.mark.parametrize('change', ['schema_parser', 'schema_budget', 'schema_file_count',
-                                  'code', 'defaults', 'loader_default', 'loader_table'])
+                                  'code', 'defaults', 'loader_default', 'loader_table', 'captured_loader_table'])
 def test_dependency_change_bypasses_and_clears_both_pure_caches(supplied, monkeypatch, change):
     cache = bc.DerivationCache()
     packet = bc.prepare(**supplied, derivations=cache)
@@ -170,6 +183,10 @@ def test_dependency_change_bypasses_and_clears_both_pure_caches(supplied, monkey
         monkeypatch.setattr(om._read, '__kwdefaults__', {**om._read.__kwdefaults__, 'limit': 1})
     elif change == 'loader_default':
         monkeypatch.setattr(yaml.parse, '__defaults__', (yaml.SafeLoader,))
+    elif change == 'captured_loader_table':
+        table = dict(DupCheckYamlLoader.yaml_constructors)
+        table['tag:yaml.org,2002:str'] = lambda loader, node: 'changed captured string'
+        monkeypatch.setattr(DupCheckYamlLoader, 'yaml_constructors', table)
     else:
         table = dict(om._UniqueLoader.yaml_constructors)
         table['tag:yaml.org,2002:str'] = lambda loader, node: 'changed parsed string'
