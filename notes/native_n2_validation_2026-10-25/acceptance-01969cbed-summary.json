@@ -1,0 +1,644 @@
+{
+  "archive": {
+    "identity": {
+      "bytes": 18352510,
+      "mode": 420,
+      "sha256": "5bf6f084b8dfd4c364907373f912129fd5705577a302407204877f9cd7e905ec",
+      "type": "file"
+    },
+    "unchanged_during_archive": true
+  },
+  "console_summary": [
+    "1 failed, 12 warnings in 732.42s (0:12:12)"
+  ],
+  "coverage_floor": {
+    "denominator": 1,
+    "numerator": 0,
+    "state": "registered"
+  },
+  "draft": {
+    "checks": 2,
+    "draft_gate_passed": false,
+    "execution": "unsupported_pending_independent_controller_review",
+    "instrument": "native source attribution offline history v1",
+    "max_draft_checks": 3,
+    "observations": [
+      {
+        "call_event": 146,
+        "epoch": 36,
+        "exit_code": 1,
+        "kind": "draft",
+        "reported_passed": false,
+        "result_event": 148,
+        "tool_use_id": "shared-test-49",
+        "verified_against_current_saved_bytes": false
+      },
+      {
+        "call_event": 155,
+        "epoch": 37,
+        "exit_code": 0,
+        "input_sha256": {
+          "bundle": "1e9eb348adb30acf7e64ab74710845ac757fcdaab151359946f06adb9795772c",
+          "chunk_manifest": "3179251da34ff5c7c803742ecd50b043c8e0628c2af2398990f315f5a5f33892",
+          "final_full": "b4e47afa24ccab79ac9d2397edf8c18b02b0c106bb197dcdee9ebb324a84d66f",
+          "report": "cb67478e5476fca8f3411bc9a65302c63beaf15e47e0362d891a91a59f5a3828",
+          "source_manifest": "19e5477e12d87242c3c45391bf37024491d02bfdac2163ff2ab936da79333cd9"
+        },
+        "kind": "draft",
+        "reported_passed": true,
+        "result_event": 157,
+        "tool_use_id": "shared-test-52",
+        "verified_against_current_saved_bytes": true
+      }
+    ],
+    "problems": [
+      "history has unresolved tool calls"
+    ],
+    "registration_sha256": "720e1eca891f950bf5033f2466312fa2b71c1720a05da922c409dbd8b140b3fb",
+    "scope": "Additional native draft attribution obligation only; historical native phase, permission, accounting and final evidence gates remain required. Offline results do not authorize execution or establish semantic support.",
+    "terminal_failure_observed": false
+  },
+  "evidence_root": "/private/tmp/d4d-native-n2-acceptance-01969cbed",
+  "final": {
+    "evidence_authentication": "not_cryptographically_authenticated",
+    "first_stop": "native control session ended without complete evidence",
+    "provider_billing": "not_verified",
+    "runtime_gates_passed": false,
+    "runtime_observation": {
+      "auth": {
+        "apiProvider": "firstParty",
+        "authMethod": "claude.ai",
+        "loggedIn": true,
+        "subscriptionType": "synthetic-software-test"
+      },
+      "binary": {
+        "bytes": 9521,
+        "path": "/private/tmp/d4d-native-n2-acceptance-01969cbed/cases/neutral/test_actual_public_correction_0/native26/ordinary-python-test-peer",
+        "sha256": "2c0d83bc90252724b8b1eaf00088ca46eaaded55cab5bbf7ea08f7dedc5fb819"
+      },
+      "checked": true,
+      "environment_sha256": "cdbf161e6ed93b1b70b24f8aabb74813187a102af05c87d6a35126669436c71f",
+      "observed_at": "EXPLICITLY SYNTHETIC TEST ONLY",
+      "passed": true,
+      "scope": "FABRICATED OFFLINE TEST observation, never real permission/auth/provider evidence.",
+      "version": "SYNTHETIC PYTHON SOFTWARE TEST"
+    },
+    "scientific_acceptance": "not_assessed",
+    "shutdown": {
+      "control_initialized": true,
+      "control_shutdown_complete": true,
+      "unfinished_control_workers": 0
+    },
+    "state": "failed"
+  },
+  "gates": {
+    "accounting": {
+      "checked": false,
+      "passed": false,
+      "reason": "ValueError: native model accounting requires one terminal result"
+    },
+    "evidence": {
+      "checked": true,
+      "passed": true
+    },
+    "first_stop": {
+      "checked": true,
+      "passed": false,
+      "reason": "native control session ended without complete evidence"
+    },
+    "keep_awake": {
+      "checked": true,
+      "passed": true
+    },
+    "live_attribution": {
+      "checked": true,
+      "passed": false
+    },
+    "observation": {
+      "checked": true,
+      "passed": false,
+      "problems": [
+        "transcript carries no terminal result with complete usage"
+      ]
+    },
+    "pair": {
+      "checked": true,
+      "passed": true
+    },
+    "phase_history": {
+      "checked": true,
+      "passed": false
+    },
+    "receipts": {
+      "checked": true,
+      "passed": true
+    },
+    "runtime_authority": {
+      "checked": true,
+      "passed": true
+    },
+    "saved_attribution": {
+      "checked": true,
+      "passed": false
+    },
+    "schema": {
+      "checked": true,
+      "passed": true,
+      "problems": []
+    },
+    "shutdown": {
+      "checked": true,
+      "passed": true
+    },
+    "terminal": {
+      "checked": false,
+      "passed": false,
+      "reason": "ValueError: one exact initialization and terminal result are required"
+    },
+    "tool_history": {
+      "checked": true,
+      "passed": false,
+      "reason": "native ordered helper obligations are incomplete"
+    }
+  },
+  "helper": {
+    "path": "/private/tmp/d4d-codex-n2-4-20261025/scripts/adhoc/summarize_native_n2_acceptance_20261025.py",
+    "sha256": "851bdc894bf013cbbe274c69579ebdf340e7ee30218635f2cafb5be3c70ddf0e"
+  },
+  "input_sha256": {
+    "cases/neutral/test_actual_public_correction_0/native26/authority/receipt-policy.json": {
+      "bytes": 327,
+      "sha256": "9ecc2d8b7c1ecea131acd0a0592a32fa7d94fc8e20c6ffd70d368556284aff1c"
+    },
+    "cases/neutral/test_actual_public_correction_0/native26/authority/runtime-execution.json": {
+      "bytes": 1199,
+      "sha256": "2638074e9d847deba310c99efc2eb9264f665b00ed7da498b28cc7a16265d48e"
+    },
+    "cases/neutral/test_actual_public_correction_0/native26/data/d4d_concatenated/claudecode_direct_core/offline-neutral/SYNTHETIC_provenance.yaml": {
+      "bytes": 25980,
+      "sha256": "1c0e396b87616db7cf5b8dcf884b874c44ed02c03de86f2b96c8e0c67feb4ff1"
+    },
+    "cases/neutral/test_actual_public_correction_0/native26/native-attempt/registration.json": {
+      "bytes": 368906,
+      "sha256": "720e1eca891f950bf5033f2466312fa2b71c1720a05da922c409dbd8b140b3fb"
+    },
+    "cases/neutral/test_actual_public_correction_0/native26/native-attempt/stderr.txt": {
+      "bytes": 31290,
+      "sha256": "9f7161e6e8fce76defcb4ba0441894c88d8952fba666ad06cf3fae32a5c02cdc"
+    },
+    "cases/neutral/test_actual_public_correction_0/native26/native-attempt/transcript.jsonl": {
+      "bytes": 23639075,
+      "sha256": "27db8370f0c2d5454a0d02fb1e846eb0dff344a94e8689687016da5fcccccd34"
+    },
+    "cases/neutral/test_actual_public_correction_0/native26/native-evidence/attribution-replay.json": {
+      "bytes": 6935,
+      "sha256": "97f5a9a5493fe9ca73c690901ac761b9fbe7b061eb2c73fd342c2c14ab1d689c"
+    },
+    "cases/neutral/test_actual_public_correction_0/native26/native-evidence/final.json": {
+      "bytes": 220436,
+      "sha256": "971eda7e9f537516b0376717730dea66ce8222793e4cd6d22bc1d6ac4a2c38a1"
+    },
+    "cases/neutral/test_actual_public_correction_0/native26/native-evidence/published.json": {
+      "bytes": 270,
+      "sha256": "5284276f5283d78d5e78de745326b45ed6abef1abc3d0ba8cf1d6491b3f2ef1a"
+    },
+    "neutral.log": {
+      "bytes": 270325,
+      "sha256": "5fa3ae13eae7d0379c6ee861ca67b1a96c26c9deaf722c2b6433e017e383feea"
+    },
+    "neutral.xml": {
+      "bytes": 561326,
+      "sha256": "d74f69f8f835c24630994d5103f048b08dd02bc6d03ade64e65e5b3482dac081"
+    },
+    "outcome.json": {
+      "bytes": 419,
+      "sha256": "87ba53dfd5a26fd1d2effe9de7420ea54d47ae85838a3d2a166b95a757212a9c"
+    },
+    "preservation.json": {
+      "bytes": 126,
+      "sha256": "a2bb06760d6d05a795db4d981f426272a7e412c168f933c7f1a0426b0aaffc09"
+    },
+    "run.json": {
+      "bytes": 14286,
+      "sha256": "692025cbe52974b60b314286d2d95939a1c595998bceb685be7dd8dea437a4c1"
+    },
+    "source-after-neutral.json": {
+      "bytes": 3018009,
+      "sha256": "ef000ecd8ec8c6dd11a6fd004a5029ebbe6c8f864132523bb2b0d118ee8e1840"
+    },
+    "source-before.json": {
+      "bytes": 3018009,
+      "sha256": "ef000ecd8ec8c6dd11a6fd004a5029ebbe6c8f864132523bb2b0d118ee8e1840"
+    },
+    "source-final.json": {
+      "bytes": 3018009,
+      "sha256": "ef000ecd8ec8c6dd11a6fd004a5029ebbe6c8f864132523bb2b0d118ee8e1840"
+    },
+    "upload/artifact-manifest.json": {
+      "bytes": 1839,
+      "sha256": "44876b057f22fc90fd3f0529fd03bfea66fc4e4d8ea0db36e937df3d8a09b8c4"
+    },
+    "upload/case-manifest.json": {
+      "bytes": 93917,
+      "sha256": "9c469ed54f5a853dca522cf985f67bda89aeda902f4eabe877af02114a31b7bd"
+    }
+  },
+  "joins": {
+    "published": {
+      "final_sha256": "971eda7e9f537516b0376717730dea66ce8222793e4cd6d22bc1d6ac4a2c38a1",
+      "registration_sha256": "720e1eca891f950bf5033f2466312fa2b71c1720a05da922c409dbd8b140b3fb",
+      "started_sha256": "0426917acc7faefa20dc67d267b1a6aab467a3420810cef5e5788dd23eb80fd4"
+    },
+    "registration_attempt_id": "native-attempt",
+    "registration_sha256_matches": true,
+    "replay_sha256_matches": true
+  },
+  "junit": {
+    "cases": [
+      {
+        "classname": "tests.test_native_shared_execution",
+        "error_count": 0,
+        "failure_count": 1,
+        "name": "test_actual_public_correction_three_workers_and_saved_completion",
+        "skipped_count": 0,
+        "time": "732.107"
+      }
+    ],
+    "suites": [
+      {
+        "errors": "0",
+        "failures": "1",
+        "hostname": "marcins-MacBook-Pro.local",
+        "name": "pytest",
+        "skipped": "0",
+        "tests": "1",
+        "time": "732.349",
+        "timestamp": "2026-10-25T01:11:26.361738"
+      }
+    ]
+  },
+  "limits": [
+    "Saved flags are extracted, not independently recomputed acceptance gates.",
+    "Archive identity is copied from the finalized manifest, not rehashed here.",
+    "Pytest elapsed time includes preparation and post-child evidence collection.",
+    "No inference about the exact slow function or provider behavior is made."
+  ],
+  "live_attribution": {
+    "checks": 2,
+    "controller_stop": "completed native shared history cannot be verified: ValueError: unsettled native tool calls; missing current final obligations; missing native terminal",
+    "draft_gate_passed": false,
+    "problems": [
+      "history has unresolved tool calls"
+    ],
+    "recorder_completed": false
+  },
+  "outcome": {
+    "error": "ValueError: neutral must pass exactly one unchanged test without skips",
+    "omission_not_run": "neutral completion and source/JUnit checks did not pass",
+    "scientific_acceptance": "not_assessed",
+    "stages": {
+      "neutral": {
+        "node": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "returncode": 1
+      }
+    },
+    "status": "failed"
+  },
+  "phase": {
+    "assembly_complete": true,
+    "checked": true,
+    "checks": [
+      {
+        "call_event": 12,
+        "exit_code": 0,
+        "helper": "chunk_check",
+        "result_event": 14,
+        "tool_use_id": "shared-test-4"
+      },
+      {
+        "call_event": 15,
+        "exit_code": 0,
+        "helper": "source_scope",
+        "result_event": 17,
+        "tool_use_id": "shared-test-5"
+      },
+      {
+        "call_event": 24,
+        "exit_code": 0,
+        "helper": "full_schema",
+        "result_event": 26,
+        "tool_use_id": "shared-test-8"
+      },
+      {
+        "call_event": 27,
+        "exit_code": 0,
+        "helper": "full_terms",
+        "result_event": 29,
+        "tool_use_id": "shared-test-9"
+      },
+      {
+        "call_event": 30,
+        "exit_code": 0,
+        "helper": "phase1_receipts",
+        "result_event": 32,
+        "tool_use_id": "shared-test-10"
+      },
+      {
+        "call_event": 33,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 35,
+        "tool_use_id": "shared-test-11"
+      },
+      {
+        "call_event": 42,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 44,
+        "tool_use_id": "shared-test-14"
+      },
+      {
+        "call_event": 45,
+        "exit_code": 0,
+        "helper": "derive_core",
+        "result_event": 47,
+        "tool_use_id": "shared-test-15"
+      },
+      {
+        "call_event": 48,
+        "exit_code": 0,
+        "helper": "core_schema",
+        "result_event": 50,
+        "tool_use_id": "shared-test-16"
+      },
+      {
+        "call_event": 51,
+        "exit_code": 0,
+        "helper": "pair",
+        "result_event": 53,
+        "tool_use_id": "shared-test-17"
+      },
+      {
+        "call_event": 54,
+        "exit_code": 0,
+        "helper": "original_source_inventory",
+        "result_event": 56,
+        "tool_use_id": "shared-test-18"
+      },
+      {
+        "call_event": 57,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 59,
+        "tool_use_id": "shared-test-19"
+      },
+      {
+        "call_event": 66,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 68,
+        "tool_use_id": "shared-test-22"
+      },
+      {
+        "call_event": 69,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 71,
+        "tool_use_id": "shared-test-23"
+      },
+      {
+        "call_event": 78,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 80,
+        "tool_use_id": "shared-test-26"
+      },
+      {
+        "call_event": 81,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 83,
+        "tool_use_id": "shared-test-27"
+      },
+      {
+        "call_event": 90,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 92,
+        "tool_use_id": "shared-test-30"
+      },
+      {
+        "call_event": 93,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 95,
+        "tool_use_id": "shared-test-31"
+      },
+      {
+        "call_event": 102,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 104,
+        "tool_use_id": "shared-test-34"
+      },
+      {
+        "call_event": 105,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 107,
+        "tool_use_id": "shared-test-35"
+      },
+      {
+        "call_event": 114,
+        "exit_code": 0,
+        "helper": "advance",
+        "result_event": 116,
+        "tool_use_id": "shared-test-38"
+      },
+      {
+        "call_event": 117,
+        "exit_code": 0,
+        "helper": "audit_evidence",
+        "result_event": 119,
+        "tool_use_id": "shared-test-39"
+      },
+      {
+        "call_event": 120,
+        "exit_code": 0,
+        "helper": "derive_final_core",
+        "result_event": 122,
+        "tool_use_id": "shared-test-40"
+      },
+      {
+        "call_event": 123,
+        "exit_code": 0,
+        "helper": "full_schema",
+        "result_event": 125,
+        "tool_use_id": "shared-test-41"
+      },
+      {
+        "call_event": 126,
+        "exit_code": 0,
+        "helper": "full_terms",
+        "result_event": 128,
+        "tool_use_id": "shared-test-42"
+      },
+      {
+        "call_event": 129,
+        "exit_code": 0,
+        "helper": "core_schema",
+        "result_event": 131,
+        "tool_use_id": "shared-test-43"
+      },
+      {
+        "call_event": 132,
+        "exit_code": 0,
+        "helper": "pair",
+        "result_event": 134,
+        "tool_use_id": "shared-test-44"
+      },
+      {
+        "call_event": 135,
+        "exit_code": 0,
+        "helper": "phase1_receipts",
+        "result_event": 137,
+        "tool_use_id": "shared-test-45"
+      },
+      {
+        "call_event": 138,
+        "exit_code": 0,
+        "helper": "final_scope",
+        "result_event": 140,
+        "tool_use_id": "shared-test-46"
+      },
+      {
+        "call_event": 141,
+        "exit_code": 0,
+        "helper": "final_source_inventory",
+        "result_event": 143,
+        "tool_use_id": "shared-test-47"
+      },
+      {
+        "call_event": 147,
+        "exit_code": 1,
+        "helper": "draft",
+        "result_event": 149,
+        "tool_use_id": "shared-test-49"
+      },
+      {
+        "call_event": 150,
+        "exit_code": 0,
+        "helper": "final_source_inventory",
+        "result_event": 152,
+        "tool_use_id": "shared-test-50"
+      },
+      {
+        "call_event": 156,
+        "exit_code": 0,
+        "helper": "draft",
+        "result_event": 158,
+        "tool_use_id": "shared-test-52"
+      },
+      {
+        "call_event": 159,
+        "exit_code": 0,
+        "helper": "final_evidence",
+        "result_event": 161,
+        "tool_use_id": "shared-test-53"
+      }
+    ],
+    "complete": true,
+    "core_sealed": true,
+    "current_checks": [
+      "advance",
+      "audit_evidence",
+      "chunk_check",
+      "core_schema",
+      "derive_final_core",
+      "draft",
+      "final_evidence",
+      "final_scope",
+      "final_source_inventory",
+      "full_schema",
+      "full_terms",
+      "original_source_inventory",
+      "pair",
+      "phase1_receipts",
+      "source_scope"
+    ],
+    "native_terminal": false,
+    "passed": false,
+    "pending_tool_ids": [
+      "shared-test-54"
+    ],
+    "phase1_sealed": true,
+    "problems": [
+      "unsettled native tool calls",
+      "missing current final obligations",
+      "missing native terminal"
+    ],
+    "scope": "Ordered settled helper obligations; capture, callback authority, file bytes and scientific support are separate checks.",
+    "terminal_failures": []
+  },
+  "preservation": {
+    "expected_head_matches": true,
+    "run_reached": true,
+    "source_inspection_succeeded": true,
+    "source_unchanged": true
+  },
+  "purpose": "Retained offline software evidence; no rerun or scientific acceptance",
+  "recorder": {
+    "call_ids": [
+      "shared-test-54"
+    ],
+    "inline_check_blocks_present": [],
+    "provenance_top_level_keys": [
+      "record_version",
+      "record_type",
+      "record_mode",
+      "record_generated_at",
+      "run",
+      "model",
+      "prompts",
+      "playbooks",
+      "phase_log",
+      "schema",
+      "software",
+      "repo",
+      "system",
+      "inputs",
+      "outputs",
+      "companions",
+      "unrecoverable",
+      "unverified",
+      "notes",
+      "native_shared_generation"
+    ],
+    "settled_call_ids": []
+  },
+  "saved_reconstruction": {
+    "additional_gate_passed": false,
+    "checked": true,
+    "passed": false,
+    "problems": [
+      "native tool call lacks unique subsequent callback and result evidence",
+      "native control lacks a terminal result",
+      "history has unresolved tool calls",
+      "complete native shared phase history did not pass",
+      "native saved tool history is not terminal and settled",
+      "completed selected history contains denials or lacks explicit empty denial accounting"
+    ],
+    "recorder_completed_in_trace": false
+  },
+  "source": {
+    "before_after_final_equal": true,
+    "head": "01969cbed8eed93f420c640c1f1c306e5f58b033",
+    "tracked_exact": true,
+    "tree": "d92f24c84aad9161457930a4b191564868ac0676"
+  },
+  "timeout": {
+    "helper_timeout_180_observed": true,
+    "registered_child_seconds": 900,
+    "stderr_has_outer_deadline_message": false
+  }
+}

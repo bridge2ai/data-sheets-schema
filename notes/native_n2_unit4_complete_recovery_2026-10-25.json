@@ -1,0 +1,54 @@
+{
+  "files": [
+    {
+      "bytes": 860598,
+      "path": ".claude/skills/d4d-generation-specificity-audit/scan.py",
+      "sha256": "84218b6b8c28ad103d8805b94c374c59d609c3155e3c967951e07aa6ed5cfd64",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a"
+    },
+    {
+      "bytes": 520215,
+      "path": "tests/test_generation_specificity_skill.py",
+      "sha256": "b249e3a6aedd3a2cda4409a4fbcb4406afb78f044031c87ab64bf17c5c172025",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a"
+    },
+    {
+      "bytes": 12788,
+      "path": "utils/native_ci_evidence.py",
+      "sha256": "7931517c28fcdc90d2b3ad572095c738ecad5db5c69be4fa61822cf329d62f30",
+      "source": "a33d80d84c70cc9ee557f15d6e34fa73fc14f153"
+    },
+    {
+      "bytes": 10131,
+      "path": "utils/native_shared_acceptance.py",
+      "sha256": "9e793fb0c9ce9b6d9bb5c9df985a653ec94a8d50692503d936c6b5061acfd9d3",
+      "source": "a33d80d84c70cc9ee557f15d6e34fa73fc14f153"
+    },
+    {
+      "bytes": 12185,
+      "path": "tests/test_native_ci_evidence.py",
+      "sha256": "48f086181b5592e2269e2e28a8471730c832e9f12983e39f02c88f4b074d0d0f",
+      "source": "a33d80d84c70cc9ee557f15d6e34fa73fc14f153"
+    },
+    {
+      "bytes": 7782,
+      "path": "tests/test_native_ci_evidence_adversarial.py",
+      "sha256": "68142307d4b962522372a6473b7d9612d8d1290a7abd4b12f5a47d2eab9577be",
+      "source": "a33d80d84c70cc9ee557f15d6e34fa73fc14f153"
+    },
+    {
+      "bytes": 9269,
+      "path": "tests/test_native_shared_acceptance_runner.py",
+      "sha256": "aee7a39f2050bbad1d037c6b4b1a15be4f20dff5d28a09b4f92bd0117cb523f7",
+      "source": "a33d80d84c70cc9ee557f15d6e34fa73fc14f153"
+    },
+    {
+      "bytes": 1500,
+      "path": "tests/test_native_typed_catalog_scanner.py",
+      "sha256": "22098d8990ca0a505f8c22c03e4950f905e68edc68f74434a8058395d9e4cae0",
+      "source": "a33d80d84c70cc9ee557f15d6e34fa73fc14f153"
+    }
+  ],
+  "kind": "native_n2_unit4_recovery",
+  "scope": "source reconstruction; no acceptance or runtime success implied"
+}

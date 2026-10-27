@@ -1,0 +1,1259 @@
+Generate the full/core D4D pair for CHORUS, label hypothetical-native26-sizing.
+<!-- D4D prompt renderer version 26 -->
+
+## Governing Rule
+
+Generated D4D YAML is an output, never an independent factual source.
+
+Do not borrow, copy, preserve, or infer a dataset fact from an older full or core
+D4D record. This prohibition includes identifiers, names, descriptions, people,
+organizations, dates, versions, URLs, licenses, access rules, counts, methods,
+ethics statements, limitations, and all nested-object content.
+
+If a fact appears only in an older generated record and not in an allowed source
+for the current run, omit it. Do not use an older record to resolve a conflict or
+fill a gap.
+
+Historical source documents are different from historical generated YAML. A
+historical document is allowed when it is explicitly selected by the current
+captured source manifest and included in the current source
+bundle.
+
+## Schema-Only Structure Rule
+
+The applicable LinkML schemas are the sole authority for record structure:
+
+- Full: `data_sheets_schema_all.yaml`, class `Dataset`
+- Core: `data_sheets_schema_core_all.yaml`, class `CoreDataset`
+
+For every populated slot, derive its name, range, required status, cardinality,
+inlining behavior, inherited availability, enum constraints, and nested-object
+shape from the schema. Follow `is_a`, `mixins`, `slots`, `attributes`,
+`slot_usage`, and class ranges as applicable.
+
+Do not infer structure from an older YAML record, a source document, a checklist,
+a model's prior knowledge, or a `d4d:docExample`. Documentation examples may
+illustrate intent but cannot add fields, alter ranges, or override schema
+constraints.
+
+UNIFORM DECISION RULES — these apply identically to every project and every arm:
+
+- Populate a slot only where the declared bundle supports it. Prefer omission
+  over inference: an absent slot is a correct answer when the evidence is
+  absent, and a plausible guess is not.
+- Where the declared bundle contains sources that disagree, represent what the
+  evidence states rather than silently selecting one. Do not merge distinct
+  entities into a single claim.
+- `Dataset` admits one referent. Choose the one the declared bundle best
+  supports, state that choice in the reconciliation report, and hold to it
+  consistently across both records.
+- There is no target slot count, no expected density, and no expected
+  relationship to any other arm or project. Apply your own judgment about what
+  the evidence supports.
+
+--- ADDED IN v2 ---
+
+- When a slot's declared range is multivalued, emit one object per distinct
+  entity. Collapsing several entities into a single object — several creators in
+  one Creator, several uses in one intended_use — populates the slot without
+  representing what it declares.
+- Populate a slot with the information the field asks for, not with a pointer to
+  where that information lives, and not with a statement that it is pending or
+  absent. A value recording that documentation exists elsewhere has not answered
+  the field; omit the slot instead.
+- Read the slot's description before populating it. Where the evidence answers a
+  neighboring field — the access route rather than the distribution formats,
+  the release cadence rather than the future-use impacts — put it in the field it
+  answers, or omit it.
+
+--- END ADDED IN v2 ---
+
+--- ADDED IN v3 ---
+
+- When a slot's declared range is a class, populate the fields that class
+  declares. Placing the content in a free-text field such as `description` while
+  the declared fields — a name, an identifier, dates, affiliations — stay empty
+  produces an object of the correct shape holding none of the structure it
+  exists to carry. Where the evidence answers a declared field, populate that
+  field rather than restating it in prose.
+
+--- END ADDED IN v3 ---
+--- ADDED IN v5 ---
+
+- In a slot whose declared range is `uriorcurie`, never write a resolver URL
+  where the schema declares a prefix: write the CURIE — a prefix, a colon, and
+  the local part. A `ROR:` CURIE, not the ror.org URL; an `ORCID:` CURIE, not
+  the orcid.org URL; a `doi:` CURIE, not the doi.org resolver form.
+  **`uriorcurie` is the range this rule exists for**: its
+  "uri" half is the fallback for an identifier that no declared prefix covers,
+  never permission to expand one that a prefix does cover. Two records naming
+  one thing in one form produce one identity; the same thing written as a
+  prefix here and a resolver URL there produces two. Check the schema's
+  declared prefixes and use one whenever it fits; a resolver URL in a
+  `uriorcurie` slot whose prefix is declared is a defect even though it
+  resolves.
+  Three things this does not govern, and they are exempt entirely: a slot
+  whose declared range is `uri` — not `uriorcurie` — takes a URL
+  (`download_url` and `access_urls` are declared `uri`, and a CURIE there is
+  wrong); a URL inside prose or a citation is text — leave both of these
+  exactly as written; and a slot whose declared range is `string` follows its
+  own description and pattern even when it holds an identifier — the `doi`
+  slot takes the bare DOI, neither prefixed nor resolved.
+- An identifier that names something outside this dataset — an organization, a
+  person, a publication, another dataset — is a fact about the world, subject to
+  the same rule as any other fact: take it from the evidence or omit it. Do not
+  supply one you recognize but the input documents do not state. A correct
+  identifier the evidence does not contain is still an unsupported claim, and to
+  every reader who was not present it is indistinguishable from an incorrect
+  one. Naming an organization the documents name is grounded; adding that
+  organization's registry identifier from your own knowledge is not.
+- An identifier that names a part of this dataset, and exists nowhere outside
+  this record, is a label rather than a claim about the world — so no evidence
+  can supply it and the rule above does not reach it. Mint it as a fragment on
+  an identifier the evidence *does* supply, so the label stays traceable to
+  something attested. This is the only case in which minting is right, and the
+  test is whether the thing named has a referent outside this record: if it
+  does, the rule above governs and you take the identifier from the evidence or
+  omit it. Never invent a prefix — one the schema does not declare resolves to
+  nothing, and where no fragment is possible either, a resolvable URL is the
+  better answer. A person is identified by a personal-identifier registry entry
+  and an organization by an organization registry entry; a fragment appended to
+  an organization's identifier does not identify a person, it makes a false
+  claim about that organization.
+- Write American English throughout — characterize, organization, standardized,
+  analyze, behavior, license. This governs the prose the record states, not
+  quoted material: a title, a name or a direct quotation keeps the spelling its
+  source used.
+- Where two sources in the declared bundle disagree, prefer the one the input
+  manifest ranks higher: state its value, and record in the caveat that the
+  sources disagreed, what each said, and which was preferred. Where the
+  disagreeing sources share the same rank the ranking cannot decide, so
+  represent what the evidence states rather than selecting one. This refines
+  the earlier rule about disagreement; it does not replace it.
+
+--- END ADDED IN v5 ---
+
+--- ADDED IN v6 ---
+
+- Within the rule above, mint a fragment identifier for a part of this
+  dataset only where another value in the record must point at that part —
+  a split a task names, a subset a distribution cites, a collection a file
+  belongs to. A part nothing points at is described in prose, not labeled:
+  an identifier no value in the record uses is not a label, it is noise that
+  reads as structure. Name the same part with the same fragment every time
+  a value points at it, and mint nothing for a part that is only described.
+
+--- END ADDED IN v6 ---
+
+--- ADDED IN v7 ---
+
+- After the full record, emit a second document: the coverage receipt for
+  the declared bundle. The bundle is divided into chunks, each opening with
+  a marker of the form `[cNNN]` on its own line. Write the record, then a
+  line reading exactly `--- COVERAGE RECEIPT ---`, then a YAML document with
+  `bundle_md5` (as given with the bundle) and `chunks`: one entry per marker,
+  in order, each with `id` and a `status` from exactly these, each status
+  with its own key — `extracted`, whose `extracted` key lists every
+  `{slot, snippet}` pair the chunk supplied, the slot being the record path
+  the value fills (a leaf, or an entry where one passage attests the whole
+  entry) and the snippet a verbatim phrase copied from that chunk, never a
+  lone short word; `redundant_with`, whose `chunks` key names the chunks
+  that already receipted everything it holds; `nothing_relevant`, with a
+  `reason`; or `duplicate_of`, whose `of` key names the chunk it repeats.
+  Every value in the record that the bundle supplied appears in some
+  chunk's receipt; a value with no receipt is one the record must not
+  carry. The phase instruction shows the exact shape.
+
+--- END ADDED IN v7 ---
+
+--- ADDED IN v8 ---
+
+- A slot whose declared range is a class takes one of two forms, and the
+  schema digest says which: an attribute the digest marks `(reference — a
+  string, not an object)` takes exactly that string, never an object; every
+  other class-ranged attribute takes an object carrying the keys the digest
+  lists for that class — a `Grant` under `grants` with its `grant_number`, an
+  `Organization` under `affiliations`, a `Person` under
+  `principal_investigator` with its `id`, its `name` and, where the evidence
+  states them, `orcid`, `email` and `affiliation` (itself an object list, as
+  the digest shows). The rule below about scalar ranges governs scalar ranges
+  only; a reconcile or repair phase must never reduce an object the digest
+  asks for to a string, nor inflate a marked reference into an object, and an
+  audit finding that an object in an object-ranged slot is "the thing, not
+  its identifier" is wrong on its face.
+- Before writing a value from a passage, name to yourself what the passage is
+  about and when. A plan, a proposal, a protocol's intention or a future
+  release is stated as such — in the tense the source uses — or omitted; it
+  is never the current state of the dataset. A description of an earlier
+  release, an archived version or a superseded file is a fact about that
+  version, not about the referent's current release. A passage whose subject
+  is another dataset — a companion release, a sibling cohort, a dataset the
+  documents cite — describes that other dataset; its facts belong only in
+  `related_datasets`, never in the referent's own slots. The coverage
+  receipt's snippet for a value comes from a passage about the value's own
+  subject: the referent's current state for its own slots, the other dataset
+  for an entry in `related_datasets`, that version for a statement about an
+  earlier version.
+- A figure the record derives from attested figures — a sum, a difference, a
+  fraction, a count — is stated as the record's own computation, with the
+  inputs it was computed from named beside it, never as a figure a source
+  reported. It is receipted at its own path by the passages that state its
+  inputs — a passage cannot receipt an arithmetic result it does not contain,
+  and the receipt says so by citing the inputs. Where the derived figure and
+  a stated total disagree, record both and the difference in
+  `source_caveats`, and do not resolve the disagreement by adjusting either.
+- Where a slot is a list of objects the bundle states one by one — creators,
+  funders, variables, file collections, files — each entry carries its own
+  receipt naming the passage that states that entry. A roster receipted by
+  one passage for one of its entries has receipted one entry; the others are
+  values the record must not carry without a receipt of their own.
+- A `Person` the schema asks for as an object carries an `id`: the ORCID the
+  evidence states, as a CURIE with the prefix ORCID, where it states one;
+  otherwise a fragment minted on this record's own id (the record's id, a
+  hash sign, then person and the name), which is the one case the fragment
+  rule reaches for a person — the object exists only as this record's way of
+  naming its contact. Never a mailto address or any other scheme as the id:
+  the address belongs in `email`, beside the id, where the evidence states
+  it. Look for the ORCID before minting — a person the documents list with
+  an ORCID has one, and a fragment for that person is a second identity for
+  one referent.
+
+--- END ADDED IN v8 ---
+
+--- ADDED IN v9 ---
+
+- A value in one of the referent's own slots is supported by a passage whose
+  subject is the referent. You are given a declared scope naming the referent
+  and, where the project has any, the datasets declared related but distinct —
+  with, for each and where the declaration states them, the slot its facts
+  belong in and the bundle source carrying its documentation. Where it names a
+  slot, a passage about that dataset supports an entry there; where it does
+  not, the facts still belong with that dataset and not in a slot describing
+  this one, however well the sentence would read there. A declaration listing
+  no related dataset says only that none was declared: it is not an assurance
+  that every passage in the bundle is about the referent, and the first
+  sentence still governs. This binds every phase, and the reconcile phase in
+  particular: reconciling the two records against each other does not test
+  what a value is about, so check each value you keep against the subject of
+  the passage behind it, not only against the rest of the record.
+- A list entry names exactly one entity. Where the bundle states several, emit
+  one entry each or none; never one entry whose value merges them. Two signs
+  that you have merged: the value names a class of things where the schema
+  asks for a thing — a plural or a collective noun standing where one
+  organization, one person or one instrument belongs — or it joins what the
+  sources state as separate names with "and", a slash or a comma. The test is
+  the sources, not the punctuation: an entity whose own registered name
+  contains "and", a comma or a slash is one entity, and splitting it is the
+  same error in the other direction. Read back each entry you write in a
+  multivalued slot and ask whether exactly one thing the sources name answers
+  to it.
+- The rule that a fragment is minted only where a value points at the part
+  does not reach an id the schema forces. Where a class declares `id` as its
+  identifier or requires it — a file, a file collection, a data subset, a
+  component dataset under `resources`, a software tool under `used_software`,
+  a person given as an object — the id exists because the object does, and
+  leaving it out is a validation failure, not a fragment saved. Take the
+  identifier the evidence states for that part first — a DOI, an ARK, a URL
+  that names the file or the component dataset, in a form that is itself an
+  identifier: a declared CURIE, an absolute URL, an ARK or a URN, and where
+  the evidence states a resolver URL for a prefix the schema declares, that
+  identifier written as the CURIE the rule above on declared prefixes
+  requires, not as the URL — and mint a label only where it states none: on
+  this record's own id where that id is itself such a form (the base rule
+  below), stable across runs, never in place of an identifier the evidence
+  supplies; and do not read that rule as a reason to omit the object. A
+  person's id follows the rule for a person given as an object — the ORCID the
+  evidence states first, a fragment only where it states none, on the base
+  this rule sends the record to and never on a bare token. The ids of
+  `file_collections` and of the files under them are copied into the core
+  record's distributions, and top-level `resources` are matched to the core by
+  id, so those ids are used whether or not the text points at them. For every
+  other fragment the test stays the referent: an organization, a grant, an
+  award, a program has a referent outside this record, so a fragment for it on
+  this dataset's identifier is a claim about that identifier, not a label; and
+  an entry under `creators` or `maintainers` is a role this record asserts
+  about a person or an organization, whose id is that person's or
+  organization's own identifier where the evidence states one. Take the
+  identifier the evidence states; where it states none and the schema does not
+  require an id, leave `id` empty and carry the name in `name`. A label this
+  record mints sits on an identifier the evidence supplies for this dataset —
+  which refines the rule that mints a label on an identifier the evidence
+  supplies, without replacing it — and this record's own id is the base to
+  prefer where it is itself an identifier form: a declared CURIE, an absolute
+  URL, an ARK or a URN. A record whose own id is a bare token, or a CURIE on a
+  prefix the schema does not declare, labels its parts on the dataset's DOI or
+  landing page instead, never on the token, and where it carries neither, on a
+  resolvable URL the evidence supplies for this dataset — the fragment rule's
+  own license, a label minted on an identifier the evidence does supply —
+  which, like every other base here, must itself be an identifier form: an
+  absolute URL with its scheme. A label on the dataset's DOI or landing page
+  is licensed too, but only on a form that is itself an identifier — the DOI
+  as a declared CURIE (the doi prefix, a colon, the DOI), which is the form to
+  write even where the evidence states the resolver URL, the page as an
+  absolute URL with its scheme; a bare DOI string or a schemeless host with a
+  label appended is a token, not an identifier. A label for a part of this
+  dataset is exempt from a receipt only when its base matches an identifier
+  carried in this record's top-level `id`, `doi` or `page`: DOI spellings
+  and a trailing slash are normalized, but a missing or different URL scheme
+  is not. A label on a scheme-added page or fallback URL needs a receipt
+  when its resulting base is absent from those carried identifiers. This
+  exemption covers labels for parts of this dataset, not claims about an
+  external entity. The own id is the one identity slot every record carries,
+  whatever form the record gave it, where `page`
+  and `doi` are optional; where it is an identifier form and not itself a
+  shared root it names this dataset alone, while a landing page is often a
+  site or project root shared with sibling releases, so a part labeled there
+  cannot be told apart from a sibling's by its id alone. Where this record's
+  own id is itself such a root, it is still the base to prefer: it is the
+  identifier this record carries, and the label must stay stable; where the
+  base this rule sends the record to already carries a fragment, the part's
+  label is that fragment, a hyphen and the part's own label, on the same base
+  — for a person under the person rule, that fragment, a hyphen, then person
+  and the name — so the record's own discriminator is kept, and one identifier
+  carries one fragment marker, never two. A fragment appended to another
+  entity's identifier — an organization's, another dataset's — labels a part
+  of that entity, not of this one.
+- A slot whose declared range is an enumeration is populated only from a
+  passage that states the category, in the source's own words or a plain
+  restatement of them — never from what a value's name, unit or position
+  suggests. A variable's `data_type` and a collection's `collection_type`
+  are claims about how a thing is classified, and a passage that names the
+  thing without classifying it supports the name and not the class. Where an
+  enumeration's permissible values are defined in the schema by observable
+  criteria rather than by a bare category label, a passage that states the
+  facts meeting a value's definition is a plain restatement of that value,
+  and the coverage receipt for the slot is the passage stating those facts:
+  in `confidentiality_level` (ConfidentialityLevelEnum), a passage stating
+  that the data are publicly available without access restrictions supports
+  unrestricted, a passage stating that access requires registration, a
+  credentialed account, authorization or a data use agreement supports
+  restricted, and a passage stating that access requires institutional review
+  board, ethics or access-committee approval under strict controls supports
+  confidential; in `hipaa_compliant` (ComplianceStatusEnum), a passage
+  stating that the dataset contains no human-subjects or protected health
+  information supports not_applicable. A label from an external
+  classification scheme is recorded as prose where relevant and never mapped
+  across schemes to an enumeration value unless the source also states the
+  observable facts that meet the schema's definition. Where no
+  passage states the category the slot stays empty — an empty enumeration
+  slot is a gap the reader can see, a guessed one an error the reader cannot
+  — except where the schema requires the slot, in which case the entry
+  itself is what the evidence must support: a related dataset is recorded
+  only where a passage states what the relation is. A file's `format`,
+  `file_type`, `media_type` and `encoding`, and a file's or collection's
+  `compression`, are read from the file the bundle names — its name and
+  extension are the passage for them — and this rule does not reach those.
+- `raw_data_format` names the form the data took before any processing this
+  dataset applied, and only where a passage states that form. The standard
+  the release conforms to, the extension the distributed files carry and the
+  format a pipeline wrote are facts about the released data and belong in
+  the slots that describe the release; where a passage states that the raw
+  form and the released form are the same, record it in both; where the
+  documents describe the release and say nothing of what preceded it, the
+  slot stays empty.
+- `principal_investigator` names a person the documents designate with that
+  title, or its usual abbreviation, for this dataset or the study that
+  produced it. A lead, a director, a corresponding author, a contact, a
+  first author, the head of the group that hosts the data — each is a role
+  the documents state, recorded as the role they state, in prose or in a
+  slot for that role where the schema has one, and never promoted to
+  principal investigator because the record has a slot for one. Where the
+  documents designate more than one, record each; where they designate none,
+  the slot stays empty.
+- A value states what a passage states, at the passage's own reach. A
+  consequence — what a limitation means for a use, what a gap does to a
+  conclusion — goes in `scope_impact` or anywhere else only where a passage
+  draws it; a limitation the documents state without its consequence is
+  recorded as the limitation alone. A term taken from a keyword line, a tag
+  list, a table header or a navigation menu attests that the term appears,
+  not what it is about: `keywords` is the one slot whose subject is that the
+  term appears, and a keyword line fills it and nothing else; any other
+  value needs a sentence behind it.
+- Every entry in a list is a member of that list: a variable under
+  `variables`, a funder under `funders`, a file under the `resources` of a
+  file collection. A remark about the list — that what is shown is a sample,
+  that the list continues elsewhere, that one column flags something — is
+  not a member and does not become an entry; it goes in `description`, or in
+  `source_caveats`, or is omitted.
+- An absence is not an entry, and a route is not a format. That no
+  correction has been published is not an erratum and does not fill
+  `errata`; that access is by request through a portal is a route and fills
+  neither `future_guarantees` nor the `format` of a distribution; the reason
+  a use is prohibited is its `prohibition_reason`, and the prohibition
+  itself is the entry that reason explains, not the reason. Where the
+  documents state that a thing is absent, the slot for the thing stays empty
+  and the statement, where it is worth keeping, goes in `source_caveats`.
+
+--- END ADDED IN v9 ---
+
+--- ADDED IN v4 ---
+
+- Where a slot's declared range is a scalar, populate it with the identifier of
+  the thing it refers to, not with the thing itself. An object placed in a
+  string-ranged slot fails validation and loses the reference it was meant to
+  record, even where that thing is richly described elsewhere in the record.
+
+--- END ADDED IN v4 ---
+
+## Shared generation rules v1
+
+Apply these before emitting any value, during reconciliation, and during final
+source review. The declared sources and their qualifications govern; these
+instructions are not factual evidence or a target amount of content.
+
+- A team, consortium, contact or leadership listing does not establish a
+  creator, maintainer or reviewer relationship. A passage must assign that
+  responsibility for the declared dataset or release. Review the containing
+  entity and the role represented by its slot, not only whether its name is
+  present in a source.
+- An ongoing operation is in_progress, not applied or completed. Preserve
+  planned, possible and conditional statements; a capability is not evidence
+  that it was used on this dataset.
+- A date governs only the bullet, clause or explicitly stated scope it heads.
+  Do not extend it to neighboring observations. A capture or snapshot date
+  dates that capture, not necessarily the underlying observation.
+- Carry source-supported lineage and derivation in was_derived_from,
+  parent_datasets or a complete textual provenance statement. Complete prose
+  lineage is valid; an empty structured slot is not proof of omission. A
+  biological source, earlier release or related study is not automatically a
+  parent dataset.
+- Populate variable metadata only for names explicitly identified as variables
+  or fields in actual data files or their data dictionary. Broad data-type
+  rows, mathematical symbols and generic descriptions of columns are not
+  thereby named data-file variables.
+- Carry a software/tool version only when its source states its use for this
+  dataset's declared release and activity. Keep processing and metadata
+  packaging roles distinct. A citation, companion analysis, hosting badge,
+  standard, license or dataset release number does not establish that use.
+- For non-entity multivalued purposes, preprocessing_strategies,
+  collection_mechanisms and subpopulations, emit one entry per source-enumerated
+  item and per distinct method or purpose explicitly named in prose. Follow
+  governing lists and headings and retain qualifications. Do not split one
+  item solely at commas, slashes or conjunctions or merge distinct items.
+- For role-bearing rosters, first identify the governing list that establishes
+  the actual role and scope. Emit every supported member of that list or none,
+  and identify an incomplete list in source_caveats. Never manufacture members
+  to satisfy a count; membership in another list does not establish this role.
+
+## Role relationship review v1
+
+Review each complete role-bearing containing entity under its actual induced
+schema owner and slot. A supported name alone does not support creator,
+maintainer, reviewer or other responsibility for the declared dataset/release.
+Assess the relationship and its scope against the governing source passage.
+This applies to original audit rows and to every final report/source_review row,
+including unchanged members and report_regate. Preserve the existing claim and
+source-review grammar; do not relabel a contradiction as supported to finish.
+Schema context identifies the role being asserted, not evidence that it is true.
+
+## Native shared generation stages v1
+
+Use the captured generation context, profile vocabulary and declared sources in
+every applicable stage. The context declares the scope and source policy; it is
+not evidence that a claim is true or scientifically applicable. The supplied
+schema specifies structure, never dataset facts. Do not consult earlier D4D
+records. Supported role relationships require evidence for the containing role,
+not just for a person's or organization's name.
+
+Generate the full record and original receipt from the complete declared bundle.
+Use the exact registered validation and seal commands before advancing. Original
+full, original receipt and original core become immutable when sealed. Neither
+later reconciliation nor receipt additions may rewrite those originals.
+
+Run the registered stage advance command exactly. The helper publishes the
+current request only after checking its predecessor and the observed history.
+Read that entire current request with a successful Read before writing one raw
+answer to its exact admitted response destination. Follow its complete policy,
+inventory, owner context, schema and output format. Do not create requests,
+journals, records, observations, seals, indexes, assemblies or completions; these
+belong to the controller and its fixed helpers. A proposed request is not Write
+permission. Future, stale, failed and already consumed responses are not writable.
+
+The receipt stage admits at most one answer. A genuine zero-work result requires
+no answer. After receipt checking, derive the core with the registered helper
+from the sealed original full and effective receipt; preserve the distinct core
+seal. Advance through every assigned worker, the complete omission inventory
+and integration in order. Never skip a worker, shorten an inventory to fit a
+limit or answer from a remembered request. Return only the requested raw answer;
+the helper retains it and derives any internal response envelope itself.
+
+A failed, malformed, interrupted or uncheckable response remains consumed. Stop
+the attempt; no second answer, restart or extra generation is authorized by this
+procedure. The caller's byte, inventory, history and evidence bounds apply to
+the whole required content. The sole runtime declaration's output-token limit
+is an asserted runtime ceiling, not a per-stage guarantee or a session budget.
+
+After the full typed assembly is independently checked, reconcile using its
+complete findings, receipt carry, omissions and source qualifications. Audit
+annotations are review evidence, not automatic authority to delete supported
+values or to add unsupported ones. Preserve source-supported content and account
+for every requested correction and every unexplained loss. Re-derive the final
+core from the final full; do not generate independent core facts. All final
+schema, pair, receipt, evidence, removal and source-review checks remain required.
+
+Check the final report draft with the registered source-attribution preflight.
+Within the explicit execution draft-check allowance, correct only that unaccepted
+report draft and preserve failed checks and correction history. A passing check
+binds its exact report, full record and input bytes. Run the terminal evidence
+check only after a current draft pass. A terminal failure is sticky. Finally run
+the exact registered live recorder command after the complete required checks.
+
+A stage completion certifies only the reconstructed receipt and typed assembly.
+It does not certify native session success, model attention, scientific support,
+human labels, applicability, an empirical receipt floor or launch authorization.
+
+Preserve the validated original full, original receipt and complete original
+source identities. The fixed receipt helper identifies every uncovered
+receiptable leaf against the captured schema. If there are none, record the
+verified zero-work result without a model answer. Otherwise admit exactly one
+complete receipt request and retain the first raw answer before parsing it.
+Never regenerate full, retry an answer or reopen a consumed stage.
+
+Return exactly one YAML mapping containing only a rereceipt list. For EVERY
+listed path return exactly one item: {path: ..., receipt: {chunk: cNNN,
+snippet: ...}} with a verbatim supporting passage from that exact source chunk,
+OR {path: ..., unsupported: true, reason: ...}. Never add, repeat, rename or omit
+paths. Never edit a record or receipt yourself. Use only uniquely listed chunks
+with status extracted, nothing_relevant or redundant_with, not duplicate_of.
+Inspect the containing passage and its qualifications; quotation identity does
+not establish scientific support. Preserve verified negative-status reversals.
+
+The helper preserves verified partial additions, every rejected or unanswered
+item, and every unsupported candidate with its reason, origin and pinned input
+identity. It retains the fixed original before/after denominator and effective
+receipt lineage. Unsupported candidates are carried into the complete typed
+audit; they do not authorize automatic deletion. Helpers refuse drift and
+duplicate publication instead of merging the same addition twice.
+
+The registered production floor is the exact integer fraction with_receipt /
+receiptable on the final record, using the unchanged receipt counters. A zero
+denominator cannot become a fabricated 100 percent. A pending floor remains a
+diagnostic pilot and cannot satisfy strict completion. Receipt additions and
+coverage do not certify truth, resolve applicability or replace origin/padding
+diagnostics, independent audit or the final evidence checks.
+
+Before the final terminal evidence check, check the saved final report draft
+with the exact source-attribution preflight command supplied below. This draft
+check does not replace any terminal evidence, removal, schema, receipt or
+source-review inventory check.
+
+In source_review claims, attributed_to lists distinct named source **filenames**
+from chunk_manifest.chunks[].source, or is empty. A source_manifest source_id
+belongs in a source-manifest provenance assertion; it is not a filename.
+Provenance-only assertions require empty attributed_to. A valid filename can
+happen to have the same spelling as a source ID: do not reinterpret it.
+
+If the draft check reports findings, reread the selected source and correct
+only the unaccepted report draft within the registered finite draft-check
+limit. Do not automatically translate IDs, invent evidence, change a verdict
+to supported, or use correct spelling as proof of semantic support. Preserve
+every failed result and correction in the transcript. Exit 2, unusable inputs,
+an interrupted check, or an absent result cannot establish a passing check.
+
+A passing draft check binds the saved report, final full record and selected
+input bytes. Editing any of them invalidates that observation; check the
+current draft again. These draft permissions never permit changing frozen
+originals, the audit, source inputs or the final full/core records. They do not
+increase any registered turn, time or cost budget.
+
+Any failed terminal evidence_assertions check or uncheckable source_review
+inventory remains terminal. Stop that attempt; a later draft pass cannot erase
+the failure or authorize another paid request. Run the unchanged final terminal
+evidence check only after a current passing draft check. Its complete evidence
+and declared-removal obligations remain mandatory.
+
+## Scientific evidence rules from protocol 7
+
+### Relationships and document attribution
+
+Read a structured value as a subject, relationship and object together.
+Membership in a leadership team does not establish that a person created
+the dataset. A project contact is not necessarily its maintainer or access
+committee contact. An affiliation does not turn a person into an institution.
+Keep separately established roles, including a stated principal investigator
+where the schema permits one. Preserve other supported information in neutral
+text, without retaining an unsupported role container.
+
+When an audit identifies an unsupported relationship, its repair must remove
+that relationship. "Keep the entry and explain that its role is unstated" is
+not a valid repair. Check the audit recommendation against the schema meaning
+before applying it. Do not call a retained unsupported relationship addressed.
+
+Check each attributed clause against the document it names, including each
+assertion that a second document corroborates a first. A fact appearing
+elsewhere in a bundle does not validate an attribution. Name only supporting
+documents; do not invent corroboration. For example, a protocol can state a
+planned holdout while a repository overview says nothing about it. That fact
+may be attributed to the protocol, but not to the overview. A receipt anchored
+to the protocol does not repair prose attributing the fact to the overview.
+
+### Audit evidence
+
+The checked helper-assembled audit has findings, summary and source_review. Each response uses its current stage contract.
+Every finding needs an evidence array. Each element has exactly one of these shapes:
+
+    {"source": "protocol.txt", "chunk": "c002", "quote": "an exact source passage"}
+    {"artifact": "original_full", "path": "/some_field/details", "op": "contains", "quote": "an exact original passage"}
+    {"artifact": "original_full", "path": "/some_field/details", "op": "lacks", "quote": "planned"}
+
+Use the source filename and chunk ID from the selected chunk manifest. Quotes
+must occur in that document's named chunk; preserve case and punctuation.
+Whitespace and YAML line wrapping are folded. Do not use ellipses to splice
+passages. Quote enough governing context to establish the subject and status.
+
+Artifact paths are JSON Pointers, with zero-based list indexes. Use @header
+only for the leading YAML comment block. For a number, boolean or null, quote
+its complete JSON scalar spelling (for example 12, true or null); scalar
+values are matched as a whole. For an allegation that a qualifier
+was lost, include a separate lacks assertion at each original location where
+you claim it is missing. If it is present, withdraw that allegation. A valid
+objection to a method's placement does not validate an adjacent allegation
+that the same value lost its "in process" qualifier. Check each subclaim.
+An absent path is not evidence that an existing value lost a qualifier.
+Quote a containing field or a source passage for an omission finding.
+
+For each rejected relationship also add remove_relationship to its finding.
+Its value is one JSON object, never an array, even for one relationship. Use
+separate findings for separate rejected relationships. Examples of that value:
+
+    {"path": "/creators/1", "identity": "/name"}
+    {"path": "/data_governance/committee_contact"}
+
+The path names the unsupported relationship in the original full record.
+For a list member using the existing identity form, identity is relative to that
+member and ends in a name or schema identifier field: id, name, orcid, doi, grant_number, variable_name,
+hash, md5, sha256, checksum or target_dataset. Choose the person's or entity's own identity,
+not an affiliation.
+All present identifiers must remain unchanged, including a person's ORCID;
+the check also binds identifying fields on the containing role wrapper.
+All nested identifiers in the selected member are bound too; an unchanged
+wrapper cannot hide a changed person or resource beneath it. Reordering a
+nested collection of identities can make matching ambiguous and needs review.
+The remaining members must also retain their structured values, including
+scalar relationship targets, so an unchanged wrapper cannot hide a changed
+endpoint. Their narrative description, notes and source_caveats may be revised.
+If other structured edits to those members are needed, removal is ambiguous
+and requires review; do not claim the checker established it.
+An identity pointer must follow nested objects, not indexed lists. All
+containing objects retain both the presence and absence of these identifier
+and name fields; moving a rejected person's identity onto a surviving wrapper fails.
+Reordering the list does not remove that relationship. For a non-list field,
+omit identity and remove the unsupported field entirely. Do not merely delete
+the name or identifier from an otherwise retained unsupported entry.
+An indexed ancestor with an original identifier or name must preserve all
+identifying fields, including their spelling. A missing, changed, duplicated
+or newly introduced identity in that container makes removal ambiguous.
+
+For an anonymous indexed ancestor with no identifier or name, child-field
+removals may instead be established from its unchanged structured content.
+For example, a removal path can be /instances/0/data_substrate without an
+identity property. Do not invent an identifier or treat the old index as one.
+All original members must survive, with a unique one-to-one match after
+excluding only explicitly declared child-removal paths and narrative
+text (description, notes and source_caveats). At least one nonempty structural
+value must remain to anchor every member. Matching permits list reordering;
+it does not permit new members, member deletion/replacement, renamed types,
+changed counts, changed endpoints or other undeclared structured edits.
+Declare every supported child removal separately. Only dictionary paths
+below anonymous ancestors are supported; another indexed list beneath one
+requires review. This child-field proof cannot establish anonymous whole-member
+removal, empty or duplicate remaining signatures, or removal of narrative fields.
+The explicit v4 whole-member form below is a separate, narrowly bounded proof.
+Retaining a field with null, a new value or a disclaimer is not its removal.
+
+The v2/v3 checker validates removal preconditions during audit admission, before
+reconciliation, including an in-memory projection of all declared removals
+at their original positions. If those actions erase the unique structural
+correspondence, admission stops without a reconciliation request. That
+hypothetical projection never changes the originals or becomes a generated
+record. Any ambiguity stops for review. The check establishes only
+these declared structural changes, not the semantic correctness of the audit.
+
+### Exact-original-bound anonymous whole-member removal (v4 and later)
+
+When the rejected relationship is an anonymous whole list member with no own
+or nested identifier/name field, v4 and later permit this exact form:
+
+    {"path": "/data_collectors/1", "match": "anonymous_structure_v1", "original_full_sha256": "copy the original_full source-review inventory sha256"}
+
+The example path is illustrative, not evidence or an action for this run.
+Copy the already supplied original-full inventory SHA256 verbatim. Do not
+compute or invent a member hash, add identifiers, or supply a descriptive
+identity or serialized structural signature. The checker computes the raw
+original-file digest and the structural correspondence itself. These are
+exactly the three keys for this form; do not also supply identity. Other modes
+or a digest for a reserialized/changed original are invalid. Existing identity
+and child-field forms remain available with their existing requirements.
+
+The original JSON Pointer identifies the candidate in the frozen original;
+the old index is never used as its identity in the final record. In this
+initial mode, every ancestor before the selected member is a dictionary key;
+a containing indexed list is unsupported and stops for review. The selected
+member must be an object with no own or nested schema identifier/name key,
+including a null, blank or malformed one. An existing usable identity requires
+the identity form instead; an invalid identifier is not an anonymous fallback.
+
+Every original member of the affected list, including unselected named peers,
+must have a distinct, nonempty structural signature. The checker binds string
+object keys, scalar types and values, and nested list order. Supported scalar
+types are null, boolean, integer, finite float and string. Integers, floats and
+booleans are distinct; signed float zero is preserved. YAML-only scalars such
+as dates, timestamps, binary values and sets are unsupported in this mode.
+Only description, notes and source_caveats whose values are text or null are
+excluded from structural matching; an object/list under those names remains
+bound. Text that resembles JSON is still text, never a manufactured identity.
+
+Every member needs a nonempty structural value after those exclusions. Zero
+and false count; null, empty or whitespace-only strings, empty containers and
+narrative-only members do not. Missing and null fields remain distinct.
+Original duplicate signatures, including members differing only in permitted
+narrative, stop for review even when all duplicates are selected for removal.
+
+Declare distinct sibling removals separately using their original positions.
+The checker processes them together and requires a unique one-to-one match
+between all unselected original members and all final survivors. Surviving
+members may reorder within that affected list and permitted narrative text may
+change. Their other structured keys, types, values, identifiers and nested
+list order must be unchanged. No selected target may remain or reappear in
+that list, no unselected member may disappear, and no new or duplicate member
+may appear. If all original members are explicitly removed, retain the
+container as an explicit empty list; absent, null or renamed containers do not
+establish this whole-member operation.
+
+Duplicate action paths, ancestor/descendant overlaps, and this new form mixed
+with existing identity-form or child actions in the same list are unsupported.
+Distinct anonymous sibling removals and independent containers may be checked
+in one batch. Admission validates these conditions and the simultaneous
+in-memory projection before reconciliation; final evidence checks verify the
+actual surviving list against the same raw original. Neither check edits the
+original or the audit. A dictionary-only helper without raw-artifact authority
+cannot establish this exact-file binding.
+
+This proof establishes removal from the declared relationship container, not
+a person's or entity's semantic identity. It does not establish that a subject
+was not reintroduced in different words elsewhere. Independently review the
+source-supported role, proposed action and all surviving claims. This mode
+does not relax evidence, attribution, source-review, status or scientific
+requirements, and it does not repair or accept a previously rejected audit.
+
+### Reconciliation and report
+
+Recheck the original evidence before accepting a proposed repair. Preserve
+the original full and derived core before any reconciliation edits. The
+original core's header must be read from that original artifact; a header
+present only after reconciliation was not present in Phase 2.
+
+Use original_full, original_core, final_full and final_core as artifact names
+for report assertions. Every report claim about an original quotation,
+qualifier or header needs its own assertion. Each source-attributed factual
+clause needs a source assertion. Evidence assertions support the prose; they
+do not replace the required Dispositions table.
+
+Before the final Dispositions section, write exactly one section headed
+"## Evidence assertions", containing only a JSON code block with exactly two
+keys: claims (an array of the source/artifact assertions above), and source_review
+(the complete final-record review specified below). An original-core header
+claim must use original_core and @header, while a final-core claim must use
+final_core and @header. Populate claims from assertions actually made about
+this run's artifacts and sources. If none are made, use an empty claims array
+and do not imply a nonzero check. source_review remains mandatory in that case.
+Report re-checks must preserve and correct this appendix as well as the
+Dispositions table. A failed evidence check stops completion.
+
+The checker verifies declared quotations and removal actions. It cannot
+establish that every claim was declared, that a quote entails a role, or that
+the audit is semantically correct. Independent review of unchanged originals
+against all relevant source context remains the acceptance gate.
+
+For native execution, the independent reviewer must also match the snapshot
+hashes printed by the actual freeze command's tool result to the preserved
+files, and verify from the transcript that the freeze preceded reconciliation.
+A model's prose claim that it preserved originals is not this evidence.
+
+
+### Registered source metadata (v5)
+
+The separately supplied source-manifest projection describes the selected
+source declarations. Its raw-file SHA256 binds the actual registered manifest;
+its finite fields are the only manifest content this evidence route admits.
+Arbitrary pointers, curator notes, curation history, source summaries and
+other omitted text are never evidence through this route. A manifest describes
+how the run names or ranks its sources; it does not establish dataset facts,
+prove a passage's truth, or imply that a higher-ranked source supports a claim.
+
+For an atomic source-review claim about that projected metadata, each evidence
+entry has exactly this shape:
+
+    {"provenance": "source_manifest", "sha256": "copy the supplied raw manifest digest", "source_id": "copy the projected source ID", "source": "copy the projected source filename", "field": "effective_priority", "value": 2}
+
+Copy the selected source's projected field and its exact typed scalar value.
+effective_priority uses the source's explicit priority first, then its source
+type's tier, and otherwise the unranked fallback 99. The projected priority_basis
+distinguishes those cases. The fallback is not a declared tier, and an override
+for one source does not establish a tier for every source of that type.
+The allowed field values are source_type, effective_priority, priority_basis,
+captured_at and superseded_by. source_id and source identify an assertion; they
+are not values for its field key. Cite a field only when the selected source's
+projection includes it. A numeric tier must be a JSON
+integer, not a string or boolean. Do not calculate or substitute a manifest
+hash. Provenance-only claims use an empty attributed_to list: the provenance
+discriminator identifies the manifest, which is not a bundled document.
+Their claim_status and source_status describe the declaration as fact.
+
+Keep provenance-only and document-backed claims separate. A provenance-only
+claim may cite several projected source entries, but it must not mix these
+assertions with source/chunk/quote assertions in the same claim. A sentence
+containing both kinds of assertion must be split into the relevant literal
+clauses, retaining complete inventory coverage. Ordinary dataset claims still
+need supporting document passages. The existing metadata_reason exception
+remains restricted to the inventory's explicitly allowed record metadata;
+source_caveats and notes receive no whole-field exemption.
+
+If no source manifest is selected, the supplied projection is null and no
+provenance assertion is admissible. Ordinary source-document review still
+works. A matching projection field only checks the declared metadata and its
+identity; independent review must establish that the claim is actually about
+that metadata and that its subject, scope and any comparison are justified.
+
+### Audit output grammar (v5)
+
+Each finding retains severity, record, slot, issue and a nonempty evidence
+array. remove_relationship is one object if present, and review_paths is an
+array of revised original inventory paths. For example, an unsupported named
+role has this finding shape (illustrative data, not a recommendation):
+
+    {"severity": "medium", "record": "full", "slot": "creators", "issue": "The source establishes a contact role, not creation.", "review_paths": ["/creators/1/name"], "evidence": [{"artifact": "original_full", "path": "/creators/1/name", "op": "contains", "quote": "Example Contact"}, {"source": "protocol.txt", "chunk": "c001", "quote": "Example Contact is the project contact."}], "remove_relationship": {"path": "/creators/1", "identity": "/name"}}
+
+The corresponding source-review value must include a revise judgment. Other
+supported claims beneath that object stay supported and do not belong in its
+review_paths merely because their container is removed. Preserve independently
+supported information without the rejected relationship. The audit's existing
+full example in the shared phase contract defines its top-level shape.
+
+Judge placement using the supplied schema's actual meaning and requirements.
+Do not invent a narrower class definition, turn optional fields into required
+ones, or reject an allowed enumeration solely because it is a general category.
+Before alleging that an original lost a qualifier, read its complete value and
+governing context. Independently justify each allegation in a grouped finding.
+For source text spanning a chunk boundary, use separate literal assertions in
+the proper chunks rather than attributing the entire passage to one chunk.
+
+### Required source review (v7 / source_review v2; unchanged scientific requirements)
+
+During generation, keep clauses with different document identities or statuses
+separate. Do not merge one source's factual clause into another source's
+attribution. Describe instructions as instructions, capabilities as capabilities,
+and plans as plans. Requests for progress reports do not attest adherence to a
+procedure. Inventory descriptions of software to be deployed remain prospective
+in every occurrence. A source can change scope locally: read the complete
+passage, including governing headings and explicit local changes.
+
+Audit the entire original full record, including claims you intend to retain.
+The final report reviews the entire final full record anew. The supplied
+source-review inventory enumerates every populated scalar as a JSON Pointer,
+its text, whether record metadata is allowed and whether each claim must quote
+the whole scalar (`whole_value_required`). It includes zero and false;
+null, empty strings and empty containers make no populated claim. For native
+execution, use the specified read-only inventory commands. Never invent a hash.
+
+The checked assembled audit includes `source_review`. In the report's existing Evidence
+assertions JSON block, include both `claims` and `source_review`. The latter has
+exactly these keys:
+
+    {"artifact": "original_full or final_full", "sha256": "copy the inventory hash",
+     "values": [{"path": "/description", "claims": [
+       {"text": "the complete literal clause at this path",
+        "verdict": "supported", "attributed_to": [],
+        "claim_status": "fact", "source_status": "fact",
+        "evidence": [{"source": "protocol.txt", "chunk": "c001",
+                      "quote": "a literal source passage with its governing context"}],
+        "reason": "why this passage supports this subject, scope and attribution"}
+     ]}]}
+
+Use one values entry for every inventory path, exactly once. Split each value
+into atomic factual clauses and review each occurrence, even if a similar claim
+was reviewed elsewhere. Claim `text` quotations together must cover the entire
+value, including punctuation; whitespace wrapping is folded, case and punctuation
+are not. Do not hide an unreviewed clause inside a supported composite claim.
+For a scalar number, boolean or date, copy its whole inventory text. Separate members
+of a prose inventory when their evidence, document identity or status differs.
+
+For document-backed clauses, `attributed_to` lists the exact source filenames the clause explicitly credits,
+including claimed corroboration by a second document. Use an empty list only
+when the clause names no source. Match names or titles in the record to the
+bundle's documents; do not choose the document that merely contains convenient
+text. Every named document must have its own supporting source evidence. A fact
+stated only in protocol.txt cannot be attributed to overview.txt. Provenance-only
+declarations instead use the separate manifest evidence route and an empty
+attributed_to list, even when they name the source whose metadata they describe.
+A matching
+quote in protocol.txt does not validate prose crediting overview.txt.
+
+`claim_status` and `source_status` each use one of:
+
+- `fact`: a non-operational fact without a governing prospective or progress
+  qualifier, such as an established name or an observed count;
+- `planned`: a future commitment, intention or proposal;
+- `in_progress`: an operation explicitly underway, without established completion;
+- `applied`: an operation, adherence, deployment or availability established for
+  the particular dataset, subject, release and time in the claim;
+- `instruction`: a procedure, requirement or request to perform/report an action;
+- `capability`: what a tool or repository can do, without evidence of use on the dataset.
+
+Use `unstated` for source_status when the source does not establish the claimed
+state. It cannot support a retained claim. Read the governing clause and local
+scope before classifying; a bare matching fragment is insufficient. Do not use
+`fact` to conceal an operational or prospective claim. For example, a supported
+claim saying that a source describes a planned deployment is `planned`, not
+`fact`. Instructions or a progress-report request do not establish that sites
+followed them. A capability does not establish its application. A plan does not
+prove that deployment did or did not occur. Status must agree for a `supported`
+claim; evidence supporting different statuses requires separate claims.
+Quantities and presence/completion booleans inherit their governing scope too;
+a target quantity under an anticipated-final heading is not an observed count.
+
+Use `verdict: revise` for an unsupported attribution, unsupported status or any
+other unsupported clause. Explain the defect in reason. Its evidence may be
+empty when no passage supports the assertion, but any quoted passage must still
+verify in the named document/chunk. Every original value containing a revise
+judgment must be linked to an actionable audit finding by adding `review_paths`
+(a list of those JSON Pointers) to the finding. Every listed path must have at
+least one revise judgment. A supported-only or metadata_reason-only path makes the
+whole link list invalid. Put supporting/context paths in evidence assertions,
+not review_paths; removing a container does not reject every descendant's
+claims. Retain the existing finding fields and evidence requirements. Final source review must honestly mark any
+remaining unsupported claim revise; that stops completion. Do not change the
+reviewed record, original audit or source classification to manufacture a pass.
+
+Only an inventory value marked record_metadata_allowed may instead use
+`{"path": "...", "metadata_reason": "why this is record structure"}`. This
+covers the record's schema/class declarations and nested identifiers minted on
+its own id. Dataset identifiers, roles and substantive facts still need source
+claims. A metadata exception is not a source-supported factual judgment.
+
+This gate checks exact-artifact coverage, quotations and consistency of declared
+attribution/status. It does not independently classify prose, prove entailment,
+verify that every clause was correctly split or establish that a model's status
+labels are correct. Independent review of the unchanged record and full source
+context remains required. A passing gate is not scientific acceptance.
+
+A failed source review is terminal for this attempt, including a missing or
+uncheckable review. Do not rewrite a rejected review's classifications to make
+it pass, resume the attempt or send another paid request. An ordinary report
+claim or Dispositions correction is allowed under the existing single re-check
+only while source reviews pass; that re-check must carry a fresh final inventory.
+For native execution, independent acceptance must verify the actual check tool
+results and confirm the agent stopped on a failed Phase 3/4 evidence-assertion
+check or an uncheckable source-review inventory, as well as verifying the
+original-freeze hashes and final artifacts. Phase 1 receipt corrections are
+governed by the pre-derivation gate, not this terminal-stop rule. Current-file
+validation alone cannot establish either tool-history requirement.
+
+
+## Complete selected generation context
+
+{
+  "context": {
+    "identity": {
+      "bytes": 6476,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json",
+      "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+    },
+    "raw_json": "{\n  \"format\": \"omission_context_v1\",\n  \"root_class\": \"Dataset\",\n  \"scopes\": [\n    {\n      \"owner\": \"\",\n      \"referent\": \"CHoRUS dataset\",\n      \"release\": null,\n      \"scope\": \"No dataset DOI appears in any CHORUS source document; the project site is the identifier the records themselves use.\"\n    }\n  ],\n  \"source_policy\": {\n    \"basis\": \"Declared source_manifest.yaml tier hierarchy.\",\n    \"priority\": [\n      \"RO-Crate, structured metadata, data resource\",\n      \"documentation, license, DUA, IRB\",\n      \"publication, preprint, white paper\",\n      \"NIH project page, tutorial\",\n      \"historical data release, historical documentation\"\n    ]\n  },\n  \"vocabulary\": {\n    \"B2AI_SUBSTRATE\": {\n      \"B2AI_SUBSTRATE:1\": \"Array\",\n      \"B2AI_SUBSTRATE:10\": \"Delimited Text\",\n      \"B2AI_SUBSTRATE:11\": \"DICOM\",\n      \"B2AI_SUBSTRATE:12\": \"Directed acyclic graph\",\n      \"B2AI_SUBSTRATE:13\": \"Document Database\",\n      \"B2AI_SUBSTRATE:14\": \"Graph\",\n      \"B2AI_SUBSTRATE:15\": \"Graph Database\",\n      \"B2AI_SUBSTRATE:16\": \"HDF5\",\n      \"B2AI_SUBSTRATE:17\": \"Heap\",\n      \"B2AI_SUBSTRATE:18\": \"Hierarchical Array\",\n      \"B2AI_SUBSTRATE:19\": \"Image\",\n      \"B2AI_SUBSTRATE:2\": \"Associative Array\",\n      \"B2AI_SUBSTRATE:20\": \"JSON\",\n      \"B2AI_SUBSTRATE:21\": \"KGX TSV\",\n      \"B2AI_SUBSTRATE:22\": \"MongoDB\",\n      \"B2AI_SUBSTRATE:23\": \"MySQL\",\n      \"B2AI_SUBSTRATE:24\": \"N-Dimensional Array\",\n      \"B2AI_SUBSTRATE:25\": \"Neo4j\",\n      \"B2AI_SUBSTRATE:26\": \"Neural Network Model\",\n      \"B2AI_SUBSTRATE:27\": \"NNEF\",\n      \"B2AI_SUBSTRATE:28\": \"ONNX\",\n      \"B2AI_SUBSTRATE:29\": \"Pandas DataFrame\",\n      \"B2AI_SUBSTRATE:3\": \"BIDS\",\n      \"B2AI_SUBSTRATE:30\": \"Parquet\",\n      \"B2AI_SUBSTRATE:31\": \"PostgreSQL\",\n      \"B2AI_SUBSTRATE:32\": \"Property graph\",\n      \"B2AI_SUBSTRATE:33\": \"PyTorch Tensor\",\n      \"B2AI_SUBSTRATE:34\": \"R data.frame\",\n      \"B2AI_SUBSTRATE:35\": \"R tibble\",\n      \"B2AI_SUBSTRATE:36\": \"Raster Image\",\n      \"B2AI_SUBSTRATE:37\": \"Relational Database\",\n      \"B2AI_SUBSTRATE:38\": \"Set\",\n      \"B2AI_SUBSTRATE:39\": \"String\",\n      \"B2AI_SUBSTRATE:4\": \"BigQuery\",\n      \"B2AI_SUBSTRATE:40\": \"SummarizedExperiment\",\n      \"B2AI_SUBSTRATE:41\": \"Tab-separated values\",\n      \"B2AI_SUBSTRATE:42\": \"Tensor\",\n      \"B2AI_SUBSTRATE:43\": \"Text\",\n      \"B2AI_SUBSTRATE:44\": \"Tree\",\n      \"B2AI_SUBSTRATE:45\": \"Trie\",\n      \"B2AI_SUBSTRATE:46\": \"Vector\",\n      \"B2AI_SUBSTRATE:47\": \"Vector Image\",\n      \"B2AI_SUBSTRATE:48\": \"Waveform Audio File Format\",\n      \"B2AI_SUBSTRATE:49\": \"Waveform Data\",\n      \"B2AI_SUBSTRATE:5\": \"Column Store\",\n      \"B2AI_SUBSTRATE:50\": \"xarray\",\n      \"B2AI_SUBSTRATE:51\": \"Zarr\",\n      \"B2AI_SUBSTRATE:52\": \"Compressed Data\",\n      \"B2AI_SUBSTRATE:53\": \"BED\",\n      \"B2AI_SUBSTRATE:54\": \"Vector Database\",\n      \"B2AI_SUBSTRATE:55\": \"Pinecone\",\n      \"B2AI_SUBSTRATE:56\": \"Immunofluorescence Image\",\n      \"B2AI_SUBSTRATE:57\": \"Spectral Data\",\n      \"B2AI_SUBSTRATE:58\": \"Mass Spectrometry Data\",\n      \"B2AI_SUBSTRATE:59\": \"Size Exclusion Chromatography-Mass Spectrometry Data\",\n      \"B2AI_SUBSTRATE:6\": \"Comma-separated values\",\n      \"B2AI_SUBSTRATE:60\": \"Sequence\",\n      \"B2AI_SUBSTRATE:61\": \"DNA Sequence Data\",\n      \"B2AI_SUBSTRATE:62\": \"RNA Sequence Data\",\n      \"B2AI_SUBSTRATE:63\": \"Single-cell RNA Sequence Data\",\n      \"B2AI_SUBSTRATE:64\": \"Perturb-seq Data\",\n      \"B2AI_SUBSTRATE:65\": \"Retinal Image\",\n      \"B2AI_SUBSTRATE:66\": \"Fluorescence Lifetime Imaging Ophthalmoscopy data\",\n      \"B2AI_SUBSTRATE:67\": \"Optical coherence tomography data\",\n      \"B2AI_SUBSTRATE:68\": \"Optical coherence tomography angiography data\",\n      \"B2AI_SUBSTRATE:69\": \"Time-series data\",\n      \"B2AI_SUBSTRATE:7\": \"Data\",\n      \"B2AI_SUBSTRATE:70\": \"Physiological data\",\n      \"B2AI_SUBSTRATE:71\": \"Heart rate\",\n      \"B2AI_SUBSTRATE:72\": \"Oxygen saturation\",\n      \"B2AI_SUBSTRATE:73\": \"Physical activity data\",\n      \"B2AI_SUBSTRATE:74\": \"Caloric burn data\",\n      \"B2AI_SUBSTRATE:75\": \"Respiratory rate\",\n      \"B2AI_SUBSTRATE:76\": \"Sleep tracking data\",\n      \"B2AI_SUBSTRATE:77\": \"Stress tracking data\",\n      \"B2AI_SUBSTRATE:78\": \"Glucose monitoring data\",\n      \"B2AI_SUBSTRATE:79\": \"Participant response data\",\n      \"B2AI_SUBSTRATE:8\": \"Data Frame\",\n      \"B2AI_SUBSTRATE:80\": \"Questionnaire response data\",\n      \"B2AI_SUBSTRATE:81\": \"File headers\",\n      \"B2AI_SUBSTRATE:9\": \"Database\"\n    },\n    \"B2AI_TOPIC\": {\n      \"B2AI_TOPIC:1\": \"Biology\",\n      \"B2AI_TOPIC:10\": \"EKG\",\n      \"B2AI_TOPIC:11\": \"Environment\",\n      \"B2AI_TOPIC:12\": \"Gene\",\n      \"B2AI_TOPIC:13\": \"Genome\",\n      \"B2AI_TOPIC:14\": \"Geolocation\",\n      \"B2AI_TOPIC:15\": \"Image\",\n      \"B2AI_TOPIC:16\": \"Literature\",\n      \"B2AI_TOPIC:17\": \"Metabolome\",\n      \"B2AI_TOPIC:18\": \"mHealth\",\n      \"B2AI_TOPIC:19\": \"Microscale Imaging\",\n      \"B2AI_TOPIC:2\": \"Cell\",\n      \"B2AI_TOPIC:20\": \"Molecular Biology\",\n      \"B2AI_TOPIC:21\": \"Networks And Pathways\",\n      \"B2AI_TOPIC:22\": \"Neurologic Imaging\",\n      \"B2AI_TOPIC:23\": \"Omics\",\n      \"B2AI_TOPIC:24\": \"Ophthalmic Imaging\",\n      \"B2AI_TOPIC:25\": \"Phenotype\",\n      \"B2AI_TOPIC:26\": \"Protein\",\n      \"B2AI_TOPIC:27\": \"Protein Structure Model\",\n      \"B2AI_TOPIC:28\": \"Proteome\",\n      \"B2AI_TOPIC:29\": \"SDoH\",\n      \"B2AI_TOPIC:3\": \"Cheminformatics\",\n      \"B2AI_TOPIC:30\": \"Social Media\",\n      \"B2AI_TOPIC:31\": \"Survey\",\n      \"B2AI_TOPIC:32\": \"Text\",\n      \"B2AI_TOPIC:33\": \"Transcript\",\n      \"B2AI_TOPIC:34\": \"Transcriptome\",\n      \"B2AI_TOPIC:35\": \"Variant\",\n      \"B2AI_TOPIC:36\": \"Voice\",\n      \"B2AI_TOPIC:37\": \"Waveform\",\n      \"B2AI_TOPIC:38\": \"Glucose Monitoring\",\n      \"B2AI_TOPIC:39\": \"Activity Monitoring\",\n      \"B2AI_TOPIC:4\": \"Clinical Observations\",\n      \"B2AI_TOPIC:40\": \"Governance\",\n      \"B2AI_TOPIC:41\": \"Neuron\",\n      \"B2AI_TOPIC:42\": \"Cardiomyocyte\",\n      \"B2AI_TOPIC:43\": \"Diabetes\",\n      \"B2AI_TOPIC:44\": \"Eye Diseases\",\n      \"B2AI_TOPIC:45\": \"Voice Disorders\",\n      \"B2AI_TOPIC:46\": \"Respiration\",\n      \"B2AI_TOPIC:47\": \"Respiratory Disorders\",\n      \"B2AI_TOPIC:48\": \"Neurology\",\n      \"B2AI_TOPIC:49\": \"Neurological Disorders\",\n      \"B2AI_TOPIC:5\": \"Data\",\n      \"B2AI_TOPIC:50\": \"Psychiatry\",\n      \"B2AI_TOPIC:51\": \"Psychiatric Disorders\",\n      \"B2AI_TOPIC:52\": \"Training\",\n      \"B2AI_TOPIC:53\": \"Ontology\",\n      \"B2AI_TOPIC:54\": \"Metadata\",\n      \"B2AI_TOPIC:55\": \"Data Packaging\",\n      \"B2AI_TOPIC:56\": \"Nutrition\",\n      \"B2AI_TOPIC:6\": \"Demographics\",\n      \"B2AI_TOPIC:7\": \"Disease\",\n      \"B2AI_TOPIC:8\": \"Drug\",\n      \"B2AI_TOPIC:9\": \"EHR\"\n    }\n  }\n}\n"
+  },
+  "profile": {
+    "basis": "manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81",
+    "name": "bridge2ai",
+    "vocabulary": {
+      "identity": {
+        "bytes": 6115,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+        "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+      },
+      "raw_text": "# Bridge2AI registry vocabularies for `values_from` slots, pinned (#538).\n#\n# `data_topic` and `data_substrate` declare `values_from: B2AI_TOPIC` /\n# `B2AI_SUBSTRATE`. Nothing rendered that declaration, so no run has ever been\n# shown the vocabulary — and the corpus reflects it: all 23 well-formed\n# `data_substrate` IRIs name cell lines (Cellosaurus MDA-MB-468, KOLF2.1J) or\n# assay techniques (Fluorescence, Mass Spectrometry, CRISPR-Cas Systems), none\n# of which is a type of data. The 11 prose values are correct in substance and\n# had no term to be expressed as.\n#\n# Pinned rather than fetched, for the same reason as the prompt pins: a\n# refresh is an edit with a diff a reviewer reads, not a network dependency\n# that turns a registry-side change into a surprise CI failure.\n#\n# Refresh with:\n#   curl -sSL https://raw.githubusercontent.com/bridge2ai/b2ai-standards-registry/main/project/data/DataSubstrate.tsv\n#   curl -sSL https://raw.githubusercontent.com/bridge2ai/b2ai-standards-registry/main/project/data/DataTopic.tsv\nsource:\n  repository: bridge2ai/b2ai-standards-registry\n  commit: d38bcf2408c960a75dfadc295b47990a3890c26f\n  committed: '2026-06-04T19:20:27Z'\n  retrieved: '2026-08-13'\n  paths:\n    - project/data/DataSubstrate.tsv\n    - project/data/DataTopic.tsv\n\nvocabularies:\n  B2AI_SUBSTRATE:\n    B2AI_SUBSTRATE:1: Array\n    B2AI_SUBSTRATE:2: Associative Array\n    B2AI_SUBSTRATE:3: BIDS\n    B2AI_SUBSTRATE:4: BigQuery\n    B2AI_SUBSTRATE:5: Column Store\n    B2AI_SUBSTRATE:6: Comma-separated values\n    B2AI_SUBSTRATE:7: Data\n    B2AI_SUBSTRATE:8: Data Frame\n    B2AI_SUBSTRATE:9: Database\n    B2AI_SUBSTRATE:10: Delimited Text\n    B2AI_SUBSTRATE:11: DICOM\n    B2AI_SUBSTRATE:12: Directed acyclic graph\n    B2AI_SUBSTRATE:13: Document Database\n    B2AI_SUBSTRATE:14: Graph\n    B2AI_SUBSTRATE:15: Graph Database\n    B2AI_SUBSTRATE:16: HDF5\n    B2AI_SUBSTRATE:17: Heap\n    B2AI_SUBSTRATE:18: Hierarchical Array\n    B2AI_SUBSTRATE:19: Image\n    B2AI_SUBSTRATE:20: JSON\n    B2AI_SUBSTRATE:21: KGX TSV\n    B2AI_SUBSTRATE:22: MongoDB\n    B2AI_SUBSTRATE:23: MySQL\n    B2AI_SUBSTRATE:24: N-Dimensional Array\n    B2AI_SUBSTRATE:25: Neo4j\n    B2AI_SUBSTRATE:26: Neural Network Model\n    B2AI_SUBSTRATE:27: NNEF\n    B2AI_SUBSTRATE:28: ONNX\n    B2AI_SUBSTRATE:29: Pandas DataFrame\n    B2AI_SUBSTRATE:30: Parquet\n    B2AI_SUBSTRATE:31: PostgreSQL\n    B2AI_SUBSTRATE:32: Property graph\n    B2AI_SUBSTRATE:33: PyTorch Tensor\n    B2AI_SUBSTRATE:34: R data.frame\n    B2AI_SUBSTRATE:35: R tibble\n    B2AI_SUBSTRATE:36: Raster Image\n    B2AI_SUBSTRATE:37: Relational Database\n    B2AI_SUBSTRATE:38: Set\n    B2AI_SUBSTRATE:39: String\n    B2AI_SUBSTRATE:40: SummarizedExperiment\n    B2AI_SUBSTRATE:41: Tab-separated values\n    B2AI_SUBSTRATE:42: Tensor\n    B2AI_SUBSTRATE:43: Text\n    B2AI_SUBSTRATE:44: Tree\n    B2AI_SUBSTRATE:45: Trie\n    B2AI_SUBSTRATE:46: Vector\n    B2AI_SUBSTRATE:47: Vector Image\n    B2AI_SUBSTRATE:48: Waveform Audio File Format\n    B2AI_SUBSTRATE:49: Waveform Data\n    B2AI_SUBSTRATE:50: xarray\n    B2AI_SUBSTRATE:51: Zarr\n    B2AI_SUBSTRATE:52: Compressed Data\n    B2AI_SUBSTRATE:53: BED\n    B2AI_SUBSTRATE:54: Vector Database\n    B2AI_SUBSTRATE:55: Pinecone\n    B2AI_SUBSTRATE:56: Immunofluorescence Image\n    B2AI_SUBSTRATE:57: Spectral Data\n    B2AI_SUBSTRATE:58: Mass Spectrometry Data\n    B2AI_SUBSTRATE:59: Size Exclusion Chromatography-Mass Spectrometry Data\n    B2AI_SUBSTRATE:60: Sequence\n    B2AI_SUBSTRATE:61: DNA Sequence Data\n    B2AI_SUBSTRATE:62: RNA Sequence Data\n    B2AI_SUBSTRATE:63: Single-cell RNA Sequence Data\n    B2AI_SUBSTRATE:64: Perturb-seq Data\n    B2AI_SUBSTRATE:65: Retinal Image\n    B2AI_SUBSTRATE:66: Fluorescence Lifetime Imaging Ophthalmoscopy data\n    B2AI_SUBSTRATE:67: Optical coherence tomography data\n    B2AI_SUBSTRATE:68: Optical coherence tomography angiography data\n    B2AI_SUBSTRATE:69: Time-series data\n    B2AI_SUBSTRATE:70: Physiological data\n    B2AI_SUBSTRATE:71: Heart rate\n    B2AI_SUBSTRATE:72: Oxygen saturation\n    B2AI_SUBSTRATE:73: Physical activity data\n    B2AI_SUBSTRATE:74: Caloric burn data\n    B2AI_SUBSTRATE:75: Respiratory rate\n    B2AI_SUBSTRATE:76: Sleep tracking data\n    B2AI_SUBSTRATE:77: Stress tracking data\n    B2AI_SUBSTRATE:78: Glucose monitoring data\n    B2AI_SUBSTRATE:79: Participant response data\n    B2AI_SUBSTRATE:80: Questionnaire response data\n    B2AI_SUBSTRATE:81: File headers\n  B2AI_TOPIC:\n    B2AI_TOPIC:1: Biology\n    B2AI_TOPIC:2: Cell\n    B2AI_TOPIC:3: Cheminformatics\n    B2AI_TOPIC:4: Clinical Observations\n    B2AI_TOPIC:5: Data\n    B2AI_TOPIC:6: Demographics\n    B2AI_TOPIC:7: Disease\n    B2AI_TOPIC:8: Drug\n    B2AI_TOPIC:9: EHR\n    B2AI_TOPIC:10: EKG\n    B2AI_TOPIC:11: Environment\n    B2AI_TOPIC:12: Gene\n    B2AI_TOPIC:13: Genome\n    B2AI_TOPIC:14: Geolocation\n    B2AI_TOPIC:15: Image\n    B2AI_TOPIC:16: Literature\n    B2AI_TOPIC:17: Metabolome\n    B2AI_TOPIC:18: mHealth\n    B2AI_TOPIC:19: Microscale Imaging\n    B2AI_TOPIC:20: Molecular Biology\n    B2AI_TOPIC:21: Networks And Pathways\n    B2AI_TOPIC:22: Neurologic Imaging\n    B2AI_TOPIC:23: Omics\n    B2AI_TOPIC:24: Ophthalmic Imaging\n    B2AI_TOPIC:25: Phenotype\n    B2AI_TOPIC:26: Protein\n    B2AI_TOPIC:27: Protein Structure Model\n    B2AI_TOPIC:28: Proteome\n    B2AI_TOPIC:29: SDoH\n    B2AI_TOPIC:30: Social Media\n    B2AI_TOPIC:31: Survey\n    B2AI_TOPIC:32: Text\n    B2AI_TOPIC:33: Transcript\n    B2AI_TOPIC:34: Transcriptome\n    B2AI_TOPIC:35: Variant\n    B2AI_TOPIC:36: Voice\n    B2AI_TOPIC:37: Waveform\n    B2AI_TOPIC:38: Glucose Monitoring\n    B2AI_TOPIC:39: Activity Monitoring\n    B2AI_TOPIC:40: Governance\n    B2AI_TOPIC:41: Neuron\n    B2AI_TOPIC:42: Cardiomyocyte\n    B2AI_TOPIC:43: Diabetes\n    B2AI_TOPIC:44: Eye Diseases\n    B2AI_TOPIC:45: Voice Disorders\n    B2AI_TOPIC:46: Respiration\n    B2AI_TOPIC:47: Respiratory Disorders\n    B2AI_TOPIC:48: Neurology\n    B2AI_TOPIC:49: Neurological Disorders\n    B2AI_TOPIC:50: Psychiatry\n    B2AI_TOPIC:51: Psychiatric Disorders\n    B2AI_TOPIC:52: Training\n    B2AI_TOPIC:53: Ontology\n    B2AI_TOPIC:54: Metadata\n    B2AI_TOPIC:55: Data Packaging\n    B2AI_TOPIC:56: Nutrition\n"
+    }
+  },
+  "scope": "Caller-declared generation scope, source policy and vocabulary; not a scientific applicability or support verdict.",
+  "source_manifest": {
+    "bytes": 40612,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml",
+    "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+  }
+}
+
+## Initial outputs and immutable stage roles
+
+{
+  "helper_owned": {
+    "audit": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/audit.json",
+    "completion": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/completion.json",
+    "core_seal": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/core-seal.json",
+    "effective_receipt": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/effective-receipt.yaml",
+    "execution_capture": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/binding/execution.json",
+    "journal": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/journal.json",
+    "journal_records_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/records",
+    "observations_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/observations",
+    "packet": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/packet.json",
+    "phase1_core": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/core.yaml",
+    "phase1_full": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/full.yaml",
+    "phase1_receipt": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/original-receipt.yaml",
+    "phase1_seal": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/phase1.json",
+    "receipt_carry": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/receipt-carry.json",
+    "receipt_result": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/receipt-result.json",
+    "requests_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/requests",
+    "responses_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/responses",
+    "selection": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/selection.json",
+    "session_binding": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/binding/session.json",
+    "stage_root": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages",
+    "started_capture": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/binding/started.json",
+    "typed_assembly": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/assembly.json",
+    "typed_index": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/typed-index.json"
+  },
+  "model_files": {
+    "core": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml",
+    "full": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml",
+    "receipt": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_coverage_receipt.yaml",
+    "report": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_reconciliation.md"
+  }
+}
+
+Read the complete selected bundle and its chunk manifest, the selected source manifest, and the complete captured full/core schema imports before using them. Use only those declared inputs. Run chunk_check and source_scope before generation. Write the full and original receipt as separate files. The full begins with this exact header:
+
+```yaml
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: schema-grounded agentic, phase 1
+# Agent runtime: Claude Code (direct)
+# Provider: HYPOTHETICAL_PROVIDER_NOT_AUTHENTICATED
+# Model: HYPOTHETICAL_MODEL_NOT_SELECTED
+# Model basis: caller runtime declaration; actual runtime must be verified
+# Reasoning effort: high
+# Mode: native shared generation v1, generic-v10 prompt
+# Prompt: src/download/prompts/d4d_generic_arm_prompt_v10.md
+# Arm: BASELINE (input documents only)
+# Source bundle: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt
+# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml
+# Schema: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Temperature: unknown (not observed from the agent runtime)
+# Generated: 2026-10-23
+```
+
+The separate original receipt has this shape: `bundle_md5` as given with the bundle, and one `chunks` entry per `[cNNN]` marker in the bundle, in order, in exactly this shape (#738):
+bundle_md5: <as given>
+chunks:
+- id: c001
+  status: extracted
+  extracted:
+  - slot: funders[0].grant_id
+    snippet: "<verbatim text from c001>"
+  - slot: funders[0]
+    snippet: "<one passage attesting the whole entry>"
+- id: c002
+  status: nothing_relevant
+  reason: <why>
+- id: c003
+  status: redundant_with
+  chunks: [c001]
+- id: c004
+  status: duplicate_of
+  of: c001
+Every snippet part (split on `...`) must be at least 8 characters after case and punctuation folding; shorter snippets fail the check (#739). No other text after the receipt.
+
+Run full_schema, full_terms and phase1_receipts on the current originals before advance. Fix initial source-grounded full/receipt defects and repeat their checks before sealing. After sealing, keep the original receipt at its model_files receipt path unchanged. The helper owns the completed effective receipt at the effective_receipt role; do not copy it over the original receipt. The selected final receipt check verifies the original against its seal and assesses the helper-owned effective receipt against the reconciled full record. After the receipt stage reports await_core, run derive_core, core_schema and pair; advance then binds the genuine core. Read original_source_inventory before completing typed audit stages. After assembly_complete, run audit_evidence before applying recommendations. Reconcile full, derive_final_core, validate full/core and pair, repeat the selected receipt check and final_scope, and read final_source_inventory before each report rewrite. Run draft before final_evidence; run recorder last. Never use a stage or helper success as overall completion.
+
+Registered maximum draft checks: 2.
+
+## Reconciliation and report contracts
+
+Reconciliation evidence contract. Check each audit allegation against the frozen originals and its declared evidence before applying it. Perform every supported remove_relationship action under Evidence protocol v7, preserving the identifiers and structured values of surviving members. A retained relationship with a disclaimer is not removal. Do not rewrite the audit or originals to make a check pass. Output the complete corrected full record as YAML. Resolve each source_review revise judgment throughout the record. Preserve each clause's document attribution and operational scope; an instruction or capability does not establish its application to this dataset.
+
+Report evidence contract. The complete Markdown report must contain exactly one section headed ## Evidence assertions before its final ## Dispositions section. That evidence section contains only a JSON code block with a claims array and source_review using Evidence protocol v7. Supply an assertion for each claim about an original quotation, qualifier or header and for each source-attributed factual clause. Use original_full, original_core, final_full and final_core for the actual artifact states; a repaired header cannot establish its original presence. Empty claims are allowed only when the report makes none of those claims. On a report re-check, preserve or correct this appendix along with the prose and Dispositions table; do not drop required evidence when repairing another defect. Output the complete report as Markdown. Bind source_review to the final_full inventory and review every populated value again, including unchanged values and each member of mixed-status prose. A retained claim requiring revision must be marked revise; it stops completion. Never relabel a contradiction as supported to pass a check.
+
+### Anonymous relationship removal (renderer v15)
+
+Evidence protocol v4 permits the explicit anonymous_structure_v1 removal mode.
+Copy original_full_sha256 from the required original_full source-review inventory;
+do not invent an identifier or compute a substitute digest. The original path
+locates the proposed removal but is not the member's identity after reconciliation.
+Follow the complete protocol's admissibility and preservation rules: the checker
+must establish which original member was removed and that every unselected member
+survives with its structured values unchanged. A disclaimer is not removal.
+This operation does not establish that a proposed removal is scientifically correct.
+
+
+### Audit evidence and output shape (renderer v16)
+
+The supplied source-manifest projection is authority only for its explicitly
+listed source metadata. It is not a source of dataset facts. For an atomic
+claim about that metadata, use the exact protocol-v5 provenance assertion and
+the supplied manifest digest; ordinary factual claims still need document
+passages. Never cite arbitrary manifest notes or the original record as an
+independent source. A metadata equality check does not prove entailment.
+
+Each finding's remove_relationship, when present, is one JSON object, never
+an array. Put separate rejected relationships in separate findings. The
+review_paths array contains only original inventory paths with at least one
+revise judgment. Supporting or contextual values belong in evidence assertions,
+not in review_paths. Do not include all descendants merely because their
+containing object is proposed for removal. Every revised value must have a
+valid finding link, including repeated claims in notes or caveats.
+
+Use the supplied schema's meaning and requirements when evaluating placement.
+Do not invent a narrower class definition, make an optional field required,
+or reject an allowed enumeration solely because it is a general category.
+Read the complete original value and its governing qualifiers before alleging
+a loss of scope. A finding about one defect does not establish its other
+allegations. Source quotes must occur in their named document and chunk;
+use separate assertions for text that crosses a chunk boundary.
+
+
+### Literal claims, scope and placement (renderer v17)
+
+Apply this checklist to every retained or revised source-review claim. It
+clarifies evidence protocol v5; it does not add evidence or change its grammar.
+
+Copy claim text from the decoded value in the applicable source-review inventory:
+original_full for the audit, final_full for the report. JSON string delimiters
+are syntax, not extra quotation-mark characters. For the inventory value Alpha,
+{"text": "Alpha"} copies it, while {"text": "\"Alpha\""} adds
+characters and is wrong. Preserve quotation marks that really occur in the
+reviewed value, escaping them once for JSON; never strip them indiscriminately.
+Do not copy YAML delimiters or wrap a copied title or passage in extra quotes.
+Each claim must quote a contiguous literal clause, allowing whitespace folding
+but retaining case and punctuation. Together the clauses must cover the whole
+value, including punctuation.
+
+Match the subject, extent and time actually asserted. Evidence for one subset,
+modality, location or release does not by itself establish a dataset-wide claim.
+Preserve the supported extent and identify the unsupported extension; lack of
+evidence does not establish that an operation is impossible or never occurred.
+Source rank, compatible quantities and a "current" label do not establish an
+observation date or order. A capture date dates the capture, not necessarily
+the observation. For example, a dated lower bound and an undated release count
+can be compatible without establishing that one observation preceded the other.
+Do not invent a conflict or trend from those facts alone.
+
+Assess the supplied schema's actual slot and relationship as well as the truth
+of the words. General access instructions do not establish version support;
+project participation does not establish a specific creator, maintainer or
+reviewer role. Preserve supported facts without an unsupported placement.
+Read explicit format guidance, including a version or an unknown-version marker
+when the slot calls for one. Do not invent a missing version, reject a supported
+tool, narrow a class to its examples, or make an optional field required.
+
+Classify the activity described, even when the clause factually reports a source:
+"The source plans a migration" is planned, not fact or applied merely because
+the source made that statement. An ongoing operation remains in_progress and
+a request remains instruction. Separate literal clauses with different statuses
+or scopes and give each its own evidence; do not hide a current observation
+inside a planned claim, or an ongoing step inside an applied claim. Preserve
+the reviewed value's qualifiers and check every occurrence and allegation separately.
+Use the existing revise links and terminal-stop rules. Do not rewrite a failed
+review or its classifications to manufacture a passing check.
+
+
+## Exact registered helper commands
+
+chunk_check:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli bundle chunk --bundle /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt --chunk-manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml --manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml --check --strict
+```
+
+source_scope:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli download scope --manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml --project CHORUS
+```
+
+full_schema:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -c 'from linkml.validator.cli import cli; cli()' -s /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml
+```
+
+full_terms:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -c 'from linkml_term_validator.cli import main; main()' validate-data /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml --schema /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml --target-class Dataset
+```
+
+phase1_receipts:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli --manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml receipts check --method claudecode_direct --label hypothetical-native26-sizing --project CHORUS --bundle /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt --chunk-manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml --native-shared-selection /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/selection.json --strict
+```
+
+advance:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.native_shared_stage advance --registration /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/selection.json
+```
+
+derive_core:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli derive core --full /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml --out /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml --full-schema /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml --core-schema /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+```
+
+core_schema:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -c 'from linkml.validator.cli import cli; cli()' -s /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml -C CoreDataset /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml
+```
+
+pair:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.d4d_pair_consistency --full /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml --core /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml --full-schema /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml --core-schema /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+```
+
+original_source_inventory:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.source_review --record /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/full.yaml --artifact original_full
+```
+
+final_source_inventory:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.source_review --record /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml --artifact final_full
+```
+
+draft:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.source_attribution_preflight --report /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_reconciliation.md --record /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml --bundle /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt --chunk-manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml --protocol-version 7 --source-manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml --project CHORUS
+```
+
+audit_evidence:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.evidence_assertions --audit /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/audit.json --bundle /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt --manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml --original-full /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/full.yaml --original-core /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/core.yaml --protocol-version 7 --source-manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml --project CHORUS
+```
+
+final_evidence:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.evidence_assertions --audit /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/outputs/audit.json --bundle /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt --manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml --original-full /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/full.yaml --original-core /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages/sealed/core.yaml --protocol-version 7 --source-manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml --project CHORUS --final-full /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml --final-core /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml --report /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_reconciliation.md
+```
+
+derive_final_core:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli derive core --full /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml --out /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml --full-schema /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml --core-schema /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml --phase4-complete
+```
+
+final_scope:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli download scope --manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml --project CHORUS --check --record /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml --record /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml --strict
+```
+
+recorder:
+
+```bash
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python -m data_sheets_schema.cli provenance record --project CHORUS --method claudecode_direct --label hypothetical-native26-sizing --input-bundle /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt --manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml --profile bridge2ai --chunk-manifest /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml --reasoning-effort high --prompt .claude/agents/d4d-provenance-guard-v2.md --prompt .claude/commands/d4d-agent-v2.md --prompt .claude/commands/d4d-full-core-v2.md --prompt .claude/commands/d4d-uniform-rules-v2.md --prompt src/data_sheets_schema/omission_inventory_v1/context.schema.json --prompt src/data_sheets_schema/omission_inventory_v1/policy.md --prompt src/data_sheets_schema/omission_inventory_v1/response.schema.json --prompt src/download/prompts/d4d_generic_arm_prompt_v10.md --prompt src/download/prompts/evidence_protocol_v7.md --prompt src/download/prompts/native_shared_generation_v1.md --prompt src/download/prompts/native_shared_receipt_policy_v1.md --prompt src/download/prompts/native_source_attribution_v1.md --prompt src/download/prompts/shared_generation_v1.md --render-spec-json '{"agentic_artifact_paths":{"core":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d_core.yaml","full":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_d4d.yaml","receipt":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_coverage_receipt.yaml","report":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/outputs/CHORUS_reconciliation.md"},"agentic_toolchain":{"python":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python","resources":{".claude/agents/d4d-description-reviewer.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-description-reviewer.md",".claude/agents/d4d-mapper.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-mapper.md",".claude/agents/d4d-provenance-guard.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-provenance-guard.md",".claude/agents/d4d-review-record.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-review-record.md",".claude/agents/d4d-rocrate.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rocrate.md",".claude/agents/d4d-rubric10-semantic.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric10-semantic.md",".claude/agents/d4d-rubric10.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric10.md",".claude/agents/d4d-rubric20-semantic-v4.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric20-semantic-v4.md",".claude/agents/d4d-rubric20-semantic.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric20-semantic.md",".claude/agents/d4d-rubric20.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-rubric20.md",".claude/agents/d4d-schema-expert.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-schema-expert.md",".claude/agents/d4d-validator.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-validator.md",".claude/agents/schema-stats.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/schema-stats.md",".claude/commands/README.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/README.md",".claude/commands/d4d-add-mapping.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-add-mapping.md",".claude/commands/d4d-agent.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-agent.md",".claude/commands/d4d-assistant.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-assistant.md",".claude/commands/d4d-full-core.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-full-core.md",".claude/commands/d4d-input-deep-research.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-input-deep-research.md",".claude/commands/d4d-uniform-rules.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-uniform-rules.md",".claude/commands/d4d-webfetch.md":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-webfetch.md","src/data_sheets_schema/schema/data_sheets_schema_all.yaml":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"}},"arm":"BASELINE (input documents only)","bundle":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt","chunk_check_uses_manifest":true,"chunk_manifest":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml","condition":"generic_v10","manifest":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml","manifest_line":"# Source manifest: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml","native_shared_generation_context":{"context":{"identity":{"bytes":6476,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json","sha256":"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"},"raw_json":"{\n  \"format\": \"omission_context_v1\",\n  \"root_class\": \"Dataset\",\n  \"scopes\": [\n    {\n      \"owner\": \"\",\n      \"referent\": \"CHoRUS dataset\",\n      \"release\": null,\n      \"scope\": \"No dataset DOI appears in any CHORUS source document; the project site is the identifier the records themselves use.\"\n    }\n  ],\n  \"source_policy\": {\n    \"basis\": \"Declared source_manifest.yaml tier hierarchy.\",\n    \"priority\": [\n      \"RO-Crate, structured metadata, data resource\",\n      \"documentation, license, DUA, IRB\",\n      \"publication, preprint, white paper\",\n      \"NIH project page, tutorial\",\n      \"historical data release, historical documentation\"\n    ]\n  },\n  \"vocabulary\": {\n    \"B2AI_SUBSTRATE\": {\n      \"B2AI_SUBSTRATE:1\": \"Array\",\n      \"B2AI_SUBSTRATE:10\": \"Delimited Text\",\n      \"B2AI_SUBSTRATE:11\": \"DICOM\",\n      \"B2AI_SUBSTRATE:12\": \"Directed acyclic graph\",\n      \"B2AI_SUBSTRATE:13\": \"Document Database\",\n      \"B2AI_SUBSTRATE:14\": \"Graph\",\n      \"B2AI_SUBSTRATE:15\": \"Graph Database\",\n      \"B2AI_SUBSTRATE:16\": \"HDF5\",\n      \"B2AI_SUBSTRATE:17\": \"Heap\",\n      \"B2AI_SUBSTRATE:18\": \"Hierarchical Array\",\n      \"B2AI_SUBSTRATE:19\": \"Image\",\n      \"B2AI_SUBSTRATE:2\": \"Associative Array\",\n      \"B2AI_SUBSTRATE:20\": \"JSON\",\n      \"B2AI_SUBSTRATE:21\": \"KGX TSV\",\n      \"B2AI_SUBSTRATE:22\": \"MongoDB\",\n      \"B2AI_SUBSTRATE:23\": \"MySQL\",\n      \"B2AI_SUBSTRATE:24\": \"N-Dimensional Array\",\n      \"B2AI_SUBSTRATE:25\": \"Neo4j\",\n      \"B2AI_SUBSTRATE:26\": \"Neural Network Model\",\n      \"B2AI_SUBSTRATE:27\": \"NNEF\",\n      \"B2AI_SUBSTRATE:28\": \"ONNX\",\n      \"B2AI_SUBSTRATE:29\": \"Pandas DataFrame\",\n      \"B2AI_SUBSTRATE:3\": \"BIDS\",\n      \"B2AI_SUBSTRATE:30\": \"Parquet\",\n      \"B2AI_SUBSTRATE:31\": \"PostgreSQL\",\n      \"B2AI_SUBSTRATE:32\": \"Property graph\",\n      \"B2AI_SUBSTRATE:33\": \"PyTorch Tensor\",\n      \"B2AI_SUBSTRATE:34\": \"R data.frame\",\n      \"B2AI_SUBSTRATE:35\": \"R tibble\",\n      \"B2AI_SUBSTRATE:36\": \"Raster Image\",\n      \"B2AI_SUBSTRATE:37\": \"Relational Database\",\n      \"B2AI_SUBSTRATE:38\": \"Set\",\n      \"B2AI_SUBSTRATE:39\": \"String\",\n      \"B2AI_SUBSTRATE:4\": \"BigQuery\",\n      \"B2AI_SUBSTRATE:40\": \"SummarizedExperiment\",\n      \"B2AI_SUBSTRATE:41\": \"Tab-separated values\",\n      \"B2AI_SUBSTRATE:42\": \"Tensor\",\n      \"B2AI_SUBSTRATE:43\": \"Text\",\n      \"B2AI_SUBSTRATE:44\": \"Tree\",\n      \"B2AI_SUBSTRATE:45\": \"Trie\",\n      \"B2AI_SUBSTRATE:46\": \"Vector\",\n      \"B2AI_SUBSTRATE:47\": \"Vector Image\",\n      \"B2AI_SUBSTRATE:48\": \"Waveform Audio File Format\",\n      \"B2AI_SUBSTRATE:49\": \"Waveform Data\",\n      \"B2AI_SUBSTRATE:5\": \"Column Store\",\n      \"B2AI_SUBSTRATE:50\": \"xarray\",\n      \"B2AI_SUBSTRATE:51\": \"Zarr\",\n      \"B2AI_SUBSTRATE:52\": \"Compressed Data\",\n      \"B2AI_SUBSTRATE:53\": \"BED\",\n      \"B2AI_SUBSTRATE:54\": \"Vector Database\",\n      \"B2AI_SUBSTRATE:55\": \"Pinecone\",\n      \"B2AI_SUBSTRATE:56\": \"Immunofluorescence Image\",\n      \"B2AI_SUBSTRATE:57\": \"Spectral Data\",\n      \"B2AI_SUBSTRATE:58\": \"Mass Spectrometry Data\",\n      \"B2AI_SUBSTRATE:59\": \"Size Exclusion Chromatography-Mass Spectrometry Data\",\n      \"B2AI_SUBSTRATE:6\": \"Comma-separated values\",\n      \"B2AI_SUBSTRATE:60\": \"Sequence\",\n      \"B2AI_SUBSTRATE:61\": \"DNA Sequence Data\",\n      \"B2AI_SUBSTRATE:62\": \"RNA Sequence Data\",\n      \"B2AI_SUBSTRATE:63\": \"Single-cell RNA Sequence Data\",\n      \"B2AI_SUBSTRATE:64\": \"Perturb-seq Data\",\n      \"B2AI_SUBSTRATE:65\": \"Retinal Image\",\n      \"B2AI_SUBSTRATE:66\": \"Fluorescence Lifetime Imaging Ophthalmoscopy data\",\n      \"B2AI_SUBSTRATE:67\": \"Optical coherence tomography data\",\n      \"B2AI_SUBSTRATE:68\": \"Optical coherence tomography angiography data\",\n      \"B2AI_SUBSTRATE:69\": \"Time-series data\",\n      \"B2AI_SUBSTRATE:7\": \"Data\",\n      \"B2AI_SUBSTRATE:70\": \"Physiological data\",\n      \"B2AI_SUBSTRATE:71\": \"Heart rate\",\n      \"B2AI_SUBSTRATE:72\": \"Oxygen saturation\",\n      \"B2AI_SUBSTRATE:73\": \"Physical activity data\",\n      \"B2AI_SUBSTRATE:74\": \"Caloric burn data\",\n      \"B2AI_SUBSTRATE:75\": \"Respiratory rate\",\n      \"B2AI_SUBSTRATE:76\": \"Sleep tracking data\",\n      \"B2AI_SUBSTRATE:77\": \"Stress tracking data\",\n      \"B2AI_SUBSTRATE:78\": \"Glucose monitoring data\",\n      \"B2AI_SUBSTRATE:79\": \"Participant response data\",\n      \"B2AI_SUBSTRATE:8\": \"Data Frame\",\n      \"B2AI_SUBSTRATE:80\": \"Questionnaire response data\",\n      \"B2AI_SUBSTRATE:81\": \"File headers\",\n      \"B2AI_SUBSTRATE:9\": \"Database\"\n    },\n    \"B2AI_TOPIC\": {\n      \"B2AI_TOPIC:1\": \"Biology\",\n      \"B2AI_TOPIC:10\": \"EKG\",\n      \"B2AI_TOPIC:11\": \"Environment\",\n      \"B2AI_TOPIC:12\": \"Gene\",\n      \"B2AI_TOPIC:13\": \"Genome\",\n      \"B2AI_TOPIC:14\": \"Geolocation\",\n      \"B2AI_TOPIC:15\": \"Image\",\n      \"B2AI_TOPIC:16\": \"Literature\",\n      \"B2AI_TOPIC:17\": \"Metabolome\",\n      \"B2AI_TOPIC:18\": \"mHealth\",\n      \"B2AI_TOPIC:19\": \"Microscale Imaging\",\n      \"B2AI_TOPIC:2\": \"Cell\",\n      \"B2AI_TOPIC:20\": \"Molecular Biology\",\n      \"B2AI_TOPIC:21\": \"Networks And Pathways\",\n      \"B2AI_TOPIC:22\": \"Neurologic Imaging\",\n      \"B2AI_TOPIC:23\": \"Omics\",\n      \"B2AI_TOPIC:24\": \"Ophthalmic Imaging\",\n      \"B2AI_TOPIC:25\": \"Phenotype\",\n      \"B2AI_TOPIC:26\": \"Protein\",\n      \"B2AI_TOPIC:27\": \"Protein Structure Model\",\n      \"B2AI_TOPIC:28\": \"Proteome\",\n      \"B2AI_TOPIC:29\": \"SDoH\",\n      \"B2AI_TOPIC:3\": \"Cheminformatics\",\n      \"B2AI_TOPIC:30\": \"Social Media\",\n      \"B2AI_TOPIC:31\": \"Survey\",\n      \"B2AI_TOPIC:32\": \"Text\",\n      \"B2AI_TOPIC:33\": \"Transcript\",\n      \"B2AI_TOPIC:34\": \"Transcriptome\",\n      \"B2AI_TOPIC:35\": \"Variant\",\n      \"B2AI_TOPIC:36\": \"Voice\",\n      \"B2AI_TOPIC:37\": \"Waveform\",\n      \"B2AI_TOPIC:38\": \"Glucose Monitoring\",\n      \"B2AI_TOPIC:39\": \"Activity Monitoring\",\n      \"B2AI_TOPIC:4\": \"Clinical Observations\",\n      \"B2AI_TOPIC:40\": \"Governance\",\n      \"B2AI_TOPIC:41\": \"Neuron\",\n      \"B2AI_TOPIC:42\": \"Cardiomyocyte\",\n      \"B2AI_TOPIC:43\": \"Diabetes\",\n      \"B2AI_TOPIC:44\": \"Eye Diseases\",\n      \"B2AI_TOPIC:45\": \"Voice Disorders\",\n      \"B2AI_TOPIC:46\": \"Respiration\",\n      \"B2AI_TOPIC:47\": \"Respiratory Disorders\",\n      \"B2AI_TOPIC:48\": \"Neurology\",\n      \"B2AI_TOPIC:49\": \"Neurological Disorders\",\n      \"B2AI_TOPIC:5\": \"Data\",\n      \"B2AI_TOPIC:50\": \"Psychiatry\",\n      \"B2AI_TOPIC:51\": \"Psychiatric Disorders\",\n      \"B2AI_TOPIC:52\": \"Training\",\n      \"B2AI_TOPIC:53\": \"Ontology\",\n      \"B2AI_TOPIC:54\": \"Metadata\",\n      \"B2AI_TOPIC:55\": \"Data Packaging\",\n      \"B2AI_TOPIC:56\": \"Nutrition\",\n      \"B2AI_TOPIC:6\": \"Demographics\",\n      \"B2AI_TOPIC:7\": \"Disease\",\n      \"B2AI_TOPIC:8\": \"Drug\",\n      \"B2AI_TOPIC:9\": \"EHR\"\n    }\n  }\n}\n"},"profile":{"basis":"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81","name":"bridge2ai","vocabulary":{"identity":{"bytes":6115,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml","sha256":"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"},"raw_text":"# Bridge2AI registry vocabularies for `values_from` slots, pinned (#538).\n#\n# `data_topic` and `data_substrate` declare `values_from: B2AI_TOPIC` /\n# `B2AI_SUBSTRATE`. Nothing rendered that declaration, so no run has ever been\n# shown the vocabulary \u2014 and the corpus reflects it: all 23 well-formed\n# `data_substrate` IRIs name cell lines (Cellosaurus MDA-MB-468, KOLF2.1J) or\n# assay techniques (Fluorescence, Mass Spectrometry, CRISPR-Cas Systems), none\n# of which is a type of data. The 11 prose values are correct in substance and\n# had no term to be expressed as.\n#\n# Pinned rather than fetched, for the same reason as the prompt pins: a\n# refresh is an edit with a diff a reviewer reads, not a network dependency\n# that turns a registry-side change into a surprise CI failure.\n#\n# Refresh with:\n#   curl -sSL https://raw.githubusercontent.com/bridge2ai/b2ai-standards-registry/main/project/data/DataSubstrate.tsv\n#   curl -sSL https://raw.githubusercontent.com/bridge2ai/b2ai-standards-registry/main/project/data/DataTopic.tsv\nsource:\n  repository: bridge2ai/b2ai-standards-registry\n  commit: d38bcf2408c960a75dfadc295b47990a3890c26f\n  committed: '"'"'2026-06-04T19:20:27Z'"'"'\n  retrieved: '"'"'2026-08-13'"'"'\n  paths:\n    - project/data/DataSubstrate.tsv\n    - project/data/DataTopic.tsv\n\nvocabularies:\n  B2AI_SUBSTRATE:\n    B2AI_SUBSTRATE:1: Array\n    B2AI_SUBSTRATE:2: Associative Array\n    B2AI_SUBSTRATE:3: BIDS\n    B2AI_SUBSTRATE:4: BigQuery\n    B2AI_SUBSTRATE:5: Column Store\n    B2AI_SUBSTRATE:6: Comma-separated values\n    B2AI_SUBSTRATE:7: Data\n    B2AI_SUBSTRATE:8: Data Frame\n    B2AI_SUBSTRATE:9: Database\n    B2AI_SUBSTRATE:10: Delimited Text\n    B2AI_SUBSTRATE:11: DICOM\n    B2AI_SUBSTRATE:12: Directed acyclic graph\n    B2AI_SUBSTRATE:13: Document Database\n    B2AI_SUBSTRATE:14: Graph\n    B2AI_SUBSTRATE:15: Graph Database\n    B2AI_SUBSTRATE:16: HDF5\n    B2AI_SUBSTRATE:17: Heap\n    B2AI_SUBSTRATE:18: Hierarchical Array\n    B2AI_SUBSTRATE:19: Image\n    B2AI_SUBSTRATE:20: JSON\n    B2AI_SUBSTRATE:21: KGX TSV\n    B2AI_SUBSTRATE:22: MongoDB\n    B2AI_SUBSTRATE:23: MySQL\n    B2AI_SUBSTRATE:24: N-Dimensional Array\n    B2AI_SUBSTRATE:25: Neo4j\n    B2AI_SUBSTRATE:26: Neural Network Model\n    B2AI_SUBSTRATE:27: NNEF\n    B2AI_SUBSTRATE:28: ONNX\n    B2AI_SUBSTRATE:29: Pandas DataFrame\n    B2AI_SUBSTRATE:30: Parquet\n    B2AI_SUBSTRATE:31: PostgreSQL\n    B2AI_SUBSTRATE:32: Property graph\n    B2AI_SUBSTRATE:33: PyTorch Tensor\n    B2AI_SUBSTRATE:34: R data.frame\n    B2AI_SUBSTRATE:35: R tibble\n    B2AI_SUBSTRATE:36: Raster Image\n    B2AI_SUBSTRATE:37: Relational Database\n    B2AI_SUBSTRATE:38: Set\n    B2AI_SUBSTRATE:39: String\n    B2AI_SUBSTRATE:40: SummarizedExperiment\n    B2AI_SUBSTRATE:41: Tab-separated values\n    B2AI_SUBSTRATE:42: Tensor\n    B2AI_SUBSTRATE:43: Text\n    B2AI_SUBSTRATE:44: Tree\n    B2AI_SUBSTRATE:45: Trie\n    B2AI_SUBSTRATE:46: Vector\n    B2AI_SUBSTRATE:47: Vector Image\n    B2AI_SUBSTRATE:48: Waveform Audio File Format\n    B2AI_SUBSTRATE:49: Waveform Data\n    B2AI_SUBSTRATE:50: xarray\n    B2AI_SUBSTRATE:51: Zarr\n    B2AI_SUBSTRATE:52: Compressed Data\n    B2AI_SUBSTRATE:53: BED\n    B2AI_SUBSTRATE:54: Vector Database\n    B2AI_SUBSTRATE:55: Pinecone\n    B2AI_SUBSTRATE:56: Immunofluorescence Image\n    B2AI_SUBSTRATE:57: Spectral Data\n    B2AI_SUBSTRATE:58: Mass Spectrometry Data\n    B2AI_SUBSTRATE:59: Size Exclusion Chromatography-Mass Spectrometry Data\n    B2AI_SUBSTRATE:60: Sequence\n    B2AI_SUBSTRATE:61: DNA Sequence Data\n    B2AI_SUBSTRATE:62: RNA Sequence Data\n    B2AI_SUBSTRATE:63: Single-cell RNA Sequence Data\n    B2AI_SUBSTRATE:64: Perturb-seq Data\n    B2AI_SUBSTRATE:65: Retinal Image\n    B2AI_SUBSTRATE:66: Fluorescence Lifetime Imaging Ophthalmoscopy data\n    B2AI_SUBSTRATE:67: Optical coherence tomography data\n    B2AI_SUBSTRATE:68: Optical coherence tomography angiography data\n    B2AI_SUBSTRATE:69: Time-series data\n    B2AI_SUBSTRATE:70: Physiological data\n    B2AI_SUBSTRATE:71: Heart rate\n    B2AI_SUBSTRATE:72: Oxygen saturation\n    B2AI_SUBSTRATE:73: Physical activity data\n    B2AI_SUBSTRATE:74: Caloric burn data\n    B2AI_SUBSTRATE:75: Respiratory rate\n    B2AI_SUBSTRATE:76: Sleep tracking data\n    B2AI_SUBSTRATE:77: Stress tracking data\n    B2AI_SUBSTRATE:78: Glucose monitoring data\n    B2AI_SUBSTRATE:79: Participant response data\n    B2AI_SUBSTRATE:80: Questionnaire response data\n    B2AI_SUBSTRATE:81: File headers\n  B2AI_TOPIC:\n    B2AI_TOPIC:1: Biology\n    B2AI_TOPIC:2: Cell\n    B2AI_TOPIC:3: Cheminformatics\n    B2AI_TOPIC:4: Clinical Observations\n    B2AI_TOPIC:5: Data\n    B2AI_TOPIC:6: Demographics\n    B2AI_TOPIC:7: Disease\n    B2AI_TOPIC:8: Drug\n    B2AI_TOPIC:9: EHR\n    B2AI_TOPIC:10: EKG\n    B2AI_TOPIC:11: Environment\n    B2AI_TOPIC:12: Gene\n    B2AI_TOPIC:13: Genome\n    B2AI_TOPIC:14: Geolocation\n    B2AI_TOPIC:15: Image\n    B2AI_TOPIC:16: Literature\n    B2AI_TOPIC:17: Metabolome\n    B2AI_TOPIC:18: mHealth\n    B2AI_TOPIC:19: Microscale Imaging\n    B2AI_TOPIC:20: Molecular Biology\n    B2AI_TOPIC:21: Networks And Pathways\n    B2AI_TOPIC:22: Neurologic Imaging\n    B2AI_TOPIC:23: Omics\n    B2AI_TOPIC:24: Ophthalmic Imaging\n    B2AI_TOPIC:25: Phenotype\n    B2AI_TOPIC:26: Protein\n    B2AI_TOPIC:27: Protein Structure Model\n    B2AI_TOPIC:28: Proteome\n    B2AI_TOPIC:29: SDoH\n    B2AI_TOPIC:30: Social Media\n    B2AI_TOPIC:31: Survey\n    B2AI_TOPIC:32: Text\n    B2AI_TOPIC:33: Transcript\n    B2AI_TOPIC:34: Transcriptome\n    B2AI_TOPIC:35: Variant\n    B2AI_TOPIC:36: Voice\n    B2AI_TOPIC:37: Waveform\n    B2AI_TOPIC:38: Glucose Monitoring\n    B2AI_TOPIC:39: Activity Monitoring\n    B2AI_TOPIC:40: Governance\n    B2AI_TOPIC:41: Neuron\n    B2AI_TOPIC:42: Cardiomyocyte\n    B2AI_TOPIC:43: Diabetes\n    B2AI_TOPIC:44: Eye Diseases\n    B2AI_TOPIC:45: Voice Disorders\n    B2AI_TOPIC:46: Respiration\n    B2AI_TOPIC:47: Respiratory Disorders\n    B2AI_TOPIC:48: Neurology\n    B2AI_TOPIC:49: Neurological Disorders\n    B2AI_TOPIC:50: Psychiatry\n    B2AI_TOPIC:51: Psychiatric Disorders\n    B2AI_TOPIC:52: Training\n    B2AI_TOPIC:53: Ontology\n    B2AI_TOPIC:54: Metadata\n    B2AI_TOPIC:55: Data Packaging\n    B2AI_TOPIC:56: Nutrition\n"}},"scope":"Caller-declared generation scope, source policy and vocabulary; not a scientific applicability or support verdict.","source_manifest":{"bytes":40612,"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml","sha256":"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"}},"native_shared_generation_descriptor":{"api_playbook_version":0,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129","src/data_sheets_schema/omission_inventory_v1/context.schema.json":"4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8","src/data_sheets_schema/omission_inventory_v1/policy.md":"0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d","src/data_sheets_schema/omission_inventory_v1/response.schema.json":"90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07","src/download/prompts/d4d_generic_arm_prompt_v10.md":"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb","src/download/prompts/evidence_protocol_v7.md":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","src/download/prompts/native_shared_generation_v1.md":"ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c","src/download/prompts/native_shared_receipt_policy_v1.md":"de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a","src/download/prompts/native_source_attribution_v1.md":"e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","native_shared_generation_version":1,"native_source_attribution_version":0,"projection":"native_shared_source_projection_v1","protocol":"native_shared_generation_v1","receipt_completion_version":0,"receipt_policy":{"path":"src/download/prompts/native_shared_receipt_policy_v1.md","sha256":"de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"},"removal_repair_version":0,"renderer":26,"runtime":"Claude Code (direct)","shared_generation_version":0,"typed_protocol":"typed_audit_protocol_v1","version":1},"native_shared_generation_registration":{"raw_json":"{\"bounds\":{\"max_authority_bytes\":64000000,\"max_evidence_bytes\":512000000,\"max_history_bytes\":64000000,\"max_history_records\":16384,\"max_input_bytes\":8000000,\"max_inventory_bytes\":12288,\"max_paths_per_worker\":80,\"max_populated_paths\":100000,\"max_request_bytes\":32000000,\"max_response_bytes\":8000000,\"max_submissions\":7,\"max_workers\":4},\"inputs\":{\"bundle\":{\"bytes\":35920,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/concatenated/CHORUS_preprocessed.txt\",\"sha256\":\"27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c\"},\"chunk_manifest\":{\"bytes\":1945,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/chunks/CHORUS_chunks.yaml\",\"sha256\":\"ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a\"},\"context\":{\"bytes\":6476,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/caller-inputs/chorus_omission_context.json\",\"sha256\":\"ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0\"},\"core_schema\":{\"root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml\",\"root_class\":\"CoreDataset\",\"sources\":[{\"bytes\":1299200,\"name\":\"data-sheets-schema-core\",\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml\",\"sha256\":\"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a\"}]},\"full_schema\":{\"root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml\",\"root_class\":\"Dataset\",\"sources\":[{\"bytes\":1442513,\"name\":\"data-sheets-schema\",\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/schema/data_sheets_schema_all.yaml\",\"sha256\":\"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f\"}]},\"profile\":{\"basis\":\"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81\",\"name\":\"bridge2ai\",\"vocabulary\":{\"bytes\":6115,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/src/data_sheets_schema/b2ai_registry_vocabularies.yaml\",\"sha256\":\"e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914\"}},\"project\":\"CHORUS\",\"source_manifest\":{\"bytes\":40612,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/launch-base/data/preprocessed/source_manifest.yaml\",\"sha256\":\"0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528\"}},\"kind\":\"d4d_native_shared_selection\",\"receipt_policy\":{\"bytes\":313,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/receipt-policy.json\",\"sha256\":\"1a355be234c92b128bd7a7a92bae44e16527f0fdba2dfdd0b5e0b131be1f52e2\"},\"registration_id\":\"hypothetical-not-registered\",\"registration_path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/selection.json\",\"run\":{\"arm\":\"BASELINE (input documents only)\",\"label\":\"hypothetical-native26-sizing\",\"method\":\"claudecode_direct\",\"project\":\"CHORUS\"},\"selection\":{\"api_playbook_version\":0,\"assets\":{\".claude/agents/d4d-provenance-guard-v2.md\":{\"bytes\":6912,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/agents/d4d-provenance-guard-v2.md\",\"sha256\":\"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085\"},\".claude/commands/d4d-agent-v2.md\":{\"bytes\":12698,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-agent-v2.md\",\"sha256\":\"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299\"},\".claude/commands/d4d-full-core-v2.md\":{\"bytes\":58267,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-full-core-v2.md\",\"sha256\":\"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124\"},\".claude/commands/d4d-uniform-rules-v2.md\":{\"bytes\":27544,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/.claude/commands/d4d-uniform-rules-v2.md\",\"sha256\":\"5662832d2934923863b593c32a0cf19d4290e29a71fc360bad6548dd6df26129\"},\"src/data_sheets_schema/omission_inventory_v1/context.schema.json\":{\"bytes\":1493,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/omission_inventory_v1/context.schema.json\",\"sha256\":\"4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8\"},\"src/data_sheets_schema/omission_inventory_v1/policy.md\":{\"bytes\":4068,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/omission_inventory_v1/policy.md\",\"sha256\":\"0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d\"},\"src/data_sheets_schema/omission_inventory_v1/response.schema.json\":{\"bytes\":3834,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/data_sheets_schema/omission_inventory_v1/response.schema.json\",\"sha256\":\"90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07\"},\"src/download/prompts/d4d_generic_arm_prompt_v10.md\":{\"bytes\":30186,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/d4d_generic_arm_prompt_v10.md\",\"sha256\":\"7bf8acedec7279f449f07f37550c846e8c0aa4ab64fc7b28e378e194caae48fb\"},\"src/download/prompts/evidence_protocol_v7.md\":{\"bytes\":33464,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/evidence_protocol_v7.md\",\"sha256\":\"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6\"},\"src/download/prompts/native_shared_generation_v1.md\":{\"bytes\":4084,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/native_shared_generation_v1.md\",\"sha256\":\"ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c\"},\"src/download/prompts/native_shared_receipt_policy_v1.md\":{\"bytes\":2336,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/native_shared_receipt_policy_v1.md\",\"sha256\":\"de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a\"},\"src/download/prompts/native_source_attribution_v1.md\":{\"bytes\":2047,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/native_source_attribution_v1.md\",\"sha256\":\"e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761\"},\"src/download/prompts/shared_generation_v1.md\":{\"bytes\":3569,\"path\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/tree/src/download/prompts/shared_generation_v1.md\",\"sha256\":\"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450\"}},\"condition\":\"generic_v10\",\"descriptor_sha256\":\"82ba5b274eace2aa646255fcb4ca0576782f7eebe9ec1d31e28eb9eb4d354a93\",\"native_shared_generation_version\":1,\"native_source_attribution_version\":0,\"protocol\":\"native_shared_generation_v1\",\"receipt_completion_version\":0,\"removal_repair_version\":0,\"renderer\":26,\"runtime\":\"Claude Code (direct)\",\"shared_generation_version\":0,\"version\":1},\"stage_root\":\"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/stages\",\"version\":1}","sha256":"bbdfc666c49a6d29c8f933c78e982d1e80bebd9deff4f1d5c5555ba391f5970a"},"native_shared_generation_version":1,"native_shared_max_draft_checks":2,"native_shared_receipt_policy":{"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/receipt-policy.json","raw_json":"{\"condition\":\"generic_v10\",\"coverage_floor\":{\"mode\":\"diagnostic_pilot\",\"state\":\"pending\"},\"kind\":\"d4d_native_shared_receipt_policy\",\"receipt_instrument_version\":4,\"registration_id\":\"hypothetical-pending-floor\",\"runtime_policy_sha256\":\"de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a\",\"version\":1}","sha256":"1a355be234c92b128bd7a7a92bae44e16527f0fdba2dfdd0b5e0b131be1f52e2"},"native_shared_runtime_declaration":{"path":"/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-n1-2026-10-23/evidence/n1b-render-current-target-20261023/hypothetical-unwritten/runtime.json","raw_json":"{\"auth\":{\"status\":\"not_observed\"},\"auxiliary_models\":[],\"budget_guard_usd\":null,\"deadline_seconds\":null,\"effort\":\"high\",\"environment\":{},\"executable\":{\"status\":\"not_selected_or_executed\"},\"keep_awake\":{\"status\":\"not_observed\"},\"limits\":{\"contextWindow\":1000000,\"maxOutputTokens\":32000},\"limits_basis\":\"hypothetical sizing assumption only; native capacity not observed\",\"model\":\"HYPOTHETICAL_MODEL_NOT_SELECTED\",\"provider\":\"HYPOTHETICAL_PROVIDER_NOT_AUTHENTICATED\",\"route\":\"claude_code_direct_stream_json_v1\"}","sha256":"cf20044364d7ddeff3e9d43fefbeccccb3abbfd30d552a0b556c518cb14e2bcb"},"profile":"bridge2ai","profile_basis":"manifest:data/preprocessed/source_manifest.yaml@0c5078c84f81","prompt_text_env":true,"provider":"HYPOTHETICAL_PROVIDER_NOT_AUTHENTICATED","reasoning_effort":"high","render_version":26,"run_date":"2026-10-23","runtime":"Claude Code (direct)"}' --prompt-text-env D4D_LAUNCH_INSTRUCTION
+```
+
+The launcher supplies the exact saved instruction in D4D_LAUNCH_INSTRUCTION. The recorder reads that environment variable itself; execute its command exactly. Return the recorded checks and outcome, without claiming scientific approval.
