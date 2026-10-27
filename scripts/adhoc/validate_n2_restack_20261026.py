@@ -26,7 +26,8 @@ LEGACY = tuple('tests/' + name + '.py' for name in (
     'test_receipts', 'test_backfill_checks', 'test_derive_core',
     'test_native_receipt_origin_reporting', 'test_provenance_reasoning_message',
     'test_provenance_reasoning_effort', 'test_provenance_header',
-    'test_cli/test_provenance_preserves_validation', 'test_cli/test_provenance_prompt'))
+    'test_cli/test_provenance_preserves_validation', 'test_cli/test_provenance_prompt',
+    'test_replicate_structure', 'test_report_audit_totals', 'test_generic_v10_r9_enum_criteria'))
 PROTECTED = ('src/data_sheets_schema/shared_generation.py', 'src/download/prompts/canonical_hashes.yaml')
 
 
