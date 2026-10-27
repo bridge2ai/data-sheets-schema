@@ -62,7 +62,7 @@ def source():
             'tracked_exact': exact, 'entries': entries}
 
 
-def origins():
+def origins(baseline):
     result = {}
     for name, module in tuple(sys.modules.items()):
         if name == 'data_sheets_schema' or name.startswith('data_sheets_schema.'):
@@ -79,6 +79,13 @@ def origins():
         for path in paths:
             if not Path(path).resolve(strict=True).is_relative_to(expected):
                 raise ValueError('foreign project/test module: ' + name + ' -> ' + str(path))
+        if getattr(module, '__file__', None):
+            path = Path(module.__file__).resolve(strict=True)
+            entry = baseline['entries'].get(str(path.relative_to(ROOT)))
+            if (not path.is_file() or not isinstance(entry, dict)
+                    or entry.get('mode') not in {'100644', '100755'}
+                    or hashlib.sha256(path.read_bytes()).hexdigest() != entry.get('sha256')):
+                raise ValueError('module origin is not an exact tracked source blob: ' + name)
         result[name] = paths
     for name in MODULES:
         if 'tests.' + name not in result:
@@ -104,7 +111,8 @@ def child(output):
         'dependency_bytes_attested': False})
     for name in MODULES:
         importlib.import_module('tests.' + name)
-    save(output / 'origins-before.json', origins())
+    baseline = json.loads((output / 'source-before.json').read_text())
+    save(output / 'origins-before.json', origins(baseline))
     import pytest
     args = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(output / 'cases'),
             '--junitxml', str(output / 'pytest.xml'), *('tests/' + name + '.py' for name in MODULES)]
@@ -112,7 +120,7 @@ def child(output):
     try:
         return int(pytest.main(args))
     finally:
-        save(output / 'origins-after.json', origins())
+        save(output / 'origins-after.json', origins(baseline))
 
 
 def run(output, expected):
@@ -147,13 +155,16 @@ def run(output, expected):
     save(output / 'source-after.json', after)
     outcome = {'returncode': code, 'source_unchanged': before == after,
                'wall_seconds': time.monotonic() - started, 'scientific_acceptance': 'not_assessed'}
-    counts, invalid = dict.fromkeys(MODULES, 0), []
+    counts, invalid, seen = dict.fromkeys(MODULES, 0), [], set()
     if (output / 'pytest.xml').is_file():
         for case in ET.parse(output / 'pytest.xml').getroot().iter('testcase'):
             name = case.get('classname', '').removeprefix('tests.')
-            if name not in counts or not case.get('name') or any(case.find(tag) is not None for tag in ('failure', 'error', 'skipped')):
+            identity = (case.get('classname'), case.get('name'))
+            duplicate = identity in seen
+            seen.add(identity)
+            if duplicate or name not in counts or not case.get('name') or any(case.find(tag) is not None for tag in ('failure', 'error', 'skipped')):
                 invalid.append({'classname': case.get('classname'), 'name': case.get('name'),
-                                'tags': [node.tag for node in case]})
+                                'tags': [node.tag for node in case], 'duplicate_identity': duplicate})
             else:
                 counts[name] += 1
     outcome.update(unmarked_identified_cases_by_module=counts, invalid_junit_cases=invalid)
