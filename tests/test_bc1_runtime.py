@@ -5,9 +5,11 @@ assembly. They do not simulate installing the protected registration hook or
 claim a registered end-to-end generation. No provider or scientific labels.
 """
 from copy import deepcopy
+from contextlib import contextmanager
 import json
 from pathlib import Path
 import socket
+import sys
 from types import SimpleNamespace
 
 import pytest
@@ -143,6 +145,23 @@ def publish(case, outcome):
 
 def evidence(case):
     return {str(path): path.read_bytes() for path in case.spec.metadata_dir.rglob('*') if path.is_file()}
+
+
+@contextmanager
+def calls_to(function):
+    """Observe calls without replacing a dependency guarded by the cache."""
+    observed = []
+    previous = sys.getprofile()
+    def observer(frame, event, argument):
+        if event == 'call' and frame.f_code is function.__code__:
+            observed.append(True)
+        if previous is not None:
+            previous(frame, event, argument)
+    sys.setprofile(observer)
+    try:
+        yield observed
+    finally:
+        sys.setprofile(previous)
 
 
 def test_complete_fixed_roster_and_verified_model_projection(case):
@@ -323,3 +342,159 @@ def test_downstream_codec_contract_and_projection_cannot_be_dropped(case):
         altered['messages'][0]['content'] = [p for p in altered['messages'][0]['content'] if p['text'] != missing]
         with pytest.raises(ledger.UsageLedgerError):
             runtime.require_request(case.spec, 'reconcile_full', altered)
+
+
+def test_cached_packet_and_sizing_renderer_are_exact_private_copies(case):
+    originals = legacy._originals(case.spec)
+    receipt = api._receipt_path(case.spec).read_bytes()
+    plain = runtime.prepare_packet_bytes(case.spec, case.captured, originals, receipt)
+    cached = runtime.prepare_packet(case.spec)
+    assert shared.canonical(cached) == shared.canonical(plain)
+    cached['plan']['workers'][0]['paths'].append('/not-a-real-path')
+    assert runtime.prepare_packet(case.spec) == plain
+    stage = runtime.roster(plain)[0]
+    request, wire, inner = runtime.build_request(case.spec, plain, stage, {}, None, case.settings)
+    sizing_request, sizing_wire = runtime.render_request(packet=plain, stage=stage, inner=inner,
+        settings=case.settings, audit_limits=case.reg['audit_limits'],
+        registration_sha256=shared.sha(case.captured.registration), generation_id=ledger.generation_id(case.spec),
+        policy_text=bc1_selection.policy_text(), evidence_contract=api.shared_evidence_contract(),
+        schema_context=bc1_context.schema_context(case.captured, originals['original_full'].decode()),
+        generation_context=bc1_context.generation_context(case.captured), receipt_carry=receipts.audit_carry(case.spec))
+    assert request == sizing_request and shared.canonical(wire) == shared.canonical(sizing_wire)
+
+
+def test_schema_memo_preserves_exact_text_and_rechecks_live_authority(case, monkeypatch):
+    text = case.carry['Original full record']
+    formatter = bc1_context.schema_context
+    expected = formatter(case.captured, text)
+    with calls_to(formatter) as calls:
+        assert runtime._schema_context(case.spec, case.captured, text) == expected
+        assert runtime._schema_context(case.spec, case.captured, text) == expected
+        changed = json.loads(expected.removeprefix(bc1_context.SCHEMA_HEADER))
+        changed['owners'].clear()
+        assert runtime._schema_context(case.spec, case.captured, text) == expected
+    assert len(calls) == 1
+    def refuse(spec):
+        raise ValueError('fresh captured authority changed')
+    monkeypatch.setattr(shared, 'assert_current', refuse)
+    with pytest.raises(ValueError, match='fresh captured authority changed'):
+        runtime._schema_context(case.spec, case.captured, text)
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize('kind', ['full_schema', 'core_schema'])
+def test_schema_memo_invalidates_exact_source_bytes(case, monkeypatch, kind):
+    text = case.carry['Original full record']
+    baseline = runtime._schema_context(case.spec, case.captured, text)
+    previous = getattr(case.captured, kind)
+    path = previous.sources[0][1]
+    path.write_bytes(path.read_bytes() + b'\ndescription: Changed captured schema semantics.\n')
+    replacement = capture_schema(path, strict=True)
+    current = SimpleNamespace(**{**vars(case.captured), kind: replacement})
+    monkeypatch.setattr(shared, 'assert_current', lambda spec: current)
+    with pytest.raises(ledger.UsageLedgerError, match='fresh captured authority'):
+        runtime._schema_context(case.spec, case.captured, text)
+    updated = runtime._schema_context(case.spec, current, text)
+    assert updated != baseline
+    assert updated == bc1_context.schema_context(current, text)
+
+
+@pytest.mark.parametrize('kind', ['full_schema', 'core_schema'])
+def test_schema_memo_keys_exact_physical_source_paths(case, tmp_path, monkeypatch, kind):
+    text = case.carry['Original full record']
+    runtime._schema_context(case.spec, case.captured, text)
+    original = getattr(case.captured, kind)
+    directory = tmp_path / ('relocated-' + kind)
+    directory.mkdir()
+    path = directory / original.sources[0][1].name
+    path.write_bytes(original.sources[0][2])
+    relocated = capture_schema(path, strict=True)
+    assert relocated.sources != original.sources
+    current = SimpleNamespace(**{**vars(case.captured), kind: relocated})
+    monkeypatch.setattr(shared, 'assert_current', lambda spec: current)
+    formatter = bc1_context.schema_context
+    expected = formatter(current, text)
+    with calls_to(formatter) as calls:
+        assert runtime._schema_context(case.spec, current, text) == expected
+    assert calls == [True]
+
+
+def test_schema_memo_record_assignment_and_retention_bounds(case, monkeypatch):
+    monkeypatch.setattr(shared, 'MAX_MEMO_ENTRIES', 2)
+    monkeypatch.setattr(shared, 'MAX_MEMO_BYTES', 1_000_000)
+    text = case.carry['Original full record']
+    normal = runtime._schema_context(case.spec, case.captured, text)
+    assigned = runtime._schema_context(case.spec, case.captured, text, assigned_paths=['/name'])
+    changed = runtime._schema_context(case.spec, case.captured, text.replace('Example', 'Other example'))
+    assert len({normal, assigned, changed}) == 3
+    memo = runtime._derivations(case.spec)._shared_generation_derivations
+    assert len(memo) <= 2 and sum(map(len, memo.values())) <= 1_000_000
+    monkeypatch.setattr(shared, 'MAX_MEMO_BYTES', 1)
+    fresh = audit.DerivationCache()
+    assert runtime._schema_context(case.spec, case.captured, text, derivations=fresh) == normal
+    assert fresh._shared_generation_derivations == {}
+
+
+def test_independent_terminal_replay_uses_fresh_caches_and_reruns_verdicts(case, monkeypatch):
+    outcome = run(case, Messages(case))
+    publish(case, outcome)
+    ordinary = runtime._derivations(case.spec)
+    seen = []
+    rebuild = runtime._rebuild
+    def observed(*args, **kwargs):
+        seen.append(kwargs.get('derivations'))
+        return rebuild(*args, **kwargs)
+    monkeypatch.setattr(runtime, '_rebuild', observed)
+    for _ in range(2):
+        assert runtime.recover(case.spec, terminal=True, independent=True).audit == outcome.audit
+    assert len(seen) == 2 and all(type(cache) is audit.DerivationCache for cache in seen)
+    assert seen[0] is not seen[1] and all(cache is not ordinary for cache in seen)
+    assert all(cache._rows and cache._shared_generation_derivations for cache in seen)
+    calls = []
+    def newly_refused(*args, **kwargs):
+        calls.append(True)
+        return {'passed': False}
+    monkeypatch.setattr(audit, 'check_worker', newly_refused)
+    with pytest.raises(ledger.UsageLedgerError, match='coverage/evidence checks failed'):
+        runtime.recover(case.spec, terminal=True, independent=True)
+    assert calls == [True]
+
+
+def test_invalid_per_run_cache_cannot_replace_a_bounded_cache(case):
+    case.spec._bc1_derivations = {}
+    with pytest.raises(ledger.UsageLedgerError, match='bounded cache type'):
+        runtime.prepare_packet(case.spec)
+
+
+def test_schema_only_lookup_bypasses_and_clears_both_caches_after_formatter_change(case, monkeypatch):
+    text = case.carry['Original full record']
+    old = runtime._schema_context(case.spec, case.captured, text)
+    cache = runtime._derivations(case.spec)
+    assert cache._rows and cache._shared_generation_derivations
+    formatter = bc1_context.schema_context
+    with monkeypatch.context() as patch:
+        patch.setattr(bc1_context, 'schema_context', lambda *a, **k: formatter(*a, **k) + '\n')
+        assert runtime._schema_context(case.spec, case.captured, text) == old + '\n'
+        assert not cache._rows and not getattr(cache, '_shared_generation_derivations', {})
+    assert runtime._schema_context(case.spec, case.captured, text) == old
+
+
+def test_schema_only_lookup_cannot_hide_a_stricter_parser_bound(case, monkeypatch):
+    from data_sheets_schema import audit_omissions
+    text = case.carry['Original full record']
+    runtime._schema_context(case.spec, case.captured, text)
+    cache = runtime._derivations(case.spec)
+    assert cache._rows and cache._shared_generation_derivations
+    monkeypatch.setattr(audit_omissions, 'MAX_DEPTH', 0)
+    with pytest.raises(ValueError):
+        runtime._schema_context(case.spec, case.captured, text)
+    assert not cache._rows and not getattr(cache, '_shared_generation_derivations', {})
+
+
+def test_schema_only_lookup_invalidates_changed_visible_header(case, monkeypatch):
+    text = case.carry['Original full record']
+    before = runtime._schema_context(case.spec, case.captured, text)
+    monkeypatch.setattr(bc1_context, 'SCHEMA_HEADER', '\n\nChanged schema header\n')
+    after = runtime._schema_context(case.spec, case.captured, text)
+    assert after.startswith(bc1_context.SCHEMA_HEADER) and before != after
+    assert not getattr(runtime._derivations(case.spec), '_shared_generation_derivations', {})

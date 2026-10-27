@@ -132,11 +132,16 @@ The completed-result manifest SHA-256 is
 It preserves selected raw result bytes/modes, including failed evidence;
 complete synthetic case directories remain external.
 
-The genuine public API pipeline, final write-footprint tests and combined BC1
-coverage accounting are still pending in the original frozen17ca process.
+The original frozen17ca BC1 batch was interrupted after 3,282.66 pytest seconds:
+106 passed and 12 failures from the already-corrected fake streaming interface.
+The public API pipeline did not complete and the four write-footprint cases were
+not reached. Source stayed unchanged; the driver retained both origin checks.
+The [interrupted-result archive](bc1_validation_2026-10-27_interrupted/README.md)
+preserves the original results and the differing driver timing field verbatim.
+Corrected complete BC1 verification remains pending.
 These cross-head results do not claim one fresh green repository-wide suite.
 
-### Performance follow-up
+### Bounded pure derivation cache
 
 Code review identifies repeated pure schema/packet derivations in
 `bc1_audit._open/_derive`, plus repeated full/core schema-context rendering
@@ -145,13 +150,24 @@ This is a concrete optimization candidate, not proof of an algorithmic hang,
 host-contention cause or measured speedup. Functional-test timings overlapped
 other authorized work and are not idle-host performance measurements.
 
-A follow-up may add a bounded caller-owned cache keyed by exact input/schema
-closure bytes, full selection, project, limits and current contract/asset
-identities. It must return private reconstructed copies, preserve fresh
-authority/raw-response/evidence/accounting checks, use fresh independent
-terminal replay, and demonstrate byte parity, invalidation and mutation
-isolation. No acceptance verdict is eligible for caching. Such a cache is not
-part of this implementation; profile this before scaling to campaign caps.
+The isolated `codex/bc1-derivation-cache-20261027` correction adds a caller-owned
+cache keyed by exact canonical input/schema closure bytes, full selection,
+project, limits and current contract/asset identities. It returns privately
+decoded values and a new omission Prepared object. The default retained audit
+budget is eight entries / 64,000,000 bytes, counting keys and values. The
+existing schema-text memo uses length/SHA-256 keys over both complete schema
+closures, source names/paths, record and assigned paths; its separate default
+budget is 32 entries / 128,000,000 encoded-value bytes. These are retention
+limits, not a bound on whole-process peak memory.
+
+Fresh authority/raw-response/evidence/accounting checks remain. Independent
+terminal replay starts with a new cache; no acceptance verdict is cached.
+Closed parser/function dependencies and current constants are rechecked before
+reuse; unfamiliar changes bypass and clear both stores. Ordinary pure-check
+interfaces remain uncached by default. Added tests cover byte parity,
+invalidation, mutation isolation, retention and fresh terminal replay. Their
+results will be recorded after the implementation is frozen and verified.
+No measured speedup or campaign-scale performance claim is made here.
 
 Remaining release work: owner review/application of the exact protected proposal,
 fresh installed-source registrations, actual six-project/arm sizing on selected

@@ -8,7 +8,10 @@ from __future__ import annotations
 
 from collections import Counter
 from copy import deepcopy
+import functools
 import hashlib
+import json
+import types
 
 from . import audit_batches as batches, audit_batch_format, audit_grammar
 from . import audit_omissions as omissions, audit_protocol, evidence_assertions as evidence
@@ -93,7 +96,70 @@ def _selection(selection, fan_in):
         raise ValueError("BC1 selected audit/context contract mismatch")
 
 
-def _derive(inputs, schema_rows, selection, project, limits):
+class DerivationCache:
+    """Bounded caller-owned immutable derivations, never response verdicts.
+
+    The complete captured input identity is the key. Every lookup checks the
+    current selected contracts and omission assets. Results are private decoded
+    copies, including a new Prepared; no SchemaView or mutable state is shared.
+    Independent terminal replay must use no cache or a fresh instance.
+    """
+    def __init__(self, *, max_entries=8, max_bytes=64_000_000):
+        if (type(max_entries) is not int or not 0 < max_entries <= 32
+                or type(max_bytes) is not int or not 0 < max_bytes <= 128_000_000):
+            raise ValueError("BC1 derivation cache requires bounded positive integer limits")
+        self.max_entries, self.max_bytes = max_entries, max_bytes
+        self._rows, self._bytes = {}, 0
+
+    def refresh(self):
+        """Unfamiliar runtime dependencies bypass both optional pure caches."""
+        current = _cache_dependency_token()
+        if current is None or current != _CACHE_DEPENDENCIES:
+            self._rows.clear()
+            self._bytes = 0
+            self.__dict__.pop('_shared_generation_derivations', None)
+            return False
+        return True
+
+    def _derive(self, inputs, schema_rows, selection, project, limits):
+        selected = [inputs, schema_rows, selection, project, limits]
+        # Reject non-JSON aliases/coercions before forming an identity; budget
+        # the key before serializing it. The packet already has this byte cap.
+        codec._bounds(selected, byte_limit=typed.MAX_PACKET_BYTES)
+        if type(limits) is not dict:
+            raise ValueError("invalid BC1 limits fields")
+        _selection(selection, limits.get("fan_in"))
+        assets = {name: _sha(omissions._asset(name)) for name in omissions.ASSET_SHA256}
+        if not self.refresh():
+            return _derive_uncached(inputs, schema_rows, selection, project, limits)
+        identity = _json([selected, assets])
+        encoded = self._rows.get(identity)
+        if encoded is None:
+            derived, raw, prepared = _derive_uncached(inputs, schema_rows, selection, project, limits)
+            encoded = _json({"derived": derived,
+                "raw": {name: typed._blob(value) for name, value in raw.items()},
+                "prepared_payload_json": prepared.payload_json})
+            size = len(identity) + len(encoded)
+            if size <= self.max_bytes:
+                while self._rows and (len(self._rows) >= self.max_entries or self._bytes + size > self.max_bytes):
+                    oldest = next(iter(self._rows))
+                    self._bytes -= len(oldest) + len(self._rows.pop(oldest))
+                self._rows[identity] = encoded
+                self._bytes += size
+        value = json.loads(encoded)
+        return (value["derived"], {name: typed._unblob(blob) for name, blob in value["raw"].items()},
+                omissions.Prepared(value["prepared_payload_json"]))
+
+
+def _derive(inputs, schema_rows, selection, project, limits, *, derivations=None):
+    if derivations is not None:
+        if type(derivations) is not DerivationCache:
+            raise ValueError("BC1 derivations must be an explicit DerivationCache")
+        return derivations._derive(inputs, schema_rows, selection, project, limits)
+    return _derive_uncached(inputs, schema_rows, selection, project, limits)
+
+
+def _derive_uncached(inputs, schema_rows, selection, project, limits):
     from .bc1_context import derive_term_policy
     required = {"original_full", "bundle", "manifest", "receipt", "context"}
     if type(inputs) is not dict or not required <= set(inputs) <= required | {"original_core", "source_manifest"}:
@@ -134,7 +200,8 @@ def _derive(inputs, schema_rows, selection, project, limits):
 def prepare(*, selection, original_full, bundle, manifest, receipt, context,
             schema_path=None, schema_snapshot=None, original_core=None,
             source_manifest=None, project=None, max_paths=96, max_inventory_bytes=16384,
-            max_workers=32, max_output_tokens=64000, max_request_bytes=32_000_000, fan_in=2):
+            max_workers=32, max_output_tokens=64000, max_request_bytes=32_000_000, fan_in=2,
+            derivations=None):
     """Capture a separate BC1 packet; legacy typed packet semantics are untouched."""
     if schema_snapshot is None:
         if schema_path is None:
@@ -146,29 +213,29 @@ def prepare(*, selection, original_full, bundle, manifest, receipt, context,
     schema_rows = typed._snapshot_rows(schema_snapshot)
     limits = dict(max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers,
                   max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes, fan_in=fan_in)
-    derived, _, _ = _derive(inputs, schema_rows, selection, project, limits)
+    derived, _, _ = _derive(inputs, schema_rows, selection, project, limits, derivations=derivations)
     packet = _seal({"kind": PACKET, "protocol": PROTOCOL, "selection": deepcopy(selection),
         "inputs": inputs, "schema_sources": schema_rows, "project": project, "limits": limits, **derived})
     _bound(packet, typed.MAX_PACKET_BYTES)
     return packet
 
 
-def _open(packet):
+def _open(packet, *, derivations=None):
     _exact(packet, {"kind", "protocol", "selection", "inputs", "schema_sources", "project", "limits",
         "plan", "groups", "term_policy", "dictionary", "omission_request", "registered_provenance",
         "contract", "limitations", "sha256"}, "packet")
     _bound(packet, typed.MAX_PACKET_BYTES)
     if packet["kind"] != PACKET or packet["protocol"] != PROTOCOL:
         raise ValueError("BC1 packet protocol mismatch")
-    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["selection"], packet["project"], packet["limits"])
+    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["selection"], packet["project"], packet["limits"], derivations=derivations)
     expected = _seal({**{key: packet[key] for key in ("kind", "protocol", "selection", "inputs", "schema_sources", "project", "limits")}, **derived})
     if _json(expected) != _json(packet):
         raise ValueError("BC1 packet differs from captured-byte derivation")
     return raw, prepared
 
 
-def roster(packet):
-    _open(packet)
+def roster(packet, *, derivations=None):
+    _open(packet, derivations=derivations)
     return ([{"phase": "bc1_worker", "worker_id": w["id"]} for w in packet["plan"]["workers"]]
         + [{"phase": "bc1_omission"}]
         + [{"phase": "bc1_integration", "stage_id": g["id"], "worker_ids": list(g["workers"])} for g in packet["groups"]]
@@ -192,8 +259,8 @@ def _request(packet, kind, payload):
     return result
 
 
-def worker_request(packet, worker_id):
-    raw, prepared = _open(packet)
+def worker_request(packet, worker_id, *, derivations=None):
+    raw, prepared = _open(packet, derivations=derivations)
     return _worker_request(packet, worker_id, raw, prepared)
 
 
@@ -209,8 +276,8 @@ def _worker_request(packet, worker_id, raw, prepared):
         "visible_output_bytes": codec.WORKER_BYTES})
 
 
-def omission_request(packet):
-    _open(packet)
+def omission_request(packet, *, derivations=None):
+    _open(packet, derivations=derivations)
     return deepcopy(packet["omission_request"])
 
 
@@ -237,8 +304,8 @@ def _unwrap(request, saved):
     return raw, decoded
 
 
-def check_worker(packet, worker_id, response):
-    request = worker_request(packet, worker_id)
+def check_worker(packet, worker_id, response, *, derivations=None):
+    request = worker_request(packet, worker_id, derivations=derivations)
     raw, value = _unwrap(request, response)
     report = batches.check_worker(_json(value), packet["plan"], worker_id, version=2)
     if report["passed"]:
@@ -248,8 +315,8 @@ def check_worker(packet, worker_id, response):
         "decoded_sha256": _sha(_json(value)), "acceptance_scope": "worker structure only; scientific support unverified"}
 
 
-def _base(packet, workers, omission_raw, *, opened=None):
-    raw, prepared = _open(packet) if opened is None else opened
+def _base(packet, workers, omission_raw, *, opened=None, derivations=None):
+    raw, prepared = _open(packet, derivations=derivations) if opened is None else opened
     expected = {w["id"] for w in packet["plan"]["workers"]}
     if type(workers) is not dict or set(workers) != expected:
         raise ValueError("BC1 worker roster mismatch")
@@ -275,8 +342,8 @@ def _base(packet, workers, omission_raw, *, opened=None):
         "omission_dispositions": [], "stages": [], "summary": None, "complete": False}
 
 
-def start(packet, workers, omission_response):
-    return _bound(_seal(_base(packet, workers, omission_response)))
+def start(packet, workers, omission_response, *, derivations=None):
+    return _bound(_seal(_base(packet, workers, omission_response, derivations=derivations)))
 
 
 def _incoming(packet, state):
@@ -410,14 +477,14 @@ def _render_stage_request(packet, raw, prepared, *, stage_id, new_workers, conce
 
 
 def render_stage_request(packet, *, stage_id, new_workers, concern_packet, record_digest,
-                         prior_state_sha256, current_row_index_sha256):
+                         prior_state_sha256, current_row_index_sha256, derivations=None):
     """Exact pure renderer, also for explicitly hypothetical sizing arguments.
 
     This neither verifies a stage transition nor authorizes dispatch. Runtime
     must use stage_request, whose arguments derive from independently replayed
     actual deliveries. Placeholder arguments remain hypothetical size scenarios.
     """
-    raw, prepared = _open(packet)
+    raw, prepared = _open(packet, derivations=derivations)
     return _render_stage_request(packet, raw, prepared, stage_id=stage_id, new_workers=new_workers,
         concern_packet=concern_packet, record_digest=record_digest,
         prior_state_sha256=prior_state_sha256, current_row_index_sha256=current_row_index_sha256)
@@ -555,13 +622,13 @@ def _audit(packet, state):
             "values": [state["rows"][path] for path in ordered if path in state["rows"]]}}
 
 
-def _replay(packet, state):
+def _replay(packet, state, *, derivations=None):
     if type(state) is not dict or state.get("kind") != STATE:
         raise ValueError("BC1 state kind mismatch")
     _bound(state)
     workers = {key: typed._unblob(value, typed.MAX_SAVED_RESPONSE_BYTES) for key, value in state["workers"].items()}
     omission = typed._unblob(state["omission"], omissions.MAX_RESPONSE_BYTES)
-    raw, prepared = _open(packet)
+    raw, prepared = _open(packet, derivations=derivations)
     saved_stages = [typed._unblob(blob, typed.MAX_SAVED_RESPONSE_BYTES) for blob in state["stages"]]
     expected = _replay_deliveries(packet, workers, omission, saved_stages, raw, prepared)
     if _json(expected) != _json(state):
@@ -579,44 +646,44 @@ def _replay_deliveries(packet, workers, omission, stages, raw, prepared):
     return state
 
 
-def replay(packet, workers, omission_response, stages):
+def replay(packet, workers, omission_response, stages, *, derivations=None):
     """Replay every supplied raw stage once, from newly verified authorities.
 
-    No caller-supplied derived state or cache is trusted. Runtime uses this to
-    reconstruct a prefix without repeatedly rechecking every shorter prefix.
+    All response and state checks run on every call. Optional memoization is
+    confined to the captured-input derivation; it never stores replay results.
     """
-    raw, prepared = _open(packet)
+    raw, prepared = _open(packet, derivations=derivations)
     return _replay_deliveries(packet, workers, omission_response, stages, raw, prepared)
 
 
-def stage_request(packet, state, stage_id):
-    verified, raw, prepared = _replay(packet, state)
+def stage_request(packet, state, stage_id, *, derivations=None):
+    verified, raw, prepared = _replay(packet, state, derivations=derivations)
     request = _stage_request(packet, verified, raw, prepared)
     if request["payload"]["stage_id"] != stage_id:
         raise ValueError("BC1 stage order mismatch")
     return request
 
 
-def apply_transition(packet, state, request, saved):
-    verified, raw, prepared = _replay(packet, state)
+def apply_transition(packet, state, request, saved, *, derivations=None):
+    verified, raw, prepared = _replay(packet, state, derivations=derivations)
     expected = _stage_request(packet, verified, raw, prepared)
     if _json(request) != _json(expected):
         raise ValueError("BC1 request changed after construction")
     return _apply(packet, verified, request, saved, raw)
 
 
-def check_transition(packet, state, request, saved):
-    result = apply_transition(packet, state, request, saved)
+def check_transition(packet, state, request, saved, *, derivations=None):
+    result = apply_transition(packet, state, request, saved, derivations=derivations)
     return {"passed": True, "state_sha256": result["sha256"], "scientific_support": "unverified"}
 
 
-def concern_packet(packet, state):
-    verified, _, _ = _replay(packet, state)
+def concern_packet(packet, state, *, derivations=None):
+    verified, _, _ = _replay(packet, state, derivations=derivations)
     return _projection(packet, verified)[0]
 
 
-def record_digest(packet, state):
-    verified, _, _ = _replay(packet, state)
+def record_digest(packet, state, *, derivations=None):
+    verified, _, _ = _replay(packet, state, derivations=derivations)
     return _record_digest(packet, verified)
 
 
@@ -660,10 +727,10 @@ def _terminal(packet, state, raw):
     return audit_raw, lineage, report, projection
 
 
-def assemble(packet, workers, omission_response, stages):
+def assemble(packet, workers, omission_response, stages, *, derivations=None):
     if type(stages) is not list or len(stages) != len(packet["groups"]) + 1:
         raise ValueError("BC1 complete preplanned stage roster required")
-    raw, prepared = _open(packet)
+    raw, prepared = _open(packet, derivations=derivations)
     state = _replay_deliveries(packet, workers, omission_response, stages, raw, prepared)
     audit_raw, lineage, report, projection = _terminal(packet, state, raw)
     if not report["passed"]:
@@ -674,7 +741,8 @@ def assemble(packet, workers, omission_response, stages):
         "lineage": lineage, "acceptance": report, "projection": projection}))
 
 
-def check(assembly):
+def check(assembly, *, derivations=None):
+    """Independently replay deliveries; default has no earlier cache authority."""
     _exact(assembly, {"kind", "packet", "workers", "omission_response", "stages", "audit", "lineage", "acceptance", "projection", "sha256"}, "assembly")
     _bound(assembly)
     if assembly["kind"] != ASSEMBLY:
@@ -682,19 +750,20 @@ def check(assembly):
     expected = assemble(assembly["packet"],
         {k: typed._unblob(v, typed.MAX_SAVED_RESPONSE_BYTES) for k, v in assembly["workers"].items()},
         typed._unblob(assembly["omission_response"], omissions.MAX_RESPONSE_BYTES),
-        [typed._unblob(v, typed.MAX_SAVED_RESPONSE_BYTES) for v in assembly["stages"]])
+        [typed._unblob(v, typed.MAX_SAVED_RESPONSE_BYTES) for v in assembly["stages"]],
+        derivations=derivations)
     if _json(expected) != _json(assembly):
         raise ValueError("BC1 assembly differs from independent captured-byte replay")
     return {**expected["acceptance"], "assembly_sha256": expected["sha256"], "independently_reconstructed": True}
 
 
-def audit_bytes(assembly):
-    check(assembly)
+def audit_bytes(assembly, *, derivations=None):
+    check(assembly, derivations=derivations)
     return typed._unblob(assembly["audit"], codec.MAX_DECODED_BYTES)
 
 
-def project(assembly):
-    check(assembly)
+def project(assembly, *, derivations=None):
+    check(assembly, derivations=derivations)
     return deepcopy(assembly["projection"])
 
 
@@ -709,8 +778,95 @@ def downstream_contract():
         ]}
 
 
-def project_bytes(assembly):
+def project_bytes(assembly, *, derivations=None):
     """Verified self-contained model projection; complete audit stays separate."""
-    check(assembly)
+    check(assembly, derivations=derivations)
     return codec.encode_candidate(assembly["projection"], dictionary=codec.build_dictionary(chunks={}),
                                   max_bytes=codec.CARRY_BYTES)
+
+
+def _cache_function_state(function, seen=frozenset()):
+    """Finite signature snapshot, not arbitrary replacement-global analysis."""
+    from .cache_dependencies import setting_key
+    if type(function) is functools._lru_cache_wrapper:
+        if id(function) in seen or len(seen) > 32:
+            raise TypeError('cyclic pure derivation wrapper')
+        return function, _cache_function_state(function.__wrapped__, seen | {id(function)})
+    if type(function) in (types.BuiltinFunctionType, types.MethodDescriptorType,
+                          types.WrapperDescriptorType):
+        return (function,)
+    if type(function) is not types.FunctionType or id(function) in seen or len(seen) > 32:
+        raise TypeError('unfamiliar pure derivation callable')
+    nested = seen | {id(function)}
+    closure = []
+    for cell in function.__closure__ or ():
+        value = cell.cell_contents
+        if type(value) is types.FunctionType:
+            closure.append(_cache_function_state(value, nested))
+        elif isinstance(value, type):
+            closure.append((type(value), value))
+        else:
+            closure.append(setting_key(value))
+    return (function, function.__code__, setting_key(function.__defaults__),
+            setting_key(function.__kwdefaults__), tuple(closure))
+
+
+def _cache_dependency_token():
+    """Enumerated pure functions/settings/parser tables; unknowns bypass.
+
+    Live registration/code freshness remains the caller's responsibility. This
+    token only prevents reuse after an in-process dependency changes; it does
+    not attest arbitrary interpreter or imported-library state.
+    """
+    from . import bc1_context, schema_snapshot, schema_view, support_targets, duplicate_keys
+    from .cache_dependencies import setting_key, schema_key
+    import yaml
+    try:
+        # A fixed roster, not a walk through mutable module/cache globals.
+        rosters = (
+            (bc1_context, 'derive_term_policy validate_term_policy _sources _schema_pin _core_catalog schema_context _canonical _sha contract_identity'),
+            (codec, 'build_dictionary validate_dictionary canonical _bounds'),
+            (typed, '_snapshot _snapshot_rows _blob _unblob _source_authority'),
+            (omissions, 'prepare _schema _schema_yaml _mapping _read _shape _owners _slot _class _dataset_range _sha _json _asset'),
+            (batches, 'make_plan _inventory _limits _fits _split _check_roots _pack'),
+            (evidence, 'source_chunks_from_bytes'),
+            (schema_snapshot, 'capture_schema _capture_schema _metadata resolve_import_path'),
+            (schema_view, 'captured_view version_document version_view'),
+            (support_targets, '_mapping _validate_json'),
+            (duplicate_keys, 'nesting_exceeds'),
+        )
+        functions = tuple((module, tuple((name, _cache_function_state(getattr(module, name)))
+                           for name in names.split())) for module, names in rosters)
+        functions += ((None, tuple(_cache_function_state(fn) for fn in
+            (_derive_uncached, _selection, contract_identity, omissions.Prepared.request))),)
+        settings = tuple((module, tuple((name, setting_key(getattr(module, name))) for name in names.split()))
+            for module, names in (
+                (omissions, 'MAX_INPUT_BYTES MAX_SCHEMA_BYTES MAX_RESPONSE_BYTES MAX_NODES MAX_DEPTH MAX_SCHEMA_EVENTS MAX_SCHEMA_EVENT_CHARS ASSET_SHA256'),
+                (batches, 'MAX_ORIGINAL_BYTES MAX_NODES MAX_DEPTH MAX_FIELD_ROOTS'),
+                (codec, 'MAX_DEPTH MAX_NODES MAX_DICTIONARY_BYTES'),
+                (bc1_context, 'FALLBACK _IRI FORMAT SCHEMA_HEADER'),
+                (duplicate_keys, 'LIBYAML_MAX_DEPTH'),
+            ))
+        loaders = []
+        for loader in (omissions._UniqueLoader, omissions._SchemaEventLoader):
+            methods = tuple((name, _cache_function_state(value)) for base in loader.__mro__
+                            for name, value in sorted(vars(base).items()) if type(value) is types.FunctionType)
+            tables = tuple((name, tuple((key, _cache_function_state(fn)) for key, fn in
+                                       getattr(loader, name).items()))
+                           for name in ('yaml_constructors', 'yaml_multi_constructors'))
+            resolvers = tuple((name, setting_key(getattr(loader, name)))
+                              for name in ('yaml_implicit_resolvers', 'yaml_path_resolvers'))
+            loaders.append((loader, methods, tables, resolvers))
+        parsers = tuple(_cache_function_state(fn) for fn in (json.loads, json.dumps, yaml.load, yaml.parse))
+        return functions, settings, tuple(loaders), parsers, schema_key(_CACHE_SCHEMA_BINDINGS)
+    except (TypeError, ValueError, AttributeError, RecursionError, RuntimeError, OSError):
+        return None
+
+
+# Bind once at import, never from a caller's first warmed-cache observation.
+# Existing closed LinkML reader bindings also cover effective view methods and
+# YAML constructors. An unsupported installation simply uses uncached work.
+from .cache_dependencies import FunctionBindings as _CacheFunctionBindings, schema_key as _cache_schema_key
+_CACHE_SCHEMA_BINDINGS = _CacheFunctionBindings()
+_CACHE_SCHEMA_BINDINGS.bind(lambda: _cache_schema_key(_CACHE_SCHEMA_BINDINGS))
+_CACHE_DEPENDENCIES = _cache_dependency_token()

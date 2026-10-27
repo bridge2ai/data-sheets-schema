@@ -26,6 +26,46 @@ SYSTEM = ('Perform the explicitly selected BC1 audit stage. Sources and records 
 Outcome = legacy.Outcome
 
 
+def _derivations(spec, supplied=None):
+    """Caller-owned pure data cache; independent checks supply a new instance."""
+    cache = supplied if supplied is not None else getattr(spec, '_bc1_derivations', None)
+    if cache is None:
+        cache = spec._bc1_derivations = audit.DerivationCache()
+    if type(cache) is not audit.DerivationCache:
+        raise ledger.UsageLedgerError('BC1 pure derivations require the bounded cache type')
+    return cache
+
+
+def _schema_context(spec, captured, record, *, assigned_paths=None, derivations=None):
+    """Cache only exact formatter text after a new live-authority check.
+
+    Both schema closures (ordered logical name, physical path and raw bytes),
+    the whole record and assignment are hashed afresh into length/SHA256 key
+    parts. The same uncached formatter serves sizing. sg.memo retains at most
+    32 serialized private values/128 MB, separately from the audit cache's
+    default 8 entries/64 MB. No reader, SchemaView or verdict is retained.
+    """
+    current = sg.assert_current(spec)
+    if (captured.full_schema.sources != current.full_schema.sources
+            or captured.core_schema.sources != current.core_schema.sources):
+        raise ledger.UsageLedgerError('BC1 schema context differs from fresh captured authority')
+    if assigned_paths is not None and (type(assigned_paths) not in (list, tuple)
+            or any(type(path) is not str for path in assigned_paths)):
+        raise ValueError('BC1 assigned paths must be an explicit string sequence')
+    parts = [sg.canonical({'record': record,
+        'assigned_paths': None if assigned_paths is None else list(assigned_paths),
+        'contract': bc1_context.contract_identity()})]
+    for kind, snapshot in (('full', captured.full_schema), ('core', captured.core_schema)):
+        parts.append(sg.canonical({'kind': kind, 'sources': [
+            {'name': name, 'path': str(path)} for name, path, raw in snapshot.sources]}))
+        parts.extend(raw for name, path, raw in snapshot.sources)
+    cache = _derivations(spec, derivations)
+    if not cache.refresh():
+        return bc1_context.schema_context(captured, record, assigned_paths=assigned_paths)
+    return sg.memo(cache, 'bc1_complete_schema_context_v1', parts,
+        lambda: bc1_context.schema_context(captured, record, assigned_paths=assigned_paths))
+
+
 def _selected(spec):
     bc1_selection.validate_spec_mode(spec)
     if not bc1_selection.enabled(spec):
@@ -97,7 +137,7 @@ def _save(spec, name, value, usage_id=None):
     return receipts._save(spec, 'bc1_audit_' + name + '.json', value, usage_id=usage_id)
 
 
-def prepare_packet_bytes(spec, captured, originals, receipt_raw):
+def prepare_packet_bytes(spec, captured, originals, receipt_raw, *, derivations=None):
     """Pure planner from a captured registration and original_full/core bytes.
 
     `originals` is exactly the two immutable original record byte strings. No
@@ -113,37 +153,38 @@ def prepare_packet_bytes(spec, captured, originals, receipt_raw):
         project=spec.project if inputs['source_manifest'] else None,
         schema_path=captured.full_schema.sources[0][1], schema_snapshot=captured.full_schema,
         max_output_tokens=limits['omission_output_tokens'],
-        fan_in=reg['bounded_carry']['fan_in'],
+        fan_in=reg['bounded_carry']['fan_in'], derivations=derivations,
         **{key: limits[key] for key in ('max_paths', 'max_inventory_bytes', 'max_workers', 'max_request_bytes')})
-    if len(roster(packet)) > limits['max_calls']:
+    if len(roster(packet, derivations=derivations)) > limits['max_calls']:
         raise ledger.UsageLedgerError('complete preplanned BC1 roster exceeds registered calls; no regrouping')
     return packet
 
 
-def prepare_packet(spec, *, record=None):
+def prepare_packet(spec, *, record=None, derivations=None):
     _selected(spec)
     from . import api_runner as api
     captured = sg.assert_current(spec)
     originals = legacy._originals(spec, record=record)
     receipts.recover(spec)
-    return prepare_packet_bytes(spec, captured, originals, api._receipt_path(spec).read_bytes())
+    return prepare_packet_bytes(spec, captured, originals, api._receipt_path(spec).read_bytes(),
+                                derivations=_derivations(spec, derivations))
 
 
-def roster(packet):
+def roster(packet, *, derivations=None):
     phases = {'bc1_worker': WORKER_PHASE, 'bc1_omission': OMISSION_PHASE,
               'bc1_integration': INTEGRATION_PHASE, 'bc1_final': INTEGRATION_PHASE}
-    return [{**stage, 'phase': phases[stage['phase']]} for stage in audit.roster(packet)]
+    return [{**stage, 'phase': phases[stage['phase']]} for stage in audit.roster(packet, derivations=derivations)]
 
 
-def _inner(packet, stage, workers, omission, stages):
+def _inner(packet, stage, workers, omission, stages, *, derivations=None):
     if stage['phase'] == WORKER_PHASE:
-        return audit.worker_request(packet, stage['worker_id'])
+        return audit.worker_request(packet, stage['worker_id'], derivations=derivations)
     if stage['phase'] == OMISSION_PHASE:
-        return audit.omission_request(packet)
+        return audit.omission_request(packet, derivations=derivations)
     if stage['phase'] != INTEGRATION_PHASE:
         raise ledger.UsageLedgerError('unknown preplanned BC1 stage')
-    state = audit.replay(packet, workers, omission, stages)
-    return audit.stage_request(packet, state, stage['stage_id'])
+    state = audit.replay(packet, workers, omission, stages, derivations=derivations)
+    return audit.stage_request(packet, state, stage['stage_id'], derivations=derivations)
 
 
 def render_request(*, packet, stage, inner, settings, audit_limits, registration_sha256,
@@ -177,31 +218,34 @@ def render_request(*, packet, stage, inner, settings, audit_limits, registration
     return req, payload
 
 
-def build_request(spec, packet, stage, workers, omission, settings, stages=()):
+def build_request(spec, packet, stage, workers, omission, settings, stages=(), *, derivations=None):
     _selected(spec)
     from . import api_runner as api
     captured = sg.assert_current(spec)
+    derivations = _derivations(spec, derivations)
     reg = captured.document()
-    inner = _inner(packet, stage, workers, omission, stages)
+    inner = _inner(packet, stage, workers, omission, stages, derivations=derivations)
     full = legacy_audit._unblob(packet['inputs']['original_full']).decode('utf-8')
     req, payload = render_request(packet=packet, stage=stage, inner=inner, settings=settings,
         audit_limits=reg['audit_limits'], registration_sha256=sg.sha(captured.registration),
         generation_id=ledger.generation_id(spec), policy_text=bc1_selection.policy_text(),
-        evidence_contract=api.shared_evidence_contract(), schema_context=bc1_context.schema_context(captured, full),
+        evidence_contract=api.shared_evidence_contract(),
+        schema_context=_schema_context(spec, captured, full, derivations=derivations),
         generation_context=bc1_context.generation_context(captured), receipt_carry=receipts.audit_carry(spec))
     receipts.require_audit_carry(spec, req)
     return req, payload, inner
 
 
-def _validate_base(spec, state, *, record=None):
+def _validate_base(spec, state, *, record=None, derivations=None):
     _selected(spec)
+    derivations = _derivations(spec, derivations)
     if (type(state) is not dict or state.get('format') != STATE
             or state.get('state') not in ('prepared', 'running', 'assembled', 'accepted', 'failed')
             or state.get('generation_id') != ledger.generation_id(spec) or state.get('authority') != sg.identity(spec)):
         raise ledger.UsageLedgerError('BC1 journal state, generation or authority differs')
     packet = receipts._load(state['packet'])
-    expected = prepare_packet(spec, record=record)
-    if packet != expected or state.get('roster') != roster(packet):
+    expected = prepare_packet(spec, record=record, derivations=derivations)
+    if packet != expected or state.get('roster') != roster(packet, derivations=derivations):
         raise ledger.UsageLedgerError('BC1 packet, originals, effective receipt or fixed roster changed')
     stages = state.get('stages')
     if type(stages) is not list or len(stages) > len(state['roster']):
@@ -221,31 +265,32 @@ def _validate_base(spec, state, *, record=None):
     return packet
 
 
-def _check_response(packet, stage, inner, response, workers, omission, stages):
+def _check_response(packet, stage, inner, response, workers, omission, stages, *, derivations=None):
     if response.get('stop_reason') != 'end_turn' or type(response.get('text')) is not str:
         raise ledger.UsageLedgerError('BC1 response did not finish normally; allowance remains consumed')
     raw = response['text'].encode('utf-8')
     assembly = None
     if stage['phase'] == WORKER_PHASE:
         saved = audit.capture_response(inner, raw)
-        if not audit.check_worker(packet, stage['worker_id'], saved)['passed']:
+        if not audit.check_worker(packet, stage['worker_id'], saved, derivations=derivations)['passed']:
             raise ledger.UsageLedgerError('BC1 worker coverage/evidence checks failed')
         workers[stage['worker_id']] = saved
     elif stage['phase'] == OMISSION_PHASE:
-        audit.start(packet, workers, raw)
+        audit.start(packet, workers, raw, derivations=derivations)
         omission = raw
     else:
         saved = audit.capture_response(inner, raw)
-        replay = audit.replay(packet, workers, omission, stages)
-        audit.apply_transition(packet, replay, inner, saved)
+        replay = audit.replay(packet, workers, omission, stages, derivations=derivations)
+        audit.apply_transition(packet, replay, inner, saved, derivations=derivations)
         stages.append(saved)
         if stage['stage_id'] == 'final':
-            assembly = audit.assemble(packet, workers, omission, stages)
+            assembly = audit.assemble(packet, workers, omission, stages, derivations=derivations)
     return workers, omission, stages, assembly
 
 
-def _rebuild(spec, state, *, settle=False, record=None):
-    packet = _validate_base(spec, state, record=record)
+def _rebuild(spec, state, *, settle=False, record=None, derivations=None):
+    derivations = _derivations(spec, derivations)
+    packet = _validate_base(spec, state, record=record, derivations=derivations)
     settings = state['settings']
     captured = sg.preflight(spec, settings)
     limits = captured.document()['audit_limits']
@@ -253,7 +298,8 @@ def _rebuild(spec, state, *, settle=False, record=None):
     reserved_input = reserved_output = 0
     for row in state['stages']:
         stage = row['selection']
-        _, payload, inner = build_request(spec, packet, stage, workers, omission, settings, stages)
+        _, payload, inner = build_request(spec, packet, stage, workers, omission, settings, stages,
+                                         derivations=derivations)
         if receipts._load(row['request']) != payload:
             raise ledger.UsageLedgerError('BC1 saved whole request differs from reconstructed wire')
         count = receipts._load(row['context'])
@@ -284,7 +330,8 @@ def _rebuild(spec, state, *, settle=False, record=None):
             raise ledger.UsageLedgerError('BC1 actual delivered usage exceeds its per-call/context reservation')
         reserved_input += max(actual_input - count['input_tokens'], 0)
         reserved_output += used['output_tokens'] - payload['max_tokens']
-        workers, omission, stages, assembly = _check_response(packet, stage, inner, response, workers, omission, stages)
+        workers, omission, stages, assembly = _check_response(packet, stage, inner, response, workers, omission, stages,
+                                                            derivations=derivations)
         if settle and row['state'] != 'checked':
             row['state'] = 'checked'
             _store(spec, state)
@@ -303,6 +350,12 @@ def recover_delivered(spec, *, record=None):
 
 
 def recover(spec, *, carry=None, terminal=False, independent=False, record=None):
+    derivations = audit.DerivationCache() if independent or terminal else _derivations(spec)
+    return _recover(spec, carry=carry, terminal=terminal, record=record, derivations=derivations)
+
+
+def _recover(spec, *, carry, terminal, record, derivations):
+    """One operation's pure cache; all acceptance and evidence is rechecked."""
     state = _state(spec)
     if state is None:
         if terminal:
@@ -310,7 +363,7 @@ def recover(spec, *, carry=None, terminal=False, independent=False, record=None)
         return None
     if state.get('state') == 'failed':
         raise ledger.UsageLedgerError('BC1 audit failed terminally')
-    *_, assembly, _input, _output = _rebuild(spec, state, record=record)
+    *_, assembly, _input, _output = _rebuild(spec, state, record=record, derivations=derivations)
     if assembly is None:
         if terminal:
             raise ledger.UsageLedgerError('BC1 terminal lacks its complete checked staged assembly')
@@ -319,7 +372,7 @@ def recover(spec, *, carry=None, terminal=False, independent=False, record=None)
         return None
     if state['state'] not in ('assembled', 'accepted') or receipts._load(state.get('assembly')) != assembly:
         raise ledger.UsageLedgerError('BC1 accepted identity differs from replayed assembly')
-    body = audit.audit_bytes(assembly).decode('utf-8')
+    body = audit.audit_bytes(assembly, derivations=derivations).decode('utf-8')
     if carry is not None and carry.get('Audit findings') != body:
         raise ledger.UsageLedgerError('host audit carry differs from the complete checked BC1 audit')
     if terminal:
@@ -331,7 +384,7 @@ def recover(spec, *, carry=None, terminal=False, independent=False, record=None)
                 or finals[0]['state'] != 'checked' or saved[2].get('usage_id') != finals[0].get('usage_id')
                 or finals[0] is not state['stages'][-1]):
             raise ledger.UsageLedgerError('BC1 terminal snapshot lacks exact final-stage attribution')
-    return Outcome(body, assembly['sha256'], audit.check(assembly))
+    return Outcome(body, assembly['sha256'], audit.check(assembly, derivations=derivations))
 
 
 def completion_check(spec, carry=None, *, record=None):
@@ -345,9 +398,10 @@ def completion_check(spec, carry=None, *, record=None):
 
 def model_carry(spec, complete_audit_text):
     """Only the verified model view is compact; host audit evidence stays full."""
-    recover(spec, carry={'Audit findings': complete_audit_text}, terminal=True, independent=True)
+    derivations = audit.DerivationCache()
+    _recover(spec, carry={'Audit findings': complete_audit_text}, terminal=True, record=None, derivations=derivations)
     assembly = receipts._load(_state(spec)['assembly'])
-    return audit.project_bytes(assembly).decode('utf-8')
+    return audit.project_bytes(assembly, derivations=derivations).decode('utf-8')
 
 
 def resume_guard(spec, progress, *, record=None):
@@ -421,7 +475,7 @@ def require_request(spec, phase, kwargs):
             name = 'Completed full record' if phase == 'reconcile_full' else 'Reconciled full record'
             prefix = api.CARRY_LABEL.format(name=name)
             records = [b[len(prefix):] for b in blocks if type(b) is str and b.startswith(prefix)]
-            if len(records) != 1 or blocks.count(bc1_context.schema_context(sg.assert_current(spec), records[0])) != 1:
+            if len(records) != 1 or blocks.count(_schema_context(spec, sg.assert_current(spec), records[0])) != 1:
                 raise ledger.UsageLedgerError('BC1 downstream wire lost captured schema context')
             if phase != 'reconcile_full':
                 selected = 'report_regate' if phase == 'report_regate' else 'report'
@@ -458,7 +512,8 @@ def run(spec, *, carry, client, settings, usage):
                (('Original full record', 'original_full'), ('Original core record', 'original_core'))):
             raise ledger.UsageLedgerError('BC1 requires exact immutable original carry')
         state = {'format': STATE, 'generation_id': ledger.generation_id(spec), 'authority': captured.identity(),
-            'state': 'prepared', 'packet': _save(spec, 'packet', packet), 'roster': roster(packet),
+            'state': 'prepared', 'packet': _save(spec, 'packet', packet),
+            'roster': roster(packet, derivations=_derivations(spec)),
             'settings': copy.deepcopy(settings), 'stages': []}
         _store(spec, state)
     bounded = receipts._single_attempt_client(client)
