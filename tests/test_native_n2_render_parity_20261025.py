@@ -12,6 +12,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+HISTORICAL_SOURCE = "fbf885213db040f5cbd19f742cdb7de76fd3382c"
 HELPER = ROOT / "scripts/adhoc/native_n2_render_parity_20261025.py"
 _spec = importlib.util.spec_from_file_location("native_n2_render_parity_test_helper", HELPER)
 helper = importlib.util.module_from_spec(_spec)
@@ -20,7 +21,10 @@ _spec.loader.exec_module(helper)
 
 @pytest.fixture
 def rendered_sections():
-    generic = (ROOT / helper.GENERIC).read_bytes()
+    # This helper deliberately verifies the pre-D38 render. Preserve that
+    # historical contract after restacking onto the rotated installed assets;
+    # current installed assets have their own 20261026 validation helper/tests.
+    generic = helper.git(ROOT, "show", HISTORICAL_SOURCE + ":" + helper.GENERIC)
     r9 = helper.between(generic, helper.R9_START, helper.R9_END, "R9")
     uniform = helper.RULE_START + b"\nBefore the reviewed rule.\n" + r9 + b"\nAfter the reviewed rule.\n"
     api = b"API-only prelude\n" + uniform + b"\n" + helper.RULE_END + b"\nAPI-only tail\n"
