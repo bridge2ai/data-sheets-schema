@@ -609,7 +609,7 @@ def main(argv=None) -> int:
     parser.add_argument(
         "--seed",
         default=None,
-        help="Cryptographic seed (at least 32 characters in campaign mode; auto-generated via secrets.token_hex(32) if omitted)",
+        help="Cryptographic seed (64 hex characters with at least 8 distinct hex digits in campaign mode; auto-generated via secrets.token_hex(32) if omitted)",
     )
     parser.add_argument("--cohort", choices=("campaign", "synthetic"), default="campaign",
                         help="Default: 24 records, v8 04f/04g + v10, 3 per project/arm; synthetic accepts other sizes")
