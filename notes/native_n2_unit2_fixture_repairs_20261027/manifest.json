@@ -1,0 +1,142 @@
+{
+  "aggregate_pass_claim": "not_made",
+  "excluded_case_and_cache_directories": "retained externally; contents not read or attested",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-n2-2-restack-20261026/scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "inputs_declared_completed_by_caller": true,
+  "metadata": "file bytes/modes preserved; archive timestamps normalized; directory metadata omitted",
+  "runs": [
+    {
+      "archive": {
+        "bytes": 753844,
+        "file": "run-01.tar.gz",
+        "sha256": "1fa6095973e6250da5a45f571489bb294a99a78a3dfe9c42c5b858286cc05621"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 3006782,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "51f7dcef98d0ffd70266f21c73a17d010c2c455b8b225d2dc3a4479657566417"
+        }
+      ],
+      "excluded": [],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {},
+        "outcomes": {}
+      },
+      "original_root": "/private/tmp/d4d-n2-unit2-repairs-20261027",
+      "selected_original_bytes_and_modes_unchanged": true
+    },
+    {
+      "archive": {
+        "bytes": 1515345,
+        "file": "run-02.tar.gz",
+        "sha256": "ad957d87899c53bd677bf3b63b4de980ac6064dc9dc7dc69acbfda5725061ff0"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 14959,
+          "mode": 420,
+          "path": "bootstrap.json",
+          "sha256": "2197812ec2b8fd3f0463b10fd8352dfa2c8ff2de0562dce9f309734b2471aa07"
+        },
+        {
+          "bytes": 12586,
+          "mode": 420,
+          "path": "origins-after.json",
+          "sha256": "a07c4a7a3170b47aa156ed97444c054ff2ef72f156396742fbcdaf75f5963d81"
+        },
+        {
+          "bytes": 10821,
+          "mode": 420,
+          "path": "origins-before.json",
+          "sha256": "8a08f311a56bbea5ebae7dba8605400a44fa4b2147498474b2012f3e026a89c7"
+        },
+        {
+          "bytes": 360,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "bf843c9f092504e559bbe7aece0d9a3b33c041f74bc81b93320a90595ccd439e"
+        },
+        {
+          "bytes": 828,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "d0583a7d15e071f9bc8c61a6e45690fb1167095129e44cfd75b220815b64d550"
+        },
+        {
+          "bytes": 431,
+          "mode": 420,
+          "path": "pytest-command.json",
+          "sha256": "95ce02ee6b1f84733e46dc229b166064d988edd3f29710a977d1f809054d81ac"
+        },
+        {
+          "bytes": 181,
+          "mode": 420,
+          "path": "pytest.log",
+          "sha256": "f7d2778bcb7ec9ab112956a4311bfc6621cd70ad604b06d9e86dce452d1871a1"
+        },
+        {
+          "bytes": 209499,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "edf17f8a4b3afb9bbb38f2aae3e4ee747d139888c0c500af67181701402a1c17"
+        },
+        {
+          "bytes": 3006782,
+          "mode": 420,
+          "path": "source-after.json",
+          "sha256": "51f7dcef98d0ffd70266f21c73a17d010c2c455b8b225d2dc3a4479657566417"
+        },
+        {
+          "bytes": 3006782,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "51f7dcef98d0ffd70266f21c73a17d010c2c455b8b225d2dc3a4479657566417"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 56,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 56,
+            "unmarked_identified_entries": 56,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-n2-unit2-repairs-20261027-r2",
+      "selected_original_bytes_and_modes_unchanged": true
+    }
+  ],
+  "scope": "selected_result_files_only_not_complete_synthetic_case_archive",
+  "selection": "top-level and neutral/omission stage JSON/log/XML files; ignored files included"
+}
