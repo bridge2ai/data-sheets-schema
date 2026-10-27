@@ -110,10 +110,14 @@ def test_actual_source_drift_after_valid_neutral_blocks_omission(setup_driver, m
     from utils import native_shared_acceptance as acceptance
     _root, baseline, origins, output = setup_driver
     calls = []
+    state = {'snapshot': baseline}
+    monkeypatch.setattr(acceptance, 'source', lambda _root: copy.deepcopy(state['snapshot']))
     def child(group, stage_output, expected, *, positive_label):
         calls.append(positive_label)
         write_evidence(stage_output, positive_label, baseline, origins)
-        monkeypatch.setattr(acceptance, 'source', lambda _root: {**baseline, 'tree': 'drifted'})
+        # Mutate the observed source state through the function already captured
+        # by the parent; rebinding the module attribute would not change it.
+        state['snapshot'] = {**baseline, 'tree': 'drifted'}
         return 0
     monkeypatch.setattr(driver, 'run', child)
     assert driver.run_positive(output, baseline['head']) == 1
