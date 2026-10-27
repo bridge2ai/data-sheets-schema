@@ -266,6 +266,13 @@ RECEIPTS_INSTRUMENT = ("v3 (#1053): an entry whose identity key the final list n
                        "own-id fragments exempt, unattesting snippets counted apart")
 
 
+#: The v4 text predates D37 and does not name `with_receipt_at_receipt` /
+#: `receiptable_at_receipt`, which v4 blocks carry since then. It stays as
+#: written: the rereceipt contract, the receipt-completion policy identity
+#: and the renderer-24+ assembly digest hash it, and the shared-generation
+#: pins own those (#5160). The keys' presence marks which v4 block a reader
+#: has, and a floor reading them fails closed on a block without them; the
+#: next instrument revision should name them.
 RERECEIPTS_INSTRUMENT = (
     "v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics "
     "split by declared phase1/rereceipt/unknown origin, with recorded chunk-status "
@@ -1363,8 +1370,10 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     reported as `reshaped_by_reconcile`, not as a path that never existed
     (#758). The API path has no re-receipt route after reconcile (#742), so
     this is a measured limitation, kept out of the findings and the gate.
-    Explicit version 4 adds origin/status accounting without changing the
-    coverage denominator or any gate; existing callers remain on version 3.
+    Explicit version 4 adds origin/status accounting, and the snapshot's own
+    coverage (`with_receipt_at_receipt` / `receiptable_at_receipt`) that a
+    receipted-part floor gates (D37), without changing any version-3 counter
+    or floor; existing callers remain on version 3.
     `identifier_bases` is independent of that version: None preserves the
     ambient legacy aliases, while an explicit table (including empty) is
     passed unchanged through identity remapping and coverage accounting.
@@ -1665,9 +1674,11 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # a later phase, which has no re-receipt route (#742). None (not 0) when
     # there is no snapshot to split against — the agentic path re-receipts.
     # The split is by *path resolution* in the snapshot, not value identity
-    # (#843): a reordered list entry counts as never_receipted, and a repair
-    # that rewrote an existing index does too — `added_after_receipt` is a
-    # floor on later-phase additions, not the whole of them.
+    # (#843), and it errs both ways (#5161): a reordered list entry, or a
+    # repair that rewrote an existing index, counts as never_receipted; a
+    # never-receipted value a later phase renamed, moved or shifted to a path
+    # the snapshot lacks counts as added. Reported, never gated: the
+    # receipted-part floor reads the snapshot's own coverage below (D37).
     never_receipted = added_after_receipt = None
     if original is not None:
         never_receipted = sum(1 for p in without if resolve(original, p))
@@ -1695,6 +1706,23 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
              "path_not_in_snapshot_count": len(not_in_snapshot) if original is not None else None,
              "reshaped_by_reconcile": reshaped,
              "receipts_to_removed_values": len(reshaped)}
+    if instrument_version == 4:
+        # What the receipted-part floor gates (D37, owner 2026-10-25, replacing
+        # D32): the coverage of the phase-1 snapshot, the record the receipt
+        # was written against. Each receipt path is credited where it was
+        # written; one the snapshot does not resolve earns nothing there, as
+        # it earns nothing in the final record (`not_in_snapshot`). A value a
+        # later phase added is not in the snapshot; a never-receipted value a
+        # later phase moved or rewrote is in it, uncovered, whatever became of
+        # it. None without a snapshot. Instrument 4 only, so v3 blocks
+        # recompute unchanged.
+        at_receipt = None
+        if original is not None:
+            at_receipt = _slot_coverage(original, attesting, {},
+                                        {p: "not_in_snapshot" for p in receipt_paths if not resolve(original, p)})
+        slots["receiptable_at_receipt"] = None if at_receipt is None else len(at_receipt["receiptable"])
+        slots["with_receipt_at_receipt"] = (None if at_receipt is None
+                                            else len(at_receipt["receiptable"]) - len(at_receipt["without"]))
 
     snippets["no_value_overlap_sample"] = snippets["no_value_overlap_sample"][:10]
     snippets["unattesting_sample"] = snippets["unattesting_sample"][:10]

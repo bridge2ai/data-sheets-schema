@@ -163,6 +163,7 @@ def test_build_registration_finds_draft_contexts(tmp_path):
 
     reg = build_registration(
         project="CHORUS",
+        partition="chorus",
         label="test_label",
         registration_path=reg_path,
         bundle_path=bundle_path,
