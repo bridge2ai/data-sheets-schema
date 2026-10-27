@@ -1,0 +1,67 @@
+{
+  "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+  "common": "74d1351a98ffa78794687681c853267df9e50b69",
+  "copied": [
+    {
+      "path": "src/data_sheets_schema/native_shared_contract.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "1355d964c0348d9aa0b13ab8f37a649864fca62afd15191d5acdde7e2f4ccf3e"
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_evidence.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "e5d2a8cd3569f797c21b9598a14058670ca6b92a855f11f42772b13b28d7c020"
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_selection.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "f42d01e65a0438d8031560136e6c99ed3f2bf44e4774684c4174b487de8b2f39"
+    },
+    {
+      "path": "src/data_sheets_schema/native_shared_render.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "8b09502eeac5488b74334365914d8a1470d84c4a67f6f057b81e0cd61a94c2f7"
+    },
+    {
+      "path": "src/download/prompts/native_shared_generation_v1.md",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c"
+    },
+    {
+      "path": "src/download/prompts/native_shared_receipt_policy_v1.md",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a"
+    },
+    {
+      "path": "tests/test_native_shared_contract.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "55441ed140f67cefa7e133167b31c01133402580fa2f44a6343653409028959d"
+    },
+    {
+      "path": "tests/test_native_shared_evidence.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "c839dc7cf593494bbfd4e3cc3130d859d191f182ffdff634e711d8e892f3a2e2"
+    },
+    {
+      "path": "tests/test_native_shared_selection.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "cdbf12d42158b5539141798470af12223c7f4135a79dd550fa245827327c2ab2"
+    },
+    {
+      "path": "tests/test_native_shared_render.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "6fe28a52dd0e8fcd388d8a405f11777d4bc7af521bbd3c61147714a8efc3340f"
+    },
+    {
+      "path": "tests/test_native_schema_metadata_reuse.py",
+      "source": "db0573d96bb16ee32d3537ea0a9ad0ca607e355a",
+      "sha256": "0833d2b44e53ccf2ef8bd99c4e150a3b0919fef2249b70952da7bfa96734f417"
+    }
+  ],
+  "patch_files": [
+    "src/data_sheets_schema/schema_snapshot.py",
+    "src/data_sheets_schema/api_runner.py"
+  ],
+  "patch_sha256": "1e19761e8accdd7d7b870a6cc9b3d1fb5885299f1c36a67addba6eefeca9301d",
+  "caller_cut": "RunSpec skips API-only select after exact native validation; shared_generation.py unchanged"
+}
