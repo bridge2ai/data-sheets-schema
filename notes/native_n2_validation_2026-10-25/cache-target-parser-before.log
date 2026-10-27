@@ -1,0 +1,18 @@
+F
+=================================== FAILURES ===================================
+_______ test_warm_catalog_preserves_current_schema_event_refusal[reader] _______
+tests/test_native_catalog_target_schema_events.py:31: in test_warm_catalog_preserves_current_schema_event_refusal
+    assert guard.runtime_token() is None
+E   assert <object object at 0x102f92300> is None
+E    +  where <object object at 0x102f92300> = <function runtime_token at 0x1079eba60>()
+E    +    where <function runtime_token at 0x1079eba60> = guard.runtime_token
+=============================== warnings summary ===============================
+../../../Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_native_catalog_target_schema_events.py::test_warm_catalog_preserves_current_schema_event_refusal[reader]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 warning in 0.80s

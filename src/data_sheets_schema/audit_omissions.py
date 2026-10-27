@@ -6,6 +6,7 @@ No provider, runtime, cache, record mutation or semantic certification. Execute
 from __future__ import annotations
 
 import argparse
+from collections import deque
 from dataclasses import dataclass
 import hashlib
 import json
@@ -33,6 +34,8 @@ MAX_NODES = 200_000
 MAX_DEPTH = 64
 MAX_SCHEMA_EVENTS = 131_072
 MAX_SCHEMA_EVENT_CHARS = 8_000_000
+_YAML_REPLAY_MAX_EVENTS = 400_008
+_YAML_REPLAY_MAX_TEXT_BYTES = 40_000_000
 LIMITATIONS = [
     "Scientific support, applicability, novelty and exhaustive recall are unverified.",
     "Chunk coverage and matching quotations are declaration/identity checks only.",
@@ -54,6 +57,107 @@ def _asset(name: str) -> bytes:
     if _sha(raw) != ASSET_SHA256[name]:
         raise ValueError(f"frozen omission policy/schema changed: {name}; use a new protocol version")
     return raw
+
+
+def captured_asset_bytes(captured_assets=None) -> dict[str, bytes]:
+    """Verify the fixed contract from immutable bytes, or use the legacy reader.
+
+    Explicit captures never fall back to installed files. Returning a new map
+    keeps caller-owned tuples immutable and does not retain a global loader.
+    """
+    if captured_assets is None:
+        return {name: _asset(name) for name in ASSET_SHA256}
+    if type(captured_assets) is not tuple or len(captured_assets) != len(ASSET_SHA256):
+        raise ValueError("captured omission assets require the exact immutable roster")
+    result = {}
+    for row in captured_assets:
+        if type(row) is not tuple or len(row) != 2:
+            raise ValueError("invalid captured omission asset row")
+        name, raw = row
+        if (type(name) is not str or name not in ASSET_SHA256 or name in result
+                or type(raw) is not bytes or not raw or len(raw) > MAX_INPUT_BYTES
+                or _sha(raw) != ASSET_SHA256[name]):
+            raise ValueError("captured omission asset name/bytes/hash mismatch")
+        result[name] = raw
+    return result
+
+
+class _EventReplayLoader(_UniqueLoader):
+    """Compose the same preflight events with the existing strict constructors."""
+    def __init__(self, text, events):
+        self._events = events
+        super().__init__(text)
+
+    def check_event(self, *choices):
+        return bool(self._events) and (not choices or isinstance(self._events[0], choices))
+
+    def peek_event(self):
+        return self._events[0] if self._events else None
+
+    def get_event(self):
+        return self._events.popleft() if self._events else None
+
+    def dispose(self):
+        self._events.clear()
+        super().dispose()
+
+
+def _legacy_yaml(text):
+    if nesting_exceeds(text, yaml.SafeLoader, MAX_DEPTH):
+        raise ValueError("depth bound exceeded")
+    return yaml.load(text, Loader=_UniqueLoader)
+
+
+def _event_text_bytes(event):
+    # Marks share the original Reader text (including its terminal NUL).
+    # Count expanded tags/directives too; text bytes are not an RSS estimate.
+    strings = [getattr(event, name, None) for name in ('value', 'tag', 'anchor', 'style', 'encoding')]
+    for key, value in (getattr(event, 'tags', None) or {}).items():
+        strings.extend((key, value))
+    return sum(len(value.encode('utf-8')) for value in strings if value is not None)
+
+
+def _load_yaml(text):
+    """Reuse only a complete bounded depth-safe SafeLoader event stream.
+
+    Malformed/over-budget input takes the exact legacy path, including its
+    error precedence. No input is refused because this optimization is full.
+    """
+    events = deque()
+    parser = yaml.parse(text, Loader=yaml.SafeLoader)
+    reusable = False
+    try:
+        total, depth = len(text.encode('utf-8')) + 1, 0
+        if total <= _YAML_REPLAY_MAX_TEXT_BYTES:
+            for event in parser:
+                if isinstance(event, (yaml.MappingStartEvent, yaml.SequenceStartEvent)):
+                    depth += 1
+                elif isinstance(event, (yaml.MappingEndEvent, yaml.SequenceEndEvent)):
+                    depth -= 1
+                total += _event_text_bytes(event)
+                if (depth > MAX_DEPTH or len(events) >= _YAML_REPLAY_MAX_EVENTS
+                        or total > _YAML_REPLAY_MAX_TEXT_BYTES):
+                    break
+                events.append(event)
+            else:
+                reusable = True
+    except (yaml.YAMLError, UnicodeError, TypeError, AttributeError, ValueError):
+        # In particular, an escaped surrogate may be accepted by the old
+        # reader although UTF-8 accounting cannot encode its scalar value.
+        pass
+    finally:
+        parser.close()
+    if not reusable:
+        events.clear()
+        return _legacy_yaml(text)
+    try:
+        loader = _EventReplayLoader(text, events)
+        try:
+            return loader.get_single_data()
+        finally:
+            loader.dispose()
+    finally:
+        events.clear()
 
 
 class _SchemaEventLoader(_UniqueLoader):
@@ -125,10 +229,12 @@ def _read(raw: bytes, label: str, *, json_only: bool = False, limit: int = MAX_I
         text = raw.decode("utf-8")
         if _schema_events and not json_only:
             value = _schema_yaml(text)
-        else:
+        elif json_only:
             if nesting_exceeds(text, yaml.SafeLoader, MAX_DEPTH):
                 raise ValueError("depth bound exceeded")
-            value = evidence.load_json(text) if json_only else yaml.load(text, Loader=_UniqueLoader)
+            value = evidence.load_json(text)
+        else:
+            value = _load_yaml(text)
         _validate_json(value, max_nodes=MAX_NODES, max_depth=MAX_DEPTH)
         return value
     except (ValueError, TypeError, KeyError, AttributeError, RecursionError, yaml.YAMLError) as exc:
@@ -146,8 +252,26 @@ def _shape(value, schema):
     return list(Draft202012Validator(schema).iter_errors(value))
 
 
-def _schema(path: Path, *, schema_snapshot=None) -> dict:
+def _schema(path: Path, *, schema_snapshot=None, logical_paths=False) -> dict:
     """Capture and validate each file once before constructing a schema view."""
+    return _schema_product(path, schema_snapshot=schema_snapshot,
+                           logical_paths=logical_paths, with_root_bases=False)[0]
+
+
+def _schema_with_root_bases(path: Path, *, schema_snapshot):
+    """Derive native root-only bases and the catalog from the same strict parse."""
+    catalog, bases = _schema_product(path, schema_snapshot=schema_snapshot,
+                                    logical_paths=True, with_root_bases=True)
+    return bases, catalog
+
+
+def _schema_product(path, *, schema_snapshot, logical_paths, with_root_bases):
+    bases = None
+    if with_root_bases:
+        from .grounding import declared_bases_of
+        # Preserve native root parsing/projection before closure validation.
+        # No caller supplies a parsed mapping or a prior validation verdict.
+        bases = tuple(declared_bases_of(_mapping(schema_snapshot.sources[0][2], 'captured schema')))
     from linkml_runtime.dumpers import json_dumper
     from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema, _capture_schema
     from data_sheets_schema.schema_view import captured_view
@@ -162,6 +286,8 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
         _mapping(raw, "schema", _schema_events=True)
         return raw
 
+    if logical_paths and schema_snapshot is None:
+        raise ValueError("logical schema replay requires captured schema bytes")
     if schema_snapshot is None:
         captured = capture_schema(path.absolute(), read_bytes=read, strict=True)
     else:
@@ -170,7 +296,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
         if type(schema_snapshot) is not SchemaSnapshot or type(schema_snapshot.sources) is not tuple or not schema_snapshot.sources:
             raise ValueError("schema_snapshot must be a nonempty immutable SchemaSnapshot")
         frozen = {}
-        for row in schema_snapshot.sources:
+        for ordinal, row in enumerate(schema_snapshot.sources):
             if type(row) is not tuple or len(row) != 3:
                 raise ValueError("invalid captured schema source")
             name, selected, raw = row
@@ -181,7 +307,10 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
             total += len(raw)
             if total > MAX_SCHEMA_BYTES:
                 raise ValueError("schema closure exceeds byte bound")
-            _mapping(raw, "schema", _schema_events=True)
+            # Only native ordinal zero has already passed this strict reader
+            # in this call. Imports retain their independent validation.
+            if not with_root_bases or ordinal != 0:
+                _mapping(raw, "schema", _schema_events=True)
             frozen[selected] = raw
         root = schema_snapshot.sources[0][1]
         if path.absolute() != root:
@@ -192,7 +321,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
                 raise ValueError("schema import is outside the captured closure")
             return frozen[selected]
 
-        replay = _capture_schema(root, frozen_read, strict=True)
+        replay = _capture_schema(root, frozen_read, strict=True, logical_paths=logical_paths)
         if replay.sources != schema_snapshot.sources:
             raise ValueError("schema snapshot is not the exact declared import closure")
         captured = replay
@@ -220,7 +349,7 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
                 if enum:
                     enums[str(slot.range)] = json.loads(json_dumper.dumps(enum))
     return {"root_class": "Dataset", "classes": classes, "enums": enums,
-            "sources": [{"name": name, "sha256": _sha(raw)} for name, _path, raw in captured.sources]}
+            "sources": [{"name": name, "sha256": _sha(raw)} for name, _path, raw in captured.sources]}, bases
 
 
 def _class(catalog, name):
@@ -387,13 +516,24 @@ class Prepared:
 
 def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             context: bytes, schema_path: Path, max_output_tokens: int, schema_snapshot=None,
-            max_request_bytes: int = 32_000_000) -> Prepared:
+            max_request_bytes: int = 32_000_000, captured_assets=None) -> Prepared:
     """Read schema once, capture input bytes, render no transport-specific call."""
+    return _prepare(record=record, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, schema_path=schema_path, max_output_tokens=max_output_tokens,
+        schema_snapshot=schema_snapshot, max_request_bytes=max_request_bytes,
+        captured_assets=captured_assets)
+
+
+def _prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
+             context: bytes, schema_path: Path, max_output_tokens: int, schema_snapshot=None,
+             max_request_bytes: int = 32_000_000, captured_assets=None, _catalog=None) -> Prepared:
+    """Common constructor; only the typed prepare stack supplies a fresh catalog."""
     if any(type(n) is not int or n < 1 for n in (max_output_tokens, max_request_bytes)):
         raise ValueError("request/output limits must be explicit positive integers")
-    policy = _asset("policy.md").decode("utf-8")
-    response_schema = json.loads(_asset("response.schema.json"))
-    context_schema = json.loads(_asset("context.schema.json"))
+    assets = captured_asset_bytes(captured_assets)
+    policy = assets["policy.md"].decode("utf-8")
+    response_schema = json.loads(assets["response.schema.json"])
+    context_schema = json.loads(assets["context.schema.json"])
     document = _mapping(record, "record")
     receipt_doc = _mapping(receipt, "receipt")
     _mapping(manifest, "manifest")
@@ -425,7 +565,9 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             raise ValueError("receipt contains an unknown chunk status")
         prior[key] = status
     try:
-        catalog = _schema(Path(schema_path), schema_snapshot=schema_snapshot)
+        catalog = (_catalog if _catalog is not None else
+                   _schema(Path(schema_path), schema_snapshot=schema_snapshot,
+                           logical_paths=captured_assets is not None))
     except (KeyError, TypeError, AttributeError, RecursionError, yaml.YAMLError) as exc:
         raise ValueError("selected schema cannot be captured unambiguously") from exc
     owners = _owners(document, catalog, context_doc["vocabulary"])
