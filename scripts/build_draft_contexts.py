@@ -173,20 +173,21 @@ def load_project_manifest_data(
         sm = Path(source_manifest_path)
         if sm.is_file():
             manifest_data = yaml.safe_load(sm.read_text(encoding="utf-8")) or {}
+        if sm.resolve() == DEFAULT_MANIFEST_PATH.resolve():
+            scope_map = manifest_data.get("scope", {}) if isinstance(manifest_data, dict) else {}
+            if (
+                norm_project.upper() == "KIDS_FIRST"
+                and not any(k.upper() == "KIDS_FIRST" for k in (scope_map or {}))
+                and KIDS_FIRST_MANIFEST_PATH.is_file()
+            ):
+                manifest_data = (
+                    yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
+                )
     elif norm_project.upper() == "KIDS_FIRST" and KIDS_FIRST_MANIFEST_PATH.is_file():
         manifest_data = yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
     elif DEFAULT_MANIFEST_PATH.is_file():
         manifest_data = yaml.safe_load(DEFAULT_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
 
-    scope_map = manifest_data.get("scope", {}) if isinstance(manifest_data, dict) else {}
-    if (
-        norm_project.upper() == "KIDS_FIRST"
-        and not any(k.upper() == "KIDS_FIRST" for k in (scope_map or {}))
-        and KIDS_FIRST_MANIFEST_PATH.is_file()
-    ):
-        manifest_data = (
-            yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
-        )
     return manifest_data if isinstance(manifest_data, dict) else {}
 
 

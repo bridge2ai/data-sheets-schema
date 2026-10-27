@@ -238,3 +238,31 @@ def test_single_synthesizer_agreement_between_builders(manifest_data):
         if proj == "KIDS_FIRST":
             assert from_reg_builder["vocabulary"] == {}
 
+
+def test_custom_source_manifest_does_not_silently_fallback_for_kids_first(tmp_path):
+    """Explicit custom source_manifest_path lacking scope.KIDS_FIRST must be respected and never replaced by KIDS_FIRST_MANIFEST_PATH (R8-F4)."""
+    from scripts.build_api_registrations import build_draft_context
+    from scripts.build_draft_contexts import load_project_manifest_data
+
+    custom_manifest = tmp_path / "a23_explicit_custom_manifest.yaml"
+    custom_manifest.write_text(
+        "profile: neutral\nprojects:\n  KIDS_FIRST:\n    sources: []\nsource_priority:\n  1: [custom_source_only]\n",
+        encoding="utf-8",
+    )
+
+    loaded = load_project_manifest_data("KIDS_FIRST", custom_manifest)
+    assert loaded.get("source_priority") == {1: ["custom_source_only"]}
+    assert "scope" not in loaded
+
+    doc = build_draft_context(
+        "KIDS_FIRST",
+        source_manifest_path=custom_manifest,
+        write_to_disk=False,
+    )
+    assert doc["vocabulary"] == {}
+    assert doc["source_policy"]["priority"] == ["custom_source_only"]
+    assert doc["scopes"][0]["referent"] == "KIDS_FIRST dataset"
+    assert doc["scopes"][0]["release"] is None
+
+
+
