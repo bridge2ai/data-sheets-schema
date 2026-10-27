@@ -148,6 +148,7 @@ def _shared_spec(project, arm, label, condition, bundle, out_dir, runtime, provi
             profile_basis=inputs['profile']['basis'], runtime=api.RUNTIME,
             provider=expected['provider'], out_dir=Path(out_dir) if out_dir else None,
             shared_generation_version=reg['selection']['version'], shared_generation_registration=raw.decode('utf-8'),
+            bounded_carry_version=(reg.get('bounded_carry') or {}).get('version', 0),
             api_playbook_version=reg['selection']['api_playbook_version'], receipt_completion_version=reg['selection']['receipt_completion_version'],
             receipt_completion_registration=receipt_raw)
     except (ValueError, OSError) as exc:

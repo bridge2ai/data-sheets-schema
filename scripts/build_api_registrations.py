@@ -167,6 +167,8 @@ def resolve_audit_limits(
     overrides: dict[str, Any] | None = None,
     *,
     arm: str = "baseline",
+    bounded_carry_version: int = 0,
+    bc1_fan_in: int = 2,
 ) -> dict[str, Any]:
     """Defaults, then a named partition profile, then explicit overrides.
 
@@ -177,7 +179,11 @@ def resolve_audit_limits(
     an allowance no plan can use. A supplied value that disagrees is refused.
     ``max_calls`` defaults to that roster's length and may not be smaller.
     """
+    if type(bounded_carry_version) is not int or bounded_carry_version not in (0, 1):
+        raise ValueError("bounded_carry_version must be 0 or 1")
     limits = copy.deepcopy(DEFAULT_AUDIT_LIMITS)
+    if bounded_carry_version == 1:
+        limits["integration_output_tokens"] = 64_000
     if partition is not None:
         if partition not in PARTITION_PROFILES:
             raise ValueError(f"unknown partition profile {partition!r}; known: {sorted(PARTITION_PROFILES)}")
@@ -204,7 +210,14 @@ def resolve_audit_limits(
     roster = limits["max_workers"] + 2
     aggregate = (limits["max_workers"] * limits["worker_output_tokens"]
                  + limits["omission_output_tokens"] + limits["integration_output_tokens"])
+    if bounded_carry_version == 1:
+        from data_sheets_schema.bc1_selection import allowances
+        selected = allowances(limits["max_workers"], bc1_fan_in,
+            **{key: limits[key] for key in ("worker_output_tokens", "omission_output_tokens", "integration_output_tokens")})
+        roster, aggregate = selected["max_calls"], selected["aggregate_output_tokens"]
     if limits.get("aggregate_output_tokens") is not None and limits["aggregate_output_tokens"] != aggregate:
+        if bounded_carry_version == 1:
+            raise ValueError(f"BC1 aggregate_output_tokens must cover the explicit worker/omission/group/final roster: {aggregate}")
         raise ValueError(
             f"aggregate_output_tokens {limits['aggregate_output_tokens']} disagrees with the stage caps: "
             f"{limits['max_workers']} x {limits['worker_output_tokens']} + {limits['omission_output_tokens']}"
@@ -214,6 +227,8 @@ def resolve_audit_limits(
     if limits.get("max_calls") is None:
         limits["max_calls"] = roster
     if limits["max_calls"] < roster:
+        if bounded_carry_version == 1:
+            raise ValueError(f"BC1 max_calls {limits['max_calls']} cannot cover every worker, omission, group and final check ({roster})")
         raise ValueError(
             f"max_calls {limits['max_calls']} cannot cover {limits['max_workers']} workers"
             f" plus omission and integration ({roster})"
@@ -336,6 +351,17 @@ def check_registration_sizing(registration_path: Path | str, raw: bytes) -> dict
     """
     reg = json.loads(raw)
     limits = reg["audit_limits"]
+    if "bounded_carry" in reg:
+        from data_sheets_schema.bc1_registration import check_sizing_record
+        path = sizing_path(registration_path)
+        if not path.is_file():
+            raise ValueError("BC1 always requires its own actual-record sizing sidecar")
+        record = json.loads(path.read_bytes())
+        if (record.get("format") != SIZING_RECORD_FORMAT
+                or record.get("registration_sha256") != hashlib.sha256(raw).hexdigest()):
+            raise ValueError("BC1 sizing sidecar belongs to different registration bytes")
+        check_sizing_record(reg, record.get("sizing"))
+        return record
     _require_request_byte_calibration(limits)
     arm = next((key for key, value in ARMS.items() if value[0] == reg["run"]["arm"]), None)
     covered = profile_covered(reg["run"]["project"], arm, limits)
@@ -798,6 +824,8 @@ def prepare_registration(
     synthesize_draft_context: bool = False,
     sizing_record: SizingRecord | Path | str | None = None,
     sizing_stand_in: bool = False,
+    bounded_carry_version: int = 0,
+    bc1_fan_in: int = 2,
 ) -> tuple[dict[str, Any], list[tuple[Path, bytes]], dict[str, Any] | None]:
     """Build a complete shared_generation_registration_v1 document without writing it.
 
@@ -813,6 +841,15 @@ def prepare_registration(
     It is refused when a typed-audit call cannot fit its window or the
     allowance is below the sizing (#5155).
     """
+    if type(bounded_carry_version) is not int or bounded_carry_version not in (0, 1):
+        raise ValueError("bounded_carry_version must be 0 or 1")
+    if bounded_carry_version == 1:
+        from data_sheets_schema import bc1_selection
+        if sizing_record is None or sizing_stand_in:
+            raise ValueError("BC1 requires an actual sizing record of this project and arm; no stand-in waiver")
+        if synthesize_draft_context:
+            raise ValueError("BC1 requires an existing authentic omission context; no draft vocabulary injection")
+        bc1_selection.require_hooks()
     if arm not in ARMS:
         raise ValueError(f"unknown arm '{arm}'; must be one of {sorted(ARMS.keys())}")
     arm_display, method, pattern, _ = ARMS[arm]
@@ -975,7 +1012,8 @@ def prepare_registration(
     }
 
     # Resolve limits
-    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm)
+    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm,
+        bounded_carry_version=bounded_carry_version, bc1_fan_in=bc1_fan_in)
 
     active_receipt = copy.deepcopy(DEFAULT_RECEIPT_LIMITS)
     if coverage_floor is not None:
@@ -1020,14 +1058,25 @@ def prepare_registration(
         "receipt": active_receipt,
     }
 
+    if bounded_carry_version == 1:
+        reg["bounded_carry"] = bc1_selection.registration_block(fan_in=bc1_fan_in)
     canonical_bytes = sg.canonical(reg)
 
     # Validate strictly with shared_generation.parse_registration
     sg.parse_registration(canonical_bytes)
-    _require_request_byte_calibration(active_audit_limits)
+    if bounded_carry_version == 0:
+        _require_request_byte_calibration(active_audit_limits)
 
     sizing = None
-    if sizing_record is not None or not profile_covered(project, arm, active_audit_limits):
+    if bounded_carry_version == 1:
+        from data_sheets_schema import bc1_registration
+        if not isinstance(sizing_record, SizingRecord):
+            sizing_record = SizingRecord.in_directory(sizing_record, project)
+        context_raw = resolved_context_raw if resolved_context_raw is not None else resolved_context.read_bytes()
+        sizing = bc1_registration.size_inputs(reg, sizing_record=sizing_record,
+            context_raw=context_raw, schema_snapshot=full_schema)
+        bc1_registration.check_sizing_record(reg, sizing)
+    elif sizing_record is not None or not profile_covered(project, arm, active_audit_limits):
         if sizing_record is None:
             raise ValueError(
                 f"{project}: an audit-limit combination no partition profile covers needs a sizing record (#5155, #5211); "
@@ -1409,6 +1458,10 @@ def parse_sizing_records(values: tuple[str, ...] | list[str]) -> dict[str, Path]
     is_flag=True,
     help="Validate existing registrations and roster on disk without rebuilding.",
 )
+@click.option("--bounded-carry-version", type=click.IntRange(0, 1), default=0, show_default=True,
+              help="Explicit BC1 mode; version1 requires reviewed protected hooks and actual project sizing.")
+@click.option("--bc1-fan-in", type=click.IntRange(1, 2), default=2, show_default=True,
+              help="Registered BC1 worker inputs per integration group; never changed after dispatch.")
 @click.option(
     "--replace",
     is_flag=True,
@@ -1450,12 +1503,18 @@ def cli(
     synthesize_draft_context: bool,
     dry_run: bool,
     check: bool,
+    bounded_carry_version: int,
+    bc1_fan_in: int,
     replace: bool = False,
 ) -> None:
     """Build shared generation registrations and batch rosters for D4D Messages-API generic_v10."""
     target_projects: list[str] = []
     if all_projects:
-        target_projects = list(DEFAULT_PROJECTS)
+        if bounded_carry_version == 1:
+            from data_sheets_schema.bc1_registration import PROJECTS
+            target_projects = list(PROJECTS)
+        else:
+            target_projects = list(DEFAULT_PROJECTS)
     elif projects:
         for p in projects:
             for item in p.split(","):
@@ -1554,12 +1613,21 @@ def cli(
                 "sized for the project"
             )
         try:
-            resolve_audit_limits(proj, part, overrides or None, arm=arm)
+            resolve_audit_limits(proj, part, overrides or None, arm=arm,
+                                 bounded_carry_version=bounded_carry_version, bc1_fan_in=bc1_fan_in)
         except ValueError as exc:
             raise click.UsageError(f"{proj}: {exc}") from exc
 
     registrations: list[dict[str, Any]] = []
     outputs: list[tuple[Path, bytes]] = []
+    selected_manifest = source_manifest
+    if bounded_carry_version == 1:
+        # Let the existing per-project manifest resolver select its declared
+        # authority only when the caller did not choose a manifest explicitly.
+        # In particular --all must not bind Kids First to the study default.
+        ctx = click.get_current_context(silent=True)
+        if ctx is not None and ctx.get_parameter_source("source_manifest") == click.core.ParameterSource.DEFAULT:
+            selected_manifest = None
     click.echo(f"Building registrations for {target_projects} (arm: {arm}, labels: {target_labels})...")
 
     # Every registration is built, sized and checked before any file is written.
@@ -1576,7 +1644,7 @@ def cli(
                     id_prefix=id_prefix,
                     context_path=context_file,
                     context_dir=context_dir or out_dir,
-                    source_manifest_path=source_manifest,
+                    source_manifest_path=selected_manifest,
                     bundle_path=bundle,
                     chunk_manifest_path=chunk_manifest,
                     profile_name=profile_name,
@@ -1586,6 +1654,8 @@ def cli(
                     audit_limits=overrides or None,
                     synthesize_draft_context=synthesize_draft_context,
                     sizing_record=records.get(proj),
+                    bounded_carry_version=bounded_carry_version,
+                    bc1_fan_in=bc1_fan_in,
                 )
             except (ValueError, FileNotFoundError) as exc:
                 raise click.ClickException(f"{proj} ({lbl}): {exc}") from exc
@@ -1593,7 +1663,15 @@ def cli(
             outputs.extend(files)
             reg_sha = hashlib.sha256(sg.canonical(reg)).hexdigest()
             click.echo(f"  ✓ {proj}: registration_id={reg['registration_id']} sha256={reg_sha}")
-            if sizing is not None:
+            if sizing is not None and bounded_carry_version == 1:
+                cap = sizing["own_plan_scenarios"]["visible_cap_ascii_scenario"]
+                click.echo(f"    BC1 actual record: {sizing['plan_workers']} workers, "
+                           f"{len(sizing['groups'])} integration groups and one final check; "
+                           f"{cap['calls']} calls in this plan")
+                click.echo("    Future response scenarios are hypothetical; actual provider counts remain required.")
+                click.echo(f"    sizing record {Path(sizing['sidecar']['path']).name} "
+                           f"sha256={sizing['sidecar']['sha256']}")
+            elif sizing is not None:
                 limits, room = reg["audit_limits"], sizing["admissible_input_tokens"]
                 click.echo(
                     f"    input sized on {sizing['sizing_record']['full']['path']}"

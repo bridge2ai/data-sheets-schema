@@ -31,6 +31,16 @@ class Outcome:
     acceptance: dict
 
 
+def _bc1(spec):
+    # Lazy import preserves the historical implementation and avoids a module
+    # cycle: BC1 reuses only explicitly selected accounting/snapshot helpers.
+    from .bc1_selection import enabled
+    if enabled(spec):
+        from . import bc1_runtime
+        return bc1_runtime
+    return None
+
+
 def _state(spec):
     return ledger._read(spec).get('typed_audit') if ledger.ledger_path(spec).exists() else None
 
@@ -75,6 +85,8 @@ def _derivations(spec):
 
 def prepare_packet(spec, *, record=None):
     """Use the single captured registration closure and exact saved originals."""
+    if selected := _bc1(spec):
+        return selected.prepare_packet(spec, record=record)
     from . import api_runner as api
     captured = sg.assert_current(spec)
     reg = captured.document()
@@ -299,6 +311,8 @@ def _rebuild(spec, state, *, settle=False, record=None, _reader=None):
 
 def recover_delivered(spec, *, record=None):
     """Before generic pending-call refusal, recover only complete bound evidence."""
+    if selected := _bc1(spec):
+        return selected.recover_delivered(spec, record=record)
     state = _state(spec)
     if state is None:
         return
@@ -308,6 +322,8 @@ def recover_delivered(spec, *, record=None):
 
 
 def recover(spec, *, carry=None, terminal=False, independent=False, record=None):
+    if selected := _bc1(spec):
+        return selected.recover(spec, carry=carry, terminal=terminal, independent=independent, record=record)
     state = _state(spec)
     if state is None:
         if terminal:
@@ -350,6 +366,8 @@ def recover(spec, *, carry=None, terminal=False, independent=False, record=None)
 
 
 def completion_check(spec, carry=None, *, record=None):
+    if selected := _bc1(spec):
+        return selected.completion_check(spec, carry, record=record)
     outcome = recover(spec, carry=carry, terminal=True, independent=True, record=record)
     routing = {}
     if spec.shared_generation_version == 2:
@@ -362,6 +380,8 @@ def completion_check(spec, carry=None, *, record=None):
 
 
 def resume_guard(spec, progress, *, record=None):
+    if selected := _bc1(spec):
+        return selected.resume_guard(spec, progress, record=record)
     state = _state(spec)
     if state is None:
         return
@@ -396,6 +416,8 @@ def resume_guard(spec, progress, *, record=None):
 
 def require_admission(spec, phase, *, data=None, usage_id=None):
     """The usage journal consumes the child allowance in its own transaction."""
+    if selected := _bc1(spec):
+        return selected.require_admission(spec, phase, data=data, usage_id=usage_id)
     if not getattr(spec, 'shared_generation_version', 0):
         return
     sg.assert_current(spec)
@@ -428,6 +450,8 @@ def require_admission(spec, phase, *, data=None, usage_id=None):
 
 
 def require_request(spec, phase, kwargs):
+    if selected := _bc1(spec):
+        return selected.require_request(spec, phase, kwargs)
     sg.require_generation_context(spec, kwargs['messages'])
     sg.require_routing_context(spec, kwargs['messages'])
     if phase not in PHASES:
@@ -466,6 +490,8 @@ def require_request(spec, phase, kwargs):
 
 def run(spec, *, carry, client, settings, usage):
     """Real audit phase; scripted clients in tests use this same entry point."""
+    if selected := _bc1(spec):
+        return selected.run(spec, carry=carry, client=client, settings=settings, usage=usage)
     from . import api_runner as api, reasoning
     captured = sg.preflight(spec, settings)
     reg = captured.document()

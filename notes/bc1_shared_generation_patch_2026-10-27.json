@@ -1,0 +1,11 @@
+{
+  "applied": false,
+  "base_path": "src/data_sheets_schema/shared_generation.py",
+  "base_sha256": "22d7b46d72109bea0c26f693091c42a1f16723387079dcb895296a277b984c2e",
+  "format": "bc1_protected_hook_proposal_v1",
+  "identity_note": "Applying this changes the shared source hash; build fresh BC1 registrations afterward.",
+  "proposal_sha256": "10cb0ff8dd77d34ec150ae9b5447a82cdeef4402a477151f220a6c02685b0cb8",
+  "proposed_source_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "scope": "BC1-only opt-in/parser/schema/plan hooks; no A14/D41 merge or canonical asset rotation",
+  "syntax_checked": true
+}

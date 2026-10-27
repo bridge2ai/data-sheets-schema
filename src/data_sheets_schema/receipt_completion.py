@@ -549,7 +549,47 @@ def audit_carry(spec) -> str:
     outcome = recover(spec)
     if outcome is None:
         raise ValueError('audit requires completed receipt continuation')
-    return _audit_carry(outcome)
+    from .bc1_selection import enabled
+    return bc1_audit_carry(outcome) if enabled(spec) else _audit_carry(outcome)
+
+
+def bc1_audit_carry(outcome) -> str:
+    """BC1 model view: all candidate/source facts, controller bodies by pin.
+
+    Only the four known registration-body locations are projected. Unknown
+    input fields, source identities, schema pins and candidate text remain
+    verbatim; the full accepted result is still retained outside this view.
+    """
+    identity = copy.deepcopy(outcome['input_identity'])
+
+    def body_pin(value):
+        result = copy.deepcopy(value)
+        if type(result) is not dict:
+            raise ValueError('BC1 registration identity must be a mapping')
+        raw = result.pop('raw_json', None)
+        if raw is not None:
+            if type(raw) is not str:
+                raise ValueError('BC1 registration raw_json must be text')
+            encoded = raw.encode('utf-8')
+            digest = sha(encoded)
+            if result.get('sha256') not in (None, digest):
+                raise ValueError('BC1 receipt registration body differs from its pin')
+            result.update(sha256=digest, raw_json_bytes=len(encoded))
+        return result
+
+    if 'shared_generation' in identity:
+        identity['shared_generation']['registration'] = body_pin(identity['shared_generation']['registration'])
+    rendered = identity.get('instruction', {}).get('spec', {})
+    for name in ('shared_generation_registration', 'receipt_completion_registration'):
+        if name in rendered:
+            rendered[name] = body_pin(rendered[name])
+    return AUDIT_HEADER + canonical({'format': 'bc1_receipt_audit_carry_v1',
+        'input_identity': identity, 'registration': body_pin(outcome['registration']),
+        'result_artifact': outcome['journal']['result'],
+        'unsupported_audit_candidates': outcome['unsupported_audit_candidates'],
+        'scientific_support': 'unverified; independent audit required, no deletion instruction',
+        'projection': 'Only controller registration raw_json bodies are replaced by exact SHA256/byte pins; '
+                      'all unsupported candidates and source identity fields are retained.'}).decode()
 
 
 def _audit_carry(outcome):

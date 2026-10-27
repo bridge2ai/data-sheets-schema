@@ -578,6 +578,7 @@ class RunSpec:
     receipt_completion_registration: str | None = None
     shared_generation_version: int = 0
     shared_generation_registration: str | None = None
+    bounded_carry_version: int = 0
     _shared_generation_capture: Any = field(default=None, init=False, repr=False)
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
@@ -610,6 +611,8 @@ class RunSpec:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
         if type(self.shared_generation_version) is not int or self.shared_generation_version not in (0, 1, 2):
             raise ValueError("shared_generation_version must be 0, 1 or 2")
+        from .bc1_selection import validate_spec_mode
+        validate_spec_mode(self)
         if self.condition == "generic_v10" and self.shared_generation_version != 1:
             raise ValueError("generic_v10 requires shared generation 1")
         if self.render_version == 25 and self.shared_generation_version != 1:
@@ -779,6 +782,7 @@ class RunSpec:
                    receipt_completion_registration=(recorded.get("receipt_completion_registration") or {}).get("raw_json"),
                    shared_generation_version=recorded.get("shared_generation_version", 0),
                    shared_generation_registration=(recorded.get("shared_generation_registration") or {}).get("raw_json"),
+                   bounded_carry_version=recorded.get("bounded_carry_version", 0),
                    _replay_only=True)
         if spec.native_source_attribution_version:
             if {k for k in recorded if k.startswith("native_source_attribution_")} != {
@@ -806,6 +810,14 @@ class RunSpec:
                 raise ValueError("invalid recorded shared-generation authority")
         elif any(key.startswith("shared_generation_") for key in recorded):
             raise ValueError("historical specs omit shared-generation metadata")
+        if spec.bounded_carry_version:
+            from .bc1_selection import identity as bc1_identity
+            if ({key for key in recorded if key.startswith("bounded_carry")}
+                    != {"bounded_carry", "bounded_carry_version"}
+                    or recorded.get("bounded_carry") != bc1_identity(spec)):
+                raise ValueError("invalid recorded BC1 contract identity")
+        elif any(key.startswith("bounded_carry") for key in recorded):
+            raise ValueError("historical specs omit BC1 metadata")
         if spec.removal_repair_version:
             from data_sheets_schema.removal_repair import POLICY_SHA256
             if recorded.get("removal_repair_sha256") != POLICY_SHA256:
@@ -947,6 +959,10 @@ class RunSpec:
         "do not intervene" from a rule into something detectable (#420).
         """
         policy_metadata = {}
+        if self.bounded_carry_version:
+            from .bc1_selection import identity as bc1_identity
+            policy_metadata.update(bounded_carry_version=self.bounded_carry_version,
+                                   bounded_carry=bc1_identity(self))
         if self.native_source_attribution_version:
             from data_sheets_schema.native_source_attribution import policy_identity
             policy_metadata.update(native_source_attribution_version=1,
@@ -1172,7 +1188,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     return out
 
 
-def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0, native_source_attribution_version: int = 0, shared_generation_version: int = 0) -> dict[str, Any]:
+def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0, native_source_attribution_version: int = 0, shared_generation_version: int = 0, bounded_carry_version: int = 0) -> dict[str, Any]:
     """Fingerprint of how requests are assembled, for provenance (#353).
 
     The prompt-file and resolved-text hashes witness the arm prompt only. #352
@@ -1247,6 +1263,15 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, r
             parts[0] = layout
             parts.append({"shared_generation": {name: descriptor(version=2, condition=name)
                                                 for name in SOURCE_HEADING_MODES.values()}})
+    if type(bounded_carry_version) is not int or bounded_carry_version not in (0, 1):
+        raise ValueError("unsupported BC1 assembly version")
+    if bounded_carry_version:
+        if (shared_generation_version, render_version, api_playbook_version, receipt_completion_version) != (1, 25, 2, 2):
+            raise ValueError("BC1 assembly requires its explicit shared1/API25/playbook2/receipt2 tuple")
+        from .bc1_selection import contract_identity
+        layout += "; BC1: lossless workers; preplanned bounded groups; final cross-group check; separate model projection"
+        parts[0] = layout
+        parts.append({"bounded_carry": contract_identity()})
     basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
@@ -1516,6 +1541,9 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
     if spec.receipt_completion_version:
         from data_sheets_schema.receipt_completion import policy_text, registration_identity
         body += "\n\n" + policy_text(version=spec.receipt_completion_version) + "\nRegistration: " + json.dumps(registration_identity(spec), sort_keys=True)
+    if spec.bounded_carry_version:
+        from .bc1_selection import PROCEDURE
+        body += "\n\n" + PROCEDURE
     return body
 
 
@@ -2851,8 +2879,15 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
         base_instruction = spec.instruction
     parts.append({"type": "text", "text": base_instruction})
     for name, text in carry.items():
+        if spec.bounded_carry_version and name == "Audit findings":
+            from .bc1_runtime import model_carry
+            text = model_carry(spec, text)
         parts.append({"type": "text",
                       "text": CARRY_LABEL.format(name=name) + text})
+        if spec.bounded_carry_version and name == "Audit findings":
+            from .bc1_audit import downstream_contract
+            from .bc1_codec import canonical as bc1_canonical
+            parts.append({"type": "text", "text": bc1_canonical(downstream_contract()).decode("utf-8")})
     if spec.render_version >= 19 and phase == "audit":
         from data_sheets_schema import schema_semantics
         schema_paths = (_audit_schema_paths if _audit_schema_paths is not None else (
@@ -2900,7 +2935,12 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
         from .shared_generation import schema_context, generation_context
         selected_record = (carry.get("Reconciled full record") if phase == "report"
                            else carry.get("Completed full record") if phase == "reconcile_full" else None)
-        parts.append({"type": "text", "text": schema_context(spec, selected_record)})
+        if spec.bounded_carry_version:
+            from .bc1_context import schema_context as bc1_schema_context
+            schema_text = bc1_schema_context(shared.assert_current(spec), selected_record)
+        else:
+            schema_text = schema_context(spec, selected_record)
+        parts.append({"type": "text", "text": schema_text})
         parts.append({"type": "text", "text": generation_context(spec)})
         routing = shared.routing_context(spec)
         if routing is not None:
@@ -2968,6 +3008,9 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     """
     settings = _model_settings(spec.condition)
     spec.bind_api_header_values(settings)
+    if spec.bounded_carry_version:
+        from .bc1_registration import plan as bc1_plan
+        return bc1_plan(spec, settings)
     if spec.shared_generation_version:
         from .shared_generation import plan as shared_plan
         return shared_plan(spec, settings)
@@ -7634,7 +7677,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     rec.data["prompts"]["assembly"] = assembly_digest(spec.render_version, api_playbook_version=spec.api_playbook_version,
                                                        removal_repair_version=spec.removal_repair_version,
                                                        receipt_completion_version=spec.receipt_completion_version,
-                                                       shared_generation_version=spec.shared_generation_version)
+                                                       shared_generation_version=spec.shared_generation_version,
+                                                       bounded_carry_version=spec.bounded_carry_version)
     if spec.receipt_completion_version:
         from data_sheets_schema.receipt_completion import recover
         rec.data["receipt_completion"] = recover(spec)

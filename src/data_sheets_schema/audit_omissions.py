@@ -238,7 +238,7 @@ def _class(catalog, name):
     return catalog["classes"][name]
 
 
-def _slot(catalog, name, field, vocabulary):
+def _slot(catalog, name, field, vocabulary, *, term_policy=None, unpopulated=False):
     slot = _class(catalog, name)["slots"].get(field)
     if slot is None:
         raise ValueError("undeclared slot in this owning class")
@@ -246,11 +246,15 @@ def _slot(catalog, name, field, vocabulary):
     if any(definition.get(k) for k in ("any_of", "all_of", "exactly_one_of", "none_of", "designates_type")):
         raise ValueError("unsupported slot constraints or type discriminator")
     if any(str(v) not in vocabulary for v in definition.get("values_from", [])):
-        raise ValueError("missing explicitly supplied vocabulary")
+        if term_policy is None:
+            raise ValueError("missing explicitly supplied vocabulary")
+        from .bc1_context import permits_unbound_slot
+        if not unpopulated and not permits_unbound_slot(term_policy, name, field):
+            raise ValueError("missing explicitly supplied vocabulary or BC1 external term source")
     return slot
 
 
-def _owners(document, catalog, vocabulary):
+def _owners(document, catalog, vocabulary, *, term_policy=None):
     owners = {}
 
     def walk(value, name, path, depth=0):
@@ -259,7 +263,8 @@ def _owners(document, catalog, vocabulary):
         _class(catalog, name)
         owners[path] = name
         for field, item in value.items():
-            slot = _slot(catalog, name, field, vocabulary)
+            slot = _slot(catalog, name, field, vocabulary, term_policy=term_policy,
+                         unpopulated=term_policy is not None and item is None)
             if item is None:
                 continue
             definition = slot["definition"]
@@ -275,6 +280,9 @@ def _owners(document, catalog, vocabulary):
                     walk(member, definition["range"], at, depth + 1)
                 elif isinstance(member, (dict, list)):
                     raise ValueError("scalar/reference slot contains an object")
+                elif term_policy is not None and definition.get("values_from"):
+                    from .bc1_context import validate_term_value
+                    validate_term_value(member, policy=term_policy, cls=name, field=field)
     walk(document, "Dataset", "")
     return owners
 
@@ -288,7 +296,8 @@ def _target(target, payload):
         raise ValueError("target owner has no explicit scope context")
     name = payload["owner_classes"][owner]
     for i, field in enumerate(chain):
-        slot = _slot(payload["schema"], name, field, payload["context"]["vocabulary"])
+        slot = _slot(payload["schema"], name, field, payload["context"]["vocabulary"],
+                     term_policy=payload.get("term_policy"))
         if i < len(chain) - 1:
             if not slot["inline"]:
                 raise ValueError("target chain traverses a scalar or non-inline reference")
@@ -328,6 +337,11 @@ class Prepared:
         if saved_request is not None and _json(saved_request) != _json(request):
             raise ValueError("saved request differs from the recaptured inputs/contract/limits")
         payload = request["payload"]
+        if "term_policy" in payload:
+            from .bc1_context import validate_term_policy
+            validate_term_policy(payload["term_policy"], catalog=payload["schema"], context=payload["context"])
+            if payload["term_policy"]["context_sha256"] != payload["input_sha256"]["context"]:
+                raise ValueError("BC1 term policy differs from captured context byte identity")
         expected = {c["chunk"]: c for c in payload["chunks"]}
         problems, candidates = [], []
         seen, ids = set(), set()
@@ -387,7 +401,7 @@ class Prepared:
 
 def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             context: bytes, schema_path: Path, max_output_tokens: int, schema_snapshot=None,
-            max_request_bytes: int = 32_000_000) -> Prepared:
+            max_request_bytes: int = 32_000_000, term_policy=None) -> Prepared:
     """Read schema once, capture input bytes, render no transport-specific call."""
     if any(type(n) is not int or n < 1 for n in (max_output_tokens, max_request_bytes)):
         raise ValueError("request/output limits must be explicit positive integers")
@@ -428,7 +442,12 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
         catalog = _schema(Path(schema_path), schema_snapshot=schema_snapshot)
     except (KeyError, TypeError, AttributeError, RecursionError, yaml.YAMLError) as exc:
         raise ValueError("selected schema cannot be captured unambiguously") from exc
-    owners = _owners(document, catalog, context_doc["vocabulary"])
+    if term_policy is not None:
+        from .bc1_context import validate_term_policy
+        validate_term_policy(term_policy, catalog=catalog, context=context_doc)
+        if term_policy["context_sha256"] != _sha(context):
+            raise ValueError("BC1 term policy context byte pin differs")
+    owners = _owners(document, catalog, context_doc["vocabulary"], term_policy=term_policy)
     scopes = [s["owner"] for s in context_doc["scopes"]]
     if "" not in scopes or len(scopes) != len(set(scopes)) or any(s not in owners for s in scopes):
         raise ValueError("scopes must include root once and name distinct existing typed owners")
@@ -443,6 +462,8 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
                "limits": {"max_output_tokens": max_output_tokens, "max_request_bytes": max_request_bytes,
                           "max_input_bytes": MAX_INPUT_BYTES, "max_response_bytes": MAX_RESPONSE_BYTES,
                           "max_schema_bytes": MAX_SCHEMA_BYTES, "max_nodes": MAX_NODES, "max_depth": MAX_DEPTH}}
+    if term_policy is not None:
+        payload["term_policy"] = term_policy
     encoded = _json(payload)
     if len(_json(Prepared(encoded).request()).encode()) > max_request_bytes:
         raise ValueError("complete request exceeds max_request_bytes; no partial request returned")
