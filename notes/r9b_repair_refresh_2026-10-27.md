@@ -88,11 +88,37 @@ expectations, the one-node validation selector and this note. This is the target
 R9b implementation acceptance, not a full-suite claim.
 
 A separate frozen mirror
-at `c16b88c7be9ae411f622dfffe5c3e266a1c15388` runs the three affected compatibility
+at `c16b88c7be9ae411f622dfffe5c3e266a1c15388` ran the three affected compatibility
 modules with identical production/test bytes; its sole initial difference is
 removal of an unjustified `not Live` name filter. No provider-enabled test is
-selected: the live-named cases use mocks. Broader compatibility results and the
-final committed evidence archive remain pending while that independent run finishes.
+selected: the live-named cases use mocks. The compatibility batch passed:
+**230 passed, 7 deselected, zero failures/errors/skips, 12 warnings, 1890.76 seconds**
+(driver 1892.8711 seconds). The seven deselections are the separately exercised
+causal class. Driver exit was zero, source preservation and actual module-origin
+checks passed, and the frozen mirror remained clean. Its tested production and
+test bytes match `1a63bcae2`; the later causal expectation correction does not
+affect the 230 selected compatibility cases.
+
+The three compatibility modules are `tests/test_download/test_api_runner.py`,
+`tests/test_usage_ledger.py` and `tests/test_report_admission.py`. All three
+batches use the retained validation helper with `--group causal`, `--group
+corruption` or `--group regression`; exact commands, environment, source and
+import-origin records accompany each raw JUnit/log.
+
+The committed [evidence archive](r9b_validation_2026-10-27/coverage.json) reconciles
+case identities: **237 distinct passing cases**, consisting of seven causal
+cases and 230 disjoint compatibility cases. The initial failed expectation is
+retained as failed evidence, not silently removed or counted twice. Raw files
+are copied verbatim and pinned in
+[SHA256SUMS](r9b_validation_2026-10-27/SHA256SUMS). The committed helper
+`scripts/adhoc/archive_r9b_validation_20261027.py` reproduces this archive and
+refuses an unexpected test partition. Complete synthetic case directories
+remain in the three external evidence locations above. Test batches partly
+overlapped other authorized offline work; durations are not performance claims.
+
+Final delivery includes the helper-only selector correction and this evidence;
+production remains the reviewed `1a63bcae2` bytes. This is focused verification
+across explicitly recorded heads, not a claim of one complete repository suite.
 
 This work does not establish scientific acceptance or authorize a live generation
 campaign. The new end-to-end causal fixtures select shared generation v1; they

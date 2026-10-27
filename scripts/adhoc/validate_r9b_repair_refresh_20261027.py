@@ -156,7 +156,7 @@ def main():
     command = ["-q", "-p", "no:cacheprovider", "--basetemp", str(output / "cases"),
                "--junitxml", str(output / "pytest.xml"), *selected]
     if args.group == "regression":
-        command.extend(("-k", "not ValidatorRepairRefreshCheckpoint and not Live"))
+        command.extend(("-k", "not ValidatorRepairRefreshCheckpoint"))
     save(output / "command.json", {"pytest_args": command, "cwd": str(ROOT)})
     started = time.monotonic()
     code = 1
