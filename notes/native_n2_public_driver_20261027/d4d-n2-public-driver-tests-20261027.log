@@ -1,0 +1,29 @@
+...........F...                                                          [100%]
+=================================== FAILURES ===================================
+_________ test_actual_source_drift_after_valid_neutral_blocks_omission _________
+
+setup_driver = (PosixPath('/private/tmp/d4d-n2-public-driver-tests-20261027/test_actual_source_drift_after0/tree'), {'entries': {}, '...election.py']}, PosixPath('/private/tmp/d4d-n2-public-driver-tests-20261027/test_actual_source_drift_after0/evidence'))
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10414add0>
+
+    def test_actual_source_drift_after_valid_neutral_blocks_omission(setup_driver, monkeypatch):
+        from utils import native_shared_acceptance as acceptance
+        _root, baseline, origins, output = setup_driver
+        calls = []
+        def child(group, stage_output, expected, *, positive_label):
+            calls.append(positive_label)
+            write_evidence(stage_output, positive_label, baseline, origins)
+            monkeypatch.setattr(acceptance, 'source', lambda _root: {**baseline, 'tree': 'drifted'})
+            return 0
+        monkeypatch.setattr(driver, 'run', child)
+>       assert driver.run_positive(output, baseline['head']) == 1
+E       AssertionError: assert 0 == 1
+E        +  where 0 = <function run_positive at 0x104145800>(PosixPath('/private/tmp/d4d-n2-public-driver-tests-20261027/test_actual_source_drift_after0/evidence'), 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+E        +    where <function run_positive at 0x104145800> = driver.run_positive
+
+tests/test_native_n2_public_driver_20261027.py:119: AssertionError
+----------------------------- Captured stdout call -----------------------------
+{"runtime_gates_passed": true, "scientific_acceptance": "not_assessed", "source_unchanged": true, "stages": {"neutral": {"exact_single_junit_case": true, "import_origins_verified": true, "node": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion", "returncode": 0, "source_matches_original_baseline": true, "status": "passed"}, "omission": {"exact_single_junit_case": true, "import_origins_verified": true, "node": "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses", "returncode": 0, "source_matches_original_baseline": true, "status": "passed"}}, "status": "passed"}
+--- generated xml file: /private/tmp/d4d-n2-public-driver-tests-20261027.xml ---
+=========================== short test summary info ============================
+FAILED tests/test_native_n2_public_driver_20261027.py::test_actual_source_drift_after_valid_neutral_blocks_omission
+1 failed, 14 passed in 0.12s
