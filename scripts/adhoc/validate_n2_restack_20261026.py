@@ -19,6 +19,12 @@ OLD_BASE = '7c1002caeb776ccb0caebb474e22e5558b7b9602'
 OLD_TOP = '8b1daa80f4f970c956dbaf7835c1694abc773abf'
 TARGET = 'a0e28d8821c69e2d4fe1b75b14e3c2a2140ae4d5'
 POSITIVE = ('tests/test_native_shared_execution.py', 'tests/test_native_shared_execution_variant.py')
+POSITIVE_NODES = (
+    ('neutral', POSITIVE[0] + '::test_actual_public_correction_three_workers_and_saved_completion'),
+    ('omission', POSITIVE[1] + '::test_actual_public_merged_omissions_and_all_chunk_statuses'),
+)
+POSITIVE_MODULES = tuple('data_sheets_schema.' + name for name in (
+    'native_shared_selection', 'native_shared_receipts', 'native_shared_capture', 'native_shared_execution'))
 LEGACY = tuple('tests/' + name + '.py' for name in (
     'test_schema_snapshot_cache', 'test_schema_snapshot_compatibility',
     'test_shared_generation_selection', 'test_source_heading_runtime',
@@ -73,7 +79,17 @@ def origins():
     return result
 
 
-def child(group, output):
+def positive_node(label):
+    if label not in dict(POSITIVE_NODES):
+        raise ValueError('positive child requires one exact registered test label')
+    return dict(POSITIVE_NODES)[label]
+
+
+def child(group, output, positive_label=None):
+    if group == 'positive':
+        positive_node(positive_label)
+    elif positive_label is not None:
+        raise ValueError('positive label is only valid for a positive child')
     # Namespace packages otherwise inherit the primary editable install's .pth
     # path even when our explicit PYTHONPATH precedes it. Disable site startup,
     # then expose only the interpreter's physical dependency directory.
@@ -99,7 +115,8 @@ def child(group, output):
     save(output / 'origins-before.json', origins())
     import pytest
     args = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(output / 'cases'),
-            '--junitxml', str(output / 'pytest.xml'), *roster()[group]]
+            '--junitxml', str(output / 'pytest.xml'),
+            *([positive_node(positive_label)] if group == 'positive' else roster()[group])]
     save(output / 'pytest-command.json', {'args': args, 'cwd': str(ROOT)})
     try:
         return int(pytest.main(args))
@@ -107,7 +124,13 @@ def child(group, output):
         save(output / 'origins-after.json', origins())
 
 
-def run(group, output, expected):
+def run(group, output, expected, *, positive_label=None):
+    if group == 'positive' and positive_label is None:
+        return run_positive(output, expected)
+    if positive_label is not None:
+        if group != 'positive':
+            raise ValueError('positive label requires the positive group')
+        positive_node(positive_label)
     if output.is_relative_to(ROOT):
         raise ValueError('evidence must be outside frozen checkout')
     output.mkdir(parents=True, exist_ok=False)
@@ -133,6 +156,8 @@ def run(group, output, expected):
                PYTHONPATH=os.pathsep.join(str(ROOT / p) for p in ('src', 'scripts', '.')))
     command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()),
                '--child', '--group', group, '--output', str(output)]
+    if positive_label is not None:
+        command += ['--positive-label', positive_label]
     save(output / 'plan.json', {'group': group, 'groups': roster(), 'head': expected, 'target': TARGET,
         'python': sys.version, 'executable': sys.executable, 'command': command,
         'credential_names_removed': removed, 'plugin_autoload': 'disabled',
@@ -163,15 +188,122 @@ def run(group, output, expected):
     return code if before == after else 1
 
 
+def evidence_json(path):
+    if path.is_symlink() or not path.is_file():
+        raise ValueError('missing regular evidence file: ' + str(path))
+    return json.loads(path.read_text())
+
+
+def positive_gate(output, label, code, baseline):
+    """One exact successful test plus completed source/import proof, before next admission."""
+    if code != 0:
+        raise ValueError(label + ' child did not exit successfully: ' + str(code))
+    for name in ('source-before.json', 'source-after.json'):
+        if evidence_json(output / name) != baseline:
+            raise ValueError(label + ' source evidence differs from the original frozen baseline')
+    for name in ('origins-before.json', 'origins-after.json'):
+        observed = evidence_json(output / name)
+        if not isinstance(observed, dict) or not set(POSITIVE_MODULES).issubset(observed):
+            raise ValueError(label + ' lacks required project import origins')
+        for module, paths in observed.items():
+            if (module != 'data_sheets_schema' and not module.startswith('data_sheets_schema.')):
+                raise ValueError(label + ' has an unexpected origin record')
+            if not isinstance(paths, list) or not paths:
+                raise ValueError(label + ' has empty project import origins')
+            for value in paths:
+                path = Path(value)
+                if (not path.is_absolute() or path.resolve(strict=True) != path
+                        or not path.is_relative_to(ROOT / 'src')):
+                    raise ValueError(label + ' has a foreign project import origin')
+    bootstrap = evidence_json(output / 'dependency-bootstrap.json')
+    if bootstrap.get('site_startup') != 'disabled' or bootstrap.get('pth_execution') != 'disabled':
+        raise ValueError(label + ' lacks the isolated dependency bootstrap')
+    node = positive_node(label)
+    path, name = node.split('::')
+    junit = output / 'pytest.xml'
+    if junit.is_symlink() or not junit.is_file():
+        raise ValueError(label + ' lacks regular JUnit evidence')
+    root = ET.parse(junit).getroot()
+    cases = list(root.iter('testcase'))
+    if (len(cases) != 1 or cases[0].get('name') != name
+            or cases[0].get('classname') != path.removesuffix('.py').replace('/', '.')
+            or any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
+            or any(int(element.get(key, '0')) != 0 for element in root.iter()
+                   for key in ('failures', 'errors', 'skipped'))):
+        raise ValueError(label + ' must pass exactly its one named test without skips/errors')
+    return {'node': node, 'returncode': code, 'exact_single_junit_case': True,
+            'source_matches_original_baseline': True, 'import_origins_verified': True}
+
+
+def run_positive(output, expected):
+    """Neutral gates omission; missing/failed evidence leaves omission explicitly pending."""
+    if output.is_relative_to(ROOT):
+        raise ValueError('evidence must be outside frozen checkout')
+    output.mkdir(parents=True, exist_ok=False)
+    sys.path.insert(0, str(ROOT))
+    from utils.native_shared_acceptance import NODES, source
+    summary = {'status': 'failed', 'runtime_gates_passed': False,
+               'scientific_acceptance': 'not_assessed', 'source_unchanged': False,
+               'stages': {label: {'status': 'pending', 'node': node} for label, node in POSITIVE_NODES}}
+    baseline, active = None, None
+    try:
+        if tuple(NODES) != POSITIVE_NODES:
+            raise ValueError('public acceptance node identities changed')
+        baseline = source(ROOT)
+        save(output / 'source-before.json', baseline)
+        if baseline['head'] != expected or not baseline['tracked_exact'] or git('status', '--porcelain'):
+            raise ValueError('committed clean exact source required')
+        save(output / 'plan.json', {'head': expected, 'target': TARGET, 'nodes': POSITIVE_NODES,
+            'order': 'neutral must pass exact result/source/origin gates before omission starts',
+            'child_flags': ['-S', '-P', '-B'], 'deadlines_changed': False,
+            'scope': 'offline public software fixtures, not real native/scientific acceptance'})
+        for label, node in POSITIVE_NODES:
+            active = label
+            if source(ROOT) != baseline or git('status', '--porcelain'):
+                raise ValueError('source changed before ' + label)
+            summary['stages'][label]['status'] = 'running'
+            code = run('positive', output / label, expected, positive_label=label)
+            summary['stages'][label]['returncode'] = code
+            proof = positive_gate(output / label, label, code, baseline)
+            after = source(ROOT)
+            save(output / ('source-after-' + label + '.json'), after)
+            if after != baseline or git('status', '--porcelain'):
+                raise ValueError('source changed after ' + label)
+            summary['stages'][label] = {'status': 'passed', **proof}
+        summary['status'] = 'passed'
+    except (Exception, KeyboardInterrupt) as error:
+        summary['error'] = {'type': type(error).__name__, 'message': str(error)}
+        if active is not None and summary['stages'][active]['status'] == 'running':
+            summary['stages'][active]['status'] = 'failed'
+    finally:
+        try:
+            final = source(ROOT)
+            save(output / 'source-final.json', final)
+            summary['source_unchanged'] = baseline is not None and final == baseline and not git('status', '--porcelain')
+        except Exception as error:
+            summary['final_source_error'] = {'type': type(error).__name__, 'message': str(error)}
+        if not summary['source_unchanged']:
+            summary['status'] = 'failed'
+        if summary['stages']['omission']['status'] == 'pending':
+            summary['omission_not_run'] = 'neutral completion and unchanged-source/import/JUnit gates did not all pass'
+        summary['runtime_gates_passed'] = summary['status'] == 'passed'
+        save(output / 'outcome.json', summary)
+    print(json.dumps(summary, sort_keys=True), flush=True)
+    return 0 if summary['status'] == 'passed' else 1
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--group', choices=('native', 'legacy', 'positive'), required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--expected-head')
     parser.add_argument('--child', action='store_true')
+    parser.add_argument('--positive-label', choices=tuple(dict(POSITIVE_NODES)))
     args = parser.parse_args()
     if args.child:
-        return child(args.group, args.output.resolve())
+        return child(args.group, args.output.resolve(), args.positive_label)
+    if args.positive_label is not None:
+        parser.error('--positive-label is only valid for an internal child')
     if not args.expected_head:
         parser.error('--expected-head required')
     return run(args.group, args.output.resolve(), args.expected_head)
