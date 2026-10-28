@@ -155,3 +155,37 @@ def test_numeric_diagnostic_refuses_ambiguous_or_partial_number_matches(value, s
 def test_million_phrase_is_compound_and_can_end_sentence():
     assert rc.check_fast_entailment(1000000, "The sample contains one million.") == (True, "numeric_equivalence")
     assert not rc.check_fast_entailment(1, "The sample contains one million.")[0]
+
+
+@pytest.mark.parametrize("value,words", [(0, "zero million"), (205, "two hundred and five"),
+                                       (1234567, "one million two hundred and thirty-four thousand five hundred and sixty-seven")])
+def test_number_word_grammar_preserves_complete_counts(value, words):
+    assert rc.check_fast_entailment(value, f"The sample contains {words} observations.") == (True, "numeric_equivalence")
+
+
+@pytest.mark.parametrize("value,words", [(1000000, "zero million"), (3, "one two"),
+                                       (31, "twenty eleven"), (2000000, "one million million"),
+                                       (1001000, "one thousand million"), (3, "one and two")])
+def test_unsupported_number_word_phrases_do_not_invent_counts(value, words):
+    assert not rc.check_fast_entailment(value, f"The sample contains {words} observations.")[0]
+
+
+@pytest.mark.parametrize("origin", [None, "rereceipt"])
+def test_completed_tool_receipt_keeps_snapshot_identity_after_final_reorder(origin):
+    original = {"file_collections": [
+        {"id": "example:a", "total_files": 2, "resources": ["x", "y"]},
+        {"id": "example:b", "total_files": 1, "resources": ["z"]},
+    ]}
+    final = {"file_collections": list(reversed(copy.deepcopy(original["file_collections"])))}
+    pair = tool("record_count", 2, slot="file_collections[0].total_files", path="file_collections[0].resources")
+    if origin is not None:
+        pair["origin"] = origin
+    doc = document(pair)
+    result = rc.check(doc, MANIFEST, TEXTS, final, MD5, original, instrument_version=5)
+    assert result["tool_receipts"]["verified"] == 1
+    assert result["tool_receipts"]["mismatched"] == 0
+    assert result["slots"]["with_receipt_at_receipt"] == 1
+    assert result["slots"]["with_receipt"] == 1
+    assert not [f for f in result["findings"] if f["kind"].startswith("tool_receipt")]
+    assert "file_collections[1].total_files" not in rc.uncovered_receiptable_leaves(
+        doc, MANIFEST, TEXTS, final, original=original, instrument_version=5)

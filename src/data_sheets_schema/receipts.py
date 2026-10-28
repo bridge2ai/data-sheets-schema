@@ -1158,21 +1158,64 @@ _NUMBER_WORD_RE = re.compile(
 
 
 def _normalise_number_words(text: str) -> str:
-    """Expand complete number-word phrases, not separate scale-word tokens."""
+    """Expand a bounded English count grammar; leave ambiguous phrases intact.
+
+    Groups below a thousand use an optional one-to-nine hundreds prefix and a
+    single tens/ones suffix. Million and thousand groups occur once each in
+    descending order. This cannot turn ``one two`` into 3 or ``zero million``
+    into a million, and retaining unsupported words gives them no count credit.
+    """
+    def small_group(words: list[str]) -> int | None:
+        if not words:
+            return None
+        total = 0
+        if "hundred" in words:
+            if len(words) < 2 or words[1] != "hundred" or words.count("hundred") != 1:
+                return None
+            leading = _NUMBER_WORDS.get(words[0], -1)
+            if not 1 <= leading <= 9:
+                return None
+            total = leading * 100
+            words = words[2:]
+            if not words:
+                return total
+            if words[0] == "and":
+                words = words[1:]
+            if not words:
+                return None
+        if len(words) == 1:
+            value = _NUMBER_WORDS.get(words[0], -1)
+            if 0 <= value < 100 and (not total or value > 0):
+                return total + value
+        elif len(words) == 2:
+            tens, ones = (_NUMBER_WORDS.get(word, -1) for word in words)
+            if tens in range(20, 100, 10) and 1 <= ones <= 9:
+                return total + tens + ones
+        return None
+
     def replace(match: re.Match[str]) -> str:
-        subtotal = total = 0
-        for word in re.split(r"[ -]+", match.group().lower()):
-            if word == "and":
-                continue
-            number = _NUMBER_WORDS[word]
-            if number == 100:
-                subtotal = max(1, subtotal) * number
-            elif number >= 1000:
-                total += max(1, subtotal) * number
-                subtotal = 0
-            else:
-                subtotal += number
-        return str(total + subtotal)
+        words = re.split(r"[ -]+", match.group().lower())
+        total, previous_scale = 0, 1000000000
+        used_scale = False
+        while any(word in ("million", "thousand") for word in words):
+            index = next(i for i, word in enumerate(words) if word in ("million", "thousand"))
+            scale = _NUMBER_WORDS[words[index]]
+            if scale >= previous_scale:
+                return match.group()
+            coefficient = small_group(words[:index])
+            if coefficient is None:
+                return match.group()
+            total += coefficient * scale
+            words = words[index + 1:]
+            previous_scale, used_scale = scale, True
+            if words and words[0] == "and":
+                words = words[1:]
+                if not words:
+                    return match.group()
+        if not words:
+            return str(total) if used_scale else match.group()
+        remainder = small_group(words)
+        return str(total + remainder) if remainder is not None else match.group()
     return _NUMBER_WORD_RE.sub(replace, text)
 
 
@@ -2097,8 +2140,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 if "tool" in pair:
                     tool_receipts["total"] += 1
                     t_ok, t_why, _t_comp = verify_tool_receipt(
-                        pair, e.get("id"), chunk_texts, manifest, full,
-                        original if origin == "phase1" else None,
+                        pair, e.get("id"), chunk_texts, manifest, full, original,
                     )
                     if t_ok:
                         tool_receipts["verified"] += 1
