@@ -1,5 +1,10 @@
 # Issue #4766: Reconciliation Report Stated Finding Totals Verification Pass
 
+Historical v2 pass notes: the corpus counts below describe that earlier reader.
+The Wave4 repair introduces instrument v3 with local statement boundaries,
+comparison of each explicit severity summary, and fresh resume readings. These
+historical counts are not a v3 corpus replay or an acceptance result for v3.
+
 ## 1. Overview & Context
 
 Issue #4766 addresses an unmeasured blind spot in the API runner and Launch Gates A6, A7, and A10:

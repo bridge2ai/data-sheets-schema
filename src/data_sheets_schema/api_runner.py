@@ -4342,10 +4342,15 @@ def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None
 
 
 def _current_report_audit_totals(spec: RunSpec, existing: dict[str, Any]) -> dict[str, Any]:
-    """Return existing `report_audit_totals` if at current `INSTRUMENT_VERSION`, else recompute."""
+    """Re-read available report/audit bytes without erasing an earlier measurement.
+
+    The instrument version identifies the reader, not the input bytes. A current
+    version alone cannot establish that a saved reading still describes the report.
+    """
     from data_sheets_schema.report_audit_totals import INSTRUMENT_VERSION
     prior = existing.get("report_audit_totals")
-    if isinstance(prior, dict) and (prior.get("instrument_version") or 0) >= INSTRUMENT_VERSION:
+    if (isinstance(prior, dict) and type(prior.get("instrument_version")) is int
+            and prior["instrument_version"] > INSTRUMENT_VERSION):
         return prior
     fresh = report_audit_totals_block(spec)
     if isinstance(prior, dict) and prior.get("checked") is True and not fresh.get("checked"):

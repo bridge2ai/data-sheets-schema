@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run PR #5094 production and causal review tests offline, 2026-10-28.
 
-Inputs: clean review checkout based on 8ff18d2e5 and cached attestation utilities
+Inputs: clean review/fix checkout based on 8ff18d2e5 and cached attestation utilities
 at immutable 808415a0. Outputs: fresh external logs, JUnit, origin/source pins.
 No provider, GitHub, or production writes; parent commits helper and results.
 """
@@ -23,6 +23,7 @@ SUPPORT_HEAD = "808415a0db55bd8bda76d42ca5e5982c099f6a6a"
 SUPPORT_PATH = "scripts/adhoc/wave3_validation_common_20261027.py"
 GROUPS = {
     "causal": ("test_wave4_5094_review",),
+    "focused": ("test_wave4_5094_review", "test_report_audit_totals"),
     "existing": ("test_report_audit_totals", "test_report_gate", "test_generation_record_schema", "test_record_required_values", "test_backfill_checks"),
 }
 
@@ -80,8 +81,10 @@ def main():
     support.save(output / "source-before.json", before)
     if before["head"] != args.head or not before["tracked_exact"] or support.git("status", "--porcelain=v1", "--untracked-files=all"):
         raise ValueError("Untouched exact-head worktree required")
-    if support.git("diff", BASE, "HEAD", "--", "src", ".claude"):
-        raise ValueError("Review checkout changes production or model-facing files")
+    changed = support.git("diff", "--name-only", BASE, "HEAD", "--", "src", ".claude").decode().splitlines()
+    allowed = {"src/data_sheets_schema/report_audit_totals.py", "src/data_sheets_schema/api_runner.py"}
+    if not set(changed).issubset(allowed):
+        raise ValueError("Review fixes changed a protected or out-of-scope source")
     env = dict(os.environ)
     removed = sorted(key for key in env if key.startswith(("ANTHROPIC_", "CBORG_", "OPENAI_", "GIT_"))
         or key.endswith(("_API_KEY", "_AUTH_TOKEN", "_ACCESS_TOKEN"))
@@ -97,7 +100,7 @@ def main():
     support.save(output / "plan.json", {"command": command, "head": args.head, "base": BASE, "modules": modules,
         "support_commit": SUPPORT_HEAD, "support_blob": SUPPORT_PATH, "support_sha256": hashlib.sha256(raw).hexdigest(),
         "helper_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "credential_names_removed": removed, "production_changes": "none"})
+        "credential_names_removed": removed, "production_changes": changed})
     start = time.monotonic()
     with (output / "pytest.log").open("xb") as stream:
         code = subprocess.run(command, env=env, stdout=stream, stderr=subprocess.STDOUT).returncode

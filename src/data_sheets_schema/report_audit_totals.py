@@ -25,7 +25,10 @@ from typing import Any
 # 'major'/'minor' only directly before 'finding(s)' or 'severity'; when no overall
 # total is stated, extract per-severity subtotals only from a non-subset audit/finding
 # summary clause (#5094 R4 F9, F10, Round 2 N2).
-INSTRUMENT_VERSION = 2
+# Version 3: bind severity readings to each admitted statement, reject numbered
+# list ordinals and record-only subset totals, and compare every explicit summary
+# (#5094 Wave4 review). Historical v1/v2 measurements keep their recorded version.
+INSTRUMENT_VERSION = 3
 
 NUM_WORDS = {
     "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
@@ -51,7 +54,7 @@ WORD_OR_DIGIT = r"(?:\d+|[a-zA-Z]+(?:-[a-zA-Z]+)?)"
 TOTAL_PATTERNS = [
     # 1. Header/table: **Findings received:** 31 or | Audit findings | 38 or **Audit findings addressed:** 16
     re.compile(
-        r"(?:\bfindings\s+received\b|\baudit\s+findings(?:\s+addressed)?\b)[^:\d|\n]*[:|][*\s]*(" + WORD_OR_DIGIT + r")\b",
+        r"(?:\bfindings\s+received\b|\baudit\s+findings(?:\s+addressed)?\b)[^:\d|\n]*[:|][* \t]*(" + WORD_OR_DIGIT + r")\b",
         re.I,
     ),
     # 2. Scope: against the 24 audit findings / against the 24 findings
@@ -166,6 +169,30 @@ SUBSET_CLAUSE_RE = re.compile(
     re.I,
 )
 
+RECORD_SUBSET_RE = re.compile(
+    r"^(?:\*\*)?\s+(?:audit\s+)?findings(?:\*\*)?"
+    r"(?:\s+were\s+(?:returned|raised|received|produced|identified))?"
+    r"\s+(?:against|for|on|about|concerning)\s+(?:the\s+)?(?:core|full)\s+record\b",
+    re.I,
+)
+
+
+def _severity_statement(report_text: str, start: int, end: int) -> str:
+    """Only the statement containing a total may supply that total's breakdown.
+
+    The former 300-character lookahead consumed later deferred subsets and
+    unrelated prose. A line/sentence boundary or explicit subset introduction
+    terminates this reading; unsupported layouts remain unmeasured.
+    """
+    tail = report_text[start:]
+    boundary = re.search(r"\n|[.!?](?=\s|$)", tail)
+    stop = start + boundary.start() if boundary else len(report_text)
+    # An explicit subset can share the sentence with the overall count.
+    subset = SUBSET_CLAUSE_RE.search(report_text, end, stop)
+    if subset:
+        stop = subset.start()
+    return report_text[start:stop]
+
 
 def _collect_pattern_matches(
     report_text: str, patterns: list[re.Pattern[str]]
@@ -176,6 +203,9 @@ def _collect_pattern_matches(
         for m in pat.finditer(report_text):
             n = parse_number(m.group(1))
             if n is None:
+                continue
+            # Counts scoped to one record are not totals of the whole audit.
+            if RECORD_SUBSET_RE.match(report_text[m.end(1):]):
                 continue
             s, e = m.start(), m.end()
             line_start = report_text.rfind("\n", 0, s)
@@ -228,45 +258,33 @@ def _extract_sevs_from_snippet(snippet: str) -> dict[str, int]:
 
 def _extract_totals_detailed(
     report_text: str,
-) -> tuple[int | None, list[int], dict[str, int]]:
-    """Extract primary stated total, all distinct stated totals, and per-severity subtotals."""
+) -> tuple[int | None, list[int], dict[str, int], list[dict[str, int]]]:
+    """Extract totals and every distinct, local per-severity summary."""
     matches = _collect_pattern_matches(report_text, EXPLICIT_TOTAL_PATTERNS)
     if not matches:
         matches = _collect_pattern_matches(report_text, FALLBACK_TOTAL_PATTERNS)
 
     stated_total: int | None = None
-    matched_pos: tuple[int, int] | None = None
     distinct_totals: list[int] = []
+    severity_summaries: list[dict[str, int]] = []
 
     if matches:
         # Primary match is the earliest statement in document order (tie-broken by pattern specificity)
         ordered_matches = sorted(matches, key=lambda item: (item[0], item[2]))
         primary = ordered_matches[0]
         stated_total = primary[3]
-        matched_pos = (primary[0], primary[1])
         # Distinct totals in document order
         for _, _, _, val in ordered_matches:
             if val not in distinct_totals:
                 distinct_totals.append(val)
+        for start, end, _, _ in ordered_matches:
+            summary = _extract_sevs_from_snippet(_severity_statement(report_text, start, end))
+            if summary and summary not in severity_summaries:
+                severity_summaries.append(summary)
 
-    # Look for severity statements near the total statement if found.
     # When no overall total is stated, extract subtotals only from a single sentence/line
     # that states two or more per-severity counts together (never isolated prose mentions).
-    sevs: dict[str, int] = {}
-    if matched_pos:
-        line_start = report_text.rfind("\n", 0, matched_pos[0])
-        sent_start = max(
-            report_text.rfind(". ", 0, matched_pos[0]),
-            report_text.rfind(".\n", 0, matched_pos[0]),
-        )
-        boundary = max(
-            line_start + 1 if line_start != -1 else 0,
-            sent_start + 2 if sent_start != -1 else 0,
-        )
-        start = max(boundary, matched_pos[0] - 100)
-        end = min(len(report_text), matched_pos[1] + 300)
-        sevs = _extract_sevs_from_snippet(report_text[start:end])
-    else:
+    if not matches:
         for clause in re.split(r"(?:[.!?\n]+)", report_text[:1500]):
             if SUBSET_CLAUSE_RE.search(clause):
                 continue
@@ -277,15 +295,16 @@ def _extract_totals_detailed(
                 len(clause_sevs) >= 2
                 and re.search(r"\b(?:audit|summary|totals?)\b|\bfindings\s*:", clause, re.I)
             ):
-                sevs = clause_sevs
-                break
+                if clause_sevs not in severity_summaries:
+                    severity_summaries.append(clause_sevs)
 
-    return stated_total, distinct_totals, sevs
+    sevs = severity_summaries[0] if severity_summaries else {}
+    return stated_total, distinct_totals, sevs, severity_summaries
 
 
 def extract_report_audit_totals(report_text: str) -> tuple[int | None, dict[str, int]]:
     """Extract stated total finding count and stated per-severity subtotals from report text."""
-    stated_total, _, sevs = _extract_totals_detailed(report_text)
+    stated_total, _, sevs, _ = _extract_totals_detailed(report_text)
     return stated_total, sevs
 
 
@@ -301,6 +320,7 @@ def check_report_audit_totals(
       stated_total: int | None
       stated_totals: list[int]
       stated_by_severity: dict[str, int]
+      stated_severity_summaries: list[dict[str, int]] (all distinct local readings)
       computed_total: int | None
       computed_by_severity: dict[str, int]
       mismatches: list[dict[str, Any]]
@@ -349,7 +369,7 @@ def check_report_audit_totals(
         else:
             report_text = report_str
 
-    stated_total, stated_totals, stated_by_severity = _extract_totals_detailed(report_text)
+    stated_total, stated_totals, stated_by_severity, severity_summaries = _extract_totals_detailed(report_text)
 
     # 2. Resolve audit text & counts
     if audit is None:
@@ -449,7 +469,10 @@ def check_report_audit_totals(
         ck = CANONICAL_SEVERITY.get(k.lower(), k.lower())
         computed_canonical[ck] = computed_canonical.get(ck, 0) + v
 
-    for sev, count in stated_by_severity.items():
+    # Repeated identical statements do not multiply findings; conflicting later
+    # readings still compare against the audit instead of silently disappearing.
+    stated_counts = dict.fromkeys((sev, count) for summary in severity_summaries for sev, count in summary.items())
+    for sev, count in stated_counts:
         c_count = computed_canonical.get(sev, 0)
         if count != c_count:
             mismatches.append({
@@ -475,6 +498,7 @@ def check_report_audit_totals(
         "stated_total": stated_total,
         "stated_totals": stated_totals,
         "stated_by_severity": stated_by_severity,
+        "stated_severity_summaries": severity_summaries,
         "computed_total": computed_total,
         "computed_by_severity": computed_by_severity,
         "mismatches": mismatches,
