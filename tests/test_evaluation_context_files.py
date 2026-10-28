@@ -149,27 +149,70 @@ def test_v10_decision_record_tables_match_committed_contexts() -> None:
         (ROOT / "data" / "omission_contexts" / "chorus_omission_context.json").read_bytes()
     ).hexdigest()
     assert chorus_omission_sha in note_text
-    active_text = _without_retired_entries(note_text)
+    active_text = _without_retired_quotations(note_text)
     assert "6e3c6b6d" not in active_text
     assert "10.18130/V3/F3TD5R" not in active_text
 
 
-def _without_retired_entries(note_text: str) -> str:
-    """Drop the retired D46-D49 entries, which the record keeps verbatim as what was written (§5.10)."""
-    import re
-
-    kept = []
-    in_retired_item = False
-    for line in note_text.splitlines():
-        if re.match(r"^[5-8]\. \*\*`D4[6-9]`", line):
-            in_retired_item = True
-        elif in_retired_item and (re.match(r"^\d+\. \*\*", line) or line.startswith("#")):
-            in_retired_item = False
-        if in_retired_item:
-            continue
-        if re.match(r"^\| \*\*`D4[6-9]`\*\*", line) or line.startswith("- **Not an owner ruling"):
-            continue
-        kept.append(line)
-    return "\n".join(kept)
+# Historical quotations the decision record keeps verbatim from the retired D46 entry (§5.10). Each is
+# exempt only inside its own section and only once; a forbidden token anywhere else is an active claim.
+RETIRED_QUOTATIONS = (
+    ("## 2. ", "the hash the retired entry gave (`6e3c6b6d…`)"),
+    ("## 4. ", "including `#5120` fixes for `CM4AI` (`release: \"https://doi.org/10.18130/V3/F3TD5R\"`, tier 1 `[\"ro_crate\"]`)"),
+    ("## 4. ", "`CHORUS` omission context bytes remain unchanged (`6e3c6b6d…`)"),
+    ("### 5.9 ", "`CM4AI` `scopes[0].release` set to `\"https://doi.org/10.18130/V3/F3TD5R\"`"),
+    ("### 5.9 ", "`CHORUS` omission context bytes remain unchanged (`6e3c6b6d4be3201b6511fb3fd0f3761874a6cfbe94d7280cd1b983863bf56ca3`)"),
+)
 
 
+def _section_bounds(lines: list[str], heading_prefix: str) -> tuple[int, int]:
+    """Line range of the one section whose heading starts with heading_prefix, up to the next heading of its level or higher."""
+    starts = [i for i, line in enumerate(lines) if line.startswith(heading_prefix)]
+    assert len(starts) == 1, f"expected exactly one section {heading_prefix!r}, found {len(starts)}"
+    level = len(heading_prefix) - len(heading_prefix.lstrip("#"))
+    end = starts[0] + 1
+    while end < len(lines):
+        line = lines[end]
+        if line.startswith("#") and len(line) - len(line.lstrip("#")) <= level:
+            break
+        end += 1
+    return starts[0], end
+
+
+def _without_retired_quotations(note_text: str) -> str:
+    """Remove each retired quotation from its own section, requiring exactly one occurrence there."""
+    lines = note_text.split("\n")
+    for heading_prefix, quotation in RETIRED_QUOTATIONS:
+        start, end = _section_bounds(lines, heading_prefix)
+        section = "\n".join(lines[start:end])
+        assert section.count(quotation) == 1, (
+            f"retired quotation must occur exactly once in section {heading_prefix!r}: {quotation[:60]!r}"
+        )
+        lines[start:end] = section.replace(quotation, "").split("\n")
+    return "\n".join(lines)
+
+
+@pytest.mark.parametrize("token", ("10.18130/V3/F3TD5R", "6e3c6b6d"))
+@pytest.mark.parametrize(
+    "claim",
+    (
+        "5. **`D46`** — Current approved setting\nCurrent approved value: {token}",
+        "| **`D46`** | Current approved setting | {token} |",
+        "- **Not an owner ruling** in the past; current approved value: {token}",
+        "Current approved value: {token}",
+    ),
+)
+def test_an_active_claim_cannot_borrow_the_retired_exemption(claim: str, token: str) -> None:
+    """A forbidden token outside the retired quotations stays visible, however it is dressed (codex wave-5 A23 review)."""
+    note_path = ROOT / "notes" / "reviews" / "v10_human_decisions_and_context_review_2026-10-20.md"
+    mutated = note_path.read_text(encoding="utf-8") + "\n\n## Active current setting\n\n" + claim.format(token=token) + "\n"
+    assert token in _without_retired_quotations(mutated)
+
+
+def test_a_duplicated_retired_quotation_is_refused() -> None:
+    note_path = ROOT / "notes" / "reviews" / "v10_human_decisions_and_context_review_2026-10-20.md"
+    note_text = note_path.read_text(encoding="utf-8")
+    quotation = RETIRED_QUOTATIONS[2][1]
+    mutated = note_text.replace(quotation, quotation + " " + quotation, 1)
+    with pytest.raises(AssertionError, match="exactly once"):
+        _without_retired_quotations(mutated)

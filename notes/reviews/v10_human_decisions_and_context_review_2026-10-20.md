@@ -47,13 +47,13 @@ All 6 project applicability context files under `data/context/` (`schema_version
    - **Owner decision (`D52`, 2026-10-27, §5.11)**: both rules accepted. `evaluate_d4d.py` on this branch implements neither yet; that is follow-up work.
 5. **Adult vs Pediatric Cohort Contexts (`VOICE` vs `VOICE_PEDIATRIC`, `CHORUS`, `KIDS_FIRST`)**:
    - **Proposed Setting**: Both `VOICE` (`voice_context.yaml`) and `VOICE_PEDIATRIC` (`voice_pediatric_context.yaml`), along with `CHORUS` and `KIDS_FIRST`, have all 7 boolean applicability flags (`human_subjects`, `regulated_access`, `shared_dataset`, `data_collection`, `data_processing`, `processing_software`, `ml_training_dataset`) set to `true` (`50 / 50` (`50.0`) on Rubric 10, `20 / 20` (`88.0`) on Rubric 20), with cohort-specific `rationale` entries distinguishing adult vs pediatric scope.
-   - **Owner decision (`D52`, 2026-10-27, §5.11)**: accepted.
+   - **Owner decision (`D52`, 2026-10-27, §5.11)**: the cohort-specific rationales are accepted. The all-`true` setting above does not hold for `KIDS_FIRST`, whose `ml_training_dataset` is `false` (item 2).
 
 ---
 
 ## 2. Omission Contexts (`Step A5d` / `#1763`, `#5120`) — `DECIDED (D51, 2026-10-27; §5.11)`
 
-Six `omission_context_v1` files have been generated in `data/omission_contexts/` via `scripts/build_draft_contexts.py`. The table shows them as they stand on this branch (`#5095`). `#5164` (A23) changes two of them, `VOICE` and `VOICE_PEDIATRIC`, and declares `CHORUS`'s release in `source_manifest.yaml`. The owner approved `#5164`'s contexts and manifest edit as `D51` (§5.11):
+Six `omission_context_v1` files have been generated in `data/omission_contexts/` via `scripts/build_draft_contexts.py`. The table is rendered from the committed context files by `scripts/render_v10_context_review_tables.py`. `#5164` (A23) changed two of them, `VOICE` and `VOICE_PEDIATRIC`, and declared `CHORUS`'s release in `source_manifest.yaml`. The owner approved `#5164`'s contexts and manifest edit as `D51` (§5.11):
 
 | Project | Draft Omission Context File | `scopes[0].referent` | `scopes[0].release` | `source_policy.basis` | `vocabulary` |
 | --- | --- | --- | --- | --- | --- |
