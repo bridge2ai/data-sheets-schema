@@ -72,7 +72,10 @@ if _selected_bootstrap_root is not None:
     import data_sheets_schema as _selected_package
     _expected_package = candidate_src / "data_sheets_schema"
     if any(Path(path).resolve() != _expected_package for path in _selected_package.__path__):
-        raise SystemExit("--worktree package imports are mixed with another checkout; use an isolated environment")
+        raise SystemExit(
+            "--worktree package imports are mixed with another checkout; use the selected checkout's own venv, "
+            "or python -S with site-packages on PYTHONPATH"
+        )
 
 import click
 import yaml
@@ -885,7 +888,7 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
 @click.option(
     "--check",
     is_flag=True,
-    help="Validate existing registrations and roster on disk without rebuilding.",
+    help="Validate existing registrations and roster on disk without rebuilding; attests pinned bytes, not runtime admission.",
 )
 @click.option(
     "--replace",
@@ -896,7 +899,10 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     "--worktree", "-w",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     default=None,
-    help="Select checkout resources; relative input/output paths resolve under this root (single-threaded preparation).",
+    help=(
+        "Select checkout resources; relative input/output paths resolve under this root (single-threaded preparation). "
+        "Use the selected checkout's own venv, or python -S with site-packages on PYTHONPATH."
+    ),
 )
 @_worktree_resources
 def cli(
@@ -934,7 +940,10 @@ def cli(
     replace: bool = False,
     worktree: Path | None = None,
 ) -> None:
-    """Build shared generation registrations and batch rosters for D4D Messages-API generic_v10."""
+    """Build shared generation registrations and batch rosters for D4D Messages-API generic_v10.
+
+    --check attests pinned bytes, not runtime admission.
+    """
     target_projects: list[str] = []
     if all_projects:
         target_projects = list(DEFAULT_PROJECTS)
@@ -992,6 +1001,7 @@ def cli(
 
     if check:
         click.echo(f"Checking registrations for {target_projects} x {target_labels} under {out_dir}...")
+        verified: dict[tuple[str, str], tuple[Path, str]] = {}
         for proj in target_projects:
             for lbl in target_labels:
                 reg_file = out_dir / f"registration_{proj.lower()}_{lbl}.json"
@@ -999,15 +1009,28 @@ def cli(
                     raise click.ClickException(f"Missing registration file: {reg_file}")
                 raw = reg_file.read_bytes()
                 parsed_reg = sg.parse_registration(raw)
+                if parsed_reg["registration_path"] != str(reg_file):
+                    raise click.ClickException(f"Out-dir registration path differs from its declared authority: {reg_file}")
                 try:
                     verify_registration_input_pins(parsed_reg, worktree=worktree)
                 except (FileNotFoundError, ValueError) as exc:
                     raise click.ClickException(f"Input pin verification failed for {reg_file.name}: {exc}") from exc
+                verified[(proj, lbl)] = (reg_file, hashlib.sha256(raw).hexdigest())
                 click.echo(f"  ✓ {proj}: {reg_file.name}")
         if not target_roster_path.is_file():
             raise click.ClickException(f"Missing roster file: {target_roster_path}")
         pairs = [(p, lbl) for p in target_projects for lbl in target_labels]
-        validate_roster_file(target_roster_path, pairs)
+        roster = validate_roster_file(target_roster_path, pairs)
+        for pair, captured in roster["registrations"].items():
+            try:
+                verify_registration_input_pins(captured["document"], worktree=worktree)
+            except (FileNotFoundError, ValueError) as exc:
+                raise click.ClickException(f"Input pin verification failed for roster registration {captured['path']}: {exc}") from exc
+            expected_path, expected_sha = verified[pair]
+            if captured["path"] != expected_path:
+                raise click.ClickException(f"Roster registration path differs from verified out-dir file: {captured['path']} != {expected_path}")
+            if captured["sha256"] != expected_sha:
+                raise click.ClickException(f"Roster registration SHA-256 differs from verified out-dir file: {expected_path}")
         click.echo(f"  ✓ Roster valid: {target_roster_path.name}")
         click.echo("All checks passed.")
         return
