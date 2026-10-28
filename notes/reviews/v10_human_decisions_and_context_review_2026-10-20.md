@@ -11,7 +11,7 @@
 
 ---
 
-## 1. Canonical Project Evaluation Contexts (`Step E3` / `#2912`, `#5121`) — `PENDING OWNER` (the "D46" ruling once recorded here was not an owner decision; retired 2026-10-27, §5.10)
+## 1. Canonical Project Evaluation Contexts (`Step E3` / `#2912`, `#5121`) — `DECIDED (D52, owner human review, 2026-10-27; §5.11)`
 
 All 6 project applicability context files under `data/context/` (`schema_version: d4d-evaluation-context-1`) have been prepared and verified against `src/data_sheets_schema/evaluation_context.py` and `tests/test_evaluation_context_files.py`.
 
@@ -45,7 +45,7 @@ All 6 project applicability context files under `data/context/` (`schema_version
 
 ---
 
-## 2. Omission Contexts (`Step A5d` / `#1763`, `#5120`) — `PENDING OWNER` (the "D46" ruling once recorded here was not an owner decision; retired 2026-10-27, §5.10)
+## 2. Omission Contexts (`Step A5d` / `#1763`, `#5120`) — `DECIDED (D51, 2026-10-27; §5.11)`
 
 Six `omission_context_v1` files have been generated in `data/omission_contexts/` via `scripts/build_draft_contexts.py` (with `#5120` fixes for `CM4AI` and `KIDS_FIRST` approved under `D46`):
 
@@ -89,7 +89,7 @@ Six `omission_context_v1` files have been generated in `data/omission_contexts/`
 
 ---
 
-## 4. Owner Decisions Status (`D01`–`D50`; `D46`–`D49` retired)
+## 4. Owner Decisions Status (`D01`–`D54`; `D46`–`D49` retired)
 
 | Decision ID | Status | Summary / Owner Ruling |
 | --- | --- | --- |
@@ -389,3 +389,30 @@ On **`2026-10-25T19:44Z`**, after Review Round 2's `R1` (`d4d-executions/plans/r
 - agy never writes decision records, owner quotes or review reports.
 - claude writes every decision-record change, including this correction, as local commits. agy pushes them verbatim, and claude verifies the pushed bytes.
 - The numbers `D46`–`D49` are not reused.
+
+### 5.11 Decided by the owner, 2026-10-27 (`D51`–`D54`): the subjects of the retired entries
+
+The owner answered claude's questions. The numbers `D46`–`D49` are not reused.
+
+1. **`D51`: omission contexts (#5164).** The owner chose "Approve; land before A21 (Recommended)".
+   - **What is approved:** the six omission contexts on #5164 and its `source_manifest.yaml` edit:
+     - CM4AI: release DOI `10.18130/V3/F3TD5R`, with tier 1 = `ro_crate`;
+     - KIDS_FIRST: tier 1 = `website`, with a neutral vocabulary;
+     - VOICE: `related_but_distinct` carried;
+     - CHORUS: context unchanged, at `ac94a74b…`.
+   - **Before merge:** claude makes one last independent check.
+   - **When it lands:** before the A21 rebuild. The manifest pin reaches every request, so the re-canary then tests production bytes (`D35`).
+2. **`D52`: evaluation contexts (#2912), the owner's human review.** The owner chose "Review now", and decided each item from claude's packet:
+   - **CM4AI:** `human_subjects: false` and `regulated_access: false`. Choice: "Accept both false (Recommended)". The data come from established cell lines and are openly licensed.
+   - **KIDS_FIRST:** `ml_training_dataset` is set to **`false`**. Choice: "false: not an ML training set (Recommended)". It is a research data resource for which ML is one possible downstream use. No current rubric item depends on this flag, so its denominators stay 50 and 88.
+   - **All other values:** accepted as recorded. Choice: "Accept all (Recommended)".
+   - **Scoring rules:** both accepted. Choice: "Accept both rules (Recommended)".
+     - `evaluate_d4d.py` accepts either `data_governance.committee_contact` or `regulatory_restrictions.governance_committee_contact`.
+     - When `regulated_access` is false, the 4 regulatory-restriction subfields of rubric `Q9` are excluded rather than scored as missing.
+     - Neither rule is implemented in `evaluate_d4d.py` yet. Implementing them is follow-up work.
+3. **`D53`: the no-touch rule and the 10-22a archive.** The owner chose "Rule now; ratify now".
+   - **The rule:** no agent edits anything inside a run directory or under `data/ATTIC/`, except README notes the owner or claude direct. This extends `D41`.
+   - **The archive:** agy's 10-22a archive commits are ratified.
+4. **`D54`: the retired "D48" and "D49".** The owner chose "Drop both (Recommended)".
+   - **What is dropped:** the `usage.jsonl` guard, which never existed and which the `D41` latch journal covers, and "D49"'s `max_calls × 1M` allowance.
+   - **What stands:** the reviewed, sizing-based #5155 rule.
