@@ -151,6 +151,19 @@ def test_unindexed_legacy_fallback_requires_a_single_snapshot(tmp_path, with_sec
         assert block['computed_total'] == (None if with_second else 13)
 
 
+def test_latest_attested_malformed_audit_is_not_replaced_by_first(tmp_path):
+    selected, record, first, second = synthetic_snapshots(tmp_path)
+    second.write_text('{invalid JSON', encoding='utf-8')
+    record['intermediates'][-1]['sha256'] = hashlib.sha256(second.read_bytes()).hexdigest()
+    write_record(selected, record)
+    runner = api.report_audit_totals_block(selected, record=record)
+    computed = backfill.compute(selected.provenance_path, only={'report_audit_totals'})['report_audit_totals']
+    for block in (runner, computed):
+        assert block['checked'] is False and block['status'] == 'not_checked'
+        assert block['computed_total'] is None and block['findings'] == []
+    assert api.audit_counts(first.read_text())['total'] == 13
+
+
 def test_explicit_live_carry_does_not_consult_ambiguous_saved_history(tmp_path, monkeypatch):
     selected, record, _, second = synthetic_snapshots(tmp_path, identified=False)
     def forbidden(*args, **kwargs):
