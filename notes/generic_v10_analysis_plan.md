@@ -409,8 +409,9 @@ never choose between projects on quality. They are inputs to three decisions:
   for A21 names its 8 single-delivery calls (item 10);
 - the decision after A21 on a transport-only redelivery for production (D64, item 4).
 
-**What the exposure means for complete n=3.** Item 3 requires three accepted cells per
-project for a primary verdict, and a cell gets two attempts. Under the same
+**What the exposure means for complete n=3.** For a primary verdict, item 3 requires
+three cells per project that each have an eligible full record (a run that completed
+`reconcile_full`), accepted or not, and a cell gets two attempts. Under the same
 illustration, the chance that a project reaches complete n=3 is:
 
 | Project | All causes | Transport only | With one transport-only redelivery per call |
@@ -1098,8 +1099,9 @@ It carries:
   - It is never imputed, and never filled from another prefix except as a recorded
     D21 continuation that declares the cell.
   - Its attempts' eligible records still enter Set A where they exist.
-  - A project without complete n=3 gets a descriptive comparison showing n and the
-    cell IDs, not a primary verdict (item 3's missing-data rule).
+  - A project without complete n=3, meaning three cells that each have an eligible
+    full record (item 3), accepted or not, gets a descriptive comparison showing n and
+    the cell IDs, not a primary verdict (item 3's missing-data rule).
   - Structure's primary estimand needs n=3 per arm. n=2 is only the flagged
     sensitivity stratum of item 3; fewer than 2 is not computable, never 0.
   - A project with no primary verdict in a set is counted as "not measured" in "k of
