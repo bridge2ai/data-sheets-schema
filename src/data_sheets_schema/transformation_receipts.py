@@ -74,6 +74,27 @@ TRANSFORMATION_RECEIPT_INSTRUMENT = (
     "linkml_mappings/full-to-core-mapping.yaml (TransformationSpecification)"
 )
 
+# This executor implements a deliberately closed subset of LinkML-Map, not
+# arbitrary expressions. Bind those expressions to the actual algorithms
+# below instead of accepting (and then ignoring) a different supplied program.
+_CORE_EXPRESSIONS = {
+    "resources": ("resources", "project_resources_by_id(resources)"),
+    "distributions": (None, "project_collections_and_files(file_collections)"),
+    "dialect": (None, "consensus_dialect(file_collections[*].resources[*].dialect)"),
+    "conforms_to_class": (None, f"'{CORE_CLASS}'"),
+    "conforms_to_schema": (None, f"'{CORE_SCHEMA_REL}'"),
+}
+_COLLECTION_EXPRESSIONS = {
+    "bytes": ("total_bytes", "coalesce(bytes, total_bytes)"),
+}
+_DOCUMENTATION_FIELDS = {"description", "comments", "implements"}
+
+
+def _unsupported_fields(model: Any, supported: set[str]) -> list[str]:
+    """Reject supplied operations this bounded executor would otherwise ignore."""
+    present = model.model_dump(exclude_none=True, exclude_defaults=True)
+    return sorted(set(present) - supported - _DOCUMENTATION_FIELDS)
+
 
 def _canonical_sha256(data: Any) -> str:
     payload = json.dumps(data, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")
@@ -114,20 +135,27 @@ def validate_spec_against_pair_schema(
 ) -> dict[str, Any]:
     """Verify that `full-to-core-mapping.yaml` declares the exact shared slots
     induced by `Dataset` / `CoreDataset`, `FileCollection` / `CoreDistribution`,
-    and `File` / `CoreDistribution`."""
+    and `File` / `CoreDistribution`, and only the expressions this executor
+    actually implements. This is not a general-purpose LinkML-Map evaluator.
+    """
     if spec is None:
         spec, _, _ = load_transformation_spec()
     ps = pair_schema or load_pair_schema()
     dist_slots = _distribution_slots(ps)
 
-    cd = spec.class_derivations.get("CoreDataset")
-    cd_coll = spec.class_derivations.get("CoreDistributionFromCollection")
-    cd_file = spec.class_derivations.get("CoreDistributionFromFile")
+    classes = spec.class_derivations
+    if not isinstance(classes, Mapping):
+        return {"valid": False, "reason": "class_derivations must be a mapping"}
+    cd = classes.get("CoreDataset")
+    cd_coll = classes.get("CoreDistributionFromCollection")
+    cd_file = classes.get("CoreDistributionFromFile")
     if cd is None or cd_coll is None or cd_file is None:
         return {
             "valid": False,
             "reason": "missing required class_derivations (CoreDataset, CoreDistributionFromCollection, CoreDistributionFromFile)",
         }
+    if any(not isinstance(deriv.slot_derivations, Mapping) for deriv in (cd, cd_coll, cd_file)):
+        return {"valid": False, "reason": "each class must carry slot_derivations as a mapping"}
 
     declared_identity = {
         name
@@ -157,6 +185,49 @@ def validate_spec_against_pair_schema(
     missing_file = sorted(expected_file - declared_file)
     extra_file = sorted(declared_file - expected_file)
 
+    unsupported: list[str] = []
+    for field, view in (("source_schema", ps.full_view), ("target_schema", ps.core_view)):
+        # The mapping's paths are repository-relative, as in the released
+        # specification. Bind them to the pair views actually executing the
+        # projection; a different declared schema cannot be ignored.
+        declared_path = getattr(spec, field)
+        loaded_path = getattr(view.schema, "source_file", None)
+        if (
+            not isinstance(declared_path, str) or not declared_path
+            or not loaded_path
+            or (REPO_ROOT / declared_path).resolve() != Path(str(loaded_path)).resolve()
+        ):
+            unsupported.append(f"specification.{field}: does not identify the loaded pair schema")
+    for field in _unsupported_fields(spec, {
+        "id", "title", "source_schema", "target_schema", "class_derivations",
+    }):
+        unsupported.append(f"specification.{field}: unsupported operation")
+    required_classes = {
+        "CoreDataset": (cd, "Dataset", None, expected_identity, _CORE_EXPRESSIONS),
+        "CoreDistributionFromCollection": (
+            cd_coll, "FileCollection", "CoreDistribution", expected_coll, _COLLECTION_EXPRESSIONS,
+        ),
+        "CoreDistributionFromFile": (cd_file, "File", "CoreDistribution", expected_file, {}),
+    }
+    if set(spec.class_derivations) != set(required_classes):
+        unsupported.append("class_derivations: unsupported class set")
+    for name, (deriv, source_class, target_class, identity_slots, expressions) in required_classes.items():
+        if deriv.name != name or deriv.populated_from != source_class or deriv.target_definition != target_class:
+            unsupported.append(f"{name}: unsupported source or target class")
+        for field in _unsupported_fields(deriv, {
+            "name", "populated_from", "target_definition", "slot_derivations",
+        }):
+            unsupported.append(f"{name}.{field}: unsupported operation")
+        expected_slots = set(identity_slots) | set(expressions)
+        if set(deriv.slot_derivations) != expected_slots:
+            unsupported.append(f"{name}: unsupported or missing slot derivations")
+        for slot_name, slot in deriv.slot_derivations.items():
+            expected_source, expected_expr = expressions.get(slot_name, (slot_name, None))
+            if slot.name != slot_name or slot.populated_from != expected_source or slot.expr != expected_expr:
+                unsupported.append(f"{name}.{slot_name}: unsupported populated_from or expr")
+            for field in _unsupported_fields(slot, {"name", "populated_from", "expr"}):
+                unsupported.append(f"{name}.{slot_name}.{field}: unsupported operation")
+
     valid = not any((
         missing_identity,
         extra_identity,
@@ -164,6 +235,7 @@ def validate_spec_against_pair_schema(
         extra_coll,
         missing_file,
         extra_file,
+        unsupported,
     ))
     return {
         "valid": valid,
@@ -176,6 +248,7 @@ def validate_spec_against_pair_schema(
         "extra_collection": extra_coll,
         "missing_file": missing_file,
         "extra_file": extra_file,
+        "unsupported_semantics": unsupported,
     }
 
 
@@ -261,6 +334,9 @@ def _derive_core_and_receipt(
     produce `(core_record, transformation_receipt)`."""
     spec, _raw_spec, spec_sha256 = load_transformation_spec(spec_path)
     ps = pair_schema or load_pair_schema()
+    spec_check = validate_spec_against_pair_schema(spec, ps)
+    if not spec_check["valid"]:
+        raise ValueError(f"unsupported transformation specification: {spec_check}")
     cd = spec.class_derivations["CoreDataset"]
     cd_coll = spec.class_derivations["CoreDistributionFromCollection"]
     cd_file = spec.class_derivations["CoreDistributionFromFile"]
@@ -454,7 +530,17 @@ def verify_transformation_receipt(
     else:
         full, core, receipt = arg1, arg2, arg3
     findings: list[dict[str, Any]] = []
-    spec, _raw_spec, spec_sha256 = load_transformation_spec(spec_path)
+    try:
+        spec, _raw_spec, spec_sha256 = load_transformation_spec(spec_path)
+    except (ValueError, TypeError, yaml.YAMLError) as exc:
+        return {
+            "checked": True,
+            "verified": False,
+            "mismatched": 1,
+            "instrument": TRANSFORMATION_RECEIPT_INSTRUMENT,
+            "findings": [{"kind": "transformation_spec_invalid", "detail": str(exc)}],
+            "derivations_verified": 0,
+        }
     ps = pair_schema or load_pair_schema()
 
     spec_check = validate_spec_against_pair_schema(spec, ps)
@@ -463,6 +549,14 @@ def verify_transformation_receipt(
             "kind": "transformation_spec_schema_drift",
             "detail": spec_check,
         })
+        return {
+            "checked": True,
+            "verified": False,
+            "mismatched": len(findings),
+            "instrument": TRANSFORMATION_RECEIPT_INSTRUMENT,
+            "findings": findings,
+            "derivations_verified": 0,
+        }
 
     rec_spec = receipt.get("specification") or {}
     if rec_spec.get("sha256") != spec_sha256:
@@ -491,6 +585,17 @@ def verify_transformation_receipt(
     derived_core, expected_receipt = _derive_core_and_receipt(
         full, spec_path=spec_path, pair_schema=ps
     )
+    actual_counts = receipt.get("counts")
+    if (
+        not isinstance(actual_counts, Mapping)
+        or any(type(value) is not int for value in actual_counts.values())
+        or actual_counts != expected_receipt["counts"]
+    ):
+        findings.append({
+            "kind": "transformation_counts_mismatch",
+            "expected": expected_receipt["counts"],
+            "actual": actual_counts,
+        })
     if dict(core) != derived_core:
         differing_keys = sorted(
             k for k in set(core.keys()) | set(derived_core.keys())

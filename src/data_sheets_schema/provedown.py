@@ -58,6 +58,7 @@ _ATTR_WATERMARK_RE = re.compile(
 _COMMENT_WATERMARK_RE = re.compile(
     r"\[(?P<display>[^\]\n]+)\]<!--\s*pd\s*:\s*(?P<expr>[^>]+?)\s*-->"
 )
+_WATERMARK_START_RE = re.compile(r"(?P<attr>\{\s*pd\s*:)|(?P<comment><!--\s*pd\s*:)")
 
 _SOURCE_PATH_RE = re.compile(
     r"^(?P<source>full|core|snapshot|receipt|manifest):(?P<path>.+)$"
@@ -104,28 +105,53 @@ def _strip_fenced_code_blocks(markdown_text: str) -> str:
     """Replace fenced code blocks with newline-preserving spaces so line
     numbers and offsets outside fences remain aligned."""
     def _blank(match: re.Match[str]) -> str:
-        return "\n" * match.group(0).count("\n")
+        return re.sub(r"[^\n]", " ", match.group(0))
 
     return _FENCED_BLOCK_RE.sub(_blank, markdown_text)
 
 
 def extract_watermarks(markdown_text: str) -> list[dict[str, Any]]:
-    """Extract all inline provedown watermarks outside fenced code blocks."""
+    """Extract watermarks, including malformed explicit markers, outside fences.
+
+    An author requesting verification with ``{pd:`` or ``<!-- pd:`` must
+    receive a finding when the surrounding syntax is incomplete. Silently
+    ignoring that request would make a broken watermark look like no claim.
+    """
     cleaned = _strip_fenced_code_blocks(markdown_text)
     found: list[tuple[int, dict[str, Any]]] = []
+    matched_spans: list[tuple[int, int]] = []
     for style, pattern in (("attr", _ATTR_WATERMARK_RE), ("comment", _COMMENT_WATERMARK_RE)):
         for m in pattern.finditer(cleaned):
+            matched_spans.append(m.span())
             line_no = cleaned.count("\n", 0, m.start()) + 1
+            display = m.group("display").strip()
+            expr = m.group("expr").strip()
             found.append((
                 m.start(),
                 {
                     "style": style,
-                    "display": m.group("display").strip(),
-                    "expr": m.group("expr").strip(),
+                    "display": display,
+                    "expr": expr,
                     "raw": m.group(0),
                     "line": line_no,
+                    **({"parse_error": "empty watermark display or expression"}
+                       if not display or not expr else {}),
                 },
             ))
+    for start in _WATERMARK_START_RE.finditer(cleaned):
+        if any(left <= start.start() < right for left, right in matched_spans):
+            continue
+        end = cleaned.find("\n", start.end())
+        if end == -1:
+            end = len(cleaned)
+        found.append((start.start(), {
+            "style": "attr" if start.group("attr") else "comment",
+            "display": "",
+            "expr": cleaned[start.end():end].strip(),
+            "raw": cleaned[start.start():end],
+            "line": cleaned.count("\n", 0, start.start()) + 1,
+            "parse_error": "malformed or unclosed provedown watermark",
+        }))
     found.sort(key=lambda item: item[0])
     return [item[1] for item in found]
 
@@ -186,7 +212,9 @@ def _parse_path_tokens(path: str) -> list[str]:
     (`a[0].b` or `a[*].b`) into a list of navigation tokens."""
     p = path.strip()
     if p.startswith("/"):
-        raw_parts = [seg.replace("~1", "/").replace("~0", "~") for seg in p.lstrip("/").split("/") if seg != ""]
+        # RFC 6901: remove exactly the pointer's leading slash. Empty keys
+        # are meaningful, including a leading, interior or trailing key.
+        raw_parts = [seg.replace("~1", "/").replace("~0", "~") for seg in p[1:].split("/")]
         return raw_parts
     tokens: list[str] = []
     for part in re.findall(r"[\w]+|\[\d+\]|\[\*\]|\*", p):
@@ -534,7 +562,14 @@ def verify_watermarks(
     findings: list[dict[str, Any]] = []
     verified_count = 0
     for wm in watermarks:
-        res = evaluate_watermark(wm["expr"], wm["display"], context)
+        if "parse_error" in wm:
+            res = {
+                "verified": False,
+                "kind": "watermark_malformed",
+                "detail": wm["parse_error"],
+            }
+        else:
+            res = evaluate_watermark(wm["expr"], wm["display"], context)
         entry = {**wm, **res}
         results.append(entry)
         if res["verified"]:

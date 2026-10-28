@@ -964,7 +964,10 @@ def _check_report_text(text, full, core, declared, snapshot=None, dispositions_e
                        receipt=None, manifest=None, chunk_texts=None):
     if type(instrument_version) is not int or instrument_version not in (7, 8, 9):
         raise ValueError(f"unsupported report-claims instrument version: {instrument_version}")
-    if check_watermarks and instrument_version == 8:
+    if check_watermarks:
+        # Watermarks change the checks being performed, including when a
+        # caller otherwise requests historical v7. Never reuse that older
+        # instrument identity for the expanded measurement (#5226, R_V5-F5).
         instrument_version = 9
     findings: list[dict[str, str]] = []
     claims = unnamed = core_cannot_hold = 0
