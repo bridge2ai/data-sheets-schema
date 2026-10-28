@@ -129,3 +129,50 @@ def test_backfill_v2_upgrade_preserves_unavailable_checked_reading(tmp_path):
     fresh = check_report_audit_totals("The audit identified 12 findings.", _make_v10g_audit())
     assert backfill.apply(path, {"report_audit_totals": fresh})
     assert yaml.safe_load(path.read_text())["report_audit_totals"]["instrument_version"] == 3
+
+
+@pytest.mark.parametrize("breakdown", [
+    "2 high, 4 medium, 6 low",
+    "2 high,\n4 medium,\n6 low",
+    "- 2 high\n- 4 medium\n- 6 low",
+])
+def test_wrapped_breakdown_retains_wrong_count(breakdown):
+    result = check_report_audit_totals("The audit identified 13 findings:\n" + breakdown, _make_v10g_audit())
+    assert result["stated_by_severity"] == {"high": 2, "medium": 4, "low": 6}
+    assert result["status"] == "mismatch"
+    assert len(result["findings"]) == 1
+    assert result["findings"][0]["severity"] == "low"
+
+
+@pytest.mark.parametrize("summary", [
+    "Audit severity summary: 3 high, 3 medium, 7 low.",
+    "Audit severity summary:\n3 high, 3 medium, 7 low.\n",
+    "Audit totals: 3 high, 3 medium, 7 low.",
+])
+def test_labeled_summary_without_repeating_total_still_compares(summary):
+    result = check_report_audit_totals(
+        "The audit identified 13 findings: 2 high, 4 medium, 7 low.\n" + summary, _make_v10g_audit())
+    assert result["status"] == "mismatch"
+    assert {row["severity"] for row in result["findings"]} == {"high", "medium"}
+
+
+@pytest.mark.parametrize("counts", [
+    "2 high, 4 medium, 7 low; later restated as 3 high, 3 medium, 7 low",
+    "3 high, 3 medium, 7 low; later restated as 2 high, 4 medium, 7 low",
+])
+def test_conflicting_counts_within_one_statement_are_not_overwritten(counts):
+    result = check_report_audit_totals("The audit identified 13 findings: " + counts + ".", _make_v10g_audit())
+    assert result["status"] == "mismatch"
+    assert set(result["stated_severity_counts"]["high"]) == {2, 3}
+    assert {row["severity"] for row in result["findings"]} == {"high", "medium"}
+
+
+@pytest.mark.parametrize("subset", [
+    "Deferred audit severity summary: 2 medium, 1 low.",
+    "Core record audit severity summary: 2 medium, 1 low.",
+    "Deferred items: 2 medium, 1 low.",
+])
+def test_subset_summary_and_prose_are_not_a_severity_continuation(subset):
+    result = check_report_audit_totals("The audit identified 13 findings:\n" + subset, _make_v10g_audit())
+    assert result["stated_by_severity"] == {}
+    assert result["status"] == "consistent"
