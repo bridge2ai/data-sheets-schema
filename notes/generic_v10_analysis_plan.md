@@ -6,6 +6,9 @@ binding only when the owner merges it with an explicit word (P4). Until then, no
 generic_v10 registration hash is put to the owner, and no billed generic_v10 step runs
 (the plan: "Every billed generic_v10 step depends on P4").
 
+- **Revised:** 2026-10-27 for R6 F1–F6, against the decision record through D49 and
+  the local BC1/N2 implementations. This remains a draft, not a retrospective
+  registration or a declaration that the composed launch condition is ready.
 - **Drafted:** 2026-10-20, by the Claude worker session (coordination Lane C2), at main
   `0a1132ecf`, on branch `claude/track-p-analysis-plan`. agy integrates the branch.
   The draft was revised the same day after an independent read-only review.
@@ -17,6 +20,15 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
   - `notes/arm_comparison.md`;
   - `data/_wcrate/README.md`;
   - Lane C1's A1 note, commit `0d45c1ec8` (item 15).
+  - `notes/reviews/v10_human_decisions_and_context_review_2026-10-20.md` at
+    `a0e28d8821c69e2d4fe1b75b14e3c2a2140ae4d5` (D26–D49), reconciled with
+    the owner's dated rulings in `notes/coordination/STATUS.md`;
+  - BC1 `notes/bc1_production_2026-10-27.md` and contract sources at
+    `3bd3c41f459b31848aee2f57e26deb86ef786970`;
+  - N2 `notes/native_n2_parity_delta_review_2026-10-25.md` at
+    `be0bd05821256212e89e4d011ba6b30a780e299b`;
+  - R_V5 remediation `aff4c9ca530a94b84f934698cdc791960cc31713` (local verification,
+    not approval to activate v5 in either generation arm).
 - **Plan dependencies:** P2 depends on G3, P1, A1 and A1b.
   - P1 is done.
   - G3 is partly decided (see the decision status below).
@@ -34,11 +46,12 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
 Both are proposals for the owner to confirm or amend at P4, not rulings. Nothing in
 this draft asserts a decision the owner has not recorded.
 
-## Decision status (2026-10-20)
+## Decision status (reconciled 2026-10-27)
 
-Since the plan was written (2026-10-09), owner rulings have been recorded only for D06
-and D07, both on 2026-10-19. D10 and D22 were decided today in the Claude worker
-session.
+The October 20 draft below is amended by D26–D49. Decisions authorize policy and
+engineering; they do not establish a merged implementation, an accepted record,
+remaining budget or a fresh launch word. Where the implementation differs from
+the requested condition, items 14–15 name the discrepancy before P4.
 
 | ID | Status | Where recorded |
 |---|---|---|
@@ -46,7 +59,25 @@ session.
 | D07 | **Decided 2026-10-19, option 1.**<br>- A $100 named generic_v10 API pilot allocation: CHORUS pilot $15 cap, one CHORUS contingency $15, AI_READI pilot $35 planning ceiling, one AI_READI contingency at most $35.<br>- At most 2 billed attempts per registered cell, then an owner review.<br>- Every run needs its own owner word naming its registration sha256 (for a roster, the roster sha256 and each registration sha256 it lists) and its cap.<br>- `d4d api batch --max-cost-dollars` is the between-run stop.<br>- The operator trigger is the cap minus the worst-case in-flight call: at most about $11.50 against $15 for CHORUS.<br>- The AI_READI lines are provisional (see item 15). | #1763 comment of 2026-10-19 |
 | D10 | **Decided 2026-10-20: retire** the v10z/audit_controls lineage and audit28. | Owner's answer in the Claude worker session. `notes/reviews/v10z_retirement_2026-10-20.md` (this branch). agy is to post it on #4761. |
 | D22 | **Decided 2026-10-20: withdraw.** The v10z standing authorizations do not extend to generic_v10, and they are withdrawn now. | Same record. agy is to post it on #1763 and #4761. |
-| D01–D05, D08, D09, D11–D21, D23–D25 | **Pending.** No owner ruling is recorded. | See the note below. This draft treats every decision in this row as pending. |
+| D01 | Superseded by D26/D28. | Native/API paths below. |
+| D05, D17, D19, D23 | Decided through D34, D35 and D36. | Rule batch, freeze and review below. |
+| D26, D27 | Track N with the default runtime profile; name **native agentic (direct arm)** and directories `claudecode_direct{,_core}/<label>/`. | D26 2026-10-23; D27 owner confirmation 2026-10-25. |
+| D28 | Void 10-22b; one clean CHORUS API re-canary; 64k/32k/32k worker/omission/integration baseline, 128k report/reconcile, A17 splitting, versioned wire/registration identity. Builder floor remains pending; 19/20 belongs to the re-canary only. | 2026-10-23; floor basis superseded by D37, partition selection refined by D45/D49. |
+| D29 | **Pending owner:** native effort and first-party `claude.ai` account. No API key. | Resolve for the native registration and launch. |
+| D30, D38 | Revised R9 criteria limited to `confidentiality_level`/`hipaa_compliant`; American `license` spelling and new prompt pins in both assets. | D30 2026-10-23/24; D38 2026-10-25. |
+| D31, D40, D47 | Both 10-20a and 10-22a are archived assisted/invalid engineering evidence. D40 supersedes D31's initial generated-record disposition for 10-22a. Preserve artifacts; no run/archive edits. | 2026-10-23–26; assisted stratum below. |
+| D32, D37 | D32's value-matching subtraction is superseded. D37 gates **phase-1 snapshot** receipt quality: `slots.with_receipt_at_receipt / slots.receiptable_at_receipt`. | D37 2026-10-25T19:44Z; item 3a. |
+| D33 | Report-family pre-dispatch token-plus-output admission; no independent report-family trim under that decision. D44 subsequently requires a reviewed BC1 condition before the canary. | 2026-10-25/26; items 14–15 disclose the new exposure. |
+| D34 | No new rule batch: measure #2918/#2919 with existing lints; defer #2931/#2937; #4018 reasons only; #3336 remains to be measured by CHORUS ×3. | 2026-10-25. |
+| D35 | Freeze at rebuilt A21 registration on merged main, after A17/#5155/#5157. A later runner change needs CHORUS byte-parity evidence and a diagnostic canary. | 2026-10-25; each billed canary still needs its own launch word. |
+| D36 | Fresh Claude source reviewer plus Codex pass, neither generator nor operator; owner signs acceptance. Second blind reviewer seeds audit-recall observations against `original_full` before seeing the audit. | 2026-10-25; human decisions are not supplied by this draft. |
+| D39 | Versioned worker wording recognizes a split list entry as a removal's owning root. | 2026-10-25; A17 contract change. |
+| D41, D42, D43 | No-touch operation and a terminal/rejection-state guard; compare both guard candidates then obtain the owner's choice. **Owner** runs the hash-approved re-canary command; agents monitor read-only. | D43 supersedes D41's operator clause; guard selection is not inferred here. |
+| D44, D45 | Build/review bounded carry for **all six projects** before the single clean CHORUS re-canary. Keep A17 splitting; select project bounds from cost and output-cap risk inside BC1. | 2026-10-26. |
+| D46 | Owner approved the seven omission/evaluation settings, including CM4AI's two false applicability flags, cohort separation and Kids First neutral `vocabulary: {}`. | 2026-10-26; corrected narratives and exact-file identities still require verification. |
+| D48 | Preflight refuses duplicated, nonretryable repeated, over-retried or out-of-order usage phases before a call or file write. | 2026-10-26; installed integration must be verified. |
+| D49 | Derive aggregate input allowance as `max_calls × 1,000,000`, with all six project profiles and A17-aware sizing; D45 governs final BC1 bounds. | 2026-10-26; an allowance does not prove request fit or authorize spending. |
+| D02–D04, D08, remaining D09 choices, D11–D16, D18, D20–D21, D24–D25 | **Pending where not specifically superseded above.** D02 comparator/analysis-set choices and D04 crate comparison are not decided by this amendment. | Separate proposal, implementation and owner decisions. |
 
 **The "Resolved" comments are not rulings.** Several issues carry comments citing
 commits that are on no remote branch:
@@ -67,14 +98,36 @@ All six issues were reopened on 2026-10-13, in two groups that state different r
 
 #2930 and #2926 had already been closed, reopened and closed again on 2026-10-11 (at
 03:43, 04:18 and 08:51Z). D07 has since been decided (2026-10-19, above). D01 and D15
-have not.
+are not established by those closing comments; D01 is now superseded by D26/D28.
+
+### Prospective boundary and assisted-evidence stratum
+
+Generic-v10 evidence already exists. The `2026-10-20a` and `2026-10-22a` CHORUS API
+canaries, their retained raw responses, ledgers, hand-edit/recovery findings and
+costs informed the redesign. Lane C1, K1/K1 v2 and the BC1 offline sizing also use
+historical outputs or explicit proxies. These are disclosed engineering inputs,
+not unseen production outcomes or tests of the final BC1 condition.
+
+Under D31/D40/D47, both canaries are **assisted/invalid evidence-only**. Preserve
+every known attempt and expenditure in an assisted-engineering table, including
+unknowns where originals are missing. Exclude them from clean generated-record
+acceptance, confirmatory effects, and **both numerator and denominator** of the
+clean automatic-success rate. Report their totals separately so exclusion cannot
+hide cost or assistance. No rewrite or rescore promotes them into the clean set.
+
+P4 must precede the first clean outcome from the fully specified, reviewed and
+registered production condition. Rules and tolerances below are prospective to
+that condition, after observing the disclosed engineering evidence; they are not
+claimed to have been fixed before any v10 data existed. A later change is a dated
+amendment and condition boundary, not a silent correction to historical results.
 
 ## 1. Estimands (P2 item 1)
 
 1. **Feasibility and acceptance.** For each registered cell, the outcome is accepted
-   or rejected (A11–A13), with its attempt count. Per stage and project, the outcome
-   is the share of billed attempts that ended in an accepted record. Pilots are
-   reported separately from production.
+   or rejected (A11–A13), with its attempt count. Per arm/stage/project, report the
+   share of clean registered attempts ending in acceptance, with billing or native
+   runtime evidence separately. Assisted attempts are the separate stratum above.
+   Pilots are reported separately from production.
 2. **Package effect against v8.** For each primary metric in item 2, the difference
    between the generic_v10 confirmatory cells and the v8 comparator records, project
    by project, in both analysis sets of item 3.
@@ -86,10 +139,12 @@ have not.
    v10 cells against v8's 3 replicates of the same project.
 4. **External feasibility.** VOICE_PEDIATRIC and Kids First: whether an accepted
    record is produced, plus descriptive metrics. There is no comparator.
-5. **Cross-arm contrast (API against Claude Code direct).** **[pending D09]** The plan
-   recommends option (a) for the first Claude Code canary, with every such cell
-   labelled the direct arm, not native. Any contrast is then preregistered as
-   runtime, provider, transport and effort together, never as one of them.
+5. **Cross-arm contrast (API against native agentic (direct arm)).** D26/D27 select
+   Track N and its default runtime profile. The first native CHORUS canary is
+   **n=1 descriptive feasibility only**. Runtime, provider, transport, effort,
+   tools, staged exposure and the procedural differences below change together;
+   shared prompt assets do not isolate a runtime effect. Native production cells
+   are unregistered. No six-project native/API effect is estimable from one canary.
 
 ## 2. Comparator, metrics and cell roles (P2 item 2; [pending D02])
 
@@ -172,7 +227,54 @@ longer holds.
 | Kids First (A19) | ×1 | — | descriptive (item 2a) **[pending D15]** |
 | With-crate CHORUS (A21–A22) | only under D04 path B | — | separate stage **[pending D04]** |
 
-The v10 confirmatory set is the CHORUS gate plus the production records: 12 records,
+The older plan's A21–A22 identifiers for the optional crate stage are retained
+only as historical task references. Current coordination's **A21 is the clean
+CHORUS API re-canary** under D35/D44, not an authorization for a crate arm.
+
+### Six-project × generation-arm and evaluation matrix
+
+All prospective cells below remain unlaunched/unregistered unless a later,
+hash-bound owner record explicitly says otherwise. “Confirmatory” names the
+proposed analysis role after P4, not current authorization or acceptance.
+
+| Project | API arm (`claudecode_api{,_core}`) | Native agentic (direct arm) (`claudecode_direct{,_core}`) | Evaluation/contrast role |
+|---|---|---|---|
+| CHORUS | One clean re-canary, n=1 descriptive; proposed production n=3 confirmatory against v8 | First canary n=1, descriptive feasibility only; no production replicates registered | API production enters E2/E5; native canary has independent acceptance review and separately registered descriptive E5 ratings, never a confirmatory native/API verdict |
+| AI_READI | No-crate pilot separately; proposed n=3, confirmatory only under D02's chosen comparator, otherwise descriptive | Unplanned/unregistered | API E2/E5 retain the cross-arm label if v8 with-crate is selected; any later native contrast must also declare source/profile/account/effort differences |
+| CM4AI | Proposed n=3 confirmatory against v8 | Unplanned/unregistered | API E2/E5 use D46's non-human-subject/non-regulated applicability; companion analyses are not dataset-processing facts |
+| VOICE | Proposed adult n=3 confirmatory against v8 | Unplanned/unregistered | API E2/E5 adult scope; pediatric records never substitute |
+| VOICE_PEDIATRIC | Proposed n=1 descriptive feasibility, no v8 comparator | Unplanned/unregistered | Separate pediatric E2-style source review/E5 descriptive row; no confirmatory effect or adult replicate |
+| KIDS_FIRST | Proposed n=1 descriptive external resource-level feasibility, neutral profile, subject to actual input fit | Unplanned/unregistered | Neutral-context source review/E5 descriptive row; no v8 comparator and no inferred cohort-level equivalence |
+
+For a later registered native/API comparison, freeze identical selected source
+bundle, manifest, source policy, full/core schema closures, profile, omission
+context and scientific assets where the contrast claims they match. Hash the
+complete effective instructions and each stage request separately; if any differ,
+declare that difference in the treatment table rather than normalizing it away.
+Native uses first-party `claude.ai` login with no API key; the effort/account and
+runtime limit basis remain D29 owner choices. API uses the explicitly selected
+CBORG route and recorded returned model identity. Attempt, termination, missing
+output and assistance rates are reported separately per arm; neither API token
+prices nor native subscription charges are assumed interchangeable.
+
+The N2 declaration at `be0bd05821256212e89e4d011ba6b30a780e299b` remains required:
+
+| Difference | Declared treatment difference |
+|---|---|
+| H1 | API receives supplied text/digests and a no-tools phase boundary; native reads declared files, generates the pair and sees full-schema/provenance instructions. |
+| H3 | API RETURN/metadata and protocol-7 batch grammar become native ordered stages, receipt-v1 duties, attribution drafts and relocated role review. |
+| H6 | Native can correct phase-1 receipts before sealing and sees captured context/full schema. API's explicit flat-claims/status-matching report clarification is not in the native appendix. |
+| H7 | API receipt-v2 continuation/registration becomes native helper commands, recorder metadata and receipt-v1 stage contracts; tool order and asset exposure differ. |
+
+These are mixed scientific and procedural differences. Common uniform/R9 bytes
+do not establish identical complete instructions, tool observations or model
+attention. BC1 currently supports only the API parent tuple (item 14); native
+BC1 parity is **not installed or accepted**. The native n=1 canary therefore
+cannot silently stand for the API bounded-carry treatment.
+
+The proposed v10 confirmatory set is the **three-replicate CHORUS gate A16** plus
+the nine other production records, excluding the separate n=1 clean re-canary:
+12 records,
 matching E2's 12 v8 + 12 v10 batch under options (a), (c) and (d). Under (b), the
 confirmatory sets are 9 + 9, and AI_READI's records form a descriptive stratum
 (item 12).
@@ -184,8 +286,8 @@ Classified as D02 classifies them:
   - populated leaves in the full record (`receipts.populated_leaves`);
   - recall-target counts under cue sha256 `768a26a3…` and tools pattern `4726c005…`
     (`scripts/recall_target_baseline.py`);
-  - receipt coverage, `with_receipt / receiptable`, with its denominator (item 3 says
-    which coverage);
+  - receipt coverage with exact record/receipt snapshots and instrument identities
+    (item 3a); the D37 acceptance ratio and pre-completion comparison are distinct;
   - #2932 replicate structure (`replicate_structure.compare_structure` and
     `summarize`);
   - validation, duplicate keys and report findings.
@@ -206,7 +308,7 @@ Classified as D02 classifies them:
   - Its bundle is `03502237` (P1).
 - **Kids First** ([pending D15]: the plan recommends API first, after A14-acc and once
   A15 exists):
-  - generated with **the neutral profile and vocabulary null**, under its own
+  - generated with **the neutral profile and `vocabulary: {}`**, under its own
     curator-written `omission_context_v1`, as a one-row roster under the registered
     floor (A19-reg);
   - its frozen chunk manifest is re-validated first (A19-reg's `d4d bundle chunk …
@@ -275,9 +377,15 @@ v10's floor would select on the measured outcome. v8's Set B is 8 of 12 records 
 (2) and 9 of 15 under (1) (P1). Set B is reported beside Set A as a sensitivity
 analysis, never instead of it.
 
-**Replicate structure** (#2932, prediction 8) is computed over exactly three records
-per arm and project, one per cell (the cell's final attempt), under either definition,
-so cells weigh equally.
+**Replicate structure** (#2932, prediction 8) has an **n=3 primary estimand**:
+exactly three records per compared arm/project, one final attempt per registered
+replicate cell, with equal cell weights. If one arm supplies only two usable
+records, n=3 is missing and n=2 is a separately flagged **sensitivity stratum**,
+never the same estimand. Use the two common registered replicate indices when
+both arms have them; otherwise show unmatched available sets and do not present
+a paired contrast. Do not choose a favorable two-record subset from a complete
+three-record arm. Show each arm's n and included cell IDs in every structure
+table. With fewer than two in either arm the comparison is not computable, not 0.
 
 **Rules for n=1 and n=3.**
 - **Default:** D02 recommends descriptive comparisons (per project, v10 values beside
@@ -287,36 +395,95 @@ so cells weigh equally.
 - **This draft's choice:** it preregisters a tolerance per directional prediction
   (Predictions below), **[proposed; owner fixes at P4]**, so that each prediction can
   be judged true or false. The owner may replace any of them with "descriptive" at P4.
-  No tolerance can be added or changed after any v10 data exist.
+  Freeze tolerances at P4 before the first clean outcome under the selected
+  production condition; prior assisted evidence is disclosed above. Subsequent
+  changes require an explicit prospective amendment and a new analysis stratum.
 - **Verdicts** are per project. A prediction's overall statement is "holds in k of K
   confirmatory projects", where K is 4, or 3 under AI_READI option (b). There is no
-  pooled test at n=3.
+  inferential significance test at n=3. Prediction 4 alone retains a descriptive
+  claim/leaf-weighted pooled decision rule, with the fixed-weight sensitivity in
+  item 16; it is not a per-project or independent-replicate significance claim.
 - **n=1 cells** (pilots, VOICE_PEDIATRIC ×1, Kids First) are descriptive only.
+
+## 3a. Receipt snapshots, instruments and coverage estimands
+
+Generation retains **receipt checker v4** and the versioned D37 snapshot gate.
+Receipt v5 is **shadow/explicit opt-in only** until a separately reviewed
+registration amendment selects it on every participating generation, provenance
+readback and evaluation route. Local R_V5 fixes establish offline behavior, not
+activation or scientific equivalence. v5 affirmative coverage accepts only
+`SUPPORT`/`PARTIAL` and verified source-bound tools; `NEUTRAL`, `REFUTE` and
+`NO_EVIDENCE` remain diagnostics without affirmative credit. Record the checker
+version, complete instrument string and code identity alongside every metric.
+D37 intentionally preserves the old v4 instrument string, so that string alone
+cannot identify the measurement: require its snapshot fields and checker/source
+hash, with executable round-trip readback on the selected route.
+
+Let `O` be the immutable phase-1 original record, `R0` its receipt before the
+completion turn, `R1` the preserved effective phase-1 receipt after that turn
+(or `R0` if no turn), and `F` the final full record with final effective receipt
+`Rf` after any declared rereceipt. Bind all available snapshots by SHA-256;
+“at receipt” is the record snapshot, not the time the checker is rerun.
+
+| Quantity | Record and receipt | Numerator / denominator; selected checker | Use |
+|---|---|---|---|
+| Pre-completion coverage | `O`, `R0` | `receipt_completion.before.slots.with_receipt / receipt_completion.before.slots.receiptable`, checked with v4 and `original=O` | Prediction 2; unavailable snapshots are missing, never replaced with post-turn or final values |
+| D37 at-receipt coverage | `O`, `R1`; when a final check also receives `F`, its snapshot counters still evaluate `O` | `slots.with_receipt_at_receipt / slots.receiptable_at_receipt`, v4 D37 | Primary registered acceptance floor; original unreceipted values removed later still remain in the denominator |
+| Final-record coverage | `F`, `Rf`, retaining `O` separately | `slots.with_receipt / slots.receiptable`, v4 | Descriptive final-record coverage, with additions/removals and rereceipt effects separately shown |
+| Completion gain | Same `O` and denominator for checks with `R0` and `R1` | `(covered(O,R1) − covered(O,R0)) / receiptable(O)`, v4; also report the integer difference and newly covered/lost leaf IDs | Attributable to the receipt turn's measured attestation change, not to record removal or schema change |
+| v5 shadow quantities | Identical explicit snapshot pairs as above | Same named counters with instrument version 5 and its changed polarity/tool semantics | Separate columns/strata only; never substituted for the v4 primary gate or pooled as the same instrument |
+
+The primary D37 acceptance reading freezes `R1` at receipt completion; it does
+not substitute a later `Rf` after seeing final results. If a registered rereceipt
+route legitimately updates phase-1 attestation, publish that additional reading
+with its receipt hash/timestamp and declared acceptance rule, alongside the
+unchanged `O,R1` baseline. A final readback must make this receipt choice explicit.
+
+For zero denominators the ratio is undefined/unmeasurable, never 0 or a perfect
+score. Report numerator, denominator and unavailable counts, not only percentages.
+Retiring audit rows or deleting unreceipted leaves **does not improve source
+coverage**: preserve original leaf IDs and lost coverage beside final ratios.
+Literal/tool verification checks source location and computation; it is not
+semantic support. Copying text intact does not automatically justify `exactMatch`
+or a `none` disposition. Fast entailment diagnostics are not adjudicated truth.
+
+Historical v8 retains its original v3 check blocks. Where the exact historical
+record, receipt, manifests, schema and sources exist, recompute both conditions
+under one explicitly pinned checker on copies and publish that common-instrument
+view alongside stored values. Do not invent missing v8 phase-1 or pre-turn
+snapshots. If only final-v8 versus pre-completion-v10 is available, label that
+timing/instrument contrast as such; it does not estimate an isolated completion
+effect. Report-claims v7/v8 and optional watermark-aware v9 likewise remain named
+instruments. Rubric changes require their own version and evaluation registration.
 
 ## 4. Confounds (P2 item 4)
 
 Every one of these differs between v8 and the v10 API arm at once, so all effects are
 package-level (plan risk 21, D02):
 - **Prompt:** the generic_v10 text against `d4d_generic_arm_prompt_v8.md`.
-- **Harness:** renderer 25's typed audit and receipt completion against v8's
-  four-phase runner, and renderer 26 against 25 where it applies.
-- **Coverage timing.** v10 coverage is post-turn and v8's is not, so the coverage
-  comparison uses v10's pre-turn figure (prediction 2). That figure is on the
-  full-phase record, before audit, reconcile and repair. v8's is on the final record,
+- **Harness:** API renderer 25 plus explicitly selected BC1 versus v8's four-phase
+  runner; native renderer 26 is a separate declared procedure, not BC1 parity.
+  BC1 staged concern/decision carry changes later evidence exposure (item 14).
+- **Coverage timing.** Prediction 2 uses v10's pre-completion figure and names its
+  checker separately from the D37 gate (item 3a). It is on the phase-1 record,
+  before audit, reconcile and repair. v8's stored figure is on the final record,
   where reconcile and repair had added leaves that have no receipt route (49 of 4094 in
   v8; P1). That residual difference stays a confound.
 - **Schema:** 2.0.0 against 3.0.0, and the change in the digest's term source.
   - P1: no v8 record's schema digest re-renders under today's renderer.
   - `d4d runs check` reproduces all 19 digest texts from historical code, but that
     does not attest the consumed implementation or profile.
-- **Caps:** the audit and report caps, 24k against 96k.
+- **Caps:** historical v8 caps versus D28's selected stage/report caps and BC1's
+  separately disclosed implementation delta (items 14–15); thinking and visible
+  output consume different bounds and must both be reported.
 - **Thinking display:** v10 sends `display: summarized` (D06). v8 declared adaptive
   thinking with no display (the plan's D06: "as v8 and v9 did"). The v8 records
   predate the `model.thinking_requested` field, so this rests on the plan, not on the
   records.
 - **AI_READI input arm:** under the owner's 2026-10-14 ruling, the AI_READI v8
   records are with-crate results; v10 reads `1a58ad7b`, without the crate (item 2;
-  #5042). The other three projects read byte-identical bundles.
+  #5042). P1 found the other three projects' bundles byte-identical; verify those
+  identities again in the selected registration rather than assume no later edit.
 - **Gating and selection asymmetry:**
   - v8 rep1 records each survived a canary gate. In three projects, earlier canaries
     were not retained: CM4AI (`04`, `04b`, `04c`), VOICE (`04d`, `04e`) and AI_READI
@@ -328,8 +495,9 @@ package-level (plan risk 21, D02):
 - **Check instruments:**
   - **Grounding:** the v8 grounding blocks declare no instrument, while v10's will
     carry v1 (#4090). That affects "ungrounded identifiers" and "resolver URLs" (P1).
-  - **Report claims:** v8's stored `report_claims` blocks are instrument v7, while
-    v10's will be v8, the `check_report` default. Recomputed under v8, the 12 v8
+  - **Report claims:** v8's stored `report_claims` blocks are instrument v7. The
+    proposed v10 baseline remains v8; watermark checks require separately selected
+    v9, never a silent expansion of v7/v8. Recomputed under v8, the 12 v8
     records change in one place: CHORUS rep3 gains one finding (P1).
   - **Form:** current on both sides.
 - **The recall rule and the newly exposed Software keys.** #2930's reopen comment of
@@ -339,9 +507,9 @@ package-level (plan risk 21, D02):
 - **Transport and provider:** both arms run CBORG `claude-opus-5`. Provider-side
   model drift under one model id cannot be excluded, so v10 records the returned
   model identity per call (plan G4).
-- **Effort:** a fixed confound. The API arm runs at the provider default (D09), as v8
+- **Effort:** a declared confound. The API arm runs at the provider default (D09), as v8
   did (each v8 record's `unverified` entry; P1). Any Claude Code cell runs at an
-  explicit level chosen at N6.
+  explicit level/account chosen under D29 before its native registration.
 - **Repository state:** `repo.dirty` will read true on every v10 run, because run
   inputs and outputs are untracked. It read true on all 12 v8 records too, across
   four commits and six distinct dirty states (P1). Launch cleanliness is defined as
@@ -354,9 +522,11 @@ one model id plus the thinking display, since the model id is the same.
 
 ## 5. Pilot acceptance rows (P2 item 5)
 
-Under the pending floor, the registered receipt gate is **UNMEASURABLE by design**.
-A10 expects exit 1 with "registered receipt gate unmeasurable". That exit is not a
-rejection; the rows below decide.
+The D28/D37 clean CHORUS re-canary registers **19/20 on the phase-1 snapshot**.
+The builder default remains `pending`; a pilot deliberately registered with that
+default has an **UNMEASURABLE** coverage gate, not an automatic acceptance. Record
+the exact basis and status; never interpret a pending gate as the decided 19/20.
+The remaining rows apply separately.
 
 Each row must be 0, or hold, and A11 records each:
 1. **The five receipt floors** of `canary.receipt_floors`, all from `d4d receipts check
@@ -372,13 +542,14 @@ Each row must be 0, or hold, and A11 records each:
 4. **Report totals (#4766):** the report's stated finding total and severity subtotals
    equal `audit_counts` of the run's `intermediate/{P}_audit.json`. The stated
    values, the computed values and any mismatch are all recorded.
-5. **Full-phase cap:** every `full` row in `api_usage`, and
+5. **Full-phase cap (API):** every `full` row in `api_usage`, and
    `model.max_tokens_by_phase.full`, read 128000.
-6. **Provider:** `model.provider` reads 'LBL CBORG (proxy to Anthropic)' and
+6. **Provider (API):** `model.provider` reads 'LBL CBORG (proxy to Anthropic)' and
    `model.base_url` reads `https://api.cborg.lbl.gov`.
 
 **Recorded, not gated:**
-- coverage as a fraction with its denominator (`with_receipt / receiptable`);
+- item 3a's coverage fractions and snapshot/denominators **other than the
+  registered D37 ratio**, which is gated as specified above;
 - per-call transport and empty-answer outcomes;
 - #2926's items, from its acceptance criteria:
   - `never_receipted` before and after the receipt-completion turn;
@@ -412,9 +583,11 @@ It carries:
 
 ## 7. Attempt accounting, canonical marks and missing cells (P2 item 7; D07 decided)
 
-- **Every attempt counts**, stopped and rejected ones included, together with its
-  usage rows, in the attempt table. Which attempts enter Set A follows item 3's
-  definition.
+- **Every attempt is retained**, stopped and rejected ones included, with its
+  usage/termination evidence. Clean registered attempts form the per-arm automatic
+  success denominator; assisted 10-20a/10-22a and any later intervention form the
+  separately reported engineering stratum, excluded from both clean numerator and
+  denominator. Which clean attempts enter Set A follows item 3's definition.
 - **Attempt bound:** at most 2 billed attempts per registered cell (D07), for example
   a pilot plus one contingency, or a replicate plus one D21 re-run. Then the owner
   reviews.
@@ -445,22 +618,24 @@ It carries:
     D21 continuation.
   - Its attempts' records still enter Set A where they exist.
   - A per-project comparison uses the replicates available and shows n.
-  - Replicate structure (#2932) needs at least 2 replicates per arm, so with fewer it
-    reads "not computable", never 0.
+  - Structure's primary estimand needs n=3 per arm. n=2 is only the flagged
+    sensitivity stratum of item 3; fewer than 2 is not computable, never 0.
   - A project with no v10 record in a set is counted as "not measured" in "k of K"
     for that set.
 - **Cells split across prefixes:** a cell that D21 splits across prefixes cannot be
   grouped by `d4d runs select --config`. It is marked by a recorded procedure or left
   unmarked (A20; a G4 gap).
 
-## 8. The D20 floor rule (P2 item 8; [pending D20])
+## 8. Production-floor decision (P2 item 8; D37 basis decided, D20 value pending)
 
-The proposed rule, D20's option 1 and the plan's default, is committed here before
-the pilots:
+D37 fixes the snapshot basis. D28 fixes 19/20 for the clean CHORUS re-canary only,
+and the builder default is pending. The older D20 recommendation below is retained
+as a **proposed production-value rule**, subject to a dated owner decision after
+the clean pilots; it does not override the re-canary registration:
 
 > The registered receipt-coverage floor is the lower of the CHORUS pilot's (A10) and
-> the AI_READI pilot's (A14) post-turn coverage fractions, `with_receipt /
-> receiptable`, rounded down to the nearest 0.05.
+> the AI_READI pilot's (A14) effective at-receipt D37 coverage fractions,
+> `with_receipt_at_receipt / receiptable_at_receipt`, rounded down to the nearest 0.05.
 
 **[pending D20]** The value is registered at A15, in a dated amendment PR that gets
 P3's review (a Claude reviewer plus a Codex CLI pass) before the owner merges it. That
@@ -473,7 +648,8 @@ For scale, from P1's per-record coverage:
   and CM4AI rep3 (0.581).
 - This matches #2926's statement.
 - The receipt floors alone fail 4 of the 12 v8 records today (item 3).
-- v8 coverage is pre-turn, so it is context for the rule, not a comparator for it.
+- v8 stored coverage is final-record coverage without a receipt-completion turn;
+  it is historical context, not a same-snapshot comparator for the D37 floor.
 
 ## 9. Gating and continuation of production rosters (P2 item 9; [pending D21])
 
@@ -525,27 +701,22 @@ results are judged, so it sits outside the confirmatory analysis.
 - The choice and its basis are recorded in the A15 amendment before any multi-row
   roster.
 
-**Not adopted: a "< 0.55" trigger.** The coordination prompt states a "D21 < 0.55
-single-delivery trigger (#5050)". No such threshold exists in any of these places:
-- the plan;
-- main, or any remote-tracking or local branch;
-- the primary checkout's `notes/`, `.local_drafts` included, or any `d4d-executions`
-  worktree's `notes/`.
-
-The only occurrence is the coordination prompt itself,
-`notes/coordination/2026-10-20-claude-prompt.md`, an untracked file in the primary
-checkout. #5050 is the GitHub assistant
-smoke-test issue. This draft keeps the plan's trigger above: any terminal
-single-delivery failure in either pilot. If a numeric trigger is intended, the owner
-states it and its source before P4.
+**No adopted "< 0.55" trigger.** The October 20 review found that threshold in
+its delegation rather than the governing plan; its repository search is historical
+evidence, not a fresh exhaustive absence claim. This draft does not adopt it.
+Any numerical trigger needs an explicit owner decision before P4.
 
 ## 10. Caps, triggers, stop-loss and stop classification (P2 item 10; D07 decided)
 
-- **Caps:** as decided under D07 (decision table above).
+- **Caps:** the historical D07 allocation remains part of the spending record.
+  It is not evidence of remaining funds after the two assisted canaries. The
+  rebuilt packet must carry the current reconciled ledger, new allocation/cap and
+  owner word; D28's planning allowance is not itself a launch authorization.
 - **Operator trigger:** the cap minus the largest worst case of any call that can be
   pending. The worst case comes from A3b's bounds, the pending phase's output cap plus
-  its stated input. For CHORUS the plan puts the trigger at most about $11.50 against
-  $15. The AI_READI and Kids First triggers wait for item 15.
+  its stated input. Recompute it from BC1's actual groups/final call and measured
+  request sizes (item 15), including simultaneous in-flight calls. The old
+  $11.50/$15 CHORUS example is historical, not the new trigger.
 - **Dollar stop-loss:**
   - the operator watches the A3b readout and runs `d4d api stop --label-prefix
     <prefix>` at the trigger, or after 2 h for the pilot (A10);
@@ -563,8 +734,8 @@ states it and its source before P4.
     identified in what was written;
   - **harness:** a deterministic stop caused by the run's own validation or by a
     registered limit, not by the provider and not by the instruction's rules. Two
-    known cases:
-    - **A record shape the runtime refuses** (Lane C1 Finding 2).
+    historical cases that informed engineering:
+    - **A record shape the runtime refused** (Lane C1 Finding 2, October 20 code).
       - Receipt completion validates the persisted full record against the captured
         schema (`_validate_record`, called from `_inputs`; `receipt_completion.py:154`,
         `:178`, `:215`). It does so before `_call_with_usage` admits the
@@ -578,8 +749,8 @@ states it and its source before P4.
         so nothing repairs such a shape before the originals freeze.
       - C1 notes that its sweep bypasses `_validate_record`, so the gate itself was
         not exercised there.
-    - **A registered limit no valid answer can meet** (Lane C1 Finding 1). The
-      registered `worker_output_tokens` (4,000) is below the floor of any worker answer
+    - **A registered limit no valid answer could meet** (Lane C1 Finding 1). The
+      superseded October 20 `worker_output_tokens` (4,000) was below the floor of any worker answer
       the terminal source review accepts, at every valid grid. It stops a run in one of
       two ways:
       - a cut-off answer is refused at the worker stage, and the typed audit is
@@ -592,11 +763,12 @@ states it and its source before P4.
           CHORUS, VOICE and VOICE_PEDIATRIC (1,744–3,852 tokens for the largest
           worker, before thinking).
         - For AI_READI, CM4AI and Kids First it is at the cap's edge (3,924–4,763).
-        - With raised caps it is open at every grid (item 15).
+      - With raised caps it was open at every grid in that historical experiment.
 
       The causes are the registration's limit and the worker check's permissiveness,
       so a contingency under the same limits would reproduce the stop. The remedies:
-      - A6's output limits, set before any registration is put to the owner;
+      - the reviewed current limits and metadata checks, before a registration is
+        put to the owner; historical C1 paths are not assertions about BC1;
       - optionally, the runtime fix C1 suggests: `check_worker` refusing a metadata row
         on a path that `record_metadata_allowed` does not allow, which would move the
         metadata form's failure to the worker stage.
@@ -624,14 +796,18 @@ states it and its source before P4.
     with independence assumed, a run with 4, 6 or 8 single-delivery calls ends
     terminally 30%, 42% or 52% of the time. Transport alone gives 20% (4 calls) and
     36% (8 calls).
-  - A 3-row roster then completes without a stop in 11–34% of cases.
-  - This is illustrative only. The pilots measure the typed-stage rates (item 18), and
-    those, not this estimate, inform the A15 trigger decision.
+  - These four/six/eight-call examples describe the old single-integrator design,
+    not BC1. Current exposure uses `W + 1 + ceil(W/fan_in) + 1` audit calls plus
+    the separately counted generation/receipt/reconcile/report calls (item 15).
+    Do not carry the old roster probabilities into BC1 budgets or predictions.
+  - Report observed stage rates and uncertainty; the independence illustration is
+    not a measured failure forecast and does not choose a favorable tolerance.
 
-## 11. Freeze (P2 item 11; [pending D17])
+## 11. Freeze (P2 item 11; D35 decided)
 
-D17 recommends a freeze from the first generic_v10 registration until each arm
-completes, unless v1 byte parity is shown and the remaining runs re-register. Every
+D35 freezes from the rebuilt A21 re-canary registration on merged main, after
+A17, #5155 and #5157. Later runner changes require a CHORUS byte-parity test and
+one separately authorized diagnostic canary before remaining runs re-register. Every
 registration pins the full and core schema closures, the bundle, the chunk manifest
 and the source manifest.
 
@@ -644,25 +820,22 @@ Frozen are:
 - API runtime changes;
 - any #4354 merge that touches the API path.
 
-The launch worktree stays at the launch base for the whole matrix. Any advance follows
-D17's procedure between stages, with no run live. Any compaction or report-family
-change item 15 describes is model-facing. It lands before A4, or at the next
-shared-generation version, never inside the matrix. The output limits are
-registration values, set at A6.
+The launch worktree stays at its pinned base. Advances occur only between stages,
+with no run live, under D35 and a new reviewed registration. BC1 is a model-access
+condition change under D44; integrate and review it before A21 rather than
+silently treating assisted-canary results as tests of the rebuilt condition.
 
-## 12. Blinding and reviewers (P2 item 12; [pending D23])
+## 12. Blinding and reviewers (P2 item 12; D36 decided)
 
-D23 recommends a mixed model:
-- a human curator;
-- a Claude reviewer plus a Codex CLI pass for registrations and code;
-- named source reviewers for acceptance and for the comparison batch.
-
-The owner names them at G3.
+D36 selects a fresh Claude blind source-review session plus a Codex CLI pass;
+neither generated nor operated the run. The owner signs each acceptance record.
+Record reviewer identities and independence for acceptance and comparison; this
+engineering revision is not the owner's scientific sign-off.
 
 **Acceptance review (A12)** is blind source review of the unchanged originals against
 the frozen bundle. It covers #1782, #1801/#2924, #1815, #1816 and #2924 dates.
-**[pending D05]:** the #2918 and #2919 classes are counted separately and do not
-reject on their own (D05's recommendation). A12 never involves the generating
+Under D34, #2918 and #2919 are measured by existing lints and reported in E2/E6;
+no new rule batch enters v10. A12 never involves the generating
 session, and it is not the comparison.
 
 **Comparison batch (E2)** is separate from acceptance:
@@ -674,8 +847,9 @@ session, and it is not the comparison.
 - E2 starts after A17-acc. No v8 record has yet been reviewed under the #1782–#1816
   protocol.
 
-**[pending D19]:** whether A12's CHORUS review also seeds the #2921 audit-recall
-ground truth. D19 recommends yes, if D23 names a second blind reviewer before A12.
+Under D36, a second blind model reviewer writes audit-recall observations against
+the SHA-256 of `original_full` before anyone reads the audit. This seeds #2921;
+unresolved human annotation/matching decisions remain explicit before scoring.
 
 **Joint re-rating (E5)** is one billed rating pass of the v8 and v10 records together,
 on the E1 route:
@@ -691,6 +865,16 @@ on the E1 route:
 E5 needs its own registration, review and owner word. D22's withdrawal means no
 standing authorization covers it.
 
+The native CHORUS canary is not automatically included in the API/v8 E2 or E5
+batch. If accepted, rate it only through a separately declared descriptive
+native-arm stratum: same selected rubric/context bytes, independent blind source
+review and exact-file validation, with generation runtime/tool/exposure
+differences retained. Other native cells are unplanned and receive no invented
+rating rows. #5126's historical-comparator authority route, the separate native
+rating authority adapter and any rubric amendment must be settled for the
+participating strata before ratings; route engineering does not authorize them.
+The proposed atomic-claim protocol belongs to D24/P4 (item 16), not #5126.
+
 ## 13. Labels and launches (P2 item 13)
 
 - One distinct date-letter prefix per roster.
@@ -700,182 +884,201 @@ standing authorization covers it.
   The launch worktree is never fast-forwarded over those data PRs except by D17's
   procedure.
 - A stopped label is never re-run.
-- Every generic_v10 launch, continuations included, goes through `d4d api batch` with
+- Every **API-arm** generic_v10 launch, continuations included, goes through `d4d api batch` with
   a roster, never `d4d api run` ([pending D20]: D20's recommendation). `d4d api run`
   has no floor verdict, canary
   block, run lock or #795 guard.
+- Native launches use Track N's registered command/recorder path and first-party
+  authentication; they never go through the API batch route. D29 and the native
+  real-binary/probe/acceptance gates remain separate prerequisites.
 - Immediately before every billed launch, the operator hashes the roster, every
   registration it lists and the launcher script, and stops on any difference from the
   sha256s named in the word and the review (A10).
 
-## 14. Fixed model-facing values (P2 item 14; pending item 15)
+## 14. Selected condition, bounded carry and model-visible identity
 
-**The rule:**
-- **One receipt-completion registration body** (`receipt_completion_registration_v2`)
-  for every project and role, identical apart from the floor. The floor is pending
-  until A15.
-- **Neutral identifiers:** that body's `registration_id` and `context_limit_basis` are
-  neutral.
-- **Audit limits:** the model-facing audit limits are the ones A1 identifies by
-  rendering twice with one limit changed. At `15d053d1a` those include at least
-  `max_request_bytes` and `omission_output_tokens`. They are fixed across projects
-  and sized for **the largest bundle**. Only non-model-facing allowances vary.
-- **Registration ids:** each registration's top-level `registration_id` differs,
-  because a roster refuses a reused one. It is neutral and sits outside the fixed
-  receipt body.
+The design label **`shared-generation-api-v2-bc1`** names the proposed scientific
+condition. It is **not** the installed `shared_generation_version` or an accepted
+registration. The current local BC1 implementation at
+`3bd3c41f459b31848aee2f57e26deb86ef786970` selects the following actual tuple;
+these differences must be resolved and pinned before P4/A21.
 
-**The largest bundle is now Kids First, not AI_READI.**
-- Kids First is 541,184 bytes, against AI_READI's 430,393 since #5042 (P1).
-- The plan's A1 sizes only CHORUS and AI_READI, and D15 and A19-word describe Kids
-  First as "about the size of AI_READI's 542,513", which is now false (for agy and the
-  owner).
-- Lane C1 sized Kids First by proxy (C1 Finding 5): it has no A5d omission context
-  and no record, and an A1b count of it needs an A5d context first.
+| Component | Current reviewed policy / local implementation | Registration obligation |
+|---|---|---|
+| Scientific assets | D30/D38 generic-v10 prompt SHA-256 `ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db`; uniform-v2 SHA-256 `22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e` | Verify actual merged bytes and native alignment; the BC1 branch itself does not install D38 |
+| Actual BC1 selection | `bounded_carry_version=1`, exact `bounded_carry` registration block; `bc1_typed_audit_v1`, parent shared generation **1**, generic_v10, API renderer **25**, playbook **2**, receipt completion **2**, direct API | Pin full contract/procedure/code/runtime identity; shared-generation-v2 routing and native are unsupported |
+| Hook status | Protected shared-generation hooks are an **unapplied proposal**, diff SHA-256 `10cb0ff8dd77d34ec150ae9b5447a82cdeef4402a477151f220a6c02685b0cb8` | Review/integrate first; applying the patch changes source identity and requires rebuilt registrations |
+| Schema and source | Complete captured reachable Dataset and CoreDataset definitions, descriptions and annotations; complete original records and source bundle | Pin exact full/core import closures, bundle, chunk/source manifests, profile and context bytes per cell; no final composed closure/registration hash is yet claimed |
+| Worker/partition contract | A17 splits large lists; D39 owning-root wording; D45 selects project bounds | Pin exact reviewed contract and each project's measured partition. Numeric partition metadata stays controller-only as specified below |
+| Carry | `bc1_codec_v1`, `ConcernPacketV1`, `RecordDigestV1`, stage delta v1 | Pin codec/contract/source digests and each predecessor/request identity; a digest is not evidence of scientific support |
+| Receipts and reports | v4 + D37 snapshot gate; v5 shadow only. Baseline report checker v8; watermark-aware v9 is a separate opt-in | Pin checker code, instrument, snapshot fields and any evaluation amendment; never silently activate new checks under old labels |
+| Composition | BC1 branch has reviewed R9b/A17 changes but does **not** install A14, D38 or D41 | Finish composition, D42 guard selection and independent review; no installed-source or campaign-readiness claim follows from isolated tests |
 
-The values themselves are set at A6 and reviewed at A7. This draft fixes the rule,
-not the numbers. Item 15 shows the numbers cannot yet be set.
+**What later models receive.** Every worker must review all assigned populated
+values and clauses against the complete sources. Integrations consume fixed
+groups of one or two new worker results plus bounded concern/decision history;
+one separate final call checks cross-group consistency. Later stages retain
+changed rows, concerns, predecessors, every explicit decision, omission candidates
+and dispositions, plus full records/schema/source. Untouched supporting/metadata
+review rows and their evidence text can be absent from that model view. The host
+archives the complete worker reviews, raw deliveries and machine audit.
 
-## 15. Stage caps and non-model-facing allowances (P2 item 15; pending an owner decision and A1b)
+This is an intentional **change in model access**, not lossless preservation of
+the full review procedure. Lossless encoding of retained strings cannot ensure
+that models rediscover a contradiction involving omitted supporting-row evidence.
+The scientific rationale is bounded context/cost with explicit concern retention;
+the tradeoff is unmeasured cross-group detection. Reconcile must inspect affected
+occurrences, and the final report must review every populated final-full value
+anew, including unchanged entries. These duties and acceptance/source-review
+gates remain; no support judgment is inferred from successful decoding.
 
-Still pending. The A1 offline sizing has a result: Lane C1's
-`notes/a1_offline_sizing_2026-10-20.md` on branch `fix/5072-offline-sizing-recovery`,
-commit `0d45c1ec8`, local and readable with `git show`, note sha256
-`9df27d8e77a24aed80aa3bc206a32fa94755781f80e8474bd496f6102832b4e3`.
-- It was under a final verification when this was written.
-- It replaces the note's first version (`64082b98d`, `e6d46f3a3`), whose
-  recommendation and three of whose claims it corrects. Its "Corrections" section
-  also lists the errors of two unpushed intermediate revisions, `118af93de` and
-  `9dcb4390a`. This draft cited `9dcb4390a` and then `e38abbf4c` before.
-- It measured tree `8ea79861` (PR #5095's pre-launch stack).
-- Every token figure in it is an estimate from bytes, except where it quotes A1b's
-  count.
+**Controller-only partition metadata.** Project-specific numerical bounds
+(`max_paths`, inventory-byte limits, `max_workers`), calibration/cost labels and
+project-profile metadata belong to the scheduler/registration record, not the
+model request. Assigned paths, actual required rows, group predecessors and
+scientific duties necessarily remain visible. Do not claim assignment invisibility
+or assume that calling a field “scheduler-only” hides it. Before registration,
+recursively inspect every captured wire request, including nested registration,
+plan and carry text, and run differential renders with only controller bounds
+changed. Record any intended visible difference; an unapproved bound leak blocks
+the fixed model-facing contract. This draft specifies that gate, not evidence
+that it has already passed for the final composition.
 
-Its answer, in the order a run would meet the problems:
+Across all six projects the visible protocol and byte envelopes are fixed;
+project bounds are selected under D45 and independently recorded. Neutral IDs
+remain neutral. Kids First uses actual neutral context with `vocabulary: {}` and
+resource-level scope; it is not sized or generated by silently substituting an
+AI_READI record. D46 approved settings, not arbitrary narrative/citation text.
+The decision note's CHORUS hash `6e3c6b6d…` conflicts with retained actual
+`ac94a74b…` bytes; resolve and pin the exact artifact before registration rather
+than copying that inconsistent digest or rewriting evidence.
 
-1. **No partition makes a typed-audit worker's input fit**, for any of the six
-   projects, under the current protocol.
-   - CHORUS: A1b counted its largest worker at 1,009,249 input tokens on the same
-     record at the same grid. That is over the 1,000,000-token window before the
-     4,000-token output cap is added.
-   - The other five: an estimated 24–60% over.
-   - The cause: every typed request carries the schema twice. Once as its own catalog
-     (1,486,502 bytes in every worker and in integration), and again as the schema
-     context's induced-slot classes. The worker's own assignment, the only part
-     partitioning controls, is 0.2–0.3% of the request.
-2. **No worker's valid answer fits its output cap, at any valid grid** (C1 Finding 1).
-   - The registered `worker_output_tokens` is 4,000, and thinking draws on the same
-     `max_tokens`.
-   - The floor of an answer the terminal source review accepts is:
-     - 2.7–3.0 times the cap at G2;
-     - 3.4–6.1 times at G5;
-     - 1.4–1.5 times at G1, where G1 is valid (CHORUS, VOICE, VOICE_PEDIATRIC).
-   - **The worker stage accepts far less.** Its check (`audit_batches.check_worker`)
-     tests structure only.
-     - Its grammar accepts a declared-metadata row (`{"path", "metadata_reason"}`)
-       for any path. Only the terminal check, at assembly, asks whether the path may be
-       declared metadata (`record_metadata_allowed`).
-     - An all-metadata answer for the largest worker, before any thinking (C1 Result
-       2):
+## 15. Token caps, visible-byte bounds, call counts and input allowances
 
-       | grid | at 4 bytes a token | at A1b's ratios | against the 4,000 cap |
-       |---|---|---|---|
-       | G1 (CHORUS, VOICE, VOICE_PEDIATRIC) | 1,282–1,355 | 1,744–2,223 | under |
-       | G2 and G4, those three | 2,226–2,349 | 3,027–3,852 | under |
-       | G2 and G4, AI_READI, CM4AI, Kids First | 2,885–2,904 | 3,924–4,763 | at the edge |
+D28's decided baseline is **64,000 / 32,000 / 32,000 tokens** for worker /
+omission / integration, with **128,000** for report, report regate and
+reconcile-full. These caps include thinking where the route uses thinking.
+The current BC1 code instead requires **64,000 for both worker and integration**,
+including each group and final integration call. This is a material implementation
+delta, not an alias for D28's 32k integration. The owner/reviewed registration must
+settle the resulting contract and budget before P4; this draft does not silently
+approve it. Retain the original decided baseline and the proposed BC1 value in
+the decision packet.
 
-       Figures at 4 bytes a token err low (the note), so they cannot by themselves
-       show that an answer fits under the cap. The verdict column rests on A1b's
-       ratios.
-   - **So the costlier failure path is open where that answer fits.** Such an answer
-     passes the worker stage and fails only at assembly, after every typed stage is
-     billed.
-     - Under the registered caps, it is open at G1, and at G2 and G4 for CHORUS, VOICE
-       and VOICE_PEDIATRIC. For AI_READI, CM4AI and Kids First it is at the edge.
-     - With the raised caps any valid answer needs, it is open at every grid.
-   - **A runtime fix to consider** (C1 Finding 1). If `check_worker` refused a
-     metadata row on a path not allowed one, that form would fail at the worker stage,
-     at the cost of one worker.
-   - No compaction option helps: this is output, not input. Item 10 classifies the
-     ways it stops a run.
-3. **Under S7, the closest compaction option, the report family is not shown to fit
-   for AI_READI or Kids First.** The audit is carried at its floor, a lower bound, and
-   the report as written at its 96k cap. On those figures:
-   - Kids First's regate is 880,265 tokens, 3.6% over the 850,000 report-family
-     ceiling.
-   - AI_READI's is 816,145, with room for 172 bytes per source-review row. The note
-     judges that a real row likely needs more.
-   - A report-family change is needed for Kids First and likely for AI_READI. The note
-     names three, each of which would clear Kids First's excess at the floor:
-     - carry only the audit's findings and revised rows;
-     - drop the remaining classes from the report family's schema context;
-     - stop repeating the source-review inventory there.
-   - The other four projects keep at least 949 bytes per row.
-   - Every other request fits under S7 at the floor, on every project. The least room
-     is in Kids First's requests:
-     - integration, 718,171 tokens, about 925 bytes of answer per row;
-     - `reconcile_full`, 624,048 tokens, 1,829 bytes per row.
+Separate fixed visible envelopes are **98,304 worker bytes**, **131,072 integration
+bytes**, **262,144 carry bytes**, and **32 open concerns**. They neither replace
+the thinking-inclusive token reservations nor authorize truncation, changed
+partitioning or an extra delivery after refusal. An answer must satisfy both
+bounds and the existing evidence/grammar checks.
 
-     Result 2's output problem remains.
-4. **The typed input aggregate rules out G2 under S7.** The registered
-   `aggregate_input_tokens` is 4,000,000.
-   - At G2, AI_READI needs 4.33M and Kids First 4.71M.
-   - With three workers (G3, G5), they need 2.70M and 2.93M.
-5. **Kids First is the largest case and is sized by proxy** (C1 Finding 5; item 14).
-6. **Byte estimates, not counts.** Only the unbilled A1b `messages.count_tokens`
-   count, which agy runs, can clear a request.
+With `W` workers and registered fan-in `f` of 1 or 2, BC1 plans
+`G = ceil(W/f)` group integrations plus **one separate final integration**:
 
-**The note's recommendation: "Nothing launches as registered."** If S7 or S6 is
-adopted, it recommends G5 (`max_paths` 384, `max_inventory_bytes` 65,536,
-`max_workers` 4), together with the report-family change. It also needs output limits
-that A6 sizes from a measured worker answer:
-- `worker_output_tokens`: at least 24,290 tokens at the floor (4 bytes a token;
-  CM4AI's largest worker), and 33,035–39,836 at A1b's ratios, before real content and
-  thinking;
-- `aggregate_output_tokens`: the registered 100,000 is likely too small for AI_READI
-  and Kids First. The runtime's admission rule needs 80,242–96,762 at A1b's ratios at
-  the floor, before thinking.
+- audit calls: `W + 1 omission + G + 1 final`;
+- proposed BC1 aggregate output reservation:
+  `W × 64,000 + omission_cap + (G + 1) × 64,000`;
+- D49 aggregate input allowance: `max_calls × 1,000,000`, with `max_calls`
+  covering every registered maximum worker, group, omission and final call;
+- generation, receipt-completion, reconcile, report/regate and permitted repair
+  calls are added separately to the full-run cost and failure exposure.
 
-Its alternative is G2, which needs A6 to raise `aggregate_input_tokens` to at least
-4.71M plus a margin.
+“One or two” refers to **new workers per group**, not a universal two-integration
+call ceiling. If that interpretation is not the intended scientific condition,
+resolve it prospectively instead of reporting the implemented schedule as parity.
+Aggregate allowance is a ceiling, not an estimate, a context-fit test or permission
+to spend. Current #5157 admission must independently enforce actual request bytes,
+provider token count plus the selected output cap, and remaining aggregate budget
+before each dispatch, including resumed repair/report refresh.
 
-**What follows for this plan:**
-- **Nothing here is decided.** S7 or S6, the report-family change and the partition
-  are the owner's decisions; the output limits are A6's.
-  - Each compaction or report-family change alters model-facing text. That makes it a
-    new shared-generation version at a condition boundary (D17), touching
-    `shared_generation.py`, the typed audit and receipt completion.
-- **No stage cap, input bound or allowance is fixed here**, until those decisions and
-  the A1b counts exist.
-- **D07.** The note quotes D07's two triggers. Its estimates point at the second:
-  "If a counted AI_READI report or regate request, with its 96k output cap, does not
-  fit the route's window, A14 waits for the owner's decision". They point at it for
-  Kids First as well as AI_READI. That trigger fires on A1b counts, not on the note.
-- **The rule that will apply**, whatever the figures:
-  - each counted request plus its output cap fits the route's window, and the report
-    family fits under 850,000;
-  - **[proposed; owner fixes at P4]** every worker's answer, at the size A6
-    measures, fits its `worker_output_tokens`, and the run's typed stages fit
-    `aggregate_output_tokens` under the admission rule;
-  - the report and its regate, with the 96k output cap, are counted figures (A1b);
-  - if a worst case does not fit, the dependent pilot waits for the owner's decision
-    (D07), and Kids First is now among them.
+Size **CHORUS, CM4AI, AI_READI, VOICE, VOICE_PEDIATRIC and KIDS_FIRST** at expected
+size and visible caps with each project's own original/full/core/receipt/context
+inputs and the real planner/formatter. Record worker/group counts, complete source
+and schema bytes, carry and omission sizes, cached/uncached assumptions, input and
+output reservations, cost and failure exposure per stage. K1 v2 is calibrated
+engineering evidence from the two assisted canary ledgers; later responses and
+receipt decisions remain unknown. Bytes/token proxies and hypothetical empty/cap
+responses are not provider counts or guarantees that all six campaigns fit.
 
-#5072 records that the 2026-10-12 A1b calibration report printed PASS on oversized
-rows. It is not launch evidence.
+Keep Lane C1 `notes/a1_offline_sizing_2026-10-20.md` at `0d45c1ec8` (SHA-256
+`9df27d8e77a24aed80aa3bc206a32fa94755781f80e8474bd496f6102832b4e3`) as historical
+engineering evidence: its 4k workers, G5/S7 recommendation, 96k reports and 4M
+aggregate limit explain the redesign. They are **superseded registration values**,
+not current prescriptions. Likewise the #5072 oversized-row PASS defect is not
+launch evidence. D44 holds A21 until all-project design/build/review; any remaining
+actual fit failure holds its dependent launch rather than being hidden in a proxy.
 
 ## 16. Instrument for the review-pass predictions (P2 item 16; [pending D24])
 
-D24 recommends option 1. The "unsupported-claim rate" and "adverse-slot rate" of
-#2930 are measured in the blind E2 comparison batch, as per-record counts of the
-rejecting classes over a stated denominator:
+D24 recommends option 1. The following precise E2 units and weighting are a
+**prospective proposal for D24/P4, not an already ratified protocol**. Pin the
+annotation manual, reviewed inventory and adjudication rules before E2. The
+unsupported-claim and adverse-slot rates of #2930 use the rejecting classes:
+
 - #1782: plans stated as current, and scope;
 - #1801 and #2924: roster roles;
 - #1815: attribution;
 - #1816: qualifiers and headers.
 
-The denominator is fixed in the E2 protocol before E2 starts. The support judge is
-excluded from preregistered predictions until #3343 is calibrated under its own
-registration and word.
+**Semantic units and exclusions.** For the unsupported-claim rate, a unit is one
+distinct atomic factual assertion in one record, identified by referent, predicate,
+value, temporal/release scope and qualification. Attach every occurrence path.
+Split conjunctions into independently verifiable assertions using the same blind
+manual in both arms; do not split one assertion because it fails more than one
+rejecting class. Repeated wording or paraphrases of the same assertion within a
+record count once, even at several paths; retain all occurrences for audit. The
+same claim in a different replicate is a different record-level observation.
+Different scope/time/qualification makes a distinct claim. Record-metadata-only
+fields, empty/unpopulated values and nonassertive headings are excluded using a
+frozen explicit eligibility list, not an outcome-dependent decision. Both
+affirmative and source-checkable negative factual assertions are eligible.
+
+For the adverse-slot rate, the unit is a unique eligible populated scalar leaf
+path in the record. A leaf is adverse if any of its adjudicated assertions falls
+in a rejecting class; count that leaf once even if several clauses/classes fail.
+Its denominator is the assessed eligible leaf count, not the number of claims or
+the full schema's possible slots. These two rates therefore have different units.
+
+Publish supported, rejected, unresolved/unassessed and excluded counts, with
+reasons and an immutable claim-to-occurrence/leaf map. Unresolved/unassessed units
+are never silently deemed supported or treated as zero. The primary E2 verdict
+requires complete adjudication of the frozen eligible inventory; otherwise mark
+the affected rate unmeasurable and show a clearly labelled assessed-only
+descriptive rate. New splitting/dedup rules require a versioned amendment applied
+equally to both arms, not a post-result favorable denominator.
+
+A missing record or project from the fixed E2 roster also blocks the primary
+pooled verdict; an available-record pool is descriptive only, even if every
+remaining claim was adjudicated. A zero assessed-claim denominator `C=0` or
+assessed-leaf denominator `L=0` is unmeasurable, never zero error or a perfect
+score. Preserve the missing/zero-denominator row and do not silently redistribute
+its project weight.
+
+**Weighting.** For record r/project p/arm a, let `U_apr` be rejected atomic claims
+and `C_apr` assessed eligible atomic claims; `A_apr` and `L_apr` are adverse and
+assessed eligible leaves. Prediction 4 retains its original **zero-tolerance**
+directional rule, evaluated separately for the two rates:
+
+- claim-weighted pool: `sum(U_apr) / sum(C_apr)` over the fixed E2 record roster;
+- leaf-weighted pool: `sum(A_apr) / sum(L_apr)` over that same roster;
+- project-specific rates: the corresponding ratios summed only within p,
+  displayed for every project with record n and both denominators;
+- equal-project-weight sensitivity: arithmetic mean of the project-specific
+  rates across the **same predeclared K projects**, each weighted `1/K` in both
+  arms. It is not recomputed by silently dropping a missing project; report that
+  sensitivity unmeasurable and any available-project result separately.
+
+Every assessed claim or leaf gets weight 1 in its pool, so projects and records
+with more assessed units receive more weight. A lower pooled rate is **not** a
+claim that every project improved, nor an equal-project effect. Publish these
+weights, per-project rates and the fixed-weight sensitivity even when they
+disagree with the pool. Under AI_READI comparator option (a), retain an explicit
+**AI_READI cross-arm (with-crate v8 / no-crate v10)** row and label the combined
+pool as mixed input-arm evidence; also show the prespecified three-project pool
+excluding AI_READI. Do not relabel it as a homogeneous runtime/package effect.
+
+The support judge remains excluded from these predictions until #3343 is
+calibrated under its own registration and word. Literal receipts, tool checks,
+BC1 row retirement and rubric scores do not determine E2 semantic verdicts.
 
 **Recorded deviations from #2930's wording:**
 - #2930 says "in the review pass". The instrument is the E2 batch instead, because
@@ -922,8 +1125,10 @@ attributed to the display.
 
 ## Predictions
 
-Each prediction names its metric, comparator, decision rule and instrument, fixed here
-before any v10 data exist. **Every rule is [proposed; owner fixes at P4].**
+Each prediction names its metric, comparator, decision rule and instrument, to be
+fixed at P4 before clean outcomes from the selected production condition. The
+assisted evidence already observed is disclosed above. **Every rule remains
+[proposed; owner fixes at P4].**
 
 **Notation:**
 - For project p, `v8_p` and `v10_p` are each arm's values in Set A, under the
@@ -939,14 +1144,14 @@ under (a) it is labelled cross-arm.
 | # | prediction (from #2930, restated against v8 per D02) | metric and instrument | decision rule [proposed; owner fixes at P4] | v8 values (P1) |
 |---|---|---|---|---|
 | 1 | Populated leaves do not fall | `len(receipts.populated_leaves(full))` per record | holds for p if mean(v10_p) ≥ 0.9 × mean(v8_p). v8's replicate SDs are 21.7 (CHORUS), 43.9 (AI_READI), 31.3 (CM4AI) and 68.6 (VOICE) leaves, so 10% of the v8 mean is 1.2, 1.1, 1.5 and 0.5 SD respectively | AI_READI [525, 525, 449], CHORUS [235, 278, 251], CM4AI [422, 473, 479], VOICE [386, 297, 432] |
-| 2 | Receipt coverage does not fall, measured pre-turn | **v10:** `receipt_completion.before.slots.with_receipt / receipt_completion.before.slots.receiptable`, from the provenance record's `receipt_completion` block (written by `api_runner.py:7384-7386` from `receipt_completion.recover`). Its `before` check is `rereceipt.complete`'s `receipts.check` of the full-phase record with `original=record`. So its `added_after_receipt` is 0, and `receipt_completion.counts.never_receipted_before` equals its `receiptable − with_receipt`.<br>**v8:** `receipts.slots.with_receipt / receipts.slots.receiptable` of the final record.<br>The v4 instrument's coverage is v3's (`receipts.py`: "v3 coverage and gates unchanged") | holds for p if v10_p's pooled pre-turn coverage ≥ v8_p's pooled coverage − 0.05 (absolute). A v10 record without a `receipt_completion.before` block has missing pre-turn coverage: never 0, and never replaced by the post-turn value. Residual confound: v10's figure is on the full-phase record, and v8's is on the final record after reconcile and repair (item 4). Post-turn coverage, which the gate selects on, is reported descriptively only | pooled, under item 3's definition (2): CHORUS 0.340, VOICE 0.592, AI_READI 0.538, CM4AI 0.688. Under (1): VOICE 0.462, AI_READI 0.491 (P1) |
+| 2 | Receipt coverage does not fall, measured pre-completion | **v10:** v4 `receipt_completion.before.slots.with_receipt / receipt_completion.before.slots.receiptable` on `O,R0` (item 3a). **v8:** stored v3 final-record `receipts.slots.with_receipt / receipts.slots.receiptable`; add a named common-checker recomputation where exact inputs exist. Pin source/checker identities; do not infer parity from the unchanged v4 string. | holds for p if pooled pre-completion v10 coverage ≥ pooled v8 coverage − 0.05 absolute. Missing pre-turn snapshots remain missing, never 0 or replaced by post-turn values. Final-v8 versus phase-1-v10 remains a timing/instrument contrast. D37 at-receipt gate coverage, final coverage and completion gain are separately reported, never substituted into this rule. | pooled, under item 3's definition (2): CHORUS 0.340, VOICE 0.592, AI_READI 0.538, CM4AI 0.688. Under (1): VOICE 0.462, AI_READI 0.491 (P1) |
 | 3 | The recall rule raises recall where the bundle states the targets | `scripts/recall_target_baseline.py` (cues `768a26a3…`, tools `4726c005…`) per record, at D02's targets:<br>- AI_READI variables 20/13/20;<br>- CM4AI lexical candidates 9/5/3;<br>- VOICE variables 4/4/4, lineage 1/1/1, lexical candidates 3/0/1, tools with a version token 0/0/0;<br>- CHORUS lineage 1/1/0. | **Counts the rule should raise** (variables, lineage entries, versioned tools): holds for a target if mean(v10_p) > mean(v8_p).<br>**Targets at their ceiling:** where every v8 replicate already sits at the target's ceiling under this plan's rules, the target holds if mean(v10_p) ≥ mean(v8_p) ("does not fall"). VOICE lineage 1/1/1 is at its ceiling: the count is the top-level `was_derived_from`, a single-valued slot (not `multivalued` in the run's schema or today's), and row 3a forbids `parent_datasets`.<br>**Lexical candidates**, which should fall as cue chunks are extracted rather than set aside: holds if mean(v10_p) < mean(v8_p).<br>**Combination:** a project's row-3 verdict holds if every target listed for it holds, and "holds in k of K" then counts projects [proposed].<br>AI_READI's v8 counts were taken over the with-crate chunking (P1) | as listed |
 | 3a | A rise is an error where the bundle states nothing | Same counts, read against the #3289 adjudication in `notes/recall_target_baseline.md`:<br>- no parent dataset in any of the four bundles;<br>- no processing-software version in the AI_READI, CHORUS or CM4AI bundles (CM4AI's versions belong to companion analyses);<br>- VOICE's one stated version is b2aiprep v3.0.0.<br>The adjudication read AI_READI's pre-#5042 bundle, when it still had its RO-Crate, which recorded FAIRSCAPE 1.2.1 as the metadata packager, not processing software. It is re-read against `1a58ad7b` before P4. | holds if every confirmatory v10 record has `parent_datasets` 0 and, for AI_READI, CHORUS and CM4AI, `used_software` with a version 0. Any non-zero instance means it does not hold, and each instance is listed | 0 today |
-| 4 | The unsupported-claim and adverse-slot rates do not rise (a review-pass prediction) | The D24 instrument: E2 blind counts of the rejecting classes over the denominator fixed in the E2 protocol | **The one exception to per-project verdicts:** pooled over the E2 batch, because E2's denominator is set per batch, not per project (item 16). The v10 records are E2's 12 confirmatory records (item 12), not Set A's attempts. Holds if the pooled v10 rate ≤ the pooled v8 rate, per rate, with no tolerance. Ties hold | no v8 record reviewed yet; measured in E2 |
+| 4 | The unsupported-claim and adverse-slot rates do not rise (a review-pass prediction) | D24/P4 proposed atomic-claim and eligible-leaf units, exclusions, dedup/splitting and complete-adjudication rules in item 16 | **Exception to per-project verdicts:** claim-weighted and leaf-weighted E2 pools, not Set A attempts. Holds separately if each v10 rate ≤ its v8 rate, zero tolerance; ties hold. Always show project-specific rates and equal-project-weight sensitivity. AI_READI option (a) stays visibly cross-arm, with the separate three-project pool. Missing/unassessed units do not create a passing verdict. | no adopted E2 annotation result asserted here; measured after protocol/roster freeze |
 | 5 | Rubric20 Q11/Q19 do not fall (secondary) | E5 joint re-rating, instrument version per E4 | holds for p if mean(v10_p) ≥ mean(v8_p) − 0.5 on the item's scale, over the records E5 re-rates, under the one joint re-rating | measured in E5 |
 | 6 | **Not a prediction: an acceptance invariant.** Validation passes with 0 duplicate keys | `validation.passed` and `canary.duplicate_key_count` | true by construction for accepted v10 records, since the batch stops on invalid output and duplicate keys gate. Set A reports the count of v10 attempts whose output failed either, descriptively | 12/12 passed, 0 duplicate keys |
 | 7 | **Descriptive, no direction:** report findings | `report_claims.findings` | reported per record and per project in both sets. Reasons:<br>- the counts cross instrument versions: v8's stored blocks are v7, and new runs are checked under v8;<br>- renderer 25's report carries the typed audit's finding totals (#4766), which v8's report did not;<br>- v8's values are 0–2 per record.<br>A directional rule would be decided by noise, as D21 argues against its option (a) | worst, stored v7 and recomputed under v8 alike: CHORUS 2, VOICE 1, AI_READI 1, CM4AI 0. Under v8, CHORUS rep3 goes from 0 to 1 (P1) |
-| 8 | **Descriptive, no direction:** replicate structure (#2932) | `replicate_structure` per project:<br>- all / some / none;<br>- identical;<br>- nested counts differ;<br>- max/min ≥ 2;<br>- intermittent slots. | reported per project, over exactly three records per arm and project, one per cell (item 3). It needs at least 2 replicates per arm (item 7). Reason: #2932's source-anchored granularity rule is not established to be in generic_v10 (#2932 is open, and #3336's retained remainder asks to verify it). Without it, the recall rule could raise intermittency by filling slots in some replicates, or lower it, so there is no directional hypothesis | P1 section "Replicate structure"; intermittent AI_READI 8, CHORUS 14, CM4AI 17, VOICE 9 |
+| 8 | **Descriptive, no direction:** replicate structure (#2932) | `replicate_structure` per project: all/some/none, identical, nested counts differ, max/min ≥ 2, intermittent slots | **n=3 primary**, one final attempt per cell; n=2 only a separately flagged sensitivity with common cell indices, n and IDs in every table; fewer than 2 is not computable (items 3/7). D34 says #3336 is in v10 and CHORUS ×3 measures it; that is not empirical proof of a directional structure effect. | P1 section "Replicate structure"; intermittent AI_READI 8, CHORUS 14, CM4AI 17, VOICE 9 |
 
 Rows 1–5 are directional and decidable, rows 6–8 are not predictions, and every
 rule is the owner's to fix at P4. Coverage and leaves use #2930's "do not fall".
@@ -954,9 +1159,13 @@ Recall is "rises where the bundle states the target, and is never invented where
 does not" (3, 3a). Structure and report findings are descriptive, for the stated
 reasons.
 
-## Differences between the coordination prompt and the plan
+## Historical October 20 delegation differences
 
-The plan is followed in every case:
+The following records the October 20 draft's interpretation of its original
+delegation. Search/remote/worktree observations here are historical, not fresh
+exhaustive absence findings. Current D26–D49, the matrix and items 14–16 above
+govern the revised draft; this section does not override them.
+
 1. **v8 records.** The prompt describes "v8 04f (`claudecode_assistant_agent`) and 04g
    (`claudecode_api_agent`)". Neither method directory exists in any local checkout
    or on origin/main. The records are one API arm under `claudecode_api`; see P1.
@@ -978,21 +1187,32 @@ The plan is followed in every case:
 
 ## Open before P4
 
-- **Owner rulings.** Every [pending Dxx] above. In order of need:
+- **Owner rulings.** Every still-pending choice above. In order of need:
   - D02, including the **AI_READI comparator** (options (a)–(d), item 2) and the
     **Set A definition** (item 3);
-  - D03, D20, D21, D24, D17, D23, D09, D04, D15, D05, D08 and D19.
-- **Item 15's open decisions**, for items 14 and 15:
-  - S7 or S6, a report-family change and the partition (the owner);
-  - the output limits, from a measured worker answer (A6);
-  - the A1b counts (agy), with Kids First's A5d context first.
+  - D03, D20 production floor, D21, D24, remaining D09 choices, D29 native
+    effort/account, D04, D15 and D08. D35/D36 already decide freeze/review policy;
+    D34 already decides the rule batch.
+- **Items 14–15's composition decisions and evidence:**
+  - reconcile the BC1 design label/actual parent tuple and 64k integration delta;
+  - integrate reviewed hooks/dependencies, select the D42 guard, and verify the
+    complete installed condition and controller-only wire projection;
+  - size all six real project contexts at expected/cap scenarios and retain
+    request-admission gates; no unsupported proxy certifies Kids First;
+  - build exact prompt/schema/contract/receipt/context/registration identities and
+    a current budget/trigger from the actual call schedule, then freeze under D35.
 - **Plan amendments, for agy and the owner; this draft does not edit the plan:**
   - the `d22b61a9` gates in A4 and A14-reg, and the run tables;
   - D15's and A19-word's "about the size of AI_READI's 542,513";
   - A1's sizing inputs, which do not include Kids First.
 - **The #3289 adjudication**, re-read against AI_READI's `1a58ad7b` bundle (prediction
   3a).
-- **The E2 protocol's denominator** (item 16).
+- **The E2 protocol and denominator:** owner review/adoption of item 16's exact
+  units/weights, blind inventory and split/dedup rules before E2, without changing
+  the directional threshold after seeing outcomes.
+- **Evaluation identities:** D46 settings remain approved; corrected narratives,
+  citations, CHORUS digest inconsistency and per-route readback still need exact
+  verification. Native canary ratings remain separately registered/descriptive.
 - **Rubric20 version** (#2911, E4).
 - **P3:** adversarial review by a Claude reviewer plus a Codex CLI pass. Each finding
   is filed as an issue and fixed in the PR.
