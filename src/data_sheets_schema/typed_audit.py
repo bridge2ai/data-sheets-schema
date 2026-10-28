@@ -22,6 +22,7 @@ from .schema_snapshot import SchemaSnapshot, capture_schema
 
 PACKET = "typed_audit_packet_v1"
 ASSEMBLY = "typed_audit_assembly_v1"
+SHARED_OMISSION_WIRE = "shared_generation_s7_v2"
 MAX_PACKET_BYTES = 96_000_000
 MAX_ASSEMBLY_BYTES = 160_000_000
 MAX_SCHEMA_FILES = 256
@@ -262,10 +263,12 @@ def _derive_uncached(inputs, schema_rows, project, limits):
 def prepare(*, protocol, original_full, bundle, manifest, receipt, context, schema_path,
             max_output_tokens, original_core=None, source_manifest=None, project=None,
             max_request_bytes=32_000_000, max_paths=96, max_inventory_bytes=16384, max_workers=16,
-            schema_snapshot=None, derivations=None):
+            schema_snapshot=None, derivations=None, omission_wire=None):
     """Capture a new packet; no saved response or self-reported success is trusted."""
     if audit_protocol.select(protocol)["protocol"] != audit_protocol.TYPED:
         raise ValueError("this consumer requires explicitly selected typed_audit_protocol_v1")
+    if omission_wire is not None and (type(omission_wire) is not str or omission_wire != SHARED_OMISSION_WIRE):
+        raise ValueError("unsupported omission wire selection")
     inputs = {key: _blob(value) for key, value in dict(original_full=original_full,
         bundle=bundle, manifest=manifest, receipt=receipt, context=context,
         original_core=original_core, source_manifest=source_manifest).items() if value is not None}
@@ -280,7 +283,8 @@ def prepare(*, protocol, original_full, bundle, manifest, receipt, context, sche
                   max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers)
     derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations)
     packet = _seal(dict(kind=PACKET, protocol=audit_protocol.select(protocol), inputs=inputs,
-        schema_sources=rows, project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))
+        schema_sources=rows, project=project, limits=limits, **derived, limitations=list(LIMITATIONS),
+        **({"omission_wire": omission_wire} if omission_wire is not None else {})))
     _bounded_json(_json(packet), "packet", MAX_PACKET_BYTES)
     for worker in packet["plan"]["workers"]:
         worker_request(packet, worker["id"], derivations=derivations)
@@ -288,16 +292,39 @@ def prepare(*, protocol, original_full, bundle, manifest, receipt, context, sche
 
 
 def _open(packet, *, derivations=None):
+    selected = {"omission_wire"} if type(packet) is dict and "omission_wire" in packet else set()
     _exact(packet, {"kind", "protocol", "inputs", "schema_sources", "project", "limits", "plan",
-        "omission_request", "contracts", "requests", "registered_provenance", "limitations", "sha256"}, "packet")
+        "omission_request", "contracts", "requests", "registered_provenance", "limitations", "sha256"} | selected, "packet")
+    if selected and (type(packet["omission_wire"]) is not str or packet["omission_wire"] != SHARED_OMISSION_WIRE):
+        raise ValueError("unsupported omission wire selection")
     if len(_json(packet)) > MAX_PACKET_BYTES or packet["kind"] != PACKET or _json(packet["protocol"]) != _json(audit_protocol.select(audit_protocol.TYPED)):
         raise ValueError("packet protocol/size mismatch")
     derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"], derivations=derivations)
     expected = _seal({**{key: packet[key] for key in ("kind", "protocol", "inputs", "schema_sources", "project", "limits")},
-                      **derived, "limitations": list(LIMITATIONS)})
+                      **derived, "limitations": list(LIMITATIONS),
+                      **({"omission_wire": packet["omission_wire"]} if selected else {})})
     if _json(packet) != _json(expected):
         raise ValueError("packet request/plan/contract/input identity mismatch")
     return raw, prepared
+
+
+def _omission_wire_prepared(packet, prepared):
+    """Derive one exact payload only after the packet's explicit selection is checked."""
+    if "omission_wire" not in packet:
+        return prepared
+    from .shared_generation import trim_omission_schema
+    payload = json.loads(prepared.payload_json)
+    payload["schema"] = trim_omission_schema(payload["schema"])
+    return omissions.Prepared(omissions._json(payload))
+
+
+def omission_wire_request(packet, *, derivations=None):
+    """Export the captured omission wire; the public default remains unprojected."""
+    _, prepared = _open(packet, derivations=derivations)
+    request = _omission_wire_prepared(packet, prepared).request()
+    if "omission_wire" in packet:
+        request["packet_request_sha256"] = packet["omission_request"]["request_sha256"]
+    return request
 
 
 def _omission_findings(findings, candidates=None):
@@ -405,7 +432,8 @@ def _index(packet, workers):
 def index(packet, workers, omission_response, *, derivations=None):
     """Bind workers and complete omission response; render the integration tail."""
     _, prepared = _open(packet, derivations=derivations)
-    report = prepared.check(omission_response, saved_request=packet["omission_request"])
+    prepared = _omission_wire_prepared(packet, prepared)
+    report = prepared.check(omission_response, saved_request=prepared.request())
     if not report["protocol_complete"]:
         raise ValueError("omission response does not satisfy complete captured inventory")
     inner_workers = _workers(packet, workers, derivations=derivations)
@@ -468,6 +496,8 @@ def _result(packet, workers, omission_response, integration_response, *, derivat
     problems = checked["findings"] + decision_problems
     lineage = {**lineage, "packet_sha256": packet["sha256"], "typed_index_sha256": bound_index["sha256"],
         "omission_request_sha256": packet["omission_request"]["request_sha256"],
+        **({"omission_wire_request_sha256": bound_index["omission_check"]["request_sha256"]}
+           if "omission_wire" in packet else {}),
         "omission_response_sha256": _sha(omission_response), "omission_candidates": accounting,
         "integration_saved_response_sha256": _sha(integration_response),
         "input_sha256": {key: item["sha256"] for key, item in packet["inputs"].items()},

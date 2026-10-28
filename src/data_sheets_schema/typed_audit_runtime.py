@@ -91,6 +91,7 @@ def _prepare_packet_bytes(spec, captured, originals, receipt_raw):
     inputs, limits = reg['inputs'], reg['audit_limits']
     key = [captured.registration, *[raw for _path, raw in captured.files], *originals.values(), receipt_raw]
     packet = sg.memo(spec, 'typed_packet', key, lambda: typed.prepare(protocol='typed_audit_protocol_v1', **originals,
+        omission_wire=typed.SHARED_OMISSION_WIRE,
         bundle=captured.raw(inputs['bundle']['path']),
         manifest=captured.raw(inputs['chunk_manifest']['path']),
         receipt=receipt_raw, context=captured.raw(inputs['context']['path']),
@@ -142,10 +143,7 @@ def _build_request_bytes(spec, captured, packet, stage, workers, omission, setti
     limit = reg['audit_limits'][label + '_output_tokens']
     full = typed._unblob(packet['inputs']['original_full']).decode('utf-8')
     if stage['phase'] == OMISSION_PHASE:
-        trimmed_payload = {**inner['payload'], 'schema': sg.trim_omission_schema(inner['payload']['schema'])}
-        wire_inner = {**inner, 'payload': trimmed_payload,
-                      'request_sha256': sg.sha(sg.canonical(trimmed_payload)),
-                      'packet_request_sha256': inner['request_sha256']}
+        wire_inner = typed.omission_wire_request(packet, derivations=_derivations(spec))
     else:
         wire_inner = inner
     binding = {'protocol': reg['selection']['protocol'], 'generation_id': ledger.generation_id(spec) if _live else generation,
