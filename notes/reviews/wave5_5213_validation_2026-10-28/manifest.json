@@ -1,0 +1,116 @@
+{
+  "format": "wave5_compact_validation_evidence_v1",
+  "helpers": [
+    {
+      "name": "preserve_wave5_validation_20261028.py",
+      "sha256": "e2057f41cc3022202918321e3dd6047e1348581a63f9d133d7f0ae04e7939f05"
+    },
+    {
+      "name": "archive_n2_restack_validation_20261027.py",
+      "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+    }
+  ],
+  "runs": [
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 20903,
+          "name": "origins-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "0775e49116ab8782c21e717ce32c6ac16593bb680bf0a68733dd1ef6cf4e62b8"
+        },
+        {
+          "bytes": 15009,
+          "name": "origins-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "25e32e64688186748048ce3d0042af273d5932dac5fe96410c4969796ee9bc1d"
+        },
+        {
+          "bytes": 466,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "3720c27bb6df0b7f520923a59354a2324a61fce2beb10387c416d712dc0e0c40"
+        },
+        {
+          "bytes": 1741,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "9da16096d0e9bdcbbb35fa31431157c8fb6f5f2c7fa7259e98a013fa55430efb"
+        },
+        {
+          "bytes": 586,
+          "name": "pytest-command.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "bd3ad85f59247396d70390bbe535ceb9e3f91549f4741454be4803a5bdad2082"
+        },
+        {
+          "bytes": 369,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "075f89702331f6d23b9b14c4ba017c186e6e58d14aeed361c2f716da411ddfca"
+        },
+        {
+          "bytes": 23635,
+          "name": "pytest.xml",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "1742cb785d01e81eb26b716e1e2a3b16be490ac8842b8eb1276425219bfc07a8"
+        },
+        {
+          "bytes": 2983333,
+          "name": "source-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "434840d7260db749a2f6f90f6f0d67df27f876c49a997a757df3fd839056cd60"
+        },
+        {
+          "bytes": 2983333,
+          "name": "source-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "434840d7260db749a2f6f90f6f0d67df27f876c49a997a757df3fd839056cd60"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_5139_relative_paths": 4,
+          "test_api_launcher": 54,
+          "test_arm_comparison": 65,
+          "test_preflight_resource_authority": 31,
+          "test_wave3_5139_paths": 1,
+          "test_wave3_5139_review": 6,
+          "test_wave4_5095_review": 5
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [],
+        "source_unchanged": true,
+        "wall_seconds": 123.5650188330037
+      },
+      "original_root": "/private/tmp/d4d-wave5-5213-validation-20261028",
+      "packet_directory": "run-01",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "cases"
+      ]
+    }
+  ],
+  "scope": "compact results, external raw inventory digests, no historical score changes",
+  "selection": "explicit top-level regular JSON/log/XML files, including ignored files",
+  "source_and_origin_inventories_embedded": false
+}

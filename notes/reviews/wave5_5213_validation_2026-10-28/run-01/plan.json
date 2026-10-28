@@ -1,0 +1,59 @@
+{
+  "base": "04799422669fb2bd9f571bf8c0800dfc4b0ef008",
+  "changed_paths": [
+    "scripts/adhoc/review_5139_paths_20261026.py",
+    "scripts/adhoc/validate_wave3_20261027.py",
+    "src/data_sheets_schema/api_launcher.py",
+    "src/data_sheets_schema/api_runner.py",
+    "src/data_sheets_schema/evaluation/arm_comparison.py",
+    "src/data_sheets_schema/provenance.py",
+    "tests/test_5139_relative_paths.py",
+    "tests/test_arm_comparison.py",
+    "tests/test_wave3_5139_paths.py",
+    "tests/test_wave3_5139_review.py"
+  ],
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-P",
+    "-B",
+    "/private/tmp/d4d-codex-wave5-5213-20261028/scripts/adhoc/validate_wave3_20261027.py",
+    "--child",
+    "--output",
+    "/private/tmp/d4d-wave5-5213-validation-20261028",
+    "--module",
+    "test_5139_relative_paths",
+    "--module",
+    "test_arm_comparison",
+    "--module",
+    "test_api_launcher",
+    "--module",
+    "test_wave3_5139_review",
+    "--module",
+    "test_wave3_5139_paths",
+    "--module",
+    "test_preflight_resource_authority",
+    "--module",
+    "test_wave4_5095_review",
+    "--mark",
+    "not corpus"
+  ],
+  "credential_names_removed": [
+    "CBORG_API_KEY",
+    "GIT_PAGER",
+    "KB_AUTH_TOKEN",
+    "OPENSCIENTIST_API_KEY"
+  ],
+  "head": "5146ec2ca5dfa0b35c7d8942c719cfae1fff4218",
+  "mark": "not corpus",
+  "modules": [
+    "test_5139_relative_paths",
+    "test_arm_comparison",
+    "test_api_launcher",
+    "test_wave3_5139_review",
+    "test_wave3_5139_paths",
+    "test_preflight_resource_authority",
+    "test_wave4_5095_review"
+  ],
+  "scope": "Offline selected modules; Python audit guard does not isolate arbitrary child binaries."
+}

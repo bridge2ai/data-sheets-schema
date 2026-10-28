@@ -1,0 +1,18 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_5139_relative_paths": 4,
+    "test_api_launcher": 54,
+    "test_arm_comparison": 65,
+    "test_preflight_resource_authority": 31,
+    "test_wave3_5139_paths": 1,
+    "test_wave3_5139_review": 6,
+    "test_wave4_5095_review": 5
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 123.5650188330037
+}
