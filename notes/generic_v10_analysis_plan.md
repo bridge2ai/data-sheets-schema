@@ -15,8 +15,9 @@ P4 is proposed in two stages, P4a and P4b ("Staged sequence under D58", below).
 
 - **Revised:** 2026-10-27 for R6 F1–F6; authority corrected 2026-10-28 against
   D26–D45 and D50–D61; revised again 2026-10-28 for the two P3 passes on `314189e4b`
-  (Claude F1–F23, Codex F1–F13) and for D62–D63. D46–D49 are retired, not owner
-  decisions. The local BC1/N2 implementations remain separately identified. This is a
+  (Claude F1–F23, Codex F1–F13) and for D62–D63; revised a third time 2026-10-28 for
+  the two verification passes on `1ed9bb1ef` (Codex V1–V8, Claude N1–N10), with the P4
+  agenda consolidated. D46–D49 are retired, not owner decisions. The local BC1/N2 implementations remain separately identified. This is a
   draft, not a retrospective registration or a declaration that the composed launch
   condition is ready.
 - **Drafted:** 2026-10-20, by the Claude worker session (coordination Lane C2), at main
@@ -106,7 +107,7 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | ID | Status | Where recorded |
 |---|---|---|
 | D06 | **Decided 2026-10-19.** Every generic_v10 API registration declares `{"type": "adaptive", "display": "summarized"}`, the routed v10 conditions included (keyed on the condition's base, v10). There is no typed-stage cache breakpoint in this condition. | #1849 comment of 2026-10-19 |
-| D07 | **Decided 2026-10-19, option 1.**<br>- A $100 named generic_v10 API pilot allocation: CHORUS pilot $15 cap, one CHORUS contingency $15, AI_READI pilot $35 planning ceiling, one AI_READI contingency at most $35.<br>- At most 2 billed attempts per registered cell, then an owner review.<br>- Every run needs its own owner word naming its registration sha256 (for a roster, the roster sha256 and each registration sha256 it lists) and its cap.<br>- `d4d api batch --max-cost-dollars` is the between-run stop.<br>- The operator trigger is the cap minus the worst-case in-flight call: at most about $11.50 against $15 for CHORUS.<br>- The AI_READI lines are provisional (see item 15). | #1763 comment of 2026-10-19 |
+| D07 | **Decided 2026-10-19, option 1.**<br>- A $100 named generic_v10 API pilot allocation: CHORUS pilot $15 cap, one CHORUS contingency $15, AI_READI pilot $35 planning ceiling, one AI_READI contingency at most $35.<br>- At most 2 billed attempts per registered cell, then an owner review.<br>- Every run needs its own owner word naming its registration sha256 (for a roster, the roster sha256 and each registration sha256 it lists) and its cap.<br>- `d4d api batch --max-cost-dollars` is the between-run stop.<br>- The operator trigger is the cap minus the worst-case in-flight call: at most about $11.50 against $15 for CHORUS.<br>- The AI_READI lines are provisional (see "Feasibility under D58" and "Plan amendments"). | #1763 comment of 2026-10-19 |
 | D10 | **Decided 2026-10-20: retire** the v10z/audit_controls lineage and audit28. | Owner's answer in the Claude worker session. `notes/reviews/v10z_retirement_2026-10-20.md` (this branch). agy is to post it on #4761. |
 | D22 | **Decided 2026-10-20: withdraw.** The v10z standing authorizations do not extend to generic_v10, and they are withdrawn now. | Same record. agy is to post it on #1763 and #4761. |
 | D01 | Superseded by D26/D28. | Native/API paths below. |
@@ -211,8 +212,28 @@ the P3 Claude review's independent recomputation.
 | v10 `10-20a` (assisted) | 72 (67) | 51/58 = 0.879 (`receipt_completion.before`, `O,R0`) | 58/58 | 58/63 = 0.921 | 0 | 0; 0 |
 | v10 `10-22a` (assisted) | 90 (79) | 52/64 = 0.813 | 64/64 | 64/75 = 0.853 | 1 | 0; 0 |
 
-The D37 values are those in D37's decision text, and they match the records'
-`receipt_completion.after` blocks.
+The D37 values are those in D37's decision text and in the records' provenance
+`receipt_completion.after` blocks. 10-20a's own
+`intermediate/CHORUS_receipt_completion_result.json` reads `after` = 51/58, the same as
+its `before`: one more assisted discrepancy.
+
+**Acceptance rows (item 5) on the same records,** read from each record's stored
+receipts and validation blocks with `canary.receipt_floors` and
+`canary.duplicate_key_count`:
+
+| CHORUS record | Snippets unverified (mismatched of total) | Other four receipt floors | Validation | Duplicate keys |
+|---|---|---|---|---|
+| v8 `04f` rep1 | 0 (0 of 79) | 0 | passed | 0 |
+| v8 `04f` rep2 | 2 (2 of 90) | 0 | passed | 0 |
+| v8 `04f` rep3 | 1 (1 of 117) | 0 | passed | 0 |
+| v10 `10-20a` (assisted) | 1 (1 of 115) | 0 | passed | 0 |
+| v10 `10-22a` (assisted) | 0 (0 of 133) | 0 | passed | 0 |
+
+So one mismatched snippet is common: two of the three v8 CHORUS records and one of the
+two assisted canaries carry at least one. Under item 10's classification as first
+proposed, that alone would have been a rule-level rejection of the re-canary, ending
+the condition; the proposed content-slip class allows one contingency instead (P4 item
+32).
 
 **What these values would imply, if clean records resembled them:**
 - **Row 1** would not hold for CHORUS. Its threshold is 0.9 × 254.7 = 229.2 leaves,
@@ -395,6 +416,22 @@ never choose between projects on quality. They are inputs to three decisions:
 - the written risk acceptance D08 recommends for single-row runs, which for A21
   should name its 8 single-delivery calls (item 10, P4 item 9);
 - whether to allow a transport-only redelivery (P4 item 4).
+
+**What the exposure means for complete n=3.** Item 3 requires three accepted cells per
+project for a primary verdict, and a cell gets two attempts. Under the same
+illustration, the chance that a project reaches complete n=3 is:
+
+| Project | All causes | Transport only | With one transport-only redelivery per call |
+|---|---:|---:|---:|
+| CHORUS | 39% | 66% | 82% |
+| CM4AI | 9% | 31% | 56% |
+| VOICE | 4% | 21% | 46% |
+| AI_READI | 0.6% | 7% | 25% |
+
+The last column keeps the 3-in-92 answer-level failures terminal (D56) and lets a
+redelivered call fail transport again at 5 in 92. Unless BC1's calls fail far less
+often than v8's, most primary verdicts beyond CHORUS would be "not measured". This is
+the main input to P4 items 4 and 16, and to P4b's budget.
 
 **Budget per accepted record [proposed; owner fixes at P4, item 2].** P4b prices each
 in-scope project per accepted record, including its expected retries within D07's
@@ -965,8 +1002,9 @@ It carries:
   artifact A11 confirms on disk.
 - **Check rows:** each item-5 row, with its value.
 - **Clean-run checks:** the journal verification, the override list (empty), the
-  journal heads printed at launch and at each stop against the monitor record, and
-  the interrupted-write check (item 7).
+  journal heads printed at launch and at each stop against the monitor record, the
+  interrupted-write check, and the check that nothing in the run directory was edited
+  (item 7).
 - **Coverage:** as a fraction with its denominator.
 - **Cost:** at that day's prices.
 - **Reviewers:** references to the A12 blind source review and its reviewers, named
@@ -1859,7 +1897,7 @@ reasons.
 
 The following records the October 20 draft's interpretation of its original
 delegation. Search/remote/worktree observations here are historical, not fresh
-exhaustive absence findings. D26–D45, D50–D61, the matrix and items 14–16 above
+exhaustive absence findings. D26–D45, D50–D63, the matrix and items 14–16 above
 govern the revised draft; this section does not override them.
 
 1. **v8 records.** The prompt describes "v8 04f (`claudecode_assistant_agent`) and 04g
