@@ -238,6 +238,151 @@ registration forbade (D31, D40). The values may not survive those changes. They 
 what was known when the rules were chosen: if a row is made descriptive at P4, the
 P4 record should say that these values were in view.
 
+## Staged sequence under D58 [proposed; owner fixes at P4, items 1–2]
+
+**Why the plan needs stages.** D58 decides the matrix's scope and budget on the
+re-canary's measured cost. P4 must come before the re-canary, because every billed
+generic_v10 step depends on P4. So the text ratified before A21 cannot fix the
+matrix, and the matrix fixed after A21 must not be free to follow A21's outcome. The
+proposal below separates the two stages, and fixes now the rules the later stage
+applies.
+
+**The sequence:**
+1. **P3 dispositions.** Every P3 finding is fixed in this text or converted to a P4
+   question, and the revision is re-reviewed.
+2. **P4a.** The owner ratifies this file's exact text, by sha256, for the A21 CHORUS
+   re-canary condition and for every analysis rule:
+   - the condition (items 14–15);
+   - the re-canary's money, attempt and stop rules (item 10);
+   - acceptance (items 5–6);
+   - the analysis sets, estimands and predictions (items 1, 3, 3a, 7–9 and 16, and
+     the Predictions);
+   - the scope rule below, and the other rules P4b applies.
+
+   A rule P4a defers is named, with the stage it holds. A deferral never permits a
+   choice after that stage's outcomes are seen.
+3. **The A21 registration.** D44's all-project build and review, D62's CHORUS fit
+   gate, D63's calibration and D55's guard compose into one registration. It is
+   reviewed, and the owner's launch word names its sha256 and the $60 cap (D07, D22,
+   D43).
+4. **A21.** One clean CHORUS re-canary: n=1, descriptive, in plan A10's role, outside
+   every confirmatory estimate.
+5. **The measured-cost packet.** It reports:
+   - A21's billed cost by stage;
+   - each call's outcome: completed, transport error, answer-level rejection or
+     terminal;
+   - each call's measured size against its room, and the aggregate against D62's
+     sizing;
+   - the wall clock.
+
+   It carries no quality comparison against v8.
+6. **P4b.** A dated amendment, reviewed as P3 was (a Claude reviewer plus a Codex CLI
+   pass, each finding filed), applies the scope rule to the measured-cost packet and
+   to the budget the owner sets under D58. It fixes the matrix's scope and budget, and
+   with them K, the confirmatory set, the E2 and E5 rosters, the pilot sequence (D03)
+   and which D20 input applies. The owner ratifies it by sha256 before any dependent
+   registration (plan A14-reg, A16-reg).
+7. **Dependent pilots and rosters,** each with its own registration, review, cap and
+   owner word.
+
+**What P4b may change, and what it may not:**
+- **It may change** which whole projects are in scope, a replicate count where this
+  text predeclares the options (VOICE_PEDIATRIC ×1 or ×3), and the budget lines.
+  Whether the AI_READI pilot runs follows from scope.
+- **It may not change** any metric, instrument, decision rule, tolerance, analysis-set
+  definition, eligibility rule or missingness rule. It may not use any v10 quality
+  value, A21's included, to choose a project or a threshold. Changing a rule needs its
+  own prospective amendment, and it starts a new analysis stratum.
+
+**The generation plan needs matching amendments,** for plan A10's role, plan A14's
+conditional start, plan A15's inputs and E5b-reg's roster. This draft does not edit
+the generation plan; the amendments are listed at the end ("Plan amendments").
+
+### Scope rule [proposed; owner fixes at P4, item 2]
+
+- **Whole projects only.** A project is in or out with all its cells. P4b never trims
+  replicates inside a project to fit a budget.
+- **The evidence is cost, fit and call failure:** A21's measured cost and call
+  outcomes, each project's D62-style sizing, and the single-delivery exposure below.
+  It is never a quality metric of A21, or of any v10 record, against v8.
+- **The order [proposed]:** CHORUS ×3 → CM4AI ×3 → VOICE ×3 → AI_READI (pilot + ×3)
+  → VOICE_PEDIATRIC ×1 → Kids First ×1.
+  - It follows the generation plan's ascending bundle size.
+  - AI_READI comes late because its comparator is pending (D02) and it costs the most.
+  - P4b funds the longest prefix of the order that the budget covers, each project
+    priced per accepted record with its retries (below).
+  - The alternative (item 2) is the owner's discretion at P4b, within the same limits
+    on evidence.
+- **A descoped project is "out of scope", not missing.** Every table lists it as "out
+  of scope (P4b)", and it is not counted in K. Item 7's missing-cell rules apply only
+  to in-scope cells.
+- **K, the confirmatory set, and the E2 and E5 rosters** follow from the in-scope
+  projects (items 3 and 12).
+- **K = 1.** If only CHORUS is in scope, every verdict is a single-project result,
+  written "holds for CHORUS", and no "k of K" statement generalizes from it.
+- **D03 and D20 without AI_READI.** If AI_READI is out of scope, its pilot does not run
+  (item 33), and the production floor comes from the re-canary alone, under item 8's
+  fallback.
+
+### Feasibility under D58 (an input to P4b, not a forecast)
+
+**Money.** These are estimates from BC1's fit analysis (§7: K1 v2's prices, 2.48 bytes
+per token, no cache breakpoint under D60). They use its "A + drop `domain_of` + bundle
+once" rows, less about $8 per run for D59's downstream A14 digest (the P3 Claude
+review's adjustment). They are engineering scenarios, not measured D59 runs:
+- they exclude retries, re-address, repair, `report_after_repair` and interrupted
+  billed tails;
+- the caps column carries half a report regate, K1's convention (fit review §7.1,
+  §7.4), so it does not bound an attempt that needs a whole regate;
+- D62's 4.5M allowance adds at most $3.13 of exposure to a CHORUS run.
+
+| Item | Expected | At caps | Set against |
+|---|---:|---:|---|
+| One CHORUS run | about $37 | about $49 | D58's $60 slice: one attempt, no contingency |
+| One CM4AI run | about $83 | about $102 | — |
+| One VOICE run | about $105 | about $127 | — |
+| One VOICE_PEDIATRIC run (VOICE record as proxy) | about $96 | about $118 | — |
+| One AI_READI run | about $162 | about $191 | D07's $35 AI_READI planning lines |
+| One Kids First run | not priced | not priced | D59 expects its integration at caps to be borderline |
+| The 15-run matrix (CHORUS 4, AI_READI 4, CM4AI 3, VOICE 3, VOICE_PEDIATRIC 1) | about $1.46k | about $1.77k | the $420 planning ceiling |
+| E5's joint rating | about $190 | about $394 | generation plan E5 |
+
+The fit review's cheapest matrix figure, $1,021, assumes a typed-stage cache breakpoint
+with every later call hitting; D60 rules that out.
+
+**Against the $420 figure.** No owner ruling set the $420; it is a planning figure
+(decision record §5.1.1). The assisted canaries spent $35.76 settled ($41.79
+worst-case reserved) of it, and A21 takes $60, which leaves about $318–324. That buys
+CHORUS ×3 (about $110–148) but not CM4AI ×3 (about $250–307). No version of the full
+matrix fits it, so D58's later scope decision is necessary, not optional.
+
+**Runs: the single-delivery exposure.** BC1's typed calls and receipt completion each
+admit one delivery (`transport_attempts=1` in `bc1_runtime`). The illustration below
+uses P1's per-call rate (8 retried calls in 92: 5 transport, 3 answer-level),
+independence between calls, and the fit analysis's call counts at current bounds
+(typed calls CHORUS 7, CM4AI 14, VOICE and VOICE_PEDIATRIC 17, AI_READI and Kids First
+25, plus one receipt-completion call each). D45's bound selection can change these
+counts.
+
+| Project | Single-delivery calls per run | Terminal-stop exposure per attempt, all causes (transport only) | Both of D07's two attempts stopped, all causes (transport only) |
+|---|---:|---:|---:|
+| CHORUS | 8 | 52% (36%) | 27% (13%) |
+| CM4AI | 15 | 74% (57%) | 55% (32%) |
+| VOICE, VOICE_PEDIATRIC | 18 | 81% (63%) | 65% (40%) |
+| AI_READI, Kids First | 26 | 91% (77%) | 82% (59%) |
+
+These are not forecasts: v8's calls were far smaller than BC1's 0.4–0.8M-token typed
+inputs, and the stage rates are measured in item 18. They are not tolerances, and they
+never choose between projects on quality. They are inputs to three decisions:
+- P4b's scope, through the budget per accepted record below;
+- the written risk acceptance D08 recommends for single-row runs, which for A21
+  should name its 8 single-delivery calls (item 10, P4 item 9);
+- whether to allow a transport-only redelivery (P4 item 4).
+
+**Budget per accepted record [proposed; owner fixes at P4].** P4b prices each in-scope
+project per accepted record, including its expected retries within D07's bound, not
+per attempt. A stopped attempt bills only the calls made before the stop.
+
 ## 1. Estimands (P2 item 1)
 
 1. **Feasibility and acceptance.** For each registered cell, the outcome is accepted
@@ -333,16 +478,19 @@ longer holds.
 
   Today's AI_READI bundle is `1a58ad7b`, and the plan needs amending before A4.
 
-### Cell roles (D03's recommended option (a), [pending D03])
+### Cell roles (D03's recommended option (a), [pending D03]; scope fixed at P4b)
+
+Every row after the re-canary runs only if P4b puts its project in scope (scope rule
+above).
 
 | role | cells | counts as a replicate | analysed as |
 |---|---|---|---|
-| CHORUS pilot (A10) | 1 | no | pilot, separately |
-| AI_READI pilot (A14) | 1, started only after the CHORUS pilot passes blind source review | no | pilot, separately |
+| CHORUS re-canary (A21, in plan A10's role) | 1 | no | descriptive n=1, separately |
+| AI_READI pilot (A14) | 1, only if AI_READI is in scope; started only after the re-canary passes blind source review | no | pilot, separately |
 | CHORUS replicate gate (A16) | 3 under the A15 floor | yes | confirmatory |
-| Production (A17) | CM4AI, VOICE and AI_READI, 3 each, in that order | yes | confirmatory (AI_READI per the comparator decision above) |
-| VOICE_PEDIATRIC (A18) | ×1 (D02's recommendation; ×3 only if the paper needs replicate variance) | — | descriptive (item 2a) |
-| Kids First (A19) | ×1 | — | descriptive (item 2a) **[pending D15]** |
+| Production (A17) | the in-scope projects among CM4AI, VOICE and AI_READI, 3 each, in the scope rule's order | yes | confirmatory (AI_READI per the comparator decision above) |
+| VOICE_PEDIATRIC (A18) | ×1 if in scope (D02's recommendation; ×3 only if the paper needs replicate variance) | — | descriptive (item 2a) |
+| Kids First (A19) | ×1 if in scope | — | descriptive (item 2a) **[pending D15]** |
 | With-crate CHORUS (plan A21–A22) | only under D04 path B | — | separate stage **[pending D04]** |
 
 The plan's A21–A22 identifiers for the optional crate stage are retained only as
@@ -354,7 +502,8 @@ crate arm.
 
 All prospective cells below remain unlaunched/unregistered unless a later,
 hash-bound owner record explicitly says otherwise. “Confirmatory” names the
-proposed analysis role after P4, not current authorization or acceptance.
+proposed analysis role after P4, not current authorization or acceptance. The table
+shows the full proposed matrix; P4b's scope decides which projects run.
 
 | Project | API arm (`claudecode_api{,_core}`) | Native agentic (direct arm) (`claudecode_direct{,_core}`) | Evaluation/contrast role |
 |---|---|---|---|
@@ -391,12 +540,13 @@ attention. BC1 currently supports only the API parent tuple (item 14); native
 BC1 parity is **not installed or accepted**. The native n=1 canary therefore
 cannot silently stand for the API bounded-carry treatment.
 
-The proposed v10 confirmatory set is the **three-replicate CHORUS gate A16** plus
-the nine other production records, excluding the separate n=1 clean re-canary:
-12 records,
-matching E2's 12 v8 + 12 v10 batch under options (a), (c) and (d). Under (b), the
-confirmatory sets are 9 + 9, and AI_READI's records form a descriptive stratum
-(item 12).
+With every project in scope, the proposed v10 confirmatory set is the
+**three-replicate CHORUS gate A16** plus the nine other production records, excluding
+the separate n=1 clean re-canary: 12 records, matching E2's 12 v8 + 12 v10 batch
+under options (a), (c) and (d). Under (b), the confirmatory sets are 9 + 9, and
+AI_READI's records form a descriptive stratum (item 12). Under P4b's scope, the set
+is the in-scope projects' cells: CHORUS alone gives 3 + 3, and a descoped project is
+out of scope, not a missing cell.
 
 ### Metrics
 
