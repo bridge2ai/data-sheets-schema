@@ -275,7 +275,8 @@ applies.
      shared-generation version, and there is no P4b (§10);
    - **any other stop, or an assisted run:** P4b waits for a funded contingency (plan
      A10c, P4 item 3), unless the owner decides scope on the partial packet, which is
-     then labelled partial.
+     then labelled partial. If the contingency also ends without acceptance, D07's owner
+     review decides between scoping on the partial packets and ending the condition.
 6. **The measured-cost packet.** It reports:
    - A21's billed cost by stage;
    - each call's outcome: completed, transport error, answer-level rejection or
@@ -716,6 +717,8 @@ definition (1) shows how large it is from the other side.
     or a scalar, say) makes that metric metric-missing for the record.
   - **The analysis manifest** lists, for each record used: label, cell, attempt, the
     completing event, the snapshot's name and its sha256.
+  - This rule selects v10's records. v8's are the comparator records P1 lists with
+    their sha256s.
 - **Selection under definition (2)** takes the cell's last attempt that left an
   eligible full record. If a later attempt left none, the earlier record stands. No
   record is chosen by score.
@@ -1095,8 +1098,8 @@ runs, and A15 only computes its value. The rule never depends on a pilot's outco
   sets the value under the same rule. Under the cap that value is always 19/20, since
   an accepted re-canary has passed its own 19/20 gate. So the AI_READI pilot can only
   lower the floor, and only the AI_READI branch makes the floor depend on a pilot.
-- **No value.** If a required pilot is missing, rejected or has a zero denominator,
-  the rule yields no value. No production roster registers until a prospective
+- **No value.** If a pilot the branch still requires has no accepted attempt, or has a
+  zero denominator, the rule yields no value. No production roster registers until a prospective
   amendment, reviewed as P3 was, supplies one. No other observed ratio is substituted.
 
 The alternatives (P4 item 28) are: the lowest fraction without the cap, which can give
