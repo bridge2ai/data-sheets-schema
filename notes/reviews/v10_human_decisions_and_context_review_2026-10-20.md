@@ -1,7 +1,7 @@
 # Human Review & Owner Decision Package for `generic_v10` D4D Generation and Evaluation
 
-- **Date**: 2026-10-20 (updated through 2026-10-28: owner decisions `D26`–`D45` and `D50`–`D60`, with `D51`'s description corrected on 2026-10-28; the `D46`–`D49` entries were not owner decisions and are retired, see §5.10)
-- **Status**: `PARTIALLY DECIDED / LAUNCHES HELD` (`D05`–`D07`, `D10`, `D17`, `D19`, `D22`, `D23`, `D26`–`D45` and `D50`–`D60` decided (`D46`–`D49` retired: not owner decisions, §5.10); two `CHORUS` API canaries `2026-10-20a` and `2026-10-22a` ran and were archived to `data/ATTIC/` as assisted/invalid evidence under `D31` and `D40`; the clean `CHORUS` API re-canary `A21`, fan-out, native canary, and evaluation runs remain held pending explicit owner launch word per `D07`/`D22`)
+- **Date**: 2026-10-20 (updated through 2026-10-28: owner decisions `D26`–`D45` and `D50`–`D61`, with `D51`'s description corrected on 2026-10-28; the `D46`–`D49` entries were not owner decisions and are retired, see §5.10)
+- **Status**: `PARTIALLY DECIDED / LAUNCHES HELD` (`D05`–`D07`, `D10`, `D17`, `D19`, `D22`, `D23`, `D26`–`D45` and `D50`–`D61` decided (`D46`–`D49` retired: not owner decisions, §5.10); two `CHORUS` API canaries `2026-10-20a` and `2026-10-22a` ran and were archived to `data/ATTIC/` as assisted/invalid evidence under `D31` and `D40`; the clean `CHORUS` API re-canary `A21`, fan-out, native canary, and evaluation runs remain held pending explicit owner launch word per `D07`/`D22`)
 - **Branches & Lanes**:
   - **AGY + Codex Lane X1 Integrated**: `/private/tmp/d4d-v10-readiness-20261019` (`feat/v10-preflight-scripts`, PR `#5095`, plus `codex/track-e-eval-runner`)
   - **Codex Lane X2**: `/private/tmp/d4d-codex-track-n-20261020` (`codex/track-n-direct-adapter`, HEAD `3bcde8004`)
@@ -95,7 +95,7 @@ Six `omission_context_v1` files have been generated in `data/omission_contexts/`
 
 ---
 
-## 4. Owner Decisions Status (`D01`–`D60`; `D46`–`D49` retired)
+## 4. Owner Decisions Status (`D01`–`D61`; `D46`–`D49` retired)
 
 | Decision ID | Status | Summary / Owner Ruling |
 | --- | --- | --- |
@@ -143,15 +143,16 @@ Six `omission_context_v1` files have been generated in `data/omission_contexts/`
 | **`D58`** (the v10 path after BC1's fit and cost review) | **DECIDED (2026-10-28T16:41Z)** | **`"Fix, canary, then decide (Recommended)"`**: BC1 is fixed for all projects; the `A21` slice is raised to $60; the CHORUS re-canary runs under the fixed BC1; the matrix's scope and budget are decided on its measured cost. |
 | **`D59`** (BC1's request shape, the `D44` design choice) | **DECIDED (2026-10-28T16:41Z)** | **`"Dedup; A14 downstream (Recommended)"`**: typed-audit calls send the full schema catalog once, drop the per-slot `domain_of` lists (redundant with each class's slot list) and send the bundle once; the full, receipt completion, reconcile, report and regate calls keep v10's A14 schema digest. |
 | **`D60`** (typed-stage prompt cache, revisiting `D06`) | **DECIDED (2026-10-28T16:41Z)** | **`"No, keep D06"`**: no typed-stage cache breakpoint. |
+| **`D61`** (scope of `D52`'s committee-contact rule) | **DECIDED (2026-10-28T18:23Z)** | **`"In scope (Recommended)"`**: the equivalence of `data_governance.committee_contact` and `regulatory_restrictions.governance_committee_contact` holds wherever `governance_committee_contact` is scored, rubric10 `E2.2` included. |
 | **`D02` (`#5042`, `P2`)** | **`PENDING OWNER`** | Choose Option `(a)`, `(b)`, `(c)`, or `(d)` for the `AI_READI` `v8` comparator and canary baseline. |
 | **`D04` (`#2914`)** | **`PENDING OWNER`** | Confirm `CHORUS` corpus policy (`Path B` frozen 17-file bundle `9b2ef4b6` for `v10` comparability vs `Path A` prune). |
 | **`D03`, `D08`, `D09`, `D11`–`D16`, `D18`, `D20`, `D21`, `D24`, `D25`** | **`PENDING OWNER`** | Documented with recommendations and `[proposed; owner fixes at P4]` rules in `notes/generic_v10_analysis_plan.md` and `notes/coordination/2026-10-25-owner-decision-packet.md`. |
 
 ---
 
-## 5. Decided Rulings of 2026-10-23 – 2026-10-28 (`D26`–`D45`, `D50`–`D60`; `D46`–`D49` retired)
+## 5. Decided Rulings of 2026-10-23 – 2026-10-28 (`D26`–`D45`, `D50`–`D61`; `D46`–`D49` retired)
 
-On **2026-10-23T23:35Z**, the owner directed `"next address these based on current recommendations"` across `D-A`, `D-C` (subsets), `D-E`, and `D-F` (supplementing the earlier 2026-10-23 direction `"focus the canary on the native agentic approach not api"`, with `D27`/`D-B` treated as following from `D26`/`D-A` and later explicitly confirmed by the owner on **2026-10-25T22:41Z**), followed on **2026-10-24T00:48Z** by `"confirm"` on the three R9 judgement calls `J3′`, `J5`, and `J6`, on **2026-10-24** by `"decision 1 = a"` (`D32`), on **2026-10-25T17:43Z** by the four group-1 rulings `D33`–`D36`, on **2026-10-25T19:44Z** by `D37` (replacing `D32` with Option `(b)`) and `D38` (R9 `"license"` spelling and re-pin), on **2026-10-25T22:41Z** by `D27` confirmation and `D39` (`A17` worker-contract wording), on **2026-10-25T23:28Z** by `D40` (archiving `2026-10-22a` to `data/ATTIC/` as evidence-only) and `D41` (no-touch operating rule plus runner latch guard), and on **2026-10-26** by `D42` (`D41` guard comparison), `D43` (`"You launch it (Recommended)"`, amending `D41`'s operator clause), `D44` (`"Redesign first, one canary"` for `BC1` bounded carry), `D45` (`"Yes, decide in the redesign (Recommended)"` for worker granularity inside `BC1`); and on **2026-10-27** by `D50` (agy's role, §5.10) and `D51`–`D54` (the omission and evaluation contexts, the no-touch rule with the archive ratification, and dropping the retired "`D48`" and "`D49`" texts, §5.11), with `D51`'s description corrected and re-approved on **2026-10-28**; and on **2026-10-28** by `D55`–`D57` (the `D42` pick and two `D41` guard rulings, §5.12), and `D58`–`D60` (the v10 path, BC1's shape and the cache, after BC1's fit and cost review, §5.13). Entries written here as `D46`–`D49` were not owner decisions and are retired (§5.10). Because the `notes/coordination/` directory is untracked, the authoritative record of each decision is preserved here under `D26`–`D45` and `D50`–`D60`.
+On **2026-10-23T23:35Z**, the owner directed `"next address these based on current recommendations"` across `D-A`, `D-C` (subsets), `D-E`, and `D-F` (supplementing the earlier 2026-10-23 direction `"focus the canary on the native agentic approach not api"`, with `D27`/`D-B` treated as following from `D26`/`D-A` and later explicitly confirmed by the owner on **2026-10-25T22:41Z**), followed on **2026-10-24T00:48Z** by `"confirm"` on the three R9 judgement calls `J3′`, `J5`, and `J6`, on **2026-10-24** by `"decision 1 = a"` (`D32`), on **2026-10-25T17:43Z** by the four group-1 rulings `D33`–`D36`, on **2026-10-25T19:44Z** by `D37` (replacing `D32` with Option `(b)`) and `D38` (R9 `"license"` spelling and re-pin), on **2026-10-25T22:41Z** by `D27` confirmation and `D39` (`A17` worker-contract wording), on **2026-10-25T23:28Z** by `D40` (archiving `2026-10-22a` to `data/ATTIC/` as evidence-only) and `D41` (no-touch operating rule plus runner latch guard), and on **2026-10-26** by `D42` (`D41` guard comparison), `D43` (`"You launch it (Recommended)"`, amending `D41`'s operator clause), `D44` (`"Redesign first, one canary"` for `BC1` bounded carry), `D45` (`"Yes, decide in the redesign (Recommended)"` for worker granularity inside `BC1`); and on **2026-10-27** by `D50` (agy's role, §5.10) and `D51`–`D54` (the omission and evaluation contexts, the no-touch rule with the archive ratification, and dropping the retired "`D48`" and "`D49`" texts, §5.11), with `D51`'s description corrected and re-approved on **2026-10-28**; and on **2026-10-28** by `D55`–`D57` (the `D42` pick and two `D41` guard rulings, §5.12), and `D58`–`D60` (the v10 path, BC1's shape and the cache, after BC1's fit and cost review, §5.13), and `D61` (the scope of `D52`'s first scoring rule, §5.14). Entries written here as `D46`–`D49` were not owner decisions and are retired (§5.10). Because the `notes/coordination/` directory is untracked, the authoritative record of each decision is preserved here under `D26`–`D45` and `D50`–`D61`.
 
 ### 5.1 `D28` (`D-C`): Void `2026-10-22b` (`CHORUS` × 3), Run One Clean `CHORUS` API Re-Canary After Fixes, and Update Registration/Runtime Rules
 
@@ -479,3 +480,12 @@ These follow claude's independent review of both `D41` guard candidates (`d4d-ex
    - **The full, receipt completion, reconcile, report and regate calls:** keep v10's A14 schema digest, which the 10-20a and 10-22a canaries ran with.
    - **Expected fit:** every project then fits per call, except Kids First integration at caps, which is borderline. This is to be verified on the implementation.
 3. **`D60`: the typed-stage prompt cache.** The owner chose "No, keep D06". No typed-stage cache breakpoint; `D06` stands.
+
+### 5.14 Decided by the owner, 2026-10-28T18:23Z (`D61`): the scope of `D52`'s first scoring rule
+
+claude's independent review of codex's evaluator packet (`4cd8f2a51`; `d4d-executions/plans/reviews/pr5096_b0978d6e6_d52_4cd8f2a51_claude_review_2026-10-28.md`, finding D2) asked whether rule 1 applies to rubric10 `E2.2`, "Regulatory Compliance and Confidentiality Classification". `governance_committee_contact` is already one of `E2.2`'s fields.
+
+1. **`D61`.** The owner chose "In scope (Recommended)".
+   - The two committee-contact locations count as the same criterion wherever `governance_committee_contact` is scored, `E2.2` included.
+   - A record whose only such evidence is `data_governance.committee_contact` now passes `E2.2`.
+   - Four committed CHORUS records move from 0 to 1 under the new evaluator instrument. Historical scores are not rewritten.
