@@ -154,13 +154,14 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             click.echo(f"   {text}")
         if "coverage_floor" in block:
             floor = block["coverage_floor"]
-            if floor.get("basis") == "receipted_part" and floor.get("eligible") is None:
-                gated = "receipted part unmeasurable: no phase-1 split by path and value"
+            # D37: a receipted-part floor gates the phase-1 record, not the
+            # final one the summary line above counts.
+            if floor.get("basis") == "receipted_part" and (floor.get("receiptable_at_receipt") is None
+                                                           or floor.get("with_receipt_at_receipt") is None):
+                gated = "receipted part unmeasurable: no phase-1 snapshot"
             elif floor.get("basis") == "receipted_part":
-                kept = floor["added_after_receipt"] - floor["added_after_receipt_unmatched"]
-                gated = (f"{floor['with_receipt']}/{floor['eligible']} of the receipted part; "
-                         f"{floor['added_after_receipt_unmatched']} added after the receipt, not gated"
-                         + (f"; {kept} at a new path with a value the snapshot had, gated" if kept else ""))
+                gated = (f"{floor['with_receipt_at_receipt']}/{floor['receiptable_at_receipt']} "
+                         "of the phase-1 record (receipted part)")
             else:
                 gated = f"{floor['with_receipt']}/{floor['receiptable']}"
             click.echo(f"   · registered receipt coverage: {floor['state']} "

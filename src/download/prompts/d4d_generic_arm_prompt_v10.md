@@ -389,13 +389,13 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   that the data are publicly available to download, that anyone can download
   them, or that downloading them needs no account, registration, approval or
   signed agreement supports `unrestricted`, unless a passage states a
-  condition below for the same data. A public licence such as Creative
-  Commons, a download page asking the user to confirm that licence, a
+  condition below for the same data. A public license such as Creative
+  Commons, a download page asking the user to confirm that license, a
   request to cite, or a form asking who is downloading is not such a
   condition. A passage stating that access requires registration or an
   account, verified identity or credentials, approval of the request,
   sign-off by the requester's institution, or a data use agreement or
-  dataset-specific licence that the requester or their institution signs or
+  dataset-specific license that the requester or their institution signs or
   accepts supports `restricted`. A passage stating that each request is
   reviewed before access is granted, by a data access committee or office or
   by an institutional review board or ethics committee approving the
@@ -427,15 +427,15 @@ UNIFORM DECISION RULES — these apply identically to every project and every ar
   an institution's data-security level such as "Level 3", an HL7
   confidentiality code such as "HL7:2N" — is recorded as prose where
   relevant and is never mapped to an enumeration value or used as the
-  receipt for one. Where no passage states the category the slot stays empty
-  — an empty enumeration slot is a gap the reader can see, a guessed one an
-  error the reader cannot — except where the schema requires the slot, in
-  which case the entry itself is what the evidence must support: a related
-  dataset is recorded only where a passage states what the relation is. A
-  file's `format`, `file_type`, `media_type` and `encoding`, and a file's or
-  collection's `compression`, are read from the file the bundle names — its
-  name and extension are the passage for them — and this rule does not reach
-  those.
+  receipt for one. Where no passage states the category the slot stays
+  empty — an empty enumeration slot is a gap the reader can see, a guessed
+  one an error the reader cannot — except where the schema requires the
+  slot, in which case the entry itself is what the evidence must support: a
+  related dataset is recorded only where a passage states what the relation
+  is. A file's `format`, `file_type`, `media_type` and `encoding`, and a
+  file's or collection's `compression`, are read from the file the bundle
+  names — its name and extension are the passage for them — and this rule
+  does not reach those.
 - `raw_data_format` names the form the data took before any processing this
   dataset applied, and only where a passage states that form. The standard
   the release conforms to, the extension the distributed files carry and the

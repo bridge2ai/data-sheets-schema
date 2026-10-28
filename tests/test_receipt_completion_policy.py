@@ -227,15 +227,26 @@ def disk(tmp_path):
     return dict(full_path=full, receipt=receipt, bundle=bundle, record_bundle_md5=md5, expected=True, manifest=manifest)
 
 
-def test_disk_rebuild_selects_registration_instrument_and_retains_legacy(disk):
+@pytest.mark.parametrize("snapshot,at_receipt", [
+    (None, (None, None)),
+    # A phase-1 snapshot with a licence no receipt names, which a later phase dropped.
+    ({"license": "CC-BY"}, (10, 11)),
+])
+def test_disk_rebuild_selects_registration_instrument_and_retains_legacy(disk, snapshot, at_receipt):
+    from tests.test_receipts import FULL
+    if snapshot is not None:
+        (disk["receipt"].parent / "intermediate").mkdir()
+        (disk["receipt"].parent / "intermediate" / "P_full.yaml").write_text(yaml.safe_dump({**FULL, **snapshot}))
     legacy = receipts.block_for(**disk)
     selected = receipts.block_for(**disk, receipt_render_spec=declaration())
     assert legacy["checked"] and legacy["instrument"] == receipts.RECEIPTS_INSTRUMENT
     assert cp.BLOCK_KEY not in legacy and "coverage_floor" not in legacy
     assert selected["checked"] and selected["instrument"] == receipts.RERECEIPTS_INSTRUMENT
-    # v3 coverage unchanged; instrument 4 adds only the receipted-part gate input (A13 F1).
-    v4_only = {"added_after_receipt_unmatched"}
+    # v3 coverage unchanged; instrument 4 adds only the receipted-part gate
+    # input (D37): the snapshot's own coverage, None without a snapshot.
+    v4_only = {"with_receipt_at_receipt", "receiptable_at_receipt"}
     assert set(selected["slots"]) - set(legacy["slots"]) == v4_only
+    assert (selected["slots"]["with_receipt_at_receipt"], selected["slots"]["receiptable_at_receipt"]) == at_receipt
     assert {k: v for k, v in selected["slots"].items() if k not in v4_only} == legacy["slots"]
     assert selected["coverage_floor"]["registration_sha256"] == declaration()["receipt_completion_registration"]["sha256"]
     rec = {"run": {"project": "P"}, "prompts": {"request": {"spec": declaration()}}}
