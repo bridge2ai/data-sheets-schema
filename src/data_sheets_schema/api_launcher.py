@@ -614,6 +614,12 @@ def launch(
     venv_dir, python_bin, d4d_bin = find_venv_and_binaries(worktree_dir, venv_arg)
 
     clean_env = clean_environment(worktree_dir)
+    unset_keys = sorted(set(os.environ) - set(clean_env))
+    unset_display = (
+        f"ANTHROPIC_*, D4D_* (removed: {', '.join(unset_keys)})"
+        if unset_keys
+        else "ANTHROPIC_*, D4D_* (removed: none; guards ANTHROPIC_API_KEY, D4D_RECEIPT_FULL_MAX_TOKENS, D4D_PHASE_WALL_CLOCK_SECONDS)"
+    )
     check_cborg_key(clean_env, allow_missing=allow_missing_key)
 
     # Always verify import isolation
@@ -669,11 +675,15 @@ def launch(
             print(f"  Command:     {' '.join(launch_cmd)}")
             print(f"  Log:         {resolved_log}")
             print(f"  PYTHONPATH:  {clean_env.get('PYTHONPATH')}")
-            print(f"  Unset keys:  ANTHROPIC_API_KEY, D4D_RECEIPT_FULL_MAX_TOKENS, D4D_PHASE_WALL_CLOCK_SECONDS")
+            print(f"  Unset keys:  {unset_display}")
             return 0
 
         resolved_log.parent.mkdir(parents=True, exist_ok=True)
         with open(resolved_log, "a", encoding="utf-8") as out:
+            out.write(
+                f"# === [d4d api_launcher] worktree={worktree_dir} command={' '.join(launch_cmd)} ===\n"
+            )
+            out.flush()
             proc = subprocess.Popen(
                 launch_cmd,
                 cwd=str(worktree_dir),
@@ -696,7 +706,7 @@ def launch(
         print(f"  Venv:        {venv_dir}")
         print(f"  Command:     {' '.join(final_cmd)}")
         print(f"  PYTHONPATH:  {clean_env.get('PYTHONPATH')}")
-        print(f"  Unset keys:  ANTHROPIC_API_KEY, D4D_RECEIPT_FULL_MAX_TOKENS, D4D_PHASE_WALL_CLOCK_SECONDS")
+        print(f"  Unset keys:  {unset_display}")
         return 0
 
     res = subprocess.run(
