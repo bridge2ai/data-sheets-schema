@@ -189,3 +189,16 @@ def test_completed_tool_receipt_keeps_snapshot_identity_after_final_reorder(orig
     assert not [f for f in result["findings"] if f["kind"].startswith("tool_receipt")]
     assert "file_collections[1].total_files" not in rc.uncovered_receiptable_leaves(
         doc, MANIFEST, TEXTS, final, original=original, instrument_version=5)
+
+
+def test_final_path_join_does_not_repair_malformed_tool_args():
+    full = {"total_files": 2, "file_collections": [{"id": "example:a"}, {"id": "example:b"}]}
+    pair = {"slot": "total_files", "tool": {"name": "record_count", "result": 2,
+                                            "path": "file_collections", "args": None}}
+    doc = document(pair)
+    block = rc.check(doc, MANIFEST, TEXTS, full, MD5, original=full, instrument_version=5)
+    assert block["tool_receipts"]["verified"] == 0
+    assert block["slots"]["with_receipt"] == 0
+    assert block["slots"]["with_receipt_at_receipt"] == 0
+    assert "total_files" in rc.uncovered_receiptable_leaves(
+        doc, MANIFEST, TEXTS, full, original=full, instrument_version=5)

@@ -1783,6 +1783,8 @@ def _v5_attesting_paths(entries: list[dict[str, Any]], manifest: dict[str, Any],
                     checked_pair = {**pair, "slot": mapped["path"]}
                     tool = pair.get("tool")
                     if isinstance(tool, dict) and tool.get("name") in ("record_count", "record_sum"):
+                        if "args" in tool and not isinstance(tool["args"], dict):
+                            continue  # path joining must not repair an invalid tool
                         args = tool.get("args") if isinstance(tool.get("args"), dict) else {}
                         source_path = str(args.get("path") or tool.get("path") or tool.get("target") or path)
                         for prefix in ("record:", "full:"):
@@ -2817,9 +2819,10 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         except Exception as exc:  # noqa: BLE001 — unusable rules must not certify an ambient join
             return {**base, "checked": False,
                     "reason": f"receipt identity rules unavailable: {type(exc).__name__}: {exc}"}
+    version = _selected_receipt_version(rec, default=4 if policy is not None else 3)
     block = check(rec, m, texts, full, record_bundle_md5, original,
                   identifier_bases=identifier_bases,
-                  instrument_version=_selected_receipt_version(rec, default=4 if policy is not None else 3))
+                  **({"instrument_version": version} if version != 3 else {}))
     if policy is not None and block.get("checked"):
         try:
             block["coverage_floor"] = selected_receipts.evaluate_floor(block.get("slots"), policy)
