@@ -15,6 +15,10 @@ Recovery is reproducible with
 `scripts/adhoc/recover_5096_progress_backup_20261028.py`; it refuses a changed source
 and refuses to overwrite either output. The file must be explicitly force-added
 by exact path because the global ignore rule still applies.
+Use `--output-dir /private/tmp/new-5096-recovery-check` to reproduce into a fresh
+directory without touching the tracked recovery copy. The manifest's
+`artifact_sha256_recorded_in_original_readme` hashes the recovered artifact, not
+the README itself.
 
 The independent review is on `codex/wave4-5096-review-20261028` at
 `8973c375bc0bcae5dae8300ac16faeb3afe5d89d`. Its recorded comparison shows the other

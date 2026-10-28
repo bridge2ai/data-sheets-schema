@@ -24,6 +24,7 @@ PATTERNS = {
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--source', type=Path, required=True)
+    parser.add_argument('--output-dir', type=Path, default=DESTINATION)
     args = parser.parse_args()
     raw = args.source.read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
@@ -50,17 +51,17 @@ def main():
     if any(matches.values()):
         raise ValueError('credential heuristic requires manual review; counts only: ' + json.dumps(matches))
     manifest = {'source': str(args.source.resolve()), 'destination': 'CHORUS_api_progress.json',
-                'sha256': digest, 'bytes': len(raw), 'original_readme_sha256': EXPECTED_SHA,
+                'sha256': digest, 'bytes': len(raw), 'artifact_sha256_recorded_in_original_readme': EXPECTED_SHA,
                 'reviewed_data_head': 'ada98b56b73b60217ccacf02fef2af4393d6ecae',
                 'source_label': '2026-10-20a_claude-opus-5-api-generic-v10_rep1',
                 'purpose': 'Exact preserved pre-edit progress backup omitted by .gitignore; evidence only.',
                 'credential_heuristic_counts': matches, 'credential_scan_limit': 'Heuristic only; no values printed.',
                 'top_level_keys': sorted(doc), 'historical_files_modified': False,
                 'scientific_acceptance': 'not granted'}
-    DESTINATION.mkdir(exist_ok=True)
-    with (DESTINATION / 'CHORUS_api_progress.json').open('xb') as handle:
+    args.output_dir.mkdir(exist_ok=True)
+    with (args.output_dir / 'CHORUS_api_progress.json').open('xb') as handle:
         handle.write(raw)
-    with (DESTINATION / 'manifest.json').open('x') as handle:
+    with (args.output_dir / 'manifest.json').open('x') as handle:
         json.dump(manifest, handle, indent=2, sort_keys=True)
         handle.write('\n')
     print(json.dumps({'sha256': digest, 'bytes': len(raw), 'credential_heuristic_counts': matches,
