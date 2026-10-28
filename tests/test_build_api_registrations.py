@@ -530,6 +530,88 @@ def test_overwrite_guard_requires_replace_on_changed_content(tmp_path: Path) -> 
     res3 = runner.invoke(cli, ["-p", "CHORUS", "-l", "cli_lbl", "-o", str(cli_dir), "--partition", "chorus", "--max-calls", "20", "--replace"])
     assert res3.exit_code == 0
     assert "sha256=" in res3.output
+    assert "context_sha256=" in res3.output
+
+
+def test_context_precedence_and_worktree_and_check_input_pins(tmp_path: Path) -> None:
+    """#5122: committed data/omission_contexts wins over stale file in output_dir; --worktree works; --check verifies input pins."""
+    import hashlib
+
+    runner = CliRunner()
+    out_dir = tmp_path / "reg_out"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Place a stale/different omission context in out_dir
+    stale_ctx = out_dir / "chorus_omission_context.json"
+    build_draft_context(project="CHORUS", context_path=stale_ctx, write_to_disk=True)
+    stale_doc = json.loads(stale_ctx.read_text(encoding="utf-8"))
+    stale_doc["scopes"][0]["scope"] = "STALE_DRAFT_SCOPE_OVERRIDE"
+    stale_ctx.write_bytes(sg.canonical(stale_doc))
+    stale_sha = hashlib.sha256(stale_ctx.read_bytes()).hexdigest()
+
+    committed_ctx = ROOT / "data" / "omission_contexts" / "chorus_omission_context.json"
+    committed_sha = hashlib.sha256(committed_ctx.read_bytes()).hexdigest()
+    assert stale_sha != committed_sha
+
+    # 1. Without --context-dir, CLI and build_registration must prefer data/omission_contexts over out_dir
+    res = runner.invoke(
+        cli,
+        [
+            "-p", "CHORUS",
+            "--partition", "chorus",
+            "-l", "test_5122",
+            "-o", str(out_dir),
+            "--worktree", str(ROOT),
+        ],
+    )
+    assert res.exit_code == 0, res.output
+    assert f"context_sha256={committed_sha}" in res.output
+    reg_file = out_dir / "registration_chorus_test_5122.json"
+    reg_data = json.loads(reg_file.read_text(encoding="utf-8"))
+    assert reg_data["inputs"]["context"]["sha256"] == committed_sha
+
+    # 2. Explicit --context-dir selects the directory passed by the caller
+    explicit_dir = tmp_path / "explicit_reg_out"
+    res_explicit = runner.invoke(
+        cli,
+        [
+            "-p", "CHORUS",
+            "--partition", "chorus",
+            "-l", "test_5122_explicit",
+            "-o", str(explicit_dir),
+            "--context-dir", str(out_dir),
+            "-w", str(ROOT),
+        ],
+    )
+    assert res_explicit.exit_code == 0, res_explicit.output
+    assert f"context_sha256={stale_sha}" in res_explicit.output
+
+    # 3. --check verifies on-disk input pins and fails if a pinned input file changes on disk
+    check_ok = runner.invoke(
+        cli,
+        [
+            "-p", "CHORUS",
+            "-l", "test_5122_explicit",
+            "-o", str(explicit_dir),
+            "--check",
+        ],
+    )
+    assert check_ok.exit_code == 0, check_ok.output
+
+    # Mutate stale_ctx on disk after registration was built -> --check must fail closed!
+    stale_ctx.write_bytes(stale_ctx.read_bytes() + b"\n")
+    check_tampered = runner.invoke(
+        cli,
+        [
+            "-p", "CHORUS",
+            "-l", "test_5122_explicit",
+            "-o", str(explicit_dir),
+            "--check",
+        ],
+    )
+    assert check_tampered.exit_code != 0
+    assert "Pinned inputs.context SHA-256 mismatch" in check_tampered.output
+
 
 
 def test_partition_bounds_have_no_default(tmp_path: Path) -> None:
