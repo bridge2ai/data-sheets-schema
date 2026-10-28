@@ -732,7 +732,8 @@ package-level (plan risk 21, D02):
 - **Prompt:** the generic_v10 text against `d4d_generic_arm_prompt_v8.md`.
 - **Harness:** API renderer 25 plus explicitly selected BC1 versus v8's four-phase
   runner; native renderer 26 is a separate declared procedure, not BC1 parity.
-  BC1 staged concern/decision carry changes later evidence exposure (item 14).
+  BC1 staged concern/decision carry changes later evidence exposure, and D59 sets
+  what schema each call sees (item 14).
 - **Coverage timing.** Prediction 2 uses v10's pre-completion figure and names its
   checker separately from the D37 gate (item 3a). It is on the phase-1 record,
   before audit, reconcile and repair. v8's stored figure is on the final record,
@@ -1236,36 +1237,62 @@ The proposed atomic-claim protocol belongs to D24/P4 (item 16), not #5126.
 
 The design label **`shared-generation-api-v2-bc1`** names the proposed scientific
 condition. It is **not** the installed `shared_generation_version` or an accepted
-registration. The BC1 implementation reviewed at
-`3bd3c41f459b31848aee2f57e26deb86ef786970` selects the following actual tuple;
-the later applied-hook head is identified below. Final composition and these
-differences must be resolved and pinned before P4/A21.
+registration; the label is P4 item 10. BC1's implementation lineage:
+- **`3bd3c41f4`:** the reviewed BC1 implementation, contract and hook proposal.
+- **`8dd00263a`** (`origin/claude/bc1-bounded-carry`): the hook applied. **It is
+  superseded, and it does not fit.** BC1's fit analysis (§1) found that no typed call
+  fits for any project as built. Each request carried about 3.5 MB of schema catalogs:
+  the full catalog twice, a core catalog and per-slot `domain_of` lists. BC1's schema
+  block also replaced the A14 digest downstream, which pushed those calls over 1M.
+- **`8f83d6cb3`** (`codex/wave5-bc1-d59-20261028`): D59's request shape. Its review
+  found that shape exactly implemented on the real wire, D60 holding, and CHORUS
+  fitting per call (the largest call at 0.70 of its room at 2.48 bytes per token). It
+  is not merge-ready:
+  - F1: its fit gate made the escaped bound a hard requirement (settled by D62);
+  - F2: it sized integration requests at the response ratio (settled by D62);
+  - F3: its CLI sizing route refuses a completed run;
+  - F4: BC1 carries 43 test failures and 46 errors that pass on main (present since
+    `8dd00263a`).
+- **D62's gate packet** is in progress on `codex/wave5-bc1-gate-d62-20261028`, whose
+  ref was still at `8f83d6cb3` when this revision was written. It is unreviewed.
+
+The A21 condition is the reviewed composition of that lineage with board A14, board
+A17, D38's assets and D55's guard, pinned before the A21 registration. This draft
+claims no later head.
 
 | Component | Current reviewed policy / local implementation | Registration obligation |
 |---|---|---|
 | Scientific assets | D30/D38 generic-v10 prompt SHA-256 `ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db`; uniform-v2 SHA-256 `22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e` | Verify actual merged bytes and native alignment; the BC1 branch itself does not install D38 |
-| Actual BC1 selection | `bounded_carry_version=1`, exact `bounded_carry` registration block; `bc1_typed_audit_v1`, parent shared generation **1**, generic_v10, API renderer **25**, playbook **2**, receipt completion **2**, direct API | Pin full contract/procedure/code/runtime identity; shared-generation-v2 routing and native are unsupported |
-| Hook status | The proposal at `3bd3c41f4`, diff SHA-256 `10cb0ff8dd77d34ec150ae9b5447a82cdeef4402a477151f220a6c02685b0cb8`, is applied in `8dd00263a542cc2ace25242271e753c5eaade6ea` | Verify the final merged composition and rebuild registrations for its changed source identity; applied hooks do not establish request fit or launch approval |
-| Schema and source | Complete captured reachable Dataset and CoreDataset definitions, descriptions and annotations; complete original records and source bundle | Pin exact full/core import closures, bundle, chunk/source manifests, profile and context bytes per cell; no final composed closure/registration hash is yet claimed |
-| Worker/partition contract | A17 splits large lists; D39 owning-root wording; D45 selects project bounds | Pin exact reviewed contract and each project's measured partition. Numeric partition metadata stays controller-only as specified below |
+| Actual BC1 selection | `bounded_carry_version=1`, exact `bounded_carry` registration block; `bc1_typed_audit_v1`, parent shared generation **1**, generic_v10, API renderer **25**, playbook **2**, receipt completion **2**, direct API (as reviewed at `8dd00263a`) | Pin full contract/procedure/code/runtime identity at the composed head; shared-generation-v2 routing and native are unsupported |
+| Implementation lineage | `3bd3c41f4` (hook diff SHA-256 `10cb0ff8dd77d34ec150ae9b5447a82cdeef4402a477151f220a6c02685b0cb8`) → `8dd00263a542cc2ace25242271e753c5eaade6ea` (applied; superseded, does not fit) → `8f83d6cb36ef56e6cf23684ec6bc56772e7ab8d7` (D59 shape; not merge-ready) → D62's packet (in progress) | Pin the reviewed composed head and rebuild registrations for its source identity; applied hooks establish neither request fit nor launch approval |
+| Schema and source, typed calls (D59) | The full schema catalog once, without the per-slot `domain_of` lists (redundant with each class's slot list); the source bundle once; the records under audit | Pin the exact catalogs, bundle, chunk/source manifests, profile and context bytes per cell; no final composed closure or registration hash is yet claimed |
+| Schema and source, other calls (D59) | Full (generation), receipt completion, reconcile, report and regate keep v10's A14 schema digest, as the two canaries had | Pin each phase's schema context. The registration also states which context the repair and report-refresh calls receive, and the wire inspection below confirms it |
+| Worker/partition contract | Board A17 (#5211) splits large lists; D39 owning-root wording; D45 selects project bounds | Pin exact reviewed contract and each project's measured partition. Numeric partition metadata stays controller-only as specified below |
 | Carry | `bc1_codec_v1`, `ConcernPacketV1`, `RecordDigestV1`, stage delta v1 | Pin codec/contract/source digests and each predecessor/request identity; a digest is not evidence of scientific support |
 | Receipts and reports | v4 + D37 snapshot gate; v5 shadow only. Baseline report checker v8; watermark-aware v9 is a separate opt-in | Pin checker code, instrument, snapshot fields and any evaluation amendment; never silently activate new checks under old labels |
-| Composition | BC1 branch has reviewed R9b/A17 changes but does **not** install A14, D38 or D41 | Finish composition, D42 guard selection and independent review; no installed-source or campaign-readiness claim follows from isolated tests |
+| Composition | BC1's lineage carries reviewed R9b and board A17 changes, but does **not** install board A14, D38 or D55's guard | Compose with board A14 (#5162), D38's assets and D55's guard A (#5212, after its D55 fixes and re-review), then review the composed head independently; no installed-source or campaign-readiness claim follows from isolated tests |
 
 **What later models receive.** Every worker must review all assigned populated
-values and clauses against the complete sources. Integrations consume fixed
-groups of one or two new worker results plus bounded concern/decision history;
-one separate final call checks cross-group consistency. Later stages retain
+values and clauses against the complete sources. Each typed call (worker, omission,
+group integration and final integration) carries the full schema catalog once,
+without per-slot `domain_of`, and the source bundle once (D59). Integrations consume
+fixed groups of one or two new worker results plus bounded concern/decision history;
+one separate final call checks cross-group consistency. Later typed stages retain
 changed rows, concerns, predecessors, every explicit decision, omission candidates
-and dispositions, plus full records/schema/source. Untouched supporting/metadata
-review rows and their evidence text can be absent from that model view. The host
-archives the complete worker reviews, raw deliveries and machine audit.
+and dispositions. Receipt completion, reconcile, report and regate see the records,
+the source, BC1's bounded carry and the A14 digest, not the full catalog. Untouched
+supporting/metadata review rows and their evidence text can be absent from those
+model views. The host archives the complete worker reviews, raw deliveries and
+machine audit.
 
 This is an intentional **change in model access**, not lossless preservation of
 the full review procedure. Lossless encoding of retained strings cannot ensure
 that models rediscover a contradiction involving omitted supporting-row evidence.
 The scientific rationale is bounded context/cost with explicit concern retention;
-the tradeoff is unmeasured cross-group detection. Reconcile must inspect affected
+the tradeoff is unmeasured cross-group detection. D59 adds two smaller changes: the
+typed calls lose the per-slot `domain_of` lists, which repeat each class's slot list,
+and the downstream calls see the A14 digest with its trimmed slot keys, as the
+canaries did, rather than the full catalog. Reconcile must inspect affected
 occurrences, and the final report must review every populated final-full value
 anew, including unchanged entries. These duties and acceptance/source-review
 gates remain; no support judgment is inferred from successful decoding.
@@ -1300,10 +1327,9 @@ omission / integration, with **128,000** for report, report regate and
 reconcile-full. These caps include thinking where the route uses thinking.
 The current BC1 code instead requires **64,000 for both worker and integration**,
 including each group and final integration call. This is a material implementation
-delta, not an alias for D28's 32k integration. The owner/reviewed registration must
-settle the resulting contract and budget before P4; this draft does not silently
-approve it. Retain the original decided baseline and the proposed BC1 value in
-the decision packet.
+delta, not an alias for D28's 32k integration. The owner settles it at P4 (item 11);
+this draft does not silently approve it. D58's cost basis already assumes 64k. Retain
+the original decided baseline and the proposed BC1 value in the decision packet.
 
 Separate fixed visible envelopes are **98,304 worker bytes**, **131,072 integration
 bytes**, **262,144 carry bytes**, and **32 open concerns**. They neither replace
@@ -1319,8 +1345,15 @@ With `W` workers and registered fan-in `f` of 1 or 2, BC1 plans
   `W × 64,000 + omission_cap + (G + 1) × 64,000`;
 - aggregate input allowance: an explicit registered value selected from the
   actual reviewed #5155/BC1 sizing for every admitted worker, group, omission
-  and final call. D49's claimed formula is retired; this draft chooses no
-  replacement cap or unverified project profile;
+  and final call. D49's claimed formula stays retired.
+  - **CHORUS:** D62 sets `aggregate_input_tokens` to 4,500,000 for the A21
+    registration. CHORUS needs about 4.06M at 2.48 bytes per token, with every call
+    at or below 0.85 of its room, and the allowance adds at most $3.13 of spend
+    exposure.
+  - **Every other project:** its allowance is a D62-style owner decision at its own
+    registration. The old 4M profile cannot hold any non-CHORUS BC1 roster; in the fit
+    analysis the smallest, CM4AI's, needs about 8.35M at 2.48 bytes per token, so
+    each allowance is roughly 8M or more;
 - generation, receipt-completion, reconcile, report/regate and permitted repair
   calls are added separately to the full-run cost and failure exposure.
 
@@ -1332,11 +1365,34 @@ to spend. Current #5157 admission must independently enforce actual request byte
 provider token count plus the selected output cap, and remaining aggregate budget
 before each dispatch, including resumed repair/report refresh.
 
-Size **CHORUS, CM4AI, AI_READI, VOICE, VOICE_PEDIATRIC and KIDS_FIRST** at expected
-size and visible caps with each project's own original/full/core/receipt/context
-inputs and the real planner/formatter. Record worker/group counts, complete source
-and schema bytes, carry and omission sizes, cached/uncached assumptions, input and
-output reservations, cost and failure exposure per stage. K1 v2 is calibrated
+**The fit gate (D62) and the calibration (D63).**
+- The A21 gate checks two scenarios: the floor, and the visible caps with the
+  measured 1.25× escape factor. The escaped bound (full caps, every byte escaped 4×)
+  is recorded and not gated.
+- Request bytes are sized at 2.48 bytes per token, and future-response bytes at 1.75.
+- Before the A21 registration, D63's single `count_tokens` call measures the ratio on
+  one fixed D59 CHORUS worker request, and the measured ratio replaces 2.48. Every
+  token figure in this draft that rests on 2.48 is provisional until then.
+- A mid-run refusal then remains possible only in the doubly pessimistic case. That is
+  a per-call failure, which no allowance fixes (the D59 review, §4).
+
+**Fit evidence, and when it is needed [proposed; owner fixes at P4, item 12].**
+- **Before A21 (D44, D58):** BC1 is built and reviewed for all six projects under D59.
+  Per-call fit is shown for every project from its own sources, schema closure and
+  context, at the floor and the caps scenario, through the real planner and formatter.
+  VOICE_PEDIATRIC and Kids First have no record of their own. For them the proxy
+  record and its margin are declared, and the result is labelled proxy fit, not actual
+  fit. D59 expects Kids First's integration at caps to be borderline. CHORUS's full
+  fit under D62, and D63's calibration, precede the A21 registration.
+- **At each other project's registration:** its own aggregate allowance (a D62-style
+  owner decision) and its sizing from its own inputs. Runtime admission (#5157, and
+  BC1's per-call count) still refuses any request that does not fit, before it bills.
+  Kids First is never sized or cleared by substituting an AI_READI record.
+- **P4a does not wait** for sizing that needs records which do not yet exist.
+
+For each project, record worker and group counts, complete source and schema bytes,
+carry and omission sizes, billing assumptions (no cache breakpoint, D60), input and
+output reservations, and cost and failure exposure per stage. K1 v2 is calibrated
 engineering evidence from the two assisted canary ledgers; later responses and
 receipt decisions remain unknown. Bytes/token proxies and hypothetical empty/cap
 responses are not provider counts or guarantees that all six campaigns fit.
