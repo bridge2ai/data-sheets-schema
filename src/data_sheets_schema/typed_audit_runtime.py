@@ -261,7 +261,7 @@ def _rebuild(spec, state, *, settle=False, record=None, _reader=None):
             raise ledger.UsageLedgerError('typed saved whole request differs from reconstructed wire')
         count = (_load(row['context']) if _reader is None else _reader.load(row['context']))
         limits = sg._context_capture(spec).document()['audit_limits']
-        receipts._context_check(count, payload, limits)
+        receipts._context_check(count, payload, limits, label=stage['phase'])
         if type(count['input_tokens']) is not int or not 0 < count['input_tokens'] <= limits['max_input_tokens_per_call']:
             raise ledger.UsageLedgerError('typed count is unknown, zero or exceeds registered input limit')
         reserved_input += count['input_tokens']
@@ -501,7 +501,7 @@ def run(spec, *, carry, client, settings, usage):
         stage = state['roster'][index]
         req, payload, inner = build_request(spec, packet, stage, workers, omission, settings)
         if index == len(state['stages']):
-            count = receipts._count_context(bounded, payload, limits)
+            count = receipts._count_context(bounded, payload, limits, label=stage['phase'])
             tokens = count['input_tokens']
             if type(tokens) is not int or not 0 < tokens <= limits['max_input_tokens_per_call']:
                 raise ledger.UsageLedgerError('typed count is unknown, zero or exceeds input ceiling')
