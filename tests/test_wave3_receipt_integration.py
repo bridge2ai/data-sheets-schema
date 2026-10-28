@@ -102,4 +102,3 @@ def test_tool_origin_report_has_distinct_identity(tmp_path):
     assert block["status"] == "checked", block["reasons"]
     assert block["instrument"] == ro.TOOL_INSTRUMENT
     assert block["origin"]["phase3_backport"] == 1
-

@@ -4,7 +4,9 @@ Completed offline on 2026-10-28 UTC (2026-10-27 PDT). Base:
 `662b5c4c8dfe75c4c698f0d4a3ab261cdc42ddb2`; branch
 `codex/receipts-v5-r-v5-fix-20261027`. Final tested production/test head:
 **`851e7cc84562319e1de60cee6a4099b6106c43a7`**. Subsequent delivery commits
-only archive this evidence and report. Nothing was pushed or activated.
+archive this evidence/report and remove one trailing blank line in a review test.
+No executable code or assertions changed after validation; final base-to-head
+`git diff --check` passes. Nothing was pushed or activated.
 
 ## Findings addressed
 
