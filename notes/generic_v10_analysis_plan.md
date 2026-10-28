@@ -386,10 +386,21 @@ per attempt. A stopped attempt bills only the calls made before the stop.
 ## 1. Estimands (P2 item 1)
 
 1. **Feasibility and acceptance.** For each registered cell, the outcome is accepted
-   or rejected (A11–A13), with its attempt count. Per arm/stage/project, report the
-   share of clean registered attempts ending in acceptance, with billing or native
-   runtime evidence separately. Assisted attempts are the separate stratum above.
-   Pilots are reported separately from production.
+   or rejected (A11–A13), with its attempt count. Pilots are reported separately from
+   production, and billing or native runtime evidence separately again. Two success
+   proportions are reported per arm, stage and project [proposed; owner fixes at P4,
+   item 31]:
+   - **All started without assistance (the feasibility headline).** The denominator is
+     every registered attempt that started without assistance, fixed at launch.
+     Success is acceptance with no later assistance. A later intervention, a terminal
+     stop or missing output is a non-success here. An assisted record still never
+     enters a clean scientific analysis.
+   - **Clean, conditional.** The denominator is the attempts that stayed clean (item 7's
+     checks), and the proportion is labelled as conditional on staying clean.
+
+   A registration refused before any billed call is a preflight refusal. It is counted
+   separately and is in neither denominator. The two pre-P4 assisted canaries stay in
+   their own engineering table (above).
 2. **Package effect against v8.** For each primary metric in item 2, the difference
    between the generic_v10 confirmatory cells and the v8 comparator records, project
    by project, in both analysis sets of item 3.
@@ -612,8 +623,8 @@ arms. The v8 figures are P1's, recomputed.
 
 | definition | v8 records | v10 records | v8 pooled coverage (CHORUS / VOICE / AI_READI / CM4AI) | v8 mean populated leaves |
 |---|---|---|---|---|
-| (1) every attempt in a comparator cell, under the arm's prompt pin, that left a full record | the 12, plus VOICE `04d`, `04e` and AI_READI `04f` rep1: 15. CM4AI `04`–`04c` (the earlier pin) enter only a sensitivity row: 18 | every attempt in a confirmatory cell that left a full record (up to 2 per cell under D07, plus any D21 continuation) | 0.340 / 0.462 / 0.491 / 0.688 (0.682 in the sensitivity row) | 254.7 / 393.0 / 505.5 / 458.0 (447.2) |
-| (2) one record per cell: the cell's final attempt that left a full record | the 12 | each confirmatory cell's final attempt | 0.340 / 0.592 / 0.538 / 0.688 | 254.7 / 371.7 / 499.7 / 458.0 |
+| (1) every attempt in a comparator cell, under the arm's prompt pin, that left a full record | the 12, plus VOICE `04d`, `04e` and AI_READI `04f` rep1: 15. CM4AI `04`–`04c` (the earlier pin) enter only a sensitivity row: 18 | every attempt in a confirmatory cell that left an eligible full record (at most 2 per cell under D07, a D21 continuation included) | 0.340 / 0.462 / 0.491 / 0.688 (0.682 in the sensitivity row) | 254.7 / 393.0 / 505.5 / 458.0 (447.2) |
+| (2) one record per cell: the cell's last attempt that left an eligible full record | the 12 | each confirmatory cell's last attempt that left an eligible full record | 0.340 / 0.592 / 0.538 / 0.688 | 254.7 / 371.7 / 499.7 / 458.0 |
 
 The recall targets move as well. Under (1), VOICE variables average 5.20 (4.00 under
 (2)) and VOICE lineage 0.80 (1.00), and AI_READI variables 19.50 (17.67) (P1).
@@ -621,8 +632,8 @@ The recall targets move as well. Under (1), VOICE variables average 5.20 (4.00 u
 **Recommendation: definition (2) for the directional rules, with (1) reported beside
 it as a sensitivity row. [proposed; owner decides]** The reasons:
 - **Equal cell weights.** A cell retried more often does not count more. The v8 VOICE
-  rep1 cell holds 3 attempts and CM4AI rep1 holds 4, while a v10 cell can hold up to 2
-  plus D21 continuations.
+  rep1 cell holds 3 attempts and CM4AI rep1 holds 4, while a v10 cell holds at most 2,
+  a D21 continuation included.
 - **It is D02's comparator exactly** (the 12), and it matches E2's batch of one record
   per cell.
 - **v8's earlier attempts ran a different package.** They were made while the v8
@@ -635,26 +646,65 @@ gate, as late as the fourth attempt, so it has no intention-to-treat counterpart
 v10 cell gets at most two attempts. This asymmetry stays a stated confound (item 4);
 definition (1) shows how large it is from the other side.
 
-**Set B, common gate.** Within whichever Set A definition is chosen, these are the
-records of either arm that pass the same absolute rows:
-- validation passed;
-- duplicate keys 0;
-- the five receipt floors at 0 (item 5).
+**Cells, attempts and eligible records [proposed; owner fixes at P4, items 19–20].**
+- **A cell** is (arm, project, replicate position). A registration declares the
+  positions it fills, and so does a D21 continuation registration, so a replicate
+  index means the same cell across prefixes. The re-canary and each pilot are cells of
+  their own.
+- **An attempt** is one billed launch of a registration for a cell. A cell has at most
+  two, counted across every prefix and registration (item 7).
+- **An eligible full record** is the run's final full record
+  (`claudecode_api/<label>/<P>_d4d.yaml`), written by the run and parseable as YAML.
+  - A record that fails schema validation is eligible for Set A; Set B removes it.
+  - A record with duplicate mapping keys is eligible for the validation and
+    duplicate-key counts only. Every metric that reads values is unmeasurable for it,
+    because a YAML loader silently keeps one of the values.
+  - A phase-1 original from a run that stopped before writing its final full record is
+    kept and reported, but it is not a full record for Set A.
+- **Selection under definition (2)** takes the cell's last attempt that left an
+  eligible full record. If a later attempt left none, the earlier record stands. No
+  record is chosen by score.
+- **Three kinds of missing are kept apart** in every table:
+  - acceptance-missing: the cell has no accepted replicate;
+  - artifact-missing: the cell has no eligible full record;
+  - metric-missing: the record exists, but the metric's required snapshot or block is
+    absent or unmeasurable.
+
+**Set B, common gate [proposed; owner fixes at P4, item 30].** Within whichever Set A
+definition is chosen, these are the records of either arm that pass the same absolute
+rows under one common instrument:
+- validation passed, under one named schema closure per arm (the arm's own registered
+  closure);
+- duplicate keys 0 (`canary.duplicate_key_count`);
+- exactly the five named receipt floors at 0 (item 5): chunks unreviewed, snippets
+  unverified, addressing slips over tolerance, receipts vacuous and receipt findings.
+
+The common checker is the v4 receipts checker at the launch base's pinned source hash,
+run on copies of both arms' records. A row counts only if the check ran and every
+counter it needs is present. `canary.receipt_floors` defaults a missing counter to
+zero, so a missing counter makes the record unmeasurable for Set B, never clean. The
+same helper also appends a registered-coverage row when a floor is registered; Set B
+excludes that row.
 
 The coverage floor is applied to neither arm, because v8 never had one and applying
-v10's floor would select on the measured outcome. v8's Set B is 8 of 12 records under
-(2) and 9 of 15 under (1) (P1). Set B is reported beside Set A as a sensitivity
-analysis, never instead of it.
+v10's floor would select on the measured outcome. P1's v8 Set B memberships, 8 of 12
+records under (2) and 9 of 15 under (1), used the stored instruments; they are
+historical context until this recipe recomputes them. Set B is reported beside Set A
+as a sensitivity analysis, never instead of it. Its intersections with the E2 and E5
+rosters (items 12 and 16) are reported separately, because those rosters differ from
+Set A.
 
 **Replicate structure** (#2932, prediction 8) has an **n=3 primary estimand**:
 exactly three records per compared arm/project, one final attempt per registered
 replicate cell, with equal cell weights. If one arm supplies only two usable
 records, n=3 is missing and n=2 is a separately flagged **sensitivity stratum**,
-never the same estimand. Use the two common registered replicate indices when
-both arms have them; otherwise show unmatched available sets and do not present
-a paired contrast. Do not choose a favorable two-record subset from a complete
-three-record arm. Show each arm's n and included cell IDs in every structure
-table. With fewer than two in either arm the comparison is not computable, not 0.
+never the same estimand. Use the two common replicate positions (the cells defined
+above) when both arms have them; a continuation's labels restart at rep1, so its
+registration's declared positions, not its labels, give the mapping. Otherwise show
+unmatched available sets and do not present a paired contrast. Do not choose a
+favorable two-record subset from a complete three-record arm. Show each arm's n and
+included cell IDs in every structure table. With fewer than two in either arm the
+comparison is not computable, not 0.
 
 **Rules for n=1 and n=3.**
 - **Default:** D02 recommends descriptive comparisons (per project, v10 values beside
@@ -668,11 +718,33 @@ table. With fewer than two in either arm the comparison is not computable, not 0
   production condition; prior assisted evidence is disclosed above. Subsequent
   changes require an explicit prospective amendment and a new analysis stratum.
 - **Verdicts** are per project. A prediction's overall statement is "holds in k of K
-  confirmatory projects", where K is 4, or 3 under AI_READI option (b). There is no
-  inferential significance test at n=3. Prediction 4 alone retains a descriptive
-  claim/leaf-weighted pooled decision rule, with the fixed-weight sensitivity in
-  item 16; it is not a per-project or independent-replicate significance claim.
-- **n=1 cells** (pilots, VOICE_PEDIATRIC ×1, Kids First) are descriptive only.
+  confirmatory projects". There is no inferential significance test at n=3.
+  Prediction 4 alone retains a descriptive claim/leaf-weighted pooled decision rule,
+  with the fixed-weight sensitivity in item 16; it is not a per-project or
+  independent-replicate significance claim.
+- **K [proposed; owner fixes at P4, item 21]** counts the in-scope projects (P4b) whose
+  contrast is like-for-like:
+  - CHORUS, CM4AI and VOICE count when in scope.
+  - AI_READI counts only under comparator option (d), and only after a render diff
+    shows that its new v8-condition run differs from the v8 records in the bundle
+    alone.
+  - Under options (a) and (c), AI_READI's contrast crosses the with-crate boundary or
+    the runtime, provider and effort, so it is a labelled separate row and not in K.
+    Under (b) it is descriptive.
+  - So with every project in scope, K is 3, or 4 under (d). With CHORUS alone in scope,
+    K is 1 and the scope rule's single-project wording applies.
+- **Missing data [proposed; owner fixes at P4, item 20].** A primary directional
+  verdict for a project needs:
+  - complete n=3 in each arm under Set A definition (2);
+  - every snapshot and block the metric requires, measured.
+
+  Otherwise the project's row is descriptive, shows n and the cell IDs, and counts as
+  "not measured" in "k of K". A missing snapshot is never replaced by another
+  snapshot, and it never shrinks a pooled denominator silently. A rule that needs
+  every record (prediction 3a) is "not measured" when a required record is absent;
+  it never passes on an empty set.
+- **n=1 cells** (the re-canary, pilots, VOICE_PEDIATRIC ×1, Kids First) are
+  descriptive only.
 
 ## 3a. Receipt snapshots, instruments and coverage estimands
 
@@ -816,6 +888,12 @@ Each row must be 0, or hold, and A11 records each:
    `model.max_tokens_by_phase.full`, read 128000.
 6. **Provider (API):** `model.provider` reads 'LBL CBORG (proxy to Anthropic)' and
    `model.base_url` reads `https://api.cborg.lbl.gov`.
+7. **Clean run [proposed; owner fixes at P4, item 13]:** item 7's clean-run checks all
+   hold. A run that fails any of them is assisted: evidence only, never accepted.
+
+**Native rows.** Every row above is written for the API arm. The native canary's
+acceptance rows are not specified here; they are deferred to a dated native amendment
+of this plan, reviewed and ratified before the native launch (P4 item 49).
 
 **Recorded, not gated:**
 - item 3a's coverage fractions and snapshot/denominators **other than the
@@ -844,29 +922,48 @@ It carries:
 - **Identities:** the registration sha256, the roster sha256, and the sha256 of every
   artifact A11 confirms on disk.
 - **Check rows:** each item-5 row, with its value.
+- **Clean-run checks:** the journal verification, the override list (empty), the
+  journal heads printed at launch and at each stop against the monitor record, and
+  the interrupted-write check (item 7).
 - **Coverage:** as a fraction with its denominator.
 - **Cost:** at that day's prices.
 - **Reviewers:** references to the A12 blind source review and its reviewers, named
   under D36, never the generating session.
+- **Disagreements [proposed; owner fixes at P4, item 14]:** each reviewer's finding and
+  disposition, kept separately. The owner adjudicates any disagreement before
+  signing. A rejecting-class finding that the owner sustains rejects the record;
+  evidence that stays unresolved blocks acceptance.
 - **What the run does not establish:** for a pilot, one project, n=1, no load test
   and no recall test.
 
 ## 7. Attempt accounting, canonical marks and missing cells (P2 item 7; D07 decided)
 
 - **Every attempt is retained**, stopped and rejected ones included, with its
-  usage/termination evidence. Clean registered attempts form the per-arm automatic
-  success denominator; assisted 10-20a/10-22a and any later intervention form the
-  separately reported engineering stratum, excluded from both clean numerator and
-  denominator. Which clean attempts enter Set A follows item 3's definition.
-- **Attempt bound:** at most 2 billed attempts per registered cell (D07), for example
-  a pilot plus one contingency, or a replicate plus one D21 re-run. Then the owner
-  reviews.
+  usage/termination evidence. Item 1 gives the two success proportions: one over every
+  attempt that started without assistance, and one over the attempts that stayed
+  clean. The pre-P4 assisted 10-20a/10-22a stay in their own engineering table. Which
+  clean attempts enter Set A follows item 3's definition.
+- **A clean run [proposed; owner fixes at P4, item 13]** passes every one of these
+  checks, and any other run is assisted:
+  - the D41 latch journal verifies;
+  - no override is recorded (D56);
+  - the journal heads printed at launch and at each stop match the monitor record
+    (D57);
+  - no write was interrupted (the #5212 re-review, R3: recovering an interrupted write
+    needs an override, which makes the run assisted);
+  - nothing in the run directory was edited (D41, D53).
+- **Attempt bound:** at most 2 billed attempts per cell (D07; cells are defined in item
+  3), for example a pilot plus one contingency, or a replicate plus one D21 re-run.
+  The count covers every prefix and registration: a new registration under D56 does
+  not reset it. Then the owner reviews.
 - **Pilots** are analysed separately, never as replicates **[pending D03]**.
 - **No replicate is chosen by score.**
 - **Canonical marks are never used as the estimate.** Estimates use every record in
   the analysis set.
 - **Canonical marks** (A20) go only to accepted replicates, and pilots are never
-  candidates. They use `d4d runs select --method claudecode_api --project P --config
+  candidates. [proposed; owner fixes at P4, item 42]: the accepted cells and their
+  record hashes are listed from the acceptance records first, and the criterion below
+  ranks only within that list. They use `d4d runs select --method claudecode_api --project P --config
   <prefix>`, with `--execute` only on the owner's word.
 
   The criterion is the current code's at `0a1132ecf`, in place since `0169f1feb`
@@ -881,17 +978,22 @@ It carries:
 
   If the launch base's criterion differs, the launch base's text is the one that
   applies, and this item is amended before P4.
-- **Missing cells ([proposed; owner fixes at P4]).** A confirmatory cell with no
-  accepted replicate after its D07 attempts is a missing cell:
-  - It is reported explicitly in every table (E6's "explicit missing cells").
+- **Missing cells ([proposed; owner fixes at P4, item 20]).** An in-scope
+  confirmatory cell with no accepted replicate after its D07 attempts is a missing
+  cell:
+  - It is reported explicitly in every table (E6's "explicit missing cells"), with
+    item 3's kind of missing: acceptance, artifact or metric.
   - It is never imputed, and never filled from another prefix except as a recorded
-    D21 continuation.
-  - Its attempts' records still enter Set A where they exist.
-  - A per-project comparison uses the replicates available and shows n.
+    D21 continuation that declares the cell.
+  - Its attempts' eligible records still enter Set A where they exist.
+  - A project without complete n=3 gets a descriptive comparison showing n and the
+    cell IDs, not a primary verdict (item 3's missing-data rule).
   - Structure's primary estimand needs n=3 per arm. n=2 is only the flagged
     sensitivity stratum of item 3; fewer than 2 is not computable, never 0.
-  - A project with no v10 record in a set is counted as "not measured" in "k of K"
-    for that set.
+  - A project with no primary verdict in a set is counted as "not measured" in "k of
+    K" for that set.
+- **Out of scope is not missing.** A project P4b leaves out of scope has no cells. It
+  is listed as "out of scope (P4b)", and it is not in K (scope rule).
 - **Cells split across prefixes:** a cell that D21 splits across prefixes cannot be
   grouped by `d4d runs select --config`. It is marked by a recorded procedure or left
   unmarked (A20; a G4 gap).
