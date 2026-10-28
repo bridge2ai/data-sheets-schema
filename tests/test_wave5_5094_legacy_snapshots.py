@@ -158,3 +158,35 @@ def test_explicit_live_carry_does_not_consult_ambiguous_saved_history(tmp_path, 
     monkeypatch.setattr(snapshot_store, 'read_latest', forbidden)
     result = api.report_audit_totals_block(selected, {'Audit findings': second.read_text()}, record=record)
     assert result['status'] == 'consistent' and result['computed_total'] == 14
+
+
+def test_default_backfill_discovers_portable_latest_without_first_file(tmp_path):
+    selected, record, first, second = synthetic_snapshots(tmp_path)
+    first.unlink()
+    # A portable snapshot can have a noncanonical filename. The phase pin,
+    # not glob discovery of the obsolete first file, advertises this check.
+    latest = second.with_name('retained-current-audit.txt')
+    second.rename(latest)
+    record['intermediates'][-1]['path'] = str(latest)
+    write_record(selected, record)
+    before = selected.provenance_path.read_bytes()
+    computed = backfill.compute(selected.provenance_path)
+    assert computed['report_audit_totals']['status'] == 'consistent'
+    assert computed['report_audit_totals']['computed_total'] == 14
+    assert selected.provenance_path.read_bytes() == before
+
+
+@pytest.mark.parametrize('index_state', ['absent', 'current', 'previous'])
+def test_unregistered_standalone_backfill_keeps_only_safe_legacy_fallback(tmp_path, index_state):
+    selected, _, first, second = synthetic_snapshots(tmp_path)
+    second.unlink()
+    selected.report_path.write_text('The audit returned 13 findings.', encoding='utf-8')
+    write_record(selected, {'record_mode': 'historical-helper'})
+    if index_state != 'absent':
+        name = ('EXAMPLE_snapshot_index.json' if index_state == 'current' else
+                'EXAMPLE_snapshot_index.previous-old.json')
+        first.with_name(name).write_text('{}', encoding='utf-8')
+    result = backfill.compute(selected.provenance_path, only={'report_audit_totals'})['report_audit_totals']
+    assert result['checked'] is (index_state == 'absent')
+    assert result['computed_total'] == (13 if index_state == 'absent' else None)
+    assert result['status'] == ('consistent' if index_state == 'absent' else 'not_checked')

@@ -23,7 +23,7 @@ GROUPS = {
     "canary": ("test_wave5_5094_legacy_snapshots",),
     "causal": ("test_wave5_5094_legacy_snapshots",),
     "targeted": ("test_wave5_5094_legacy_snapshots", "test_report_audit_totals",
-                 "test_pr5094_round2", "test_wave4_5094_review", "test_backfill_checks"),
+                 "test_pr5094_round2", "test_backfill_checks", "test_snapshot_attestation"),
 }
 CANARY = 'test_committed_voice_ambiguity_is_unchecked_and_preserves_prior'
 
