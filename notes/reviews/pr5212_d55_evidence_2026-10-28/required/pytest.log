@@ -1,0 +1,92 @@
+........................................................................ [ 12%]
+........................................................................ [ 24%]
+........................................................................ [ 36%]
+........................................................................ [ 48%]
+........................F............................................... [ 61%]
+........................................................................ [ 73%]
+........................................................................ [ 85%]
+........................................................................ [ 97%]
+..............                                                           [100%]
+=================================== FAILURES ===================================
+_ TestEveryArtifactWriteIsStamped.test_the_repaired_record_on_disk_carries_the_stamp _
+
+self = <tests.test_provenance_header.TestEveryArtifactWriteIsStamped testMethod=test_the_repaired_record_on_disk_carries_the_stamp>
+
+    def test_the_repaired_record_on_disk_carries_the_stamp(self):
+        """Through `_repair_invalid` with a fake client that returns the
+        prompt-copied header: the file lands stamped, and the re-derived core
+        with it."""
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+        from data_sheets_schema import api_runner
+        import sys
+        if str(Path(__file__).resolve().parents[1]) not in sys.path:      # `python tests/x.py` (round-2 finding 3)
+            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        from tests.test_download.test_api_runner import spec
+        tmp = tempfile.TemporaryDirectory(); self.addCleanup(tmp.cleanup)
+        s = spec(out_dir=Path(tmp.name) / "out")
+        s.full_path.parent.mkdir(parents=True, exist_ok=True)
+        s.core_path.parent.mkdir(parents=True, exist_ok=True)
+        s.full_path.write_text("# Model: claude-opus-5\n# Temperature: 0.0\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")
+        s.core_path.write_text("# Model: claude-opus-5\n# Temperature: 0.0\nid: x\n")   # so the core branch runs (round-2 finding 2)
+        repaired = ("```yaml\n# Model: claude-opus-5\n# Temperature: 0.0\nid: x\ntitle: T\nname: n\n"
+                    "description: d\nkeywords: [a]\n```\n")
+    
+        class _Block:
+            type = "text"; text = repaired
+    
+        class _Usage:
+            input_tokens = output_tokens = 1; cache_read_input_tokens = cache_creation_input_tokens = 0
+    
+        class _Resp:
+            stop_reason = "end_turn"; content = [_Block()]; usage = _Usage()
+    
+        settings = {"name": "claude-opus-5", "temperature": 0.0, "max_tokens": 1000,
+                    "temperature_applies": False, "config_path": "x"}
+        calls = {"n": 0}
+    
+        def fake_validate(path, schema, cls):
+            calls["n"] += 1
+            return (["one failure"], None) if calls["n"] == 1 else ([], None)
+    
+        with mock.patch.object(api_runner, "_validator_lines", fake_validate), \
+                mock.patch.object(api_runner, "_call_with_retry", lambda *a, **k: _Resp()), \
+                mock.patch.object(api_runner, "_snapshot", lambda *a, **k: None):
+>           api_runner._repair_invalid(s, object(), settings, [])
+
+tests/test_provenance_header.py:255: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:5408: in _repair_invalid
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5609: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:635: in check
+    _, events, mine = _validated(spec, spending=spending and not startup, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:472: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:38: UsageLedgerError
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_report_gate.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+-- generated xml file: /private/tmp/codex-5212-evidence/required/results.xml ---
+=========================== short test summary info ============================
+FAILED tests/test_provenance_header.py::TestEveryArtifactWriteIsStamped::test_the_repaired_record_on_disk_carries_the_stamp
+1 failed, 589 passed, 13 warnings in 2589.79s (0:43:09)

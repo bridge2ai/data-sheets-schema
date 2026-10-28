@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """D41 offline wire parity, 2026-10-26; refs #5138, #5142.
 
-Inputs: pinned f8c5ac73c package source, current source, real CHORUS inputs,
+Inputs: target merge-base package source, current source, real CHORUS inputs,
 synthetic records/replies and a fresh scratch directory. Outputs: exact SDK
 HTTP request bodies and a JSON parity report. MockTransport handles every
 request; no provider, token-count endpoint, generation or scoring is used.
@@ -23,7 +23,7 @@ import subprocess
 import sys
 import tarfile
 
-BASE = 'f8c5ac73caba610d40c49aaceddb31ead3590a72'
+DEFAULT_TARGET = 'origin/claude/dc-a13-receipt-floor-v3'
 PACKAGE = 'src/data_sheets_schema'
 FULL = 'id: urn:d41:offline\nname: D41 offline parity fixture\n'
 GENERATION = 'd41-offline-fixed-generation'
@@ -55,10 +55,21 @@ def git(root, *args):
     return subprocess.check_output(['git', *args], cwd=root)
 
 
-def unpack_baseline(root, destination):
+def baseline_commit(root, target=None):
+    """Resolve only local refs; CI's PR merge compares against its first parent."""
+    target = target or os.environ.get('D41_PARITY_TARGET')
+    if target is None:
+        if os.environ.get('GITHUB_EVENT_NAME') == 'pull_request':
+            target = 'HEAD^1'
+        else:
+            target = DEFAULT_TARGET
+    return git(root, 'merge-base', 'HEAD', target).decode().strip()
+
+
+def unpack_baseline(root, destination, base):
     """Materialize only regular pinned package files; never alter a checkout."""
     destination.mkdir(parents=True, exist_ok=False)
-    archive = git(root, 'archive', BASE, PACKAGE)
+    archive = git(root, 'archive', base, PACKAGE)
     with tarfile.open(fileobj=io.BytesIO(archive)) as stream:
         for member in stream:
             if member.isdir():
@@ -70,7 +81,7 @@ def unpack_baseline(root, destination):
                 raise ValueError('baseline archive contains a nonregular file')
             raw = stream.extractfile(member).read()
             save(destination / path, raw)
-    return {'commit': BASE, 'archive_sha256': sha(archive), 'scope': PACKAGE}
+    return {'commit': base, 'archive_sha256': sha(archive), 'scope': PACKAGE}
 
 
 def _offline():
@@ -114,7 +125,7 @@ def _resource_authority(root, registration):
         except ValueError:
             external.append(selected)
             continue
-        raw = git(root, 'show', BASE + ':' + relative)
+        raw = git(root, 'show', os.environ['D41_PARITY_BASE'] + ':' + relative)
         if sha(raw) != selected['sha256']:
             raise ValueError('selected resource differs from pinned baseline: ' + relative)
         owned[relative] = selected
@@ -146,7 +157,7 @@ def _module_authority(root, code_root, *, baseline, modules=None):
         entry = pin(path)
         if baseline:
             relative = path.relative_to(code_root).as_posix()
-            expected_raw = git(root, 'show', BASE + ':' + relative)
+            expected_raw = git(root, 'show', os.environ['D41_PARITY_BASE'] + ':' + relative)
             if sha(expected_raw) != entry['sha256']:
                 raise ValueError('baseline package module differs from Git: ' + name)
             entry['baseline_git_path'] = relative
@@ -330,8 +341,8 @@ def capture(root, code_root, fixture, output, mode):
     if resources.resource_root()[0].resolve() != root:
         raise ValueError('wrong common resource root')
     guarded = 'before_attempt' in inspect.signature(api._call_with_retry).parameters
-    if guarded != (mode == 'candidate'):
-        raise ValueError('expected baseline/candidate callback signatures differ')
+    if mode == 'candidate' and not guarded:
+        raise ValueError('candidate lacks the per-attempt latch callback')
     spec, reg, settings = _fixture(root, fixture, output / 'registration.json')
     origins_after_fixture = _module_authority(root, code_root, baseline=mode == 'baseline')
     common_resources = _resource_authority(root, reg)
@@ -365,10 +376,11 @@ def capture(root, code_root, fixture, output, mode):
     return result
 
 
-def compare(root, workdir):
+def compare(root, workdir, *, target=None):
     root, workdir = root.resolve(), workdir.resolve()
     workdir.mkdir(parents=True, exist_ok=False)
-    baseline = unpack_baseline(root, workdir / 'baseline-code')
+    base = baseline_commit(root, target)
+    baseline = unpack_baseline(root, workdir / 'baseline-code', base)
     fixture = workdir / 'common-fixture'
     fixture.mkdir()
     helper_before = pin(__file__)
@@ -376,7 +388,8 @@ def compare(root, workdir):
     captures = {}
     for mode, code_root in [('baseline', workdir / 'baseline-code'), ('candidate', root)]:
         out = workdir / mode
-        env = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONPATH': str(code_root / 'src') + os.pathsep + str(root)}
+        env = {**os.environ, 'D41_PARITY_BASE': base, 'PYTHONDONTWRITEBYTECODE': '1',
+               'PYTHONPATH': str(code_root / 'src') + os.pathsep + str(root)}
         command = [sys.executable, str(Path(__file__).resolve()), '--capture', mode, '--root', str(root),
                    '--code-root', str(code_root), '--fixture', str(fixture), '--out', str(out)]
         completed = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=300)
@@ -408,7 +421,7 @@ def compare(root, workdir):
         'excluded_request_branches': ['full readdress and receipt after readdress', 'schema repair'],
         'captures': {mode: pin(workdir / mode / 'capture.json') for mode in captures},
         'scope': 'Exact generic_v10/shared-v1 CHORUS request construction with explicitly selected bridge2ai profile and real SDK serialization; synthetic records/replies, no run admission or acceptance claim.',
-        'shared_v2': 'Controller code identity and registration SHA must change; no normalization or shared-v2 byte-parity claim. Protected ROUTING_CODE addition remains proposal-only.'}
+        'shared_v2': 'Controller code identity and registration SHA must change; no normalization or shared-v2 byte-parity claim. Journal is included in ROUTING_CODE since db88ca68c.'}
     save(workdir / 'summary.json', json.dumps(result, indent=2, sort_keys=True).encode() + b'\n')
     return result
 
@@ -417,6 +430,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--workdir', type=Path)
+    parser.add_argument('--target', help='local target ref used for merge-base; no fetch')
     parser.add_argument('--capture', choices=('baseline', 'candidate'))
     parser.add_argument('--code-root', type=Path)
     parser.add_argument('--fixture', type=Path)
@@ -425,7 +439,7 @@ def main():
     if args.capture:
         capture(args.root, args.code_root, args.fixture, args.out, args.capture)
     else:
-        result = compare(args.root, args.workdir)
+        result = compare(args.root, args.workdir, target=args.target)
         print(json.dumps({'passed': result['passed'], 'requests': len(result['rows']), 'summary': str(args.workdir / 'summary.json')}))
 
 

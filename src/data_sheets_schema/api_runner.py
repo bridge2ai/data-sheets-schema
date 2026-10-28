@@ -6119,11 +6119,6 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         out["table_missing_before"] = True
     if not contradictions:
         return out
-    from .usage_ledger import record_report_rejection
-    record_report_rejection(spec, stage="report_gate_before",
-        report_sha256=hashlib.sha256(spec.report_path.read_bytes() if spec.report_path.exists() else b"").hexdigest(),
-        reading={**before, "findings": contradictions},
-        reason="report claims or required dispositions rejected")
     # Once per run, not once per invocation: a resumed invocation whose
     # earlier pass already regenerated the report must not spend again
     # (#965). The prior gate is kept under `prior`.
@@ -6132,6 +6127,11 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
                     "findings_after": out["findings_before"],
                     "remaining": (before.get("findings") or [])[:20]})
         return out
+    from .usage_ledger import record_report_rejection
+    record_report_rejection(spec, stage="report_gate_before",
+        report_sha256=hashlib.sha256(spec.report_path.read_bytes() if spec.report_path.exists() else b"").hexdigest(),
+        reading={**before, "findings": contradictions},
+        reason="report claims or required dispositions rejected")
     as_written = spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else ""
     _snapshot(spec, f"{spec.project}_report_before_regate.md", as_written)
     out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
@@ -6661,12 +6661,14 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
 
 
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
-            client=None) -> dict[str, Any]:
+            client=None, expect_journal_head_sha256: str | None = None) -> dict[str, Any]:
     """Run the phases, writing each artifact as it completes.
 
     ``resume`` skips phases whose artifact already exists, so a run that failed
     at phase 5 costs one call to finish rather than six. Set it False to force
-    a clean regeneration.
+    a clean regeneration. An existing journal requires its head from the prior
+    launch/monitor record as ``expect_journal_head_sha256``, even on a fresh
+    generation request. Start/stop heads are printed to stderr for that record.
     """
     if spec._replay_only:
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
@@ -6686,7 +6688,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         from .output_ownership import require_selected_resume_owner
         assert_current(spec)  # authority isolation precedes even sidecar lock writes
         require_selected_resume_owner(spec, resume=resume)
-    with _exclusive_run(spec):
+    from .latch_journal import launch_record
+    with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
         if getattr(spec, 'shared_generation_version', 0):
             # Another sequential writer may have changed ownership while we waited.
             require_selected_resume_owner(spec, resume=resume)
@@ -6869,7 +6872,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # Before recovery can rewrite a ledger or settle a saved delivery. A
     # missing journal on spent work is not permission to adopt edited state.
     from . import latch_journal
-    latch_journal.check(spec, spending=resume)
+    latch_journal.check(spec, spending=resume, startup=True)
 
     # Before a token is spent. The digest this run is about to send, the schema
     # it validates against and the identity slots its pair check uses all come

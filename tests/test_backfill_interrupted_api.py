@@ -131,3 +131,7 @@ def test_backfill_does_not_publish_while_an_api_writer_holds_the_output_lock(lay
     assert result.exit_code == 0, result.output
     assert "deferred" in result.output and "active" in result.output, result.output
     assert not spec.provenance_path.exists()
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

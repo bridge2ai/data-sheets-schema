@@ -377,3 +377,7 @@ def test_assisted_record_cannot_supply_baseline_metrics(tmp_path):
     for reader in (canary.baseline_for, canary.report_basis):
         with pytest.raises(LookupError, match="runtime integrity is ineligible"):
             reader("CHORUS", "baseline", "claudecode_api", tmp_path)
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

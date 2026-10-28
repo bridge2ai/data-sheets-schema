@@ -285,3 +285,7 @@ def test_live_phase_check_uses_current_index_over_an_older_portable_record(exter
     latest = api._snapshot(external, 'EXTERNAL_full.yaml', 'id: live\n')
     state, path, doc, _ = receipts.phase1_snapshot_state(api._receipt_path(external), spec=external)
     assert state == 'usable' and path == latest and doc['id'] == 'live'
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

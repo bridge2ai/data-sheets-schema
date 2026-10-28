@@ -71,3 +71,7 @@ def test_completed_shortcut_requires_all_same_generation_charges_on_record(exter
         api.execute(spec, client=client)
     assert client.messages.calls == []
     assert spec.provenance_path.read_bytes() == original_record
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

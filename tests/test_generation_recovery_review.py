@@ -211,3 +211,7 @@ def test_registry_bundle_audit_checks_external_destinations(tmp_path, damage):
     else:
         assert str(bundle if damage in ("bundle", "missing-bundle", "sources") else chunks) in audit.output
     assert {str(path): path.read_bytes() for path in tmp_path.rglob("*") if path.is_file()} == before
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

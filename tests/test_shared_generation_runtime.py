@@ -454,3 +454,7 @@ def assert_snapshot_attribution_checks_without_calls(spec):
     finally:
         for path, raw in baseline.items(): Path(path).write_bytes(raw)
     assert files(spec) == baseline
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

@@ -417,10 +417,13 @@ class TestTheRunnerGate(unittest.TestCase):
                     messages = property(lambda self: (_ for _ in ()).throw(AssertionError("must not call")))
                 # Exercise the gate itself, without the v9 terminal-refusal
                 # guard masking whether its allowance can reset (#1821).
+                from data_sheets_schema import usage_ledger
+                rejected = usage_ledger._read(s).get('report_rejections', [])
                 for _ in range(3):
                     gate = api_runner._gate_report(s, Boom(), api_runner._model_settings(), [], {})
                     self.assertTrue(gate["regeneration_attempted"])
                     self.assertFalse(gate["regenerated"])
+                    self.assertEqual(usage_ledger._read(s).get('report_rejections', []), rejected)
                     record["report_gate"] = gate
                     s.provenance_path.write_text(yaml.safe_dump(record))
 
@@ -541,3 +544,8 @@ class TestTheAssemblyDigestCoversIt(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

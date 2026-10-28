@@ -1,6 +1,5 @@
 """D41 wire/identity boundaries; offline only, refs #5138 and #5142."""
 from pathlib import Path
-import subprocess
 from types import SimpleNamespace
 
 import pytest
@@ -41,10 +40,9 @@ def test_package_authority_refuses_recalculated_namespace_paths(tmp_path):
 
 
 def test_chorus_shared_v1_exact_baseline_sdk_bytes(tmp_path):
-    available = subprocess.run(['git', 'cat-file', '-e', parity.BASE + '^{commit}'], cwd=ROOT,
-                               capture_output=True).returncode == 0
-    if not available:
-        pytest.skip('Pinned f8c5ac73c Git object unavailable; local D41 parity artifact is still required.')
+    # Missing target history must be supplied locally rather than silently
+    # skipping the acceptance check or reverting to an obsolete asset pin.
+    assert parity.baseline_commit(ROOT)
     result = parity.compare(ROOT, tmp_path / 'parity')
     assert result['passed']
     assert {'full', 'reconcile_full', 'report', 'report_regate', 'full_receipt_completion',
@@ -70,3 +68,10 @@ def test_shared_v2_keeps_strict_controller_code_freshness(tmp_path, draft_files,
     assert before['selection']['routing_code'][name] != after['routing_code'][name]
     with pytest.raises(ValueError, match='different protocol or selected assets'):
         sg.parse_registration(registration)
+
+
+def test_chorus_shared_v1_accepts_an_already_guarded_merge_base(tmp_path):
+    # Subsequent PR merge parents may already contain D41. That remains a
+    # valid wire comparison; only the candidate must provide the callback.
+    result = parity.compare(ROOT, tmp_path / 'guarded-parity', target='HEAD')
+    assert result['passed'] and len(result['rows']) == 8

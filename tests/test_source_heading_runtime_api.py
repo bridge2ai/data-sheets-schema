@@ -638,3 +638,7 @@ def test_selected_registration_binds_live_historical_validation(tmp_path, draft_
     with pytest.raises(ValueError, match='descriptor|selection|registration'):
         sg.parse_registration(registration)
     assert sg.descriptor(version=1) == legacy
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

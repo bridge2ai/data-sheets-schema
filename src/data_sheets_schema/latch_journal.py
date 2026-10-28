@@ -1,11 +1,13 @@
 """Durable local failure/response latches; not cryptographic authenticity (#5138, #5142).
 
-The append-only chain precedes each mutable ledger/index update. A crash between
-those writes deliberately refuses continuation rather than adopting partial state.
+The append-only chain precedes each mutable ledger/index update. A proved
+interrupted update requires explicit acknowledgement; terminal and consumed
+control state never grant another call. Launch records anchor resume heads.
 """
 from __future__ import annotations
 
 import copy
+from contextlib import contextmanager
 from datetime import datetime
 import hashlib
 import json
@@ -13,6 +15,7 @@ import os
 from pathlib import Path
 import re
 import stat
+import sys
 
 from data_sheets_schema import usage_ledger as ledger
 
@@ -74,7 +77,7 @@ def _events(spec) -> list[dict]:
         return []
     raw = _bytes(path)
     if not raw or not raw.endswith(b"\n"):
-        _fail("empty or truncated journal")
+        _fail(f"empty or truncated journal: expected=nonempty newline-terminated events; found={len(raw)} bytes, trailing_newline={raw.endswith(bytes([10]))}")
     events = []
     previous = None
     try:
@@ -90,14 +93,17 @@ def _events(spec) -> list[dict]:
                     or event["previous_sha256"] != previous
                     or not isinstance(event["identity"], dict)
                     or not isinstance(event["generation_id"], str) or not event["generation_id"]
-                    or event["kind"] not in {"generation", "legacy_unverifiable", "latch", "override"}
+                    or event["kind"] not in {"generation", "legacy_unverifiable", "latch", "override", "aborted_update"}
                     or not isinstance(event["payload"], dict)
                     or event["sha256"] != _sha(_canonical(body))):
-                raise ValueError(f"invalid event at line {number}")
+                raise ValueError(f"invalid event at line {number}: expected previous_sha256={previous}, "
+                                 f"sha256={_sha(_canonical(body))}, line={number}, version=1; "
+                                 f"found previous_sha256={event.get('previous_sha256')}, "
+                                 f"sha256={event.get('sha256')}, line={event.get('line')}, version={event.get('version')}")
             previous = event["sha256"]
             events.append(event)
     except (TypeError, ValueError, KeyError) as exc:
-        _fail(f"broken chain: {exc}")
+        _fail(f"broken chain: expected=valid hash-chained event; found={exc}")
     return events
 
 
@@ -154,7 +160,7 @@ def _observations(data):
         if data.get(name) is True:
             result[f"allowance:{name}"] = True
     for name in ("typed_audit", "receipt_completion", "removal_repair_admission",
-                 "receipt_completion_transcript"):
+                 "receipt_completion_transcript", "validator_repair_refresh"):
         if name in data:
             result[f"controller:{name}"] = copy.deepcopy(data[name])
     if data.get("receipt_completion_full") is not None:
@@ -219,8 +225,10 @@ def _observations(data):
 
 def _latches(events):
     result = {}
+    aborted = {digest for event in events if event['kind'] == 'aborted_update'
+               for digest in event['payload']['aborted_event_sha256s']}
     for event in events:
-        if event["kind"] == "latch":
+        if event["kind"] == "latch" and event['sha256'] not in aborted:
             payload = event["payload"]
             if set(payload) != {"key", "value"} or not isinstance(payload["key"], str):
                 _fail("malformed latch event")
@@ -267,7 +275,8 @@ def _mismatches(spec, data, events):
 
 
 def _acknowledgements(events):
-    return [copy.deepcopy(event["payload"]) for event in events if event["kind"] == "override"]
+    return [copy.deepcopy(event["payload"]) for event in events
+            if event["kind"] in {"override", "aborted_update"}]
 
 
 def _override(spec, data, required):
@@ -315,6 +324,15 @@ def _apply_override(spec, data, events, mine, discrepancies):
                                          + (f"; {len(pending) - 4} further discrepancies" if len(pending) > 4 else "")) from exc
         if any(record.get("sha256") == acknowledgement["sha256"] for record in prior):
             _fail("an already-applied override cannot acknowledge a later discrepancy; obtain a new explicit acknowledgement")
+        # D56: an acknowledgement that cannot authorize continuation is not
+        # recorded, even when the caller only requested provenance or a write.
+        if any(key.startswith('terminal:') for key in _latches(mine)):
+            _fail("historical terminal failure or evidence rejection remains latched; "
+                  "override refused without recording assistance")
+        if any(item['key'].startswith(('controller:', 'intent:', 'allowance:', 'admission:'))
+               for item in discrepancies):
+            _fail("control-state discrepancy cannot authorize a call or refund a consumed allowance; "
+                  "override refused without recording assistance")
         acknowledgement["discrepancies"] = copy.deepcopy(pending)
         event = _event(spec, data, events, "override", acknowledgement)
         _append(spec, events, event)
@@ -332,6 +350,8 @@ def _legacy(spec, data, events):
                    {"ledger_sha256": _sha(_bytes(ledger.ledger_path(spec))),
                     "reason": "historical latches cannot be independently established"})
     acknowledgement = _override(spec, data, {event["sha256"]})
+    if any(key.startswith('terminal:') for key in _observations(data)):
+        _fail('historical terminal failure; legacy override cannot authorize continuation')
     _append(spec, events, event)
     mine = [event]
     for key, value in _observations(data).items():
@@ -380,13 +400,74 @@ def _legacy_evidence(spec):
     return found
 
 
-def _validated(spec, *, spending=False, allow_new=False):
+def _recover_update(spec, data, events, mine):
+    """Abort only a prefix-proved, uncommitted update that bought no allowance.
+
+    The acknowledgement and aborted suffix are one durable event. If its ledger
+    checkpoint write is interrupted too, replay only that already authorized
+    checkpoint update. No terminal/controller/admission/allowance is discarded.
+    """
+    checkpoint = data.get('latch_journal')
+    prefix_end = next((i + 1 for i, event in enumerate(events)
+                       if checkpoint == _checkpoint(spec, event)
+                       and event['identity'] == data['identity']
+                       and event['generation_id'] == data['generation_id']), None)
+    expected = _checkpoint(spec, mine[-1])
+    error = (f"ledger checkpoint does not match journal head: expected={expected}; found={checkpoint}")
+    if prefix_end is None:
+        _fail(error)
+    prefix = _mine(spec, events[:prefix_end], data['generation_id'])
+    suffix = events[prefix_end:]
+    if (not suffix or any(e['identity'] != data['identity'] or e['generation_id'] != data['generation_id']
+                          for e in suffix)
+            or _observations(data) != {k: e['payload']['value'] for k, e in _latches(prefix).items()}
+            or _mismatches(spec, data, prefix)
+            or data.get('latch_overrides', []) != _acknowledgements(prefix)):
+        _fail(error + '; not an intact interrupted-update prefix')
+    recovered = suffix[-1] if suffix[-1]['kind'] == 'aborted_update' else None
+    pending = suffix[:-1] if recovered else suffix
+    if not pending or any(e['kind'] != 'latch' for e in pending):
+        _fail(error + '; unsupported interrupted-update suffix')
+    prior = _latches(prefix)
+    for event in pending:
+        key, value = event['payload']['key'], event['payload']['value']
+        # A newly committed intent precedes dispatch; returning to None after
+        # owner acknowledgement does not refund any separately latched quota.
+        new_intent = (key == 'intent:pending_call' and isinstance(value, dict)
+                      and prior.get(key, {}).get('payload', {}).get('value') is None)
+        if (key.startswith(('terminal:', 'controller:', 'allowance:', 'admission:'))
+                or key.startswith('intent:') and not new_intent
+                or any(k.startswith('terminal:') for k in prior)):
+            _fail(error + '; terminal or consumed control state cannot be aborted')
+    digests = [e['sha256'] for e in pending]
+    discrepancy = {'event_sha256': pending[-1]['sha256'], 'key': 'interrupted_update',
+                   'expected': checkpoint, 'found': _checkpoint(spec, pending[-1])}
+    if recovered:
+        acknowledgement = recovered['payload']
+        if (acknowledgement.get('aborted_event_sha256s') != digests
+                or acknowledgement.get('discrepancies') != [discrepancy]
+                or set(acknowledgement.get('acknowledgement', {}).get('event_sha256s', [])) != set(digests)):
+            _fail(error + '; invalid interrupted-update acknowledgement')
+    else:
+        acknowledgement = _override(spec, data, set(digests))
+        if any(a.get('sha256') == acknowledgement['sha256'] for a in _acknowledgements(prefix)):
+            _fail('an already-applied override cannot acknowledge a later interrupted update')
+        acknowledgement.update(discrepancies=[discrepancy], aborted_event_sha256s=digests)
+        recovered = _event(spec, data, events, 'aborted_update', acknowledgement)
+        _append(spec, events, recovered)
+        mine.append(recovered)
+    data['latch_journal'] = _checkpoint(spec, recovered)
+    data['latch_overrides'] = _acknowledgements(mine)
+    ledger._write_unlatched(spec, data)
+
+
+def _validated(spec, *, spending=False, allow_new=False, startup=False):
     events = _events(spec)
     own = _mine(spec, events)
     path = ledger.ledger_path(spec)
     if not path.exists() and not path.is_symlink():
         if own:
-            _fail("usage ledger deleted while its generation journal survives")
+            _fail(f"usage ledger deleted while its generation journal survives: expected generation={own[-1]['generation_id']}; found=missing ledger")
         if not allow_new and _legacy_evidence(spec):
             _fail("surviving historical outputs/progress have no usage ledger or latch history; "
                   "restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume")
@@ -399,26 +480,33 @@ def _validated(spec, *, spending=False, allow_new=False):
     mine = _mine(spec, events, data["generation_id"])
     if not own:
         if "latch_journal" in data:
-            _fail("journal was deleted from a guarded ledger")
+            _fail(f"journal was deleted from a guarded ledger: expected={data['latch_journal']}; found=missing journal")
         mine = _legacy(spec, data, events)
     else:
         if not mine or own[-1]["generation_id"] != data["generation_id"]:
-            _fail("current generation does not match the last journaled boundary")
+            _fail(f"current generation does not match the last journaled boundary: expected={own[-1]['generation_id']}; found={data['generation_id']}")
         if data.get("latch_journal") != _checkpoint(spec, mine[-1]):
-            _fail("ledger checkpoint does not match journal head (deletion, truncation or interrupted update)")
+            _recover_update(spec, data, events, mine)
         if data.get("latch_overrides", []) != _acknowledgements(mine):
-            _fail("durable override history was changed or removed")
+            _fail(f"durable override history was changed or removed: expected={_acknowledgements(mine)}; found={data.get('latch_overrides')}")
     discrepancies = _mismatches(spec, data, mine)
     mine = _apply_override(spec, data, events, mine, discrepancies)
-    if spending and any(key.startswith("terminal:") for key in _latches(mine)):
+    if (spending or startup and discrepancies) and any(key.startswith("terminal:") for key in _latches(mine)):
         _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
-    if spending and any(item["key"].startswith(("controller:", "intent:", "allowance:", "admission:"))
+    if (spending or startup) and any(item["key"].startswith(("controller:", "intent:", "allowance:", "admission:"))
                         for item in discrepancies):
         _fail("acknowledged control-state discrepancy cannot authorize a call or refund a consumed allowance")
     return data, events, mine
 
 
 def _allowed_transition(key, before, after):
+    if key == 'controller:validator_repair_refresh':
+        if not isinstance(before, dict) or not isinstance(after, dict):
+            return False
+        if before.get('checkpoint') != after.get('checkpoint'):
+            return before.get('state') == 'accepted' and after.get('state') == 'pending'
+        return ((before.get('state'), after.get('state')) in {('pending', 'in_flight'), ('in_flight', 'accepted')}
+                and all(after.get(k) == v for k, v in before.items() if k != 'state'))
     return (key.startswith(("controller:", "intent:")) or
             (key.startswith("admission:") and isinstance(before, dict) and isinstance(after, dict)
             and set(before) == set(after) == {"state", "response_sha256"}
@@ -445,13 +533,35 @@ def _check_transcript_transition(spec, previous, data):
         _fail("receipt transcript selector requires a previously journaled exchange snapshot")
 
 
-def before_ledger_write(spec, data):
+def _carry_guard_fields(spec, data, previous, mine):
+    """Omitted or stale prefixes are carried forward; conflicting bytes refuse."""
+    for key in ('latch_snapshots', 'latch_overrides', 'latch_journal'):
+        if key in data:
+            supplied, persisted = data[key], previous.get(key)
+            if key == 'latch_journal':
+                compatible = any(supplied == _checkpoint(spec, e) for e in mine)
+            else:
+                actual = persisted or []
+                compatible = isinstance(supplied, list) and supplied == actual[:len(supplied)]
+            if not compatible:
+                _fail(f'conflicting guard-owned {key}: expected persisted value or prior prefix; found caller mutation')
+        if key in previous:
+            data[key] = copy.deepcopy(previous[key])
+        else:
+            data.pop(key, None)
+
+
+def before_ledger_write(spec, data, *, snapshot=None):
     """Validate persisted state before accepting a caller's proposed mutation."""
     explicit_fresh = data.get("accept_legacy") is False and data.get("rows") == []
     previous, events, mine = _validated(spec, allow_new=explicit_fresh)
     ledger._validate_data(spec, data, ledger.ledger_path(spec))
     same_generation = previous is not None and previous["generation_id"] == data["generation_id"]
     _check_transcript_transition(spec, previous if same_generation else None, data)
+    if same_generation:
+        _carry_guard_fields(spec, data, previous, mine)
+    if snapshot is not None:
+        data.setdefault('latch_snapshots', []).append(copy.deepcopy(snapshot))
     if previous is None or previous["generation_id"] != data["generation_id"]:
         if previous is not None and previous["generation_id"] not in data.get("prior_generation_ids", []):
             _fail("new generation omitted its predecessor")
@@ -465,6 +575,11 @@ def before_ledger_write(spec, data):
         old = event["payload"]["value"]
         new = proposed.get(key, _MISSING)
         allowed = current.get(key, _MISSING) == old and _allowed_transition(key, old, new)
+        if (allowed and key == 'controller:validator_repair_refresh'
+                and old.get('checkpoint') != new.get('checkpoint')
+                and any(e['kind'] == 'latch' and e['payload']['key'] == key
+                        and e['payload']['value'].get('checkpoint') == new.get('checkpoint') for e in mine)):
+            allowed = False
         if new != old and not allowed:
             # A previously acknowledged observed discrepancy can remain visible;
             # the acknowledgement never permits a different subsequent edit.
@@ -496,8 +611,8 @@ def remember_snapshot(spec, entry, *, index_path):
     pin = {**entry, "index_path": str(index_path)}
     if _sha(_bytes(Path(pin["path"]))) != pin["sha256"]:
         _fail("response bytes changed before their first journal pin")
-    data.setdefault("latch_snapshots", []).append(pin)
-    ledger._write(spec, data)
+    before_ledger_write(spec, data, snapshot=pin)
+    ledger._write_unlatched(spec, data)
 
 
 def _metadata(spec, events, mine):
@@ -513,10 +628,44 @@ def _metadata(spec, events, mine):
     return result
 
 
-def check(spec, *, spending=True):
+def check(spec, *, spending=True, startup=False):
     """Check startup and immediately before each physical provider attempt."""
-    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+    # An intact terminal account reaches the runner's detailed refusal at
+    # startup; the physical-call boundary always retains the spending check.
+    _, events, mine = _validated(spec, spending=spending and not startup,
+                                allow_new=not spending, startup=startup)
     return _metadata(spec, events, mine)
+
+
+def head_sha256(spec):
+    events = _events(spec)
+    return events[-1]['sha256'] if events else None
+
+
+@contextmanager
+def launch_record(spec, expected):
+    """D57: print externally retainable heads, requiring the prior launch head.
+
+    This never derives the caller's expectation from the mutable run directory.
+    The journal remains locally hashed, not cryptographically authenticated.
+    """
+    def display(boundary):
+        try:
+            head = head_sha256(spec)
+        except ledger.UsageLedgerError:
+            head = 'invalid'
+        print(f'latch journal {boundary}: project={spec.project} label={spec.label} '
+              f'head_sha256={head or "none"} path={journal_path(spec)}', file=sys.stderr, flush=True)
+    display('start')
+    try:
+        found = head_sha256(spec)
+        if expected is not None and (not isinstance(expected, str) or not _HEX.fullmatch(expected)):
+            _fail(f'resume journal head: expected=64 lowercase hexadecimal digits; found={expected!r}')
+        if found != expected:
+            _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
+        yield
+    finally:
+        display('stop')
 
 
 def provenance(spec):

@@ -798,3 +798,7 @@ def test_the_record_states_the_answer_envelope_and_parser(selected, mode, envelo
     assert outcome['answer_parser'] == rereceipt.ANSWER_PARSER
     assert rc.recover(selected)['answer_envelope'] == envelope
 
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

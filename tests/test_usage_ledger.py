@@ -453,23 +453,13 @@ def test_resume_after_reasoning_failure_does_not_misattribute_the_retry(tmp_path
 def test_hard_exit_then_resume_preserves_completed_call_usage(tmp_path, completed_phase):
     s = spec(out_dir=tmp_path)
     root = Path(__file__).resolve().parents[1]
-    code = """
-import os, sys
-from pathlib import Path
-from data_sheets_schema import api_runner as api
-from tests.test_download.test_api_runner import FakeClient, spec
-save = api._save_progress
-def exit_after_progress(run, completed, audit):
-    save(run, completed, audit)
-    if sys.argv[2] in completed:
-        os._exit(23)
-api._save_progress = exit_after_progress
-api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
-"""
+    helper = root / 'scripts/adhoc/pr5212_hard_exit_fixture_20261028.py'
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
-    killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), completed_phase],
+    killed = subprocess.run([sys.executable, str(helper), str(tmp_path), completed_phase],
                             cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert killed.returncode == 23, killed.stdout + killed.stderr
+    head = next(line.split('=', 1)[1] for line in killed.stderr.splitlines()
+                if line.startswith('test launch monitor head='))
     assert not s.provenance_path.exists()
     assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
     completed = ledger.merge_usage(s, [])
@@ -478,11 +468,11 @@ api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
     ledger.ledger_path(s).unlink()
     blocked = FakeClient()
     with pytest.raises(ledger.UsageLedgerError, match="usage ledger deleted while its generation journal survives"):
-        api.execute(s, client=blocked)
+        api.execute(s, client=blocked, expect_journal_head_sha256=head)
     assert blocked.messages.calls == []
     ledger.ledger_path(s).write_bytes(saved_ledger)
     client = FakeClient()
-    resumed = api.execute(s, client=client)
+    resumed = api.execute(s, client=client, expect_journal_head_sha256=head)
     assert "full" in resumed["skipped"]
     assert len(client.messages.calls) == 3
     final = yaml.safe_load(s.provenance_path.read_text())["api_usage"]
@@ -554,7 +544,7 @@ def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path, porta
 @pytest.mark.parametrize("stage,legacy_prior", [
     ("before_progress", False), ("full", False), ("core", False), ("full", True),
 ])
-def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior):
+def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, stage, legacy_prior, journal_launch_monitor):
     s = spec(out_dir=tmp_path)
     old = api.execute(s, client=FakeClient())["usage"]
     old_ids = {r["usage_id"] for r in old}
@@ -573,35 +563,22 @@ def test_interrupted_fresh_generation_cannot_recover_previous_charges(tmp_path, 
         api._reasoning_path(s).write_text("\n".join(json.dumps(e) for e in reasoning) + "\n")
     old_provenance = s.provenance_path.read_bytes()
     root = Path(__file__).resolve().parents[1]
-    code = """
-import os, sys
-from pathlib import Path
-from data_sheets_schema import api_runner as api
-from tests.test_download.test_api_runner import FakeClient, spec
-save, generate = api._save_progress, api._generate_phase
-def exit_after_progress(run, completed, audit):
-    save(run, completed, audit)
-    if sys.argv[2] in completed:
-        os._exit(23)
-def exit_before_progress(*args, **kwargs):
-    if sys.argv[2] == 'before_progress':
-        os._exit(23)
-    return generate(*args, **kwargs)
-api._save_progress = exit_after_progress
-api._generate_phase = exit_before_progress
-api.execute(spec(out_dir=Path(sys.argv[1])), resume=False, client=FakeClient())
-"""
+    helper = root / 'scripts/adhoc/pr5212_hard_exit_fixture_20261028.py'
+    from data_sheets_schema.latch_journal import journal_path
+    prior_head = journal_launch_monitor[str(journal_path(s))]
     environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
-    killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), stage],
+    killed = subprocess.run([sys.executable, str(helper), str(tmp_path), stage, prior_head],
                             cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
     assert killed.returncode == 23, killed.stdout + killed.stderr
+    head = next(line.split('=', 1)[1] for line in killed.stderr.splitlines()
+                if line.startswith('test launch monitor head='))
     assert s.provenance_path.read_bytes() == old_provenance
     generation = ledger.generation_id(s)
     assert generation != old_generation
     if stage != "before_progress":
         assert json.loads(api._progress_path(s).read_text())["generation_id"] == generation
     client = FakeClient()
-    resumed = api.execute(s, client=client)
+    resumed = api.execute(s, client=client, expect_journal_head_sha256=head)
     assert len(resumed["usage"]) == 4
     assert old_ids.isdisjoint(r["usage_id"] for r in resumed["usage"])
     assert len(client.messages.calls) == (4 if stage == "before_progress" else 3)
@@ -1147,3 +1124,7 @@ def test_the_concurrency_test_reports_a_first_run_that_ends_without_the_boundary
     with pytest.raises(AssertionError, match="first run finished without reaching the request boundary"):
         test_shared_outputs_reject_overlapping_resume_fresh_and_other_labels(tmp_path, monkeypatch)
     assert clock.reads == 1 and joins == [guard], (clock.reads, joins)
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

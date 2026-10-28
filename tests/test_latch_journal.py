@@ -192,7 +192,7 @@ def test_inherited_failure_cannot_be_edited_back_to_live(tmp_path, controller, d
         ledger.persist_usage(selected, {'usage_id': 'another', 'phase': 'full'})
 
 
-def test_terminal_override_preserves_evidence_but_never_authorizes_retry(tmp_path):
+def test_terminal_override_is_refused_without_recording_assistance(tmp_path):
     selected = start(tmp_path)
     data = ledger._read(selected)
     data['typed_audit'] = {'state': 'failed', 'failure_type': 'ValueError'}
@@ -202,12 +202,12 @@ def test_terminal_override_preserves_evidence_but_never_authorizes_retry(tmp_pat
         'terminal:typed_audit')]
     disk_edit(selected, lambda account: account['typed_audit'].update(state='running'))
     acknowledge(selected, [event['sha256'] for event in affected_events])
+    before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
     with pytest.raises(ledger.UsageLedgerError, match='historical terminal failure'):
         journal.check(selected)
-    metadata = journal.provenance(selected)
-    assert metadata['assisted'] is metadata['evidence_only'] is True
+    assert before == (journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
+    assert ledger._read(selected)['latch_overrides'] == []
     assert ledger._read(selected)['typed_audit']['state'] == 'running'
-    assert journal.eligibility_problem(metadata)
 
 
 def test_pending_admission_can_be_accepted_only_by_a_validated_writer(tmp_path):
@@ -458,7 +458,7 @@ def test_spent_transport_regate_allowance_cannot_be_refunded(tmp_path, damage):
         journal.check(selected)
     with pytest.raises(ledger.UsageLedgerError, match='cannot authorize a call or refund'):
         ledger.begin_call(selected, 'report_regate', 2, '2026-10-26T12:00:01Z')
-    assert journal.provenance(selected)['evidence_only'] is True
+    assert ledger._read(selected)['latch_overrides'] == []
 
 
 def test_pending_call_cannot_be_erased_then_blessed_by_an_ordinary_write(tmp_path):
@@ -469,9 +469,10 @@ def test_pending_call_cannot_be_erased_then_blessed_by_an_ordinary_write(tmp_pat
     acknowledge(selected, [event['sha256']])
     with pytest.raises(ledger.UsageLedgerError, match='cannot authorize a call'):
         journal.check(selected)
-    # Retaining more evidence after acknowledgement must not replace the
-    # original intent latch with the altered state and quietly reopen spending.
-    ledger.persist_usage(selected, {'usage_id': 'independent-evidence', 'phase': 'diagnostic'})
+    # D56 refuses the ineffective override, including ordinary ledger writes.
+    with pytest.raises(ledger.UsageLedgerError, match='cannot authorize a call'):
+        ledger.persist_usage(selected, {'usage_id': 'independent-evidence', 'phase': 'diagnostic'})
+    assert ledger._read(selected)['latch_overrides'] == []
     assert latch_event(selected, 'intent:pending_call')['payload']['value']['usage_id'] == identifier
     with pytest.raises(ledger.UsageLedgerError, match='cannot authorize a call'):
         journal.check(selected)

@@ -273,3 +273,7 @@ def test_actual_cli_scope_delivery_regate_and_completed_replay(tmp_path, monkeyp
         'completed_replay_no_calls': True, 'cli_reuse_refused_without_calls': True,
         'all_originals_preserved': True, 'provider_calls': False,
         'scientific_approval': False}, indent=2) + '\n')
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

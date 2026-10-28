@@ -2451,3 +2451,8 @@ class TestReceiptCondition(unittest.TestCase):
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS, assembly_digest
         self.assertIn("full_receipt", PHASE_INSTRUCTIONS)
         self.assertIn("#710", assembly_digest()["layout"])
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

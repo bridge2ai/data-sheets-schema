@@ -454,3 +454,7 @@ def test_real_native_final_checker_and_cli_require_final_source_review(tmp_path,
                         '--artifact','final_full'],capture_output=True,text=True,check=True)
     assert json.loads(inv.stdout)==source_review.inventory(final,'final_full')
     assert before=={p:p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

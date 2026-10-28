@@ -286,3 +286,7 @@ def assert_completed_replay_authority(spec):
             for path, raw in baseline.items():
                 Path(path).write_bytes(raw)
     assert inventory(spec) == baseline
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

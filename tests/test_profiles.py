@@ -1724,3 +1724,8 @@ class TestRoundThirteen(_Clean):
         self.assertTrue(_identity_differs(window, current)); self.assertTrue(pre_profile_pin(window))
         self.assertIn("cannot be resumed", identity_refusal(window, "x"))
         self.assertFalse(pre_profile_pin(current))
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")
