@@ -975,102 +975,170 @@ its delegation rather than the governing plan; its repository search is historic
 evidence, not a fresh exhaustive absence claim. This draft does not adopt it.
 Any numerical trigger needs an explicit owner decision before P4.
 
-## 10. Caps, triggers, stop-loss and stop classification (P2 item 10; D07 decided)
+## 10. Caps, triggers, stop-loss and stop classification (P2 item 10; D07 and D58 decided)
 
-- **Caps:** the historical D07 allocation remains part of the spending record.
-  It is not evidence of remaining funds after the two assisted canaries. The
-  rebuilt packet must carry the current reconciled ledger, new allocation/cap and
-  owner word; D28's planning allowance is not itself a launch authorization.
-- **Operator trigger:** the cap minus the largest worst case of any call that can be
-  pending. The worst case comes from A3b's bounds, the pending phase's output cap plus
-  its stated input. Recompute it from BC1's actual groups/final call and measured
-  request sizes (item 15), including simultaneous in-flight calls. The old
-  $11.50/$15 CHORUS example is historical, not the new trigger.
-- **Dollar stop-loss:**
-  - the operator watches the A3b readout and runs `d4d api stop --label-prefix
-    <prefix>` at the trigger, or after 2 h for the pilot (A10);
-  - `--max-cost-dollars` stops between runs (#5045). It cannot recall an in-flight
-    request, and an interrupted stream may still bill (#1849).
-- **Defect-class stop-loss (plan risk 1; [proposed; owner fixes at P4]).** Two
-  rejections in one defect class end re-running in this condition and schedule the
-  next shared-generation version. With D05: if both pilots are rejected for the same
-  rule-level cause, the #2918 and #2919 rules enter at that next-version boundary.
-- **Stop and rejection classification ([proposed; owner fixes at P4]).** The owner
-  classifies each stop or rejection by these criteria, after the evidence is in the
-  acceptance record:
-  - **transport:** the terminal call's `api_usage` row records a transport error or a
-    dropped stream, or the provider returned an HTTP error, and no content defect is
-    identified in what was written;
-  - **harness:** a deterministic stop caused by the run's own validation or by a
-    registered limit, not by the provider and not by the instruction's rules. Two
-    historical cases that informed engineering:
-    - **A record shape the runtime refused** (Lane C1 Finding 2, October 20 code).
-      - Receipt completion validates the persisted full record against the captured
-        schema (`_validate_record`, called from `_inputs`; `receipt_completion.py:154`,
-        `:178`, `:215`). It does so before `_call_with_usage` admits the
-        receipt-completion call (`run`, `:554`, `:584`). So the run stops after the
-        full phase, and any re-address, have been billed.
-      - C1 Finding 2 names the shapes no step repairs. The write-time normaliser misses
-        a scalar on a line that opens a sequence item (`- slot: value`), and a scalar
-        in a multivalued slot whose range is not `string`. Nothing unwraps or joins a
-        list written in a single-valued slot.
-      - `_repair_invalid` runs only after the phase loop (`api_runner.py:7456-7471`),
-        so nothing repairs such a shape before the originals freeze.
-      - C1 notes that its sweep bypasses `_validate_record`, so the gate itself was
-        not exercised there.
-    - **A registered limit no valid answer could meet** (Lane C1 Finding 1). The
-      superseded October 20 `worker_output_tokens` (4,000) was below the floor of any worker answer
-      the terminal source review accepts, at every valid grid. It stops a run in one of
-      two ways:
-      - a cut-off answer is refused at the worker stage, and the typed audit is
-        terminal after one worker is billed;
-      - an answer that fits, by declaring rows as metadata or by shortening its
-        quotes, passes the worker stage and fails at assembly, after every typed stage
-        is billed. The worker grammar accepts a metadata row for any path.
-        - Under the registered caps, the metadata form is open where an all-metadata
-          answer fits under the cap at A1b's ratios: at G1, and at G2 and G4 for
-          CHORUS, VOICE and VOICE_PEDIATRIC (1,744–3,852 tokens for the largest
-          worker, before thinking).
-        - For AI_READI, CM4AI and Kids First it is at the cap's edge (3,924–4,763).
-      - With raised caps it was open at every grid in that historical experiment.
+### The re-canary's allocation
 
-      The causes are the registration's limit and the worker check's permissiveness,
-      so a contingency under the same limits would reproduce the stop. The remedies:
-      - the reviewed current limits and metadata checks, before a registration is
-        put to the owner; historical C1 paths are not assertions about BC1;
-      - optionally, the runtime fix C1 suggests: `check_worker` refusing a metadata row
-        on a path that `record_metadata_allowed` does not allow, which would move the
-        metadata form's failure to the worker stage.
-    - The defect is filed as an engineering issue before the classification;
-  - **instrument:** an offline recomputation shows that a gate or checker misread a
-    record that is valid under the registered rules. The defect is filed as an issue
-    before the classification;
-  - **rule-level:** otherwise, a deterministic row failure or an A12 rejecting-class
-    finding attributable to the generated content.
+- **The cap is D58's $60 A21 slice.** D28's earlier slice of about $25 is superseded.
+  The historical D07 allocation stays in the spending record, but it is spent: $35.76
+  settled ($41.79 worst-case reserved) against D07's $30 CHORUS lines, with 2 of 2
+  attempts used (decision record §5.1.1). It is not evidence of remaining funds. The
+  launch packet carries the reconciled ledger, the $60 cap and the owner's word (D07,
+  D22).
+- **One attempt, no contingency [proposed; owner fixes at P4, item 3].** A fixed-BC1
+  CHORUS run is estimated at about $37 expected and $49 at caps ("Feasibility under
+  D58"), so $60 funds one attempt and no contingency. D07's two billed attempts per
+  cell are a ceiling, not funding. A contingency (plan A10c) needs its own allocation
+  line, a new registration (D56) and its own owner word, unless the owner adds a
+  funded contingency at P4.
+- **No production money.** P4a funds nothing beyond A21. The matrix's budget is P4b's
+  decision (D58).
 
-  The class and its evidence appear in the attempt table.
+### Operator trigger [proposed; owner fixes at P4, item 5]
 
-  **A13's "operational" cause** ("a transport or operational cause allows one
-  contingency") is read as transport or harness [proposed; owner fixes at P4]. Under
-  that reading:
-  - **a record-shape stop** allows one contingency. If the contingency is refused for
-    the same shape, the fix is an engineering change, which lands only by D17's
-    advance procedure or at the next shared-generation version;
-  - **a registered-limit stop** allows no contingency under the same registration,
-    since it would reproduce the stop. The limits are corrected first;
-  - no harness stop counts toward the defect-class stop-loss.
-- **Single-delivery terminal-failure estimate:**
-  - Typed stages and receipt completion admit exactly one delivery.
-  - At v8's per-call rate of 8 retried calls in 92 (5 transport, 3 answer-level; P1),
-    with independence assumed, a run with 4, 6 or 8 single-delivery calls ends
-    terminally 30%, 42% or 52% of the time. Transport alone gives 20% (4 calls) and
-    36% (8 calls).
-  - These four/six/eight-call examples describe the old single-integrator design,
-    not BC1. Current exposure uses `W + 1 + ceil(W/fan_in) + 1` audit calls plus
-    the separately counted generation/receipt/reconcile/report calls (item 15).
-    Do not carry the old roster probabilities into BC1 budgets or predictions.
-  - Report observed stage rates and uncertainty; the independence illustration is
-    not a measured failure forecast and does not choose a favorable tolerance.
+The trigger is the cap minus the largest worst case of any call that can still be
+pending. The launch packet computes it from the registration's D62 sizing.
+- **One pending typed call.** D62 admits a typed call only at or below 0.85 of its
+  936,000-token room, so about 0.80M input tokens at most. At the typed calls' blended
+  rate of $6.25 per million that is about $5.0, plus $1.60 for a 64,000-token output at
+  $25 per million: about $6.6 in all.
+- **So the trigger is about $53** at a $60 cap.
+- **The launch packet recomputes it** from D63's measured ratio and from the largest
+  admitted call in the actual schedule. It covers every call type, the report family
+  with its 128,000-token outputs included, and any calls that can be in flight
+  together. An interrupted call whose usage is unknown counts at its worst case.
+- **The margin is thin.** A caps-heavy D59 run is estimated at about $49 before
+  retries, repair and re-address, so a legitimate run can reach the trigger. A stop at
+  the trigger is a budget stop (classification below), not a defect.
+- The old $11.50/$15 CHORUS example is historical.
+
+### Wall clock [proposed; owner fixes at P4, item 6]
+
+The 2 h stop came from the pre-BC1 plan A10, and nothing in BC1 justifies it:
+- 10-22a's uninterrupted call time was already 51 min, across 9 calls with typed inputs
+  of about 139k tokens;
+- a BC1 CHORUS run has about 12–13 sequential calls, with typed inputs of 0.4–0.8M
+  tokens, which is about 2 h of call time at caps (P3 Claude review).
+
+This draft proposes a 3 h clock, about 1.5 times that estimate, re-derived in the
+launch packet from the registered call schedule. The alternatives (item 6) are to keep
+2 h as a deliberate censoring rule, under which a timeout is a feasibility failure, or
+to have no clock. The clock is never extended during a live attempt.
+
+### Stopping a live run
+
+- **The command.** At the trigger or the clock, `d4d api stop --label-prefix <prefix>`
+  stops the run. `--max-cost-dollars` stops only between runs (#5045). It cannot recall
+  an in-flight request, and an interrupted stream may still bill (#1849).
+- **Who runs it: open (P4 item 8).** D43 has the owner launch and the agents monitor
+  read-only, and the decision record does not say who runs the stop command. The
+  options are the owner, or one agent the owner names to run only that command, only
+  at the trigger or the clock. Under D43's read-only monitoring, no agent runs it
+  unless the owner's answer authorizes one.
+- **What the monitor keeps:** the D57 journal heads printed at each start and stop,
+  and the A3b readout against the trigger.
+
+### Defect-class stop-loss and A13 [proposed; owner fixes at P4, item 37]
+
+- **Pilots: A13 governs.** The first rule-level rejection of a pilot, the re-canary
+  included, ends this condition and schedules the next shared-generation version for
+  both arms. Nothing below permits a second rule-level pilot attempt.
+- **Production: two rejections with the same recorded root cause** end re-running in
+  this condition.
+  - "The same root cause" means one filed issue, named as the cause in both acceptance
+    records, not a broad class label.
+  - The count covers this API condition across every prefix and registration, and it
+    never resets.
+- **With D05:** if both pilots are rejected for the same rule-level cause, the #2918
+  and #2919 rules enter at that next-version boundary.
+- **Other stops do not count.** Transport, harness, instrument, budget and assisted
+  stops are counted and reported separately, and never count toward this stop-loss.
+
+### Stop and rejection classification [proposed; owner fixes at P4, items 38–39]
+
+The owner classifies each stop or rejection after the evidence is in the acceptance
+record, and the defect is filed as an issue before the classification. A stop may
+carry several diagnostic tags, but it gets exactly one primary class: the first row of
+this table that matches. The class fixes the next action.
+
+| Precedence | Primary class | Test | Next action |
+|---:|---|---|---|
+| 1 | **assisted** | any intervention after launch: an override, a hand edit, a journal that does not verify, a head mismatch, or an interrupted write (item 1's clean-run checks) | Evidence only (D40, D53). Any new attempt is the owner's decision, with a new registration, allocation and word, and it counts against the cell's two attempts |
+| 2 | **instrument** | an offline recomputation shows that a gate or checker misread a record that is valid under the registered rules | The verdict is re-read once the instrument is corrected and reviewed. No generation re-run, and the attempt is not a rejection |
+| 3 | **rule-level** | a deterministic acceptance row fails on the final records, or an A12 rejecting-class finding is sustained on what was written, whatever else stopped the run | Pilots: A13, so the condition ends. Production: counts toward the stop-loss above; the cell may use its second attempt only while the stop-loss is not reached |
+| 4 | **impossible limit** (harness) | a registered limit no valid answer can meet | No contingency under the same limits. The limits are corrected and reviewed first, and the corrected registration is a new condition identity |
+| 5 | **record shape** (harness) | the runtime's own validation refused an intermediate record before the runner's own normaliser or repair step for that shape could run, and no rejecting-class finding is sustained | One contingency under a new registration, within the cell's two attempts. If it is refused for the same shape, the fix is engineering, landing only by D17's procedure or at the next version |
+| 6 | **transport** | the terminal call's `api_usage` row records a transport error or a dropped stream, or the provider returned an HTTP error | One contingency under a new registration, within the cell's two attempts |
+| 7 | **budget or clock** | the operator stopped the run at the trigger or the clock | One contingency under a new registration, with a new allocation line and word, within the cell's two attempts [proposed; item 7] |
+| 8 | **unknown** | nothing above matches | Held for the owner's adjudication before any retry, then reclassified into rows 1–7. No contingency until then |
+
+Rules that go with the table:
+- **A content defect outranks a harness or transport stop.** A report with a content
+  defect, followed by a dropped stream, is rule-level. A harness or transport label
+  never exempts a substantive rule defect.
+- **Two attempts per cell, counted across prefixes and registrations.** A new
+  registration under D56 does not reset the count; the cell (item 7) carries it.
+- **D56 applies to every class.** No class continues a run past a terminal or
+  control-state discrepancy, and every retry is a new registration.
+- **A13's "transport or operational cause"** is read as rows 5–7 [proposed; item 39].
+  Transport, record-shape and budget stops allow one contingency. An impossible-limit
+  stop does not, since a contingency under the same limits would reproduce it.
+
+**Historical examples of the two harness classes** (they informed engineering; they
+are not assertions about BC1):
+- **A record shape the runtime refused** (Lane C1 Finding 2, October 20 code).
+  - Receipt completion validates the persisted full record against the captured
+    schema (`_validate_record`, called from `_inputs`; `receipt_completion.py:154`,
+    `:178`, `:215`). It does so before `_call_with_usage` admits the
+    receipt-completion call (`run`, `:554`, `:584`). So the run stops after the
+    full phase, and any re-address, have been billed.
+  - C1 Finding 2 names the shapes no step repairs. The write-time normaliser misses
+    a scalar on a line that opens a sequence item (`- slot: value`), and a scalar
+    in a multivalued slot whose range is not `string`. Nothing unwraps or joins a
+    list written in a single-valued slot.
+  - `_repair_invalid` runs only after the phase loop (`api_runner.py:7456-7471`),
+    so nothing repairs such a shape before the originals freeze.
+  - C1 notes that its sweep bypasses `_validate_record`, so the gate itself was
+    not exercised there.
+- **A registered limit no valid answer could meet** (Lane C1 Finding 1). The
+  superseded October 20 `worker_output_tokens` (4,000) was below the floor of any worker answer
+  the terminal source review accepts, at every valid grid. It stops a run in one of
+  two ways:
+  - a cut-off answer is refused at the worker stage, and the typed audit is
+    terminal after one worker is billed;
+  - an answer that fits, by declaring rows as metadata or by shortening its
+    quotes, passes the worker stage and fails at assembly, after every typed stage
+    is billed. The worker grammar accepts a metadata row for any path.
+    - Under the registered caps, the metadata form is open where an all-metadata
+      answer fits under the cap at A1b's ratios: at G1, and at G2 and G4 for
+      CHORUS, VOICE and VOICE_PEDIATRIC (1,744–3,852 tokens for the largest
+      worker, before thinking).
+    - For AI_READI, CM4AI and Kids First it is at the cap's edge (3,924–4,763).
+  - With raised caps it was open at every grid in that historical experiment.
+
+  The causes are the registration's limit and the worker check's permissiveness,
+  so a contingency under the same limits would reproduce the stop. The remedies:
+  - the reviewed current limits and metadata checks, before a registration is
+    put to the owner; historical C1 paths are not assertions about BC1;
+  - optionally, the runtime fix C1 suggests: `check_worker` refusing a metadata row
+    on a path that `record_metadata_allowed` does not allow, which would move the
+    metadata form's failure to the worker stage.
+
+### Single-delivery exposure
+
+- BC1's typed calls and receipt completion each admit exactly one delivery
+  (`transport_attempts=1`).
+- A21 has 8 such calls. At v8's per-call rate (8 retried calls in 92, P1), with
+  independence assumed, that is an illustrative 52% terminal-stop exposure from all
+  causes, and 36% from transport alone. The per-project table is under "Feasibility
+  under D58".
+- The plan's earlier four-, six- and eight-call figures describe the pre-BC1
+  single-integrator design. They are not carried into BC1 budgets or predictions.
+- Content failures stay terminal under D56. Whether to allow one transport-only
+  redelivery per typed call is P4 item 4; it would be new engineering.
+- Observed stage rates and their uncertainty are reported in item 18. The independence
+  illustration is not a measured failure forecast, and it does not choose a favorable
+  tolerance.
 
 ## 11. Freeze (P2 item 11; D35 decided)
 
@@ -1160,9 +1228,9 @@ The proposed atomic-claim protocol belongs to D24/P4 (item 16), not #5126.
 - Native launches use Track N's registered command/recorder path and first-party
   authentication; they never go through the API batch route. D29 and the native
   real-binary/probe/acceptance gates remain separate prerequisites.
-- Immediately before every billed launch, the operator hashes the roster, every
-  registration it lists and the launcher script, and stops on any difference from the
-  sha256s named in the word and the review (A10).
+- Immediately before every billed launch, the operator (under D43, the owner) hashes
+  the roster, every registration it lists and the launcher script, and stops on any
+  difference from the sha256s named in the word and the review (A10).
 
 ## 14. Selected condition, bounded carry and model-visible identity
 
