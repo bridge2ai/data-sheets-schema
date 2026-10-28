@@ -31,7 +31,7 @@ data_processing:
 processing_software:
   value: true
   # chunks: [c002, c004, c006, c009, c013]
-  evidence: "[chunks: c002, c004, c006, c009, c013] The Kids First DRC provides open-source CWL (c013) bioinformatics workflows on GitHub and CAVATICA (c006) including BWA-MEM alignment, GATK Base Quality Score Recalibration, HaplotypeCaller and joint genotyping, STAR alignment, RSEM quantification, Arriba and STAR-Fusion callers, and FHIR/Kids First data model tooling (c002, c004, c006, c009, c013)."
+  evidence: "[chunks: c002, c004, c006, c009, c013] The Kids First DRC provides open-source CWL (c013) bioinformatics workflows on GitHub and CAVATICA (c006) including alignment/re-alignment to a bwa-indexed reference fasta, GATK Base Quality Score Recalibration, HaplotypeCaller and joint genotyping, STAR alignment, RSEM quantification, Arriba and STAR-Fusion callers, and FHIR/Kids First data model tooling (c002, c004, c006, c009, c013)."
 
 ml_training_dataset:
   value: true

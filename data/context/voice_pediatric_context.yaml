@@ -20,18 +20,18 @@ shared_dataset:
 
 data_collection:
   value: true
-  # chunks: [c002, c003, c004, c005, c006, c008]
-  evidence: "[chunks: c002, c003, c004, c005, c006, c008] Pediatric participants recruited at the Hospital for Sick Children (c002, c003) are screened, consented/assented, and recorded using a standardized headset and custom data collection application (reproschema-ui, c002) across pediatric voice and speech tasks alongside REDCap / ReproSchema pediatric demographic, confounder, diagnosis, and validated clinical questionnaires (e.g., pVHI, pediatric anxiety/depression/ADHD scales; c002, c003, c004, c005, c006, c008)."
+  # chunks: [c002, c003, c004, c005, c006]
+  evidence: "[chunks: c002, c003, c004, c005, c006] Pediatric participants recruited at the Hospital for Sick Children (c002, c003) are screened, consented/assented, and recorded using a headset for most participants (with built-in tablet microphones for the remaining recordings) and custom data collection application (reproschema-ui, c002) across pediatric voice and speech tasks alongside REDCap / ReproSchema pediatric demographic, confounder, diagnosis, and clinical questionnaires (c002, c003, c004, c005, c006)."
 
 data_processing:
   value: true
-  # chunks: [c002, c003, c008]
-  evidence: "[chunks: c002, c003, c008] Raw pediatric audio recordings are converted to monaural, resampled to 16 kHz, and transformed into spectrograms, Mel-filterbanks, 60 MFCCs, pitch, and openSMILE and Praat/Parselmouth acoustic features, while stripping HIPAA Safe Harbor identifiers; in v1.1.0, audio features are released for all free speech tasks after manual checking for unconsented speakers and PII (c002, c003, c008)."
+  # chunks: [c002, c003, c007]
+  evidence: "[chunks: c002, c003, c007] Raw pediatric audio recordings are transformed into 400-point FFT spectrograms, Mel-filterbanks, 60 MFCCs, pitch, and openSMILE and Praat/Parselmouth acoustic features under HIPAA de-identification rules; in v1.1.0, audio features are released for all free speech tasks after manual checking for unconsented speakers and PII (c002, c003, c007)."
 
 processing_software:
   value: true
-  # chunks: [c002, c003, c008]
-  evidence: "[chunks: c002, c003, c008] Data collection, feature extraction, and phenotype table packaging are performed with reproschema-ui (c002), the open-source b2aiprep library (github.com/sensein/b2aiprep), the Bridge2AI Voice REDCap export library (zenodo.org/records/14989503), TorchAudio, openSMILE, Praat, and Parselmouth (c002, c003, c008)."
+  # chunks: [c002, c003]
+  evidence: "[chunks: c002, c003] Data collection, feature extraction, and phenotype table packaging are performed with reproschema-ui (c002), the open-source b2aiprep library (github.com/sensein/b2aiprep), TorchAudio, openSMILE, Praat, and Parselmouth (c002, c003)."
 
 ml_training_dataset:
   value: true

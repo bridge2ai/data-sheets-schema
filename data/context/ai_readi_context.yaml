@@ -25,13 +25,13 @@ data_collection:
 
 data_processing:
   value: true
-  # chunks: [c004, c005, c010, c011, c015, c018, c019]
-  evidence: "[chunks: c004, c005, c010, c011, c015, c018, c019] Acquired clinical, wearable, and imaging streams are harmonized into standardized formats — OMOP CDM tables for clinical CSV/survey data, DICOM for retinal imaging, WFDB (WaveForm DataBase) for 12-lead cardiac ECG waveforms, and custom JSON for continuous glucose monitoring (Dexcom G6), wearable fitness activity (Garmin Vivosmart 5), and environmental sensor streams — and checked to ensure no HIPAA direct identifiers or PHI remain in the public release (c004, c005, c010, c011, c015, c018, c019)."
+  # chunks: [c004, c005, c010, c011, c015, c016, c017, c018, c019]
+  evidence: "[chunks: c004, c005, c010, c011, c015, c016, c017, c018, c019] Acquired clinical, wearable, and imaging streams are harmonized into standardized formats — OMOP CDM tables for clinical CSV/survey data, DICOM for retinal imaging, WFDB (WaveForm DataBase) for 12-lead cardiac ECG waveforms, Open mHealth for continuous glucose monitoring (Dexcom G6) and wearable fitness activity (Garmin Vivosmart 5), and ASCII File Format Guidelines for Earth Science Data (Earth Science Data Systems / ESDS format) for environmental sensor streams — and checked to ensure no HIPAA direct identifiers or PHI remain in the public release (c004, c005, c010, c011, c015, c016, c017, c018, c019)."
 
 processing_software:
   value: true
-  # chunks: [c002, c004, c005, c015, c018, c019]
-  evidence: "[chunks: c002, c004, c005, c015, c018, c019] The AI-READI corpus documents data capture, conversion, harmonization, and portal packaging software used to produce the dataset, including REDCap survey export and OMOP CDM mapping workflows, DICOM conversion for retinal imaging devices, WFDB conversion for 12-lead cardiac ECG, custom JSON formatting for CGM/wearable/environmental streams, and FAIRhub dataset metadata/packaging infrastructure (c002, c004, c005, c015, c018, c019)."
+  # chunks: [c002, c004, c005, c015, c016, c017, c018, c019]
+  evidence: "[chunks: c002, c004, c005, c015, c016, c017, c018, c019] The AI-READI corpus documents data capture, conversion, harmonization, and portal packaging software used to produce the dataset, including REDCap survey export and OMOP CDM mapping workflows, DICOM conversion for retinal imaging devices, WFDB conversion for 12-lead cardiac ECG, Open mHealth formatting for CGM and wearable activity streams, ASCII/ESDS formatting for environmental sensor streams, and FAIRhub dataset metadata/packaging infrastructure (c002, c004, c005, c015, c016, c017, c018, c019)."
 
 ml_training_dataset:
   value: true
