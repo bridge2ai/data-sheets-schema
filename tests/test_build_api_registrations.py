@@ -192,6 +192,7 @@ def test_build_registration_error_cases(tmp_path: Path) -> None:
     # Missing bundle path
     with pytest.raises(FileNotFoundError, match="bundle file not found"):
         build_registration(
+            partition="chorus",
             project="CHORUS",
             label="test",
             bundle_path=tmp_path / "nonexistent_bundle.txt",
@@ -201,6 +202,7 @@ def test_build_registration_error_cases(tmp_path: Path) -> None:
     # Missing context path
     with pytest.raises(FileNotFoundError, match="specified context file not found"):
         build_registration(
+            partition="chorus",
             project="CHORUS",
             label="test",
             context_path=tmp_path / "nonexistent_context.json",
@@ -210,6 +212,7 @@ def test_build_registration_error_cases(tmp_path: Path) -> None:
     # None registration_path
     with pytest.raises(ValueError, match="registration_path must be specified"):
         build_registration(
+            partition="chorus",
             project="CHORUS",
             label="test",
             registration_path=None,
@@ -222,6 +225,7 @@ def test_build_registration_error_cases(tmp_path: Path) -> None:
     dummy_chunks.write_text("version: 2\nchunks: []\n", encoding="utf-8")
     with pytest.raises(FileNotFoundError, match="no omission context file found"):
         build_registration(
+            audit_limits=dict(EXPLICIT_BOUNDS),
             project="UNREGISTERED_PROJECT_XYZ",
             label="test",
             bundle_path=dummy_bundle,
