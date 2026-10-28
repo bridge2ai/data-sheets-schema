@@ -140,7 +140,7 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | D59 | BC1's request shape (the D44 design choice): typed-audit calls send the full schema catalog once, drop the redundant per-slot `domain_of` lists and send the bundle once; the full, receipt-completion, reconcile, report and regate calls keep v10's A14 schema digest. | 2026-10-28T16:41Z; implemented in `8f83d6cb3` (items 14–15). |
 | D60 | No typed-stage prompt-cache breakpoint; D06 stands. | 2026-10-28T16:41Z. |
 | D61 | D52's committee-contact equivalence applies wherever `governance_committee_contact` is scored, rubric10 E2.2 included. | 2026-10-28T18:23Z. |
-| D62 | BC1's fit gate for A21: the gate checks the floor and the caps scenario with the measured 1.25× escape factor; the escaped bound is reported, not gated. Request bytes are sized at 2.48 bytes per token and future-response bytes at 1.75. The CHORUS A21 registration uses `aggregate_input_tokens` 4,500,000 (CHORUS needs about 4.06M, every call at or below 0.85 of its room; added spend exposure at most $3.13). | 2026-10-28T20:12:01Z, after the review of `8f83d6cb3`; item 15. |
+| D62 | BC1's fit gate for A21: the gate checks the floor and the caps scenario with the measured 1.25× escape factor; the escaped bound is reported, not gated. Request bytes are sized at 2.48 bytes per token and future-response bytes at 1.75. The CHORUS A21 registration uses `aggregate_input_tokens` 4,500,000 (in D62's sizing CHORUS needs about 4.06M, every call at or below 0.85 of its room, which is a sizing result and not an enforced ceiling; added spend exposure at most $3.13). | 2026-10-28T20:12:01Z, after the review of `8f83d6cb3`; item 15. |
 | D63 | One `count_tokens` calibration, run by agy from the launch-base checkout through the runner's admission-check route, on one named, fixed D59 CHORUS worker request. It logs the request sha256 and the count; no generation and no other provider call. The measured ratio replaces the extrapolated 2.48 before registration. | 2026-10-28T20:12:01Z; item 15. |
 | D02–D04, D08, remaining D09 choices, D11–D16, D18, D20–D21, D24–D25 | **Pending where not specifically superseded above.** D02 comparator/analysis-set choices and D04 crate comparison are not decided by this amendment. Each of these, and D29, is a numbered question in the P4 agenda. | Separate proposal, implementation and owner decisions. |
 
@@ -1174,16 +1174,26 @@ Any numerical trigger needs an explicit owner decision before P4.
 ### Operator trigger [proposed; owner fixes at P4, item 5]
 
 The trigger is the cap minus the largest worst case of any call that can still be
-pending. The launch packet computes it from the registration's D62 sizing.
-- **One pending typed call.** D62 admits a typed call only at or below 0.85 of its
-  936,000-token room, so about 0.80M input tokens at most. At the typed calls' blended
-  rate of $6.25 per million that is about $5.0, plus $1.60 for a 64,000-token output at
-  $25 per million: about $6.6 in all.
-- **So the trigger is about $53** at a $60 cap.
-- **The launch packet recomputes it** from D63's measured ratio and from the largest
-  admitted call in the actual schedule. It covers every call type, the report family
-  with its 128,000-token outputs included, and any calls that can be in flight
-  together. An interrupted call whose usage is unknown counts at its worst case.
+pending. The launch packet computes it from the bounds the runtime enforces, not from a
+sizing scenario.
+- **What the runtime enforces.** BC1's admission holds each typed call to its context
+  room (936,000 input tokens beside a 64,000-token reservation), the registered
+  per-call limit and the aggregate allowance (`bc1_runtime` at `8f83d6cb3`). #5157 holds
+  each report-family call to `count_tokens + max_tokens ≤ 1,000,000`. D62's figure,
+  every CHORUS call at or below 0.85 of its room, is a sizing result, not an enforced
+  ceiling.
+- **Worst cases at those bounds,** with all input priced as cache writes ($6.25 per
+  million) and output at $25 per million:
+  - a typed call, 936,000 in and 64,000 out: about $7.45;
+  - a full, reconcile, report or regate call, 872,000 in and 128,000 out: about $8.65.
+- **So the trigger is about $51** at a $60 cap. D62's sizing would put it near $53, but
+  only as an illustration.
+- **The launch packet recomputes it** over every admitted call type, any calls that can
+  be in flight together, unsettled usage and the dispatches that can still follow. An
+  interrupted call whose usage is unknown counts at its worst case.
+- **A higher trigger needs an enforced ceiling.** Registering and enforcing a lower
+  per-call input limit would raise it; that is an engineering change and a new
+  registration (P4 item 5).
 - **The margin is thin.** A caps-heavy D59 run is estimated at about $49 before
   retries, repair and re-address, so a legitimate run can reach the trigger. A stop at
   the trigger is a budget stop (classification below), not a defect.
@@ -1215,51 +1225,68 @@ failure, or to have no clock. The clock is never extended during a live attempt.
 - **What the monitor keeps:** the D57 journal heads printed at each start and stop,
   and the A3b readout against the trigger.
 
-### Defect-class stop-loss and A13 [proposed; owner fixes at P4, item 37]
+### Defect-class stop-loss and A13 [proposed; owner fixes at P4, item 34]
 
 - **Pilots: A13 governs.** The first rule-level rejection of a pilot, the re-canary
   included, ends this condition and schedules the next shared-generation version for
-  both arms. Nothing below permits a second rule-level pilot attempt.
-- **Production: two rejections with the same recorded root cause** end re-running in
-  this condition.
-  - "The same root cause" means one filed issue, named as the cause in both acceptance
-    records, not a broad class label.
+  both arms. Nothing below permits a second rule-level pilot attempt, and neither
+  assistance nor a change of label does.
+- **Production: two rejections with the same root cause** end re-running in this
+  condition.
+  - The owner records a root-cause ID in each acceptance record. A later finding with
+    the same diagnosis takes the same ID, whichever issue it is filed under, so a new
+    issue cannot reset the count.
   - The count covers this API condition across every prefix and registration, and it
     never resets.
-- **With D05:** if both pilots are rejected for the same rule-level cause, the #2918
-  and #2919 rules enter at that next-version boundary.
-- **Other stops do not count.** Transport, harness, instrument, budget and assisted
-  stops are counted and reported separately, and never count toward this stop-loss.
+  - Rule-level causes and content slips count (content slips: P4 item 32).
+- **The older D05 clause** (if both pilots are rejected for the same rule-level cause,
+  the #2918 and #2919 rules enter at the next version) cannot arise once the first
+  rule-level pilot rejection ends the condition, and D34 has since decided the rule
+  batch. It is historical.
+- **Other stops do not count.** Instrument, registration, harness, transport and budget
+  stops are counted and reported separately.
 
-### Stop and rejection classification [proposed; owner fixes at P4, items 38–39]
+### Stop and rejection classification [proposed; owner fixes at P4, items 31–33]
 
-The owner classifies each stop or rejection after the evidence is in the acceptance
-record, and the defect is filed as an issue before the classification. A stop may
-carry several diagnostic tags, but it gets exactly one primary class: the first row of
-this table that matches. The class fixes the next action.
+Two things are recorded for every stop or rejection, separately:
+- **The record's evidence status:** clean or assisted, by item 7's checks. An assisted
+  record is evidence only (D40, D53), whatever stopped the run. Assistance never
+  changes the cause class, never removes a rule-level cause and never grants an
+  attempt.
+- **The cause:** exactly one primary class, the first row of this table that matches,
+  once the evidence is in the acceptance record and the defect is filed as an issue. A
+  stop may carry several diagnostic tags. The class fixes the next action.
 
-| Precedence | Primary class | Test | Next action |
+| Precedence | Class | Test | Next action |
 |---:|---|---|---|
-| 1 | **assisted** | any intervention after launch: an override, a hand edit, a journal that does not verify, a head mismatch, or an interrupted write (item 1's clean-run checks) | Evidence only (D40, D53). Any new attempt is the owner's decision, with a new registration, allocation and word, and it counts against the cell's two attempts |
-| 2 | **instrument** | an offline recomputation shows that a gate or checker misread a record that is valid under the registered rules | The verdict is re-read once the instrument is corrected and reviewed. No generation re-run, and the attempt is not a rejection |
-| 3 | **rule-level** | a deterministic acceptance row fails on the final records, or an A12 rejecting-class finding is sustained on what was written, whatever else stopped the run | Pilots: A13, so the condition ends. Production: counts toward the stop-loss above; the cell may use its second attempt only while the stop-loss is not reached |
-| 4 | **impossible limit** (harness) | a registered limit no valid answer can meet | No contingency under the same limits. The limits are corrected and reviewed first, and the corrected registration is a new condition identity |
-| 5 | **record shape** (harness) | the runtime's own validation refused an intermediate record before the runner's own normaliser or repair step for that shape could run, and no rejecting-class finding is sustained | One contingency under a new registration, within the cell's two attempts. If it is refused for the same shape, the fix is engineering, landing only by D17's procedure or at the next version |
-| 6 | **transport** | the terminal call's `api_usage` row records a transport error or a dropped stream, or the provider returned an HTTP error | One contingency under a new registration, within the cell's two attempts |
-| 7 | **budget or clock** | the operator stopped the run at the trigger or the clock | One contingency under a new registration, with a new allocation line and word, within the cell's two attempts [proposed; P4 item 7] |
-| 8 | **unknown** | nothing above matches | Held for the owner's adjudication before any retry, then reclassified into rows 1–7. No contingency until then |
+| 1 | **instrument** | an offline recomputation shows that a gate or checker misread a record that is valid under the registered rules | The verdict is re-read once the instrument is corrected and reviewed. No generation re-run, and the attempt is not a rejection |
+| 2 | **rule-level** | an A12 rejecting-class finding is sustained on anything the run wrote (the final records, an intermediate record or the report), or the final records fail validation or carry duplicate keys (item 5, rows 2–3), whatever else stopped the run | Pilots: A13, so the condition ends. Production: counts toward the stop-loss; the cell may use its second attempt only while the stop-loss is not reached |
+| 3 | **content slip** [proposed; P4 item 32] | a receipt floor or the report totals fail (item 5, rows 1 and 4), and row 2 does not match | One contingency under a new registration, within the cell's two attempts. Counts toward production's stop-loss by root cause. Under P4 item 32's option (i) this row merges into row 2 |
+| 4 | **registration or environment** | a configuration row fails (item 5, rows 5–6: the full-phase cap, the provider or base URL), or another fault of the registration or the launch environment rather than of generated content | The attempt is void. One contingency under a corrected registration, within the cell's two attempts |
+| 5 | **impossible limit** (harness) | a registered limit no valid answer can meet | No contingency under the same limits. The limits are corrected and reviewed first, and the corrected registration is a new condition identity |
+| 6 | **record shape** (harness) | receipt completion's validation refused the phase-1 record for a value of the wrong cardinality or type for its slot: a shape the write-time normaliser does not fix, which the repair call (run only after the phase loop) never had the chance to fix | One contingency under a new registration, within the cell's two attempts. If it is refused for the same shape, the fix is engineering, landing only by D17's procedure or at the next version |
+| 7 | **transport** | the terminal call's `api_usage` row records a transport error or a dropped stream, or the provider returned an HTTP error | One contingency under a new registration, within the cell's two attempts |
+| 8 | **budget or clock** | the operator stopped the run at the trigger or the clock | One contingency under a new registration, with a new allocation line and word, within the cell's two attempts |
+| 9 | **unknown** | nothing above matches | Held for the owner's adjudication before any retry, then reclassified. No contingency until then |
 
 Rules that go with the table:
-- **A content defect outranks a harness or transport stop.** A report with a content
-  defect, followed by a dropped stream, is rule-level. A harness or transport label
-  never exempts a substantive rule defect.
+- **A content defect outranks every operational class.** A sustained rejecting-class
+  finding in a report, followed by a dropped stream, is rule-level. A harness,
+  transport or registration label never exempts a substantive rule defect.
+- **Unmeasurable is not failed.** A row that could not be measured, because a check did
+  not run or a counter is missing, is unmeasurable: class instrument when a checker or
+  gate defect caused it, otherwise unknown.
+- **An assisted run that completed** leaves its cell without a clean record. The cell
+  may take a new attempt only by the owner's decision, under a new registration and
+  within its two attempts, and only if no rule-level cause was found.
 - **Two attempts per cell, counted across prefixes and registrations.** A new
-  registration under D56 does not reset the count; the cell (item 7) carries it.
+  registration under D56 does not reset the count; the cell (items 3 and 7) carries
+  it.
 - **D56 applies to every class.** No class continues a run past a terminal or
   control-state discrepancy, and every retry is a new registration.
-- **A13's "transport or operational cause"** is read as rows 5–7 [proposed; P4 item 39].
-  Transport, record-shape and budget stops allow one contingency. An impossible-limit
-  stop does not, since a contingency under the same limits would reproduce it.
+- **A13's "transport or operational cause"** is read as rows 3, 4 and 6–8 [proposed;
+  P4 item 33]: they allow one contingency. An impossible-limit stop does not, since a
+  contingency under the same limits would reproduce it.
 
 **Historical examples of the two harness classes** (they informed engineering; they
 are not assertions about BC1):
@@ -1312,7 +1339,8 @@ are not assertions about BC1):
 - The plan's earlier four-, six- and eight-call figures describe the pre-BC1
   single-integrator design. They are not carried into BC1 budgets or predictions.
 - Content failures stay terminal under D56. Whether to allow one transport-only
-  redelivery per typed call is P4 item 4; it would be new engineering.
+  redelivery per typed call is P4 item 4; it would be new engineering, and adopted
+  after A21 it needs item 9's analysis amendment.
 - Observed stage rates and their uncertainty are reported in item 18. The independence
   illustration is not a measured failure forecast, and it does not choose a favorable
   tolerance.
@@ -1558,9 +1586,9 @@ With `W` workers and registered fan-in `f` of 1 or 2, BC1 plans
   actual reviewed #5155/BC1 sizing for every admitted worker, group, omission
   and final call. D49's claimed formula stays retired.
   - **CHORUS:** D62 sets `aggregate_input_tokens` to 4,500,000 for the A21
-    registration. CHORUS needs about 4.06M at 2.48 bytes per token, with every call
-    at or below 0.85 of its room, and the allowance adds at most $3.13 of spend
-    exposure.
+    registration. In D62's sizing, CHORUS needs about 4.06M at 2.48 bytes per token,
+    with every call at or below 0.85 of its room (a sizing result, not an enforced
+    per-call ceiling), and the allowance adds at most $3.13 of spend exposure.
   - **Every other project:** its allowance is a D62-style owner decision at its own
     registration. The old 4M profile cannot hold any non-CHORUS BC1 roster; in the fit
     analysis the smallest, CM4AI's, needs about 8.35M at 2.48 bytes per token, so
@@ -1584,8 +1612,10 @@ before each dispatch, including resumed repair/report refresh.
 - Before the A21 registration, D63's single `count_tokens` call measures the ratio on
   one fixed D59 CHORUS worker request, and the measured ratio replaces 2.48. Every
   token figure in this draft that rests on 2.48 is provisional until then.
-- A mid-run refusal then remains possible only in the doubly pessimistic case. That is
-  a per-call failure, which no allowance fixes (the D59 review, §4).
+- In the scenarios the D59 review inspected, a mid-run refusal arises only in the
+  doubly pessimistic one, a per-call failure that no allowance fixes (its §4). Sampled
+  byte ratios and response proxies do not exhaust the possible refusals, so runtime
+  admission remains the guard.
 
 **Fit evidence, and when it is needed [proposed; owner fixes at P4, item 12].**
 - **Before A21 (D44, D58):** BC1 is built and reviewed for all six projects under D59.
