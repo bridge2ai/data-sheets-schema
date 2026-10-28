@@ -1,0 +1,22 @@
+{
+  "invalid_junit_cases": [
+    {
+      "identity": [
+        "tests.test_wave4_a14_review",
+        "test_public_omission_response_matches_exact_saved_request[different_projection]"
+      ],
+      "tags": [
+        "failure"
+      ]
+    }
+  ],
+  "passed": false,
+  "passed_cases_by_module": {
+    "test_wave4_a14_review": 1
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 2.6529749170003925
+}
