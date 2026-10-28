@@ -1,0 +1,625 @@
+{
+  "baseline": "8f181a68699066d5fab847a46d5c2368aedf1e95",
+  "source_sha256": {
+    "src/data_sheets_schema/report_audit_totals.py": "5102114041034b456c1ea25b02cf4d3a75bf912a4099069c309e87b52a6095a8",
+    "src/data_sheets_schema/api_runner.py": "eb4e831ab3a08b721bf75f210be05ac28bd6c288539aafc149ce96f2dc77aed1"
+  },
+  "before": {
+    "exit_code": 1,
+    "summary": "41 failed, 3 passed, 1 warning in 1.03s",
+    "failed_tests": [
+      "FAILED tests/test_pr5094_round2.py::test_full_record_corpus_total[claudecode_agent_core-2026-09-01_claude-opus-5-api-generic-v7_rep3-CM4AI-22-mismatch]",
+      "FAILED tests/test_pr5094_round2.py::test_full_record_corpus_total[claudecode_api_core-2026-09-04f_claude-opus-5-api-generic-v8_rep1-AI_READI-17-consistent]",
+      "FAILED tests/test_pr5094_round2.py::test_full_record_is_global_in_each_reader[The audit returned 13 findings against the full record: 2 high, 4 medium, 7 low.]",
+      "FAILED tests/test_pr5094_round2.py::test_full_record_is_global_in_each_reader[Full record findings by severity: 2 high, 4 medium, 6 low.]",
+      "FAILED tests/test_pr5094_round2.py::test_full_record_is_global_in_each_reader[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\nFull record severity summary: 2 high, 4 medium, 6 low.]",
+      "FAILED tests/test_pr5094_round2.py::test_disposition_fallback_is_not_a_total[Two findings produced no change beyond what is described above.]",
+      "FAILED tests/test_pr5094_round2.py::test_disposition_fallback_is_not_a_total[Twelve findings resulted in changes.]",
+      "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high, 4 medium, 7 low; 2 medium were deferred.-expected0]",
+      "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high (1 high withdrawn on re-check), 4 medium, 7 low.-expected1]",
+      "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high, 4 medium, 7 low, touching 3 high-priority slots.-expected2]",
+      "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[**Audit input:** 13 findings \\u2014 2 high, 3 medium (core), 1 medium (full), 7 low.-expected3]",
+      "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[Findings by severity: 2 high, 4 medium, 7 low.\\nFindings still open after reconciliation: 0 high, 1 medium, 2 low.-expected4]",
+      "FAILED tests/test_pr5094_round2.py::test_corpus_subset_does_not_enter_regate[directory0-VOICE-medium-2]",
+      "FAILED tests/test_pr5094_round2.py::test_corpus_subset_does_not_enter_regate[directory1-AI_READI-high-1]",
+      "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[It returned 13 findings: 2 high, 4 medium,\\n6 low. No fabricated facts were found.]",
+      "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit identified 13 findings:\\n- 2 high (identifiers)\\n- 4 medium (placement)\\n- 6 low (shape)]",
+      "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, including 2 high, 4 medium and 6 low.]",
+      "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings (all resolved): 2 high, 4 medium, 6 low.]",
+      "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, e.g. 2 high, 4 medium, 6 low.]",
+      "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, i.e. 2 high, 4 medium, 6 low.]",
+      "FAILED tests/test_pr5094_round2.py::test_corpus_wrapped_low_mismatch_is_kept",
+      "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[-### Core record\\n]",
+      "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[-### Core record\\n\\n]",
+      "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[-Core record:\\n]",
+      "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[-### Deferred findings\\n]",
+      "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Core record\\n]",
+      "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Core record\\n\\n]",
+      "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-Core record:\\n]",
+      "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Deferred findings\\n]",
+      "FAILED tests/test_pr5094_round2.py::test_heading_scope_ends_at_next_peer_heading",
+      "FAILED tests/test_pr5094_round2.py::test_resume_reads_attested_second_snapshot[14]",
+      "FAILED tests/test_pr5094_round2.py::test_resume_reads_attested_second_snapshot[13]",
+      "FAILED tests/test_pr5094_round2.py::test_legacy_ambiguous_snapshots_preserve_checked_prior",
+      "FAILED tests/test_pr5094_round2.py::test_unparseable_or_oversized_counts_are_bounded[5000-digits]",
+      "FAILED tests/test_pr5094_round2.py::test_unparseable_or_oversized_counts_are_bounded[10-digits]",
+      "FAILED tests/test_pr5094_round2.py::test_unparseable_or_oversized_counts_are_bounded[superscript]",
+      "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[no-report]",
+      "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[report-path]",
+      "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[no-audit]",
+      "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[audit-path]",
+      "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[invalid-audit]"
+    ],
+    "command": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "-o",
+      "addopts=",
+      "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+      "tests/test_pr5094_round2.py"
+    ]
+  },
+  "after": {
+    "exit_code": 0,
+    "summary": "44 passed, 1 warning in 0.79s",
+    "failed_tests": [],
+    "command": [
+      "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "-o",
+      "addopts=",
+      "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+      "tests/test_pr5094_round2.py"
+    ]
+  },
+  "mutations": {
+    "F1_M17_full_record_total": {
+      "exit_code": 1,
+      "summary": "2 failed, 42 deselected, 1 warning in 0.72s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_full_record_corpus_total[claudecode_agent_core-2026-09-01_claude-opus-5-api-generic-v7_rep3-CM4AI-22-mismatch]",
+        "FAILED tests/test_pr5094_round2.py::test_full_record_corpus_total[claudecode_api_core-2026-09-04f_claude-opus-5-api-generic-v8_rep1-AI_READI-17-consistent]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_full_record_corpus_total"
+      ]
+    },
+    "F1_full_record_no_total": {
+      "exit_code": 1,
+      "summary": "1 failed, 2 passed, 41 deselected, 1 warning in 0.60s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_full_record_is_global_in_each_reader[Full record findings by severity: 2 high, 4 medium, 6 low.]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_full_record_is_global_in_each_reader"
+      ]
+    },
+    "F1_full_record_label": {
+      "exit_code": 1,
+      "summary": "1 failed, 2 passed, 41 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_full_record_is_global_in_each_reader[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\nFull record severity summary: 2 high, 4 medium, 6 low.]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_full_record_is_global_in_each_reader"
+      ]
+    },
+    "F1_fallback_produced": {
+      "exit_code": 1,
+      "summary": "1 failed, 1 passed, 42 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_disposition_fallback_is_not_a_total[Two findings produced no change beyond what is described above.]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_disposition_fallback_is_not_a_total"
+      ]
+    },
+    "F1_fallback_resulted": {
+      "exit_code": 1,
+      "summary": "1 failed, 1 passed, 42 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_disposition_fallback_is_not_a_total[Twelve findings resulted in changes.]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_disposition_fallback_is_not_a_total"
+      ]
+    },
+    "F2_first_severity_count": {
+      "exit_code": 1,
+      "summary": "3 failed, 2 passed, 39 deselected, 1 warning in 0.55s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high, 4 medium, 7 low; 2 medium were deferred.-expected0]",
+        "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high, 4 medium, 7 low, touching 3 high-priority slots.-expected2]",
+        "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[**Audit input:** 13 findings \\u2014 2 high, 3 medium (core), 1 medium (full), 7 low.-expected3]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_later_subset_counts_do_not_add_mismatches"
+      ]
+    },
+    "F2_disposition_scope": {
+      "exit_code": 1,
+      "summary": "1 failed, 4 passed, 39 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[Findings by severity: 2 high, 4 medium, 7 low.\\nFindings still open after reconciliation: 0 high, 1 medium, 2 low.-expected4]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_later_subset_counts_do_not_add_mismatches"
+      ]
+    },
+    "F3_continuation": {
+      "exit_code": 1,
+      "summary": "4 failed, 3 passed, 37 deselected, 1 warning in 0.61s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[It returned 13 findings: 2 high, 4 medium,\\n6 low. No fabricated facts were found.]",
+        "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit identified 13 findings:\\n- 2 high (identifiers)\\n- 4 medium (placement)\\n- 6 low (shape)]",
+        "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, including 2 high, 4 medium and 6 low.]",
+        "FAILED tests/test_pr5094_round2.py::test_corpus_wrapped_low_mismatch_is_kept"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_global_breakdown_after_wrap_or_intro or test_corpus_wrapped_low_mismatch_is_kept"
+      ]
+    },
+    "F3_including": {
+      "exit_code": 1,
+      "summary": "1 failed, 5 passed, 38 deselected, 1 warning in 0.59s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, including 2 high, 4 medium and 6 low.]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_global_breakdown_after_wrap_or_intro"
+      ]
+    },
+    "F3_parenthetical": {
+      "exit_code": 1,
+      "summary": "2 failed, 9 passed, 33 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_later_subset_counts_do_not_add_mismatches[The audit returned 13 findings: 2 high (1 high withdrawn on re-check), 4 medium, 7 low.-expected1]",
+        "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings (all resolved): 2 high, 4 medium, 6 low.]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_global_breakdown_after_wrap_or_intro or test_later_subset_counts_do_not_add_mismatches"
+      ]
+    },
+    "F3_abbreviation": {
+      "exit_code": 1,
+      "summary": "2 failed, 4 passed, 38 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, e.g. 2 high, 4 medium, 6 low.]",
+        "FAILED tests/test_pr5094_round2.py::test_global_breakdown_after_wrap_or_intro[The audit returned 13 findings, i.e. 2 high, 4 medium, 6 low.]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_global_breakdown_after_wrap_or_intro"
+      ]
+    },
+    "F4_heading_scope": {
+      "exit_code": 1,
+      "summary": "6 failed, 2 passed, 36 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[-### Core record\\n]",
+        "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[-### Core record\\n\\n]",
+        "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[-### Deferred findings\\n]",
+        "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Core record\\n]",
+        "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Core record\\n\\n]",
+        "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-### Deferred findings\\n]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_heading_or_paragraph_scoped_summary"
+      ]
+    },
+    "F4_paragraph_scope": {
+      "exit_code": 1,
+      "summary": "2 failed, 6 passed, 36 deselected, 1 warning in 0.56s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[-Core record:\\n]",
+        "FAILED tests/test_pr5094_round2.py::test_heading_or_paragraph_scoped_summary[The audit returned 13 findings: 2 high, 4 medium, 7 low.\\n\\n-Core record:\\n]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_heading_or_paragraph_scoped_summary"
+      ]
+    },
+    "F5_attested_latest": {
+      "exit_code": 1,
+      "summary": "2 failed, 42 deselected, 1 warning in 0.61s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_resume_reads_attested_second_snapshot[14]",
+        "FAILED tests/test_pr5094_round2.py::test_resume_reads_attested_second_snapshot[13]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_resume_reads_attested_second_snapshot"
+      ]
+    },
+    "F5_legacy_ambiguity": {
+      "exit_code": 1,
+      "summary": "1 failed, 43 deselected, 1 warning in 0.62s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_legacy_ambiguous_snapshots_preserve_checked_prior"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_legacy_ambiguous_snapshots_preserve_checked_prior"
+      ]
+    },
+    "F6_M9_two_no_total_clauses": {
+      "exit_code": 1,
+      "summary": "1 failed, 43 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_no_total_compares_two_global_clauses"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_no_total_compares_two_global_clauses"
+      ]
+    },
+    "F6_M14_noninteger_version": {
+      "exit_code": 1,
+      "summary": "1 failed, 43 deselected, 1 warning in 0.75s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_resume_recomputes_noninteger_instrument"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_resume_recomputes_noninteger_instrument"
+      ]
+    },
+    "F6_M18_newer_version": {
+      "exit_code": 1,
+      "summary": "1 failed, 43 deselected, 1 warning in 0.64s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_resume_keeps_newer_instrument_with_sources_present"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_resume_keeps_newer_instrument_with_sources_present"
+      ]
+    },
+    "F9_digit_bound": {
+      "exit_code": 1,
+      "summary": "1 failed, 2 passed, 41 deselected, 1 warning in 0.58s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_unparseable_or_oversized_counts_are_bounded[10-digits]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_unparseable_or_oversized_counts_are_bounded"
+      ]
+    },
+    "F9_nondecimal_digit": {
+      "exit_code": 1,
+      "summary": "1 failed, 2 passed, 41 deselected, 1 warning in 0.58s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_unparseable_or_oversized_counts_are_bounded[superscript]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_unparseable_or_oversized_counts_are_bounded"
+      ]
+    },
+    "F9_shape_exit_1": {
+      "exit_code": 1,
+      "summary": "1 failed, 4 passed, 39 deselected, 1 warning in 0.59s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[no-report]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_unchecked_blocks_have_uniform_shape"
+      ]
+    },
+    "F9_shape_exit_2": {
+      "exit_code": 1,
+      "summary": "1 failed, 4 passed, 39 deselected, 1 warning in 1.25s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[report-path]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_unchecked_blocks_have_uniform_shape"
+      ]
+    },
+    "F9_shape_exit_3": {
+      "exit_code": 1,
+      "summary": "1 failed, 4 passed, 39 deselected, 1 warning in 0.59s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[no-audit]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_unchecked_blocks_have_uniform_shape"
+      ]
+    },
+    "F9_shape_exit_4": {
+      "exit_code": 1,
+      "summary": "1 failed, 4 passed, 39 deselected, 1 warning in 0.57s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[audit-path]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_unchecked_blocks_have_uniform_shape"
+      ]
+    },
+    "F9_shape_exit_5": {
+      "exit_code": 1,
+      "summary": "1 failed, 4 passed, 39 deselected, 1 warning in 0.58s",
+      "failed_tests": [
+        "FAILED tests/test_pr5094_round2.py::test_unchecked_blocks_have_uniform_shape[invalid-audit]"
+      ],
+      "command": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--basetemp=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5094-r2/.codex-pt",
+        "tests/test_pr5094_round2.py",
+        "-k",
+        "test_unchecked_blocks_have_uniform_shape"
+      ]
+    }
+  }
+}

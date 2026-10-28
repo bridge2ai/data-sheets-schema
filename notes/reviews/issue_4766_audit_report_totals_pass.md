@@ -4,6 +4,10 @@ Historical v2 pass notes: the corpus counts below describe that earlier reader.
 The Wave4 repair introduces instrument v3 with local statement boundaries,
 comparison of each explicit severity summary, and fresh resume readings. These
 historical counts are not a v3 corpus replay or an acceptance result for v3.
+The [round-2 pass](pr5094_round2_pass_2026-10-28.md) replays all 96 committed
+pairs and corrects the full-record exclusion. Stored v1/v2 blocks keep their
+stamp only until `backfill-checks` replaces them with a checked v3 reading,
+including without `--overwrite`; unavailable recomputations are withheld.
 
 ## 1. Overview & Context
 

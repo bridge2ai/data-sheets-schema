@@ -26,8 +26,10 @@ from typing import Any
 # total is stated, extract per-severity subtotals only from a non-subset audit/finding
 # summary clause (#5094 R4 F9, F10, Round 2 N2).
 # Version 3: bind severity readings to each admitted statement, reject numbered
-# list ordinals and record-only subset totals, and compare every explicit summary
-# (#5094 Wave4 review). Historical v1/v2 measurements keep their recorded version.
+# list ordinals and core-record subset totals, and compare explicit global summaries
+# (#5094 Wave4/round-2 reviews). Full-record totals describe the Phase 3 audit.
+# Stored v1/v2 blocks keep their stamp until backfill-checks replaces them with
+# a checked v3 reading (even without --overwrite); it does not retain the old block.
 INSTRUMENT_VERSION = 3
 
 NUM_WORDS = {
@@ -105,7 +107,7 @@ TOTAL_PATTERNS = [
     # 10. Synthetic/simple fallback: report stating "twelve findings" or "N findings" as isolated phrase,
     # ignoring subset counts (e.g., "Six findings were deliberately left as-is").
     re.compile(
-        r"(?:^|[.!?]\s+|report\s+saying\s+[\"']?)(?:\*\*)?(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings\b(?!\s+(?:were\s+(?:\w+\s+)?(?:left|acted|addressed|remediated|withdrawn|rejected|accepted|retained|raised\s+(?:for\s+the\s+record\s+without|against\s+the\s+core\s+record|on\s+|about\s+|concerning\s+|specifically\b|without\s+recommending))|produced\s+(?:edits|changes)|cluster|fall|concerned|apply|relate))",
+        r"(?:^|[.!?]\s+|report\s+saying\s+[\"']?)(?:\*\*)?(" + WORD_OR_DIGIT + r")(?:\*\*)?\s+findings\b(?!\s+(?:were\s+(?:\w+\s+)?(?:left|acted|addressed|remediated|withdrawn|rejected|accepted|retained|raised\s+(?:for\s+the\s+record\s+without|against\s+the\s+core\s+record|on\s+|about\s+|concerning\s+|specifically\b|without\s+recommending))|produced\s+(?:edits|changes|no\s+changes?)|resulted\s+in|cluster|fall|concerned|apply|relate))",
         re.I | re.M,
     ),
 ]
@@ -143,7 +145,12 @@ def parse_number(text: str) -> int | None:
         return None
     s = text.strip().lower()
     if s.isdigit():
-        return int(s)
+        if len(s) > 9:
+            return None
+        try:
+            return int(s)
+        except ValueError:  # e.g. superscripts satisfy isdigit, but not int()
+            return None
     if s in NUM_WORDS:
         return NUM_WORDS[s]
     if "-" in s:
@@ -165,14 +172,14 @@ SUBSET_PREFIX_RE = re.compile(
 )
 
 SUBSET_CLAUSE_RE = re.compile(
-    r"\b(?:deferred|retained|rejected|resolved|applied|left|withdrawn|of\s+which|including|subset)\b",
+    r"\b(?:deferred|retained|rejected|resolved|applied|left|withdrawn|of\s+which|including|subset|still\s+open|after\s+reconciliation)\b",
     re.I,
 )
 
 RECORD_SUBSET_RE = re.compile(
     r"^(?:\*\*)?\s+(?:audit\s+)?findings(?:\*\*)?"
     r"(?:\s+were\s+(?:returned|raised|received|produced|identified))?"
-    r"\s+(?:against|for|on|about|concerning)\s+(?:the\s+)?(?:core|full)\s+record\b",
+    r"\s+(?:against|for|on|about|concerning)\s+(?:the\s+)?core\s+record\b",
     re.I,
 )
 
@@ -182,14 +189,12 @@ SEVERITY_SUMMARY_LABEL_RE = re.compile(
 
 
 def _severity_continuation(line: str) -> bool:
-    """Admit a wrapped count list, never a line describing deferred work."""
-    if not _extract_severity_counts(line):
-        return False
-    remainder = SEV_PATTERN.sub("", line)
-    for pattern in ZERO_SEV_PATTERNS:
-        remainder = pattern.sub("", remainder)
-    remainder = re.sub(r"\b(?:and|or|findings?|severity)\b", "", remainder, flags=re.I)
-    return not remainder.strip(" \t,*()[]-;:.**")
+    """A wrapped list starts with a count; labels and following prose may follow."""
+    leading = line.lstrip(" \t*-([").removeprefix("and ")
+    return bool(SEV_PATTERN.match(leading) or any(p.match(leading) for p in ZERO_SEV_PATTERNS))
+
+
+STATEMENT_BOUNDARY_RE = re.compile(r"\n|(?<!e\.g)(?<!i\.e)[.!?](?=\s|$)", re.I)
 
 
 def _severity_statement(report_text: str, start: int, end: int) -> str:
@@ -197,11 +202,16 @@ def _severity_statement(report_text: str, start: int, end: int) -> str:
 
     The former 300-character lookahead consumed later deferred subsets and
     unrelated prose. A line/sentence boundary or explicit subset introduction
-    terminates this reading. Immediately adjacent lines made entirely of a
-    severity list are retained, so ordinary wrapping does not drop counts.
+    terminates this reading. Adjacent lines starting with counts contribute up
+    to their first sentence boundary, including labelled bullets. Parenthetical
+    disposition remarks do not cut off the rest of the global distribution.
     """
+    # Keep offsets while masking remarks such as '(all resolved)' and
+    # '(one high finding ... withdrawn on re-check)'. Count-list parentheses stay.
+    report_text = re.sub(r"\([^()\n]*\)", lambda m: " " * len(m[0])
+                         if SUBSET_CLAUSE_RE.search(m[0]) else m[0], report_text)
     tail = report_text[start:]
-    boundary = re.search(r"\n|[.!?](?=\s|$)", tail)
+    boundary = STATEMENT_BOUNDARY_RE.search(tail)
     stop = start + boundary.start() if boundary else len(report_text)
     if boundary and boundary.group(0) == "\n":
         cursor = stop + 1
@@ -211,12 +221,20 @@ def _severity_statement(report_text: str, start: int, end: int) -> str:
                 following_end = len(report_text)
             if not _severity_continuation(report_text[cursor:following_end]):
                 break
-            stop = following_end
+            sentence_end = STATEMENT_BOUNDARY_RE.search(report_text, cursor, following_end)
+            stop = sentence_end.start() if sentence_end else following_end
+            if sentence_end:
+                break
             cursor = following_end + 1
     # An explicit subset can share the sentence with the overall count.
-    subset = SUBSET_CLAUSE_RE.search(report_text, end, stop)
-    if subset:
+    for subset in SUBSET_CLAUSE_RE.finditer(report_text, end, stop):
+        # 'including 2 high, ...' can introduce the global distribution.
+        if (subset[0].lower() == "including"
+                and not _extract_severity_counts(report_text[start:subset.start()])
+                and _severity_continuation(report_text[subset.end():stop])):
+            continue
         stop = subset.start()
+        break
     return report_text[start:stop]
 
 
@@ -230,7 +248,7 @@ def _collect_pattern_matches(
             n = parse_number(m.group(1))
             if n is None:
                 continue
-            # Counts scoped to one record are not totals of the whole audit.
+            # Core-record counts are subsets; Phase 3's full record is the audit.
             if RECORD_SUBSET_RE.match(report_text[m.end(1):]):
                 continue
             s, e = m.start(), m.end()
@@ -253,8 +271,8 @@ def _collect_pattern_matches(
 
 
 def _extract_severity_counts(snippet: str) -> list[tuple[str, int]]:
-    """Retain distinct counts, including contradictory repeats of a severity."""
-    counts: list[tuple[str, int]] = []
+    """Use the first count per severity in a statement, before later subsets."""
+    readings: list[tuple[int, str, int]] = []
     for m in SEV_PATTERN.finditer(snippet):
         # Ignore individual finding citations like 'finding 1, high'
         prefix = snippet[max(0, m.start() - 15):m.start()]
@@ -263,8 +281,8 @@ def _extract_severity_counts(snippet: str) -> list[tuple[str, int]]:
         n = parse_number(m.group(1))
         sev_raw = (m.group(2) or m.group(3) or m.group(4) or "").lower()
         sev = CANONICAL_SEVERITY.get(sev_raw, sev_raw)
-        if n is not None and sev and (sev, n) not in counts:
-            counts.append((sev, n))
+        if n is not None and sev:
+            readings.append((m.start(), sev, n))
 
     for zpat in ZERO_SEV_PATTERNS:
         for m in zpat.finditer(snippet):
@@ -276,18 +294,38 @@ def _extract_severity_counts(snippet: str) -> list[tuple[str, int]]:
                         raw = k
                         break
             sev = CANONICAL_SEVERITY.get(raw.lower(), raw.lower())
-            if sev and (sev, 0) not in counts:
-                counts.append((sev, 0))
-
-    return counts
+            if sev:
+                readings.append((m.start(), sev, 0))
+    first: dict[str, int] = {}
+    for _, sev, count in sorted(readings):
+        first.setdefault(sev, count)
+    return list(first.items())
 
 
 def _extract_sevs_from_snippet(snippet: str) -> dict[str, int]:
-    """First counts for the historical display field; comparisons keep all."""
+    """First counts within one statement; separate statements compare separately."""
     sevs: dict[str, int] = {}
     for sev, count in _extract_severity_counts(snippet):
         sevs.setdefault(sev, count)
     return sevs
+
+
+def _summary_is_subset(report_text: str, start: int) -> bool:
+    """Carry enclosing Markdown headings and an adjacent paragraph lead."""
+    before = report_text[:start]
+    headings: list[tuple[int, str]] = []
+    for heading in re.finditer(r"^\s{0,3}(#{1,6})\s+(.+)$", before, re.M):
+        level = len(heading[1])
+        while headings and headings[-1][0] >= level:
+            headings.pop()
+        headings.append((level, heading[2]))
+    line_start = before.rfind("\n") + 1
+    contexts = [text for _, text in headings] + [before[line_start:]]
+    previous = before[:line_start].rstrip("\n").split("\n")[-1].strip()
+    if previous.rstrip("*").endswith(":"):
+        contexts.append(previous)
+    return any(SUBSET_CLAUSE_RE.search(text) or re.search(r"\bcore\s+record\b", text, re.I)
+               for text in contexts)
 
 
 def _extract_totals_detailed(
@@ -304,13 +342,16 @@ def _extract_totals_detailed(
     severity_counts: dict[str, list[int]] = {}
 
     def add_summary(snippet: str) -> None:
-        summary = _extract_sevs_from_snippet(snippet)
-        if summary and summary not in severity_summaries:
-            severity_summaries.append(summary)
-        for severity, count in _extract_severity_counts(snippet):
-            observed = severity_counts.setdefault(severity, [])
-            if count not in observed:
-                observed.append(count)
+        # An explicit restatement starts another reading even within a sentence.
+        # Otherwise later same-severity counts describe subsets, not the audit.
+        for statement in re.split(r";\s*(?:later\s+)?restated\s+as\s+", snippet, flags=re.I):
+            summary = _extract_sevs_from_snippet(statement)
+            if summary and summary not in severity_summaries:
+                severity_summaries.append(summary)
+            for severity, count in summary.items():
+                observed = severity_counts.setdefault(severity, [])
+                if count not in observed:
+                    observed.append(count)
 
     if matches:
         # Primary match is the earliest statement in document order (tie-broken by pattern specificity)
@@ -324,11 +365,13 @@ def _extract_totals_detailed(
         for start, end, _, _ in ordered_matches:
             add_summary(_severity_statement(report_text, start, end))
 
-    # When no overall total is stated, extract subtotals only from a single sentence/line
+    # When no overall total is stated, extract subtotals from each sentence/line
     # that states two or more per-severity counts together (never isolated prose mentions).
     if not matches:
-        for clause in re.split(r"(?:[.!?\n]+)", report_text[:1500]):
-            if SUBSET_CLAUSE_RE.search(clause) or re.search(r"\b(?:core|full)\s+record\b", clause, re.I):
+        for match in re.finditer(r"[^.!?\n]+", report_text[:1500]):
+            clause = match[0]
+            if (_summary_is_subset(report_text, match.start()) or SUBSET_CLAUSE_RE.search(clause)
+                    or re.search(r"\bcore\s+record\b", clause, re.I)):
                 continue
             if not re.search(r"\b(?:findings?|audit|summary|totals?)\b", clause, re.I):
                 continue
@@ -343,9 +386,7 @@ def _extract_totals_detailed(
     # different paragraph already supplied the overall total. Do not promote
     # arbitrary prose or a labeled deferred/record-only subset to this scope.
     for label in SEVERITY_SUMMARY_LABEL_RE.finditer(report_text):
-        line_start = report_text.rfind("\n", 0, label.start()) + 1
-        prefix = report_text[line_start:label.start()]
-        if SUBSET_CLAUSE_RE.search(prefix) or re.search(r"\b(?:core|full)\s+record\b", prefix, re.I):
+        if _summary_is_subset(report_text, label.start()):
             continue
         add_summary(_severity_statement(report_text, label.start(), label.end()))
 
@@ -391,6 +432,8 @@ def check_report_audit_totals(
             "stated_total": None,
             "stated_totals": [],
             "stated_by_severity": {},
+            "stated_severity_summaries": [],
+            "stated_severity_counts": {},
             "computed_total": None,
             "computed_by_severity": {},
             "mismatches": [],
@@ -407,6 +450,8 @@ def check_report_audit_totals(
                 "stated_total": None,
                 "stated_totals": [],
                 "stated_by_severity": {},
+                "stated_severity_summaries": [],
+                "stated_severity_counts": {},
                 "computed_total": None,
                 "computed_by_severity": {},
                 "mismatches": [],
@@ -433,6 +478,8 @@ def check_report_audit_totals(
             "stated_total": stated_total,
             "stated_totals": stated_totals,
             "stated_by_severity": stated_by_severity,
+            "stated_severity_summaries": [],
+            "stated_severity_counts": {},
             "computed_total": None,
             "computed_by_severity": {},
             "mismatches": [],
@@ -449,6 +496,8 @@ def check_report_audit_totals(
                 "stated_total": stated_total,
                 "stated_totals": stated_totals,
                 "stated_by_severity": stated_by_severity,
+                "stated_severity_summaries": [],
+                "stated_severity_counts": {},
                 "computed_total": None,
                 "computed_by_severity": {},
                 "mismatches": [],
@@ -483,6 +532,8 @@ def check_report_audit_totals(
             "stated_total": stated_total,
             "stated_totals": stated_totals,
             "stated_by_severity": stated_by_severity,
+            "stated_severity_summaries": [],
+            "stated_severity_counts": {},
             "computed_total": None,
             "computed_by_severity": {},
             "mismatches": [],
