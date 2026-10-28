@@ -841,7 +841,7 @@ def _cache_dependency_token():
     try:
         # A fixed roster, not a walk through mutable module/cache globals.
         rosters = (
-            (bc1_context, 'derive_term_policy validate_term_policy _sources _schema_pin _core_catalog schema_context _canonical _sha contract_identity'),
+            (bc1_context, 'derive_term_policy validate_term_policy _sources _schema_pin _core_catalog schema_context model_catalog _canonical _sha contract_identity'),
             (codec, 'build_dictionary validate_dictionary canonical _bounds'),
             (typed, '_snapshot _snapshot_rows _blob _unblob _source_authority'),
             (omissions, 'prepare _schema _schema_yaml _mapping _read _shape _owners _slot _class _dataset_range _sha _json _asset'),

@@ -1,5 +1,7 @@
 """BC1 own-record sizing/roster regressions; no provider (2026-10-27)."""
 from copy import deepcopy
+import hashlib
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -28,10 +30,15 @@ def sizing_fixture(context_fixture, tmp_path):
         if key != "receipt":
             content = b"# D4D Datasheet for KIDS_FIRST Dataset\n# Arm: de novo\n" + content
         paths[key].write_bytes(content)
+    paths["receipt_result"] = tmp_path / "receipt-result.json"
+    paths["receipt_result"].write_bytes(reg._raw({
+        "receipt_after_sha256": hashlib.sha256(inputs["receipt"]).hexdigest(),
+        "input_identity": {"fixture": "saved receipt outcome"}, "registration": {},
+        "unsupported_audit_candidates": [{"reason": "quotes \\\" and unicode λ"}]}))
     limits = {"max_paths": 2, "max_inventory_bytes": 8192, "max_workers": 8,
               "worker_output_tokens": 64000, "omission_output_tokens": 32000,
               "integration_output_tokens": 64000, "max_request_bytes": 32000000,
-              "max_input_tokens_per_call": 1000000, "context_limit_tokens": 1000000,
+              "max_input_tokens_per_call": 2000000, "context_limit_tokens": 2000000,
               "context_limit_basis": "offline test", "aggregate_input_tokens": 40000000}
     counts = selected.allowances(8, 2, omission_output_tokens=32000)
     limits.update({k: counts[k] for k in ("max_calls", "aggregate_output_tokens")})
@@ -137,3 +144,76 @@ def test_every_project_uses_its_own_header_without_inferred_study_profile(sizing
     assert result["captured_inputs"]["profile"]["name"] == "neutral"
     assert result["own_plan_scenarios"]["empty_future_floor"]["calls"] == 4
     assert result["downstream_projection"]["bytes"] is None
+
+
+@pytest.mark.parametrize("limit,value,message", [
+    ("max_input_tokens_per_call", 100, "over per-call room"),
+    ("context_limit_tokens", 65000, "over per-call room"),
+    ("aggregate_input_tokens", 3, "over allowance"),
+])
+def test_fit_gate_recomputes_and_refuses_before_builder_writes(sizing_fixture, monkeypatch, limit, value, message):
+    registration, files, inputs = sizing_fixture
+    registration["audit_limits"][limit] = value
+    result = reg.size_inputs(registration, sizing_record=files,
+        context_raw=inputs["context"], schema_snapshot=inputs["schema_snapshot"])
+    with pytest.raises(ValueError, match=message):
+        reg.check_sizing_record(registration, result)
+    # Keep the real builder's prepare -> validate -> write ordering. Only its
+    # expensive byte measurement is supplied by this already rendered fixture.
+    def measured(candidate, **kwargs):
+        result["registration_sha256"] = hashlib.sha256(reg._raw(candidate)).hexdigest()
+        result["project"] = candidate["run"]["project"]
+        return result
+    monkeypatch.setattr(reg, "size_inputs", measured)
+    monkeypatch.setattr(builder, "_write_outputs", lambda *a: pytest.fail("wrote refused plan"))
+    with pytest.raises(ValueError, match=message):
+        builder.build_registration("CHORUS", "offline", partition="chorus", bounded_carry_version=1,
+            audit_limits={"max_workers": 8, "max_input_tokens_per_call": 2000000,
+                          "context_limit_tokens": 2000000, limit: value},
+            sizing_record=builder.SizingRecord(files.full, files.core, files.receipt, files.receipt_result),
+            registration_path=files.full.parent / "refused.json")
+    assert not (files.full.parent / "refused.json").exists()
+
+
+def test_real_carry_escaping_calibration_and_determinism(sizing_fixture):
+    registration, files, inputs = sizing_fixture
+    options = dict(sizing_record=files, context_raw=inputs["context"], schema_snapshot=inputs["schema_snapshot"])
+    first = reg.size_inputs(registration, **options)
+    assert reg._raw(first) == reg._raw(reg.size_inputs(registration, **options))
+    assert first["calibration"] == registration["bounded_carry"]["contract"]["sizing_calibration"]
+    assert first["receipt_completion_carry"]["actual"] is True
+    rows = first["rows"]
+    for bound in (r for r in rows if r["scenario"] == "visible_cap_escaped_bound"):
+        ascii_row = next(r for r in rows if r["stage"] == bound["stage"] and r["scenario"] == "visible_cap_ascii_scenario")
+        assert bound["wire_bytes"] > ascii_row["wire_bytes"]
+    forged = deepcopy(first)
+    forged["rows"][0]["estimated_input_tokens"] = 0
+    with pytest.raises(ValueError, match="calibrated wire bytes"):
+        reg.check_sizing_record(registration, forged)
+    files.receipt_result.unlink()
+    with pytest.raises(ValueError, match="saved receipt-completion result"):
+        reg.size_inputs(registration, **options)
+
+
+def test_fit_gate_accepts_exact_aggregate_and_input_boundaries(sizing_fixture):
+    registration, files, inputs = sizing_fixture
+    options = dict(sizing_record=files, context_raw=inputs["context"], schema_snapshot=inputs["schema_snapshot"])
+    result = reg.size_inputs(registration, **options)
+    largest = max(row['estimated_input_tokens'] for row in result['rows'])
+    total = max(row['estimated_input_tokens'] for row in result['own_plan_scenarios'].values())
+    registration['audit_limits'].update(max_input_tokens_per_call=largest, aggregate_input_tokens=total)
+    result = reg.size_inputs(registration, **options)
+    reg.check_sizing_record(registration, result)
+
+
+@pytest.mark.parametrize('value', ['ordinary text', '"' * 200, '\\' * 200,
+                                  '\x00\t\r\n' * 50, 'λ 漢字 😀' * 50])
+def test_future_json_escaped_envelope_bounds_actual_serialized_text(value):
+    # Valid candidate JSON is embedded in the stage JSON, then in provider JSON.
+    candidate = reg._raw({'strings': [value], 'body': {'literal': value}}).decode()
+    bound = '\\' * len(candidate.encode())
+    def wire(text):
+        return reg._raw({'text': reg._raw({'concern_packet': text}).decode()})
+    assert len(wire(candidate)) <= len(wire(bound))
+    if value == '\\' * 200:
+        assert len(wire(candidate)) > len(wire('x' * len(candidate.encode())))

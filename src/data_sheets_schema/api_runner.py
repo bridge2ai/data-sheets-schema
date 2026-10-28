@@ -2936,8 +2936,8 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
         selected_record = (carry.get("Reconciled full record") if phase == "report"
                            else carry.get("Completed full record") if phase == "reconcile_full" else None)
         if spec.bounded_carry_version:
-            from .bc1_context import schema_context as bc1_schema_context
-            schema_text = bc1_schema_context(shared.assert_current(spec), selected_record)
+            from .bc1_context import downstream_schema_context
+            schema_text = downstream_schema_context(spec, selected_record)
         else:
             schema_text = schema_context(spec, selected_record)
         parts.append({"type": "text", "text": schema_text})

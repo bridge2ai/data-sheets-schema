@@ -73,7 +73,7 @@ def require_hooks() -> None:
 
 def contract_identity() -> dict:
     """Bind contracts, project source and reader versions; not binary attestation."""
-    from . import bc1_audit, bc1_context, shared_generation as shared
+    from . import bc1_audit, bc1_context, bc1_registration, shared_generation as shared
     from .resources import resource_path
     code = sorted(set(shared.ROUTING_CODE) | set(EXTRA_CODE))
     return {
@@ -83,6 +83,7 @@ def contract_identity() -> dict:
                    "api_playbook_version": 2, "receipt_completion_version": 2},
         "audit": bc1_audit.contract_identity(),
         "context": bc1_context.contract_identity(),
+        "sizing_calibration": bc1_registration.calibration(),
         "procedure_sha256": hashlib.sha256(PROCEDURE.encode("utf-8")).hexdigest(),
         "code": {name: hashlib.sha256(resource_path(name).read_bytes()).hexdigest()
                  for name in code},

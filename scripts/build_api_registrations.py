@@ -284,6 +284,8 @@ def profile_covered(project: str, arm: str | None, limits: dict[str, Any]) -> bo
 #   envelopes cost, for a response written as text with no thinking.
 SIZING_INSTRUMENT = "typed_audit_input_sizing_v3"
 SIZING_BYTES_PER_TOKEN = 2.0
+# Historical v0 calibration retained byte-for-byte. BC1 uses the explicit
+# per-call measured ratios in bc1_registration.calibration (D59/F6).
 SIZING_INPUT_TOKENS_PER_RESPONSE_TOKEN = 3.5
 SIZING_EXPECTED_INPUT_TOKENS_PER_RESPONSE_TOKEN = 1.2
 # 10-22a's typed workers used 50,130, 43,348 and 14,032 of 64,000 (mean
@@ -310,6 +312,7 @@ class SizingRecord:
     full: Path
     core: Path
     receipt: Path
+    receipt_result: Path | None = None
 
     @classmethod
     def in_directory(cls, directory: Path | str, project: str) -> "SizingRecord":

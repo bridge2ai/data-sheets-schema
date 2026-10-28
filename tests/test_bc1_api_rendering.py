@@ -1,7 +1,7 @@
 """Model/host carry boundary under explicitly simulated BC1 hooks, offline."""
 from copy import deepcopy
 
-from data_sheets_schema import api_runner as api, bc1_audit, bc1_codec, bc1_runtime
+from data_sheets_schema import api_runner as api, bc1_audit, bc1_codec, bc1_runtime, bc1_context
 from tests.test_bc1_selection import external, simulated_hooks, registered  # noqa: F401
 
 
@@ -29,7 +29,8 @@ def test_downstream_uses_exact_projection_and_keeps_complete_host_carry(register
     assert all(complete not in block for block in blocks)
     contract = bc1_codec.canonical(bc1_audit.downstream_contract()).decode()
     assert blocks.count(contract) == 1
-    assert any('BC1 COMPLETE CAPTURED SCHEMA CONTEXT' in block for block in blocks)
+    assert blocks.count(bc1_context.downstream_schema_context(spec, full)) == 1
+    assert not any('BC1 COMPLETE CAPTURED SCHEMA CONTEXT' in block for block in blocks)
     assert all(type(block) is str for block in blocks)
 
 

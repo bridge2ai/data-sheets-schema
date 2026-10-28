@@ -36,6 +36,7 @@ def _sha(raw: bytes) -> str:
 def contract_identity() -> dict:
     """Semantic contract; source bytes are separately closed by BC1 selection."""
     return {"format": FORMAT, "schema_context": "complete_dataset_and_core_reachable_schema_v1",
+            "request_shape": "D59: catalog once; no domain_of; bundle once in chunks; A14 downstream",
             "annotation": "d4d:termSources",
             "fallback": [{"class": cls, "slot": slot, "sources": list(sources)}
                          for (cls, slot), sources in sorted(FALLBACK.items())],
@@ -220,8 +221,8 @@ def schema_context(captured, record: str | None, *, assigned_paths=None) -> str:
     unoccupied reachable classes, false/null/list values or source text.
     """
     from . import audit_omissions as om
-    catalog = om._schema(captured.full_schema.sources[0][1], schema_snapshot=captured.full_schema)
-    core_catalog = _core_catalog(captured.core_schema)
+    catalog = model_catalog(om._schema(captured.full_schema.sources[0][1], schema_snapshot=captured.full_schema))
+    core_catalog = model_catalog(_core_catalog(captured.core_schema))
     owners = []
     if record is not None:
         document = om._mapping(record.encode("utf-8"), "BC1 whole record")
@@ -254,6 +255,49 @@ def schema_context(captured, record: str | None, *, assigned_paths=None) -> str:
         "record_yaml": record, "owners": owners,
         "assigned_paths": None if assigned_paths is None else list(assigned_paths),
         "scope": "Captured schema semantics and source record; no applicability or scientific-support verdict."}).decode("utf-8")
+
+
+def model_catalog(value):
+    """D59: omit the redundant inverse class index, without mutating host evidence."""
+    result = deepcopy(value)
+    for cls in result["classes"].values():
+        for slot in cls["slots"].values():
+            slot["definition"].pop("domain_of", None)
+    return result
+
+
+def downstream_schema_context(spec, record=None):
+    """D59: use the unchanged A14 renderer on freshly checked captured inputs.
+
+    The protected shared-generation public wrapper selects the complete BC1
+    context. Call its existing A14 implementation explicitly for these phases.
+    """
+    from . import shared_generation as shared
+    captured = shared.assert_current(spec)
+    return shared.memo(spec, 'bc1_downstream_a14',
+        [_canonical(_schema_pin(captured.full_schema)),
+         *[raw for _name, _path, raw in captured.full_schema.sources], _canonical(record)],
+        lambda: shared._schema_context(captured, record))
+
+
+def model_request(inner, schema_text):
+    """One catalog and one bundle on the wire; original checked request stays host-side."""
+    if not schema_text.startswith(SCHEMA_HEADER):
+        raise ValueError("BC1 typed request requires its complete captured schema context")
+    catalog = json.loads(schema_text[len(SCHEMA_HEADER):])["catalog"]
+    projected = deepcopy(inner)
+    payload = projected["payload"]
+    shared = payload.get("shared_context", payload)
+    if model_catalog(shared["schema"]) != catalog:
+        raise ValueError("BC1 duplicate schema differs from the captured catalog")
+    shared["schema"] = {"ref": "schema_context.catalog", "sha256": _sha(_canonical(catalog))}
+    if "shared_context" in payload:
+        del shared["bundle"]
+        shared["bundle_ref"] = {"ref": "payload.dictionary.chunks",
+                                "dictionary_sha256": payload["dictionary"]["sha256"]}
+    # request_sha256 continues to identify the complete host request checked by
+    # the response validator. The outer binding separately pins this model view.
+    return projected
 
 
 def generation_context(captured) -> str:

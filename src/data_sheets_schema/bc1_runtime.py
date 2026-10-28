@@ -203,6 +203,7 @@ def render_request(*, packet, stage, inner, settings, audit_limits, registration
     if any(type(value) is not str or not value for value in
            (policy_text, evidence_contract, schema_context, generation_context, receipt_carry)):
         raise ledger.UsageLedgerError('BC1 requires every captured scientific/context block')
+    inner = bc1_context.model_request(inner, schema_context)
     binding = {'protocol': audit.PROTOCOL, 'generation_id': generation_id,
         'registration_sha256': registration_sha256, 'packet_sha256': packet['sha256'],
         'stage': stage, 'inner_request_sha256': sg.sha(sg.canonical(inner)),
@@ -463,6 +464,11 @@ def require_request(spec, phase, kwargs):
     sg.require_routing_context(spec, kwargs['messages'])
     from . import api_runner as api
     if phase not in PHASES:
+        if phase in ('full', receipts.PHASE):
+            blocks = [p.get('text') for message in kwargs['messages'] if type(message.get('content')) is list
+                      for p in message['content'] if type(p) is dict]
+            if blocks.count(bc1_context.downstream_schema_context(spec)) != 1:
+                raise ledger.UsageLedgerError('BC1 full/receipt wire lost captured A14 schema digest')
         if phase in ('reconcile_full', 'report', 'report_regate', 'report_after_repair'):
             outcome = recover(spec, terminal=True)
             expected = api.CARRY_LABEL.format(name='Audit findings') + model_carry(spec, outcome.audit)
@@ -475,8 +481,8 @@ def require_request(spec, phase, kwargs):
             name = 'Completed full record' if phase == 'reconcile_full' else 'Reconciled full record'
             prefix = api.CARRY_LABEL.format(name=name)
             records = [b[len(prefix):] for b in blocks if type(b) is str and b.startswith(prefix)]
-            if len(records) != 1 or blocks.count(_schema_context(spec, sg.assert_current(spec), records[0])) != 1:
-                raise ledger.UsageLedgerError('BC1 downstream wire lost captured schema context')
+            if len(records) != 1 or blocks.count(bc1_context.downstream_schema_context(spec, records[0])) != 1:
+                raise ledger.UsageLedgerError('BC1 downstream wire lost captured A14 schema digest')
             if phase != 'reconcile_full':
                 selected = 'report_regate' if phase == 'report_regate' else 'report'
                 if blocks.count(api.phase_instruction(selected, spec.render_version)) != 1:

@@ -159,6 +159,19 @@ def test_evaluation_rationale_cannot_replace_or_influence_context(fixture, tmp_p
         bc.derive_term_policy(selection=selection, context_raw=poisoned, schema_snapshot=inputs["schema_snapshot"])
 
 
+def test_domain_inverse_is_the_only_catalog_content_removed():
+    catalog = {"classes": {"domain_of": {"slots": {"example": {"definition": {
+        "domain_of": ["A", "B"], "description": "Keep this verbatim.",
+        "annotations": {"domain_of": "Not an inverse list."}}}}}},
+        "enums": {"domain_of": {"permissible_values": {"domain_of": {"text": "domain_of"}}}}}
+    before = deepcopy(catalog)
+    result = bc.model_catalog(catalog)
+    assert catalog == before
+    expected = deepcopy(before)
+    del expected["classes"]["domain_of"]["slots"]["example"]["definition"]["domain_of"]
+    assert result == expected
+
+
 def test_bridge2ai_requires_its_declared_vocabulary_and_does_not_use_neutral_policy(fixture):
     selection, inputs = fixture
     selection["inputs"]["profile"]["name"] = "bridge2ai"

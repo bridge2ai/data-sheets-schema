@@ -89,6 +89,12 @@ def test_public_bc1_pipeline_multiple_groups_final_and_completed_replay(register
                 + [runtime.OMISSION_PHASE] + [runtime.INTEGRATION_PHASE] * (len(packet["groups"]) + 1)
                 + ["reconcile_full", "report"])
     assert messages.phases == expected
+    for phase, wire in zip(expected, messages.calls):
+        if phase in ('full', receipts.PHASE, 'reconcile_full', 'report'):
+            texts = [part.get('text', '') for message in wire['messages']
+                     if isinstance(message['content'], list) for part in message['content']]
+            assert sum(text.startswith(shared.SCHEMA_CONTEXT_HEADER) for text in texts) == 1
+            assert not any('BC1 COMPLETE CAPTURED SCHEMA CONTEXT' in text for text in texts)
     assert [row["phase"] for row in result["usage"]] == expected
     group_calls = [row for row in state["stages"] if row["selection"]["phase"] == runtime.INTEGRATION_PHASE]
     assert [row["selection"]["stage_id"] for row in group_calls] == [g["id"] for g in packet["groups"]] + ["final"]

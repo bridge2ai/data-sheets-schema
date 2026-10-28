@@ -1,8 +1,9 @@
 """Offline BC1 registration sizing through the production renderers.
 
 BC1 / 2026-10-27. Inputs are an explicit registration and actual earlier full,
-core and receipt bytes. Outputs are byte-pinned planning scenarios, never a
-token-count, scientific decision, launch authorization or future-size bound.
+core, receipt and receipt-completion result bytes. Outputs are byte-pinned
+planning scenarios and future-JSON byte envelopes, never provider token counts,
+scientific decisions or launch authorization.
 """
 from __future__ import annotations
 
@@ -16,8 +17,23 @@ from types import SimpleNamespace
 
 from . import bc1_context as context, bc1_selection as selection
 
-FORMAT = "bc1_input_sizing_v1"
+FORMAT = "bc1_input_sizing_v2"
 PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC", "KIDS_FIRST")
+
+
+def calibration():
+    """F5/F6: historical measurements, not a claim to have tokenized BC1."""
+    return {"bytes_per_token": {"typed_audit_worker": 2.48,
+                              "typed_audit_omission": 2.48,
+                              "typed_audit_integration": 1.75},
+        "source": "bc1_fit_calibration_claude_2026-10-28.md sections 2 and 4.4 (F5-F7)",
+        "source_sha256": "7024eec029a77745b76c75273d2b9189c1844c1d81f0e44f8a77e17f0a9678df",
+        "basis": "Canonical request bytes / settled input_tokens + cache_read + cache_write; "
+                 "worker minimum 2.482 rounded down to 2.48; integration minimum 1.755 "
+                 "(reported as 1.76) rounded down to 1.75. BC1 extrapolation, not provider counts.",
+        "future_wire_bound": "Four wire bytes per byte of valid UTF-8 JSON carried through two string encodings; "
+                             "backslash fill bounds quotes, escapes and JSON whitespace. Bytes only, not token density.",
+        "receipt_carry": "Exact BC1 projection of the pinned historical receipt-completion result; no placeholder."}
 
 
 def _raw(value):
@@ -91,7 +107,7 @@ def _placeholder(size, label):
 
 def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
                 exploratory_stand_in=False, expected_visible_bytes=None,
-                planning_bytes_per_token=2.0, payload_sink=None):
+                payload_sink=None):
     """Measure actual current request shapes and explicit future-byte scenarios.
 
     Future codec strings are deliberately NOT accepted model responses. They
@@ -99,9 +115,7 @@ def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
     manufacturing source-review judgments to reach a later integration stage.
     """
     from . import api_runner as api, bc1_audit as audit, bc1_runtime as runtime
-    from . import bc1_codec as codec, shared_generation as shared
-    if not isinstance(planning_bytes_per_token, (int, float)) or isinstance(planning_bytes_per_token, bool) or not math.isfinite(planning_bytes_per_token) or planning_bytes_per_token <= 0:
-        raise ValueError("BC1 planning bytes/token ratio must be explicit and positive")
+    from . import bc1_codec as codec, shared_generation as shared, receipt_completion as receipts
     selection.validate_registration(registration)
     project, arm = registration["run"]["project"], registration["run"]["arm"]
     if project not in PROJECTS:
@@ -120,9 +134,19 @@ def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
     settings = {"name": registration["runtime"]["model"], "thinking": deepcopy(registration["runtime"]["thinking"]),
                 "temperature": registration["runtime"]["temperature"], "effort": registration["runtime"]["effort"]}
     registration_sha = hashlib.sha256(shared.canonical(registration)).hexdigest()
-    # Receipt completion is not replayed or invented. Its selected bounded carry
-    # is future authority, so this absence is made explicit in every scenario.
-    receipt_carry = "BC1 SIZING PLACEHOLDER: future receipt-completion decision carry is not yet available."
+    result_path = Path(getattr(sizing_record, "receipt_result", None) or
+                       paths["full"].with_name(project + "_receipt_completion_result.json"))
+    if not result_path.is_file():
+        raise ValueError("BC1 sizing requires the saved receipt-completion result; no undersized carry placeholder")
+    result_raw = result_path.read_bytes()
+    outcome = json.loads(result_raw)
+    if outcome.get("receipt_after_sha256") != hashlib.sha256(raws["receipt"]).hexdigest():
+        raise ValueError("BC1 sizing receipt-completion result does not name its effective receipt")
+    outcome["journal"] = {"result": {key: value for key, value in _pin(result_path, result_raw).items()
+                                    if key != "bytes"}}
+    receipt_carry = receipts.bc1_audit_carry(outcome)
+    ratios = calibration()["bytes_per_token"]
+    schema_text = context.schema_context(captured, raws["full"].decode())
     common = {"packet": packet, "settings": settings, "audit_limits": limits,
         "registration_sha256": registration_sha, "generation_id": "0" * 32,
         "policy_text": selection.policy_text(), "evidence_contract": api.shared_evidence_contract(),
@@ -131,12 +155,14 @@ def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
 
     def render(stage, inner, scenario, *, assignment=None, placeholders=None):
         _, payload = runtime.render_request(**common, stage=stage, inner=inner,
-            schema_context=context.schema_context(captured, raws["full"].decode(), assigned_paths=assignment))
+            schema_context=schema_text)
         wire = shared.canonical(payload)
         output = payload["max_tokens"]
-        estimate = math.ceil(len(wire) / planning_bytes_per_token)
+        ratio = ratios[stage["phase"]]
+        estimate = math.ceil(len(wire) / ratio)
         row = {"stage": deepcopy(stage), "scenario": scenario, "wire_bytes": len(wire),
                "wire_sha256": hashlib.sha256(wire).hexdigest(), "output_token_reserve": output,
+               "planning_bytes_per_token": ratio,
                "estimated_input_tokens": estimate,
                "estimated_context_tokens": estimate + output,
                "estimated_context_fits": estimate <= min(limits["max_input_tokens_per_call"], limits["context_limit_tokens"] - output),
@@ -152,7 +178,8 @@ def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
                "captured_record")
     render({"phase": "typed_audit_omission"}, audit.omission_request(packet), "captured_record")
     scenarios = {"empty_future_floor": {"worker": 0, "concern": 0},
-                 "visible_cap_ascii_scenario": {"worker": codec.WORKER_BYTES, "concern": codec.CARRY_BYTES}}
+                 "visible_cap_ascii_scenario": {"worker": codec.WORKER_BYTES, "concern": codec.CARRY_BYTES},
+                 "visible_cap_escaped_bound": {"worker": codec.WORKER_BYTES, "concern": codec.CARRY_BYTES}}
     if expected_visible_bytes is not None:
         if type(expected_visible_bytes) is not dict or set(expected_visible_bytes) != {"worker", "concern", "basis"} or not isinstance(expected_visible_bytes["basis"], str) or not expected_visible_bytes["basis"].strip():
             raise ValueError("BC1 expected-byte scenario needs worker/concern integer bytes and an explicit basis")
@@ -162,14 +189,15 @@ def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
         scenarios["caller_expected_visible_scenario"] = dict(expected_visible_bytes)
     stages = [*packet["groups"], {"id": "final", "workers": []}]
     for scenario, amounts in scenarios.items():
+        placeholder = (lambda size, label: "\\" * size) if scenario == "visible_cap_escaped_bound" else _placeholder
         processed = []
         for group in stages:
             processed.extend(group["workers"])
             selected_paths = {path for worker in packet["plan"]["workers"] if worker["id"] in processed
                               for path in worker["paths"]}
             inner = audit.render_stage_request(packet, stage_id=group["id"],
-                new_workers={key: _placeholder(amounts["worker"], "future worker") for key in group["workers"]},
-                concern_packet=_placeholder(amounts["concern"], "future complete concern packet").encode(),
+                new_workers={key: placeholder(amounts["worker"], "future worker") for key in group["workers"]},
+                concern_packet=placeholder(amounts["concern"], "future complete concern packet").encode(),
                 record_digest=audit.render_record_digest(packet, row_count=len(selected_paths),
                     current_row_index_sha256="0" * 64, processed_workers=processed),
                 prior_state_sha256="0" * 64, current_row_index_sha256="0" * 64)
@@ -193,15 +221,15 @@ def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
         "final_cross_group_calls": 1, "registered_maximum_roster": selection.allowances(limits["max_workers"], fan,
             **{key: limits[key] for key in ("worker_output_tokens", "omission_output_tokens", "integration_output_tokens")}),
         "rows": rows, "own_plan_scenarios": totals, "expected_visible_bytes": expected_visible_bytes,
-        "planning_bytes_per_token": planning_bytes_per_token,
-        "shared_placeholders": {"generation_id": "32-character hypothetical UUID hex; never a live generation",
-                                "receipt_carry": "future checked receipt-completion outcome unavailable"},
-        "receipt_completion_carry": {"actual": False, "placeholder_bytes": len(receipt_carry.encode())},
+        "calibration": calibration(),
+        "shared_placeholders": {"generation_id": "32-character hypothetical UUID hex; never a live generation"},
+        "receipt_completion_carry": {"actual": True, "bytes": len(receipt_carry.encode()),
+            "sha256": hashlib.sha256(receipt_carry.encode()).hexdigest(), "source": _pin(result_path, result_raw)},
         "downstream_projection": {"actual": False, "bytes": None,
             "representation": "Self-contained BC1 codec with empty external dictionary; runtime visible-byte cap 262144.",
             "reason": "No completed BC1 assembly exists before generation; reconcile/report bodies remain unknown."},
         "actual_provider_token_counts": None, "admission": "UNVERIFIED_UNTIL_ACTUAL_REQUEST_COUNT",
-        "warnings": ["Future record, judgment, UTF-8 escaping and receipt carry can change request sizes.",
+        "warnings": ["Historical record and receipt carry are exact; a future record/carry requires fresh sizing.",
                      "Visible-byte caps do not bound thinking tokens; 64k output reservations remain.",
                      "The ASCII visible-cap scenario is not an upper bound on escaped JSON wire bytes or token counts.",
                      "Own-plan totals are not maximum-worker or retry-inclusive campaign budgets."],
@@ -239,6 +267,14 @@ def check_sizing_record(registration, sizing):
         raise ValueError("BC1 registration requires its actual project/arm sizing record")
     if sizing.get("source_identity") != selection.contract_identity():
         raise ValueError("BC1 sizing code/contract identity is stale")
+    if sizing.get("calibration") != calibration():
+        raise ValueError("BC1 sizing requires the registered per-call calibration")
+    carry = sizing.get("receipt_completion_carry", {})
+    if carry.get("actual") is not True or "source" not in carry:
+        raise ValueError("BC1 sizing requires a real rendered receipt carry")
+    pin = carry["source"]
+    if _pin(pin["path"], Path(pin["path"]).read_bytes()) != pin:
+        raise ValueError("BC1 sizing receipt-completion source bytes changed")
     groups = sizing.get("groups")
     if (not isinstance(groups, list) or not groups or any(type(g) is not dict or set(g) != {"id", "workers"}
             or not isinstance(g["id"], str) or not isinstance(g["workers"], list)
@@ -255,8 +291,8 @@ def check_sizing_record(registration, sizing):
                        for group in groups] + [{"phase": "typed_audit_integration", "stage_id": "final", "worker_ids": []}]
     rows, totals = sizing.get("rows"), sizing.get("own_plan_scenarios")
     if (not isinstance(rows, list) or not isinstance(totals, dict)
-            or not {"empty_future_floor", "visible_cap_ascii_scenario"} <= set(totals)
-            or set(totals) - {"empty_future_floor", "visible_cap_ascii_scenario", "caller_expected_visible_scenario"}):
+            or not {"empty_future_floor", "visible_cap_ascii_scenario", "visible_cap_escaped_bound"} <= set(totals)
+            or set(totals) - {"empty_future_floor", "visible_cap_ascii_scenario", "visible_cap_escaped_bound", "caller_expected_visible_scenario"}):
         raise ValueError("BC1 sizing scenario roster is incomplete")
     if any(type(row) is not dict or row.get("scenario") not in {"captured_record", *totals} for row in rows):
         raise ValueError("BC1 sizing has an undeclared scenario")
@@ -273,6 +309,16 @@ def check_sizing_record(registration, sizing):
                 or row.get("output_token_reserve") != limits[label + "_output_tokens"]
                 or type(row.get("estimated_input_tokens")) is not int or row["estimated_input_tokens"] < 0):
             raise ValueError("BC1 sizing wire/output envelope is invalid")
+        ratio = calibration()["bytes_per_token"][row["stage"]["phase"]]
+        estimate = math.ceil(row["wire_bytes"] / ratio)
+        room = min(limits["max_input_tokens_per_call"], limits["context_limit_tokens"] - row["output_token_reserve"])
+        if (row.get("planning_bytes_per_token") != ratio or row["estimated_input_tokens"] != estimate
+                or row.get("estimated_context_tokens") != estimate + row["output_token_reserve"]
+                or row.get("estimated_context_fits") is not (estimate <= room)):
+            raise ValueError("BC1 sizing token estimate does not match calibrated wire bytes")
+        if estimate > room:
+            raise ValueError(f"BC1 {row['stage']} ({row['scenario']}) needs {estimate:,} input tokens, "
+                             f"over per-call room {room:,} at {ratio} bytes/token; registration refused before writing")
     for name, total in totals.items():
         future = [row for row in rows if row["scenario"] == name]
         if [row.get("stage") for row in future] != expected_stages:
@@ -284,6 +330,9 @@ def check_sizing_record(registration, sizing):
             "estimated_all_calls_fit": all(r["estimated_context_fits"] for r in chosen)}
         if total != expected or expected["calls"] > limits["max_calls"] or expected["output_token_reservations"] > limits["aggregate_output_tokens"]:
             raise ValueError("BC1 sizing totals omit or exceed registered audit calls/output reservations")
+        if expected["estimated_input_tokens"] > limits["aggregate_input_tokens"]:
+            raise ValueError(f"BC1 {name} needs aggregate_input_tokens {expected['estimated_input_tokens']:,}, "
+                             f"over allowance {limits['aggregate_input_tokens']:,}; registration refused before writing")
     for pin in sizing.get("sizing_record", {}).values():
         if _pin(pin["path"], Path(pin["path"]).read_bytes()) != pin:
             raise ValueError("BC1 sizing source bytes changed")

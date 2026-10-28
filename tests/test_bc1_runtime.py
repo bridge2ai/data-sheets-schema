@@ -333,11 +333,11 @@ def test_downstream_codec_contract_and_projection_cannot_be_dropped(case):
     records = case.carry['Original full record']
     projection = api.CARRY_LABEL.format(name='Audit findings') + runtime.model_carry(case.spec, outcome.audit)
     contract = shared.canonical(audit.downstream_contract()).decode()
-    texts = [bc1_context.generation_context(case.captured), bc1_context.schema_context(case.captured, records),
+    texts = [bc1_context.generation_context(case.captured), bc1_context.downstream_schema_context(case.spec, records),
              api.CARRY_LABEL.format(name='Completed full record') + records, projection, contract]
     kwargs = {'messages': [{'role': 'user', 'content': [{'type': 'text', 'text': text} for text in texts]}]}
     runtime.require_request(case.spec, 'reconcile_full', kwargs)
-    for missing in (projection, contract):
+    for missing in (projection, contract, texts[1]):
         altered = deepcopy(kwargs)
         altered['messages'][0]['content'] = [p for p in altered['messages'][0]['content'] if p['text'] != missing]
         with pytest.raises(ledger.UsageLedgerError):
@@ -361,6 +361,40 @@ def test_cached_packet_and_sizing_renderer_are_exact_private_copies(case):
         schema_context=bc1_context.schema_context(case.captured, originals['original_full'].decode()),
         generation_context=bc1_context.generation_context(case.captured), receipt_carry=receipts.audit_carry(case.spec))
     assert request == sizing_request and shared.canonical(wire) == shared.canonical(sizing_wire)
+
+
+def test_each_typed_wire_has_catalog_and_source_chunks_exactly_once(case):
+    run(case, Messages(case))
+    def walk(value):
+        yield value
+        if isinstance(value, dict):
+            for child in value.values():
+                yield from walk(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from walk(child)
+    phases = set()
+    for stage in runtime._state(case.spec)['stages']:
+        wire = receipts._load(stage['request'])
+        phases.add(stage['selection']['phase'])
+        parts = wire['messages'][0]['content']
+        assert not any('cache_control' in part for part in parts)  # D60
+        schema = json.loads(parts[3]['text'][len(bc1_context.SCHEMA_HEADER):])
+        inner = json.loads(parts[-1]['text'].split('\n\n', 1)[1])
+        all_text = '\n'.join(part['text'] for part in parts)
+        assert all_text.count(shared.canonical(schema['catalog']).decode()) == 1
+        nodes = list(walk([schema, inner]))
+        assert sum(node == schema['catalog'] for node in nodes) == 1
+        assert not any(isinstance(node, dict) and 'domain_of' in node for node in nodes)
+        payload = inner['payload']
+        chunks = payload['dictionary']['chunks'] if 'dictionary' in payload else payload['chunks']
+        for chunk in chunks:
+            assert sum(node == chunk['text'] for node in nodes if isinstance(node, str)) == 1
+            assert all_text.count(shared.canonical(chunk['text']).decode()) == 1
+        if 'shared_context' in payload:
+            assert 'bundle' not in payload['shared_context']
+            assert payload['shared_context']['bundle_ref']['ref'] == 'payload.dictionary.chunks'
+    assert phases == set(runtime.PHASES)
 
 
 def test_schema_memo_preserves_exact_text_and_rechecks_live_authority(case, monkeypatch):
