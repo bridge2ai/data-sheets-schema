@@ -23,25 +23,62 @@ Usage examples:
 from __future__ import annotations
 
 import copy
+import functools
 import hashlib
+import inspect
 import json
+import os
 import sys
+import threading
 from pathlib import Path
 from typing import Any
 
-# Ensure repository root and src/ are importable
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _bootstrap_worktree(argv: list[str]) -> Path | None:
+    """Select copied-script imports before any project package is imported."""
+    selected = None
+    # All non-flag CLI options take one value. Skip those values so a literal
+    # label/path spelled '--worktree' can never change the import authority.
+    flags = {"--all", "--synthesize-draft-context", "--dry-run", "--check", "--replace", "--help"}
+    index = 0
+    while index < len(argv):
+        arg = argv[index]
+        if arg == "--":
+            break
+        if arg in ("--worktree", "-w") and index + 1 < len(argv):
+            selected = argv[index + 1]
+            index += 2
+            continue
+        elif arg.startswith("--worktree="):
+            selected = arg.split("=", 1)[1]
+        elif arg.startswith("-w") and len(arg) > 2:
+            selected = arg[2:]
+        elif arg not in flags and ((arg.startswith("--") and "=" not in arg) or (arg.startswith("-") and len(arg) == 2)):
+            index += 2
+            continue
+        index += 1
+    return Path(selected).resolve() if selected else None
+
+
+_selected_bootstrap_root = _bootstrap_worktree(sys.argv[1:]) if __name__ == "__main__" else None
+candidate_src = (_selected_bootstrap_root or ROOT) / "src"
+if _selected_bootstrap_root is not None and not (candidate_src / "data_sheets_schema" / "api_runner.py").is_file():
+    raise SystemExit("--worktree must contain the data_sheets_schema source package")
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-if (ROOT / "src").is_dir() and str(ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(ROOT / "src"))
+if candidate_src.is_dir() and str(candidate_src) not in sys.path:
+    sys.path.insert(0, str(candidate_src))
 
-# Support --worktree argument if copied to sibling inputs directory
-for idx, arg in enumerate(sys.argv):
-    if arg in ("--worktree", "-w") and idx + 1 < len(sys.argv):
-        candidate_src = Path(sys.argv[idx + 1]).resolve() / "src"
-        if candidate_src.is_dir() and str(candidate_src) not in sys.path:
-            sys.path.insert(0, str(candidate_src))
+if _selected_bootstrap_root is not None:
+    import data_sheets_schema as _selected_package
+    _expected_package = candidate_src / "data_sheets_schema"
+    if any(Path(path).resolve() != _expected_package for path in _selected_package.__path__):
+        raise SystemExit(
+            "--worktree package imports are mixed with another checkout; use the selected checkout's own venv, "
+            "or python -S with site-packages on PYTHONPATH"
+        )
 
 import click
 import yaml
@@ -53,22 +90,48 @@ from data_sheets_schema.chunking import CONCAT_DIR as BUNDLE_DIR, manifest_for
 from data_sheets_schema.cli.api import ARMS
 from data_sheets_schema.profiles import profile_named, select_profile
 from data_sheets_schema.registry import load_registry
-from data_sheets_schema.resources import resource_path
+from data_sheets_schema.resources import checkout_at, resource_path
 from data_sheets_schema.schema_snapshot import capture_schema
 
 DEFAULT_PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE")
-KIDS_FIRST_MANIFEST_PATH = (
-    ROOT / "notes" / "matched_cborg_2026-09-13" / "kids_first" / "manifest.yaml"
-)
 DEFAULT_CONDITION = "generic_v10"
 DEFAULT_ID_PREFIX = "generic-v10"
 DEFAULT_RECEIPT_ID = "generic-v10-receipt"
 DEFAULT_PROVIDER = "LBL CBORG (proxy to Anthropic)"
 DEFAULT_BASE_URL = "https://api.cborg.lbl.gov"
 DEFAULT_MODEL = "claude-opus-5"
-DEFAULT_VOCABULARIES_PATH = (
-    ROOT / "src" / "data_sheets_schema" / "b2ai_registry_vocabularies.yaml"
-)
+DEFAULT_VOCABULARIES_PATH = Path("src/data_sheets_schema/b2ai_registry_vocabularies.yaml")
+
+
+def _worktree_resources(function):
+    """Scope explicit worktree resources in this single-threaded preparation CLI.
+
+    Relative input/output arguments are relative to the selected worktree. The
+    implicit calling convention is unchanged. A library caller selecting another
+    tree must run without other threads because cwd is process-global; all exits
+    restore the caller's cwd. Project resource readers then honor missing files
+    in the selected checkout instead of falling back to another checkout.
+    """
+    signature = inspect.signature(function)
+    @functools.wraps(function)
+    def wrapped(*args, **kwargs):
+        bound = signature.bind(*args, **kwargs)
+        worktree = bound.arguments.get("worktree")
+        if worktree is None:
+            return function(*args, **kwargs)
+        selected = Path(worktree).resolve()
+        if checkout_at(selected) != selected:
+            raise ValueError("--worktree must be the root of a data-sheets-schema checkout")
+        previous = Path.cwd()
+        if previous != selected and threading.active_count() != 1:
+            raise ValueError("--worktree resource selection requires a single-threaded process")
+        bound.arguments["worktree"] = selected
+        try:
+            os.chdir(selected)
+            return function(*bound.args, **bound.kwargs)
+        finally:
+            os.chdir(previous)
+    return wrapped
 
 DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
     "max_paths": 384,
@@ -152,11 +215,13 @@ def parse_coverage_floor(value: str | dict[str, Any] | None) -> dict[str, Any]:
     return {"state": "registered", "numerator": num_1000, "denominator": 1000}
 
 
+@_worktree_resources
 def build_draft_context(
     project: str,
     source_manifest_path: Path | str | None = None,
     context_path: Path | str | None = None,
     write_to_disk: bool = True,
+    worktree: Path | str | None = None,
 ) -> dict[str, Any]:
     """Synthesize a compliant root-only omission_context_v1 draft document.
 
@@ -172,6 +237,17 @@ def build_draft_context(
     manifest_data = load_project_manifest_data(project, source_manifest_path)
     doc = build_draft_scope_context(project, manifest_data)
 
+    vocab_path = resource_path(DEFAULT_VOCABULARIES_PATH)
+    if vocab_path.is_file():
+        declared_prof = str(manifest_data.get("profile") or "").strip().lower()
+        if declared_prof != "neutral":
+            vocab_data = yaml.safe_load(vocab_path.read_text(encoding="utf-8")) or {}
+            doc["vocabulary"] = vocab_data.get("vocabularies", {})
+        else:
+            doc["vocabulary"] = {}
+    elif worktree is not None:
+        raise FileNotFoundError(f"selected worktree vocabulary is missing: {vocab_path}")
+
     if write_to_disk and context_path is not None:
         target = Path(context_path).resolve()
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -180,6 +256,7 @@ def build_draft_context(
     return doc
 
 
+@_worktree_resources
 def build_registration(
     project: str,
     label: str,
@@ -324,6 +401,7 @@ def build_registration(
                 source_manifest_path=sm_resolved,
                 context_path=target_context,
                 write_to_disk=write_to_disk,
+                worktree=worktree,
             )
             resolved_context = target_context.resolve()
             resolved_context_raw = serialize_draft_context(draft_doc)
@@ -347,14 +425,17 @@ def build_registration(
     prof_vocab_pin = None
     if prof.pin_path:
         vocab_path = Path(prof.pin_path).resolve()
-        if vocab_path.is_file():
-            prof_vocab_pin = sg.file_pin(vocab_path)
+        prof_vocab_pin = sg.file_pin(vocab_path)
 
     # Capture schema snapshots
     full_schema_pin = sg.schema_pin(capture_schema(api.FULL_SCHEMA_PATH, strict=True))
     core_schema_pin = sg.schema_pin(capture_schema(api.CORE_SCHEMA_PATH, strict=True))
 
     # Resolve runtime settings
+    # An explicitly selected checkout must provide its declared configuration;
+    # missing files cannot silently select the API's built-in fallback settings.
+    if worktree is not None and not resource_path(api.DETERMINISTIC_CONFIG).is_file():
+        raise FileNotFoundError(f"selected worktree runtime config is missing: {api.DETERMINISTIC_CONFIG}")
     model_settings = api._model_settings(condition=DEFAULT_CONDITION)
     config_pin = None
     if model_settings.get("config_path"):
@@ -512,13 +593,14 @@ def validate_registration_document(reg: dict[str, Any]) -> dict[str, Any]:
     return sg.parse_registration(raw)
 
 
+@_worktree_resources
 def verify_registration_input_pins(
     reg: dict[str, Any],
     *,
     worktree: Path | str | None = None,
 ) -> None:
-    """Verify that pinned input files in a registration document match their on-disk SHA-256 digests."""
-    root_dir = Path(worktree).resolve() if worktree is not None else ROOT
+    """Verify current file bytes and complete full/core schema import closures."""
+    reg = sg.parse_registration(sg.canonical(reg))
     inputs = reg.get("inputs") or {}
     runtime = reg.get("runtime") or {}
     pin_entries: list[tuple[str, Any]] = [
@@ -529,31 +611,49 @@ def verify_registration_input_pins(
         ("inputs.profile.vocabulary", (inputs.get("profile") or {}).get("vocabulary")),
         ("runtime.config", runtime.get("config")),
     ]
+    if reg["format"] == sg.ROUTING_FORMAT:
+        pin_entries.append(("routing.artifact", reg["routing"]["artifact"]))
+    for schema in ("full_schema", "core_schema"):
+        pin_entries.extend((f"inputs.{schema}.sources[{index}]", pin)
+                           for index, pin in enumerate(inputs[schema]["sources"]))
+    captured: dict[str, bytes] = {}
     for label, pin in pin_entries:
-        if not isinstance(pin, dict):
+        if pin is None:
             continue
-        raw_path = pin.get("path")
-        expected_sha = pin.get("sha256")
-        if not raw_path or not expected_sha:
-            continue
-        p = Path(str(raw_path))
-        if not p.is_file() and not p.is_absolute():
-            alt = (root_dir / p).resolve()
-            if alt.is_file():
-                p = alt
+        raw_path = pin["path"]
+        expected_sha = pin["sha256"]
+        p = Path(raw_path)
         if not p.is_file():
             raise FileNotFoundError(f"Pinned {label} file not found on disk: {raw_path}")
-        raw_bytes = p.read_bytes()
+        if p.stat().st_size > sg.MAX_AUTHORITY_BYTES:
+            raise ValueError(f"Pinned {label} file exceeds the authority byte bound: {raw_path}")
+        raw_bytes = captured.get(raw_path)
+        if raw_bytes is None:
+            with p.open("rb") as stream:
+                raw_bytes = stream.read(sg.MAX_AUTHORITY_BYTES + 1)
+            if len(raw_bytes) > sg.MAX_AUTHORITY_BYTES:
+                raise ValueError(f"Pinned {label} file exceeds the authority byte bound: {raw_path}")
+            captured[raw_path] = raw_bytes
         actual_sha = hashlib.sha256(raw_bytes).hexdigest()
         if actual_sha.lower() != str(expected_sha).lower():
             raise ValueError(
                 f"Pinned {label} SHA-256 mismatch for {p}: expected {expected_sha}, got {actual_sha}"
             )
-        expected_bytes = pin.get("bytes")
-        if isinstance(expected_bytes, int) and len(raw_bytes) != expected_bytes:
+        expected_bytes = pin["bytes"]
+        if len(raw_bytes) != expected_bytes:
             raise ValueError(
                 f"Pinned {label} byte-length mismatch for {p}: expected {expected_bytes}, got {len(raw_bytes)}"
             )
+    for schema in ("full_schema", "core_schema"):
+        selected = inputs[schema]
+        allowed = {pin["path"] for pin in selected["sources"]}
+        def read_selected(path):
+            if str(path) not in allowed:
+                raise ValueError(f"Pinned {schema} import is outside the registered closure: {path}")
+            return captured[str(path)]
+        actual = capture_schema(Path(selected["root"]), strict=True, read_bytes=read_selected)
+        if sg.schema_pin(actual) != selected:
+            raise ValueError(f"Pinned {schema} closure/order differs from its actual imports")
 
 
 def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] | None = None) -> dict[str, Any]:
@@ -734,7 +834,7 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
 @click.option(
     "--check",
     is_flag=True,
-    help="Validate existing registrations and roster on disk without rebuilding.",
+    help="Validate existing registrations and roster on disk without rebuilding; attests pinned bytes, not runtime admission.",
 )
 @click.option(
     "--replace",
@@ -745,8 +845,12 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     "--worktree", "-w",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     default=None,
-    help="Repository/worktree root override.",
+    help=(
+        "Select checkout resources; relative input/output paths resolve under this root (single-threaded preparation). "
+        "Use the selected checkout's own venv, or python -S with site-packages on PYTHONPATH."
+    ),
 )
+@_worktree_resources
 def cli(
     projects: tuple[str, ...],
     all_projects: bool,
@@ -782,7 +886,10 @@ def cli(
     replace: bool = False,
     worktree: Path | None = None,
 ) -> None:
-    """Build shared generation registrations and batch rosters for D4D Messages-API generic_v10."""
+    """Build shared generation registrations and batch rosters for D4D Messages-API generic_v10.
+
+    --check attests pinned bytes, not runtime admission.
+    """
     target_projects: list[str] = []
     if all_projects:
         target_projects = list(DEFAULT_PROJECTS)
@@ -840,6 +947,7 @@ def cli(
 
     if check:
         click.echo(f"Checking registrations for {target_projects} x {target_labels} under {out_dir}...")
+        verified: dict[tuple[str, str], tuple[Path, str]] = {}
         for proj in target_projects:
             for lbl in target_labels:
                 reg_file = out_dir / f"registration_{proj.lower()}_{lbl}.json"
@@ -847,15 +955,28 @@ def cli(
                     raise click.ClickException(f"Missing registration file: {reg_file}")
                 raw = reg_file.read_bytes()
                 parsed_reg = sg.parse_registration(raw)
+                if parsed_reg["registration_path"] != str(reg_file):
+                    raise click.ClickException(f"Out-dir registration path differs from its declared authority: {reg_file}")
                 try:
                     verify_registration_input_pins(parsed_reg, worktree=worktree)
                 except (FileNotFoundError, ValueError) as exc:
                     raise click.ClickException(f"Input pin verification failed for {reg_file.name}: {exc}") from exc
+                verified[(proj, lbl)] = (reg_file, hashlib.sha256(raw).hexdigest())
                 click.echo(f"  ✓ {proj}: {reg_file.name}")
         if not target_roster_path.is_file():
             raise click.ClickException(f"Missing roster file: {target_roster_path}")
         pairs = [(p, lbl) for p in target_projects for lbl in target_labels]
-        validate_roster_file(target_roster_path, pairs)
+        roster = validate_roster_file(target_roster_path, pairs)
+        for pair, captured in roster["registrations"].items():
+            try:
+                verify_registration_input_pins(captured["document"], worktree=worktree)
+            except (FileNotFoundError, ValueError) as exc:
+                raise click.ClickException(f"Input pin verification failed for roster registration {captured['path']}: {exc}") from exc
+            expected_path, expected_sha = verified[pair]
+            if captured["path"] != expected_path:
+                raise click.ClickException(f"Roster registration path differs from verified out-dir file: {captured['path']} != {expected_path}")
+            if captured["sha256"] != expected_sha:
+                raise click.ClickException(f"Roster registration SHA-256 differs from verified out-dir file: {expected_path}")
         click.echo(f"  ✓ Roster valid: {target_roster_path.name}")
         click.echo("All checks passed.")
         return
