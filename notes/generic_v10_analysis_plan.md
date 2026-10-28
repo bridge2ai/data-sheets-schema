@@ -240,7 +240,7 @@ disclosed so that the owner, a later reader and this draft can see what was know
 when the rules were chosen: if a row is made descriptive at P4, the P4 record should
 say that these values were in view.
 
-## Staged sequence under D58 [proposed; owner fixes at P4, items 1–2]
+## Staged sequence under D58 [proposed; owner fixes at P4, items 1–3]
 
 **Why the plan needs stages.** D58 decides the matrix's scope and budget on the
 re-canary's measured cost. P4 must come before the re-canary, because every billed
@@ -252,24 +252,28 @@ applies.
 **The sequence:**
 1. **P3 dispositions.** Every P3 finding is fixed in this text or converted to a P4
    question, and the revision is re-reviewed.
-2. **P4a.** The owner ratifies this file's exact text, by sha256, for the A21 CHORUS
-   re-canary condition and for every analysis rule:
-   - the condition (items 14–15);
-   - the re-canary's money, attempt and stop rules (item 10);
-   - acceptance (items 5–6);
-   - the analysis sets, estimands and predictions (items 1, 3, 3a, 7–9 and 16, and
-     the Predictions);
-   - the scope rule below, and the other rules P4b applies.
-
-   A rule P4a defers is named, with the stage it holds. A deferral never permits a
-   choice after that stage's outcomes are seen.
-3. **The A21 registration.** After D44's all-project build and review, one
-   registration composes D59's request shape, D62's fit gate (with D63's calibrated
-   ratio) and D55's guard. It is reviewed, and the owner's launch word names its sha256
-   and the $60 cap (D07, D22, D43).
-4. **A21.** One clean CHORUS re-canary: n=1, descriptive, in plan A10's role, outside
-   every confirmatory estimate.
-5. **The measured-cost packet.** It reports:
+2. **P4a.** The owner ratifies this file's exact text, by sha256: the A21 condition and
+   every rule whose first relevant outcome is A21 or a later run. The P4 agenda gives
+   each item's latest decision point. P4a may leave to P4b only the items the agenda
+   marks P4b (items 38–41), and to a later stage only items 42 and 43. No rule is
+   chosen after an outcome it governs.
+3. **The A21 registration.** After D44's all-project build and review, the composed
+   head is named by commit, and one registration composes D59's request shape, D62's
+   fit gate (with D63's calibrated ratio) and D55's guard. Its review checks the
+   composed condition against this ratified text; any deviation needs a P4a amendment
+   before the launch word. The owner's launch word names the registration's sha256 and
+   the $60 cap (D07, D22, D43).
+4. **A21.** One clean CHORUS re-canary, n=1, in plan A10's role. It stays descriptive
+   permanently, whatever its outcome: it never becomes a replicate, a confirmatory
+   record, or a record of the E2 or E5 rosters.
+5. **After A21, by outcome:**
+   - **accepted:** the measured-cost packet, then P4b;
+   - **rejected for a rule-level cause:** A13 ends the condition and schedules the next
+     shared-generation version, and there is no P4b (§10);
+   - **any other stop, or an assisted run:** P4b waits for a funded contingency (plan
+     A10c, P4 item 3), unless the owner decides scope on the partial packet, which is
+     then labelled partial.
+6. **The measured-cost packet.** It reports:
    - A21's billed cost by stage;
    - each call's outcome: completed, transport error, answer-level rejection or
      terminal;
@@ -277,28 +281,40 @@ applies.
      sizing;
    - the wall clock.
 
-   It carries no quality comparison against v8.
-6. **P4b.** A dated amendment, reviewed as P3 was (a Claude reviewer plus a Codex CLI
-   pass, each finding filed), applies the scope rule to the measured-cost packet and
-   to the budget the owner sets under D58. It fixes the matrix's scope and budget, and
-   with them K, the confirmatory set, the E2 and E5 rosters, the pilot sequence (D03)
-   and which D20 input applies. The owner ratifies it by sha256 before any dependent
-   registration (plan A14-reg, A16-reg).
-7. **Dependent pilots and rosters,** each with its own registration, review, cap and
+   It carries no quality comparison against v8. A partial packet says which stages it
+   lacks.
+7. **P4b.** A dated amendment, reviewed as P3 was (a Claude reviewer plus a Codex CLI
+   pass, each finding filed), applies the scope rule to the measured-cost packet and to
+   the budget the owner sets under D58. It fixes the matrix's scope and budget, and
+   with them K, the confirmatory set and the E2 and E5 rosters. It applies the D20
+   branch and the D03 sequence that P4a selected, and it answers items 38–41. It
+   applies rules; it does not invent them. The owner ratifies it by sha256 before any
+   dependent registration (plan A14-reg, A16-reg).
+8. **The floor's branch (§8, P4 item 28).** If AI_READI is in scope, its pilot runs and
+   is accepted before A15, and A15 computes the floor from both pilots. If AI_READI is
+   out of scope, A15 applies the re-canary-only fallback. If the AI_READI pilot ends
+   without acceptance for a cause that is not rule-level, AI_READI leaves scope as
+   infeasible, reported as a feasibility result, and the fallback applies. No
+   production roster starts before A15 registers the floor.
+9. **Dependent pilots and rosters,** each with its own registration, review, cap and
    owner word.
 
 **What P4b may change, and what it may not:**
 - **It may change** which whole projects are in scope, a replicate count where this
-  text predeclares the options (VOICE_PEDIATRIC ×1 or ×3), and the budget lines.
-  Whether the AI_READI pilot runs follows from scope.
-- **It may not change** any metric, instrument, decision rule, tolerance, analysis-set
-  definition, eligibility rule or missingness rule. It may not use any v10 quality
-  value, A21's included, to choose a project or a threshold. Changing a rule needs its
-  own prospective amendment, and it starts a new analysis stratum.
+  text predeclares the options (VOICE_PEDIATRIC ×1 or ×3), the budget lines, and the
+  answers to the items P4a left to it (38–41). Whether the AI_READI pilot runs follows
+  from scope.
+- **It may not change** any rule P4a fixed: no metric, instrument, decision rule,
+  tolerance, analysis-set definition, eligibility rule or missingness rule. It may not
+  use any v10 quality value, A21's included, to choose a project or a threshold.
+  Changing a rule needs its own prospective amendment, and it starts a new analysis
+  stratum.
 
 **The generation plan needs matching amendments,** for plan A10's role, plan A14's
 conditional start, plan A15's inputs and E5b-reg's roster. This draft does not edit
-the generation plan; the amendments are listed at the end ("Plan amendments").
+the generation plan; the amendments are listed at the end ("Plan amendments"), with
+their deadlines. The generation plan's own P4 gate stands: the ratified plan is merged
+on main before any registration hash is put to the owner.
 
 ### Scope rule [proposed; owner fixes at P4, item 2]
 
@@ -322,9 +338,8 @@ the generation plan; the amendments are listed at the end ("Plan amendments").
   projects (items 3 and 12).
 - **K = 1.** If only CHORUS is in scope, every verdict is a single-project result,
   written "holds for CHORUS", and no "k of K" statement generalizes from it.
-- **D03 and D20 without AI_READI.** If AI_READI is out of scope, its pilot does not run
-  (P4 item 33), and the production floor comes from the re-canary alone, under item
-  8's fallback.
+- **D03 and D20 follow the floor's branch** (step 8): with AI_READI out of scope its
+  pilot does not run, and the production floor comes from the re-canary alone.
 
 ### Feasibility under D58 (an input to P4b, not a forecast)
 
@@ -383,7 +398,9 @@ never choose between projects on quality. They are inputs to three decisions:
 
 **Budget per accepted record [proposed; owner fixes at P4, item 2].** P4b prices each
 in-scope project per accepted record, including its expected retries within D07's
-bound, not per attempt. A stopped attempt bills only the calls made before the stop.
+bound, not per attempt. The failure rate it uses is P1's 92 v8 calls pooled with A21's
+calls, by call type where A21 has them. A stopped attempt bills only the calls made
+before the stop.
 
 ## 1. Estimands (P2 item 1)
 
@@ -498,8 +515,8 @@ above).
 
 | role | cells | counts as a replicate | analysed as |
 |---|---|---|---|
-| CHORUS re-canary (A21, in plan A10's role) | 1 | no | descriptive n=1, separately |
-| AI_READI pilot (A14) | 1, only if AI_READI is in scope; started only after the re-canary passes blind source review | no | pilot, separately |
+| CHORUS re-canary (A21, in plan A10's role) | 1 | never | descriptive n=1, separately and permanently |
+| AI_READI pilot (A14) | 1, only if AI_READI is in scope; after the re-canary passes blind source review, and before A15 | no | pilot, separately |
 | CHORUS replicate gate (A16) | 3 under the A15 floor | yes | confirmatory |
 | Production (A17) | the in-scope projects among CM4AI, VOICE and AI_READI, 3 each, in the scope rule's order | yes | confirmatory (AI_READI per the comparator decision above) |
 | VOICE_PEDIATRIC (A18) | ×1 if in scope (D02's recommendation; ×3 only if the paper needs replicate variance) | — | descriptive (item 2a) |
@@ -1009,7 +1026,7 @@ and the builder default is pending. The generation plan's D20 recommendation is 
 draft follows it **[pending D20]**: the owner fixes the rule at P4a, before any pilot
 runs, and A15 only computes its value. The rule never depends on a pilot's outcome.
 
-**The proposed rule [proposed; owner fixes at P4, item 32]:**
+**The proposed rule [proposed; owner fixes at P4, item 28]:**
 
 > The registered receipt-coverage floor is the lowest of the eligible pilots' D37
 > at-receipt coverage fractions, `with_receipt_at_receipt / receiptable_at_receipt`,
@@ -1018,28 +1035,35 @@ runs, and A15 only computes its value. The rule never depends on a pilot's outco
 - **Eligible pilots.** The A21 re-canary (in plan A10's role) and, if AI_READI is in
   scope, the AI_READI pilot (plan A14). A pilot is eligible only if A13 accepted it.
   Its fraction is read from the accepted attempt's frozen `O,R1` snapshot (item 3a);
-  a rejected or assisted attempt never supplies one.
+  a rejected or assisted attempt never supplies one. A pilot cell has at most one
+  accepted attempt, since a contingency runs only after a non-acceptance.
 - **The cap at 19/20.** Receipt completion drives the D37 ratio towards 1: both
   assisted canaries read 58/58 and 64/64. Without the cap, two perfect pilots would
   register a floor of 1.00. A production record with hundreds of receiptable leaves
   would then fail on one unreceipted phase-1 leaf, and under D21 that one stop closes
   the roster. With the cap, production's floor is never stricter than the
-  re-canary's.
+  re-canary's. The cap removes the 100% requirement; it does not make a roster immune
+  to one lost receipt (with 19 receiptable leaves, 18/19 is below 19/20).
 - **Arithmetic.** Exact integers: `floor(20 × with_receipt_at_receipt /
   receiptable_at_receipt) / 20`, then the minimum with 19/20.
-- **The fallback, declared now.** If P4b leaves AI_READI out of scope, so that its
-  pilot does not run, the re-canary's fraction alone sets the value under the same
-  rule.
+- **The branch, declared now** (staged sequence, step 8). If P4b puts AI_READI in
+  scope, its pilot runs and is accepted before A15, and the floor is the lower of the
+  two pilots' values. If AI_READI is out of scope, or leaves it because its pilot ended
+  without acceptance for a cause that is not rule-level, the re-canary's fraction alone
+  sets the value under the same rule. Under the cap that value is always 19/20, since
+  an accepted re-canary has passed its own 19/20 gate. So the AI_READI pilot can only
+  lower the floor, and only the AI_READI branch makes the floor depend on a pilot.
 - **No value.** If a required pilot is missing, rejected or has a zero denominator,
   the rule yields no value. No production roster registers until a prospective
   amendment, reviewed as P3 was, supplies one. No other observed ratio is substituted.
 
-The alternatives (P4 item 32) are: the lowest fraction without the cap, which can give
+The alternatives (P4 item 28) are: the lowest fraction without the cap, which can give
 20/20; the lowest fraction minus 0.05, rounded down; and 19/20 fixed for all
 production. The last is an owner value (D28), not one derived from the pilots as
-#2926 asked ("from the canary's post-turn distribution, not a guess"), but it makes
-the re-canary's registration body match production's (P4 item 33's option d′). For the
-fallback, the alternative is no value until an amendment.
+#2926 asked ("from the canary's post-turn distribution, not a guess"). It is
+independent of scope, so it takes the AI_READI pilot off the floor's path altogether,
+and the re-canary's registration body then matches production's. For the fallback,
+the alternative is no value until an amendment.
 
 **At A15** the value is computed under the rule and registered in a dated amendment PR
 that gets P3's review (a Claude reviewer plus a Codex CLI pass) before the owner
@@ -1115,6 +1139,13 @@ same estimand. So:
 - **Moving to the next shared-generation version** ends this matrix (plan A15).
 - Under every option, Set A and Set B keep item 3's definitions. The choice and its
   basis are recorded in the A15 amendment before any multi-row roster.
+
+**A transport redelivery adopted after A21** (P4 item 4) is a procedure change of the
+same kind. It needs its own reviewed, prospective analysis amendment before any
+production registration; it then applies to every production cell, so production has
+one procedure; and A21 stays a separate descriptive record. D35's parity test and
+diagnostic canary are needed too, but they are engineering evidence, not that
+amendment. A cost-only scope amendment (P4b) cannot adopt it.
 
 **No adopted "< 0.55" trigger.** The October 20 review found that threshold in
 its delegation rather than the governing plan; its repository search is historical
@@ -1804,10 +1835,11 @@ govern the revised draft; this section does not override them.
 - **P3 closure.** Every P3 finding is fixed here or converted to an item below, each is
   filed as an issue, and this revision gets its re-review. The dispositions are in
   `d4d-executions/plans/reviews/p2_p3_dispositions_2026-10-28.md`.
-- **The condition's identity (§14–15).** The reviewed D59/D62 composed head, named
-  by commit, with board A14, board A17, D38's assets and D55's guard composed. D44's
-  all-project build and review, D62's CHORUS fit and D63's calibration gate the A21
-  registration, not P4a (§15).
+- **The condition's specification (§14–15),** as P4a ratifies it. The composed head
+  (with board A14, board A17, D38's assets and D55's guard), D44's all-project build
+  and review, D62's CHORUS fit and D63's calibration are prerequisites of the A21
+  registration (staged sequence, step 3), not of P4a. That registration's review checks
+  the composed head against the ratified text, and a deviation needs a P4a amendment.
 - **The #3289 adjudication,** re-read against AI_READI's `1a58ad7b` bundle
   (prediction 3a).
 - **Context and evaluation identities.** The omission contexts are approved (D51) and
