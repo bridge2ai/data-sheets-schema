@@ -723,29 +723,37 @@ definition (1) shows how large it is from the other side.
   place, so after an early stop that path still holds the phase-1 record. Each phase
   also writes a snapshot, `intermediate/<P>_<phase>.yaml`, whose sha256 the run's
   snapshot index records.
-  - **The event:** `reconcile_full` completed. The runner deletes its progress file
-    when a run finishes without validation problems, so the event is established by
-    a witness that survives:
-    - **a run that finished** (it wrote its provenance record): the record's
-      `intermediates` list holds `<P>_reconcile_full.yaml` with its sha256,
-      `generation_id` and `usage_id`, and that `usage_id` names a `reconcile_full`
-      row of the same record's `api_usage`;
-    - **a run that stopped** (no provenance record from its end): its progress file,
-      which a stopped run keeps, lists `reconcile_full` as completed, and the run's
-      snapshot index holds the matching `<P>_reconcile_full.yaml`. A reconcile
-      snapshot without that progress entry does not count: the snapshot is written
-      before the progress update, so the phase may not have completed.
+  - **The event:** `reconcile_full` completed. It is read from one source, the run's
+    snapshot index, `intermediate/<P>_snapshot_index.json`, because that is what a
+    clean run keeps:
+    - when a phase writes its output, the runner snapshots it and appends an index
+      entry with the snapshot's name, path, sha256 and the `usage_id` of the call that
+      produced it (`api_runner._snapshot`, which calls `snapshot_store.record`:
+      `api_runner.py:5231–5252` and `snapshot_store.py:245–266` on this branch;
+      `api_runner.py:5408–5428` at `8f83d6cb3`);
+    - no code deletes that index, while the runner deletes its progress file when a run
+      finishes without validation problems (`api_runner.py:7686–7689` here, 8019–8022
+      at `8f83d6cb3`), so the progress file is not used;
+    - the event is an index entry named `<P>_reconcile_full.yaml` whose `usage_id`
+      names a `reconcile_full` row of the run's usage ledger (`<P>_api_usage_*.json`).
+      A finished run's provenance `intermediates` block republishes the same entries
+      (`snapshot_store.entries`), so it agrees by construction and is not a second
+      source.
 
-    The A21 registration's review confirms that the composed runner writes these
-    witnesses.
-  - **The record:** the last full-record snapshot written at or after that event,
-    either `<P>_reconcile_full.yaml` or, if repair ran, its last round's
-    `<P>_repair_full_r<N>.yaml`, identified by the sha256 in the provenance record's
-    `intermediates` or, for a stopped run, in the snapshot index. A repair interrupted
+    Checked on 10-22a, a completed run: it has no progress file; its index entry for
+    `CHORUS_reconcile_full.yaml` holds sha256 `b1716e82…`, the disclosed final record's
+    hash, and `usage_id` `f53bc1c5…`, which names the ledger's `reconcile_full` row
+    (`stop_reason: end_turn`). The A21 registration's review confirms that the composed
+    runner keeps this behaviour.
+  - **The record:** the last full-record snapshot in the index at or after that entry:
+    `<P>_reconcile_full.yaml` or, if repair ran, its last round's
+    `<P>_repair_full_r<N>.yaml`, identified by its sha256 there. A repair interrupted
     before writing its snapshot leaves the previous one eligible. A report or regate
-    that failed after reconcile does not change which record is eligible.
-  - **A run with neither witness has no eligible full record.** Its phase-1 record is
-    kept and reported, but it is artifact-missing for Set A.
+    that failed after reconcile does not change which record is eligible, and neither
+    does an interruption between the reconcile snapshot and the progress update, since
+    the reconciled record is already written.
+  - **A run with no such entry has no eligible full record.** Its phase-1 record is kept
+    and reported, but it is artifact-missing for Set A.
   - A record that fails schema validation is eligible for Set A; Set B removes it.
   - A record with duplicate mapping keys is eligible for the validation and
     duplicate-key counts only. Every metric that reads values is unmeasurable for it,
