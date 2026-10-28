@@ -200,6 +200,7 @@ def build_registration(
     synthesize_draft_context: bool = False,
     write_to_disk: bool = True,
     replace: bool = False,
+    worktree: Path | str | None = None,
 ) -> dict[str, Any]:
     """Build a complete shared_generation_registration_v1 document.
 
@@ -209,15 +210,19 @@ def build_registration(
     if arm not in ARMS:
         raise ValueError(f"unknown arm '{arm}'; must be one of {sorted(ARMS.keys())}")
     arm_display, method, pattern, _ = ARMS[arm]
+    root_dir = Path(worktree).resolve() if worktree is not None else ROOT
+    kids_first_manifest = (
+        root_dir / "notes" / "matched_cborg_2026-09-13" / "kids_first" / "manifest.yaml"
+    )
 
     # Resolve manifest
-    default_study_manifest = (ROOT / "data" / "preprocessed" / "source_manifest.yaml").resolve()
+    default_study_manifest = (root_dir / "data" / "preprocessed" / "source_manifest.yaml").resolve()
     sm_resolved: Path | None = None
     if source_manifest_path is not None:
         raw_sm = Path(source_manifest_path)
         p = raw_sm.resolve()
         if not p.is_file() and not raw_sm.is_absolute():
-            alt = (ROOT / raw_sm).resolve()
+            alt = (root_dir / raw_sm).resolve()
             if alt.is_file():
                 p = alt
         if p.is_file():
@@ -225,8 +230,8 @@ def build_registration(
         else:
             raise FileNotFoundError(f"source manifest not found: {source_manifest_path}")
     else:
-        if project.upper() == "KIDS_FIRST" and KIDS_FIRST_MANIFEST_PATH.is_file():
-            sm_resolved = KIDS_FIRST_MANIFEST_PATH.resolve()
+        if project.upper() == "KIDS_FIRST" and kids_first_manifest.is_file():
+            sm_resolved = kids_first_manifest.resolve()
         elif default_study_manifest.is_file():
             sm_resolved = default_study_manifest
 
@@ -235,9 +240,9 @@ def build_registration(
         not reg_registry.declares(project)
         and project.upper() == "KIDS_FIRST"
         and sm_resolved == default_study_manifest
-        and KIDS_FIRST_MANIFEST_PATH.is_file()
+        and kids_first_manifest.is_file()
     ):
-        sm_resolved = KIDS_FIRST_MANIFEST_PATH.resolve()
+        sm_resolved = kids_first_manifest.resolve()
         reg_registry = load_registry(sm_resolved)
 
     # Resolve bundle
@@ -292,10 +297,10 @@ def build_registration(
                 cd / f"{project.lower()}_context.json",
             ])
         candidates.extend([
+            root_dir / "data" / "omission_contexts" / f"{project.lower()}_omission_context.json",
+            root_dir / "data" / "omission_contexts" / f"{project}_context.json",
             resolved_reg_path.parent / f"{project.lower()}_omission_context.json",
             resolved_reg_path.parent / f"{project}_context.json",
-            ROOT / "data" / "omission_contexts" / f"{project.lower()}_omission_context.json",
-            ROOT / "data" / "omission_contexts" / f"{project}_context.json",
         ])
 
         found: Path | None = None
@@ -507,6 +512,50 @@ def validate_registration_document(reg: dict[str, Any]) -> dict[str, Any]:
     return sg.parse_registration(raw)
 
 
+def verify_registration_input_pins(
+    reg: dict[str, Any],
+    *,
+    worktree: Path | str | None = None,
+) -> None:
+    """Verify that pinned input files in a registration document match their on-disk SHA-256 digests."""
+    root_dir = Path(worktree).resolve() if worktree is not None else ROOT
+    inputs = reg.get("inputs") or {}
+    runtime = reg.get("runtime") or {}
+    pin_entries: list[tuple[str, Any]] = [
+        ("inputs.bundle", inputs.get("bundle")),
+        ("inputs.chunk_manifest", inputs.get("chunk_manifest")),
+        ("inputs.source_manifest", inputs.get("source_manifest")),
+        ("inputs.context", inputs.get("context")),
+        ("inputs.profile.vocabulary", (inputs.get("profile") or {}).get("vocabulary")),
+        ("runtime.config", runtime.get("config")),
+    ]
+    for label, pin in pin_entries:
+        if not isinstance(pin, dict):
+            continue
+        raw_path = pin.get("path")
+        expected_sha = pin.get("sha256")
+        if not raw_path or not expected_sha:
+            continue
+        p = Path(str(raw_path))
+        if not p.is_file() and not p.is_absolute():
+            alt = (root_dir / p).resolve()
+            if alt.is_file():
+                p = alt
+        if not p.is_file():
+            raise FileNotFoundError(f"Pinned {label} file not found on disk: {raw_path}")
+        raw_bytes = p.read_bytes()
+        actual_sha = hashlib.sha256(raw_bytes).hexdigest()
+        if actual_sha.lower() != str(expected_sha).lower():
+            raise ValueError(
+                f"Pinned {label} SHA-256 mismatch for {p}: expected {expected_sha}, got {actual_sha}"
+            )
+        expected_bytes = pin.get("bytes")
+        if isinstance(expected_bytes, int) and len(raw_bytes) != expected_bytes:
+            raise ValueError(
+                f"Pinned {label} byte-length mismatch for {p}: expected {expected_bytes}, got {len(raw_bytes)}"
+            )
+
+
 def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] | None = None) -> dict[str, Any]:
     """Validate roster file using cli/api._shared_roster."""
     from data_sheets_schema.cli.api import _shared_roster
@@ -692,6 +741,12 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     is_flag=True,
     help="Allow overwriting an existing registration or roster file with different bytes.",
 )
+@click.option(
+    "--worktree", "-w",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Repository/worktree root override.",
+)
 def cli(
     projects: tuple[str, ...],
     all_projects: bool,
@@ -725,6 +780,7 @@ def cli(
     dry_run: bool,
     check: bool,
     replace: bool = False,
+    worktree: Path | None = None,
 ) -> None:
     """Build shared generation registrations and batch rosters for D4D Messages-API generic_v10."""
     target_projects: list[str] = []
@@ -790,7 +846,11 @@ def cli(
                 if not reg_file.is_file():
                     raise click.ClickException(f"Missing registration file: {reg_file}")
                 raw = reg_file.read_bytes()
-                sg.parse_registration(raw)
+                parsed_reg = sg.parse_registration(raw)
+                try:
+                    verify_registration_input_pins(parsed_reg, worktree=worktree)
+                except (FileNotFoundError, ValueError) as exc:
+                    raise click.ClickException(f"Input pin verification failed for {reg_file.name}: {exc}") from exc
                 click.echo(f"  ✓ {proj}: {reg_file.name}")
         if not target_roster_path.is_file():
             raise click.ClickException(f"Missing roster file: {target_roster_path}")
@@ -813,7 +873,7 @@ def cli(
                 registration_path=reg_file,
                 id_prefix=id_prefix,
                 context_path=context_file,
-                context_dir=context_dir or out_dir,
+                context_dir=context_dir,
                 source_manifest_path=source_manifest,
                 bundle_path=bundle,
                 chunk_manifest_path=chunk_manifest,
@@ -823,10 +883,14 @@ def cli(
                 synthesize_draft_context=synthesize_draft_context,
                 write_to_disk=not dry_run,
                 replace=replace,
+                worktree=worktree,
             )
             registrations.append(reg)
             reg_sha = hashlib.sha256(sg.canonical(reg)).hexdigest()
-            click.echo(f"  ✓ {proj}: registration_id={reg['registration_id']} sha256={reg_sha}")
+            ctx_sha = ((reg.get("inputs") or {}).get("context") or {}).get("sha256", "")
+            click.echo(
+                f"  ✓ {proj}: registration_id={reg['registration_id']} sha256={reg_sha} context_sha256={ctx_sha}"
+            )
 
     roster = build_roster(
         registrations=registrations,
