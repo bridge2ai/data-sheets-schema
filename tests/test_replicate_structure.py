@@ -1180,17 +1180,50 @@ def test_the_nested_walk_reproduces_the_top_level_alignment_on_v7_production():
 
 
 def test_worktree_absolute_preprocessed_tail_resolves_against_repo_root(tmp_path):
-    """Worktree-prefixed paths under data/preprocessed/... resolve against the active repo root."""
+    """Worktree-prefixed paths under data/preprocessed/... resolve against the active repo root when missing,
+    prefer an intact declared input when both exist and differ, and restrict remap to repo.resource_root (R4 F4)."""
     import hashlib
     from data_sheets_schema.chunking import DEFAULT_RULE
-    from data_sheets_schema.provenance import resolve_record_input
-    fake_wt_bundle = Path("/private/tmp/ephemeral-wt-123/data/preprocessed/concatenated/CHORUS_preprocessed.txt")
-    fake_record = ROOT / "data/d4d_concatenated/claude_api_core/2026-10-20a/CHORUS_provenance.yaml"
-    resolved = resolve_record_input(fake_wt_bundle, fake_record)
-    assert resolved == ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
-    assert resolved.is_file()
+    from data_sheets_schema.provenance import resolve_record_input, verify_entry
 
-    expected_sha = hashlib.sha256(resolved.read_bytes()).hexdigest()
+    fake_wt_root = tmp_path / "missing_wt"
+    fake_wt_bundle = fake_wt_root / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+    fake_record = ROOT / "data/d4d_concatenated/claudecode_api_core/2026-10-20a/CHORUS_provenance.yaml"
+    # When the record has no repo.resource_root on disk, a missing worktree path resolves to ROOT
+    assert resolve_record_input(fake_wt_bundle, fake_record) == ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+
+    # A missing path under the record's own repo.resource_root remaps to the owner checkout's copy,
+    # whereas an unrelated worktree path outside repo.resource_root is not remapped
+    matching_wt_root = tmp_path / "record_wt"
+    checkout_a = tmp_path / "checkout_a"
+    (checkout_a / ".git").mkdir(parents=True)
+    tail = Path("data/preprocessed/concatenated/X_preprocessed.txt")
+    a_bundle = checkout_a / tail
+    a_bundle.parent.mkdir(parents=True)
+    a_bundle.write_text("checkout-a-bytes\n", encoding="utf-8")
+    rec_in_a = checkout_a / "data/d4d_concatenated/claudecode_api_core/run1/X_provenance.yaml"
+    rec_in_a.parent.mkdir(parents=True)
+    rec_in_a.write_text(
+        yaml.safe_dump({"repo": {"resource_root": str(matching_wt_root)}}),
+        encoding="utf-8",
+    )
+    unrelated_bundle = fake_wt_root / tail
+    assert resolve_record_input(unrelated_bundle, rec_in_a) == unrelated_bundle
+    w_bundle = matching_wt_root / tail
+    # When W is missing, falls back to checkout A's copy
+    assert resolve_record_input(w_bundle, rec_in_a) == a_bundle
+
+    # When both W and A exist and differ, the declared input W wins over checkout A
+    w_bundle.parent.mkdir(parents=True)
+    w_bytes = b"declared-worktree-w-bytes\n"
+    w_bundle.write_bytes(w_bytes)
+    w_sha = hashlib.sha256(w_bytes).hexdigest()
+    assert resolve_record_input(w_bundle, rec_in_a) == w_bundle
+    assert verify_entry({"path": str(w_bundle), "sha256": w_sha}, record=rec_in_a) is True
+
+    # And record_chunk_texts resolves a missing worktree path against ROOT
+    root_bundle = ROOT / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+    expected_sha = hashlib.sha256(root_bundle.read_bytes()).hexdigest()
     inputs = {
         "bundle_path": str(fake_wt_bundle),
         "bundle_sha256": expected_sha,

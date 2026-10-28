@@ -437,9 +437,10 @@ def build_roster(
     write_to_disk: bool = True,
     replace: bool = False,
 ) -> dict[str, Any]:
-    """Build a shared_generation_batch_roster_v1 document from registration dicts.
+    """Build a shared_generation_batch_roster_v2 document from registration dicts.
 
-    Ensures no duplicate (project, label) rows, paths, or registration_ids.
+    Ensures no duplicate (project, label) rows, paths, or registration_ids, and
+    pins each row's canonical registration SHA-256 digest.
     """
     rows: list[dict[str, str]] = []
     seen_keys: set[tuple[str, str]] = set()
@@ -471,14 +472,19 @@ def build_roster(
                 raise ValueError(f"duplicate registration_id across roster rows: {reg_id}")
             seen_ids.add(reg_id)
 
+        reg_file = Path(resolved_path)
+        reg_bytes = reg_file.read_bytes() if reg_file.is_file() else sg.canonical(reg)
+        reg_sha256 = hashlib.sha256(reg_bytes).hexdigest()
+
         rows.append({
             "project": project,
             "label": label,
             "registration_path": resolved_path,
+            "registration_sha256": reg_sha256,
         })
 
     roster: dict[str, Any] = {
-        "format": "shared_generation_batch_roster_v1",
+        "format": "shared_generation_batch_roster_v2",
         "registrations": rows,
     }
 
@@ -631,7 +637,10 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
 @click.option(
     "--aggregate-output-tokens",
     type=int,
-    help="Override audit_limits.aggregate_output_tokens.",
+    help=(
+        "Explicit aggregate output token cap (must equal "
+        "max_workers * worker_output_tokens + omission_output_tokens + integration_output_tokens)."
+    ),
 )
 @click.option(
     "--worker-output-tokens",
