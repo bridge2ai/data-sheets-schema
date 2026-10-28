@@ -76,7 +76,8 @@ P4 is proposed in two stages, P4a and P4b ("Staged sequence under D58", below).
   offers.
 - **(P4 item N):** the numbered question in "P4 agenda" at the end of this file.
 
-Both markers are proposals for the owner to confirm or amend at P4, not rulings.
+The first two markers are proposals for the owner to confirm or amend at P4, not
+rulings.
 Nothing in this draft asserts a decision the owner has not recorded.
 
 **Step IDs.** Two numbering schemes meet in this draft:
@@ -234,9 +235,10 @@ S7 as implemented, with slot descriptions trimmed in generation, and before BC1,
 board A14 rework, D59 and the D30/D38 rule text. Both were also assisted: 10-20a
 changed registration mid-run and carries a patched model response, and 10-22a's
 ledger was reset by hand mid-run, which bought a second integration call its
-registration forbade (D31, D40). The values may not survive those changes. They are disclosed so that the owner, a later reader and this draft can see
-what was known when the rules were chosen: if a row is made descriptive at P4, the
-P4 record should say that these values were in view.
+registration forbade (D31, D40). The values may not survive those changes. They are
+disclosed so that the owner, a later reader and this draft can see what was known
+when the rules were chosen: if a row is made descriptive at P4, the P4 record should
+say that these values were in view.
 
 ## Staged sequence under D58 [proposed; owner fixes at P4, items 1–2]
 
@@ -261,10 +263,10 @@ applies.
 
    A rule P4a defers is named, with the stage it holds. A deferral never permits a
    choice after that stage's outcomes are seen.
-3. **The A21 registration.** D44's all-project build and review, D62's CHORUS fit
-   gate, D63's calibration and D55's guard compose into one registration. It is
-   reviewed, and the owner's launch word names its sha256 and the $60 cap (D07, D22,
-   D43).
+3. **The A21 registration.** After D44's all-project build and review, one
+   registration composes D59's request shape, D62's fit gate (with D63's calibrated
+   ratio) and D55's guard. It is reviewed, and the owner's launch word names its sha256
+   and the $60 cap (D07, D22, D43).
 4. **A21.** One clean CHORUS re-canary: n=1, descriptive, in plan A10's role, outside
    every confirmatory estimate.
 5. **The measured-cost packet.** It reports:
@@ -379,9 +381,9 @@ never choose between projects on quality. They are inputs to three decisions:
   should name its 8 single-delivery calls (item 10, P4 item 9);
 - whether to allow a transport-only redelivery (P4 item 4).
 
-**Budget per accepted record [proposed; owner fixes at P4].** P4b prices each in-scope
-project per accepted record, including its expected retries within D07's bound, not
-per attempt. A stopped attempt bills only the calls made before the stop.
+**Budget per accepted record [proposed; owner fixes at P4, item 2].** P4b prices each
+in-scope project per accepted record, including its expected retries within D07's
+bound, not per attempt. A stopped attempt bills only the calls made before the stop.
 
 ## 1. Estimands (P2 item 1)
 
@@ -964,8 +966,8 @@ It carries:
 - **Canonical marks** (A20) go only to accepted replicates, and pilots are never
   candidates. [proposed; owner fixes at P4, item 42]: the accepted cells and their
   record hashes are listed from the acceptance records first, and the criterion below
-  ranks only within that list. They use `d4d runs select --method claudecode_api --project P --config
-  <prefix>`, with `--execute` only on the owner's word.
+  ranks only within that list. They use `d4d runs select --method claudecode_api
+  --project P --config <prefix>`, with `--execute` only on the owner's word.
 
   The criterion is the current code's at `0a1132ecf`, in place since `0169f1feb`
   (#835): "full and core both validate against the current schema, then most slots,
@@ -1165,9 +1167,9 @@ The 2 h stop came from the pre-BC1 plan A10, and nothing in BC1 justifies it:
   tokens, which is about 2 h of call time at caps (P3 Claude review).
 
 This draft proposes a 3 h clock, about 1.5 times that estimate, re-derived in the
-launch packet from the registered call schedule. The alternatives (P4 item 6) are to keep
-2 h as a deliberate censoring rule, under which a timeout is a feasibility failure, or
-to have no clock. The clock is never extended during a live attempt.
+launch packet from the registered call schedule. The alternatives (P4 item 6) are to
+keep 2 h as a deliberate censoring rule, under which a timeout is a feasibility
+failure, or to have no clock. The clock is never extended during a live attempt.
 
 ### Stopping a live run
 
@@ -1287,10 +1289,10 @@ are not assertions about BC1):
 ## 11. Freeze (P2 item 11; D35 decided)
 
 D35 freezes from the rebuilt A21 re-canary registration on merged main, after
-board A17 (#5211), #5155 and #5157. Later runner changes require a CHORUS byte-parity test and
-one separately authorized diagnostic canary before remaining runs re-register. Every
-registration pins the full and core schema closures, the bundle, the chunk manifest
-and the source manifest.
+board A17 (#5211), #5155 and #5157. Later runner changes require a CHORUS byte-parity
+test and one separately authorized diagnostic canary before remaining runs
+re-register. Every registration pins the full and core schema closures, the bundle,
+the chunk manifest and the source manifest.
 
 Frozen are:
 - schema releases (#3972, #3124);
