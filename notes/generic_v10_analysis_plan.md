@@ -1919,6 +1919,10 @@ lands before the first registration it affects, and the generation plan's own P4
 stands: the ratified plan is merged on main before any registration hash is put to the
 owner.
 - the `d22b61a9` gates in A4 and A14-reg, and the run tables (§2): before A4;
+- A14-reg's `--canary-baseline 2026-09-04g_claude-opus-5-api-generic-v8`, which D64's
+  answer to item 14 replaces with the new no-crate v8 run's prefix under (d) and
+  removes under (b), and the steps for that new run (its registration, review,
+  allocation and owner word): with P4b, before plan A14-reg;
 - D15's and A19-word's "about the size of AI_READI's 542,513" (Kids First's bundle is
   541,184 bytes): before A19-reg (P4b);
 - A19-reg's "vocabulary null", which should read `vocabulary: {}` (§2a): before A19-reg
