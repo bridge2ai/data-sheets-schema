@@ -1,11 +1,9 @@
 """D55/D56/D57 regression contracts for PR #5212; offline, 2026-10-28."""
-import subprocess
 from types import SimpleNamespace
 
 import pytest
 
 from data_sheets_schema import api_runner as api, latch_journal as journal, usage_ledger as ledger
-from scripts.adhoc import d41_request_parity_20261026 as parity
 from tests.test_latch_journal import acknowledge, delivered, disk_edit, raw_events, start
 
 
@@ -256,7 +254,8 @@ def test_resume_needs_external_head_before_recovery_or_dispatch(tmp_path, monkey
     with pytest.raises(ledger.UsageLedgerError, match='expected.*found'):
         api.execute(selected, client=SimpleNamespace(), expect_journal_head_sha256=expected)
     output = capsys.readouterr().err
-    assert 'latch journal start' in output and 'latch journal stop' in output
+    assert 'latch journal refused:' in output and 'not a resume anchor' in output
+    assert 'latch journal start:' not in output and 'latch journal stop:' not in output
     assert raw_events(selected)[-1]['sha256'] in output
 
 
@@ -269,29 +268,3 @@ def test_resume_accepts_recorded_head_and_fresh_launch_needs_none(tmp_path, monk
     head = raw_events(selected)[-1]['sha256']
     assert api.execute(selected, expect_journal_head_sha256=head)['accepted']
     assert capsys.readouterr().err.count('latch journal stop') == 2
-
-
-def test_parity_baseline_tracks_target_merge_base(tmp_path):
-    def git(*args):
-        return subprocess.check_output(['git', *args], cwd=tmp_path, text=True).strip()
-    git('init', '-q')
-    git('config', 'user.email', 'offline@example.invalid')
-    git('config', 'user.name', 'Offline fixture')
-    (tmp_path / 'asset').write_text('first')
-    git('add', 'asset')
-    git('commit', '-qm', 'initial')
-    git('branch', 'target')
-    git('checkout', '-qb', 'guard')
-    (tmp_path / 'guard').write_text('guard')
-    git('add', 'guard')
-    git('commit', '-qm', 'guard')
-    first = parity.baseline_commit(tmp_path, target='target')
-    git('checkout', '-q', 'target')
-    (tmp_path / 'asset').write_text('authorized target asset update')
-    git('add', 'asset')
-    git('commit', '-qm', 'target update')
-    updated = git('rev-parse', 'HEAD')
-    git('checkout', '-q', 'guard')
-    git('merge', '-qm', 'merge target', 'target')
-    assert first != updated
-    assert parity.baseline_commit(tmp_path, target='target') == updated

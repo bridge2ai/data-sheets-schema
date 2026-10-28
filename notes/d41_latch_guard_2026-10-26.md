@@ -77,10 +77,16 @@ the next check replays that already acknowledged checkpoint write. Terminal,
 controller, admission and consumed-allowance suffixes cannot be aborted;
 neither can a settled/cleared call intent. Those need their original evidence,
 not permission to spend again. This recovery never invents completed usage.
+Even an innocent interrupted write recovered through `aborted_update` is
+assisted and evidence-only. Its owner acknowledgement cannot restore campaign
+eligibility; a re-canary affected this way remains evidence-only (R3).
 
-Every execution entering the run lock prints `latch journal start` and
-`latch journal stop` to stderr, with project, label, path and `head_sha256`.
-The stop record is printed on exceptions and interrupts too. A fresh start
+An accepted launch prints `latch journal start` and `latch journal stop` to
+stderr, with project, label, path and `head_sha256`. A refused launch prints
+only `latch journal refused` with diagnostics marked `not a resume anchor`;
+it must not replace a monitor's retained head (R2). Python exceptions and
+SIGINT normally unwind the context and print a stop record. SIGTERM (including
+`d4d api stop`), SIGHUP, SIGKILL and abrupt process loss do not (R1). A fresh start
 without a journal needs no expected head. Existing journals, including an
 explicit fresh-generation request, require the retained head:
 
@@ -100,6 +106,34 @@ stop record; an unobserved suffix requires read-only reconciliation and a new
 owner-approved launch record before resume. Do not replace the expected head
 merely because a resume refused. Coordinated replacement of the launch record
 and run artifacts remains outside this local hash mechanism's guarantee.
+
+**Supported SIGTERM recovery (R1):** first confirm the recorded process has
+stopped; preserve its external launch record and all run files. Reconcile the
+unobserved suffix read-only against the ledger checkpoint, snapshots, usage and
+last independently observed head. Local chain validity alone is not independent
+authentication. If the evidence supports it, the owner can approve a new external
+launch record naming the reconciled head and the evidence inspected; pass that
+head explicitly to resume. Do not automatically adopt a refused diagnostic or
+the on-disk tail. Ordinary interrupted-call, terminal and control-state refusals
+still apply; reconciliation cannot grant a fresh allowance. We deliberately
+keep this fallback instead of installing process-global signal handlers in the
+library: asynchronous unwinding can interrupt the append/checkpoint write pair,
+and a library must not silently replace its caller's signal policy.
+
+**CLI label reuse (R4):** `api run` still refuses an existing full artifact when
+no expected head is supplied. Supplying `--expect-journal-head-sha256` opts into
+the guarded resume path; a missing journal refuses with `found=missing`.
+
+**Flat output directories (R8):** the anchor belongs to the whole project journal
+file, not to one label. Multiple labels sharing `{P}_latch_journal.jsonl` need the
+latest independently retained head of that file, including for a new label.
+Use a separate metadata directory per label when independent anchors are needed;
+the standard API layout already does this.
+
+**Fresh-generation requests (R9):** `resume=False` does not erase immutable
+history. A control-state discrepancy in an old generation blocks a new generation
+too, and cannot be overridden under D56. Preserve the refused history; a new
+label in a separate directory is a separate run, subject to ordinary admission.
 
 ## Explicit acknowledgements remain assisted evidence
 

@@ -654,15 +654,22 @@ def launch_record(spec, expected):
             head = head_sha256(spec)
         except ledger.UsageLedgerError:
             head = 'invalid'
+            boundary = 'unverified (not a resume anchor)'
         print(f'latch journal {boundary}: project={spec.project} label={spec.label} '
               f'head_sha256={head or "none"} path={journal_path(spec)}', file=sys.stderr, flush=True)
-    display('start')
     try:
         found = head_sha256(spec)
         if expected is not None and (not isinstance(expected, str) or not _HEX.fullmatch(expected)):
             _fail(f'resume journal head: expected=64 lowercase hexadecimal digits; found={expected!r}')
         if found != expected:
             _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
+    except ledger.UsageLedgerError as exc:
+        # Never promote rejected on-disk bytes to a launch/monitor anchor.
+        print(f'latch journal refused: project={spec.project} label={spec.label} '
+              f'{exc} (not a resume anchor)', file=sys.stderr, flush=True)
+        raise
+    display('start')
+    try:
         yield
     finally:
         display('stop')

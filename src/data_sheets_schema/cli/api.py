@@ -1481,10 +1481,10 @@ def api_status_cmd():
 def api_stop_cmd(label_prefix, force):
     """Stop a running sweep by the label it holds (#513).
 
-    Stopping mid-run is safe: each run resumes from its progress file, so the
-    cost of stopping is the unfinished phases of the current run and nothing
-    more. What is *not* safe is believing a sweep has stopped when it has not,
-    which is what this command exists to prevent.
+    SIGTERM does not emit a journal stop head. Preserve the last external
+    launch/monitor record; an unobserved suffix requires read-only evidence
+    reconciliation and an owner-approved new launch record before resuming.
+    Interrupted calls and terminal failures retain their ordinary refusal rules.
     """
     import signal as _signal
 
@@ -1504,6 +1504,9 @@ def api_stop_cmd(label_prefix, force):
                    f"{lock.pid} ({'KILL' if force else 'TERM'})")
     click.echo("Re-run `d4d api status` to confirm it is gone — a signal sent "
                "is not a process stopped.")
+    click.echo("SIGTERM/SIGKILL do not emit a journal stop head. Retain the last external "
+               "head; reconcile any unobserved suffix and obtain an owner-approved "
+               "new launch record before resuming.")
 
 
 @api.group("prompts")

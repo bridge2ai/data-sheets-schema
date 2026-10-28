@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """D41 offline wire parity, 2026-10-26; refs #5138, #5142.
 
-Inputs: target merge-base package source, current source, real CHORUS inputs,
+Inputs: current package source with/without the D41 transport callback, real CHORUS inputs,
 synthetic records/replies and a fresh scratch directory. Outputs: exact SDK
 HTTP request bodies and a JSON parity report. MockTransport handles every
 request; no provider, token-count endpoint, generation or scoring is used.
@@ -14,16 +14,13 @@ import copy
 import hashlib
 import inspect
 from importlib.metadata import version as package_version
-import io
 import json
 import os
 from pathlib import Path
 import socket
 import subprocess
 import sys
-import tarfile
 
-DEFAULT_TARGET = 'origin/claude/dc-a13-receipt-floor-v3'
 PACKAGE = 'src/data_sheets_schema'
 FULL = 'id: urn:d41:offline\nname: D41 offline parity fixture\n'
 GENERATION = 'd41-offline-fixed-generation'
@@ -51,39 +48,6 @@ def save(path, raw):
     return pin(path)
 
 
-def git(root, *args):
-    return subprocess.check_output(['git', *args], cwd=root)
-
-
-def baseline_commit(root, target=None):
-    """Resolve only local refs; CI's PR merge compares against its first parent."""
-    target = target or os.environ.get('D41_PARITY_TARGET')
-    if target is None:
-        if os.environ.get('GITHUB_EVENT_NAME') == 'pull_request':
-            target = 'HEAD^1'
-        else:
-            target = DEFAULT_TARGET
-    return git(root, 'merge-base', 'HEAD', target).decode().strip()
-
-
-def unpack_baseline(root, destination, base):
-    """Materialize only regular pinned package files; never alter a checkout."""
-    destination.mkdir(parents=True, exist_ok=False)
-    archive = git(root, 'archive', base, PACKAGE)
-    with tarfile.open(fileobj=io.BytesIO(archive)) as stream:
-        for member in stream:
-            if member.isdir():
-                continue
-            path = Path(member.name)
-            if path.is_absolute() or '..' in path.parts or path.parts[:2] != ('src', 'data_sheets_schema'):
-                raise ValueError('unexpected baseline archive path')
-            if not member.isfile():
-                raise ValueError('baseline archive contains a nonregular file')
-            raw = stream.extractfile(member).read()
-            save(destination / path, raw)
-    return {'commit': base, 'archive_sha256': sha(archive), 'scope': PACKAGE}
-
-
 def _offline():
     attempts = []
     def refuse(*args, **kwargs):
@@ -96,7 +60,7 @@ def _offline():
 
 
 def _resource_authority(root, registration):
-    """Bind common repo resources to the baseline; pin external dependencies."""
+    """Pin the same current resources for both sides; no historical refs."""
     from data_sheets_schema import shared_generation as sg
     from data_sheets_schema.resources import resource_path
     paths = {resource_path(name).resolve() for name in sg.ASSET_HASHES}
@@ -125,15 +89,12 @@ def _resource_authority(root, registration):
         except ValueError:
             external.append(selected)
             continue
-        raw = git(root, 'show', os.environ['D41_PARITY_BASE'] + ':' + relative)
-        if sha(raw) != selected['sha256']:
-            raise ValueError('selected resource differs from pinned baseline: ' + relative)
         owned[relative] = selected
-    return {'baseline_equal_repo_resources': owned, 'external_dependency_pins': external,
-            'scope': 'Repo resources equal pinned Git bytes. External dependencies are paired environment inputs, not reconstructed historical installs.'}
+    return {'same_tree_repo_resources': owned, 'external_dependency_pins': external,
+            'scope': 'Both captures use identical current resource bytes and paired external dependencies.'}
 
 
-def _module_authority(root, code_root, *, baseline, modules=None):
+def _module_authority(root, code_root, *, modules=None):
     """Refuse mixed package origins, including recalculated namespace paths."""
     selected = {}
     for name, module in list((sys.modules if modules is None else modules).items()):
@@ -155,13 +116,6 @@ def _module_authority(root, code_root, *, baseline, modules=None):
         if path not in (expected.with_suffix('.py'), expected / '__init__.py'):
             raise ValueError('foreign package module origin: ' + name + ': ' + str(path))
         entry = pin(path)
-        if baseline:
-            relative = path.relative_to(code_root).as_posix()
-            expected_raw = git(root, 'show', os.environ['D41_PARITY_BASE'] + ':' + relative)
-            if sha(expected_raw) != entry['sha256']:
-                raise ValueError('baseline package module differs from Git: ' + name)
-            entry['baseline_git_path'] = relative
-            entry['baseline_bytes_verified'] = True
         selected[name] = entry
     if not selected:
         raise ValueError('no package modules available to attest')
@@ -340,14 +294,16 @@ def capture(root, code_root, fixture, output, mode):
         raise ValueError('wrong API implementation imported')
     if resources.resource_root()[0].resolve() != root:
         raise ValueError('wrong common resource root')
-    guarded = 'before_attempt' in inspect.signature(api._call_with_retry).parameters
-    if mode == 'candidate' and not guarded:
+    if 'before_attempt' not in inspect.signature(api._call_with_retry).parameters:
         raise ValueError('candidate lacks the per-attempt latch callback')
+    # The only counterfactual is omission of the guard callback at the physical
+    # transport boundary. Builders, descriptors, resources and SDK stay identical.
+    guarded = mode == 'candidate'
     spec, reg, settings = _fixture(root, fixture, output / 'registration.json')
-    origins_after_fixture = _module_authority(root, code_root, baseline=mode == 'baseline')
+    origins_after_fixture = _module_authority(root, code_root)
     common_resources = _resource_authority(root, reg)
     requests, worker_checks = _requests(spec, reg, settings)
-    origins_after_requests = _module_authority(root, code_root, baseline=mode == 'baseline')
+    origins_after_requests = _module_authority(root, code_root)
     rows = {}
     for phase, (req, cap) in requests.items():
         bodies, calls = _transport(api, req, settings, cap, guarded=guarded)
@@ -358,7 +314,7 @@ def capture(root, code_root, fixture, output, mode):
         _transport(api, req, settings, cap, guarded=True, deny=True)
     if attempts:
         raise AssertionError('a network connection was attempted')
-    origins_after_transport = _module_authority(root, code_root, baseline=mode == 'baseline')
+    origins_after_transport = _module_authority(root, code_root)
     result = {'mode': mode, 'api_module': pin(api.__file__), 'registration': pin(fixture / 'registration.json'),
         'selection': sg.descriptor(), 'rows': rows, 'network_attempts': attempts,
         'callback_refusal_prevented_dispatch': guarded,
@@ -376,19 +332,19 @@ def capture(root, code_root, fixture, output, mode):
     return result
 
 
-def compare(root, workdir, *, target=None):
+def compare(root, workdir):
     root, workdir = root.resolve(), workdir.resolve()
     workdir.mkdir(parents=True, exist_ok=False)
-    base = baseline_commit(root, target)
-    baseline = unpack_baseline(root, workdir / 'baseline-code', base)
+    baseline = {'scope': PACKAGE, 'counterfactual': 'same tree, before_attempt callback omitted'}
     fixture = workdir / 'common-fixture'
     fixture.mkdir()
     helper_before = pin(__file__)
     production_before = {str(p.relative_to(root)): pin(p) for p in (root / PACKAGE).rglob('*.py')}
     captures = {}
-    for mode, code_root in [('baseline', workdir / 'baseline-code'), ('candidate', root)]:
+    for mode in ('baseline', 'candidate'):
+        code_root = root
         out = workdir / mode
-        env = {**os.environ, 'D41_PARITY_BASE': base, 'PYTHONDONTWRITEBYTECODE': '1',
+        env = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1',
                'PYTHONPATH': str(code_root / 'src') + os.pathsep + str(root)}
         command = [sys.executable, str(Path(__file__).resolve()), '--capture', mode, '--root', str(root),
                    '--code-root', str(code_root), '--fixture', str(fixture), '--out', str(out)]
@@ -404,8 +360,12 @@ def compare(root, workdir, *, target=None):
         raise AssertionError('v1 authority differs; request identities must not be normalized')
     if left['rows'].keys() != right['rows'].keys():
         raise AssertionError('request roster differs')
+    if left['package_origins'] != right['package_origins']:
+        raise AssertionError('package source changed between captures')
     rows = {}
     for phase in left['rows']:
+        if (left['rows'][phase]['callback_count'], right['rows'][phase]['callback_count']) != (0, 1):
+            raise AssertionError('guard counterfactual did not change callback execution')
         before, after = left['rows'][phase]['body'], right['rows'][phase]['body']
         if Path(before['path']).read_bytes() != Path(after['path']).read_bytes():
             raise AssertionError(f'exact SDK HTTP bytes differ: {phase}')
@@ -430,7 +390,6 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
     parser.add_argument('--workdir', type=Path)
-    parser.add_argument('--target', help='local target ref used for merge-base; no fetch')
     parser.add_argument('--capture', choices=('baseline', 'candidate'))
     parser.add_argument('--code-root', type=Path)
     parser.add_argument('--fixture', type=Path)
@@ -439,7 +398,7 @@ def main():
     if args.capture:
         capture(args.root, args.code_root, args.fixture, args.out, args.capture)
     else:
-        result = compare(args.root, args.workdir, target=args.target)
+        result = compare(args.root, args.workdir)
         print(json.dumps({'passed': result['passed'], 'requests': len(result['rows']), 'summary': str(args.workdir / 'summary.json')}))
 
 

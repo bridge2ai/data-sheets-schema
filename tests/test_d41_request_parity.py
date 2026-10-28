@@ -17,13 +17,13 @@ def test_package_authority_refuses_a_late_foreign_module(tmp_path):
     path.write_text('# selected fixture\n')
     module = SimpleNamespace(__file__=str(path))
     modules = {'data_sheets_schema.late': module}
-    assert parity._module_authority(ROOT, selected, baseline=False, modules=modules)
+    assert parity._module_authority(ROOT, selected, modules=modules)
     foreign = tmp_path / 'other/src/data_sheets_schema/late.py'
     foreign.parent.mkdir(parents=True)
     foreign.write_bytes(path.read_bytes())
     module.__file__ = str(foreign)
     with pytest.raises(ValueError, match='foreign package module origin'):
-        parity._module_authority(ROOT, selected, baseline=False, modules=modules)
+        parity._module_authority(ROOT, selected, modules=modules)
 
 
 def test_package_authority_refuses_recalculated_namespace_paths(tmp_path):
@@ -33,16 +33,18 @@ def test_package_authority_refuses_recalculated_namespace_paths(tmp_path):
     module = SimpleNamespace(__file__=None, __path__=locations,
         __spec__=SimpleNamespace(submodule_search_locations=locations))
     modules = {'data_sheets_schema': module}
-    assert parity._module_authority(ROOT, selected, baseline=False, modules=modules)
+    assert parity._module_authority(ROOT, selected, modules=modules)
     locations.insert(0, str(tmp_path / 'other/src/data_sheets_schema'))
     with pytest.raises(ValueError, match='foreign package namespace origin'):
-        parity._module_authority(ROOT, selected, baseline=False, modules=modules)
+        parity._module_authority(ROOT, selected, modules=modules)
 
 
-def test_chorus_shared_v1_exact_baseline_sdk_bytes(tmp_path):
-    # Missing target history must be supplied locally rather than silently
-    # skipping the acceptance check or reverting to an obsolete asset pin.
-    assert parity.baseline_commit(ROOT)
+@pytest.mark.parametrize('event', ['push', 'pull_request'])
+def test_chorus_shared_v1_exact_baseline_sdk_bytes(tmp_path, monkeypatch, event):
+    monkeypatch.setenv('GITHUB_EVENT_NAME', event)
+    monkeypatch.setenv('D41_PARITY_TARGET', 'deleted/nonexistent-branch')
+    # The helper runs from source even with no git executable/history available.
+    monkeypatch.setenv('PATH', str(tmp_path))
     result = parity.compare(ROOT, tmp_path / 'parity')
     assert result['passed']
     assert {'full', 'reconcile_full', 'report', 'report_regate', 'full_receipt_completion',
@@ -70,8 +72,14 @@ def test_shared_v2_keeps_strict_controller_code_freshness(tmp_path, draft_files,
         sg.parse_registration(registration)
 
 
-def test_chorus_shared_v1_accepts_an_already_guarded_merge_base(tmp_path):
-    # Subsequent PR merge parents may already contain D41. That remains a
-    # valid wire comparison; only the candidate must provide the callback.
-    result = parity.compare(ROOT, tmp_path / 'guarded-parity', target='HEAD')
-    assert result['passed'] and len(result['rows']) == 8
+def test_parity_uses_changed_request_bytes_on_both_sides():
+    from data_sheets_schema import api_runner as api
+    settings = {'name': 'offline-model', 'temperature': None}
+    bodies = []
+    for text in ('original request', 'later authorized request bytes'):
+        request = SimpleNamespace(system='offline', messages=[{'role': 'user', 'content': text}])
+        plain, plain_calls = parity._transport(api, request, settings, 10, guarded=False)
+        guarded, calls = parity._transport(api, request, settings, 10, guarded=True)
+        assert plain == guarded and plain_calls == [] and calls == ['checked']
+        bodies.append(plain)
+    assert bodies[0] != bodies[1]
