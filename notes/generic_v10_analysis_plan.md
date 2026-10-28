@@ -698,16 +698,29 @@ definition (1) shows how large it is from the other side.
   place, so after an early stop that path still holds the phase-1 record. Each phase
   also writes a snapshot, `intermediate/<P>_<phase>.yaml`, whose sha256 the run's
   snapshot index records.
-  - **The event:** the run's progress file records `reconcile_full` as completed.
+  - **The event:** `reconcile_full` completed. The runner deletes its progress file
+    when a run finishes without validation problems, so the event is established by
+    a witness that survives:
+    - **a run that finished** (it wrote its provenance record): the record's
+      `intermediates` list holds `<P>_reconcile_full.yaml` with its sha256,
+      `generation_id` and `usage_id`, and that `usage_id` names a `reconcile_full`
+      row of the same record's `api_usage`;
+    - **a run that stopped** (no provenance record from its end): its progress file,
+      which a stopped run keeps, lists `reconcile_full` as completed, and the run's
+      snapshot index holds the matching `<P>_reconcile_full.yaml`. A reconcile
+      snapshot without that progress entry does not count: the snapshot is written
+      before the progress update, so the phase may not have completed.
+
+    The A21 registration's review confirms that the composed runner writes these
+    witnesses.
   - **The record:** the last full-record snapshot written at or after that event,
     either `<P>_reconcile_full.yaml` or, if repair ran, its last round's
-    `<P>_repair_full_r<N>.yaml`, identified by the sha256 in the snapshot index. A
-    repair interrupted before writing its snapshot leaves the previous one eligible. A
-    report or regate that failed after reconcile does not change which record is
-    eligible.
-  - **A run that stopped before `reconcile_full` completed has no eligible full
-    record.** Its phase-1 record is kept and reported, but it is artifact-missing
-    for Set A.
+    `<P>_repair_full_r<N>.yaml`, identified by the sha256 in the provenance record's
+    `intermediates` or, for a stopped run, in the snapshot index. A repair interrupted
+    before writing its snapshot leaves the previous one eligible. A report or regate
+    that failed after reconcile does not change which record is eligible.
+  - **A run with neither witness has no eligible full record.** Its phase-1 record is
+    kept and reported, but it is artifact-missing for Set A.
   - A record that fails schema validation is eligible for Set A; Set B removes it.
   - A record with duplicate mapping keys is eligible for the validation and
     duplicate-key counts only. Every metric that reads values is unmeasurable for it,
