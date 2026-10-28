@@ -149,7 +149,27 @@ def test_v10_decision_record_tables_match_committed_contexts() -> None:
         (ROOT / "data" / "omission_contexts" / "chorus_omission_context.json").read_bytes()
     ).hexdigest()
     assert chorus_omission_sha in note_text
-    assert "6e3c6b6d" not in note_text
-    assert "10.18130/V3/F3TD5R" not in note_text
+    active_text = _without_retired_entries(note_text)
+    assert "6e3c6b6d" not in active_text
+    assert "10.18130/V3/F3TD5R" not in active_text
+
+
+def _without_retired_entries(note_text: str) -> str:
+    """Drop the retired D46-D49 entries, which the record keeps verbatim as what was written (§5.10)."""
+    import re
+
+    kept = []
+    in_retired_item = False
+    for line in note_text.splitlines():
+        if re.match(r"^[5-8]\. \*\*`D4[6-9]`", line):
+            in_retired_item = True
+        elif in_retired_item and (re.match(r"^\d+\. \*\*", line) or line.startswith("#")):
+            in_retired_item = False
+        if in_retired_item:
+            continue
+        if re.match(r"^\| \*\*`D4[6-9]`\*\*", line) or line.startswith("- **Not an owner ruling"):
+            continue
+        kept.append(line)
+    return "\n".join(kept)
 
 

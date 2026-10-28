@@ -12,7 +12,7 @@ regulated_access:
   value: true
   # chunks: [c002, c003, c004, c005, c006]
   # curator_assertion: true
-  evidence: "[chunks: c002, c003, c004, c005, c006] [curator_assertion: true; pending human E3 review] The CHoRUS dataset is held under controlled access inside a secure cloud enclave (OMOP EHR, DICOM imaging, WFDB telemetry, EDF+/Persyst EEG, and OHNLP clinical note tokens all marked 'Controlled' in c003; cloud enclave in c003, c006); data access requires registration with a .edu email address (c005) and signing a licensing agreement before compute is provisioned (c003, c004), alongside HIPAA/GDPR compliance and privacy/de-identification controls (c002, c004)."
+  evidence: "[chunks: c002, c003, c004, c005, c006] [curator_assertion: true; accepted by the owner's human review, D52, 2026-10-27] The CHoRUS dataset is held under controlled access inside a secure cloud enclave (OMOP EHR, DICOM imaging, WFDB telemetry, EDF+/Persyst EEG, and OHNLP clinical note tokens all marked 'Controlled' in c003; cloud enclave in c003, c006); data access requires registration with a .edu email address (c005) and signing a licensing agreement before compute is provisioned (c003, c004), alongside HIPAA/GDPR compliance and privacy/de-identification controls (c002, c004)."
 
 shared_dataset:
   value: true

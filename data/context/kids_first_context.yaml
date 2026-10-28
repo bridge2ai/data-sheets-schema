@@ -34,7 +34,7 @@ processing_software:
   evidence: "[chunks: c002, c004, c006, c009, c013] The Kids First DRC provides open-source CWL (c013) bioinformatics workflows on GitHub and CAVATICA (c006) including alignment/re-alignment to a bwa-indexed reference fasta, GATK Base Quality Score Recalibration, HaplotypeCaller and joint genotyping, STAR alignment, RSEM quantification, Arriba and STAR-Fusion callers, and FHIR/Kids First data model tooling (c002, c004, c006, c009, c013)."
 
 ml_training_dataset:
-  value: true
+  value: false
   # chunks: [c003, c004, c011, c012]
   # curator_assertion: true
-  evidence: "[chunks: c003, c004, c011, c012] [curator_assertion: true; pending human E3 review] Kids First DRC curates large-scale harmonized multi-modal pediatric genomic and HPO-coded phenotypic datasets in cloud-ready CAVATICA / FHIR formats to support computational discovery, cross-disease integrative analysis, and downstream machine learning / AI modeling in pediatric cancer and structural birth defects (c003, c004, c011, c012)."
+  evidence: "[chunks: c003, c004, c011, c012] [curator_assertion: true; set to false by the owner's human review, D52, 2026-10-27] Kids First DRC curates large-scale harmonized multi-modal pediatric genomic and HPO-coded phenotypic datasets in cloud-ready CAVATICA / FHIR formats to support computational discovery, cross-disease integrative analysis, and downstream machine learning / AI modeling in pediatric cancer and structural birth defects (c003, c004, c011, c012). It is a research data resource for which ML is one possible downstream use, not a dataset released as an ML training set."

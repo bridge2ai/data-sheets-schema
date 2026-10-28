@@ -19,12 +19,12 @@ All 6 project applicability context files under `data/context/` (`schema_version
 
 | Project | Context File | Normalized Context Digest (`SHA-256`) | `human_subjects` | `regulated_access` | `shared_dataset` | `data_collection` | `data_processing` | `processing_software` | `ml_training_dataset` | Rubric 10 Applicable (`max`) | Rubric 20 Applicable (`max`) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **AI_READI** | `data/context/ai_readi_context.yaml` | `2d3da438de3d365e54467ba5a6144b20d954198fd2e03e7b101a7b6d81880418` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **CHORUS** | `data/context/chorus_context.yaml` | `21f63f6eaaa3d236210c3f10103b0e283f8b52724b875045c9773cabf46e9c0d` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **CM4AI** | `data/context/cm4ai_context.yaml` | `9077caaaff2112c84dd3fd261eb2ce5025607eacb7f4997150cc8847660286e9` | `false` | `false` | `true` | `true` | `true` | `true` | `true` | `44 / 50` (`44.0`) | `18 / 20` (`78.0`) |
-| **VOICE** | `data/context/voice_context.yaml` | `ddf1dcb4127a7d4158515c04307d8f378f5d70268b9bb17f0242af871d863ebd` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **VOICE_PEDIATRIC** | `data/context/voice_pediatric_context.yaml` | `740276bb518a875d98ea8208c0992679aac1c50b14f5f28d1b51dcf2d3e28855` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
-| **KIDS_FIRST** | `data/context/kids_first_context.yaml` | `b43d7baba4c1621c4748db1a493adc216000135da8ec774b717d750d6cabaae5` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **AI_READI** | `data/context/ai_readi_context.yaml` | `f8339eeacc6c41d0516449f482f4ac9f7bdde60067975664e29f0b17f5a961be` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **CHORUS** | `data/context/chorus_context.yaml` | `300645af08fb5b2e4a986a941337b1ba01ed644e532a7c7cf2c958fe1ff33d2c` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **CM4AI** | `data/context/cm4ai_context.yaml` | `97047473e7e4f2b8c7fa78169f52be33be2a67e70a287ca1d4c9b2e66540eb76` | `false` | `false` | `true` | `true` | `true` | `true` | `true` | `44 / 50` (`44.0`) | `18 / 20` (`78.0`) |
+| **VOICE** | `data/context/voice_context.yaml` | `0dc82e8f96455552ed52feef1f6a00dd0cfbd691bed08019741ce81999b7b2e9` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **VOICE_PEDIATRIC** | `data/context/voice_pediatric_context.yaml` | `5b941e87f05454581e26b4d9f2d1f6227368405ce6fc4406c994e4fb9720a92b` | `true` | `true` | `true` | `true` | `true` | `true` | `true` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
+| **KIDS_FIRST** | `data/context/kids_first_context.yaml` | `4732910a6c51493a1a9cf65d82625de1c002e399e22e50499fad836aee0352a9` | `true` | `true` | `true` | `true` | `true` | `true` | `false` | `50 / 50` (`50.0`) | `20 / 20` (`88.0`) |
 
 ### 1.2 The 5 Hold Questions Requiring Human Confirmation (`#2912`)
 
