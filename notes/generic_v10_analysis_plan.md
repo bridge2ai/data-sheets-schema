@@ -1417,7 +1417,10 @@ on the E1 route:
 - contexts pinned by hash;
 - the instrument version named (rubric10 3.0; rubric20 3.0 or 4.0 per E4, **[pending
   owner, #2911]**), and with it the evaluator implementation that D52 and D61 change
-  (rubric10 E2.2, rubric20 Q9). A version label alone does not identify the
+  (rubric10 E2.2, rubric20 Q9). The choice is made at P4b, before the first
+  confirmatory launch (D64, item 26; P4 item 41). E5's later registration binds only
+  execution details under that choice; it never switches the instrument for records
+  already generated. A version label alone does not identify the
   instrument: an unmodified historical 3.0 is not the D52/D61 instrument. Old scores
   are not rewritten. Prediction 5's items, Q11 and Q19, are not among those D52/D61
   change;
@@ -2344,8 +2347,12 @@ item, and the body states the resulting rules. Items 38–43 are open.
 - **Options:** (a) the reviewed 3.0-based successor with the D52/D61 changes pinned,
   in one joint re-rating scaled to item 2's scope; (b) 4.0, with its normative-example
   approval and nine-case Q19 calibration; (c) defer E5, which leaves row 5 unmeasured.
-- **Recommended:** (a), about $190–394 at full scope, unless 4.0's calibration is
-  approved before E5's registration. *Depends on:* items 2 and 26.
+- **Recommended:** (a), about $190–394 at full scope, unless 4.0's normative-example
+  approval and nine-case Q19 calibration are completed, and 4.0 selected, at P4b before
+  the first confirmatory launch (D64, item 26). If the calibration cannot finish by
+  then, P4b selects (a) or holds the affected launch. E5's later registration binds
+  only execution details and never switches the instrument for records already
+  generated. *Depends on:* items 2 and 26.
 
 #### Group E. Later
 
