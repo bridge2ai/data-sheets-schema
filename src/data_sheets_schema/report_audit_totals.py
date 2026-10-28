@@ -328,7 +328,7 @@ def _extract_totals_detailed(
     # that states two or more per-severity counts together (never isolated prose mentions).
     if not matches:
         for clause in re.split(r"(?:[.!?\n]+)", report_text[:1500]):
-            if SUBSET_CLAUSE_RE.search(clause):
+            if SUBSET_CLAUSE_RE.search(clause) or re.search(r"\b(?:core|full)\s+record\b", clause, re.I):
                 continue
             if not re.search(r"\b(?:findings?|audit|summary|totals?)\b", clause, re.I):
                 continue

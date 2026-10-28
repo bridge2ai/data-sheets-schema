@@ -172,7 +172,8 @@ def test_conflicting_counts_within_one_statement_are_not_overwritten(counts):
     "Core record audit severity summary: 2 medium, 1 low.",
     "Deferred items: 2 medium, 1 low.",
 ])
-def test_subset_summary_and_prose_are_not_a_severity_continuation(subset):
-    result = check_report_audit_totals("The audit identified 13 findings:\n" + subset, _make_v10g_audit())
+@pytest.mark.parametrize("prefix", ["", "The audit identified 13 findings:\n"])
+def test_subset_summary_and_prose_are_not_a_severity_continuation(subset, prefix):
+    result = check_report_audit_totals(prefix + subset, _make_v10g_audit())
     assert result["stated_by_severity"] == {}
-    assert result["status"] == "consistent"
+    assert result["status"] == ("consistent" if prefix else "no_total_stated")

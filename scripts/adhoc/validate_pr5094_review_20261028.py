@@ -26,6 +26,7 @@ GROUPS = {
     "focused": ("test_wave4_5094_review", "test_report_audit_totals"),
     "existing": ("test_report_audit_totals", "test_report_gate", "test_generation_record_schema", "test_record_required_values", "test_backfill_checks"),
 }
+GROUPS["all"] = GROUPS["existing"] + GROUPS["causal"]
 
 
 def main():
