@@ -8,7 +8,7 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
 (the plan: "Every billed generic_v10 step depends on P4").
 
 - **Revised:** 2026-10-27 for R6 F1–F6; authority corrected 2026-10-28 against
-  D26–D45 and D50. D46–D49 are retired, not owner decisions. The local BC1/N2
+  D26–D45 and D50–D54. D46–D49 are retired, not owner decisions. The local BC1/N2
   implementations remain separately identified. This is a draft, not a retrospective
   registration or a declaration that the composed launch condition is ready.
 - **Drafted:** 2026-10-20, by the Claude worker session (coordination Lane C2), at main
@@ -25,8 +25,11 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
   - `notes/reviews/v10_human_decisions_and_context_review_2026-10-20.md` at
     `a0e28d8821c69e2d4fe1b75b14e3c2a2140ae4d5` was the historical basis of
     the R6 amendment. Claude's correction
-    `8f800a5919732cc1b773edc1537cb11e5b874b32` retires D46–D49 and records D50,
-    consistent with `notes/coordination/STATUS.md` at 2026-10-28T02:23Z/02:24Z;
+    `8f800a5919732cc1b773edc1537cb11e5b874b32` retires D46–D49 and records D50;
+    `32c62222e1518db605ce5bfac426344bb5b1b711` records D51–D54, and
+    `57784daadcc109839e4c76260ee4e5fd415a1c21` corrects D51's description
+    (owner re-approval 2026-10-28T04:13:37Z), consistent with
+    `notes/coordination/STATUS.md`;
   - BC1 `notes/bc1_production_2026-10-27.md` and contract sources at
     `3bd3c41f459b31848aee2f57e26deb86ef786970`;
   - N2 `notes/native_n2_parity_delta_review_2026-10-25.md` at
@@ -52,8 +55,8 @@ this draft asserts a decision the owner has not recorded.
 
 ## Decision status (reconciled 2026-10-28)
 
-The October 20 draft is amended by D26–D45 and D50. The former D46–D49
-entries are retired proposals, not owner rulings. Decisions authorize policy and
+The October 20 draft is amended by D26–D45 and D50–D54. The former D46–D49
+entries are retired proposals, not owner rulings; D51–D54 decide their subjects. Decisions authorize policy and
 engineering; they do not establish a merged implementation, an accepted record,
 remaining budget or a fresh launch word. Where the implementation differs from
 the requested condition, items 14–15 name the discrepancy before P4.
@@ -79,11 +82,15 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | D39 | Versioned worker wording recognizes a split list entry as a removal's owning root. | 2026-10-25; A17 contract change. |
 | D41, D42, D43 | No-touch operation and a terminal/rejection-state guard; compare both guard candidates then obtain the owner's choice. **Owner** runs the hash-approved re-canary command; agents monitor read-only. | D43 supersedes D41's operator clause; guard selection is not inferred here. |
 | D44, D45 | Build/review bounded carry for **all six projects** before the single clean CHORUS re-canary. Keep A17 splitting; select project bounds from cost and output-cap risk inside BC1. | 2026-10-26. |
-| D46 | **Retired; not an owner decision.** Omission/evaluation context settings remain proposals, including CM4AI's two false applicability flags, cohort separation and Kids First neutral `vocabulary: {}`. | Claude's correction, §5.10; owner review and exact-file scientific review remain required. |
-| D47 | **Retired; not an owner decision.** It supplies no archival-maintenance exception. | D31/D40 preserve the assisted/invalid evidence disposition; D41 remains the no-touch authority. |
-| D48 | **Retired; not an owner decision.** Its claimed phase-sequence mechanism does not establish an implemented or approved guard. | Review the actual D41/D42 guard candidates; selection is not inferred here. |
-| D49 | **Retired; not an owner decision.** It supplies no aggregate-input formula or approved project profiles. | D45 governs selection of BC1 bounds from reviewed per-project sizing; an allowance does not establish request fit or spending authority. |
+| D46 | **Retired; not an owner decision.** Its subjects are decided by D51 and D52. | Claude's correction, §5.10. |
+| D47 | **Retired; not an owner decision.** Its subjects are decided by D53. | Claude's correction, §5.10. |
+| D48 | **Retired; not an owner decision.** Dropped by D54; the D41 latch journal covers its purpose. | Guard selection remains D42's, and is not inferred here. |
+| D49 | **Retired; not an owner decision.** Dropped by D54; it supplies no aggregate-input formula or project profiles. | D45 governs selection of BC1 bounds from reviewed per-project sizing; an allowance does not establish request fit or spending authority. |
 | D50 | Decision-record corrections are prepared by Claude; agy fixes assigned code and pushes the permitted prepared bytes. | 2026-10-28T02:24Z in STATUS; Claude's correction §5.10. |
+| D51 | Approves #5164's six omission contexts and its `source_manifest.yaml` edit: VOICE and VOICE_PEDIATRIC name their related-but-distinct dataset; the manifest declares CHORUS `release: null`; the AI_READI, CHORUS, CM4AI and KIDS_FIRST contexts are unchanged (CHORUS `ac94a74b…`). Lands before the A21 rebuild. | 2026-10-27; description corrected and re-approved 2026-10-28T04:13:37Z; claude's final independent check precedes merge. |
+| D52 | Owner's human review of the evaluation contexts (#2912): CM4AI `human_subjects` and `regulated_access` false; KIDS_FIRST `ml_training_dataset` false; all other values accepted; committee-contact equivalence and the `regulated_access`-false Q9 exclusion accepted as scoring rules. | 2026-10-27; the scoring rules still need their implementation merged before scoring. |
+| D53 | No agent edits anything inside a run directory or under `data/ATTIC/`, except README notes the owner or claude direct (extends D41); agy's 10-22a archive commits are ratified. | 2026-10-27. |
+| D54 | Drops the retired "D48" guard and "D49" allowance; the reviewed, sizing-based #5155 rule stands. | 2026-10-27. |
 | D02–D04, D08, remaining D09 choices, D11–D16, D18, D20–D21, D24–D25 | **Pending where not specifically superseded above.** D02 comparator/analysis-set choices and D04 crate comparison are not decided by this amendment. | Separate proposal, implementation and owner decisions. |
 
 **The "Resolved" comments are not rulings.** Several issues carry comments citing
@@ -115,7 +122,7 @@ costs informed the redesign. Lane C1, K1/K1 v2 and the BC1 offline sizing also u
 historical outputs or explicit proxies. These are disclosed engineering inputs,
 not unseen production outcomes or tests of the final BC1 condition.
 
-Under D31/D40, both canaries are **assisted/invalid evidence-only**. Preserve
+Under D31/D40 (archive commits ratified by D53), both canaries are **assisted/invalid evidence-only**. Preserve
 every known attempt and expenditure in an assisted-engineering table, including
 unknowns where originals are missing. Exclude them from clean generated-record
 acceptance, confirmatory effects, and **both numerator and denominator** of the
@@ -248,7 +255,7 @@ proposed analysis role after P4, not current authorization or acceptance.
 |---|---|---|---|
 | CHORUS | One clean re-canary, n=1 descriptive; proposed production n=3 confirmatory against v8 | First canary n=1, descriptive feasibility only; no production replicates registered | API production enters E2/E5; native canary has independent acceptance review and separately registered descriptive E5 ratings, never a confirmatory native/API verdict |
 | AI_READI | No-crate pilot separately; proposed n=3, confirmatory only under D02's chosen comparator, otherwise descriptive | Unplanned/unregistered | API E2/E5 retain the cross-arm label if v8 with-crate is selected; any later native contrast must also declare source/profile/account/effort differences |
-| CM4AI | Proposed n=3 confirmatory against v8 | Unplanned/unregistered | API E2/E5 propose non-human-subject/non-regulated applicability, pending owner and exact-file scientific review; companion analyses are not dataset-processing facts |
+| CM4AI | Proposed n=3 confirmatory against v8 | Unplanned/unregistered | API E2/E5 use non-human-subject/non-regulated applicability (D52); companion analyses are not dataset-processing facts |
 | VOICE | Proposed adult n=3 confirmatory against v8 | Unplanned/unregistered | API E2/E5 adult scope; pediatric records never substitute |
 | VOICE_PEDIATRIC | Proposed n=1 descriptive feasibility, no v8 comparator | Unplanned/unregistered | Separate pediatric E2-style source review/E5 descriptive row; no confirmatory effect or adult replicate |
 | KIDS_FIRST | Proposed n=1 descriptive external resource-level feasibility, neutral profile, subject to actual input fit | Unplanned/unregistered | Neutral-context source review/E5 descriptive row; no v8 comparator and no inferred cohort-level equivalence |
@@ -956,8 +963,9 @@ Across all six projects the visible protocol and byte envelopes are fixed;
 project bounds are selected under D45 and independently recorded. Neutral IDs
 remain neutral. Kids First uses actual neutral context with `vocabulary: {}` and
 resource-level scope; it is not sized or generated by silently substituting an
-AI_READI record. Context settings and their narratives remain pending owner
-and exact-file scientific review; the retired D46 entry supplies no approval.
+AI_READI record. The omission contexts are approved as D51 (#5164), and the
+evaluation-context settings were decided by the owner's human review as D52; the
+retired D46 entry supplies no approval.
 The historical decision note's CHORUS hash `6e3c6b6d…` was incorrect; A23
 retains the actual `ac94a74b…` context bytes. Verify and pin the exact
 selected artifact before registration without rewriting historical evidence.
@@ -1174,7 +1182,7 @@ reasons.
 
 The following records the October 20 draft's interpretation of its original
 delegation. Search/remote/worktree observations here are historical, not fresh
-exhaustive absence findings. D26–D45, D50, the matrix and items 14–16 above
+exhaustive absence findings. D26–D45, D50–D54, the matrix and items 14–16 above
 govern the revised draft; this section does not override them.
 
 1. **v8 records.** The prompt describes "v8 04f (`claudecode_assistant_agent`) and 04g
@@ -1221,10 +1229,10 @@ govern the revised draft; this section does not override them.
 - **The E2 protocol and denominator:** owner review/adoption of item 16's exact
   units/weights, blind inventory and split/dedup rules before E2, without changing
   the directional threshold after seeing outcomes.
-- **Context and evaluation identities:** omission/evaluation settings remain
-  pending owner review; D46 is retired. Corrected narratives and citations need
-  exact-file human scientific review, and selected hashes and per-route readback
-  need verification. Preserve A23's current normalized context digests when
+- **Context and evaluation identities:** the omission contexts are approved
+  (D51) and the evaluation-context settings decided (D52); D46 is retired. The
+  D52 scoring rules need their implementation merged before scoring, and selected
+  hashes and per-route readback need verification. Preserve A23's current normalized context digests when
   integrating the decision-record correction. Native canary ratings remain
   separately registered/descriptive.
 - **Rubric20 version** (#2911, E4).
