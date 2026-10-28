@@ -40,6 +40,19 @@ from data_sheets_schema.evaluation_context import (
 
 SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
+# D52 (2026-10-28): these nested paths are alternative representations of
+# one governance contact. A nested criterion never reads a bare root field.
+GOVERNANCE_CONTACT_FIELDS = (
+    "data_governance.committee_contact",
+    "regulatory_restrictions.governance_committee_contact",
+)
+Q9_REGULATED_FIELDS = frozenset(
+    "regulatory_restrictions." + field for field in (
+        "confidentiality_level", "hipaa_compliant", "other_compliance",
+        "governance_committee_contact",
+    )
+)
+
 # Schema used for validation, keyed by method name
 _METHOD_SCHEMA = {
     "claudecode_agent_core": (
@@ -284,19 +297,38 @@ class D4DEvaluator:
         """Keep every dataset resource; only remove an optional class wrapper."""
         return load_document(file_path)[0]
 
+    @staticmethod
+    def _resolved_field_values(d4d_data: Dict[str, Any], field_path: str):
+        """Resolve approved contact alternatives within the supplied dataset.
+
+        Rubric10's legacy bare criterion keeps its existing lookup and also
+        recognizes the approved nested representations. Evidence retains its
+        actual source pointer; aliases never search other dataset members.
+        """
+        candidates = (field_path,)
+        if field_path in (*GOVERNANCE_CONTACT_FIELDS, "governance_committee_contact"):
+            candidates += GOVERNANCE_CONTACT_FIELDS
+        found = {}
+        for candidate in dict.fromkeys(candidates):
+            for pointer, value in field_values(d4d_data, candidate):
+                found.setdefault(pointer, value)
+        return list(found.items())
+
     def _extract_field_value(self, d4d_data: Dict[str, Any], field_path: str) -> Optional[Any]:
-        values = [value for _, value in field_values(d4d_data, field_path)]
+        values = [value for _, value in self._resolved_field_values(d4d_data, field_path)]
         return values[0] if len(values) == 1 else values or None
 
     def _is_field_present(self, d4d_data: Dict[str, Any], field_paths: List[str]) -> Tuple[bool, List[str]]:
         found = []
+        seen = set()
         for field_path in field_paths:
-            for pointer, value in field_values(d4d_data, field_path):
+            for pointer, value in self._resolved_field_values(d4d_data, field_path):
                 meaningful = ((isinstance(value, str) and bool(value.strip()))
                               or isinstance(value, (int, float, bool))
                               or (isinstance(value, (list, dict)) and bool(value)))
-                if meaningful:
+                if meaningful and pointer not in seen:
                     found.append(f"{pointer}: {str(value)[:100]}")
+                    seen.add(pointer)
         return bool(found), found
 
     def _score_rubric10_element(self, d4d_data: Dict[str, Any], element: Dict[str, Any]) -> ElementScore:
@@ -347,7 +379,7 @@ class D4DEvaluator:
     def _raw_values(self, d4d_data, field_paths):
         found = {}
         for field_path in field_paths:
-            for pointer, value in field_values(d4d_data, field_path):
+            for pointer, value in self._resolved_field_values(d4d_data, field_path):
                 if value is not None and value != "" and value != [] and value != {}:
                     found[pointer] = value
         return list(found.values())
@@ -465,8 +497,20 @@ class D4DEvaluator:
 
     def _score_rubric20_question(self, d4d_data: Dict[str, Any], question: Dict[str, Any]) -> QuestionScore:
         paths = question['field']
-        field_paths = [paths] if isinstance(paths, str) else paths
+        field_paths = [paths] if isinstance(paths, str) else list(paths)
         decision = applicability(question.get('applies_to'), self.context)
+        applicability_evidence = decision.evidence
+        if question['id'] == 9:
+            regulated = applicability('regulated_access', self.context)
+            if regulated.value is False:
+                omitted = [path for path in field_paths if path in Q9_REGULATED_FIELDS]
+                field_paths = [path for path in field_paths if path not in Q9_REGULATED_FIELDS]
+                if omitted:
+                    applicability_evidence += (
+                        " D52: regulated_access explicitly false (" + regulated.evidence + "); "
+                        "omitted Q9 field criteria: " + ", ".join(omitted) + ". "
+                        "The scoring denominator changes; no additional source evidence is inferred."
+                    )
         score_type = question['score_type']
         fixed_max = 1 if score_type == 'pass_fail' else 5
         unit_scores, evidence = [], []
@@ -487,7 +531,7 @@ class D4DEvaluator:
             score=selected['score'], max_score=fixed_max if decision.applicable else 0,
             score_label=selected['label'], found_values=evidence,
             applicable=decision.applicable, applicability_status=decision.status,
-            applicability_evidence=decision.evidence, fixed_max_score=fixed_max, unit_scores=unit_scores)
+            applicability_evidence=applicability_evidence, fixed_max_score=fixed_max, unit_scores=unit_scores)
 
     def _get_question_category(self, question_id: int) -> str:
         """Get category name for a rubric20 question based on ID"""
