@@ -1,0 +1,297 @@
+{
+  "state": "completed",
+  "exit": 1,
+  "self_test": true,
+  "model_facing_modules": {
+    "derived": {
+      "agentic_runtime": [
+        "text in instruction_adapter() (its value reaches instruction_adapter())",
+        "text in temperature_instructions() (its value reaches temperature_instructions())",
+        "module text (part of UNOBSERVED_TEMPERATURE, its value reaches temperature_instructions())"
+      ],
+      "api_playbook": [
+        "text in adapt_template() (its value reaches adapt_template())"
+      ],
+      "api_runner": [
+        "module text (part of PHASE_SYSTEM, sent in a PhaseRequest at src/data_sheets_schema/api_runner.py:2953)",
+        "module text (part of CARRY_LABEL, sent in a PhaseRequest at src/data_sheets_schema/api_runner.py:2953)",
+        "module text (part of SCHEMA_SEMANTICS_HEADER_V19, sent in a PhaseRequest at src/data_sheets_schema/api_runner.py:2953)"
+      ],
+      "audit_batch_context": [
+        "module text (part of COMMON_DUTIES, its value reaches _base())",
+        "module text (part of WORKER_DUTIES, its value reaches _base())",
+        "module text (part of GLOBAL_DUTIES, its value reaches _base())"
+      ],
+      "audit_batch_format": [
+        "text in render() (its value reaches render())",
+        "text in contract() (its value reaches contract())",
+        "module text (part of COMMON_RULES, its value reaches contract())"
+      ],
+      "bc1_audit": [
+        "text in downstream_contract() (its value reaches downstream_contract())"
+      ],
+      "bc1_codec": [
+        "text in contract() (its value reaches contract())"
+      ],
+      "bc1_context": [
+        "module text (part of SCHEMA_HEADER, its value reaches schema_context())",
+        "text in schema_context() (its value reaches schema_context())"
+      ],
+      "bc1_runtime": [
+        "module text (part of SYSTEM, sent in a PhaseRequest at src/data_sheets_schema/bc1_runtime.py:213)",
+        "text in render_request() (sent in a PhaseRequest at src/data_sheets_schema/bc1_runtime.py:213)"
+      ],
+      "bc1_selection": [
+        "module text (part of PROCEDURE, its value reaches resolve_prompt())"
+      ],
+      "chunking": [
+        "module text (part of DEFAULT_RULE, its value reaches manifest_from_bytes())",
+        "module text (part of FILE_MARK, its value reaches _documents())"
+      ],
+      "healthsheet": [
+        "text in render() (its value reaches render())"
+      ],
+      "native_source_attribution": [
+        "text in instructions() (its value reaches instructions())"
+      ],
+      "receipt_completion": [
+        "module text (part of AUDIT_HEADER, sent in a PhaseRequest at src/data_sheets_schema/api_runner.py:2953)",
+        "text in _audit_carry() (its value reaches _audit_carry())",
+        "text in _result() (its value reaches _result())"
+      ],
+      "receipts": [
+        "module text (part of RERECEIPTS_INSTRUMENT, its value reaches policy_identity())",
+        "module text (part of RECEIPTS_INSTRUMENT, part of RERECEIPTS_INSTRUMENT, its value reaches policy_identity())",
+        "text in check() (its value reaches check())"
+      ],
+      "removals": [
+        "module text (part of INSTRUMENT, its value reaches classify())",
+        "module text (part of NON_CHECKS, its value reaches classify())",
+        "text in classify() (its value reaches classify())"
+      ],
+      "rereceipt": [
+        "module text (part of HEADER, sent in a PhaseRequest at src/data_sheets_schema/api_runner.py:3384)",
+        "module text (part of INSTRUCTION, its value reaches phase_instruction())",
+        "module text (part of ANSWER_FENCE, part of ANSWER_PARSER, its value reaches _result())"
+      ],
+      "rocrate_normalize": [
+        "text in build_crate_bundle() (written to a `*_preprocessed_with_crate.txt` model input at src/data_sheets_schema/rocrate_normalize.py:698)",
+        "module text (part of DE_NOVO_INCLUDE, written to a `*_preprocessed_with_crate.txt` model input at src/data_sheets_schema/rocrate_normalize.py:698)",
+        "module text (part of DE_NOVO_EXCLUDE, written to a `*_preprocessed_with_crate.txt` model input at src/data_sheets_schema/rocrate_normalize.py:698)"
+      ],
+      "schema_digest": [
+        "module text (part of TERM_SOURCES, its value reaches build_record())"
+      ],
+      "schema_semantics": [
+        "text in render_pair() (its value reaches render_pair())",
+        "text in build_record() (its value reaches build_record())"
+      ],
+      "shared_generation": [
+        "text in role_instruction() (its value reaches role_instruction())",
+        "text in marked_bundle() (its value reaches marked_bundle())",
+        "module text (part of GENERATION_CONTEXT_HEADER, its value reaches generation_context())"
+      ],
+      "source_heading_runtime": [
+        "text in check_condition() (its value reaches check_condition())",
+        "module text (part of MARKER, its value reaches _derive())",
+        "module text (part of INSTRUCTION, its value reaches _derive())"
+      ],
+      "source_priority": [
+        "text in priority_of() (its value reaches priority_of())"
+      ],
+      "source_review": [
+        "module text (part of INVENTORY_HEADER, sent in a PhaseRequest at src/data_sheets_schema/api_runner.py:2953)"
+      ],
+      "typed_audit_runtime": [
+        "module text (part of SYSTEM, sent in a PhaseRequest at src/data_sheets_schema/typed_audit_runtime.py:171)",
+        "text in _build_request_bytes() (sent in a PhaseRequest at src/data_sheets_schema/typed_audit_runtime.py:171)"
+      ]
+    },
+    "derived_outside_closures": [],
+    "listed": [
+      "agentic_runtime",
+      "api_playbook",
+      "api_runner",
+      "audit_batch_context",
+      "audit_batch_format",
+      "audit_batches",
+      "audit_grammar",
+      "audit_omissions",
+      "bc1_audit",
+      "bc1_codec",
+      "bc1_context",
+      "bc1_runtime",
+      "bc1_selection",
+      "chunking",
+      "evidence_assertions",
+      "grounding",
+      "healthsheet",
+      "native_source_attribution",
+      "receipt_completion",
+      "receipts",
+      "removals",
+      "rereceipt",
+      "rocrate_normalize",
+      "schema_digest",
+      "schema_semantics",
+      "scope",
+      "shared_generation",
+      "source_heading_runtime",
+      "source_metadata",
+      "source_priority",
+      "source_review",
+      "typed_audit",
+      "typed_audit_runtime"
+    ],
+    "derived_not_listed": [],
+    "listed_not_derived": [
+      "audit_batches",
+      "audit_grammar",
+      "audit_omissions",
+      "evidence_assertions",
+      "grounding",
+      "scope",
+      "source_metadata",
+      "typed_audit"
+    ]
+  },
+  "violations": 101,
+  "bc1_violations": [
+    {
+      "path": "src/data_sheets_schema/bc1_registration.py",
+      "line": 24,
+      "approaches": [
+        "api",
+        "native_agentic",
+        "deterministic",
+        "github_assistant"
+      ],
+      "role": "run_shaping",
+      "status": "live",
+      "context": "code_table",
+      "category": "gc_project",
+      "match": "CHORUS",
+      "pattern": "CHo?RUS",
+      "model_facing": false,
+      "code": true,
+      "gates_in": [
+        "api",
+        "deterministic",
+        "github_assistant",
+        "native_agentic"
+      ],
+      "snippet": "PROJECTS = (\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\", \"KIDS_FIRST\")",
+      "exception": null,
+      "violation": true
+    },
+    {
+      "path": "src/data_sheets_schema/bc1_registration.py",
+      "line": 24,
+      "approaches": [
+        "api",
+        "native_agentic",
+        "deterministic",
+        "github_assistant"
+      ],
+      "role": "run_shaping",
+      "status": "live",
+      "context": "code_table",
+      "category": "gc_project",
+      "match": "AI_READI",
+      "pattern": "AI[-_ ]?READI",
+      "model_facing": false,
+      "code": true,
+      "gates_in": [
+        "api",
+        "deterministic",
+        "github_assistant",
+        "native_agentic"
+      ],
+      "snippet": "PROJECTS = (\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\", \"KIDS_FIRST\")",
+      "exception": null,
+      "violation": true
+    },
+    {
+      "path": "src/data_sheets_schema/bc1_registration.py",
+      "line": 24,
+      "approaches": [
+        "api",
+        "native_agentic",
+        "deterministic",
+        "github_assistant"
+      ],
+      "role": "run_shaping",
+      "status": "live",
+      "context": "code_table",
+      "category": "gc_project",
+      "match": "CM4AI",
+      "pattern": "CM4AI",
+      "model_facing": false,
+      "code": true,
+      "gates_in": [
+        "api",
+        "deterministic",
+        "github_assistant",
+        "native_agentic"
+      ],
+      "snippet": "PROJECTS = (\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\", \"KIDS_FIRST\")",
+      "exception": null,
+      "violation": true
+    },
+    {
+      "path": "src/data_sheets_schema/bc1_registration.py",
+      "line": 24,
+      "approaches": [
+        "api",
+        "native_agentic",
+        "deterministic",
+        "github_assistant"
+      ],
+      "role": "run_shaping",
+      "status": "live",
+      "context": "code_table",
+      "category": "gc_project",
+      "match": "VOICE",
+      "pattern": "(?-i:\\bVOICE\\b)",
+      "model_facing": false,
+      "code": true,
+      "gates_in": [
+        "api",
+        "deterministic",
+        "github_assistant",
+        "native_agentic"
+      ],
+      "snippet": "PROJECTS = (\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\", \"KIDS_FIRST\")",
+      "exception": null,
+      "violation": true
+    },
+    {
+      "path": "src/data_sheets_schema/bc1_registration.py",
+      "line": 24,
+      "approaches": [
+        "api",
+        "native_agentic",
+        "deterministic",
+        "github_assistant"
+      ],
+      "role": "run_shaping",
+      "status": "live",
+      "context": "code_table",
+      "category": "gc_project",
+      "match": "VOICE_PEDIATRIC",
+      "pattern": "VOICE_PEDIATRIC",
+      "model_facing": false,
+      "code": true,
+      "gates_in": [
+        "api",
+        "deterministic",
+        "github_assistant",
+        "native_agentic"
+      ],
+      "snippet": "PROJECTS = (\"CHORUS\", \"AI_READI\", \"CM4AI\", \"VOICE\", \"VOICE_PEDIATRIC\", \"KIDS_FIRST\")",
+      "exception": null,
+      "violation": true
+    }
+  ],
+  "note": "Completed scan can report repository-specificity violations; exit 1 is not ConfigError."
+}

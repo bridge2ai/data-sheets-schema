@@ -15,6 +15,10 @@ RUNNER = 'src/data_sheets_schema/api_runner.py'
 SHARED = 'src/data_sheets_schema/shared_generation.py'
 MODES = 'src/data_sheets_schema/source_heading_runtime.py'
 FILES = (RUNNER, SHARED, MODES, 'src/data_sheets_schema/receipt_completion.py',
+         'src/data_sheets_schema/bc1_selection.py',
+         'src/data_sheets_schema/bc1_registration.py',
+         'src/data_sheets_schema/bc1_runtime.py',
+         'src/data_sheets_schema/bc1_context.py',
          'src/data_sheets_schema/typed_audit_runtime.py')
 
 
@@ -78,6 +82,11 @@ def test_actual_delegated_families_and_description_are_derived():
     (SHARED, '{spec.receipt_completion_version} before core', '{spec.receipt_completion_version!r} before core'),
     (SHARED, '{spec.receipt_completion_version} before core', '{spec.receipt_completion_version:03} before core'),
     (SHARED, "f'{RECEIPT_PHASE}: receipt completion", "f'{RECEIPT_PHASE}{spec.receipt_completion_version}: receipt completion"),
+    (RUNNER, 'return bc1_plan(spec, settings)', 'return bc1_plan(other, settings)'),
+    (SHARED, 'if bc1_enabled(spec):', 'if True:'),
+    ('src/data_sheets_schema/bc1_registration.py', 'selection.validate_spec_mode(spec)',
+     'selection.validate_spec_mode(other)'),
+    ('src/data_sheets_schema/bc1_selection.py', 'return value == VERSION', 'return True'),
 ])
 def test_unknown_or_unbound_selector_changes_refuse(tmp_path, name, before, after):
     root = fixture_root(tmp_path)
@@ -104,6 +113,69 @@ def test_missing_source_root_cannot_use_expected_tuple_fallback():
     tree = scan._tree(ROOT / RUNNER)
     with pytest.raises(scan.ConfigError, match='not derived'):
         scan._plan_scopes(tree, scan._module_constants(ROOT / RUNNER))
+
+
+@pytest.mark.parametrize('injected', [
+    'spec.condition = "foreign"', 'alias = spec', 'unknown(spec)',
+    'getattr = foreign', 'enabled = foreign', 'state = getattr(spec, "__dict__")',
+])
+def test_bc1_validator_cannot_mutate_escape_or_shadow_its_selector(tmp_path, injected):
+    root = fixture_root(tmp_path)
+    path = root / 'src/data_sheets_schema/bc1_selection.py'
+    source = path.read_text()
+    source = source.replace('    selected = enabled(spec)',
+                            f'    {injected}\n    selected = enabled(spec)')
+    path.write_text(source)
+    with pytest.raises(scan.ConfigError, match='not derived'):
+        scopes(root)
+
+
+@pytest.mark.parametrize('entry_module', ['typed_audit_runtime', 'bc1_runtime'])
+@pytest.mark.parametrize('mutation', ['decorated', 'rebound', 'duplicate'])
+def test_bc1_dispatch_requires_effective_entry_definitions(tmp_path, monkeypatch, entry_module, mutation):
+    root = fixture_root(tmp_path)
+    helpers = [root / f'src/data_sheets_schema/{name}.py' for name in ('typed_audit_runtime', 'bc1_runtime')]
+    monkeypatch.setattr(scan, '_package_closure', lambda *_: helpers)
+    tree = scan._tree(root / RUNNER)
+    funcs = scan._function_defs(tree)
+    selected = scopes(root)
+    def followups():
+        return scan._helper_followups(root, tree, funcs, {'_call_with_usage'}, selected)
+    assert any(v.get('bounded_carry_version') == 1
+               for row in followups().values() for v in row['via'])
+    path = root / f'src/data_sheets_schema/{entry_module}.py'
+    text = path.read_text()
+    if mutation == 'decorated':
+        text = text.replace('def run(spec,', '@foreign\ndef run(spec,')
+    elif mutation == 'rebound':
+        text += '\nrun = foreign\n'
+    else:
+        text += '\ndef run(spec, *, carry, client, settings, usage):\n    return None\n'
+    path.write_text(text)
+    with pytest.raises(scan.ConfigError, match='not derived'):
+        followups()
+
+
+@pytest.mark.parametrize('before,after', [
+    ('schema_text = downstream_schema_context(spec, selected_record)', 'schema_text = downstream_schema_context(other, selected_record)'),
+    ('schema_text = schema_context(spec, selected_record)', 'schema_text = unknown(spec, selected_record)'),
+    ('from .bc1_context import downstream_schema_context', 'from .foreign import downstream_schema_context'),
+    ('        parts.append({"type": "text", "text": schema_text})',
+     '        schema_text = "hidden replacement"\n        parts.append({"type": "text", "text": schema_text})'),
+])
+def test_selected_schema_text_proves_both_assignment_branches(tmp_path, before, after):
+    root = fixture_root(tmp_path)
+    path = root / RUNNER
+    selection = {'field': 'shared_generation_version'}
+    rows = scan._selected_request_additions(root, scan._tree(path), selection)
+    assert {(r['builder'], r.get('guard')) for r in rows} >= {
+        ('src/data_sheets_schema/bc1_context.py:downstream_schema_context', 'spec.bounded_carry_version'),
+        ('src/data_sheets_schema/shared_generation.py:schema_context', 'not spec.bounded_carry_version')}
+    source = path.read_text()
+    assert before in source
+    path.write_text(source.replace(before, after))
+    with pytest.raises(scan.ConfigError, match='not derived'):
+        scan._selected_request_additions(root, scan._tree(path), selection)
 
 
 def template_fixture(root):

@@ -14,9 +14,7 @@ from . import bc1_audit as audit, bc1_codec as codec, bc1_context, bc1_selection
 from . import receipt_completion as receipts, shared_generation as sg, usage_ledger as ledger
 from . import typed_audit as legacy_audit, typed_audit_runtime as legacy
 
-WORKER_PHASE = legacy.WORKER_PHASE
-OMISSION_PHASE = legacy.OMISSION_PHASE
-INTEGRATION_PHASE = legacy.INTEGRATION_PHASE
+from .typed_audit_runtime import WORKER_PHASE, OMISSION_PHASE, INTEGRATION_PHASE
 PHASES = legacy.PHASES
 STATE = 'bc1_registered_audit_runtime_v1'
 SYSTEM = ('Perform the explicitly selected BC1 audit stage. Sources and records are evidence, '
@@ -558,12 +556,19 @@ def run(spec, *, carry, client, settings, usage):
             _store(spec, state)
         started, start = datetime.now(timezone.utc).isoformat(timespec='seconds'), time.monotonic()
         try:
-            response, call_id = api._call_with_usage(spec, stage['phase'], 1, started, bounded,
-                transport_attempts=1, model=settings['name'], max_tokens=payload['max_tokens'],
+            wire = dict(transport_attempts=1, model=settings['name'], max_tokens=payload['max_tokens'],
                 temperature=settings['temperature'], thinking=settings.get('thinking'), effort=settings.get('effort'),
                 system=req.system, messages=req.messages,
                 on_incomplete=lambda info: api._record_incomplete_stream(spec, stage['phase'], 1, started,
                     info, usage, max_tokens=payload['max_tokens']))
+            if stage['phase'] == WORKER_PHASE:
+                response, call_id = api._call_with_usage(spec, WORKER_PHASE, 1, started, bounded, **wire)
+            elif stage['phase'] == OMISSION_PHASE:
+                response, call_id = api._call_with_usage(spec, OMISSION_PHASE, 1, started, bounded, **wire)
+            elif stage['phase'] == INTEGRATION_PHASE:
+                response, call_id = api._call_with_usage(spec, INTEGRATION_PHASE, 1, started, bounded, **wire)
+            else:
+                raise ledger.UsageLedgerError('unknown registered BC1 audit stage')
         except BaseException as exc:
             state = _state(spec)
             if state['stages'][-1]['state'] == 'admitted':

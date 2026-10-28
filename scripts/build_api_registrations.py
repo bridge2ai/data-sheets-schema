@@ -315,10 +315,24 @@ class SizingRecord:
     receipt_result: Path | None = None
 
     @classmethod
-    def in_directory(cls, directory: Path | str, project: str) -> "SizingRecord":
+    def in_directory(cls, directory: Path | str, project: str, *, effective_receipt: bool = False) -> "SizingRecord":
         """An API run's intermediate directory: {P}_full.yaml, {P}_core.yaml, {P}_coverage_receipt.yaml."""
         root = Path(directory)
-        return cls(*(root / f"{project}_{name}.yaml" for name in ("full", "core", "coverage_receipt")))
+        full, core, receipt = (root / f"{project}_{name}.yaml" for name in ("full", "core", "coverage_receipt"))
+        if not effective_receipt:
+            return cls(full, core, receipt)
+        result_path = root / f"{project}_receipt_completion_result.json"
+        outcome = json.loads(result_path.read_bytes())
+        expected = outcome.get("receipt_after_sha256")
+        text = outcome.get("receipt_yaml")
+        if not isinstance(text, str) or hashlib.sha256(text.encode()).hexdigest() != expected:
+            raise ValueError("BC1 sizing completion result has invalid effective receipt bytes")
+        # Completed runs retain the pre-completion receipt in intermediate/.
+        # Select only exact completed bytes, never a best-effort stale fallback.
+        for candidate in (receipt, root.parent / receipt.name):
+            if candidate.is_file() and candidate.read_bytes() == text.encode():
+                return cls(full, core, candidate, result_path)
+        raise ValueError("BC1 sizing cannot find the completion result's exact effective receipt")
 
 
 SIZING_RECORD_FORMAT = "typed_audit_input_sizing_record_v1"
@@ -1074,7 +1088,7 @@ def prepare_registration(
     if bounded_carry_version == 1:
         from data_sheets_schema import bc1_registration
         if not isinstance(sizing_record, SizingRecord):
-            sizing_record = SizingRecord.in_directory(sizing_record, project)
+            sizing_record = SizingRecord.in_directory(sizing_record, project, effective_receipt=True)
         context_raw = resolved_context_raw if resolved_context_raw is not None else resolved_context.read_bytes()
         sizing = bc1_registration.size_inputs(reg, sizing_record=sizing_record,
             context_raw=context_raw, schema_snapshot=full_schema)

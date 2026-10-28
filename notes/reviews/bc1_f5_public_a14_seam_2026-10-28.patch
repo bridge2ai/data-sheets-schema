@@ -1,0 +1,26 @@
+diff --git a/src/data_sheets_schema/shared_generation.py b/src/data_sheets_schema/shared_generation.py
+--- a/src/data_sheets_schema/shared_generation.py
++++ b/src/data_sheets_schema/shared_generation.py
+@@ -667,3 +667,8 @@ def schema_context(spec, record: str | None = None) -> str:
++def a14_schema_context(captured, record: str | None = None) -> str:
++    """Render A14 from already verified captured inputs, independent of BC1 selection."""
++    return _schema_context(captured, record)
++
++
+ _TRIMMED_SLOT_KEYS = ('domain_of', 'from_schema', 'alias', 'owner', '@type',
+                       'slot_uri', 'annotations', 'exact_mappings', 'description',
+                       'broad_mappings', 'comments')
+diff --git a/src/data_sheets_schema/bc1_context.py b/src/data_sheets_schema/bc1_context.py
+--- a/src/data_sheets_schema/bc1_context.py
++++ b/src/data_sheets_schema/bc1_context.py
+@@ -277,7 +277,7 @@ def downstream_schema_context(spec, record=None):
+     return shared.memo(spec, 'bc1_downstream_a14',
+         [_canonical(_schema_pin(captured.full_schema)),
+          *[raw for _name, _path, raw in captured.full_schema.sources], _canonical(record)],
+-        lambda: shared._schema_context(captured, record))
+-
+-
++        lambda: shared.a14_schema_context(captured, record))
++
++
+ def model_request(inner, schema_text):

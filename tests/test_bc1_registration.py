@@ -2,10 +2,12 @@
 from copy import deepcopy
 import hashlib
 import json
+import math
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from click.testing import CliRunner
 
 from tests.test_bc1_context import fixture as context_fixture
 from data_sheets_schema import bc1_registration as reg, bc1_selection as selected
@@ -199,11 +201,100 @@ def test_fit_gate_accepts_exact_aggregate_and_input_boundaries(sizing_fixture):
     registration, files, inputs = sizing_fixture
     options = dict(sizing_record=files, context_raw=inputs["context"], schema_snapshot=inputs["schema_snapshot"])
     result = reg.size_inputs(registration, **options)
-    largest = max(row['estimated_input_tokens'] for row in result['rows'])
-    total = max(row['estimated_input_tokens'] for row in result['own_plan_scenarios'].values())
+    largest = max(row['estimated_input_tokens'] for row in result['rows'] if row['gated'])
+    total = max(result['own_plan_scenarios'][name]['estimated_input_tokens'] for name in reg.GATED_SCENARIOS)
     registration['audit_limits'].update(max_input_tokens_per_call=largest, aggregate_input_tokens=total)
     result = reg.size_inputs(registration, **options)
     reg.check_sizing_record(registration, result)
+    assert any(not r['estimated_context_fits'] for r in result['rows'] if not r['gated'])
+    assert result['own_plan_scenarios']['visible_cap_escaped_bound']['estimated_input_tokens'] > total
+
+
+def test_d62_split_applies_to_every_call_and_measured_escaping_only_to_future(sizing_fixture):
+    registration, files, inputs = sizing_fixture
+    result = reg.size_inputs(registration, sizing_record=files,
+        context_raw=inputs['context'], schema_snapshot=inputs['schema_snapshot'])
+    for row in result['rows']:
+        if row['scenario'] in ('captured_record', reg.FLOOR):
+            assert row['estimated_input_tokens'] == math.ceil(row['wire_bytes'] / 2.48)
+            assert row['future_wire_bytes'] == 0
+        if row['scenario'] == reg.CAPS:
+            floor = next(r for r in result['rows'] if r['stage'] == row['stage'] and r['scenario'] == reg.FLOOR)
+            assert row['request_bytes'] == floor['wire_bytes']
+            assert row['planning_future_wire_bytes'] == math.ceil(row['future_wire_bytes'] * 1.25)
+            assert row['estimated_input_tokens'] == math.ceil(
+                floor['wire_bytes'] / 2.48 + math.ceil(row['future_wire_bytes'] * 1.25) / 1.75)
+    forged = deepcopy(result)
+    forged['calibration']['future_response_escape_factor'] = 1.0
+    with pytest.raises(ValueError, match='component calibration'):
+        reg.check_sizing_record(registration, forged)
+
+
+@pytest.fixture
+def completed_chorus(tmp_path):
+    source = Path(__file__).parent / 'fixtures/audit_batches/chorus_v10_2026-10-22a'
+    intermediate = tmp_path / 'completed/intermediate'
+    intermediate.mkdir(parents=True)
+    for name in ('full', 'core'):
+        (intermediate / f'CHORUS_{name}.yaml').write_bytes((source / f'CHORUS_{name}.yaml').read_bytes())
+    effective = (source / 'CHORUS_coverage_receipt.yaml').read_bytes()
+    (intermediate / 'CHORUS_coverage_receipt.yaml').write_text('# earlier receipt\nchunks: []\n')
+    (intermediate.parent / 'CHORUS_coverage_receipt.yaml').write_bytes(effective)
+    (intermediate / 'CHORUS_receipt_completion_result.json').write_bytes(reg._raw({
+        'receipt_yaml': effective.decode(), 'receipt_after_sha256': hashlib.sha256(effective).hexdigest(),
+        'input_identity': {}, 'registration': {}, 'unsupported_audit_candidates': []}))
+    return intermediate
+
+
+def test_completed_run_cli_sizing_uses_exact_effective_receipt_and_check_revalidates(completed_chorus, tmp_path):
+    output = tmp_path / 'registrations'
+    args = ['-p', 'CHORUS', '-l', 'completed', '--partition', 'chorus',
+            '--bounded-carry-version', '1', '--aggregate-input-tokens', '4500000',
+            '--sizing-record', f'CHORUS={completed_chorus}', '-o', str(output)]
+    result = CliRunner().invoke(builder.cli, args)
+    assert result.exit_code == 0, result.output
+    path = output / 'registration_chorus_completed.json'
+    assert path.stat().st_size > 0
+    record = builder.check_registration_sizing(path, path.read_bytes())
+    assert record is not None
+    files = builder.SizingRecord.in_directory(completed_chorus, 'CHORUS', effective_receipt=True)
+    assert files.receipt.parent == completed_chorus.parent
+    # v0 keeps its prior selection, including when a completion result exists.
+    assert builder.SizingRecord.in_directory(completed_chorus, 'CHORUS').receipt.parent == completed_chorus
+    files.receipt.write_bytes(files.receipt.read_bytes() + b'\n')
+    with pytest.raises(ValueError, match='source bytes changed'):
+        builder.check_registration_sizing(path, path.read_bytes())
+    with pytest.raises(ValueError, match='exact effective receipt'):
+        builder.SizingRecord.in_directory(completed_chorus, 'CHORUS', effective_receipt=True)
+
+
+@pytest.mark.parametrize('allowance,ceiling,message', [
+    (4000000, 1000000, 'over allowance'),
+    (4500000, 600000, 'over per-call room'),
+])
+def test_completed_run_cli_and_library_refuse_before_any_write(completed_chorus, tmp_path, allowance, ceiling, message):
+    output = tmp_path / 'refused'
+    args = ['-p', 'CHORUS', '-l', 'refused', '--partition', 'chorus',
+            '--bounded-carry-version', '1', '--aggregate-input-tokens', str(allowance),
+            '--max-input-tokens-per-call', str(ceiling),
+            '--sizing-record', f'CHORUS={completed_chorus}', '-o', str(output)]
+    result = CliRunner().invoke(builder.cli, args)
+    assert result.exit_code != 0 and message in result.output, result.output
+    assert not output.exists()
+    with pytest.raises(ValueError, match=message):
+        builder.build_registration('CHORUS', 'refused', partition='chorus', bounded_carry_version=1,
+            audit_limits={'aggregate_input_tokens': allowance, 'max_input_tokens_per_call': ceiling},
+            sizing_record=completed_chorus, registration_path=output / 'registration.json')
+    assert not output.exists()
+
+
+def test_completed_receipt_text_cannot_disagree_with_its_hash(completed_chorus):
+    path = completed_chorus / 'CHORUS_receipt_completion_result.json'
+    outcome = json.loads(path.read_bytes())
+    outcome['receipt_yaml'] += '\n'
+    path.write_bytes(reg._raw(outcome))
+    with pytest.raises(ValueError, match='invalid effective receipt bytes'):
+        builder.SizingRecord.in_directory(completed_chorus, 'CHORUS', effective_receipt=True)
 
 
 @pytest.mark.parametrize('value', ['ordinary text', '"' * 200, '\\' * 200,
