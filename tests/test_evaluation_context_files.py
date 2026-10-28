@@ -143,3 +143,13 @@ def test_v10_decision_record_tables_match_committed_contexts() -> None:
     assert "`Q8`, `Q15`" in note_text
     assert "`processing_software: true`" in note_text
 
+    import hashlib
+
+    chorus_omission_sha = hashlib.sha256(
+        (ROOT / "data" / "omission_contexts" / "chorus_omission_context.json").read_bytes()
+    ).hexdigest()
+    assert chorus_omission_sha in note_text
+    assert "6e3c6b6d" not in note_text
+    assert "10.18130/V3/F3TD5R" not in note_text
+
+
