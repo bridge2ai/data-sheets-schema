@@ -662,6 +662,8 @@ def verify_registration_input_pins(
         ("inputs.profile.vocabulary", (inputs.get("profile") or {}).get("vocabulary")),
         ("runtime.config", runtime.get("config")),
     ]
+    if reg["format"] == sg.ROUTING_FORMAT:
+        pin_entries.append(("routing.artifact", reg["routing"]["artifact"]))
     for schema in ("full_schema", "core_schema"):
         pin_entries.extend((f"inputs.{schema}.sources[{index}]", pin)
                            for index, pin in enumerate(inputs[schema]["sources"]))

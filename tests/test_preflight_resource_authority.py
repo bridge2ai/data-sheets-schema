@@ -18,6 +18,7 @@ import pytest
 from scripts import build_api_registrations as builder
 from data_sheets_schema import api_runner as api, shared_generation as sg
 from data_sheets_schema.schema_snapshot import capture_schema
+from tests.test_source_heading_runtime_api import draft_files, selected_spec
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -171,6 +172,21 @@ def test_schema_import_closure_refuses_changes(tmp_path, schema, mutation):
         builder.verify_registration_input_pins(reg)
 
 
+@pytest.mark.parametrize("mutation", ["drift", "missing"])
+def test_v2_routing_artifact_pin_refuses_changes(tmp_path, draft_files, mutation):
+    spec = selected_spec(tmp_path, draft_files)
+    reg = sg.parse_registration(spec.shared_generation_registration.encode())
+    assert reg["format"] == sg.ROUTING_FORMAT
+    builder.verify_registration_input_pins(reg)
+    artifact = Path(reg["routing"]["artifact"]["path"])
+    if mutation == "drift":
+        artifact.write_bytes(artifact.read_bytes() + b"\n")
+    else:
+        artifact.unlink()
+    with pytest.raises((OSError, ValueError), match=r"routing\.artifact"):
+        builder.verify_registration_input_pins(reg)
+
+
 @pytest.mark.parametrize("options", [lambda p: ["--worktree", p], lambda p: ["--worktree=" + p], lambda p: ["-w", p], lambda p: ["-w" + p]])
 def test_bootstrap_parses_supported_worktree_spellings(tmp_path, options):
     assert builder._bootstrap_worktree(["--label", "--worktree", *options(str(tmp_path))]) == tmp_path
@@ -208,7 +224,10 @@ def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option)
             env.pop(key)
     env.update(PYTHONPATH=str(site), PYTHONDONTWRITEBYTECODE="1", GIT_NO_LAZY_FETCH="1")
     selection = [option + str(selected)] if option.endswith("=") else [option, str(selected)]
-    command = [sys.executable, "-S", "-P", "-B", str(copied), "-p", "CHORUS", "-l", "foreign", "-o", "prepared", *selection]
+    # Python 3.9/3.10 have no -P; the copied script's directory is isolated
+    # and contains no importable dependencies on those supported interpreters.
+    safe_path = ["-P"] if sys.version_info >= (3, 11) else []
+    command = [sys.executable, "-S", *safe_path, "-B", str(copied), "-p", "CHORUS", "-l", "foreign", "-o", "prepared", *selection]
     result = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
     path = selected / "prepared" / "registration_chorus_foreign.json"
