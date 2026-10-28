@@ -1,16 +1,24 @@
 # generic_v10 analysis plan (preregistration draft)
 
-**Status: DRAFT for P3 review. Not preregistered, and it authorizes nothing.** This
-is step P2 of `notes/d4d_generation_plan_2026-10-09.md` ("#### P2"). The plan becomes
-binding only after the owner's explicit P4 ratification of its exact final text.
-Merging this draft as an engineering artifact does not perform P4. Until then, no
-generic_v10 registration hash is put to the owner, and no billed generic_v10 step runs
-(the plan: "Every billed generic_v10 step depends on P4").
+**Status: DRAFT, revised after P3, awaiting P4. Not preregistered, and it authorizes
+nothing.** This is step P2 of `notes/d4d_generation_plan_2026-10-09.md` ("#### P2").
+The plan becomes binding only after the owner's explicit P4 ratification of its exact
+final text. Until then, no generic_v10 registration hash is put to the owner, and no
+billed generic_v10 step runs (the plan: "Every billed generic_v10 step depends on P4").
+
+**What performs P4 [proposed; owner fixes at P4, item 16].** The generation plan
+words P4 as "The owner merges P2 with an explicit word", gated on "Merged on main".
+This draft proposes that P4 is the owner's word naming this file's sha256 at a named
+commit, recorded in the decision record, with the merge following it. Merging the
+draft as an engineering artifact without that word does not perform P4. Under D58,
+P4 is proposed in two stages, P4a and P4b ("Staged sequence under D58", below).
 
 - **Revised:** 2026-10-27 for R6 F1–F6; authority corrected 2026-10-28 against
-  D26–D45 and D50–D61. D46–D49 are retired, not owner decisions. The local BC1/N2
-  implementations remain separately identified. This is a draft, not a retrospective
-  registration or a declaration that the composed launch condition is ready.
+  D26–D45 and D50–D61; revised again 2026-10-28 for the two P3 passes on `314189e4b`
+  (Claude F1–F23, Codex F1–F13) and for D62–D63. D46–D49 are retired, not owner
+  decisions. The local BC1/N2 implementations remain separately identified. This is a
+  draft, not a retrospective registration or a declaration that the composed launch
+  condition is ready.
 - **Drafted:** 2026-10-20, by the Claude worker session (coordination Lane C2), at main
   `0a1132ecf`, on branch `claude/track-p-analysis-plan`. agy integrates the branch.
   The draft was revised the same day after an independent read-only review.
@@ -30,8 +38,21 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
     `57784daadcc109839e4c76260ee4e5fd415a1c21` corrects D51's description
     (owner re-approval 2026-10-28T04:13:37Z), consistent with
     `notes/coordination/STATUS.md`;
+    `13c81fdc16b66157056c0359e2c4a72086df7647` records D55–D57 and
+    `4c6c5ac8b6866786b14e785a147b761cdfd8cba4` records D58–D60. D61 is recorded by
+    `8c91e373a39cfc47a128ce21b034bd6587adcddb` on #5164's branch
+    (`claude/5164-d52-kf-tables`), not in #5095's record at `4c6c5ac8b`. D62 and D63
+    (2026-10-28T20:12:01Z) are recorded in `STATUS.md` only, so far;
   - BC1 `notes/bc1_production_2026-10-27.md` and contract sources at
     `3bd3c41f459b31848aee2f57e26deb86ef786970`;
+  - BC1's fit and cost analysis,
+    `d4d-executions/plans/reviews/bc1_fit_calibration_claude_2026-10-28.md` (§1 fit,
+    §7 cost), and the review of the D59 implementation `8f83d6cb3`,
+    `d4d-executions/plans/reviews/bc1_8f83d6cb3_claude_review_2026-10-28.md`;
+  - the two P3 passes on `314189e4b`:
+    `d4d-executions/plans/reviews/p2_314189e4b_p3_claude_review_2026-10-28.md` and
+    `d4d-executions/plans/reviews/p3-codex-work/p2_314189e4b_p3_codex_review_2026-10-28.md`.
+    Their dispositions are in `d4d-executions/plans/reviews/p2_p3_dispositions_2026-10-28.md`;
   - N2 `notes/native_n2_parity_delta_review_2026-10-25.md` at
     `be0bd05821256212e89e4d011ba6b30a780e299b`;
   - R_V5 remediation `aff4c9ca530a94b84f934698cdc791960cc31713` (local verification,
@@ -39,23 +60,43 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
 - **Plan dependencies:** P2 depends on G3, P1, A1 and A1b.
   - P1 is done.
   - G3 is partly decided (see the decision status below).
-  - A1 has a measured result that leaves an owner decision open.
-  - A1b is not done.
+  - A1's Lane C1 sizing is superseded as a sizing input. BC1's fit analysis and the
+    D59/D62 sizing replace it (item 15), and the owner has decided on them (D58–D60,
+    D62).
+  - A1b is not done. D63 authorizes one part of it: a single `count_tokens` call by
+    agy on one fixed D59 CHORUS worker request, before the CHORUS registration.
 
-  Every number that depends on A1 or A1b is marked pending.
+  Every token figure that rests on the extrapolated 2.48 bytes per token is provisional
+  until D63's measured ratio replaces it.
 
 **Markers used throughout:**
 - **[pending Dxx]:** a rule that rests on an undecided owner decision, followed by the
   plan's recommendation.
 - **[proposed; owner fixes at P4]:** every decision rule and tolerance this draft
   offers.
+- **(P4 item N):** the numbered question in "P4 agenda" at the end of this file.
 
-Both are proposals for the owner to confirm or amend at P4, not rulings. Nothing in
-this draft asserts a decision the owner has not recorded.
+Both markers are proposals for the owner to confirm or amend at P4, not rulings.
+Nothing in this draft asserts a decision the owner has not recorded.
+
+**Step IDs.** Two numbering schemes meet in this draft:
+- **Plan IDs** are the generation plan's steps, for example A10 (the CHORUS pilot),
+  A14 (the AI_READI pilot), A15 (the floor amendment), A16 (the CHORUS replicate
+  gate), A17 (production), A18 and A19 (VOICE_PEDIATRIC and Kids First), and A21–A22
+  (the optional with-crate stage).
+- **Board IDs** are tasks in `notes/coordination/STATUS.md`, for example board A14
+  (the S7 rework, #5162), board A17 (list splitting, #5211) and board A21 (the rebuilt
+  clean CHORUS re-canary).
+- **An unprefixed step ID is a plan ID,** with two exceptions. "A21" alone means board
+  A21, the re-canary, so the crate stage is always written "plan A21–A22". "The A14
+  digest" means board A14's schema digest, the one D59 keeps downstream.
+- **The re-canary fills plan A10's CHORUS-pilot role,** with the 19/20 floor that
+  D28/D37 register for it, where plan A10 assumed a pending floor. Plan A10c is its
+  contingency.
 
 ## Decision status (reconciled 2026-10-28)
 
-The October 20 draft is amended by D26–D45 and D50–D61. The former D46–D49
+The October 20 draft is amended by D26–D45 and D50–D63. The former D46–D49
 entries are retired proposals, not owner rulings; D51–D54 decide their subjects. Decisions authorize policy and
 engineering; they do not establish a merged implementation, an accepted record,
 remaining budget or a fresh launch word. Where the implementation differs from
@@ -70,35 +111,37 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | D01 | Superseded by D26/D28. | Native/API paths below. |
 | D05, D17, D19, D23 | Decided through D34, D35 and D36. | Rule batch, freeze and review below. |
 | D26, D27 | Track N with the default runtime profile; name **native agentic (direct arm)** and directories `claudecode_direct{,_core}/<label>/`. | D26 2026-10-23; D27 owner confirmation 2026-10-25. |
-| D28 | Void 10-22b; one clean CHORUS API re-canary; 64k/32k/32k worker/omission/integration baseline, 128k report/reconcile, A17 splitting, versioned wire/registration identity. Builder floor remains pending; 19/20 belongs to the re-canary only. | 2026-10-23; floor basis superseded by D37, partition selection refined by D45. |
+| D28 | Void 10-22b; one clean CHORUS API re-canary; 64k/32k/32k worker/omission/integration baseline, 128k report/reconcile, board A17 splitting, versioned wire/registration identity. Builder floor remains pending; 19/20 belongs to the re-canary only. | 2026-10-23; floor basis superseded by D37, partition selection refined by D45, re-canary slice raised by D58. |
 | D29 | **Pending owner:** native effort and first-party `claude.ai` account. No API key. | Resolve for the native registration and launch. |
 | D30, D38 | Revised R9 criteria limited to `confidentiality_level`/`hipaa_compliant`; American `license` spelling and new prompt pins in both assets. | D30 2026-10-23/24; D38 2026-10-25. |
 | D31, D40 | Both 10-20a and 10-22a are archived assisted/invalid engineering evidence. D40 supersedes D31's initial generated-record disposition for 10-22a. Preserve artifacts; no run/archive edits. | 2026-10-23–26; assisted stratum below. |
 | D32, D37 | D32's value-matching subtraction is superseded. D37 gates **phase-1 snapshot** receipt quality: `slots.with_receipt_at_receipt / slots.receiptable_at_receipt`. | D37 2026-10-25T19:44Z; item 3a. |
 | D33 | Report-family pre-dispatch token-plus-output admission; no independent report-family trim under that decision. D44 subsequently requires a reviewed BC1 condition before the canary. | 2026-10-25/26; items 14–15 disclose the new exposure. |
 | D34 | No new rule batch: measure #2918/#2919 with existing lints; defer #2931/#2937; #4018 reasons only; #3336 remains to be measured by CHORUS ×3. | 2026-10-25. |
-| D35 | Freeze at rebuilt A21 registration on merged main, after A17/#5155/#5157. A later runner change needs CHORUS byte-parity evidence and a diagnostic canary. | 2026-10-25; each billed canary still needs its own launch word. |
+| D35 | Freeze at rebuilt A21 registration on merged main, after board A17 (#5211), #5155 and #5157. A later runner change needs CHORUS byte-parity evidence and a diagnostic canary. | 2026-10-25; each billed canary still needs its own launch word. |
 | D36 | Fresh Claude source reviewer plus Codex pass, neither generator nor operator; owner signs acceptance. Second blind reviewer seeds audit-recall observations against `original_full` before seeing the audit. | 2026-10-25; human decisions are not supplied by this draft. |
-| D39 | Versioned worker wording recognizes a split list entry as a removal's owning root. | 2026-10-25; A17 contract change. |
-| D41, D42, D43 | No-touch operation and a terminal/rejection-state guard; compare both guard candidates then obtain the owner's choice. **Owner** runs the hash-approved re-canary command; agents monitor read-only. | D43 supersedes D41's operator clause; guard selection is not inferred here. |
-| D44, D45 | Build/review bounded carry for **all six projects** before the single clean CHORUS re-canary. Keep A17 splitting; select project bounds from cost and output-cap risk inside BC1. | 2026-10-26. |
+| D39 | Versioned worker wording recognizes a split list entry as a removal's owning root. | 2026-10-25; board A17 contract change. |
+| D41, D42, D43 | No-touch operation and a terminal/rejection-state guard. D42 required a review of both guard candidates and an owner pick; the review is done and D55 made the pick. **Owner** runs the hash-approved re-canary command; agents monitor read-only. | D43 supersedes D41's operator clause; D55 records the guard pick. |
+| D44, D45 | Build/review bounded carry for **all six projects** before the single clean CHORUS re-canary. Keep board A17 splitting; select project bounds from cost and output-cap risk inside BC1. | 2026-10-26; D59 chose BC1's request shape. |
 | D46 | **Retired; not an owner decision.** Its subjects are decided by D51 and D52. | Claude's correction, §5.10. |
 | D47 | **Retired; not an owner decision.** Its subjects are decided by D53. | Claude's correction, §5.10. |
-| D48 | **Retired; not an owner decision.** Dropped by D54; the D41 latch journal covers its purpose. | Guard selection remains D42's, and is not inferred here. |
+| D48 | **Retired; not an owner decision.** Dropped by D54; the D41 latch journal covers its purpose. | The guard pick is D55's. |
 | D49 | **Retired; not an owner decision.** Dropped by D54; it supplies no aggregate-input formula or project profiles. | D45 governs selection of BC1 bounds from reviewed per-project sizing; an allowance does not establish request fit or spending authority. |
 | D50 | Decision-record corrections are prepared by Claude; agy fixes assigned code and pushes the permitted prepared bytes. | 2026-10-28T02:24Z in STATUS; Claude's correction §5.10. |
 | D51 | Approves #5164's six omission contexts and its `source_manifest.yaml` edit: VOICE and VOICE_PEDIATRIC name their related-but-distinct dataset; the manifest declares CHORUS `release: null`; the AI_READI, CHORUS, CM4AI and KIDS_FIRST contexts are unchanged (CHORUS `ac94a74b…`). Lands before the A21 rebuild. | 2026-10-27; description corrected and re-approved 2026-10-28T04:13:37Z; claude's final independent check precedes merge. |
 | D52 | Owner's human review of the evaluation contexts (#2912): CM4AI `human_subjects` and `regulated_access` false; KIDS_FIRST `ml_training_dataset` false; all other values accepted; committee-contact equivalence and the `regulated_access`-false Q9 exclusion accepted as scoring rules. | 2026-10-27; the scoring rules still need their implementation merged before scoring. |
 | D53 | No agent edits anything inside a run directory or under `data/ATTIC/`, except README notes the owner or claude direct (extends D41); agy's 10-22a archive commits are ratified. | 2026-10-27. |
 | D54 | Drops the retired "D48" guard and "D49" allowance; the reviewed, sizing-based #5155 rule stands. | 2026-10-27. |
-| D55 | The D42 pick: codex's latch guard A (#5212), fixed first. Review findings F1–F4, F6 and F7 are fixed and re-reviewed before merge; agy's candidate B is not adopted. | 2026-10-28T07:02Z. |
+| D55 | The D42 pick: codex's latch guard A (#5212), fixed first. Review findings F1–F4, F6 and F7 are fixed and re-reviewed before merge; agy's candidate B is not adopted. | 2026-10-28T07:02Z. State when this revision was written: #5212 is a draft at `db88ca68c`; the fix packet `4f20a300d` is not on it, and its re-review found it not merge-ready (R5, major: a textual conflict with the PR base). What remains open is implementation, re-review and composition, not the pick. |
 | D56 | Override semantics: an override never continues a run past a terminal or control-state discrepancy; a retry needs a new registration; an override that can authorize nothing is refused before it is recorded. Amends the H3 spec. | 2026-10-28T07:02Z. |
 | D57 | The D41 journal head is anchored at launch: the runner prints it at each start and stop, the monitor record keeps it, and a resume must present the expected head. | 2026-10-28T07:02Z. |
-| D58 | The v10 path after BC1's fit and cost analysis: fix BC1 for all projects; raise the A21 slice from about $25 to $60; run the CHORUS re-canary under the fixed BC1; decide the matrix's scope and budget on its measured cost. | 2026-10-28T16:41Z; the matrix decision is deferred to that measurement. |
-| D59 | BC1's request shape (the D44 design choice): typed-audit calls send the full schema catalog once, drop the redundant per-slot `domain_of` lists and send the bundle once; the full, receipt-completion, reconcile, report and regate calls keep v10's A14 schema digest. | 2026-10-28T16:41Z. |
+| D58 | The v10 path after BC1's fit and cost analysis: fix BC1 for all projects; raise the A21 slice from about $25 to $60; run the CHORUS re-canary under the fixed BC1; decide the matrix's scope and budget on its measured cost. | 2026-10-28T16:41Z; the matrix decision is deferred to that measurement. This draft reads the $60 as funding one attempt (item 10) and proposes the P4a/P4b staging that applies the deferral ("Staged sequence under D58"). |
+| D59 | BC1's request shape (the D44 design choice): typed-audit calls send the full schema catalog once, drop the redundant per-slot `domain_of` lists and send the bundle once; the full, receipt-completion, reconcile, report and regate calls keep v10's A14 schema digest. | 2026-10-28T16:41Z; implemented in `8f83d6cb3` (items 14–15). |
 | D60 | No typed-stage prompt-cache breakpoint; D06 stands. | 2026-10-28T16:41Z. |
 | D61 | D52's committee-contact equivalence applies wherever `governance_committee_contact` is scored, rubric10 E2.2 included. | 2026-10-28T18:23Z. |
-| D02–D04, D08, remaining D09 choices, D11–D16, D18, D20–D21, D24–D25 | **Pending where not specifically superseded above.** D02 comparator/analysis-set choices and D04 crate comparison are not decided by this amendment. | Separate proposal, implementation and owner decisions. |
+| D62 | BC1's fit gate for A21: the gate checks the floor and the caps scenario with the measured 1.25× escape factor; the escaped bound is reported, not gated. Request bytes are sized at 2.48 bytes per token and future-response bytes at 1.75. The CHORUS A21 registration uses `aggregate_input_tokens` 4,500,000 (CHORUS needs about 4.06M, every call at or below 0.85 of its room; added spend exposure at most $3.13). | 2026-10-28T20:12:01Z, after the review of `8f83d6cb3`; item 15. |
+| D63 | One `count_tokens` calibration, run by agy from the launch-base checkout through the runner's admission-check route, on one named, fixed D59 CHORUS worker request. It logs the request sha256 and the count; no generation and no other provider call. The measured ratio replaces the extrapolated 2.48 before registration. | 2026-10-28T20:12:01Z; item 15. |
+| D02–D04, D08, remaining D09 choices, D11–D16, D18, D20–D21, D24–D25 | **Pending where not specifically superseded above.** D02 comparator/analysis-set choices and D04 crate comparison are not decided by this amendment. Each of these, and D29, is a numbered question in the P4 agenda. | Separate proposal, implementation and owner decisions. |
 
 **The "Resolved" comments are not rulings.** Several issues carry comments citing
 commits that are on no remote branch:
@@ -228,7 +271,8 @@ longer holds.
   - Under (c) or (d), the replacement records enter E2. Under (c) they differ from
     the v10 records in runtime, provider, transport and effort as well as package, and
     the E2 comparison is labelled so.
-- **Plan gates that cannot pass as written** (for agy and the owner; P1):
+- **Plan gates that cannot pass as written** (P1; under D50 claude prepares the plan
+  amendment and agy pushes it):
   - A4's gate, "The CHORUS and AI_READI bundle md5s equal the comparators'
     (9b2ef4b6, d22b61a9)";
   - A14-reg's gate, "the bundle md5 is d22b61a9";
@@ -246,11 +290,12 @@ longer holds.
 | Production (A17) | CM4AI, VOICE and AI_READI, 3 each, in that order | yes | confirmatory (AI_READI per the comparator decision above) |
 | VOICE_PEDIATRIC (A18) | ×1 (D02's recommendation; ×3 only if the paper needs replicate variance) | — | descriptive (item 2a) |
 | Kids First (A19) | ×1 | — | descriptive (item 2a) **[pending D15]** |
-| With-crate CHORUS (A21–A22) | only under D04 path B | — | separate stage **[pending D04]** |
+| With-crate CHORUS (plan A21–A22) | only under D04 path B | — | separate stage **[pending D04]** |
 
-The older plan's A21–A22 identifiers for the optional crate stage are retained
-only as historical task references. Current coordination's **A21 is the clean
-CHORUS API re-canary** under D35/D44, not an authorization for a crate arm.
+The plan's A21–A22 identifiers for the optional crate stage are retained only as
+historical task references, always written "plan A21–A22". Unprefixed **A21 is the
+clean CHORUS API re-canary** (board A21) under D35/D44, not an authorization for a
+crate arm.
 
 ### Six-project × generation-arm and evaluation matrix
 
@@ -597,8 +642,8 @@ It carries:
 - **Check rows:** each item-5 row, with its value.
 - **Coverage:** as a fraction with its denominator.
 - **Cost:** at that day's prices.
-- **Reviewers:** references to the A12 blind source review and its reviewer, named
-  under D23, never the generating session.
+- **Reviewers:** references to the A12 blind source review and its reviewers, named
+  under D36, never the generating session.
 - **What the run does not establish:** for a pilot, one project, n=1, no load test
   and no recall test.
 
@@ -827,7 +872,7 @@ Any numerical trigger needs an explicit owner decision before P4.
 ## 11. Freeze (P2 item 11; D35 decided)
 
 D35 freezes from the rebuilt A21 re-canary registration on merged main, after
-A17, #5155 and #5157. Later runner changes require a CHORUS byte-parity test and
+board A17 (#5211), #5155 and #5157. Later runner changes require a CHORUS byte-parity test and
 one separately authorized diagnostic canary before remaining runs re-register. Every
 registration pins the full and core schema closures, the bundle, the chunk manifest
 and the source manifest.
