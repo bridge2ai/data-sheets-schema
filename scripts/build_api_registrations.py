@@ -415,6 +415,9 @@ def build_registration(
     """
     if arm not in ARMS:
         raise ValueError(f"unknown arm '{arm}'; must be one of {sorted(ARMS.keys())}")
+    # Library callers need the same refusal-before-write guarantee as the
+    # CLI precheck: context synthesis below can create files and directories.
+    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm)
     arm_display, method, pattern, _ = ARMS[arm]
     root_dir = Path(worktree).resolve() if worktree is not None else ROOT
     kids_first_manifest = (
@@ -579,9 +582,6 @@ def build_registration(
         "effort": None,
         "config": config_pin,
     }
-
-    # Resolve limits
-    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm)
 
     active_receipt = copy.deepcopy(DEFAULT_RECEIPT_LIMITS)
     if coverage_floor is not None:
