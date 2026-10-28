@@ -998,21 +998,51 @@ It carries:
   grouped by `d4d runs select --config`. It is marked by a recorded procedure or left
   unmarked (A20; a G4 gap).
 
-## 8. Production-floor decision (P2 item 8; D37 basis decided, D20 value pending)
+## 8. Production-floor decision (P2 item 8; D37 basis decided, D20 rule at P4, value at A15)
 
 D37 fixes the snapshot basis. D28 fixes 19/20 for the clean CHORUS re-canary only,
-and the builder default is pending. The older D20 recommendation below is retained
-as a **proposed production-value rule**, subject to a dated owner decision after
-the clean pilots; it does not override the re-canary registration:
+and the builder default is pending. The generation plan's D20 recommendation is to
+"Commit the rule in P2 before the pilots run, and register the value at A15". This
+draft follows it **[pending D20]**: the owner fixes the rule at P4a, before any pilot
+runs, and A15 only computes its value. The rule never depends on a pilot's outcome.
 
-> The registered receipt-coverage floor is the lower of the CHORUS pilot's (A10) and
-> the AI_READI pilot's (A14) effective at-receipt D37 coverage fractions,
-> `with_receipt_at_receipt / receiptable_at_receipt`, rounded down to the nearest 0.05.
+**The proposed rule [proposed; owner fixes at P4, item 32]:**
 
-**[pending D20]** The value is registered at A15, in a dated amendment PR that gets
-P3's review (a Claude reviewer plus a Codex CLI pass) before the owner merges it. That
-amendment creates a new registration identity and does not certify the pilots. A
-floor failure stops the roster without discarding records.
+> The registered receipt-coverage floor is the lowest of the eligible pilots' D37
+> at-receipt coverage fractions, `with_receipt_at_receipt / receiptable_at_receipt`,
+> rounded down to a multiple of 1/20 and capped at 19/20.
+
+- **Eligible pilots.** The A21 re-canary (in plan A10's role) and, if AI_READI is in
+  scope, the AI_READI pilot (plan A14). A pilot is eligible only if A13 accepted it.
+  Its fraction is read from the accepted attempt's frozen `O,R1` snapshot (item 3a);
+  a rejected or assisted attempt never supplies one.
+- **The cap at 19/20.** Receipt completion drives the D37 ratio towards 1: both
+  assisted canaries read 58/58 and 64/64. Without the cap, two perfect pilots would
+  register a floor of 1.00. A production record with hundreds of receiptable leaves
+  would then fail on one unreceipted phase-1 leaf, and under D21 that one stop closes
+  the roster. With the cap, production's floor is never stricter than the
+  re-canary's.
+- **Arithmetic.** Exact integers: `floor(20 × with_receipt_at_receipt /
+  receiptable_at_receipt) / 20`, then the minimum with 19/20.
+- **The fallback, declared now.** If P4b leaves AI_READI out of scope, so that its
+  pilot does not run, the re-canary's fraction alone sets the value under the same
+  rule.
+- **No value.** If a required pilot is missing, rejected or has a zero denominator,
+  the rule yields no value. No production roster registers until a prospective
+  amendment, reviewed as P3 was, supplies one. No other observed ratio is substituted.
+
+The alternatives (item 32) are: the lowest fraction without the cap, which can give
+20/20; the lowest fraction minus 0.05, rounded down; and 19/20 fixed for all
+production. The last is an owner value (D28), not one derived from the pilots as
+#2926 asked ("from the canary's post-turn distribution, not a guess"), but it makes
+the re-canary's registration body match production's (item 33's option d′). For the
+fallback, the alternative is no value until an amendment.
+
+**At A15** the value is computed under the rule and registered in a dated amendment PR
+that gets P3's review (a Claude reviewer plus a Codex CLI pass) before the owner
+merges it. A15 checks the arithmetic and the inputs; it does not revisit the rule.
+That amendment creates a new registration identity and does not certify the pilots.
+A floor failure stops the roster without discarding records.
 
 For scale, from P1's per-record coverage:
 - A 0.6 floor would fail 8 of the 12 v8 records: all three CHORUS (0.290, 0.335,
@@ -1034,7 +1064,7 @@ D21 recommends option (b) with continuation (ii).
 - the seven defect metrics are reported but never gated.
 
 **Pilots** keep `--canary-baseline`:
-- CHORUS (A10): `2026-09-04f_claude-opus-5-api-generic-v8`;
+- CHORUS (A21, in plan A10's role): `2026-09-04f_claude-opus-5-api-generic-v8`;
 - AI_READI (A14-reg): `2026-09-04g_claude-opus-5-api-generic-v8` as planned, under
   option (a). Under (b) the pilot runs with no baseline, and under (c) and (d) as item
   2 says. It is never `04f`, because that prefix's AI_READI rep1 is declared
@@ -1064,14 +1094,24 @@ decides at A15 between three options:
 - move to the next shared-generation version with one recorded retry. That is a
   condition boundary for both arms and ends this generic_v10 API matrix.
 
-**[proposed; owner fixes at P4]:** the A15 choice changes what runs next, not how
-results are judged, so it sits outside the confirmatory analysis.
-- Whichever option is chosen, Set A and Set B keep the definitions item 3 settles;
-  the A15 choice does not change them.
-- Cells completed under a different procedure, such as (c), are flagged in every
-  table.
-- The choice and its basis are recorded in the A15 amendment before any multi-row
-  roster.
+**The A15 choice is part of the analysis [proposed; owner fixes at P4, item 36].**
+It can change which calls and cells complete and how many attempts survive, and so
+which records enter every metric. D35's parity test and diagnostic canary show that
+the engineering is sound; they do not show that a changed selection process has the
+same estimand. So:
+- **Preferred: (b), with continuation (ii).** The procedure does not change. Eligible
+  remaining attempts run under new registrations and a new prefix, within each cell's
+  two attempts.
+- **If (c) is chosen,** it needs its own reviewed, prospective analysis amendment
+  before any affected production roster.
+  - The amendment states exactly what continues. It never revives a run that stopped
+    on a terminal or control-state discrepancy (D56).
+  - Production then runs wholly under (c), or its (c) cells form a separately
+    reported procedure stratum. (b) and (c) cells are pooled into one estimate only
+    under a rule that amendment states.
+- **Moving to the next shared-generation version** ends this matrix (plan A15).
+- Under every option, Set A and Set B keep item 3's definitions. The choice and its
+  basis are recorded in the A15 amendment before any multi-row roster.
 
 **No adopted "< 0.55" trigger.** The October 20 review found that threshold in
 its delegation rather than the governing plan; its repository search is historical
