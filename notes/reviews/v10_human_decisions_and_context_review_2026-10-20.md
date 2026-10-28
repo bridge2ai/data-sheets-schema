@@ -1,7 +1,7 @@
 # Human Review & Owner Decision Package for `generic_v10` D4D Generation and Evaluation
 
-- **Date**: 2026-10-20 (updated through 2026-10-28: owner decisions `D26`–`D45` and `D50`–`D54`, with `D51`'s description corrected on 2026-10-28; the `D46`–`D49` entries were not owner decisions and are retired, see §5.10)
-- **Status**: `PARTIALLY DECIDED / LAUNCHES HELD` (`D05`–`D07`, `D10`, `D17`, `D19`, `D22`, `D23`, `D26`–`D45` and `D50`–`D54` decided (`D46`–`D49` retired: not owner decisions, §5.10); two `CHORUS` API canaries `2026-10-20a` and `2026-10-22a` ran and were archived to `data/ATTIC/` as assisted/invalid evidence under `D31` and `D40`; the clean `CHORUS` API re-canary `A21`, fan-out, native canary, and evaluation runs remain held pending explicit owner launch word per `D07`/`D22`)
+- **Date**: 2026-10-20 (updated through 2026-10-28: owner decisions `D26`–`D45` and `D50`–`D57`, with `D51`'s description corrected on 2026-10-28; the `D46`–`D49` entries were not owner decisions and are retired, see §5.10)
+- **Status**: `PARTIALLY DECIDED / LAUNCHES HELD` (`D05`–`D07`, `D10`, `D17`, `D19`, `D22`, `D23`, `D26`–`D45` and `D50`–`D57` decided (`D46`–`D49` retired: not owner decisions, §5.10); two `CHORUS` API canaries `2026-10-20a` and `2026-10-22a` ran and were archived to `data/ATTIC/` as assisted/invalid evidence under `D31` and `D40`; the clean `CHORUS` API re-canary `A21`, fan-out, native canary, and evaluation runs remain held pending explicit owner launch word per `D07`/`D22`)
 - **Branches & Lanes**:
   - **AGY + Codex Lane X1 Integrated**: `/private/tmp/d4d-v10-readiness-20261019` (`feat/v10-preflight-scripts`, PR `#5095`, plus `codex/track-e-eval-runner`)
   - **Codex Lane X2**: `/private/tmp/d4d-codex-track-n-20261020` (`codex/track-n-direct-adapter`, HEAD `3bcde8004`)
@@ -95,7 +95,7 @@ Six `omission_context_v1` files have been generated in `data/omission_contexts/`
 
 ---
 
-## 4. Owner Decisions Status (`D01`–`D54`; `D46`–`D49` retired)
+## 4. Owner Decisions Status (`D01`–`D57`; `D46`–`D49` retired)
 
 | Decision ID | Status | Summary / Owner Ruling |
 | --- | --- | --- |
@@ -124,7 +124,7 @@ Six `omission_context_v1` files have been generated in `data/omission_contexts/`
 | **`D39`** (`A17` worker-contract wording) | **DECIDED (2026-10-25T22:41Z)** | **`"Fix now (Recommended)"`**: `typed_audit.contract()`'s v2 worker rule (`stage == "worker"`) replaces the removal clause to state each removal's `"owning root (its top-level field, or its list entry when the plan splits that list)"` (leaving `audit_batch_format.WORKER_RULES` and v1 unchanged), landing with `A17` before `A21` per `D35`. |
 | **`D40`** (`10-22a` disposition, supersedes `D31` on `10-22a`, `#5096`) | **DECIDED (2026-10-25T23:28Z)** | **`"Archive as evidence (Recommended)"`**: Following `R5` (`pr5096_3a292504f_review_2026-10-24.md`, finding `N1`), `2026-10-22a_claude-opus-5-api-generic-v10_rep1` is archived to `data/ATTIC/` as assisted and invalid evidence-only alongside `2026-10-20a`, with a companion `README.md` listing every mid-run/post-run intervention and preserved originals. |
 | **`D41`** (operating the re-canary, `#5096`) | **DECIDED (2026-10-25T23:28Z; operator clause amended by `D43` on 2026-10-26T06:24Z)** | **`"agy, no-touch rule, plus guard (Recommended)"` (operator clause amended by `D43` `"You launch it (Recommended)"`)**: Under `D41` as amended by `D43`, the owner runs the exact launch command from `claude`'s launch packet after giving the word on the `sha256`, while `agy` and `claude` monitor read-only under the written no-touch rule (no edit to any run artifact; any failure stops the run and is reported to the owner; any assisted run is evidence-only), and a runner guard refuses a ledger whose typed audit or latched terminal/rejection state moved back to live without a recorded authorization. |
-| **`D42`** (`D41` guard comparison, `#5096`, `#5212`) | **DECIDED (2026-10-26T06:24Z)** | **`"Review both, then pick"`**: A `claude` reviewer compares both `D41` guard implementations (`9fa5d391b` / `db88ca68c` and `8ab03fda9`) against the `D41` spec and recommends one; the owner then picks (`STATUS.md:181`). |
+| **`D42`** (`D41` guard comparison, `#5096`, `#5212`) | **DECIDED (2026-10-26T06:24Z); the pick is `D55` (2026-10-28)** | **`"Review both, then pick"`**: A `claude` reviewer compares both `D41` guard implementations (`9fa5d391b` / `db88ca68c` and `8ab03fda9`) against the `D41` spec and recommends one; the owner then picks (`STATUS.md:181`). |
 | **`D43`** (re-canary operator, amends `D41`, `#5096`) | **DECIDED (2026-10-26T06:24Z)** | **`"You launch it (Recommended)"`**: Amends `D41`'s operator clause — the owner runs the exact launch command from `claude`'s launch packet after giving the word on the `sha256`; `agy` and `claude` monitor read-only; the guard and the rule that any assisted run is evidence-only both still apply (`STATUS.md:182`). |
 | **`D44`** (sequencing the large-project fix, `BC1`) | **DECIDED (2026-10-26T06:28Z)** | **`"Redesign first, one canary"`**: `A21` is held until a bounded-carry protocol (`BC1`, `notes/coordination/2026-10-26-codex-bounded-carry.md`) has been built and reviewed for **all** projects; the single `CHORUS` re-canary then tests the production condition (`D35`), and the `AI_READI` pilot and production run under the same protocol (`STATUS.md:196`). |
 | **`D45`** (worker granularity inside `BC1`, `A17`) | **DECIDED (2026-10-26T06:28Z)** | **`"Yes, decide in the redesign (Recommended)"`**: `A17`'s list-splitting code stays; each project's partition bounds are chosen inside `BC1` from measured cost against output-cap risk (`STATUS.md:201`). |
@@ -137,15 +137,18 @@ Six `omission_context_v1` files have been generated in `data/omission_contexts/`
 | **`D52`** (evaluation contexts, `#2912`, `#5121`, `#2911`) | **DECIDED (2026-10-27)** | **`"Review now"`**, then per item: `CM4AI` `human_subjects` and `regulated_access` `false` (`"Accept both false (Recommended)"`); `KIDS_FIRST` `ml_training_dataset: false` (`"false: not an ML training set (Recommended)"`); all other values accepted (`"Accept all (Recommended)"`); both scoring rules accepted (`"Accept both rules (Recommended)"`: committee-contact equivalence, and `Q9`'s 4 regulatory subfields excluded when `regulated_access` is false). |
 | **`D53`** (no-touch rule and the `10-22a` archive, `#5096`) | **DECIDED (2026-10-27)** | **`"Rule now; ratify now"`**: no agent edits anything inside a run directory or under `data/ATTIC/`, except README notes the owner or claude direct (extends `D41`); agy's `10-22a` archive commits are ratified. |
 | **`D54`** (the retired "`D48`" and "`D49`") | **DECIDED (2026-10-27)** | **`"Drop both (Recommended)"`**: the `usage.jsonl` guard (which never existed; the `D41` latch journal covers its purpose) and the `max_calls × 1M` allowance are dropped; the reviewed, sizing-based `#5155` rule stands. |
+| **`D55`** (the `D42` pick, `#5212`) | **DECIDED (2026-10-28T07:02Z)** | **`"A, fixed first (Recommended)"`**: codex's design (`#5212`) goes forward; agy's candidate B does not. Before `#5212` merges, the review's F1–F4, F6 and F7 are fixed and claude re-reviews. |
+| **`D56`** (`D41` override semantics) | **DECIDED (2026-10-28T07:02Z)** | **`"No: terminal ends the run (Recommended)"`**: an override never lets a run continue past a terminal or control-state discrepancy; a retry needs a new registration. An override that cannot authorize anything is refused before it is recorded. Amends the H3 spec's "a valid override continues, marked assisted". |
+| **`D57`** (anchoring the `D41` journal) | **DECIDED (2026-10-28T07:02Z)** | **`"Record head at launch (Recommended)"`**: the runner prints the journal head sha256 at every start and stop; claude's monitor record keeps it; a resume must present the expected head, as a registration presents its `--expect-sha256`. |
 | **`D02` (`#5042`, `P2`)** | **`PENDING OWNER`** | Choose Option `(a)`, `(b)`, `(c)`, or `(d)` for the `AI_READI` `v8` comparator and canary baseline. |
 | **`D04` (`#2914`)** | **`PENDING OWNER`** | Confirm `CHORUS` corpus policy (`Path B` frozen 17-file bundle `9b2ef4b6` for `v10` comparability vs `Path A` prune). |
 | **`D03`, `D08`, `D09`, `D11`–`D16`, `D18`, `D20`, `D21`, `D24`, `D25`** | **`PENDING OWNER`** | Documented with recommendations and `[proposed; owner fixes at P4]` rules in `notes/generic_v10_analysis_plan.md` and `notes/coordination/2026-10-25-owner-decision-packet.md`. |
 
 ---
 
-## 5. Decided Rulings of 2026-10-23 – 2026-10-28 (`D26`–`D45`, `D50`–`D54`; `D46`–`D49` retired)
+## 5. Decided Rulings of 2026-10-23 – 2026-10-28 (`D26`–`D45`, `D50`–`D57`; `D46`–`D49` retired)
 
-On **2026-10-23T23:35Z**, the owner directed `"next address these based on current recommendations"` across `D-A`, `D-C` (subsets), `D-E`, and `D-F` (supplementing the earlier 2026-10-23 direction `"focus the canary on the native agentic approach not api"`, with `D27`/`D-B` treated as following from `D26`/`D-A` and later explicitly confirmed by the owner on **2026-10-25T22:41Z**), followed on **2026-10-24T00:48Z** by `"confirm"` on the three R9 judgement calls `J3′`, `J5`, and `J6`, on **2026-10-24** by `"decision 1 = a"` (`D32`), on **2026-10-25T17:43Z** by the four group-1 rulings `D33`–`D36`, on **2026-10-25T19:44Z** by `D37` (replacing `D32` with Option `(b)`) and `D38` (R9 `"license"` spelling and re-pin), on **2026-10-25T22:41Z** by `D27` confirmation and `D39` (`A17` worker-contract wording), on **2026-10-25T23:28Z** by `D40` (archiving `2026-10-22a` to `data/ATTIC/` as evidence-only) and `D41` (no-touch operating rule plus runner latch guard), and on **2026-10-26** by `D42` (`D41` guard comparison), `D43` (`"You launch it (Recommended)"`, amending `D41`'s operator clause), `D44` (`"Redesign first, one canary"` for `BC1` bounded carry), `D45` (`"Yes, decide in the redesign (Recommended)"` for worker granularity inside `BC1`); and on **2026-10-27** by `D50` (agy's role, §5.10) and `D51`–`D54` (the omission and evaluation contexts, the no-touch rule with the archive ratification, and dropping the retired "`D48`" and "`D49`" texts, §5.11), with `D51`'s description corrected and re-approved on **2026-10-28**. Entries written here as `D46`–`D49` were not owner decisions and are retired (§5.10). Because the `notes/coordination/` directory is untracked, the authoritative record of each decision is preserved here under `D26`–`D45` and `D50`–`D54`.
+On **2026-10-23T23:35Z**, the owner directed `"next address these based on current recommendations"` across `D-A`, `D-C` (subsets), `D-E`, and `D-F` (supplementing the earlier 2026-10-23 direction `"focus the canary on the native agentic approach not api"`, with `D27`/`D-B` treated as following from `D26`/`D-A` and later explicitly confirmed by the owner on **2026-10-25T22:41Z**), followed on **2026-10-24T00:48Z** by `"confirm"` on the three R9 judgement calls `J3′`, `J5`, and `J6`, on **2026-10-24** by `"decision 1 = a"` (`D32`), on **2026-10-25T17:43Z** by the four group-1 rulings `D33`–`D36`, on **2026-10-25T19:44Z** by `D37` (replacing `D32` with Option `(b)`) and `D38` (R9 `"license"` spelling and re-pin), on **2026-10-25T22:41Z** by `D27` confirmation and `D39` (`A17` worker-contract wording), on **2026-10-25T23:28Z** by `D40` (archiving `2026-10-22a` to `data/ATTIC/` as evidence-only) and `D41` (no-touch operating rule plus runner latch guard), and on **2026-10-26** by `D42` (`D41` guard comparison), `D43` (`"You launch it (Recommended)"`, amending `D41`'s operator clause), `D44` (`"Redesign first, one canary"` for `BC1` bounded carry), `D45` (`"Yes, decide in the redesign (Recommended)"` for worker granularity inside `BC1`); and on **2026-10-27** by `D50` (agy's role, §5.10) and `D51`–`D54` (the omission and evaluation contexts, the no-touch rule with the archive ratification, and dropping the retired "`D48`" and "`D49`" texts, §5.11), with `D51`'s description corrected and re-approved on **2026-10-28**; and on **2026-10-28** by `D55`–`D57` (the `D42` pick and two `D41` guard rulings, §5.12). Entries written here as `D46`–`D49` were not owner decisions and are retired (§5.10). Because the `notes/coordination/` directory is untracked, the authoritative record of each decision is preserved here under `D26`–`D45` and `D50`–`D57`.
 
 ### 5.1 `D28` (`D-C`): Void `2026-10-22b` (`CHORUS` × 3), Run One Clean `CHORUS` API Re-Canary After Fixes, and Update Registration/Runtime Rules
 
@@ -429,3 +432,29 @@ The owner answered claude's questions. The numbers `D46`–`D49` are not reused.
 4. **`D54`: the retired "D48" and "D49".** The owner chose "Drop both (Recommended)".
    - **What is dropped:** the `usage.jsonl` guard, which never existed and which the `D41` latch journal covers, and "D49"'s `max_calls × 1M` allowance.
    - **What stands:** the reviewed, sizing-based #5155 rule.
+
+### 5.12 Decided by the owner, 2026-10-28T07:02Z (`D55`–`D57`): the `D42` pick and two `D41` guard rulings
+
+These follow claude's independent review of both `D41` guard candidates (`d4d-executions/plans/reviews/d42_claude_independent_review_2026-10-27.md`). Its verdict: neither as it stands; choose A's design and fix it before `#5212` merges; do not merge B.
+
+1. **`D55`: the `D42` pick.** The owner chose "A, fixed first (Recommended)".
+   - **A** is codex's design: `#5212`, `8ab03fda9` merged into `db88ca68c`. It covers the `D41` spec structurally. In the review's tamper fixtures it refused every incident pattern before any dispatch, and it pins its journal in provenance.
+   - **B**, agy's `9fa5d391b`, has no journal, override, provenance pin or old-code decision. It lets both 10-20a edit patterns through and refuses normal report regates. It stays in history only.
+   - **Before `#5212` merges:**
+     - F1 (blocker): every shared-v2 routing run refuses itself after its first billed ordinary call;
+     - F2: 29 existing tests fail, because terminal resumes lose the runner's own refusal;
+     - F3: the CHORUS parity test is pinned to the wrong base;
+     - F4: an interrupted ledger write wedges the run;
+     - F6: the latch allowlist misses `#5157`'s one-shot refresh;
+     - F7: the merge-order conflict with BC1's pinned `shared_generation.py` hash.
+
+     All of these are fixed, and claude re-reviews.
+2. **`D56`: override semantics (review F5).** The owner chose "No: terminal ends the run (Recommended)".
+   - A valid override never lets a run continue past a terminal or control-state discrepancy. A retry needs a new registration.
+   - An override that cannot authorize anything is refused before it is recorded, so it does not needlessly mark the run assisted.
+   - This amends the H3 spec's "a valid override: continues, marked assisted". Assisted runs are evidence-only in any case (`D40`, `D53`).
+3. **`D57`: anchoring the journal (review F8).** The owner chose "Record head at launch (Recommended)".
+   - The runner prints the journal head sha256 at every start and stop.
+   - claude's monitor record for each `D43` launch keeps it.
+   - A resume must present the expected head, as a registration presents its `--expect-sha256`.
+   - This closes the review's fixture (d′), in which an operator who can edit the run directory re-latches every event and recomputes the chain.
