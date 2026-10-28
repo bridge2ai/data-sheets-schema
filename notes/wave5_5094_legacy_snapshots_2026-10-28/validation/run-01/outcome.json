@@ -1,0 +1,23 @@
+{
+  "invalid_cases": [
+    {
+      "identity": [
+        "tests.test_wave5_5094_legacy_snapshots",
+        "test_committed_voice_ambiguity_is_unchecked_and_preserves_prior"
+      ],
+      "tags": [
+        "failure"
+      ]
+    }
+  ],
+  "origins_complete": true,
+  "passed": false,
+  "passes_by_module": {
+    "test_wave5_5094_legacy_snapshots": 0
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 6.381445916020311
+}

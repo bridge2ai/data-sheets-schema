@@ -1,0 +1,13 @@
+{
+  "invalid_cases": [],
+  "origins_complete": true,
+  "passed": true,
+  "passes_by_module": {
+    "test_wave5_5094_legacy_snapshots": 1
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 2.8679312920139637
+}
