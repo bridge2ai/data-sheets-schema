@@ -13,7 +13,7 @@ This changes selection for freshly computed audit-total checks. It does not rewr
 - Branch: `codex/wave5-5094-legacy-snapshots-20261028`.
 - Worktree: `/private/tmp/d4d-codex-wave5-5094-legacy-20261028`.
 
-The orchestrator independently reviewed the two-file production delta read-only at `94484d0a9`: exception scope, unchecked-block shape, prior-result preservation, strict snapshot authority, legacy fallback and portable-only discovery. No additional source defect was identified. The production bytes did not change afterward. The original findings are draft Issues 11/N2 and 12/N3 in the lead's `notes/coordination/2026-10-28-issues-from-pr5094-review.md`; the self-contained drafts in this directory record them without inventing GitHub issue numbers.
+The Codex parent session performed a separate read-only review of the implementation sub-agent's two-file production delta at `94484d0a9`: exception scope, unchecked-block shape, prior-result preservation, strict snapshot authority, legacy fallback and portable-only discovery. No additional source defect was identified. The production bytes did not change afterward. Claude is the orchestrator and lead; Claude's external review and publication remain pending. The original findings are draft Issues 11/N2 and 12/N3 in the lead's `notes/coordination/2026-10-28-issues-from-pr5094-review.md`; the self-contained drafts in this directory record them without inventing GitHub issue numbers.
 
 ## What changed
 
