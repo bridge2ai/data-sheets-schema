@@ -340,7 +340,8 @@ on main before any registration hash is put to the owner.
 - **The order:** CHORUS ×3 → CM4AI ×3 → VOICE ×3 → AI_READI (pilot + ×3)
   → VOICE_PEDIATRIC ×1 → Kids First ×1.
   - It follows the generation plan's ascending bundle size.
-  - AI_READI comes late because its comparator is pending (D02) and it costs the most.
+  - AI_READI comes late because its comparator needs a new no-crate v8 run (D64, item
+    14) and it costs the most.
   - P4b funds the longest prefix of the order that the budget covers, each project
     priced per accepted record with its retries (below).
 - **A descoped project is "out of scope", not missing.** Every table lists it as "out
@@ -453,8 +454,9 @@ before the stop.
    by project, in both analysis sets of item 3.
    - It is a **package-level** effect: everything listed in item 4 changes together,
      and nothing here attributes a difference to any one component.
-   - For AI_READI the comparator is itself pending (item 2). Under option (a) the
-     AI_READI difference also crosses the owner's with-crate arm boundary.
+   - For AI_READI the comparator is the active manifest's (item 2): the new no-crate
+     v8 run when AI_READI is in scope and its render diff passes, otherwise none, and
+     AI_READI is descriptive (D64, item 14).
 3. **Replicate structure (#2932).** The structure metrics of item 2 for the 3-replicate
    v10 cells against v8's 3 replicates of the same project.
 4. **External feasibility.** VOICE_PEDIATRIC and Kids First: whether an accepted
@@ -468,15 +470,30 @@ before the stop.
 
 ## 2. Comparator, metrics and cell roles (P2 item 2; D02 decided by D64)
 
-**Comparator** (D02, decided by D64, items 13–14): the v8 API fill.
-- Prefix `2026-09-04f` for CHORUS and VOICE, and `2026-09-04g` for AI_READI and CM4AI:
-  12 records, 3 per project, listed with their sha256s in P1.
-- Excluded: the `04` and `04b`–`04e` canaries and the invalid `04f` AI_READI rep1.
+**Comparator** (D02, decided by D64, items 13–14): the v8 API package. **The active
+comparator manifest** depends on scope:
+- **CHORUS, CM4AI and VOICE:** the v8 API fill, prefix `2026-09-04f` for CHORUS and
+  VOICE and `2026-09-04g` for CM4AI: 9 records, 3 per project, listed with their
+  sha256s in P1.
+- **AI_READI, under option (d) only:** the 3 records of the new no-crate v8 run, when
+  AI_READI is in scope and its render diff passes, pinned by their sha256s in the
+  analysis manifest once they exist. Otherwise AI_READI has no comparator and is
+  descriptive (option (b)).
+- **Historical only:** the with-crate AI_READI records (`04g` rep1–3, and the invalid
+  `04f` rep1) and every value P1 computed from them. They never stand in for the
+  comparator, and a missing comparator record or metric is handled by item 3's
+  missingness rule, never by substituting `04g`.
+- Excluded: the `04` and `04b`–`04e` canaries.
 - The v9 CHORUS canary (2026-09-12) is a secondary single-point CHORUS reference.
+
+Every rule below that names "the v8 comparator records" reads this manifest. Where a
+table shows AI_READI v8 values from P1, they are the historical with-crate records';
+under option (d), each rule is applied to the new records' values, measured under the
+same rule.
 
 ### The AI_READI comparator (D02, decided by D64, item 14)
 
-**Why it is open.** The three AI_READI v8 records (`04g` rep1–3) were generated from
+**Why it needed a decision.** The three AI_READI v8 records (`04g` rep1–3) were generated from
 bundle `d22b61a9`, which contained the dataset's RO-Crate.
 - The owner's ruling of 2026-10-14 is recorded in `data/_wcrate/README.md`: "generation
   runs read no RO-Crate content. Crates are the input of the separate with-crate and
@@ -657,24 +674,32 @@ two arms differently:
     (`506af01b…`);
   - CM4AI `04`, `04b` and `04c`, under an earlier pin (`06666c4d…`).
 
+The AI_READI facts above describe the historical with-crate records, which are not the
+comparator (§2).
+
 **Set A: which records each arm contributes (D64, item 15).** Either of two
 definitions applies one rule to both arms. The v8 figures are P1's, recomputed.
 
 | definition | v8 records | v10 records | v8 pooled coverage (CHORUS / VOICE / AI_READI / CM4AI) | v8 mean populated leaves |
 |---|---|---|---|---|
-| (1) every attempt in a comparator cell, under the arm's prompt pin, that left a full record | the 12, plus VOICE `04d`, `04e` and AI_READI `04f` rep1: 15. CM4AI `04`–`04c` (the earlier pin) enter only a sensitivity row: 18 | every attempt in a confirmatory cell that left an eligible full record (at most 2 per cell under D07, a D21 continuation included) | 0.340 / 0.462 / 0.491 / 0.688 (0.682 in the sensitivity row) | 254.7 / 393.0 / 505.5 / 458.0 (447.2) |
-| (2) one record per cell: the cell's last attempt that left an eligible full record | the 12 | each confirmatory cell's last attempt that left an eligible full record | 0.340 / 0.592 / 0.538 / 0.688 | 254.7 / 371.7 / 499.7 / 458.0 |
+| (1) every attempt in a comparator cell, under the arm's prompt pin, that left a full record | CHORUS, CM4AI and VOICE: their 9, plus VOICE `04d` and `04e`: 11; CM4AI `04`–`04c` (the earlier pin) enter only a sensitivity row: 14. AI_READI, under (d): every attempt of the new run that left an eligible full record | every attempt in a confirmatory cell that left an eligible full record (at most 2 per cell under D07, a D21 continuation included) | 0.340 / 0.462 / [0.491] / 0.688 (0.682 in the sensitivity row) | 254.7 / 393.0 / [505.5] / 458.0 (447.2) |
+| (2) one record per cell: the cell's last attempt that left an eligible full record | the active manifest (§2): CHORUS, CM4AI and VOICE's 9, and AI_READI's 3 new records under (d) | each confirmatory cell's last attempt that left an eligible full record | 0.340 / 0.592 / [0.538] / 0.688 | 254.7 / 371.7 / [499.7] / 458.0 |
+
+Bracketed AI_READI values are the historical with-crate records' (P1), shown for
+reference only. Under (d) they are replaced by the new records' values, measured under
+the same definition.
 
 The recall targets move as well. Under (1), VOICE variables average 5.20 (4.00 under
-(2)) and VOICE lineage 0.80 (1.00), and AI_READI variables 19.50 (17.67) (P1).
+(2)) and VOICE lineage 0.80 (1.00); AI_READI's historical with-crate variables average
+19.50 (17.67) (P1).
 
 **Definition (2) is primary for the directional rules, with (1) reported beside it as
 a sensitivity row (D64, item 15).** The reasons:
 - **Equal cell weights.** A cell retried more often does not count more. The v8 VOICE
   rep1 cell holds 3 attempts and CM4AI rep1 holds 4, while a v10 cell holds at most 2,
   a D21 continuation included.
-- **It is D02's comparator exactly** (the 12), and it matches E2's batch of one record
-  per cell.
+- **It is the active comparator manifest exactly** (§2), and it matches E2's batch of
+  one record per cell.
 - **v8's earlier attempts ran a different package.** They were made while the v8
   package was still being changed: VOICE `04f` rep1 "passed under the final package"
   (commit `251b4ddc3`) after `04d` and `04e` regressed. So pooling v8 attempts mixes
@@ -729,8 +754,10 @@ definition (1) shows how large it is from the other side.
     or a scalar, say) makes that metric metric-missing for the record.
   - **The analysis manifest** lists, for each record used: label, cell, attempt, the
     completing event, the snapshot's name and its sha256.
-  - This rule selects v10's records. v8's are the comparator records P1 lists with
-    their sha256s.
+  - This rule selects v10's records, and under option (d) the new no-crate v8
+    AI_READI records, using the completion evidence that run's runner writes, which
+    its registration review identifies. CHORUS, CM4AI and VOICE's v8 records are those
+    P1 lists with their sha256s.
 - **Selection under definition (2)** takes the cell's last attempt that left an
   eligible full record. If a later attempt left none, the earlier record stands. No
   record is chosen by score.
@@ -800,14 +827,11 @@ comparison is not computable, not 0.
 - **K (D64, item 17)** counts the in-scope projects (P4b) whose
   contrast is like-for-like:
   - CHORUS, CM4AI and VOICE count when in scope.
-  - AI_READI counts only under comparator option (d), and only after a render diff
-    shows that its new v8-condition run differs from the v8 records in the bundle
-    alone.
-  - Under options (a) and (c), AI_READI's contrast crosses the with-crate boundary or
-    the runtime, provider and effort, so it is a labelled separate row and not in K.
-    Under (b) it is descriptive.
-  - So with every project in scope, K is 3, or 4 under (d). With CHORUS alone in scope,
-    K is 1 and the scope rule's single-project wording applies.
+  - AI_READI counts only under option (d) (D64, item 14): when it is in scope and a
+    render diff shows that its new v8-condition run differs from the v8 records in the
+    bundle alone. Otherwise, under (b), it is descriptive and not in K.
+  - So with every project in scope, K is 4 under (d) and 3 under (b). With CHORUS
+    alone in scope, K is 1 and the scope rule's single-project wording applies.
 - **Missing data (D64, item 16).** A primary directional
   verdict for a project needs:
   - complete n=3 in each arm under Set A definition (2);
@@ -897,10 +921,12 @@ package-level (plan risk 21, D02):
   thinking with no display (the plan's D06: "as v8 and v9 did"). The v8 records
   predate the `model.thinking_requested` field, so this rests on the plan, not on the
   records.
-- **AI_READI input arm:** under the owner's 2026-10-14 ruling, the AI_READI v8
-  records are with-crate results; v10 reads `1a58ad7b`, without the crate (item 2;
-  #5042). P1 found the other three projects' bundles byte-identical; verify those
-  identities again in the selected registration rather than assume no later edit.
+- **AI_READI input arm:** under the owner's 2026-10-14 ruling, the historical AI_READI
+  v8 records are with-crate results, while v10 reads `1a58ad7b`, without the crate
+  (item 2; #5042). D64's option (d) removes this difference by generating a no-crate
+  v8 comparator; under (b) AI_READI is not compared. P1 found the other three
+  projects' bundles byte-identical; verify those identities again in the selected
+  registration rather than assume no later edit.
 - **Gating and selection asymmetry:**
   - v8 rep1 records each survived a canary gate. In three projects, earlier canaries
     were not retained: CM4AI (`04`, `04b`, `04c`), VOICE (`04d`, `04e`) and AI_READI
@@ -1126,7 +1152,8 @@ merges it. A15 checks the arithmetic and the inputs; it does not revisit the rul
 That amendment creates a new registration identity and does not certify the pilots.
 A floor failure stops the roster without discarding records.
 
-For scale, from P1's per-record coverage:
+For scale, from P1's per-record coverage of the 12 historical v8 records (AI_READI's
+are the with-crate ones):
 - A 0.6 floor would fail 8 of the 12 v8 records: all three CHORUS (0.290, 0.335,
   0.394), VOICE rep2 and rep3 (0.540, 0.576), AI_READI rep1 and rep2 (0.583, 0.388)
   and CM4AI rep3 (0.581).
@@ -1147,12 +1174,13 @@ D64 adopts D21's option (b) with continuation (ii) (item 35).
 
 **Pilots** keep `--canary-baseline`:
 - CHORUS (A21, in plan A10's role): `2026-09-04f_claude-opus-5-api-generic-v8`;
-- AI_READI (A14-reg): `2026-09-04g_claude-opus-5-api-generic-v8` as planned, under
-  option (a). Under (b) the pilot runs with no baseline, and under (c) and (d) as item
-  2 says. It is never `04f`, because that prefix's AI_READI rep1 is declared
+- AI_READI (A14-reg), if in scope: under option (d), the new no-crate v8 run's
+  prefix; under (b), no baseline (§2; D64, items 14 and 30). Never `04g` or `04f`:
+  `04g` is the historical with-crate run, and `04f`'s AI_READI rep1 is declared
   invalid.
 
-The v8 per-project worst values, recomputed in P1. The AI_READI row is with-crate.
+The v8 per-project worst values, recomputed in P1. The AI_READI row is the historical
+with-crate run's; under (d) the new run's values replace it.
 
 | project | report findings | British spellings | pair errors, ungrounded identifiers, resolver URLs, organisational fragments, undeclared prefixes |
 |---|---|---|---|
@@ -1755,13 +1783,10 @@ with more assessed units receive more weight. A lower pooled rate is **not** a
 claim that every project improved, nor an equal-project effect. Publish these
 weights, per-project rates and the fixed-weight sensitivity even when they
 disagree with the pool. **The primary pool (D64, item 22)**
-is over the in-scope projects in K, whatever their number. Under AI_READI comparator
-options (a) and (c), AI_READI is outside K: the pool excluding it decides 4a and 4b
-(three projects at full scope), and AI_READI is an explicit **AI_READI cross-arm** row
-(with-crate v8 / no-crate v10 under (a); runtime, provider and effort as well under
-(c)). A combined pool that includes AI_READI may be shown, labelled as mixed input-arm
-evidence, but it decides nothing. Do not relabel it as a homogeneous runtime/package
-effect.
+is over the in-scope projects in K, whatever their number. AI_READI is in it only
+under option (d), against the new no-crate v8 records (§2); under (b) AI_READI is
+outside K and reported descriptively. The historical with-crate AI_READI records enter
+no pool.
 
 The support judge remains excluded from these predictions until #3343 is
 calibrated under its own registration and word. Literal receipts, tool checks,
@@ -1824,16 +1849,20 @@ predicted metrics"), and the P4 record should say they were in view.
 - Set B results are reported beside every row, as a sensitivity analysis; for rows 4
   and 5, Set B's intersection with that row's roster.
 
-For AI_READI, each row is judged under the comparator option chosen in item 2. Under
-(a) and (c) it is a labelled separate row outside K (item 3).
+For AI_READI, each row is judged against the active comparator manifest (§2): under
+option (d), the new no-crate v8 records' values, measured under the row's own rule;
+under (b), AI_READI is descriptive and outside K. The AI_READI v8 values in the last
+column are the historical with-crate records', shown for reference only. They are
+never the comparator's values, and a missing comparator record or metric is handled
+by item 3's missingness rule.
 
 | # | prediction (from #2930, restated against v8 per D02) | metric and instrument | decision rule (D64) | v8 values (P1) |
 |---|---|---|---|---|
-| 1 | Populated leaves fall by no more than 10% (a non-inferiority reading of #2930's "do not fall") | `len(receipts.populated_leaves(full))` per eligible full record, `receipts.py` at P1's pin `7bfb8470…` | holds for p if mean(v10_p) ≥ 0.9 × mean(v8_p); equality passes. v8's replicate SDs are 21.7 (CHORUS), 43.9 (AI_READI), 31.3 (CM4AI) and 68.6 (VOICE) leaves, so 10% of the v8 mean is 1.2, 1.1, 1.5 and 0.5 SD respectively | AI_READI [525, 525, 449], CHORUS [235, 278, 251], CM4AI [422, 473, 479], VOICE [386, 297, 432] |
-| 2 | Receipt coverage does not fall, measured pre-completion | **v10:** v4 `receipt_completion.before.slots.with_receipt / receipt_completion.before.slots.receiptable` on `O,R0` (item 3a). **v8, primary:** the stored v3 final-record `receipts.slots.with_receipt / receipts.slots.receiptable` values in the last column. **v8, sensitivity:** a named common-checker recomputation where exact inputs exist. **Pooled** means the sum of the numerators over the sum of the denominators, across the project's Set A records. Pin source/checker identities; do not infer parity from the unchanged v4 string. | holds for p if pooled pre-completion v10 coverage ≥ pooled v8 coverage − 0.05 absolute. **The numerator is reported beside every ratio.** If the ratio holds while v10's pooled receipted-leaf count is below v8's, the result is reported as "ratio held with a smaller record", never as improved coverage, and it is read with row 1. Every required snapshot must be present (item 3): a missing pre-turn snapshot is never 0, never replaced by a post-turn value, and never dropped silently from the pool. Final-v8 versus phase-1-v10 remains a timing/instrument contrast. D37 at-receipt gate coverage, final coverage and completion gain are separately reported, never substituted into this rule. | pooled, under item 3's definition (2), receipted / receiptable: CHORUS 215/632 = 0.340, VOICE 584/986 = 0.592, AI_READI 694/1289 = 0.538, CM4AI 817/1187 = 0.688. Under (1): VOICE 0.462, AI_READI 0.491 (P1) |
-| 3 | The recall rule raises recall where the bundle states the targets | The pure counters of `scripts/recall_target_baseline.py` (cues `768a26a3…`, tools `4726c005…`), applied directly to item 3's Set A roster. Not through the script's `collect()`, which skips records whose validation failed, and not through its default arm list, which stops at v9. D02's targets:<br>- AI_READI variables 20/13/20;<br>- CM4AI lexical candidates 9/5/3;<br>- VOICE variables 4/4/4, lineage 1/1/1, lexical candidates 3/0/1, b2aiprep v3.0.0 in `used_software`/`tools` 0/0/0;<br>- CHORUS lineage 1/1/0.<br>**Lineage (D64, item 20)** is a top-level presence indicator: 1 if the record's top-level `was_derived_from` holds at least one populated entry, whatever its type or number of entries, else 0. It does not rely on the schema's single-valued declaration, which Set A's invalid records may break. The script's `target_counts` instead counts lineage entries at every depth, and nested objects can carry `was_derived_from`. On all 12 v8 records and both assisted records the two agree (no nested or multiple lineage occurs; recomputed for this revision), so the v8 values do not change.<br>**VOICE's version target (D64, item 20)** is the fact-specific carriage measure for `voice-b2aiprep-3.0.0` in `notes/recall_target_baseline.md` ("used_software/tools" column, with that note's matching rules). It replaces "tools with a version token", which counts any version-shaped token in `tools`, so a wrong version can raise it; that count stays reported as a lexical carriage proxy. The v8 records carry b2aiprep v3.0.0 elsewhere in all three.<br>**The adapter** that applies these counters to Set A is a script pinned by sha256 in the P4b amendment, before any confirmatory record exists; on the 12 v8 records it must reproduce this row's v8 values.<br>These are carriage counts, not support or recall accuracy. | **Counts the rule should raise** (variables, lineage, b2aiprep carried): holds for a target if mean(v10_p) > mean(v8_p); a tie fails.<br>**Targets at their ceiling, enumerated now:** only VOICE lineage. The presence indicator is at most 1 by construction, and every v8 VOICE replicate is at 1. That target holds if mean(v10_p) ≥ mean(v8_p). No other target gets a ceiling exception after the outcomes.<br>**Lexical candidates**, which should fall as cue chunks are extracted rather than set aside: holds if mean(v10_p) < mean(v8_p).<br>**Combination:** a project's row-3 verdict holds if every target listed for it holds, and "holds in k of K" then counts projects.<br>AI_READI's v8 counts were taken over the with-crate chunking (P1) | as listed |
+| 1 | Populated leaves fall by no more than 10% (a non-inferiority reading of #2930's "do not fall") | `len(receipts.populated_leaves(full))` per eligible full record, `receipts.py` at P1's pin `7bfb8470…` | holds for p if mean(v10_p) ≥ 0.9 × mean(v8_p); equality passes. v8's replicate SDs are 21.7 (CHORUS), 43.9 (AI_READI), 31.3 (CM4AI) and 68.6 (VOICE) leaves, so 10% of the v8 mean is 1.2, 1.1, 1.5 and 0.5 SD respectively | CHORUS [235, 278, 251], CM4AI [422, 473, 479], VOICE [386, 297, 432]; historical with-crate AI_READI [525, 525, 449] |
+| 2 | Receipt coverage does not fall, measured pre-completion | **v10:** v4 `receipt_completion.before.slots.with_receipt / receipt_completion.before.slots.receiptable` on `O,R0` (item 3a). **v8, primary:** the stored final-record `receipts.slots.with_receipt / receipts.slots.receiptable` values of the active manifest's records (§2): for CHORUS, CM4AI and VOICE the stored v3 values in the last column; for AI_READI under (d), the new no-crate records' stored values. **v8, sensitivity:** a named common-checker recomputation where exact inputs exist. **Pooled** means the sum of the numerators over the sum of the denominators, across the project's Set A records. Pin source/checker identities; do not infer parity from the unchanged v4 string. | holds for p if pooled pre-completion v10 coverage ≥ pooled v8 coverage − 0.05 absolute. **The numerator is reported beside every ratio.** If the ratio holds while v10's pooled receipted-leaf count is below v8's, the result is reported as "ratio held with a smaller record", never as improved coverage, and it is read with row 1. Every required snapshot must be present (item 3): a missing pre-turn snapshot is never 0, never replaced by a post-turn value, and never dropped silently from the pool. Final-v8 versus phase-1-v10 remains a timing/instrument contrast. D37 at-receipt gate coverage, final coverage and completion gain are separately reported, never substituted into this rule. | pooled, under item 3's definition (2), receipted / receiptable: CHORUS 215/632 = 0.340, VOICE 584/986 = 0.592, CM4AI 817/1187 = 0.688. Under (1): VOICE 0.462 (P1). Historical with-crate AI_READI, reference only: 694/1289 = 0.538, and 0.491 under (1) |
+| 3 | The recall rule raises recall where the bundle states the targets | The pure counters of `scripts/recall_target_baseline.py` (cues `768a26a3…`, tools `4726c005…`), applied directly to item 3's Set A roster. Not through the script's `collect()`, which skips records whose validation failed, and not through its default arm list, which stops at v9. D02's targets:<br>- AI_READI variables, measured on the new no-crate v8 records under (d) (the historical with-crate values were 20/13/20);<br>- CM4AI lexical candidates 9/5/3;<br>- VOICE variables 4/4/4, lineage 1/1/1, lexical candidates 3/0/1, b2aiprep v3.0.0 in `used_software`/`tools` 0/0/0;<br>- CHORUS lineage 1/1/0.<br>**Lineage (D64, item 20)** is a top-level presence indicator: 1 if the record's top-level `was_derived_from` holds at least one populated entry, whatever its type or number of entries, else 0. It does not rely on the schema's single-valued declaration, which Set A's invalid records may break. The script's `target_counts` instead counts lineage entries at every depth, and nested objects can carry `was_derived_from`. On all 12 v8 records and both assisted records the two agree (no nested or multiple lineage occurs; recomputed for this revision), so the v8 values do not change.<br>**VOICE's version target (D64, item 20)** is the fact-specific carriage measure for `voice-b2aiprep-3.0.0` in `notes/recall_target_baseline.md` ("used_software/tools" column, with that note's matching rules). It replaces "tools with a version token", which counts any version-shaped token in `tools`, so a wrong version can raise it; that count stays reported as a lexical carriage proxy. The v8 records carry b2aiprep v3.0.0 elsewhere in all three.<br>**The adapter** that applies these counters to Set A is a script pinned by sha256 in the P4b amendment, before any confirmatory record exists; on the 12 historical v8 records it must reproduce this row's listed values, as a check of the adapter, not of any comparator.<br>These are carriage counts, not support or recall accuracy. | **Counts the rule should raise** (variables, lineage, b2aiprep carried): holds for a target if mean(v10_p) > mean(v8_p); a tie fails.<br>**Targets at their ceiling, enumerated now:** only VOICE lineage. The presence indicator is at most 1 by construction, and every v8 VOICE replicate is at 1. That target holds if mean(v10_p) ≥ mean(v8_p). No other target gets a ceiling exception after the outcomes.<br>**Lexical candidates**, which should fall as cue chunks are extracted rather than set aside: holds if mean(v10_p) < mean(v8_p).<br>**Combination:** a project's row-3 verdict holds if every target listed for it holds, and "holds in k of K" then counts projects.<br>AI_READI's historical counts were taken over the with-crate chunking (P1); under (d) the comparator's counts come from the new no-crate records | as listed |
 | 3a | A rise is an error where the bundle states nothing | Same counts, read against the #3289 adjudication in `notes/recall_target_baseline.md`:<br>- no parent dataset in any of the four bundles;<br>- no processing-software version in the AI_READI, CHORUS or CM4AI bundles (CM4AI's versions belong to companion analyses);<br>- VOICE's one stated version is b2aiprep v3.0.0.<br>The adjudication read AI_READI's pre-#5042 bundle, when it still had its RO-Crate, which recorded FAIRSCAPE 1.2.1 as the metadata packager, not processing software. It is re-read against `1a58ad7b` before P4. | holds if every confirmatory v10 record has `parent_datasets` 0; for AI_READI, CHORUS and CM4AI, `used_software` with a version 0; and for VOICE, no versioned `used_software` entry other than b2aiprep v3.0.0, the one processing-software version the adjudication found in VOICE's bundle. Any non-zero instance means it does not hold, and each instance is listed. If a required record is absent, the row is "not measured" for that project; it never passes on an empty set (item 3) | 0 today |
-| 4 | The rejecting-class unsupported-claim and adverse-slot rates do not rise (a review-pass prediction) | item 16's atomic-claim and eligible-leaf units, exclusions, dedup/splitting and complete-adjudication rules, as P4b fixes them (P4 item 40) before any confirmatory outcome; E2's roster with the v10 records taken before acceptance (item 12) | **Exception to per-project verdicts:** claim-weighted and leaf-weighted E2 pools over the projects in K, not Set A attempts. Two verdicts: **4a** holds if v10's claim rate ≤ v8's, and **4b** if v10's leaf rate ≤ v8's; zero tolerance, ties hold, and neither is folded into the other. Always show project-specific rates and equal-project-weight sensitivity. Under AI_READI options (a) and (c), AI_READI is outside K: the pool over the in-scope projects in K decides (three at full scope), and AI_READI is a separate cross-arm row (item 16). The accepted-final records are a sensitivity row. Missing/unassessed units do not create a passing verdict. | no adopted E2 annotation result asserted here; measured after protocol/roster freeze |
+| 4 | The rejecting-class unsupported-claim and adverse-slot rates do not rise (a review-pass prediction) | item 16's atomic-claim and eligible-leaf units, exclusions, dedup/splitting and complete-adjudication rules, as P4b fixes them (P4 item 40) before any confirmatory outcome; E2's roster with the v10 records taken before acceptance (item 12) | **Exception to per-project verdicts:** claim-weighted and leaf-weighted E2 pools over the projects in K, not Set A attempts. Two verdicts: **4a** holds if v10's claim rate ≤ v8's, and **4b** if v10's leaf rate ≤ v8's; zero tolerance, ties hold, and neither is folded into the other. Always show project-specific rates and equal-project-weight sensitivity. AI_READI is in the pool only under option (d), against the new no-crate v8 records; under (b) it is outside K (item 16). The accepted-final records are a sensitivity row. Missing/unassessed units do not create a passing verdict. | no adopted E2 annotation result asserted here; measured after protocol/roster freeze |
 | 5 | Rubric20 Q11 and Q19 do not fall (secondary) | E5 joint re-rating, instrument version per E4 with the D52/D61 evaluator identity (item 12); one primary rating per record of E5's analysis roster; repeat-panel ratings are reliability evidence only | Two verdicts: **5a** (Q11) holds for p if mean(v10_p) ≥ mean(v8_p) − 0.5 on the item's scale as the selected instrument defines it, and **5b** (Q19) likewise; equality passes, and a project's row-5 label is "holds" only if both do. A rating the instrument scores N/A, or a record with no usable primary rating for an item, is metric-missing for it (item 3). No pilot, re-canary, with-crate, native or calibration record enters these means | measured in E5 |
 | 6 | **Not a prediction: an acceptance invariant.** Validation passes with 0 duplicate keys | `validation.passed` and `canary.duplicate_key_count` | true by construction for accepted v10 records, since the batch stops on invalid output and duplicate keys gate. Set A reports the count of v10 attempts whose output failed either, descriptively | 12/12 passed, 0 duplicate keys |
 | 7 | **Descriptive, no direction:** report findings | `report_claims.findings` | reported per record and per project in both sets. Reasons:<br>- the counts cross instrument versions: v8's stored blocks are v7, and new runs are checked under v8;<br>- renderer 25's report carries the typed audit's finding totals (#4766), which v8's report did not;<br>- v8's values are 0–2 per record.<br>A directional rule would be decided by noise, as D21 argues against its option (a) | worst, stored v7 and recomputed under v8 alike: CHORUS 2, VOICE 1, AI_READI 1, CM4AI 0. Under v8, CHORUS rep3 goes from 0 to 1 (P1) |
