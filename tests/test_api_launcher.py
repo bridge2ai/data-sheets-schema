@@ -6,7 +6,9 @@ D20 subcommand refusal ('d4d api run'), import isolation checks, dry-run, and la
 
 from __future__ import annotations
 
+import atexit
 import os
+import shutil
 import site
 import stat
 import subprocess
@@ -61,6 +63,7 @@ def _get_isolated_venv() -> Path:
         return _CACHED_ISOLATED_VENV
 
     venv_dir = Path(tempfile.mkdtemp(prefix="d4d_isolated_venv_"))
+    atexit.register(shutil.rmtree, venv_dir, ignore_errors=True)
     subprocess.run(
         [sys.executable, "-m", "venv", "--without-pip", str(venv_dir)],
         check=True,
@@ -355,7 +358,9 @@ class TestLauncherCLI:
         ret = main(["--check-only", "--allow-missing-key", "--worktree", str(REPO_ROOT)] + _default_venv_arg())
         assert ret == 0
 
-    def test_dry_run_batch_command(self, capsys):
+    def test_dry_run_batch_command(self, capsys, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-be-unset")
+        monkeypatch.setenv("D4D_CUSTOM_TEST_FLAG", "1")
         ret = main([
             "--dry-run",
             "--allow-missing-key",
@@ -367,7 +372,9 @@ class TestLauncherCLI:
         captured = capsys.readouterr()
         assert "[DRY-RUN] Worktree launch configuration:" in captured.out
         assert "d4d api batch" in captured.out or "bin/d4d api batch" in captured.out
-        assert "Unset keys:  ANTHROPIC_API_KEY" in captured.out
+        assert "Unset keys:  ANTHROPIC_*, D4D_*" in captured.out
+        assert "ANTHROPIC_API_KEY" in captured.out
+        assert "D4D_CUSTOM_TEST_FLAG" in captured.out
 
     def test_dry_run_forbidden_api_run(self, capsys):
         ret = main([
@@ -499,6 +506,8 @@ class TestLauncherCLI:
         )
         assert rc == 0
         assert captured_popen.get("stdin") == subprocess.DEVNULL
+        unit_log_text = (tmp_path / "logs" / "unit_popen.log").read_text(encoding="utf-8")
+        assert "# === [d4d api_launcher] worktree=" in unit_log_text
 
     def test_validate_command_restricts_python_entrypoint(self, tmp_path: Path):
         with pytest.raises(LauncherError, match="requires '-m data_sheets_schema.cli <subcommand>'"):
