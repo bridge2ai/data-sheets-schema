@@ -30,19 +30,28 @@ ADMITTED = ('reconcile_full', 'report', 'report_regate')
 BASIS = 'Synthetic assertion, not measured route capacity'
 REPAIR_MARK = '# synthetic validation repair'
 
-#: The CHORUS fixture's dispatched wire at the base f8c5ac73c (PR #5158's head,
-#: before this check existed): sha256 of the `messages.stream` keyword
+#: The CHORUS fixture's dispatched wire at incoming A13 base
+#: 04799422669fb2bd9f571bf8c0800dfc4b0ef008, independently derived without
+#: the #5210 admission implementation: sha256 of `messages.stream` keyword
 #: arguments as sorted compact JSON, with the run's temporary root replaced by
 #: `<root>` and the checkout the schema resolved from by `<repo>`, so any
 #: checkout reproduces them. They move with any model-facing input (the
 #: bundle, the schema, a v10 prompt asset or carry format, the selected
 #: settings) or the fake's scripted records; the admission must never move
-#: them. The second half of the test re-derives them with the admission
-#: bypassed.
-BASE_WIRE_SHA256 = {
+#: them. The second half of the test re-derives them with admission bypassed.
+#: The original f8 baseline remains named historical metadata. Its three
+#: hashes reproduce exactly; the incoming A13 differences are explained only
+#: by inherited D38 v10 prompt spelling/wrapping. See the committed reversible
+#: comparison in notes/wave5_5210_wire_lineage_2026-10-28/README.md.
+HISTORICAL_F8_WIRE_SHA256 = {
     'reconcile_full': 'b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa',
     'report': '9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8',
     'report_regate': '300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9',
+}
+BASE_WIRE_SHA256 = {
+    'reconcile_full': '31340b31d787baa1da17c2b738c99d21efd2a1db9150eb0d0aaf917f1ac6160c',
+    'report': 'eea1fe34d3de44efbc85a681b5b2d58c0f66bcc70f7b64450378db75fc996749',
+    'report_regate': 'd085cabccdc8d0b7e1e99d498e6f3cfe59b80322c907d3e8d49b177aaf672f1d',
 }
 
 
