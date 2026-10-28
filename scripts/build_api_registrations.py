@@ -1160,11 +1160,15 @@ def build_roster(
     roster_path: Path | str | None = None,
     write_to_disk: bool = True,
     replace: bool = False,
+    *,
+    pending_registration_writes: bool = False,
 ) -> dict[str, Any]:
     """Build a shared_generation_batch_roster_v2 document from registration dicts.
 
     Ensures no duplicate (project, label) rows, paths, or registration_ids, and
-    pins each row's canonical registration SHA-256 digest.
+    pins each row's registration SHA-256 digest. Existing files retain their
+    actual serialization unless the caller will write the supplied canonical
+    registrations after preparing the entire transaction.
     """
     rows: list[dict[str, str]] = []
     seen_keys: set[tuple[str, str]] = set()
@@ -1197,7 +1201,8 @@ def build_roster(
             seen_ids.add(reg_id)
 
         reg_file = Path(resolved_path)
-        reg_bytes = reg_file.read_bytes() if reg_file.is_file() else sg.canonical(reg)
+        reg_bytes = (reg_file.read_bytes()
+                     if reg_file.is_file() and not pending_registration_writes else sg.canonical(reg))
         reg_sha256 = hashlib.sha256(reg_bytes).hexdigest()
 
         rows.append({
@@ -1773,7 +1778,7 @@ def cli(
                 for note in sizing["notes"]:
                     click.echo(f"    note: {note}")
 
-    roster = build_roster(registrations=registrations, write_to_disk=False)
+    roster = build_roster(registrations=registrations, write_to_disk=False, pending_registration_writes=True)
     roster_sha = hashlib.sha256(sg.canonical(roster)).hexdigest()
     if not dry_run:
         _write_outputs(outputs + [(target_roster_path, sg.canonical(roster))], replace)
