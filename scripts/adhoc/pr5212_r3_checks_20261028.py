@@ -45,6 +45,8 @@ def main():
                 'tests/test_receipts.py', 'tests/test_receipt_rereceipt.py'],
         'options': ['tests/test_api_launcher.py', 'tests/test_shared_generation_cli.py',
                     'tests/test_shared_generation_batch_authority.py', 'tests/test_run_lock.py'],
+        'locks-rerun': ['tests/test_run_lock.py::TestAgainstARealProcess::test_it_becomes_stale_once_stopped',
+                        'tests/test_run_lock.py::TestAgainstARealProcess::test_stop_actually_stops_it'],
     }
     if set(args.groups) - groups.keys():
         parser.error('unknown group')
