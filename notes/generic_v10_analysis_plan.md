@@ -2088,9 +2088,9 @@ item, and the body states the resulting rules. Items 38–43 are open.
   hash is put to the owner; (ii) the merge itself, as the generation plan words it.
 - **Recommended:** (i). It binds the exact bytes, and the generation plan's merge gate
   still stands. *Depends on:* nothing.
+- **Answer (D64):** (i), as recommended. The P4a word itself has not been given.
 
 #### Group B. P4a: the analysis rules (answered, D64)
-- **Answer (D64):** (i), as recommended. The P4a word itself has not been given.
 
 **13. D02: the comparator and the metric hierarchy** · §2 · latest P4a · [D02, decided by D64; Codex Q02]
 - **Question:** Which comparator and metric hierarchy does the analysis register?
@@ -2241,9 +2241,9 @@ item, and the body states the resulting rules. Items 38–43 are open.
   opened; (b) keep D36's blind observations as a seed only, with no scored recall
   claim from this condition; (c) fund a separate human-annotated recall study.
 - **Recommended:** (b), unless a reviewed rule already exists. *Depends on:* D36.
+- **Answer (D64):** (b), as recommended.
 
 #### Group C. P4a: pilots, the floor, stops and continuation (answered, D64)
-- **Answer (D64):** (b), as recommended.
 
 **28. D20: the floor rule and its pilot branch** · §8; staged sequence, step 8 · latest P4a for the rule and branch; the value at A15 · [D20, decided by D64; Claude F3, A4, N7; Codex F6, Q12, V1, V8]
 - **Question:** Which rule sets the production floor, and does the AI_READI pilot feed
@@ -2346,7 +2346,7 @@ item, and the body states the resulting rules. Items 38–43 are open.
 - **Answer (D64):** (a), or (c) if the failure shows the condition is infeasible, as
   recommended.
 
-**37. Optional arms: the crate path (D04) and a monolithic baseline (D16)** · §17 · latest P4a, or P4b if kept open · [D04 and D16, decided by D64; Claude D2; Codex Q11, Q44]
+**37. Optional arms: the crate path (D04) and a monolithic baseline (D16)** · §17 · decided at P4a (D64); the earlier "or P4b if kept open" no longer applies · [D04 and D16, decided by D64; Claude D2; Codex Q11, Q44]
 - **Question:** Does this matrix include the with-crate CHORUS stage, or a monolithic
   API baseline?
 - **Options:** (a) neither: both stay out of this matrix, and either needs its own
@@ -2354,9 +2354,9 @@ item, and the body states the resulting rules. Items 38–43 are open.
   A16-acc, separately funded (about 4 runs at roughly $40–60 each); (c) a separately
   registered monolithic baseline.
 - **Recommended:** (a), given D58's budget. *Depends on:* item 2.
+- **Answer (D64):** (a), as recommended: both arms are out of this matrix.
 
 #### Group D. P4b: before any production registration
-- **Answer (D64):** (a), as recommended.
 
 **38. D15: Kids First** · §2a · latest P4b · [pending D15; Claude B7; Codex Q10]
 - **Question:** Which route, order and floor does Kids First take?
@@ -2443,7 +2443,7 @@ at the edges. This draft follows the earlier deadline wherever they differ.
 |---|---|---|---|
 | 13–24, the comparison rules | P4a | P4a "where feasible"; a named deferral to P4b only with A21 kept out | P4a |
 | 26, when the E2/E5 instruments are fixed | the instruments at P4b at the latest | P4a decides whether to fix them now or defer them by name | P4a decides the deferral; items 40–41 at P4b |
-| 37, the crate path and D16 | D04 at P4b; D16 with the native items | both may be ruled out of this matrix now; D16 is API, not native | P4a, or P4b if kept open |
+| 37, the crate path and D16 | D04 at P4b; D16 with the native items | both may be ruled out of this matrix now; D16 is API, not native | P4a; D64 ruled both out of this matrix |
 | 42, canonical marks | later, at A20 | P4b is adequate | at the latest before any mark (A20) |
 | 43, the native items | later, in the native amendment | the native amendment, except D16 | the native amendment, with D16 moved to item 37 |
 
