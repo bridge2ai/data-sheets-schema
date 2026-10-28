@@ -6,7 +6,7 @@ The plan becomes binding only after the owner's explicit P4 ratification of its 
 final text. Until then, no generic_v10 registration hash is put to the owner, and no
 billed generic_v10 step runs (the plan: "Every billed generic_v10 step depends on P4").
 
-**What performs P4 [proposed; owner fixes at P4, item 16].** The generation plan
+**What performs P4 [proposed; owner fixes at P4, item 12].** The generation plan
 words P4 as "The owner merges P2 with an explicit word", gated on "Merged on main".
 This draft proposes that P4 is the owner's word naming this file's sha256 at a named
 commit, recorded in the decision record, with the merge following it. Merging the
@@ -145,26 +145,8 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | D63 | One `count_tokens` calibration, run by agy from the launch-base checkout through the runner's admission-check route, on one named, fixed D59 CHORUS worker request. It logs the request sha256 and the count; no generation and no other provider call. The measured ratio replaces the extrapolated 2.48 before registration. | 2026-10-28T20:12:01Z; item 15. |
 | D02–D04, D08, remaining D09 choices, D11–D16, D18, D20–D21, D24–D25 | **Pending where not specifically superseded above.** D02 comparator/analysis-set choices and D04 crate comparison are not decided by this amendment. Each of these, and D29, is a numbered question in the P4 agenda. | Separate proposal, implementation and owner decisions. |
 
-**The "Resolved" comments are not rulings.** Several issues carry comments citing
-commits that are on no remote branch:
-- `027c2272c`: on #2930 and #2926, 2026-10-11T03:43Z;
-- `c92d89824`: on #2930 and #2926, 2026-10-11T08:51Z, naming D01, D07 and D15;
-- `25994a4d2`: on #2914, 2026-10-11T03:44Z. It records a proposed Path B (D04's
-  subject) and does not name D04;
-- `d9f7d9a72`: on #4758, #4759 and #4761, 2026-10-11T03:43–03:44Z.
-
-All six issues were reopened on 2026-10-13, in two groups that state different reasons:
-- **#4758, #4759 and #4761, at 06:08Z.** The comments each say the closing record "does
-  not reflect an owner decision".
-- **#2914, #2930 and #2926, at 17:35:44–17:35:59Z.** These were reopened "at the
-  owner's request following the 2026-10-13 closure audit". The cited commits were
-  outside GitHub main, and they do not establish the issues' required acceptance. For
-  #2914 the comment adds that scheduling a proposed Path B does not establish its
-  experimental acceptance.
-
-#2930 and #2926 had already been closed, reopened and closed again on 2026-10-11 (at
-03:43, 04:18 and 08:51Z). D07 has since been decided (2026-10-19, above). D01 and D15
-are not established by those closing comments; D01 is now superseded by D26/D28.
+The closing comments of October 11 that cited unpushed commits are not rulings; the
+appendix records them (A).
 
 ### Prospective boundary and assisted-evidence stratum
 
@@ -414,7 +396,7 @@ inputs, and the stage rates are measured in item 18. They are not tolerances, an
 never choose between projects on quality. They are inputs to three decisions:
 - P4b's scope, through the budget per accepted record below;
 - the written risk acceptance D08 recommends for single-row runs, which for A21
-  should name its 8 single-delivery calls (item 10, P4 item 9);
+  should name its 8 single-delivery calls (item 10, P4 item 8);
 - whether to allow a transport-only redelivery (P4 item 4).
 
 **What the exposure means for complete n=3.** Item 3 requires three accepted cells per
@@ -445,7 +427,7 @@ before the stop.
    or rejected (A11–A13), with its attempt count. Pilots are reported separately from
    production, and billing or native runtime evidence separately again. Two success
    proportions are reported per arm, stage and project [proposed; owner fixes at P4,
-   item 31]:
+   item 25]:
    - **All started without assistance (the feasibility headline).** The denominator is
      every registered attempt that started without assistance, fixed at launch.
      Success is acceptance with no later assistance. A later intervention, a terminal
@@ -967,12 +949,12 @@ Each row must be 0, or hold, and A11 records each:
    `model.max_tokens_by_phase.full`, read 128000.
 6. **Provider (API):** `model.provider` reads 'LBL CBORG (proxy to Anthropic)' and
    `model.base_url` reads `https://api.cborg.lbl.gov`.
-7. **Clean run [proposed; owner fixes at P4, item 13]:** item 7's clean-run checks all
+7. **Clean run [proposed; owner fixes at P4, item 11]:** item 7's clean-run checks all
    hold. A run that fails any of them is assisted: evidence only, never accepted.
 
 **Native rows.** Every row above is written for the API arm. The native canary's
 acceptance rows are not specified here; they are deferred to a dated native amendment
-of this plan, reviewed and ratified before the native launch (P4 item 49).
+of this plan, reviewed and ratified before the native launch (P4 item 43).
 
 **Recorded, not gated:**
 - item 3a's coverage fractions and snapshot/denominators **other than the
@@ -1009,7 +991,7 @@ It carries:
 - **Cost:** at that day's prices.
 - **Reviewers:** references to the A12 blind source review and its reviewers, named
   under D36, never the generating session.
-- **Disagreements [proposed; owner fixes at P4, item 14]:** each reviewer's finding and
+- **Disagreements [proposed; owner fixes at P4, item 11]:** each reviewer's finding and
   disposition, kept separately. The owner adjudicates any disagreement before
   signing. A rejecting-class finding that the owner sustains rejects the record;
   evidence that stays unresolved blocks acceptance.
@@ -1023,7 +1005,7 @@ It carries:
   attempt that started without assistance, and one over the attempts that stayed
   clean. The pre-P4 assisted 10-20a/10-22a stay in their own engineering table. Which
   clean attempts enter Set A follows item 3's definition.
-- **A clean run [proposed; owner fixes at P4, item 13]** passes every one of these
+- **A clean run [proposed; owner fixes at P4, item 11]** passes every one of these
   checks, and any other run is assisted:
   - the D41 latch journal verifies;
   - no override is recorded (D56);
@@ -1277,7 +1259,7 @@ failure, or to have no clock. The clock is never extended during a live attempt.
 - **The command.** At the trigger or the clock, `d4d api stop --label-prefix <prefix>`
   stops the run. `--max-cost-dollars` stops only between runs (#5045). It cannot recall
   an in-flight request, and an interrupted stream may still bill (#1849).
-- **Who runs it: open (P4 item 8).** D43 has the owner launch and the agents monitor
+- **Who runs it: open (P4 item 7).** D43 has the owner launch and the agents monitor
   read-only, and the decision record does not say who runs the stop command. The
   options are the owner, or one agent the owner names to run only that command, only
   at the trigger or the clock. Under D43's read-only monitoring, no agent runs it
@@ -1348,45 +1330,7 @@ Rules that go with the table:
   P4 item 33]: they allow one contingency. An impossible-limit stop does not, since a
   contingency under the same limits would reproduce it.
 
-**Historical examples of the two harness classes** (they informed engineering; they
-are not assertions about BC1):
-- **A record shape the runtime refused** (Lane C1 Finding 2, October 20 code).
-  - Receipt completion validates the persisted full record against the captured
-    schema (`_validate_record`, called from `_inputs`; `receipt_completion.py:154`,
-    `:178`, `:215`). It does so before `_call_with_usage` admits the
-    receipt-completion call (`run`, `:554`, `:584`). So the run stops after the
-    full phase, and any re-address, have been billed.
-  - C1 Finding 2 names the shapes no step repairs. The write-time normaliser misses
-    a scalar on a line that opens a sequence item (`- slot: value`), and a scalar
-    in a multivalued slot whose range is not `string`. Nothing unwraps or joins a
-    list written in a single-valued slot.
-  - `_repair_invalid` runs only after the phase loop (`api_runner.py:7456-7471`),
-    so nothing repairs such a shape before the originals freeze.
-  - C1 notes that its sweep bypasses `_validate_record`, so the gate itself was
-    not exercised there.
-- **A registered limit no valid answer could meet** (Lane C1 Finding 1). The
-  superseded October 20 `worker_output_tokens` (4,000) was below the floor of any worker answer
-  the terminal source review accepts, at every valid grid. It stops a run in one of
-  two ways:
-  - a cut-off answer is refused at the worker stage, and the typed audit is
-    terminal after one worker is billed;
-  - an answer that fits, by declaring rows as metadata or by shortening its
-    quotes, passes the worker stage and fails at assembly, after every typed stage
-    is billed. The worker grammar accepts a metadata row for any path.
-    - Under the registered caps, the metadata form is open where an all-metadata
-      answer fits under the cap at A1b's ratios: at G1, and at G2 and G4 for
-      CHORUS, VOICE and VOICE_PEDIATRIC (1,744–3,852 tokens for the largest
-      worker, before thinking).
-    - For AI_READI, CM4AI and Kids First it is at the cap's edge (3,924–4,763).
-  - With raised caps it was open at every grid in that historical experiment.
-
-  The causes are the registration's limit and the worker check's permissiveness,
-  so a contingency under the same limits would reproduce the stop. The remedies:
-  - the reviewed current limits and metadata checks, before a registration is
-    put to the owner; historical C1 paths are not assertions about BC1;
-  - optionally, the runtime fix C1 suggests: `check_worker` refusing a metadata row
-    on a path that `record_metadata_allowed` does not allow, which would move the
-    metadata form's failure to the worker stage.
+Historical examples of the two harness classes are in the appendix (B).
 
 ### Single-delivery exposure
 
@@ -1441,7 +1385,7 @@ no new rule batch enters v10. A12 never involves the generating
 session, and it is not the comparison.
 
 **Comparison batch (E2)** is separate from acceptance [proposed; owner fixes at P4,
-items 26 and 44]:
+items 21 and 40]:
 - **The v10 roster is taken before acceptance:** each in-scope confirmatory cell's
   first clean attempt that left an eligible full record, accepted or not.
   - An A12 rejection never removes a record from E2.
@@ -1458,7 +1402,7 @@ items 26 and 44]:
   records, removes labels, provenance and the `#` header, and shuffles them (#3280).
   What it cannot remove is listed: schema 2.0.0 and 3.0.0 records differ visibly. Each
   reviewer records a guess of the arm before scoring, and the guesses are reported.
-- **Reviewers:** a named pair chosen at P4 (P4 item 44). D36 names the acceptance
+- **Reviewers:** a named pair chosen at P4b (P4 item 40). D36 names the acceptance
   reviewers, not E2's. Neither E2 reviewer generated or operated a run under review.
   Each review is dated and bound to the record sha256.
 - **The protocol is frozen before any confirmatory outcome** (item 16): at P4b at the
@@ -1489,7 +1433,7 @@ E5 needs its own registration, review and owner word. D22's withdrawal means no
 standing authorization covers it.
 
 **The rating workload is not the analysis roster [proposed; owner fixes at P4, items
-26 and 28].** E5b-reg rates every accepted generic_v10 API-route record, the v8
+21 and 23].** E5b-reg rates every accepted generic_v10 API-route record, the v8
 comparators and a repeat panel. Prediction 5 reads a narrower roster:
 - exactly one primary rating per record of E2's v8 and v10 rosters above, the v10
   roster taken before acceptance. E5b-reg must add any such record it would not
@@ -1499,7 +1443,7 @@ comparators and a repeat panel. Prediction 5 reads a narrower roster:
   repeat-panel copies;
 - repeat ratings are reliability evidence only.
 
-The alternative (P4 item 26) is to keep E5's accepted-only roster and label row 5 as
+The alternative (P4 item 21) is to keep E5's accepted-only roster and label row 5 as
 conditional on acceptance.
 
 The native CHORUS canary is not automatically included in the API/v8 E2 or E5
@@ -1536,7 +1480,7 @@ The proposed atomic-claim protocol belongs to D24/P4 (item 16), not #5126.
 
 The design label **`shared-generation-api-v2-bc1`** names the proposed scientific
 condition. It is **not** the installed `shared_generation_version` or an accepted
-registration; the label is P4 item 10. BC1's implementation lineage:
+registration; the label is P4 item 9. BC1's implementation lineage:
 - **`3bd3c41f4`:** the reviewed BC1 implementation, contract and hook proposal.
 - **`8dd00263a`** (`origin/claude/bc1-bounded-carry`): the hook applied. **It is
   superseded, and it does not fit.** BC1's fit analysis (§1) found that no typed call
@@ -1626,7 +1570,7 @@ omission / integration, with **128,000** for report, report regate and
 reconcile-full. These caps include thinking where the route uses thinking.
 The current BC1 code instead requires **64,000 for both worker and integration**,
 including each group and final integration call. This is a material implementation
-delta, not an alias for D28's 32k integration. The owner settles it at P4 (P4 item 11);
+delta, not an alias for D28's 32k integration. The owner settles it at P4 (P4 item 9);
 this draft does not silently approve it. D58's cost basis already assumes 64k. Retain
 the original decided baseline and the proposed BC1 value in the decision packet.
 
@@ -1677,7 +1621,7 @@ before each dispatch, including resumed repair/report refresh.
   byte ratios and response proxies do not exhaust the possible refusals, so runtime
   admission remains the guard.
 
-**Fit evidence, and when it is needed [proposed; owner fixes at P4, item 12].**
+**Fit evidence, and when it is needed [proposed; owner fixes at P4, item 10].**
 - **Before A21 (D44, D58):** BC1 is built and reviewed for all six projects under D59.
   Per-call fit is shown for every project from its own sources, schema closure and
   context, at the floor and the caps scenario, through the real planner and formatter.
@@ -1711,7 +1655,7 @@ actual fit failure holds its dependent launch rather than being hidden in a prox
 D24 recommends option 1. The following precise E2 units and weighting are a
 **prospective proposal for D24/P4, not an already ratified protocol**.
 
-**What is frozen, and when [proposed; owner fixes at P4, item 44].** These determine
+**What is frozen, and when [proposed; owner fixes at P4, items 26 and 40].** These determine
 the denominators and the rejecting classes, so they are frozen before any
 confirmatory outcome exists: at P4b at the latest, before any confirmatory roster's
 launch word. "Before E2" would be after the v10 outcomes exist.
@@ -1893,7 +1837,595 @@ Recall is "rises where the bundle states the target, and is never invented where
 does not" (3, 3a). Structure and report findings are descriptive, for the stated
 reasons.
 
-## Historical October 20 delegation differences
+## Open before P4
+
+### What P4a needs, apart from the owner's answers
+
+- **P3 closure.** Every P3 finding, and every finding of the verification round on
+  `1ed9bb1ef`, is fixed here or converted to an item below; each is filed as an issue;
+  and this revision gets its re-review. The dispositions are in
+  `d4d-executions/plans/reviews/p2_p3_dispositions_2026-10-28.md`, and a one-page P4a
+  packet is in `d4d-executions/plans/p4a_decision_packet_2026-10-28.md`.
+- **The condition's specification (§14–15),** as P4a ratifies it. The composed head
+  (with board A14, board A17, D38's assets and D55's guard), D44's all-project build
+  and review, D62's CHORUS fit and D63's calibration are prerequisites of the A21
+  registration (staged sequence, step 3), not of P4a. That registration's review checks
+  the composed head against the ratified text, and a deviation needs a P4a amendment.
+- **The #3289 adjudication,** re-read against AI_READI's `1a58ad7b` bundle
+  (prediction 3a).
+- **Context and evaluation identities.** The omission contexts are approved (D51) and
+  the evaluation-context settings decided (D52); D46 is retired. The D52/D61 scoring
+  rules need their implementation merged before scoring, and the selected hashes and
+  per-route readback need verification. Preserve A23's current normalized context
+  digests when integrating the decision-record correction. Native canary ratings
+  remain separately registered and descriptive.
+
+### Plan amendments (claude prepares them under D50; agy pushes them)
+
+This draft does not edit the generation plan. The amendments below go in one PR,
+reviewed as P3 was and ratified with P4a; those marked P4b are ratified with P4b. Each
+lands before the first registration it affects, and the generation plan's own P4 gate
+stands: the ratified plan is merged on main before any registration hash is put to the
+owner.
+- the `d22b61a9` gates in A4 and A14-reg, and the run tables (§2): before A4;
+- D15's and A19-word's "about the size of AI_READI's 542,513" (Kids First's bundle is
+  541,184 bytes): before A19-reg (P4b);
+- A19-reg's "vocabulary null", which should read `vocabulary: {}` (§2a): before A19-reg
+  (P4b);
+- D07's AI_READI lines (a $35 planning ceiling and a contingency of at most $35), which a
+  D59 AI_READI run, at about $162–191, exceeds: before plan A14-reg (P4b);
+- A1's sizing inputs, which do not include Kids First and are superseded by BC1's fit
+  analysis (§15): before the A21 registration;
+- the staged sequence: plan A10's role, which the re-canary fills with a registered
+  19/20 floor, before the A21 registration; plan A14's conditional start and plan A15's
+  branch (§8), and E5b-reg's roster (§12), with P4b;
+- the wording of P4 itself (the header): with P4a.
+
+### P4 agenda
+
+**How to read it.** There are 43 items, in the order the answers are needed.
+- **Each item** gives the question, the options, this draft's recommendation with its
+  consequence, the latest point at which it can be decided, and its dependencies. The
+  rule itself is in the section cited ("§N" is this file's item N; "item N" inside
+  this agenda is an agenda item).
+- **Latest decision.** Items 1–37 are decided at P4a, before A21, because A21 or a
+  later run is their first relevant outcome. Items 38–41 are decided at P4b, before
+  any production registration. Items 42–43 come later, at the stage named. Deciding a
+  rule is distinct from producing what it governs: a floor's value, a manifest or a
+  manual can come later under a rule fixed now.
+- **Sources** in brackets: the Claude P3 review's agenda (A1–D3), findings (F) and
+  re-review (N); the Codex pass's questions (Q01–Q50), findings (F) and verification
+  (V).
+- **Recommendations are this draft's,** not owner decisions. Where the reviews differ,
+  the item says so. Already decided and not asked again: D06, D07, D10, D22, D26–D28,
+  D30–D45 and D50–D63. D46–D49 stay retired.
+
+#### Group A. P4a: the A21 condition and its operation
+
+**1. What P4a ratifies** · the staged sequence · latest P4a · [Claude F2, A1; Codex F1, Q01, V3]
+- **Question:** While D58 holds the matrix's scope and budget until A21's cost is
+  measured, what does the P4 word before A21 ratify?
+- **Options:** (a) the staged sequence: this text, every rule whose first relevant
+  outcome is A21 or later, and the latest-decision points of this agenda, with P4b
+  applying them; (b) A21 as a feasibility study only, with any comparison registered
+  later as a new prospective study; (c) hold everything until a funded full matrix is
+  approved, which amends D58.
+- **Recommended:** (a). A21 can run under D58, and no later choice can follow a
+  quality outcome. *Depends on:* nothing. Every other item assumes (a).
+
+**2. The scope rule** · "Scope rule" · latest P4a; applied at P4b · [Claude F2, A1; Codex Q01]
+- **Question:** Which rule turns D58's later scope decision into K, the confirmatory
+  set and the rosters?
+- **Options:** (i) the predeclared order CHORUS ×3 → CM4AI ×3 → VOICE ×3 → AI_READI
+  (pilot + ×3) → VOICE_PEDIATRIC ×1 → Kids First ×1, whole projects only, on cost, fit
+  and call-failure evidence, priced per accepted record, with a descoped project out
+  of scope rather than missing; (ii) the owner's discretion at P4b within the same
+  limits; (iii) as (i), in another predeclared order.
+- **Recommended:** (i). At the $420 figure it stops after CHORUS ×3, so K would be 1.
+  *Depends on:* item 1 and D58's budget.
+
+**3. A21's attempts, and what follows an A21 that is not accepted** · §10; staged sequence, step 5 · latest P4a · [Claude F1, A2, N5; Codex F3, Q19]
+- **Question:** Does D58's $60 fund one attempt or two, and what happens after an A21
+  that stops or is assisted?
+- **Options:** (i) one attempt; a contingency needs its own allocation, registration
+  and word, and P4b waits for it unless the owner scopes on a packet labelled partial;
+  (ii) raise the slice to about $120 to pre-fund one contingency; (iii) one attempt,
+  with P4b proceeding on whatever packet exists.
+- **Recommended:** (i). (ii) commits money before the measured cost D58 waits for, and
+  (iii) can scope the matrix on a packet missing most stages. *Depends on:* D58, items
+  4 and 8.
+
+**4. Single-delivery exposure: allow a transport-only redelivery, or accept it** · "Feasibility under D58"; §9; §10 · latest P4a · [Claude F14, N6; Codex V3]
+- **Question:** BC1's typed calls and receipt completion admit one delivery each.
+  Allow one transport-only redelivery per typed call, or accept the exposure?
+- **Options:** (i) accept it for A21 and production; (ii) build the redelivery before
+  A21, so that A21 runs the production procedure; (iii) accept it for A21, and adopt
+  it for production only through a reviewed prospective analysis amendment (§9), with
+  D35's parity test and diagnostic canary.
+- **What holds under every option:** a redelivery is new engineering; it re-sends the
+  same request after a transport error only; content failures stay terminal (D56). At
+  v8's per-call rate, the chance of complete n=3 rises with it from 39% to 82% for
+  CHORUS and from 9% to 56% for CM4AI.
+- **Recommended:** (iii): measure A21 first. Adopting it later costs an amendment and
+  a diagnostic canary (about $37–49). (ii) delays A21 but has it test the production
+  procedure; (i) leaves most non-CHORUS verdicts likely unmeasured. *Depends on:*
+  items 3, 8 and 16; D35.
+
+**5. The operator trigger** · §10 · latest P4a · [Claude F1, A3; Codex F3, Q19, V4]
+- **Question:** At what spend is A21 stopped?
+- **Options:** (i) the cap minus the worst pending call at the bounds the runtime
+  enforces, about $51 at $60, recomputed in the launch packet; (ii) register and
+  enforce a lower per-call input ceiling (engineering and a new registration), which
+  raises the trigger towards $53; (iii) a fixed $50.
+- **Recommended:** (i). *Depends on:* D62, D63, #5157.
+
+**6. The wall clock** · §10 · latest P4a · [Claude F1, A3; Codex F3, Q20]
+- **Question:** What time stop applies to A21?
+- **Options:** (i) 3 h, re-derived from BC1's 12–13 calls; (ii) 2 h as a deliberate
+  censoring rule, under which a timeout is a feasibility failure; (iii) 4 h; (iv) no
+  clock.
+- **Recommended:** (i), since 2 h would cut off a legitimate caps-heavy run. The Codex
+  pass recommends (ii) unless duration evidence supports more. The clock is never
+  extended during a live attempt. *Depends on:* the registered call schedule.
+
+**7. Who runs `d4d api stop`** · §10 · latest P4a · [Claude F1, A3]
+- **Question:** D43 does not say who stops a live run at the trigger or the clock. Who
+  does?
+- **Options:** (i) the owner; (ii) one agent the owner names, for that command only
+  and only at the trigger or the clock.
+- **Recommended:** (i), consistent with D41 and D43. (ii) stops faster, but makes an
+  agent an operator for one action. *Depends on:* D41, D43, D53.
+
+**8. D08: A21's written risk acceptance, and the CBORG follow-up** · "Feasibility under D58" · latest P4a for A21; before plan A16 for multi-row · [pending D08; Claude B6, F14; Codex Q34]
+- **Question:** Is the prepared CBORG follow-up sent, and what gates single-row and
+  multi-row runs?
+- **Options:** (1) prepare the exact message for its own per-action owner approval
+  (recipient, channel, text), accept the risk in writing for single-row runs now, and
+  require CBORG's answer or a renewed acceptance before the first multi-row roster;
+  (2) send nothing, and accept the risk in writing for everything; (3) send nothing,
+  and block every roster until CBORG answers.
+- **Recommended:** (1). A21's written acceptance names its 8 single-delivery calls.
+  Nothing in this draft sends a message. *Depends on:* item 4.
+
+**9. BC1's identity: label and integration reservation** · §14, §15 · latest P4a · [Claude F7, A11; Codex Q18]
+- **Question:** Which identity does the registration name, and is the integration
+  reservation BC1's 64k or D28's 32k?
+- **Options:** (a) the installed tuple (shared generation 1 plus
+  `bounded_carry_version` 1) with 64k as a declared D28 amendment; (b) the installed
+  tuple with 32k, which needs a BC1 change, re-sizing and re-review; (c) a new
+  shared-generation version (code changes where #5212's F1 sits), with 64k; (d)
+  neither, pending a redesign.
+- **Recommended:** (a). D58's cost basis already assumes 64k. *Depends on:* D55's
+  composition, D62.
+
+**10. Fit evidence and the composed head** · §15; staged sequence, step 3 · latest P4a for the standard; the evidence before the A21 registration · [Claude F13, N4; Codex Q50]
+- **Question:** Which fit evidence and which composed head must exist, and before
+  what?
+- **Options:** (a) §15's staging, with the composed head, D44's build and review,
+  D62's fit and D63's calibration as prerequisites of the A21 registration, whose
+  review checks them against the ratified text (a deviation needs a P4a amendment);
+  (b) answer item 9 first, compose and review the head, then hold P4a; (c) hold A21
+  until all six projects are sized with their own records, which cannot happen before
+  two of them have records.
+- **Recommended:** (a). No clean outcome comes before the registration, so nothing is
+  lost by checking there. *Depends on:* D44, D58, D62, D63, item 9.
+
+**11. Acceptance mechanics** · §5 row 7, §6, §7, §3a · latest P4a · [Claude F10, A10; Codex F11, Q22, Q49, V6]
+- **Question:** Which test makes a run clean, how is a disagreement between the two
+  D36 reviewers settled, and which receipt reading decides acceptance?
+- **Options:** (a) as written: §7's five checks applied mechanically; both reviewers'
+  dispositions kept, the owner adjudicating before signing, a sustained
+  rejecting-class finding rejecting and unresolved evidence blocking acceptance; v4
+  with D37 on the frozen `O,R1` snapshot; (b) as (a), with the owner's judgement per
+  run for cleanliness; (c) as (a), with a third blind adjudicator.
+- **Recommended:** (a). Membership of every analysis set becomes mechanical, and an
+  acceptance failure is never repaired by reading `Rf` or v5 instead. *Depends on:*
+  D36, D37, D55–D57.
+
+**12. What performs P4** · header · latest P4a · [Claude F23, A12]
+- **Question:** Which act performs P4?
+- **Options:** (i) the owner's word naming this file's sha256 at a named commit,
+  recorded in the decision record, with the merge following before any registration
+  hash is put to the owner; (ii) the merge itself, as the generation plan words it.
+- **Recommended:** (i). It binds the exact bytes, and the generation plan's merge gate
+  still stands. *Depends on:* nothing.
+
+#### Group B. P4a: the analysis rules
+
+**13. D02: the comparator and the metric hierarchy** · §2 · latest P4a · [pending D02; Codex Q02]
+- **Question:** Which comparator and metric hierarchy does the analysis register?
+- **Options:** (a) the v8 package contrast, with the deterministic metrics primary and
+  E5 secondary; (b) the v9 CHORUS canary as a descriptive reference only; (c)
+  descriptive reporting only.
+- **Recommended:** (a), conditional on item 2 funding a comparison. The v9 canary
+  stays a secondary n=1 reference. *Depends on:* item 2.
+
+**14. D02: the AI_READI comparator, and its pilot's baseline** · §2 · latest P4a · [pending D02; Claude A5; Codex Q03, Q04]
+- **Question:** Which records are AI_READI's comparator, and which baseline does its
+  pilot use?
+- **Options:** (a) v8 `04g`, labelled cross-arm, with the baseline informational only;
+  (b) AI_READI descriptive only, its pilot running with no baseline; (c) the
+  `2026-10-14b` agentic rerun, which also changes runtime, provider, transport and
+  effort and needs a reviewed data PR, with P4a recording whether the pilot has no
+  baseline or that prefix as an informational one; (d) a new no-crate v8 API run on
+  the historical v8 code (billed, about $10–14), used only if a render diff shows that
+  only the bundle differs.
+- **Recommended:** (b), unless item 2 funds AI_READI; then (d) if the diff passes,
+  otherwise (b). *Depends on:* item 2. It gates K, the E2 roster and the `d22b61a9`
+  plan gates.
+
+**15. Set A and the eligible record** · §3 · latest P4a · [pending D02; Claude A6, F16, N3; Codex F5, Q05, V5]
+- **Question:** Which records does each arm contribute, and what makes a record
+  eligible?
+- **Options:** (a) definition (2) primary and (1) as a sensitivity row, with
+  eligibility fixed by the completion event and the snapshot's hash (§3); (b)
+  definition (1) primary; (c) both descriptive.
+- **Recommended:** (a). Cells carry equal weights, so v8 pooled coverage is 0.592 for
+  VOICE and 0.538 for AI_READI; v8 rep1's survivorship stays a stated confound.
+  *Depends on:* nothing.
+
+**16. Missing data, and complete n=3** · §3, §7 · latest P4a · [Claude B5, N6; Codex F5, Q06]
+- **Question:** When does a project get a primary directional verdict?
+- **Options:** (a) only with complete n=3 and every required snapshot; otherwise the
+  row is descriptive and "not measured"; (b) n=2 may also be primary, under a
+  separately fixed rule; (c) every comparison descriptive.
+- **Recommended:** (a). At v8's per-call rate, complete n=3 is likely only for CHORUS
+  (39%, or 82% with a redelivery; "Feasibility under D58"). *Depends on:* items 4 and
+  15.
+
+**17. K** · §3 · latest P4a · [Claude F12; Codex Q29, V8]
+- **Question:** Which projects count in "k of K"?
+- **Options:** (i) only in-scope projects whose contrast is like-for-like: AI_READI is
+  outside K under options (a), (b) and (c), and inside under (d) only after the render
+  diff; (ii) AI_READI inside K under (a) and (c) as well, labelled mixed-input.
+- **Recommended:** (i). *Depends on:* items 2 and 14.
+
+**18. Rows 1, 3a, 6, 7 and 8 as written** · Predictions · latest P4a · [Claude A7, F17; Codex Q25, Q28, Q31–Q33]
+- **Question:** Are these five rows adopted as written?
+- **Options:** (a) all as written: row 1, v10 ≥ 0.9 × v8's mean leaves; row 3a, zero
+  inventions with the VOICE clause, "not measured" when a record is missing; row 6, an
+  invariant with failures over all started attempts reported; rows 7 and 8,
+  descriptive; (b) as (a), but row 1 at ≥ 1.00, or row 7 directional under one pinned
+  checker; (c) all five descriptive.
+- **Recommended:** (a). The assisted CHORUS records sat at 28–35% of v8's leaves, so
+  row 1 may well fail for CHORUS, which would be a legitimate result. *Depends on:*
+  item 16; for row 3a, the #3289 re-read.
+
+**19. Row 2: pre-completion coverage** · Predictions · latest P4a · [Claude A7, F6, F11; Codex Q26]
+- **Question:** Which rule judges v10's pre-completion coverage against v8's stored
+  final coverage?
+- **Options:** (a) v10 pooled ≥ v8 pooled − 0.05, with the numerator reported, the
+  smaller-record wording and the stored v8 values primary; (b) zero tolerance under
+  one common checker, where the inputs can be recovered; (c) descriptive only, as a
+  timing and instrument contrast.
+- **Recommended:** (a). The Codex pass recommends (c). The assisted values would pass
+  (a) by about 0.55, with smaller numerators. *Depends on:* items 15 and 16.
+
+**20. Row 3: the recall metrics** · Predictions · latest P4a · [Claude A7; Codex F10, Q27, V7]
+- **Question:** Which lineage and version metrics does row 3 use?
+- **Options:** (a) row 3 as written: top-level lineage presence (0 or 1), the
+  fact-specific b2aiprep v3.0.0 measure for VOICE, the one enumerated ceiling, ties
+  failing and a pinned adapter; (b) the script's recursive count and the version-token
+  count, named as lexical proxies; (c) source-adjudicated recall with recomputed
+  baselines; (d) descriptive.
+- **Recommended:** (a). Its v8 baselines are unchanged. *Depends on:* nothing.
+
+**21. The E2 and E5 v10 rosters** · §12 · latest P4a · [Claude F4, C2, N9; Codex F9]
+- **Question:** Which v10 records do rows 4 and 5 read?
+- **Options:** (i) each in-scope cell's first clean attempt with an eligible record,
+  accepted or not, with the accepted finals as a sensitivity row; (ii) all clean
+  attempts, cell-weighted; (iii) the accepted finals, with row 4 descriptive and row 5
+  labelled conditional on acceptance.
+- **Recommended:** (i). Row 4 becomes falsifiable, and E5b-reg must add the few
+  unaccepted first attempts. *Depends on:* items 2, 14 and 16.
+
+**22. Row 4: pool, weights and verdicts** · §16, Predictions · latest P4a · [Claude A7, F12, F18; Codex Q29, V8]
+- **Question:** How are row 4's two rates pooled, weighted and judged?
+- **Options:** (a) claim- and leaf-weighted pools over the projects in K primary,
+  equal-project weights as a sensitivity, and two verdicts, 4a and 4b, with zero
+  tolerance and ties holding; (b) equal-project rates primary; (c) descriptive.
+- **Recommended:** (a). *Depends on:* items 17, 21 and 26.
+
+**23. Row 5: Q11 and Q19** · Predictions · latest P4a · [Codex F9, Q30]
+- **Question:** Which tolerance and combination apply to rubric20 Q11 and Q19?
+- **Options:** (a) two verdicts, each v10 mean ≥ v8 mean − 0.5 on the selected
+  instrument's scale, over one primary rating per record; (b) zero tolerance for each;
+  (c) descriptive.
+- **Recommended:** (a). *Depends on:* items 21, 26 and 41.
+
+**24. Set B** · §3 · latest P4a for the recipe; its identities bound at P4b · [Codex F12, Q07]
+- **Question:** What exactly is Set B's common gate?
+- **Options:** (a) §3's recipe: the five named floors, measured, one common v4 checker
+  on copies, the coverage row excluded and the E2 and E5 intersections reported apart;
+  (b) the stored instruments' gates, as a historical sensitivity; (c) no Set B
+  verdicts.
+- **Recommended:** (a). *Depends on:* item 15.
+
+**25. The automatic-success estimand** · §1 · latest P4a · [Codex F13, Q24]
+- **Question:** Is success measured over every unassisted start, or only over runs
+  that stayed clean?
+- **Options:** (a) both, with the all-started proportion as the feasibility headline;
+  (b) the clean conditional proportion only; (c) only an attempt-flow table.
+- **Recommended:** (a). It measures A21 itself, so it is fixed before A21.
+  *Depends on:* item 11.
+
+**26. When the E2 and E5 instruments are fixed** · §12, §16 · latest P4a · [Codex V3; Claude re-review R4]
+- **Question:** Are the E2 manual and reviewers and the E5 rubric version fixed now,
+  or deferred?
+- **Options:** (a) deferred by name to P4b, before any confirmatory launch word, with
+  A21 descriptive permanently and the P4b record stating which pilot results the
+  authors had seen (items 40 and 41); (b) fixed at P4a; (c) predictions 4 and 5 moved
+  to a separate prospective study.
+- **Recommended:** (a). The manual does not exist yet, and (b) would hold A21 for it.
+  *Depends on:* items 21–23.
+
+**27. The audit-recall rule** · §12 · latest P4a · [Claude re-review R4; Codex Q48]
+- **Question:** Is a scored audit-recall claim wanted, given that A21's audit is the
+  first one opened?
+- **Options:** (a) freeze a matching rule and its adjudication before A21's audit is
+  opened; (b) keep D36's blind observations as a seed only, with no scored recall
+  claim from this condition; (c) fund a separate human-annotated recall study.
+- **Recommended:** (b), unless a reviewed rule already exists. *Depends on:* D36.
+
+#### Group C. P4a: pilots, the floor, stops and continuation
+
+**28. D20: the floor rule and its pilot branch** · §8; staged sequence, step 8 · latest P4a for the rule and branch; the value at A15 · [pending D20; Claude F3, A4, N7; Codex F6, Q12, V1, V8]
+- **Question:** Which rule sets the production floor, and does the AI_READI pilot feed
+  it?
+- **Options:** (i) the lowest accepted pilot's fraction rounded down to 1/20, with the
+  scope branch; it can register 20/20; (ii) as (i), capped at 19/20: AI_READI's pilot
+  is accepted before A15 when AI_READI is in scope, otherwise the re-canary alone sets
+  the value, which is then always 19/20; (iii) the lowest fraction minus 0.05, with
+  the branch; (iv) 19/20 fixed for all production, independent of scope, with no pilot
+  on the floor's path.
+- **Recommended:** (ii). The floor follows the data where that can matter (AI_READI),
+  and no 100% requirement arises. The Codex pass recommended no cap; (iv) is the
+  simpler scope-independent route its V1 names. *Depends on:* items 2 and 29.
+
+**29. D03: cell roles and sequence, and A21's role** · §2; staged sequence · latest P4a · [pending D03; Claude A8, N7; Codex Q08, V2]
+- **Question:** Which cells run, in which order, and what is A21's role?
+- **Options:** (a) re-canary → AI_READI pilot → floor → CHORUS ×3 → production, at
+  every scope; (a′) re-canary → P4b → the AI_READI pilot only if AI_READI is in scope
+  → floor → CHORUS ×3 → production in item 2's order; (b) only A21's role fixed now,
+  the rest at P4b.
+- **Recommended:** (a′), with A21 descriptive permanently. Counting A21 as CHORUS
+  replicate 1, which Claude's N7 showed the capped floor would permit, could only be
+  chosen now, irrevocably and for every A21 outcome, as a different design. The Codex
+  pass recommends against it, and this draft does not propose it. *Depends on:* items
+  2 and 28.
+
+**30. Pilot rejection on v8's per-project worst** · §5 · latest P4a · [Claude A9; Codex Q04]
+- **Question:** May a pilot, A21 included, be rejected for exceeding v8's per-project
+  worst on the seven defect metrics?
+- **Options:** (i) no: the comparison is recorded as evidence only; (ii) yes, on any
+  regression; (iii) only on a regression in report findings.
+- **Recommended:** (i). The bars are mostly zero and come from a different package.
+  *Depends on:* item 14.
+
+**31. Stop classification** · §10 · latest P4a · [Claude B4, N2; Codex F8, Q16, V6]
+- **Question:** Is each stop classified by §10's table: evidence status recorded apart
+  from the cause, one primary cause by precedence, registration faults voiding the
+  attempt?
+- **Options:** (a) §10's table as written; (b) mutually exclusive categories assigned
+  by an independent reviewer under a frozen manual; (c) any ambiguous case ends the
+  condition.
+- **Recommended:** (a). Assistance cannot erase a rule-level cause, and no label can
+  exempt one. *Depends on:* items 11 and 32.
+
+**32. Content slips** · §10, row 3 · latest P4a · [new; Claude N1]
+- **Question:** Is a receipt-floor or report-total miss, such as one mismatched
+  snippet, rule-level? In A21 a rule-level rejection ends generic_v10.
+- **Options:** (i) yes, rule-level, as first proposed; (ii) a "content slip": one
+  contingency, counted by root cause toward production's stop-loss, with rule-level
+  kept for sustained rejecting-class findings, validation failures and duplicate keys;
+  (iii) rule-level only with a filed diagnosis that a rule change would prevent it.
+- **Recommended:** (ii). One mismatched snippet is common (10-20a, and two of the
+  three v8 CHORUS records), so under (i) A21 has a real chance of ending the condition
+  on one. *Depends on:* item 31.
+
+**33. Which classes allow a contingency** · §10 · latest P4a · [Claude A3, B4; Codex Q17]
+- **Question:** Which stop classes allow one contingency (A13's "transport or
+  operational cause")?
+- **Options:** (a) content slips, registration faults, record shapes, transport and
+  budget or clock stops allow one, and an impossible limit allows none; (b) transport
+  only; (c) no contingency in this condition.
+- **Recommended:** (a), within each cell's two attempts, and never by resuming a
+  terminal run. *Depends on:* items 3, 31 and 32.
+
+**34. The defect-class stop-loss and A13** · §10 · latest P4a · [Claude B3, F22; Codex F8, Q15, V8]
+- **Question:** What ends re-running in this condition?
+- **Options:** (a) the first rule-level pilot rejection (A13); in production, two
+  rejections with the same root-cause ID, counted across prefixes and never reset; (b)
+  any first rule-level rejection, pilot or production; (c) two rejections of any
+  cause, which amends A13.
+- **Recommended:** (a). *Depends on:* items 31 and 32.
+
+**35. D21: production gating, continuation and the launch route** · §9, §13 · latest P4a for the route and A21's retry boundary; applied at P4b · [pending D21; Claude B1, B9; Codex Q13]
+- **Question:** How do production rosters gate and continue, and through which route
+  does every API launch go?
+- **Options:** (a) D21 (b) with continuation (ii): absolute floors, no baseline, a
+  stopped label never re-run, continuation under a new prefix, registration and word,
+  and every API launch through `d4d api batch`; (b) as (a), with production also gated
+  on v8's per-project worst; (c) an adjudicated-continue path built into `d4d api
+  batch`; (d) the condition ends at any roster stop.
+- **Recommended:** (a). It matches D56, under which a retry needs a new registration.
+  *Depends on:* item 34.
+
+**36. The A15 adaptation after a pilot's terminal failure** · §9 · latest P4a · [Codex F7, Q14; Claude B2]
+- **Question:** If a pilot ends in a terminal single-delivery failure, what may change
+  at A15?
+- **Options:** (a) nothing: D21 (b) continues under new registrations; (b) D21 (c) as
+  its own procedure stratum, under a reviewed prospective analysis amendment; (c) end
+  the condition and register the next version.
+- **Recommended:** (a), or (c) if the failure shows the condition is infeasible. None
+  of them sits outside the analysis. *Depends on:* items 4 and 35.
+
+**37. Optional arms: the crate path (D04) and a monolithic baseline (D16)** · §17 · latest P4a, or P4b if kept open · [pending D04, D16; Claude D2; Codex Q11, Q44]
+- **Question:** Does this matrix include the with-crate CHORUS stage, or a monolithic
+  API baseline?
+- **Options:** (a) neither: both stay out of this matrix, and either needs its own
+  specification, fit, budget, review and word later; (b) crate path B after plan
+  A16-acc, separately funded (about 4 runs at roughly $40–60 each); (c) a separately
+  registered monolithic baseline.
+- **Recommended:** (a), given D58's budget. *Depends on:* item 2.
+
+#### Group D. P4b: before any production registration
+
+**38. D15: Kids First** · §2a · latest P4b · [pending D15; Claude B7; Codex Q10]
+- **Question:** Which route, order and floor does Kids First take?
+- **Options:** (i) API after plan A14-acc and A15, with the registered floor; (ii)
+  last in item 2's order, run only if funded and fitted at its own registration, with
+  D33's descriptive own condition if admission refuses it; (iii) defer it, pending its
+  own fit; (iv) drop it.
+- **Recommended:** (ii). The Codex pass recommends (iii) for now. Kids First is never
+  cleared with AI_READI's inputs. *Depends on:* items 2 and 10.
+
+**39. VOICE_PEDIATRIC ×1 or ×3** · §2a · latest P4b · [pending D02; Claude B8; Codex Q09]
+- **Question:** How many VOICE_PEDIATRIC runs, and in what role?
+- **Options:** (a) ×1, descriptive, if funded; (b) ×3, if replicate variance is a
+  stated need and it is funded; (c) defer.
+- **Recommended:** (a), at about $96–118 per run. It is never an adult VOICE
+  replicate. *Depends on:* item 2.
+
+**40. E2's instrument, protocol and reviewers (D24)** · §12, §16 · latest P4b, before any confirmatory launch word · [pending D24; Claude C1, C3, F19; Codex F11, Q21, Q22]
+- **Question:** Which instrument measures row 4, who reviews, and what does the frozen
+  protocol contain?
+- **Options:** (a) E2's blind source review with §16's units, a fresh Claude session
+  plus a Codex pass as reviewers, the seeded blinding and arm guesses recorded; (b) as
+  (a), with a cross-family or human rater; (c) the support judge, after #3343's paid
+  calibration, which delays E2.
+- **Recommended:** (a). *Depends on:* item 26.
+
+**41. E5's instrument and funding (rubric20, E4)** · §12 · latest P4b · [pending owner, #2911; Claude C4, C5; Codex Q23]
+- **Question:** Which rubric20 version and evaluator implementation does E5 use, and
+  is E5 funded?
+- **Options:** (a) the reviewed 3.0-based successor with the D52/D61 changes pinned,
+  in one joint re-rating scaled to item 2's scope; (b) 4.0, with its normative-example
+  approval and nine-case Q19 calibration; (c) defer E5, which leaves row 5 unmeasured.
+- **Recommended:** (a), about $190–394 at full scope, unless 4.0's calibration is
+  approved before E5's registration. *Depends on:* items 2 and 26.
+
+#### Group E. Later
+
+**42. Canonical marks across prefixes** · §7 · latest before any canonical mark (A20) · [Codex Q47]
+- **Question:** How are canonical marks kept to accepted cells?
+- **Options:** (a) rank by the existing criterion only within an accepted-cell list
+  from the acceptance records; (b) leave cells unmarked until an accepted-only
+  selector exists; (c) an owner-recorded manual mark.
+- **Recommended:** (a) if the procedure is reviewed, otherwise (b). A mark never
+  changes an estimate. *Depends on:* item 35.
+
+**43. The native amendment** · §1 item 5, §5, §12 · latest before native registration · [pending D29 and the native IDs; Claude D1, D3, F20; Codex Q35–Q43, Q45, Q46]
+- **Question:** Are the native questions left to a dated native amendment of this
+  plan: D29's effort and account, the native acceptance rows, and the pending D09
+  remainder, D11–D14, D18 and D25?
+- **Options:** (i) yes, an amendment reviewed and ratified before native registration,
+  none of them blocking A21; (ii) decide them now.
+- **Recommended:** (i). Its proposals for that amendment: D29, the runtime's default
+  effort recorded as such, an owner-named first-party account and seven-day headroom
+  checked (the v3 direct run stopped at 0.96–1.0); D09, the pause scoped to the old
+  generic_v9 arm; D11, the binary and hash deferred; D12, an owner-named operator and
+  review pair; D13, toolchain exposure, launch flags, the runtime-closure fix and
+  receipt origin pinned; D14, the old spend package validated against current
+  evidence; D18, a two-week time-box; D25, no native canary counted as a replicate.
+  *Depends on:* nothing on the API side.
+
+#### Dependencies
+
+- **D58's budget** decides item 2, and item 2 decides items 14, 17, 21, 28, 29 and
+  37–41.
+- **Item 14 (D02's AI_READI comparator)** decides K, the E2 roster, the AI_READI pilot's
+  baseline and whether the `d22b61a9` plan gates matter.
+- **Item 28 (D20)** feeds plan A15's amendment, which gates plan A16.
+- **Rows 4 and 5** need items 21–23, 26, 40 and 41.
+- **Item 11** decides membership of every analysis set.
+- **Item 8 (D08)** gates A21's risk acceptance and every multi-row roster.
+- **D62 and D63** feed the A21 registration; each later project needs its own allowance
+  (item 10).
+
+#### Where the reviews' stage splits differ
+
+Both reviews put every rule that A21 or a later run first tests at P4a; they differ only
+at the edges. This draft follows the earlier deadline wherever they differ.
+
+| Items (this agenda) | Claude re-review | Codex verification | This draft |
+|---|---|---|---|
+| 13–24, the comparison rules | P4a | P4a "where feasible"; a named deferral to P4b only with A21 kept out | P4a |
+| 26, when the E2/E5 instruments are fixed | the instruments at P4b at the latest | P4a decides whether to fix them now or defer them by name | P4a decides the deferral; items 40–41 at P4b |
+| 37, the crate path and D16 | D04 at P4b; D16 with the native items | both may be ruled out of this matrix now; D16 is API, not native | P4a, or P4b if kept open |
+| 42, canonical marks | later, at A20 | P4b is adequate | at the latest before any mark (A20) |
+| 43, the native items | later, in the native amendment | the native amendment, except D16 | the native amendment, with D16 moved to item 37 |
+
+## Appendix: historical records
+
+These records add no rule. They are kept so that the history the rules rest on stays
+visible.
+
+### A. The "Resolved" comments are not rulings
+
+Several issues carry comments citing commits that are on no remote branch:
+- `027c2272c`: on #2930 and #2926, 2026-10-11T03:43Z;
+- `c92d89824`: on #2930 and #2926, 2026-10-11T08:51Z, naming D01, D07 and D15;
+- `25994a4d2`: on #2914, 2026-10-11T03:44Z. It records a proposed Path B (D04's
+  subject) and does not name D04;
+- `d9f7d9a72`: on #4758, #4759 and #4761, 2026-10-11T03:43–03:44Z.
+
+All six issues were reopened on 2026-10-13, in two groups that state different reasons:
+- **#4758, #4759 and #4761, at 06:08Z.** The comments each say the closing record "does
+  not reflect an owner decision".
+- **#2914, #2930 and #2926, at 17:35:44–17:35:59Z.** These were reopened "at the
+  owner's request following the 2026-10-13 closure audit". The cited commits were
+  outside GitHub main, and they do not establish the issues' required acceptance. For
+  #2914 the comment adds that scheduling a proposed Path B does not establish its
+  experimental acceptance.
+
+#2930 and #2926 had already been closed, reopened and closed again on 2026-10-11 (at
+03:43, 04:18 and 08:51Z). D07 has since been decided (2026-10-19; see the decision table). D01 and D15
+are not established by those closing comments; D01 is now superseded by D26/D28.
+
+### B. Historical examples of the two harness classes (§10)
+
+They informed engineering; they are not assertions about BC1.
+
+- **A record shape the runtime refused** (Lane C1 Finding 2, October 20 code).
+  - Receipt completion validates the persisted full record against the captured
+    schema (`_validate_record`, called from `_inputs`; `receipt_completion.py:154`,
+    `:178`, `:215`). It does so before `_call_with_usage` admits the
+    receipt-completion call (`run`, `:554`, `:584`). So the run stops after the
+    full phase, and any re-address, have been billed.
+  - C1 Finding 2 names the shapes no step repairs. The write-time normaliser misses
+    a scalar on a line that opens a sequence item (`- slot: value`), and a scalar
+    in a multivalued slot whose range is not `string`. Nothing unwraps or joins a
+    list written in a single-valued slot.
+  - `_repair_invalid` runs only after the phase loop (`api_runner.py:7456-7471`),
+    so nothing repairs such a shape before the originals freeze.
+  - C1 notes that its sweep bypasses `_validate_record`, so the gate itself was
+    not exercised there.
+- **A registered limit no valid answer could meet** (Lane C1 Finding 1). The
+  superseded October 20 `worker_output_tokens` (4,000) was below the floor of any worker answer
+  the terminal source review accepts, at every valid grid. It stops a run in one of
+  two ways:
+  - a cut-off answer is refused at the worker stage, and the typed audit is
+    terminal after one worker is billed;
+  - an answer that fits, by declaring rows as metadata or by shortening its
+    quotes, passes the worker stage and fails at assembly, after every typed stage
+    is billed. The worker grammar accepts a metadata row for any path.
+    - Under the registered caps, the metadata form is open where an all-metadata
+      answer fits under the cap at A1b's ratios: at G1, and at G2 and G4 for
+      CHORUS, VOICE and VOICE_PEDIATRIC (1,744–3,852 tokens for the largest
+      worker, before thinking).
+    - For AI_READI, CM4AI and Kids First it is at the cap's edge (3,924–4,763).
+  - With raised caps it was open at every grid in that historical experiment.
+
+  The causes are the registration's limit and the worker check's permissiveness,
+  so a contingency under the same limits would reproduce the stop. The remedies:
+  - the reviewed current limits and metadata checks, before a registration is
+    put to the owner; historical C1 paths are not assertions about BC1;
+  - optionally, the runtime fix C1 suggests: `check_worker` refusing a metadata row
+    on a path that `record_metadata_allowed` does not allow, which would move the
+    metadata form's failure to the worker stage.
+
+### C. Historical October 20 delegation differences
 
 The following records the October 20 draft's interpretation of its original
 delegation. Search/remote/worktree observations here are historical, not fresh
@@ -1918,725 +2450,3 @@ govern the revised draft; this section does not override them.
    `d4d-executions`. The coordination prompt put it in
    `/private/tmp/d4d-claude-track-p-20261020`. The branch ref and commits live in the
    main repository, so they survive a reboot even if that directory does not.
-
-## Open before P4
-
-### What P4a needs, apart from the owner's answers
-
-- **P3 closure.** Every P3 finding is fixed here or converted to an item below, each is
-  filed as an issue, and this revision gets its re-review. The dispositions are in
-  `d4d-executions/plans/reviews/p2_p3_dispositions_2026-10-28.md`.
-- **The condition's specification (§14–15),** as P4a ratifies it. The composed head
-  (with board A14, board A17, D38's assets and D55's guard), D44's all-project build
-  and review, D62's CHORUS fit and D63's calibration are prerequisites of the A21
-  registration (staged sequence, step 3), not of P4a. That registration's review checks
-  the composed head against the ratified text, and a deviation needs a P4a amendment.
-- **The #3289 adjudication,** re-read against AI_READI's `1a58ad7b` bundle
-  (prediction 3a).
-- **Context and evaluation identities.** The omission contexts are approved (D51) and
-  the evaluation-context settings decided (D52); D46 is retired. The D52/D61 scoring
-  rules need their implementation merged before scoring, and the selected hashes and
-  per-route readback need verification. Preserve A23's current normalized context
-  digests when integrating the decision-record correction. Native canary ratings
-  remain separately registered and descriptive.
-
-### Plan amendments (claude prepares them under D50; agy pushes them)
-
-This draft does not edit the generation plan. These amendments are needed:
-- the `d22b61a9` gates in A4 and A14-reg, and the run tables (§2);
-- D15's and A19-word's "about the size of AI_READI's 542,513" (Kids First's bundle is
-  541,184 bytes);
-- A19-reg's "vocabulary null", which should read `vocabulary: {}` (§2a);
-- D07's AI_READI lines (a $35 planning ceiling and a contingency of at most $35), which
-  a D59 AI_READI run, at about $162–191, exceeds;
-- A1's sizing inputs, which do not include Kids First and are superseded by BC1's fit
-  analysis (§15);
-- for the staged sequence: plan A10's role, which the re-canary fills with a
-  registered 19/20 floor; plan A14's start, conditional on scope; plan A15's inputs,
-  under §8's fallback; E5b-reg's roster (§12); and the wording of P4 itself
-  (the header).
-
-### P4 agenda
-
-**How to read it:**
-- Items are numbered once, in the order the answers are needed.
-  - Group A is needed at P4a, before the A21 re-canary.
-  - Group B holds the analysis rules. P4a fixes them. An item may be deferred to P4b
-    only if P4a names it, and never past the first confirmatory launch word.
-  - Groups C–E are needed later, at the stage named.
-- Each item gives the question, the options, this draft's recommendation and what it
-  depends on. The sources in brackets are the Claude P3 review's agenda items (A1–D3)
-  and findings, and the Codex P3 pass's questions (Q01–Q50) and findings.
-- Inside this agenda, "item N" is an agenda item and "§N" is this file's item N.
-- A recommendation is this draft's, not an owner decision. Where the two reviews
-  recommend differently, the item says so.
-- What the decision table records as decided (D06, D07, D10, D22, D26–D28, D30–D45
-  and D50–D63) is not asked again; D29 is pending, and D46–D49 stay retired.
-
-#### Group A: P4a, before the A21 re-canary
-
-**1. What P4a ratifies** [new; Claude F2, A1(iii); Codex F1, Q01]
-- **Question:** while D58 holds the matrix's scope and budget until A21's cost is
-  measured, what does the P4 word before A21 ratify?
-- **Options:**
-  - (a) the staged sequence: P4a ratifies this text (the A21 condition and every
-    analysis rule), and P4b, a dated, reviewed amendment, fixes scope and budget under
-    the scope rule ("Staged sequence under D58");
-  - (b) P4a ratifies A21 as a feasibility study only, and any comparison is
-    registered later as a new prospective study;
-  - (c) hold everything until a funded full matrix is approved, which would amend D58.
-- **Recommendation:** (a). It lets A21 run under D58, and it keeps the later scope
-  choice blind to quality outcomes.
-- **Depends on:** nothing. Items 2–51 assume (a).
-
-**2. The matrix scope rule** [new; Claude F2, A1; Codex F1, Q01]
-- **Question:** which rule turns D58's later scope decision into K, the confirmatory
-  set
-  and the E2 and E5 rosters?
-- **Options:**
-  - (i) the predeclared order (CHORUS ×3 → CM4AI ×3 → VOICE ×3 → AI_READI pilot + ×3
-    → VOICE_PEDIATRIC ×1 → Kids First ×1): whole projects only, on cost, fit and
-    call-failure evidence, with a descoped project out of scope, not missing;
-  - (ii) the owner's discretion at P4b, limited to whole projects and the same
-    evidence;
-  - (iii) as (i), with a different predeclared order.
-- **Recommendation:** (i). At the $420 figure it stops after CHORUS ×3, so K would be 1
-  and every verdict a single-project result.
-- **Depends on:** item 1 and D58's budget. It gates items 18, 21, 26, 32, 33, 40, 41,
-  46 and 50.
-
-**3. The re-canary's attempts and contingency** [new; Claude F1, A2; Codex F3, Q19]
-- **Question:** does D58's $60 fund one attempt or two, and what funds a contingency?
-- **Options:**
-  - (i) one attempt; a contingency needs its own allocation line, registration and
-    word (D07, D56);
-  - (ii) raise the slice to about $120, to pre-fund one contingency;
-  - (iii) split $60 into two smaller caps, which an estimate of about $37–49 per run
-    does not support.
-- **Recommendation:** (i). A transport or harness stop then needs a new word and money
-  before anything else runs. (ii) shortens that path, but commits money before the
-  measured cost D58 waits for.
-- **Depends on:** D58, item 4.
-
-**4. Single-delivery exposure: allow a transport-only redelivery, or accept it** [new; Claude F14]
-- **Question:** BC1's typed calls and receipt completion admit one delivery each. At
-  v8's per-call rate that is an illustrative 52% terminal-stop exposure for A21's 8
-  calls, and 74–91% for the larger projects. Allow one transport-only redelivery per
-  BC1 typed call, or accept the exposure?
-- **Options:**
-  - (i) accept it for A21 and for production, under item 9's written risk acceptance;
-  - (ii) build one transport-only redelivery per typed call before A21;
-  - (iii) accept it for A21, and decide for production at P4b from A21's observed call
-    outcomes.
-- **Facts that hold under every option:**
-  - Redelivery would be new engineering in BC1's runtime, with its own review and D35's
-    parity test.
-  - It would re-send the same request after a transport error only. Content failures
-    stay terminal under D56.
-  - A change made after the A21 freeze also needs D35's diagnostic CHORUS canary,
-    about $37–49.
-- **Recommendation:** (iii). A21 runs the condition already built, and the per-call
-  rates are measured first. If P4b then wants redelivery, the diagnostic canary is its
-  price.
-- **Depends on:** items 3 and 9; D35.
-
-**5. The operator trigger** [new; Claude F1, A3; Codex F3, Q19]
-- **Question:** at what spend is A21 stopped?
-- **Options:**
-  - (i) the cap minus the largest pending worst case, from D62's sizing, computed in
-    the launch packet: about $53 at $60;
-  - (ii) a fixed $50.
-- **Recommendation:** (i). A caps-heavy run (about $49) leaves a thin margin; a stop at
-  the trigger is a budget stop (item 7), not a defect.
-- **Depends on:** D62, D63.
-
-**6. The wall clock** [new; Claude F1, A3; Codex F3, Q20]
-- **Question:** what time stop applies to A21?
-- **Options:**
-  - (i) 3 h, re-derived from BC1's 12–13 calls (about 2 h of call time at caps);
-  - (ii) keep 2 h as a deliberate censoring rule, a timeout counting as a feasibility
-    failure;
-  - (iii) 4 h;
-  - (iv) no clock.
-- **Recommendation:** (i): 2 h would cut off a legitimate caps-heavy run. The Codex pass
-  recommends (ii) unless duration evidence supports a longer clock. Under every option
-  the clock is never extended during a live attempt.
-- **Depends on:** the registered call schedule.
-
-**7. The class of a budget or clock stop** [new; Claude F1, A3]
-- **Question:** what class, and what next action, does a stop at the trigger or the
-  clock get?
-- **Options:**
-  - (i) a new "budget or clock" class that allows one contingency, under a new
-    registration, allocation and word;
-  - (ii) a harness "registered limit", which allows none.
-- **Recommendation:** (i). Without it, such a stop has no class and no contingency rule
-  (§10's table).
-- **Depends on:** item 3.
-
-**8. Who runs `d4d api stop`** [new; Claude F1, A3]
-- **Question:** D43 has the owner launch and the agents monitor read-only, and the
-  decision record does not say who runs the stop command at the trigger or the clock.
-  Who does?
-- **Options:**
-  - (i) the owner;
-  - (ii) one agent the owner names, for that command only, and only at the trigger or
-    the clock.
-- **Recommendation:** (i), consistent with D41 and D43. (ii) gives a faster stop, but it
-  makes an agent an operator for one action.
-- **Depends on:** D41, D43, D53.
-
-**9. D08: A21's written risk acceptance, and the CBORG follow-up** [pending D08; Claude B6, F14; Codex Q34]
-- **Question:** is the prepared CBORG timeout and keepalive follow-up sent, and what
-  gates single-row and multi-row runs?
-- **Options:**
-  - (1) prepare the exact message for its own per-action owner approval, naming the
-    recipient, channel and text; accept the risk in writing for single-row runs now;
-    require CBORG's answer, or a renewed written acceptance, before the first multi-row
-    roster;
-  - (2) send nothing, and accept the risk in writing for everything;
-  - (3) send nothing, and block every roster until CBORG answers.
-- **Recommendation:** (1). Under any option, A21's written acceptance names its 8
-  single-delivery calls and BC1's exposure, replacing the obsolete four-to-eight-call
-  estimate. Nothing in this draft sends a message.
-- **Depends on:** item 4. It gates A21 (the acceptance) and plan A16 (multi-row).
-
-**10. The condition's label** [open in §14; Claude F7, A11; Codex Q18]
-- **Question:** what identity does the registration name?
-- **Options:**
-  - (i) the installed tuple, shared generation 1 plus `bounded_carry_version` 1, with
-    `shared-generation-api-v2-bc1` kept as a design label only;
-  - (ii) bump the shared-generation version, which needs code changes in the shared-v2
-    routing that #5212's F1 concerns.
-- **Recommendation:** (i).
-- **Depends on:** D55's guard composition.
-
-**11. The integration reservation** [open in §15; Claude F7, A11; Codex Q18]
-- **Question:** BC1 requires 64k for every group and final integration call, where D28
-  decided 32k. Which is the condition?
-- **Options:**
-  - (i) amend D28 to 64k for BC1's integration calls, as a declared amendment;
-  - (ii) keep 32k, which needs a BC1 change, re-sizing and re-review;
-  - (iii) withhold the selection pending a redesign.
-- **Recommendation:** (i). D58's cost basis already assumes 64k.
-- **Depends on:** D62's sizing.
-
-**12. Fit evidence per project, and when** [new; Claude F13; Codex Q50]
-- **Question:** what fit evidence must exist before A21, and what waits for each
-  project's own registration?
-- **Options:**
-  - (i) §15's staging: before A21, the all-project build and review with per-call
-    fit from each project's own sources (proxy fit labelled as such for
-    VOICE_PEDIATRIC and Kids First), and CHORUS's D62/D63 fit before its registration;
-    each other project's allowance and full sizing at its own registration;
-  - (ii) as (i), but VOICE_PEDIATRIC and Kids First sized only at their registration,
-    from their own full phase, through runtime admission;
-  - (iii) hold A21 until all six are sized with their own records, which cannot happen
-    before two of them have records.
-- **Recommendation:** (i).
-- **Depends on:** D44, D58, D62, D63.
-
-**13. What makes a run clean** [new; Claude F10, A10]
-- **Question:** which test puts a run in the clean set rather than the assisted one?
-- **Options:**
-  - (i) §7's checks, applied mechanically: the journal verifies, no override, the
-    D57 heads match, no interrupted write, nothing edited;
-  - (ii) the owner's judgement per run, recorded.
-- **Recommendation:** (i). Membership of every analysis set becomes mechanical.
-- **Depends on:** D55–D57 and #5212's composition.
-
-**14. Acceptance when the two D36 reviewers disagree** [new; Codex F11, Q22]
-- **Question:** what happens when the Claude and Codex acceptance reviewers disagree
-  on
-  a rejecting-class finding?
-- **Options:**
-  - (a) both dispositions are kept; the owner adjudicates before signing; a sustained
-    rejecting-class finding rejects; unresolved evidence blocks acceptance;
-  - (b) as (a), with a third blind adjudicator before the owner signs;
-  - (c) any disagreement rejects.
-- **Recommendation:** (a).
-- **Depends on:** D36.
-
-**15. The receipt reading that decides acceptance** [Codex Q49]
-- **Question:** which receipt and checker reading decides acceptance, including any
-  later re-receipt?
-- **Options:**
-  - (a) v4 with D37, on the frozen `O,R1` snapshot; `Rf` readings and v5 are separate
-    diagnostics;
-  - (b) a separately reviewed re-receipt amendment before the affected runs;
-  - (c) hold, if the selected route cannot reproduce the frozen snapshot reading.
-- **Recommendation:** (a), with (c) if readback fails. An acceptance failure is never
-  repaired by replacing `R1` with `Rf`, or by activating v5.
-- **Depends on:** D37 and #5158's implementation.
-
-**16. What records P4** [new; Claude F23, A12]
-- **Question:** what act performs P4?
-- **Options:**
-  - (i) the owner's word naming this file's sha256 at a named commit, recorded in the
-    decision record, with the merge following;
-  - (ii) the merge itself, as the generation plan words it.
-- **Recommendation:** (i). It binds the exact bytes, independently of any later merge
-  commit. The generation plan's P4 wording is then amended to match.
-- **Depends on:** nothing.
-
-#### Group B: the analysis rules (fixed at P4a; at P4b only if P4a names the item)
-
-**17. D02: the primary comparator and the metric hierarchy** [pending D02; Codex Q02]
-- **Question:** Which comparator and metric hierarchy does the confirmatory analysis
-  register?
-- **Options:**
-  - (a) the v8 package contrast, with the deterministic metrics primary and E5
-    secondary;
-  - (b) the v9 CHORUS canary as a descriptive reference only;
-  - (c) feasibility and descriptive reporting only, with no directional comparison.
-- **Recommendation:** (a), conditional on item 2 funding a production comparison. The
-  v9 canary stays a secondary n=1 reference.
-- **Depends on:** item 2. It gates E2's comparator manifest and E5.
-
-**18. D02: the AI_READI comparator, and the AI_READI pilot's baseline** [pending D02; Claude A5; Codex Q03, Q04]
-- **Question:** Which records are AI_READI's v8 comparator, and with which baseline
-  does the AI_READI pilot run?
-- **Options:**
-  - (a) v8 `04g`, labelled cross-arm;
-  - (b) AI_READI descriptive only;
-  - (c) the `2026-10-14b` agentic no-crate rerun, which also changes runtime,
-    provider, transport and effort, and needs a reviewed data PR first;
-  - (d) a new no-crate v8 API run on the historical v8 code with only the bundle
-    swapped (billed, about $10–14), used only if a render diff shows that only the
-    bundle differs.
-- **Recommendation:** (b), unless item 2 funds AI_READI; then (d) if the parity check
-  passes, otherwise (b). Under (b) the AI_READI pilot runs with no `--canary-baseline`,
-  so the A11 rows decide; under (a) its baseline is informational only (item 34). The
-  `d22b61a9` plan gates still need amending.
-- **Depends on:** item 2. It gates K (item 21) and the E2 roster.
-
-**19. D02: the Set A definition and the eligible-record rule** [pending D02; Claude A6; Codex Q05, F5]
-- **Question:** Which records does each arm contribute to Set A?
-- **Options:**
-  - (a) definition (2) primary and (1) as a sensitivity row, with §3's
-    last-eligible-record rule;
-  - (b) definition (1) primary;
-  - (c) both descriptive, with no directional Set A verdict.
-- **Recommendation:** (a). Cells carry equal weights. v8 pooled coverage is then 0.592
-  for VOICE, not 0.462, and 0.538 for AI_READI, not 0.491. v8 rep1's survivorship stays
-  a stated confound.
-- **Depends on:** nothing.
-
-**20. Missing cells, snapshots and metrics** [proposed; Codex F5, Q06; Claude B5]
-- **Question:** When does a project get a primary directional verdict, if cells,
-  snapshots or metrics are missing?
-- **Options:**
-  - (a) a primary project verdict needs complete n=3 and every required snapshot;
-    a reduced n is descriptive and "not measured";
-  - (b) n=2 may be primary under a separately fixed rule, n=1 descriptive;
-  - (c) every comparison descriptive.
-- **Recommendation:** (a), with "out of scope is not missing" (item 2) and the three
-  kinds of missing kept apart.
-- **Depends on:** item 19.
-
-**21. K and the primary pool** [proposed; Claude F12; Codex Q29]
-- **Question:** Which projects count in K, and which pool decides row 4, when
-  AI_READI's contrast crosses an arm?
-- **Options:**
-  - (i) K counts only like-for-like in-scope projects. AI_READI is a labelled separate
-    row under (a) and (c), descriptive under (b), and in K under (d) only after the
-    render-parity check. The three-project pool decides row 4;
-  - (ii) K counts AI_READI under (a) and (c) too, and a labelled mixed-input pool
-    decides.
-- **Recommendation:** (i).
-- **Depends on:** items 2 and 18.
-
-**22. Prediction 1: populated leaves** [proposed; Claude A7; Codex Q25]
-- **Question:** Is a fall of up to 10% in populated leaves compatible with prediction
-  1?
-- **Options:**
-  - (a) v10 mean ≥ 0.9 × v8 mean, worded as non-inferiority;
-  - (b) v10 mean ≥ v8 mean;
-  - (c) descriptive.
-- **Recommendation:** (a). The disclosed assisted CHORUS records sat at 28–35% of v8's
-  mean, so row 1 may well fail for CHORUS, which would be a legitimate result.
-- **Depends on:** item 20.
-
-**23. Prediction 2: pre-completion coverage** [proposed; Claude A7, F6, F11; Codex Q26]
-- **Question:** Which rule judges v10's pre-completion coverage against v8's stored
-  final coverage?
-- **Options:**
-  - (a) v10 pooled ≥ v8 pooled − 0.05, with the numerator rule, the stored v8 values
-    primary and complete snapshots;
-  - (b) zero tolerance under one common checker, where the inputs can be recovered;
-  - (c) descriptive only, as a timing and instrument contrast, with D37 acceptance
-    kept separately.
-- **Recommendation:** (a). The Codex pass recommends (c), because final-v8 against
-  phase-1-v10 crosses timing and instrument; the numerator rule answers part of that,
-  not all of it. The disclosed assisted values would pass (a) by about 0.55, with
-  smaller numerators.
-- **Depends on:** items 19 and 20.
-
-**24. Prediction 3: the recall metric** [proposed; Claude A7; Codex F10, Q27]
-- **Question:** Which lineage and version metrics does prediction 3 use, and which
-  ceilings are exempt?
-- **Options:**
-  - (a) row 3's corrected carriage counts: top-level lineage, the fact-specific
-    b2aiprep v3.0.0 measure for VOICE, the one enumerated ceiling, ties failing;
-  - (b) the script's recursive lineage count and "tools with a version token" as they
-    are, named as lexical carriage proxies, with a weaker interpretation;
-  - (c) source-adjudicated recall of each target, with recomputed baselines;
-  - (d) descriptive.
-- **Recommendation:** (a). Its v8 baselines are unchanged, recomputed for this
-  revision.
-- **Depends on:** nothing.
-
-**25. Prediction 3a: inventions** [proposed; Claude A7, F17; Codex Q28]
-- **Question:** What counts as an invention in prediction 3a, and what happens when a
-  required record is missing?
-- **Options:**
-  - (a) the exact named-slot zero rule, with the VOICE clause, and an absent required
-    record "not measured";
-  - (b) source-adjudicated unsupported parent or software assertions anywhere in the
-    record, under a frozen manual;
-  - (c) descriptive counts.
-- **Recommendation:** (a), once the #3289 adjudication is re-read against `1a58ad7b`.
-- **Depends on:** that re-read.
-
-**26. The E2 and E5 v10 rosters** [new; Claude F4, C2; Codex F9]
-- **Question:** Which v10 records do E2 (row 4) and E5's analysis (row 5) use?
-- **Options:**
-  - (i) each in-scope cell's first clean attempt that left an eligible full record,
-    accepted or not, for rows 4 and 5, with the accepted finals as a sensitivity row;
-  - (ii) all clean attempts, cell-weighted;
-  - (iii) accepted finals, as before, with row 4 made descriptive and row 5 labelled
-    conditional on acceptance.
-- **Recommendation:** (i). Row 4 becomes falsifiable. Extra reviews and ratings arise
-  only where a cell needed a second attempt, and E5b-reg must add those records.
-- **Depends on:** items 2, 18 and 20.
-
-**27. Prediction 4: weighting and verdicts** [proposed; Claude A7, F18; Codex Q29]
-- **Question:** How are row 4's rates weighted, and how are its two rates combined?
-- **Options:**
-  - (a) claim- and leaf-weighted pools primary, equal-project weights as a
-    sensitivity, and two verdicts, 4a and 4b;
-  - (b) equal-project rates primary, the pools as a sensitivity;
-  - (c) descriptive.
-- **Recommendation:** (a): zero tolerance, ties hold, and missing or unadjudicated
-  units never pass.
-- **Depends on:** items 21, 26, 43 and 44.
-
-**28. Prediction 5: Q11 and Q19, and E5's analysis roster** [proposed; Codex F9, Q30]
-- **Question:** Which tolerance and combination apply to Q11 and Q19, over which
-  ratings?
-- **Options:**
-  - (a) two verdicts, each v10 mean ≥ v8 mean − 0.5 on the item's scale, over one
-    primary rating per record of E5's analysis roster;
-  - (b) zero tolerance for each;
-  - (c) descriptive.
-- **Recommendation:** (a), once item 45 fixes the scale. Repeat ratings measure
-  reliability only.
-- **Depends on:** items 26, 45 and 46.
-
-**29. Rows 6–8** [proposed; Codex Q31–Q33]
-- **Question:** Do rows 6–8 stay an invariant and two descriptive rows, as written?
-- **Options:**
-  - (a) as written: row 6 an acceptance invariant, with validity failures over all
-    started attempts reported as feasibility; row 7 descriptive under named
-    instruments; row 8 n=3 primary, with n=2 a sensitivity on common positions;
-  - (b) as (a), but row 7 directional under one pinned checker;
-  - (c) all three descriptive only.
-- **Recommendation:** (a).
-- **Depends on:** item 20.
-
-**30. Set B's common gate** [proposed; Codex F12, Q07]
-- **Question:** What exactly is Set B's common gate?
-- **Options:**
-  - (a) §3's recipe: the five named floors, measured; one common v4 checker on
-    copies; the coverage row excluded; separate E2 and E5 intersections;
-  - (b) the stored instruments' gates, as a clearly historical sensitivity;
-  - (c) no Set B verdicts, only defect strata.
-- **Recommendation:** (a).
-- **Depends on:** item 19.
-
-**31. The automatic-success estimand** [proposed; Codex F13, Q24]
-- **Question:** Is automatic success measured over every unassisted start, or only
-  over runs that stayed clean?
-- **Options:**
-  - (a) both proportions, with the one over all attempts started without assistance as
-    the feasibility headline;
-  - (b) the clean conditional proportion only, named as such;
-  - (c) no proportion, only a complete attempt-flow table.
-- **Recommendation:** (a).
-- **Depends on:** item 13.
-
-**32. D20: the production-floor rule** [pending D20; Claude F3, A4; Codex F6, Q12]
-- **Question:** Which rule, fixed now, sets the production floor's value at A15?
-- **Options:**
-  - (i) the lowest accepted pilot's D37 fraction, rounded down to 1/20, which can
-    register 20/20;
-  - (ii) as (i), capped at 19/20;
-  - (iii) the lowest fraction minus 0.05, rounded down;
-  - (iv) 19/20 fixed for all production.
-- **Sub-rules under (i)–(iii):** accepted pilots only, each read from its accepted
-  attempt's `O,R1`. If AI_READI is out of scope, the re-canary alone sets the value; the
-  Codex pass's alternative is no value until an amendment. A missing or
-  zero-denominator input gives no value and no roster.
-- **Recommendation:** (ii), with the re-canary-alone fallback. One unreceipted leaf can
-  then never close a roster, and the floor is never stricter than the re-canary's. The
-  Codex pass recommends (i) without the cap, and did not address the 20/20 case.
-- **Depends on:** items 2 and 33. (iv) enables item 33's (d′).
-
-**33. D03: cell roles and sequence** [pending D03; Claude A8; Codex Q08]
-- **Question:** Which cells run, in which order, and in which role?
-- **Options:**
-  - (a) re-canary → AI_READI pilot → floor → CHORUS ×3 → production;
-  - (a′) re-canary → floor → CHORUS ×3 → production in item 2's order, with the
-    AI_READI pilot only if AI_READI is in scope;
-  - (d′) as (a′), with the re-canary counting as CHORUS replicate 1: valid only under
-    item 32 (iv), and only if a byte diff shows its model-facing inputs equal
-    production's;
-  - (b) only A21 now, and the rest at P4b.
-- **Recommendation:** (a′), confirmed at P4b. It takes the AI_READI pilot (about
-  $162–191) off the critical path; if AI_READI is descoped, the owner waives #2926's
-  AI_READI pilot for this condition. The Codex pass recommends (b) at P4a, with (a) as
-  the frozen proposed path.
-- **Depends on:** items 2 and 32.
-
-**34. May a pilot be rejected for exceeding v8's per-project worst?** [proposed; Claude A9; Codex Q04]
-- **Question:** May a pilot be rejected for exceeding v8's per-project worst on the
-  seven defect metrics?
-- **Options:**
-  - (i) no: the comparison is recorded as evidence for A13 only;
-  - (ii) yes, on any regression, which is D21 (a) applied to pilots;
-  - (iii) only on a regression in report findings.
-- **Recommendation:** (i). The bars are mostly zero, and they come from a different
-  package.
-- **Depends on:** item 18.
-
-**35. D21: production gating, continuation and the launch route** [pending D21 and D20's route clause; Claude B1, B9; Codex Q13]
-- **Question:** How do production rosters gate and continue, and through which launch
-  route?
-- **Options:**
-  - (a) D21 (b) with continuation (ii): absolute floors and no `--canary-baseline`; a
-    stopped label is never re-run; continuation runs under a new prefix, registration
-    and word; every API launch goes through `d4d api batch`;
-  - (b) as (a), and production is also gated on v8's seven per-project worst values;
-  - (c) an adjudicated-continue path built into `d4d api batch`;
-  - (d) the condition ends at any roster stop.
-- **Recommendation:** (a). It matches D56, under which a retry needs a new
-  registration.
-- **Depends on:** item 37.
-
-**36. The A15 choice after a pilot's terminal single-delivery failure** [proposed; Codex F7, Q14; Claude B2]
-- **Question:** If a pilot ends in a terminal single-delivery failure, what may change
-  at A15, and how does the analysis treat it?
-- **Options:**
-  - (a) continue the unchanged D21 (b) procedure under new registrations;
-  - (b) introduce D21 (c) as its own procedure stratum, under a reviewed, prospective
-    analysis amendment;
-  - (c) end the condition and register the next version.
-- **Recommendation:** (a), or (c) if the failure shows that the condition is
-  infeasible. None of them sits "outside the confirmatory analysis" (§9).
-- **Depends on:** items 4 and 35.
-
-**37. The defect-class stop-loss and A13** [proposed; Claude B3, F22; Codex F8, Q15]
-- **Question:** What counts toward the defect-class stop-loss, and does a pilot's
-  rule-level rejection end the condition?
-- **Options:**
-  - (a) A13 governs pilots: the first rule-level rejection ends the condition. In
-    production, two rejections with the same recorded root cause, counted across this
-    API condition and never reset, end it;
-  - (b) any first rule-level rejection, pilot or production, ends it;
-  - (c) two of any cause end it, which amends A13.
-- **Recommendation:** (a).
-- **Depends on:** item 38.
-
-**38. Stop classification** [proposed; Claude B4; Codex F8, Q16]
-- **Question:** How is a stop with mixed, ambiguous or unknown causes classified?
-- **Options:**
-  - (a) §10's table: several diagnostic tags, one primary class by a frozen
-    precedence, and unknown causes held for the owner;
-  - (b) mutually exclusive categories, assigned by an independent reviewer under a
-    frozen manual;
-  - (c) any ambiguous case ends the condition.
-- **Recommendation:** (a). A convenient harness label can never exempt a substantive
-  rule defect.
-- **Depends on:** item 7.
-
-**39. A13's "operational" contingency** [proposed; Claude B4; Codex Q17]
-- **Question:** Which stops does A13's "transport or operational cause" cover?
-- **Options:**
-  - (a) transport, record-shape and budget stops allow one contingency, and an
-    impossible-limit stop does not (§10, rows 5–7);
-  - (b) transport only;
-  - (c) no contingency in this condition.
-- **Recommendation:** (a), within each cell's two attempts, and never by resuming a
-  terminal run.
-- **Depends on:** items 7 and 38.
-
-#### Group C: before production rosters (P4b)
-
-**40. D15: Kids First** [pending D15; Claude B7; Codex Q10]
-- **Question:** Which route, order and floor does Kids First take?
-- **Options:**
-  - (i) API after plan A14-acc and A15, with the registered floor;
-  - (ii) last in item 2's order, run only if funded and fitted at its own
-    registration; if admission refuses it, D33's descriptive own condition applies;
-  - (iii) defer it, pending its own fit and D58's scope;
-  - (iv) drop it from this condition.
-- **Recommendation:** (ii): one resource-level descriptive record under the neutral
-  context, never cleared by substituting AI_READI's inputs. The Codex pass recommends
-  (iii) now and (i) only if later funded and fitted.
-- **Depends on:** items 2 and 12.
-
-**41. VOICE_PEDIATRIC ×1 or ×3** [pending D02; Claude B8; Codex Q09]
-- **Question:** How many VOICE_PEDIATRIC runs, and in what role?
-- **Options:**
-  - (a) ×1, descriptive, if funded;
-  - (b) ×3, if replicate variance is a stated need and it is funded;
-  - (c) defer.
-- **Recommendation:** (a), at about $96–118 per run with no comparator. It is never an
-  adult VOICE replicate or part of K.
-- **Depends on:** item 2.
-
-**42. Canonical marks across prefixes** [Codex Q47]
-- **Question:** How are canonical marks kept to accepted cells across prefixes?
-- **Options:**
-  - (a) rank with the existing criterion, but only within an accepted-cell list taken
-    from the acceptance records;
-  - (b) leave cells unmarked until an accepted-only selector exists;
-  - (c) an owner-recorded manual mark under the same criterion.
-- **Recommendation:** (a) if the procedure is reviewed, otherwise (b). A canonical mark
-  never changes an estimate.
-- **Depends on:** item 35.
-
-#### Group D: before E2 and E5
-
-**43. D24: the review-pass instrument** [pending D24; Claude C1; Codex Q21]
-- **Question:** Which instrument measures the two review-pass rates?
-- **Options:**
-  - (1) E2's blind source review, with §16's units and weights;
-  - (2) calibrate the support judge first, which delays E2;
-  - (3) the support judge as a secondary measure, after #3343's paid calibration.
-- **Recommendation:** (1).
-- **Depends on:** nothing.
-
-**44. E2's protocol freeze, reviewers and blinding** [new; Claude F19, C3; Codex F11, Q22]
-- **Question:** who reviews, how blind, and when is the protocol frozen?
-- **Options for the reviewers:**
-  - (i) a fresh Claude session plus a Codex pass, D36's pattern applied to E2;
-  - (ii) a cross-family rater;
-  - (iii) human reviewers.
-- **Options for the freeze:**
-  - (a) at P4b, before any confirmatory launch word, by a named author who declares
-    which v10 records they have read;
-  - (b) at P4a, which delays A21 until the manual exists;
-  - (c) defer prediction 4 to a separate prospective study.
-- **Recommendation:** (i) and (a), with the seeded blinding transformation, and arm
-  guesses recorded before scoring (§12).
-- **Depends on:** item 43.
-
-**45. Rubric20's version (E4, #2911) and the evaluator identity** [pending owner, #2911; Claude C4; Codex Q23]
-- **Question:** Which rubric20 version and evaluator implementation does E5 use?
-- **Options:**
-  - (a) the reviewed 3.0-based successor, with the D52/D61 changes versioned and
-    pinned;
-  - (b) 4.0, with its normative-example approval and nine-case Q19 calibration;
-  - (c) defer E5, and drop prediction 5's directional rule.
-- **Recommendation:** (a), unless 4.0's calibration is approved before E5's
-  registration. Row 5 reads Q19, so that calibration matters.
-- **Depends on:** D52, D61.
-
-**46. E5's funding and scope** [Claude C5]
-- **Question:** How is E5 funded and scoped?
-- **Options:**
-  - (i) one joint re-rating, scaled to item 2's scope (about $190–394 for the full
-    matrix);
-  - (ii) defer E5, which leaves row 5 unmeasured;
-  - (iii) use the stored v8 ratings, which come from older instruments.
-- **Recommendation:** (i).
-- **Depends on:** items 2, 26 and 45.
-
-**47. The audit-recall matching rule** [Codex Q48]
-- **Question:** When and how is the audit-recall matching rule fixed?
-- **Options:**
-  - (a) freeze the matching rule and adjudication before the relevant audit is opened;
-  - (b) keep D36's blind observations as a seed, and make no scored recall claim yet;
-  - (c) fund a separate human-annotated recall study.
-- **Recommendation:** (b), unless a reviewed exact rule already exists. The seed is
-  still written before anyone reads the audit (D36).
-- **Depends on:** D36.
-
-#### Group E: native and optional arms
-
-**48. D29: native effort and account** [pending D29; Claude D1; Codex Q43]
-- **Question:** Which effort level and which first-party account does the native
-  registration name?
-- **Options:**
-  - (a) the runtime's default effort level for the model, recorded as such, and an
-    owner-named first-party account;
-  - (b) explicit `high`;
-  - (c) explicit `max`, as the generic_v9 direct arm used;
-  - (d) defer native registration until both are supplied.
-- **Recommendation:** (a), with seven-day quota headroom checked before launch: the v3
-  direct run stopped at 0.96–1.0. The Codex pass recommends (d) unless the owner
-  supplies both now. No account is inferred, and "default" is never equated with an
-  effort level.
-- **Depends on:** nothing on the API side; it gates only the native canary.
-
-**49. Native acceptance rows** [new; Claude F20]
-- **Question:** When are the native canary's acceptance rows specified?
-- **Options:**
-  - (i) a dated native amendment of this plan lists them, reviewed and ratified before
-    the native launch;
-  - (ii) list them now.
-- **Recommendation:** (i), since the native condition's acceptance evidence is not yet
-  settled.
-- **Depends on:** item 48 and the native gates.
-
-**50. D04: the CHORUS crate path** [pending D04; Claude D2; Codex Q11]
-- **Question:** Does this study include the optional with-crate CHORUS stage?
-- **Options:**
-  - (a) defer it;
-  - (b) path B after plan A16-acc, separately funded, registered and analysed: about 4
-    runs at roughly $40–60 each;
-  - (c) path A, as a separate future condition with a changed bundle.
-- **Recommendation:** (a), given D58's budget, unless the paper needs the crate delta
-  and it is funded.
-- **Depends on:** item 2.
-
-**51. The remaining legacy and native pending IDs** [Claude D3; Codex Q35–Q42, Q44–Q46]
-- **Question:** D08 aside, the generation plan's D09 (its remainder), D11–D14, D16,
-  D18
-  and D25 are pending. Are they part of this P4?
-- **Options:**
-  - (i) out of scope for the API P4a: each goes to the native registration's own
-    amendment, and none is a prerequisite for A21;
-  - (ii) decide them now, on the Codex pass's per-ID recommendations;
-  - (iii) decide only D16 now (no monolithic API baseline in this matrix), and defer
-    the native ones.
-- **Recommendation:** (i). Their subjects, with the Codex pass's recommendations:
-  - D09's remainder: scope the 2026-09-25 direct-arm pause to the old generic_v9 arm;
-  - D11, the native binary and its hash: defer;
-  - D12, native roles: the owner names an operator and a review pair;
-  - D13, toolchain exposure, launch flags, the runtime-closure fix and receipt origin:
-    pin each before native registration;
-  - D14, the native spend package: validate the old proposal against current evidence;
-  - D16: no monolithic API baseline in this matrix;
-  - D18: a two-week time-box, if native work continues;
-  - D25: no native canary counts as a replicate, and no native production is planned
-    here.
-- **Depends on:** item 48.
-
-#### Dependencies
-
-- **D58's budget** decides item 2. Item 2 decides K (21), the rosters (26), the floor's
-  fallback (32), the sequence (33), Kids First (40), VOICE_PEDIATRIC (41), E5's scope
-  (46) and the crate path (50).
-- **Item 18 (D02's AI_READI comparator)** decides K and the E2 roster, so D02 gates the
-  comparison batch, the AI_READI pilot's baseline, and whether the `d22b61a9` plan gates
-  matter.
-- **Item 32 (D20)** feeds plan A15's amendment, which gates plan A16. Its option (iv)
-  enables item 33's (d′).
-- **Row 4** needs items 26, 27, 43 and 44. **Row 5** needs items 26, 28, 45 and 46.
-- **Item 13** decides membership of every analysis set.
-- **Item 9 (D08)** gates A21's risk acceptance and every multi-row roster.
-- **D62 and D63** feed the A21 registration. Each later project needs its own
-  allowance decision (item 12).
-- **Items 48–51** gate only the native arm and the optional crate stage.
