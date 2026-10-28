@@ -8,7 +8,7 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
 (the plan: "Every billed generic_v10 step depends on P4").
 
 - **Revised:** 2026-10-27 for R6 F1–F6; authority corrected 2026-10-28 against
-  D26–D45 and D50–D54. D46–D49 are retired, not owner decisions. The local BC1/N2
+  D26–D45 and D50–D61. D46–D49 are retired, not owner decisions. The local BC1/N2
   implementations remain separately identified. This is a draft, not a retrospective
   registration or a declaration that the composed launch condition is ready.
 - **Drafted:** 2026-10-20, by the Claude worker session (coordination Lane C2), at main
@@ -55,7 +55,7 @@ this draft asserts a decision the owner has not recorded.
 
 ## Decision status (reconciled 2026-10-28)
 
-The October 20 draft is amended by D26–D45 and D50–D54. The former D46–D49
+The October 20 draft is amended by D26–D45 and D50–D61. The former D46–D49
 entries are retired proposals, not owner rulings; D51–D54 decide their subjects. Decisions authorize policy and
 engineering; they do not establish a merged implementation, an accepted record,
 remaining budget or a fresh launch word. Where the implementation differs from
@@ -91,6 +91,13 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | D52 | Owner's human review of the evaluation contexts (#2912): CM4AI `human_subjects` and `regulated_access` false; KIDS_FIRST `ml_training_dataset` false; all other values accepted; committee-contact equivalence and the `regulated_access`-false Q9 exclusion accepted as scoring rules. | 2026-10-27; the scoring rules still need their implementation merged before scoring. |
 | D53 | No agent edits anything inside a run directory or under `data/ATTIC/`, except README notes the owner or claude direct (extends D41); agy's 10-22a archive commits are ratified. | 2026-10-27. |
 | D54 | Drops the retired "D48" guard and "D49" allowance; the reviewed, sizing-based #5155 rule stands. | 2026-10-27. |
+| D55 | The D42 pick: codex's latch guard A (#5212), fixed first. Review findings F1–F4, F6 and F7 are fixed and re-reviewed before merge; agy's candidate B is not adopted. | 2026-10-28T07:02Z. |
+| D56 | Override semantics: an override never continues a run past a terminal or control-state discrepancy; a retry needs a new registration; an override that can authorize nothing is refused before it is recorded. Amends the H3 spec. | 2026-10-28T07:02Z. |
+| D57 | The D41 journal head is anchored at launch: the runner prints it at each start and stop, the monitor record keeps it, and a resume must present the expected head. | 2026-10-28T07:02Z. |
+| D58 | The v10 path after BC1's fit and cost analysis: fix BC1 for all projects; raise the A21 slice from about $25 to $60; run the CHORUS re-canary under the fixed BC1; decide the matrix's scope and budget on its measured cost. | 2026-10-28T16:41Z; the matrix decision is deferred to that measurement. |
+| D59 | BC1's request shape (the D44 design choice): typed-audit calls send the full schema catalog once, drop the redundant per-slot `domain_of` lists and send the bundle once; the full, receipt-completion, reconcile, report and regate calls keep v10's A14 schema digest. | 2026-10-28T16:41Z. |
+| D60 | No typed-stage prompt-cache breakpoint; D06 stands. | 2026-10-28T16:41Z. |
+| D61 | D52's committee-contact equivalence applies wherever `governance_committee_contact` is scored, rubric10 E2.2 included. | 2026-10-28T18:23Z. |
 | D02–D04, D08, remaining D09 choices, D11–D16, D18, D20–D21, D24–D25 | **Pending where not specifically superseded above.** D02 comparator/analysis-set choices and D04 crate comparison are not decided by this amendment. | Separate proposal, implementation and owner decisions. |
 
 **The "Resolved" comments are not rulings.** Several issues carry comments citing
@@ -1182,7 +1189,7 @@ reasons.
 
 The following records the October 20 draft's interpretation of its original
 delegation. Search/remote/worktree observations here are historical, not fresh
-exhaustive absence findings. D26–D45, D50–D54, the matrix and items 14–16 above
+exhaustive absence findings. D26–D45, D50–D61, the matrix and items 14–16 above
 govern the revised draft; this section does not override them.
 
 1. **v8 records.** The prompt describes "v8 04f (`claudecode_assistant_agent`) and 04g
