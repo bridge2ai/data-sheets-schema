@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -37,12 +38,13 @@ def main():
         'routing': ROUTING,
         'parity': ['tests/test_d41_request_parity.py'],
         'report': ['tests/test_report_gate.py', 'tests/test_report_admission.py'],
+        'report-wire': ['tests/test_report_admission.py::test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted'],
         'provenance': [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'tests').rglob('test*provenance*.py'))],
         'a13': ['tests/test_receipt_floor_basis.py', 'tests/test_receipt_completion_policy.py',
                 'tests/test_receipt_completion_runtime.py', 'tests/test_rereceipt_completion.py',
                 'tests/test_receipts.py', 'tests/test_receipt_rereceipt.py'],
         'options': ['tests/test_api_launcher.py', 'tests/test_shared_generation_cli.py',
-                    'tests/test_shared_generation_batch_authority.py'],
+                    'tests/test_shared_generation_batch_authority.py', 'tests/test_run_lock.py'],
     }
     if set(args.groups) - groups.keys():
         parser.error('unknown group')
@@ -73,6 +75,11 @@ def main():
                            errors=sum(c.find('error') is not None for c in cases),
                            skipped=sum(c.find('skipped') is not None for c in cases))
         (out / 'outcome.json').write_text(json.dumps(outcome, indent=2) + '\n')
+        if group == 'parity':
+            basetemp = Path(env.get('TMPDIR', '/private/tmp')) / 'codex-5212r3-pt'
+            for source in sorted(basetemp.glob('test_chorus_shared_v1_exact_ba*/parity')):
+                if not source.parent.is_symlink():
+                    shutil.copytree(source, out / source.parent.name)
         print(json.dumps(outcome), flush=True)
         print('\n'.join((out / 'pytest.log').read_text().splitlines()[-5:]), flush=True)
         if completed.returncode or not same:

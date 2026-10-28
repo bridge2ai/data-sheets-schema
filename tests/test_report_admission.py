@@ -32,22 +32,6 @@ ADMITTED = ('reconcile_full', 'report', 'report_regate')
 BASIS = 'Synthetic assertion, not measured route capacity'
 REPAIR_MARK = '# synthetic validation repair'
 
-#: The CHORUS fixture's dispatched wire at the base f8c5ac73c (PR #5158's head,
-#: before this check existed): sha256 of the `messages.stream` keyword
-#: arguments as sorted compact JSON, with the run's temporary root replaced by
-#: `<root>` and the checkout the schema resolved from by `<repo>`, so any
-#: checkout reproduces them. They move with any model-facing input (the
-#: bundle, the schema, a v10 prompt asset or carry format, the selected
-#: settings) or the fake's scripted records; the admission must never move
-#: them. The second half of the test re-derives them with the admission
-#: bypassed.
-BASE_WIRE_SHA256 = {
-    'reconcile_full': 'b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa',
-    'report': '9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8',
-    'report_regate': '300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9',
-}
-
-
 @pytest.fixture(autouse=True)
 def offline(monkeypatch):
     monkeypatch.setattr(socket.socket, 'connect', lambda *a, **k: pytest.fail('network forbidden'))
@@ -246,9 +230,10 @@ def test_every_phase_sent_at_a_raised_cap_is_admitted():
     assert api.SHARED_ADMITTED_PHASES == set(dr.SHARED_V1_PHASE_OUTPUT_CAPS)
 
 
-def test_chorus_wire_is_byte_identical_to_the_base_and_is_what_was_counted(tmp_path, monkeypatch):
+def test_chorus_wire_is_byte_identical_without_admission_and_is_what_was_counted(tmp_path, monkeypatch):
     spec, messages, wires = chorus_wires(tmp_path / 'head', monkeypatch)
-    assert {p: wire_sha256(w, tmp_path / 'head') for p, w in wires.items()} == BASE_WIRE_SHA256
+    assert set(wires) == set(ADMITTED)
+    guarded = {p: wire_sha256(w, tmp_path / 'head') for p, w in wires.items()}
     # Each admitted phase was counted once, on exactly the request it then sent.
     for phase, wire in wires.items():
         [count] = counts_for(messages, phase)
@@ -260,7 +245,9 @@ def test_chorus_wire_is_byte_identical_to_the_base_and_is_what_was_counted(tmp_p
     # Without the admission the same wire goes out: the check adds a count, never bytes.
     monkeypatch.setattr(api, '_admit_shared_context', lambda *a, **k: None)
     _, unchecked, plain = chorus_wires(tmp_path / 'base', monkeypatch)
-    assert {p: wire_sha256(w, tmp_path / 'base') for p, w in plain.items()} == BASE_WIRE_SHA256
+    # Compare the same composed tree. A13/A14 may intentionally change model
+    # bytes; admission must leave those current bytes unchanged (R6/R7, #5212).
+    assert {p: wire_sha256(w, tmp_path / 'base') for p, w in plain.items()} == guarded
     assert not any(unchecked.counted)
 
 

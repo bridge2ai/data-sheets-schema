@@ -178,9 +178,10 @@ that historical quality scores were invalidated or recomputed.
 ## Model-facing and protected-file boundary
 
 The bounded parity helper compares exact SDK HTTP request bodies for CHORUS
-generic-v10/shared-v1 using the same fixed inputs and the merge-base with the
-target branch (the first parent of a CI PR merge). `D41_PARITY_TARGET` or the
-helper's `--target` selects another locally available target without fetching.
+generic-v10/shared-v1 using the same current source, descriptors and fixed
+inputs on both sides, with the D41 transport callback enabled versus omitted.
+It needs no historical Git ref, merge parent or `D41_PARITY_TARGET`. Authorized
+later changes to requests apply to both sides of this counterfactual (R7).
 It includes full, reconcile, report, report-regate, receipt
 completion, typed worker, omission and integration construction. Synthetic
 records/replies and MockTransport make this a construction/transport check,

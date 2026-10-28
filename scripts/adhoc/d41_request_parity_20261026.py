@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+from dataclasses import replace
 import hashlib
 import inspect
 from importlib.metadata import version as package_version
@@ -231,14 +232,16 @@ def _requests(spec, reg, settings):
     return requests, worker_checks
 
 
-def _transport(api, req, settings, cap, *, guarded, deny=False):
+def _transport(api, req, settings, cap, *, guarded, deny=False, guard_check=None):
     """Capture actual SDK serialization, not a reconstructed dictionary."""
     import anthropic
     import httpx
     bodies, callback_calls = [], []
     def before_attempt():
         callback_calls.append('checked')
-        if deny:
+        if guard_check is not None:
+            guard_check()
+        elif deny:
             raise RuntimeError('offline latch refusal before dispatch')
     def respond(request):
         if request.url.path != '/v1/messages':
@@ -262,8 +265,10 @@ def _transport(api, req, settings, cap, *, guarded, deny=False):
             result = api._call_with_retry(client, model=settings['name'], max_tokens=cap,
                 temperature=settings['temperature'], thinking=settings.get('thinking'), effort=settings.get('effort'),
                 system=req.system, messages=req.messages, transport_attempts=1, **extra)
-        except RuntimeError as exc:
-            if not (deny and str(exc) == 'offline latch refusal before dispatch'):
+        except (RuntimeError, api.UsageLedgerError) as exc:
+            expected_refusal = (isinstance(exc, api.UsageLedgerError) if guard_check is not None
+                                else str(exc) == 'offline latch refusal before dispatch')
+            if not (deny and expected_refusal):
                 raise
         else:
             if deny or result.stop_reason != 'end_turn':
@@ -290,6 +295,7 @@ def capture(root, code_root, fixture, output, mode):
     data_sheets_schema.__path__ = package_path
     data_sheets_schema.__spec__.submodule_search_locations = package_path
     from data_sheets_schema import api_runner as api, shared_generation as sg, resources
+    from data_sheets_schema import latch_journal, usage_ledger
     if Path(api.__file__).resolve() != code_root / PACKAGE / 'api_runner.py':
         raise ValueError('wrong API implementation imported')
     if resources.resource_root()[0].resolve() != root:
@@ -300,24 +306,36 @@ def capture(root, code_root, fixture, output, mode):
     # transport boundary. Builders, descriptors, resources and SDK stay identical.
     guarded = mode == 'candidate'
     spec, reg, settings = _fixture(root, fixture, output / 'registration.json')
+    # Identical synthetic state setup, outside request inputs, on both sides.
+    # Only candidate transports invoke the real D41 check on that state.
+    guard_spec = replace(spec, out_dir=output / 'guard-state')
+    usage_ledger.prepare_usage(guard_spec, resume=False)
+    journal_checks = []
+    def verify_guard():
+        journal_checks.append('checked')
+        assert latch_journal.check(guard_spec)['verified']
     origins_after_fixture = _module_authority(root, code_root)
     common_resources = _resource_authority(root, reg)
     requests, worker_checks = _requests(spec, reg, settings)
     origins_after_requests = _module_authority(root, code_root)
     rows = {}
     for phase, (req, cap) in requests.items():
-        bodies, calls = _transport(api, req, settings, cap, guarded=guarded)
+        bodies, calls = _transport(api, req, settings, cap, guarded=guarded, guard_check=verify_guard)
         rows[phase] = {'body': save(output / (phase.replace(':', '-') + '.http.json'), bodies[0]),
             'callback_count': len(calls), 'max_tokens': cap}
     if guarded:
+        data = usage_ledger._read(guard_spec)
+        data['evidence_refusal'] = {'stage': 'offline-parity', 'findings': ['synthetic terminal refusal']}
+        usage_ledger._write(guard_spec, data)
         req, cap = requests['full']
-        _transport(api, req, settings, cap, guarded=True, deny=True)
+        _transport(api, req, settings, cap, guarded=True, deny=True, guard_check=verify_guard)
     if attempts:
         raise AssertionError('a network connection was attempted')
     origins_after_transport = _module_authority(root, code_root)
     result = {'mode': mode, 'api_module': pin(api.__file__), 'registration': pin(fixture / 'registration.json'),
         'selection': sg.descriptor(), 'rows': rows, 'network_attempts': attempts,
         'callback_refusal_prevented_dispatch': guarded,
+        'journal_check_count': len(journal_checks),
         'builder': pin(root / 'scripts/build_api_registrations.py'),
         'input_pins': reg['inputs'], 'runtime': reg['runtime'],
         'fixture_selection': {'profile': 'bridge2ai', 'basis': 'stated by the caller',
@@ -360,6 +378,8 @@ def compare(root, workdir):
         raise AssertionError('v1 authority differs; request identities must not be normalized')
     if left['rows'].keys() != right['rows'].keys():
         raise AssertionError('request roster differs')
+    if (left['journal_check_count'], right['journal_check_count']) != (0, len(right['rows']) + 1):
+        raise AssertionError('real journal guard counterfactual was not exercised')
     if left['package_origins'] != right['package_origins']:
         raise AssertionError('package source changed between captures')
     rows = {}
