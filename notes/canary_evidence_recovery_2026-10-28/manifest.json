@@ -1,4 +1,5 @@
 {
+  "artifact_sha256_recorded_in_original_readme": "679aab514fb672586e234f4218a81397dd9d9e4ac1b9a8eb7c235bd471e963a6",
   "bytes": 23364,
   "credential_heuristic_counts": {
     "bearer_value": 0,
@@ -10,7 +11,6 @@
   "credential_scan_limit": "Heuristic only; no values printed.",
   "destination": "CHORUS_api_progress.json",
   "historical_files_modified": false,
-  "artifact_sha256_recorded_in_original_readme": "679aab514fb672586e234f4218a81397dd9d9e4ac1b9a8eb7c235bd471e963a6",
   "purpose": "Exact preserved pre-edit progress backup omitted by .gitignore; evidence only.",
   "reviewed_data_head": "ada98b56b73b60217ccacf02fef2af4393d6ecae",
   "scientific_acceptance": "not granted",
