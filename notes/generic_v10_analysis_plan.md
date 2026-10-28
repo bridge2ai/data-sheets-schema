@@ -483,7 +483,7 @@ longer holds.
   - Under (b), the pilot runs without `--canary-baseline`. Under a pending floor with
     no baseline, `d4d api batch` computes no verdict at all (D15's text), so the A11
     rows alone decide.
-  - Under (c), there are two choices:
+  - Under (c), there are two choices, and P4a records which one (P4 item 14):
     - the same as (b);
     - the `2026-10-14b` prefix as a baseline, once those records are on the launch
       base. It differs in runtime, provider, transport and effort as well as package,
@@ -666,31 +666,51 @@ gate, as late as the fourth attempt, so it has no intention-to-treat counterpart
 v10 cell gets at most two attempts. This asymmetry stays a stated confound (item 4);
 definition (1) shows how large it is from the other side.
 
-**Cells, attempts and eligible records [proposed; owner fixes at P4, items 19–20].**
+**Cells, attempts and eligible records [proposed; owner fixes at P4, items 15–16].**
 - **A cell** is (arm, project, replicate position). A registration declares the
   positions it fills, and so does a D21 continuation registration, so a replicate
   index means the same cell across prefixes. The re-canary and each pilot are cells of
   their own.
 - **An attempt** is one billed launch of a registration for a cell. A cell has at most
   two, counted across every prefix and registration (item 7).
-- **An eligible full record** is the run's final full record
-  (`claudecode_api/<label>/<P>_d4d.yaml`), written by the run and parseable as YAML.
+- **An eligible full record** is fixed by a completion event, not by a file's
+  existence. The runner writes phase 1's record to the final path
+  (`claudecode_api/<label>/<P>_d4d.yaml`), and reconcile and repair overwrite it in
+  place, so after an early stop that path still holds the phase-1 record. Each phase
+  also writes a snapshot, `intermediate/<P>_<phase>.yaml`, whose sha256 the run's
+  snapshot index records.
+  - **The event:** the run's progress file records `reconcile_full` as completed.
+  - **The record:** the last full-record snapshot written at or after that event,
+    either `<P>_reconcile_full.yaml` or, if repair ran, its last round's
+    `<P>_repair_full_r<N>.yaml`, identified by the sha256 in the snapshot index. A
+    repair interrupted before writing its snapshot leaves the previous one eligible. A
+    report or regate that failed after reconcile does not change which record is
+    eligible.
+  - **A run that stopped before `reconcile_full` completed has no eligible full
+    record.** Its phase-1 record is kept and reported, but it is artifact-missing
+    for Set A.
   - A record that fails schema validation is eligible for Set A; Set B removes it.
   - A record with duplicate mapping keys is eligible for the validation and
     duplicate-key counts only. Every metric that reads values is unmeasurable for it,
     because a YAML loader silently keeps one of the values.
-  - A phase-1 original from a run that stopped before writing its final full record is
-    kept and reported, but it is not a full record for Set A.
+  - A value whose shape a metric cannot read (a mapping where the metric expects a list
+    or a scalar, say) makes that metric metric-missing for the record.
+  - **The analysis manifest** lists, for each record used: label, cell, attempt, the
+    completing event, the snapshot's name and its sha256.
 - **Selection under definition (2)** takes the cell's last attempt that left an
   eligible full record. If a later attempt left none, the earlier record stands. No
   record is chosen by score.
+- **Rows 1–3 and row 4 read different attempts of a cell, by design.** Rows 1–3, 3a and
+  6–8 read the last eligible record (definition (2)); definition (1) is their
+  all-attempts view. Row 4, and row 5, read the cell's first clean attempt that left an
+  eligible record (item 12), because acceptance screens on exactly row 4's classes.
 - **Three kinds of missing are kept apart** in every table:
   - acceptance-missing: the cell has no accepted replicate;
   - artifact-missing: the cell has no eligible full record;
   - metric-missing: the record exists, but the metric's required snapshot or block is
     absent or unmeasurable.
 
-**Set B, common gate [proposed; owner fixes at P4, item 30].** Within whichever Set A
+**Set B, common gate [proposed; owner fixes at P4, item 24].** Within whichever Set A
 definition is chosen, these are the records of either arm that pass the same absolute
 rows under one common instrument:
 - validation passed, under one named schema closure per arm (the arm's own registered
@@ -712,11 +732,13 @@ records under (2) and 9 of 15 under (1), used the stored instruments; they are
 historical context until this recipe recomputes them. Set B is reported beside Set A
 as a sensitivity analysis, never instead of it. Its intersections with the E2 and E5
 rosters (items 12 and 16) are reported separately, because those rosters differ from
-Set A.
+Set A. The checker's source hash, the two schema closures and the snapshot and receipt
+identities it reads are bound in the P4b amendment, before any confirmatory record
+exists.
 
 **Replicate structure** (#2932, prediction 8) has an **n=3 primary estimand**:
-exactly three records per compared arm/project, one final attempt per registered
-replicate cell, with equal cell weights. If one arm supplies only two usable
+exactly three records per compared arm/project, each cell's last eligible record
+(definition (2)), with equal cell weights. If one arm supplies only two usable
 records, n=3 is missing and n=2 is a separately flagged **sensitivity stratum**,
 never the same estimand. Use the two common replicate positions (the cells defined
 above) when both arms have them; a continuation's labels restart at rep1, so its
@@ -742,7 +764,7 @@ comparison is not computable, not 0.
   Prediction 4 alone retains a descriptive claim/leaf-weighted pooled decision rule,
   with the fixed-weight sensitivity in item 16; it is not a per-project or
   independent-replicate significance claim.
-- **K [proposed; owner fixes at P4, item 21]** counts the in-scope projects (P4b) whose
+- **K [proposed; owner fixes at P4, item 17]** counts the in-scope projects (P4b) whose
   contrast is like-for-like:
   - CHORUS, CM4AI and VOICE count when in scope.
   - AI_READI counts only under comparator option (d), and only after a render diff
@@ -753,7 +775,7 @@ comparison is not computable, not 0.
     Under (b) it is descriptive.
   - So with every project in scope, K is 3, or 4 under (d). With CHORUS alone in scope,
     K is 1 and the scope rule's single-project wording applies.
-- **Missing data [proposed; owner fixes at P4, item 20].** A primary directional
+- **Missing data [proposed; owner fixes at P4, item 16].** A primary directional
   verdict for a project needs:
   - complete n=3 in each arm under Set A definition (2);
   - every snapshot and block the metric requires, measured.
@@ -998,7 +1020,7 @@ It carries:
 
   If the launch base's criterion differs, the launch base's text is the one that
   applies, and this item is amended before P4.
-- **Missing cells ([proposed; owner fixes at P4, item 20]).** An in-scope
+- **Missing cells ([proposed; owner fixes at P4, item 16]).** An in-scope
   confirmatory cell with no accepted replicate after its D07 attempts is a missing
   cell:
   - It is reported explicitly in every table (E6's "explicit missing cells"), with
@@ -1718,7 +1740,7 @@ its project weight.
 and `C_apr` assessed eligible atomic claims; `A_apr` and `L_apr` are adverse and
 assessed eligible leaves. Prediction 4 retains its original **zero-tolerance**
 directional rule, evaluated separately for the two rates as two verdicts, **4a**
-(claims) and **4b** (leaves) [proposed; owner fixes at P4, item 27]. Row 4 as a whole
+(claims) and **4b** (leaves) [proposed; owner fixes at P4, item 22]. Row 4 as a whole
 is reported as "4a holds, 4b holds" or as each one's verdict; neither is folded into
 the other:
 
@@ -1736,13 +1758,14 @@ Every assessed claim or leaf gets weight 1 in its pool, so projects and records
 with more assessed units receive more weight. A lower pooled rate is **not** a
 claim that every project improved, nor an equal-project effect. Publish these
 weights, per-project rates and the fixed-weight sensitivity even when they
-disagree with the pool. **The primary pool [proposed; owner fixes at P4, item 21]**
-is over the projects in K. Under AI_READI comparator options (a) and (c), the
-three-project pool excluding AI_READI decides 4a and 4b, and AI_READI is an explicit
-**AI_READI cross-arm** row (with-crate v8 / no-crate v10 under (a); runtime, provider
-and effort as well under (c)). A combined four-project pool may be shown, labelled as
-mixed input-arm evidence, but it decides nothing. Do not relabel it as a homogeneous
-runtime/package effect.
+disagree with the pool. **The primary pool [proposed; owner fixes at P4, item 22]**
+is over the in-scope projects in K, whatever their number. Under AI_READI comparator
+options (a) and (c), AI_READI is outside K: the pool excluding it decides 4a and 4b
+(three projects at full scope), and AI_READI is an explicit **AI_READI cross-arm** row
+(with-crate v8 / no-crate v10 under (a); runtime, provider and effort as well under
+(c)). A combined pool that includes AI_READI may be shown, labelled as mixed input-arm
+evidence, but it decides nothing. Do not relabel it as a homogeneous runtime/package
+effect.
 
 The support judge remains excluded from these predictions until #3343 is
 calibrated under its own registration and word. Literal receipts, tool checks,
@@ -1795,7 +1818,7 @@ attributed to the display.
 
 Each prediction names its metric, comparator, decision rule and instrument, to be
 fixed at P4 before clean outcomes from the selected production condition. **Every rule
-remains [proposed; owner fixes at P4]** (P4 items 22–29). The values the assisted
+remains [proposed; owner fixes at P4]** (P4 items 18–23). The values the assisted
 canaries showed on these metrics are disclosed above ("Known v10 values on the
 predicted metrics"), and the P4 record should say they were in view.
 
@@ -1817,13 +1840,13 @@ For AI_READI, each row is judged under the comparator option chosen in item 2. U
 |---|---|---|---|---|
 | 1 | Populated leaves fall by no more than 10% (a non-inferiority reading of #2930's "do not fall") | `len(receipts.populated_leaves(full))` per eligible full record, `receipts.py` at P1's pin `7bfb8470…` | holds for p if mean(v10_p) ≥ 0.9 × mean(v8_p); equality passes. v8's replicate SDs are 21.7 (CHORUS), 43.9 (AI_READI), 31.3 (CM4AI) and 68.6 (VOICE) leaves, so 10% of the v8 mean is 1.2, 1.1, 1.5 and 0.5 SD respectively | AI_READI [525, 525, 449], CHORUS [235, 278, 251], CM4AI [422, 473, 479], VOICE [386, 297, 432] |
 | 2 | Receipt coverage does not fall, measured pre-completion | **v10:** v4 `receipt_completion.before.slots.with_receipt / receipt_completion.before.slots.receiptable` on `O,R0` (item 3a). **v8, primary:** the stored v3 final-record `receipts.slots.with_receipt / receipts.slots.receiptable` values in the last column. **v8, sensitivity:** a named common-checker recomputation where exact inputs exist. **Pooled** means the sum of the numerators over the sum of the denominators, across the project's Set A records. Pin source/checker identities; do not infer parity from the unchanged v4 string. | holds for p if pooled pre-completion v10 coverage ≥ pooled v8 coverage − 0.05 absolute. **The numerator is reported beside every ratio.** If the ratio holds while v10's pooled receipted-leaf count is below v8's, the result is reported as "ratio held with a smaller record", never as improved coverage, and it is read with row 1. Every required snapshot must be present (item 3): a missing pre-turn snapshot is never 0, never replaced by a post-turn value, and never dropped silently from the pool. Final-v8 versus phase-1-v10 remains a timing/instrument contrast. D37 at-receipt gate coverage, final coverage and completion gain are separately reported, never substituted into this rule. | pooled, under item 3's definition (2), receipted / receiptable: CHORUS 215/632 = 0.340, VOICE 584/986 = 0.592, AI_READI 694/1289 = 0.538, CM4AI 817/1187 = 0.688. Under (1): VOICE 0.462, AI_READI 0.491 (P1) |
-| 3 | The recall rule raises recall where the bundle states the targets | The pure counters of `scripts/recall_target_baseline.py` (cues `768a26a3…`, tools `4726c005…`), applied directly to item 3's Set A roster. Not through the script's `collect()`, which skips records whose validation failed, and not through its default arm list, which stops at v9. D02's targets:<br>- AI_READI variables 20/13/20;<br>- CM4AI lexical candidates 9/5/3;<br>- VOICE variables 4/4/4, lineage 1/1/1, lexical candidates 3/0/1, b2aiprep v3.0.0 in `used_software`/`tools` 0/0/0;<br>- CHORUS lineage 1/1/0.<br>**Lineage [proposed; P4 item 24]** is the record's top-level `was_derived_from` entry count. The script's `target_counts` instead counts lineage keys at every depth, and nested objects can carry `was_derived_from`. On all 12 v8 records and both assisted records the two agree (no nested lineage occurs; recomputed for this revision), so the v8 values do not change.<br>**VOICE's version target [proposed; P4 item 24]** is the fact-specific carriage measure for `voice-b2aiprep-3.0.0` in `notes/recall_target_baseline.md` ("used_software/tools" column, with that note's matching rules). It replaces "tools with a version token", which counts any version-shaped token in `tools`, so a wrong version can raise it; that count stays reported as a lexical carriage proxy. The v8 records carry b2aiprep v3.0.0 elsewhere in all three.<br>These are carriage counts, not support or recall accuracy. | **Counts the rule should raise** (variables, lineage, b2aiprep carried): holds for a target if mean(v10_p) > mean(v8_p); a tie fails.<br>**Targets at their ceiling, enumerated now:** only VOICE lineage. Top-level `was_derived_from` is single-valued (not `multivalued` in the run's schema or today's), so a record carries at most one, and row 3a forbids `parent_datasets`; every v8 VOICE replicate is at 1. That target holds if mean(v10_p) ≥ mean(v8_p). No other target gets a ceiling exception after the outcomes.<br>**Lexical candidates**, which should fall as cue chunks are extracted rather than set aside: holds if mean(v10_p) < mean(v8_p).<br>**Combination:** a project's row-3 verdict holds if every target listed for it holds, and "holds in k of K" then counts projects [proposed].<br>AI_READI's v8 counts were taken over the with-crate chunking (P1) | as listed |
+| 3 | The recall rule raises recall where the bundle states the targets | The pure counters of `scripts/recall_target_baseline.py` (cues `768a26a3…`, tools `4726c005…`), applied directly to item 3's Set A roster. Not through the script's `collect()`, which skips records whose validation failed, and not through its default arm list, which stops at v9. D02's targets:<br>- AI_READI variables 20/13/20;<br>- CM4AI lexical candidates 9/5/3;<br>- VOICE variables 4/4/4, lineage 1/1/1, lexical candidates 3/0/1, b2aiprep v3.0.0 in `used_software`/`tools` 0/0/0;<br>- CHORUS lineage 1/1/0.<br>**Lineage [proposed; P4 item 20]** is a top-level presence indicator: 1 if the record's top-level `was_derived_from` holds at least one populated entry, whatever its type or number of entries, else 0. It does not rely on the schema's single-valued declaration, which Set A's invalid records may break. The script's `target_counts` instead counts lineage entries at every depth, and nested objects can carry `was_derived_from`. On all 12 v8 records and both assisted records the two agree (no nested or multiple lineage occurs; recomputed for this revision), so the v8 values do not change.<br>**VOICE's version target [proposed; P4 item 20]** is the fact-specific carriage measure for `voice-b2aiprep-3.0.0` in `notes/recall_target_baseline.md` ("used_software/tools" column, with that note's matching rules). It replaces "tools with a version token", which counts any version-shaped token in `tools`, so a wrong version can raise it; that count stays reported as a lexical carriage proxy. The v8 records carry b2aiprep v3.0.0 elsewhere in all three.<br>**The adapter** that applies these counters to Set A is a script pinned by sha256 in the P4b amendment, before any confirmatory record exists; on the 12 v8 records it must reproduce this row's v8 values.<br>These are carriage counts, not support or recall accuracy. | **Counts the rule should raise** (variables, lineage, b2aiprep carried): holds for a target if mean(v10_p) > mean(v8_p); a tie fails.<br>**Targets at their ceiling, enumerated now:** only VOICE lineage. The presence indicator is at most 1 by construction, and every v8 VOICE replicate is at 1. That target holds if mean(v10_p) ≥ mean(v8_p). No other target gets a ceiling exception after the outcomes.<br>**Lexical candidates**, which should fall as cue chunks are extracted rather than set aside: holds if mean(v10_p) < mean(v8_p).<br>**Combination:** a project's row-3 verdict holds if every target listed for it holds, and "holds in k of K" then counts projects [proposed].<br>AI_READI's v8 counts were taken over the with-crate chunking (P1) | as listed |
 | 3a | A rise is an error where the bundle states nothing | Same counts, read against the #3289 adjudication in `notes/recall_target_baseline.md`:<br>- no parent dataset in any of the four bundles;<br>- no processing-software version in the AI_READI, CHORUS or CM4AI bundles (CM4AI's versions belong to companion analyses);<br>- VOICE's one stated version is b2aiprep v3.0.0.<br>The adjudication read AI_READI's pre-#5042 bundle, when it still had its RO-Crate, which recorded FAIRSCAPE 1.2.1 as the metadata packager, not processing software. It is re-read against `1a58ad7b` before P4. | holds if every confirmatory v10 record has `parent_datasets` 0; for AI_READI, CHORUS and CM4AI, `used_software` with a version 0; and for VOICE, no versioned `used_software` entry other than b2aiprep v3.0.0, the one processing-software version the adjudication found in VOICE's bundle. Any non-zero instance means it does not hold, and each instance is listed. If a required record is absent, the row is "not measured" for that project; it never passes on an empty set (item 3) | 0 today |
-| 4 | The rejecting-class unsupported-claim and adverse-slot rates do not rise (a review-pass prediction) | D24/P4 proposed atomic-claim and eligible-leaf units, exclusions, dedup/splitting and complete-adjudication rules in item 16, frozen before any confirmatory outcome; E2's roster with the v10 records taken before acceptance (item 12) | **Exception to per-project verdicts:** claim-weighted and leaf-weighted E2 pools over the projects in K, not Set A attempts. Two verdicts: **4a** holds if v10's claim rate ≤ v8's, and **4b** if v10's leaf rate ≤ v8's; zero tolerance, ties hold, and neither is folded into the other. Always show project-specific rates and equal-project-weight sensitivity. Under AI_READI options (a) and (c), the three-project pool decides and AI_READI is a separate cross-arm row (item 16). The accepted-final records are a sensitivity row. Missing/unassessed units do not create a passing verdict. | no adopted E2 annotation result asserted here; measured after protocol/roster freeze |
-| 5 | Rubric20 Q11 and Q19 do not fall (secondary) | E5 joint re-rating, instrument version per E4 with the D52/D61 evaluator identity (item 12); one primary rating per record of E5's analysis roster; repeat-panel ratings are reliability evidence only | Two verdicts: **5a** (Q11) holds for p if mean(v10_p) ≥ mean(v8_p) − 0.5 on the item's own scale, and **5b** (Q19) likewise; equality passes, and a project's row-5 label is "holds" only if both do. A record with no usable primary rating for an item is metric-missing for it (item 3). No pilot, re-canary, with-crate, native or calibration record enters these means | measured in E5 |
+| 4 | The rejecting-class unsupported-claim and adverse-slot rates do not rise (a review-pass prediction) | D24/P4 proposed atomic-claim and eligible-leaf units, exclusions, dedup/splitting and complete-adjudication rules in item 16, frozen before any confirmatory outcome; E2's roster with the v10 records taken before acceptance (item 12) | **Exception to per-project verdicts:** claim-weighted and leaf-weighted E2 pools over the projects in K, not Set A attempts. Two verdicts: **4a** holds if v10's claim rate ≤ v8's, and **4b** if v10's leaf rate ≤ v8's; zero tolerance, ties hold, and neither is folded into the other. Always show project-specific rates and equal-project-weight sensitivity. Under AI_READI options (a) and (c), AI_READI is outside K: the pool over the in-scope projects in K decides (three at full scope), and AI_READI is a separate cross-arm row (item 16). The accepted-final records are a sensitivity row. Missing/unassessed units do not create a passing verdict. | no adopted E2 annotation result asserted here; measured after protocol/roster freeze |
+| 5 | Rubric20 Q11 and Q19 do not fall (secondary) | E5 joint re-rating, instrument version per E4 with the D52/D61 evaluator identity (item 12); one primary rating per record of E5's analysis roster; repeat-panel ratings are reliability evidence only | Two verdicts: **5a** (Q11) holds for p if mean(v10_p) ≥ mean(v8_p) − 0.5 on the item's scale as the selected instrument defines it, and **5b** (Q19) likewise; equality passes, and a project's row-5 label is "holds" only if both do. A rating the instrument scores N/A, or a record with no usable primary rating for an item, is metric-missing for it (item 3). No pilot, re-canary, with-crate, native or calibration record enters these means | measured in E5 |
 | 6 | **Not a prediction: an acceptance invariant.** Validation passes with 0 duplicate keys | `validation.passed` and `canary.duplicate_key_count` | true by construction for accepted v10 records, since the batch stops on invalid output and duplicate keys gate. Set A reports the count of v10 attempts whose output failed either, descriptively | 12/12 passed, 0 duplicate keys |
 | 7 | **Descriptive, no direction:** report findings | `report_claims.findings` | reported per record and per project in both sets. Reasons:<br>- the counts cross instrument versions: v8's stored blocks are v7, and new runs are checked under v8;<br>- renderer 25's report carries the typed audit's finding totals (#4766), which v8's report did not;<br>- v8's values are 0–2 per record.<br>A directional rule would be decided by noise, as D21 argues against its option (a) | worst, stored v7 and recomputed under v8 alike: CHORUS 2, VOICE 1, AI_READI 1, CM4AI 0. Under v8, CHORUS rep3 goes from 0 to 1 (P1) |
-| 8 | **Descriptive, no direction:** replicate structure (#2932) | `replicate_structure` per project: all/some/none, identical, nested counts differ, max/min ≥ 2, intermittent slots | **n=3 primary**, one final attempt per cell; n=2 only a separately flagged sensitivity with common cell indices, n and IDs in every table; fewer than 2 is not computable (items 3/7). D34 says #3336 is in v10 and CHORUS ×3 measures it; that is not empirical proof of a directional structure effect. | P1 section "Replicate structure"; intermittent AI_READI 8, CHORUS 14, CM4AI 17, VOICE 9 |
+| 8 | **Descriptive, no direction:** replicate structure (#2932) | `replicate_structure` per project: all/some/none, identical, nested counts differ, max/min ≥ 2, intermittent slots | **n=3 primary**, each cell's last eligible record (item 3); n=2 only a separately flagged sensitivity on common replicate positions, n and IDs in every table; fewer than 2 is not computable (items 3/7). D34 says #3336 is in v10 and CHORUS ×3 measures it; that is not empirical proof of a directional structure effect. | P1 section "Replicate structure"; intermittent AI_READI 8, CHORUS 14, CM4AI 17, VOICE 9 |
 
 Rows 1–5 are directional and decidable, rows 6–8 are not predictions, and every
 rule is the owner's to fix at P4. Leaves and coverage read #2930's "do not fall" with
