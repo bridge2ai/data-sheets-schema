@@ -315,7 +315,7 @@ def _omission_wire_prepared(packet, prepared):
     from .shared_generation import trim_omission_schema
     payload = json.loads(prepared.payload_json)
     payload["schema"] = trim_omission_schema(payload["schema"])
-    return omissions.Prepared(_json(payload).decode("utf-8"))
+    return omissions.Prepared(omissions._json(payload))
 
 
 def omission_wire_request(packet, *, derivations=None):
