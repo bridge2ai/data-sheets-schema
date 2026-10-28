@@ -1,0 +1,430 @@
+{
+  "aggregate_pass_claim": "not_made",
+  "excluded_case_and_cache_directories": "retained externally; contents not read or attested",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-receipts-v5-fix-20261027/scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "inputs_declared_completed_by_caller": true,
+  "metadata": "file bytes/modes preserved; archive timestamps normalized; directory metadata omitted",
+  "runs": [
+    {
+      "archive": {
+        "bytes": 1500787,
+        "file": "run-01.tar.gz",
+        "sha256": "2d1eac7c335fb6aeb2b62c60f9af689847eb83ae733be339c753cdc241a76e72"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 406,
+          "mode": 420,
+          "path": "bootstrap.json",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 13167,
+          "mode": 420,
+          "path": "origins-after.json",
+          "sha256": "7ca182f4bbed6ffe4b6cca0b25d455598ec7bdc3552df2d603f93d604a751f19"
+        },
+        {
+          "bytes": 2811,
+          "mode": 420,
+          "path": "origins-before.json",
+          "sha256": "8950402326d1bc307de42abc48cb00adc6f62930f7533c1a3458b74b7c6d4668"
+        },
+        {
+          "bytes": 512,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "79459bd67195a1a00097470e2424ec3100d4d7e2a5934ef8aae7db901bad0083"
+        },
+        {
+          "bytes": 1959,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "a98537b8a35e8443111346d8d3723873ffa5e1856126875fa4a02069ace5485c"
+        },
+        {
+          "bytes": 601,
+          "mode": 420,
+          "path": "pytest-command.json",
+          "sha256": "2919cf71e3b496ba1276bb564923fc513c281b63a492ee9da9402bf175291f72"
+        },
+        {
+          "bytes": 1178,
+          "mode": 420,
+          "path": "pytest.log",
+          "sha256": "5bc3edd0e892edf338ccb7583242e2813431393a899206a824955f2cfcad623b"
+        },
+        {
+          "bytes": 43048,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "06e0802c4e90215e81cd7759650c0b00879e7eebc8c9bc7d8b097803af80abbe"
+        },
+        {
+          "bytes": 2980988,
+          "mode": 420,
+          "path": "source-after.json",
+          "sha256": "536faf3e2d6a532b182252c998136104e100dc660b66eec212f666c940f50202"
+        },
+        {
+          "bytes": 2980988,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "536faf3e2d6a532b182252c998136104e100dc660b66eec212f666c940f50202"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 302,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 302,
+            "unmarked_identified_entries": 302,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-wave3-rv5-focused-20261027",
+      "selected_original_bytes_and_modes_unchanged": true
+    },
+    {
+      "archive": {
+        "bytes": 1500991,
+        "file": "run-02.tar.gz",
+        "sha256": "ce10b852490ad26643f169db9bb258d4631a0a30c99d0924af93a67f035d9af2"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 406,
+          "mode": 420,
+          "path": "bootstrap.json",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 13167,
+          "mode": 420,
+          "path": "origins-after.json",
+          "sha256": "7ca182f4bbed6ffe4b6cca0b25d455598ec7bdc3552df2d603f93d604a751f19"
+        },
+        {
+          "bytes": 2811,
+          "mode": 420,
+          "path": "origins-before.json",
+          "sha256": "8950402326d1bc307de42abc48cb00adc6f62930f7533c1a3458b74b7c6d4668"
+        },
+        {
+          "bytes": 512,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "6ce648d5881d41dc90e997930b8d6b2825a5b6ab2ced60da720d64286cc5b0f2"
+        },
+        {
+          "bytes": 1965,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "471a01866dc3af7cf9a4a6568ceb2cdc424f18d89ab826fa6b071ed2af266f05"
+        },
+        {
+          "bytes": 613,
+          "mode": 420,
+          "path": "pytest-command.json",
+          "sha256": "c8c5711651778b8114818b5079d8e9b9fc63a35b6906b5d11dee1c593f931a45"
+        },
+        {
+          "bytes": 1182,
+          "mode": 420,
+          "path": "pytest.log",
+          "sha256": "aef207542b7c8d0afae85dbc6c3e7501acdd85fc4ef0e7f85e8d0b23de6991f9"
+        },
+        {
+          "bytes": 44789,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "08b5e38115ddf9675ee8cd7d42c7cb58389c5eb13791bd89e247b42ff05ed0aa"
+        },
+        {
+          "bytes": 2980988,
+          "mode": 420,
+          "path": "source-after.json",
+          "sha256": "a209ae999cbcb91b6d4a96c3b90197fc64576cff527f3eea992d62002111044d"
+        },
+        {
+          "bytes": 2980988,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "a209ae999cbcb91b6d4a96c3b90197fc64576cff527f3eea992d62002111044d"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 313,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 313,
+            "unmarked_identified_entries": 313,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-wave3-rv5-final-focused-20261027",
+      "selected_original_bytes_and_modes_unchanged": true
+    },
+    {
+      "archive": {
+        "bytes": 1508476,
+        "file": "run-03.tar.gz",
+        "sha256": "48bd5e39e9146f1bc33527fd96ac5663b9beb4de844df456bd78d7180b4de1d3"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 406,
+          "mode": 420,
+          "path": "bootstrap.json",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 14932,
+          "mode": 420,
+          "path": "origins-after.json",
+          "sha256": "59edece7ff1f4dc8abe8abaf959df58cf3b8fb03c2e2deaace86a45d9166c069"
+        },
+        {
+          "bytes": 12469,
+          "mode": 420,
+          "path": "origins-before.json",
+          "sha256": "53ff91879f5f07782bfd2e95d445b58b65b485eca08ed7eadee18b4396dc4173"
+        },
+        {
+          "bytes": 10745,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "8b02f047e57c5de2894477342b8fbde91432c3893337d3ce53218f84334512b6"
+        },
+        {
+          "bytes": 1901,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "07bed5c49c6778447d725a3bea79f86356c6a1e5019c93d567a880a9a41bff3e"
+        },
+        {
+          "bytes": 580,
+          "mode": 420,
+          "path": "pytest-command.json",
+          "sha256": "da05f0fcc2d8e8ed9f324c5e0d237eb8d005d365634ad6902ed8af9701328141"
+        },
+        {
+          "bytes": 53382,
+          "mode": 420,
+          "path": "pytest.log",
+          "sha256": "9dc31368b24d7528328b90e73ed5f6e44ca6089d0cdd82d28bc145bcb189f957"
+        },
+        {
+          "bytes": 135446,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "a3ce4ee5cfbf49578f894f8259a72d310984add1f0c0498e3ff4c464ec854bb4"
+        },
+        {
+          "bytes": 2980988,
+          "mode": 420,
+          "path": "source-after.json",
+          "sha256": "a209ae999cbcb91b6d4a96c3b90197fc64576cff527f3eea992d62002111044d"
+        },
+        {
+          "bytes": 2980988,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "a209ae999cbcb91b6d4a96c3b90197fc64576cff527f3eea992d62002111044d"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 19,
+            "identified_entries": 547,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 19,
+            "testcase_entries": 547,
+            "unmarked_identified_entries": 509,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "outcome.json": {
+            "classification": "nonzero_exit",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 1,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-wave3-rv5-compatibility-20261027",
+      "selected_original_bytes_and_modes_unchanged": true
+    },
+    {
+      "archive": {
+        "bytes": 1511307,
+        "file": "run-04.tar.gz",
+        "sha256": "86d651ccbf43901e77cdcd6deacbf1c573793be6659517b2967ab4b8d8e7d143"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 406,
+          "mode": 420,
+          "path": "bootstrap.json",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 16290,
+          "mode": 420,
+          "path": "origins-after.json",
+          "sha256": "e824e0a04535f3a60d9e67fd3cd93fd80f799c959e13b9f8865e9a8730f0b33d"
+        },
+        {
+          "bytes": 14224,
+          "mode": 420,
+          "path": "origins-before.json",
+          "sha256": "4a9375c273b05eebfcfa77f708ba3da2b054db47a96233e5fc1202da61876b9f"
+        },
+        {
+          "bytes": 5991,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "6db401c098635f30afd5e424e49f5751d74b82a87822264ab22cbbabe899e302"
+        },
+        {
+          "bytes": 2569,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "b5d4044983b6b645eb271139b09c245072a493ca76988ba2dc8161d6bb4d6422"
+        },
+        {
+          "bytes": 895,
+          "mode": 420,
+          "path": "pytest-command.json",
+          "sha256": "3d8fc7307cf10d75f81b8aac0d366f351b3aa98c27f5de4db420c4ab29866f13"
+        },
+        {
+          "bytes": 1084,
+          "mode": 420,
+          "path": "pytest.log",
+          "sha256": "837d8b29bf460d1c4580143ccc5d72b78a85b7bf9079f5f33bcd9eaa7e85e333"
+        },
+        {
+          "bytes": 132294,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "e048d653122dae3bb744c3efd0817ec314ca4776165ae648ea92cde33c345a2d"
+        },
+        {
+          "bytes": 2980989,
+          "mode": 420,
+          "path": "source-after.json",
+          "sha256": "37ad3be7088c0ffe153b277ec1db493bd7f1797d63197dada6a8ae677443ec79"
+        },
+        {
+          "bytes": 2980989,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "37ad3be7088c0ffe153b277ec1db493bd7f1797d63197dada6a8ae677443ec79"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 861,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 19,
+            "testcase_entries": 861,
+            "unmarked_identified_entries": 842,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-wave3-rv5-final-all-20261027",
+      "selected_original_bytes_and_modes_unchanged": true
+    }
+  ],
+  "scope": "selected_result_files_only_not_complete_synthetic_case_archive",
+  "selection": "top-level and neutral/omission stage JSON/log/XML files; ignored files included"
+}
