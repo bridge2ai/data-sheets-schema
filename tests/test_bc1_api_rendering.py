@@ -6,6 +6,7 @@ from tests.test_bc1_selection import external, simulated_hooks, registered  # no
 
 
 def test_downstream_uses_exact_projection_and_keeps_complete_host_carry(registered, monkeypatch):
+    monkeypatch.setattr(api, 'provider_identity', lambda: {'provider': None, 'base_url': None, 'key_env': None})
     spec = registered
     spec.bind_api_header_values(api._model_settings(spec.condition))
     full = 'name: Example\n'

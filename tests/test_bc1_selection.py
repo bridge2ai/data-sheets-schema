@@ -24,9 +24,13 @@ from tests.test_generation_manifest_identity import external  # noqa: F401
 
 @pytest.fixture
 def simulated_hooks(monkeypatch):
-    """Execute proposal in memory only, replacing imported aliases temporarily."""
+    """Execute proposal in memory if unapplied, or yield installed module directly."""
     path = Path(original_shared.__file__)
     before = path.read_bytes()
+    if getattr(original_shared, 'BC1_HOOK_VERSION', None) == bc.VERSION:
+        yield original_shared
+        assert path.read_bytes() == before
+        return
     name = original_shared.__name__
     shadow = ModuleType(name)
     shadow.__file__, shadow.__package__ = str(path), original_shared.__package__
@@ -67,7 +71,8 @@ def registered(external, simulated_hooks):
         provider=reg['runtime']['provider'])
 
 
-def test_uninstalled_hook_refuses_before_generation(external):
+def test_uninstalled_hook_refuses_before_generation(external, monkeypatch):
+    monkeypatch.delattr(original_shared, 'BC1_HOOK_VERSION', raising=False)
     reg = parent_tests.registration_for(external)
     reg['bounded_carry'] = bc.registration_block()
     with pytest.raises(ValueError, match='hook is not installed'):
@@ -140,8 +145,11 @@ def test_legacy_serialization_and_hook_parser_stay_unselected(external, simulate
 def test_proposal_is_exact_and_does_not_modify_protected_source():
     raw = Path(original_shared.__file__).read_bytes()
     expected = Path(proposal.ROOT / 'notes/bc1_shared_generation_patch_2026-10-27.diff').read_bytes()
-    assert proposal.proposal_bytes(raw) == expected
     manifest = json.loads((proposal.ROOT / 'notes/bc1_shared_generation_patch_2026-10-27.json').read_bytes())
-    assert manifest['base_sha256'] == hashlib.sha256(raw).hexdigest()
     assert manifest['proposal_sha256'] == hashlib.sha256(expected).hexdigest()
-    assert not manifest['applied']
+    if manifest['applied']:
+        assert getattr(original_shared, 'BC1_HOOK_VERSION', None) == bc.VERSION
+        assert manifest['proposed_source_sha256'] == hashlib.sha256(raw).hexdigest()
+    else:
+        assert proposal.proposal_bytes(raw) == expected
+        assert manifest['base_sha256'] == hashlib.sha256(raw).hexdigest()

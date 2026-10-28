@@ -98,12 +98,13 @@ def test_registration_allowances_include_all_groups_and_separate_final(fan, work
     assert limits["integration_output_tokens"] == 64000
 
 
-def test_legacy_profile_is_preserved_but_cannot_waive_bc1_sizing(tmp_path):
+def test_legacy_profile_is_preserved_but_cannot_waive_bc1_sizing(tmp_path, monkeypatch):
     old = builder.resolve_audit_limits("CHORUS", "chorus")
     assert old["max_calls"] == 6 and old["integration_output_tokens"] == 32000
     with pytest.raises(ValueError, match="actual sizing record"):
         builder.prepare_registration("CHORUS", "offline", registration_path=tmp_path / "r.json",
                                      partition="chorus", bounded_carry_version=1)
+    monkeypatch.delattr(builder.sg, "BC1_HOOK_VERSION", raising=False)
     with pytest.raises(ValueError, match="hook is not installed"):
         builder.prepare_registration("CHORUS", "offline", registration_path=tmp_path / "r.json",
             partition="chorus", bounded_carry_version=1, sizing_record=tmp_path)

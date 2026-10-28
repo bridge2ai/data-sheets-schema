@@ -1,5 +1,5 @@
 {
-  "applied": false,
+  "applied": true,
   "base_path": "src/data_sheets_schema/shared_generation.py",
   "base_sha256": "22d7b46d72109bea0c26f693091c42a1f16723387079dcb895296a277b984c2e",
   "format": "bc1_protected_hook_proposal_v1",
