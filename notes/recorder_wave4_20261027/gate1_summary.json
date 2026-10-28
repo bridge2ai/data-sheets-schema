@@ -1,0 +1,333 @@
+{
+  "archive": {
+    "all_member_bytes_and_modes_verified": true,
+    "bytes": 1392808,
+    "every_original_file_archived": true,
+    "path": "gate1_originals.tar.gz",
+    "sha256": "76b6067f3986d6230833116a3ca0ec831abcc44a244d8eff424c926bbfe7c307"
+  },
+  "archive_helper": {
+    "path": "scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "competing_observation_samples": 60,
+  "competitor_scope": "Recorded driver classification; each entry joined to its raw sample and checked against threshold. Ownership exclusions are not independently recomputed.",
+  "distinct_reported_competitors": 86,
+  "driver_wall_seconds": 66.83092983299866,
+  "failed_conditions": [
+    "mean_cpu_percent",
+    "peak_cpu_percent",
+    "max_one_minute_load_per_cpu",
+    "above_threshold_competing_processes"
+  ],
+  "files": {
+    "host.jsonl": {
+      "bytes": 7088274,
+      "mode": 420,
+      "sha256": "e42d69df6cdc56fe1bfef32fe76c42f49e84a3174f391248d03b48688cfa98d9"
+    },
+    "idle-decision.json": {
+      "bytes": 124332,
+      "mode": 420,
+      "sha256": "2ab7f72cbb860a91e33c76b2d61bfcbaef717ad5c09ad84dc9b9a745aa48a870"
+    },
+    "outcome.json": {
+      "bytes": 226,
+      "mode": 420,
+      "sha256": "bf90fa29404a37442f479135d3b979288491813dc3c8414c4c070f1ec3880b22"
+    },
+    "plan.json": {
+      "bytes": 2180,
+      "mode": 420,
+      "sha256": "49a317e9ded301d756aeb15fbf7c712dbfa3d450b19da6f06dbbaa460af4cb2c"
+    },
+    "source-after.json": {
+      "bytes": 1319745,
+      "mode": 420,
+      "sha256": "80d306d4768a311959c807229d838c7f2f9c7929925271ed9bd21047e9e5788b"
+    },
+    "source-before.json": {
+      "bytes": 1319745,
+      "mode": 420,
+      "sha256": "80d306d4768a311959c807229d838c7f2f9c7929925271ed9bd21047e9e5788b"
+    }
+  },
+  "finished_at": "2026-10-28T01:45:58.414600+00:00",
+  "first_sample": {
+    "at": "2026-10-28T01:44:52.653579+00:00",
+    "cpu_percent": 50.3,
+    "load": [
+      10.009765625,
+      6.29443359375,
+      5.8017578125
+    ],
+    "logical_cpus": 10,
+    "top_reported_processes": [
+      {
+        "cpu_percent": 98.9,
+        "executable": "python3",
+        "pid": 177,
+        "ppid": 73906
+      },
+      {
+        "cpu_percent": 95.0,
+        "executable": "soffice",
+        "pid": 4205,
+        "ppid": 4204
+      },
+      {
+        "cpu_percent": 33.8,
+        "executable": "Terminal",
+        "pid": 3231,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 29.0,
+        "executable": "WindowServer",
+        "pid": 429,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 19.6,
+        "executable": "WindowManager",
+        "pid": 684,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 16.7,
+        "executable": "corespotlightd",
+        "pid": 784,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 12.0,
+        "executable": "Safari",
+        "pid": 33000,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 10.6,
+        "executable": "rsync",
+        "pid": 5106,
+        "ppid": 5105
+      },
+      {
+        "cpu_percent": 10.0,
+        "executable": "spotlightknowledged.updater",
+        "pid": 37307,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 9.5,
+        "executable": "agy",
+        "pid": 87673,
+        "ppid": 3720
+      }
+    ]
+  },
+  "format": "d4d_wave4_recorder_gate_summary_v1",
+  "helper": {
+    "path": "scripts/adhoc/summarize_wave4_recorder_gate_20261027.py",
+    "sha256": "95fbdf0a39a645046d49b8ef3ed6e370fedf40df983b16f43c0fec0436727009"
+  },
+  "label": "gate1",
+  "limits": [
+    "No assertion that pytest, uv, Claude or AGY test processes were absent.",
+    "Executable names do not establish process role or earlier-timeout causality.",
+    "Requested Wave4 paired N=10 control/treatment recorder trials remain unrun after gate refusal.",
+    "Conditional unit-4 test-path and D38 harness-pin corrections were not applied after gate refusal.",
+    "No recorder timing was measured and no production timeout was altered."
+  ],
+  "measured": {
+    "max_one_minute_load_per_cpu": 1.049853515625,
+    "mean_cpu_percent": 57.04833333333333,
+    "peak_cpu_percent": 87.3
+  },
+  "measurement_driver_sha256": "2f77329c51fc27f8f7e5f7157643f47c43b6e7a94872e3e5e292bb1817806169",
+  "original_directory": "/private/tmp/d4d-recorder-measurements-wave4-20261027/idle-check-wave4-20261027",
+  "original_inputs_rechecked_unchanged": true,
+  "peak_host_cpu_sample": {
+    "at": "2026-10-28T01:45:05.557306+00:00",
+    "cpu_percent": 87.3,
+    "load": [
+      9.892578125,
+      6.38427734375,
+      5.8388671875
+    ],
+    "logical_cpus": 10,
+    "top_reported_processes": [
+      {
+        "cpu_percent": 93.3,
+        "executable": "python3",
+        "pid": 177,
+        "ppid": 73906
+      },
+      {
+        "cpu_percent": 91.2,
+        "executable": "python3",
+        "pid": 4247,
+        "ppid": 4244
+      },
+      {
+        "cpu_percent": 61.6,
+        "executable": "(python3.13)",
+        "pid": 5319,
+        "ppid": 5318
+      },
+      {
+        "cpu_percent": 59.2,
+        "executable": "ninjarmm-macagent",
+        "pid": 554,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 46.4,
+        "executable": "Terminal",
+        "pid": 3231,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 42.4,
+        "executable": "server-gdrive",
+        "pid": 5320,
+        "ppid": 74399
+      },
+      {
+        "cpu_percent": 39.3,
+        "executable": "WindowServer",
+        "pid": 429,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 33.0,
+        "executable": "log",
+        "pid": 4884,
+        "ppid": 73906
+      },
+      {
+        "cpu_percent": 29.5,
+        "executable": "Finder",
+        "pid": 751,
+        "ppid": 1
+      },
+      {
+        "cpu_percent": 21.7,
+        "executable": "agy",
+        "pid": 74399,
+        "ppid": 3810
+      }
+    ]
+  },
+  "privacy": "Summary retains executable basename and PID only; no argv, environment values or executable directory paths. Original names-only raw files are preserved unchanged in the archive.",
+  "ranking_scope": "Descending sum of reported above-threshold CPU percentages; this is a ranking statistic, not elapsed CPU time or host-CPU attribution. Unreported intervals are not assumed idle.",
+  "recorder_trials_launched": 0,
+  "refs": [
+    "#5149",
+    "#5212",
+    "#4354"
+  ],
+  "sample_first_at": "2026-10-28T01:44:52.653579+00:00",
+  "sample_interval_seconds": 63.759715791995404,
+  "sample_last_at": "2026-10-28T01:45:56.413313+00:00",
+  "samples": 60,
+  "scientific_acceptance": "not_assessed",
+  "separate_uptime_before_tests_sample": "not collected; no file synthesized",
+  "source": {
+    "head": "01969cbed8eed93f420c640c1f1c306e5f58b033",
+    "inventory_scope": "all tracked root files and src/scripts/tests/utils/.claude/notes assets; also ignored/hidden Python in those roots; gitlinks separately pin path/commit only and require absent/empty uninitialized directories; submodule contents and other data/docs are outside this byte inventory",
+    "new_target_source_inspection_performed": false,
+    "saved_inventories_byte_identical": true,
+    "saved_pristine_source": true,
+    "tree": "d92f24c84aad9161457930a4b191564868ac0676"
+  },
+  "started_at": "2026-10-28T01:44:51.550455+00:00",
+  "status": "blocked_host_busy",
+  "thresholds": {
+    "foreign_process_cpu_percent": 5.0,
+    "mean_cpu_percent": 15.0,
+    "one_minute_load_per_cpu": 0.5,
+    "peak_cpu_percent": 35.0
+  },
+  "top_competitors": [
+    {
+      "executable": "python3",
+      "mean_cpu_percent_when_reported_above_threshold": 93.38039215686274,
+      "observed_above_threshold_samples": 51,
+      "peak_observed_cpu_percent": 103.0,
+      "pid": 4247,
+      "sum_observed_cpu_percent": 4762.4
+    },
+    {
+      "executable": "python3",
+      "mean_cpu_percent_when_reported_above_threshold": 93.56666666666666,
+      "observed_above_threshold_samples": 24,
+      "peak_observed_cpu_percent": 100.0,
+      "pid": 177,
+      "sum_observed_cpu_percent": 2245.6
+    },
+    {
+      "executable": "Terminal",
+      "mean_cpu_percent_when_reported_above_threshold": 36.38333333333334,
+      "observed_above_threshold_samples": 60,
+      "peak_observed_cpu_percent": 75.1,
+      "pid": 3231,
+      "sum_observed_cpu_percent": 2183.0000000000005
+    },
+    {
+      "executable": "WindowServer",
+      "mean_cpu_percent_when_reported_above_threshold": 31.94166666666667,
+      "observed_above_threshold_samples": 60,
+      "peak_observed_cpu_percent": 47.0,
+      "pid": 429,
+      "sum_observed_cpu_percent": 1916.5000000000002
+    },
+    {
+      "executable": "ninjarmm-macagent",
+      "mean_cpu_percent_when_reported_above_threshold": 86.51333333333334,
+      "observed_above_threshold_samples": 15,
+      "peak_observed_cpu_percent": 97.8,
+      "pid": 554,
+      "sum_observed_cpu_percent": 1297.7
+    },
+    {
+      "executable": "WindowManager",
+      "mean_cpu_percent_when_reported_above_threshold": 17.261666666666663,
+      "observed_above_threshold_samples": 60,
+      "peak_observed_cpu_percent": 22.8,
+      "pid": 684,
+      "sum_observed_cpu_percent": 1035.6999999999998
+    },
+    {
+      "executable": "duetexpertd",
+      "mean_cpu_percent_when_reported_above_threshold": 52.91538461538461,
+      "observed_above_threshold_samples": 13,
+      "peak_observed_cpu_percent": 67.7,
+      "pid": 4542,
+      "sum_observed_cpu_percent": 687.9
+    },
+    {
+      "executable": "python3",
+      "mean_cpu_percent_when_reported_above_threshold": 93.67142857142858,
+      "observed_above_threshold_samples": 7,
+      "peak_observed_cpu_percent": 99.1,
+      "pid": 5565,
+      "sum_observed_cpu_percent": 655.7
+    },
+    {
+      "executable": "python3",
+      "mean_cpu_percent_when_reported_above_threshold": 91.92857142857143,
+      "observed_above_threshold_samples": 7,
+      "peak_observed_cpu_percent": 100.0,
+      "pid": 6828,
+      "sum_observed_cpu_percent": 643.5
+    },
+    {
+      "executable": "python3",
+      "mean_cpu_percent_when_reported_above_threshold": 89.48571428571428,
+      "observed_above_threshold_samples": 7,
+      "peak_observed_cpu_percent": 99.7,
+      "pid": 6967,
+      "sum_observed_cpu_percent": 626.4
+    }
+  ]
+}
