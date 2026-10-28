@@ -26,9 +26,11 @@ Key safeguards:
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -211,8 +213,12 @@ def validate_command(
     dry_run: bool = False,
     expect_sha256: str | None = None,
     worktree_dir: Path | None = None,
-) -> None:
-    """Reject forbidden subcommands ('d4d api run' per D20), unbudgeted batch runs, and non-allowlisted entry points."""
+) -> str | None:
+    """Validate a launch and return its verified, normalized approval digests.
+
+    A command without a registration approval returns None. The returned value
+    comes from the parsed and verified options, never a second raw-token scan.
+    """
     import math
 
     tokens = list(cmd_args)
@@ -451,6 +457,8 @@ def validate_command(
                 raise LauncherError(
                     f"Registration SHA-256 mismatch for {reg_path}: expected {','.join(expected_hashes)}, got {actual_sha}"
                 )
+        return ",".join(expected_hashes)
+    return None
 
 
 def find_worktree_root(worktree_arg: str | Path | None = None) -> Path:
@@ -614,6 +622,12 @@ def launch(
     venv_dir, python_bin, d4d_bin = find_venv_and_binaries(worktree_dir, venv_arg)
 
     clean_env = clean_environment(worktree_dir)
+    unset_keys = sorted(set(os.environ) - set(clean_env))
+    unset_display = (
+        f"ANTHROPIC_*, D4D_* (removed: {', '.join(unset_keys)})"
+        if unset_keys
+        else "ANTHROPIC_*, D4D_* (removed: none; guards ANTHROPIC_API_KEY, D4D_RECEIPT_FULL_MAX_TOKENS, D4D_PHASE_WALL_CLOCK_SECONDS)"
+    )
     check_cborg_key(clean_env, allow_missing=allow_missing_key)
 
     # Always verify import isolation
@@ -636,7 +650,9 @@ def launch(
             "or use --check-only."
         )
 
-    validate_command(tokens, dry_run=dry_run, expect_sha256=expect_sha256, worktree_dir=worktree_dir)
+    approved_sha256 = validate_command(
+        tokens, dry_run=dry_run, expect_sha256=expect_sha256, worktree_dir=worktree_dir
+    )
     final_cmd = list(resolve_execution_command(tokens, python_bin, d4d_bin))
     for idx, tok in enumerate(final_cmd):
         if tok == "--expect-sha256" and idx + 1 < len(final_cmd):
@@ -669,11 +685,18 @@ def launch(
             print(f"  Command:     {' '.join(launch_cmd)}")
             print(f"  Log:         {resolved_log}")
             print(f"  PYTHONPATH:  {clean_env.get('PYTHONPATH')}")
-            print(f"  Unset keys:  ANTHROPIC_API_KEY, D4D_RECEIPT_FULL_MAX_TOKENS, D4D_PHASE_WALL_CLOCK_SECONDS")
+            print(f"  Unset keys:  {unset_display}")
             return 0
 
         resolved_log.parent.mkdir(parents=True, exist_ok=True)
         with open(resolved_log, "a", encoding="utf-8") as out:
+            out.write(
+                f"# === [d4d api_launcher] worktree={shlex.quote(str(worktree_dir))} "
+                f"timestamp={datetime.now(timezone.utc).isoformat()} "
+                f"approved_sha256={approved_sha256 or 'none'} "
+                f"command={shlex.join(launch_cmd)} ===\n"
+            )
+            out.flush()
             proc = subprocess.Popen(
                 launch_cmd,
                 cwd=str(worktree_dir),
@@ -696,7 +719,7 @@ def launch(
         print(f"  Venv:        {venv_dir}")
         print(f"  Command:     {' '.join(final_cmd)}")
         print(f"  PYTHONPATH:  {clean_env.get('PYTHONPATH')}")
-        print(f"  Unset keys:  ANTHROPIC_API_KEY, D4D_RECEIPT_FULL_MAX_TOKENS, D4D_PHASE_WALL_CLOCK_SECONDS")
+        print(f"  Unset keys:  {unset_display}")
         return 0
 
     res = subprocess.run(

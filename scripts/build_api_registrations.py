@@ -24,23 +24,56 @@ Usage examples:
 from __future__ import annotations
 
 import copy
+import functools
 import hashlib
+import inspect
 import json
+import os
 import sys
+import threading
 from pathlib import Path
 from typing import Any
 
-# Ensure repository root and src/ are importable
 ROOT = Path(__file__).resolve().parents[1]
-if (ROOT / "src").is_dir() and str(ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(ROOT / "src"))
 
-# Support --worktree argument if copied to sibling inputs directory
-for idx, arg in enumerate(sys.argv):
-    if arg in ("--worktree", "-w") and idx + 1 < len(sys.argv):
-        candidate_src = Path(sys.argv[idx + 1]).resolve() / "src"
-        if candidate_src.is_dir() and str(candidate_src) not in sys.path:
-            sys.path.insert(0, str(candidate_src))
+def _bootstrap_worktree(argv: list[str]) -> Path | None:
+    """Select copied-script imports before any project package is imported."""
+    selected = None
+    # All non-flag CLI options take one value. Skip those values so a literal
+    # label/path spelled '--worktree' can never change the import authority.
+    flags = {"--all", "--synthesize-draft-context", "--dry-run", "--check", "--replace", "--help"}
+    index = 0
+    while index < len(argv):
+        arg = argv[index]
+        if arg == "--":
+            break
+        if arg in ("--worktree", "-w") and index + 1 < len(argv):
+            selected = argv[index + 1]
+            index += 2
+            continue
+        elif arg.startswith("--worktree="):
+            selected = arg.split("=", 1)[1]
+        elif arg.startswith("-w") and len(arg) > 2:
+            selected = arg[2:]
+        elif arg not in flags and ((arg.startswith("--") and "=" not in arg) or (arg.startswith("-") and len(arg) == 2)):
+            index += 2
+            continue
+        index += 1
+    return Path(selected).resolve() if selected else None
+
+
+_selected_bootstrap_root = _bootstrap_worktree(sys.argv[1:]) if __name__ == "__main__" else None
+candidate_src = (_selected_bootstrap_root or ROOT) / "src"
+if _selected_bootstrap_root is not None and not (candidate_src / "data_sheets_schema" / "api_runner.py").is_file():
+    raise SystemExit("--worktree must contain the data_sheets_schema source package")
+if candidate_src.is_dir() and str(candidate_src) not in sys.path:
+    sys.path.insert(0, str(candidate_src))
+
+if _selected_bootstrap_root is not None:
+    import data_sheets_schema as _selected_package
+    _expected_package = candidate_src / "data_sheets_schema"
+    if any(Path(path).resolve() != _expected_package for path in _selected_package.__path__):
+        raise SystemExit("--worktree package imports are mixed with another checkout; use an isolated environment")
 
 import click
 import yaml
@@ -52,22 +85,48 @@ from data_sheets_schema.chunking import CONCAT_DIR as BUNDLE_DIR, manifest_for
 from data_sheets_schema.cli.api import ARMS
 from data_sheets_schema.profiles import profile_named, select_profile
 from data_sheets_schema.registry import load_registry
-from data_sheets_schema.resources import resource_path
+from data_sheets_schema.resources import checkout_at, resource_path
 from data_sheets_schema.schema_snapshot import capture_schema
 
 DEFAULT_PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE")
-KIDS_FIRST_MANIFEST_PATH = (
-    ROOT / "notes" / "matched_cborg_2026-09-13" / "kids_first" / "manifest.yaml"
-)
 DEFAULT_CONDITION = "generic_v10"
 DEFAULT_ID_PREFIX = "generic-v10"
 DEFAULT_RECEIPT_ID = "generic-v10-receipt"
 DEFAULT_PROVIDER = "LBL CBORG (proxy to Anthropic)"
 DEFAULT_BASE_URL = "https://api.cborg.lbl.gov"
 DEFAULT_MODEL = "claude-opus-5"
-DEFAULT_VOCABULARIES_PATH = (
-    ROOT / "src" / "data_sheets_schema" / "b2ai_registry_vocabularies.yaml"
-)
+DEFAULT_VOCABULARIES_PATH = Path("src/data_sheets_schema/b2ai_registry_vocabularies.yaml")
+
+
+def _worktree_resources(function):
+    """Scope explicit worktree resources in this single-threaded preparation CLI.
+
+    Relative input/output arguments are relative to the selected worktree. The
+    implicit calling convention is unchanged. A library caller selecting another
+    tree must run without other threads because cwd is process-global; all exits
+    restore the caller's cwd. Project resource readers then honor missing files
+    in the selected checkout instead of falling back to another checkout.
+    """
+    signature = inspect.signature(function)
+    @functools.wraps(function)
+    def wrapped(*args, **kwargs):
+        bound = signature.bind(*args, **kwargs)
+        worktree = bound.arguments.get("worktree")
+        if worktree is None:
+            return function(*args, **kwargs)
+        selected = Path(worktree).resolve()
+        if checkout_at(selected) != selected:
+            raise ValueError("--worktree must be the root of a data-sheets-schema checkout")
+        previous = Path.cwd()
+        if previous != selected and threading.active_count() != 1:
+            raise ValueError("--worktree resource selection requires a single-threaded process")
+        bound.arguments["worktree"] = selected
+        try:
+            os.chdir(selected)
+            return function(*bound.args, **bound.kwargs)
+        finally:
+            os.chdir(previous)
+    return wrapped
 
 # Stage output caps follow the CHORUS canaries (D-C, owner decision
 # 2026-10-23): at 25,000 the first 2026-10-20a worker spent its whole budget
@@ -243,11 +302,13 @@ def _parse_floor_fraction(value: str) -> dict[str, Any]:
     return {"state": "registered", "numerator": num_1000, "denominator": 1000}
 
 
+@_worktree_resources
 def build_draft_context(
     project: str,
     source_manifest_path: Path | str | None = None,
     context_path: Path | str | None = None,
     write_to_disk: bool = True,
+    worktree: Path | str | None = None,
 ) -> dict[str, Any]:
     """Synthesize a compliant root-only omission_context_v1 draft document.
 
@@ -308,9 +369,12 @@ def build_draft_context(
                 pass
 
     vocabulary: dict[str, Any] = {}
-    if DEFAULT_VOCABULARIES_PATH.is_file():
-        vocab_data = yaml.safe_load(DEFAULT_VOCABULARIES_PATH.read_text(encoding="utf-8")) or {}
+    vocab_path = resource_path(DEFAULT_VOCABULARIES_PATH)
+    if vocab_path.is_file():
+        vocab_data = yaml.safe_load(vocab_path.read_text(encoding="utf-8")) or {}
         vocabulary = vocab_data.get("vocabularies", {})
+    elif worktree is not None:
+        raise FileNotFoundError(f"selected worktree vocabulary is missing: {vocab_path}")
 
     doc: dict[str, Any] = {
         "format": "omission_context_v1",
@@ -338,6 +402,7 @@ def build_draft_context(
     return doc
 
 
+@_worktree_resources
 def build_registration(
     project: str,
     label: str,
@@ -360,6 +425,7 @@ def build_registration(
     synthesize_draft_context: bool = False,
     write_to_disk: bool = True,
     replace: bool = False,
+    worktree: Path | str | None = None,
 ) -> dict[str, Any]:
     """Build a complete shared_generation_registration_v1 document.
 
@@ -368,16 +434,23 @@ def build_registration(
     """
     if arm not in ARMS:
         raise ValueError(f"unknown arm '{arm}'; must be one of {sorted(ARMS.keys())}")
+    # Library callers need the same refusal-before-write guarantee as the
+    # CLI precheck: context synthesis below can create files and directories.
+    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm)
     arm_display, method, pattern, _ = ARMS[arm]
+    root_dir = Path(worktree).resolve() if worktree is not None else ROOT
+    kids_first_manifest = (
+        root_dir / "notes" / "matched_cborg_2026-09-13" / "kids_first" / "manifest.yaml"
+    )
 
     # Resolve manifest
-    default_study_manifest = (ROOT / "data" / "preprocessed" / "source_manifest.yaml").resolve()
+    default_study_manifest = (root_dir / "data" / "preprocessed" / "source_manifest.yaml").resolve()
     sm_resolved: Path | None = None
     if source_manifest_path is not None:
         raw_sm = Path(source_manifest_path)
         p = raw_sm.resolve()
         if not p.is_file() and not raw_sm.is_absolute():
-            alt = (ROOT / raw_sm).resolve()
+            alt = (root_dir / raw_sm).resolve()
             if alt.is_file():
                 p = alt
         if p.is_file():
@@ -385,8 +458,8 @@ def build_registration(
         else:
             raise FileNotFoundError(f"source manifest not found: {source_manifest_path}")
     else:
-        if project.upper() == "KIDS_FIRST" and KIDS_FIRST_MANIFEST_PATH.is_file():
-            sm_resolved = KIDS_FIRST_MANIFEST_PATH.resolve()
+        if project.upper() == "KIDS_FIRST" and kids_first_manifest.is_file():
+            sm_resolved = kids_first_manifest.resolve()
         elif default_study_manifest.is_file():
             sm_resolved = default_study_manifest
 
@@ -395,9 +468,9 @@ def build_registration(
         not reg_registry.declares(project)
         and project.upper() == "KIDS_FIRST"
         and sm_resolved == default_study_manifest
-        and KIDS_FIRST_MANIFEST_PATH.is_file()
+        and kids_first_manifest.is_file()
     ):
-        sm_resolved = KIDS_FIRST_MANIFEST_PATH.resolve()
+        sm_resolved = kids_first_manifest.resolve()
         reg_registry = load_registry(sm_resolved)
 
     # Resolve bundle
@@ -452,10 +525,10 @@ def build_registration(
                 cd / f"{project.lower()}_context.json",
             ])
         candidates.extend([
+            root_dir / "data" / "omission_contexts" / f"{project.lower()}_omission_context.json",
+            root_dir / "data" / "omission_contexts" / f"{project}_context.json",
             resolved_reg_path.parent / f"{project.lower()}_omission_context.json",
             resolved_reg_path.parent / f"{project}_context.json",
-            ROOT / "data" / "omission_contexts" / f"{project.lower()}_omission_context.json",
-            ROOT / "data" / "omission_contexts" / f"{project}_context.json",
         ])
 
         found: Path | None = None
@@ -477,6 +550,7 @@ def build_registration(
                 source_manifest_path=sm_resolved,
                 context_path=target_context,
                 write_to_disk=write_to_disk,
+                worktree=worktree,
             )
             resolved_context = target_context.resolve()
             resolved_context_raw = sg.canonical(draft_doc)
@@ -500,14 +574,17 @@ def build_registration(
     prof_vocab_pin = None
     if prof.pin_path:
         vocab_path = Path(prof.pin_path).resolve()
-        if vocab_path.is_file():
-            prof_vocab_pin = sg.file_pin(vocab_path)
+        prof_vocab_pin = sg.file_pin(vocab_path)
 
     # Capture schema snapshots
     full_schema_pin = sg.schema_pin(capture_schema(api.FULL_SCHEMA_PATH, strict=True))
     core_schema_pin = sg.schema_pin(capture_schema(api.CORE_SCHEMA_PATH, strict=True))
 
     # Resolve runtime settings
+    # An explicitly selected checkout must provide its declared configuration;
+    # missing files cannot silently select the API's built-in fallback settings.
+    if worktree is not None and not resource_path(api.DETERMINISTIC_CONFIG).is_file():
+        raise FileNotFoundError(f"selected worktree runtime config is missing: {api.DETERMINISTIC_CONFIG}")
     model_settings = api._model_settings(condition=DEFAULT_CONDITION)
     config_pin = None
     if model_settings.get("config_path"):
@@ -524,9 +601,6 @@ def build_registration(
         "effort": None,
         "config": config_pin,
     }
-
-    # Resolve limits
-    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm)
 
     active_receipt = copy.deepcopy(DEFAULT_RECEIPT_LIMITS)
     if coverage_floor is not None:
@@ -661,6 +735,69 @@ def validate_registration_document(reg: dict[str, Any]) -> dict[str, Any]:
     """Validate registration document using shared_generation.parse_registration."""
     raw = sg.canonical(reg)
     return sg.parse_registration(raw)
+
+
+@_worktree_resources
+def verify_registration_input_pins(
+    reg: dict[str, Any],
+    *,
+    worktree: Path | str | None = None,
+) -> None:
+    """Verify current file bytes and complete full/core schema import closures."""
+    reg = sg.parse_registration(sg.canonical(reg))
+    inputs = reg.get("inputs") or {}
+    runtime = reg.get("runtime") or {}
+    pin_entries: list[tuple[str, Any]] = [
+        ("inputs.bundle", inputs.get("bundle")),
+        ("inputs.chunk_manifest", inputs.get("chunk_manifest")),
+        ("inputs.source_manifest", inputs.get("source_manifest")),
+        ("inputs.context", inputs.get("context")),
+        ("inputs.profile.vocabulary", (inputs.get("profile") or {}).get("vocabulary")),
+        ("runtime.config", runtime.get("config")),
+    ]
+    if reg["format"] == sg.ROUTING_FORMAT:
+        pin_entries.append(("routing.artifact", reg["routing"]["artifact"]))
+    for schema in ("full_schema", "core_schema"):
+        pin_entries.extend((f"inputs.{schema}.sources[{index}]", pin)
+                           for index, pin in enumerate(inputs[schema]["sources"]))
+    captured: dict[str, bytes] = {}
+    for label, pin in pin_entries:
+        if pin is None:
+            continue
+        raw_path = pin["path"]
+        expected_sha = pin["sha256"]
+        p = Path(raw_path)
+        if not p.is_file():
+            raise FileNotFoundError(f"Pinned {label} file not found on disk: {raw_path}")
+        if p.stat().st_size > sg.MAX_AUTHORITY_BYTES:
+            raise ValueError(f"Pinned {label} file exceeds the authority byte bound: {raw_path}")
+        raw_bytes = captured.get(raw_path)
+        if raw_bytes is None:
+            with p.open("rb") as stream:
+                raw_bytes = stream.read(sg.MAX_AUTHORITY_BYTES + 1)
+            if len(raw_bytes) > sg.MAX_AUTHORITY_BYTES:
+                raise ValueError(f"Pinned {label} file exceeds the authority byte bound: {raw_path}")
+            captured[raw_path] = raw_bytes
+        actual_sha = hashlib.sha256(raw_bytes).hexdigest()
+        if actual_sha.lower() != str(expected_sha).lower():
+            raise ValueError(
+                f"Pinned {label} SHA-256 mismatch for {p}: expected {expected_sha}, got {actual_sha}"
+            )
+        expected_bytes = pin["bytes"]
+        if len(raw_bytes) != expected_bytes:
+            raise ValueError(
+                f"Pinned {label} byte-length mismatch for {p}: expected {expected_bytes}, got {len(raw_bytes)}"
+            )
+    for schema in ("full_schema", "core_schema"):
+        selected = inputs[schema]
+        allowed = {pin["path"] for pin in selected["sources"]}
+        def read_selected(path):
+            if str(path) not in allowed:
+                raise ValueError(f"Pinned {schema} import is outside the registered closure: {path}")
+            return captured[str(path)]
+        actual = capture_schema(Path(selected["root"]), strict=True, read_bytes=read_selected)
+        if sg.schema_pin(actual) != selected:
+            raise ValueError(f"Pinned {schema} closure/order differs from its actual imports")
 
 
 def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] | None = None) -> dict[str, Any]:
@@ -863,6 +1000,13 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     is_flag=True,
     help="Allow overwriting an existing registration or roster file with different bytes.",
 )
+@click.option(
+    "--worktree", "-w",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Select checkout resources; relative input/output paths resolve under this root (single-threaded preparation).",
+)
+@_worktree_resources
 def cli(
     projects: tuple[str, ...],
     all_projects: bool,
@@ -898,6 +1042,7 @@ def cli(
     dry_run: bool,
     check: bool,
     replace: bool = False,
+    worktree: Path | None = None,
 ) -> None:
     """Build shared generation registrations and batch rosters for D4D Messages-API generic_v10."""
     target_projects: list[str] = []
@@ -963,7 +1108,11 @@ def cli(
                 if not reg_file.is_file():
                     raise click.ClickException(f"Missing registration file: {reg_file}")
                 raw = reg_file.read_bytes()
-                sg.parse_registration(raw)
+                parsed_reg = sg.parse_registration(raw)
+                try:
+                    verify_registration_input_pins(parsed_reg, worktree=worktree)
+                except (FileNotFoundError, ValueError) as exc:
+                    raise click.ClickException(f"Input pin verification failed for {reg_file.name}: {exc}") from exc
                 click.echo(f"  ✓ {proj}: {reg_file.name}")
         if not target_roster_path.is_file():
             raise click.ClickException(f"Missing roster file: {target_roster_path}")
@@ -998,7 +1147,7 @@ def cli(
                 registration_path=reg_file,
                 id_prefix=id_prefix,
                 context_path=context_file,
-                context_dir=context_dir or out_dir,
+                context_dir=context_dir,
                 source_manifest_path=source_manifest,
                 bundle_path=bundle,
                 chunk_manifest_path=chunk_manifest,
@@ -1010,10 +1159,14 @@ def cli(
                 synthesize_draft_context=synthesize_draft_context,
                 write_to_disk=not dry_run,
                 replace=replace,
+                worktree=worktree,
             )
             registrations.append(reg)
             reg_sha = hashlib.sha256(sg.canonical(reg)).hexdigest()
-            click.echo(f"  ✓ {proj}: registration_id={reg['registration_id']} sha256={reg_sha}")
+            ctx_sha = ((reg.get("inputs") or {}).get("context") or {}).get("sha256", "")
+            click.echo(
+                f"  ✓ {proj}: registration_id={reg['registration_id']} sha256={reg_sha} context_sha256={ctx_sha}"
+            )
 
     roster = build_roster(
         registrations=registrations,

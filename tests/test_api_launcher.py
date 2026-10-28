@@ -6,7 +6,12 @@ D20 subcommand refusal ('d4d api run'), import isolation checks, dry-run, and la
 
 from __future__ import annotations
 
+import atexit
+from datetime import datetime, timezone
+import hashlib
+import json
 import os
+import shutil
 import site
 import stat
 import subprocess
@@ -61,6 +66,7 @@ def _get_isolated_venv() -> Path:
         return _CACHED_ISOLATED_VENV
 
     venv_dir = Path(tempfile.mkdtemp(prefix="d4d_isolated_venv_"))
+    atexit.register(shutil.rmtree, venv_dir, ignore_errors=True)
     subprocess.run(
         [sys.executable, "-m", "venv", "--without-pip", str(venv_dir)],
         check=True,
@@ -355,7 +361,9 @@ class TestLauncherCLI:
         ret = main(["--check-only", "--allow-missing-key", "--worktree", str(REPO_ROOT)] + _default_venv_arg())
         assert ret == 0
 
-    def test_dry_run_batch_command(self, capsys):
+    def test_dry_run_batch_command(self, capsys, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-should-be-unset")
+        monkeypatch.setenv("D4D_CUSTOM_TEST_FLAG", "1")
         ret = main([
             "--dry-run",
             "--allow-missing-key",
@@ -367,7 +375,9 @@ class TestLauncherCLI:
         captured = capsys.readouterr()
         assert "[DRY-RUN] Worktree launch configuration:" in captured.out
         assert "d4d api batch" in captured.out or "bin/d4d api batch" in captured.out
-        assert "Unset keys:  ANTHROPIC_API_KEY" in captured.out
+        assert "Unset keys:  ANTHROPIC_*, D4D_*" in captured.out
+        assert "ANTHROPIC_API_KEY" in captured.out
+        assert "D4D_CUSTOM_TEST_FLAG" in captured.out
 
     def test_dry_run_forbidden_api_run(self, capsys):
         ret = main([
@@ -411,6 +421,10 @@ class TestLauncherCLI:
         (custom_venv / "bin" / "python").symlink_to(base_venv / "bin" / "python")
         for lib_dir in base_venv.glob("lib"):
             (custom_venv / "lib").symlink_to(lib_dir)
+        # The interpreter uses this file, not the lib symlink, to recognize a
+        # virtual environment. Without it Linux resolves the base interpreter
+        # and loses this environment's dependencies (CI: No module named yaml).
+        shutil.copyfile(base_venv / "pyvenv.cfg", custom_venv / "pyvenv.cfg")
         d4d_bin = custom_venv / "bin" / "d4d"
         d4d_bin.write_text(
             f"#!{custom_venv / 'bin' / 'python'}\n"
@@ -499,6 +513,89 @@ class TestLauncherCLI:
         )
         assert rc == 0
         assert captured_popen.get("stdin") == subprocess.DEVNULL
+        unit_log_text = (tmp_path / "logs" / "unit_popen.log").read_text(encoding="utf-8")
+        assert "# === [d4d api_launcher] worktree=" in unit_log_text
+        assert "approved_sha256=none " in unit_log_text
+
+    @pytest.mark.parametrize("approval_option", ["launcher", "separate", "equals"])
+    @pytest.mark.parametrize("approval_target", ["registration", "roster"])
+    @pytest.mark.parametrize("entrypoint", [
+        ["d4d"], ["python", "-m", "data_sheets_schema.cli"],
+    ])
+    def test_launch_log_records_verified_approval_and_time_before_child(
+        self, tmp_path, monkeypatch, approval_option, entrypoint, approval_target,
+    ):
+        """#5124: appended launches remain attributable without executing a provider."""
+        reg_file = tmp_path / "approved registration.json"
+        reg_file.write_text('{"format":"shared_generation_registration_v1"}\n')
+        approved_file = reg_file
+        if approval_target == "roster":
+            approved_file = tmp_path / "approved roster.json"
+            approved_file.write_text(json.dumps({
+                "format": "shared_generation_batch_roster_v2",
+                "registrations": [{
+                    "registration_path": str(reg_file),
+                    "registration_sha256": hashlib.sha256(reg_file.read_bytes()).hexdigest(),
+                }],
+            }))
+        digest = hashlib.sha256(approved_file.read_bytes()).hexdigest()
+        log_file = tmp_path / "launch.log"
+        log_file.write_text("previous launch output\n")
+        cmd = entrypoint + [
+            "api", "batch", "--max-cost-dollars", "1",
+            "--shared-generation-registration", str(approved_file),
+        ]
+        launch_kwargs = {}
+        if approval_option == "launcher":
+            launch_kwargs["expect_sha256"] = digest.upper()
+        elif approval_option == "separate":
+            cmd += ["--expect-sha256", digest.upper()]
+        else:
+            cmd += ["--expect-sha256=" + digest.upper()]
+
+        monkeypatch.setattr("data_sheets_schema.api_launcher.run_import_check", lambda *a, **k: None)
+        monkeypatch.setenv("CBORG_API_KEY", "secret-never-in-log")
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "stripped-secret-never-in-log")
+        test_venv = _get_isolated_venv()
+        before = datetime.now(timezone.utc)
+        observed = []
+
+        def fake_popen(command, **kwargs):
+            # The log must already be flushed before the child could emit bytes.
+            text = log_file.read_text()
+            observed.append(text)
+            assert text.startswith("previous launch output\n# === [d4d api_launcher]")
+            assert f"approved_sha256={digest} " in text
+            timestamp = text.split("timestamp=", 1)[1].split(" ", 1)[0]
+            parsed = datetime.fromisoformat(timestamp)
+            assert parsed.tzinfo is not None
+            assert before <= parsed <= datetime.now(timezone.utc)
+            assert "secret-never-in-log" not in text
+            assert "'" + str(approved_file) + "'" in text
+            assert kwargs["stdin"] == subprocess.DEVNULL
+            return type("FakeProcess", (), {"pid": 42424})()
+
+        monkeypatch.setattr(subprocess, "Popen", fake_popen)
+        assert launch(
+            worktree_arg=REPO_ROOT, venv_arg=test_venv, cmd_args=cmd,
+            background=True, log_file=log_file, **launch_kwargs,
+        ) == 0
+        assert len(observed) == 1
+
+        # Changed bytes invalidate approval before either logging or spawning.
+        reg_file.write_text(reg_file.read_text() + " ")
+        with pytest.raises(LauncherError, match="Registration SHA-256 mismatch"):
+            launch(
+                worktree_arg=REPO_ROOT, venv_arg=test_venv, cmd_args=cmd,
+                background=True, log_file=log_file, **launch_kwargs,
+            )
+        assert observed == [log_file.read_text()]
+
+    def test_option_looking_value_does_not_become_an_approval(self):
+        assert validate_command([
+            "d4d", "api", "batch", "--max-cost-dollars", "1",
+            "--manifest=--expect-sha256=" + "a" * 64,
+        ]) is None
 
     def test_validate_command_restricts_python_entrypoint(self, tmp_path: Path):
         with pytest.raises(LauncherError, match="requires '-m data_sheets_schema.cli <subcommand>'"):
@@ -601,9 +698,9 @@ class TestLauncherCLI:
             "--max-cost-dollars", "25.0",
             "--shared-generation-registration", str(roster_v2),
         ]
-        validate_command(cmd_v2, expect_sha256=reg1_sha)
-        validate_command(cmd_v2, expect_sha256=reg1_sha.upper())
-        validate_command(cmd_v2, expect_sha256=roster_v2_sha)
+        assert validate_command(cmd_v2, expect_sha256=reg1_sha) == reg1_sha
+        assert validate_command(cmd_v2, expect_sha256=reg1_sha.upper()) == reg1_sha
+        assert validate_command(cmd_v2, expect_sha256=roster_v2_sha) == roster_v2_sha
 
         # Modify reg1 in place after roster creation -> both reg1_sha and roster_v2_sha must fail!
         orig_reg1 = reg1.read_bytes()
@@ -635,7 +732,7 @@ class TestLauncherCLI:
             "--max-cost-dollars", "25.0",
             "--shared-generation-registration", str(roster_v1),
         ]
-        validate_command(cmd_v1, expect_sha256=reg1_sha)
+        assert validate_command(cmd_v1, expect_sha256=reg1_sha) == reg1_sha
         with pytest.raises(LauncherError, match="unpinned v1 roster SHA-256"):
             validate_command(cmd_v1, expect_sha256=roster_v1_sha)
 
@@ -667,8 +764,8 @@ class TestLauncherCLI:
             "--max-cost-dollars", "50.0",
             "--shared-generation-registration", str(roster_multi),
         ]
-        validate_command(cmd_multi, expect_sha256=f"{reg1_sha},{reg2_sha}")
-        validate_command(cmd_multi, expect_sha256=roster_multi_sha)
+        assert validate_command(cmd_multi, expect_sha256=f"{reg1_sha},{reg2_sha}") == f"{reg1_sha},{reg2_sha}"
+        assert validate_command(cmd_multi, expect_sha256=roster_multi_sha) == roster_multi_sha
         with pytest.raises(LauncherError, match="Registration SHA-256 mismatch"):
             validate_command(cmd_multi, expect_sha256=reg1_sha)
 
