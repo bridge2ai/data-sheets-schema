@@ -2,12 +2,14 @@
 
 **Status: DRAFT for P3 review. Not preregistered, and it authorizes nothing.** This
 is step P2 of `notes/d4d_generation_plan_2026-10-09.md` ("#### P2"). The plan becomes
-binding only when the owner merges it with an explicit word (P4). Until then, no
+binding only after the owner's explicit P4 ratification of its exact final text.
+Merging this draft as an engineering artifact does not perform P4. Until then, no
 generic_v10 registration hash is put to the owner, and no billed generic_v10 step runs
 (the plan: "Every billed generic_v10 step depends on P4").
 
-- **Revised:** 2026-10-27 for R6 F1–F6, against the decision record through D49 and
-  the local BC1/N2 implementations. This remains a draft, not a retrospective
+- **Revised:** 2026-10-27 for R6 F1–F6; authority corrected 2026-10-28 against
+  D26–D45 and D50. D46–D49 are retired, not owner decisions. The local BC1/N2
+  implementations remain separately identified. This is a draft, not a retrospective
   registration or a declaration that the composed launch condition is ready.
 - **Drafted:** 2026-10-20, by the Claude worker session (coordination Lane C2), at main
   `0a1132ecf`, on branch `claude/track-p-analysis-plan`. agy integrates the branch.
@@ -21,8 +23,10 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
   - `data/_wcrate/README.md`;
   - Lane C1's A1 note, commit `0d45c1ec8` (item 15).
   - `notes/reviews/v10_human_decisions_and_context_review_2026-10-20.md` at
-    `a0e28d8821c69e2d4fe1b75b14e3c2a2140ae4d5` (D26–D49), reconciled with
-    the owner's dated rulings in `notes/coordination/STATUS.md`;
+    `a0e28d8821c69e2d4fe1b75b14e3c2a2140ae4d5` was the historical basis of
+    the R6 amendment. Claude's correction
+    `8f800a5919732cc1b773edc1537cb11e5b874b32` retires D46–D49 and records D50,
+    consistent with `notes/coordination/STATUS.md` at 2026-10-28T02:23Z/02:24Z;
   - BC1 `notes/bc1_production_2026-10-27.md` and contract sources at
     `3bd3c41f459b31848aee2f57e26deb86ef786970`;
   - N2 `notes/native_n2_parity_delta_review_2026-10-25.md` at
@@ -46,9 +50,10 @@ generic_v10 registration hash is put to the owner, and no billed generic_v10 ste
 Both are proposals for the owner to confirm or amend at P4, not rulings. Nothing in
 this draft asserts a decision the owner has not recorded.
 
-## Decision status (reconciled 2026-10-27)
+## Decision status (reconciled 2026-10-28)
 
-The October 20 draft below is amended by D26–D49. Decisions authorize policy and
+The October 20 draft is amended by D26–D45 and D50. The former D46–D49
+entries are retired proposals, not owner rulings. Decisions authorize policy and
 engineering; they do not establish a merged implementation, an accepted record,
 remaining budget or a fresh launch word. Where the implementation differs from
 the requested condition, items 14–15 name the discrepancy before P4.
@@ -62,10 +67,10 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | D01 | Superseded by D26/D28. | Native/API paths below. |
 | D05, D17, D19, D23 | Decided through D34, D35 and D36. | Rule batch, freeze and review below. |
 | D26, D27 | Track N with the default runtime profile; name **native agentic (direct arm)** and directories `claudecode_direct{,_core}/<label>/`. | D26 2026-10-23; D27 owner confirmation 2026-10-25. |
-| D28 | Void 10-22b; one clean CHORUS API re-canary; 64k/32k/32k worker/omission/integration baseline, 128k report/reconcile, A17 splitting, versioned wire/registration identity. Builder floor remains pending; 19/20 belongs to the re-canary only. | 2026-10-23; floor basis superseded by D37, partition selection refined by D45/D49. |
+| D28 | Void 10-22b; one clean CHORUS API re-canary; 64k/32k/32k worker/omission/integration baseline, 128k report/reconcile, A17 splitting, versioned wire/registration identity. Builder floor remains pending; 19/20 belongs to the re-canary only. | 2026-10-23; floor basis superseded by D37, partition selection refined by D45. |
 | D29 | **Pending owner:** native effort and first-party `claude.ai` account. No API key. | Resolve for the native registration and launch. |
 | D30, D38 | Revised R9 criteria limited to `confidentiality_level`/`hipaa_compliant`; American `license` spelling and new prompt pins in both assets. | D30 2026-10-23/24; D38 2026-10-25. |
-| D31, D40, D47 | Both 10-20a and 10-22a are archived assisted/invalid engineering evidence. D40 supersedes D31's initial generated-record disposition for 10-22a. Preserve artifacts; no run/archive edits. | 2026-10-23–26; assisted stratum below. |
+| D31, D40 | Both 10-20a and 10-22a are archived assisted/invalid engineering evidence. D40 supersedes D31's initial generated-record disposition for 10-22a. Preserve artifacts; no run/archive edits. | 2026-10-23–26; assisted stratum below. |
 | D32, D37 | D32's value-matching subtraction is superseded. D37 gates **phase-1 snapshot** receipt quality: `slots.with_receipt_at_receipt / slots.receiptable_at_receipt`. | D37 2026-10-25T19:44Z; item 3a. |
 | D33 | Report-family pre-dispatch token-plus-output admission; no independent report-family trim under that decision. D44 subsequently requires a reviewed BC1 condition before the canary. | 2026-10-25/26; items 14–15 disclose the new exposure. |
 | D34 | No new rule batch: measure #2918/#2919 with existing lints; defer #2931/#2937; #4018 reasons only; #3336 remains to be measured by CHORUS ×3. | 2026-10-25. |
@@ -74,9 +79,11 @@ the requested condition, items 14–15 name the discrepancy before P4.
 | D39 | Versioned worker wording recognizes a split list entry as a removal's owning root. | 2026-10-25; A17 contract change. |
 | D41, D42, D43 | No-touch operation and a terminal/rejection-state guard; compare both guard candidates then obtain the owner's choice. **Owner** runs the hash-approved re-canary command; agents monitor read-only. | D43 supersedes D41's operator clause; guard selection is not inferred here. |
 | D44, D45 | Build/review bounded carry for **all six projects** before the single clean CHORUS re-canary. Keep A17 splitting; select project bounds from cost and output-cap risk inside BC1. | 2026-10-26. |
-| D46 | Owner approved the seven omission/evaluation settings, including CM4AI's two false applicability flags, cohort separation and Kids First neutral `vocabulary: {}`. | 2026-10-26; corrected narratives and exact-file identities still require verification. |
-| D48 | Preflight refuses duplicated, nonretryable repeated, over-retried or out-of-order usage phases before a call or file write. | 2026-10-26; installed integration must be verified. |
-| D49 | Derive aggregate input allowance as `max_calls × 1,000,000`, with all six project profiles and A17-aware sizing; D45 governs final BC1 bounds. | 2026-10-26; an allowance does not prove request fit or authorize spending. |
+| D46 | **Retired; not an owner decision.** Omission/evaluation context settings remain proposals, including CM4AI's two false applicability flags, cohort separation and Kids First neutral `vocabulary: {}`. | Claude's correction, §5.10; owner review and exact-file scientific review remain required. |
+| D47 | **Retired; not an owner decision.** It supplies no archival-maintenance exception. | D31/D40 preserve the assisted/invalid evidence disposition; D41 remains the no-touch authority. |
+| D48 | **Retired; not an owner decision.** Its claimed phase-sequence mechanism does not establish an implemented or approved guard. | Review the actual D41/D42 guard candidates; selection is not inferred here. |
+| D49 | **Retired; not an owner decision.** It supplies no aggregate-input formula or approved project profiles. | D45 governs selection of BC1 bounds from reviewed per-project sizing; an allowance does not establish request fit or spending authority. |
+| D50 | Decision-record corrections are prepared by Claude; agy fixes assigned code and pushes the permitted prepared bytes. | 2026-10-28T02:24Z in STATUS; Claude's correction §5.10. |
 | D02–D04, D08, remaining D09 choices, D11–D16, D18, D20–D21, D24–D25 | **Pending where not specifically superseded above.** D02 comparator/analysis-set choices and D04 crate comparison are not decided by this amendment. | Separate proposal, implementation and owner decisions. |
 
 **The "Resolved" comments are not rulings.** Several issues carry comments citing
@@ -108,7 +115,7 @@ costs informed the redesign. Lane C1, K1/K1 v2 and the BC1 offline sizing also u
 historical outputs or explicit proxies. These are disclosed engineering inputs,
 not unseen production outcomes or tests of the final BC1 condition.
 
-Under D31/D40/D47, both canaries are **assisted/invalid evidence-only**. Preserve
+Under D31/D40, both canaries are **assisted/invalid evidence-only**. Preserve
 every known attempt and expenditure in an assisted-engineering table, including
 unknowns where originals are missing. Exclude them from clean generated-record
 acceptance, confirmatory effects, and **both numerator and denominator** of the
@@ -241,7 +248,7 @@ proposed analysis role after P4, not current authorization or acceptance.
 |---|---|---|---|
 | CHORUS | One clean re-canary, n=1 descriptive; proposed production n=3 confirmatory against v8 | First canary n=1, descriptive feasibility only; no production replicates registered | API production enters E2/E5; native canary has independent acceptance review and separately registered descriptive E5 ratings, never a confirmatory native/API verdict |
 | AI_READI | No-crate pilot separately; proposed n=3, confirmatory only under D02's chosen comparator, otherwise descriptive | Unplanned/unregistered | API E2/E5 retain the cross-arm label if v8 with-crate is selected; any later native contrast must also declare source/profile/account/effort differences |
-| CM4AI | Proposed n=3 confirmatory against v8 | Unplanned/unregistered | API E2/E5 use D46's non-human-subject/non-regulated applicability; companion analyses are not dataset-processing facts |
+| CM4AI | Proposed n=3 confirmatory against v8 | Unplanned/unregistered | API E2/E5 propose non-human-subject/non-regulated applicability, pending owner and exact-file scientific review; companion analyses are not dataset-processing facts |
 | VOICE | Proposed adult n=3 confirmatory against v8 | Unplanned/unregistered | API E2/E5 adult scope; pediatric records never substitute |
 | VOICE_PEDIATRIC | Proposed n=1 descriptive feasibility, no v8 comparator | Unplanned/unregistered | Separate pediatric E2-style source review/E5 descriptive row; no confirmatory effect or adult replicate |
 | KIDS_FIRST | Proposed n=1 descriptive external resource-level feasibility, neutral profile, subject to actual input fit | Unplanned/unregistered | Neutral-context source review/E5 descriptive row; no v8 comparator and no inferred cohort-level equivalence |
@@ -292,8 +299,8 @@ Classified as D02 classifies them:
     `summarize`);
   - validation, duplicate keys and report findings.
 - **Review-pass predictions:** #2930's unsupported-claim and adverse-slot rates,
-  measured with the D24 instrument in E2 (item 16). They are preregistered
-  predictions but not deterministic metrics.
+  measured with the D24 instrument in E2 (item 16). They are proposed for
+  preregistration at P4, not already registered or deterministic metrics.
 - **Secondary:** rubric scores, from one joint re-rating (E5).
 - **Reported, not predicted:** the seven D21 defect metrics (item 9).
 
@@ -392,7 +399,7 @@ table. With fewer than two in either arm the comparison is not computable, not 0
   v8 values with mean ± SD and min–max), with no "v10 mean at or above the v8
   minimum" test unless a tolerance is preregistered per metric. Plan P2 item 3 allows
   either.
-- **This draft's choice:** it preregisters a tolerance per directional prediction
+- **This draft's proposal:** adopt a tolerance per directional prediction
   (Predictions below), **[proposed; owner fixes at P4]**, so that each prediction can
   be judged true or false. The owner may replace any of them with "descriptive" at P4.
   Freeze tolerances at P4 before the first clean outcome under the selected
@@ -899,15 +906,16 @@ The proposed atomic-claim protocol belongs to D24/P4 (item 16), not #5126.
 
 The design label **`shared-generation-api-v2-bc1`** names the proposed scientific
 condition. It is **not** the installed `shared_generation_version` or an accepted
-registration. The current local BC1 implementation at
+registration. The BC1 implementation reviewed at
 `3bd3c41f459b31848aee2f57e26deb86ef786970` selects the following actual tuple;
-these differences must be resolved and pinned before P4/A21.
+the later applied-hook head is identified below. Final composition and these
+differences must be resolved and pinned before P4/A21.
 
 | Component | Current reviewed policy / local implementation | Registration obligation |
 |---|---|---|
 | Scientific assets | D30/D38 generic-v10 prompt SHA-256 `ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db`; uniform-v2 SHA-256 `22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e` | Verify actual merged bytes and native alignment; the BC1 branch itself does not install D38 |
 | Actual BC1 selection | `bounded_carry_version=1`, exact `bounded_carry` registration block; `bc1_typed_audit_v1`, parent shared generation **1**, generic_v10, API renderer **25**, playbook **2**, receipt completion **2**, direct API | Pin full contract/procedure/code/runtime identity; shared-generation-v2 routing and native are unsupported |
-| Hook status | Protected shared-generation hooks are an **unapplied proposal**, diff SHA-256 `10cb0ff8dd77d34ec150ae9b5447a82cdeef4402a477151f220a6c02685b0cb8` | Review/integrate first; applying the patch changes source identity and requires rebuilt registrations |
+| Hook status | The proposal at `3bd3c41f4`, diff SHA-256 `10cb0ff8dd77d34ec150ae9b5447a82cdeef4402a477151f220a6c02685b0cb8`, is applied in `8dd00263a542cc2ace25242271e753c5eaade6ea` | Verify the final merged composition and rebuild registrations for its changed source identity; applied hooks do not establish request fit or launch approval |
 | Schema and source | Complete captured reachable Dataset and CoreDataset definitions, descriptions and annotations; complete original records and source bundle | Pin exact full/core import closures, bundle, chunk/source manifests, profile and context bytes per cell; no final composed closure/registration hash is yet claimed |
 | Worker/partition contract | A17 splits large lists; D39 owning-root wording; D45 selects project bounds | Pin exact reviewed contract and each project's measured partition. Numeric partition metadata stays controller-only as specified below |
 | Carry | `bc1_codec_v1`, `ConcernPacketV1`, `RecordDigestV1`, stage delta v1 | Pin codec/contract/source digests and each predecessor/request identity; a digest is not evidence of scientific support |
@@ -948,10 +956,11 @@ Across all six projects the visible protocol and byte envelopes are fixed;
 project bounds are selected under D45 and independently recorded. Neutral IDs
 remain neutral. Kids First uses actual neutral context with `vocabulary: {}` and
 resource-level scope; it is not sized or generated by silently substituting an
-AI_READI record. D46 approved settings, not arbitrary narrative/citation text.
-The decision note's CHORUS hash `6e3c6b6d…` conflicts with retained actual
-`ac94a74b…` bytes; resolve and pin the exact artifact before registration rather
-than copying that inconsistent digest or rewriting evidence.
+AI_READI record. Context settings and their narratives remain pending owner
+and exact-file scientific review; the retired D46 entry supplies no approval.
+The historical decision note's CHORUS hash `6e3c6b6d…` was incorrect; A23
+retains the actual `ac94a74b…` context bytes. Verify and pin the exact
+selected artifact before registration without rewriting historical evidence.
 
 ## 15. Token caps, visible-byte bounds, call counts and input allowances
 
@@ -977,8 +986,10 @@ With `W` workers and registered fan-in `f` of 1 or 2, BC1 plans
 - audit calls: `W + 1 omission + G + 1 final`;
 - proposed BC1 aggregate output reservation:
   `W × 64,000 + omission_cap + (G + 1) × 64,000`;
-- D49 aggregate input allowance: `max_calls × 1,000,000`, with `max_calls`
-  covering every registered maximum worker, group, omission and final call;
+- aggregate input allowance: an explicit registered value selected from the
+  actual reviewed #5155/BC1 sizing for every admitted worker, group, omission
+  and final call. D49's claimed formula is retired; this draft chooses no
+  replacement cap or unverified project profile;
 - generation, receipt-completion, reconcile, report/regate and permitted repair
   calls are added separately to the full-run cost and failure exposure.
 
@@ -1163,7 +1174,7 @@ reasons.
 
 The following records the October 20 draft's interpretation of its original
 delegation. Search/remote/worktree observations here are historical, not fresh
-exhaustive absence findings. Current D26–D49, the matrix and items 14–16 above
+exhaustive absence findings. D26–D45, D50, the matrix and items 14–16 above
 govern the revised draft; this section does not override them.
 
 1. **v8 records.** The prompt describes "v8 04f (`claudecode_assistant_agent`) and 04g
@@ -1210,9 +1221,12 @@ govern the revised draft; this section does not override them.
 - **The E2 protocol and denominator:** owner review/adoption of item 16's exact
   units/weights, blind inventory and split/dedup rules before E2, without changing
   the directional threshold after seeing outcomes.
-- **Evaluation identities:** D46 settings remain approved; corrected narratives,
-  citations, CHORUS digest inconsistency and per-route readback still need exact
-  verification. Native canary ratings remain separately registered/descriptive.
+- **Context and evaluation identities:** omission/evaluation settings remain
+  pending owner review; D46 is retired. Corrected narratives and citations need
+  exact-file human scientific review, and selected hashes and per-route readback
+  need verification. Preserve A23's current normalized context digests when
+  integrating the decision-record correction. Native canary ratings remain
+  separately registered/descriptive.
 - **Rubric20 version** (#2911, E4).
 - **P3:** adversarial review by a Claude reviewer plus a Codex CLI pass. Each finding
   is filed as an issue and fixed in the PR.
