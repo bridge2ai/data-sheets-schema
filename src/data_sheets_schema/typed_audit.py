@@ -321,7 +321,9 @@ def _omission_wire_prepared(packet, prepared):
 def omission_wire_request(packet, *, derivations=None):
     """Export the captured omission wire; the public default remains unprojected."""
     _, prepared = _open(packet, derivations=derivations)
-    request = _omission_wire_prepared(packet, prepared).request()
+    # An explicit frozen constructor makes the method receiver statically known.
+    wire_prepared = omissions.Prepared(_omission_wire_prepared(packet, prepared).payload_json)
+    request = wire_prepared.request()
     if "omission_wire" in packet:
         request["packet_request_sha256"] = packet["omission_request"]["request_sha256"]
     return request

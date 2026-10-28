@@ -73,6 +73,11 @@ def selected_resources(tmp_path):
         target = selected / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
+    # Selected-tree authority includes A14's executable request closure.
+    for name in sg.REQUEST_CODE:
+        target = selected / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / name, target)
     args = dict(project="CHORUS", label="selected", registration_path=tmp_path / "selected.json",
                 bundle_path=original["inputs"]["bundle"]["path"],
                 chunk_manifest_path=original["inputs"]["chunk_manifest"]["path"],
@@ -111,11 +116,13 @@ def test_default_kids_first_manifest_comes_from_selected_tree(selected_resources
     assert reg["inputs"]["profile"]["name"] == "neutral"
 
 
-@pytest.mark.parametrize("resource", ["prompt", "config", "vocabulary", "full_schema", "core_schema"])
+@pytest.mark.parametrize("resource", ["prompt", "config", "vocabulary", "full_schema", "core_schema", "request_code"])
 def test_missing_selected_resource_refuses_without_fallback(selected_resources, resource):
     selected, original, args = selected_resources
     if resource == "prompt":
         relative = next(iter(sg.ASSET_HASHES))
+    elif resource == "request_code":
+        relative = sg.REQUEST_CODE[0]
     elif resource == "config":
         relative = Path(original["runtime"]["config"]["path"]).relative_to(ROOT)
     elif resource == "vocabulary":
