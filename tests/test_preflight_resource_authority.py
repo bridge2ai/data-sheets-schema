@@ -14,6 +14,7 @@ import sys
 import threading
 
 import pytest
+from click.testing import CliRunner
 
 from scripts import build_api_registrations as builder
 from data_sheets_schema import api_runner as api, shared_generation as sg
@@ -22,6 +23,32 @@ from tests.test_source_heading_runtime_api import draft_files, selected_spec
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.fixture
+def checkout_unchanged(tmp_path_factory):
+    """Include ignored files; exclude Git metadata and this run's scratch tree."""
+    scratch = tmp_path_factory.getbasetemp().resolve()
+
+    def snapshot():
+        entries = {}
+        for directory, dirs, files in os.walk(ROOT):
+            base = Path(directory)
+            dirs[:] = [name for name in dirs
+                       if name != ".git" and (base / name).resolve() != scratch]
+            for name in dirs + files:
+                path = base / name
+                if path == ROOT / ".git":
+                    continue
+                stat = path.lstat()
+                entries[str(path.relative_to(ROOT))] = (
+                    stat.st_mode, stat.st_size, stat.st_mtime_ns, stat.st_ino,
+                )
+        return entries
+
+    before = snapshot()
+    yield
+    assert snapshot() == before, "test changed the checkout outside pytest's scratch tree"
 
 
 def _registration(directory):
@@ -125,9 +152,10 @@ def test_check_uses_selected_prompt_authority_and_restores_cwd(selected_resource
     assert Path.cwd() == before
 
 
-def test_positional_draft_context_worktree_selects_vocabulary(selected_resources):
+def test_positional_draft_context_worktree_selects_vocabulary(selected_resources, checkout_unchanged):
     selected, _, _ = selected_resources
-    vocabulary = selected / builder.DEFAULT_VOCABULARIES_PATH
+    assert not builder.DEFAULT_VOCABULARIES_PATH.is_absolute()
+    vocabulary = selected / "src/data_sheets_schema/b2ai_registry_vocabularies.yaml"
     vocabulary.write_text("vocabularies:\n  SELECTED_TREE: [selected-only]\n")
     before = Path.cwd()
     doc = builder.build_draft_context("CHORUS", None, None, False, selected)
@@ -228,7 +256,7 @@ def test_bootstrap_parses_supported_worktree_spellings(tmp_path, options):
 
 
 @pytest.mark.parametrize("option", ["--worktree=", "-w"])
-def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option):
+def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option, checkout_unchanged):
     selected = tmp_path / "selected"
     selected.mkdir()
     shutil.copyfile(ROOT / "pyproject.toml", selected / "pyproject.toml")
@@ -262,7 +290,7 @@ def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option)
     # and contains no importable dependencies on those supported interpreters.
     safe_path = ["-P"] if sys.version_info >= (3, 11) else []
     command = [sys.executable, "-S", *safe_path, "-B", str(copied), "-p", "CHORUS", "--partition", "chorus", "-l", "foreign", "-o", "prepared", *selection]
-    result = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True, timeout=60)
+    result = subprocess.run(command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
     path = selected / "prepared" / "registration_chorus_foreign.json"
     reg = json.loads(path.read_text())
@@ -272,5 +300,66 @@ def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option)
         assert Path(reg["inputs"][key]["root"]).is_relative_to(selected)
     assert Path(reg["inputs"]["profile"]["vocabulary"]["path"]).is_relative_to(selected)
     assert Path(reg["runtime"]["config"]["path"]).is_relative_to(selected)
-    check = subprocess.run([*command, "--check"], cwd=ROOT, env=env, capture_output=True, text=True, timeout=60)
+    check = subprocess.run([*command, "--check"], cwd=tmp_path, env=env, capture_output=True, text=True, timeout=60)
     assert check.returncode == 0, check.stdout + check.stderr
+
+
+@pytest.mark.parametrize("kind", ["subdirectory", "nested"])
+def test_worktree_must_be_checkout_root(selected_resources, kind):
+    selected, _, args = selected_resources
+    target = selected / kind
+    target.mkdir()
+    if kind == "nested":
+        shutil.copyfile(selected / "pyproject.toml", target / "pyproject.toml")
+        (target / "src/data_sheets_schema").mkdir(parents=True)
+    args["worktree"] = target
+    before = Path.cwd()
+    with pytest.raises(ValueError, match="--worktree must be the root of a data-sheets-schema checkout"):
+        builder.build_registration(**args)
+    assert Path.cwd() == before
+
+
+@pytest.mark.parametrize("missing_package", [False, True], ids=["mixed-namespace", "missing-package"])
+def test_copied_cli_refuses_invalid_import_authority(tmp_path, missing_package):
+    selected = tmp_path / "selected"
+    package = selected / "src/data_sheets_schema"
+    package.mkdir(parents=True)
+    if not missing_package:
+        (package / "api_runner.py").write_text("# Namespace portion; never execute it.\n")
+    copied = tmp_path / "build_api_registrations.py"
+    shutil.copyfile(Path(builder.__file__), copied)
+    site = Path(sys.executable).parent.parent / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"
+    env = dict(os.environ)
+    for key in tuple(env):
+        if key.startswith(("ANTHROPIC_", "CBORG_", "OPENAI_", "D4D_")) or key.endswith(("_API_KEY", "_AUTH_TOKEN", "_ACCESS_TOKEN")):
+            env.pop(key)
+    env.update(PYTHONPATH=os.pathsep.join((str(ROOT / "src"), str(site))), PYTHONDONTWRITEBYTECODE="1")
+    result = subprocess.run(
+        [sys.executable, "-S", "-B", str(copied), "--worktree", str(selected), "--help"],
+        cwd=tmp_path, env=env, capture_output=True, text=True, timeout=60,
+    )
+    expected = ("--worktree must contain the data_sheets_schema source package" if missing_package
+                else "--worktree package imports are mixed with another checkout")
+    assert result.returncode != 0
+    assert expected in result.stderr
+    if not missing_package:
+        assert "selected checkout's own venv" in result.stderr
+        assert "python -S with site-packages on PYTHONPATH" in result.stderr
+
+
+def test_synthesized_context_requires_selected_vocabulary(selected_resources, tmp_path):
+    selected, original, _ = selected_resources
+    (selected / "src/data_sheets_schema/b2ai_registry_vocabularies.yaml").unlink()
+    out_dir = tmp_path / "synthesized"
+    args = ["-p", "CHORUS", "--partition", "chorus", "-l", "missing_vocab", "-o", str(out_dir),
+            "--worktree", str(selected), "--synthesize-draft-context"]
+    for option, key in (("--bundle", "bundle"), ("--chunk-manifest", "chunk_manifest"),
+                        ("--source-manifest", "source_manifest")):
+        args.extend([option, original["inputs"][key]["path"]])
+    before = Path.cwd()
+    result = CliRunner().invoke(builder.cli, args)
+    assert result.exit_code != 0
+    assert isinstance(result.exception, FileNotFoundError)
+    assert "selected worktree vocabulary is missing:" in str(result.exception)
+    assert not out_dir.exists(), "refusal must precede writing a draft context"
+    assert Path.cwd() == before

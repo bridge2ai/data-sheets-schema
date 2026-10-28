@@ -562,7 +562,6 @@ def test_context_precedence_and_worktree_and_check_input_pins(tmp_path: Path) ->
         cli,
         [
             "-p", "CHORUS",
-            "--partition", "chorus",
             "-l", "test_5122",
             "--partition", "chorus",
             "-o", str(out_dir),
@@ -581,7 +580,6 @@ def test_context_precedence_and_worktree_and_check_input_pins(tmp_path: Path) ->
         cli,
         [
             "-p", "CHORUS",
-            "--partition", "chorus",
             "-l", "test_5122_explicit",
             "--partition", "chorus",
             "-o", str(explicit_dir),
