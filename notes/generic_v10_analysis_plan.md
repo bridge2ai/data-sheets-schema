@@ -185,6 +185,59 @@ that condition, after observing the disclosed engineering evidence; they are not
 claimed to have been fixed before any v10 data existed. A later change is a dated
 amendment and condition boundary, not a silent correction to historical results.
 
+### Known v10 values on the predicted metrics
+
+The two assisted CHORUS canaries are the only v10 observations. Their values on
+the metrics the Predictions use are disclosed here, so that every P4 choice of a rule,
+a tolerance or a conversion to "descriptive" is made with them on the record.
+
+They were recomputed read-only from the records in `launch-base`:
+- `receipts.populated_leaves` at P1's pinned `receipts.py` (sha256 `7bfb8470…`);
+- `scripts/recall_target_baseline.py` `target_counts` (sha256 `e8960965…`, this
+  branch);
+- each record's `receipt_completion` and `receipts` blocks.
+
+The full records hash to `ac182648…` (10-20a) and `b1716e82…` (10-22a); the phase-1
+originals `O` to `d3b91e60…` and `440ea561…`. The leaf and coverage figures agree with
+the P3 Claude review's independent recomputation.
+
+| CHORUS record | Row 1: populated leaves, final (phase-1 `O`) | Row 2: coverage as row 2 reads it, receipted / receiptable | D37 at receipt (`O,R1`) | Final-record coverage (`F,Rf`) | Row 3: lineage | Row 3a: parent datasets; versioned processing software |
+|---|---|---|---|---|---|---|
+| v8 `04f` rep1 | 235 | 54/186 = 0.290 (stored v3, final) | — | as row 2 | 1 | 0; 0 |
+| v8 `04f` rep2 | 278 | 83/248 = 0.335 | — | as row 2 | 1 | 0; 0 |
+| v8 `04f` rep3 | 251 | 78/198 = 0.394 | — | as row 2 | 0 | 0; 0 |
+| v8, mean or pooled | 254.7 | 215/632 = 0.340 | — | — | 0.67 | — |
+| v10 `10-20a` (assisted) | 72 (67) | 51/58 = 0.879 (`receipt_completion.before`, `O,R0`) | 58/58 | 58/63 = 0.921 | 0 | 0; 0 |
+| v10 `10-22a` (assisted) | 90 (79) | 52/64 = 0.813 | 64/64 | 64/75 = 0.853 | 1 | 0; 0 |
+
+The D37 values are those in D37's decision text, and they match the records'
+`receipt_completion.after` blocks.
+
+**What these values would imply, if clean records resembled them:**
+- **Row 1** would not hold for CHORUS. Its threshold is 0.9 × 254.7 = 229.2 leaves,
+  and the assisted records have 72 and 90, 28% and 35% of v8's mean.
+- **Row 2** would hold by about 0.55: the pooled ratio is 103/122 = 0.844, against a
+  threshold of 0.340 − 0.05 = 0.290. But each assisted record has fewer receipted
+  leaves (51, 52) than every v8 replicate (54, 83, 78). The ratio rose because the
+  record shrank, which is why row 2 now reports its numerator (Predictions).
+- **Row 3** (CHORUS lineage) would not hold: the assisted mean is 0.5, against v8's
+  0.67, and row 3 needs a strict rise.
+- **Row 3a** would hold for CHORUS: neither record has a parent dataset or a
+  versioned processing-software entry.
+- **The D37 acceptance ratio** (not a prediction) was 1.00 on both. Receipt completion
+  drives it towards 1, which is why item 8's floor rule matters.
+- **Rows 4 and 5** have no measurement: neither record has had an E2-protocol review
+  or a joint rating. Rows 6–8 are not predictions.
+
+**Why they are not evidence for or against the selected condition.** Both canaries ran
+S7 as implemented, with slot descriptions trimmed in generation, and before BC1, the
+board A14 rework, D59 and the D30/D38 rule text. Both were also assisted: 10-20a
+changed registration mid-run and carries a patched model response, and 10-22a's
+ledger was reset by hand mid-run, which bought a second integration call its
+registration forbade (D31, D40). The values may not survive those changes. They are disclosed so that the owner, a later reader and this draft can see
+what was known when the rules were chosen: if a row is made descriptive at P4, the
+P4 record should say that these values were in view.
+
 ## 1. Estimands (P2 item 1)
 
 1. **Feasibility and acceptance.** For each registered cell, the outcome is accepted
