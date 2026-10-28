@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import re
 
+BC1_HOOK_VERSION = 1  # Explicit opt-in; dependencies and registrations must be rebuilt.
 NAME = "shared_generation_v1"
 FORMAT = "shared_generation_registration_v1"
 PROMPT = "src/download/prompts/d4d_generic_arm_prompt_v10.md"
@@ -172,6 +173,8 @@ def role_instruction() -> str:
 
 
 def select(spec) -> dict | None:
+    from .bc1_selection import validate_spec_mode
+    validate_spec_mode(spec)
     version = getattr(spec, "shared_generation_version", 0)
     if type(version) is not int or version not in (0, 1, 2):
         raise ValueError("shared_generation_version must be the integer 0, 1 or 2")
@@ -264,7 +267,8 @@ def parse_registration(raw: bytes) -> dict:
         raise ValueError("unsupported shared registration format")
     _exact(value, {"format", "registration_id", "registration_path", "selection", "inputs",
                    "runtime", "audit_limits", "audit_transport", "receipt", "run"}
-                   | ({"routing"} if version == 2 else set()), "shared registration")
+                   | ({"routing"} if version == 2 else set())
+                   | ({"bounded_carry"} if "bounded_carry" in value else set()), "shared registration")
     if type(value['selection']) is not dict:
         raise ValueError("selected descriptor must be an object")
     if canonical(value["selection"]) != canonical(descriptor(version=version, condition=value['selection'].get('condition'))):
@@ -351,6 +355,9 @@ def parse_registration(raw: bytes) -> dict:
             raise ValueError('routing generation exceeds finite call/request bounds')
         if limits['max_output_tokens'] >= limits['context_limit_tokens']:
             raise ValueError("generation output cap leaves no input context")
+    if "bounded_carry" in value:
+        from .bc1_selection import validate_registration as validate_bc1
+        validate_bc1(value, shared_version=version)
     return value
 
 
@@ -648,6 +655,10 @@ def schema_context(spec, record: str | None = None) -> str:
     Software's induced keys are included for generation before values exist.
     """
     captured = _context_capture(spec)
+    from .bc1_selection import enabled as bc1_enabled
+    if bc1_enabled(spec):
+        from .bc1_context import schema_context as bc1_schema_context
+        return bc1_schema_context(captured, record)
     return memo(spec, 'schema_context', [canonical(schema_pin(captured.full_schema)),
         *[raw for _name, _path, raw in captured.full_schema.sources],
         canonical(record)], lambda: _schema_context(captured, record))
@@ -714,6 +725,10 @@ def require_client(spec, client):
 
 def plan(spec, settings):
     """No client or historical-output discovery; dynamic sizes remain unknown."""
+    from .bc1_selection import enabled as bc1_enabled
+    if bc1_enabled(spec):
+        from .bc1_registration import plan as bc1_plan
+        return bc1_plan(spec, settings)
     from . import api_runner as api
     captured = preflight(spec, settings)
     reg = captured.document()
