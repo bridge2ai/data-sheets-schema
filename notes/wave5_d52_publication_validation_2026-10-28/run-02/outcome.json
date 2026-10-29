@@ -1,0 +1,12 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_d52_publication_labels": 1
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 5.22742308297893
+}

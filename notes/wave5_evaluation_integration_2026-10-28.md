@@ -1,5 +1,12 @@
 # Wave 5 E3x and D52 evaluation integration
 
+**Later publication follow-up:** this report preserves the original073fe89d
+integration result and review constraints. The
+[D52 follow-up](wave5_d52_publication_followup_2026-10-28.md) records D1's label
+repair, owner D61 resolving D2, compact evidence resolving D3, the new
+instrument and121 passing focused tests. Its source is newer than the588-pass
+integration head below; counts are not pooled.
+
 2026-10-28. Refs #5125, #5131, #5132, #5133, #5135, #5136, #5137,
 #2912 and #5121. Prepared for Claude's lead coordination and AGY's publication.
 

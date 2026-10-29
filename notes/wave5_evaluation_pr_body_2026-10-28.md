@@ -1,48 +1,45 @@
-Registered evaluation results need consistent provenance checks and blinding
-before comparison. This change connects the registered runner's retained
-ratings to the comparability audit, shares identity-aware blinding and leakage
-checks, keeps the private review key outside reviewer material, and reports
-recorded bundle identities without treating them as equivalent source exposure.
+Registered evaluation results need consistent provenance and blinding before
+comparison. This change connects retained ratings to the comparability audit,
+shares identity-aware blinding/leakage checks, keeps the private review key
+outside reviewer material, and reports recorded bundle identities without
+assuming equivalent source exposure.
 
-It also implements the owner's two D52 deterministic scoring rules: accept the
-two approved nested governance-contact representations, and omit exactly four
-Q9 regulatory subfields only when `regulated_access` is explicitly false. Q9
-keeps its five-point maximum and explains the reduced field denominator in its
-applicability evidence. This changes the scoring instrument identity; it does
-not add source coverage or rewrite historical scores.
+The evaluator implements D52's approved contact aliases and excludes exactly
+four Q9 regulatory criteria only when regulated_access is explicitly false.
+Owner D61 confirms alias scope includes Rubric10 E2.2. Q9 keeps its five-point
+maximum and now labels only the criteria measured, avoiding claims that
+excluded confidentiality/governance fields were present. These applicability
+changes alter scoring conditions; they do not add source coverage or rewrite
+historical scores.
 
-The merge preserves published E3x ancestry and composes it with #5095 at
-`cf01eb12bbbbde04854163ecb1036cf9a5431e6e`. No new production repair or conflict
-resolution was needed. Protected generation assets, rubrics, contexts and the
-decision record match that base. Target `feat/v10-preflight-scripts` initially,
-then retarget `main` after #5095 lands; preserve the merge ancestry.
+The branch preserves published E3x ancestry and composes with #5095 at
+cf01eb12bbbbde04854163ecb1036cf9a5431e6e. Target feat/v10-preflight-scripts
+initially; retarget main after #5095. Generation assets, rubrics, contexts and
+the decision record match that base. Compact original results replace two
+redundant inventory tarballs in the publication tree; original archives remain
+recoverable from Git and preserved worktrees.
 
-Validation: **588 passed, zero failures/errors/skips/deselections**, including
-the committed-corpus check, at frozen head
-`fbbb2c7599c4a4a98ae27242db9b05c90954a020`. Source and import-origin checks
-passed. See `notes/wave5_evaluation_integration_2026-10-28.md` for the module
-counts, instrument identity, reproduction command and compact evidence digests.
+Validation at distinct heads:
 
-Publication still needs the lead's disposition of Claude's independent D52
-review of `4cd8f2a5191d7cb58d7bf639603a820d38e825d5`, at
-`/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5096_b0978d6e6_d52_4cd8f2a51_claude_review_2026-10-28.md`:
+- Integration fbbb2c7599c4a4a98ae27242db9b05c90954a020: 588 passed,
+  including committed-corpus checks, no failures or skips.
+- Label correction f5d00a9fa0cc1eb058f16122d31ed0db560efccd: baseline canary
+  fails, fixed same canary passes, then 121 focused tests pass with no skips
+  or failures. An earlier invocation with incorrect module names failed
+  before pytest; its diagnostic is preserved.
+- Source/import checks passed. Actual baseline/fixed JSON has unchanged
+  scores, maxima and evidence; only two labels, source-derived instrument
+  identity and run metadata differ. Counts across heads are not pooled.
 
-- **D1:** Q9's top-band label still describes criteria excluded under explicit
-  false; the explanatory applicability note does not fix that label.
-- **D2:** lead/owner confirmation is needed for extending the contact alias to
-  the bare Rubric10 E2.2 criterion, where governance-only content can gain credit.
-- **D3:** approximately 3 MB of inherited D52 inventory tarballs need a lead
-  publication disposition. The new Wave 5 evidence is compact; historical
-  evidence and ancestry have been preserved.
+Final instrument:
+b38117d96e73987f236d4d3d47da5b84a952401537f9a2ae4d2c44bf981fc064.
+See notes/wave5_d52_publication_followup_2026-10-28.md for exact boundaries,
+independent read-only review and artifact digests. Claude's D1–D3 findings
+have local issue-ready dispositions. D4 is a maintenance nit and D5 a
+specification observation outside this correction. Lead review and CI remain.
 
-D4 (future rubric-ID/path robustness) is an optional nit. D5 (the parent
-`regulatory_restrictions` criterion still counts) is an optional specification
-observation, not a defect under the current rule. These findings are recorded
-without adopting new scoring rules. This documentation-only update leaves the
-frozen 588-test result intact; it is not an unconditional merge-readiness claim.
-
-Historical/v8 (#5126) and native E5-direct rating adapters remain design-only.
-This PR does not authorize generation or scoring. Claude's #5164 context/table
-changes and the remaining owner/lead acceptance gates stay separate.
+Historical/v8 #5126 and native E5-direct adapters remain design-only. This PR
+does not authorize generation or scoring. Claude's #5164 context/table work
+remains a separate dependency.
 
 Refs #5125, #5131, #5132, #5133, #5135, #5136, #5137, #2912, #5121.
