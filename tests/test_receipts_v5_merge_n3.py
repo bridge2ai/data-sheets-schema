@@ -5,6 +5,11 @@ import subprocess
 import sys
 import time
 
+# The subprocess uses the parent's dependency paths without requiring a venv,
+# site startup, or the developer's validation harness (works in CI as well).
+if __name__ == "__main__":
+    sys.path[:] = json.loads(sys.argv[1])
+
 import pytest
 
 from data_sheets_schema import receipts as rc
@@ -26,11 +31,11 @@ def probe(pattern, text, mode):
 def test_n3_pathological_pattern_refuses_within_deadline(mode):
     # Reviewer's 9-character polynomial pattern: formerly ~33 seconds at n=320,
     # and check() evaluates it three times when a snapshot is supplied.
-    runner = Path(__file__).resolve().parents[1] / "scripts/adhoc/validate_receipts_v5_merge_20261029.py"
+    tree = Path(rc.__file__).resolve().parents[2]
+    paths = [str(tree / "src"), str(tree), *sys.path]
     start = time.monotonic()
-    result = subprocess.run([sys.executable, "-S", "-B", str(runner),
-                             "--tree", str(Path(rc.__file__).resolve().parents[2]), "--script", __file__,
-                             "--", mode], capture_output=True, text=True, timeout=4, check=True)
+    result = subprocess.run([sys.executable, "-S", "-B", __file__, json.dumps(paths), mode],
+                             capture_output=True, text=True, timeout=4, check=True)
     assert time.monotonic() - start < 4
     value = json.loads(result.stdout)
     if mode == "verify":
@@ -61,4 +66,4 @@ def test_n3_bounded_regex_retains_nonoverlapping_count(pattern, expected):
 
 
 if __name__ == "__main__":
-    print(json.dumps(probe(".*.*.*.*x", "a" * 320, sys.argv[1])))
+    print(json.dumps(probe(".*.*.*.*x", "a" * 320, sys.argv[2])))
