@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def registration(tmp_path):
     return builder.build_registration(
         project="CHORUS", label="wave4_review", registration_path=tmp_path / "registration_chorus_wave4_review.json",
-        write_to_disk=False,
+        partition="chorus", write_to_disk=False,
     )
 
 
@@ -83,6 +83,7 @@ def test_worktree_override_uses_selected_tree_schema_resources(tmp_path):
     # schema/protocol resources. The caller intentionally remains in ROOT.
     reg = builder.build_registration(
         project="CHORUS", label="wave4_foreign_worktree",
+        partition="chorus",
         registration_path=tmp_path / "foreign_registration.json", worktree=target,
         bundle_path=initial["inputs"]["bundle"]["path"],
         chunk_manifest_path=initial["inputs"]["chunk_manifest"]["path"],
