@@ -1280,7 +1280,10 @@ def _spec_profile_disagreement(data: dict[str, Any]) -> str | None:
         schema = {}                        # for_record decides the dated fallback (#1709, F18)
     stated = schema.get("profile")
     from data_sheets_schema.profiles import for_record
-    effective = for_record(data).name if stated is None else stated
+    try:
+        effective = for_record(data).name if stated is None else stated
+    except ValueError as exc:
+        return str(exc)
     if effective != spec["profile"]:
         basis = f" (read as {effective!r})" if stated is None else ""
         return (f"prompts.request.spec.profile is {spec['profile']!r} but schema.profile is "

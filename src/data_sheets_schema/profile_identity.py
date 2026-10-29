@@ -232,17 +232,29 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
     schema = snapshot.get('schema')
     schema = schema if isinstance(schema, dict) else {}
     stated, recorded = schema.get('profile'), schema.get('digest_md5')
-    effective = profiles.for_record({'schema': schema}).name if stated is None else stated
+    selection_error = None
+    try:
+        effective = profiles.for_record(snapshot).name if stated is None else stated
+    except ValueError as exc:
+        effective, selection_error = None, str(exc)
+    basis = ('recorded schema.profile' if stated is not None else
+             'could not select one' if selection_error else
+             'historical study fallback' if effective == profiles.BRIDGE2AI.name else
+             'contemporary neutral fallback')
     context: dict[str, Any] = {
         'status': 'unknown', 'recorded_digest_md5': recorded if isinstance(recorded, str) else None,
         'stated_profile': stated if isinstance(stated, str) else None,
         'effective_profile': effective if isinstance(effective, str) else None,
-        'profile_basis': 'historical study fallback' if stated is None else 'recorded schema.profile',
+        'profile_basis': basis,
         'comparison_basis': None, 'schema_basis': None, 'candidate_digests': {},
         'vocabularies': {}, 'renderer': None, 'finding': None, 'reason': None,
     }
     if not recorded:
-        context.update(status='no_recorded_digest', reason='the record names no digest to compare')
+        context.update(status='no_recorded_digest', finding=selection_error,
+                       reason=selection_error or 'the record names no digest to compare')
+        return context
+    if selection_error:
+        context.update(reason=selection_error, finding=selection_error)
         return context
     if not isinstance(effective, str) or not isinstance(recorded, str):
         context['reason'] = 'malformed profile or digest; handled by record structural validation'
