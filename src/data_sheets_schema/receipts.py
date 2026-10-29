@@ -49,7 +49,6 @@ from __future__ import annotations
 
 import copy
 import math
-import os
 import re
 import unicodedata
 from decimal import Decimal, InvalidOperation
@@ -1043,7 +1042,10 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None,
     (#899) — and `resolution`, the basis of that join; the core path is then
     taken from the resolved path, since that is the entry the core carries."""
     identifier_bases = _validated_identifier_bases(identifier_bases)
-    version = _selected_receipt_version(receipt, instrument_version)
+    # Sidecars have no run registration to resolve: only the caller can select
+    # v5. Neither measured receipt content nor ambient state is an authority.
+    version = 3 if instrument_version is None else instrument_version
+    receipt_instrument(version)
     pmap = core_path_map(full) if full is not None else None
     slots: dict[str, list[dict[str, Any]]] = {}
     for entry in receipt.get("chunks") or []:
@@ -1084,22 +1086,6 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None,
             item["core_path"] = core_path(target, pmap)
         out["slots"][slot] = item
     return out
-
-
-def _selected_receipt_version(receipt: dict[str, Any], explicit: int | None = None,
-                              *, default: int = 3) -> int:
-    """Select v5 only for an explicit caller, typed document marker or opt-in.
-
-    Pure check/completion callers remain pinned by their version argument. An
-    explicit 3/4 also keeps historical claim sidecars independent of ambient env.
-    """
-    if explicit is not None:
-        receipt_instrument(explicit)
-        return explicit
-    marker = receipt.get("receipt_format_version")
-    if (type(marker) is int and marker == 5) or os.environ.get("RECEIPTS_V5_INSTRUMENT") == "1":
-        return 5
-    return default
 
 
 def _value_tokens(node: Any) -> set[str]:
@@ -2018,6 +2004,12 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     manifest_ids = _manifest_ids(manifest)
     entries, findings = _receipt_entries(receipt)
 
+    if "receipt_format_version" in receipt:
+        declared = receipt["receipt_format_version"]
+        if type(declared) is not int or declared != instrument_version:
+            findings.append({"kind": "receipt_format_version_mismatch",
+                             "declared": declared, "selected": instrument_version})
+
     # --- chunks: exactly once each, no strangers, a status with its predicate
     seen: dict[str, int] = {}
     by_status: dict[str, int] = {s: 0 for s in STATUSES}
@@ -2819,7 +2811,9 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
         except Exception as exc:  # noqa: BLE001 — unusable rules must not certify an ambient join
             return {**base, "checked": False,
                     "reason": f"receipt identity rules unavailable: {type(exc).__name__}: {exc}"}
-    version = _selected_receipt_version(rec, default=4 if policy is not None else 3)
+    # select_policy validated the run's registration/provenance above. The
+    # artifact being measured can disagree, but cannot select its instrument.
+    version = policy["registration"]["receipt_instrument_version"] if policy is not None else 3
     block = check(rec, m, texts, full, record_bundle_md5, original,
                   identifier_bases=identifier_bases,
                   **({"instrument_version": version} if version != 3 else {}))

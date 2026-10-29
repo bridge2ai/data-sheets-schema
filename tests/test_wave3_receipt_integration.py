@@ -25,7 +25,7 @@ def test_tool_vacuity_is_versioned(version):
     assert receipt_floors(block)["receipts vacuous"] == (0 if version == 5 else 1)
 
 
-def test_tool_only_explicit_v5_disk_check_reaches_canary(tmp_path, monkeypatch):
+def test_tool_only_receipt_marker_cannot_activate_v5_disk_check(tmp_path, monkeypatch):
     from data_sheets_schema.chunking import build_manifest, dump_manifest
     monkeypatch.delenv("RECEIPTS_V5_INSTRUMENT", raising=False)
     bundle = tmp_path / "P_preprocessed.txt"
@@ -44,11 +44,12 @@ def test_tool_only_explicit_v5_disk_check_reaches_canary(tmp_path, monkeypatch):
     receipt.write_text(yaml.safe_dump(rec))
     block = rc.block_for(full, receipt, bundle, manifest["bundle_md5"], expected=True, manifest=manifest_path)
     assert block["checked"]
-    assert block["instrument"] == rc.RECEIPTS_V5_INSTRUMENT
-    assert block["tool_receipts"]["verified"] == count
+    assert block["instrument"] == rc.RECEIPTS_INSTRUMENT
+    assert "tool_receipts" not in block
     assert block["snippets"]["verified"] == 0
     assert block["slots"]["with_receipt"] == 1
-    assert all(value == 0 for value in receipt_floors(block).values())
+    assert receipt_floors(block)["receipts vacuous"] == 1
+    assert any(f["kind"] == "receipt_format_version_mismatch" for f in block["findings"])
 
 
 def test_legacy_origin_key_and_digest_stay_identical():

@@ -140,7 +140,9 @@ def test_sidecar_and_completion_explicit_v4_ignore_ambient_v5(monkeypatch):
     doc["receipt_format_version"] = 5
     assert rc.claim_receipts(doc, instrument_version=4)["slots"]["description"]["receipts"] == [
         {"chunk": "c001", "snippet": TEXT}]
-    assert rc.claim_receipts(doc)["slots"]["description"]["receipts"][0]["supports"] == "NEUTRAL"
+    assert rc.claim_receipts(doc)["slots"]["description"]["receipts"] == [
+        {"chunk": "c001", "snippet": TEXT}]
+    assert rc.claim_receipts(doc, instrument_version=5)["slots"]["description"]["receipts"][0]["supports"] == "NEUTRAL"
     assert rc.uncovered_receiptable_leaves(doc, MANIFEST, TEXTS, {"description": TEXT}) == []
 
 

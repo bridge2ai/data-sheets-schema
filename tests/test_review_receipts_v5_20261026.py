@@ -147,7 +147,7 @@ def test_default_claim_receipt_preserves_historical_output_shape():
 
 
 @pytest.mark.parametrize("selection", ["env", "document"])
-def test_declared_v5_optin_reaches_real_block_for(tmp_path, monkeypatch, selection):
+def test_untrusted_v5_optin_cannot_select_real_block_for(tmp_path, monkeypatch, selection):
     from data_sheets_schema.chunking import build_manifest, dump_manifest
     bundle = tmp_path / "P_preprocessed.txt"
     bundle.write_text(TEXT)
@@ -167,7 +167,7 @@ def test_declared_v5_optin_reaches_real_block_for(tmp_path, monkeypatch, selecti
     receipt_path.write_text(yaml.safe_dump(rp))
     block = rc.block_for(full, receipt_path, bundle, MD5, expected=True, manifest=manifest_path)
     assert block["checked"]
-    assert block["instrument"] == rc.RECEIPTS_V5_INSTRUMENT
+    assert block["instrument"] == rc.RECEIPTS_INSTRUMENT
 
 
 def test_tool_only_v5_receipt_is_not_vacuous():
