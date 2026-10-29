@@ -4,11 +4,19 @@
 # Generality G1, 2026-10-29; preserves previous release entries verbatim.
 import hashlib
 from pathlib import Path
+import sys
 
 schema = Path(__file__).resolve().parents[2] / 'src/data_sheets_schema/schema'
 history = schema / 'release_history.yaml'
 text = history.read_text()
-assert '  - version: 3.1.0\n' not in text
+if sys.argv[1:] == ['--refresh-unpublished']:
+    # N7: this branch's 3.1.0 release has not been published. Preserve every
+    # previous release byte; refresh only the unpublished entry after rebuild.
+    text, current = text.split('  - version: 3.1.0\n')
+    assert '  - version:' not in current
+else:
+    assert not sys.argv[1:]
+    assert '  - version: 3.1.0\n' not in text
 addition = '  - version: 3.1.0\n    declared: 2026-10-29\n'
 for kind, stem in (('full', 'data_sheets_schema'), ('core', 'data_sheets_schema_core')):
     for product, suffix in (('source', ''), ('merged', '_all')):
@@ -17,6 +25,7 @@ for kind, stem in (('full', 'data_sheets_schema'), ('core', 'data_sheets_schema_
 addition += ('    note: >-\n'
              '      D66/F6 declares EDAM Data/Format and IANA media-type term sources\n'
              '      for Instance.data_substrate. The selected profile may additionally\n'
-             '      supply its pinned registry. Historical schema hashes stay unchanged.\n')
+             '      supply its pinned registry. N7 declares the EDAM CURIE prefix.\n'
+             '      Historical schema hashes stay unchanged.\n')
 history.write_text(text + addition)
 assert history.read_text() == text + addition

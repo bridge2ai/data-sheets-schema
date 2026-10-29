@@ -11,6 +11,7 @@ see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"
 
 prefixes:
+  EDAM: http://edamontology.org/
   biolink: https://w3id.org/biolink/vocab/
   d4d: https://w3id.org/bridge2ai/data-sheets-schema/
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/

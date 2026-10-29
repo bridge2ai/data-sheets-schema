@@ -9,6 +9,15 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES = 'EDAM Data, EDAM Format, IANA media types'
 
 
+def test_edam_curie_prefix_survives_full_and_core_generation():
+    from linkml_runtime.utils.schemaview import SchemaView
+    for name in ('data_sheets_schema_all.yaml', 'data_sheets_schema_core_all.yaml'):
+        view = SchemaView(str(ROOT / 'src/data_sheets_schema/schema' / name))
+        assert str(view.schema.prefixes['EDAM'].prefix_reference) == 'http://edamontology.org/'
+        for curie in ('EDAM:data_0006', 'EDAM:format_3752'):
+            assert str(view.namespaces().uri_for(curie)) == 'http://edamontology.org/' + curie.split(':')[1]
+
+
 def test_declared_substrate_sources_survive_merge_and_neutral_rendering():
     schema = ROOT / 'src/data_sheets_schema/schema'
     for filename in ('D4D_Composition.yaml', 'data_sheets_schema_all.yaml',

@@ -83,6 +83,9 @@ prefixes:
   shex:
     prefix_prefix: shex
     prefix_reference: http://www.w3.org/ns/shex#
+  EDAM:
+    prefix_prefix: EDAM
+    prefix_reference: http://edamontology.org/
   rai:
     prefix_prefix: rai
     prefix_reference: http://mlcommons.org/croissant/RAI/
