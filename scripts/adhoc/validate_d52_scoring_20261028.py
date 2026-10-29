@@ -8,6 +8,7 @@ import importlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -22,6 +23,17 @@ common.ROOT = ROOT
 PROTECTED = ('.claude/commands/d4d-uniform-rules-v2.md', 'src/download/prompts/d4d_generic_arm_prompt_v10.md',
              'src/data_sheets_schema/shared_generation.py', 'src/download/prompts/canonical_hashes.yaml',
              'src/data_sheets_schema/api_Generation_v2.py')
+
+
+def selected_nodes(options):
+    paths = ['tests/' + module.replace('.', '/') + '.py' for module in options.module]
+    if options.test_node is None:
+        return paths
+    parts = options.test_node.split('::')
+    if (len(paths) != 1 or len(parts) != 2 or parts[0] != paths[0]
+            or not re.fullmatch(r'[A-Za-z_]\w*', parts[1])):
+        raise ValueError('one exact function from the one selected module is required')
+    return [options.test_node]
 
 
 def deny_live(event, args):
@@ -56,7 +68,7 @@ def child(options):
     import pytest
     args = ['-q', '-p', 'no:cacheprovider', '--basetemp', str(options.output / 'cases'),
             '--junitxml', str(options.output / 'pytest.xml'),
-            *('tests/' + module.replace('.', '/') + '.py' for module in options.module)]
+            *selected_nodes(options)]
     common.save(options.output / 'pytest-command.json', {'args': args, 'cwd': str(ROOT)})
     try:
         return int(pytest.main(args))
@@ -65,6 +77,7 @@ def child(options):
 
 
 def run(options):
+    selected_nodes(options)
     output = options.output
     if output.is_relative_to(ROOT):
         raise ValueError('evidence must be outside frozen tree')
@@ -89,6 +102,8 @@ def run(options):
     command = [sys.executable, '-S', '-P', '-B', str(Path(__file__).resolve()), '--child', '--output', str(output)]
     for module in options.module:
         command += ['--module', module]
+    if options.test_node:
+        command += ['--test-node', options.test_node]
     common.save(output / 'plan.json', {'command': command, 'head': options.expect_head, 'base': options.base,
         'modules': options.module, 'credential_names_removed': removed, 'changed_paths': changed,
         'scope': 'Offline selected modules; Python audit guard does not isolate arbitrary child binaries.'})
@@ -113,6 +128,8 @@ def run(options):
                 counts[module] += 1
             seen.add(identity)
     complete = all((output / f'origins-{stage}.json').is_file() for stage in ('before', 'after'))
+    if options.test_node:
+        complete = complete and seen == {('tests.' + options.module[0], options.test_node.split('::')[1])}
     outcome = {'returncode': code, 'source_unchanged': before == after, 'wall_seconds': time.monotonic() - start,
                'passed_cases_by_module': counts, 'invalid_junit_cases': invalid, 'skipped': skipped,
                'scientific_acceptance': 'not_assessed',
@@ -129,6 +146,7 @@ if __name__ == '__main__':
     parser.add_argument('--expect-head')
     parser.add_argument('--base')
     parser.add_argument('--child', action='store_true')
+    parser.add_argument('--test-node')
     args = parser.parse_args()
     args.output = args.output.resolve()
     raise SystemExit(child(args) if args.child else run(args))
