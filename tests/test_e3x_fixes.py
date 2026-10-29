@@ -11,6 +11,7 @@ from tests.test_audit_evaluation_comparability import (
     isolated_execution_locks, no_network, no_unmocked_runtime,
     registered_generation_inputs, registered_prepared, registered_case,
     registered_audit, registered_problem, registered_roster,
+    rewrite_plan,
 )
 
 
@@ -63,5 +64,14 @@ def test_f7_untargeted_registered_tuple_stays_visibly_pending(registered_case):
     assert queued["reasons"] == ["pending_target_selection"]
     assert queued["action"] == "select_evaluator_and_context_targets"
     assert "pending_target_selection" in audit.markdown(result)
+
+
+def test_f11_plan_records_yaml_emitter_and_audit_names_drift(registered_case):
+    _, output, prepared = registered_case
+    identity = prepared.document()["blinding"]
+    assert identity["pyyaml_version"] == yaml.__version__
+    assert identity["dumper_class"] == "yaml.dumper.SafeDumper"
+    rewrite_plan(output, lambda plan: plan["blinding"].update(pyyaml_version="different-version"))
+    assert registered_problem(registered_audit(registered_case)) == ["registered_yaml_emitter_version_mismatch"]
 
 

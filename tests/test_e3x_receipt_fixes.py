@@ -10,6 +10,7 @@ from tests.test_audit_evaluation_comparability import (
     audit, isolated_execution_locks, no_network, no_unmocked_runtime,
     registered_generation_inputs, registered_prepared, registered_case,
     registered_audit, registered_problem, rewrite_plan, save,
+    anchor_synthetic_receipt,
 )
 
 
@@ -106,3 +107,19 @@ def test_f8_started_attempt_is_durable_before_directory_creation(registered_prep
     assert not registered_problem(result), result["registered_evaluations"]
     assert result["totals"]["bound_registered_rating_files"] == 1
     assert result["registered_evaluations"][0]["attempts"][1]["reason"] == "registered_attempt_failed_or_incomplete"
+
+
+def test_f12_reported_panel_count_uses_actual_ratings(registered_case):
+    _, output, _ = registered_case
+    receipt = json.loads((output / "receipt.json").read_bytes())
+    receipt.update(status="incomplete", ratings=receipt["ratings"][:1], attempts=receipt["attempts"][:1])
+    save(output / "receipt.json", receipt)
+    for index in (2, 3):
+        shutil.rmtree(output / f"rating-{index:03d}")
+    anchor_synthetic_receipt(output)
+    result = registered_audit(registered_case)
+    assert not registered_problem(result)
+    block = result["records"][0]["evaluations"]["rubric20"]
+    assert block["repeat_panel"]["reported_n_at_least_three"] is False
+    assert block["repeat_panel"]["declared_n"] == [1]
+    assert block["files"][0]["planned_repeat_n"] == 3

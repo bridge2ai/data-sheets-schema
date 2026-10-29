@@ -30,7 +30,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema import agent_pin
 from data_sheets_schema.evaluation_context import context_digest, normalize_context, unwrap_document
 from data_sheets_schema.evaluation.validate import validate_evaluation
-from data_sheets_schema.evaluation.run_identity import same_run, blinding_identity, forbidden_blinding_identities
+from data_sheets_schema.evaluation.run_identity import same_run, blinding_identity, forbidden_blinding_identities, yaml_emitter_identity
 from data_sheets_schema.evaluation.cohort_manifest import read_cohort
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from data_sheets_schema.semantic_scope import validate_scope
@@ -507,6 +507,11 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         # merging. Later package failures belong to the package, not the record.
         package["record"] = record
         blinding = plan.get("blinding")
+        emitter = yaml_emitter_identity()
+        require(mapping(blinding).get("pyyaml_version") == emitter["pyyaml_version"],
+                "registered_yaml_emitter_version_mismatch")
+        require(mapping(blinding).get("dumper_class") == emitter["dumper_class"],
+                "registered_yaml_dumper_class_mismatch")
         require(blinding == blinding_identity(run, provenance["run"], mapping(blinding).get("arm"), blind.BLINDING_VERSION),
                 "registered_blinding_unsupported_or_mismatched")
         blinded = blind.blind_input(original, blind.Record(blinding["arm"], run["project"], run["label"],
@@ -657,7 +662,8 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                 "evaluator": runtime["canonical_model"], "model_name": runtime["canonical_model"],
                 "context_block_present": True, "context_hash": plan["context_sha256"],
                 "input_hashes": {"input_sha256": sha(blinded)}, "session_id": session,
-                "declared_repeat_n": plan["repeat_count"], "reasons": reasons, "pending": pending,
+                "declared_repeat_n": len(ratings), "planned_repeat_n": plan["repeat_count"],
+                "reasons": reasons, "pending": pending,
                 "contract_checked": True, "eligible_for_condition_review": not reasons and not pending,
                 "source": "registered_blinded", "input_condition": condition,
                 "manifest_sha256": sha(manifest_raw), "receipt_sha256": sha(receipt_raw),

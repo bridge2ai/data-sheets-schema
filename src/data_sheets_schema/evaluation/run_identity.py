@@ -28,6 +28,12 @@ def same_run(left, right):
         return False
 
 
+def yaml_emitter_identity():
+    import yaml
+    return {"pyyaml_version": yaml.__version__,
+            "dumper_class": f"{yaml.SafeDumper.__module__}.{yaml.SafeDumper.__qualname__}"}
+
+
 def blinding_identity(run, provenance_run, comparison_arm, version):
     """Comparison arm is declared; condition and method come from bound runs."""
     condition = provenance_run.get("condition")
@@ -37,7 +43,7 @@ def blinding_identity(run, provenance_run, comparison_arm, version):
     replicate = provenance_run.get("replicate")
     if replicate is not None and (type(replicate) is not int or replicate < 1):
         raise ValueError("blinding replicate must be a positive integer when recorded")
-    return {"version": version, "arm": comparison_arm, "input_arm": run["arm"],
+    return {"version": version, **yaml_emitter_identity(), "arm": comparison_arm, "input_arm": run["arm"],
             "project": run["project"], "label": run["label"], "condition": condition,
             "method": run["method"], "replicate_token": f"rep{replicate}" if replicate else None}
 
