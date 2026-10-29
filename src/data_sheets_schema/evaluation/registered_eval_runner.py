@@ -32,7 +32,7 @@ from data_sheets_schema.resources import resource_path
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from data_sheets_schema.semantic_scope import validate_scope
 from data_sheets_schema.evaluation.validate import validate_evaluation
-from data_sheets_schema.evaluation.run_identity import same_run
+from data_sheets_schema.evaluation.run_identity import same_run, blinding_identity, forbidden_blinding_identities
 
 CBORG_BASE_URL = "https://api.cborg.lbl.gov"
 FORMAT = "registered_semantic_evaluation_v1"
@@ -240,7 +240,7 @@ def prepare(
     max_cost_dollars="5", runtime: Path | None = None,
     runtime_sha256: str | None = None, runtime_version: str | None = None,
     record_sha256: str | None = None, registration_sha256: str | None = None,
-    provenance: Path, provenance_sha256: str, record_role: str = "full",
+    provenance: Path, provenance_sha256: str, comparison_arm: str, record_role: str = "full",
     effort: str = "high", canonical_model: str | None = None,
     context_window: int | None = None,
 ) -> PreparedEvaluation:
@@ -348,11 +348,11 @@ def prepare(
         raise ValueError("blinding implementation has an unexpected source path")
     take(Path(__file__))
     take(pack_source)
-    blinding = {"version": blind.BLINDING_VERSION,
-                **{key: reg["run"][key] for key in ("arm", "project", "label")}}
+    blinding = blinding_identity(reg["run"], prior["run"], comparison_arm, blind.BLINDING_VERSION)
     blinded = blind.blind_input(original, blind.Record(
-        reg["run"]["arm"], reg["run"]["project"], reg["run"]["label"],
-        Path(record).absolute(), _sha(original)), forbidden=(str(registration), str(Path(provenance).absolute())))
+        comparison_arm, reg["run"]["project"], reg["run"]["label"],
+        Path(record).absolute(), _sha(original), input_arm=reg["run"]["arm"]),
+        forbidden=(str(registration), str(Path(provenance).absolute()), *forbidden_blinding_identities(blinding)))
     selected = select_semantic_instrument(rubric, instrument_version)
     resources = {}
     for rel in (selected.definition_path, selected.rubric_path,
@@ -849,6 +849,7 @@ def main(argv=None) -> int:
     parser.add_argument("--context-sha256", required=True)
     parser.add_argument("--provenance", type=Path, required=True)
     parser.add_argument("--provenance-sha256", required=True)
+    parser.add_argument("--comparison-arm", required=True, help="Declared comparison identity to blind")
     parser.add_argument("--record-role", choices=("full", "core"), default="full")
     parser.add_argument("--registration-sha256")
     parser.add_argument("--record-sha256")

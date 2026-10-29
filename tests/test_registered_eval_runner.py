@@ -97,6 +97,7 @@ def registration(tmp_path_factory):
         canonical_model="claude-opus-5", context_window=1_000_000,
         runtime_sha256=sha(runtime.read_bytes()), runtime_version="2.1.269", max_cost_dollars="5",
         provenance=provenance, provenance_sha256=sha(provenance.read_bytes()),
+        comparison_arm="v10",
     )
 
 
@@ -233,9 +234,10 @@ def test_runner_uses_actual_registered_arm_and_same_public_gate(registration, tm
     raw = yaml.safe_dump({"Dataset": with_metadata} if wrapper else with_metadata).encode()
     options = rebind_record(registration, tmp_path, raw)
     selected = runner.prepare(**options)
-    assert selected.document()["blinding"] == {"version": blind.BLINDING_VERSION,
-                                                **{key: run[key] for key in ("arm", "project", "label")}}
-    record = blind.Record(run["arm"], run["project"], run["label"], options["record"], sha(raw))
+    identity = selected.document()["blinding"]
+    assert identity["arm"] == "v10" and identity["input_arm"] == run["arm"]
+    assert identity["condition"] == "generic_v10" and identity["method"] == run["method"]
+    record = blind.Record("v10", run["project"], run["label"], options["record"], sha(raw), input_arm=run["arm"])
     assert selected.blinded == blind.blind_input(raw, record, forbidden=(
         str(options["registration"]), str(options["provenance"])))
     assert yaml.safe_load(selected.blinded) == ({"Dataset": scientific} if wrapper else scientific)
@@ -243,8 +245,8 @@ def test_runner_uses_actual_registered_arm_and_same_public_gate(registration, tm
 
 
 @pytest.mark.parametrize("raw, reason", [
-    (b"arm: v10\nid: example:record\n", "ambiguous root arm"),
-    (b"Dataset:\n  id: example:record\n  arm: v10\n", "ambiguous root arm"),
+    (b"arm: another-arm\nid: example:record\n", "ambiguous root arm"),
+    (b"Dataset:\n  id: example:record\n  arm: another-arm\n", "ambiguous root arm"),
     (b"id: example:record\nresources:\n- arm: v10\n", "nested provenance"),
     (b"id: example:record\nmodel: opaque-generator\n", "ambiguous root model"),
     (b"id: example:record\ndescription: claude-opus-5\n", "model identifier"),

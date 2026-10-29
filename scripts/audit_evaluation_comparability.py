@@ -29,7 +29,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema import agent_pin
 from data_sheets_schema.evaluation_context import context_digest, normalize_context, unwrap_document
 from data_sheets_schema.evaluation.validate import validate_evaluation
-from data_sheets_schema.evaluation.run_identity import same_run
+from data_sheets_schema.evaluation.run_identity import same_run, blinding_identity, forbidden_blinding_identities
 from data_sheets_schema.evaluation.cohort_manifest import read_cohort
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from data_sheets_schema.semantic_scope import validate_scope
@@ -477,12 +477,12 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         # merging. Later package failures belong to the package, not the record.
         package["record"] = record
         blinding = plan.get("blinding")
-        require(blinding == {"version": blind.BLINDING_VERSION,
-                            **{key: run[key] for key in ("arm", "project", "label")}},
+        require(blinding == blinding_identity(run, provenance["run"], mapping(blinding).get("arm"), blind.BLINDING_VERSION),
                 "registered_blinding_unsupported_or_mismatched")
-        blinded = blind.blind_input(original, blind.Record(run["arm"], run["project"], run["label"],
-            Path(plan["record"]["path"]), sha(original)), forbidden=(
-                plan["generation_registration"]["path"], plan["generation_provenance"]["path"]))
+        blinded = blind.blind_input(original, blind.Record(blinding["arm"], run["project"], run["label"],
+            Path(plan["record"]["path"]), sha(original), input_arm=run["arm"]), forbidden=(
+                plan["generation_registration"]["path"], plan["generation_provenance"]["path"],
+                *forbidden_blinding_identities(blinding)))
         require(capture.take("record.yaml") == blinded and plan.get("blinded_input_sha256") == sha(blinded),
                 "registered_blinded_input_mismatch")
         context_raw = original_pin("applicability_context")

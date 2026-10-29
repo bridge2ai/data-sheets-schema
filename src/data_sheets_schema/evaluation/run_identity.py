@@ -26,3 +26,21 @@ def same_run(left, right):
         return normalized_run(left) == normalized_run(right)
     except (ValueError, TypeError):
         return False
+
+
+def blinding_identity(run, provenance_run, comparison_arm, version):
+    """Comparison arm is declared; condition and method come from bound runs."""
+    condition = provenance_run.get("condition")
+    for value in (comparison_arm, condition, run["method"]):
+        if not isinstance(value, str) or not value.strip() or value != value.strip():
+            raise ValueError("blinding requires declared comparison arm, condition and method")
+    replicate = provenance_run.get("replicate")
+    if replicate is not None and (type(replicate) is not int or replicate < 1):
+        raise ValueError("blinding replicate must be a positive integer when recorded")
+    return {"version": version, "arm": comparison_arm, "input_arm": run["arm"],
+            "project": run["project"], "label": run["label"], "condition": condition,
+            "method": run["method"], "replicate_token": f"rep{replicate}" if replicate else None}
+
+
+def forbidden_blinding_identities(identity):
+    return tuple(identity[key] for key in ("condition", "method", "replicate_token") if identity[key])

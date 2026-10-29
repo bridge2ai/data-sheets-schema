@@ -99,6 +99,7 @@ class Record:
     label: str
     source_path: Path
     source_sha256: str | None = None
+    input_arm: str | None = None
 
     def __post_init__(self):
         for name in ("arm", "project", "label"):
@@ -236,7 +237,7 @@ def _strip(raw: bytes, record: Record) -> tuple[bytes, set[str]]:
                 identifiers.update(_metadata_identifiers({key: item}))
                 continue
             if key == "arm":
-                if item != record.arm:
+                if item not in (record.arm, record.input_arm):
                     raise ValueError("ambiguous root arm; explicit blinding review required")
                 continue
             if key == "label" and item == record.label:
@@ -337,6 +338,8 @@ def _identity_blind(raw: bytes, record: Record, forbidden=()) -> tuple[bytes, se
     if any(not isinstance(item, str) for item in identifiers):
         raise ValueError("forbidden blinding identifiers must be strings")
     blinded, metadata_ids = _strip(raw, record)
+    if record.input_arm is not None:
+        metadata_ids.discard(record.input_arm)
     identifiers.update((record.arm, record.label, str(record.source_path)))
     identifiers.update(metadata_ids)
     _leakage(blinded, identifiers, yaml_document=True)
