@@ -221,6 +221,10 @@ scope:
   CHORUS:
     referent: CHoRUS dataset
     referent_id: https://chorus4ai.org/
+    # D04 (#5120): the document corpus carries no release record or dataset DOI
+    # for CHORUS (the XNBOPG RO-Crate is excluded by crate_manifest.yaml), so
+    # the omission context's release field is null rather than the landing page.
+    release: null
     referent_note: >-
       No dataset DOI appears in any CHORUS source document; the project site is
       the identifier the records themselves use.
