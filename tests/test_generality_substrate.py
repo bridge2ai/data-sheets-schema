@@ -23,7 +23,7 @@ def test_declared_substrate_sources_survive_merge_and_neutral_rendering():
     assert SOURCES in schema_digest.digest_text('Dataset', profile=BRIDGE2AI)
 
 
-def test_older_schema_has_neutral_fallback_without_profile_vocabulary(tmp_path):
+def test_unannotated_schema_renders_no_substrate_sources(tmp_path):
     # Simulate the historical schema shape without relying on an offline Git
     # merge object being available in the eventual cherry-picked checkout.
     document = yaml.safe_load((ROOT / 'src/data_sheets_schema/schema/data_sheets_schema_all.yaml').read_bytes())
@@ -32,5 +32,5 @@ def test_older_schema_has_neutral_fallback_without_profile_vocabulary(tmp_path):
     older = tmp_path / 'without_substrate_annotation.yaml'
     older.write_text(yaml.safe_dump(document, sort_keys=False))
     rendered = schema_digest.digest_text('Dataset', older, profile=NEUTRAL)
-    assert SOURCES in rendered
+    assert SOURCES not in rendered
     assert 'B2AI_SUBSTRATE:' not in rendered
