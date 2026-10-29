@@ -75,11 +75,12 @@ classes:
           "d4d:docExample": "medical imaging studies"
       data_substrate:
         description: >
-          Type of data (e.g., raw text, images) as a term from the pinned
-          standards registry. A *term*, not a description: prose characterising
+          Type or format of data (e.g., raw text, images) as an EDAM Data or
+          Format term URI, an IANA media-type URI, or a term from the selected
+          profile's pinned standards registry. A *term*, not a description: prose characterising
           the instances — "multimodal per-participant records comprising
           tabular survey and clinical data" — belongs in `instance_type`, which
-          is ranged `string` for exactly that. Where no registry term fits,
+          is ranged `string` for exactly that. Where no declared term fits,
           prefer omission here and describe it there.
         # Range deliberately kept `uriorcurie` (#456). All 22 unresolvable
         # values are prose, but the remedy is not to widen the range: the
@@ -92,6 +93,8 @@ classes:
         range: uriorcurie
         values_from:
           - B2AI_SUBSTRATE
+        annotations:
+          "d4d:termSources": "EDAM Data, EDAM Format, IANA media types"
         slot_uri: dcterms:type
       counts:
         description: >

@@ -15,7 +15,7 @@ see_also:
 - https://bridge2ai.github.io/data-sheets-schema
 - src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 id: https://w3id.org/bridge2ai/data-sheets-schema/core-schema
-version: 3.0.0
+version: 3.1.0
 license: MIT
 prefixes:
   AIO:
@@ -7937,12 +7937,17 @@ classes:
         range: string
       data_substrate:
         name: data_substrate
-        description: 'Type of data (e.g., raw text, images) as a term from the pinned
-          standards registry. A *term*, not a description: prose characterising the
-          instances — "multimodal per-participant records comprising tabular survey
-          and clinical data" — belongs in `instance_type`, which is ranged `string`
-          for exactly that. Where no registry term fits, prefer omission here and
-          describe it there.
+        annotations:
+          d4d:termSources:
+            tag: d4d:termSources
+            value: EDAM Data, EDAM Format, IANA media types
+        description: 'Type or format of data (e.g., raw text, images) as an EDAM Data
+          or Format term URI, an IANA media-type URI, or a term from the selected
+          profile''s pinned standards registry. A *term*, not a description: prose
+          characterising the instances — "multimodal per-participant records comprising
+          tabular survey and clinical data" — belongs in `instance_type`, which is
+          ranged `string` for exactly that. Where no declared term fits, prefer omission
+          here and describe it there.
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition

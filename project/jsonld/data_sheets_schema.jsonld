@@ -6,7 +6,7 @@
     "https://bridge2ai.github.io/data-sheets-schema"
   ],
   "id": "https://w3id.org/bridge2ai/data-sheets-schema",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "imports": [
     "linkml:types",
     "D4D_Base_import",
@@ -4951,7 +4951,14 @@
     },
     {
       "name": "instance__data_substrate",
-      "description": "Type of data (e.g., raw text, images) as a term from the pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
+      "annotations": [
+        {
+          "tag": "d4d:termSources",
+          "value": "EDAM Data, EDAM Format, IANA media types",
+          "@type": "Annotation"
+        }
+      ],
+      "description": "Type or format of data (e.g., raw text, images) as an EDAM Data or Format term URI, an IANA media-type URI, or a term from the selected profile's pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no declared term fits, prefer omission here and describe it there.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
         "http://purl.org/dc/terms/type"
@@ -10660,7 +10667,14 @@
         },
         {
           "name": "data_substrate",
-          "description": "Type of data (e.g., raw text, images) as a term from the pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no registry term fits, prefer omission here and describe it there.\n",
+          "annotations": [
+            {
+              "tag": "d4d:termSources",
+              "value": "EDAM Data, EDAM Format, IANA media types",
+              "@type": "Annotation"
+            }
+          ],
+          "description": "Type or format of data (e.g., raw text, images) as an EDAM Data or Format term URI, an IANA media-type URI, or a term from the selected profile's pinned standards registry. A *term*, not a description: prose characterising the instances \u2014 \"multimodal per-participant records comprising tabular survey and clinical data\" \u2014 belongs in `instance_type`, which is ranged `string` for exactly that. Where no declared term fits, prefer omission here and describe it there.\n",
           "values_from": [
             "B2AI_SUBSTRATE"
           ],
@@ -14336,9 +14350,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-09-16T11:00:40",
-  "source_file_size": 35275,
-  "generation_date": "2026-09-16T12:20:23",
+  "source_file_date": "2026-10-29T04:04:24",
+  "source_file_size": 35269,
+  "generation_date": "2026-10-29T04:04:28",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

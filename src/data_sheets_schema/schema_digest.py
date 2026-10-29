@@ -169,6 +169,7 @@ TERM_SOURCES_ANNOTATION = "d4d:termSources"
 #: schema carries it, and it wins over this table.
 TERM_SOURCES: dict[tuple[str, str], str] = {
     ("Instance", "data_topic"): "GO, MeSH, EFO, NCIT",
+    ("Instance", "data_substrate"): "EDAM Data, EDAM Format, IANA media types",
 }
 
 _VOCABULARIES: dict[str, dict[str, str]] | None = None

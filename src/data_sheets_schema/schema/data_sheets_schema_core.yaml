@@ -14,7 +14,7 @@ description: |-
 # select and restrict slots the shared modules define, and a core record is
 # derived from a full record. By policy the core carries the full schema's
 # version and moves with it (#1874); the two are released together.
-version: 3.0.0
+version: 3.1.0
 license: MIT
 see_also:
   - https://bridge2ai.github.io/data-sheets-schema

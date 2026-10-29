@@ -38,3 +38,13 @@ releases:
       profile's digest md5 moved; the entry points, merged files and edited
       modules did. See
       notes/schema_release_3.0.0_2026-09-16.md.
+  - version: 3.1.0
+    declared: 2026-10-29
+    full_source_sha256: 0ac0ad99c6e74c51ed9586290bf294a77e9c553c39110fb3da5881494f5e6909
+    full_merged_sha256: 1af17d22426e2083a2636ac87fb68ce2f6dd6ee861c946361a3ebb772e635643
+    core_source_sha256: 9ced09cfaa57a5ead99a048978353c6d5db7c515f0c56774a503ea8167381bac
+    core_merged_sha256: b3bc7fb69a098efa9093f240bd4699b0a24e1855fd48d6bdb3016c108e4f8678
+    note: >-
+      D66/F6 declares EDAM Data/Format and IANA media-type term sources
+      for Instance.data_substrate. The selected profile may additionally
+      supply its pinned registry. Historical schema hashes stay unchanged.
