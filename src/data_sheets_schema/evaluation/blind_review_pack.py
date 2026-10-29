@@ -104,8 +104,15 @@ class Record:
     def __post_init__(self):
         for name in ("arm", "project", "label"):
             _text(getattr(self, name), name)
-        if len(self.arm.strip()) < 2:
+        for name in ("arm", "label"):
+            value = getattr(self, name)
+            if value != value.strip() or not _fold_identity(value):
+                raise ValueError(f"{name} cannot have surrounding whitespace or an empty folded identity")
+        if len(_fold_identity(self.arm)) < 2:
             raise ValueError("arm requires at least 2 non-whitespace characters")
+        folded_arm = _fold_identity(self.arm)
+        if not folded_arm[0].isalnum() or not folded_arm[-1].isalnum():
+            raise ValueError("arm cannot have edge punctuation")
         if not isinstance(self.source_path, (str, os.PathLike)):
             raise ValueError("source_path must be a filesystem path")
         object.__setattr__(self, "source_path", Path(_text(str(self.source_path), "source_path")))
@@ -336,18 +343,26 @@ def _separability(entries):
     return result
 
 
+def _fold_identity(value):
+    return "".join(char for char in unicodedata.normalize("NFKC", value)
+                   if unicodedata.category(char) != "Cf").casefold()
+
+
 def _identifier_leaked(ident_folded: str, text_folded: str) -> bool:
     """Short IDs require boundaries outside Unicode letters/numbers/marks.
 
     Punctuation and underscores remain delimiters. Longer identifiers retain
     exact case-folded substring matching; no source text is normalized away.
     """
+    ident_folded, text_folded = _fold_identity(ident_folded), _fold_identity(text_folded)
+    if not ident_folded:
+        return False
     if len(ident_folded) < 4:
         def word_character(char):
             return char.isalnum() or unicodedata.category(char).startswith("M")
 
-        for match in re.finditer(re.escape(ident_folded), text_folded):
-            start, end = match.span()
+        for match in re.finditer("(?=" + re.escape(ident_folded) + ")", text_folded):
+            start, end = match.start(), match.start() + len(ident_folded)
             if ((start == 0 or not word_character(text_folded[start - 1]))
                     and (end == len(text_folded) or not word_character(text_folded[end]))):
                 return True
@@ -360,15 +375,15 @@ def _leakage(raw: bytes, forbidden: set[str], *, yaml_document: bool = False):
     strings = [text]
     if yaml_document:
         strings.extend(_strings(registered._yaml(raw)))
-    folded = [item.casefold() for item in strings]
+    folded = [_fold_identity(item) for item in strings]
     if any(
-        _identifier_leaked(identifier.casefold(), item)
+        _identifier_leaked(identifier, item)
         for identifier in forbidden
         if identifier
         for item in folded
     ):
         raise ValueError("generation identity remains in reviewer content; explicit blinding review required")
-    if any(_MODEL_LITERAL.search(item) for item in strings):
+    if any(_MODEL_LITERAL.search(item) for item in folded):
         raise ValueError("generator model identifier remains in reviewer content; explicit blinding review required")
 
 

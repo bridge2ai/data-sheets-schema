@@ -42,3 +42,20 @@ def test_f4_structure_and_size_separability_are_private(tmp_path):
     assert "structure" in key["residual_fingerprint_notice"] and "size" in key["residual_fingerprint_notice"]
     assert {p.name for p in output.iterdir()} == {"blind_01.yaml", "blind_02.yaml", "review_sheet.tsv"}
     assert sorted((yaml.safe_load(p.read_bytes()) for p in output.glob("*.yaml")), key=len) == sorted(scientific, key=len)
+
+
+@pytest.mark.parametrize("text", ["ｖ８", "v\u00ad8", "v\u200b8", "V\u200d8"])
+def test_f9_compatibility_and_format_characters_do_not_hide_identity(tmp_path, text):
+    raw = yaml.safe_dump({"id": "example:data", "description": f"Generated under {text}."}).encode()
+    with pytest.raises(ValueError, match="generation identity"):
+        pack.blind_input(raw, pack.Record("v8", "EXTERNAL", "secret-label", tmp_path / "record.yaml"))
+
+
+@pytest.mark.parametrize("arm,label", [("v8 ", "label"), (" v8", "label"), ("v8", " label"), ("-v8", "label")])
+def test_f9_padded_or_edge_punctuation_identity_is_refused(tmp_path, arm, label):
+    with pytest.raises(ValueError, match="whitespace|edge"):
+        pack.Record(arm, "EXTERNAL", label, tmp_path / "record.yaml")
+
+
+def test_f9_short_id_search_checks_overlapping_matches():
+    assert pack._identifier_leaked("a-a", "xa-a-a")
