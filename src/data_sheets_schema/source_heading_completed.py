@@ -405,6 +405,7 @@ def _typed(spec):
         raise UsageLedgerError('captured audit snapshot differs from its checked integration')
     spec._audit = body.decode()
     return {'protocol': 'shared_generation_v2', 'generation_id': spec._ledger['generation_id'],
+        'schema_context_version': sg.SCHEMA_CONTEXT_VERSION,
         'assembly_sha256': assembly['sha256'], 'audit_sha256': sg.sha(body),
         'acceptance': typed.check(assembly, derivations=typed.DerivationCache()),
         'authority': spec._captured_authority.identity(),
