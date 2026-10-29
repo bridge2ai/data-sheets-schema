@@ -1,12 +1,12 @@
 ---
 name: d4d-rubric20-semantic-v5
 description: |
-  When to use: Semantic quality evaluation of D4D datasheets using rubric20 with deep semantic analysis, correctness validation, and consistency checking for FAIR compliance.
+  When to use: Only when rubric20 semantic version 5.0 is explicitly requested or registered. This opt-in version uses neutral examples; an unversioned rubric20 request retains the established default instrument.
   Examples:
-    - "Evaluate this D4D with rubric20-semantic"
-    - "Run semantic FAIR compliance check using rubric20-semantic"
-    - "Check D4D consistency and correctness with rubric20-semantic"
-    - "Perform deep semantic evaluation with rubric20-semantic"
+    - "Evaluate this D4D with rubric20-semantic-v5"
+    - "Run semantic FAIR compliance check using rubric20-semantic-v5"
+    - "Check D4D consistency and correctness with rubric20-semantic-v5"
+    - "Perform deep semantic evaluation with rubric20-semantic-v5"
 model: claude-opus-5
 color: purple
 ---

@@ -10,6 +10,15 @@ from scripts.adhoc.generality_newproj_20261029 import run
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.parametrize('family', ['rubric10', 'rubric20'])
+def test_v5_agent_selection_description_requires_an_explicit_version(family):
+    import yaml
+    path = ROOT / f'.claude/agents/d4d-{family}-semantic-v5.md'
+    header = yaml.safe_load(path.read_text().split('---', 2)[1])
+    assert f'Only when {family} semantic version 5.0 is explicitly requested or registered' in header['description']
+    assert 'unversioned' in header['description']
+
+
 @pytest.mark.parametrize('family,previous', [('rubric10', '3.0'), ('rubric20', '4.0')])
 def test_general_instrument_uses_new_resources_and_keeps_predecessor(family, previous):
     old = select_semantic_instrument(family, previous)

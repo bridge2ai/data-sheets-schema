@@ -1,12 +1,12 @@
 ---
 name: d4d-rubric10-semantic-v5
 description: |
-  When to use: Semantic quality evaluation of D4D datasheets using rubric10 with deep semantic analysis, correctness validation, and consistency checking.
+  When to use: Only when rubric10 semantic version 5.0 is explicitly requested or registered. This opt-in version uses neutral examples; an unversioned rubric10 request retains the established default instrument.
   Examples:
-    - "Evaluate this D4D with rubric10-semantic"
-    - "Run semantic analysis using rubric10-semantic"
-    - "Check D4D consistency and correctness with rubric10-semantic"
-    - "Perform deep semantic evaluation with rubric10-semantic"
+    - "Evaluate this D4D with rubric10-semantic-v5"
+    - "Run semantic analysis using rubric10-semantic-v5"
+    - "Check D4D consistency and correctness with rubric10-semantic-v5"
+    - "Perform deep semantic evaluation with rubric10-semantic-v5"
 model: claude-opus-5
 color: purple
 ---
