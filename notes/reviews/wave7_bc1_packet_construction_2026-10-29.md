@@ -142,3 +142,20 @@ remain. All context/decision changes are inherited automatically from A23.
 The parent independently reviewed the actual hunk and approved this exact
 union. Retained resolver mode `a23` applies it with a preimage SHA check;
 `03-a23-resolution.json` pins the source and helper bytes. No tests ran.
+
+A23 merge commit: `d6c83e58b057da48bd11f007d4f4a0985ae6923c`.
+
+## Merge 4: #5210 report admission
+
+First parent `d6c83e58b057da48bd11f007d4f4a0985ae6923c`; incoming
+`fba016d92fd292c66d580006e848b8c43eb59505`. Actual bases are
+`cd07f2a3738e146eeaa30ae86d35d3161eb3413b` (protected C) and
+`aaa6f5bec2a0c7832d36143c4c7470d51cb8cee4` (F). Their sole common base is
+`f8c5ac73caba610d40c49aaceddb31ead3590a72` (F), so their file-level union is
+C. Incoming is also C; Git preserves current B without a file merge. The
+Codex parent independently verified these actual Git bases and blobs before
+execution. Full attributes/path/mode preflight and protected postcheck pass.
+
+The merge is clean, with no ordinary conflict or manual source resolution.
+Evidence: `wave7_bc1_merge_evidence_2026-10-29/04-5210-{preflight,postflight}.json`.
+No tests, protected edits, calibration changes or publication occurred.

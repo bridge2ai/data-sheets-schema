@@ -1,0 +1,13 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-5210-wire-fixed-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-5210-wire-fixed-20261028/pytest.xml",
+    "tests/test_report_admission.py::test_chorus_wire_is_byte_identical_to_the_base_and_is_what_was_counted"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-5210-20261028"
+}
