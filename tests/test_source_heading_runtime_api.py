@@ -637,7 +637,12 @@ def test_selected_registration_binds_live_historical_validation(tmp_path, draft_
     copy.write_bytes(raw + b'\n# controlled installed dependency change\n')
     with pytest.raises(ValueError, match='descriptor|selection|registration'):
         sg.parse_registration(registration)
-    assert sg.descriptor(version=1) == legacy
+    # A14 also binds these historical-validation dependencies in shared v1.
+    # Exactly this source hash changes; the rest of the descriptor stays fixed.
+    expected = deepcopy(legacy)
+    expected['stage_contracts']['request_code_sha256'][name] = sg.sha(copy.read_bytes())
+    assert expected != legacy
+    assert sg.descriptor(version=1) == expected
 
 
 # D57: retain externally observed journal heads across fixture resumes.
