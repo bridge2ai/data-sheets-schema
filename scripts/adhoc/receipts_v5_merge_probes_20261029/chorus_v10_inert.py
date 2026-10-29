@@ -26,6 +26,11 @@ from data_sheets_schema.chunking import chunk_texts  # noqa: E402
 ROOT = Path(sys.argv[1])
 OUT = Path(sys.argv[2])
 TREE = Path(rc.__file__).resolve().parents[2]
+# R6: the launcher resolves imports, while macOS TMPDIR may spell /private/var
+# as /var. Preserve the caller's tree spelling for its path-only normalization,
+# after verifying that it really is the imported source tree.
+DISPLAY_TREE = Path(os.environ.get("GIT_WORK_TREE", TREE))
+assert DISPLAY_TREE.resolve() == TREE, "probe imported a different source tree"
 BUNDLE = TREE / "data/preprocessed/concatenated/CHORUS_preprocessed.txt"
 MANIFEST = TREE / "data/preprocessed/chunks/CHORUS_chunks.yaml"
 
@@ -39,7 +44,7 @@ def sha(b):
     return hashlib.sha256(b).hexdigest()
 
 
-out = {"receipts_file": str(Path(rc.__file__).resolve()),
+out = {"receipts_file": str(DISPLAY_TREE / Path(rc.__file__).resolve().relative_to(TREE)),
        "RECEIPTS_INSTRUMENT_sha": sha(rc.RECEIPTS_INSTRUMENT.encode()),
        "RERECEIPTS_INSTRUMENT_sha": sha(rc.RERECEIPTS_INSTRUMENT.encode()),
        "runs": {}}
