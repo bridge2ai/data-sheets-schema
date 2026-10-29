@@ -18,8 +18,8 @@ contexts, `{project}_{phase}_context.json` where the runner pins one, #5157, and
 shared generation 2's counted requests); a measured attempt of the same request
 in this generation; the generation's measured `full` request plus the files the
 phase carries, at one token per byte, within the room the context window leaves
-beside max_tokens; and the static project baseline, which the display flags as
-possibly low (#5117).
+beside max_tokens. Without declared or measured data the bound is unknown;
+project identity supplies no token estimate (F10).
 
 Abandoned attempts are priced from the journal: this generation's from its
 boundary and a prior generation's wherever it lies. Without the stream's final
@@ -69,30 +69,6 @@ PHASE_OUTPUT_CAPS: dict[str, int] = {
     "report_regate": CAP_REPORT_FAMILY,
     "repair_full": CAP_REPORT_FAMILY,
     "report_after_repair": CAP_REPORT_FAMILY,
-}
-
-# Baseline reference input bounds (tokens or split) from preserved empirical runs:
-# - CHORUS: v9 full input (9,636 uncached + 31,703 cache_write = 41,339 tokens)
-# - AI_READI: v8 full input (6,361 uncached + 203,662 cache_write = 210,023 tokens)
-PROJECT_BASELINE_INPUT_BOUNDS: dict[str, dict[str, Any]] = {
-    "CHORUS": {
-        "full": {"input_tokens": 9636, "cache_write": 31703, "cache_read": 0},
-        "full_readdress": {"input_tokens": 41339 + 46182},  # input + v9 full response
-        "reconcile_full": {"input_tokens": 22057, "cache_write": 0, "cache_read": 31703},
-        "report": {"input_tokens": 44534, "cache_write": 0, "cache_read": 31703},
-        "report_regate": {"input_tokens": 76237 + 96000 + 1500},  # report + 96k report + regate instructions
-        "repair_full": {"input_tokens": 8914, "cache_write": 17406, "cache_read": 0},
-        "report_after_repair": {"input_tokens": 44563, "cache_write": 0, "cache_read": 31703},
-    },
-    "AI_READI": {
-        "full": {"input_tokens": 6361, "cache_write": 203662, "cache_read": 0},
-        "full_readdress": {"input_tokens": 210023 + 115616},  # input + v8 full response
-        "reconcile_full": {"input_tokens": 43279, "cache_write": 0, "cache_read": 203662},
-        "report": {"input_tokens": 134946, "cache_write": 186293, "cache_read": 17369},
-        "report_regate": {"input_tokens": 338608 + 96000 + 1500},  # report + 96k report + regate instructions
-        "repair_full": {"input_tokens": 37011, "cache_write": 17419, "cache_read": 0},
-        "report_after_repair": {"input_tokens": 134823, "cache_write": 186293, "cache_read": 17369},
-    },
 }
 
 #: Phases whose every attempt sends the same request, so a measured attempt in
@@ -652,13 +628,8 @@ def resolve_pending_input_bound(
                 source += f"; capped at the {window:,}-token window less {max_tokens:,} max_tokens"
             return bound, source
 
-    # 6. Project-specific empirical baseline bounds
-    if project and project in PROJECT_BASELINE_INPUT_BOUNDS:
-        proj_bounds = PROJECT_BASELINE_INPUT_BOUNDS[project]
-        if phase in proj_bounds:
-            return proj_bounds[phase], f"baseline[{project}][{phase}]"
-
-    # 7. Unresolved input bound: return None so caller fails closed rather than pricing as $0.00
+    # No name-keyed fallback: use declared custom bounds or this run's measurements.
+    # Unresolved input bound: return None so caller fails closed rather than pricing as $0.00
     return None, "unknown"
 
 

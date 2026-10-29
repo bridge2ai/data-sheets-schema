@@ -61,7 +61,8 @@ def test_chorus_pending_full_worst_case():
             "usage_id": "call_1",
         },
     }
-    summary = compute_readout(ledger, project="CHORUS")
+    summary = compute_readout(ledger, project="CHORUS", custom_bounds={
+        'full': {'input_tokens': 9636, 'cache_write': 31703, 'cache_read': 0}})
     assert summary["has_pending_call"] is True
     pending = summary["pending_call"]
     assert pending["output_cap_tokens"] == CAP_FULL  # 128,000
@@ -89,7 +90,8 @@ def test_ai_readi_pending_full_worst_case():
             "usage_id": "call_2",
         },
     }
-    summary = compute_readout(ledger, project="AI_READI")
+    summary = compute_readout(ledger, project="AI_READI", custom_bounds={
+        'full': {'input_tokens': 6361, 'cache_write': 203662, 'cache_read': 0}})
     assert summary["has_pending_call"] is True
     pending = summary["pending_call"]
     assert pending["output_cap_tokens"] == CAP_FULL  # 128,000
@@ -291,18 +293,19 @@ def test_cap_and_operator_trigger_alerts():
     }
     # CHORUS pending full is ~3.4463, total projected is ~11.4463
     # Cap = 15.00, Trigger = 11.00 -> total 11.4463 >= trigger 11.00 -> trigger_reached!
-    s1 = compute_readout(ledger, project="CHORUS", cap=15.0, trigger=11.0)
+    declared = {'full': {'input_tokens': 9636, 'cache_write': 31703, 'cache_read': 0}}
+    s1 = compute_readout(ledger, project="CHORUS", cap=15.0, trigger=11.0, custom_bounds=declared)
     assert s1["trigger_reached"] is True
     assert s1["cap_reached"] is False
     assert "TRIGGER REACHED" in format_readout(s1)
 
     # Trigger = 12.00 -> not reached
-    s2 = compute_readout(ledger, project="CHORUS", cap=15.0, trigger=12.0)
+    s2 = compute_readout(ledger, project="CHORUS", cap=15.0, trigger=12.0, custom_bounds=declared)
     assert s2["trigger_reached"] is False
     assert s2["cap_reached"] is False
 
     # Cap = 10.00 -> cap_reached!
-    s3 = compute_readout(ledger, project="CHORUS", cap=10.0, trigger=9.0)
+    s3 = compute_readout(ledger, project="CHORUS", cap=10.0, trigger=9.0, custom_bounds=declared)
     assert s3["cap_reached"] is True
     assert "CAP EXCEEDED" in format_readout(s3)
 
@@ -775,9 +778,8 @@ def test_derived_bound_is_capped_at_the_context_window_less_max_tokens(tmp_path)
     )
 
 
-def test_static_baseline_bound_is_flagged_with_warning(tmp_path):
-    """When no count pin or measured request exists yet, the static project baseline
-    is flagged with `input_bound_static = True` and a display warning (#5117)."""
+def test_no_project_baseline_is_inferred_without_declared_or_measured_inputs(tmp_path):
+    """F10: a familiar project name supplies no cost measurement."""
     ledger = {
         "version": 1,
         "identity": {"project": "CHORUS", "label": "test_static_warn", "condition": "generic_v10"},
@@ -785,13 +787,10 @@ def test_static_baseline_bound_is_flagged_with_warning(tmp_path):
         "pending_call": {"phase": "full", "attempt": 1},
     }
     summary = compute_readout(ledger, project="CHORUS")
-    assert summary["pending_input_bound_static"] is True
-    assert summary["pending_call"]["input_bound_static"] is True
+    assert summary["pending_input_bound_static"] is False
+    assert summary["pending_call"]["input_bound_unknown"] is True
     formatted = format_readout(summary)
-    assert (
-        "WARNING: pending full input is a static baseline from earlier runs "
-        "(baseline[CHORUS][full]); it may be low for this run"
-    ) in formatted
+    assert 'UNKNOWN' in formatted
 
     # An unmeasured abandoned attempt that falls back to baseline[CHORUS][full] also warns (N8).
     meta = tmp_path / "run_abandoned_static"
@@ -811,10 +810,14 @@ def test_static_baseline_bound_is_flagged_with_warning(tmp_path):
         encoding="utf-8",
     )
     aband_summary = compute_readout(ledger_file)
-    assert aband_summary["abandoned_input_bound_static"] is True
-    assert aband_summary["abandoned_attempts"][0]["input_bound_static"] is True
-    assert (
-        "WARNING: abandoned full input is a static baseline from earlier runs "
-        "(baseline[CHORUS][full]); it may be low for this run"
-    ) in format_readout(aband_summary)
+    assert aband_summary["abandoned_input_bound_static"] is False
+    assert aband_summary["abandoned_attempts"][0]["input_source"] == 'unknown'
+
+
+@pytest.mark.parametrize('project', ['CHORUS', 'AI_READI', 'NEWPROJ'])
+def test_any_project_uses_only_declared_bounds_or_measured_data(project):
+    from data_sheets_schema.dollar_readout import resolve_pending_input_bound
+    assert resolve_pending_input_bound('full', project) == (None, 'unknown')
+    assert resolve_pending_input_bound('full', project, custom_bounds={project: {'full': 1234}}) == (
+        1234, f'custom_bounds[{project}][full]')
 
