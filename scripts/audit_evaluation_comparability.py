@@ -673,7 +673,10 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         if receipt["status"] == "validated":
             require(len(ratings) == plan["repeat_count"], "registered_validated_panel_incomplete")
         actual = registered_attempt_names(capture.directory, len(attempts))
-        require(actual == [f"rating-{index:03d}" for index in by_index], "registered_attempt_directories_mismatch")
+        expected_directories = [f"rating-{index:03d}" for index in by_index]
+        missing_trailing_started = (bool(attempts) and attempts[-1].get("status") == "started"
+                                    and actual == expected_directories[:-1])
+        require(actual == expected_directories or missing_trailing_started, "registered_attempt_directories_mismatch")
         if marked_receipt:
             for index, attempt in by_index.items():
                 if index in seen_ratings or attempt.get("status") == "started":

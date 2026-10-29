@@ -120,6 +120,21 @@ def _read(path: Path, limit: int = MAX_FILE_BYTES) -> bytes:
     return raw
 
 
+def _atomic_evidence(path: Path, raw: bytes):
+    """Publish one durable evidence file without exposing truncated JSON."""
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temporary.open("wb") as stream:
+        stream.write(raw)
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(temporary, path)
+    fd = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
 class _UniqueLoader(yaml.SafeLoader):
     # JSON-schema date fields are strings. Avoid YAML timestamp coercion while
     # preserving their source text (including leading zeroes).
@@ -703,6 +718,8 @@ def execute(
     per_attempt_cap = Decimal(plan["reserved_cost_dollars_per_attempt"])
 
     def _write_receipt_and_lock() -> None:
+        unaccounted = sum(a.get("estimated_cost_usd") is None for a in receipt["attempts"])
+        receipt["unaccounted_reserved_usd"] = str(per_attempt_cap * unaccounted) if unaccounted else "0"
         for attempt in receipt["attempts"]:
             folder = destination / f'rating-{attempt["rating"]:03d}'
             attempt["files"] = sorted(p.name for p in folder.iterdir()) if folder.is_dir() else []
@@ -713,7 +730,7 @@ def execute(
                 if rating["rating"] == attempt["rating"]:
                     rating.update({key: attempt[key] for key in ("files", "transcript_sha256", "stderr_sha256")})
         receipt_bytes = shared.canonical(receipt)
-        (destination / "receipt.json").write_bytes(receipt_bytes)
+        _atomic_evidence(destination / "receipt.json", receipt_bytes)
         lock_payload = shared.canonical({
             "plan_sha256": prepared.digest,
             "destination": str(destination),
@@ -723,9 +740,7 @@ def execute(
             "prior_receipt": prior_receipt_resolved,
             "authorization_basis": authorization_basis,
         })
-        tmp_lock = lock_dir / f".{prepared.digest}.{os.getpid()}.tmp"
-        tmp_lock.write_bytes(lock_payload)
-        os.replace(tmp_lock, lock_file)
+        _atomic_evidence(lock_file, lock_payload)
 
     owns_lock = False
     try:
@@ -779,9 +794,10 @@ def execute(
         for index in range(1, plan["repeat_count"] + 1):
             prepared.assert_current()
             attempt = destination / f"rating-{index:03d}"
-            attempt.mkdir()
             attempt_receipt = {"rating": index, "status": "started", "estimated_cost_usd": None}
             receipt["attempts"].append(attempt_receipt)
+            _write_receipt_and_lock()
+            attempt.mkdir()
             # Random neutral basename; neither generation label nor repeat ID
             # appears in the evaluator's cwd, config, arguments or prompt.
             with tempfile.TemporaryDirectory(prefix="d4d-rating-") as directory:
