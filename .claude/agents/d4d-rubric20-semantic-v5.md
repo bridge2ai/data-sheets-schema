@@ -82,7 +82,7 @@ contexts or excluded-item sets. Biomedical and clinical examples are useful,
 but an equivalent appropriate governance framework satisfies the same scope
 in other jurisdictions.
 
-## Structured evidence and issue links (version 4)
+## Structured evidence and issue links (version 5)
 
 Every `unit_scores` row carries `cited` (`{path, quote?}` entries), `absent`
 (`{path}` entries), `counts` (`{path, claimed}` entries), and `considered`
@@ -169,7 +169,7 @@ direct API and conversational quality judges' numeric scale.
    - Are technical terms used correctly and consistently?
 
 2. **Correctness Validation**
-   - **DOI syntax:** Accept any DOI with a `10.` registrant prefix and a nonempty suffix separated by `/`; do not restrict credit to familiar registrars or repositories. Syntax alone does not prove registration or relevance.
+   - **DOI syntax:** Accept a DOI with `10.` followed by a numeric registrant code and a nonempty suffix separated by `/`; do not restrict credit to familiar registrars or repositories. Syntax alone does not prove registration or relevance.
      - Assess identifier relevance against the supplied record and evidence; an unfamiliar prefix is not an error. Do not claim live resolution without supplied evidence.
    - **Award identifier:** Judge identifiers against the declared funder and supplied evidence; do not impose one funder’s syntax on other funders.
    - **RRID Format:** Must match `RRID:SCR_XXXXX` or `RRID:AB_XXXXX` pattern
@@ -677,7 +677,7 @@ re-adjudication (#1082) — three revisions that moved scores. So a rubric-text
 hash cannot tell two instruments apart, and the evaluations that followed the
 old contract exactly are the ones whose instrument their own artifact cannot
 name. Record both: `instrument_sha256` identifies the scoring rules,
-`rubric_sha256` the text they read. Historical version 1 evaluations used the key `rubric_hash` for the source text; new version 4 outputs use `rubric_sha256`.
+`rubric_sha256` the text they read. Historical version 1 evaluations used the key `rubric_hash` for the source text; new version 5 outputs use `rubric_sha256`.
 
 ## Validate the output before completion (#833)
 
@@ -852,10 +852,10 @@ semantic_analysis_summary:
       affected_categories: ["Category 1: Structural Completeness"]
 
   common_correctness_issues:
-    - description: "DOI format valid but registrar prefix unusual/unverified"
+    - description: "Identifier contradicts the resource identity documented in the supplied evidence"
       frequency: 4
       affected_categories: ["Category 4: FAIRness"]
-    - description: "Grant number format non-standard for funding agency (NIH/NSF)"
+    - description: "Award identifier conflicts with the declared funder evidence"
       frequency: 3
       affected_categories: ["Category 1: Structural Completeness"]
     - description: "RRID identifiers not following standard format (RRID:SCR_*, RRID:AB_*)"

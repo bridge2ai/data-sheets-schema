@@ -14,7 +14,7 @@ def generalize(text):
     lines = []
     for line in text.splitlines():
         if 'DOI Format:' in line or 'DOI must match' in line:
-            line = ('   - **DOI syntax:** Accept any DOI with a `10.` registrant prefix and a nonempty suffix separated by `/`; '
+            line = ('   - **DOI syntax:** Accept a DOI with `10.` followed by a numeric registrant code and a nonempty suffix separated by `/`; '
                     'do not restrict credit to familiar registrars or repositories. Syntax alone does not prove registration or relevance.')
         elif 'Prefix plausibility:' in line or ('Example:' in line and '10.13026' in line):
             line = ('     - Assess identifier relevance against the supplied record and evidence; '
@@ -29,7 +29,8 @@ def generalize(text):
                     'inclusion rule and missing-observation procedure are specified."')
         elif '**Score 3 Example:**' in line:
             line = '- **Score 3 Example:** "Synthetic example: sensors recorded hourly measurements at three stations; calibration and outage handling are unspecified."'
-        elif 'DOI prefix not matching known registrars' in line:
+        elif ('DOI prefix not matching known registrars' in line
+              or 'DOI format valid but registrar prefix unusual/unverified' in line):
             line = '    - description: "Identifier contradicts the resource identity documented in the supplied evidence"'
         elif 'Look for: PhysioNet' in line:
             line = '   - Look for: a named repository, publisher, archive, or other documented hosting service'
@@ -37,7 +38,8 @@ def generalize(text):
             line = '   - **Award identifier:** Judge identifiers against the declared funder and supplied evidence; do not impose one funder’s syntax on other funders.'
         elif '     - NIH:' in line or '     - NSF:' in line:
             continue
-        elif 'Grant number format non-standard for NIH/NSF' in line:
+        elif ('Grant number format non-standard for NIH/NSF' in line
+              or 'Grant number format non-standard for funding agency (NIH/NSF)' in line):
             line = '    - description: "Award identifier conflicts with the declared funder evidence"'
         elif line.startswith('# AI/ML Readiness (Bridge2AI):'):
             line = '# AI/ML Readiness: assess the criteria declared by this instrument.'
@@ -52,7 +54,7 @@ def generalize(text):
     return result
 
 
-def build(family):
+def build(family, refresh=False):
     version = 3 if family == 'rubric10' else 4
     old_agent = f'd4d-{family}-semantic' + ('-v4' if version == 4 else '')
     new_agent = f'd4d-{family}-semantic-v5'
@@ -66,6 +68,8 @@ def build(family):
     text = text.replace(f'Emit version "{version}.0"', 'Emit version "5.0"')
     text = text.replace(f'"version": "{version}.0"', '"version": "5.0"')
     text = text.replace(f'--semantic-version {version}.0', '--semantic-version 5.0')
+    text = text.replace(f'(version {version})', '(version 5)')
+    text = text.replace(f'new version {version} outputs', 'new version 5 outputs')
     text = text.replace('## General context instrument v5\n',
         '## General context instrument v5\n\n'
         'Semantic 5.0 generalizes identifier criteria, collection examples and repository anchors. '
@@ -91,16 +95,19 @@ def build(family):
     schema['properties']['version'] = {'type': 'string', 'const': '5.0'}
     outputs = {f'.claude/agents/{new_agent}.md': text, new_rubric: rubric,
                new_schema: json.dumps(schema, indent=2) + '\n'}
+    for path in outputs:
+        assert refresh or not (ROOT / path).exists(), path
     for path, content in outputs.items():
-        assert not (ROOT / path).exists(), path
         (ROOT / path).write_text(content)
         assert (ROOT / path).read_text() == content and len(content) > 1000
     combined = text + rubric
-    assert not re.search(r'Bridge2AI|FAIRhub|PhysioNet|10\.13026|10\.18130|OT2OD032742|MGH|UT Health|prefix is plausible', combined)
+    assert not re.search(r'Bridge2AI|FAIRhub|PhysioNet|10\.13026|10\.18130|OT2OD032742|MGH|UT Health|prefix is plausible|prefix unusual|NIH/NSF', combined)
     print('\n'.join(outputs))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('family', choices=['rubric10', 'rubric20'])
-    build(parser.parse_args().family)
+    parser.add_argument('--refresh', action='store_true', help='Regenerate only this unpublished v5 family')
+    args = parser.parse_args()
+    build(args.family, args.refresh)

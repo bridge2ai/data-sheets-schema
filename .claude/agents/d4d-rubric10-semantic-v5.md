@@ -80,7 +80,7 @@ contexts or excluded-item sets. Biomedical and clinical examples are useful,
 but an equivalent appropriate governance framework satisfies the same scope
 in other jurisdictions.
 
-## Structured evidence and issue links (version 3)
+## Structured evidence and issue links (version 5)
 
 Every `unit_scores` row carries `cited` (`{path, quote?}` entries), `absent`
 (`{path}` entries), `counts` (`{path, claimed}` entries), and `considered`
@@ -163,7 +163,7 @@ Individual item scores and their per-record sums are integers. Fractional means 
    - Are technical terms used correctly and consistently?
 
 2. **Correctness Validation**
-   - **DOI syntax:** Accept any DOI with a `10.` registrant prefix and a nonempty suffix separated by `/`; do not restrict credit to familiar registrars or repositories. Syntax alone does not prove registration or relevance.
+   - **DOI syntax:** Accept a DOI with `10.` followed by a numeric registrant code and a nonempty suffix separated by `/`; do not restrict credit to familiar registrars or repositories. Syntax alone does not prove registration or relevance.
      - Assess identifier relevance against the supplied record and evidence; an unfamiliar prefix is not an error. Do not claim live resolution without supplied evidence.
    - **Award identifier:** Judge identifiers against the declared funder and supplied evidence; do not impose one funder’s syntax on other funders.
    - **RRID Format:** Must match `RRID:SCR_XXXXX` or `RRID:AB_XXXXX` pattern
@@ -264,7 +264,7 @@ concepts without expecting absent top-level slots.
    - Fields: `doi`, `id`
    - Look for: Properly formatted persistent identifiers (DOI, RRID in `id`, or unique dataset ID)
    - **Semantic Check:**
-   - **DOI syntax:** Accept any DOI with a `10.` registrant prefix and a nonempty suffix separated by `/`; do not restrict credit to familiar registrars or repositories. Syntax alone does not prove registration or relevance.
+   - **DOI syntax:** Accept a DOI with `10.` followed by a numeric registrant code and a nonempty suffix separated by `/`; do not restrict credit to familiar registrars or repositories. Syntax alone does not prove registration or relevance.
      - Assess identifier relevance against the supplied record and evidence; an unfamiliar prefix is not an error. Do not claim live resolution without supplied evidence.
      - RRID must match `RRID:SCR_XXXXX` or `RRID:AB_XXXXX` format
      - Score 1 when the identifier is well formed and identifies the documented resource; registrar familiarity is not a scoring criterion.
@@ -861,7 +861,7 @@ re-adjudication (#1082) — three revisions that moved scores. So a rubric-text
 hash cannot tell two instruments apart, and the evaluations that followed the
 old contract exactly are the ones whose instrument their own artifact cannot
 name. Record both: `instrument_sha256` identifies the scoring rules,
-`rubric_sha256` the text they read. Historical version 1 evaluations used the key `rubric_hash` for the source text; new version 3 outputs use `rubric_sha256`.
+`rubric_sha256` the text they read. Historical version 1 evaluations used the key `rubric_hash` for the source text; new version 5 outputs use `rubric_sha256`.
 
 ## Validate the output before completion (#833)
 
