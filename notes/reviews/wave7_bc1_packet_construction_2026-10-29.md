@@ -65,3 +65,11 @@ Use disabled hooks, `GIT_NO_LAZY_FETCH=1` and file-only Git protocols. The
 first A13 merge remains a canary: inspect its protected postcheck and ordinary
 conflicts before continuing. Multiple-base file unions require a separate
 read-only parent review of the actual bases.
+
+The guard repair now uses `git check-attr --source REF` with the same scoped
+attributes for current, incoming and every actual base tree, and retains
+their root/src/package attribute blobs and text. Rename-aware full-diff
+name-status checks reject any protected-path change other than an ordinary
+modification. All helper Git reads disable hooks/lazy fetch and allow only
+the file protocol. The merge command must carry these same settings. These
+are merge-safety checks, not application tests or production changes.

@@ -33,7 +33,10 @@ def sha(raw):
 
 
 def git(*args, ok=(0,)):
-    result = subprocess.run(['git', '-C', str(ROOT), *args], capture_output=True)
+    environment = {**os.environ, 'GIT_NO_LAZY_FETCH': '1'}
+    result = subprocess.run(['git', '-C', str(ROOT), '-c', 'core.hooksPath=/dev/null',
+                             '-c', 'protocol.allow=never', '-c', 'protocol.file.allow=always',
+                             *args], capture_output=True, env=environment)
     if result.returncode not in ok:
         raise RuntimeError(result.stderr.decode('utf-8', 'replace'))
     return result.stdout.decode()
@@ -54,6 +57,39 @@ def tree_row(ref):
     return {'ref': ref, 'mode': mode, 'blob': blob}
 
 
+def attributes_at(ref=None):
+    source = ['--source', ref] if ref else []
+    query = git('-c', 'core.attributesFile=' + str(ATTRS), 'check-attr', *source, '-z',
+                'merge', 'filter', 'text', 'eol', 'working-tree-encoding', '--', PROTECTED).split('\0')
+    attributes = {query[i + 1]: query[i + 2] for i in range(0, len(query) - 1, 3)}
+    if attributes != {'merge': DRIVER, 'filter': 'unspecified', 'text': 'unspecified',
+                      'eol': 'unspecified', 'working-tree-encoding': 'unspecified'}:
+        raise ValueError('effective protected-path attributes differ: ' + repr((ref, attributes)))
+    tracked = {}
+    if ref:
+        for name in ('.gitattributes', 'src/.gitattributes', 'src/data_sheets_schema/.gitattributes'):
+            entry = git('ls-tree', ref, '--', name).strip()
+            if entry:
+                mode, kind, blob = entry.split('\t')[0].split()
+                if (mode, kind) != ('100644', 'blob'):
+                    raise ValueError('unexpected tracked attributes mode/type')
+                tracked[name] = {'blob': blob, 'text': git('cat-file', 'blob', blob)}
+    return {'effective': attributes, 'tracked_ancestor_attributes': tracked}
+
+
+def path_change_proof(left, right):
+    related = []
+    for line in git('diff', '--no-ext-diff', '--no-textconv', '--name-status',
+                    '--find-renames', left, right, '--').splitlines():
+        fields = line.split('\t')
+        if PROTECTED in fields[1:]:
+            if fields != ['M', PROTECTED]:
+                raise ValueError('protected path rename/deletion/type change: ' + line)
+            related.append(line)
+    return {'from': left, 'to': right, 'protected_name_status': related,
+            'rename_detection': 'git diff --no-ext-diff --no-textconv --name-status --find-renames'}
+
+
 def protected_state():
     head = git('rev-parse', 'HEAD').strip()
     current = tree_row(head)
@@ -66,14 +102,8 @@ def protected_state():
     attrs_raw = raw_file(ATTRS)
     if attrs_raw != (PROTECTED + ' merge=' + DRIVER + '\n').encode():
         raise ValueError('unexpected scoped attributes file')
-    query = git('-c', 'core.attributesFile=' + str(ATTRS), 'check-attr', '-z',
-                'merge', 'filter', 'text', 'eol', 'working-tree-encoding', '--', PROTECTED).split('\0')
-    attributes = {query[i + 1]: query[i + 2] for i in range(0, len(query) - 1, 3)}
-    if attributes != {'merge': DRIVER, 'filter': 'unspecified', 'text': 'unspecified',
-                      'eol': 'unspecified', 'working-tree-encoding': 'unspecified'}:
-        raise ValueError('effective protected-path attributes differ: ' + repr(attributes))
     return {'head': head, 'protected_blob': BLOB, 'protected_sha256': SHA,
-            'protected_mode': '100644', 'attributes': attributes,
+            'protected_mode': '100644', 'attributes': attributes_at(),
             'helper_sha256': sha(raw_file(Path(__file__).resolve())),
             'attributes_sha256': sha(attrs_raw)}
 
@@ -104,10 +134,18 @@ def preflight(args):
         raise ValueError('multiple bases require a separately reviewed file-level union explanation')
     if args.effective_base_blob == BLOB and incoming['blob'] != BLOB:
         raise ValueError('trivial fast path would bypass keep-first driver; stop')
+    refs = [state['head'], args.incoming, *[row['ref'] for row in bases]]
+    tree_attributes = {ref: attributes_at(ref) for ref in refs}
+    pairs = [(state['head'], args.incoming)]
+    for row in bases:
+        pairs.extend([(row['ref'], state['head']), (row['ref'], args.incoming)])
+    path_changes = [path_change_proof(left, right) for left, right in pairs]
     state.update(incoming=incoming, merge_bases=bases, effective_base_blob=args.effective_base_blob,
+                 tree_attributes=tree_attributes, protected_path_changes=path_changes,
                  virtual_base_basis=args.virtual_basis,
                  expected_behavior=('incoming equals effective base; preserve current bytes without file merge'
                     if incoming['blob'] == args.effective_base_blob else 'three-way file merge invokes keep-first driver'),
+                 git_policy={'hooks': '/dev/null', 'GIT_NO_LAZY_FETCH': '1', 'protocol': 'file only'},
                  scope='preflight only; no merge or source edit')
     write_new(args.output, state)
     print(json.dumps(state, sort_keys=True))
