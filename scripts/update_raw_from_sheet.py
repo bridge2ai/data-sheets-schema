@@ -252,13 +252,18 @@ class DriveAwareExtractor:
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description='Update data/raw/ from GC Input Sheet')
     parser.add_argument('--dry-run', action='store_true',
                         help='Print URLs that would be downloaded (no downloads)')
-    parser.add_argument('--project', choices=['CM4AI', 'VOICE', 'AI_READI', 'CHORUS'],
+    parser.add_argument('--source-manifest', type=Path, help='Manifest declaring the available projects')
+    parser.add_argument('--project',
                         help='Download only this project (default: all)')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    from data_sheets_schema.registry import load_registry, default_manifest_path
+    declared_projects = load_registry(args.source_manifest or default_manifest_path()).projects()
+    if args.project and args.project not in declared_projects:
+        parser.error(f'project {args.project!r} is not declared; choose from {declared_projects}')
 
     print(f'Reading sheet {SHEET_ID} …')
     rows = read_sheet(SHEET_ID)
@@ -295,15 +300,12 @@ def main():
 
     # ── filter to one project if requested ───────────────────────────────────
     if args.project:
-        target_col = args.project.replace('_', '-')   # AI_READI → AI-READI
         try:
-            col_idx = header.index(target_col)
-        except ValueError:
-            try:
-                col_idx = header.index(args.project)
-            except ValueError:
-                print(f'ERROR: column {args.project!r} not found in {header}')
-                sys.exit(1)
+            col_idx = next(i for i, name in enumerate(header)
+                           if normalize_project_name(name) == args.project)
+        except StopIteration:
+            print(f'ERROR: column {args.project!r} not found in {header}')
+            sys.exit(1)
         rows = [[r[0] if r else '',
                  r[col_idx] if col_idx < len(r) else ''] for r in rows]
         rows[0] = ['', args.project]
