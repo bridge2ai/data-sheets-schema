@@ -101,8 +101,17 @@ def rating(corpus, number=10, *, name=None, session="session-one", version="3.0"
 
 
 def run(corpus, **kwargs):
-    return audit.audit(corpus[0], arms=ARMS, evaluator_model=MODEL,
+    return audit.audit(corpus[0], roster_manifest=legacy_roster(corpus[0]), evaluator_model=MODEL,
                        contexts={"CHORUS": CONTEXT}, **kwargs)
+
+
+def legacy_roster(root):
+    path = root / "cohort.yaml"
+    path.write_text(yaml.safe_dump({"format": "evaluation_cohort_v1", "cells": [
+        {"arm": "synthetic", "projects": ["CHORUS"], "replicates": [1, 2, 3],
+         "label_template": PREFIX + "_rep{replicate}", "method": "claudecode_api",
+         "condition": "generic_v10", "input_arm": "baseline"}]}))
+    return path
 
 
 def block(result, rubric="rubric10"):
@@ -176,7 +185,7 @@ def test_condition_mismatch_enters_exact_queue(corpus, mutation, reason):
 
 def test_context_hash_presence_never_implies_target_selection_or_human_review(corpus):
     rating(corpus)
-    result = audit.audit(corpus[0], arms=ARMS)
+    result = audit.audit(corpus[0], roster_manifest=legacy_roster(corpus[0]))
     row = block(result)["files"][0]
     assert not row["reasons"]
     assert row["pending"] == ["target_context_not_selected", "target_evaluator_not_selected"]
@@ -186,7 +195,7 @@ def test_context_hash_presence_never_implies_target_selection_or_human_review(co
 
 def test_changed_independent_context_refuses_self_consistent_evaluator_context(corpus):
     rating(corpus)
-    result = audit.audit(corpus[0], arms=ARMS, evaluator_model=MODEL, contexts={"CHORUS": {"human_subjects": False}})
+    result = audit.audit(corpus[0], roster_manifest=legacy_roster(corpus[0]), evaluator_model=MODEL, contexts={"CHORUS": {"human_subjects": False}})
     assert "applicability_context_differs_from_target" in block(result)["reasons"]
 
 
@@ -423,9 +432,20 @@ def registered_case(registered_prepared, tmp_path, monkeypatch):
 def registered_audit(case, *, directories=None, **kwargs):
     root, output, prepared = case
     plan = prepared.document()
-    return audit.audit(root, arms={}, evaluator_model=plan["runtime"]["canonical_model"],
+    return audit.audit(root, roster_manifest=registered_roster(case), evaluator_model=plan["runtime"]["canonical_model"],
         contexts={plan["generation_run"]["project"]: json.loads(prepared.context)},
         registered_evaluations=directories or [("explicit-v10", output)], **kwargs)
+
+
+def registered_roster(case):
+    root, output, prepared = case
+    run = prepared.document()["generation_run"]
+    path = output.parent / "cohort.yaml"
+    path.write_text(yaml.safe_dump({"format": "evaluation_cohort_v1", "cells": [
+        {"arm": "explicit-v10", "projects": [run["project"]], "replicates": [17],
+         "label_template": run["label"], "method": run["method"],
+         "condition": "generic_v10", "input_arm": run["arm"]}]}))
+    return path
 
 
 def rewrite_plan(output, callback):
@@ -471,7 +491,7 @@ def test_actual_registered_runner_output_satisfies_only_its_exact_ingestion_tupl
     result = registered_audit(registered_case)
     assert not registered_problem(result), result["registered_evaluations"]
     record = result["records"][0]
-    assert record["label"] == "concealed-v10-rep17" and record["replicate"] is None
+    assert record["label"] == "concealed-v10-rep17" and record["replicate"] == 17
     assert record["registered_run"] == prepared.document()["generation_run"]
     assert record["arm"] == "explicit-v10"  # audit grouping does not rewrite generation arm
     accepted = record["evaluations"]["rubric20"]
@@ -892,6 +912,7 @@ def test_registered_capture_rechecks_absolute_authority_alias_on_repeated_take(t
 def test_registered_cli_input_is_explicit_and_does_not_select_comparator(registered_case, capsys):
     root, output, _ = registered_case
     assert audit.main(["--root", str(root), "--format", "json",
+                       "--roster-manifest", str(registered_roster(registered_case)),
                        "--registered-evaluation", f"explicit-v10={output}"]) == 0
     result = json.loads(capsys.readouterr().out)
     assert result["totals"]["registered_directories"] == 1
@@ -906,8 +927,8 @@ def test_cli_can_select_context_for_actual_registered_project_without_expanding_
     root, output, prepared = registered_case
     plan = prepared.document()
     project = plan["generation_run"]["project"]
-    assert project not in audit.PROJECTS
     assert audit.main(["--root", str(root), "--format", "json",
+        "--roster-manifest", str(registered_roster(registered_case)),
         "--registered-evaluation", f"explicit-v10={output}",
         "--context", f"{project}={plan['applicability_context']['path']}",
         "--evaluator-model", plan["runtime"]["canonical_model"]]) == 0

@@ -45,8 +45,6 @@ FINGERPRINT_NOTICE = (
     "new outputs unpublished until blinded review completes. Historical public records "
     "cannot be made secret by this pack."
 )
-PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE")
-ARMS = ("v8", "v10")
 REVIEW_COLUMNS = (
     "blind_id", "project", "reviewer", "accuracy_score", "completeness_score",
     "hallucination_count", "omission_notes", "verdict",
@@ -153,7 +151,7 @@ def read_manifest(path: Path) -> list[Record]:
     return records
 
 
-def validate_cohort(records: Iterable[Record], *, cohort: str = "campaign") -> list[Record]:
+def validate_cohort(records: Iterable[Record], *, cohort: str = "campaign", cohort_manifest=None) -> list[Record]:
     records = list(records)
     if not records or len(records) > MAX_RECORDS or not all(isinstance(record, Record) for record in records):
         raise ValueError(f"select 1..{MAX_RECORDS} explicit Record entries")
@@ -162,21 +160,12 @@ def validate_cohort(records: Iterable[Record], *, cohort: str = "campaign") -> l
     if cohort not in {"campaign", "synthetic"}:
         raise ValueError("cohort must be campaign or synthetic")
     if cohort == "campaign":
-        expected = Counter({(arm, project): 3 for arm in ARMS for project in PROJECTS})
-        if len(records) != 24 or Counter((r.arm, r.project) for r in records) != expected:
-            raise ValueError("campaign requires exactly 24 records: v8/v10, four projects, three per cell")
-        for record in records:
-            if record.arm == "v8":
-                suffix = "04f" if record.project in {"CHORUS", "VOICE"} else "04g"
-                labels = {f"2026-09-{suffix}_claude-opus-5-api-generic-v8_rep{i}" for i in (1, 2, 3)}
-                if record.label not in labels:
-                    raise ValueError(f"campaign v8 comparator for {record.project} requires {suffix} rep1–3")
-            elif record.arm == "v10":
-                lbl_lower = record.label.lower()
-                if "v10" not in lbl_lower and not record.label.startswith("registered-final-"):
-                    raise ValueError(
-                        f"campaign v10 record for {record.project} requires a v10 or registered-final label, got {record.label!r}"
-                    )
+        from .cohort_manifest import read_cohort
+        if cohort_manifest is None:
+            raise ValueError("campaign requires a declared cohort manifest")
+        declared, _ = read_cohort(cohort_manifest)
+        if {r.identity for r in records} != {(r["arm"], r["project"], r["label"]) for r in declared}:
+            raise ValueError("selection differs from the declared cohort")
     return sorted(records, key=lambda record: record.identity)
 
 
@@ -406,7 +395,8 @@ def _verify_private_key(path: Path, raw: bytes, identity: tuple[int, int]):
 
 
 def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_output: Path, seed: str | int,
-                            cohort: str = "campaign", generated_at: str | None = None) -> dict:
+                            cohort: str = "campaign", generated_at: str | None = None,
+                            cohort_manifest=None) -> dict:
     """Publish reviewer files and an external private key without overwrites.
 
     Seeded order is SHA256(seed, arm, project, label), independent of selection
@@ -422,7 +412,11 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
         raise ValueError("seed must be a nonempty string or integer")
     seed = _text(str(seed), "seed")
     generated_at = _timestamp(generated_at)
-    records = validate_cohort(records, cohort=cohort)
+    records = validate_cohort(records, cohort=cohort, cohort_manifest=cohort_manifest)
+    declared, cohort_pin = [], None
+    if cohort == "campaign":
+        from .cohort_manifest import read_cohort
+        declared, cohort_pin = read_cohort(cohort_manifest)
     if cohort == "campaign" and (not _SHA.fullmatch(seed) or len(set(seed)) < 8):
         raise ValueError("campaign blind review pack requires a 64-character hex seed with at least 8 distinct hex digits")
     output = Path(output_dir)
@@ -474,11 +468,10 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
             if isinstance(run_block, dict):
                 if run_block.get("label") and run_block.get("label") != record.label:
                     raise ValueError("campaign record label does not match sibling provenance run.label")
-                cond = str(run_block.get("condition") or "")
-                if record.arm == "v10" and cond and not cond.startswith("generic_v10"):
-                    raise ValueError(f"campaign v10 record provenance condition {cond!r} is not generic_v10")
-                if record.arm == "v8" and cond and not cond.startswith("generic_v8"):
-                    raise ValueError(f"campaign v8 record provenance condition {cond!r} is not generic_v8")
+                declaration = next(r for r in declared if
+                    (r["arm"], r["project"], r["label"]) == record.identity)
+                if any(run_block.get(key) != declaration[key] for key in ("project", "label", "condition", "method")):
+                    raise ValueError("campaign record identity differs from the declared cohort provenance")
             val_block = prov_doc.get("validation") or {}
             artifacts = val_block.get("artifacts") if isinstance(val_block, dict) else None
             full_art = artifacts.get("full") if isinstance(artifacts, dict) else None
@@ -516,7 +509,7 @@ def build_blind_review_pack(records: Iterable[Record], output_dir: Path, *, key_
         "normalization": "sorted mapping keys; scientific scalar values and list order preserved",
         "residual_fingerprint_notice": FINGERPRINT_NOTICE,
         "timestamp_basis": "caller_supplied_unverified" if generated_at else "omitted_for_reproducibility",
-        "cohort": cohort, "generator": {
+        "cohort": cohort, "cohort_manifest": cohort_pin, "generator": {
             "algorithm": "sha256_seed_identity_order_v1",
             "module_sha256": _sha(registered._read(Path(__file__))),
             "stripper_module_sha256": _sha(registered._read(Path(registered.__file__))),
@@ -612,7 +605,8 @@ def main(argv=None) -> int:
         help="Cryptographic seed (64 hex characters with at least 8 distinct hex digits in campaign mode; auto-generated via secrets.token_hex(32) if omitted)",
     )
     parser.add_argument("--cohort", choices=("campaign", "synthetic"), default="campaign",
-                        help="Default: 24 records, v8 04f/04g + v10, 3 per project/arm; synthetic accepts other sizes")
+                        help="Campaign requires an explicit cohort manifest; synthetic accepts other sizes")
+    parser.add_argument("--cohort-manifest", type=Path, help="Declared evaluation_cohort_v1 campaign")
     parser.add_argument("--generated-at", help="Optional explicit UTC YYYY-MM-DDTHH:MM:SSZ; otherwise null, not current time")
     parser.add_argument("--output-dir", type=Path, required=True,
                         help="New 0700 reviewer directory containing only YAML and review_sheet.tsv")
@@ -624,7 +618,7 @@ def main(argv=None) -> int:
         records = read_manifest(args.manifest) if args.manifest else [parse_record(item) for item in args.record]
         result = build_blind_review_pack(records, args.output_dir, key_output=args.key_output,
                                          seed=seed_val, cohort=args.cohort,
-                                         generated_at=args.generated_at)
+                                         generated_at=args.generated_at, cohort_manifest=args.cohort_manifest)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     print(f"Prepared {len(result['records'])} blinded records. Reviewer directory: {args.output_dir}")

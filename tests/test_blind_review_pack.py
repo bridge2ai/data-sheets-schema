@@ -64,6 +64,9 @@ def key_path(output):
 def build(tmp_path, records, *, name="pack", **kwargs):
     output = tmp_path / name
     cohort = kwargs.pop("cohort", "synthetic")
+    if cohort == "campaign":
+        kwargs.setdefault("cohort_manifest", Path(__file__).resolve().parents[1] /
+                          "configs/evaluation/legacy_bridge2ai_campaign.example.yaml")
     default_seed = "a1b2c3d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff00" if cohort == "campaign" else "registered-seed"
     key = pack.build_blind_review_pack(records, output, key_output=kwargs.pop("key_output", key_path(output)),
                                       seed=kwargs.pop("seed", default_seed),
@@ -151,8 +154,8 @@ def test_seed_integer_matches_cli_string_and_timestamp_changes_only_key(tmp_path
 def campaign(tmp_path):
     records = []
     concat_dir = tmp_path / "data" / "d4d_concatenated"
-    for arm in pack.ARMS:
-        for project in pack.PROJECTS:
+    for arm in ("v8", "v10"):
+        for project in ("CHORUS", "AI_READI", "CM4AI", "VOICE"):
             for replicate in (1, 2, 3):
                 prefix = "04f" if project in {"CHORUS", "VOICE"} else "04g"
                 label = (f"2026-09-{prefix}_claude-opus-5-api-generic-v8_rep{replicate}"
@@ -171,6 +174,7 @@ def campaign(tmp_path):
                             "project": project,
                             "label": label,
                             "condition": "generic_v8" if arm == "v8" else "generic_v10",
+                            "method": "claudecode_api",
                         },
                         "validation": {
                             "artifacts": {
@@ -570,7 +574,7 @@ def test_campaign_v10_label_and_sibling_provenance_validation(tmp_path):
     bad_label = list(records)
     v10_idx = next(i for i, r in enumerate(bad_label) if r.arm == "v10")
     bad_label[v10_idx] = replace(bad_label[v10_idx], label="unregistered-custom-label")
-    with pytest.raises(ValueError, match="requires a v10 or registered-final label"):
+    with pytest.raises(ValueError, match="declared cohort"):
         build(tmp_path, bad_label, cohort="campaign", name="pack_bad_label")
 
     # Swapping two replicates' full files on the corpus layout (claudecode_api vs claudecode_api_core) is refused (R4 F5)
@@ -599,7 +603,7 @@ def test_campaign_v10_label_and_sibling_provenance_validation(tmp_path):
     # Provenance with mismatched full hash refuses
     core_prov.write_text(
         yaml.safe_dump({
-            "run": {"project": v10_rec.project, "label": v10_rec.label, "condition": "generic_v10"},
+            "run": {"project": v10_rec.project, "label": v10_rec.label, "condition": "generic_v10", "method": "claudecode_api"},
             "validation": {"artifacts": {"full": {"sha256": "0" * 64}}},
         }),
         encoding="utf-8",

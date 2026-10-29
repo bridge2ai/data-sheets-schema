@@ -30,18 +30,10 @@ from data_sheets_schema import agent_pin
 from data_sheets_schema.evaluation_context import context_digest, normalize_context, unwrap_document
 from data_sheets_schema.evaluation.validate import validate_evaluation
 from data_sheets_schema.evaluation.run_identity import same_run
+from data_sheets_schema.evaluation.cohort_manifest import read_cohort
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from data_sheets_schema.semantic_scope import validate_scope
 
-PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
-ARMS = {
-    "v4": ("2026-08-13_claude-opus-5-api-generic-v4", PROJECTS),
-    "22c": ("2026-08-22c_claude-opus-5-api-generic-v5", PROJECTS),
-    "v6": ("2026-08-28_claude-opus-5-claudecode-generic-v6", PROJECTS),
-    "v7": ("2026-09-01_claude-opus-5-api-generic-v7", PROJECTS),
-    "v8_04f": ("2026-09-04f_claude-opus-5-api-generic-v8", ("CHORUS", "VOICE")),
-    "v8_04g": ("2026-09-04g_claude-opus-5-api-generic-v8", ("AI_READI", "CM4AI")),
-}
 RUBRICS = ("rubric10", "rubric20")
 MAX_BYTES = 32 * 1024 * 1024
 MAX_REGISTERED_BYTES = 256 * 1024 * 1024
@@ -167,7 +159,7 @@ def read_local(root, path):
     return read(selected)
 
 
-def load_record(root, arm, project, label):
+def load_record(root, arm, project, label, replicate=None):
     """One exact provenance identity; never choose an ambiguous method copy."""
     paths = sorted((root / "data/d4d_concatenated").glob(f"*_core/{label}/{project}_provenance.yaml"))
     result = {"arm": arm, "project": project, "label": label,
@@ -192,7 +184,7 @@ def load_record(root, arm, project, label):
     if (rec.get("record_type") != "d4d_generation_provenance" or run.get("project") != project
             or run.get("label") != label or run.get("method") != paths[0].parents[1].name.removesuffix("_core")
             or (run.get("replicate") is not None and
-                (type(run["replicate"]) is not int or run["replicate"] != int(label.rsplit("_rep", 1)[1])))):
+                (type(run["replicate"]) is not int or run["replicate"] != replicate))):
         result["reasons"].append("provenance_identity_conflict")
     outputs = mapping(mapping(rec.get("outputs")).get("full"))
     artifact = mapping(mapping(mapping(rec.get("validation")).get("artifacts")).get("full"))
@@ -783,10 +775,10 @@ def repeat_panel(rows):
         "basis": "Distinct reported sessions of one fixed input/condition; registered rows additionally join retained transcripts and receipts. Neither proves independent evaluators or human approval."}
 
 
-def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, contexts=None,
+def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None, contexts=None,
           registered_evaluations=(), authority_roots=()):
     root = Path(root).resolve()
-    arms = ARMS if arms is None else arms
+    roster, roster_pin = read_cohort(roster_manifest)
     if rubric20_version not in ("3.0", "4.0"):
         raise ValueError("rubric20 target must be 3.0 or 4.0")
     contexts = {} if contexts is None else contexts
@@ -797,41 +789,25 @@ def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, cont
                  for rubric in RUBRICS}
     evaluations_found, problems, stores = evaluations(root)
     records, rescore, excluded, associated = [], [], [], set()
-    for arm, (prefix, projects) in sorted(arms.items()):
-        for project in sorted(set(projects)):
-            for replicate in (1, 2, 3):
-                label = f"{prefix}_rep{replicate}"
-                record, raw = load_record(root, arm, project, label)
-                record["replicate"] = replicate
-                record["evaluations"] = {}
-                for rubric in RUBRICS:
-                    candidates = [evaluation for evaluation in evaluations_found
-                                  if evaluation["store"] == rubric and association(root, evaluation, record)]
-                    associated.update(evaluation["path"] for evaluation in candidates)
-                    rows = [inspect_evaluation(root, evaluation, record, raw,
-                        version="3.0" if rubric == "rubric10" else rubric20_version,
-                        evaluator_model=evaluator_model, target_context=normalized_contexts.get(project),
-                        instrument_snapshot=snapshots[rubric])
-                        for evaluation in candidates]
-                    reasons = set(record["reasons"])
-                    if not rows:
-                        reasons.add("evaluation_missing_from_selected_stores")
-                    if rows and not any(not row["reasons"] for row in rows):
-                        reasons.update(reason for row in rows for reason in row["reasons"])
-                    pending = sorted({reason for row in rows for reason in row["pending"]})
-                    panel = repeat_panel(rows) if rubric == "rubric20" else None
-                    block = {"files": rows, "file_count": len(rows), "reasons": sorted(reasons),
-                             "pending": pending, "repeat_panel": panel,
-                             "comparable_for_final_v10": False,
-                             "status": "rescore_or_ingestion_required" if reasons else "condition_review_pending"}
-                    record["evaluations"][rubric] = block
-                    if reasons:
-                        rescore.append({"arm": arm, "project": project, "label": label, "rubric": rubric,
-                            "target_version": "3.0" if rubric == "rubric10" else rubric20_version,
-                            "reasons": sorted(reasons), "action": "ingest_bound_current_rating_or_rescore"})
-                records.append(record)
-        # Retained invalid/out-of-cohort v8 canaries remain visible, not pooled.
-        for path in sorted((root / "data/d4d_concatenated").glob(f"*_core/{prefix}_rep*/*_provenance.yaml")):
+    for declared in roster:
+        arm, project, label = (declared[key] for key in ("arm", "project", "label"))
+        record, raw = load_record(root, arm, project, label, declared["replicate"])
+        record["replicate"] = declared["replicate"]
+        record["evaluations"] = {}
+        for rubric in RUBRICS:
+            candidates = [evaluation for evaluation in evaluations_found
+                          if evaluation["store"] == rubric and association(root, evaluation, record)]
+            associated.update(evaluation["path"] for evaluation in candidates)
+            rows = [inspect_evaluation(root, evaluation, record, raw,
+                version="3.0" if rubric == "rubric10" else rubric20_version,
+                evaluator_model=evaluator_model, target_context=normalized_contexts.get(project),
+                instrument_snapshot=snapshots[rubric]) for evaluation in candidates]
+            record["evaluations"][rubric] = {"files": rows}
+        records.append(record)
+    # Evidence with a selected label but an undeclared project stays visible.
+    for arm, label in sorted({(r["arm"], r["label"]) for r in roster}):
+        projects = {r["project"] for r in roster if r["arm"] == arm and r["label"] == label}
+        for path in sorted((root / "data/d4d_concatenated").glob(f"*_core/{label}/*_provenance.yaml")):
             project = path.name.removesuffix("_provenance.yaml")
             if project not in projects:
                 declared_valid, exclusion = None, "outside_selected_arm_project_roster"
@@ -871,6 +847,11 @@ def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, cont
                     for key in ("arm", "project", "label"))]
         if matches:
             record = matches[0]
+            if (record["reasons"] == ["provenance_missing"] and not record["provenance_files"]
+                    and record["record_path"] is None):
+                record.update(candidate)
+                record["replicate"] = next(r["replicate"] for r in roster
+                    if (r["arm"], r["project"], r["label"]) == (arm, candidate["project"], candidate["label"]))
             same = (len(matches) == 1 and all(record.get(key) == candidate.get(key)
                     for key in ("record_sha256", "record_path", "provenance_sha256", "generation_method")))
             if not same:
@@ -958,6 +939,7 @@ def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, cont
                             "independence_verified": False})
     return {"format": "historical_evaluation_comparability_audit_v1",
         "scope": {"stores": stores, "filesystem_globs_include_ignored_and_hidden": True,
+            "roster_manifest": roster_pin,
             "other_evaluation_directories_audited": bool(registered_evaluations), "historical_files_mutated": False,
             "absence_basis": "Only named nonrecursive label_aware stores, selected provenance paths and explicitly supplied registered directories.",
             "repeat_policy": "At least three independent ratings of one fixed selected record per project; no requirement to repeat every generation replicate."},
@@ -1032,6 +1014,8 @@ def markdown(result):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--roster-manifest", type=Path, required=True,
+                        help="Explicit evaluation_cohort_v1 manifest; no default campaign")
     parser.add_argument("--authority-root", type=Path, action="append", default=[],
                         help="Additional trusted authority directory; repeatable, read-only")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
@@ -1043,16 +1027,14 @@ def main(argv=None):
                         help="Explicit retained E1 directory inside --root; does not select a campaign comparator")
     args = parser.parse_args(argv)
     root, contexts = args.root.resolve(), {}
+    roster, _ = read_cohort(args.roster_manifest)
+    projects = {row["project"] for row in roster}
     for item in args.context:
         project, separator, name = item.partition("=")
         path = local_path(root, name)
-        explicit_project = (bool(args.registered_evaluation) and bool(project.strip())
-                            and len(project) <= 4096
-                            and all(ord(char) >= 32 and ord(char) != 127 for char in project))
         if (not separator or project in contexts or path is None
-                or not (project in PROJECTS or explicit_project)):
-            parser.error("--context requires unique PROJECT=PATH inside the selected checkout; "
-                         "non-legacy project names require an explicit registered input")
+                or project not in projects):
+            parser.error("--context requires a manifest project and unique PROJECT=PATH inside the checkout")
         contexts[project] = document(read(path))
     registered = []
     for item in args.registered_evaluation:
@@ -1060,7 +1042,7 @@ def main(argv=None):
         if not separator or not arm.strip() or not name or local_path(root, name) is None:
             parser.error("--registered-evaluation requires ARM=DIR inside the selected checkout")
         registered.append((arm, name))
-    result = audit(root, rubric20_version=args.rubric20_version,
+    result = audit(root, roster_manifest=args.roster_manifest, rubric20_version=args.rubric20_version,
                    evaluator_model=args.evaluator_model, contexts=contexts, registered_evaluations=registered,
                    authority_roots=args.authority_root)
     print(json.dumps(result, sort_keys=True, indent=2, allow_nan=False) if args.format == "json" else markdown(result), end="\n")
