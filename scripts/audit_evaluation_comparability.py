@@ -976,15 +976,20 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
             if not any(not row["reasons"] for row in rows):
                 reasons.update(reason for problem in record.get("registered_input_problems", [])
                                if problem["rubric"] in (None, rubric) for reason in problem["reasons"])
+            if (rows and not any(not row["reasons"] and not row["pending"] for row in rows)
+                    and any(row["pending"] for row in rows)):
+                reasons.add("pending_target_selection")
             block.update(file_count=len(rows), reasons=sorted(reasons),
                 pending=sorted({reason for row in rows for reason in row["pending"]}),
                 repeat_panel=repeat_panel(rows) if rubric == "rubric20" else None,
                 comparable_for_final_v10=False,
-                status="rescore_or_ingestion_required" if reasons else "condition_review_pending")
+                status=("pending_target_selection" if reasons == {"pending_target_selection"}
+                        else "rescore_or_ingestion_required" if reasons else "condition_review_pending"))
             if reasons:
                 rescore.append({**{key: record[key] for key in ("arm", "project", "label")},
                     "rubric": rubric, "target_version": "3.0" if rubric == "rubric10" else rubric20_version,
-                    "reasons": sorted(reasons), "action": "ingest_bound_current_rating_or_rescore"})
+                    "reasons": sorted(reasons), "action": ("select_evaluator_and_context_targets"
+                    if reasons == {"pending_target_selection"} else "ingest_bound_current_rating_or_rescore")})
     rescore.sort(key=lambda item: tuple(item[key] for key in ("arm", "project", "label", "rubric")))
     summary = []
     for arm in sorted({row["arm"] for row in records}):

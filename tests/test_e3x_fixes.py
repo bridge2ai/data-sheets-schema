@@ -55,3 +55,13 @@ def test_f6_bound_run_is_visible_beside_grouping_arm(registered_case):
     assert all(run[key] in markdown for key in ("arm", "method", "label"))
 
 
+def test_f7_untargeted_registered_tuple_stays_visibly_pending(registered_case):
+    root, output, _ = registered_case
+    result = audit.audit(root, roster_manifest=registered_roster(registered_case),
+                         registered_evaluations=[("explicit-v10", output)])
+    queued = next(row for row in result["rescore_tuples"] if row["rubric"] == "rubric20")
+    assert queued["reasons"] == ["pending_target_selection"]
+    assert queued["action"] == "select_evaluator_and_context_targets"
+    assert "pending_target_selection" in audit.markdown(result)
+
+
