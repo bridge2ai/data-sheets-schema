@@ -399,8 +399,17 @@ def test_parse_coverage_floor() -> None:
     """Test coverage_floor parsing for pending, NUM/DEN, and decimal inputs."""
     assert parse_coverage_floor(None) == {"state": "pending", "mode": "diagnostic_pilot"}
     assert parse_coverage_floor("pending") == {"state": "pending", "mode": "diagnostic_pilot"}
-    assert parse_coverage_floor("13/20") == {"state": "registered", "numerator": 13, "denominator": 20}
-    assert parse_coverage_floor("0.65") == {"state": "registered", "numerator": 13, "denominator": 20}
+    # A registered floor gates the receipted part by default (D-C, 2026-10-23).
+    assert parse_coverage_floor("13/20") == {"state": "registered", "numerator": 13, "denominator": 20,
+                                              "basis": "receipted_part"}
+    assert parse_coverage_floor("0.65") == {"state": "registered", "numerator": 13, "denominator": 20,
+                                             "basis": "receipted_part"}
+    # The v2 form, with no basis key, is still available byte for byte.
+    assert parse_coverage_floor("13/20", basis="all_receiptable") == {
+        "state": "registered", "numerator": 13, "denominator": 20}
+    assert parse_coverage_floor("pending", basis="all_receiptable") == {"state": "pending", "mode": "diagnostic_pilot"}
+    with pytest.raises(ValueError, match="invalid coverage floor basis"):
+        parse_coverage_floor("13/20", basis="final_record")
 
     with pytest.raises(ValueError, match="require 0 < numerator <= denominator <= 1000"):
         parse_coverage_floor("25/20")
@@ -425,7 +434,8 @@ def test_build_registration_kids_first_neutral_profile(tmp_path: Path) -> None:
     assert reg["inputs"]["chunk_manifest"]["path"].endswith("kids_first/chunks.yaml")
     assert reg["inputs"]["profile"]["name"] == "neutral"
     assert reg["inputs"]["profile"]["vocabulary"] is None
-    assert reg["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
+    assert reg["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20,
+                                                "basis": "receipted_part"}
     validate_registration_document(reg)
 
 
@@ -462,7 +472,8 @@ def test_cli_multi_replicate_roster_and_custom_limits(tmp_path: Path) -> None:
     assert reg1["audit_limits"]["max_workers"] == 18
     assert reg1["audit_limits"]["max_calls"] == 20
     assert reg1["audit_limits"]["aggregate_output_tokens"] == 18 * 64000 + 32000 + 32000
-    assert reg1["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
+    assert reg1["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20,
+                                                 "basis": "receipted_part"}
 
     # Check mode succeeds for multi-replicate roster
     check_res = runner.invoke(
@@ -518,7 +529,8 @@ def test_overwrite_guard_requires_replace_on_changed_content(tmp_path: Path) -> 
         write_to_disk=True,
         replace=True,
     )
-    assert updated["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20}
+    assert updated["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 13, "denominator": 20,
+                                                    "basis": "receipted_part"}
 
     # CLI outputs sha256= and honors --replace
     runner = CliRunner()
@@ -678,4 +690,15 @@ def test_cli_floor_default_stays_pending(tmp_path: Path) -> None:
     reg = json.loads((out_dir / "registration_chorus_floor_default.json").read_text(encoding="utf-8"))
     assert reg["receipt"]["coverage_floor"] == {"state": "pending", "mode": "diagnostic_pilot"}
     assert reg["audit_limits"]["aggregate_output_tokens"] == 320000
+
+
+def test_cli_floor_basis_all_receiptable_writes_the_v2_floor(tmp_path: Path) -> None:
+    """--floor-basis all_receiptable reproduces a pre-decision registration's floor exactly."""
+    out_dir = tmp_path / "regs"
+    res = CliRunner().invoke(cli, ["-p", "CHORUS", "--partition", "chorus", "-l", "v2_floor", "-o", str(out_dir),
+                                   "--coverage-floor", "17/20", "--floor-basis", "all_receiptable"])
+    assert res.exit_code == 0, res.output
+    reg = json.loads((out_dir / "registration_chorus_v2_floor.json").read_text(encoding="utf-8"))
+    assert reg["receipt"]["coverage_floor"] == {"state": "registered", "numerator": 17, "denominator": 20}
+    validate_registration_document(reg)
 

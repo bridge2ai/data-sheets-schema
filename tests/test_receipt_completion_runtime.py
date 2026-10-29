@@ -85,7 +85,10 @@ class Messages(FakeMessages):
                 answers.append(copy.deepcopy(answers[0]))
             if self.mode == 'outside':
                 answers.append({'path': 'invented[99]', 'unsupported': True, 'reason': 'outside'})
-            response = FakeResponse('rereceipt: [broken' if self.mode == 'malformed' else raw({'rereceipt': answers}))
+            text = 'rereceipt: [broken' if self.mode == 'malformed' else raw({'rereceipt': answers})
+            if self.mode == 'fenced':
+                text = '```yaml\n' + text + '```\n'
+            response = FakeResponse(text)
             response.stop_reason = 'max_tokens' if self.mode == 'truncated' else 'end_turn'
             response.content.append(SimpleNamespace(type='thinking', thinking='Synthetic disclosed reasoning summary', signature='present'))
             return response
@@ -226,6 +229,7 @@ def test_no_work_makes_no_completion_request(selected):
     api.execute(selected, client=c)
     out = rc.recover(selected)
     assert out['counts']['requested'] == 0 and out['state'] == 'answers_complete'
+    assert out['answer_envelope'] is None  # no model answered (#5116)
     assert not c.messages.completion_calls
     assert rc._load(out['journal']['response'])['stop_reason'] == 'no_work'
     assert out['journal']['context'] is None
@@ -727,3 +731,16 @@ def test_complete_recovery_refuses_edited_accounted_token_counters(selected):
     ledger._write(selected, data)
     with pytest.raises(ledger.UsageLedgerError, match='usage is unresolved'):
         rc.recover(selected)
+
+
+@pytest.mark.parametrize('mode,envelope', [('unsupported', 'bare'), ('fenced', 'yaml_fence')])
+def test_the_record_states_the_answer_envelope_and_parser(selected, mode, envelope):
+    """#5116: the completion result in the record names the envelope the answer arrived in."""
+    from data_sheets_schema import rereceipt
+    api.execute(selected, client=client(selected, mode))
+    outcome = yaml.safe_load(selected.provenance_path.read_bytes())['receipt_completion']
+    assert outcome['state'] == 'answers_complete'
+    assert outcome['answer_envelope'] == envelope
+    assert outcome['answer_parser'] == rereceipt.ANSWER_PARSER
+    assert rc.recover(selected)['answer_envelope'] == envelope
+
