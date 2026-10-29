@@ -664,10 +664,16 @@ def launch_record(spec, expected):
         if found != expected:
             _fail(f'resume journal head: expected={expected or "required from prior launch/monitor record"}; found={found or "missing"}')
     except ledger.UsageLedgerError as exc:
-        # Never promote rejected on-disk bytes to a launch/monitor anchor.
-        print(f'latch journal refused: project={spec.project} label={spec.label} '
-              f'{exc} (not a resume anchor)', file=sys.stderr, flush=True)
-        raise
+        # No refused diagnostic is a source of anchors, including malformed
+        # expectations and hashes embedded in broken-chain errors. Redact the
+        # exception too, and suppress its unsafe context in CLI/log tracebacks.
+        def redact(message):
+            return re.sub(r'[0-9a-fA-F]{64,}',
+                          lambda match: match[0][:8] + '…(unverified, not a resume anchor)', message)
+        message = redact(str(exc))
+        print(redact(f'latch journal refused: project={spec.project} label={spec.label} '
+                     f'{message} (not a resume anchor)'), file=sys.stderr, flush=True)
+        raise ledger.UsageLedgerError(message) from None
     display('start')
     try:
         yield

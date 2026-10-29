@@ -26,7 +26,7 @@ def retain_stop(output, previous):
     return heads[-1] if heads else previous
 
 
-def test_refused_forgery_cannot_supply_the_next_monitored_resume_head(tmp_path, monkeypatch, capsys):
+def test_refused_forgery_cannot_supply_the_next_monitored_resume_head(tmp_path, monkeypatch, capsys, caplog):
     selected = start(tmp_path)
     retained = raw_events(selected)[-1]['sha256']
     # Forge a consistent local chain and checkpoint, as the attack in R2 did.
@@ -45,11 +45,16 @@ def test_refused_forgery_cannot_supply_the_next_monitored_resume_head(tmp_path, 
     before = journal.journal_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes()
     monkeypatch.setattr(api, '_execute', lambda *a, **k: pytest.fail('refused launch reached execution'))
     for _ in range(2):
-        with pytest.raises(ledger.UsageLedgerError, match='resume journal head'):
+        with pytest.raises(ledger.UsageLedgerError, match='resume journal head') as caught:
             api.execute(selected, expect_journal_head_sha256=retained)
-        output = capsys.readouterr().err
+        captured = capsys.readouterr()
+        output = '\n'.join((captured.out, captured.err, str(caught.value), caplog.text))
         assert 'latch journal refused:' in output and 'not a resume anchor' in output
-        assert previous in output
+        assert previous not in output
+        for candidate in set(re.findall(r'[0-9a-fA-F]{64}', output)):
+            with pytest.raises(ledger.UsageLedgerError, match='resume journal head'):
+                api.execute(selected, expect_journal_head_sha256=candidate)
+        capsys.readouterr()
         assert 'latch journal start:' not in output and 'latch journal stop:' not in output
         assert retain_stop(output, retained) == retained
         retained = retain_stop(output, retained)

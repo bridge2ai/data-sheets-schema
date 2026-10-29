@@ -256,7 +256,9 @@ def test_resume_needs_external_head_before_recovery_or_dispatch(tmp_path, monkey
     output = capsys.readouterr().err
     assert 'latch journal refused:' in output and 'not a resume anchor' in output
     assert 'latch journal start:' not in output and 'latch journal stop:' not in output
-    assert raw_events(selected)[-1]['sha256'] in output
+    head = raw_events(selected)[-1]['sha256']
+    assert head not in output
+    assert head[:8] + '…(unverified, not a resume anchor)' in output
 
 
 def test_resume_accepts_recorded_head_and_fresh_launch_needs_none(tmp_path, monkeypatch, capsys):
