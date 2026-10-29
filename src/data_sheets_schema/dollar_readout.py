@@ -18,7 +18,8 @@ contexts, `{project}_{phase}_context.json` where the runner pins one, #5157, and
 shared generation 2's counted requests); a measured attempt of the same request
 in this generation; the generation's measured `full` request plus the files the
 phase carries, at one token per byte, within the room the context window leaves
-beside max_tokens. Without declared or measured data the bound is unknown;
+beside max_tokens; otherwise the declared registration window less max_tokens,
+priced entirely as cache writes. Without declared or measured data the bound is unknown;
 project identity supplies no token estimate (F10).
 
 Abandoned attempts are priced from the journal: this generation's from its
@@ -631,6 +632,18 @@ def resolve_pending_input_bound(
                 source += f"; capped at the {window:,}-token window less {max_tokens:,} max_tokens"
             return bound, source
 
+    # N2: an uncounted request still fits the registered context window.
+    # Cache writes are the most expensive input category; no measured cache
+    # allocation is available here, so price the entire allowance at that rate.
+    if isinstance(registration, Mapping):
+        window = _context_window(registration, None, None)
+        cap = max_tokens if type(max_tokens) is int and max_tokens > 0 else get_phase_output_cap(
+            phase, registration=registration)
+        if window is not None:
+            if cap >= window:
+                raise ValueError('registered context window must exceed max_tokens')
+            return {'cache_write': window - cap}, 'registration context_limit_tokens - max_tokens'
+
     # No name-keyed fallback: use declared custom bounds or this run's measurements.
     # Unresolved input bound: return None so caller fails closed rather than pricing as $0.00
     return None, "unknown"
@@ -669,6 +682,8 @@ def price_pending_call(
         counted = _phase_count_pin(phase, project, metadata_dir, ledger_data)
         saved_request = counted[0] if counted is not None else None
 
+    if saved_request is None and type(pending.get('max_tokens')) is int and pending['max_tokens'] > 0:
+        saved_request = {'max_tokens': pending['max_tokens']}
     output_cap = get_phase_output_cap(phase, saved_request=saved_request, registration=registration)
     output_cost = output_cap * RATE_OUTPUT
 
@@ -1019,7 +1034,14 @@ def format_readout(summary: Mapping[str, Any]) -> str:
     if trigger is not None:
         lines.append(f"Operator stop trigger: ${trigger:.2f}")
 
-    if summary.get("cap_reached"):
+    # Unknown input is a stop condition, not evidence that dollars exceeded
+    # the cap. Retain the fail-closed exit flags, but name the actual reason.
+    known = summary.get('settled_priced_components_dollars') or 0.0
+    pending = summary.get('pending_call') or {}
+    known += pending.get('output_worst_case_dollars') or 0.0
+    if total is None and not (cap is not None and known >= cap):
+        lines.append('>>> ALERT: input bound unknown; resolve the bound before continuing. <<<')
+    elif summary.get("cap_reached"):
         lines.append(">>> ALERT: CAP EXCEEDED! Run 'd4d api stop --label-prefix <prefix>' immediately! <<<")
     elif summary.get("trigger_reached"):
         lines.append(">>> ALERT: TRIGGER REACHED! Projected worst-case meets or exceeds operator stop trigger! <<<")

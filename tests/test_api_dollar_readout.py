@@ -251,6 +251,35 @@ def test_unknown_pending_input_bound_fails_closed():
     assert summary["cap_reached"] is True
     formatted = format_readout(summary)
     assert "UNKNOWN" in formatted
+    assert 'input bound unknown' in formatted
+    assert 'CAP EXCEEDED' not in formatted
+
+
+@pytest.mark.parametrize('phase,cap', [('full', 128000), ('repair_full', 128000),
+                                     ('full_readdress', 32000)])
+def test_uncounted_pending_uses_pinned_registration_window(phase, cap):
+    reg = {'format': 'shared_generation_registration_v1',
+           'audit_limits': {'context_limit_tokens': 1000000}}
+    raw = json.dumps(reg)
+    ledger = {'identity': {'project': 'NEWPROJ'}, 'rows': [],
+              'input_identity': {'shared_generation': {'registration': {
+                  'raw_json': raw, 'sha256': hashlib.sha256(raw.encode()).hexdigest()}}},
+              'pending_call': {'phase': phase, 'max_tokens': cap}}
+    summary = compute_readout(ledger, cap=60, trigger=51)
+    pending = summary['pending_call']
+    assert pending['input_bound'] == {'cache_write': 1000000 - cap}
+    assert not pending['input_bound_unknown']
+    assert summary['total_projected_dollars'] == pytest.approx(
+        (1000000 - cap) * 6.25e-6 + cap * 25e-6)
+    assert not summary['cap_reached'] and not summary['trigger_reached']
+    assert 'CAP EXCEEDED' not in format_readout(summary)
+
+
+def test_unknown_input_does_not_hide_a_known_cap_overrun():
+    summary = compute_readout({'rows': [{'output_tokens': 4000000}],
+                              'pending_call': {'phase': 'full'}}, cap=60)
+    assert summary['total_projected_dollars'] is None
+    assert 'CAP EXCEEDED' in format_readout(summary)
 
 
 def test_custom_bounds_and_worst_case_cache():
