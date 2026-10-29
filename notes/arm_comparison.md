@@ -26,7 +26,7 @@ The cross-arm table counts recorded bundle MD5 declarations, not today's files. 
 
 A shared identity requires at least two selected arms, one recorded hash per arm/project, and no missing or malformed pins or empty arm/project cells. Mixed replicate hashes are heterogeneous evidence; incomplete comparisons remain insufficient.
 
-Each record is compared separately with today's bundle and the chunk manifest whose hashes it recorded. A source-ranking manifest is not a bundle-byte pin. Unknown evidence is not a match; drift describes changed inputs, not generation quality. Absolute input paths inside the selected checkout are supported. External absolute paths remain unknown: this record-only interface lacks the provenance-file ownership needed for the repository's relocation resolver and never reads an external file.
+Each record is compared separately with today's bundle and the chunk manifest whose hashes it recorded. A source-ranking manifest is not a bundle-byte pin. Unknown evidence is not a match; drift describes changed inputs, not generation quality. Absolute input paths inside the selected checkout keep their owned relative paths. Foreign absolute paths with exactly one data/preprocessed pair support relocation under the selected checkout, where disk bytes and the pinned manifest are checked. Unsupported or ambiguous relocation (including repeated data/preprocessed pairs) stays unknown. Lexical and resolved paths must remain inside the selected checkout; external files are never read. Relocation alone does not establish bundle identity.
 
 | arm | records | disk: match / drift / unknown | pinned manifest: match / drift / unknown |
 |---|---:|---|---|
