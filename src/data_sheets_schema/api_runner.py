@@ -405,6 +405,17 @@ DERIVED_PHASES = frozenset({"core", "reconcile_core"})
 #: the record carries whatever value a run used, clamped to the route.
 RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 
+#: generic_v10 (shared generation 1) report and reconcile room (D-C, owner
+#: decision 2026-10-23). The 2026-10-22a CHORUS canary's report used 83,367
+#: of 96,000 tokens (87%), the tightest margin of the run, and the regate
+#: shares the report budget; a report cut off at its ceiling costs a billed
+#: regate. Raised to the route's ceiling for shared generation 1 only: every
+#: earlier renderer and condition keeps its recorded budget, and the value a
+#: run used is in its api_usage rows and `max_tokens_by_phase`.
+#: `dollar_readout.SHARED_V1_PHASE_OUTPUT_CAPS` mirrors this; a test keeps
+#: them equal.
+SHARED_PHASE_MAX_TOKENS = {"report": 128000, "reconcile_full": 128000}
+
 
 def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
                      model: str | None = None) -> int:
@@ -414,6 +425,11 @@ def phase_max_tokens(spec: "RunSpec", ph: str, default: int, *,
     # finding-only response. Keep earlier renderers' recorded limits intact.
     if spec.render_version >= 12 and ph in {"audit", "report"}:
         value = 96000
+    if getattr(spec, "shared_generation_version", 0) in (1, 2):
+        if os.environ.get("D4D_RECEIPT_FULL_MAX_TOKENS", "").strip():
+            raise ValueError("D4D_RECEIPT_FULL_MAX_TOKENS is not permitted for shared-generation runs")
+    if getattr(spec, "shared_generation_version", 0) == 1 and ph in SHARED_PHASE_MAX_TOKENS:
+        value = SHARED_PHASE_MAX_TOKENS[ph]
     if spec.condition in RECEIPT_CONDITIONS and ph in RECEIPT_PHASE_MAX_TOKENS:
         # Env-overridable (#777): three consecutive full-phase stalls on the
         # AI_READI v7 re-canary followed the raise to 128k, where two runs at
@@ -4340,24 +4356,43 @@ def report_claims_block(spec: RunSpec, *, record: dict | None = None) -> dict[st
     return out
 
 
-def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None) -> dict[str, Any]:
+def report_audit_totals_block(spec: RunSpec, carry: dict[str, str] | None = None,
+                             *, record: dict[str, Any] | None = None) -> dict[str, Any]:
     """Check written report's stated finding totals against structured audit (#4766)."""
     from data_sheets_schema.report_audit_totals import check_report_audit_totals
     audit_source = carry.get("Audit findings") if carry else None
     if audit_source is None:
-        intermediate_audit = _intermediate_dir(spec) / f"{spec.project}_audit.json"
-        if intermediate_audit.exists():
-            audit_source = intermediate_audit
+        from data_sheets_schema import snapshot_store
+        indexed, snapshot = snapshot_store.read_latest(
+            spec.metadata_dir, spec.project, f"{spec.project}_audit.json", spec=spec,
+            record=record if record and ("run" in record or "intermediates" in record) else None)
+        if snapshot is not None:
+            audit_source = snapshot[1].decode("utf-8")
+        elif not indexed:
+            # Legacy single-snapshot helpers have no byte attestation. With
+            # multiple snapshots, preserve a checked prior on resume rather than
+            # guessing which audit produced the report from filename order.
+            intermediate = _intermediate_dir(spec)
+            pattern = re.compile(re.escape(spec.project) + r"_audit(?:_[0-9]+)?\.json")
+            candidates = [p for p in intermediate.glob(f"{spec.project}_audit*.json")
+                          if pattern.fullmatch(p.name)]
+            if len(candidates) == 1:
+                audit_source = candidates[0]
     return check_report_audit_totals(spec.report_path, audit_source)
 
 
 def _current_report_audit_totals(spec: RunSpec, existing: dict[str, Any]) -> dict[str, Any]:
-    """Return existing `report_audit_totals` if at current `INSTRUMENT_VERSION`, else recompute."""
+    """Re-read available report/audit bytes without erasing an earlier measurement.
+
+    The instrument version identifies the reader, not the input bytes. A current
+    version alone cannot establish that a saved reading still describes the report.
+    """
     from data_sheets_schema.report_audit_totals import INSTRUMENT_VERSION
     prior = existing.get("report_audit_totals")
-    if isinstance(prior, dict) and (prior.get("instrument_version") or 0) >= INSTRUMENT_VERSION:
+    if (isinstance(prior, dict) and type(prior.get("instrument_version")) is int
+            and prior["instrument_version"] > INSTRUMENT_VERSION):
         return prior
-    fresh = report_audit_totals_block(spec)
+    fresh = report_audit_totals_block(spec, record=existing)
     if isinstance(prior, dict) and prior.get("checked") is True and not fresh.get("checked"):
         return prior
     return fresh

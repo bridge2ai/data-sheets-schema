@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def registration(tmp_path):
     return builder.build_registration(
         project="CHORUS", label="wave4_review", registration_path=tmp_path / "registration_chorus_wave4_review.json",
-        write_to_disk=False,
+        partition="chorus", write_to_disk=False,
     )
 
 
@@ -72,6 +72,11 @@ def test_worktree_override_uses_selected_tree_schema_resources(tmp_path):
         path = target / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(raw)
+    # A14 binds executable request dependencies in both descriptor versions.
+    for name in sg.REQUEST_CODE:
+        path = target / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / name, path)
     for pin in (initial["runtime"]["config"], initial["inputs"]["profile"]["vocabulary"]):
         if pin and Path(pin["path"]).is_relative_to(ROOT):
             original = Path(pin["path"])
@@ -83,6 +88,7 @@ def test_worktree_override_uses_selected_tree_schema_resources(tmp_path):
     # schema/protocol resources. The caller intentionally remains in ROOT.
     reg = builder.build_registration(
         project="CHORUS", label="wave4_foreign_worktree",
+        partition="chorus",
         registration_path=tmp_path / "foreign_registration.json", worktree=target,
         bundle_path=initial["inputs"]["bundle"]["path"],
         chunk_manifest_path=initial["inputs"]["chunk_manifest"]["path"],

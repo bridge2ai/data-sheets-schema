@@ -52,7 +52,7 @@ def checkout_unchanged(tmp_path_factory):
 
 
 def _registration(directory):
-    return builder.build_registration("CHORUS", "authority", registration_path=directory / "registration.json", write_to_disk=False)
+    return builder.build_registration("CHORUS", "authority", partition="chorus", registration_path=directory / "registration.json", write_to_disk=False)
 
 
 @pytest.fixture
@@ -73,12 +73,17 @@ def selected_resources(tmp_path):
         target = selected / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
+    # Selected-tree authority includes A14's executable request closure.
+    for name in sg.REQUEST_CODE:
+        target = selected / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / name, target)
     args = dict(project="CHORUS", label="selected", registration_path=tmp_path / "selected.json",
                 bundle_path=original["inputs"]["bundle"]["path"],
                 chunk_manifest_path=original["inputs"]["chunk_manifest"]["path"],
                 source_manifest_path=original["inputs"]["source_manifest"]["path"],
                 context_path=original["inputs"]["context"]["path"], write_to_disk=False,
-                worktree=selected)
+                worktree=selected, partition="chorus")
     return selected, original, args
 
 
@@ -103,16 +108,21 @@ def test_default_kids_first_manifest_comes_from_selected_tree(selected_resources
     shutil.copyfile(ROOT / relative, manifest)
     args.pop("source_manifest_path")
     args["project"] = "KIDS_FIRST"
+    args.pop("partition")
+    # Mechanics-only fixture limits, not a scientific Kids First sizing claim.
+    args["audit_limits"] = {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4}
     reg = builder.build_registration(**args)
     assert reg["inputs"]["source_manifest"] == sg.file_pin(manifest)
     assert reg["inputs"]["profile"]["name"] == "neutral"
 
 
-@pytest.mark.parametrize("resource", ["prompt", "config", "vocabulary", "full_schema", "core_schema"])
+@pytest.mark.parametrize("resource", ["prompt", "config", "vocabulary", "full_schema", "core_schema", "request_code"])
 def test_missing_selected_resource_refuses_without_fallback(selected_resources, resource):
     selected, original, args = selected_resources
     if resource == "prompt":
         relative = next(iter(sg.ASSET_HASHES))
+    elif resource == "request_code":
+        relative = sg.REQUEST_CODE[0]
     elif resource == "config":
         relative = Path(original["runtime"]["config"]["path"]).relative_to(ROOT)
     elif resource == "vocabulary":
@@ -174,6 +184,37 @@ def test_foreign_tree_refused_while_other_thread_active(selected_resources):
         thread.join(timeout=5)
     assert not thread.is_alive()
     assert Path.cwd() == before
+
+
+@pytest.mark.parametrize("invalid", ["missing", "unknown_profile", "aggregate"])
+def test_partition_refusal_precedes_draft_context_writes(tmp_path, selected_resources, invalid):
+    _, _, args = selected_resources
+    output = tmp_path / "must-stay-absent"
+    args.pop("context_path")
+    args.update(registration_path=output / "registration.json", context_dir=output / "contexts",
+                synthesize_draft_context=True, write_to_disk=True)
+    if invalid == "missing":
+        args.pop("partition")
+    elif invalid == "unknown_profile":
+        args["partition"] = "unknown"
+    else:
+        args["audit_limits"] = {"aggregate_output_tokens": 1}
+    with pytest.raises(ValueError, match="partition|aggregate_output_tokens"):
+        builder.build_registration(**args)
+    assert not output.exists(), "refused registration created draft output before validating bounds"
+
+
+def test_valid_partition_still_publishes_requested_draft(tmp_path, selected_resources):
+    _, _, args = selected_resources
+    output = tmp_path / "valid-draft"
+    args.pop("context_path")
+    args.update(registration_path=output / "registration.json", context_dir=output / "contexts",
+                synthesize_draft_context=True, write_to_disk=True)
+    reg = builder.build_registration(**args)
+    assert Path(reg["registration_path"]).is_file()
+    assert Path(reg["inputs"]["context"]["path"]) == output / "contexts" / "chorus_omission_context.json"
+    assert reg["inputs"]["context"] == sg.file_pin(Path(reg["inputs"]["context"]["path"]))
+    assert reg["audit_limits"] == builder.resolve_audit_limits("CHORUS", "chorus")
 
 
 @pytest.mark.parametrize("schema", ["full_schema", "core_schema"])
@@ -255,7 +296,7 @@ def test_copied_cli_selects_foreign_tree_from_another_checkout(tmp_path, option,
     # Python 3.9/3.10 have no -P; the copied script's directory is isolated
     # and contains no importable dependencies on those supported interpreters.
     safe_path = ["-P"] if sys.version_info >= (3, 11) else []
-    command = [sys.executable, "-S", *safe_path, "-B", str(copied), "-p", "CHORUS", "-l", "foreign", "-o", "prepared", *selection]
+    command = [sys.executable, "-S", *safe_path, "-B", str(copied), "-p", "CHORUS", "--partition", "chorus", "-l", "foreign", "-o", "prepared", *selection]
     result = subprocess.run(command, cwd=tmp_path, env=env, capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stdout + result.stderr
     path = selected / "prepared" / "registration_chorus_foreign.json"
@@ -317,7 +358,7 @@ def test_synthesized_context_requires_selected_vocabulary(selected_resources, tm
     selected, original, _ = selected_resources
     (selected / "src/data_sheets_schema/b2ai_registry_vocabularies.yaml").unlink()
     out_dir = tmp_path / "synthesized"
-    args = ["-p", "CHORUS", "-l", "missing_vocab", "-o", str(out_dir),
+    args = ["-p", "CHORUS", "--partition", "chorus", "-l", "missing_vocab", "-o", str(out_dir),
             "--worktree", str(selected), "--synthesize-draft-context"]
     for option, key in (("--bundle", "bundle"), ("--chunk-manifest", "chunk_manifest"),
                         ("--source-manifest", "source_manifest")):

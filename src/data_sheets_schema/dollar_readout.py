@@ -5,11 +5,11 @@ projects worst-case costs for in-flight pending calls across all generation phas
 - ``full`` (128,000 output cap)
 - ``full_readdress`` (8,000 output cap / READDRESS_MAX_TOKENS)
 - ``receipt_completion`` (cap and input from saved request and counted context)
-- ``reconcile_full`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report_regate`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``repair_full`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
-- ``report_after_repair`` (96,000 fallback output cap; 128,000 when pinned in ``{project}_{phase}_context.json`` under #5157)
+- ``reconcile_full`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``report`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``report_regate`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
+- ``repair_full`` (96,000 output cap)
+- ``report_after_repair`` (96,000 default output cap; 128,000 under ``SHARED_V1_PHASE_OUTPUT_CAPS`` for ``shared_generation_registration_v1``, or from ``{project}_{phase}_context.json`` when pinned under #5157)
 - typed audit stages (cap and input from saved stage request and context)
 
 A pending call's input is bounded, in order, by an operator's custom bound; the
@@ -50,6 +50,13 @@ from data_sheets_schema.run_telemetry import (
 CAP_FULL = 128000
 CAP_FULL_READDRESS = 8000
 CAP_REPORT_FAMILY = 96000  # reconcile_full, report, report_regate, repair_full, report_after_repair
+#: generic_v10 registrations (shared generation 1) raise the report family to
+#: the route ceiling (D-C, 2026-10-23); mirrors
+#: `api_runner.SHARED_PHASE_MAX_TOKENS`, where the regate shares the report
+#: budget. A test keeps the two equal.
+SHARED_V1_FORMAT = "shared_generation_registration_v1"
+SHARED_V1_PHASE_OUTPUT_CAPS: dict[str, int] = {
+    "reconcile_full": 128000, "report": 128000, "report_regate": 128000, "report_after_repair": 128000}
 CAP_DEFAULT_ORDINARY = 128000
 CAP_DEFAULT_TYPED = 24000
 
@@ -293,6 +300,10 @@ def get_phase_output_cap(
     # If a saved request payload with max_tokens exists, it takes precedence (e.g. typed / receipt)
     if saved_request and isinstance(saved_request.get("max_tokens"), int):
         return saved_request["max_tokens"]
+
+    # A generic_v10 registration selects the raised report-family caps
+    if registration and registration.get("format") == SHARED_V1_FORMAT and phase in SHARED_V1_PHASE_OUTPUT_CAPS:
+        return SHARED_V1_PHASE_OUTPUT_CAPS[phase]
 
     # Known ordinary phase caps
     if phase in PHASE_OUTPUT_CAPS:
@@ -723,6 +734,26 @@ def price_pending_call(
     }
 
 
+def registration_from_ledger(ledger_data: Mapping[str, Any]) -> dict[str, Any] | None:
+    """The shared-generation registration a v10 ledger pins, or None for any other ledger.
+
+    The runner writes the exact registration bytes and their sha256 under
+    `input_identity.shared_generation.registration`, so the readout can select
+    a v10 run's caps without a caller passing the registration. Bytes that
+    disagree with their own sha256 are refused rather than priced.
+    """
+    identity = ledger_data.get("input_identity")
+    shared = identity.get("shared_generation") if isinstance(identity, Mapping) else None
+    pin = shared.get("registration") if isinstance(shared, Mapping) else None
+    if not isinstance(pin, Mapping) or not isinstance(pin.get("raw_json"), str) or not isinstance(pin.get("sha256"), str):
+        return None
+    raw = pin["raw_json"].encode("utf-8")
+    if hashlib.sha256(raw).hexdigest() != pin["sha256"]:
+        raise ValueError("ledger's pinned shared-generation registration differs from its sha256")
+    value = json.loads(raw)
+    return value if isinstance(value, dict) else None
+
+
 def compute_readout(
     ledger_source: Mapping[str, Any] | str | Path,
     *,
@@ -747,6 +778,8 @@ def compute_readout(
         ledger_data = dict(ledger_source)
         ledger_file_str = None
 
+    if registration is None:
+        registration = registration_from_ledger(ledger_data)
     identity = ledger_data.get("identity") or {}
     resolved_project = project or identity.get("project")
     label = identity.get("label")

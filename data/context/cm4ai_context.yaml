@@ -1,31 +1,39 @@
 # Evaluation applicability context for CM4AI (Cell Maps for AI)
 # Bridge2AI Data Generation Project: in vitro multi-scale cell architecture mapping
 # Format: d4d-evaluation-context-1
+# Bundle chunks: data/preprocessed/chunks/CM4AI_chunks.yaml (rule.version: 2, 28 chunks)
 
 human_subjects:
   value: false
-  evidence: "CM4AI generates data from continuous cell lines (e.g., MDA-MB-468, HeLa) in vitro; no living human participants, clinical interventions, or human subject recruitment."
+  # chunks: [c002, c010, c026]
+  evidence: "[chunks: c002, c010, c026] CM4AI generates multimodal cell-architecture maps from established in vitro human cell lines — U2OS osteosarcoma cells (Nature 2025, c002), MDA-MB-468 triple-negative breast cancer cells (+/- paclitaxel or vorinostat), and KOLF2.1J human iPSCs (+/- neuronal and cardiomyocytic differentiation; bioRxiv 2024 c010; UVA Dataverse June 2026 release doi:10.18130/V3/HIGT4C c026) — rather than recruiting living human subjects ('non-clinical (from tissue cultures) and are considered to be de-identified as they cannot be matched, with current knowledge, to a human subject', c010)."
 
 regulated_access:
   value: false
-  evidence: "CM4AI data is publicly accessible via open repositories (e.g., Fairscape, NDEx, Dataverse) under standard open licenses without Data Access Committee (DAC) approval or credentialed gatekeeping."
+  # chunks: [c012, c016, c017, c026]
+  evidence: "[chunks: c012, c016, c017, c026] CM4AI data releases on University of Virginia Dataverse (LibraData, including doi:10.18130/V3/HIGT4C in c016, c026) are openly downloadable under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) license (c012, c017) with no controlled-access gate, DUA, or credentialing requirement."
 
 shared_dataset:
   value: true
-  evidence: "CM4AI releases open-access public dataset packages with persistent identifiers and standard schemas."
+  # chunks: [c012, c016, c018, c020, c023, c026]
+  evidence: "[chunks: c012, c016, c018, c020, c023, c026] CM4AI publicly distributes quarterly multimodal data releases via cm4ai.org and UVA Dataverse (LibraData), including mass spectrometry (SEC-MS, AP-MS), immunofluorescence imaging, Perturb-seq, and RO-Crate provenance packages (doi:10.18130/V3/B35XWX c018; doi:10.18130/V3/F3TD5R c020; doi:10.18130/V3/K7TGEM c023; doi:10.18130/V3/HIGT4C c016, c026)."
 
 data_collection:
   value: true
-  evidence: "CM4AI collects experimental microscopy, mass spectrometry, and biophysical measurements directly."
+  # chunks: [c002, c010, c014, c026]
+  evidence: "[chunks: c002, c010, c014, c026] CM4AI acquires primary experimental data across three complementary mapping modalities — affinity purification and size-exclusion mass spectrometry (AP-MS, SEC-MS), high-throughput immunofluorescence (IF) confocal microscopy, and single-cell CRISPR/Cas9 genetic perturbation screens (Perturb-seq via 10x Genomics) — in U2OS, MDA-MB-468, and KOLF2.1J cell lines (c002, c010, c014, c026)."
 
 data_processing:
   value: true
-  evidence: "CM4AI applies image processing, feature extraction, calibration, and graph construction pipelines."
+  # chunks: [c002, c010, c011]
+  evidence: "[chunks: c002, c010, c011] Raw proteomics, IF imaging, and CRISPR perturbation streams undergo dimensionality reduction (node2vec PPI embeddings and Human Protein Atlas image embeddings), contrastive co-embedding, multiscale community detection to construct hierarchical DAG cell maps, LLM-assisted assembly naming, and FAIRSCAPE RO-Crate provenance graph packaging (c002, c010, c011)."
 
 processing_software:
   value: true
-  evidence: "CM4AI publishes and documents open-source processing tools, containerized pipelines, and software repositories."
+  # chunks: [c010, c011, c012]
+  evidence: "[chunks: c010, c011, c012] CM4AI develops and distributes open-source processing and packaging software including the Multi-Scale Integrated Cell (MuSIC) data integration pipeline, FAIRSCAPE-CLI RO-Crate provenance and PID packaging client/server (MIT license), Integrative Modeling Platform (IMP v2.18), Cytoscape, HiView, and ndex2 (c010, c011, c012)."
 
 ml_training_dataset:
   value: true
-  evidence: "CM4AI benchmarks and architectures are designed for training and validating predictive cell models."
+  # chunks: [c010, c014, c016]
+  evidence: "[chunks: c010, c014, c016] CM4AI is the NIH Bridge2AI Functional Genomics Data Generation Project (OT2OD032742, c014) whose core objective is to deliver AI-ready hierarchical maps of human cell architecture to train and benchmark interpretable 'visible machine learning' / 'visible neural network' (VNN) systems for genotype-phenotype learning (c010, c014, c016)."

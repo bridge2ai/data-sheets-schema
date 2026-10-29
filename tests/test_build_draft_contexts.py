@@ -163,6 +163,7 @@ def test_build_registration_finds_draft_contexts(tmp_path):
 
     reg = build_registration(
         project="CHORUS",
+        partition="chorus",
         label="test_label",
         registration_path=reg_path,
         bundle_path=bundle_path,
@@ -195,3 +196,74 @@ def test_kids_first_draft_context_neutral_profile(context_schema):
     assert not errors, f"KIDS_FIRST context validation errors: {errors}"
     assert omissions._shape(doc, context_schema) == []
     assert "KIDS_FIRST" in ALL_CAMPAIGN_PROJECTS
+
+
+def test_chorus_omission_context_frozen_sha256(manifest_data):
+    """Verify CHORUS context bytes stay identical (#5120) and release=null comes from source_manifest.yaml."""
+    import hashlib
+
+    assert "release" in manifest_data["scope"]["CHORUS"]
+    assert manifest_data["scope"]["CHORUS"]["release"] is None
+
+    chorus_path = DEFAULT_OUT_DIR / "chorus_omission_context.json"
+    raw = chorus_path.read_bytes()
+    assert len(raw) == 6476
+    assert (
+        hashlib.sha256(raw).hexdigest()
+        == "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+    )
+
+
+def test_voice_carries_related_but_distinct(manifest_data):
+    """Verify VOICE and VOICE_PEDIATRIC carry related_but_distinct into scopes[0].scope (#5120)."""
+    voice_doc = build_draft_scope_context("VOICE", manifest_data)
+    assert "datasets that are NOT this one:" in voice_doc["scopes"][0]["scope"]
+    assert "b2ai-voice-pediatric" in voice_doc["scopes"][0]["scope"]
+
+    vp_doc = build_draft_scope_context("VOICE_PEDIATRIC", manifest_data)
+    assert "datasets that are NOT this one:" in vp_doc["scopes"][0]["scope"]
+    assert "37yb-1t42" in vp_doc["scopes"][0]["scope"]
+
+
+def test_single_synthesizer_agreement_between_builders(manifest_data):
+    """Verify build_api_registrations.build_draft_context and build_draft_contexts agree on all 6 projects (#5120)."""
+    import yaml
+    from scripts.build_api_registrations import build_draft_context
+
+    kf_data = yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
+    for proj in ALL_CAMPAIGN_PROJECTS:
+        mdata = kf_data if proj == "KIDS_FIRST" else manifest_data
+        from_draft_builder = build_draft_scope_context(proj, mdata)
+        from_reg_builder = build_draft_context(proj)
+        assert from_reg_builder == from_draft_builder, f"Synthesizer mismatch for {proj}"
+        if proj == "KIDS_FIRST":
+            assert from_reg_builder["vocabulary"] == {}
+
+
+def test_custom_source_manifest_does_not_silently_fallback_for_kids_first(tmp_path):
+    """Explicit custom source_manifest_path lacking scope.KIDS_FIRST must be respected and never replaced by KIDS_FIRST_MANIFEST_PATH (R8-F4)."""
+    from scripts.build_api_registrations import build_draft_context
+    from scripts.build_draft_contexts import load_project_manifest_data
+
+    custom_manifest = tmp_path / "a23_explicit_custom_manifest.yaml"
+    custom_manifest.write_text(
+        "profile: neutral\nprojects:\n  KIDS_FIRST:\n    sources: []\nsource_priority:\n  1: [custom_source_only]\n",
+        encoding="utf-8",
+    )
+
+    loaded = load_project_manifest_data("KIDS_FIRST", custom_manifest)
+    assert loaded.get("source_priority") == {1: ["custom_source_only"]}
+    assert "scope" not in loaded
+
+    doc = build_draft_context(
+        "KIDS_FIRST",
+        source_manifest_path=custom_manifest,
+        write_to_disk=False,
+    )
+    assert doc["vocabulary"] == {}
+    assert doc["source_policy"]["priority"] == ["custom_source_only"]
+    assert doc["scopes"][0]["referent"] == "KIDS_FIRST dataset"
+    assert doc["scopes"][0]["release"] is None
+
+
+

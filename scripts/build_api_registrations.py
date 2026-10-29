@@ -10,14 +10,15 @@ Modelled on `tests/test_shared_generation_selection.py:17-52`.
 Kept outside `src/` so registrations remain project inputs.
 
 Usage examples:
-    # Build single-project registration for CHORUS baseline:
-    python scripts/build_api_registrations.py -p CHORUS -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10
+    # Build single-project registration for CHORUS baseline (partition bounds are
+    # never defaulted; the chorus profile is validated for CHORUS only):
+    python scripts/build_api_registrations.py -p CHORUS --partition chorus -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10
 
-    # Build batch registrations and roster for all 4 study projects:
-    python scripts/build_api_registrations.py --all -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10 -r data/registrations/generic_v10/roster.json
+    # Any other project names bounds sized for it (see PARTITION_PROFILES):
+    python scripts/build_api_registrations.py -p AI_READI --max-paths N --max-inventory-bytes B --max-workers W -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 -o data/registrations/generic_v10
 
     # Dry-run validation without writing to disk:
-    python scripts/build_api_registrations.py --all -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 --dry-run
+    python scripts/build_api_registrations.py -p CHORUS --partition chorus -l 2026-10-DDa_claude-opus-5-api-generic-v10_rep1 --dry-run
 """
 
 from __future__ import annotations
@@ -34,6 +35,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+
 
 def _bootstrap_worktree(argv: list[str]) -> Path | None:
     """Select copied-script imports before any project package is imported."""
@@ -65,6 +67,8 @@ _selected_bootstrap_root = _bootstrap_worktree(sys.argv[1:]) if __name__ == "__m
 candidate_src = (_selected_bootstrap_root or ROOT) / "src"
 if _selected_bootstrap_root is not None and not (candidate_src / "data_sheets_schema" / "api_runner.py").is_file():
     raise SystemExit("--worktree must contain the data_sheets_schema source package")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 if candidate_src.is_dir() and str(candidate_src) not in sys.path:
     sys.path.insert(0, str(candidate_src))
 
@@ -130,20 +134,39 @@ def _worktree_resources(function):
             os.chdir(previous)
     return wrapped
 
+# Stage output caps follow the CHORUS canaries (D-C, owner decision
+# 2026-10-23): at 25,000 the first 2026-10-20a worker spent its whole budget
+# thinking and wrote nothing; under 64,000/32,000/32,000 the most any stage
+# used was 53,204 (83%), 23,997 (75%) and 23,347 (73%). The aggregate output
+# allowance and the call allowance are derived from these and the partition
+# bounds in `resolve_audit_limits`, never stated separately.
 DEFAULT_AUDIT_LIMITS: dict[str, Any] = {
-    "max_paths": 384,
-    "max_inventory_bytes": 65536,
-    "max_workers": 4,
     "max_request_bytes": 32000000,
     "max_input_tokens_per_call": 1000000,
-    "worker_output_tokens": 25000,
-    "omission_output_tokens": 16000,
-    "integration_output_tokens": 16000,
+    "worker_output_tokens": 64000,
+    "omission_output_tokens": 32000,
+    "integration_output_tokens": 32000,
     "aggregate_input_tokens": 4000000,
-    "aggregate_output_tokens": 150000,
-    "max_calls": 18,
     "context_limit_tokens": 1000000,
     "context_limit_basis": "Route context window 1,000,000 tokens; sized for largest bundle",
+}
+
+# Partition bounds have no default (D-C, owner decision 2026-10-23): no one
+# setting plans every project. 80 paths / 12,288 bytes / 4 workers refuses
+# every v8 AI_READI, CM4AI, VOICE and CHORUS full record (a single /creators
+# or /file_collections field outgrows a worker, or the plan needs more than
+# four), and the refusal comes after `full` and receipt completion are
+# billed. 384 / 65,536 / 4 plans them but hands one worker about five times
+# the inventory a CHORUS worker filled 64k of output with. A registration
+# names its bounds, or a profile validated for its project.
+PARTITION_KEYS = ("max_paths", "max_inventory_bytes", "max_workers")
+PARTITION_PROFILES: dict[str, dict[str, Any]] = {
+    # What 2026-10-22a ran: 98 paths in three workers (35/54/9), the fullest
+    # 39 bytes under the inventory bound, each using 14k-50k of its 64k.
+    # Baseline arm only: 16 of the 18 CHORUS crate-arm records fail planning
+    # under these bounds, and the de novo arm has no v10 evidence.
+    "chorus": {"projects": ("CHORUS",), "arms": ("baseline",),
+               "limits": {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4}},
 }
 
 DEFAULT_RECEIPT_LIMITS: dict[str, Any] = {
@@ -165,19 +188,92 @@ DEFAULT_AUDIT_TRANSPORT: dict[str, int] = {
 }
 
 
-def parse_coverage_floor(value: str | dict[str, Any] | None) -> dict[str, Any]:
+def resolve_audit_limits(
+    project: str,
+    partition: str | None = None,
+    overrides: dict[str, Any] | None = None,
+    *,
+    arm: str = "baseline",
+) -> dict[str, Any]:
+    """Defaults, then a named partition profile, then explicit overrides.
+
+    The aggregate output allowance is the sum of every stage cap for the
+    largest plan (``max_workers`` workers, omission, integration): the typed
+    runtime admits each call only while settled output plus that call's cap
+    fits, so anything less refuses a full plan midway and anything more is
+    an allowance no plan can use. A supplied value that disagrees is refused.
+    ``max_calls`` defaults to that roster's length and may not be smaller.
+    """
+    limits = copy.deepcopy(DEFAULT_AUDIT_LIMITS)
+    if partition is not None:
+        if partition not in PARTITION_PROFILES:
+            raise ValueError(f"unknown partition profile {partition!r}; known: {sorted(PARTITION_PROFILES)}")
+        profile = PARTITION_PROFILES[partition]
+        if project not in profile["projects"] or arm not in profile["arms"]:
+            raise ValueError(
+                f"partition profile {partition!r} is validated only for {', '.join(profile['projects'])} "
+                f"({', '.join(profile['arms'])} arm); pass --max-paths, --max-inventory-bytes and "
+                f"--max-workers sized for {project} ({arm})"
+            )
+        limits.update(profile["limits"])
+    limits.update(overrides or {})
+    missing = [key for key in PARTITION_KEYS if limits.get(key) is None]
+    if missing:
+        raise ValueError(
+            "audit partition bounds have no default (D-C): pass --partition, or "
+            + ", ".join(f"--{key.replace('_', '-')}" for key in missing)
+        )
+    roster = limits["max_workers"] + 2
+    aggregate = (limits["max_workers"] * limits["worker_output_tokens"]
+                 + limits["omission_output_tokens"] + limits["integration_output_tokens"])
+    if limits.get("aggregate_output_tokens") is not None and limits["aggregate_output_tokens"] != aggregate:
+        raise ValueError(
+            f"aggregate_output_tokens {limits['aggregate_output_tokens']} disagrees with the stage caps: "
+            f"{limits['max_workers']} x {limits['worker_output_tokens']} + {limits['omission_output_tokens']}"
+            f" + {limits['integration_output_tokens']} = {aggregate}"
+        )
+    limits["aggregate_output_tokens"] = aggregate
+    if limits.get("max_calls") is None:
+        limits["max_calls"] = roster
+    if limits["max_calls"] < roster:
+        raise ValueError(
+            f"max_calls {limits['max_calls']} cannot cover {limits['max_workers']} workers"
+            f" plus omission and integration ({roster})"
+        )
+    return limits
+
+
+FLOOR_BASIS_CHOICES = ("receipted_part", "all_receiptable")
+
+
+def parse_coverage_floor(value: str | dict[str, Any] | None, *,
+                         basis: str = "receipted_part") -> dict[str, Any]:
     """Parse a coverage floor specification into receipt_completion_registration_v2 format.
 
     Accepts:
       - None, "pending", or "diagnostic_pilot" -> {"state": "pending", "mode": "diagnostic_pilot"}
-      - "NUM/DEN" (e.g. "13/20") -> {"state": "registered", "numerator": NUM, "denominator": DEN}
-      - Decimal multiple of 0.05 in (0, 1] (e.g. "0.65") -> {"state": "registered", "numerator": 13, "denominator": 20}
-      - An existing dict.
+      - "NUM/DEN" (e.g. "13/20") -> {"state": "registered", "numerator": NUM, "denominator": DEN, "basis": ...}
+      - Decimal multiple of 0.05 in (0, 1] (e.g. "0.65") -> {"state": "registered", "numerator": 13, "denominator": 20, ...}
+      - An existing dict, unchanged.
+
+    A registered floor gates the receipted part by default (D-C, 2026-10-23):
+    values reconciliation added after the receipt are reported, not gated.
+    ``basis="all_receiptable"`` writes the v2 floor with no basis key, the
+    form every registration before the decision carries.
     """
+    if basis not in FLOOR_BASIS_CHOICES:
+        raise ValueError(f"invalid coverage floor basis {basis!r}; expected one of {FLOOR_BASIS_CHOICES}")
     if value is None:
         return {"state": "pending", "mode": "diagnostic_pilot"}
     if isinstance(value, dict):
         return copy.deepcopy(value)
+    floor = _parse_floor_fraction(value)
+    if floor["state"] == "registered" and basis == "receipted_part":
+        floor["basis"] = "receipted_part"
+    return floor
+
+
+def _parse_floor_fraction(value: str) -> dict[str, Any]:
     text = str(value).strip()
     if text.lower() in ("pending", "diagnostic_pilot"):
         return {"state": "pending", "mode": "diagnostic_pilot"}
@@ -222,92 +318,33 @@ def build_draft_context(
 ) -> dict[str, Any]:
     """Synthesize a compliant root-only omission_context_v1 draft document.
 
-    Extracts referent and note from source_manifest.yaml scope metadata when available,
-    satisfying context.schema.json and shared_generation.py root scope requirements.
+    Delegates to scripts/build_draft_contexts.py so both synthesizers share one
+    implementation, profile/vocabulary policy, and canonical byte serialization (#5120).
     """
-    referent = f"{project} dataset"
-    referent_id = None
-    referent_note = f"Scope authority for {project} dataset."
-    source_policy_priority = [
-        "RO-Crate, structured metadata, data resource",
-        "documentation, license, DUA, IRB",
-        "publication, preprint, white paper",
-        "NIH project page, tutorial",
-        "historical data release, historical documentation",
-    ]
-    source_policy_basis = "Declared source_manifest.yaml tier hierarchy."
-    manifest_profile: str | None = None
+    from scripts.build_draft_contexts import (
+        build_draft_scope_context,
+        load_project_manifest_data,
+        serialize_draft_context,
+    )
 
-    if source_manifest_path:
-        sm = Path(source_manifest_path)
-        if sm.is_file():
-            try:
-                data = yaml.safe_load(sm.read_text(encoding="utf-8")) or {}
-                if isinstance(data.get("profile"), str):
-                    manifest_profile = data["profile"].strip()
-                scope_map = data.get("scope", {})
-                if isinstance(scope_map, dict) and project in scope_map:
-                    entry = scope_map[project]
-                    if isinstance(entry, dict):
-                        referent = entry.get("referent") or referent
-                        referent_id = entry.get("referent_id")
-                        # Under D04, CHORUS release is null (not the website URL)
-                        if project.upper() == "CHORUS" and referent_id == "https://chorus4ai.org/":
-                            referent_id = None
-                        referent_note = entry.get("referent_note") or referent_note
-                if "source_priority" in data and isinstance(data["source_priority"], dict):
-                    sp = data["source_priority"]
-                    source_policy_priority = [
-                        ", ".join(str(x) for x in sp[k]) if isinstance(sp[k], list) else str(sp[k])
-                        for k in sorted(sp.keys())
-                    ]
-                elif isinstance(data.get("projects"), dict) and project in data["projects"]:
-                    proj_entry = data["projects"][project]
-                    sources = proj_entry.get("sources", []) if isinstance(proj_entry, dict) else []
-                    seen_types: list[str] = []
-                    for src in sources:
-                        if isinstance(src, dict):
-                            st = str(src.get("source_type") or "").strip()
-                            if st and st not in seen_types:
-                                seen_types.append(st)
-                    if seen_types:
-                        source_policy_priority = seen_types
-                        source_policy_basis = (
-                            "Declared source types from project manifest (no tier hierarchy declared)."
-                        )
-            except Exception:
-                pass
+    manifest_data = load_project_manifest_data(project, source_manifest_path)
+    doc = build_draft_scope_context(project, manifest_data)
 
-    vocabulary: dict[str, Any] = {}
     vocab_path = resource_path(DEFAULT_VOCABULARIES_PATH)
     if vocab_path.is_file():
-        vocab_data = yaml.safe_load(vocab_path.read_text(encoding="utf-8")) or {}
-        vocabulary = vocab_data.get("vocabularies", {})
+        declared_prof = str(manifest_data.get("profile") or "").strip().lower()
+        if declared_prof != "neutral":
+            vocab_data = yaml.safe_load(vocab_path.read_text(encoding="utf-8")) or {}
+            doc["vocabulary"] = vocab_data.get("vocabularies", {})
+        else:
+            doc["vocabulary"] = {}
     elif worktree is not None:
         raise FileNotFoundError(f"selected worktree vocabulary is missing: {vocab_path}")
-
-    doc: dict[str, Any] = {
-        "format": "omission_context_v1",
-        "root_class": "Dataset",
-        "scopes": [
-            {
-                "owner": "",
-                "referent": referent,
-                "release": referent_id,
-                "scope": referent_note,
-            }
-        ],
-        "source_policy": {
-            "priority": source_policy_priority,
-            "basis": source_policy_basis,
-        },
-        "vocabulary": vocabulary,
-    }
 
     if write_to_disk and context_path is not None:
         target = Path(context_path).resolve()
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(sg.canonical(doc))
+        target.write_bytes(serialize_draft_context(doc))
 
     return doc
 
@@ -328,6 +365,8 @@ def build_registration(
     chunk_manifest_path: Path | str | None = None,
     profile_name: str | None = None,
     coverage_floor: str | dict[str, Any] | None = None,
+    floor_basis: str = "receipted_part",
+    partition: str | None = None,
     audit_limits: dict[str, Any] | None = None,
     receipt_limits: dict[str, Any] | None = None,
     synthesize_draft_context: bool = False,
@@ -342,6 +381,9 @@ def build_registration(
     """
     if arm not in ARMS:
         raise ValueError(f"unknown arm '{arm}'; must be one of {sorted(ARMS.keys())}")
+    # Library callers need the same refusal-before-write guarantee as the
+    # CLI precheck: context synthesis below can create files and directories.
+    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm)
     arm_display, method, pattern, _ = ARMS[arm]
     root_dir = Path(worktree).resolve() if worktree is not None else ROOT
     kids_first_manifest = (
@@ -450,6 +492,8 @@ def build_registration(
                 if context_dir is not None
                 else resolved_reg_path.parent / f"{project.lower()}_omission_context.json"
             )
+            from scripts.build_draft_contexts import serialize_draft_context
+
             draft_doc = build_draft_context(
                 project=project,
                 source_manifest_path=sm_resolved,
@@ -458,7 +502,7 @@ def build_registration(
                 worktree=worktree,
             )
             resolved_context = target_context.resolve()
-            resolved_context_raw = sg.canonical(draft_doc)
+            resolved_context_raw = serialize_draft_context(draft_doc)
         else:
             raise FileNotFoundError(
                 f"no omission context file found for {project!r} (searched {[str(c) for c in candidates]}); "
@@ -507,14 +551,9 @@ def build_registration(
         "config": config_pin,
     }
 
-    # Resolve limits
-    active_audit_limits = copy.deepcopy(DEFAULT_AUDIT_LIMITS)
-    if audit_limits:
-        active_audit_limits.update(audit_limits)
-
     active_receipt = copy.deepcopy(DEFAULT_RECEIPT_LIMITS)
     if coverage_floor is not None:
-        active_receipt["coverage_floor"] = parse_coverage_floor(coverage_floor)
+        active_receipt["coverage_floor"] = parse_coverage_floor(coverage_floor, basis=floor_basis)
     if "context_limit_tokens" in (audit_limits or {}) and "context_limit_tokens" not in (receipt_limits or {}):
         active_receipt["context_limit_tokens"] = active_audit_limits["context_limit_tokens"]
     if "context_limit_basis" in (audit_limits or {}) and "context_limit_basis" not in (receipt_limits or {}):
@@ -808,6 +847,21 @@ def validate_roster_file(roster_path: Path | str, pairs: list[tuple[str, str]] |
     help="Receipt coverage floor: 'pending' or 'NUM/DEN' (e.g. '13/20') or decimal in (0, 1] (e.g. '0.65').",
 )
 @click.option(
+    "--floor-basis",
+    type=click.Choice(FLOOR_BASIS_CHOICES),
+    default="receipted_part",
+    show_default=True,
+    help="What a registered floor divides by: the receipted part (values added after the receipt are "
+         "reported, not gated; D-C 2026-10-23) or all receiptable leaves (the v2 form, no basis key).",
+)
+@click.option(
+    "--partition", "partition",
+    type=click.Choice(sorted(PARTITION_PROFILES)),
+    help="Named audit partition bounds validated for a project (chorus: 80 paths, 12,288 bytes, "
+         "4 workers; CHORUS only). Without it --max-paths, --max-inventory-bytes and --max-workers "
+         "are required: partition bounds have no default.",
+)
+@click.option(
     "--max-paths",
     type=int,
     help="Override audit_limits.max_paths.",
@@ -921,6 +975,8 @@ def cli(
     chunk_manifest: Path | None,
     profile_name: str | None,
     coverage_floor: str,
+    floor_basis: str,
+    partition: str | None,
     max_paths: int | None,
     max_workers: int | None,
     max_calls: int | None,
@@ -1035,6 +1091,18 @@ def cli(
         click.echo("All checks passed.")
         return
 
+    if partition is None and any(audit_overrides.get(key) is None for key in PARTITION_KEYS):
+        raise click.UsageError(
+            "audit partition bounds have no default (D-C, 2026-10-23): pass --partition chorus for "
+            "CHORUS, or --max-paths, --max-inventory-bytes and --max-workers sized for the project"
+        )
+    # Every target must accept the bounds before any registration is written.
+    for proj in target_projects:
+        try:
+            resolve_audit_limits(proj, partition, audit_overrides or None, arm=arm)
+        except ValueError as exc:
+            raise click.UsageError(str(exc)) from exc
+
     registrations: list[dict[str, Any]] = []
     click.echo(f"Building registrations for {target_projects} (arm: {arm}, labels: {target_labels})...")
 
@@ -1054,6 +1122,8 @@ def cli(
                 chunk_manifest_path=chunk_manifest,
                 profile_name=profile_name,
                 coverage_floor=coverage_floor,
+                floor_basis=floor_basis,
+                partition=partition,
                 audit_limits=audit_overrides or None,
                 synthesize_draft_context=synthesize_draft_context,
                 write_to_disk=not dry_run,

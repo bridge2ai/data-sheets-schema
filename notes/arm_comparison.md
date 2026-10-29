@@ -692,7 +692,7 @@ Receipting replicates by removals status (distinct arm × project × replicate; 
 
 ## Release-level corpus inventory (#2914, #3282)
 
-What release evidence each project's document corpus holds (`release_inventory v2 (#2914, #3283)`, `d4d download release-inventory`), read from today's `data/preprocessed/source_manifest.yaml` (`0c5078c84f81`) and crate manifest `data/ro-crate_packages/crate_manifest.yaml` (`99285827c8b9`). It counts what the manifests declare, not what the documents say: a source typed `license` is a licence source whatever its text, and a related-but-distinct dataset's declared `in_bundle` source is not this dataset's evidence.
+What release evidence each project's document corpus holds (`release_inventory v2 (#2914, #3283)`, `d4d download release-inventory`), read from today's `data/preprocessed/source_manifest.yaml` (`b28c300596cc`) and crate manifest `data/ro-crate_packages/crate_manifest.yaml` (`99285827c8b9`). It counts what the manifests declare, not what the documents say: a source typed `license` is a licence source whatever its text, and a related-but-distinct dataset's declared `in_bundle` source is not this dataset's evidence.
 
 | project | tier-1 sources | licence | DUA | IRB | release records | crate in corpus | crate policy |
 |---|---|---|---|---|---|---|---|

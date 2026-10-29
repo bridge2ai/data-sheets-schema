@@ -1,0 +1,16 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_audit_omissions": 73,
+    "test_shared_generation_assets": 100,
+    "test_shared_generation_capture": 10,
+    "test_shared_generation_condition_compatibility": 6,
+    "test_shared_generation_scope_context": 13
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 277.6229999169882
+}

@@ -46,8 +46,17 @@ def _path(root: Path, value: Any) -> Path | None:
     if not isinstance(value, str) or not value:
         return None
     try:
-        lexical = Path(os.path.abspath(root / value))
-        lexical.relative_to(root)
+        raw = Path(value)
+        lexical = Path(os.path.abspath(root / raw))
+        try:
+            lexical.relative_to(root)
+        except ValueError:
+            from data_sheets_schema.provenance import _repo_preprocessed_tail
+            tail = _repo_preprocessed_tail(raw) if raw.is_absolute() else None
+            if tail is None:
+                return None
+            lexical = Path(os.path.abspath(root / tail))
+            lexical.relative_to(root)
         path = lexical.resolve()
         path.relative_to(root)
         return path
@@ -138,7 +147,13 @@ def bundle_drift(
     else:
         # Git names the recorded path, not the destination of today's symlink.
         # _path already bounded live IO; normalize this lexical path separately.
-        relative = Path(os.path.abspath(root / chunks["path"])).relative_to(root).as_posix()
+        cpath = Path(chunks["path"])
+        if cpath.is_absolute():
+            from data_sheets_schema.provenance import _repo_preprocessed_tail
+            tail = _repo_preprocessed_tail(cpath)
+            if tail is not None:
+                cpath = tail
+        relative = Path(os.path.abspath(root / cpath)).relative_to(root).as_posix()
         try:
             found = ((recover(relative, md5=md5, sha256=sha) if recover is not None
                       else _recover(root, relative, md5=md5, sha256=sha)))
