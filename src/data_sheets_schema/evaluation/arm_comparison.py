@@ -42,13 +42,38 @@ def _digest(value: Any, size: int) -> str | None:
     return None
 
 
-def _path(root: Path, value: Any) -> Path | None:
-    if not isinstance(value, str) or not value:
+def _lexical_relative(root: Path, value: Any) -> Path | None:
+    """Resolve ``value`` lexically relative to ``root``.
+
+    Absolute paths already inside ``root`` keep their exact relative path
+    (including any prefix before ``data/preprocessed``). Foreign absolute paths
+    from another checkout fall back to ``_repo_preprocessed_tail`` (scoped to
+    ``data/preprocessed/...`` trees).
+    """
+    if not isinstance(value, str) or not value or "\x00" in value:
         return None
     try:
-        lexical = Path(os.path.abspath(root / value))
-        lexical.relative_to(root)
-        path = lexical.resolve()
+        raw = Path(value)
+        lexical = Path(os.path.abspath(root / raw))
+        try:
+            return lexical.relative_to(root)
+        except ValueError:
+            from data_sheets_schema.provenance import _repo_preprocessed_tail
+            tail = _repo_preprocessed_tail(raw) if raw.is_absolute() else None
+            if tail is None:
+                return None
+            lexical = Path(os.path.abspath(root / tail))
+            return lexical.relative_to(root)
+    except (OSError, RuntimeError, ValueError):
+        return None
+
+
+def _path(root: Path, value: Any) -> Path | None:
+    rel = _lexical_relative(root, value)
+    if rel is None:
+        return None
+    try:
+        path = (root / rel).resolve()
         path.relative_to(root)
         return path
     except (OSError, RuntimeError, ValueError):
@@ -133,8 +158,13 @@ def bundle_drift(
         result["manifest_basis"] = "pinned manifest on disk"
     else:
         # Git names the recorded path, not the destination of today's symlink.
-        # _path already bounded live IO; normalize this lexical path separately.
-        relative = Path(os.path.abspath(root / chunks["path"])).relative_to(root).as_posix()
+        # _path already bounded live IO; _lexical_relative preserves owned
+        # paths inside root before falling back to _repo_preprocessed_tail.
+        rel_manifest = _lexical_relative(root, chunks["path"])
+        if rel_manifest is None:
+            result["manifest_reason"] = "recorded chunk-manifest path/hash missing or malformed"
+            return result
+        relative = rel_manifest.as_posix()
         try:
             found = ((recover(relative, md5=md5, sha256=sha) if recover is not None
                       else _recover(root, relative, md5=md5, sha256=sha)))

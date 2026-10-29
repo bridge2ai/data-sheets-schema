@@ -1699,12 +1699,25 @@ def build_record(project: str, method: str, label: str, *, mode: str,
     notes = list(extra_notes or [])
 
     # ---- inputs -------------------------------------------------------
+    def _rel_if_owned(p: Path | None) -> Path | None:
+        if p is None or freeze_inputs or not Path(p).is_absolute():
+            return p
+        try:
+            lex = Path(os.path.abspath(p))
+            rel = lex.relative_to(owner)
+            lex.resolve().relative_to(owner)
+            return rel
+        except (OSError, RuntimeError, ValueError):
+            return p
+
     bundle = input_bundle
     if bundle is None:
         declared = header.get("Source bundle") or header.get("Source")
         bundle = relative_to_root(Path(declared), owner) if declared else None
     if bundle is not None and freeze_inputs:
         bundle = Path(bundle).absolute()
+    elif bundle is not None:
+        bundle = _rel_if_owned(Path(bundle))
     if automatic_namespace and input_bundle is None:
         namespace = select_manifest(project, bundle) if bundle is not None else None
 
@@ -1727,6 +1740,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
                                          source_manifest=SOURCE_MANIFEST_AUTO if namespace is AUTO else namespace)
         if freeze_inputs and inputs["chunks"] is not None:
             inputs["chunks"]["path"] = str(Path(inputs["chunks"]["path"]).absolute())
+        elif inputs["chunks"] is not None and inputs["chunks"].get("path"):
+            inputs["chunks"]["path"] = str(_rel_if_owned(Path(inputs["chunks"]["path"])))
     elif bundle:
         inputs["bundle_md5"] = None
         inputs["chunks"] = None      # nothing anchors chunk ids to unverified bytes (#716)
@@ -1767,6 +1782,8 @@ def build_record(project: str, method: str, label: str, *, mode: str,
         manifest = Path(manifest)
         if freeze_inputs:
             manifest = manifest.absolute()
+        else:
+            manifest = _rel_if_owned(manifest)
         try:
             manifest_md5 = _md5(manifest)
         except OSError:
