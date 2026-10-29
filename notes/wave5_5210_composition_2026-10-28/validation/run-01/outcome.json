@@ -1,0 +1,24 @@
+{
+  "invalid_junit_cases": [
+    {
+      "identity": [
+        "tests.test_report_admission",
+        "test_chorus_wire_is_byte_identical_to_the_base_and_is_what_was_counted"
+      ],
+      "tags": [
+        "failure"
+      ]
+    }
+  ],
+  "passed": false,
+  "passed_cases_by_module": {
+    "test_download.test_api_runner": 156,
+    "test_report_admission": 21,
+    "test_usage_ledger": 59
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 3983.899230582989
+}

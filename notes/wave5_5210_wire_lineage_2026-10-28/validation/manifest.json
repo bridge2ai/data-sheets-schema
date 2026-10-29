@@ -1,0 +1,234 @@
+{
+  "format": "wave5_compact_validation_evidence_v1",
+  "helpers": [
+    {
+      "name": "preserve_wave5_validation_20261028.py",
+      "sha256": "230a36b1df400de203623cbb29865205724cd1c821ab8a6b8670b3a0c7ed4b08"
+    },
+    {
+      "name": "archive_n2_restack_validation_20261027.py",
+      "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+    }
+  ],
+  "runs": [
+    {
+      "files": [
+        {
+          "bytes": 18480,
+          "name": "origins-after.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "f3e97e3ebb704110a98e44fc9a830f4b064b6a2fa58aeae49ce142892d0fdcc5"
+        },
+        {
+          "bytes": 14873,
+          "name": "origins-before.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "7541b444920bde0ebc6994f19fce4715ae05b668df289cc49d059504941195a8"
+        },
+        {
+          "bytes": 950,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "11f687e8bc65a168d7a1b08114147ae63d26cd195cfa2a7e1859fc261d85aafb"
+        },
+        {
+          "bytes": 279,
+          "name": "phases.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "1c96a148cd3b07b7244e8b5d463d32d06d2a566c40508376abd73d7f93249a55"
+        },
+        {
+          "bytes": 1293,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "925ac9e71db2813c3d4eff87e8502c1412434f5865db7fd0fe392cc6ddbeef17"
+        },
+        {
+          "bytes": 190453,
+          "name": "reconcile_full.canonical.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa"
+        },
+        {
+          "bytes": 193993,
+          "name": "report.canonical.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8"
+        },
+        {
+          "bytes": 194777,
+          "name": "report_regate.canonical.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9"
+        },
+        {
+          "bytes": 2975759,
+          "name": "source-after.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "2dcc8e2a906d4b9f8452f87be4dfbeb58c419dc9534c8f3e28eb0ad2b61fe4e4"
+        },
+        {
+          "bytes": 2975759,
+          "name": "source-before.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "2dcc8e2a906d4b9f8452f87be4dfbeb58c419dc9534c8f3e28eb0ad2b61fe4e4"
+        }
+      ],
+      "original_outcome": {
+        "error": null,
+        "passed": true,
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "source_unchanged": true,
+        "wall_seconds": 133.4408134589903,
+        "wires": {
+          "reconcile_full": {
+            "bytes": 190453,
+            "matches_old_golden": true,
+            "old_golden": "b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa",
+            "sha256": "b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa"
+          },
+          "report": {
+            "bytes": 193993,
+            "matches_old_golden": true,
+            "old_golden": "9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8",
+            "sha256": "9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8"
+          },
+          "report_regate": {
+            "bytes": 194777,
+            "matches_old_golden": true,
+            "old_golden": "300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9",
+            "sha256": "300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9"
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-wave5-5210-wire-old-control-20261028",
+      "packet_directory": "run-01",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "case"
+      ]
+    },
+    {
+      "files": [
+        {
+          "bytes": 18114,
+          "name": "origins-after.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "d7fbba7c6181e77ba1430c4e6a5baf0d6d0b3bed1398cfc80345de493ff4a543"
+        },
+        {
+          "bytes": 14576,
+          "name": "origins-before.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "520043ca49e2d0b447f16c0c8384db8708b05c986bca244d53e8d8d1542e69a5"
+        },
+        {
+          "bytes": 953,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "c8866ed889a96ed221501e26f58e779f14bf4101e5d5f79249289cd82bc64d60"
+        },
+        {
+          "bytes": 279,
+          "name": "phases.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "1c96a148cd3b07b7244e8b5d463d32d06d2a566c40508376abd73d7f93249a55"
+        },
+        {
+          "bytes": 1287,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "196b0c5173478482b8f15619e54e102814c920bb5e97c4a6fc9dcef00c7eec6b"
+        },
+        {
+          "bytes": 190453,
+          "name": "reconcile_full.canonical.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "31340b31d787baa1da17c2b738c99d21efd2a1db9150eb0d0aaf917f1ac6160c"
+        },
+        {
+          "bytes": 193993,
+          "name": "report.canonical.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "eea1fe34d3de44efbc85a681b5b2d58c0f66bcc70f7b64450378db75fc996749"
+        },
+        {
+          "bytes": 194777,
+          "name": "report_regate.canonical.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "d085cabccdc8d0b7e1e99d498e6f3cfe59b80322c907d3e8d49b177aaf672f1d"
+        },
+        {
+          "bytes": 2982878,
+          "name": "source-after.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "753748e334fcb69b820092156e7c5728b881251aca520820e01672a564319a39"
+        },
+        {
+          "bytes": 2982878,
+          "name": "source-before.json",
+          "reason": "detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "753748e334fcb69b820092156e7c5728b881251aca520820e01672a564319a39"
+        }
+      ],
+      "original_outcome": {
+        "error": null,
+        "passed": true,
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "source_unchanged": true,
+        "wall_seconds": 141.4742299169884,
+        "wires": {
+          "reconcile_full": {
+            "bytes": 190453,
+            "matches_old_golden": false,
+            "old_golden": "b4f8f925e29b54d80cc95ad7c5bbe3f170e7295ccb1c8b8eb3a3dcaf97421daa",
+            "sha256": "31340b31d787baa1da17c2b738c99d21efd2a1db9150eb0d0aaf917f1ac6160c"
+          },
+          "report": {
+            "bytes": 193993,
+            "matches_old_golden": false,
+            "old_golden": "9a13ed423b0c5bb7c0da908100ead81128f713dfc0dc0b565ecd4bd11c8bfbe8",
+            "sha256": "eea1fe34d3de44efbc85a681b5b2d58c0f66bcc70f7b64450378db75fc996749"
+          },
+          "report_regate": {
+            "bytes": 194777,
+            "matches_old_golden": false,
+            "old_golden": "300b1213e94825e41fc22a38bb4100aabebbb533ec0de49487485dfac49a79a9",
+            "sha256": "d085cabccdc8d0b7e1e99d498e6f3cfe59b80322c907d3e8d49b177aaf672f1d"
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-wave5-5210-wire-baseline-20261028",
+      "packet_directory": "run-02",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "case"
+      ]
+    }
+  ],
+  "scope": "compact results, external raw inventory digests, no historical score changes",
+  "selection": "explicit top-level regular JSON/log/XML files, including ignored files",
+  "source_and_origin_inventories_embedded": false
+}
