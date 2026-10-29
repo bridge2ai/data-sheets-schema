@@ -11,7 +11,7 @@ no executable production code or tests). The inertness replay started at
 | Finding | Change | Original code → fixed code |
 | --- | --- | --- |
 | N1 | `block_for` selects only the validated registration/provenance instrument, otherwise historical v3. Neither an artifact marker nor the environment selects v5. A conflicting or malformed marker is a `receipt_format_version_mismatch` finding. Claim sidecars require an explicit caller version for v5 fields. | `test_receipts_v5_merge_n1.py`: 28 failed / 6 controls passed → 34 passed. |
-| N3 | `regex_count` retains the 200-character pattern bound, caps source text at 48 Ki characters, and compiles/counts in an isolated stdlib subprocess with a 250 ms timeout. Timeout kills and reaps the worker and refuses verification/coverage. | `test_receipts_v5_merge_n3.py`: 4 failed / 5 controls passed → 9 passed. Includes `.*.*.*.*x` on 320 `a` characters through both verifier and snapshot-aware `check()`. |
+| N3 | `regex_count` retains the 200-character pattern bound, caps source text at 48 Ki characters, and compiles/counts in an isolated stdlib subprocess with a 250 ms timeout. While the parent lives, timeout kills and reaps the worker and refuses verification/coverage. Parent termination can orphan the worker (R2, independent re-review `receipts_v5_fixes_claude_rereview_2026-10-29.md`, §5); this remains an activation blocker. | `test_receipts_v5_merge_n3.py`: 4 failed / 5 controls passed → 9 passed. Includes `.*.*.*.*x` on 320 `a` characters through both verifier and snapshot-aware `check()`. |
 | N4 | Pass the selected instrument to `_receipt_paths`; apply the non-string guard only to v5. Historical v3/v4 scalar coverage, D37 counters and completion planning are restored. | `test_receipts_v5_merge_n4.py`: 6 failed / 3 controls passed → 9 passed. |
 
 The exact final causal tests were run against the original archived code:
@@ -34,8 +34,9 @@ identities. The proof reuses the reviewer's exact corpus and CHORUS slices;
 the baseline code is verified against git commit `148c869dd`. As in that
 review, checkout absolute paths are normalized to `<TREE>`, and the separate
 transcript-derived receipt-origin block is omitted from the receipt probe.
-No semantic fields are normalized. Report output also has to match the
-reviewer's saved baseline bytes, and CHORUS request bytes have to match the
+No semantic fields are normalized. The original replay also matched the
+reviewer's saved baseline bytes; the R6 replay checks their committed SHA-256
+identities after recomputing A13 from git. CHORUS request bytes must match the
 saved requests themselves.
 
 All four comparisons passed with v5 off:
@@ -65,10 +66,12 @@ Scripts are committed in `scripts/adhoc/`:
 - `validate_receipts_v5_merge_20261029.py`: bootstrap local dependencies with
   site startup disabled, strip provider credentials, deny Python network calls,
   and enforce the pytest scratch location.
-- `prove_receipts_v5_inertness_20261029.py canary` then `full`: replay the four
-  comparison surfaces serially, check saved baseline identities and persist
-  the compact ledger. It reads the reviewer's retained archive under
-  `/private/tmp/claude-501/receipts-v5-IDc5/`; it does not edit that archive.
+- `prove_receipts_v5_inertness_20261029.py canary` then `full`: rebuild A13 with
+  `git archive 148c869dd` into a fresh directory under `$TMPDIR` on every run;
+  recover CHORUS canary inputs from local commit `5457b71b4`; replay serially
+  and check the committed baseline hashes. Both phases run one receipt and
+  one report canary in each tree before any full replay. New results go to
+  `r4_r6/`, preserving the original evidence. No prior temporary tree is needed.
 - `receipts_v5_merge_probes_20261029/`: the four adapted reviewer probes.
 - `summarize_receipts_v5_merge_20261029.py`: assert causal transitions,
   acceptance counts, four equal comparisons and unchanged protected paths.
