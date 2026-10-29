@@ -7,6 +7,11 @@ import yaml
 
 from data_sheets_schema.evaluation import blind_review_pack as pack
 from tests.test_audit_evaluation_comparability import audit
+from tests.test_audit_evaluation_comparability import (
+    isolated_execution_locks, no_network, no_unmocked_runtime,
+    registered_generation_inputs, registered_prepared, registered_case,
+    registered_audit, registered_problem, registered_roster,
+)
 
 
 def cohort_file(tmp_path, cells=None):
@@ -33,5 +38,20 @@ def test_f5_campaign_uses_declared_cohort_without_version_heuristics(tmp_path):
     assert pack.validate_cohort(records, cohort_manifest=manifest) == records
     with pytest.raises(ValueError, match="declared cohort"):
         pack.validate_cohort(records[:1], cohort_manifest=manifest)
+
+
+def test_f6_cli_arm_must_match_manifest_assignment(registered_case):
+    _, output, _ = registered_case
+    result = registered_audit(registered_case, directories=[("swapped-arm", output)])
+    assert registered_problem(result) == ["registered_arm_mapping_undeclared_or_mismatched"]
+    assert result["totals"]["bound_registered_rating_files"] == 0
+
+
+def test_f6_bound_run_is_visible_beside_grouping_arm(registered_case):
+    result = registered_audit(registered_case)
+    run = registered_case[2].document()["generation_run"]
+    assert result["summary"][0]["bound_generation_runs"] == [run]
+    markdown = audit.markdown(result)
+    assert all(run[key] in markdown for key in ("arm", "method", "label"))
 
 

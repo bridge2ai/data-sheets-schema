@@ -382,7 +382,7 @@ def committed_package(capture):
 
 
 def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts, authority_roots=(),
-                   execution_lock_root=None):
+                   execution_lock_root=None, roster=()):
     """Read saved E1 evidence, then reuse its actual offline acceptance validator.
 
     This does not call prepare/assert_current, execute historical code, read a
@@ -455,6 +455,13 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         require(provenance.get("record_type") == "d4d_generation_provenance"
                 and same_run(provenance.get("run"), run),
                 "registered_provenance_identity_mismatch")
+        assignments = [entry for entry in roster if entry["arm"] == arm
+                       and entry["project"] == run["project"] and entry["label"] == run["label"]]
+        require(len(assignments) == 1 and same_run(
+            {**assignments[0], "arm": assignments[0]["input_arm"]}, run)
+            and assignments[0]["condition"] == provenance["run"].get("condition")
+            and provenance["run"].get("replicate") in (None, assignments[0]["replicate"]),
+            "registered_arm_mapping_undeclared_or_mismatched")
         prior = mapping(mapping(provenance.get("shared_generation")).get("authority"))
         require(prior.get("registration") == {"sha256": sha(generation_raw),
                 "raw_json": generation_raw.decode()}, "registered_provenance_registration_mismatch")
@@ -892,7 +899,8 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
                 seen_directories.add(identity)
             package = registered_run(root, arm, directory, snapshots=snapshots,
                                      evaluator_model=evaluator_model, contexts=normalized_contexts,
-                                     authority_roots=authority_roots, execution_lock_root=execution_lock_root)
+                                     authority_roots=authority_roots, execution_lock_root=execution_lock_root,
+                                     roster=roster)
         except (OSError, ValueError) as exc:
             package = {"arm": arm, "path": str(directory), "status": "refused", "record": None,
                 "rows": [], "attempts": [], "reasons": [str(exc) if isinstance(exc, RegisteredRefusal)
@@ -916,6 +924,8 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
                 package["reasons"] = sorted(set(package["reasons"]) | {"registered_record_linkage_conflict"})
                 record["reasons"] = sorted(set(record["reasons"]) | {"registered_record_linkage_conflict"})
                 package["rows"] = []
+            else:
+                record["registered_run"] = candidate["registered_run"]
         else:
             record = candidate
             record["evaluations"] = {rubric: {"files": []} for rubric in RUBRICS}
@@ -981,6 +991,7 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
         for project in sorted({row["project"] for row in records if row["arm"] == arm}):
             group = [row for row in records if row["arm"] == arm and row["project"] == project]
             summary.append({"arm": arm, "project": project, "expected_records": len(group),
+                "bound_generation_runs": [row["registered_run"] for row in group if row.get("registered_run")],
                 "canonical_labels": [row["label"] for row in group if row["canonical"]],
                 "provenance_present": sum(bool(row["provenance_files"]) for row in group),
                 "evaluations_present": {rubric: sum(row["evaluations"][rubric]["file_count"] > 0 for row in group) for rubric in RUBRICS},
@@ -1063,10 +1074,13 @@ def markdown(result):
         lines += ["", "## Explicit registered evaluation inputs", "",
                   "Captured transcript hashes and joins are audit evidence, not producer signatures or human approval.", ""]
         for row in result["registered_evaluations"]:
+            bound = row.get("generation_run", {})
             lines.append(f"- {esc(row['arm'])} / {esc(row['path'])}: {esc(row['status'])}; "
                          f"{esc('; '.join(row['reasons']) or 'no package-level refusal')}; "
                          f"lock_verified={row.get('lock_verified', False)} ({row.get('lock_status', 'not_checked')}); "
-                         f"committed_package={row.get('committed_package', False)}")
+                         f"committed_package={row.get('committed_package', False)}; "
+                         f"bound arm={esc(bound.get('arm', 'unavailable'))}, "
+                         f"method={esc(bound.get('method', 'unavailable'))}, label={esc(bound.get('label', 'unavailable'))}")
     lines.append("")
     return "\n".join(lines)
 
