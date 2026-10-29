@@ -314,12 +314,12 @@ to every project:
   available to download, that anyone can download them, or that downloading
   them needs no account, registration, approval or signed agreement supports
   `unrestricted`, unless a passage states a condition below for the same
-  data. A public licence such as Creative Commons, a download page asking
-  the user to confirm that licence, a request to cite, or a form asking who
+  data. A public license such as Creative Commons, a download page asking
+  the user to confirm that license, a request to cite, or a form asking who
   is downloading is not such a condition. A passage stating that access
   requires registration or an account, verified identity or credentials,
   approval of the request, sign-off by the requester's institution, or a
-  data use agreement or dataset-specific licence that the requester or their
+  data use agreement or dataset-specific license that the requester or their
   institution signs or accepts supports `restricted`. A passage stating that
   each request is reviewed before access is granted, by a data access
   committee or office or by an institutional review board or ethics

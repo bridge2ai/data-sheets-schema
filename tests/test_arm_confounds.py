@@ -301,3 +301,35 @@ class TestTheFullPhaseCapIsAProcedureField(unittest.TestCase):
         self.assertEqual(v8["values"]["full max_tokens"], ["128000"])       # measured, not absent (#1164 review, S2)
         self.assertEqual([c for c in arm_confounds(production, v8) if c["field"] == "full max_tokens"], [])
 
+    def test_reconcile_full_and_report_caps_are_procedure_fields(self):
+        """#5156: `reconcile_full max_tokens` and `report max_tokens` are read
+        from `api_usage` rows or `model.max_tokens_by_phase` so a 64k->128k or
+        32k->128k change across arms is reported by `arm_confounds`."""
+        from data_sheets_schema.runs import ARM_PROCEDURE_FIELDS, arm_confounds, arm_facts
+        self.assertIn(("reconcile_full max_tokens", ("model", "max_tokens_by_phase", "reconcile_full")), ARM_PROCEDURE_FIELDS)
+        self.assertIn(("report max_tokens", ("model", "max_tokens_by_phase", "report")), ARM_PROCEDURE_FIELDS)
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            for prefix, rf_cap, rep_cap in (("legacy_arm", 64000, 32000), ("shared_v1_arm", 128000, 128000)):
+                d = base / "claudecode_api_core" / f"{prefix}_rep1"
+                d.mkdir(parents=True)
+                (d / "CHORUS_provenance.yaml").write_text(yaml.safe_dump({
+                    "run": {"project": "CHORUS", "label": f"{prefix}_rep1", "method": "claudecode_api", "condition": "generic_v10"},
+                    "model": {"max_tokens_by_phase": {"full": 128000, "reconcile_full": rf_cap, "report": rep_cap}},
+                    "api_usage": [
+                        {"phase": "full", "max_tokens": 128000},
+                        {"phase": "reconcile_full", "max_tokens": rf_cap},
+                        {"phase": "report", "max_tokens": rep_cap},
+                    ],
+                }))
+            a = arm_facts("legacy_arm", method="claudecode_api", concat_dir=base)
+            b = arm_facts("shared_v1_arm", method="claudecode_api", concat_dir=base)
+        self.assertEqual(a["values"]["reconcile_full max_tokens"], ["64000"])
+        self.assertEqual(a["values"]["report max_tokens"], ["32000"])
+        self.assertEqual(b["values"]["reconcile_full max_tokens"], ["128000"])
+        self.assertEqual(b["values"]["report max_tokens"], ["128000"])
+        diff_fields = [c["field"] for c in arm_confounds(a, b)]
+        self.assertIn("reconcile_full max_tokens", diff_fields)
+        self.assertIn("report max_tokens", diff_fields)
+
+

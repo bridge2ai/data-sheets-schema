@@ -29,13 +29,23 @@ A read-only evaluation pass was conducted across all 87 committed audit/report p
 
 ### Mismatch Analysis
 1. **Total Count Drift (Audit vs Report Summary)**:
-   - In multiple v10g runs, the audit LLM wrote a narrative summary like "Phase 3 source audit produced 12 findings", but the structured JSON `findings` array contained 13 items.
-   - The reconciliation report phase copied the summary phrase ("twelve findings") verbatim instead of verifying the count of elements in the structured list.
+   - Across the 87 committed pairs in `data/d4d_concatenated/` (which span `generic-v3-schema2`, `api-generic`, `api-generic-v4`, and `v5`–`v9`; none of the 87 committed pairs is from `v10g`), 45 `finding_total_mismatch` findings occur where the reconciliation report states a finding total that differs from `len(audit["findings"])` (for example, `2026-08-13_claude-opus-5-api-generic-v4_rep1` CM4AI states 24 findings against 26 structured audit entries: 4 high, 8 medium, 10 low, 4 info). In the separate `v10g` observation that motivated #4766, the audit narrative summary stated 12 findings while the structured JSON `findings` array contained 13 items, and the reconciliation report copied "twelve findings" verbatim.
 2. **Severity Classification Mismatch**:
-   - Reports frequently reported "none of them high" or "0 high", while the structured audit included 1 high-severity finding that was reclassified or downplayed during prose drafting.
-   - Low vs. medium borderline classifications frequently drifted between audit structured records and report prose (e.g. stating 6 low instead of 7 low).
+   - Across the 87 committed pairs, 72 `finding_severity_mismatch` findings occur across high, medium, and low subtotals. None of the 87 committed pairs states `0 high` or `none of them high` against a computed `high >= 1`; rather, high-severity mismatches in the 87 committed pairs are non-zero count differences (e.g. stating 3 high vs computed 4 high in `2026-08-13_claude-opus-5-api-generic-v4_rep1` CM4AI, or 2 high vs computed 3 high in `2026-08-13_claude-opus-5-api-generic-v4_rep3` AI_READI), alongside medium and low borderline count drift.
 3. **No Total Stated**:
    - 8 reports omitted finding counts entirely in introductory prose and proceeded directly to thematic discussion and dispositions. These are cleanly marked as `status: "no_total_stated"` with zero false-positive contradictions.
+
+### False-Positive Review (`INSTRUMENT_VERSION = 2`)
+- **Historical corpus shapes guarded**:
+  1. Subset disposition sentences (`"Six findings were deliberately left as-is"`, `"Fourteen findings produced edits..."`, `"Three findings were raised for the record without recommending change"`).
+  2. Numbered markdown section headings (`"### 2.1 High severity"`, `"## 6. Additional changes not driven by audit findings"`).
+  3. Combined severity buckets (`"2 high/medium-severity structural"`, `"21 medium and low"`).
+  4. Non-finding count nouns (`"2 high-severity pairs"`).
+  5. Earlier subset mentions before a summary count (`VOICE 08-20b rep3` line 12 summary total `30 findings: 3 high, 15 medium, 12 low`).
+- **R4 F9 and Round 2 N2 prose and subset guards (`INSTRUMENT_VERSION = 2`)**:
+  1. Ordinary prose containing `"major"` or `"minor"` in reports stating no total (`"No major restructuring of the record was needed"`, `"corrected two major structural defects"`) is not read as a severity count: `major` and `minor` match only directly before `finding(s)` or `severity`.
+  2. When no overall total is stated, severity subtotals are extracted only from a non-subset clause (`SUBSET_CLAUSE_RE` excludes `deferred`, `retained`, `rejected`, `resolved`, `applied`, `left`, `withdrawn`, `of which`, `including`, `subset`) that references `finding(s)`/`audit`/`summary`/`total(s)` and either names all three primary severities or explicitly introduces an audit/finding summary (`"Deferred items (3 findings: 2 medium, 1 low) ..."`, `"Two high-severity and three medium-severity issues were resolved..."`, and `"We applied 2 high and 1 low priority fixes..."` remain `no_total_stated` with zero findings).
+  3. Inline, parenthetical (`"audit (13 findings: 2 high, 4 medium, 7 low)"`), bullet (`"- 13 findings: ..."`), labelled (`"Audit summary: 13 findings: ..."`, `"**Audit totals:** 13 findings: ..."`), em-dash (`"Phase 3 audit — 13 findings: ..."`), and table-cell (`"| Audit | 13 findings: ... |"`) total statements are matched by Pattern 7 (`N findings: ...`) while subset-introduced clauses (`SUBSET_PREFIX_RE`) are filtered out in `_collect_pattern_matches`.
 
 ---
 

@@ -1,0 +1,220 @@
+{
+ "generation_id": "d4b09f0816e04ca3a8f2ee8abdfc034e",
+ "run_identity": {
+  "project": "CHORUS",
+  "label": "2026-10-20a_claude-opus-5-api-generic-v10_rep1",
+  "method": "claudecode_api",
+  "condition": "generic_v10"
+ },
+ "snapshots": [
+  {
+   "name": "CHORUS_receipt_completion_transcript.json",
+   "file": "CHORUS_receipt_completion_transcript.json",
+   "bytes": 322578,
+   "usage_id": "dd63564c51c6489aa90c25b08a91fdcc"
+  },
+  {
+   "name": "CHORUS_full_response_dd63564c51c6489aa90c25b08a91fdcc.txt",
+   "file": "CHORUS_full_response_dd63564c51c6489aa90c25b08a91fdcc.txt",
+   "bytes": 31184,
+   "usage_id": "dd63564c51c6489aa90c25b08a91fdcc"
+  },
+  {
+   "name": "CHORUS_coverage_receipt.yaml",
+   "file": "CHORUS_coverage_receipt.yaml",
+   "bytes": 12365
+  },
+  {
+   "name": "CHORUS_full.yaml",
+   "file": "CHORUS_full.yaml",
+   "bytes": 18794,
+   "usage_id": "dd63564c51c6489aa90c25b08a91fdcc"
+  },
+  {
+   "name": "CHORUS_receipt_completion_context.json",
+   "file": "CHORUS_receipt_completion_context.json",
+   "bytes": 307
+  },
+  {
+   "name": "CHORUS_receipt_completion_inputs.json",
+   "file": "CHORUS_receipt_completion_inputs.json",
+   "bytes": 1906692
+  },
+  {
+   "name": "CHORUS_receipt_completion_request.json",
+   "file": "CHORUS_receipt_completion_request.json",
+   "bytes": 276630
+  },
+  {
+   "name": "CHORUS_receipt_completion_response.json",
+   "file": "CHORUS_receipt_completion_response.json",
+   "bytes": 2827,
+   "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c"
+  },
+  {
+   "name": "CHORUS_receipt_completion_result.json",
+   "file": "CHORUS_receipt_completion_result.json",
+   "bytes": 40914,
+   "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c"
+  },
+  {
+   "name": "CHORUS_receipt_completion_result.json",
+   "file": "CHORUS_receipt_completion_result_2.json",
+   "bytes": 42167,
+   "usage_id": "223cf6484a6d47d0b1a69ba408e7c76c"
+  },
+  {
+   "name": "CHORUS_core.yaml",
+   "file": "CHORUS_core.yaml",
+   "bytes": 18442
+  },
+  {
+   "name": "CHORUS_typed_audit_packet.json",
+   "file": "CHORUS_typed_audit_packet_2.json",
+   "bytes": 3767665
+  },
+  {
+   "name": "CHORUS_typed_audit_0_request.json",
+   "file": "CHORUS_typed_audit_0_request_2.json",
+   "bytes": 342811
+  },
+  {
+   "name": "CHORUS_typed_audit_0_context.json",
+   "file": "CHORUS_typed_audit_0_context_2.json",
+   "bytes": 308
+  },
+  {
+   "name": "CHORUS_typed_audit_0_response.json",
+   "file": "CHORUS_typed_audit_0_response_2.json",
+   "bytes": 91747,
+   "usage_id": "d2b5eed070e44b1ab99fd399dda6de1f"
+  },
+  {
+   "name": "CHORUS_typed_audit_1_request.json",
+   "file": "CHORUS_typed_audit_1_request.json",
+   "bytes": 342831
+  },
+  {
+   "name": "CHORUS_typed_audit_1_context.json",
+   "file": "CHORUS_typed_audit_1_context.json",
+   "bytes": 308
+  },
+  {
+   "name": "CHORUS_typed_audit_1_response.json",
+   "file": "CHORUS_typed_audit_1_response.json",
+   "bytes": 54565,
+   "usage_id": "4b4aaf0f017246ddbca3a614e24de8e9"
+  },
+  {
+   "name": "CHORUS_typed_audit_2_request.json",
+   "file": "CHORUS_typed_audit_2_request.json",
+   "bytes": 342290
+  },
+  {
+   "name": "CHORUS_typed_audit_2_context.json",
+   "file": "CHORUS_typed_audit_2_context.json",
+   "bytes": 308
+  },
+  {
+   "name": "CHORUS_typed_audit_2_response.json",
+   "file": "CHORUS_typed_audit_2_response.json",
+   "bytes": 71180,
+   "usage_id": "8ff30d9469e943a48916b15bd561a3a0"
+  },
+  {
+   "name": "CHORUS_typed_audit_3_request.json",
+   "file": "CHORUS_typed_audit_3_request.json",
+   "bytes": 238562
+  },
+  {
+   "name": "CHORUS_typed_audit_3_context.json",
+   "file": "CHORUS_typed_audit_3_context.json",
+   "bytes": 307
+  },
+  {
+   "name": "CHORUS_typed_audit_3_response.json",
+   "file": "CHORUS_typed_audit_3_response.json",
+   "bytes": 41894,
+   "usage_id": "30cbdaeefed54ff4b0bad11b03e81658"
+  },
+  {
+   "name": "CHORUS_typed_audit_4_request.json",
+   "file": "CHORUS_typed_audit_4_request.json",
+   "bytes": 621487
+  },
+  {
+   "name": "CHORUS_typed_audit_4_context.json",
+   "file": "CHORUS_typed_audit_4_context.json",
+   "bytes": 308
+  },
+  {
+   "name": "CHORUS_typed_audit_4_response.json",
+   "file": "CHORUS_typed_audit_4_response.json",
+   "bytes": 45532,
+   "usage_id": "51ed3b8231984bce989c70062a9403be"
+  },
+  {
+   "name": "CHORUS_typed_audit_assembly.json",
+   "file": "CHORUS_typed_audit_assembly.json",
+   "bytes": 4860818
+  },
+  {
+   "name": "CHORUS_audit.json",
+   "file": "CHORUS_audit.json",
+   "bytes": 150831,
+   "usage_id": "51ed3b8231984bce989c70062a9403be"
+  },
+  {
+   "name": "CHORUS_audit_evidence.json",
+   "file": "CHORUS_audit_evidence.json",
+   "bytes": 1224
+  },
+  {
+   "name": "CHORUS_reconcile_full.yaml",
+   "file": "CHORUS_reconcile_full.yaml",
+   "bytes": 25178,
+   "usage_id": "7a1a9a2a0cfe499f996d3145281b4c13"
+  },
+  {
+   "name": "CHORUS_reconcile_evidence.json",
+   "file": "CHORUS_reconcile_evidence.json",
+   "bytes": 1310
+  },
+  {
+   "name": "CHORUS_reconcile_core.yaml",
+   "file": "CHORUS_reconcile_core.yaml",
+   "bytes": 24815
+  },
+  {
+   "name": "CHORUS_report_incomplete_attempt1_1.txt",
+   "file": "CHORUS_report_incomplete_attempt1_1.txt",
+   "bytes": 4036
+  },
+  {
+   "name": "CHORUS_report.md",
+   "file": "CHORUS_report.md",
+   "bytes": 162181,
+   "usage_id": "72ac7d9a77bb438798e7d8d55ff1bf0f"
+  },
+  {
+   "name": "CHORUS_report_evidence.json",
+   "file": "CHORUS_report_evidence.json",
+   "bytes": 364
+  },
+  {
+   "name": "CHORUS_report_before_regate.md",
+   "file": "CHORUS_report_before_regate.md",
+   "bytes": 162181
+  },
+  {
+   "name": "CHORUS_report_evidence.json",
+   "file": "CHORUS_report_evidence_2.json",
+   "bytes": 4166
+  },
+  {
+   "name": "CHORUS_report_evidence.json",
+   "file": "CHORUS_report_evidence_3.json",
+   "bytes": 1909
+  }
+ ]
+}

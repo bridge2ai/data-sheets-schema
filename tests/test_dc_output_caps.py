@@ -30,6 +30,15 @@ def test_unshared_renderers_keep_their_recorded_budget(phase):
     assert api.phase_max_tokens(_spec(0, render=12), phase, 16000, model="claude-opus-5") == 96000
 
 
+@pytest.mark.parametrize("phase", ["report", "reconcile_full"])
+def test_shared_v2_keeps_its_recorded_budget_and_readout_mirrors_it(phase):
+    runner_cap = api.phase_max_tokens(_spec(2, render=27), phase, 16000, model="claude-opus-5")
+    assert runner_cap == 96000
+    sg2_reg = {"format": "source_heading_routing_registration_v1"}
+    assert dr.get_phase_output_cap(phase, registration=sg2_reg) == runner_cap
+    assert dr.get_phase_output_cap(phase, registration=sg2_reg, saved_request={"max_tokens": runner_cap}) == runner_cap
+
+
 def test_shared_v1_leaves_other_phases_alone():
     assert api.phase_max_tokens(_spec(1), "repair_full", 16000, model="claude-opus-5") == api.PHASE_MAX_TOKENS["repair_full"]
     assert api.phase_max_tokens(_spec(1), "core", 16000, model="claude-opus-5") == api.PHASE_MAX_TOKENS["core"]

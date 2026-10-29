@@ -13,15 +13,23 @@ SPEC_KEYS = {"receipt_completion_version", "receipt_completion_policy_sha256",
 BLOCK_KEY = "receipt_completion_policy"
 #: A registered floor may name what it divides by (D-C, owner decision
 #: 2026-10-23; v2 registrations only). Without a basis a floor keeps its v2
-#: meaning, `with_receipt / receiptable` over the final record. With
-#: `receipted_part` the values a later phase added are reported beside the
-#: gate and not gated (#742): `with_receipt / (receiptable -
-#: added_after_receipt_unmatched)`, the uncovered leaves whose path *and*
-#: value the phase-1 snapshot lacks. The path-only `added_after_receipt`
-#: also counts a never-receipted value that was renamed, moved or shifted
-#: (A13 review F1; owner's option (a), 2026-10-24), so it is reported, not
-#: subtracted. In both CHORUS v10 canaries every miss was a new value
-#: (never_receipted 0), so the v2 meaning measured how much the audit found.
+#: meaning, `with_receipt / receiptable` over the final record. In both
+#: CHORUS v10 canaries every miss was a value the audit added after the
+#: receipt, which has no re-receipt route (#742), so that meaning measured
+#: how much the audit found. With `receipted_part` the floor gates the record
+#: the receipt was written against (D37, owner decision 2026-10-25, replacing
+#: D32): `with_receipt_at_receipt / receiptable_at_receipt`, the phase-1
+#: snapshot's own coverage, 58/58 and 64/64 on the two canaries. The final
+#: record's counters are reported beside it. D32 subtracted from the final
+#: record the uncovered leaves the snapshot lacked by path and by value, and
+#: the A13 review of that rule found it wrong both ways. A value a later
+#: phase added stayed gated whenever the same value occurred anywhere in the
+#: snapshot: 219 of the 745 uncovered leaves at paths the snapshot lacked, on
+#: the 36 API records with a snapshot, 150 of them booleans or strings of 12
+#: characters or fewer. A never-receipted value moved *and* rewritten (case,
+#: whitespace, type, a list merged or split) left the gate. Neither happens on
+#: the snapshot: the additions are not in it, and every never-receipted value
+#: is, as written.
 #: Readers that predate the basis refuse it rather than read it as the v2
 #: meaning.
 FLOOR_BASES = ("receipted_part",)
@@ -249,15 +257,11 @@ def evaluate_floor(coverage: dict, policy: dict) -> dict:
         truncated = 0 if truncated is None else truncated
         if not isinstance(paths, list) or any(not isinstance(p, str) for p in paths) or len(set(paths)) != len(paths) or len(paths) + truncated != missing:
             raise ValueError("coverage missing paths/counters disagree")
-    for key in ("never_receipted", "added_after_receipt", "added_after_receipt_unmatched"):
+    for key in ("never_receipted", "added_after_receipt"):
         if coverage.get(key) is not None:
             _integer(coverage[key], key)
             if coverage[key] > missing:
                 raise ValueError(f"coverage {key} exceeds uncovered leaves")
-    if coverage.get("added_after_receipt_unmatched") is not None and (
-            coverage.get("added_after_receipt") is None
-            or coverage["added_after_receipt_unmatched"] > coverage["added_after_receipt"]):
-        raise ValueError("coverage added_after_receipt_unmatched exceeds added_after_receipt")
     if all(coverage.get(k) is not None for k in ("never_receipted", "added_after_receipt")):
         if coverage["never_receipted"] + coverage["added_after_receipt"] != missing:
             raise ValueError("coverage phase-1 missing counters disagree")
@@ -270,20 +274,23 @@ def evaluate_floor(coverage: dict, policy: dict) -> dict:
     if floor["state"] == "pending":
         return {**result, "state": "pending", "reason": "diagnostic pilot; coverage floor not registered"}
     if floor.get("basis") == "receipted_part":
-        # The block keeps its v2 keys; these four exist only under a basis.
-        added = coverage.get("added_after_receipt")
-        unmatched = coverage.get("added_after_receipt_unmatched")
-        result.update(basis="receipted_part", added_after_receipt=added,
-                      added_after_receipt_unmatched=unmatched)
-        if added is None or unmatched is None:
-            return {**result, "eligible": None, "state": "unmeasurable",
-                    "reason": "receipted-part floor needs the phase-1 split by path and value "
-                              "(added_after_receipt_unmatched)"}
-        unmatched = _integer(unmatched, "added_after_receipt_unmatched")
-        if unmatched > eligible - covered:
-            raise ValueError("added_after_receipt_unmatched exceeds the leaves without a receipt")
-        eligible -= unmatched
-        result["eligible"] = eligible
+        # D37: the gate is the phase-1 snapshot's own coverage. The result
+        # keeps its v2 keys, so the final record's `with_receipt` and
+        # `receiptable` stay beside the gate for context; these three exist
+        # only under a basis. A block without the snapshot counters (no
+        # snapshot, or written before D37) fails closed.
+        at_eligible = coverage.get("receiptable_at_receipt")
+        at_covered = coverage.get("with_receipt_at_receipt")
+        result.update(basis="receipted_part", receiptable_at_receipt=at_eligible,
+                      with_receipt_at_receipt=at_covered)
+        if at_eligible is None or at_covered is None:
+            return {**result, "state": "unmeasurable",
+                    "reason": "receipted-part floor needs the phase-1 snapshot's coverage "
+                              "(receiptable_at_receipt, with_receipt_at_receipt)"}
+        eligible = _integer(at_eligible, "receiptable_at_receipt")
+        covered = _integer(at_covered, "with_receipt_at_receipt")
+        if covered > eligible:
+            raise ValueError("with_receipt_at_receipt exceeds receiptable_at_receipt")
     if eligible == 0:
         return {**result, "state": "not_applicable", "reason": "no eligible leaves; coverage unmeasurable"}
     passed = covered * floor["denominator"] >= eligible * floor["numerator"]

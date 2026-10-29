@@ -119,7 +119,9 @@ Keep release/install canaries and documentation/publication gates when applicabl
 - Read the exact selected playbook and provenance guard before generation. Use
   fresh generation contexts and current source documents, not facts copied from
   older generated YAML. Keep full/core derivation, audit, reconciliation and
-  required receipts/checks; phase order and resume authority belong to that protocol.
+  required receipts/checks (`_gate_report` checks `report_claims`, `evidence_assertions`,
+  and `report_audit_totals`, triggering a one-time `report_regate` on contradictions);
+  phase order and resume authority belong to that protocol.
 - The selected source manifest is the project registry. Scope, source ranking,
   dataset relationships and naming belong there, not in launch-text adaptations.
   A run consults its selected manifest or explicitly none; chunk manifests must

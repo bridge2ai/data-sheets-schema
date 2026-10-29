@@ -1,0 +1,118 @@
+{
+  "aggregate_pass_claim": "not_made",
+  "excluded_case_and_cache_directories": "retained externally; contents not read or attested",
+  "helper": {
+    "path": "/private/tmp/d4d-codex-wave4-a13-integration-20261028/scripts/adhoc/archive_n2_restack_validation_20261027.py",
+    "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+  },
+  "inputs_declared_completed_by_caller": true,
+  "metadata": "file bytes/modes preserved; archive timestamps normalized; directory metadata omitted",
+  "runs": [
+    {
+      "archive": {
+        "bytes": 1501686,
+        "file": "run-01.tar.gz",
+        "sha256": "9755653e6ff984d75379f61ecc66f24e8cac22afeae882050d30ad3727b74805"
+      },
+      "archive_bytes_and_modes_verified": true,
+      "entries": [
+        {
+          "bytes": 406,
+          "mode": 420,
+          "path": "bootstrap.json",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 20687,
+          "mode": 420,
+          "path": "origins-after.json",
+          "sha256": "7127ed497231f605196d36806dee2e15cf5aa16e1f97f5dda9cfc41cffabfbba"
+        },
+        {
+          "bytes": 16069,
+          "mode": 420,
+          "path": "origins-before.json",
+          "sha256": "cacff2ac457ed7e30ed3ea4bbd66ce94fe8c7fa5e7ac5785836645913990ae15"
+        },
+        {
+          "bytes": 548,
+          "mode": 420,
+          "path": "outcome.json",
+          "sha256": "350d2697e360920edc0d7f77732c59b79a52a40896228cdf746e0ca990d709ea"
+        },
+        {
+          "bytes": 2492,
+          "mode": 420,
+          "path": "plan.json",
+          "sha256": "a22f8077be019f4a70fc1353de87ffc9ba325bafc515dde4878f0b600c4a7cdb"
+        },
+        {
+          "bytes": 651,
+          "mode": 420,
+          "path": "pytest-command.json",
+          "sha256": "5840a859f6ec6a9957a681bb38967447a75854b319dee62b3b56f596034c9da6"
+        },
+        {
+          "bytes": 1277,
+          "mode": 420,
+          "path": "pytest.log",
+          "sha256": "dd033496fbe67de7acd8624de6e3b96c34ba3c09ca7a1de2a9d1377122ce0d64"
+        },
+        {
+          "bytes": 57749,
+          "mode": 420,
+          "path": "pytest.xml",
+          "sha256": "89c423abb5b1c5e3909827a017bb1925b9ad79ca19cb1b62d160397c6301a6a3"
+        },
+        {
+          "bytes": 2981590,
+          "mode": 420,
+          "path": "source-after.json",
+          "sha256": "999c9836ab0e14ba53121e50f02555b687a100df771b8e2c267e7ebad7431b9f"
+        },
+        {
+          "bytes": 2981590,
+          "mode": 420,
+          "path": "source-before.json",
+          "sha256": "999c9836ab0e14ba53121e50f02555b687a100df771b8e2c267e7ebad7431b9f"
+        }
+      ],
+      "excluded": [
+        {
+          "kind": "directory",
+          "path": "cases",
+          "reason": "not traversed: synthetic cases/cache/other directories stay external"
+        }
+      ],
+      "observations": {
+        "aggregate_pass_claim": "not_made",
+        "junit_shape_only": {
+          "pytest.xml": {
+            "error_elements": 0,
+            "failure_elements": 0,
+            "identified_entries": 384,
+            "pass_inference": "not_performed: exit/completeness/status may invalidate unmarked entries",
+            "skipped_elements": 0,
+            "testcase_entries": 384,
+            "unmarked_identified_entries": 384,
+            "unnamed_or_unclassified_entries": 0
+          }
+        },
+        "outcomes": {
+          "outcome.json": {
+            "classification": "reported_success_not_independently_accepted",
+            "original_summary_preserved_verbatim": true,
+            "pass_totals_not_recomputed_or_endorsed": true,
+            "reported_returncode": 0,
+            "reported_source_unchanged": true,
+            "reported_status": null
+          }
+        }
+      },
+      "original_root": "/private/tmp/d4d-wave4-a13-validation-20261028",
+      "selected_original_bytes_and_modes_unchanged": true
+    }
+  ],
+  "scope": "selected_result_files_only_not_complete_synthetic_case_archive",
+  "selection": "top-level and neutral/omission stage JSON/log/XML files; ignored files included"
+}

@@ -73,3 +73,36 @@ name-status checks reject any protected-path change other than an ordinary
 modification. All helper Git reads disable hooks/lazy fetch and allow only
 the file protocol. The merge command must carry these same settings. These
 are merge-safety checks, not application tests or production changes.
+
+## Merge 1: A13 / #5158
+
+Pre-merge HEAD `a69a5bd347799662ffb03de000787ac62bea4313`; incoming
+`cd07f2a3738e146eeaa30ae86d35d3161eb3413b`; actual sole merge base
+`f8c5ac73caba610d40c49aaceddb31ead3590a72` with protected blob
+`ae9d68d6c72c514df34b8e24b9e035eefdee7194`. Incoming blob is
+`3fbe1b2c1ee89387369e34ae4f7363e0e89c34ed`. Both sides differ from base;
+the driver was invoked once and preserved the exact B current bytes. All
+pre/post path, mode and attribute checks passed. The complete preflight and
+nine verbatim builder conflict hunks are retained in
+`wave7_bc1_merge_evidence_2026-10-29/01-a13-{preflight,postflight}.json`.
+
+Proposed resolution sent for the parent's independent read-only review before
+editing: union the required imports; preserve staged `_write_outputs` and
+`build_registration`, placing A13's decorator on `prepare_registration`;
+retain sizing/BC1 parameters plus explicit `worktree`; synthesize context in
+memory with worktree forwarding; resolve BC1-aware limits in the early A13
+position before any preparation writes, deleting the late duplicate; retain
+both sizing validation and A13 path/input/roster authority in `--check`; keep
+staged per-project/BC1 CLI preparation with worktree forwarding; include
+context SHA in progress alongside the existing sizing diagnostics.
+
+Other files are Git's automatic merge. Prompt pins and the decision record
+are inherited from the exact assigned head, not manually changed. No
+protected proposal/re-pin or application validation has run.
+
+The Codex parent reviewed all nine actual hunks and approved that union. It
+was applied with retained `resolve_wave7_bc1_conflicts_20261029.py a13`;
+`01-a13-resolution.json` records exact pre/post source and helper SHA-256.
+The following A13 roster path/digest checks remain intact. The final #5211
+merge will additionally carry its reviewed pending-registration-write handling.
+`git diff --check` passes; this is not a pytest result.

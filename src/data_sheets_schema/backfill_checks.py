@@ -41,7 +41,7 @@ import yaml
 #: without it, so absence means "attested by the run".
 RECORDED_BY = "backfill_checks"
 
-BLOCKS = ("pair_consistency", "report_claims", "grounding", "form", "receipts", "review")
+BLOCKS = ("pair_consistency", "report_claims", "report_audit_totals", "grounding", "form", "receipts", "review")
 
 
 def _schema_sha(path):
@@ -263,6 +263,23 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             for key in ("schema_basis", "schema_selection_instrument", "schema_overrides"):
                 block.pop(key, None)
 
+    # --- report audit totals (#4766) --------------------------------------
+    audit_path = provenance.parent / "intermediate" / f"{paths['project']}_audit.json"
+    if (only is not None and "report_audit_totals" in only) or (
+        only is None and ("report_audit_totals" in record or audit_path.exists())
+    ):
+        from data_sheets_schema.report_audit_totals import check_report_audit_totals
+        if not report.exists():
+            out["report_audit_totals"] = {"checked": False,
+                                          "status": "not_checked",
+                                          "reason": "no reconciliation report",
+                                          "recorded_by": RECORDED_BY}
+        else:
+            out["report_audit_totals"] = {
+                **check_report_audit_totals(report, audit_path if audit_path.exists() else None),
+                "recorded_by": RECORDED_BY,
+            }
+
     # --- form -------------------------------------------------------------
     # Computed from the records alone, so unlike grounding it is available even
     # where the bundle has drifted (#602).
@@ -395,7 +412,15 @@ def apply(provenance: Path, blocks: dict[str, Any],
     changed = False
     for name in BLOCKS:
         if name in record and not overwrite:
-            continue
+            if name == "report_audit_totals":
+                from data_sheets_schema.report_audit_totals import INSTRUMENT_VERSION as _RAT_V
+                old_rat = record.get(name)
+                if isinstance(old_rat, dict) and (old_rat.get("instrument_version") or 0) < _RAT_V:
+                    pass
+                else:
+                    continue
+            else:
+                continue
         if name not in blocks:
             continue
         # A recomputation that could not measure must never erase a
@@ -406,7 +431,7 @@ def apply(provenance: Path, blocks: dict[str, Any],
         # the record of what the run read; today's inability to re-read
         # it is named to the caller (`withheld`), not written over it.
         old, new = record.get(name), blocks[name]
-        if (overwrite and isinstance(old, dict) and isinstance(new, dict)
+        if ((overwrite or name == "report_audit_totals") and isinstance(old, dict) and isinstance(new, dict)
                 and old.get("checked") is True and new.get("checked") is False):
             if withheld is not None:
                 withheld.append(name)

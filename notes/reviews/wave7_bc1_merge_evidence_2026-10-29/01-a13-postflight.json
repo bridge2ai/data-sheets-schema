@@ -1,0 +1,63 @@
+{
+  "attributes": {
+    "effective": {
+      "eol": "unspecified",
+      "filter": "unspecified",
+      "merge": "bc1-keep-first",
+      "text": "unspecified",
+      "working-tree-encoding": "unspecified"
+    },
+    "tracked_ancestor_attributes": {}
+  },
+  "attributes_sha256": "9dc2def3f37f3da241330d135469a7828156481e09c0583a8649ff0a313cc328",
+  "conflicts": {
+    "scripts/build_api_registrations.py": {
+      "hunks": [
+        {
+          "line": 31,
+          "text": "<<<<<<< HEAD\nfrom dataclasses import dataclass\n=======\nimport functools\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        },
+        {
+          "line": 39,
+          "text": "<<<<<<< HEAD\nimport math\nimport sys\nimport types\n=======\nimport os\nimport sys\nimport threading\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        },
+        {
+          "line": 873,
+          "text": "<<<<<<< HEAD\ndef _write_outputs(outputs: list[tuple[Path, bytes]], replace: bool) -> None:\n    \"\"\"Write every file only after checking that none would overwrite different bytes.\"\"\"\n    for target, data in outputs:\n        if target.exists() and not replace and target.read_bytes() != data:\n            raise FileExistsError(f\"{target} already exists with different bytes; pass --replace to overwrite\")\n    for target, data in outputs:\n        target.parent.mkdir(parents=True, exist_ok=True)\n        target.write_bytes(data)\n\n\ndef build_registration(project: str, label: str, *, write_to_disk: bool = True, replace: bool = False,\n                       **options: Any) -> dict[str, Any]:\n    \"\"\"Build, check and (unless ``write_to_disk`` is false) write one registration.\n\n    Takes `prepare_registration`'s options. Nothing is written unless every\n    check passed, including the input sizing.\n    \"\"\"\n    reg, outputs, _ = prepare_registration(project, label, **options)\n    if write_to_disk:\n        _write_outputs(outputs, replace)\n    return reg\n\n\ndef prepare_registration(\n=======\n@_worktree_resources\ndef build_registration(\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        },
+        {
+          "line": 921,
+          "text": "<<<<<<< HEAD\n    sizing_record: SizingRecord | Path | str | None = None,\n    sizing_stand_in: bool = False,\n    bounded_carry_version: int = 0,\n    bc1_fan_in: int = 2,\n) -> tuple[dict[str, Any], list[tuple[Path, bytes]], dict[str, Any] | None]:\n    \"\"\"Build a complete shared_generation_registration_v1 document without writing it.\n=======\n    write_to_disk: bool = True,\n    replace: bool = False,\n    worktree: Path | str | None = None,\n) -> dict[str, Any]:\n    \"\"\"Build a complete shared_generation_registration_v1 document.\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        },
+        {
+          "line": 1075,
+          "text": "<<<<<<< HEAD\n                write_to_disk=False,\n=======\n                write_to_disk=write_to_disk,\n                worktree=worktree,\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        },
+        {
+          "line": 1133,
+          "text": "<<<<<<< HEAD\n    # Resolve limits\n    active_audit_limits = resolve_audit_limits(project, partition, audit_limits, arm=arm,\n        bounded_carry_version=bounded_carry_version, bc1_fan_in=bc1_fan_in)\n\n=======\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        },
+        {
+          "line": 1787,
+          "text": "<<<<<<< HEAD\n                sg.parse_registration(raw)\n                try:\n                    sized = check_registration_sizing(reg_file, raw)\n                except ValueError as exc:\n                    raise click.ClickException(str(exc)) from exc\n                click.echo(f\"  \u2713 {proj}: {reg_file.name}\" + (f\" (sized: {sizing_path(reg_file).name})\" if sized else \"\"))\n=======\n                parsed_reg = sg.parse_registration(raw)\n                if parsed_reg[\"registration_path\"] != str(reg_file):\n                    raise click.ClickException(f\"Out-dir registration path differs from its declared authority: {reg_file}\")\n                try:\n                    verify_registration_input_pins(parsed_reg, worktree=worktree)\n                except (FileNotFoundError, ValueError) as exc:\n                    raise click.ClickException(f\"Input pin verification failed for {reg_file.name}: {exc}\") from exc\n                verified[(proj, lbl)] = (reg_file, hashlib.sha256(raw).hexdigest())\n                click.echo(f\"  \u2713 {proj}: {reg_file.name}\")\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        },
+        {
+          "line": 1869,
+          "text": "<<<<<<< HEAD\n            try:\n                reg, files, sizing = prepare_registration(\n                    project=proj,\n                    label=lbl,\n                    arm=arm,\n                    registration_path=reg_file,\n                    id_prefix=id_prefix,\n                    context_path=context_file,\n                    context_dir=context_dir or out_dir,\n                    source_manifest_path=selected_manifest,\n                    bundle_path=bundle,\n                    chunk_manifest_path=chunk_manifest,\n                    profile_name=profile_name,\n                    coverage_floor=coverage_floor,\n                    floor_basis=floor_basis,\n                    partition=part,\n                    audit_limits=overrides or None,\n                    synthesize_draft_context=synthesize_draft_context,\n                    sizing_record=records.get(proj),\n                    bounded_carry_version=bounded_carry_version,\n                    bc1_fan_in=bc1_fan_in,\n                )\n            except (ValueError, FileNotFoundError) as exc:\n                raise click.ClickException(f\"{proj} ({lbl}): {exc}\") from exc\n=======\n            reg = build_registration(\n                project=proj,\n                label=lbl,\n                arm=arm,\n                registration_path=reg_file,\n                id_prefix=id_prefix,\n                context_path=context_file,\n                context_dir=context_dir,\n                source_manifest_path=source_manifest,\n                bundle_path=bundle,\n                chunk_manifest_path=chunk_manifest,\n                profile_name=profile_name,\n                coverage_floor=coverage_floor,\n                floor_basis=floor_basis,\n                partition=partition,\n                audit_limits=audit_overrides or None,\n                synthesize_draft_context=synthesize_draft_context,\n                write_to_disk=not dry_run,\n                replace=replace,\n                worktree=worktree,\n            )\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        },
+        {
+          "line": 1920,
+          "text": "<<<<<<< HEAD\n            click.echo(f\"  \u2713 {proj}: registration_id={reg['registration_id']} sha256={reg_sha}\")\n            if sizing is not None and bounded_carry_version == 1:\n                cap = sizing[\"own_plan_scenarios\"][\"visible_cap_ascii_scenario\"]\n                click.echo(f\"    BC1 actual record: {sizing['plan_workers']} workers, \"\n                           f\"{len(sizing['groups'])} integration groups and one final check; \"\n                           f\"{cap['calls']} calls in this plan\")\n                click.echo(\"    Future response scenarios are hypothetical; actual provider counts remain required.\")\n                click.echo(f\"    sizing record {Path(sizing['sidecar']['path']).name} \"\n                           f\"sha256={sizing['sidecar']['sha256']}\")\n            elif sizing is not None:\n                limits, room = reg[\"audit_limits\"], sizing[\"admissible_input_tokens\"]\n                click.echo(\n                    f\"    input sized on {sizing['sizing_record']['full']['path']}\"\n                    f\"{' (stand-in)' if sizing['stand_in'] else ''}: {sizing['plan_workers']} of \"\n                    f\"{sizing['max_workers']} workers; per call worker {sizing['worker_input_tokens']:,} of \"\n                    f\"{room['worker']:,}, omission {sizing['omission_input_tokens']:,} of {room['omission']:,}, \"\n                    f\"integration {sizing['integration_input_tokens']:,} of {room['integration']:,} expected \"\n                    f\"({sizing['integration_worst_input_tokens']:,} at worst); aggregate \"\n                    f\"{sizing['aggregate_input_tokens']:,} of {limits['aggregate_input_tokens']:,}\"\n                )\n                click.echo(f\"    sizing record {Path(sizing['sidecar']['path']).name} \"\n                           f\"sha256={sizing['sidecar']['sha256']}\")\n                for warning in sizing[\"warnings\"]:\n                    click.echo(f\"    warning: {warning}\")\n                for note in sizing[\"notes\"]:\n                    click.echo(f\"    note: {note}\")\n=======\n            ctx_sha = ((reg.get(\"inputs\") or {}).get(\"context\") or {}).get(\"sha256\", \"\")\n            click.echo(\n                f\"  \u2713 {proj}: registration_id={reg['registration_id']} sha256={reg_sha} context_sha256={ctx_sha}\"\n            )\n>>>>>>> cd07f2a3738e146eeaa30ae86d35d3161eb3413b\n"
+        }
+      ],
+      "index_stages": "100644 72fc109def79e4706ddd647eb23d470af35dde16 1\tscripts/build_api_registrations.py\n100644 1debc6e6197af8c7b75c0d3cbf0894fe81a6bcd0 2\tscripts/build_api_registrations.py\n100644 0d3d11e36a101dbd394dc79565802d40968fdce7 3\tscripts/build_api_registrations.py\n"
+    }
+  },
+  "head": "a69a5bd347799662ffb03de000787ac62bea4313",
+  "helper_sha256": "0e6d1d80858f0f72389c4bf55d399ab7f1dbd93e80f59de62581d64525f53d20",
+  "merge_head": "cd07f2a3738e146eeaa30ae86d35d3161eb3413b",
+  "protected_blob": "91105618cd25e33962b1c2d30f20b37101530bb2",
+  "protected_mode": "100644",
+  "protected_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "scope": "protected postcheck and verbatim ordinary conflict evidence"
+}
