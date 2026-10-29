@@ -100,13 +100,13 @@ def test_explicit_tree_selects_schema_configuration_and_vocabulary(selected_reso
     assert Path.cwd() == before
 
 
-def test_default_kids_first_manifest_comes_from_selected_tree(selected_resources):
+def test_explicit_project_manifest_comes_from_selected_tree(selected_resources):
     selected, _, args = selected_resources
     relative = Path("notes/matched_cborg_2026-09-13/kids_first/manifest.yaml")
     manifest = selected / relative
     manifest.parent.mkdir(parents=True)
     shutil.copyfile(ROOT / relative, manifest)
-    args.pop("source_manifest_path")
+    args["source_manifest_path"] = manifest
     args["project"] = "KIDS_FIRST"
     args.pop("partition")
     # Mechanics-only manifest/authority fixture, not a Kids First sizing claim.

@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -39,21 +40,10 @@ if (ROOT / "src").is_dir() and str(ROOT / "src") not in sys.path:
 from data_sheets_schema import shared_generation as sg
 
 DEFAULT_MANIFEST_PATH = ROOT / "data" / "preprocessed" / "source_manifest.yaml"
-KIDS_FIRST_MANIFEST_PATH = (
-    ROOT / "notes" / "matched_cborg_2026-09-13" / "kids_first" / "manifest.yaml"
-)
 DEFAULT_OUT_DIR = ROOT / "data" / "omission_contexts"
 SCHEMA_PATH = (
     ROOT / "src" / "data_sheets_schema" / "omission_inventory_v1" / "context.schema.json"
 )
-DEFAULT_VOCABULARIES_PATH = (
-    ROOT / "src" / "data_sheets_schema" / "b2ai_registry_vocabularies.yaml"
-)
-
-# Standard Grand Challenge projects declared in source_manifest.yaml
-DEFAULT_PROJECTS = ["CHORUS", "AI_READI"]
-ALL_GC_PROJECTS = ["CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC"]
-ALL_CAMPAIGN_PROJECTS = [*ALL_GC_PROJECTS, "KIDS_FIRST"]
 
 FORBIDDEN_SUBSTRINGS = [
     "diagnosis",
@@ -99,14 +89,8 @@ def extract_source_policy(
             priority_list = declared_types
             basis = "Declared source types from project manifest (no tier hierarchy declared)."
         else:
-            priority_list = [
-                "RO-Crate, structured metadata, data resource",
-                "documentation, license, DUA, IRB",
-                "publication, preprint, white paper",
-                "NIH project page, tutorial",
-                "historical data release, historical documentation",
-            ]
-            basis = "Declared source_manifest.yaml tier hierarchy."
+            priority_list = []
+            basis = "No source ranking declared."
     return {
         "priority": priority_list,
         "basis": basis,
@@ -166,34 +150,26 @@ def load_project_manifest_data(
     project: str,
     source_manifest_path: Path | str | None = None,
 ) -> dict[str, Any]:
-    """Load manifest data for a project, resolving KIDS_FIRST neutral manifest when appropriate."""
-    norm_project = project.strip()
-    manifest_data: dict[str, Any] = {}
-    if source_manifest_path is not None:
-        sm = Path(source_manifest_path)
-        if sm.is_file():
-            manifest_data = yaml.safe_load(sm.read_text(encoding="utf-8")) or {}
-        if sm.resolve() == DEFAULT_MANIFEST_PATH.resolve():
-            scope_map = manifest_data.get("scope", {}) if isinstance(manifest_data, dict) else {}
-            if (
-                norm_project.upper() == "KIDS_FIRST"
-                and not any(k.upper() == "KIDS_FIRST" for k in (scope_map or {}))
-                and KIDS_FIRST_MANIFEST_PATH.is_file()
-            ):
-                manifest_data = (
-                    yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
-                )
-    elif norm_project.upper() == "KIDS_FIRST" and KIDS_FIRST_MANIFEST_PATH.is_file():
-        manifest_data = yaml.safe_load(KIDS_FIRST_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
-    elif DEFAULT_MANIFEST_PATH.is_file():
-        manifest_data = yaml.safe_load(DEFAULT_MANIFEST_PATH.read_text(encoding="utf-8")) or {}
-
-    return manifest_data if isinstance(manifest_data, dict) else {}
+    """Read only an explicit manifest or the registry's declared project lookup."""
+    from data_sheets_schema.registry import AUTO, select_manifest
+    selected = select_manifest(project, None,
+        requested=source_manifest_path if source_manifest_path is not None else AUTO)
+    if selected is None:
+        raise ValueError(f"No manifest declares {project!r}; pass --source-manifest")
+    data = yaml.safe_load(selected.read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        raise ValueError("source manifest must be a mapping")
+    # A scope-only document is sufficient for this context-only helper.
+    declared = set(data.get('projects') or {}) | set(data.get('scope') or {})
+    if project.upper() not in {str(key).upper() for key in declared}:
+        raise ValueError(f"source manifest does not declare {project!r}")
+    return data
 
 
 def build_draft_scope_context(
     project: str,
     manifest_data: dict[str, Any],
+    *, profile_name: str | None = None,
 ) -> dict[str, Any]:
     """Build a compliant root-only omission_context_v1 document for a project."""
     norm_project = project.strip()
@@ -229,11 +205,11 @@ def build_draft_scope_context(
 
     source_policy = extract_source_policy(manifest_data, project=norm_project)
 
-    vocabulary: dict[str, Any] = {}
-    declared_prof = str(manifest_data.get("profile") or "").strip().lower()
-    if declared_prof != "neutral" and DEFAULT_VOCABULARIES_PATH.is_file():
-        vocab_data = yaml.safe_load(DEFAULT_VOCABULARIES_PATH.read_text(encoding="utf-8")) or {}
-        vocabulary = vocab_data.get("vocabularies", {})
+    from data_sheets_schema.profiles import ENV_VAR, profile_named, vocabulary_for
+    # Same precedence as registration: caller, environment, manifest, neutral.
+    profile = profile_named(profile_name or os.environ.get(ENV_VAR)
+                            or manifest_data.get("profile") or "neutral")
+    vocabulary = vocabulary_for(profile)
 
     doc: dict[str, Any] = {
         "format": "omission_context_v1",
@@ -326,12 +302,12 @@ def main(argv: list[str] | None = None) -> int:
         "--projects",
         type=str,
         default="",
-        help="Comma-separated project list (default: CHORUS,AI_READI)",
+        help="Comma-separated project list (default: projects in the selected manifest)",
     )
     parser.add_argument(
         "--all",
         action="store_true",
-        help="Generate draft contexts for all declared campaign projects (5 GC + KIDS_FIRST)",
+        help="Generate draft contexts for every project in the selected manifest",
     )
     parser.add_argument(
         "--source-manifest",
@@ -353,12 +329,11 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
-    if args.all:
-        selected_projects = ALL_CAMPAIGN_PROJECTS
-    elif args.projects:
+    if args.projects and not args.all:
         selected_projects = [p.strip() for p in args.projects.split(",") if p.strip()]
     else:
-        selected_projects = DEFAULT_PROJECTS
+        from data_sheets_schema.registry import load_registry
+        selected_projects = load_registry(args.source_manifest).projects()
 
     try:
         paths = generate_draft_contexts(
