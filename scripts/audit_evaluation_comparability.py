@@ -29,6 +29,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema import agent_pin
 from data_sheets_schema.evaluation_context import context_digest, normalize_context, unwrap_document
 from data_sheets_schema.evaluation.validate import validate_evaluation
+from data_sheets_schema.evaluation.run_identity import same_run
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from data_sheets_schema.semantic_scope import validate_scope
 
@@ -269,8 +270,9 @@ def checked_pin(value):
 class RegisteredCapture:
     """One bounded read snapshot; never follows a manifest outside --root."""
 
-    def __init__(self, root, directory):
+    def __init__(self, root, directory, authority_roots=()):
         self.root = root
+        self.roots = (root, *(Path(path).resolve(strict=True) for path in authority_roots))
         self.logical_directory = root / directory
         self.directory = local_path(root, str(self.logical_directory))
         require(self.directory is not None and self.directory.is_dir(),
@@ -281,11 +283,19 @@ class RegisteredCapture:
         self.files = {}
         self.total = 0
 
+    def locate(self, logical):
+        for root in self.roots:
+            path = local_path(root, str(logical))
+            if path is not None:
+                return path
+        return None
+
     def read_inside(self, path):
         """Hold directory descriptors, refusing a parent-symlink replacement."""
-        parts = path.relative_to(self.root).parts
+        root = next(root for root in self.roots if path.is_relative_to(root))
+        parts = path.relative_to(root).parts
         require(bool(parts) and ".." not in parts, "registered_authority_missing_or_external")
-        directories = [os.open(self.root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)]
+        directories = [os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)]
         try:
             for part in parts[:-1]:
                 directories.append(os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
@@ -307,12 +317,12 @@ class RegisteredCapture:
 
     def take(self, name):
         logical = self.logical_directory / name
-        path = local_path(self.root, str(logical))
+        path = self.locate(logical)
         require(path is not None, "registered_authority_missing_or_external")
         require(logical not in self.logical_paths or self.logical_paths[logical] == path,
                 "registered_evidence_changed")
         raw = self.read_inside(path)
-        require(local_path(self.root, str(logical)) == path, "registered_evidence_changed")
+        require(self.locate(logical) == path, "registered_evidence_changed")
         if path in self.files:
             require(self.files[path] == raw, "registered_evidence_changed")
         else:
@@ -337,11 +347,11 @@ class RegisteredCapture:
             require((info.st_dev, info.st_ino) == self.directory_identity,
                     "registered_evidence_changed")
             for logical, path in self.logical_paths.items():
-                require(local_path(self.root, str(logical)) == path, "registered_evidence_changed")
+                require(self.locate(logical) == path, "registered_evidence_changed")
 
         bindings_current()
         for path, raw in self.files.items():
-            require(local_path(self.root, str(path)) == path and self.read_inside(path) == raw,
+            require(self.locate(path) == path and self.read_inside(path) == raw,
                     "registered_evidence_changed")
         bindings_current()
 
@@ -360,7 +370,7 @@ def registered_attempt_names(directory, count):
     return sorted(names)
 
 
-def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts):
+def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts, authority_roots=()):
     """Read saved E1 evidence, then reuse its actual offline acceptance validator.
 
     This does not call prepare/assert_current, execute historical code, read a
@@ -370,7 +380,7 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
     from data_sheets_schema.evaluation import blind_review_pack as blind
     from data_sheets_schema.provenance import resolve_record_input
 
-    capture = RegisteredCapture(root, directory)
+    capture = RegisteredCapture(root, directory, authority_roots)
     package = {"arm": arm, "path": relative(root, capture.directory), "reasons": [],
                "attempts": [], "record": None, "rows": [], "generation_acceptance_verified": False}
     try:
@@ -428,8 +438,7 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
         provenance_raw = original_pin("generation_provenance")
         provenance = document(provenance_raw)
         require(provenance.get("record_type") == "d4d_generation_provenance"
-                and isinstance(provenance.get("run"), dict)
-                and {key: provenance["run"].get(key) for key in run} == run,
+                and same_run(provenance.get("run"), run),
                 "registered_provenance_identity_mismatch")
         prior = mapping(mapping(provenance.get("shared_generation")).get("authority"))
         require(prior.get("registration") == {"sha256": sha(generation_raw),
@@ -775,7 +784,7 @@ def repeat_panel(rows):
 
 
 def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, contexts=None,
-          registered_evaluations=()):
+          registered_evaluations=(), authority_roots=()):
     root = Path(root).resolve()
     arms = ARMS if arms is None else arms
     if rubric20_version not in ("3.0", "4.0"):
@@ -848,7 +857,8 @@ def audit(root, *, arms=None, rubric20_version="3.0", evaluator_model=None, cont
                 require(identity not in seen_directories, "registered_directory_duplicate")
                 seen_directories.add(identity)
             package = registered_run(root, arm, directory, snapshots=snapshots,
-                                     evaluator_model=evaluator_model, contexts=normalized_contexts)
+                                     evaluator_model=evaluator_model, contexts=normalized_contexts,
+                                     authority_roots=authority_roots)
         except (OSError, ValueError) as exc:
             package = {"arm": arm, "path": str(directory), "status": "refused", "record": None,
                 "rows": [], "attempts": [], "reasons": [str(exc) if isinstance(exc, RegisteredRefusal)
@@ -1022,6 +1032,8 @@ def markdown(result):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--authority-root", type=Path, action="append", default=[],
+                        help="Additional trusted authority directory; repeatable, read-only")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
     parser.add_argument("--rubric20-version", choices=("3.0", "4.0"), default="3.0")
     parser.add_argument("--evaluator-model", help="Explicit final-condition evaluator; no alias equivalence inferred")
@@ -1049,7 +1061,8 @@ def main(argv=None):
             parser.error("--registered-evaluation requires ARM=DIR inside the selected checkout")
         registered.append((arm, name))
     result = audit(root, rubric20_version=args.rubric20_version,
-                   evaluator_model=args.evaluator_model, contexts=contexts, registered_evaluations=registered)
+                   evaluator_model=args.evaluator_model, contexts=contexts, registered_evaluations=registered,
+                   authority_roots=args.authority_root)
     print(json.dumps(result, sort_keys=True, indent=2, allow_nan=False) if args.format == "json" else markdown(result), end="\n")
     return 0
 

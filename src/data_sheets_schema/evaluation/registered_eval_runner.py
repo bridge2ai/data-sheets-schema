@@ -32,6 +32,7 @@ from data_sheets_schema.resources import resource_path
 from data_sheets_schema.semantic_instrument import select_semantic_instrument
 from data_sheets_schema.semantic_scope import validate_scope
 from data_sheets_schema.evaluation.validate import validate_evaluation
+from data_sheets_schema.evaluation.run_identity import same_run
 
 CBORG_BASE_URL = "https://api.cborg.lbl.gov"
 FORMAT = "registered_semantic_evaluation_v1"
@@ -317,9 +318,7 @@ def prepare(
     from data_sheets_schema.provenance import recorded_hash, resolve_record_input
     if not isinstance(prior, dict) or prior.get("record_type") != "d4d_generation_provenance":
         raise ValueError("requires the generated record's provenance")
-    if not isinstance(prior.get("run"), dict) or {
-        key: prior["run"].get(key) for key in reg["run"]
-    } != reg["run"]:
+    if not same_run(prior.get("run"), reg["run"]):
         raise ValueError("record provenance identifies another registered run")
     if (not isinstance(prior.get("shared_generation"), dict)
             or prior["shared_generation"].get("authority") != captured.identity()):
@@ -384,7 +383,7 @@ def prepare(
         "evaluation/registered_eval_runner.py", "evaluation/blind_review_pack.py", "evaluation/validate.py",
         "evaluation_context.py", "semantic_scope.py", "semantic_instrument.py",
         "semantic_evidence.py", "semantic_evidence_authority.py", "judge_contract.py",
-        "agent_pin.py", "provenance.py",
+        "agent_pin.py", "provenance.py", "evaluation/run_identity.py", "cli/api.py", "runs.py",
     ):
         take(Path(__file__).parents[1] / module)
     manifest = {

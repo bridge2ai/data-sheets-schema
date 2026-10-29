@@ -443,6 +443,28 @@ def registered_problem(result):
     return result["registered_evaluations"][0]["reasons"]
 
 
+def test_writer_roundtrip_with_declared_external_authority_root(registered_generation_inputs, tmp_path, monkeypatch):
+    from tests import test_registered_eval_runner as support
+    inputs = support.rebind_record(dict(registered_generation_inputs), tmp_path,
+                                  registered_generation_inputs["record"].read_bytes())
+    prior = yaml.safe_load(inputs["provenance"].read_bytes())
+    assert prior["run"]["arm"] == "baseline"
+    original_registration = inputs["registration"].read_bytes()
+    prepared = support.runner.prepare(**inputs)
+    output = tmp_path / "ratings"
+    with monkeypatch.context() as mocked:
+        support.install_cli(mocked, prepared)
+        receipt = support.runner.execute(prepared, output, plan_sha256=prepared.digest,
+                                         environ={"CBORG_API_KEY": "synthetic"})
+    assert receipt["status"] == "validated"
+    case = (tmp_path, output, prepared)
+    assert registered_problem(registered_audit(case)) == ["registered_authority_missing_or_external"]
+    result = registered_audit(case, authority_roots=[inputs["registration"].parent])
+    assert not registered_problem(result)
+    assert {row["rubric"] for row in result["rescore_tuples"]} == {"rubric10"}
+    assert inputs["registration"].read_bytes() == original_registration
+
+
 def test_actual_registered_runner_output_satisfies_only_its_exact_ingestion_tuple(registered_case):
     root, output, prepared = registered_case
     before = {str(path): path.read_bytes() for path in output.rglob("*") if path.is_file()}

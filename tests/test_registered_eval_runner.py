@@ -78,13 +78,18 @@ def registration(tmp_path_factory):
     files[reg["registration_path"]] = Path(reg["registration_path"]).read_bytes()
     captured = shared._capture_bytes(files[reg["registration_path"]], reg, files)
     provenance = directory / "generation-provenance.yaml"
-    provenance.write_text(yaml.safe_dump({
-        "record_type": "d4d_generation_provenance", "run": reg["run"],
+    from data_sheets_schema.provenance import build_record
+    prior = build_record(base.project, base.method, base.label, mode="reconstructed",
+                         input_bundle=base.bundle, manifest=base.manifest,
+                         chunk_manifest=base.chunk_manifest, concat_dir=directory,
+                         outputs={"full": record}, condition="generic_v10")
+    prior.data.update({
         "shared_generation": {"authority": captured.identity()},
         "validation": {"artifacts": {"full": {
             "path": str(record), "md5": hashlib.md5(record.read_bytes()).hexdigest(),
         }}},
-    }))
+    })
+    prior.write(provenance)
     return dict(
         registration=Path(reg["registration_path"]), record=record, context=context,
         context_sha256=sha(context.read_bytes()), rubric="rubric20", instrument_version="3.0",
@@ -98,6 +103,23 @@ def registration(tmp_path_factory):
 @pytest.fixture(scope="module")
 def prepared(registration):
     return runner.prepare(**registration)
+
+
+def test_copied_registration_run_control(registration, tmp_path):
+    prior = yaml.safe_load(registration["provenance"].read_bytes())
+    prior["run"].update(json.loads(registration["registration"].read_bytes())["run"])
+    path = tmp_path / "copied-shape.yaml"
+    path.write_text(yaml.safe_dump(prior))
+    assert runner.prepare(**{**registration, "provenance": path,
+                              "provenance_sha256": sha(path.read_bytes())})
+
+
+@pytest.mark.parametrize("arm,method", [("unmapped", "claudecode_api"),
+                                       ("baseline", "unmapped"), ("crate_only", "claudecode_api")])
+def test_unmapped_or_inconsistent_arm_is_not_an_identity(arm, method):
+    from data_sheets_schema.evaluation.run_identity import same_run
+    run = {"arm": arm, "method": method, "project": "P", "label": "L"}
+    assert not same_run(run, run)
 
 
 def document_for(prepared):
