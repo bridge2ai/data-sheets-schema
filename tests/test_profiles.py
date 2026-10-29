@@ -21,8 +21,8 @@ STUDY_MANIFEST = ROOT / "data/preprocessed/source_manifest.yaml"
 
 # Current generated-record fixtures after the deliberate #1771 boundary.
 # Historical fingerprints remain covered by test_nested_string_lists.py.
-CURRENT_STUDY = "6be1582236d9320bac6040b9a8b92da9"
-CURRENT_NEUTRAL = "94859bbbe7fa229619a3d5e2a50c3668"
+CURRENT_STUDY = "b2d80be089a79aab0ef1a88002b94ca6"
+CURRENT_NEUTRAL = "49d14e268864c35704fd000a1b10fb05"
 
 
 class _Clean(unittest.TestCase):
@@ -168,8 +168,7 @@ class TestTheDigest(_Clean):
         self.assertIn("GO, MeSH, EFO, NCIT", line)
         self.assertNotIn("B2AI_TOPIC", line)
         self.assertNotIn("Diabetes", line)
-        # And no substrate list at all: the schema declares no sources there.
-        self.assertFalse(any("`data_substrate` draws from" in l for l in text.splitlines()))
+        self.assertIn("EDAM Data, EDAM Format, IANA media types", text)
         self.assertNotIn("B2AI", text)
 
     def test_the_two_profiles_are_different_instruments(self):
@@ -361,7 +360,9 @@ class TestTheThreadingHolds(_Clean):
                         manifest=STUDY_MANIFEST, manifest_line=ARMS["crate_only"][3])
         self.assertEqual((crate.profile, crate.manifest_used), ("bridge2ai", False))
         line = next(l for l in resolve_prompt(crate).splitlines() if " provenance record --project " in l)
-        self.assertIn(f"--manifest {STUDY_MANIFEST}", line)
+        import shlex
+        command = shlex.split(line)
+        self.assertEqual(Path(command[command.index('--manifest') + 1]).resolve(), STUDY_MANIFEST.resolve())
         self.assertNotIn("--manifest none", line)
         with tempfile.TemporaryDirectory() as d:
             ext = Path(d) / "clinic_preprocessed.txt"; ext.write_text("FILE: a\nhi\n", encoding="utf-8")
@@ -387,7 +388,7 @@ class TestTheThreadingHolds(_Clean):
         from data_sheets_schema.d4d_pair_consistency import pair_predates_current_schema
         from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, for_record
         self.assertIs(for_record({"schema": {"profile": "neutral"}}), NEUTRAL)
-        self.assertIs(for_record({"schema": {"digest_md5": "x"}}), BRIDGE2AI)      # pre-profile: the ambient one
+        self.assertIs(for_record({"record_generated_at": "2026-09-01", "schema": {"digest_md5": "x"}}), BRIDGE2AI)
         self.assertNotIn("B2AI_TOPIC", evidence_score.slot_spec("instances", profile=NEUTRAL))
         self.assertIn("MeSH", evidence_score.slot_spec("instances", profile=NEUTRAL))
         judge = evidence_score.LLMSlotFitnessScorer(client=object(), model="offline-test", profile=NEUTRAL)
@@ -680,14 +681,15 @@ class TestRoundFour(_Clean):
         """#1518"""
         from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, for_record
         os.environ["D4D_PROFILE"] = "neutral"
-        self.assertIs(for_record({"schema": {"digest_md5": "34d24ff30fb6ad0f10d82af09ddc1fba"}}), BRIDGE2AI)
-        self.assertIs(for_record({"schema": {}}), BRIDGE2AI)               # no profile at all: before profiles, the study's (#1583)
-        self.assertIs(for_record({"schema": "not a mapping"}), BRIDGE2AI)
+        self.assertIs(for_record({"record_generated_at": "2026-09-01", "schema": {"digest_md5": "34d24ff30fb6ad0f10d82af09ddc1fba"}}), BRIDGE2AI)
+        self.assertIs(for_record({"schema": {}}), NEUTRAL)
+        self.assertIs(for_record({"schema": "not a mapping"}), NEUTRAL)
         import warnings
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
-            self.assertIs(for_record({"schema": {"profile": "acme"}}), BRIDGE2AI)
-        self.assertTrue(any("does not know" in str(w.message) for w in caught))
+            with self.assertRaisesRegex(ValueError, 'unknown profile'):
+                for_record({"schema": {"profile": "acme"}})
+        self.assertEqual(caught, [])
 
     def test_own_record_under_another_project_gets_its_own_file(self):
         """#1516"""
@@ -1642,7 +1644,7 @@ class TestRoundThirteen(_Clean):
         """#1709"""
         from data_sheets_schema.provenance import _spec_profile_disagreement
         for schema in ({}, None, "x", ["x"]):
-            data = {"prompts": {"request": {"spec": {"profile": "neutral"}}}}
+            data = {"record_generated_at": "2026-09-01", "prompts": {"request": {"spec": {"profile": "neutral"}}}}
             if schema != {}:
                 data["schema"] = schema
             finding = _spec_profile_disagreement(data)

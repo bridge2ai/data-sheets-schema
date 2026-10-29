@@ -270,28 +270,31 @@ def active_profile(manifest: Path | str | None | Any = "default") -> Profile:
 
 
 def for_record(record: dict[str, Any] | None) -> Profile:
-    """The profile a *record's* readers use (#1462): the one its `schema`
-    block states, else the ambient one — a record that predates profiles
-    was made under the study's, which is the ambient one in the study's
-    checkout. Evaluation, review packs and backfills read this, never the
-    environment alone, so a historical record keeps its instrument when the
-    environment changes."""
+    """Read a declared profile; unknown names refuse (F18).
+
+    Only a record dated before profiles were introduced (2026-09-13,
+    e78e4bb5699af0ecaca28cdc5c328e5c908ae959) inherits the historical study
+    profile, with a warning stating that basis. Missing/unproven dates and
+    contemporary profile-less records are neutral, independent of environment.
+    """
     schema = (record or {}).get("schema") if isinstance(record, dict) else None
     if not isinstance(schema, dict):
         schema = {}
     name = schema.get("profile")
-    if name:
-        try:
-            return profile_named(str(name))
-        except ValueError as exc:
-            import warnings
-            warnings.warn(f"record states a profile this code does not know ({exc}); read as the study's",
-                          RuntimeWarning, stacklevel=2)
-            return BRIDGE2AI
-    # No profile: a record made before profiles existed — every one of them
-    # the study's, digest or not (103 corpus records carry neither; #1518,
-    # #1583) — and it must not follow the environment.
-    return BRIDGE2AI
+    if name is not None:
+        return profile_named(str(name))
+    from datetime import date
+    raw_date = record.get('record_generated_at') if isinstance(record, dict) else None
+    try:
+        recorded_date = date.fromisoformat(str(raw_date)[:10])
+    except (TypeError, ValueError):
+        recorded_date = None
+    if recorded_date is not None and recorded_date < date(2026, 9, 13):
+        import warnings
+        warnings.warn('profile absent: record predates profiles (2026-09-13); '
+                      'read as historical bridge2ai', RuntimeWarning, stacklevel=2)
+        return BRIDGE2AI
+    return NEUTRAL
 
 
 def arm_projects_for(arm: str, profile: Profile | None = None) -> list[str] | None:
