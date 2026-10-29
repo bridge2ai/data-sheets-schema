@@ -260,8 +260,14 @@ def assert_completed_replay_authority(spec, journal_heads):
             original_entry(spec, selected).update(path=str(alternate), sha256=sha(raw))
             spec.provenance_path.write_text(yaml.safe_dump(selected))
         elif case == 'missing_core_index':
+            core_rows = [row for row in index['snapshots'] if row['name'] == f'{spec.project}_core.yaml']
+            assert len(core_rows) == 1
+            assert core_rows[0].get('usage_id') is None
+            assert all(pin['path'] != core_rows[0]['path']
+                       for pin in ledger._read(spec)['latch_snapshots'])
             changed = deepcopy(index)
             changed['snapshots'] = [r for r in changed['snapshots'] if r['name'] != f'{spec.project}_core.yaml']
+            assert len(changed['snapshots']) == len(index['snapshots']) - 1
             index_path.write_bytes(sg.canonical(changed))
         else:
             selected.pop('intermediates')
@@ -282,14 +288,12 @@ def assert_completed_replay_authority(spec, journal_heads):
                     with pytest.raises(ledger.UsageLedgerError, match='original|attestation|packet') as refused:
                         api.execute(replace(spec), resume=True, client=client)
                     assert 'resume journal head:' not in str(refused.value)
-                elif case == 'missing_core_index':
-                    # The portable reader may use the explicit record. API
-                    # resume must still refuse a changed journaled index.
-                    assert runtime.completion_check(spec, record=record) == record['shared_generation']
-                    with pytest.raises(ledger.UsageLedgerError, match='latch journal') as refused:
-                        api.execute(replace(spec), resume=True, client=client)
-                    assert 'resume journal head:' not in str(refused.value)
                 else:
+                    if case == 'missing_core_index':
+                        # This deterministic core row is not a journaled model
+                        # delivery. Preserve portable and API completed replay;
+                        # whole-index/latched-delivery removals are separate refusals.
+                        assert runtime.completion_check(spec, record=record) == record['shared_generation']
                     result = api.execute(replace(spec), resume=True, client=client)
                     assert result['already_complete'] and result['validation_problems'] == []
                     assert result['checks']['shared_generation'] == record['shared_generation']
