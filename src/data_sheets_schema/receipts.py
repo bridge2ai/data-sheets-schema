@@ -1620,7 +1620,8 @@ def _receipt_entries(receipt: dict[str, Any]) -> tuple[list[dict[str, Any]], lis
     return entries, findings
 
 
-def _receipt_paths(entries: list[dict[str, Any]], unattesting_pairs: set) -> tuple[list[str], set[str]]:
+def _receipt_paths(entries: list[dict[str, Any]], unattesting_pairs: set, *,
+                   instrument_version: int = 3) -> tuple[list[str], set[str]]:
     """(every receipt path, the paths an attesting snippet receipts). A pair
     in `unattesting_pairs` — (chunk, slot, snippet) below the #720 floors, or
     id(pair) for v5 non-supporting / failed-tool pairs — keeps its path for the
@@ -1629,7 +1630,7 @@ def _receipt_paths(entries: list[dict[str, Any]], unattesting_pairs: set) -> tup
                         for p in (e.get("extracted") or [])})
     attesting = {str(p.get("slot") or "") for e in entries if e.get("status") == "extracted"
                  for p in (e.get("extracted") or [])
-                 if isinstance(p.get("snippet"), (str, type(None)))
+                 if (instrument_version != 5 or isinstance(p.get("snippet"), (str, type(None))))
                  and (e.get("id"), str(p.get("slot") or ""), p.get("snippet")) not in unattesting_pairs
                  and id(p) not in unattesting_pairs}
     return all_paths, attesting
@@ -1754,7 +1755,7 @@ def uncovered_receiptable_leaves(receipt: dict[str, Any], manifest: dict[str, An
             snippet = pair.get("snippet")
             if isinstance(snippet, str) and snippet.strip() and _attests_nothing(snippet):
                 unattesting_pairs.add((e.get("id"), str(pair.get("slot") or ""), snippet))
-    receipt_paths, attesting = _receipt_paths(entries, unattesting_pairs)
+    receipt_paths, attesting = _receipt_paths(entries, unattesting_pairs, instrument_version=instrument_version)
     if instrument_version == 5:
         attesting = _v5_attesting_paths(entries, manifest, chunk_texts, full,
                                         original=original, identifier_bases=identifier_bases)
@@ -2311,7 +2312,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # claim about the record's structure - it runs the same resolution,
     # off-by-one and addressing checks, so a fabricated path cannot hide
     # behind a tiny snippet.
-    receipt_paths, attesting = _receipt_paths(entries, unattesting_pairs)
+    receipt_paths, attesting = _receipt_paths(entries, unattesting_pairs, instrument_version=instrument_version)
     snapshot_attesting = attesting
     if instrument_version == 5:
         attesting = _v5_attesting_paths(entries, manifest, chunk_texts, full,
