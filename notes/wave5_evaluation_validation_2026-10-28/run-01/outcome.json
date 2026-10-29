@@ -1,0 +1,20 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_arm_comparison": 72,
+    "test_audit_evaluation_comparability": 115,
+    "test_blind_review_pack": 146,
+    "test_d52_scoring": 31,
+    "test_evaluation.test_evaluate_d4d": 18,
+    "test_evaluation.test_explicit_dataset_scope": 22,
+    "test_evaluation.test_general_context": 25,
+    "test_evaluation.test_rubric20_scoring": 16,
+    "test_registered_eval_runner": 143
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 719.6319682920002
+}
