@@ -1,0 +1,227 @@
+{
+  "before": {
+    "format": "wave6_a14_a17_sizing_parity_v1",
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "registration_sha256": "7ac286ae0ffa69112661ad22273829f74f0f339be73e8ee27396eda908ac5fd9",
+    "packet_sha256": "a5f16a4333d883bf77879da65ae0662574ec4b34b1d1768149cd4e42661a3afa",
+    "inputs_sha256": {
+      "full": "440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7",
+      "core": "473d3b94296f1cb2aec491b1bba77c64aced2f4803e8361b96b520e7f50e6f38",
+      "receipt": "5829b77841b837f5d30b12e55db6b1e22bb701d7fe71036d7225a7a2db3693db",
+      "context": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0",
+      "bundle": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+      "manifest": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a",
+      "schema": "313a92942f18499bc667fb40449b90c4b151cd56ac909237b3ee6462272727d4"
+    },
+    "source_sha256": {
+      "scripts/build_api_registrations.py": "6df9fa982c97e39cb80738f4349ffe0c31647db45cedb9af0fdc5a6dcf4c7cb6",
+      "src/data_sheets_schema/typed_audit_runtime.py": "719f4b1b2006e26ca40e3d83f1eb918f083a194d44d591eb4aa179721afc48b9",
+      "src/data_sheets_schema/typed_audit.py": "f8461ced9da25b85985d15590a8798f24fba83b5da4c3905edb7cb8199d8be5c",
+      "src/data_sheets_schema/audit_omissions.py": "d70599523ff734a728a0051f547ca56f0929a991aa998b11c140c7e548b51d68",
+      "src/data_sheets_schema/shared_generation.py": "ebd73f9ef26f7b37ea5477a01183e2264885425742e70c76e23a7f832c8be140"
+    },
+    "plan_workers": 3,
+    "rows": [
+      {
+        "stage": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0001"
+        },
+        "sized_text_bytes": 388375,
+        "current_wire_text_bytes": 301193,
+        "expected_sized_text_bytes": 388375,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 47262,
+        "response_bytes": 0,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 333134,
+        "canonical_payload_sha256": "ee82338e40c3ad2b4d43b9236528da4ff0c6eb3fd48d34d9bcacf21d50f58105"
+      },
+      {
+        "stage": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0002"
+        },
+        "sized_text_bytes": 388555,
+        "current_wire_text_bytes": 300175,
+        "expected_sized_text_bytes": 388555,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 48460,
+        "response_bytes": 0,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 332195,
+        "canonical_payload_sha256": "c1eea055ffe6cb04e01055ba227225d43ee61a784414c96aed5a1cf93b56a098"
+      },
+      {
+        "stage": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0003"
+        },
+        "sized_text_bytes": 387168,
+        "current_wire_text_bytes": 294644,
+        "expected_sized_text_bytes": 387168,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 52604,
+        "response_bytes": 0,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 326329,
+        "canonical_payload_sha256": "3e68310b7ff40f05c7ea670eef1b73758ea01d190b0bf1591824fa633ac9530d"
+      },
+      {
+        "stage": {
+          "phase": "typed_audit_omission"
+        },
+        "sized_text_bytes": 307870,
+        "current_wire_text_bytes": 540935,
+        "expected_sized_text_bytes": 580855,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 0,
+        "response_bytes": 0,
+        "inner_matches": false,
+        "parity": false,
+        "canonical_payload_bytes": 578245,
+        "canonical_payload_sha256": "90df834a0848ee901ff9546d6f6e07fa8227f68a6e176eb79f6f9d13988142b8"
+      },
+      {
+        "stage": {
+          "phase": "typed_audit_integration"
+        },
+        "sized_text_bytes": 400076,
+        "current_wire_text_bytes": 495761,
+        "expected_sized_text_bytes": 400076,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 0,
+        "response_bytes": 135605,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 530134,
+        "canonical_payload_sha256": "3104c8226a4dddd2f8b3d550bda9a0626f088fd484f4780180b1cec11590b7ea"
+      }
+    ],
+    "passed": false,
+    "omission_sized_text_bytes": 307870,
+    "omission_current_wire_text_bytes": 540935,
+    "omission_wire_inner_bytes": 402947,
+    "omission_sizing_inner_bytes": 130059,
+    "omission_wire_schema_bytes": 313217,
+    "scope": "Text-byte sizing, with explicit carry/schema allowances and response contribution; canonical payload sizes are also recorded, not equated with text-byte estimates."
+  },
+  "after": {
+    "format": "wave6_a14_a17_sizing_parity_v1",
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "registration_sha256": "7ac286ae0ffa69112661ad22273829f74f0f339be73e8ee27396eda908ac5fd9",
+    "packet_sha256": "a5f16a4333d883bf77879da65ae0662574ec4b34b1d1768149cd4e42661a3afa",
+    "inputs_sha256": {
+      "full": "440ea561b0a26e73b82d12e0093ad1a4ba8288abb3aa8a3c82ed8a2e3dbab0d7",
+      "core": "473d3b94296f1cb2aec491b1bba77c64aced2f4803e8361b96b520e7f50e6f38",
+      "receipt": "5829b77841b837f5d30b12e55db6b1e22bb701d7fe71036d7225a7a2db3693db",
+      "context": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0",
+      "bundle": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+      "manifest": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a",
+      "schema": "313a92942f18499bc667fb40449b90c4b151cd56ac909237b3ee6462272727d4"
+    },
+    "source_sha256": {
+      "scripts/build_api_registrations.py": "480977c75ff61a2377df968b3b5484a150ec260e5a544a2c33aafa4bc1e9fcb2",
+      "src/data_sheets_schema/typed_audit_runtime.py": "719f4b1b2006e26ca40e3d83f1eb918f083a194d44d591eb4aa179721afc48b9",
+      "src/data_sheets_schema/typed_audit.py": "f8461ced9da25b85985d15590a8798f24fba83b5da4c3905edb7cb8199d8be5c",
+      "src/data_sheets_schema/audit_omissions.py": "d70599523ff734a728a0051f547ca56f0929a991aa998b11c140c7e548b51d68",
+      "src/data_sheets_schema/shared_generation.py": "ebd73f9ef26f7b37ea5477a01183e2264885425742e70c76e23a7f832c8be140"
+    },
+    "plan_workers": 3,
+    "rows": [
+      {
+        "stage": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0001"
+        },
+        "sized_text_bytes": 388375,
+        "current_wire_text_bytes": 301193,
+        "expected_sized_text_bytes": 388375,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 47262,
+        "response_bytes": 0,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 333134,
+        "canonical_payload_sha256": "ee82338e40c3ad2b4d43b9236528da4ff0c6eb3fd48d34d9bcacf21d50f58105"
+      },
+      {
+        "stage": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0002"
+        },
+        "sized_text_bytes": 388555,
+        "current_wire_text_bytes": 300175,
+        "expected_sized_text_bytes": 388555,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 48460,
+        "response_bytes": 0,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 332195,
+        "canonical_payload_sha256": "c1eea055ffe6cb04e01055ba227225d43ee61a784414c96aed5a1cf93b56a098"
+      },
+      {
+        "stage": {
+          "phase": "typed_audit_worker",
+          "worker_id": "worker_0003"
+        },
+        "sized_text_bytes": 387168,
+        "current_wire_text_bytes": 294644,
+        "expected_sized_text_bytes": 387168,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 52604,
+        "response_bytes": 0,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 326329,
+        "canonical_payload_sha256": "3e68310b7ff40f05c7ea670eef1b73758ea01d190b0bf1591824fa633ac9530d"
+      },
+      {
+        "stage": {
+          "phase": "typed_audit_omission"
+        },
+        "sized_text_bytes": 580855,
+        "current_wire_text_bytes": 540935,
+        "expected_sized_text_bytes": 580855,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 0,
+        "response_bytes": 0,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 578245,
+        "canonical_payload_sha256": "90df834a0848ee901ff9546d6f6e07fa8227f68a6e176eb79f6f9d13988142b8"
+      },
+      {
+        "stage": {
+          "phase": "typed_audit_integration"
+        },
+        "sized_text_bytes": 400076,
+        "current_wire_text_bytes": 495761,
+        "expected_sized_text_bytes": 400076,
+        "carry_allowance_bytes": 39920,
+        "schema_allowance_bytes": 0,
+        "response_bytes": 135605,
+        "inner_matches": true,
+        "parity": true,
+        "canonical_payload_bytes": 530134,
+        "canonical_payload_sha256": "3104c8226a4dddd2f8b3d550bda9a0626f088fd484f4780180b1cec11590b7ea"
+      }
+    ],
+    "passed": true,
+    "omission_sized_text_bytes": 580855,
+    "omission_current_wire_text_bytes": 540935,
+    "omission_wire_inner_bytes": 402947,
+    "omission_sizing_inner_bytes": 402947,
+    "omission_wire_schema_bytes": 313217,
+    "scope": "Text-byte sizing, with explicit carry/schema allowances and response contribution; canonical payload sizes are also recorded, not equated with text-byte estimates."
+  },
+  "actual_payloads_unchanged": true,
+  "omission_sizing_delta_bytes": 272985,
+  "d62_bytes_per_token": 2.48,
+  "d62_delta_tokens": 110074.59677419355,
+  "d62_ceil_delta_tokens": 110074
+}

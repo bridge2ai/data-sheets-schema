@@ -12,6 +12,7 @@ import math
 import os
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 import pytest
 from click.testing import CliRunner
@@ -136,10 +137,11 @@ def test_the_response_constants_are_pinned_to_10_22a(tmp_path):
     used = 3 * 0.56 * 64000 + 0.75 * 32000
     assert three["integration_response_input_tokens"] == math.ceil(1.2 * used)
     assert three["integration_worst_response_input_tokens"] == 3.5 * (3 * 64000 + 32000)
-    # Sized for 10-22a's own plan, its integration call covers what the endpoint counted for it;
-    # at one input token per output token it would not.
+    # The current estimate still covers the historical count. A14's larger
+    # schema context changes the base, so that old total can no longer
+    # distinguish response factors; the calibrated factors and formulas are
+    # checked directly above.
     assert three["integration_input_tokens"] >= MEASURED["integration"]
-    assert three["integration_base_input_tokens"] + 1.0 * used < MEASURED["integration"]
 
 
 @pytest.mark.parametrize("project,run", [("AI_READI", "2026-09-04g_claude-opus-5-api-generic-v8_rep2"),
@@ -155,13 +157,18 @@ def test_large_projects_are_refused_when_their_expected_integration_cannot_fit(t
 
 
 def test_a_large_project_whose_expected_integration_fits_is_built_with_its_worst_case_warned(tmp_path):
-    limits = {**BOUNDS, "max_workers": 16, "aggregate_input_tokens": 12000000}
+    # The corrected S7 omission estimate raises this historical fixture above
+    # its former 12M aggregate allowance. Keep this a positive build case.
+    limits = {**BOUNDS, "max_workers": 16, "aggregate_input_tokens": 13000000}
     _, outputs, sizing = prepare("CM4AI", tmp_path, audit_limits=limits,
                                  sizing_record=RUNS / "2026-09-04g_claude-opus-5-api-generic-v8_rep1" / "intermediate")
     assert sizing["plan_workers"] == 8 and sizing["integration_input_tokens"] <= 968000
+    assert 12000000 < sizing["aggregate_input_tokens"] <= limits["aggregate_input_tokens"]
     assert sizing["integration_worst_input_tokens"] > 968000
     recorded = json.loads(outputs[-1][1])["sizing"]
     assert recorded["warnings"] == sizing["warnings"] and "at worst, 16 worker responses" in recorded["warnings"][0]
+    assert recorded["notes"] == sizing["notes"]
+    assert any("no current typed owner traversal" in note for note in recorded["notes"])
 
 
 def test_a_worker_call_that_cannot_fit_is_refused_too(tmp_path):
@@ -319,11 +326,12 @@ classes:
 
 
 def test_rendering_agrees_with_the_typed_packet(typed_inputs):
-    """The sizing renders the typed packet's own requests, digests and owner classes aside."""
+    """Sizing shares the sealed omission wire, with fixed-width worker digests."""
     t = typed_inputs
     snapshot = capture_schema(t["schema_root"].absolute(), strict=True)
     packet = ta.prepare(protocol="typed_audit_protocol_v1", original_full=t["record"], bundle=t["bundle"],
                         manifest=t["manifest"], receipt=t["receipt"], context=t["context"], schema_path=t["schema_root"],
+                        schema_snapshot=snapshot, omission_wire=ta.SHARED_OMISSION_WIRE,
                         max_output_tokens=t["limits"]["omission_output_tokens"],
                         **{k: t["limits"][k] for k in ("max_paths", "max_inventory_bytes", "max_workers", "max_request_bytes")})
     rendered = render_typed_audit_inputs("EXAMPLE", t["limits"], t["registration"], record=t["record"], core=None,
@@ -335,15 +343,7 @@ def test_rendering_agrees_with_the_typed_packet(typed_inputs):
         stage, expected = json.loads(mine["payload"]["stage"]), json.loads(theirs["payload"]["stage"])
         assert stage == {**expected, "shared_context_sha256": stage["shared_context_sha256"]}
         assert len(sg.canonical(mine)) == len(sg.canonical(theirs))
-    wire = deepcopy(packet["omission_request"])
-    wire["payload"]["schema"] = {k: v for k, v in wire["payload"]["schema"].items() if k not in ("classes", "slots")}
-    mine = deepcopy(rendered["requests"]["omission"])
-    owners = mine["payload"].pop("owner_classes")
-    assert set(wire["payload"].pop("owner_classes")) <= set(owners)
-    for key in ("input_sha256",):
-        mine["payload"][key] = wire["payload"][key]
-    mine["request_sha256"] = wire["request_sha256"]
-    assert mine == wire
+    assert rendered["requests"]["omission"] == ta.omission_wire_request(packet)
     # Integration: the same shared context, contract and rows; responses are sized from the caps.
     integration = rendered["requests"]["integration"]["integration_request"]["payload"]
     assert integration["shared_context"] == packet["requests"]["shared_context"]
@@ -351,9 +351,48 @@ def test_rendering_agrees_with_the_typed_packet(typed_inputs):
     assert [row["path"] for row in integration["proposal_index"]["rows"]] == [r["path"] for r in packet["plan"]["inventory"]["values"]]
 
 
+def test_historical_sizing_receipt_does_not_relax_execution_validation(typed_inputs):
+    """An old receipt is an estimate input, never authority for a current packet."""
+    t = typed_inputs
+    snapshot = capture_schema(t["schema_root"].absolute(), strict=True)
+    old = yaml.safe_load(t["receipt"])
+    old["bundle_md5"] = "0" * 32
+    receipt = yaml.safe_dump(old).encode()
+    rendered = render_typed_audit_inputs("EXAMPLE", t["limits"], t["registration"], record=t["record"], core=None,
+        receipt=receipt, context=t["context"], schema_snapshot=snapshot)
+    payload = rendered["requests"]["omission"]["payload"]
+    assert payload["receipt_yaml"] == receipt.decode()
+    assert payload["input_sha256"]["receipt"] == hashlib.sha256(receipt).hexdigest()
+    with pytest.raises(ValueError, match="receipt does not name the captured bundle"):
+        ta.prepare(protocol="typed_audit_protocol_v1", original_full=t["record"], bundle=t["bundle"],
+            manifest=t["manifest"], receipt=receipt, context=t["context"], schema_path=t["schema_root"],
+            schema_snapshot=snapshot, omission_wire=ta.SHARED_OMISSION_WIRE,
+            max_output_tokens=t["limits"]["omission_output_tokens"])
+
+
+def test_historical_owner_allowance_does_not_relax_execution_validation(typed_inputs):
+    t = typed_inputs
+    snapshot = capture_schema(t["schema_root"].absolute(), strict=True)
+    document = yaml.safe_load(t["record"])
+    document["old_schema_field"] = {"text": "An older record shape."}
+    record = yaml.safe_dump(document).encode()
+    rendered = render_typed_audit_inputs("EXAMPLE", t["limits"], t["registration"], record=record, core=None,
+        receipt=t["receipt"], context=t["context"], schema_snapshot=snapshot)
+    assert "undeclared slot" in rendered["owner_allowance_note"]
+    assert "not validation of an executable packet" in rendered["owner_allowance_note"]
+    payload = rendered["requests"]["omission"]["payload"]
+    assert payload["record_yaml"] == record.decode()
+    assert len(payload["owner_classes"]["/old_schema_field"]) >= 32
+    with pytest.raises(ValueError, match="undeclared slot"):
+        ta.prepare(protocol="typed_audit_protocol_v1", original_full=record, bundle=t["bundle"],
+            manifest=t["manifest"], receipt=t["receipt"], context=t["context"], schema_path=t["schema_root"],
+            schema_snapshot=snapshot, omission_wire=ta.SHARED_OMISSION_WIRE,
+            max_output_tokens=t["limits"]["omission_output_tokens"])
+
+
 @pytest.mark.skipif(not V10_RUN, reason="set D4D_CHORUS_V10_TYPED_RUN to the 2026-10-22a intermediate directory")
 def test_rendering_reproduces_the_chorus_v10_wire():
-    """Rendered from 10-22a's own inputs, every request matches its saved text but for the allowances."""
+    """Historical lineage allows the explicit D35/A14 changes; current parity is mandatory elsewhere."""
     run = Path(V10_RUN)
     packet = json.loads((run / "CHORUS_typed_audit_packet.json").read_bytes())
     raw = {key: ta._unblob(value) for key, value in packet["inputs"].items()}
@@ -377,11 +416,20 @@ def test_rendering_reproduces_the_chorus_v10_wire():
     # Since that run, one worker-contract sentence was reworded (D35); it occurs twice in each worker request.
     reworded = 2 * (len("Every removal's owning root (its top-level field, or its list entry when the plan splits that list) belongs")
                     - len("Every removal's top-level owner belongs"))
-    assert rendered["worker_bytes"] - max(actual[:3]) == allowance + reworded
-    owners = (len(sg.canonical(rendered["requests"]["omission"]["payload"]["owner_classes"]))
-              - len(sg.canonical(packet["omission_request"]["payload"]["owner_classes"])))
-    assert owners >= 0
-    assert rendered["omission_bytes"] - actual[3] == allowance + owners
+    # A14 restores schema descriptions and sends its sealed S7 omission wire.
+    # Compare those declared changes explicitly, rather than treating v10 as
+    # the current wire. test_wave6_a14_a17_sizing checks today's real formatter.
+    schema_bytes = len(sg._schema_context(SimpleNamespace(full_schema=ta._snapshot(packet["schema_sources"])),
+                                         raw["original_full"].decode()).encode())
+    assert all(parts[3] == wires[0][3] for parts in wires[:3])
+    assert rendered["worker_bytes"] - max(actual[:3]) == allowance + reworded + schema_bytes - len(wires[0][3].encode())
+    old_inner = json.loads(wires[3][6].split("\n\n", 1)[1])
+    old_binding = json.loads(wires[3][5].split("\n\n", 1)[1])
+    binding_delta = (len(sg.canonical({**old_binding, "packet_inner_request_sha256": "0" * 64}))
+                     - len(sg.canonical(old_binding)))
+    inner_delta = len(sg.canonical(rendered["requests"]["omission"])) - len(sg.canonical(old_inner))
+    assert rendered["omission_bytes"] - actual[3] == (allowance + inner_delta + binding_delta
+                                                     + schema_bytes - len(wires[3][3].encode()))
     assert rendered["integration_base_bytes"] < actual[4]
     # The expected-response constants are this run's own usage ledger.
     ledger = json.loads(next(run.parent.glob("CHORUS_api_usage_*.json")).read_bytes())

@@ -305,12 +305,14 @@ def profile_covered(project: str, arm: str | None, limits: dict[str, Any]) -> bo
 
 
 # Typed-audit input sizing (#5155), calibrated on CHORUS 2026-10-22a.
-# - Rendered as below from that run's own inputs, its worker and omission
-#   requests match their saved text in byte count (digests are stand-ins),
-#   apart from two allowances: the receipt carry (2,931 bytes over) and the
-#   omission request's owner classes (padded). Worker requests are also 136
-#   bytes longer since one contract sentence was reworded (D35). The
-#   integration request is rendered without its responses.
+# - The original render matched that run's saved text with receipt-carry and
+#   padded-owner allowances, plus the D35 worker sentence change. A14 changes
+#   the schema context and omission wire: current omission sizing now uses
+#   the sealed runtime formatter, with exact owners when the historical record
+#   can be interpreted and a declared padding allowance otherwise. Worker schema context
+#   retains a conservative description allowance; integration excludes its
+#   responses. Current-runtime parity checks all calls, separately from the
+#   historical calibration below.
 # - Its worker, omission and integration requests counted 2.25, 2.35 and
 #   1.75 bytes per token.
 # - Its integration request carried four responses, the workers' as base64
@@ -447,7 +449,9 @@ def render_typed_audit_inputs(
 
     The inner requests follow typed_audit, the outer parts typed_audit_runtime.
     Digests and identifiers are stand-ins of the same width; the receipt carry
-    is an allowance; owner classes are counted for every mapping in the record.
+    is an allowance. The omission request uses the runtime's sealed S7 formatter
+    and complete projected schema. Uninterpretable historical owner classes keep
+    a declared padding allowance; interpretable records use their actual owners.
     The integration request is rendered without its worker and omission
     responses, at the plan's worker count and at ``max_workers``;
     `size_typed_audit_input` adds the responses. A record that does not plan
@@ -500,6 +504,8 @@ def render_typed_audit_inputs(
         binding = {"protocol": registration["selection"]["protocol"], "generation_id": "0" * 32,
                    "registration_sha256": _STAND_IN_DIGEST, "packet_sha256": _STAND_IN_DIGEST, "stage": stage,
                    "inner_request_sha256": _STAND_IN_DIGEST, "scope": _BINDING_SCOPE}
+        if stage["phase"] == runtime.OMISSION_PHASE:
+            binding["packet_inner_request_sha256"] = _STAND_IN_DIGEST
         return common + len(("# Registered audit request identity\n\n" + sg.canonical(binding).decode("utf-8")
                              + "# Exact typed stage request\n\n" + sg.canonical(inner).decode("utf-8")).encode("utf-8"))
 
@@ -513,38 +519,44 @@ def render_typed_audit_inputs(
                                                 "shared_context": shared, "stage": stage}})
         workers.append(call({"phase": runtime.WORKER_PHASE, "worker_id": worker["id"]}, requests["workers"][-1]))
 
+    # Share the runtime payload and selected-wire formatters (F1, #5162).
+    # A historical sizing receipt may name an older/different bundle: estimate
+    # its bytes without granting it execution authority or rewriting its input.
     chunks, _ = evidence.source_chunks_from_bytes(bundle, manifest)
     receipt_doc = yaml.safe_load(receipt)
     prior = {entry["id"]: entry.get("status") for entry in (receipt_doc or {}).get("chunks", [])
              if isinstance(entry, dict) and "id" in entry} if isinstance(receipt_doc, dict) else {}
-    owners = {}
+    catalog = _SIZING_CATALOGS[identity]
+    document = yaml.safe_load(record_text)
+    owner_note = None
+    try:
+        owners = omissions._owners(document, catalog, context_doc["vocabulary"])
+    except ValueError as exc:
+        # Historical sizing already allowed records from earlier schemas and
+        # other arms. Preserve that estimate, with a visible allowance, without
+        # weakening the runtime's strict owner traversal.
+        owners = {}
+        width = max([32, *[len(sg.canonical(name)) for name in catalog["classes"]]])
 
-    def mappings(value, pointer):
-        if isinstance(value, dict):
-            owners[pointer] = "X" * 32
-            for key, child in value.items():
-                mappings(child, pointer + "/" + str(key).replace("~", "~0").replace("/", "~1"))
-        elif isinstance(value, list):
-            for index, child in enumerate(value):
-                mappings(child, f"{pointer}/{index}")
+        def mappings(value, pointer):
+            if isinstance(value, dict):
+                owners[pointer] = "X" * width
+                for key, child in value.items():
+                    mappings(child, pointer + "/" + str(key).replace("~", "~0").replace("/", "~1"))
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    mappings(child, f"{pointer}/{index}")
 
-    mappings(yaml.safe_load(record_text), "")
-    requests["omission"] = {
-        "format": omissions.FORMAT, "request_sha256": _STAND_IN_DIGEST, "limitations": list(omissions.LIMITATIONS),
-        "payload": {"policy": omissions._asset("policy.md").decode("utf-8"),
-                    "response_schema": json.loads(omissions._asset("response.schema.json")),
-                    "contract_sha256": dict(omissions.ASSET_SHA256), "context": context_doc,
-                    "record_yaml": record_text, "receipt_yaml": receipt.decode("utf-8"), "schema": schema,
-                    "owner_classes": owners,
-                    "chunks": [{"chunk": key, **value, "prior_receipt_status": prior.get(key, "unreviewed")}
-                               for key, value in chunks.items()],
-                    "input_sha256": {key: _STAND_IN_DIGEST for key in ("record", "bundle", "manifest", "receipt", "context")},
-                    "limits": {"max_output_tokens": limits["omission_output_tokens"],
-                               "max_request_bytes": limits["max_request_bytes"],
-                               "max_input_bytes": omissions.MAX_INPUT_BYTES,
-                               "max_response_bytes": omissions.MAX_RESPONSE_BYTES,
-                               "max_schema_bytes": omissions.MAX_SCHEMA_BYTES,
-                               "max_nodes": omissions.MAX_NODES, "max_depth": omissions.MAX_DEPTH}}}
+        mappings(document, "")
+        owner_note = (f"historical sizing record has no current typed owner traversal ({exc}); "
+                      f"omission owner classes use a {width}-byte name allowance for every mapping; "
+                      "this is an estimate, not validation of an executable packet")
+    prepared = omissions._render_prepared(record=record, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, context_doc=context_doc, catalog=catalog,
+        owners=owners,
+        chunks=chunks, prior=prior, max_output_tokens=limits["omission_output_tokens"],
+        max_request_bytes=limits["max_request_bytes"])
+    requests["omission"] = typed._render_omission_wire_request(prepared, omission_wire=typed.SHARED_OMISSION_WIRE)
     omission = call({"phase": runtime.OMISSION_PHASE}, requests["omission"])
 
     owner_of = {path: worker["id"] for worker in plan["workers"] for path in worker["paths"]}
@@ -567,7 +579,8 @@ def render_typed_audit_inputs(
             "integration_base_bytes": call({"phase": runtime.INTEGRATION_PHASE}, requests["integration"]),
             "integration_largest_base_bytes": call({"phase": runtime.INTEGRATION_PHASE},
                                                    integration_request(limits["max_workers"])),
-            "carry_allowance_bytes": carry, "shared_context": shared, "requests": requests}
+            "carry_allowance_bytes": carry, "owner_allowance_note": owner_note,
+            "shared_context": shared, "requests": requests}
 
 
 def size_typed_audit_input(
@@ -652,7 +665,8 @@ def size_typed_audit_input(
             "integration_response_input_tokens": expected_responses, "integration_input_tokens": expected,
             "integration_worst_response_input_tokens": worst_responses, "integration_worst_input_tokens": worst,
             "aggregate_input_tokens": workers * worker + omission + worst,
-            "admissible_input_tokens": admissible, "warnings": warnings, "notes": [SIZING_WORKER_CAP_NOTE]}
+            "admissible_input_tokens": admissible, "warnings": warnings,
+            "notes": [SIZING_WORKER_CAP_NOTE, *([rendered["owner_allowance_note"]] if rendered["owner_allowance_note"] else [])]}
 
 
 FLOOR_BASIS_CHOICES = ("receipted_part", "all_receiptable")
