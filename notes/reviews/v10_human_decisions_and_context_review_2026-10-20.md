@@ -489,3 +489,62 @@ claude's independent review of codex's evaluator packet (`4cd8f2a51`; `d4d-execu
    - The two committee-contact locations count as the same criterion wherever `governance_committee_contact` is scored, `E2.2` included.
    - A record whose only such evidence is `data_governance.committee_contact` now passes `E2.2`.
    - Four committed CHORUS records move from 0 to 1 under the new evaluator instrument. Historical scores are not rewritten.
+
+### 5.15 Decided by the owner, 2026-10-28T20:12:01Z (`D62`–`D63`): BC1's fit gate for `A21`, and one token-count calibration
+
+**The evidence:** claude's independent review of BC1's `D59` fix, `d4d-executions/plans/reviews/bc1_8f83d6cb3_claude_review_2026-10-28.md`. It was offline, with no provider calls.
+
+1. **`D62`: BC1's fit gate.** The owner chose "Floor + caps; 4.5M (Recommended)".
+   - The gate checks the floor scenario and the caps scenario, with the measured 1.25× escape factor. The escaped bound is reported, not gated.
+   - Request bytes are sized at 2.48 bytes per token, and future-response bytes at 1.75.
+   - The CHORUS `A21` registration declares `aggregate_input_tokens` = 4,500,000. CHORUS needs about 4.06M, and every call is at or below 0.85 of its room. The added spend exposure is at most $3.13.
+2. **`D63`: the calibration.** The owner chose "Yes, one call by agy (Recommended)".
+   - agy runs exactly one `count_tokens` call, on one named and fixed `D59` CHORUS worker request, from the launch-base checkout.
+   - agy logs the request's sha256 and the count. There is no generation and no other provider call.
+   - The measured ratio replaces the extrapolated 2.48 before registration.
+   - **Where it runs:** the owner's question named the launch-base checkout. That checkout predates the `D59` code, so the call runs from codex's BC1 worktree (`b7e4d3ef7`), through the same count-only route. claude reported the difference to the owner.
+
+### 5.16 Decided by the owner, by 2026-10-28T23:23Z (`D64`): the answers to all 37 P4a items of the analysis plan
+
+**The packet:** `d4d-executions/plans/p4a_decision_packet_2026-10-28.md`. The owner answered its eight attention items in two rounds, and accepted the other 27 as recommended.
+
+1. **The eight attention items:**
+   - item 32: content slip, with one contingency;
+   - items 3, 4 and 16: one `A21` attempt at $60. Redelivery is decided after `A21`, through an amendment and a diagnostic canary;
+   - **item 7: "agy, stop command only"**, not the recommendation. agy runs only `d4d api stop`, at the spend trigger (about $51) or at the 3 h clock. This amends the monitor-only rule of `D41` and `D43` for `A21`;
+   - item 14: a new no-crate v8 run, if AI_READI is funded;
+   - item 28: the lowest accepted pilot, capped at 19/20, with the scope branch;
+   - item 29: `A21` stays descriptive, for good;
+   - item 19: v10 ≥ v8 − 0.05, with the numerator reported;
+   - item 6: a 3 h wall clock.
+2. **The other 27 items:** accepted as recommended ("Accept all 27 (Recommended)").
+3. **Pending decisions this settles:**
+   - `D02`, its comparator parts;
+   - `D03`;
+   - `D08`, `A21`'s risk acceptance. The CBORG follow-up still needs the owner's separate yes;
+   - `D20` and `D21`.
+4. **Still open:** P4b's items 38–41, and the later items 42–43.
+
+### 5.17 Performed by the owner, 2026-10-29T00:25:02Z (`D65`): the P4a word
+
+1. **`D65`.** The owner said "Ratify b4a4f9a5… and merge #5163".
+   - **What is ratified:** the generic_v10 analysis plan, `notes/generic_v10_analysis_plan.md` at commit `5b17ae079c8eb1fa4abdda3261054bfd22e4c2f1`. Its sha256 is `b4a4f9a596173d3bdeb817b01ea53fb1a1d77574e121c7cecaf6f63b67fd4b4b`, and it has 2,559 lines. It carries `D64`.
+   - **These exact bytes are binding.** Any change is a dated amendment.
+   - **Checked before the word:** both P3 passes found the plan ready. They were claude's, which re-hashed the plan independently, and codex's.
+   - **The merge:** the owner also approved merging `#5163` into main, with a merge commit, once its CI is green.
+   - **`A21`** may proceed once its engineering and its registration review are done.
+   - **Still open:** P4b's items 38–41, and the later items 42–43.
+
+### 5.18 Decided by the owner, 2026-10-29T00:28:46Z (`D66`–`D67`): two findings of the generality review
+
+**The evidence:** claude's independent review of whether the generation pipeline is hard-coded to particular projects or to Bridge2AI, `d4d-executions/plans/reviews/generation_pipeline_generality_review_2026-10-28.md`. It made 19 findings: 12 violations and 7 project-specific interventions.
+
+**The rule it applied:** the owner's standing rule of 2026-10-28T23:37Z, "the methods need to be generalized which also means no specific interventions or fixes unless they are part of a generalized approach".
+
+1. **`D66` (F6).** The owner chose "Fix before A21 (Recommended)".
+   - The schema's `data_substrate` slot gets declared, neutral term sources, such as EDAM Data/Format or IANA media types, as `data_topic` declares its sources. A dataset outside Bridge2AI can then fill it.
+   - **This is model-facing.** BC1's catalog changes the CHORUS request bytes, so under `D35` it lands before the `A21` rebuild.
+2. **`D67` (F17).** The owner chose "Retire for new runs (Recommended)".
+   - The runner refuses the per-project `tuned` condition for any new registration.
+   - Historical tuned records and prompts stay as evidence.
+3. **The other generality findings** (F1–F5, F7–F16, F18 and F19) are fixed under the owner's standing rule. Because of `D35`, the runner-code fixes also land before `A21`; that avoids a diagnostic canary after the freeze.
