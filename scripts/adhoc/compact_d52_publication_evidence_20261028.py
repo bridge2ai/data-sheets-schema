@@ -45,8 +45,8 @@ def main():
     members = {}
     with tarfile.open(fileobj=io.BytesIO(raw), mode="r:gz") as bundle:
         for member in bundle:
-            name = member.name
-            if (name in members or name not in expected or Path(name).name != name
+            name = member.name.removeprefix("results/")
+            if (member.name != "results/" + name or name in members or name not in expected or Path(name).name != name
                     or not member.isfile() or not 0 <= member.size <= 4_000_000):
                 raise ValueError("unexpected or unsafe archive member")
             content = bundle.extractfile(member).read()
@@ -71,7 +71,7 @@ def main():
         "helper_sha256": digest(Path(__file__).read_bytes()),
         "preserved_files": [expected[name] for name in sorted(members.keys() - OMIT)],
         "omitted_inventories": [dict(expected[name], exact_recovery_command=
-            f"git show {SOURCE}:{archive_path} | tar -xzOf - {name}") for name in sorted(OMIT)],
+            f"git show {SOURCE}:{archive_path} | tar -xzOf - results/{name}") for name in sorted(OMIT)],
         "tracked_tree_regeneration_command": f"git ls-tree -r -l {head}",
         "regeneration_scope": "ls-tree regenerates tracked paths/blob identities/sizes; exact archived JSON includes run metadata and is recovered by the commands above",
         "validation_outcomes": "original result files preserved verbatim; no new test or pass count inferred",

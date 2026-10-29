@@ -1,0 +1,89 @@
+{
+  "format": "d52_compact_publication_v1",
+  "helper_sha256": "b437ef3c1b152df13692abaa52076eba6df72ff3eef5528b49952bd9de5397fa",
+  "omitted_inventories": [
+    {
+      "bytes": 2985568,
+      "exact_recovery_command": "git show 4cd8f2a5191d7cb58d7bf639603a820d38e825d5:notes/d52_scoring_validation_2026-10-28/run-01.tar.gz | tar -xzOf - results/source-after.json",
+      "mode": 420,
+      "path": "source-after.json",
+      "sha256": "53062f49d4e092c9b08e4729d36b16977b3a4bb4127e603c3fb09957a4430f1b"
+    },
+    {
+      "bytes": 2985568,
+      "exact_recovery_command": "git show 4cd8f2a5191d7cb58d7bf639603a820d38e825d5:notes/d52_scoring_validation_2026-10-28/run-01.tar.gz | tar -xzOf - results/source-before.json",
+      "mode": 420,
+      "path": "source-before.json",
+      "sha256": "53062f49d4e092c9b08e4729d36b16977b3a4bb4127e603c3fb09957a4430f1b"
+    }
+  ],
+  "original_archive": {
+    "bytes": 1497408,
+    "file": "run-01.tar.gz",
+    "sha256": "e576b5f3a8b619858f7df87098a023de6dfc37ba4cb008b38fab8113b0c24b30"
+  },
+  "original_archive_path": "notes/d52_scoring_validation_2026-10-28/run-01.tar.gz",
+  "original_evidence_root": "/private/tmp/d4d-d52-baseline-validation-20261028",
+  "original_manifest_sha256": "cabe2e9410a2df1f4c47a7b009e57e1502785f6ade62f9d8393d91a1fa3add28",
+  "preserved_files": [
+    {
+      "bytes": 406,
+      "mode": 420,
+      "path": "bootstrap.json",
+      "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+    },
+    {
+      "bytes": 1906,
+      "mode": 420,
+      "path": "origins-after.json",
+      "sha256": "357a85914605ba47d8d59f573fad926cab7dcd73dd3ce7a5d2e2fac9f3285814"
+    },
+    {
+      "bytes": 1811,
+      "mode": 420,
+      "path": "origins-before.json",
+      "sha256": "e4ed805c4ba74a1200eb7da1e183826dbc16535ea2b9a4962f95390abe529d8d"
+    },
+    {
+      "bytes": 2657,
+      "mode": 420,
+      "path": "outcome.json",
+      "sha256": "896a35531468eb2969e4460048837a922b0b1602863ba44846aa87ec5dba5dce"
+    },
+    {
+      "bytes": 979,
+      "mode": 420,
+      "path": "plan.json",
+      "sha256": "706a48b68646276db2bbd0f21589e4640ea2aaba4bc45dc91a98c0cb64311b56"
+    },
+    {
+      "bytes": 319,
+      "mode": 420,
+      "path": "pytest-command.json",
+      "sha256": "85816dbb4a60a196774b39f7eda8a5b6acd5d01718cc0170eef94ec61edf2a59"
+    },
+    {
+      "bytes": 10956,
+      "mode": 420,
+      "path": "pytest.log",
+      "sha256": "175c09bbb1efc20822d4aadacbbf7c6aba1a545b416313957ef6af456a5cd0bf"
+    },
+    {
+      "bytes": 13701,
+      "mode": 420,
+      "path": "pytest.xml",
+      "sha256": "d3ad50959a89135bc056f5f988dfcd983b8f183c8be9d703c58c3b3b89b77938"
+    },
+    {
+      "bytes": 497,
+      "mode": 420,
+      "path": "scoring-identity.json",
+      "sha256": "45d7443fd10909c3e52a8b6b051f76edd681861406cae77888b04341e43eb337"
+    }
+  ],
+  "regeneration_scope": "ls-tree regenerates tracked paths/blob identities/sizes; exact archived JSON includes run metadata and is recovered by the commands above",
+  "source_commit": "4cd8f2a5191d7cb58d7bf639603a820d38e825d5",
+  "tested_head": "615c440f1730bed2b3f33318fec4a43b23eb4052",
+  "tracked_tree_regeneration_command": "git ls-tree -r -l 615c440f1730bed2b3f33318fec4a43b23eb4052",
+  "validation_outcomes": "original result files preserved verbatim; no new test or pass count inferred"
+}
