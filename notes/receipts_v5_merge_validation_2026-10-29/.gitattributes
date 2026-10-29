@@ -1,0 +1,3 @@
+# Preserve the exact spacing in pytest's captured failure excerpts.
+causal_before.log -whitespace
+causal_before.xml -whitespace
