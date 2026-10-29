@@ -64,7 +64,7 @@ def preserve(roots, output):
                          'sha256': evidence.sha(item['raw']),
                          'retention': 'copied_verbatim' if retained else 'external_hash_reference',
                          'reason': 'compact result evidence' if retained else
-                         'full source/origin inventories stay external; regenerate using retained plan and helper'})
+                         'detailed source/origin or canonical request artifacts stay external; regenerate using retained plan and helper'})
         runs.append({'original_root': str(root), 'packet_directory': folder.name,
                      'files': rows, 'unread_external_directories': directories,
                      'original_outcome': json.loads(files['outcome.json']['raw']),
