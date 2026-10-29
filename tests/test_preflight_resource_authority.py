@@ -364,8 +364,8 @@ def test_synthesized_context_requires_selected_vocabulary(selected_resources, tm
         args.extend([option, original["inputs"][key]["path"]])
     before = Path.cwd()
     result = CliRunner().invoke(builder.cli, args)
-    assert result.exit_code != 0
-    assert isinstance(result.exception, FileNotFoundError)
-    assert "selected worktree vocabulary is missing:" in str(result.exception)
+    # A17's prepare-then-write CLI reports preparation failures as Click errors.
+    assert result.exit_code == 1, result.output
+    assert "selected worktree vocabulary is missing:" in result.output
     assert not out_dir.exists(), "refusal must precede writing a draft context"
     assert Path.cwd() == before
