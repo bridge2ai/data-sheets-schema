@@ -283,8 +283,17 @@ classes:
           What the in-process report check found before the run completed
           (#929, v8 step E): claims checked and contradictions before, whether
           the report was regenerated once with the contradictions named, and
-          what remained after. The final `report_claims` block is recomputed
+          what remained after. Includes `report_audit_totals` findings when
+          `findings_include_report_audit_totals: true` (#4766). The final
+          `report_claims` and `report_audit_totals` blocks are recomputed
           from the report as it stands.
+        inlined: true
+        range: AnyBlock
+
+      report_audit_totals:
+        description: >-
+          Deterministic check comparing written report's stated finding total
+          and per-severity subtotals against structured audit counts (#4766).
         inlined: true
         range: AnyBlock
 
