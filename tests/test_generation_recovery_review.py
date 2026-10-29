@@ -90,6 +90,8 @@ def client_named(marker, fail_on=None):
 
 
 def test_changed_input_restart_recovers_only_its_own_snapshots(external):
+    import re
+
     api.execute(external, client=client_named("GENERATION_A_EVIDENCE"))
     old_record = yaml.safe_load(external.provenance_path.read_text())
     old = {entry["path"]: Path(entry["path"]).read_bytes() for entry in old_record["intermediates"]}
@@ -122,16 +124,40 @@ def test_changed_input_restart_recovers_only_its_own_snapshots(external):
     # Hash drift in the selected snapshot is refused before any further calls.
     api._save_progress(external, ["full", "core"], None)
     saved_progress = api._progress_path(external).read_bytes()
+    saved_ledger = ledger.ledger_path(external).read_bytes()
+    account = json.loads(saved_ledger)
+    journal_path = Path(account["latch_journal"]["path"])
+    journal_before = journal_path.read_bytes()
+    snapshot_event, = [event for line in journal_before.splitlines()
+                       if (event := json.loads(line))["kind"] == "latch"
+                       and event["identity"] == account["identity"]
+                       and event["generation_id"] == account["generation_id"]
+                       and event["payload"]["key"].startswith("snapshot:")
+                       and event["payload"]["value"]["path"] == str(phase1)]
+    expected_sha256 = hashlib.sha256(phase1.read_bytes()).hexdigest()
+    assert snapshot_event["payload"]["value"]["sha256"] == expected_sha256
     phase1.write_text(phase1.read_text() + "\n# tampered\n")
+    tampered_snapshot = phase1.read_bytes()
     refused = client_named("GENERATION_B_EVIDENCE")
     assert receipts.phase1_snapshot_state(api._receipt_path(external))[0] == "unusable"
     assert api.report_claims_block(external)["checked"] is False
     with pytest.raises(ledger.UsageLedgerError, match="snapshot bytes changed"):
         api._save_progress(external, ["full", "core"], None)
     assert api._progress_path(external).read_bytes() == saved_progress
-    with pytest.raises(ledger.UsageLedgerError, match="snapshot bytes changed"):
+    prefix = ("latch journal: unacknowledged discrepancy; required event_sha256s="
+              + snapshot_event["sha256"] + "; discrepancies=")
+    with pytest.raises(ledger.UsageLedgerError, match="^" + re.escape(prefix)) as caught:
         api.execute(replace(external), client=refused)
+    assert json.loads(str(caught.value)[len(prefix):]) == [{
+        "event_sha256": snapshot_event["sha256"],
+        "key": snapshot_event["payload"]["key"] + ":bytes",
+        "expected": expected_sha256,
+        "found": hashlib.sha256(tampered_snapshot).hexdigest()}]
     assert refused.messages.calls == []
+    assert api._progress_path(external).read_bytes() == saved_progress
+    assert phase1.read_bytes() == tampered_snapshot
+    assert ledger.ledger_path(external).read_bytes() == saved_ledger
+    assert journal_path.read_bytes() == journal_before
 
 
 def test_drift_before_receipt_readdressing_keeps_delivered_response(external):

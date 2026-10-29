@@ -11,7 +11,9 @@ Saved CI list SHA-256:
 The initial full preview at `19ab6025c2be8069895e563f771aeaef82a3e57d`
 reproduced18 of21 saved failures; three passed. Own-head controls at
 `39d6c33b5abdcd05bd8ec830211adb9caf013acb` are recorded separately.
-This patch addresses only six fixture defects, not all18 failures.
+The first commit addresses six fixture defects. A second change updates two
+specific diagnostics to the earlier D41 guard while retaining their original
+invariants. Ten other locally reproduced cases remain unresolved.
 
 | Cases | Reviewed repair | Assertions retained |
 |---|---|---|
@@ -19,6 +21,8 @@ This patch addresses only six fixture defects, not all18 failures.
 | Readable schema-repair rounds | Real accounting initialization before initial malformed full output | Worsening finding count, second repair and final clean output |
 | Two foreign-owner entrypoints | Create matching accounting first, then inject only the foreign label as raw adversarial bytes | Real before-lock/inside-lock owner guards, no dispatch/date restoration, released lock and unchanged evidence |
 | Two thinking-display wire units | Isolate the per-attempt latch at the already-stubbed accounting boundary; assert exactly one call with the spec | Real SDK MockTransport, count and stream bodies, summarized display, bounded-client identity and zero retries |
+| Validator-refresh checkpoint counterfactuals | Require the precise earlier latch-journal diagnostic for the three ledger mutations, including independently computed canonical expected/found values | All first ten progress/output assertions, untouched journal bytes, zero dispatch and the final real refresh positive |
+| Changed input snapshot | Require the precise public latch-journal byte discrepancy, tied to the saved event SHA and independently hashed original/tampered bytes | Direct writer's original diagnostic, generation isolation, archives, untouched ledger/journal/progress and zero dispatch |
 
 Independent root review read the complete diff before this commit. The changes
 do not re-anchor a monitor from mutated disk, change a recovery success into a
@@ -39,9 +43,10 @@ Both response `request_sha256` and chunk entries come from that projected wire
 request. The initial preview's six parity cases passed. This statement does
 not claim the documentation-only cf7 commit originated the earlier code fix.
 
-Required verification: complete four changed test modules plus real API-latch
-retry/tamper/allowed-retry coverage, on committed exact bytes with external
-basetemp and network denial. The remaining diagnostic-precedence and public
+Required verification: the four original changed test modules, the two
+additional diagnostic cases, and real API-latch retry/tamper/allowed-retry
+coverage, on committed exact bytes with external basetemp and network denial.
+The remaining diagnostic-precedence and public
 legacy-recovery cases keep their existing assertions pending classification
 and lead disposition. The #5212+simulated-main-after-batch2 full-suite gate is
 still required before publication; no push or GitHub action is authorized here.

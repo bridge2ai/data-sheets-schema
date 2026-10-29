@@ -123,6 +123,7 @@ class TestValidatorRepairRefreshCheckpoint:
 
     def test_missing_corrupt_or_stale_checkpoint_refuses_before_calls(self, tmp_path, monkeypatch):
         from dataclasses import replace
+        import hashlib
         from data_sheets_schema import api_runner as api, usage_ledger as ledger
         from tests.test_report_admission import Counted, client_for
         selected, _ = self.pending(tmp_path, monkeypatch)
@@ -131,6 +132,26 @@ class TestValidatorRepairRefreshCheckpoint:
                                                selected.core_path, selected.report_path)}
         progress = json.loads(original[progress_path])
         data = json.loads(original[ledger_path])
+        journal_path = Path(data["latch_journal"]["path"])
+        journal_before = journal_path.read_bytes()
+        controller_events = [event for line in journal_before.splitlines()
+                             if (event := json.loads(line))["kind"] == "latch"
+                             and event["identity"] == data["identity"]
+                             and event["generation_id"] == data["generation_id"]
+                             and event["payload"]["key"] == "controller:validator_repair_refresh"]
+        controller_event = controller_events[-1]
+        assert controller_event["payload"]["value"] == data[api.VALIDATOR_REFRESH_KEY]
+
+        def controller_summary(value):
+            # Independently hash the fixture's large controller value; the
+            # public diagnostic abbreviates it instead of echoing its body.
+            raw = json.dumps(value, sort_keys=True, separators=(",", ":"),
+                             ensure_ascii=True, allow_nan=False).encode()
+            assert isinstance(value, dict) and len(raw) > 240
+            return {"type": "dict", "canonical_bytes": len(raw),
+                    "canonical_sha256": hashlib.sha256(raw).hexdigest()}
+
+        expected_controller = controller_summary(data[api.VALIDATOR_REFRESH_KEY])
         mutations = [
             (progress_path, None), (progress_path, b"{broken"), (progress_path, b"[]"),
             (progress_path, json.dumps({k: v for k, v in progress.items() if k != api.VALIDATOR_REFRESH_KEY}).encode()),
@@ -159,10 +180,27 @@ class TestValidatorRepairRefreshCheckpoint:
                 error, message = ValueError, "^unreadable selected ownership declaration:"
             elif path == progress_path and changed == b"[]":
                 error, message = ValueError, "^selected ownership declaration must be a mapping:"
-            with pytest.raises(error, match=message):
+            elif path == ledger_path:
+                prefix = ("latch journal: unacknowledged discrepancy; required event_sha256s="
+                          + controller_event["sha256"] + "; discrepancies=")
+                message = "^" + re.escape(prefix)
+            with pytest.raises(error, match=message) as caught:
                 api.execute(replace(selected), client=client_for(again))
+            if path == ledger_path:
+                changed_data = json.loads(changed)
+                if api.VALIDATOR_REFRESH_KEY not in changed_data:
+                    found = {"__d4d_latch_missing__": True}
+                elif changed_data[api.VALIDATOR_REFRESH_KEY] is None:
+                    found = None
+                else:
+                    found = controller_summary(changed_data[api.VALIDATOR_REFRESH_KEY])
+                assert json.loads(str(caught.value)[len(prefix):]) == [{
+                    "event_sha256": controller_event["sha256"],
+                    "key": "controller:validator_repair_refresh",
+                    "expected": expected_controller, "found": found}]
             assert not again.calls and not again.count_calls
             assert {p: p.read_bytes() if p.exists() else None for p in original} == before_attempt
+            assert journal_path.read_bytes() == journal_before
             for saved, raw in original.items():
                 saved.write_bytes(raw)
         again = Counted(selected)
