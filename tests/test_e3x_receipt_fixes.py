@@ -26,7 +26,7 @@ def test_f2_receipt_and_lock_pin_attempt_files(registered_case):
             assert row["stderr_sha256"] == audit.sha((folder / "stderr.txt").read_bytes())
             assert row["files"] == ["evaluation.json", "stderr.txt", "transcript.jsonl"]
     assert lock["attempts"] == receipt["attempts"] and lock["ratings"] == receipt["ratings"]
-    assert registered_audit(registered_case)["registered_evaluations"][0]["lock_verified"] is True
+    assert registered_audit(registered_case)["registered_evaluations"][0]["lock_consistent"] is True
 
 
 @pytest.mark.parametrize("name,reason", [
@@ -76,7 +76,7 @@ def test_f2_unavailable_lock_store_is_explicit(registered_case, tmp_path):
     result = registered_audit(registered_case, execution_lock_root=tmp_path / "unavailable")
     package = result["registered_evaluations"][0]
     assert package["reasons"] == []
-    assert package["lock_verified"] is False and package["lock_status"] == "store_unavailable"
+    assert package["lock_consistent"] is False and package["lock_status"] == "store_unavailable"
     assert package["committed_package"] is False
     assert "Final claims require committed" in result["interpretation"]
 

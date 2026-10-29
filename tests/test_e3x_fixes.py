@@ -61,8 +61,8 @@ def test_f7_untargeted_registered_tuple_stays_visibly_pending(registered_case):
     result = audit.audit(root, roster_manifest=registered_roster(registered_case),
                          registered_evaluations=[("explicit-v10", output)])
     queued = next(row for row in result["rescore_tuples"] if row["rubric"] == "rubric20")
-    assert queued["reasons"] == ["pending_target_selection"]
-    assert queued["action"] == "select_evaluator_and_context_targets"
+    assert queued["reasons"] == ["package_not_committed", "pending_target_selection"]
+    assert queued["action"] == "select_targets_verify_execution_lock_and_commit_package"
     assert "pending_target_selection" in audit.markdown(result)
 
 

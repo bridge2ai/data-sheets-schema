@@ -54,13 +54,18 @@ and validated rating pins its transcript, stderr and file roster; the execution
 lock retains the same evidence and the receipt hash. The audit checks the local
 runner lock store, or `--execution-lock-root`, when present. A missing plan lock
 in an available store refuses ingestion. An unavailable store is disclosed as
-`lock_verified=false`, `lock_status=store_unavailable`.
+`lock_consistent=false`, `lock_status=store_unavailable`, with row and queue
+pending reason `execution_lock_unverified`. A matching local lock reports
+`lock_consistent=true`, `lock_status=consistent`; it is self-attestable, not
+authentication. Unmarked or unknown receipt formats are refused.
 
 Bound ratings are internally consistent retained evidence. They do not prove
 provider execution or evaluator independence. Final claims require committed,
 unchanged package bytes and separate scientific review. Without explicit
 evaluator and applicability-context targets, rated tuples remain in the queue
-as `pending_target_selection`.
+as `pending_target_selection`. Uncommitted or changed packages remain pending
+as `package_not_committed`. These pending reasons prevent condition-review
+eligibility without discarding the internally bound ratings.
 
 The private review key reports slot structure, key paths, blinded sizes and
 per-project separability. These are descriptive diagnostics for the owner's

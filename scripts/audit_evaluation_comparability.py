@@ -395,13 +395,13 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
     capture = RegisteredCapture(root, directory, authority_roots)
     package = {"arm": arm, "path": relative(root, capture.directory), "reasons": [],
                "attempts": [], "record": None, "rows": [], "generation_acceptance_verified": False,
-               "lock_verified": False, "lock_status": "not_checked", "committed_package": False}
+               "lock_consistent": False, "lock_status": "not_checked", "committed_package": False}
     try:
         manifest_raw = capture.take("registration.json")
         plan = document(manifest_raw, json_only=True)
         receipt_raw = capture.take("receipt.json")
         receipt = document(receipt_raw, json_only=True)
-        require(receipt.get("format") in (None, runner.RECEIPT_FORMAT), "registered_receipt_format_unsupported")
+        require(receipt.get("format") == runner.RECEIPT_FORMAT, "registered_receipt_format_unsupported")
         marked_receipt = receipt.get("format") is not None
         package.update(manifest_sha256=sha(manifest_raw), receipt_sha256=sha(receipt_raw))
         require(plan.get("format") == runner.FORMAT and runner.shared.canonical(plan) == manifest_raw,
@@ -718,8 +718,15 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                     and (not marked_receipt or (lock.get("attempts") == attempts and lock.get("ratings") == ratings)),
                     "registered_execution_lock_mismatch")
             lock_capture.unchanged()
-            package.update(lock_verified=True, lock_status="verified")
+            package.update(lock_consistent=True, lock_status="consistent")
         package["committed_package"] = committed_package(capture)
+        for row in package["rows"]:
+            if not package["lock_consistent"]:
+                row["pending"].append("execution_lock_unverified")
+            if not package["committed_package"]:
+                row["pending"].append("package_not_committed")
+            row["pending"].sort()
+            row["eligible_for_condition_review"] = not row["reasons"] and not row["pending"]
         capture.unchanged()
         require(registered_attempt_names(capture.directory, len(attempts)) == actual,
                 "registered_attempt_directories_changed")
@@ -998,18 +1005,27 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
                                if problem["rubric"] in (None, rubric) for reason in problem["reasons"])
             if (rows and not any(not row["reasons"] and not row["pending"] for row in rows)
                     and any(row["pending"] for row in rows)):
-                reasons.add("pending_target_selection")
+                pending = {reason for row in rows for reason in row["pending"]}
+                if pending & {"target_evaluator_not_selected", "target_context_not_selected"}:
+                    reasons.add("pending_target_selection")
+                reasons.update(pending & {"execution_lock_unverified", "package_not_committed"})
+            evidence_pending = {"execution_lock_unverified", "package_not_committed"}
+            only_pending = bool(reasons) and reasons <= evidence_pending | {"pending_target_selection"}
             block.update(file_count=len(rows), reasons=sorted(reasons),
                 pending=sorted({reason for row in rows for reason in row["pending"]}),
                 repeat_panel=repeat_panel(rows) if rubric == "rubric20" else None,
                 comparable_for_final_v10=False,
                 status=("pending_target_selection" if reasons == {"pending_target_selection"}
+                        else "pending" if only_pending
                         else "rescore_or_ingestion_required" if reasons else "condition_review_pending"))
             if reasons:
                 rescore.append({**{key: record[key] for key in ("arm", "project", "label")},
                     "rubric": rubric, "target_version": "3.0" if rubric == "rubric10" else rubric20_version,
                     "reasons": sorted(reasons), "action": ("select_evaluator_and_context_targets"
-                    if reasons == {"pending_target_selection"} else "ingest_bound_current_rating_or_rescore")})
+                    if reasons == {"pending_target_selection"}
+                    else "verify_execution_lock_and_commit_package" if only_pending and reasons <= evidence_pending
+                    else "select_targets_verify_execution_lock_and_commit_package" if only_pending
+                    else "ingest_bound_current_rating_or_rescore")})
     rescore.sort(key=lambda item: tuple(item[key] for key in ("arm", "project", "label", "rubric")))
     summary = []
     for arm in sorted({row["arm"] for row in records}):
@@ -1102,7 +1118,7 @@ def markdown(result):
             bound = row.get("generation_run", {})
             lines.append(f"- {esc(row['arm'])} / {esc(row['path'])}: {esc(row['status'])}; "
                          f"{esc('; '.join(row['reasons']) or 'no package-level refusal')}; "
-                         f"lock_verified={row.get('lock_verified', False)} ({row.get('lock_status', 'not_checked')}); "
+                         f"lock_consistent={row.get('lock_consistent', False)} ({row.get('lock_status', 'not_checked')}); "
                          f"committed_package={row.get('committed_package', False)}; "
                          f"bound arm={esc(bound.get('arm', 'unavailable'))}, "
                          f"method={esc(bound.get('method', 'unavailable'))}, label={esc(bound.get('label', 'unavailable'))}")

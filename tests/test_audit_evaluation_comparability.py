@@ -495,7 +495,8 @@ def test_writer_roundtrip_with_declared_external_authority_root(registered_gener
     assert registered_problem(registered_audit(case)) == ["registered_authority_missing_or_external"]
     result = registered_audit(case, authority_roots=[inputs["registration"].parent])
     assert not registered_problem(result)
-    assert {row["rubric"] for row in result["rescore_tuples"]} == {"rubric10"}
+    assert block(result, "rubric20")["reasons"] == ["package_not_committed"]
+    assert {row["rubric"] for row in result["rescore_tuples"]} == {"rubric10", "rubric20"}
     assert inputs["registration"].read_bytes() == original_registration
 
 
@@ -509,9 +510,9 @@ def test_actual_registered_runner_output_satisfies_only_its_exact_ingestion_tupl
     assert record["registered_run"] == prepared.document()["generation_run"]
     assert record["arm"] == "explicit-v10"  # audit grouping does not rewrite generation arm
     accepted = record["evaluations"]["rubric20"]
-    assert accepted["file_count"] == 3 and accepted["reasons"] == []
+    assert accepted["file_count"] == 3 and accepted["reasons"] == ["package_not_committed"]
     assert accepted["comparable_for_final_v10"] is False
-    assert {row["rubric"] for row in result["rescore_tuples"]} == {"rubric10"}
+    assert {row["rubric"] for row in result["rescore_tuples"]} == {"rubric10", "rubric20"}
     panel = accepted["repeat_panel"]
     assert panel["distinct_reported_sessions"] == 3
     assert panel["three_distinct_session_claims_present"] is True
@@ -542,11 +543,13 @@ def test_alternate_supported_instruments_roundtrip_actual_runner_to_audit(
     result = registered_audit(case, rubric20_version=version)
     assert not registered_problem(result), result["registered_evaluations"]
     accepted = block(result, rubric)
-    assert accepted["file_count"] == repeats and accepted["reasons"] == []
-    assert all(row["version"] == version and row["eligible_for_condition_review"] for row in accepted["files"])
+    assert accepted["file_count"] == repeats and accepted["reasons"] == ["package_not_committed"]
+    assert all(row["version"] == version and row["pending"] == ["package_not_committed"]
+               and not row["eligible_for_condition_review"] for row in accepted["files"])
     other = "rubric20" if rubric == "rubric10" else "rubric10"
     assert {(row["label"], row["rubric"]) for row in result["rescore_tuples"]} == {
-        (prepared.document()["generation_run"]["label"], other)}
+        (prepared.document()["generation_run"]["label"], other),
+        (prepared.document()["generation_run"]["label"], rubric)}
     assert accepted["comparable_for_final_v10"] is False
     if version == "4.0":
         predecessor = audit.ROOT / audit.select_semantic_instrument("rubric20", "3.0").definition_path
@@ -696,9 +699,9 @@ def test_invalid_package_never_poisons_independently_bound_good_record(registere
         rewrite_plan(bad, mutate)
     result = registered_audit(registered_case, directories=[("explicit-v10", bad), ("explicit-v10", good)])
     assert len(result["records"]) == 1
-    assert block(result, "rubric20")["reasons"] == []
+    assert block(result, "rubric20")["reasons"] == ["package_not_committed"]
     assert block(result, "rubric20")["repeat_panel"]["distinct_reported_sessions"] == 3
-    assert {row["rubric"] for row in result["rescore_tuples"]} == {"rubric10"}
+    assert {row["rubric"] for row in result["rescore_tuples"]} == {"rubric10", "rubric20"}
     rejected = [package for package in result["registered_evaluations"] if package["status"] == "refused"]
     assert len(rejected) == 1 and rejected[0]["reasons"]
 
@@ -957,6 +960,7 @@ def test_cli_can_select_context_for_actual_registered_project_without_expanding_
     selected = [row for row in result["records"] if row["project"] == project]
     assert len(selected) == 1 and selected[0]["label"] == plan["generation_run"]["label"]
     rows = selected[0]["evaluations"]["rubric20"]["files"]
-    assert len(rows) == 3 and all(row["eligible_for_condition_review"] for row in rows)
+    assert len(rows) == 3 and all(row["pending"] == ["package_not_committed"]
+                                and not row["eligible_for_condition_review"] for row in rows)
     assert result["targets"]["context_digests"][project] == plan["context_sha256"]
     assert result["targets"]["context_human_review_verified"] is False
