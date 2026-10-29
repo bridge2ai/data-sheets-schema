@@ -2,3 +2,5 @@
 data/_wcrate/** -text
 # Retain D41 validation output and SDK capture bytes exactly, including whitespace.
 notes/d41_validation_2026-10-26/** -text -whitespace
+# Preserve the reviewed #5212/A14 diagnostic evidence byte-for-byte.
+notes/reviews/wave7_5212_a14_evidence_2026-10-29/** -text -whitespace

@@ -615,7 +615,7 @@ class TestReviewRound(unittest.TestCase):
         from types import SimpleNamespace
         from unittest import mock
 
-        from data_sheets_schema import api_runner
+        from data_sheets_schema import api_runner, usage_ledger
         from data_sheets_schema.api_runner import RunSpec, _repair_invalid
         prompts = []
 
@@ -641,6 +641,7 @@ class TestReviewRound(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             spec = RunSpec(project="P", arm="", method="m", bundle=Path(tmp) / "b.txt", label="L",
                            out_dir=Path(tmp))
+            usage_ledger.prepare_usage(spec, resume=False)
             spec.full_path.write_text("id: doi:10.1/x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
                                       "source_caveats: a\nsource_caveats: b\n")
             spec.core_path.write_text("id: doi:10.1/x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")

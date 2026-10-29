@@ -163,7 +163,8 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         """The runner's own path, not the SDK called directly (#5068):
         `_call_with_usage` -> `_call_with_retry` -> the real SDK client on a
         mock transport, with the settings generic_v10 declares. The ledger
-        hooks are stubbed; the request is built by the runner. This is the
+        hooks, including the per-attempt latch check, are stubbed; the request
+        is built by the runner. This is the
         runner's generic path (`shared_generation_version=0`), not the
         registered v10 path, whose shared-2 admission swaps in a bounded
         client (`source_heading_admission.prepare`); the next test covers
@@ -173,7 +174,7 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         from unittest.mock import patch
         import anthropic
         import httpx
-        from data_sheets_schema import api_runner
+        from data_sheets_schema import api_runner, latch_journal
         bodies = []
 
         def sse(*events):
@@ -199,11 +200,13 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         spec = SimpleNamespace(shared_generation_version=0)
         with patch.object(api_runner, "_require_surviving_accounting"), \
              patch.object(api_runner, "_begin_usage_call", return_value="u1"), \
-             patch.object(api_runner, "_cancel_usage_call"):
+             patch.object(api_runner, "_cancel_usage_call"), \
+             patch.object(latch_journal, "check") as check_latches:
             resp, identifier = api_runner._call_with_usage(
                 spec, "full", 1, "2026-10-18T00:00:00Z", client, model=settings["name"], max_tokens=100,
                 temperature=None, system="s", messages=[{"role": "user", "content": "x"}],
                 thinking=settings["thinking"])
+        check_latches.assert_called_once_with(spec)
         self.assertEqual(identifier, "u1")
         self.assertEqual(resp.stop_reason, "end_turn")
         self.assertEqual([b["thinking"] for b in bodies], [{"type": "adaptive", "display": "summarized"}])
@@ -214,14 +217,15 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         which swaps in the bounded single-attempt client and counts the request
         with `messages.count_tokens` before sending it. Both the count and the
         stream leave through that real client on a mock transport and carry the
-        display; the ledger and registration checks around them are stubbed."""
+        display; the ledger (including the per-attempt latch) and registration
+        checks around them are stubbed."""
         import json
         from contextlib import ExitStack
         from types import SimpleNamespace
         from unittest.mock import patch
         import anthropic
         import httpx
-        from data_sheets_schema import api_runner, receipt_completion, shared_generation
+        from data_sheets_schema import api_runner, latch_journal, receipt_completion, shared_generation
         from data_sheets_schema import source_heading_admission as admission
         from data_sheets_schema import typed_audit_runtime, usage_ledger
         bodies = []
@@ -264,6 +268,7 @@ class TestTheRequestStatesThinking(unittest.TestCase):
         limits = {"max_calls": 5, "aggregate_input_tokens": 10**9, "aggregate_output_tokens": 10**9,
                   "context_limit_tokens": 1_000_000, "context_limit_basis": "offline test"}
         with ExitStack() as stack:
+            check_latches = stack.enter_context(patch.object(latch_journal, "check"))
             for target, name, kw in [
                     (api_runner, "_require_surviving_accounting", {}),
                     (api_runner, "_begin_usage_call", {"return_value": "u1"}),
@@ -286,6 +291,7 @@ class TestTheRequestStatesThinking(unittest.TestCase):
                 spec, "full", 1, "2026-10-18T00:00:00Z", client, model=settings["name"], max_tokens=100,
                 temperature=None, system="s", messages=[{"role": "user", "content": "x"}],
                 thinking=settings["thinking"])
+        check_latches.assert_called_once_with(spec)
         self.assertEqual((identifier, resp.stop_reason), ("u1", "end_turn"))
         self.assertEqual(len(used), 1)
         self.assertEqual(used[0].max_retries, 0)

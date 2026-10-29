@@ -6,6 +6,7 @@ The full genuine eight-wire resume proof is a separate final integration check.
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import replace
+import json
 import os
 from pathlib import Path
 import socket
@@ -39,6 +40,16 @@ def live_account(spec, *, label=None, run_date=None):
         data['input_identity'] = {'instruction': {'spec': {'run_date': run_date}}}
     ledger._write(spec, data)
     return data
+
+
+def inject_foreign_account(spec, *, label):
+    """Adversarial external-writer setup, not a legitimate guarded ledger write."""
+    path = ledger.ledger_path(spec)
+    data = json.loads(path.read_text())
+    data['identity']['label'] = label
+    # Preserve the real generation, checkpoint, journal and observed head;
+    # change only the persisted owner's label before the public guard runs.
+    path.write_text(json.dumps(data, ensure_ascii=True, indent=2) + '\n')
 
 
 def tree(root):
@@ -103,7 +114,9 @@ def test_public_execute_refuses_existing_unowned_state_before_lock(registered, t
     base, reg = registered
     spec = selected_spec(base, reg)
     if state in ('foreign', 'own_no_resume'):
-        live_account(spec, label='foreign-run' if state == 'foreign' else None)
+        live_account(spec)
+        if state == 'foreign':
+            inject_foreign_account(spec, label='foreign-run')
     else:
         spec.full_path.parent.mkdir(parents=True)
         spec.full_path.write_text('id: https://example.org/synthetic-unowned\n')
@@ -129,7 +142,7 @@ def test_public_execute_rechecks_owner_inside_lock_before_date_restore(registere
     @contextmanager
     def acquire(current):
         calls.append('acquired')
-        live_account(current, label='changed-during-lock-admission')
+        inject_foreign_account(current, label='changed-during-lock-admission')
         observed.update(tree(tmp_path))
         try:
             yield
