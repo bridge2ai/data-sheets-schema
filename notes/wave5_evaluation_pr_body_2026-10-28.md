@@ -23,6 +23,24 @@ the committed-corpus check, at frozen head
 passed. See `notes/wave5_evaluation_integration_2026-10-28.md` for the module
 counts, instrument identity, reproduction command and compact evidence digests.
 
+Publication still needs the lead's disposition of Claude's independent D52
+review of `4cd8f2a5191d7cb58d7bf639603a820d38e825d5`, at
+`/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5096_b0978d6e6_d52_4cd8f2a51_claude_review_2026-10-28.md`:
+
+- **D1:** Q9's top-band label still describes criteria excluded under explicit
+  false; the explanatory applicability note does not fix that label.
+- **D2:** lead/owner confirmation is needed for extending the contact alias to
+  the bare Rubric10 E2.2 criterion, where governance-only content can gain credit.
+- **D3:** approximately 3 MB of inherited D52 inventory tarballs need a lead
+  publication disposition. The new Wave 5 evidence is compact; historical
+  evidence and ancestry have been preserved.
+
+D4 (future rubric-ID/path robustness) is an optional nit. D5 (the parent
+`regulatory_restrictions` criterion still counts) is an optional specification
+observation, not a defect under the current rule. These findings are recorded
+without adopting new scoring rules. This documentation-only update leaves the
+frozen 588-test result intact; it is not an unconditional merge-readiness claim.
+
 Historical/v8 (#5126) and native E5-direct rating adapters remain design-only.
 This PR does not authorize generation or scoring. Claude's #5164 context/table
 changes and the remaining owner/lead acceptance gates stay separate.

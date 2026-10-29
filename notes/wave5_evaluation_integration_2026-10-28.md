@@ -5,8 +5,47 @@
 
 The composed evaluation packet passes **588 tests, with no failures, errors,
 skips or deselections**, including the committed-corpus comparison. No new
-production repair was needed for this composition. This is offline software
-validation, not generation/scoring authorization or scientific acceptance.
+production repair was made for this composition. This is offline software
+validation, not unconditional merge readiness, generation/scoring authorization
+or scientific acceptance. The later independent review constraints below remain
+for the lead to settle before publication.
+
+## Independent D52 review: publication constraints
+
+Claude independently reviewed the exact D52 delivery
+`4cd8f2a5191d7cb58d7bf639603a820d38e825d5` in
+`/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/plans/reviews/pr5096_b0978d6e6_d52_4cd8f2a51_claude_review_2026-10-28.md`.
+The evaluation implementation in this composition is byte-identical to that
+reviewed D52/E3x source. Record the following dispositions before publication:
+
+- **D1, minor defect:** when the four regulated-access criteria are excluded,
+  Q9's existing top-band `score_label` still describes confidentiality and
+  governance content that was not required. The separate applicability note
+  explains the omission but does not correct the label. The lead must direct
+  its repair or explicitly record its deferral; the 588 passing tests do not
+  establish that this label is accurate.
+- **D2, scope decision:** the bare Rubric10 E2.2 criterion also accepts the
+  nested contacts. A governance-only record can therefore gain E2.2 credit.
+  The lead/owner must confirm that this legacy-criterion extension is intended;
+  the existing implementation and tests are not that confirmation.
+- **D3, publication disposition:** the branch inherits approximately 3 MB of
+  D52 inventory tarballs under `notes/d52_scoring_validation_2026-10-28/`.
+  The new Wave 5 results are compact, but that does not remove the inherited
+  publication concern. The lead must choose how to publish/preserve that
+  evidence. No historical evidence was removed and no ancestry was rewritten.
+
+**D4 is an optional maintainability nit:** the rule keys on numeric question
+ID 9 and literal paths, so a future rubric revision could bypass it. **D5 is
+an optional owner/specification observation, not an implementation defect:**
+the parent `regulatory_restrictions` object still counts among the three base
+criteria, as specified, including when its content consists of excluded
+subfields. Neither observation authorizes a scoring-rule change here.
+
+This post-validation amendment changes only this report and the draft PR
+description. The tested source remains
+`fbbb2c7599c4a4a98ae27242db9b05c90954a020`; the 588-test result is unchanged and
+no tests were rerun. Recording these findings does not adopt all of the
+reviewer's recommendations or resolve D1–D3.
 
 ## Publication route and exact ancestry
 
