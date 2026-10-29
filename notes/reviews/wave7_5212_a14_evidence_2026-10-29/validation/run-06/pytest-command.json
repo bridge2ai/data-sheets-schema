@@ -1,0 +1,13 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave7-5212-parent-replay-20261029/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave7-5212-parent-replay-20261029/pytest.xml",
+    "tests/test_shared_generation_runtime.py::test_real_complete_api_pipeline_and_completed_recheck"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave7-5212-parent-20261029"
+}

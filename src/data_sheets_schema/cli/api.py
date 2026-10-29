@@ -743,6 +743,8 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 
 
 @api.command("run")
+@click.option("--expect-journal-head-sha256", default=None,
+              help="resume head retained in the previous launch/monitor record; required for an existing journal")
 @click.option("--shared-generation-version", type=click.IntRange(0, 2), default=0,
               help="explicit shared-generation API condition; requires its immutable registration")
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
@@ -776,7 +778,7 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
-def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
+def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, expect_journal_head_sha256=None):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
@@ -785,7 +787,7 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
     _require_bundle(spec, project, bundle)
     _require_canonical_prompts(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)
-    if spec.full_path.exists():
+    if spec.full_path.exists() and expect_journal_head_sha256 is None:
         raise click.ClickException(
             f"{spec.full_path} already exists; a run label is never reused")
 
@@ -801,7 +803,8 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
     if spec.shared_generation_version:
         _shared_current([spec])
     try:
-        res = execute(spec)
+        res = execute(spec, **({'expect_journal_head_sha256': expect_journal_head_sha256}
+                               if expect_journal_head_sha256 is not None else {}))
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
     for u in res["usage"]:
@@ -1006,10 +1009,13 @@ def _rows_cost(rows) -> float:
                    "or single-run canary cannot be stopped mid-run by --max-cost-dollars; use dollar_readout "
                    "and 'd4d api stop' for mid-run monitoring). Usage a "
                    "resumed run spent before this invocation is not counted (#5045)")
+@click.option("--expect-journal-head", type=(str, str, str), multiple=True,
+              metavar="PROJECT LABEL SHA256",
+              help="expected head from the prior launch/monitor record; repeat for each resumed run")
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, expect_sha256=None, max_cost_dollars=None):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None, expect_sha256=None, max_cost_dollars=None, expect_journal_head=()):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -1017,6 +1023,11 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     """
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api batch")          # the record and the outputs land under the cwd (#1643)
+    journal_heads = {}
+    for project, label, head in expect_journal_head:
+        if (project, label) in journal_heads:
+            raise click.ClickException(f"duplicate expected journal head for {project} / {label}")
+        journal_heads[project, label] = head
     if max_cost_dollars is not None and (not math.isfinite(max_cost_dollars) or max_cost_dollars <= 0):
         # A cap of 0 would still run, and bill, the first run (#5045 review).
         raise click.ClickException("--max-cost-dollars must be positive and finite")
@@ -1171,7 +1182,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         try:
             if roster:
                 _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
-            res = execute(s)
+            head = journal_heads.get((s.project, s.label))
+            res = execute(s, **({'expect_journal_head_sha256': head} if head is not None else {}))
             # This invocation's attempts only: a resumed run returns its
             # earlier usage too, a completed one all of it (#5045 review).
             returned = [u for u in res.get("usage") or [] if isinstance(u, dict)]
@@ -1469,10 +1481,10 @@ def api_status_cmd():
 def api_stop_cmd(label_prefix, force):
     """Stop a running sweep by the label it holds (#513).
 
-    Stopping mid-run is safe: each run resumes from its progress file, so the
-    cost of stopping is the unfinished phases of the current run and nothing
-    more. What is *not* safe is believing a sweep has stopped when it has not,
-    which is what this command exists to prevent.
+    SIGTERM does not emit a journal stop head. Preserve the last external
+    launch/monitor record; an unobserved suffix requires read-only evidence
+    reconciliation and an owner-approved new launch record before resuming.
+    Interrupted calls and terminal failures retain their ordinary refusal rules.
     """
     import signal as _signal
 
@@ -1492,6 +1504,9 @@ def api_stop_cmd(label_prefix, force):
                    f"{lock.pid} ({'KILL' if force else 'TERM'})")
     click.echo("Re-run `d4d api status` to confirm it is gone — a signal sent "
                "is not a process stopped.")
+    click.echo("SIGTERM/SIGKILL do not emit a journal stop head. Retain the last external "
+               "head; reconcile any unobserved suffix and obtain an owner-approved "
+               "new launch record before resuming.")
 
 
 @api.group("prompts")

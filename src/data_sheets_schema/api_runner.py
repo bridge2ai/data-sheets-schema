@@ -32,6 +32,7 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 import time
 import uuid
 from dataclasses import dataclass, field
@@ -413,7 +414,8 @@ RECEIPT_PHASE_MAX_TOKENS = {"full": 128000}
 #: earlier renderer and condition keeps its recorded budget, and the value a
 #: run used is in its api_usage rows and `max_tokens_by_phase`.
 #: `dollar_readout.SHARED_V1_PHASE_OUTPUT_CAPS` mirrors this; a test keeps
-#: them equal.
+#: them equal. Every request sent at these caps is counted and admitted
+#: before dispatch (`SHARED_ADMITTED_PHASES`, #5157).
 SHARED_PHASE_MAX_TOKENS = {"report": 128000, "reconcile_full": 128000}
 
 
@@ -3801,6 +3803,7 @@ def normalise_temporal(text: str) -> str:
 
 
 PROGRESS_SUFFIX = "_api_progress.json"
+VALIDATOR_REFRESH_KEY = "validator_repair_refresh"
 
 
 def _progress_path(spec: RunSpec) -> Path:
@@ -3862,7 +3865,104 @@ def _save_progress(spec: RunSpec, completed: list[str],
         for artifact, path in (("full", spec.full_path),
                                ("core", spec.core_path))
         if path.exists()}
-    p.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    from data_sheets_schema.usage_ledger import validator_refresh
+    refresh = validator_refresh(spec)
+    if refresh is None:
+        p.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        return
+    data[VALIDATOR_REFRESH_KEY] = refresh["checkpoint"]
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=p.parent,
+                                         prefix=f".{p.stem}.", suffix=".tmp", delete=False) as out:
+            temporary = Path(out.name)
+            json.dump(data, out, indent=2)
+            out.flush()
+            os.fsync(out.fileno())
+        os.replace(temporary, p)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def _validator_refresh_resume(spec: RunSpec, progress: dict) -> dict | None:
+    """Validate a repaired pair before ordinary artifact-drift restart logic.
+
+    A report may legitimately be stale only while this exact pending obligation
+    exists. Missing/malformed checkpoints and ambiguous paid deliveries refuse;
+    they are never interpreted as a new generation or permission to bill again.
+    """
+    from data_sheets_schema.usage_ledger import validator_refresh
+    refresh = validator_refresh(spec)
+    if not isinstance(progress, dict):
+        if refresh is not None:
+            raise UsageLedgerError("validator repair report refresh needs mapping-shaped saved progress")
+        return None
+    if refresh is None:
+        if VALIDATOR_REFRESH_KEY in progress:
+            raise UsageLedgerError("validator repair report refresh lost its ledger evidence")
+        return None
+    checkpoint = refresh["checkpoint"]
+    if (set(checkpoint) != {"version", "id", "artifacts", "report_before_sha256", "audit_sha256",
+                           "repair", "changed", "why"}
+            or type(checkpoint.get("version")) is not int or checkpoint["version"] != 1
+            or not re.fullmatch(r"[a-f0-9]{32}", str(checkpoint.get("id", "")))
+            or not isinstance(checkpoint.get("repair"), list)
+            or any(not isinstance(row, dict) for row in checkpoint["repair"])
+            or not isinstance(checkpoint.get("changed"), list)
+            or any(not isinstance(name, str) for name in checkpoint["changed"])
+            or not checkpoint["changed"] or checkpoint["changed"] != sorted(set(checkpoint["changed"]))
+            or not set(checkpoint["changed"]).issubset({"full", "core"})
+            or not isinstance(checkpoint.get("why"), str)
+            or not isinstance(checkpoint.get("artifacts"), dict)
+            or set(checkpoint["artifacts"]) != {"full", "core"}
+            or any(not re.fullmatch(r"[a-f0-9]{64}", str(checkpoint.get(key, "")))
+                   for key in ("report_before_sha256", "audit_sha256"))):
+        raise UsageLedgerError("invalid validator repair report refresh checkpoint")
+    if refresh["state"] == "in_flight":
+        raise UsageLedgerError("validator repair report refresh was admitted without an accepted completion; "
+                               "restore its delivery evidence before resuming")
+    # Successful finalization removes progress. Its completed-provenance route
+    # below still verifies the final files, accounting, receipt and report.
+    if refresh["state"] == "accepted" and not _progress_path(spec).exists() and spec.provenance_path.is_file():
+        return None
+    if (progress.get(VALIDATOR_REFRESH_KEY) != checkpoint
+            or progress.get("completed") != list(PHASES)
+            or progress.get("generation_id") != _usage_generation(spec)
+            or progress.get("run_identity") != _usage_identity(spec)
+            or progress.get("label") != spec.label
+            or progress.get("input_identity") != spec.input_identity()
+            or not isinstance(progress.get("artifact_md5"), dict)
+            or not isinstance(progress.get("Audit findings"), str)
+            or hashlib.sha256(progress["Audit findings"].encode()).hexdigest() != checkpoint["audit_sha256"]):
+        raise UsageLedgerError("validator repair report refresh needs its exact saved progress; restore the checkpoint")
+    for name, path in (("full", spec.full_path), ("core", spec.core_path)):
+        pin = checkpoint["artifacts"][name]
+        if (not isinstance(pin, dict) or set(pin) != {"md5", "sha256"}
+                or not path.is_file()
+                or pin != {"md5": hashlib.md5(path.read_bytes()).hexdigest(),
+                           "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                or (progress.get("artifact_md5") or {}).get(name) != pin["md5"]):
+            raise UsageLedgerError("validator repair report refresh repaired artifact differs: " + name)
+    if refresh["state"] == "pending" and (not spec.report_path.is_file()
+            or hashlib.sha256(spec.report_path.read_bytes()).hexdigest() != checkpoint["report_before_sha256"]):
+        raise UsageLedgerError("validator repair report refresh previous report differs")
+    return refresh
+
+
+def _prepare_validator_refresh(spec: RunSpec, completed: list[str], carry: dict[str, str],
+                               repair: list[dict], description: dict) -> dict:
+    from data_sheets_schema.usage_ledger import prepare_validator_refresh, validator_refresh
+    checkpoint = {"version": 1, "id": uuid.uuid4().hex,
+        "artifacts": {name: {"md5": hashlib.md5(path.read_bytes()).hexdigest(),
+                              "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                      for name, path in (("full", spec.full_path), ("core", spec.core_path))},
+        "report_before_sha256": hashlib.sha256(spec.report_path.read_bytes()).hexdigest(),
+        "audit_sha256": hashlib.sha256(carry.get("Audit findings", "").encode()).hexdigest(),
+        "repair": repair, "changed": description["changed"], "why": description["why"]}
+    prepare_validator_refresh(spec, checkpoint)
+    _save_progress(spec, completed, carry.get("Audit findings"))
+    return validator_refresh(spec)
 
 
 def _artifact_path(spec: RunSpec, artifact: str) -> Path:
@@ -5470,6 +5570,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 "max_tokens": phase_max_tokens(spec, ph, DEFAULT_MAX_TOKENS, model=settings["name"]),
                 "stop_reason": getattr(resp, "stop_reason", None),
             })
+            text = "".join(b.text for b in resp.content
+                           if getattr(b, "type", "") == "text")
+            # A billed repair is evidence even when reasoning, truncation or
+            # extraction rejects it. Bind the raw delivery before those steps.
+            _snapshot(spec, f"{spec.project}_{ph}_response_{call_id}.txt", text,
+                      usage_id=call_id)
             cap = reasoning.capture(resp)
             reasoning.append(_reasoning_path(spec),
                              {"phase": ph, "label": spec.label,
@@ -5480,8 +5586,6 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": "truncated; record left as it was"})
                 continue
-            text = "".join(b.text for b in resp.content
-                           if getattr(b, "type", "") == "text")
             try:
                 body = _extract(text, "yaml", schema, cls)
             except RuntimeError as exc:
@@ -5499,7 +5603,8 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # repaired output changes its readability (#1747).
             repaired_from_class = _finding_class(errors, path)
             path.write_text(body, encoding="utf-8")
-            _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
+            _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body,
+                      usage_id=call_id)
             applied_from = len(errors)
             applied_class = repaired_from_class
             log.append({"phase": ph, "round": rnd, "outcome": "applied",
@@ -5549,6 +5654,46 @@ def _declared_error_type(exc: Exception) -> str | None:
     if isinstance(kind, str) and kind != "error":
         return kind
     return None
+
+
+def _transient(exc: BaseException) -> bool:
+    """Whether a provider error is one `_call_with_retry` retries.
+
+    The dispatch's watchdog and incomplete-stream cases are its own; this is
+    the classification it shares with the admission count (#5157).
+    """
+    import anthropic          # imported here, not at module load
+    transient = isinstance(exc, (
+        getattr(anthropic, "RateLimitError", ()),
+        getattr(anthropic, "APIConnectionError", ()),
+        getattr(anthropic, "InternalServerError", ()),
+    ))
+    # Raw httpx transport errors are not wrapped in an anthropic class
+    # when they occur mid-stream, so classifying only on anthropic types
+    # misses them. A 64k-token streamed response through a proxy is a
+    # long-lived connection; `RemoteProtocolError: peer closed
+    # connection without sending complete message body` killed the
+    # second live CHORUS run in phase 1 without a single retry.
+    # TransportError is the base for connect/read/write/protocol/timeout.
+    try:
+        import httpx
+        if isinstance(exc, httpx.TransportError):
+            transient = True
+    except ImportError:          # pragma: no cover - httpx ships with the SDK
+        pass
+    status = getattr(exc, "status_code", None)
+    if status is not None and 500 <= status < 600:
+        transient = True
+    # Mid-stream errors carry the *stream's* status, which is 200: the
+    # connection opened fine and the failure arrived later as an SSE
+    # `error` event. So an `overloaded_error` reaches here as a plain
+    # APIStatusError with status_code 200, matches none of the checks
+    # above, and kills the run on the first attempt — which is what
+    # happened to the first fitness sweep. Classify on the error body's
+    # own type, which is where the transience is actually stated.
+    if not transient and _transient_error_type(exc):
+        transient = True
+    return transient
 
 
 #: How many clean early closes one call tolerates before the phase fails
@@ -5627,11 +5772,98 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
             extra["output_tokens_details"] = details
 
 
+#: The phases shared generation 1 sends at its raised caps: the two in
+#: `SHARED_PHASE_MAX_TOKENS`, and the regate and the refresh after repair,
+#: which share the report budget (#5157, owner decision D33). At 128k of
+#: output a 1M window leaves 872k of input, and the regate also carries the
+#: report it rejected, so each request is counted and admitted before it is
+#: sent, as the receipt completion and the typed audit stages are.
+SHARED_ADMITTED_PHASES = frozenset({"reconcile_full", "report", "report_regate", "report_after_repair"})
+
+
+class ContextNotAdmitted(UsageLedgerError):
+    """A shared-generation request refused before dispatch (#5157).
+
+    `facts` is what the refusal rests on, as the record states it: the phase,
+    why, the output cap, the registered window and, where the endpoint gave
+    one, its count. A UsageLedgerError, so reconcile_full or the report,
+    which the run cannot complete without, stops the run before dispatch.
+    The report regate catches it and keeps the report as written, as for any
+    regate that fails (#967), and the run goes on to its record. The refresh
+    after repair catches it and latches a terminal evidence refusal that
+    names it (#1820): the report as written no longer describes the records.
+    """
+
+    def __init__(self, message: str, facts: dict[str, Any]):
+        super().__init__(message)
+        self.facts = facts
+
+
+def _admit_shared_context(spec: RunSpec, phase: str, attempt: int, client, kwargs: dict[str, Any]) -> None:
+    """Count the request `_call_with_retry` will send; refuse it if it cannot fit.
+
+    The receipt completion's count and window check: `messages.count_tokens`
+    against the window the registration's `audit_limits` assert, as the typed
+    audit stages use it. The count takes the transport of the call it admits:
+    the same client, and the transient errors `_call_with_retry` retries are
+    retried up to MAX_ATTEMPTS. A refusal raises `ContextNotAdmitted` before
+    the usage call begins, so it sends nothing, leaves no pending call or
+    usage row, consumes no regate allowance and is not retried. The refused
+    count is kept as `{phase}_context_refused.json`, an admitted one as
+    `{phase}_context.json`.
+    """
+    from . import receipt_completion as receipts
+    from .shared_generation import assert_current
+    limits = assert_current(spec).document()["audit_limits"]
+    request = PhaseRequest(phase=phase, system=kwargs["system"], messages=kwargs["messages"])
+    # The body `_call_with_retry` builds, its route clamp included.
+    payload = receipts.request_payload(request, {
+        "name": kwargs["model"], "temperature": kwargs["temperature"],
+        "thinking": kwargs.get("thinking"), "effort": kwargs.get("effort")},
+        {"max_output_tokens": min(kwargs["max_tokens"], output_limit(kwargs["model"]))})
+    facts: dict[str, Any] = {
+        "phase": phase, "attempt": attempt, "max_tokens": payload["max_tokens"],
+        "context_limit_tokens": limits["context_limit_tokens"],
+        "context_limit_basis": limits["context_limit_basis"],
+        "request_sha256": receipts.sha(receipts.canonical(payload))}
+
+    def refuse(reason: str, detail: str, **found: Any) -> ContextNotAdmitted:
+        facts.update(reason=reason, **found)
+        receipts._save(spec, f"{phase}_context_refused.json", facts)
+        return ContextNotAdmitted(f"{phase} not admitted: {detail}", dict(facts))
+
+    for tries in range(1, MAX_ATTEMPTS + 1):
+        try:
+            count = receipts._measure_context(client, payload, limits, label=phase)
+            break
+        except UsageLedgerError as exc:
+            cause = exc.__cause__
+            if tries == MAX_ATTEMPTS or cause is None or not _transient(cause):
+                raise refuse("count_unavailable", str(exc), error=str(exc)[:500]) from exc
+            print(f"   {phase} count attempt {tries} {type(cause).__name__}; retrying")
+            time.sleep(_rate_limit_pause(cause) or BACKOFF_BASE_SECONDS ** tries)
+    tokens, limit = count["input_tokens"], limits["context_limit_tokens"]
+    if type(tokens) is int and tokens >= 0 and tokens + payload["max_tokens"] > limit:
+        raise refuse("over_window",
+            f"the endpoint counted {tokens:,} input tokens and max_tokens is "
+            f"{payload['max_tokens']:,}, {tokens + payload['max_tokens']:,} in all, over the registered "
+            f"context limit of {limit:,} tokens ({limits['context_limit_basis']}); refused before "
+            "dispatch and not retried", input_tokens=tokens)
+    try:
+        receipts._context_check(count, payload, limits, label=phase)
+    except UsageLedgerError as exc:
+        raise refuse("count_unusable", str(exc), input_tokens=receipts._counter_evidence(tokens)) from exc
+    receipts._save(spec, f"{phase}_context.json",
+                   {**count, "phase": phase, "attempt": attempt, "max_tokens": payload["max_tokens"]})
+
+
 def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, client, **kwargs):
     _require_surviving_accounting(spec)
     if spec.shared_generation_version:
         from .typed_audit_runtime import require_request
         require_request(spec, phase, kwargs)
+    if spec.shared_generation_version == 1 and phase in SHARED_ADMITTED_PHASES:
+        _admit_shared_context(spec, phase, attempt, client, kwargs)
     if spec.shared_generation_version == 2:
         from . import source_heading_admission as routing_admission
         client, kwargs = routing_admission.prepare(spec, phase, attempt, client, kwargs)
@@ -5640,7 +5872,8 @@ def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, c
         routing_admission.require_wire(spec, phase, identifier, kwargs)
     call_started = time.monotonic()
     try:
-        response = _call_with_retry(client, **kwargs)
+        from .latch_journal import check as check_latches
+        response = _call_with_retry(client, before_attempt=lambda: check_latches(spec), **kwargs)
     except UsageLedgerError:
         raise
     except Exception:
@@ -5670,7 +5903,7 @@ def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, c
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
                      sleep=time.sleep, wall_clock: float | None = None,
                      thinking: dict[str, Any] | None = None, effort: str | None = None,
-                     transport_attempts: int | None = None):
+                     transport_attempts: int | None = None, before_attempt=None):
     """One API call, retrying transient failures.
 
     Retries rate limits, connection errors and 5xx. Does not retry 4xx other
@@ -5678,7 +5911,6 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     every attempt, and retrying only multiplies the delay before the operator
     sees the real problem.
     """
-    import anthropic
     limit = MAX_ATTEMPTS if transport_attempts is None else transport_attempts
     if type(limit) is not int or limit < 1:
         raise ValueError("transport_attempts must be a positive integer")
@@ -5743,6 +5975,11 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             def _run(box: dict[str, Any] = box, holder: dict[str, Any] = holder,
                      trace: StreamTrace = trace) -> None:
                 try:
+                    # Controller authority only. Check each physical attempt,
+                    # including transport retries, immediately before dispatch.
+                    # This callback never enters the provider request kwargs.
+                    if before_attempt is not None:
+                        before_attempt()
                     with client.messages.stream(**kwargs) as stream:
                         holder["stream"] = stream
                         # The proxy's thinking-token count rides on the
@@ -5822,36 +6059,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             # abandoned worker may still deliver events after this point.
             trace.response(getattr(exc, "response", None))
             stream_trace = trace.snapshot(exception=exc, provider_error_type=_declared_error_type(exc))
-            transient = isinstance(exc, (
-                getattr(anthropic, "RateLimitError", ()),
-                getattr(anthropic, "APIConnectionError", ()),
-                getattr(anthropic, "InternalServerError", ()),
-            ))
-            # Raw httpx transport errors are not wrapped in an anthropic class
-            # when they occur mid-stream, so classifying only on anthropic types
-            # misses them. A 64k-token streamed response through a proxy is a
-            # long-lived connection; `RemoteProtocolError: peer closed
-            # connection without sending complete message body` killed the
-            # second live CHORUS run in phase 1 without a single retry.
-            # TransportError is the base for connect/read/write/protocol/timeout.
-            try:
-                import httpx
-                if isinstance(exc, httpx.TransportError):
-                    transient = True
-            except ImportError:          # pragma: no cover - httpx ships with the SDK
-                pass
-            status = getattr(exc, "status_code", None)
-            if status is not None and 500 <= status < 600:
-                transient = True
-            # Mid-stream errors carry the *stream's* status, which is 200: the
-            # connection opened fine and the failure arrived later as an SSE
-            # `error` event. So an `overloaded_error` reaches here as a plain
-            # APIStatusError with status_code 200, matches none of the checks
-            # above, and kills the run on the first attempt — which is what
-            # happened to the first fitness sweep. Classify on the error body's
-            # own type, which is where the transience is actually stated.
-            if not transient and _transient_error_type(exc):
-                transient = True
+            transient = _transient(exc)
             # A watchdog abandonment is transient by definition: the point of
             # leaving a stalled call is to try again — and it is said, because
             # a silent retry made a stalled phase look like a slow one (#779).
@@ -5947,7 +6155,7 @@ def _rate_limit_pause(exc: Exception, *, now: datetime | None = None) -> float |
     dies: the reset can be ten minutes out, and the ordinary backoff ladder is
     thirty seconds long.
     """
-    import anthropic          # imported here, as in `_call_with_retry`
+    import anthropic          # imported here, as in `_transient`
     if not isinstance(exc, getattr(anthropic, "RateLimitError", ())):
         return None
     m = re.search(r"resets at:\s*([\d]{4}-[\d]{2}-[\d]{2}[ T][\d]{2}:[\d]{2}:[\d]{2})",
@@ -6042,6 +6250,10 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "stop_reason": getattr(resp, "stop_reason", None)})
     text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
                    if getattr(b, "type", None) == "text")
+    # Keep the delivered bytes even when the report gate restores an older
+    # report. The journal pins this raw response to its recorded usage ID.
+    _snapshot(spec, f"{spec.project}_{phase}_response_{call_id}.txt", text,
+              usage_id=call_id)
     _admit_source_response(spec, phase, text, getattr(resp, "stop_reason", None), call_usage, needed)
     cap = reasoning.capture(resp)
     reasoning.append(_reasoning_path(spec),
@@ -6146,11 +6358,23 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
                     "findings_after": out["findings_before"],
                     "remaining": (before.get("findings") or [])[:20]})
         return out
+    from .usage_ledger import record_report_rejection
+    record_report_rejection(spec, stage="report_gate_before",
+        report_sha256=hashlib.sha256(spec.report_path.read_bytes() if spec.report_path.exists() else b"").hexdigest(),
+        reading={**before, "findings": contradictions},
+        reason="report claims or required dispositions rejected")
     as_written = spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else ""
     _snapshot(spec, f"{spec.project}_report_before_regate.md", as_written)
-    out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
-                                            phase="report_regate",
-                                            contradictions=contradictions)
+    try:
+        out["regenerated"] = _regenerate_report(spec, client, settings, usage, carry,
+                                                phase="report_regate",
+                                                contradictions=contradictions)
+    except ContextNotAdmitted as refused:
+        # Refused before dispatch (#5157): the report as written stands, as
+        # for a regate that fails (#967), and the gate says why. Nothing was
+        # admitted, so the one regeneration stays unspent.
+        out.update({"regenerated": False, "regate_refused": refused.facts,
+                    "reason": "the regate was not admitted before dispatch; the report as written was kept"})
     out["regeneration_attempted"] = report_regate_attempted(spec)
     after = reading()
     require_source_reviews(spec, carry, evidence=after.get("evidence_assertions"))
@@ -6158,6 +6382,12 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         (before.get("disposition_rows") and not after.get("disposition_rows"))
         or len(after.get("findings") or []) > len(before.get("findings") or [])
         or after.get("_core_findings_count", 0) > before.get("_core_findings_count", 0)))
+    if out["regenerated"] and after.get("checked") and (
+            worse or after.get("findings") or not after.get("disposition_rows")):
+        record_report_rejection(spec, stage="report_gate_after",
+            report_sha256=hashlib.sha256(spec.report_path.read_bytes() if spec.report_path.exists() else b"").hexdigest(),
+            reading=after, reason="regenerated report rejected; original retained" if worse else
+                "regenerated report retains contradictions or lacks dispositions")
     if worse:
         # A prose reply that drops the table, or a rewrite with more
         # contradictions than before, is not an improvement (#965/#967). The
@@ -6319,7 +6549,7 @@ def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
             f"stop_reason: {(usage_row or {}).get('stop_reason')}\n"
             + extent + kept)
     return _snapshot(spec, f"{spec.project}_{ph}_unusable_attempt{attempt}.txt",
-                     body)
+                     body, usage_id=(usage_row or {}).get("usage_id"))
 
 
 def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: str,
@@ -6337,10 +6567,15 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
             + (f"# stream trace: {json.dumps(info['stream_trace'], ensure_ascii=True)}\n"
                if "stream_trace" in info else "") +
             f"# last {INCOMPLETE_TAIL_CHARS} characters as delivered:\n" + (info.get("tail") or ""))
-    path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
+    # The abandoned row and its saved partial delivery have one identity.
+    # Preserve the snapshot before appending that row, as before; it is not a
+    # completed response and must not be synthesized into the completed ledger.
+    usage_id = uuid.uuid4().hex
+    path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt",
+                     body, usage_id=usage_id)
     snap_usage = info.get("usage") or {}
     row = {"phase": ph, "attempt": attempt, "transport_attempt": n,
-                  "usage_id": uuid.uuid4().hex,
+                  "usage_id": usage_id,
                   "run_identity": _usage_identity(spec),
                   # The retry ladder's own count (a rate limit before the cut
                   # advances it; the transport count does not).
@@ -6631,11 +6866,9 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         # Before the retry, and before the last-attempt raise: the final
         # attempt's body is evidence too, and raising without it loses the
         # one that actually ended the run (#1048).
-        # Both the phase and the attempt: `_readdress_receipt` appends a
-        # `full_readdress` row with attempt 1, which an attempt-only guard
-        # would stamp on loop attempt 1 (round-3 finding 3).
-        own_row = (usage[-1] if usage and usage[-1].get("attempt") == attempt
-                   and usage[-1].get("phase") == ph else None)
+        # Retain this delivery's row. Re-addressing can append another billed
+        # row before failing; the last row then belongs to a different call.
+        own_row = call_usage
         kept = _record_unusable_response(spec, ph, attempt, problem, response_text, own_row)
         if kept is not None and own_row is not None:
             # A distinct key, never `outcome` (#1048 review). `outcome` is
@@ -6666,12 +6899,14 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
 
 
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
-            client=None) -> dict[str, Any]:
+            client=None, expect_journal_head_sha256: str | None = None) -> dict[str, Any]:
     """Run the phases, writing each artifact as it completes.
 
     ``resume`` skips phases whose artifact already exists, so a run that failed
     at phase 5 costs one call to finish rather than six. Set it False to force
-    a clean regeneration.
+    a clean regeneration. An existing journal requires its head from the prior
+    launch/monitor record as ``expect_journal_head_sha256``, even on a fresh
+    generation request. Start/stop heads are printed to stderr for that record.
     """
     if spec._replay_only:
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
@@ -6691,7 +6926,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         from .output_ownership import require_selected_resume_owner
         assert_current(spec)  # authority isolation precedes even sidecar lock writes
         require_selected_resume_owner(spec, resume=resume)
-    with _exclusive_run(spec):
+    from .latch_journal import launch_record
+    with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
         if getattr(spec, 'shared_generation_version', 0):
             # Another sequential writer may have changed ownership while we waited.
             require_selected_resume_owner(spec, resume=resume)
@@ -6871,6 +7107,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     if spec.native_source_attribution_version:
         raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
+    # Before recovery can rewrite a ledger or settle a saved delivery. A
+    # missing journal on spent work is not permission to adopt edited state.
+    from . import latch_journal
+    latch_journal.check(spec, spending=resume, startup=True)
+
     # Before a token is spent. The digest this run is about to send, the schema
     # it validates against and the identity slots its pair check uses all come
     # from the *merged* schemas, which are generated artifacts — so a module
@@ -6962,6 +7203,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         require_source_review_admission(spec)
     if progress is None:
         progress = _load_progress(spec) if resume else {}
+    validator_refresh = _validator_refresh_resume(spec, progress) if resume else None
     if resume and spec.receipt_completion_version:
         from data_sheets_schema.receipt_completion import resume_guard
         resume_guard(spec, progress)
@@ -6998,6 +7240,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             usage.extend(prior_record.get("api_usage") or [])
             # Only this generation's repair history belongs here (#366, #1291).
             prior_repair = list(prior_record.get("repair") or [])
+        if validator_refresh is not None:
+            prior_repair = list(validator_refresh["checkpoint"]["repair"])
 
     if resume:
         merge_completed_rows(spec, usage)
@@ -7054,7 +7298,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                "restore the ledger before resuming")
     from data_sheets_schema import snapshot_store
     if resume:
-        snapshot_store.require_accounted(spec, prior_record)
+        # Partial deliveries are owned by real abandoned rows, not completed
+        # charges. An unfinished run may have no provenance record yet.
+        accounting_proof = {**prior_record, "api_usage": merge_abandoned_rows(
+            spec, list(prior_record.get("api_usage") or []))}
+        snapshot_store.require_accounted(spec, accounting_proof)
         if generation is not None:
             _require_surviving_accounting(spec, prior_record.get("api_usage") or [])
     # A *finished* run has no progress file — success deletes it — so resuming
@@ -7147,10 +7395,16 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                 completion_check_result = recover(spec)
             if completed_context is not None:
                 _require_same_resume_record(spec, completed_context)
+            runtime_integrity = latch_journal.provenance(spec)
+            if runtime_integrity["assisted"] and (
+                    (existing.get("model") or {}).get("runtime_integrity") != runtime_integrity):
+                raise UsageLedgerError("completed provenance does not disclose the applied D41 override; "
+                                       "it cannot be returned as an unassisted completed run")
             return {"label": spec.label, "project": spec.project,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
                     "checks": {"pair": pair_consistency(spec),
+                               "runtime_integrity": runtime_integrity,
                                "validation": validation_block(spec, problems),
                                # A run this runner produced asked for the
                                # dispositions table (#929); its record says so.
@@ -7290,7 +7544,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         require_evidence_checks(spec, carry, stage="audit", preserve=False)
     if "reconcile_full" in done:
         require_evidence_checks(spec, carry, stage="reconcile", preserve=False)
-    if "report" in done:
+    if "report" in done and not (validator_refresh is not None and validator_refresh["state"] == "pending"):
         require_source_reviews(spec, carry)
 
     core_derivation: dict[str, Any] | None = None
@@ -7534,7 +7788,12 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # because it only checks that files exist. An invalid record that looks
     # finished is worse than a failed run.
     problems = validate_outputs(spec)
-    if problems:
+    if problems and validator_refresh is not None and validator_refresh["state"] == "accepted":
+        # Completed-but-invalid runs retain the existing bounded repair-on-
+        # resume behavior (#361). Only an outstanding report obligation blocks
+        # another repair; accepted refresh evidence does not waive validation.
+        validator_refresh = None
+    if problems and validator_refresh is None:
         # Validator-driven shape repair (#356): the validator's findings are
         # precise and the run is already fully billed, so a bounded repair is
         # cheaper than discarding the run. Hashing happens in
@@ -7566,9 +7825,38 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                         "artifact a reviewer reads instead of the diff"),
             }
             if not spec.removal_repair_version:
-                _regenerate_report(spec, client, settings, usage, carry)
+                if spec.shared_generation_version:
+                    validator_refresh = _prepare_validator_refresh(
+                        spec, [x for x in PHASES if x in done], carry, rec.data["repair"] or [],
+                        rec.data["report_regenerated_after_repair"])
+                else:
+                    # Preserve the historical unregistered renderer's explicit
+                    # stale-report fallback. The selected shared protocol has
+                    # stricter source-review/admission and restart authority.
+                    _save_progress(spec, [x for x in PHASES if x in done], carry.get("Audit findings"))
+                    rec.data["report_regenerated_after_repair"]["refreshed"] = _regenerate_report(
+                        spec, client, settings, usage, carry)
     else:
         rec.data["repair"] = prior_repair or None
+    if validator_refresh is not None:
+        checkpoint = validator_refresh["checkpoint"]
+        rec.data["repair"] = checkpoint["repair"]
+        rec.data["report_regenerated_after_repair"] = {
+            "changed": checkpoint["changed"], "why": checkpoint["why"], "refreshed": True}
+        if validator_refresh["state"] == "pending":
+            try:
+                refreshed = _regenerate_report(spec, client, settings, usage, carry)
+            except ContextNotAdmitted as refused:
+                # The durable repaired pair and refresh obligation precede
+                # the count. A refused count remains a terminal no-retry fact.
+                _assert_evidence_clean({"checked": False, "findings": [
+                    {"kind": "report_refresh_not_admitted", **refused.facts}]}, "report", spec=spec)
+            if not refreshed:
+                raise UsageLedgerError("validator repair report refresh did not complete; "
+                                       "preserve its checkpoint and delivery evidence before resuming")
+            from data_sheets_schema.usage_ledger import finish_validator_refresh
+            finish_validator_refresh(spec)
+            _save_progress(spec, [x for x in PHASES if x in done], carry.get("Audit findings"))
     removal_check = None
     if spec.removal_repair_version:
         from data_sheets_schema.removal_repair import run as repair_removals
@@ -7712,6 +8000,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     if spec.shared_generation_version:
         from .typed_audit_runtime import completion_check
         rec.data["shared_generation"] = completion_check(spec, carry, record=rec.data)
+    rec.data.setdefault("model", {})["runtime_integrity"] = latch_journal.provenance(spec)
     rec.write(spec.provenance_path)
     # Persist the one-time report regeneration and its usage before refusing
     # completion; otherwise resume could admit that same call again (#1818).
@@ -7779,6 +8068,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             # a run with 11 pair errors and 19 ungrounded identifiers as a
             # success, which is how the v4 arm swept clean.
             "checks": {"pair": rec.data.get("pair_consistency"),
+                       "runtime_integrity": rec.data["model"]["runtime_integrity"],
                        "validation": rec.data.get("validation"),
                        "report": rec.data.get("report_claims"),
                        "report_audit_totals": rec.data.get("report_audit_totals"),

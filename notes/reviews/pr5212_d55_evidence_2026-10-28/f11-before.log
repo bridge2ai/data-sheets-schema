@@ -1,0 +1,62 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ TestTheRunnerGate.test_regeneration_exhaustion_survives_multiple_rechecks_and_unusable_answers _
+
+self = <tests.test_report_gate.TestTheRunnerGate testMethod=test_regeneration_exhaustion_survives_multiple_rechecks_and_unusable_answers>
+
+    def test_regeneration_exhaustion_survives_multiple_rechecks_and_unusable_answers(self):
+        root = self.out
+        for outcome in ("retained", "truncated", "discarded"):
+            with self.subTest(outcome=outcome):
+                self.out = root / outcome
+                fake = _ReportFake("| `keywords` | removed | full | gone |\n",
+                                   "| `keywords` | removed | full | gone |\n")
+                original = fake.create
+                def create(**kw):
+                    response = original(**kw)
+                    blob = " ".join(p.get("text", "") for p in kw["messages"][0]["content"])
+                    if PHASE_INSTRUCTIONS["report_regate"] in blob:
+                        if outcome == "truncated":
+                            response.stop_reason = "max_tokens"
+                        elif outcome == "discarded":
+                            return FakeResponse("No table in this answer.")
+                    return response
+                fake.create = create
+                s, result, record = self._run(fake)
+                self.assertTrue(record["report_gate"]["regeneration_attempted"])
+                self.assertEqual([u["phase"] for u in result["usage"]].count("report_regate"), 1)
+                class Boom:
+                    messages = property(lambda self: (_ for _ in ()).throw(AssertionError("must not call")))
+                # Exercise the gate itself, without the v9 terminal-refusal
+                # guard masking whether its allowance can reset (#1821).
+                from data_sheets_schema import usage_ledger
+                rejected = usage_ledger._read(s).get('report_rejections', [])
+                for _ in range(3):
+                    gate = api_runner._gate_report(s, Boom(), api_runner._model_settings(), [], {})
+                    self.assertTrue(gate["regeneration_attempted"])
+                    self.assertFalse(gate["regenerated"])
+>                   self.assertEqual(usage_ledger._read(s).get('report_rejections', []), rejected)
+E                   AssertionError: Lists differ: [{'re[7724 chars]ons'}, {'rejection_id': '1a03693361324363b9cf5[3815 chars]ed'}] != [{'re[7724 chars]ons'}]
+E                   
+E                   First list contains 1 additional elements.
+E                   First extra element 2:
+E                   {'rejection_id': '1a03693361324363b9cf5e6cac82fd59', 'stage': 'report_gate_before', 'report_sha256': '66c3c6e6abacd9e9f2a87199eb0e1af8f32f7014d5c3c8dcaddb3bcdddffede4', 'reading': {'checked': True, 'findings': [{'kind': 'removal_not_performed', 'slot': 'keywords', 'record': 'full', 'detail': 'report says removed; record has 1 entry', 'claim': '| `keywords` | removed | full | gone |'}], 'claims_checked': 1, 'claims_unnamed': 0, 'disposition_rows': 1, 'rows_by_record': {'full': 1, 'core': 0, 'both': 0, 'either': 0, 'no_record_column': 0, 'invalid': 0}, 'claims_core_cannot_hold': 0, 'snapshot_checked': True, 'snapshot_basis': 'dispositions table expected: unrecorded removals are findings', 'prose_retention_claims': 0, 'removals_unrecorded': [], 'removals_unrecorded_count': 0, 'instrument': "v8 (#1808): an explicitly full/both top-level removal is false when the key is absent from both the pinned original full snapshot and final full record; no prior-core or nested-entry identity is inferred; v7 (#1089, #1194, #1196): attributed schema claims, exact nested paths and record scopes, table positions, mixed list counts and removal suppression are distinguished; phase-1 snapshot bytes are pinned; v6 (#994): a `both` row's path is judged step by step against the core class's declared ranges rather than at its root alone, a `[*]` wildcard is a step's subscript rather than a step of its own, and `claims_core_cannot_hold` counts only a path the core cannot hold: one that descends through a scalar violates the core schema's declared range, carries its own cause and is excluded from that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the snapshot carried that the final full record does not, with no `removed` row or removal sentence naming it, is `removal_not_recorded`; a prose retention claim (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions rows by their record column — `full`, `core`, `both`, `either` for an empty cell, `no_record_column` for a table with no such column, `invalid` for anything else — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full` row resolves against the full record only), is countable from the block; v3 (#1022, #1046): a schema claim that names its own scope — the core schema, the full schema, a class — is resolved against that scope only, not against every class; v2 (#990): a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold` counts them", 'artifacts': {'report': {'path': '/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpaumryq7q/out/retained/CHORUS_reconciliation.md', 'md5': 'b76c5ac9eb15043d579ba82482906fc5'}, 'full': {'path': '/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpaumryq7q/out/retained/CHORUS_d4d.yaml', 'md5': 'c8460526646d4bf6029a573734f68f4c'}, 'core': {'path': '/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpaumryq7q/out/retained/CHORUS_d4d_core.yaml', 'md5': 'ec46fa1b7e3ab529894467adf5b2324c'}, 'phase1_snapshot': {'path': '/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpaumryq7q/out/retained/intermediate/CHORUS_full.yaml', 'sha256': '64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f', 'state': 'usable'}}, 'schema': {'full_sha256': 'eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f', 'core_sha256': '09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a'}, 'report_audit_totals': {'checked': True, 'instrument_version': 1, 'reason': None, 'stated_total': None, 'stated_totals': [], 'stated_by_severity': {}, 'computed_total': 0, 'computed_by_severity': {}, 'mismatches': [], 'findings': [], 'status': 'no_total_stated'}, '_core_findings_count': 1}, 'reason': 'report claims or required dispositions rejected'}
+E                   
+E                   Diff is 19493 characters long. Set self.maxDiff to None to see it.
+
+tests/test_report_gate.py:426: AssertionError
+----------------------------- Captured stdout call -----------------------------
+   report re-checked: 1 contradiction(s) before, 1 after
+----------------------------- Captured stderr call -----------------------------
+latch journal start: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=none path=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpaumryq7q/out/retained/CHORUS_latch_journal.jsonl
+latch journal stop: project=CHORUS label=2026-07-29_claude-opus-5-api-generic_rep1 head_sha256=0e0ff0782ea324f7c480188040c8339e3b2e1bc26fcd2250c12440bd9f53e217 path=/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/tmpaumryq7q/out/retained/CHORUS_latch_journal.jsonl
+=============================== warnings summary ===============================
+tests/test_report_gate.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+----- generated xml file: /private/tmp/codex-5212-evidence/f11-before.xml ------
+=========================== short test summary info ============================
+FAILED tests/test_report_gate.py::TestTheRunnerGate::test_regeneration_exhaustion_survives_multiple_rechecks_and_unusable_answers
+1 failed, 12 warnings in 18.29s

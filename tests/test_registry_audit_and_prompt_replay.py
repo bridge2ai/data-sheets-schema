@@ -85,3 +85,7 @@ def test_legacy_renderer_without_manifest_field_uses_only_recorded_substitutions
     replay = api.RunSpec.from_render_spec(recorded, project=spec.project, method=spec.method, label=spec.label)
     assert replay.render_version == 1
     assert api.resolve_prompt(replay) == body
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

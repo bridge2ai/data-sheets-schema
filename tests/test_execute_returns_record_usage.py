@@ -27,3 +27,8 @@ def test_a_row_recovered_at_the_final_accounting_is_returned(external, monkeypat
     assert ABANDONED in recorded
     assert ABANDONED in result["usage"]
     assert result["usage"] == recorded
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

@@ -166,9 +166,21 @@ def checks_from_record(record: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("receipt block has no authoritative run policy")
     except ValueError as exc:
         receipt = {"expected": True, "checked": False, "reason": f"receipt policy refused: {exc}"}
+    model = record.get("model")
+    integrity = ({"runtime_integrity": model["runtime_integrity"]}
+                 if isinstance(model, dict) and "runtime_integrity" in model else {})
     return {"pair": record.get("pair_consistency"), "validation": record.get("validation"),
             "report": record.get("report_claims"), "grounding": record.get("grounding"),
-            "form": record.get("form"), "receipts": receipt}
+            "form": record.get("form"), "receipts": receipt, **integrity}
+
+
+def _require_eligible_baseline(record, path):
+    model = record.get("model") if isinstance(record, dict) else None
+    if isinstance(model, dict) and "runtime_integrity" in model:
+        from .latch_journal import eligibility_problem
+        problem = eligibility_problem(model["runtime_integrity"])
+        if problem:
+            raise LookupError(f"baseline runtime integrity is ineligible: {path}: {problem}")
 
 
 def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
@@ -388,6 +400,7 @@ def baseline_for(project: str, label_prefix: str,
     worst: dict[str, int | None] = {name: None for name, _, _ in METRICS}
     for path in _baseline_records(base, method, label_prefix, project):
         rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        _require_eligible_baseline(rec, path)
         counts = counts_from({"pair": rec.get("pair_consistency"),
                               "report": rec.get("report_claims"),
                               "grounding": rec.get("grounding"),
@@ -417,6 +430,7 @@ def report_basis(project: str, label_prefix: str,
     out = {"measured": 0, "vacuous": 0, "unchecked": 0}
     for path in _baseline_records(base, method, label_prefix, project):
         rec = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        _require_eligible_baseline(rec, path)
         block = rec.get("report_claims")
         if report_vacuous(block):
             out["vacuous"] += 1
@@ -533,6 +547,15 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
             regressions.append(f"duplicate keys: {n} against a floor of 0")
         rows.append(row)
 
+    # Eligibility is separate from the measured quality counts. A disclosed
+    # assisted/unverifiable run cannot authorize a clean campaign fan-out.
+    if "runtime_integrity" in (checks or {}):
+        from .latch_journal import eligibility_problem
+        problem = eligibility_problem(checks["runtime_integrity"])
+        if problem:
+            blind.append("runtime integrity")
+            rows.append({"metric": "runtime integrity", "run": None,
+                         "baseline_worst": None, "note": f"ineligible: {problem}"})
     if blind:
         status = UNMEASURABLE
     elif baseline_requested and unbaselined:

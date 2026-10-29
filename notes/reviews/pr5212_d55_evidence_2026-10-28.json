@@ -1,0 +1,1364 @@
+{
+  "artifacts": [
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/before/command.txt",
+      "bytes": 3968,
+      "path": "/private/tmp/codex-5212-evidence/before/command.txt",
+      "sha256": "b9c453e5d84a5c73dd1952c9dc769151afe954f301753ae7bba33195ea50730c"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/before/pytest.log",
+      "bytes": 107130,
+      "path": "/private/tmp/codex-5212-evidence/before/pytest.log",
+      "sha256": "cec00686e29ce81f97d4ced6af511942ef26ef1821746bbe35d6ab14dcb620b7"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/before/results.xml",
+      "bytes": 111328,
+      "path": "/private/tmp/codex-5212-evidence/before/results.xml",
+      "sha256": "0c4946fb465008aa46cdd77463a0513be232c7bda184915d61f6426b3373f86d"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/before/selection.txt",
+      "bytes": 3568,
+      "path": "/private/tmp/codex-5212-evidence/before/selection.txt",
+      "sha256": "420b6a6f873b0c1e1053efb4a1a7286084cbfbad8373fb9f5d5ee34f8a44d5d0"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/core-first.log",
+      "bytes": 11898,
+      "path": "/private/tmp/codex-5212-evidence/core-first.log",
+      "sha256": "bbfff9609d6fde1394f52b6f20a1783b7eefa799d56e7c484e50d69e31d42214"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/core-first.xml",
+      "bytes": 23954,
+      "path": "/private/tmp/codex-5212-evidence/core-first.xml",
+      "sha256": "4a13c0362a009d6293bac3b8fd6cf7962576c05d7c0b2a6cb40fdde7bc8f6301"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/core-second.log",
+      "bytes": 918,
+      "path": "/private/tmp/codex-5212-evidence/core-second.log",
+      "sha256": "02cff75593f114be9661e82f8416cd67cfea0956ba44752c1470c01dd9170a7c"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/core-second.xml",
+      "bytes": 16337,
+      "path": "/private/tmp/codex-5212-evidence/core-second.xml",
+      "sha256": "7bad98eeaee6b8876c9cfc1de6a9432425d8c917a3db5a783174121ae77b48ec"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/f11-before.log",
+      "bytes": 8437,
+      "path": "/private/tmp/codex-5212-evidence/f11-before.log",
+      "sha256": "7152ea24cc601e7dd9230a760836ed8479b59d9e41d39472c2f754f8489f895d"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/f11-before.xml",
+      "bytes": 11124,
+      "path": "/private/tmp/codex-5212-evidence/f11-before.xml",
+      "sha256": "22873fadda36b13c976552ba97810f68315b70ea81ab9016ce4a504be7e0360a"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/f4-before.log",
+      "bytes": 4016,
+      "path": "/private/tmp/codex-5212-evidence/f4-before.log",
+      "sha256": "789b8e0ded0a4b11d1e008c0d08e73dcc19116482d490fee78237345912e90ae"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/f4-before.xml",
+      "bytes": 3483,
+      "path": "/private/tmp/codex-5212-evidence/f4-before.xml",
+      "sha256": "317fecd6177e099bf7ac06c15a41b3ded4147e423b3a64cc30277fe5d8d782d8"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-guarded-parity/baseline/capture.json",
+      "bytes": 121053,
+      "path": "/private/tmp/codex-5212-evidence/final-guarded-parity/baseline/capture.json",
+      "sha256": "9ab7abb73e55213ab49dcf125935d4f35ee71171efe013970ffb593e7b4de2d5"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-guarded-parity/baseline.log",
+      "bytes": 0,
+      "path": "/private/tmp/codex-5212-evidence/final-guarded-parity/baseline.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-guarded-parity/candidate/capture.json",
+      "bytes": 82349,
+      "path": "/private/tmp/codex-5212-evidence/final-guarded-parity/candidate/capture.json",
+      "sha256": "c54213b4c231d5da1ee6493f51d6fc3c70713893d6cf0343472fdcd869791d1c"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-guarded-parity/candidate.log",
+      "bytes": 0,
+      "path": "/private/tmp/codex-5212-evidence/final-guarded-parity/candidate.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-guarded-parity/summary.json",
+      "bytes": 82220,
+      "path": "/private/tmp/codex-5212-evidence/final-guarded-parity/summary.json",
+      "sha256": "94b70a03ef2cf16327d81e213acab53b9d9e1d6069c115558c211d9e1ec4a7a3"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-parity/baseline/capture.json",
+      "bytes": 118838,
+      "path": "/private/tmp/codex-5212-evidence/final-parity/baseline/capture.json",
+      "sha256": "c791fd5aa94de79e2620a3d613e982d271aa1e218616aee8294949b8be256d6a"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-parity/baseline.log",
+      "bytes": 0,
+      "path": "/private/tmp/codex-5212-evidence/final-parity/baseline.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-parity/candidate/capture.json",
+      "bytes": 82277,
+      "path": "/private/tmp/codex-5212-evidence/final-parity/candidate/capture.json",
+      "sha256": "8a8e8f9c2dd261a98ebd66a3c0d75b945625977cd2665f976721a0c0f35efcd8"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-parity/candidate.log",
+      "bytes": 0,
+      "path": "/private/tmp/codex-5212-evidence/final-parity/candidate.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/final-parity/summary.json",
+      "bytes": 82076,
+      "path": "/private/tmp/codex-5212-evidence/final-parity/summary.json",
+      "sha256": "eff4c12068405807ae9ccdf7e0390343ab0f45ffcce646b0a68aefc2d95a8903"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/new-before.log",
+      "bytes": 35182,
+      "path": "/private/tmp/codex-5212-evidence/new-before.log",
+      "sha256": "28911337fe514c160525c72fb4c35cb037db062df2dfa7d4b7dd8c54b5d7511d"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/new-before.xml",
+      "bytes": 41055,
+      "path": "/private/tmp/codex-5212-evidence/new-before.xml",
+      "sha256": "4272772683eb733fe1640544430207ae95852f00401754e1588ea743aad9b9cd"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/new-parity.log",
+      "bytes": 848,
+      "path": "/private/tmp/codex-5212-evidence/new-parity.log",
+      "sha256": "76d2a1e90661777fed72703999014fd86a172d997a309970530e42a131f685cf"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/new-parity.xml",
+      "bytes": 4589,
+      "path": "/private/tmp/codex-5212-evidence/new-parity.xml",
+      "sha256": "11d1c876332d66e549ed0c2dc6916d8945594dffa3227091bd0299dc67ae9728"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/old-override-before.log",
+      "bytes": 5587,
+      "path": "/private/tmp/codex-5212-evidence/old-override-before.log",
+      "sha256": "317f55c0303550ae14bd526523a3a619c13c9dcc71c3934d4c325fbf2e00f52b"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/old-override-before.xml",
+      "bytes": 4977,
+      "path": "/private/tmp/codex-5212-evidence/old-override-before.xml",
+      "sha256": "74f78b3f6bfbd06f972c30f6ba4f3a3b59b7c36f60e45488e0062abc7abebd10"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/parity-final.log",
+      "bytes": 848,
+      "path": "/private/tmp/codex-5212-evidence/parity-final.log",
+      "sha256": "997a146370827f10901d0a8356f6532ea4bc04295f8fdaa23df16f14e6a1a75b"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/parity-final.xml",
+      "bytes": 884,
+      "path": "/private/tmp/codex-5212-evidence/parity-final.xml",
+      "sha256": "21ba2202ff0ab03b13cf9dcf331133e6a433f3c649fc92b5bb1b0f13c99a1384"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/parity-initial/baseline/capture.json",
+      "bytes": 118838,
+      "path": "/private/tmp/codex-5212-evidence/parity-initial/baseline/capture.json",
+      "sha256": "c791fd5aa94de79e2620a3d613e982d271aa1e218616aee8294949b8be256d6a"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/parity-initial/baseline.log",
+      "bytes": 0,
+      "path": "/private/tmp/codex-5212-evidence/parity-initial/baseline.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/parity-initial/candidate/capture.json",
+      "bytes": 82277,
+      "path": "/private/tmp/codex-5212-evidence/parity-initial/candidate/capture.json",
+      "sha256": "8a8e8f9c2dd261a98ebd66a3c0d75b945625977cd2665f976721a0c0f35efcd8"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/parity-initial/candidate.log",
+      "bytes": 0,
+      "path": "/private/tmp/codex-5212-evidence/parity-initial/candidate.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/parity-initial/summary.json",
+      "bytes": 82076,
+      "path": "/private/tmp/codex-5212-evidence/parity-initial/summary.json",
+      "sha256": "cbfe3b25ba484b81506d59fb8004f32eb6441816341d98081501fc631dcedbb7"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/command.txt",
+      "bytes": 4698,
+      "path": "/private/tmp/codex-5212-evidence/required/command.txt",
+      "sha256": "483834ee64faf628bc362aa5144b46fd07efa2ffd49e3f403b4ff39cbff5eeb9"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/parity/baseline/capture.json",
+      "bytes": 118838,
+      "path": "/private/tmp/codex-5212-evidence/required/parity/baseline/capture.json",
+      "sha256": "c791fd5aa94de79e2620a3d613e982d271aa1e218616aee8294949b8be256d6a"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/parity/baseline.log",
+      "bytes": 0,
+      "path": "/private/tmp/codex-5212-evidence/required/parity/baseline.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/parity/candidate/capture.json",
+      "bytes": 82277,
+      "path": "/private/tmp/codex-5212-evidence/required/parity/candidate/capture.json",
+      "sha256": "8a8e8f9c2dd261a98ebd66a3c0d75b945625977cd2665f976721a0c0f35efcd8"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/parity/candidate.log",
+      "bytes": 0,
+      "path": "/private/tmp/codex-5212-evidence/required/parity/candidate.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/parity/summary.json",
+      "bytes": 82076,
+      "path": "/private/tmp/codex-5212-evidence/required/parity/summary.json",
+      "sha256": "cbfe3b25ba484b81506d59fb8004f32eb6441816341d98081501fc631dcedbb7"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/production_sources.json",
+      "bytes": 25912,
+      "path": "/private/tmp/codex-5212-evidence/required/production_sources.json",
+      "sha256": "7d8fa30ec64ae926f8d68a67cc66cc37f6b2b380e6a35b55f27a65bead6aa1cd"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/pytest.log",
+      "bytes": 6240,
+      "path": "/private/tmp/codex-5212-evidence/required/pytest.log",
+      "sha256": "7a2e68cd1f757b7942d55d1002a946d9702be295ddc5b52435d3381e234607b1"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/results.xml",
+      "bytes": 95829,
+      "path": "/private/tmp/codex-5212-evidence/required/results.xml",
+      "sha256": "23063e6d9928a50ea52624bcbcea481730541273155746b704d9bf5e8e3ad45c"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/required/selection.txt",
+      "bytes": 4242,
+      "path": "/private/tmp/codex-5212-evidence/required/selection.txt",
+      "sha256": "0267d919aaccbaec339ec5993cc321a728d29f41042afc63609467cd2be31279"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/runtime/command.txt",
+      "bytes": 3908,
+      "path": "/private/tmp/codex-5212-evidence/runtime/command.txt",
+      "sha256": "731dfcfb431372ac095ed7d22c6348d286b0c6cac9613bc83b5bde1cda840e21"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/runtime/production_sources.json",
+      "bytes": 25912,
+      "path": "/private/tmp/codex-5212-evidence/runtime/production_sources.json",
+      "sha256": "a61f09f5ba64d80c27d1897a0b708493f05caaeb1f9ea7cb398fb97659a7774d"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/runtime/pytest.log",
+      "bytes": 26022,
+      "path": "/private/tmp/codex-5212-evidence/runtime/pytest.log",
+      "sha256": "454f2ae33aec229252119f7102fe636bc55639b537276294e5041ef2b17dab19"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/runtime/results.xml",
+      "bytes": 103712,
+      "path": "/private/tmp/codex-5212-evidence/runtime/results.xml",
+      "sha256": "d3aa78bf999a7632f55ef79a5187b9dc60e81c610ecae0a2d2d94f3b5cf714b6"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/runtime/selection.txt",
+      "bytes": 3492,
+      "path": "/private/tmp/codex-5212-evidence/runtime/selection.txt",
+      "sha256": "cf590e44a5558d12cca4c68ea38e657f72671d41437b80b71628888914ff9aeb"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/subprocess-final.log",
+      "bytes": 1353,
+      "path": "/private/tmp/codex-5212-evidence/subprocess-final.log",
+      "sha256": "c54a67c0cb0c9650fdff3f06fc9c3eb97dc65a07938ad42536a5909c51139426"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/subprocess-final.xml",
+      "bytes": 1101,
+      "path": "/private/tmp/codex-5212-evidence/subprocess-final.xml",
+      "sha256": "ea97fc313d1aa4023586f7df93cb465b9b70968323d67b97331b7cdf8c3c2602"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/tamper.jsonl",
+      "bytes": 12895,
+      "path": "/private/tmp/codex-5212-evidence/tamper.jsonl",
+      "sha256": "24a72f4ab962798b0d773462379dd2af97d1a2dab1902ad1f08d4e0c2757d9eb"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/tamper.log",
+      "bytes": 1356,
+      "path": "/private/tmp/codex-5212-evidence/tamper.log",
+      "sha256": "0b0b1c21d2ad63e65d9bab27686f9bba742bcdbd148e5074dc249b0fcd6359b8"
+    },
+    {
+      "archive": "notes/reviews/pr5212_d55_evidence_2026-10-28/tamper.xml",
+      "bytes": 3240,
+      "path": "/private/tmp/codex-5212-evidence/tamper.xml",
+      "sha256": "a6e0abb2d37b7b100cb91a20564e3d1b37c053825dc7a65892775322275501a3"
+    }
+  ],
+  "base": "db88ca68c1443a91e9264cbc632a8639376e99bc",
+  "batches": {
+    "before/results.xml": {
+      "bytes": 111328,
+      "failed": 34,
+      "failures": [
+        {
+          "classname": "tests.test_evidence_generation_gate",
+          "name": "test_evidence_refusal_cannot_spend_again_on_resume[options0]",
+          "time": "16.067"
+        },
+        {
+          "classname": "tests.test_evidence_generation_gate",
+          "name": "test_evidence_refusal_cannot_spend_again_on_resume[options1]",
+          "time": "0.170"
+        },
+        {
+          "classname": "tests.test_evidence_generation_gate",
+          "name": "test_evidence_refusal_cannot_spend_again_on_resume[options2]",
+          "time": "2.859"
+        },
+        {
+          "classname": "tests.test_evidence_generation_gate",
+          "name": "test_evidence_refusal_cannot_spend_again_on_resume[options3]",
+          "time": "1.010"
+        },
+        {
+          "classname": "tests.test_evidence_generation_gate",
+          "name": "test_evidence_refusal_cannot_spend_again_on_resume[options4]",
+          "time": "0.979"
+        },
+        {
+          "classname": "tests.test_evidence_generation_gate",
+          "name": "test_shape_repair_then_evidence_refusal_is_terminal_before_phase_invalidation",
+          "time": "1.232"
+        },
+        {
+          "classname": "tests.test_evidence_phase_contract",
+          "name": "test_missing_evidence_still_stops_v10_before_reconciliation_and_resume",
+          "time": "0.171"
+        },
+        {
+          "classname": "tests.test_anonymous_relationship_evidence",
+          "name": "test_unactionable_v11_audit_stops_before_reconciliation",
+          "time": "0.154"
+        },
+        {
+          "classname": "tests.test_anonymous_relationship_evidence",
+          "name": "test_plan_that_would_erase_anchors_stops_before_paid_reconciliation",
+          "time": "0.207"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[missing_audit-2]",
+          "time": "0.134"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[audit_status-2]",
+          "time": "0.124"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[final_status-4]",
+          "time": "0.264"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_source_review_precedes_shape_repair_and_fresh_report[True]",
+          "time": "0.209"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-malformed-2]",
+          "time": "0.126"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-empty-2]",
+          "time": "0.127"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[audit-truncated-2]",
+          "time": "0.122"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report-empty-4]",
+          "time": "0.218"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report-truncated-4]",
+          "time": "0.205"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_regate-empty-5]",
+          "time": "0.709"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_regate-truncated-5]",
+          "time": "0.709"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_after_repair-empty-6]",
+          "time": "0.648"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_unusable_reviews_never_retry_or_resume[report_after_repair-truncated-6]",
+          "time": "0.732"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-reasoning]",
+          "time": "0.124"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-progress]",
+          "time": "0.131"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-phase_snapshot]",
+          "time": "0.169"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-reasoning]",
+          "time": "0.230"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-progress]",
+          "time": "0.238"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-phase_snapshot]",
+          "time": "0.237"
+        },
+        {
+          "classname": "tests.test_source_review",
+          "name": "test_refusal_survives_failure_to_preserve_its_response_snapshot",
+          "time": "0.222"
+        },
+        {
+          "classname": "tests.test_source_heading_runtime_api",
+          "name": "test_actual_sent_routing_counts_usage_and_completed_zero_calls",
+          "time": "31.436"
+        },
+        {
+          "classname": "tests.test_source_heading_runtime_api",
+          "name": "test_actual_completed_capture_is_portable_and_refuses_changed_bytes",
+          "time": "25.027"
+        },
+        {
+          "classname": "tests.test_source_heading_runtime_api",
+          "name": "test_actual_regated_report_captured_lineage",
+          "time": "24.479"
+        },
+        {
+          "classname": "tests.test_source_heading_runtime_api",
+          "name": "test_actual_default_layout_completed_capture",
+          "time": "45.472"
+        },
+        {
+          "classname": "notes.matched_cborg_2026-09-13.test_budgeted_cborg",
+          "name": "test_real_repair_catch_cannot_allow_a_cheaper_report",
+          "time": "0.005"
+        }
+      ],
+      "passed": 0,
+      "path": "/private/tmp/codex-5212-evidence/before/results.xml",
+      "sha256": "0c4946fb465008aa46cdd77463a0513be232c7bda184915d61f6426b3373f86d",
+      "skipped": 0,
+      "tests": 34
+    },
+    "core-first.xml": {
+      "bytes": 23954,
+      "failed": 5,
+      "failures": [
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_interrupted_intent_requires_exact_acknowledgement_and_can_continue",
+          "time": "0.015"
+        },
+        {
+          "classname": "tests.test_latch_journal",
+          "name": "test_terminal_override_preserves_evidence_but_never_authorizes_retry",
+          "time": "0.042"
+        },
+        {
+          "classname": "tests.test_latch_journal",
+          "name": "test_spent_transport_regate_allowance_cannot_be_refunded[false]",
+          "time": "0.058"
+        },
+        {
+          "classname": "tests.test_latch_journal",
+          "name": "test_spent_transport_regate_allowance_cannot_be_refunded[deleted]",
+          "time": "0.033"
+        },
+        {
+          "classname": "tests.test_latch_journal",
+          "name": "test_pending_call_cannot_be_erased_then_blessed_by_an_ordinary_write",
+          "time": "0.039"
+        }
+      ],
+      "passed": 87,
+      "path": "/private/tmp/codex-5212-evidence/core-first.xml",
+      "sha256": "4a13c0362a009d6293bac3b8fd6cf7962576c05d7c0b2a6cb40fdde7bc8f6301",
+      "skipped": 0,
+      "tests": 92
+    },
+    "core-second.xml": {
+      "bytes": 16337,
+      "failed": 0,
+      "failures": [],
+      "passed": 114,
+      "path": "/private/tmp/codex-5212-evidence/core-second.xml",
+      "sha256": "7bad98eeaee6b8876c9cfc1de6a9432425d8c917a3db5a783174121ae77b48ec",
+      "skipped": 0,
+      "tests": 114
+    },
+    "f11-before.xml": {
+      "bytes": 11124,
+      "failed": 1,
+      "failures": [
+        {
+          "classname": "tests.test_report_gate.TestTheRunnerGate",
+          "name": "test_regeneration_exhaustion_survives_multiple_rechecks_and_unusable_answers",
+          "time": "18.081"
+        }
+      ],
+      "passed": 0,
+      "path": "/private/tmp/codex-5212-evidence/f11-before.xml",
+      "sha256": "22873fadda36b13c976552ba97810f68315b70ea81ab9016ce4a504be7e0360a",
+      "skipped": 0,
+      "tests": 1
+    },
+    "f4-before.xml": {
+      "bytes": 3483,
+      "failed": 1,
+      "failures": [
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_interrupted_intent_requires_exact_acknowledgement_and_can_continue",
+          "time": "2.172"
+        }
+      ],
+      "passed": 0,
+      "path": "/private/tmp/codex-5212-evidence/f4-before.xml",
+      "sha256": "317fecd6177e099bf7ac06c15a41b3ded4147e423b3a64cc30277fe5d8d782d8",
+      "skipped": 0,
+      "tests": 1
+    },
+    "new-before.xml": {
+      "bytes": 41055,
+      "failed": 21,
+      "failures": [
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_guard_owns_fields_across_a_stale_writer[missing]",
+          "time": "2.346"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_guard_owns_fields_across_a_stale_writer[prefix]",
+          "time": "0.023"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_guard_owned_conflicting_value_is_refused[latch_snapshots]",
+          "time": "0.021"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_guard_owned_conflicting_value_is_refused[latch_journal]",
+          "time": "0.022"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_guard_owned_conflicting_value_is_refused[latch_overrides]",
+          "time": "0.021"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_interrupted_intent_requires_exact_acknowledgement_and_can_continue",
+          "time": "0.017"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_ineffective_override_is_refused_without_assistance[terminal]",
+          "time": "0.018"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_ineffective_override_is_refused_without_assistance[control]",
+          "time": "0.019"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_ineffective_override_is_refused_without_assistance[allowance]",
+          "time": "0.016"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_validator_refresh_cannot_be_rewound[delete]",
+          "time": "0.022"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_validator_refresh_cannot_be_rewound[pending]",
+          "time": "0.021"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_validator_refresh_cannot_be_rewound[in_flight]",
+          "time": "0.022"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_validator_refresh_new_checkpoint_is_allowed_but_same_one_cannot_repeat",
+          "time": "0.015"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_structural_refusal_names_expected_and_found[delete]",
+          "time": "0.014"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_structural_refusal_names_expected_and_found[truncate]",
+          "time": "0.014"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_structural_refusal_names_expected_and_found[payload]",
+          "time": "0.016"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_structural_refusal_names_expected_and_found[checkpoint]",
+          "time": "0.014"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_resume_needs_external_head_before_recovery_or_dispatch[None]",
+          "time": "0.014"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_resume_needs_external_head_before_recovery_or_dispatch[ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff]",
+          "time": "0.014"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_resume_accepts_recorded_head_and_fresh_launch_needs_none",
+          "time": "0.020"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_parity_baseline_tracks_target_merge_base",
+          "time": "0.308"
+        }
+      ],
+      "passed": 0,
+      "path": "/private/tmp/codex-5212-evidence/new-before.xml",
+      "sha256": "4272772683eb733fe1640544430207ae95852f00401754e1588ea743aad9b9cd",
+      "skipped": 0,
+      "tests": 21
+    },
+    "new-parity.xml": {
+      "bytes": 4589,
+      "failed": 0,
+      "failures": [],
+      "passed": 32,
+      "path": "/private/tmp/codex-5212-evidence/new-parity.xml",
+      "sha256": "11d1c876332d66e549ed0c2dc6916d8945594dffa3227091bd0299dc67ae9728",
+      "skipped": 0,
+      "tests": 32
+    },
+    "old-override-before.xml": {
+      "bytes": 4977,
+      "failed": 2,
+      "failures": [
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_pre_d56_ineffective_acknowledgement_cannot_bypass_startup[terminal]",
+          "time": "2.453"
+        },
+        {
+          "classname": "tests.test_pr5212_d55_fixes",
+          "name": "test_pre_d56_ineffective_acknowledgement_cannot_bypass_startup[control]",
+          "time": "0.015"
+        }
+      ],
+      "passed": 0,
+      "path": "/private/tmp/codex-5212-evidence/old-override-before.xml",
+      "sha256": "74f78b3f6bfbd06f972c30f6ba4f3a3b59b7c36f60e45488e0062abc7abebd10",
+      "skipped": 0,
+      "tests": 2
+    },
+    "parity-final.xml": {
+      "bytes": 884,
+      "failed": 0,
+      "failures": [],
+      "passed": 5,
+      "path": "/private/tmp/codex-5212-evidence/parity-final.xml",
+      "sha256": "21ba2202ff0ab03b13cf9dcf331133e6a433f3c649fc92b5bb1b0f13c99a1384",
+      "skipped": 0,
+      "tests": 5
+    },
+    "required/results.xml": {
+      "bytes": 95829,
+      "failed": 1,
+      "failures": [
+        {
+          "classname": "tests.test_provenance_header.TestEveryArtifactWriteIsStamped",
+          "name": "test_the_repaired_record_on_disk_carries_the_stamp",
+          "time": "0.012"
+        }
+      ],
+      "passed": 589,
+      "path": "/private/tmp/codex-5212-evidence/required/results.xml",
+      "sha256": "23063e6d9928a50ea52624bcbcea481730541273155746b704d9bf5e8e3ad45c",
+      "skipped": 0,
+      "tests": 590
+    },
+    "runtime/results.xml": {
+      "bytes": 103712,
+      "failed": 4,
+      "failures": [
+        {
+          "classname": "tests.test_usage_ledger",
+          "name": "test_interrupted_fresh_generation_cannot_recover_previous_charges[before_progress-False]",
+          "time": "4.864"
+        },
+        {
+          "classname": "tests.test_usage_ledger",
+          "name": "test_interrupted_fresh_generation_cannot_recover_previous_charges[full-False]",
+          "time": "4.862"
+        },
+        {
+          "classname": "tests.test_usage_ledger",
+          "name": "test_interrupted_fresh_generation_cannot_recover_previous_charges[core-False]",
+          "time": "4.870"
+        },
+        {
+          "classname": "tests.test_usage_ledger",
+          "name": "test_interrupted_fresh_generation_cannot_recover_previous_charges[full-True]",
+          "time": "5.157"
+        }
+      ],
+      "passed": 485,
+      "path": "/private/tmp/codex-5212-evidence/runtime/results.xml",
+      "sha256": "d3aa78bf999a7632f55ef79a5187b9dc60e81c610ecae0a2d2d94f3b5cf714b6",
+      "skipped": 0,
+      "tests": 489
+    },
+    "subprocess-final.xml": {
+      "bytes": 1101,
+      "failed": 0,
+      "failures": [],
+      "passed": 6,
+      "path": "/private/tmp/codex-5212-evidence/subprocess-final.xml",
+      "sha256": "ea97fc313d1aa4023586f7df93cb465b9b70968323d67b97331b7cdf8c3c2602",
+      "skipped": 0,
+      "tests": 6
+    },
+    "tamper.xml": {
+      "bytes": 3240,
+      "failed": 0,
+      "failures": [],
+      "passed": 23,
+      "path": "/private/tmp/codex-5212-evidence/tamper.xml",
+      "sha256": "a6e0abb2d37b7b100cb91a20564e3d1b37c053825dc7a65892775322275501a3",
+      "skipped": 0,
+      "tests": 23
+    }
+  },
+  "branch": "codex/wave5-5212-d55-fixes-20261028",
+  "chorus_shared_v1": {
+    "baseline_commit": "f8c5ac73caba610d40c49aaceddb31ead3590a72",
+    "bodies": {
+      "full": {
+        "bytes": 208062,
+        "identical": true,
+        "sha256": "c798816e681d845c8583bf4f8d72eff2e9f3c5aaf9e378afb57e691d04977dae"
+      },
+      "full_receipt_completion": {
+        "bytes": 215592,
+        "identical": true,
+        "sha256": "468cbfe4185446edb43a60d34e3f924d4cd51dad92f6a9c41419e619add91f25"
+      },
+      "reconcile_full": {
+        "bytes": 209471,
+        "identical": true,
+        "sha256": "52e480fd4f973330cc9fc281b58ccd6cd9ff8af82db77bde2077e989ff23c4a9"
+      },
+      "report": {
+        "bytes": 212025,
+        "identical": true,
+        "sha256": "5b74158d07111763a8e7531c7d9f037e0ca9b71255837fcfcad039739441fffc"
+      },
+      "report_regate": {
+        "bytes": 210368,
+        "identical": true,
+        "sha256": "9e991388c49c4c70e6a42b27187d8e452008f9cb212a3e6bf5658451bd88b586"
+      },
+      "typed_audit_integration": {
+        "bytes": 200958,
+        "identical": true,
+        "sha256": "7cfff536a9a609f493f978e39022110af42fef3e370fe63a52d4f2973161f91d"
+      },
+      "typed_audit_omission": {
+        "bytes": 136126,
+        "identical": true,
+        "sha256": "800fe7f313218da42dff5839bd90c0f80d80b86ddf72f68b53c0962d835d3aed"
+      },
+      "typed_audit_worker:worker_0001": {
+        "bytes": 183739,
+        "identical": true,
+        "sha256": "97ace9842d4efd133f027f4782e29d7eb0464f9d9d5d3575564f6847312794d1"
+      }
+    },
+    "summary": {
+      "bytes": 82076,
+      "path": "/private/tmp/codex-5212-evidence/final-parity/summary.json",
+      "sha256": "eff4c12068405807ae9ccdf7e0390343ab0f45ffcce646b0a68aefc2d95a8903"
+    }
+  },
+  "f2": [
+    {
+      "before": "failed",
+      "node": "tests/test_evidence_generation_gate.py::test_evidence_refusal_cannot_spend_again_on_resume[options0]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_evidence_generation_gate.py::test_evidence_refusal_cannot_spend_again_on_resume[options1]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_evidence_generation_gate.py::test_evidence_refusal_cannot_spend_again_on_resume[options2]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_evidence_generation_gate.py::test_evidence_refusal_cannot_spend_again_on_resume[options3]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_evidence_generation_gate.py::test_evidence_refusal_cannot_spend_again_on_resume[options4]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_evidence_generation_gate.py::test_shape_repair_then_evidence_refusal_is_terminal_before_phase_invalidation",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_evidence_phase_contract.py::test_missing_evidence_still_stops_v10_before_reconciliation_and_resume",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_anonymous_relationship_evidence.py::test_unactionable_v11_audit_stops_before_reconciliation",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_anonymous_relationship_evidence.py::test_plan_that_would_erase_anchors_stops_before_paid_reconciliation",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[missing_audit-2]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[audit_status-2]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[final_status-4]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_source_review_precedes_shape_repair_and_fresh_report[True]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[audit-malformed-2]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[audit-empty-2]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[audit-truncated-2]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[report-empty-4]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[report-truncated-4]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[report_regate-empty-5]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[report_regate-truncated-5]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[report_after_repair-empty-6]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_unusable_reviews_never_retry_or_resume[report_after_repair-truncated-6]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-reasoning]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-progress]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-phase_snapshot]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-reasoning]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-progress]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-phase_snapshot]",
+      "passed": true
+    },
+    {
+      "before": "failed",
+      "node": "tests/test_source_review.py::test_refusal_survives_failure_to_preserve_its_response_snapshot",
+      "passed": true
+    }
+  ],
+  "production_sources": [
+    {
+      "bytes": 35765,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py",
+      "sha256": "f2ac548c3797c276c3bc3c4882e18787bdc581a39453a859b67216ef7dc24435"
+    },
+    {
+      "bytes": 445749,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py",
+      "sha256": "39c0aa22b6e32c3bfc8ea917225643bd9e1cff82cfbd9a43aeb4f7aafa477613"
+    },
+    {
+      "bytes": 15353,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/source_heading_admission.py",
+      "sha256": "1671f568ca80672264661b414d9a456fbc9fee54da51975d799ce5ea5939b843"
+    },
+    {
+      "bytes": 91916,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/cli/api.py",
+      "sha256": "c2e702ecec845bd74c5a31bd277a5c420bf7f901939e43364bdc29d6116f5ff2"
+    },
+    {
+      "bytes": 48839,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/shared_generation.py",
+      "sha256": "3b8925b678f7dc0ca344489ec327e73102057bdf19c6d2404b2a1759ed810047"
+    }
+  ],
+  "scope": "Serial selected offline tests; overlapping batches, not a full-suite or CI claim.",
+  "tamper": [
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: typed audit failed terminally; generation cannot buy another response",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "a0_untampered_failed_typed_audit",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: unacknowledged discrepancy; required event_sha256s=09ca16d313d5cb45cdd21bfe3aa0cc2b4e40fb26ddba7991ef26daecfa6d0de7,32f99a8fe412b1d2522e71a1c5633cc6825118c0226ec0f6a39057d5ce264c33,372f258473b7d6b3af55f3c67a65702da5d5c7c53379912be73c7b324e1a2981,c2e5175b8136138a445fb6e25d83546766d8553e58066b6db6d56e9a27c1923a; discrepancies=[{\"event_sha256\":\"c2e5175b8136138a445fb6e...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "phases": [],
+      "scenario": "a_10_22a_reset",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: unacknowledged discrepancy; required event_sha256s=227fde361fbabe1433742bf3158e64b9dd0fd67e4f149ff656c3ed73c14b2de3,3160bd65bdc77f8dd35030a3dfc587b63f6a726ed459b9cbfc6b987eae3cf57f,396e921196b2a73aed0151fc9e8b2b7fa5670bcb2e42559a3935af6a16cb52f4,a8fc5976a5fbc3f8c270b2d361bc33b825b53feb52a874193b22b49846596da6,e911591a838fb51b47146c04cb471f6b3581f44d2f0fdaba6bd0956c...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "phases": [],
+      "scenario": "a_10_22a_reset_plus_traces",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: unacknowledged discrepancy; required event_sha256s=251d821cf1b2a5d1af7a834f6aa76ca547c4a839eebdf169e6ba8454e282329f,53534e31d3aa151c15cc75f89b97ec2909ab8993750b0f1a6eee3119e48ac148,8650b39238a16d1abcfe9a8df6d8836d305e7cd21f6e3f8af8b8365af3424875,a0262906fd98c52ec73748e3e9b9baba713a8ec2868ccd55686807fece237632,c44aa4bbcb2ec77ad5dc3cb75ad70fd47db2dadc7101aeb1d2ba8ee3...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "phases": [],
+      "scenario": "b_10_20a_edit3",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: unacknowledged discrepancy; required event_sha256s=0e140570f57fda0347ade0356e2bf51225037e4038c63f460a5edfdd9a824d5d,16048b6d987a0181366766d66cecf8554762b7084a8cda31a226a6286c445f03,738d0b393e8e1b12b0bd295cb985eceb20540da2e6b9c9e193e6364c1bbd70f4; discrepancies=[{\"event_sha256\":\"738d0b393e8e1b12b0bd295cb985eceb20540da2e6b9c9e193e6364c1bbd70f4\",\"expected\":{\"response_...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "phases": [],
+      "scenario": "c_10_20a_edit4",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: unacknowledged discrepancy; required event_sha256s=4763a4e287b4944ee00c888a20915bfdef0f931ca11ff28faf188a358a0c8311,5143d22d885ba5d627c2d38478007ce09e4baa38d0853c87e4bcb0f77ae17dc0,6b379d3bede71ae5fb2b11a04481ef9211850e2ec9a3945b2e23043167ab966c; discrepancies=[{\"event_sha256\":\"6b379d3bede71ae5fb2b11a04481ef9211850e2ec9a3945b2e23043167ab966c\",\"expected\":{\"response_...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "phases": [],
+      "scenario": "c_10_20a_edit4_plus_progress",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: resume journal head: expected=c26674b82e313e84fc9a600479904e79ef7fb376d1fbb674a1dfb55b838a92e5; found=fc7b213025f47efa91857825dcff30dc325369d5e91c1210673032e4f6a756e0",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "d_truncate_last_line",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: empty or truncated journal: expected=nonempty newline-terminated events; found=146570 bytes, trailing_newline=False",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "d_truncate_mid_line",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: broken chain: expected=valid hash-chained event; found=invalid event at line 45: expected previous_sha256=20a6b955791c22d6d6c2ad6391ec342bf90855712787cbe7cb57dc450a106367, sha256=8a70b509f889cd6c2146b8bfbf0d9614e149b7480b64138c48702d1054eb848c, line=45, version=1; found previous_sha256=20a6b955791c22d6d6c2ad6391ec342bf90855712787cbe7cb57dc450a106367, sha256=eacc72c...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "d_edit_payload",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: resume journal head: expected=cee610e56feb1b1f268ffe2a8c1b70a6da482ae8de14bd3342d98df62c8dcd53; found=missing",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "d_delete_journal",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: resume journal head: expected=7601e96da8facb08ce6a02d2fccab18a40b1caa3b21ffec83983d772f9e6c5ef; found=missing",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "d_delete_journal_and_checkpoint",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: resume journal head: expected=1e76308d1a2a78b36cd22b5fbb15fee8143d99e23729917d22727a8089d6560a; found=c7cb70e9935e61e4d30ff114e40242fb69a51674137f5a044d5a95d633e70c42",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "d_forged_rechain",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 0,
+      "detail": "UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; override refused without recording assistance",
+      "dispatches": 0,
+      "outcome": "refused",
+      "override_recorded": false,
+      "scenario": "e_override_10_22a",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "detail": null,
+      "dispatches": 3,
+      "first_refusal": "UsageLedgerError: latch journal: unacknowledged discrepancy; required event_sha256s=f26363fb213df14683d20916f2752acaaef2346177b15b8f3564895cd1dd3b14; discrepancies=[{\"event_sha256\":\"f26363fb213df14683",
+      "integrity": {
+        "assisted": true,
+        "authentication": "not_cryptographically_authenticated",
+        "evidence_only": true,
+        "format": "d4d_latch_guard_v1",
+        "journal": {
+          "head_sha256": "694bfef93fd1484444f3d617f352472d7ea2be8c08e87c47040e0c8850c8d1e2",
+          "line_count": 17,
+          "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_e_valid_override_on_a_pat0/out/CHORUS_latch_journal.jsonl",
+          "sha256": "930c3b295eadff98e9e6e8b363ecc30968583f9131fbf25bb5a2b517597922fd"
+        },
+        "overrides": [
+          {
+            "acknowledgement": {
+              "authorization": "D42 fixture: owner authorized continuing after the named edit",
+              "authorized_at": "2026-10-27T12:00:00-07:00",
+              "authorized_by": "fixture owner",
+              "event_sha256s": [
+                "f26363fb213df14683d20916f2752acaaef2346177b15b8f3564895cd1dd3b14"
+              ],
+              "format": "d4d_latch_override_v1",
+              "generation_id": "316de2a808e84aba9bd07867667a8715",
+              "identity": {
+                "condition": "generic",
+                "label": "2026-07-29_claude-opus-5-api-generic_rep1",
+                "method": "claudecode_agent",
+                "project": "CHORUS"
+              }
+            },
+            "discrepancies": [
+              {
+                "event_sha256": "f26363fb213df14683d20916f2752acaaef2346177b15b8f3564895cd1dd3b14",
+                "expected": {
+                  "index_path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_e_valid_override_on_a_pat0/out/intermediate/CHORUS_snapshot_index.json",
+                  "name": "CHORUS_full.yaml",
+                  "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_e_valid_override_on_a_pat0/out/intermediate/CHORUS_full.yaml",
+                  "sha256": "64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f",
+                  "usage_id": "3c801fb4ec9646a6a5abd0a1f3638bb2"
+                },
+                "found": {
+                  "index_path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_e_valid_override_on_a_pat0/out/intermediate/CHORUS_snapshot_index.json",
+                  "name": "CHORUS_full.yaml",
+                  "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_e_valid_override_on_a_pat0/out/intermediate/CHORUS_full.yaml",
+                  "sha256": "982181a0277e442128caf7b328152dbd02949b0008d5c81b6a2087378c9f4922",
+                  "usage_id": "3c801fb4ec9646a6a5abd0a1f3638bb2"
+                },
+                "key": "snapshot:85d27a73f23874a0a8e06206453e59da04f8f3613225c1a282105d8b7e46b8e9"
+              },
+              {
+                "event_sha256": "f26363fb213df14683d20916f2752acaaef2346177b15b8f3564895cd1dd3b14",
+                "expected": "64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f",
+                "found": "982181a0277e442128caf7b328152dbd02949b0008d5c81b6a2087378c9f4922",
+                "key": "snapshot:85d27a73f23874a0a8e06206453e59da04f8f3613225c1a282105d8b7e46b8e9:bytes"
+              },
+              {
+                "event_sha256": "f26363fb213df14683d20916f2752acaaef2346177b15b8f3564895cd1dd3b14",
+                "expected": {
+                  "name": "CHORUS_full.yaml",
+                  "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_e_valid_override_on_a_pat0/out/intermediate/CHORUS_full.yaml",
+                  "sha256": "64bea46796fc5ce0198c255c9b0b81d73d2663efb518729b6561352aa993268f",
+                  "usage_id": "3c801fb4ec9646a6a5abd0a1f3638bb2"
+                },
+                "found": {
+                  "name": "CHORUS_full.yaml",
+                  "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_e_valid_override_on_a_pat0/out/intermediate/CHORUS_full.yaml",
+                  "sha256": "982181a0277e442128caf7b328152dbd02949b0008d5c81b6a2087378c9f4922",
+                  "usage_id": "3c801fb4ec9646a6a5abd0a1f3638bb2"
+                },
+                "key": "snapshot:85d27a73f23874a0a8e06206453e59da04f8f3613225c1a282105d8b7e46b8e9:index"
+              }
+            ],
+            "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_e_valid_override_on_a_pat0/out/CHORUS_latch_override.json",
+            "sha256": "4eba1a5424565a87a27644116203cd6452f50ca242f4c8a148d47b9cb20257ef"
+          }
+        ],
+        "verified": true
+      },
+      "outcome": "completed",
+      "scenario": "e_override_patched_response",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "detail": "UsageLedgerError: latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set; discrepancies=[{\"event_sha256\":\"5b3931ba7e41908e929c010b3e7d2127e53d8d5b0c610c147ef41e0117d49060\",\"expected\":{\"canonical_bytes\":457,\"canonical_sha256\":\"a4c90a8dae76a0322977b40ccf153b6e387d9d8e27ebb88e27c1a1172e1b2604\",\"type\":\"dict\"},\"found\":{\"canonical_bytes\":45...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "f_override_other_event",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "detail": "UsageLedgerError: latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set; discrepancies=[{\"event_sha256\":\"299141e3f1738a66007f7b099947ba0003095914423db398b2e08dcb26fc7f86\",\"expected\":{\"canonical_bytes\":457,\"canonical_sha256\":\"951e4549bf514e5e9f3ee3656109a4b59a5e6b85caf04aca42f315329644ff12\",\"type\":\"dict\"},\"found\":{\"canonical_bytes\":45...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "f_override_extra_event",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "detail": "UsageLedgerError: latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set; discrepancies=[{\"event_sha256\":\"ee608cee5f2eb93faa98bf1d041572a0239b484d58921d0a9f48ae58db091c3a\",\"expected\":{\"canonical_bytes\":457,\"canonical_sha256\":\"bc26167c9febf25f3c9320ab9bb0f680087919b9e375b6980d21f89c891a6568\",\"type\":\"dict\"},\"found\":{\"canonical_bytes\":45...",
+      "dispatches": 0,
+      "outcome": "refused",
+      "scenario": "f_override_wrong_generation",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "abandoned_rows": 1,
+      "detail": null,
+      "dispatches": 5,
+      "outcome": "completed",
+      "scenario": "g_permitted_retry",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "detail": null,
+      "dispatches": 3,
+      "outcome": "completed",
+      "scenario": "g_resume_after_retry",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "counts": 2,
+      "detail": null,
+      "dispatches": 4,
+      "first_phases": [
+        "full",
+        "full",
+        "full_receipt_completion",
+        "typed_audit_worker"
+      ],
+      "outcome": "completed",
+      "phases": [
+        "typed_audit_omission",
+        "typed_audit_integration",
+        "reconcile_full",
+        "report"
+      ],
+      "rerun": "already_complete",
+      "rerun_detail": null,
+      "rerun_dispatches": 0,
+      "scenario": "g_shared_retry_then_resume",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "integrity": {
+        "assisted": false,
+        "authentication": "not_cryptographically_authenticated",
+        "evidence_only": false,
+        "format": "d4d_latch_guard_v1",
+        "journal": {
+          "head_sha256": "f0431961525364e8da5f4bdbd20e67fe4dab17d155d9eea048d4db92950b57da",
+          "line_count": 56,
+          "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_h_normal_completion_pins_0/output/EXAMPLE_latch_journal.jsonl",
+          "sha256": "486e89baa555cf55f32b43459024d549f7c58f0f39e7c413e58bc81565e64464"
+        },
+        "overrides": [],
+        "verified": true
+      },
+      "journal_sha_matches": true,
+      "outcome": "completed",
+      "phases": [
+        "full",
+        "full_receipt_completion",
+        "typed_audit_worker",
+        "typed_audit_omission",
+        "typed_audit_integration",
+        "reconcile_full",
+        "report"
+      ],
+      "rerun": "already_complete",
+      "rerun_dispatches": 0,
+      "scenario": "h_normal_completion",
+      "tree": "codex-D55-working-tree",
+      "validation_problems": []
+    },
+    {
+      "detail": null,
+      "outcome": "completed",
+      "phases": [
+        "full",
+        "full_receipt_completion",
+        "typed_audit_worker",
+        "typed_audit_omission",
+        "typed_audit_integration",
+        "reconcile_full",
+        "report",
+        "report_regate"
+      ],
+      "scenario": "h_first_regate",
+      "tree": "codex-D55-working-tree"
+    },
+    {
+      "acknowledgement_required": true,
+      "resume": "completed",
+      "resume_detail": null,
+      "resume_dispatches": 3,
+      "scenario": "fp_crash_window",
+      "tree": "codex-D55-working-tree"
+    }
+  ],
+  "tamper_refusals": {
+    "cases": 16,
+    "cases_measuring_token_counts": 13,
+    "dispatches": 0,
+    "measured_token_counts": 0
+  }
+}

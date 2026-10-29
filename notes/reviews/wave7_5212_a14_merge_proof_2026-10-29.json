@@ -1,0 +1,37 @@
+{
+  "base": "cd07f2a3738e146eeaa30ae86d35d3161eb3413b",
+  "canonical_hashes_matches_a14_sha256": "39b93c009457681a1d8d8b8afee5a869bbd6f5e70b6f4332522db5d7e22d0584",
+  "format": "wave7_5212_a14_exact_union_v1",
+  "left": "39d6c33b5abdcd05bd8ec830211adb9caf013acb",
+  "left_change": "Exactly one latch_journal.py line added after usage_ledger.py in ROUTING_CODE.",
+  "merge": "c119d58ddf18cc7c4a77bc8293d09335ab24f921",
+  "merged_exact_union": true,
+  "protected_path": "src/data_sheets_schema/shared_generation.py",
+  "protected_sources": {
+    "base": {
+      "bytes": 48780,
+      "sha256": "3ae7e8f5b039c65a7feaf61efdbb9dc25f2f38e5f5fc920111267aab4e8fcad0"
+    },
+    "left": {
+      "bytes": 48839,
+      "sha256": "136b62d5f1c3e0f942812b5fedcc5b3a26a9cd5d82e9a8230a7ed08ec01e86ad"
+    },
+    "merged": {
+      "bytes": 57094,
+      "sha256": "8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47"
+    },
+    "right": {
+      "bytes": 57035,
+      "sha256": "ebd73f9ef26f7b37ea5477a01183e2264885425742e70c76e23a7f832c8be140"
+    }
+  },
+  "protected_worktree_index_and_merge_blob_identical": true,
+  "right": "8b885ee68262474275316755c3fc55dc05517dcb",
+  "right_recovered_by_removing_only_left_line": true,
+  "run_attic_and_decision_diff_empty": true,
+  "scientific_acceptance": "not_assessed",
+  "source_was_only_auto_merged": "No helper write operation targets source or tests; Git auto-merge was retained.",
+  "test_resolution": "Exact A14 file followed by exact D57 module-level journal_launch_monitor marker.",
+  "test_sha256": "c032acdb3ec97302729ec1a2261843ea71794202494680b1664cf1846951fae4",
+  "verification_head": "c119d58ddf18cc7c4a77bc8293d09335ab24f921"
+}

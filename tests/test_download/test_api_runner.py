@@ -10,6 +10,7 @@ import re
 import time
 import unittest
 
+import pytest
 import yaml
 import unittest.mock
 from pathlib import Path
@@ -27,6 +28,231 @@ from data_sheets_schema.api_runner import (
 )
 
 BUNDLE = Path("data/preprocessed/concatenated/CHORUS_preprocessed.txt")
+
+
+class TestValidatorRepairRefreshCheckpoint:
+    """R9b/#5157: accepted shape repair survives its later report interruption."""
+
+    @pytest.fixture(autouse=True)
+    def offline_refresh(self, monkeypatch):
+        import socket
+        from data_sheets_schema import api_runner as api
+        monkeypatch.setattr(socket.socket, "connect", lambda *a, **k: pytest.fail("network forbidden"))
+        monkeypatch.setattr(api, "provider_identity", lambda: {"provider": None, "base_url": None, "key_env": None})
+        monkeypatch.setattr(api, "MAX_ATTEMPTS", 1)
+
+    def pending(self, tmp_path, monkeypatch):
+        from data_sheets_schema import api_runner as api
+        from tests.test_report_admission import Counted, client_for, example, repaired_once
+        repaired_once(monkeypatch, "full")
+        selected = example(tmp_path)
+        real_refresh = api._regenerate_report
+
+        def interrupted(*args, **kwargs):
+            raise KeyboardInterrupt("R9b interruption before refreshed report admission")
+
+        monkeypatch.setattr(api, "_regenerate_report", interrupted)
+        messages = Counted(selected)
+        with pytest.raises(KeyboardInterrupt, match="R9b interruption"):
+            api.execute(selected, client=client_for(messages))
+        monkeypatch.setattr(api, "_regenerate_report", real_refresh)
+        return selected, messages
+
+    def test_refused_refresh_preserves_the_repaired_artifact_progress(self, tmp_path, monkeypatch):
+        """Original R9b reproducer, plus terminal refusal and repair-history retention."""
+        from dataclasses import replace
+        import hashlib
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for, example, repaired_once
+        repaired_once(monkeypatch, "full")
+        selected = example(tmp_path)
+        messages = Counted(selected, counts={"report_after_repair": 772001})
+        with pytest.raises(RuntimeError, match="report_refresh_not_admitted"):
+            api.execute(selected, client=client_for(messages))
+        assert ledger.evidence_refusal(selected)["reading"]["findings"][0]["kind"] == "report_refresh_not_admitted"
+        assert "report_after_repair" not in messages.phases
+        progress = json.loads(api._progress_path(selected).read_bytes())
+        assert progress["artifact_md5"]["full"] == hashlib.md5(selected.full_path.read_bytes()).hexdigest()
+        checkpoint = ledger.validator_refresh(selected)["checkpoint"]
+        assert progress[api.VALIDATOR_REFRESH_KEY] == checkpoint
+        assert checkpoint["repair"] == [{"phase": "repair_full", "round": 1, "outcome": "synthetic rewrite"}]
+        before = (api._progress_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
+        again = Counted(selected)
+        with pytest.raises(RuntimeError, match="report_refresh_not_admitted"):
+            api.execute(replace(selected), client=client_for(again))
+        assert not again.calls and not again.count_calls
+        assert before == (api._progress_path(selected).read_bytes(), ledger.ledger_path(selected).read_bytes())
+
+    def test_interruption_before_refresh_does_not_restart_the_sealed_full(self, tmp_path, monkeypatch):
+        """Original R9b reproducer strengthened to require exactly the owed refresh."""
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for
+        selected, first = self.pending(tmp_path, monkeypatch)
+        assert ledger.evidence_refusal(selected) is None
+        state = ledger.validator_refresh(selected)
+        assert state["state"] == "pending" and "usage_id" not in state
+        from data_sheets_schema import snapshot_store
+        initial = ledger._read(selected)
+        generation, old_ids = initial["generation_id"], {row["usage_id"] for row in initial["rows"]}
+        receipt = initial["receipt_completion"]
+        original_snapshot = snapshot_store.read_latest(selected.provenance_path.parent, selected.project,
+            f"{selected.project}_full.yaml", spec=selected)[1][1]
+        monkeypatch.setattr(api, "_repair_invalid", lambda *a, **k: pytest.fail("accepted repair must not repeat"))
+        again = Counted(selected)
+        result = api.execute(replace(selected), client=client_for(again))
+        assert "full" not in again.phases
+        assert again.phases == ["report_after_repair"]
+        assert again.counted == ["report_after_repair"]
+        assert result["validation_problems"] == []
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert record["repair"] == state["checkpoint"]["repair"]
+        assert record["report_regenerated_after_repair"]["refreshed"] is True
+        settled = ledger._read(selected)
+        assert settled["receipt_completion"] == receipt
+        assert settled["generation_id"] == generation
+        assert old_ids < {row["usage_id"] for row in settled["rows"]}
+        assert len(settled["rows"]) == len(old_ids) + 1
+        assert snapshot_store.read_latest(selected.provenance_path.parent, selected.project,
+            f"{selected.project}_full.yaml", spec=selected)[1][1] == original_snapshot
+        assert ledger.validator_refresh(selected)["state"] == "accepted"
+        assert len(record["api_usage"]) == len(first.phases) + 1
+        replay = Counted(selected)
+        assert api.execute(replace(selected), client=client_for(replay))["already_complete"]
+        assert not replay.calls and not replay.count_calls
+
+    def test_missing_corrupt_or_stale_checkpoint_refuses_before_calls(self, tmp_path, monkeypatch):
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for
+        selected, _ = self.pending(tmp_path, monkeypatch)
+        progress_path, ledger_path = api._progress_path(selected), ledger.ledger_path(selected)
+        original = {p: p.read_bytes() for p in (progress_path, ledger_path, selected.full_path,
+                                               selected.core_path, selected.report_path)}
+        progress = json.loads(original[progress_path])
+        data = json.loads(original[ledger_path])
+        mutations = [
+            (progress_path, None), (progress_path, b"{broken"), (progress_path, b"[]"),
+            (progress_path, json.dumps({k: v for k, v in progress.items() if k != api.VALIDATOR_REFRESH_KEY}).encode()),
+            (progress_path, json.dumps({**progress, "completed": ["full"]}).encode()),
+            (progress_path, json.dumps({**progress, "artifact_md5": {"full": "0" * 32}}).encode()),
+            (progress_path, json.dumps({**progress, "Audit findings": "{}"}).encode()),
+            (selected.full_path, original[selected.full_path] + b"\n# external change\n"),
+            (selected.core_path, original[selected.core_path] + b"\n# external change\n"),
+            (selected.report_path, original[selected.report_path] + b"\nChanged report.\n"),
+            (ledger_path, json.dumps({**data, api.VALIDATOR_REFRESH_KEY: None}).encode()),
+            (ledger_path, json.dumps({**data, api.VALIDATOR_REFRESH_KEY: {
+                **data[api.VALIDATOR_REFRESH_KEY], "state": "unknown"}}).encode()),
+            (ledger_path, json.dumps({k: v for k, v in data.items() if k != api.VALIDATOR_REFRESH_KEY}).encode()),
+        ]
+        for path, changed in mutations:
+            if changed is None:
+                path.unlink()
+            else:
+                path.write_bytes(changed)
+            before_attempt = {p: p.read_bytes() if p.exists() else None for p in original}
+            again = Counted(selected)
+            # The existing selected-output ownership guard parses declarations
+            # before controller recovery. Preserve its earlier strict refusals.
+            error, message = ledger.UsageLedgerError, "validator repair report refresh"
+            if path == progress_path and changed == b"{broken":
+                error, message = ValueError, "^unreadable selected ownership declaration:"
+            elif path == progress_path and changed == b"[]":
+                error, message = ValueError, "^selected ownership declaration must be a mapping:"
+            with pytest.raises(error, match=message):
+                api.execute(replace(selected), client=client_for(again))
+            assert not again.calls and not again.count_calls
+            assert {p: p.read_bytes() if p.exists() else None for p in original} == before_attempt
+            for saved, raw in original.items():
+                saved.write_bytes(raw)
+        again = Counted(selected)
+        api.execute(replace(selected), client=client_for(again))
+        assert again.phases == ["report_after_repair"]
+
+    def test_paid_refresh_interruption_refuses_duplicate_dispatch(self, tmp_path, monkeypatch):
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for, example, repaired_once
+        repaired_once(monkeypatch, "full")
+        selected = example(tmp_path)
+        real_refresh = api._regenerate_report
+
+        def interrupted(*args, **kwargs):
+            assert real_refresh(*args, **kwargs)
+            raise KeyboardInterrupt("after paid refresh write, before accepted checkpoint")
+
+        monkeypatch.setattr(api, "_regenerate_report", interrupted)
+        first = Counted(selected)
+        with pytest.raises(KeyboardInterrupt, match="after paid refresh"):
+            api.execute(selected, client=client_for(first))
+        assert first.phases.count("report_after_repair") == 1
+        assert ledger.validator_refresh(selected)["state"] == "in_flight"
+        monkeypatch.setattr(api, "_regenerate_report", real_refresh)
+        for _ in range(2):
+            again = Counted(selected)
+            with pytest.raises(ledger.UsageLedgerError, match="without an accepted completion"):
+                api.execute(replace(selected), client=client_for(again))
+            assert not again.calls and not again.count_calls
+
+    @pytest.mark.parametrize("bad_report", [False, True])
+    def test_accepted_refresh_survives_interrupted_completion_checkpoint(self, tmp_path, monkeypatch, bad_report):
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for, example, repaired_once
+        repaired_once(monkeypatch, "full")
+        selected = example(tmp_path)
+        real_finish = ledger.finish_validator_refresh
+
+        def interrupted(spec):
+            real_finish(spec)
+            raise KeyboardInterrupt("after accepted refresh, before progress/final provenance")
+
+        monkeypatch.setattr(ledger, "finish_validator_refresh", interrupted)
+        first = Counted(selected, bad_report=bad_report)
+        with pytest.raises(KeyboardInterrupt, match="after accepted refresh"):
+            api.execute(selected, client=client_for(first))
+        assert first.phases.count("report_after_repair") == 1
+        assert ledger.validator_refresh(selected)["state"] == "accepted"
+        monkeypatch.setattr(ledger, "finish_validator_refresh", real_finish)
+        monkeypatch.setattr(api, "_repair_invalid", lambda *a, **k: pytest.fail("accepted repair must not repeat"))
+        again = Counted(selected, bad_report=bad_report)
+        api.execute(replace(selected), client=client_for(again))
+        assert again.phases == (["report_regate"] if bad_report else [])
+        assert again.counted == again.phases
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert record["report_regenerated_after_repair"]["refreshed"] is True
+        assert record["repair"] == ledger.validator_refresh(selected)["checkpoint"]["repair"]
+        replay = Counted(selected)
+        assert api.execute(replace(selected), client=client_for(replay))["already_complete"]
+        assert not replay.calls and not replay.count_calls
+
+    def test_accepted_refresh_does_not_disable_later_invalid_run_repair(self, tmp_path, monkeypatch):
+        """The prior #361 completed-invalid repair-on-resume behavior remains."""
+        from dataclasses import replace
+        from data_sheets_schema import api_runner as api, usage_ledger as ledger
+        from tests.test_report_admission import Counted, client_for, example, REPAIR_MARK
+        selected = example(tmp_path)
+        repairs = []
+        finding = {"artifact": str(selected.full_path), "class": "Dataset", "error": "synthetic persistent finding"}
+        monkeypatch.setattr(api, "validate_outputs", lambda spec: [finding])
+
+        def repair(spec, client, settings, usage):
+            repairs.append(len(repairs) + 1)
+            spec.full_path.write_text(spec.full_path.read_text() + REPAIR_MARK + str(repairs[-1]) + "\n")
+            return [{"phase": "repair_full", "round": 1, "outcome": "synthetic rewrite " + str(repairs[-1])}]
+
+        monkeypatch.setattr(api, "_repair_invalid", repair)
+        first = Counted(selected)
+        assert api.execute(selected, client=client_for(first))["validation_problems"] == [finding]
+        assert ledger.validator_refresh(selected)["state"] == "accepted"
+        assert api._progress_path(selected).is_file()
+        again = Counted(selected)
+        assert api.execute(replace(selected), client=client_for(again))["validation_problems"] == [finding]
+        assert repairs == [1, 2]
+        assert again.phases == ["report_after_repair"]
+        record = yaml.safe_load(selected.provenance_path.read_bytes())
+        assert [row["outcome"] for row in record["repair"]] == ["synthetic rewrite 1", "synthetic rewrite 2"]
+        assert sum(row["phase"] == "report_after_repair" for row in ledger._read(selected)["rows"]) == 2
 
 
 def spec(**kw):
@@ -783,7 +1009,10 @@ class TestValidatorDrivenRepair(unittest.TestCase):
         self.settings = {"name": "claude-opus-5", "temperature": 0.0}
 
     def _spec_with_artifacts(self):
+        from data_sheets_schema import usage_ledger
         s = spec(out_dir=self.out)
+        # These are this generation's repair inputs, not unaccounted history.
+        usage_ledger.prepare_usage(s, resume=False)
         self.out.mkdir(parents=True, exist_ok=True)
         for p in (s.full_path, s.core_path):
             p.write_text("id: x\ntitle: T\nname: n\ndescription: d\n"
@@ -1083,7 +1312,9 @@ class TestResumeAndRetry(unittest.TestCase):
         self.assertEqual(len(again.messages.calls), 4)
 
     def test_corrupt_progress_file_is_ignored_not_fatal(self):
+        from data_sheets_schema import usage_ledger
         s = spec(out_dir=self.out)
+        usage_ledger.prepare_usage(s, resume=False)
         p = self.api._progress_path(s)
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text("{not json", encoding="utf-8")
@@ -1960,10 +2191,21 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
 
     REC = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
 
+    def _prepare_generation(self, spec, *, completed=False):
+        """Create current accounting before any synthetic output appears."""
+        from data_sheets_schema import usage_ledger
+        usage_ledger.prepare_usage(spec, resume=False)
+        if completed:
+            usage = []
+            for phase in ("full", "core", "audit", "reconcile_full",
+                          "reconcile_core", "report"):
+                usage_ledger.append_usage(spec, usage, {
+                    "usage_id": f"fixture-{phase}", "phase": phase,
+                    "input_tokens": 100, "output_tokens": 200})
+
     def _complete_run(self, spec, *, provenance=True, label=None):
-        """Lay down a finished run: three artifacts and its provenance record."""
-        import hashlib
-        import yaml as _yaml
+        """Lay down current accounting, artifacts and optional provenance."""
+        self._prepare_generation(spec, completed=provenance)
         spec.out_dir.mkdir(parents=True, exist_ok=True)
         spec.full_path.write_text(self.REC)
         spec.core_path.write_text(self.REC)
@@ -1988,19 +2230,22 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
         import hashlib
         import yaml as _yaml
 
+        from data_sheets_schema import usage_ledger
         from data_sheets_schema.provenance import build_record
+        generation = usage_ledger.generation_id(spec)
+        self.assertIsNotNone(generation, "initialize the fixture before its artifacts")
         def sha(p):
             return hashlib.sha256(p.read_bytes()).hexdigest()
         rec = build_record(spec.project, spec.method, label or spec.label,
                            mode="live", input_bundle=spec.bundle,
                            input_verified=True, concat_dir=spec.out_dir)
         data = dict(rec.data)
-        data["run"] = {**(data.get("run") or {}), "method": spec.method,
-                       "label": label or spec.label, "project": spec.project}
-        data["api_usage"] = [{"phase": ph, "input_tokens": 100,
-                              "output_tokens": 200} for ph in
-                             ("full", "core", "audit", "reconcile_full",
-                              "reconcile_core", "report")]
+        data["run"] = {**(data.get("run") or {}),
+                       **usage_ledger.run_identity(spec), "label": label or spec.label,
+                       "generation_id": generation,
+                       "prior_generation_ids": usage_ledger.prior_generation_ids(spec)}
+        # Rewriting provenance reads the same charges; it never creates more.
+        data["api_usage"] = usage_ledger.merge_usage(spec, [])
         data["validation"] = {"artifacts": {
             "full": {"path": str(spec.full_path), "sha256": sha(spec.full_path)},
             "core": {"path": str(spec.core_path), "sha256": sha(spec.core_path)},
@@ -2028,6 +2273,72 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
             execute(spec, client=self._no_api(called))
             self.assertEqual(called["n"], 0,
                              "a completed run must cost nothing to resume")
+
+    def test_deleted_completed_accounting_requires_exact_restoration(self):
+        import tempfile
+        from data_sheets_schema import latch_journal, snapshot_store, usage_ledger
+        from data_sheets_schema.api_runner import execute
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            self._complete_run(spec)
+            # A completed generation has finished snapshot activation. Keep
+            # the exact-byte restoration assertion against that settled state.
+            snapshot_store.finish_activation(spec)
+            account = usage_ledger.ledger_path(spec)
+            account_before = account.read_bytes()
+            journal = latch_journal.journal_path(spec)
+            journal_before = journal.read_bytes()
+            record_before = spec.provenance_path.read_bytes()
+            account.unlink()
+            called = {"n": 0}
+            with self.assertRaisesRegex(usage_ledger.UsageLedgerError,
+                                        "usage ledger deleted while its generation journal survives"):
+                execute(spec, client=self._no_api(called))
+            self.assertEqual(called["n"], 0)
+            self.assertFalse(account.exists())
+            self.assertEqual(journal.read_bytes(), journal_before)
+            self.assertEqual(spec.provenance_path.read_bytes(), record_before)
+
+            account.write_bytes(account_before)
+            result = execute(spec, client=self._no_api(called))
+            self.assertTrue(result["already_complete"])
+            self.assertEqual(len(result["usage"]), 6)
+            self.assertEqual(called["n"], 0)
+            self.assertEqual(account.read_bytes(), account_before)
+            self.assertEqual(journal.read_bytes(), journal_before)
+            self.assertEqual(spec.provenance_path.read_bytes(), record_before)
+
+    def test_legacy_completed_outputs_without_accounting_are_not_clean_resumes(self):
+        import tempfile
+        from data_sheets_schema import latch_journal, usage_ledger
+        from data_sheets_schema.api_runner import execute
+        from data_sheets_schema.provenance import build_record
+
+        with tempfile.TemporaryDirectory() as td:
+            spec = self._spec(td)
+            spec.out_dir.mkdir(parents=True)
+            spec.full_path.write_text(self.REC)
+            spec.core_path.write_text(self.REC)
+            spec.report_path.write_text("# historical report\n")
+            rec = build_record(spec.project, spec.method, spec.label, mode="live",
+                               input_bundle=spec.bundle, input_verified=True,
+                               concat_dir=spec.out_dir)
+            rec.data["run"] = usage_ledger.run_identity(spec)
+            rec.data["api_usage"] = [{"phase": "full", "input_tokens": 100,
+                                      "output_tokens": 200}]
+            spec.provenance_path.parent.mkdir(parents=True, exist_ok=True)
+            spec.provenance_path.write_text(yaml.safe_dump(rec.data))
+            before = {path: path.read_bytes() for path in
+                      (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path)}
+            called = {"n": 0}
+            with self.assertRaisesRegex(usage_ledger.UsageLedgerError,
+                                        "historical evidence cannot become a clean resume"):
+                execute(spec, client=self._no_api(called))
+            self.assertEqual(called["n"], 0)
+            self.assertEqual({path: path.read_bytes() for path in before}, before)
+            self.assertFalse(usage_ledger.ledger_path(spec).exists())
+            self.assertFalse(latch_journal.journal_path(spec).exists())
 
     def test_resume_will_not_report_a_non_conforming_record_as_complete(self):
         """The resume exit has now been patched three times for one omission.
@@ -2100,6 +2411,7 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
                "keywords: [a]\ninstances: not-a-list\n")
         with tempfile.TemporaryDirectory() as td:
             spec = self._spec(td)
+            self._prepare_generation(spec, completed=True)
             spec.out_dir.mkdir(parents=True, exist_ok=True)
             # Lay the invalid records down *first*, then hash them, so the
             # provenance is internally consistent and the run resumes.
@@ -2141,6 +2453,10 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             old = self._spec(td)
             self._complete_run(old)
+            from data_sheets_schema import usage_ledger
+            old_account = usage_ledger.ledger_path(old)
+            old_account_before = old_account.read_bytes()
+            old_record_before = old.provenance_path.read_bytes()
             new = RunSpec(project="P", arm="baseline", method="claudecode_agent",
                           bundle=old.bundle, label="2026-07-31_DIFFERENT_rep1",
                           out_dir=old.out_dir)
@@ -2150,6 +2466,9 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
                 execute(new, client=self._no_api(called))
             self.assertEqual(called["n"], 1,
                              "the new label claimed the old run's outputs")
+            self.assertEqual(old_account.read_bytes(), old_account_before)
+            self.assertEqual(old.provenance_path.read_bytes(), old_record_before)
+            self.assertNotEqual(usage_ledger.ledger_path(new), old_account)
 
     def test_a_corrupt_artifact_is_not_resumed_on_top_of(self):
         """The exact debris one VOICE run left: progress said `core` was done,
@@ -2162,19 +2481,20 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             spec = self._spec(td)
-            spec.out_dir.mkdir(parents=True)
+            from data_sheets_schema import api_runner, usage_ledger
+            generation = usage_ledger.prepare_usage(spec, resume=False)
+            spec.out_dir.mkdir(parents=True, exist_ok=True)
             spec.full_path.write_text(self.REC)
             # Keep actual phase ownership evidence before corrupting the
             # working artifact: the test isolates artifact validation.
-            from data_sheets_schema import api_runner, usage_ledger
-            usage_ledger.prepare_usage(spec, resume=True)
             api_runner._snapshot(spec, f"{spec.project}_full.yaml", self.REC)
             api_runner._snapshot(spec, f"{spec.project}_core.yaml", self.REC)
             spec.core_path.write_text(
                 "_distributions: []\ncompression: none\ndialect: x\n")
             _progress_path(spec).parent.mkdir(parents=True, exist_ok=True)
             _progress_path(spec).write_text(json.dumps(
-                {"completed": ["full", "core"], "input_identity": spec.input_identity()}))
+                {"completed": ["full", "core"], "input_identity": spec.input_identity(),
+                 "run_identity": usage_ledger.run_identity(spec), "generation_id": generation}))
 
             ran = []
 
@@ -2219,7 +2539,8 @@ class TestResumeUsesArtifactsNotOnlyProgress(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as td:
             spec = self._spec(td)
-            spec.out_dir.mkdir(parents=True)
+            self._prepare_generation(spec)
+            spec.out_dir.mkdir(parents=True, exist_ok=True)
             spec.full_path.write_text("id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n")     # phase 1 only
 
             calls = {"n": 0}
@@ -2356,3 +2677,8 @@ class TestReceiptCondition(unittest.TestCase):
         from data_sheets_schema.api_runner import PHASE_INSTRUCTIONS, assembly_digest
         self.assertIn("full_receipt", PHASE_INSTRUCTIONS)
         self.assertIn("#710", assembly_digest()["layout"])
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+import pytest
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

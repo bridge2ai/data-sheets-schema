@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="25.816" timestamp="2026-10-28T23:38:53.969916" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_source_heading_runtime_api" name="test_selected_form_captures_actual_default_instrument_per_invocation" time="25.703"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume">tmp_path = PosixPath('/private/tmp/d4d-wave7-5212-parent-form-20261029/cases/test_selected_form_captures_ac0')
+draft_files = {'base.txt': b'', 'catalog.json': b'{"authority_warnings":["unsettled TTL/schema disagreement on conforms_to: the TTL ...HBsYW5uZWQuIn1dfQ==","bytes":211,"sha256":"5c574327536ae34ad2a92ed23c2e6a2b9a445c199a81c539b3770a5cc77304fc"}}\n', ...}
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x107cee2c0&gt;
+
+    def test_selected_form_captures_actual_default_instrument_per_invocation(tmp_path, draft_files, monkeypatch):
+        import os
+        from data_sheets_schema import grounding, identifiers
+        from data_sheets_schema.run_schema import IdentifierRules
+        from data_sheets_schema import source_heading_completed as complete
+        spec = selected_spec(tmp_path, draft_files, source_naming={'canonical_label': 'Other Project', 'variants': ['Different Programme']})
+        spec.bind_api_header_values(api._model_settings(spec.condition))
+        authority = sg.capture(spec)
+        spec.full_path.parent.mkdir(parents=True, exist_ok=True)
+        spec.full_path.write_text('description: Sample Programme\n')
+        spec.core_path.write_text('description: Sample Programme\n')
+        cwd = tmp_path/'caller'; default = cwd/'data/preprocessed/source_manifest.yaml'
+        default.parent.mkdir(parents=True)
+        default.write_bytes(b'naming:\r\n  EXAMPLE:\r\n    canonical_label: Sample Project\r\n    variants: [Sample Programme]\r\n')
+        monkeypatch.chdir(cwd)
+        # The actual selected producer calls the same form worker and stores the
+        # bytes it read during that call, not those found later by the exporter.
+        expected = grounding.form_facts(spec.full_path, spec.core_path)
+        original_full = spec.full_path.read_bytes()
+        original_core = spec.core_path.read_bytes()
+        read_naming = grounding._capture_declared_naming
+        def mutate_after_first_pass():
+            observed = read_naming()
+            spec.full_path.write_bytes(original_full + b'# changed with the same counts\n')
+            return observed
+        with monkeypatch.context() as m:
+            m.setattr(grounding, '_capture_declared_naming', mutate_after_first_pass)
+&gt;           first = complete.measure_form(spec)
+
+/private/tmp/d4d-codex-wave7-5212-parent-20261029/tests/test_source_heading_runtime_api.py:492: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/private/tmp/d4d-codex-wave7-5212-parent-20261029/src/data_sheets_schema/source_heading_completed.py:238: in measure_form
+    ledger._write(spec, data)
+/private/tmp/d4d-codex-wave7-5212-parent-20261029/src/data_sheets_schema/usage_ledger.py:685: in _write
+    latch_journal.before_ledger_write(spec, data)
+/private/tmp/d4d-codex-wave7-5212-parent-20261029/src/data_sheets_schema/latch_journal.py:557: in before_ledger_write
+    previous, events, mine = _validated(spec, allow_new=explicit_fresh)
+/private/tmp/d4d-codex-wave7-5212-parent-20261029/src/data_sheets_schema/latch_journal.py:472: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+/private/tmp/d4d-codex-wave7-5212-parent-20261029/src/data_sheets_schema/latch_journal.py:38: UsageLedgerError</failure></testcase></testsuite></testsuites>

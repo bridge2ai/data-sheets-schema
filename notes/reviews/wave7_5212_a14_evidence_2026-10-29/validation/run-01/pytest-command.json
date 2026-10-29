@@ -1,0 +1,13 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave7-5212-a14-canary-20261029/pytest.xml",
+    "tests/test_shared_generation_scope_context.py::test_actual_cli_scope_delivery_regate_and_completed_replay"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave7-5212-a14-20261029"
+}

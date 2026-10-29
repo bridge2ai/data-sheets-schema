@@ -1,0 +1,1676 @@
+# D4D generation provenance record
+# record_version 1 — see src/data_sheets_schema/provenance.py
+record_version: 1
+record_type: d4d_generation_provenance
+record_mode: live
+record_generated_at: '2026-10-29T04:38:07+00:00'
+run:
+  label: scope-cli-synthetic_rep1
+  project: EXAMPLE
+  method: claudecode_api
+  arm: baseline
+  replicate: 1
+  condition: generic_v10
+  condition_basis: stated by the runner
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  prior_generation_ids: []
+model:
+  generation_method: schema-grounded API, four model phases with the core derived
+    from the full record (#694)
+  agent_runtime: Claude API (direct)
+  provider: Anthropic
+  base_url: null
+  model: claude-opus-5
+  max_tokens_by_phase:
+    full: 128000
+    reconcile_full: 128000
+    repair_full: 96000
+    audit: 96000
+    report: 128000
+    full_readdress: 8000
+    full_receipt_completion: 4000
+    report_regate: 128000
+  context:
+    peak_request_tokens: 200
+    peak_phase: full
+    peak_basis: 'observed: input + cache_read + cache_write of the largest request'
+    limit_tokens: null
+    limit_basis: not stated by the route and not returned by the provider; headroom
+      cannot be computed from this record
+  thinking_requested:
+    type: adaptive
+    display: summarized
+  thinking_basis: 'set on every generation-phase request (full, audit, reconcile,
+    report, repair, regate, readdress); on this model family adaptive thinking is
+    also the default when the parameter is omitted, so the request states the regime
+    rather than changing it, and a phase returning no thinking block is a legal adaptive
+    outcome, not a deviation. The judging paths (merge, agreement, evidence_score,
+    form_defects) send no parameter and are not covered by this line. The request
+    also sets display: summarized, which is not the omitted-parameter default; this
+    condition declares it (#5043)'
+  temperature: null
+  temperature_basis: not applicable to this model
+  runtime_integrity:
+    format: d4d_latch_guard_v1
+    verified: true
+    assisted: false
+    evidence_only: false
+    overrides: []
+    authentication: not_cryptographically_authenticated
+    journal:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_latch_journal.jsonl
+      sha256: 215da78d4268dcf04ae8e7f140646eaa7fa4bb471149b54390cdd3a3b2d70056
+      head_sha256: ce6f4bf6828fb71982a1eafe75a100eb68e973cd22b119ae911947fee7742087
+      line_count: 63
+prompts:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/agents/d4d-provenance-guard-v2.md
+    sha256: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
+    bytes: 6912
+    exists: true
+  - path: .claude/commands/d4d-agent-v2.md
+    sha256: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
+    bytes: 12698
+    exists: true
+  - path: .claude/commands/d4d-full-core-v2.md
+    sha256: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
+    bytes: 58267
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules-v2.md
+    sha256: 22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e
+    bytes: 29867
+    exists: true
+  - path: src/download/prompts/api_playbook_v2.md
+    sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+    bytes: 4492
+    exists: true
+  - path: src/download/prompts/d4d_generic_arm_prompt_v10.md
+    sha256: ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db
+    bytes: 32568
+    exists: true
+  - path: src/download/prompts/evidence_protocol_v7.md
+    sha256: 72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6
+    bytes: 33464
+    exists: true
+  - path: src/download/prompts/receipt_completion_runtime_v2.md
+    sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+    bytes: 3158
+    exists: true
+  - path: src/download/prompts/shared_generation_v1.md
+    sha256: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
+    bytes: 3569
+    exists: true
+  request:
+    sha256: 4e81615bb1c1ef3f1213fd21a417803ad7e578c1a089c8576100f3b5993fe679
+    bytes: 86478
+    note: the instruction as sent, after substitution; the files above are what it
+      was built from
+    spec:
+      api_playbook_version: 2
+      api_playbook_sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+      receipt_completion_version: 2
+      receipt_completion_policy_sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+      receipt_completion_registration:
+        sha256: 7ba33beee79075073569118fcd3cf45c0939abd52141724b93e2b93b6387f01a
+        raw_json: '{"condition":"generic_v10","context_limit_basis":"Synthetic fixture","context_limit_tokens":900000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"invented-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"}'
+      shared_generation_version: 1
+      shared_generation_registration:
+        sha256: c6a3ec0a977edeb40841757b40e239c119f2e2d63d584e47b47e4cbb26daa735
+        raw_json: '{"audit_limits":{"aggregate_input_tokens":4000000,"aggregate_output_tokens":100000,"context_limit_basis":"Synthetic
+          assertion, not measured route capacity","context_limit_tokens":900000,"integration_output_tokens":4000,"max_calls":18,"max_input_tokens_per_call":850000,"max_inventory_bytes":16384,"max_paths":96,"max_request_bytes":32000000,"max_workers":16,"omission_output_tokens":4000,"worker_output_tokens":4000},"audit_transport":{"malformed_response_retries":0,"sdk_max_retries":0,"transport_attempts":1},"format":"shared_generation_registration_v1","inputs":{"bundle":{"bytes":67,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt","sha256":"8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225"},"chunk_manifest":{"bytes":519,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml","sha256":"e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f"},"context":{"bytes":268,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/generation-context.json","sha256":"0e6e8175a77516e034e52a27aee858ffc1b4383ad0f0032ca26b7b3c9a7c887b"},"core_schema":{"root":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sources":[{"bytes":1299200,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sha256":"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"}]},"full_schema":{"root":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sources":[{"bytes":1442513,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sha256":"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"}]},"profile":{"basis":"stated
+          by the caller","name":"neutral","vocabulary":null},"project":"EXAMPLE","source_manifest":null},"receipt":{"condition":"generic_v10","context_limit_basis":"Synthetic
+          fixture","context_limit_tokens":900000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"invented-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"},"registration_id":"invented-local-test","registration_path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/shared-registration.json","run":{"arm":"BASELINE
+          (input documents only)","label":"scope-cli-synthetic_rep1","method":"claudecode_api","project":"EXAMPLE"},"runtime":{"base_url":"https://example.invalid","config":{"bytes":6250,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/.github/workflows/d4d_assistant_deterministic.config","sha256":"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"},"effort":null,"model":"claude-opus-5","provider":"Synthetic
+          offline fixture","temperature":null,"thinking":{"display":"summarized","type":"adaptive"}},"selection":{"api_playbook_version":2,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e","src/download/prompts/api_playbook_v2.md":"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719","src/download/prompts/d4d_generic_arm_prompt_v10.md":"ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db","src/download/prompts/evidence_protocol_v7.md":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","src/download/prompts/receipt_completion_runtime_v2.md":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","protocol":"shared_generation_v1","reader_runtime":{"packages":{"PyYAML":"6.0.2","jsonschema":"4.25.1","linkml":"1.9.3","linkml-runtime":"1.9.4","referencing":"0.31.1"},"python":[3,13]},"receipt_completion_version":2,"renderer":25,"runtime":"Claude
+          API (direct)","schema_context_trim":{"generation_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings"],"linkml_dumper_probe_sha256":"e9bdb6f458123773125f7071060083c6e5eb11f213c201484bf3574d7c76a10a","omission_all_reachable_classes":true,"omission_retained_top_keys":["classes","enums","root_class","sources"],"omission_schema_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings"],"worker_non_assigned_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings","description","comments"]},"schema_context_version":2,"stage_contracts":{"api_playbook_probe_sha256":"a73b6eaa19cceb4d6817bffacbc8765454607440c416707ce4e4f23196173c87","chunk_projection_probe_sha256":"c5dffaabd9e11ef96267fb95f00a4524911f090bb24de218e268abcc8f7e2063","evidence_protocol_sha256":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","generation_context_header_sha256":"6215150c4f76c9ba0672b4ceafd4e009a68ce3b9bc18830bb79402e68a0f23c0","omission_assets_sha256":{"context.schema.json":"4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8","policy.md":"0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d","response.schema.json":"90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"},"phase_instructions_sha256":{"audit":"2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111","core":"77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986","full":"2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283","full_readdress":"59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27","full_receipt":"849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a","reconcile_core":"6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6","reconcile_full":"d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958","report":"1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853","report_regate":"bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"},"phase_max_tokens_sha256":"0b9100ac3f041de8ef82ad74a385e5665ba4714e341aab41b341f25c829c3bdc","phase_system_sha256":"badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88","readdress_header_sha256":"818baf385a68598ea659f318017d94994daf36aa257cf98f8cf607ec3a3d23bc","receipt_completion_audit_carry_sha256":"4bd93e8ca5e9130a3e954df80580ded5545a2a22e88ebc7ebacddb02c948ea1e","receipt_completion_policy_sha256":"f5be675610879e4aa50dfa03b14691ef8310cce19478daf007e9fcef557f97d0","regate_headers_sha256":"81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d","repair_instruction_sha256":"970025c4b1af524a733e28e44ea0f4355e846d5778c34d9b3c3e7a3d5f524a83","request_code_sha256":{"src/data_sheets_schema/american_spelling.py":"cce0940a957dd6dd25ed47919aa9f3a1bbf00b02dd5e71ad562e60de6a225dba","src/data_sheets_schema/anonymous_removals.py":"7a33288b481cf76b7cfeea1fbee99ac605660560b382a191119ca4d0768b80b0","src/data_sheets_schema/api_playbook.py":"3678b690deb288bb9b2eeea3ef6b3b29399573214ab145fd4710f4e51aa1ad46","src/data_sheets_schema/api_runner.py":"3d2a62f84d8902cb262d81c2d8bbafdf37ef057425e00ba133bd97d3cb8206d7","src/data_sheets_schema/audit_batch_format.py":"5bff6225905f3c1f40f9e32dfae6de9f374742b2ee66dfe5804cdc148b77046f","src/data_sheets_schema/audit_batches.py":"c95ec83f2f730df8c9766173f4d71367dfe705b08ec4acc4a17f8ef002da4414","src/data_sheets_schema/audit_grammar.py":"234eb188c0d7938b2f7f79f8a0282deaa5b5ef3963917d0a745ccbe4d53e451d","src/data_sheets_schema/audit_omissions.py":"807f5bfbd7355d0c6b801f79ff7e2f4a969bf717b71c7234e7837df1ba45e285","src/data_sheets_schema/audit_protocol.py":"384cca650e8cbcdefb18b27a65883b081c79fdf0ba9e7863c2ca8ffcfaf5fc19","src/data_sheets_schema/cache_dependencies.py":"25b9b110878b643a9bcb56f94f2a4123d51896e0559313958f45f1c35fb0336d","src/data_sheets_schema/chunking.py":"8d10582971cd4139dbca50a4ab465488ca4604ab7d692dcf31e5963a8b11b9fc","src/data_sheets_schema/corpus.py":"16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089","src/data_sheets_schema/d4d_pair_consistency.py":"1f95b6206062522998b3eb7ea2f8bcbe479867fd88adbacfc21173adf235dbb2","src/data_sheets_schema/derive_core.py":"ea7fe9db9edef8f4b89eef19b776667a9a0e013c92245575b103c62117434701","src/data_sheets_schema/duplicate_keys.py":"22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2","src/data_sheets_schema/evidence_assertions.py":"da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583","src/data_sheets_schema/grounding.py":"701c43041f2f6aa28e889a0165fe20bf0ed33c52e4cfe5b937db4f84f606c8fe","src/data_sheets_schema/historical_digest.py":"00718e3cf15b8a947b29914837244237873fac16267d659c6a64394b5871ba96","src/data_sheets_schema/identifiers.py":"31a581fa946cec0ceffa28ec641dd0d12135ebac201d3750609982349214b0a6","src/data_sheets_schema/latch_journal.py":"625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c","src/data_sheets_schema/profile_identity.py":"5fb08098439b17e72b7a9ab5529b2fe0e700d1d3d1fcedc0ecbd8b9c1b5ab3a6","src/data_sheets_schema/profiles.py":"f461414f7e035c5502c4312ea819fcc2b45c4eabb8fef18de8e791fe27061909","src/data_sheets_schema/provenance.py":"9e6955fa7f22bc77e05e3df81a1f32cbc0308aec503495fa8e72d15cb420d5be","src/data_sheets_schema/reasoning.py":"bd3d55c4d87dcbe05fe1b329870dc84116aa878c61888d4f352b2161d043c293","src/data_sheets_schema/receipt_completion.py":"6e126e379f6f2191858a95977c3fe4b4082111df01f4bcd73497529b2b6d0b43","src/data_sheets_schema/receipt_completion_policy.py":"3c7c727213369638827af0bdfd71484ebdb66661d88ae8942a591990c91b4f23","src/data_sheets_schema/receipt_sources.py":"c12db753773fc622503074f98c75607fa3e04d9b6f3e738994fffcc0ae05b400","src/data_sheets_schema/receipts.py":"658195581a9ca6a3dcf4700d25dd90d403985c2815c423069d2603b58b33d64d","src/data_sheets_schema/record_schema.py":"878239befd37d795a5915602f8715826aa828720eb28acdc70979c8968739a98","src/data_sheets_schema/registry.py":"04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3","src/data_sheets_schema/report_claims.py":"2d005a3a371f7d2b85ca3b45de3cebc591f05cda3a710195b2932ff5e5c10776","src/data_sheets_schema/rereceipt.py":"cd34f9d880d334f97812f4ab29fb516b0e442ac05d7d4e5e1c47533c1433b15c","src/data_sheets_schema/resources.py":"7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435","src/data_sheets_schema/run_schema.py":"92ee3b52474bf5152308f45ef3b1e03f752549091ed6eeb03e9d4fcb94c7644d","src/data_sheets_schema/schema_digest.py":"150a5f005ab1ed5fdf73f927559f15a3c7dbf34a0915ff2b83896991c1fcc095","src/data_sheets_schema/schema_snapshot.py":"fca5a4ed354418a5828df661df76f535a743bed3a8e156a8aff24d01e79eff32","src/data_sheets_schema/schema_view.py":"81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff","src/data_sheets_schema/scope.py":"f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199","src/data_sheets_schema/shared_generation.py":"8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47","src/data_sheets_schema/shared_generation_resources.py":"13f84a7a227532bc8c424af8737626a5ad40d2c898100299541f9ca215de70b5","src/data_sheets_schema/shared_write_footprint.py":"8522be189c935b8f6c83fc4163535d9ca9b634a36bde115388dedbeb9cda7624","src/data_sheets_schema/snapshot_store.py":"9414763d1cac8534edf7f18933f51f78b2b62879b0997548000430f0c4073a92","src/data_sheets_schema/source_heading_admission.py":"1671f568ca80672264661b414d9a456fbc9fee54da51975d799ce5ea5939b843","src/data_sheets_schema/source_heading_completed.py":"65bcbb67778282175c117559930350290f64357f63382a33d35833f54b12a839","src/data_sheets_schema/source_heading_routing.py":"72827fdefe6bcc5fe9b56660d448afe1c6e4edbc0cd4327af2855a9c1592890d","src/data_sheets_schema/source_heading_runtime.py":"651c0ee3dfd4017793b95bea91dbd46718afd1092bb02dbb0e539bef0d0ba16e","src/data_sheets_schema/source_metadata.py":"a4cb403bc56462cf22a4aa39338b7fffa27206f2d9e73f6e1369000ea68a56ae","src/data_sheets_schema/source_priority.py":"ae2b8bb514e110e5bc78200dc3dc2917abd9522d512a384467ca151f28768eb5","src/data_sheets_schema/source_review.py":"855115983efb9b0c5f653d7195bbf47901b4303725103e07d9a45fd33e940775","src/data_sheets_schema/support_targets.py":"7465f93c7b146d6858a43ff23b565b445d2a0523df7432f197c59544537dd432","src/data_sheets_schema/typed_audit.py":"b3e1bf1fa79d4e5c7d3be5bc1fe13e6f466f37967088dc240dbff66662168d27","src/data_sheets_schema/typed_audit_runtime.py":"58e85dcc5c632c0656d9a7d97d0e93c4cdf59bb86b835ed27ffb882139e6f493","src/data_sheets_schema/usage_ledger.py":"a175c6f5b5cc0bedd51bafcca51468bd4f650cb839f00dbecf741b9a23217165"},"schema_context_header_sha256":"8faa102cdffe979b766d61543a65a85c6cc28f4dcb400d61ed56e3c957d54497","shared_evidence_contract_sha256":"a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c","typed_audit_integration_format_sha256":"de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496","typed_audit_system_sha256":"37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b","typed_audit_worker_format_sha256":"f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336","typed_binding_header_sha256":"54cab5c9129755ac184578022f3b1cf5fe23d4ee2b4848314ee48e45096dce26"},"typed_protocol":"typed_audit_protocol_v1","version":1}}'
+      shared_generation_assets:
+        .claude/agents/d4d-provenance-guard-v2.md: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
+        .claude/commands/d4d-agent-v2.md: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
+        .claude/commands/d4d-full-core-v2.md: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
+        .claude/commands/d4d-uniform-rules-v2.md: 22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e
+        src/download/prompts/api_playbook_v2.md: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+        src/download/prompts/d4d_generic_arm_prompt_v10.md: ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db
+        src/download/prompts/evidence_protocol_v7.md: 72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6
+        src/download/prompts/receipt_completion_runtime_v2.md: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+        src/download/prompts/shared_generation_v1.md: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
+      api_header_values:
+        Temperature: not sent (claude-opus-5 rejects the parameter; the config's value
+          did not reach the request)
+        Model: claude-opus-5
+        Reasoning effort: not set by the request (the provider's own choice; not recorded
+          as a value)
+      render_version: 25
+      chunk_manifest: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml
+      condition: generic_v10
+      arm: BASELINE (input documents only)
+      manifest_line: '# Source manifest: not used (no manifest selected; the bundle
+        was passed explicitly)'
+      run_date: '2026-10-29'
+      manifest: null
+      profile: neutral
+      profile_basis: stated by the caller
+      runtime: Claude API (direct)
+      provider: Synthetic offline fixture
+      bundle: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt
+  resolved:
+    sha256: 4e81615bb1c1ef3f1213fd21a417803ad7e578c1a089c8576100f3b5993fe679
+    bytes: 86478
+  assembly:
+    sha256: 987d372c60cc42267004a184073092c2a11f747c904039fb50dfaf7988bffa93
+    layout: 'schema digest, input bundle, source ranking, declared naming, declared
+      scope (#932), arm prompt, carried artifacts, computed audit counts and core
+      inventory for reports, phase instruction; audit counts come from the structured
+      entries, never their prose summary (#1802); core derived from the full record,
+      not generated (#694); audit and reconcile_full address the full record only,
+      the core being its projection (#705); under a receipt condition the bundle carries
+      [cNNN] chunk markers and the full phase instruction asks for the coverage receipt
+      after the record (#710); a receipt entry whose slot is not a path in the record
+      just written gets one follow-up turn — the full-phase exchange replayed as an
+      assistant turn, then the unresolved entries with their chunk and ordinal and
+      the re-addressing instruction — whose answer moves the entry only to a resolving
+      path or drops it (#952); the report phase ends with a dispositions table, checked
+      against the records before the run completes, and a report with contradictory
+      claims, unrecorded changes or a missing dispositions table is regenerated once
+      with the discrepancies named (#929, #1181); the report phase carries the core
+      class''s top-level slot inventory before its instruction, so the model can see
+      which slots the core declares — the gate still judges presence in the two records,
+      and the inventory decides only whether a finding carries the ''core class declares
+      no such slot'' cause (#998); hash-bound source-review inventory before audit/report
+      instruction: # Required source-review inventory
+
+
+      ; shared_generation_v1: common contracts once; typed workers + source-first
+      omission + integration; checked exact audit carry; bound terminal reconstruction'
+  context_blocks:
+    source_ranking:
+      sent: false
+      basis: no manifest was selected for this run
+    declared_naming:
+      sent: false
+      basis: no manifest was selected for this run
+    declared_scope:
+      sent: false
+      basis: no manifest was selected for this run
+playbooks:
+  hash_algorithm: sha256
+  files:
+  - path: .claude/commands/d4d-full-core.md
+    sha256: 669d3f53725a62ecca20f1a95518b4878280ac278d91e626b762d1cb1bfe7cc1
+    bytes: 57830
+    exists: true
+  - path: .claude/commands/d4d-agent.md
+    sha256: acfbda817247ace3b2b5c2cc947a0dec678cdd53422dc0f234ed55352500dbb4
+    bytes: 12553
+    exists: true
+  - path: .claude/agents/d4d-provenance-guard.md
+    sha256: a5b4940b4acd4d4d359ff243aaa6f55209f71285993b49d398616e196a9092f2
+    bytes: 6909
+    exists: true
+  - path: .claude/commands/d4d-uniform-rules.md
+    sha256: 851c0911da08bf0747c55a5f84e4578b192bd87616677773f6b58a4771b37b73
+    bytes: 24252
+    exists: true
+  consumed: false
+  consumed_basis: this runtime renders a condition prompt and sends nothing else,
+    so these were not read; they are hashed so an unchanged hash shows that (#545)
+phase_log: null
+schema:
+  declared_version: 3.0.0
+  declared_in: src/data_sheets_schema/schema/data_sheets_schema.yaml
+  core_declared_version: 3.0.0
+  core_declared_in: src/data_sheets_schema/schema/data_sheets_schema_core.yaml
+  full_path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+  core_path: src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+  core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  merged_schema_carries_version: true
+  digest_md5: 94859bbbe7fa229619a3d5e2a50c3668
+  profile: neutral
+  profile_basis: stated by the caller
+software:
+  data_sheets_schema: 0.1.0
+  linkml: 1.9.3
+  linkml_runtime: 1.9.4
+  python: 3.13.12
+repo:
+  commit: fc3417be63b55c579c48df13fb54ae33437a3977
+  commit_short: fc3417be6
+  branch: codex/wave7-5212-a14-20261029
+  resource_root: /private/tmp/d4d-codex-wave7-5212-a14-20261029
+  resource_kind: checkout
+  dirty: false
+  dirty_file_count: 0
+  dirty_paths: []
+system:
+  platform: macOS-26.5.1-arm64-arm-64bit-Mach-O
+  machine: arm64
+  processor: arm
+  cpu_count: 10
+  python: 3.13.12
+  cpu_brand: null
+  memory_bytes: null
+inputs:
+  bundle_path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt
+  chunks:
+    path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml
+    sha256: e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f
+    bundle_name: documents.txt
+    rule:
+      version: 2
+      unit: source-document
+      boundary: 'FILE: line followed by PATH: or ROLE:'
+      preamble: own-chunk
+      split: line-window
+      max_lines: 400
+      max_bytes: 48000
+    chunk_count: 1
+  receipt_expected: true
+  bundle_md5: 364ac45e7cfd44f82bda95af5fd87b9c
+  bundle_bytes: 67
+  hash_basis: verified identical to the bytes consumed
+  source_manifest:
+    path: null
+    md5: null
+    basis: 'no source manifest was consulted: the arm''s header declares it unused
+      (Source manifest: not used (no manifest selected; the bundle was passed explicitly))'
+  dispositions_expected: true
+outputs:
+  full:
+    path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d.yaml
+    bytes: 135
+    slots: 6
+  core:
+    path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d_core.yaml
+    bytes: 481
+    slots: 8
+  report:
+    path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_reconciliation.md
+    bytes: 2350
+    slots: null
+companions:
+  reasoning_log:
+    path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_reasoning.jsonl
+    present: true
+    md5: 39ff138ec3dfe069eb5c3926802215ca
+    note: one JSON line per phase; absent for a runtime that cannot report its own
+      token accounting (#400)
+  telemetry_report:
+    path: data/run_telemetry/scope-cli-synthetic.yaml
+    present: false
+    note: derived from records like this one, per label rather than per run; `d4d
+      runs telemetry` writes it
+  prompt_registry:
+    path: src/download/prompts/canonical_hashes.yaml
+    present: true
+    md5: b6676b3ebf7344ba276876c5336d2711
+    note: the pins the recorded prompt hashes were judged against
+  digest_inventory:
+    path: src/data_sheets_schema/schema/digest_inventory.yaml
+    present: true
+    md5: 59eb49602f449dd74eecce6df72d12ca
+    note: digest to slot inventory, which decides whether a slot predates a pair
+unrecoverable:
+- field: model.model
+  reason: the record header predates model identity being written into headers
+unverified:
+- field: model.reasoning_effort
+  value: null
+  reason: 'no effort is recorded: the header carries none and the route ''unknown''
+    exposes no effort ladder, so the provider default applied. That is not a value
+    this run chose, and it is not comparable with a run that named one.'
+- field: model.temperature
+  value: null
+  reason: 'claude-opus-5 rejects `temperature` (400: deprecated for this model), so
+    the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config is not
+    sent and does not apply. Sampling for this model family is selected by model-name
+    suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+notes:
+- 'Generated via Claude API (direct). claude-opus-5 rejects `temperature` (400: deprecated
+  for this model), so the 0.0 declared in .github/workflows/d4d_assistant_deterministic.config
+  is not sent and does not apply. Sampling for this model family is selected by model-name
+  suffix (-low/-medium/-high/-xhigh/-max), not by parameter.'
+- Model settings read from .github/workflows/d4d_assistant_deterministic.config.
+- 'Endpoint: None at None.'
+receipt_completion:
+  added_pairs: []
+  after:
+    checked: true
+    chunks:
+      by_status:
+        duplicate_of: 0
+        extracted: 0
+        nothing_relevant: 1
+        redundant_with: 0
+      reviewed: 1
+      total: 1
+      unreviewed: []
+    findings: []
+    findings_gated: 0
+    findings_truncated: null
+    instrument: 'v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics
+      split by declared phase1/rereceipt/unknown origin, with recorded chunk-status
+      reversals counted separately. Origin markers are accounting metadata, not proof
+      of authorship or semantic support. v3 (#1053): an entry whose identity key the
+      final list no longer carries anywhere (a minted id reconciliation stripped)
+      is located as a keyless entry — by overlap, else by position for the same shape
+      when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`)
+      — instead of declared dropped; v2 (#1123): a fragment minted on an identifier
+      the record carries for the dataset at its top level — its id in CURIE or resolver
+      form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+      counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+      commentary and own-id fragments exempt, unattesting snippets counted apart'
+    non_checks:
+    - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+      sample by chunk id in review
+    - that a verified snippet supports the value it is attached to — a snippet can
+      be real and irrelevant; sample by slot path in review
+    rereceipt:
+      status_reversal_count: 0
+      status_reversals: []
+      unusable_prior_chunks: []
+      unusable_prior_count: 0
+    slots:
+      added_after_receipt: 0
+      addressing_slips: []
+      addressing_slips_count: 0
+      exempt: 1
+      exempt_on_carried_identifier: 0
+      index_reused_by_another_entry: []
+      index_reused_by_another_entry_count: 0
+      located_after_key_stripped: []
+      located_after_key_stripped_count: 0
+      never_receipted: 5
+      path_not_in_snapshot: []
+      path_not_in_snapshot_count: 0
+      path_off_by_one: []
+      path_off_by_one_count: 0
+      populated: 6
+      receipt_paths: 0
+      receiptable: 5
+      receiptable_at_receipt: 5
+      receipts_to_removed_values: 0
+      remapped_by_identity: []
+      remapped_by_identity_count: 0
+      reshaped_by_reconcile: []
+      unresolved: []
+      value_changed_after_receipt: []
+      value_changed_after_receipt_count: 0
+      with_receipt: 0
+      with_receipt_at_receipt: 0
+      without_receipt:
+      - creators[0].name
+      - description
+      - keywords
+      - name
+      - title
+      without_receipt_truncated: null
+    snippets:
+      adjacent: 0
+      artifact_elided: 0
+      by_origin:
+        phase1:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+        rereceipt:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+        unknown:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+      elsewhere: 0
+      entry_single_leaf: 0
+      entry_single_leaf_sample: []
+      linewrap_joined: 0
+      mismatched: 0
+      no_value_overlap: 0
+      no_value_overlap_sample: []
+      spans_boundary: 0
+      split_at_linebreaks: 0
+      total: 0
+      unattesting: 0
+      unattesting_sample: []
+      unchecked: 0
+      verified: 0
+    summary: chunks 1/1 reviewed · snippets 0/0 verified · slots 0/5 with a receipt
+      (5 never receipted, 0 added after the receipt) (1 exempt)
+  answer_envelope: bare
+  answer_parser:
+    envelopes:
+    - bare
+    - yaml_fence
+    fence_pattern_sha256: 39f7a28a28ede3f5f1e9dfdc7469440b18f1ef44f57228e56cbcf1f8b1f51db7
+    version: 2
+  before:
+    checked: true
+    chunks:
+      by_status:
+        duplicate_of: 0
+        extracted: 0
+        nothing_relevant: 1
+        redundant_with: 0
+      reviewed: 1
+      total: 1
+      unreviewed: []
+    findings: []
+    findings_gated: 0
+    findings_truncated: null
+    instrument: 'v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics
+      split by declared phase1/rereceipt/unknown origin, with recorded chunk-status
+      reversals counted separately. Origin markers are accounting metadata, not proof
+      of authorship or semantic support. v3 (#1053): an entry whose identity key the
+      final list no longer carries anywhere (a minted id reconciliation stripped)
+      is located as a keyless entry — by overlap, else by position for the same shape
+      when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`)
+      — instead of declared dropped; v2 (#1123): a fragment minted on an identifier
+      the record carries for the dataset at its top level — its id in CURIE or resolver
+      form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+      counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+      commentary and own-id fragments exempt, unattesting snippets counted apart'
+    non_checks:
+    - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+      sample by chunk id in review
+    - that a verified snippet supports the value it is attached to — a snippet can
+      be real and irrelevant; sample by slot path in review
+    rereceipt:
+      status_reversal_count: 0
+      status_reversals: []
+      unusable_prior_chunks: []
+      unusable_prior_count: 0
+    slots:
+      added_after_receipt: 0
+      addressing_slips: []
+      addressing_slips_count: 0
+      exempt: 1
+      exempt_on_carried_identifier: 0
+      index_reused_by_another_entry: []
+      index_reused_by_another_entry_count: 0
+      located_after_key_stripped: []
+      located_after_key_stripped_count: 0
+      never_receipted: 5
+      path_not_in_snapshot: []
+      path_not_in_snapshot_count: 0
+      path_off_by_one: []
+      path_off_by_one_count: 0
+      populated: 6
+      receipt_paths: 0
+      receiptable: 5
+      receiptable_at_receipt: 5
+      receipts_to_removed_values: 0
+      remapped_by_identity: []
+      remapped_by_identity_count: 0
+      reshaped_by_reconcile: []
+      unresolved: []
+      value_changed_after_receipt: []
+      value_changed_after_receipt_count: 0
+      with_receipt: 0
+      with_receipt_at_receipt: 0
+      without_receipt:
+      - creators[0].name
+      - description
+      - keywords
+      - name
+      - title
+      without_receipt_truncated: null
+    snippets:
+      adjacent: 0
+      artifact_elided: 0
+      by_origin:
+        phase1:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+        rereceipt:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+        unknown:
+          entry_single_leaf: 0
+          no_value_overlap: 0
+          total: 0
+          unattesting: 0
+      elsewhere: 0
+      entry_single_leaf: 0
+      entry_single_leaf_sample: []
+      linewrap_joined: 0
+      mismatched: 0
+      no_value_overlap: 0
+      no_value_overlap_sample: []
+      spans_boundary: 0
+      split_at_linebreaks: 0
+      total: 0
+      unattesting: 0
+      unattesting_sample: []
+      unchecked: 0
+      verified: 0
+    summary: chunks 1/1 reviewed · snippets 0/0 verified · slots 0/5 with a receipt
+      (5 never receipted, 0 added after the receipt) (1 exempt)
+  counts:
+    accepted: 5
+    already_present: 0
+    answers_received: 5
+    never_receipted_after: 5
+    never_receipted_before: 5
+    receipts_added: 0
+    rejected_answers: 0
+    rejected_paths: 0
+    requested: 5
+    status_reversals_added: 0
+    unanswered: 0
+    unsupported: 5
+  input_identity:
+    bundle:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt
+      sha256: 8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225
+    chunks:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml
+      sha256: e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f
+    instruction:
+      render_version: 25
+      sha256: 4e81615bb1c1ef3f1213fd21a417803ad7e578c1a089c8576100f3b5993fe679
+      spec:
+        api_header_values:
+          Model: claude-opus-5
+          Reasoning effort: not set by the request (the provider's own choice; not
+            recorded as a value)
+          Temperature: not sent (claude-opus-5 rejects the parameter; the config's
+            value did not reach the request)
+        api_playbook_sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+        api_playbook_version: 2
+        arm: BASELINE (input documents only)
+        bundle: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt
+        chunk_manifest: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml
+        condition: generic_v10
+        manifest: null
+        manifest_line: '# Source manifest: not used (no manifest selected; the bundle
+          was passed explicitly)'
+        profile: neutral
+        provider: Synthetic offline fixture
+        receipt_completion_policy_sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+        receipt_completion_registration:
+          raw_json: '{"condition":"generic_v10","context_limit_basis":"Synthetic fixture","context_limit_tokens":900000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"invented-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"}'
+          sha256: 7ba33beee79075073569118fcd3cf45c0939abd52141724b93e2b93b6387f01a
+        receipt_completion_version: 2
+        render_version: 25
+        run_date: '2026-10-29'
+        runtime: Claude API (direct)
+        shared_generation_assets:
+          .claude/agents/d4d-provenance-guard-v2.md: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
+          .claude/commands/d4d-agent-v2.md: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
+          .claude/commands/d4d-full-core-v2.md: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
+          .claude/commands/d4d-uniform-rules-v2.md: 22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e
+          src/download/prompts/api_playbook_v2.md: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+          src/download/prompts/d4d_generic_arm_prompt_v10.md: ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db
+          src/download/prompts/evidence_protocol_v7.md: 72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6
+          src/download/prompts/receipt_completion_runtime_v2.md: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+          src/download/prompts/shared_generation_v1.md: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
+        shared_generation_registration:
+          raw_json: '{"audit_limits":{"aggregate_input_tokens":4000000,"aggregate_output_tokens":100000,"context_limit_basis":"Synthetic
+            assertion, not measured route capacity","context_limit_tokens":900000,"integration_output_tokens":4000,"max_calls":18,"max_input_tokens_per_call":850000,"max_inventory_bytes":16384,"max_paths":96,"max_request_bytes":32000000,"max_workers":16,"omission_output_tokens":4000,"worker_output_tokens":4000},"audit_transport":{"malformed_response_retries":0,"sdk_max_retries":0,"transport_attempts":1},"format":"shared_generation_registration_v1","inputs":{"bundle":{"bytes":67,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt","sha256":"8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225"},"chunk_manifest":{"bytes":519,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml","sha256":"e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f"},"context":{"bytes":268,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/generation-context.json","sha256":"0e6e8175a77516e034e52a27aee858ffc1b4383ad0f0032ca26b7b3c9a7c887b"},"core_schema":{"root":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sources":[{"bytes":1299200,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sha256":"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"}]},"full_schema":{"root":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sources":[{"bytes":1442513,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sha256":"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"}]},"profile":{"basis":"stated
+            by the caller","name":"neutral","vocabulary":null},"project":"EXAMPLE","source_manifest":null},"receipt":{"condition":"generic_v10","context_limit_basis":"Synthetic
+            fixture","context_limit_tokens":900000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"invented-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"},"registration_id":"invented-local-test","registration_path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/shared-registration.json","run":{"arm":"BASELINE
+            (input documents only)","label":"scope-cli-synthetic_rep1","method":"claudecode_api","project":"EXAMPLE"},"runtime":{"base_url":"https://example.invalid","config":{"bytes":6250,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/.github/workflows/d4d_assistant_deterministic.config","sha256":"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"},"effort":null,"model":"claude-opus-5","provider":"Synthetic
+            offline fixture","temperature":null,"thinking":{"display":"summarized","type":"adaptive"}},"selection":{"api_playbook_version":2,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e","src/download/prompts/api_playbook_v2.md":"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719","src/download/prompts/d4d_generic_arm_prompt_v10.md":"ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db","src/download/prompts/evidence_protocol_v7.md":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","src/download/prompts/receipt_completion_runtime_v2.md":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","protocol":"shared_generation_v1","reader_runtime":{"packages":{"PyYAML":"6.0.2","jsonschema":"4.25.1","linkml":"1.9.3","linkml-runtime":"1.9.4","referencing":"0.31.1"},"python":[3,13]},"receipt_completion_version":2,"renderer":25,"runtime":"Claude
+            API (direct)","schema_context_trim":{"generation_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings"],"linkml_dumper_probe_sha256":"e9bdb6f458123773125f7071060083c6e5eb11f213c201484bf3574d7c76a10a","omission_all_reachable_classes":true,"omission_retained_top_keys":["classes","enums","root_class","sources"],"omission_schema_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings"],"worker_non_assigned_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings","description","comments"]},"schema_context_version":2,"stage_contracts":{"api_playbook_probe_sha256":"a73b6eaa19cceb4d6817bffacbc8765454607440c416707ce4e4f23196173c87","chunk_projection_probe_sha256":"c5dffaabd9e11ef96267fb95f00a4524911f090bb24de218e268abcc8f7e2063","evidence_protocol_sha256":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","generation_context_header_sha256":"6215150c4f76c9ba0672b4ceafd4e009a68ce3b9bc18830bb79402e68a0f23c0","omission_assets_sha256":{"context.schema.json":"4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8","policy.md":"0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d","response.schema.json":"90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"},"phase_instructions_sha256":{"audit":"2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111","core":"77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986","full":"2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283","full_readdress":"59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27","full_receipt":"849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a","reconcile_core":"6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6","reconcile_full":"d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958","report":"1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853","report_regate":"bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"},"phase_max_tokens_sha256":"0b9100ac3f041de8ef82ad74a385e5665ba4714e341aab41b341f25c829c3bdc","phase_system_sha256":"badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88","readdress_header_sha256":"818baf385a68598ea659f318017d94994daf36aa257cf98f8cf607ec3a3d23bc","receipt_completion_audit_carry_sha256":"4bd93e8ca5e9130a3e954df80580ded5545a2a22e88ebc7ebacddb02c948ea1e","receipt_completion_policy_sha256":"f5be675610879e4aa50dfa03b14691ef8310cce19478daf007e9fcef557f97d0","regate_headers_sha256":"81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d","repair_instruction_sha256":"970025c4b1af524a733e28e44ea0f4355e846d5778c34d9b3c3e7a3d5f524a83","request_code_sha256":{"src/data_sheets_schema/american_spelling.py":"cce0940a957dd6dd25ed47919aa9f3a1bbf00b02dd5e71ad562e60de6a225dba","src/data_sheets_schema/anonymous_removals.py":"7a33288b481cf76b7cfeea1fbee99ac605660560b382a191119ca4d0768b80b0","src/data_sheets_schema/api_playbook.py":"3678b690deb288bb9b2eeea3ef6b3b29399573214ab145fd4710f4e51aa1ad46","src/data_sheets_schema/api_runner.py":"3d2a62f84d8902cb262d81c2d8bbafdf37ef057425e00ba133bd97d3cb8206d7","src/data_sheets_schema/audit_batch_format.py":"5bff6225905f3c1f40f9e32dfae6de9f374742b2ee66dfe5804cdc148b77046f","src/data_sheets_schema/audit_batches.py":"c95ec83f2f730df8c9766173f4d71367dfe705b08ec4acc4a17f8ef002da4414","src/data_sheets_schema/audit_grammar.py":"234eb188c0d7938b2f7f79f8a0282deaa5b5ef3963917d0a745ccbe4d53e451d","src/data_sheets_schema/audit_omissions.py":"807f5bfbd7355d0c6b801f79ff7e2f4a969bf717b71c7234e7837df1ba45e285","src/data_sheets_schema/audit_protocol.py":"384cca650e8cbcdefb18b27a65883b081c79fdf0ba9e7863c2ca8ffcfaf5fc19","src/data_sheets_schema/cache_dependencies.py":"25b9b110878b643a9bcb56f94f2a4123d51896e0559313958f45f1c35fb0336d","src/data_sheets_schema/chunking.py":"8d10582971cd4139dbca50a4ab465488ca4604ab7d692dcf31e5963a8b11b9fc","src/data_sheets_schema/corpus.py":"16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089","src/data_sheets_schema/d4d_pair_consistency.py":"1f95b6206062522998b3eb7ea2f8bcbe479867fd88adbacfc21173adf235dbb2","src/data_sheets_schema/derive_core.py":"ea7fe9db9edef8f4b89eef19b776667a9a0e013c92245575b103c62117434701","src/data_sheets_schema/duplicate_keys.py":"22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2","src/data_sheets_schema/evidence_assertions.py":"da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583","src/data_sheets_schema/grounding.py":"701c43041f2f6aa28e889a0165fe20bf0ed33c52e4cfe5b937db4f84f606c8fe","src/data_sheets_schema/historical_digest.py":"00718e3cf15b8a947b29914837244237873fac16267d659c6a64394b5871ba96","src/data_sheets_schema/identifiers.py":"31a581fa946cec0ceffa28ec641dd0d12135ebac201d3750609982349214b0a6","src/data_sheets_schema/latch_journal.py":"625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c","src/data_sheets_schema/profile_identity.py":"5fb08098439b17e72b7a9ab5529b2fe0e700d1d3d1fcedc0ecbd8b9c1b5ab3a6","src/data_sheets_schema/profiles.py":"f461414f7e035c5502c4312ea819fcc2b45c4eabb8fef18de8e791fe27061909","src/data_sheets_schema/provenance.py":"9e6955fa7f22bc77e05e3df81a1f32cbc0308aec503495fa8e72d15cb420d5be","src/data_sheets_schema/reasoning.py":"bd3d55c4d87dcbe05fe1b329870dc84116aa878c61888d4f352b2161d043c293","src/data_sheets_schema/receipt_completion.py":"6e126e379f6f2191858a95977c3fe4b4082111df01f4bcd73497529b2b6d0b43","src/data_sheets_schema/receipt_completion_policy.py":"3c7c727213369638827af0bdfd71484ebdb66661d88ae8942a591990c91b4f23","src/data_sheets_schema/receipt_sources.py":"c12db753773fc622503074f98c75607fa3e04d9b6f3e738994fffcc0ae05b400","src/data_sheets_schema/receipts.py":"658195581a9ca6a3dcf4700d25dd90d403985c2815c423069d2603b58b33d64d","src/data_sheets_schema/record_schema.py":"878239befd37d795a5915602f8715826aa828720eb28acdc70979c8968739a98","src/data_sheets_schema/registry.py":"04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3","src/data_sheets_schema/report_claims.py":"2d005a3a371f7d2b85ca3b45de3cebc591f05cda3a710195b2932ff5e5c10776","src/data_sheets_schema/rereceipt.py":"cd34f9d880d334f97812f4ab29fb516b0e442ac05d7d4e5e1c47533c1433b15c","src/data_sheets_schema/resources.py":"7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435","src/data_sheets_schema/run_schema.py":"92ee3b52474bf5152308f45ef3b1e03f752549091ed6eeb03e9d4fcb94c7644d","src/data_sheets_schema/schema_digest.py":"150a5f005ab1ed5fdf73f927559f15a3c7dbf34a0915ff2b83896991c1fcc095","src/data_sheets_schema/schema_snapshot.py":"fca5a4ed354418a5828df661df76f535a743bed3a8e156a8aff24d01e79eff32","src/data_sheets_schema/schema_view.py":"81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff","src/data_sheets_schema/scope.py":"f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199","src/data_sheets_schema/shared_generation.py":"8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47","src/data_sheets_schema/shared_generation_resources.py":"13f84a7a227532bc8c424af8737626a5ad40d2c898100299541f9ca215de70b5","src/data_sheets_schema/shared_write_footprint.py":"8522be189c935b8f6c83fc4163535d9ca9b634a36bde115388dedbeb9cda7624","src/data_sheets_schema/snapshot_store.py":"9414763d1cac8534edf7f18933f51f78b2b62879b0997548000430f0c4073a92","src/data_sheets_schema/source_heading_admission.py":"1671f568ca80672264661b414d9a456fbc9fee54da51975d799ce5ea5939b843","src/data_sheets_schema/source_heading_completed.py":"65bcbb67778282175c117559930350290f64357f63382a33d35833f54b12a839","src/data_sheets_schema/source_heading_routing.py":"72827fdefe6bcc5fe9b56660d448afe1c6e4edbc0cd4327af2855a9c1592890d","src/data_sheets_schema/source_heading_runtime.py":"651c0ee3dfd4017793b95bea91dbd46718afd1092bb02dbb0e539bef0d0ba16e","src/data_sheets_schema/source_metadata.py":"a4cb403bc56462cf22a4aa39338b7fffa27206f2d9e73f6e1369000ea68a56ae","src/data_sheets_schema/source_priority.py":"ae2b8bb514e110e5bc78200dc3dc2917abd9522d512a384467ca151f28768eb5","src/data_sheets_schema/source_review.py":"855115983efb9b0c5f653d7195bbf47901b4303725103e07d9a45fd33e940775","src/data_sheets_schema/support_targets.py":"7465f93c7b146d6858a43ff23b565b445d2a0523df7432f197c59544537dd432","src/data_sheets_schema/typed_audit.py":"b3e1bf1fa79d4e5c7d3be5bc1fe13e6f466f37967088dc240dbff66662168d27","src/data_sheets_schema/typed_audit_runtime.py":"58e85dcc5c632c0656d9a7d97d0e93c4cdf59bb86b835ed27ffb882139e6f493","src/data_sheets_schema/usage_ledger.py":"a175c6f5b5cc0bedd51bafcca51468bd4f650cb839f00dbecf741b9a23217165"},"schema_context_header_sha256":"8faa102cdffe979b766d61543a65a85c6cc28f4dcb400d61ed56e3c957d54497","shared_evidence_contract_sha256":"a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c","typed_audit_integration_format_sha256":"de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496","typed_audit_system_sha256":"37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b","typed_audit_worker_format_sha256":"f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336","typed_binding_header_sha256":"54cab5c9129755ac184578022f3b1cf5fe23d4ee2b4848314ee48e45096dce26"},"typed_protocol":"typed_audit_protocol_v1","version":1}}'
+          sha256: c6a3ec0a977edeb40841757b40e239c119f2e2d63d584e47b47e4cbb26daa735
+        shared_generation_version: 1
+    profile:
+      digest_md5: 94859bbbe7fa229619a3d5e2a50c3668
+      name: neutral
+    receipt_completion_schema:
+      sources:
+      - name: data-sheets-schema
+        path: /private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+        sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    shared_generation:
+      files:
+      - bytes: 6250
+        path: /private/tmp/d4d-codex-wave7-5212-a14-20261029/.github/workflows/d4d_assistant_deterministic.config
+        sha256: 0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91
+      - bytes: 1442513
+        path: /private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+        sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+      - bytes: 1299200
+        path: /private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+        sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+      - bytes: 519
+        path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml
+        sha256: e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f
+      - bytes: 67
+        path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt
+        sha256: 8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225
+      - bytes: 268
+        path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/generation-context.json
+        sha256: 0e6e8175a77516e034e52a27aee858ffc1b4383ad0f0032ca26b7b3c9a7c887b
+      - bytes: 13891
+        path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/shared-registration.json
+        sha256: c6a3ec0a977edeb40841757b40e239c119f2e2d63d584e47b47e4cbb26daa735
+      registration:
+        raw_json: '{"audit_limits":{"aggregate_input_tokens":4000000,"aggregate_output_tokens":100000,"context_limit_basis":"Synthetic
+          assertion, not measured route capacity","context_limit_tokens":900000,"integration_output_tokens":4000,"max_calls":18,"max_input_tokens_per_call":850000,"max_inventory_bytes":16384,"max_paths":96,"max_request_bytes":32000000,"max_workers":16,"omission_output_tokens":4000,"worker_output_tokens":4000},"audit_transport":{"malformed_response_retries":0,"sdk_max_retries":0,"transport_attempts":1},"format":"shared_generation_registration_v1","inputs":{"bundle":{"bytes":67,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt","sha256":"8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225"},"chunk_manifest":{"bytes":519,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml","sha256":"e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f"},"context":{"bytes":268,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/generation-context.json","sha256":"0e6e8175a77516e034e52a27aee858ffc1b4383ad0f0032ca26b7b3c9a7c887b"},"core_schema":{"root":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sources":[{"bytes":1299200,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sha256":"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"}]},"full_schema":{"root":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sources":[{"bytes":1442513,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sha256":"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"}]},"profile":{"basis":"stated
+          by the caller","name":"neutral","vocabulary":null},"project":"EXAMPLE","source_manifest":null},"receipt":{"condition":"generic_v10","context_limit_basis":"Synthetic
+          fixture","context_limit_tokens":900000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"invented-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"},"registration_id":"invented-local-test","registration_path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/shared-registration.json","run":{"arm":"BASELINE
+          (input documents only)","label":"scope-cli-synthetic_rep1","method":"claudecode_api","project":"EXAMPLE"},"runtime":{"base_url":"https://example.invalid","config":{"bytes":6250,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/.github/workflows/d4d_assistant_deterministic.config","sha256":"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"},"effort":null,"model":"claude-opus-5","provider":"Synthetic
+          offline fixture","temperature":null,"thinking":{"display":"summarized","type":"adaptive"}},"selection":{"api_playbook_version":2,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e","src/download/prompts/api_playbook_v2.md":"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719","src/download/prompts/d4d_generic_arm_prompt_v10.md":"ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db","src/download/prompts/evidence_protocol_v7.md":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","src/download/prompts/receipt_completion_runtime_v2.md":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","protocol":"shared_generation_v1","reader_runtime":{"packages":{"PyYAML":"6.0.2","jsonschema":"4.25.1","linkml":"1.9.3","linkml-runtime":"1.9.4","referencing":"0.31.1"},"python":[3,13]},"receipt_completion_version":2,"renderer":25,"runtime":"Claude
+          API (direct)","schema_context_trim":{"generation_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings"],"linkml_dumper_probe_sha256":"e9bdb6f458123773125f7071060083c6e5eb11f213c201484bf3574d7c76a10a","omission_all_reachable_classes":true,"omission_retained_top_keys":["classes","enums","root_class","sources"],"omission_schema_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings"],"worker_non_assigned_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings","description","comments"]},"schema_context_version":2,"stage_contracts":{"api_playbook_probe_sha256":"a73b6eaa19cceb4d6817bffacbc8765454607440c416707ce4e4f23196173c87","chunk_projection_probe_sha256":"c5dffaabd9e11ef96267fb95f00a4524911f090bb24de218e268abcc8f7e2063","evidence_protocol_sha256":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","generation_context_header_sha256":"6215150c4f76c9ba0672b4ceafd4e009a68ce3b9bc18830bb79402e68a0f23c0","omission_assets_sha256":{"context.schema.json":"4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8","policy.md":"0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d","response.schema.json":"90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"},"phase_instructions_sha256":{"audit":"2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111","core":"77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986","full":"2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283","full_readdress":"59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27","full_receipt":"849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a","reconcile_core":"6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6","reconcile_full":"d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958","report":"1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853","report_regate":"bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"},"phase_max_tokens_sha256":"0b9100ac3f041de8ef82ad74a385e5665ba4714e341aab41b341f25c829c3bdc","phase_system_sha256":"badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88","readdress_header_sha256":"818baf385a68598ea659f318017d94994daf36aa257cf98f8cf607ec3a3d23bc","receipt_completion_audit_carry_sha256":"4bd93e8ca5e9130a3e954df80580ded5545a2a22e88ebc7ebacddb02c948ea1e","receipt_completion_policy_sha256":"f5be675610879e4aa50dfa03b14691ef8310cce19478daf007e9fcef557f97d0","regate_headers_sha256":"81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d","repair_instruction_sha256":"970025c4b1af524a733e28e44ea0f4355e846d5778c34d9b3c3e7a3d5f524a83","request_code_sha256":{"src/data_sheets_schema/american_spelling.py":"cce0940a957dd6dd25ed47919aa9f3a1bbf00b02dd5e71ad562e60de6a225dba","src/data_sheets_schema/anonymous_removals.py":"7a33288b481cf76b7cfeea1fbee99ac605660560b382a191119ca4d0768b80b0","src/data_sheets_schema/api_playbook.py":"3678b690deb288bb9b2eeea3ef6b3b29399573214ab145fd4710f4e51aa1ad46","src/data_sheets_schema/api_runner.py":"3d2a62f84d8902cb262d81c2d8bbafdf37ef057425e00ba133bd97d3cb8206d7","src/data_sheets_schema/audit_batch_format.py":"5bff6225905f3c1f40f9e32dfae6de9f374742b2ee66dfe5804cdc148b77046f","src/data_sheets_schema/audit_batches.py":"c95ec83f2f730df8c9766173f4d71367dfe705b08ec4acc4a17f8ef002da4414","src/data_sheets_schema/audit_grammar.py":"234eb188c0d7938b2f7f79f8a0282deaa5b5ef3963917d0a745ccbe4d53e451d","src/data_sheets_schema/audit_omissions.py":"807f5bfbd7355d0c6b801f79ff7e2f4a969bf717b71c7234e7837df1ba45e285","src/data_sheets_schema/audit_protocol.py":"384cca650e8cbcdefb18b27a65883b081c79fdf0ba9e7863c2ca8ffcfaf5fc19","src/data_sheets_schema/cache_dependencies.py":"25b9b110878b643a9bcb56f94f2a4123d51896e0559313958f45f1c35fb0336d","src/data_sheets_schema/chunking.py":"8d10582971cd4139dbca50a4ab465488ca4604ab7d692dcf31e5963a8b11b9fc","src/data_sheets_schema/corpus.py":"16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089","src/data_sheets_schema/d4d_pair_consistency.py":"1f95b6206062522998b3eb7ea2f8bcbe479867fd88adbacfc21173adf235dbb2","src/data_sheets_schema/derive_core.py":"ea7fe9db9edef8f4b89eef19b776667a9a0e013c92245575b103c62117434701","src/data_sheets_schema/duplicate_keys.py":"22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2","src/data_sheets_schema/evidence_assertions.py":"da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583","src/data_sheets_schema/grounding.py":"701c43041f2f6aa28e889a0165fe20bf0ed33c52e4cfe5b937db4f84f606c8fe","src/data_sheets_schema/historical_digest.py":"00718e3cf15b8a947b29914837244237873fac16267d659c6a64394b5871ba96","src/data_sheets_schema/identifiers.py":"31a581fa946cec0ceffa28ec641dd0d12135ebac201d3750609982349214b0a6","src/data_sheets_schema/latch_journal.py":"625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c","src/data_sheets_schema/profile_identity.py":"5fb08098439b17e72b7a9ab5529b2fe0e700d1d3d1fcedc0ecbd8b9c1b5ab3a6","src/data_sheets_schema/profiles.py":"f461414f7e035c5502c4312ea819fcc2b45c4eabb8fef18de8e791fe27061909","src/data_sheets_schema/provenance.py":"9e6955fa7f22bc77e05e3df81a1f32cbc0308aec503495fa8e72d15cb420d5be","src/data_sheets_schema/reasoning.py":"bd3d55c4d87dcbe05fe1b329870dc84116aa878c61888d4f352b2161d043c293","src/data_sheets_schema/receipt_completion.py":"6e126e379f6f2191858a95977c3fe4b4082111df01f4bcd73497529b2b6d0b43","src/data_sheets_schema/receipt_completion_policy.py":"3c7c727213369638827af0bdfd71484ebdb66661d88ae8942a591990c91b4f23","src/data_sheets_schema/receipt_sources.py":"c12db753773fc622503074f98c75607fa3e04d9b6f3e738994fffcc0ae05b400","src/data_sheets_schema/receipts.py":"658195581a9ca6a3dcf4700d25dd90d403985c2815c423069d2603b58b33d64d","src/data_sheets_schema/record_schema.py":"878239befd37d795a5915602f8715826aa828720eb28acdc70979c8968739a98","src/data_sheets_schema/registry.py":"04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3","src/data_sheets_schema/report_claims.py":"2d005a3a371f7d2b85ca3b45de3cebc591f05cda3a710195b2932ff5e5c10776","src/data_sheets_schema/rereceipt.py":"cd34f9d880d334f97812f4ab29fb516b0e442ac05d7d4e5e1c47533c1433b15c","src/data_sheets_schema/resources.py":"7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435","src/data_sheets_schema/run_schema.py":"92ee3b52474bf5152308f45ef3b1e03f752549091ed6eeb03e9d4fcb94c7644d","src/data_sheets_schema/schema_digest.py":"150a5f005ab1ed5fdf73f927559f15a3c7dbf34a0915ff2b83896991c1fcc095","src/data_sheets_schema/schema_snapshot.py":"fca5a4ed354418a5828df661df76f535a743bed3a8e156a8aff24d01e79eff32","src/data_sheets_schema/schema_view.py":"81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff","src/data_sheets_schema/scope.py":"f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199","src/data_sheets_schema/shared_generation.py":"8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47","src/data_sheets_schema/shared_generation_resources.py":"13f84a7a227532bc8c424af8737626a5ad40d2c898100299541f9ca215de70b5","src/data_sheets_schema/shared_write_footprint.py":"8522be189c935b8f6c83fc4163535d9ca9b634a36bde115388dedbeb9cda7624","src/data_sheets_schema/snapshot_store.py":"9414763d1cac8534edf7f18933f51f78b2b62879b0997548000430f0c4073a92","src/data_sheets_schema/source_heading_admission.py":"1671f568ca80672264661b414d9a456fbc9fee54da51975d799ce5ea5939b843","src/data_sheets_schema/source_heading_completed.py":"65bcbb67778282175c117559930350290f64357f63382a33d35833f54b12a839","src/data_sheets_schema/source_heading_routing.py":"72827fdefe6bcc5fe9b56660d448afe1c6e4edbc0cd4327af2855a9c1592890d","src/data_sheets_schema/source_heading_runtime.py":"651c0ee3dfd4017793b95bea91dbd46718afd1092bb02dbb0e539bef0d0ba16e","src/data_sheets_schema/source_metadata.py":"a4cb403bc56462cf22a4aa39338b7fffa27206f2d9e73f6e1369000ea68a56ae","src/data_sheets_schema/source_priority.py":"ae2b8bb514e110e5bc78200dc3dc2917abd9522d512a384467ca151f28768eb5","src/data_sheets_schema/source_review.py":"855115983efb9b0c5f653d7195bbf47901b4303725103e07d9a45fd33e940775","src/data_sheets_schema/support_targets.py":"7465f93c7b146d6858a43ff23b565b445d2a0523df7432f197c59544537dd432","src/data_sheets_schema/typed_audit.py":"b3e1bf1fa79d4e5c7d3be5bc1fe13e6f466f37967088dc240dbff66662168d27","src/data_sheets_schema/typed_audit_runtime.py":"58e85dcc5c632c0656d9a7d97d0e93c4cdf59bb86b835ed27ffb882139e6f493","src/data_sheets_schema/usage_ledger.py":"a175c6f5b5cc0bedd51bafcca51468bd4f650cb839f00dbecf741b9a23217165"},"schema_context_header_sha256":"8faa102cdffe979b766d61543a65a85c6cc28f4dcb400d61ed56e3c957d54497","shared_evidence_contract_sha256":"a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c","typed_audit_integration_format_sha256":"de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496","typed_audit_system_sha256":"37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b","typed_audit_worker_format_sha256":"f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336","typed_binding_header_sha256":"54cab5c9129755ac184578022f3b1cf5fe23d4ee2b4848314ee48e45096dce26"},"typed_protocol":"typed_audit_protocol_v1","version":1}}'
+        sha256: c6a3ec0a977edeb40841757b40e239c119f2e2d63d584e47b47e4cbb26daa735
+    source_manifest: null
+  policy:
+    audit_header: '# Receipt completion candidates for independent audit
+
+
+      '
+    path: src/download/prompts/receipt_completion_runtime_v2.md
+    phase: full_receipt_completion
+    receipt_instrument: 'v4 (#3314, #3315): v3 coverage and gates unchanged; snippet
+      diagnostics split by declared phase1/rereceipt/unknown origin, with recorded
+      chunk-status reversals counted separately. Origin markers are accounting metadata,
+      not proof of authorship or semantic support. v3 (#1053): an entry whose identity
+      key the final list no longer carries anywhere (a minted id reconciliation stripped)
+      is located as a keyless entry — by overlap, else by position for the same shape
+      when the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`)
+      — instead of declared dropped; v2 (#1123): a fragment minted on an identifier
+      the record carries for the dataset at its top level — its id in CURIE or resolver
+      form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+      counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+      commentary and own-id fragments exempt, unattesting snippets counted apart'
+    receipt_instrument_version: 4
+    sdk_max_retries: 0
+    sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+    transport_attempts: 1
+    version: 2
+  receipt_after_sha256: eced6a4ee4315649e4dc4bef7ee7880fca2924f29c8cd1de1773a4020976448f
+  receipt_yaml: "bundle_md5: 364ac45e7cfd44f82bda95af5fd87b9c\nchunks:\n- id: c001\n\
+    \  reason: Synthetic prior negative.\n  status: nothing_relevant\n"
+  registration:
+    raw_json: '{"condition":"generic_v10","context_limit_basis":"Synthetic fixture","context_limit_tokens":900000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"invented-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"}'
+    sha256: 7ba33beee79075073569118fcd3cf45c0939abd52141724b93e2b93b6387f01a
+  rejected_paths: []
+  rejections: []
+  requested_paths:
+  - creators[0].name
+  - description
+  - keywords
+  - name
+  - title
+  schema_validation: captured schema and dependency closure validated before admission
+  semantic_support: not mechanically established
+  state: answers_complete
+  still_uncovered_paths:
+  - creators[0].name
+  - description
+  - keywords
+  - name
+  - title
+  unanswered_paths: []
+  unsupported_audit_candidates:
+  - path: creators[0].name
+    reason: Synthetic unknown support; independent judgment required.
+  - path: description
+    reason: Synthetic unknown support; independent judgment required.
+  - path: keywords
+    reason: Synthetic unknown support; independent judgment required.
+  - path: name
+    reason: Synthetic unknown support; independent judgment required.
+  - path: title
+    reason: Synthetic unknown support; independent judgment required.
+  journal:
+    state: complete
+    inputs:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_inputs.json
+      sha256: 11a160e704e1c8fe96cd9ce0d654789b35b0f70a6b5d4155fdcb6f1bd3f4be0d
+    request:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_request.json
+      sha256: 58b13710a190aaee3d432b7d8b0559d65e5228d2d1c282413a458bbb7627f9b3
+    context:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_context.json
+      sha256: 7871aa93bb939887ce836fb36f70917194e132be1ac584e2de7d1e259362c18c
+    requested_paths:
+    - creators[0].name
+    - description
+    - keywords
+    - name
+    - title
+    usage_id: 3f5c998a3bf4499c80c549728468d929
+    response:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_response.json
+      sha256: 37885a958ceb4eb1d384c1c26013952821a352daa7e3ad00b3898fc9b62179ea
+    result:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_result.json
+      sha256: da15ee430b2805005bb5bbfb8b2c68b9d3d7107d2171c5665f4bf7db1c8f28a6
+  response_sha256: 37885a958ceb4eb1d384c1c26013952821a352daa7e3ad00b3898fc9b62179ea
+api_usage:
+- usage_id: fe1c298ea85347b5bcd67bba1a3bc093
+  phase: full
+  attempt: 1
+  started_at: '2026-10-29T04:36:14+00:00'
+  seconds: 0.319
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  cache_read: 0
+  cache_write: 100
+  max_tokens: 128000
+  stop_reason: end_turn
+- usage_id: 3f5c998a3bf4499c80c549728468d929
+  phase: full_receipt_completion
+  attempt: 1
+  started_at: '2026-10-29T04:36:26+00:00'
+  seconds: 1.686
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  cache_read: 0
+  cache_write: 100
+  max_tokens: 4000
+  stop_reason: end_turn
+- usage_id: 3fa37ff157274fb99561ab9c38a99aa8
+  phase: typed_audit_worker
+  attempt: 1
+  started_at: '2026-10-29T04:36:43+00:00'
+  seconds: 0.74
+  max_tokens: 4000
+  input_tokens: 100
+  output_tokens: 50
+  cache_read: 0
+  cache_write: 100
+  thinking_tokens: null
+  stop_reason: end_turn
+- usage_id: 974d9158966d41f691418d40bce09a4c
+  phase: typed_audit_omission
+  attempt: 1
+  started_at: '2026-10-29T04:36:49+00:00'
+  seconds: 0.649
+  max_tokens: 4000
+  input_tokens: 100
+  output_tokens: 50
+  cache_read: 0
+  cache_write: 100
+  thinking_tokens: null
+  stop_reason: end_turn
+- usage_id: 91dff5c425654c03988d8f7197ef9b26
+  phase: typed_audit_integration
+  attempt: 1
+  started_at: '2026-10-29T04:36:55+00:00'
+  seconds: 0.667
+  max_tokens: 4000
+  input_tokens: 100
+  output_tokens: 50
+  cache_read: 0
+  cache_write: 100
+  thinking_tokens: null
+  stop_reason: end_turn
+- usage_id: 1cb8ac65bf474052807285cba05abc7c
+  phase: reconcile_full
+  attempt: 1
+  started_at: '2026-10-29T04:37:25+00:00'
+  seconds: 12.058
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  cache_read: 0
+  cache_write: 100
+  max_tokens: 128000
+  stop_reason: end_turn
+- source_review_admission:
+    state: accepted
+    response_sha256: 3d9cd638c5b0082a7070ddefd08a5afaba4af9c2f94b0c4362f7a8f4519f5117
+  usage_id: d61e5adf991a407d96be4edb23fe0416
+  phase: report
+  attempt: 1
+  started_at: '2026-10-29T04:37:53+00:00'
+  seconds: 12.317
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  cache_read: 0
+  cache_write: 100
+  max_tokens: 128000
+  stop_reason: end_turn
+- usage_id: b11620f68ff94a4fafd518f8cb8c2e1e
+  phase: report_regate
+  attempt: 1
+  started_at: '2026-10-29T04:38:14+00:00'
+  source_review_admission:
+    state: accepted
+    response_sha256: 4959d8f6f819db6df78b4048fa2c69c8587a03041cd2c75a2288d256de7e97dd
+  seconds: 12.546
+  input_tokens: 100
+  output_tokens: 50
+  thinking_tokens: null
+  max_tokens: 128000
+  cache_read: 0
+  cache_write: 100
+  stop_reason: end_turn
+phases_skipped: null
+repair: null
+validation:
+  passed: true
+  artifacts:
+    full:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d.yaml
+      md5: 72e687fb407f708cb83f85379a73d99d
+    core:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d_core.yaml
+      md5: dcf665ec69eacb20d7b03d50e92cb22e
+  schema:
+    full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  duplicate_keys:
+    full: []
+    core: []
+  recorded_by: api_runner.execute
+core_derivation:
+  derived: true
+  rule: shared slots copied from the full record; resources projected by id with full-only
+    nested slots dropped; distributions built from file_collections (one per collection
+    over the shared slots, total_bytes as bytes) and from each collection's File entries
+    (one per file over the slots CoreDistribution and File share); dialect from the
+    File entries when they agree on one value, else absent
+  from:
+    path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d.yaml
+    md5: 72e687fb407f708cb83f85379a73d99d
+  identity_slots: 79
+  projected_slots:
+  - resources
+  distribution_slots:
+    collection:
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - id
+    - name
+    - notes
+    - path
+    - source_caveats
+    file:
+    - bytes
+    - compression
+    - conforms_to
+    - conforms_to_standard
+    - description
+    - encoding
+    - format
+    - hash
+    - id
+    - md5
+    - media_type
+    - name
+    - notes
+    - path
+    - sha256
+    - source_caveats
+  conditional:
+    dialect: derived only when every File-level dialect in the full record agrees
+      on one value
+  phase: reconcile_core
+pair_consistency:
+  ran: true
+  consistent: true
+  artifacts:
+    full:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d.yaml
+      md5: 72e687fb407f708cb83f85379a73d99d
+    core:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d_core.yaml
+      md5: dcf665ec69eacb20d7b03d50e92cb22e
+  errors: 0
+  warnings: 0
+  identity_slots: 79
+  schema_moved: false
+  findings: []
+  findings_truncated: null
+normalisation:
+  identifier_form: {}
+  mailto_ids: {}
+  mailto_ids_skipped: []
+  mailto_ids_skipped_count: 0
+  occurrences: 0
+  distinct_values: 0
+  british_spellings: {}
+  british_occurrences: 0
+  british_rewrites: []
+  british_distinct: []
+  british_skipped: []
+  british_skipped_count: 0
+  british_normaliser: 'v2 (#1006): one rule per BRITISH_PATTERNS v4 entry; v1 (#1002)
+    mirrored v3; double-quoted spans, identifier-shaped tokens, title-case runs, genus
+    names and verbatim slots left as written'
+report_gate:
+  checked: true
+  claims_checked_before: 1
+  findings_before: 1
+  rows_by_record_before:
+    full: 1
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
+  regenerated: true
+  regeneration_attempted: true
+  evidence_assertions_before:
+    instrument: evidence_assertions v7 / source_review v2 (#2192)
+    checked: true
+    assertions_checked: 2
+    findings:
+    - kind: artifact_assertion_contradicted
+      detail: quoted text is absent at this exact artifact location
+      assertion: 0
+      artifact: original_core
+      path: '@header'
+      op: contains
+      quote: '# Phase 4 reconciliation: completed'
+    source_review_original:
+      instrument: source_review v2 (#2169)
+      artifact: original_full
+      sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      values_required: 6
+      values_reviewed: 6
+      claims_checked: 6
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    source_review_final:
+      instrument: source_review v2 (#2169)
+      artifact: final_full
+      sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      values_required: 6
+      values_reviewed: 6
+      claims_checked: 6
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    artifact_sha256:
+      bundle: 8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225
+      chunk_manifest: e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f
+      report: 7a439bb9ef594f114178defcbc3dbd670a26db9ff237a34245c8139237a7d15d
+      audit: ba12eba93ab5a4ede5c6b2c578743ca2a1340c0ddd2ca219d6351c93875d5967
+      original_full: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      original_core: ae58dbbfe0e59378f90da8e0dc54d9f278800d765a05d5801d53713f4dd5daa2
+      final_full: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      final_core: 9e8f2acef73ebff513e4a28b58096c46ad56e9f7b9f781785380d5a387b64cd8
+    scope: Declared evidence only; semantic support and omitted claims require independent
+      review.
+  findings_include_evidence_assertions: true
+  report_audit_totals_before:
+    checked: true
+    instrument_version: 2
+    reason: null
+    stated_total: null
+    stated_totals: []
+    stated_by_severity: {}
+    computed_total: 1
+    computed_by_severity:
+      medium: 1
+    mismatches: []
+    findings: []
+    status: no_total_stated
+  findings_include_report_audit_totals: true
+  claims_checked_after: 1
+  findings_after: 0
+  rows_by_record_after:
+    full: 1
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
+  remaining: []
+  evidence_assertions_after:
+    instrument: evidence_assertions v7 / source_review v2 (#2192)
+    checked: true
+    assertions_checked: 1
+    findings: []
+    source_review_original:
+      instrument: source_review v2 (#2169)
+      artifact: original_full
+      sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      values_required: 6
+      values_reviewed: 6
+      claims_checked: 6
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    source_review_final:
+      instrument: source_review v2 (#2169)
+      artifact: final_full
+      sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      values_required: 6
+      values_reviewed: 6
+      claims_checked: 6
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    artifact_sha256:
+      bundle: 8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225
+      chunk_manifest: e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f
+      report: 31b598c7d19d4ae7b39fe3da0ff73560a3845dafbafcb9e1b7ce1544dea2bd60
+      audit: ba12eba93ab5a4ede5c6b2c578743ca2a1340c0ddd2ca219d6351c93875d5967
+      original_full: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      original_core: ae58dbbfe0e59378f90da8e0dc54d9f278800d765a05d5801d53713f4dd5daa2
+      final_full: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      final_core: 9e8f2acef73ebff513e4a28b58096c46ad56e9f7b9f781785380d5a387b64cd8
+    scope: Declared evidence only; semantic support and omitted claims require independent
+      review.
+  report_audit_totals_after:
+    checked: true
+    instrument_version: 2
+    reason: null
+    stated_total: null
+    stated_totals: []
+    stated_by_severity: {}
+    computed_total: 1
+    computed_by_severity:
+      medium: 1
+    mismatches: []
+    findings: []
+    status: no_total_stated
+  evidence_assertions_final:
+    instrument: evidence_assertions v7 / source_review v2 (#2192)
+    checked: true
+    assertions_checked: 1
+    findings: []
+    source_review_original:
+      instrument: source_review v2 (#2169)
+      artifact: original_full
+      sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      values_required: 6
+      values_reviewed: 6
+      claims_checked: 6
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    source_review_final:
+      instrument: source_review v2 (#2169)
+      artifact: final_full
+      sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      values_required: 6
+      values_reviewed: 6
+      claims_checked: 6
+      findings: []
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    artifact_sha256:
+      bundle: 8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225
+      chunk_manifest: e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f
+      report: 31b598c7d19d4ae7b39fe3da0ff73560a3845dafbafcb9e1b7ce1544dea2bd60
+      audit: ba12eba93ab5a4ede5c6b2c578743ca2a1340c0ddd2ca219d6351c93875d5967
+      original_full: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      original_core: ae58dbbfe0e59378f90da8e0dc54d9f278800d765a05d5801d53713f4dd5daa2
+      final_full: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      final_core: 9e8f2acef73ebff513e4a28b58096c46ad56e9f7b9f781785380d5a387b64cd8
+    scope: Declared evidence only; semantic support and omitted claims require independent
+      review.
+report_claims:
+  checked: true
+  findings: []
+  claims_checked: 1
+  claims_unnamed: 0
+  disposition_rows: 1
+  rows_by_record:
+    full: 1
+    core: 0
+    both: 0
+    either: 0
+    no_record_column: 0
+    invalid: 0
+  claims_core_cannot_hold: 0
+  snapshot_checked: true
+  snapshot_basis: 'dispositions table expected: unrecorded removals are findings'
+  prose_retention_claims: 0
+  removals_unrecorded: []
+  removals_unrecorded_count: 0
+  instrument: 'v8 (#1808): an explicitly full/both top-level removal is false when
+    the key is absent from both the pinned original full snapshot and final full record;
+    no prior-core or nested-entry identity is inferred; v7 (#1089, #1194, #1196):
+    attributed schema claims, exact nested paths and record scopes, table positions,
+    mixed list counts and removal suppression are distinguished; phase-1 snapshot
+    bytes are pinned; v6 (#994): a `both` row''s path is judged step by step against
+    the core class''s declared ranges rather than at its root alone, a `[*]` wildcard
+    is a step''s subscript rather than a step of its own, and `claims_core_cannot_hold`
+    counts only a path the core cannot hold: one that descends through a scalar violates
+    the core schema''s declared range, carries its own cause and is excluded from
+    that count; v5 (#1054): with the phase-1 snapshot on disk, a top-level slot the
+    snapshot carried that the final full record does not, with no `removed` row or
+    removal sentence naming it, is `removal_not_recorded`; a prose retention claim
+    (`remains in`, `stays in`, `is kept in`, `is retained in` a backticked path) is
+    read like a retained row; v4 (#1122): `rows_by_record` tallies the dispositions
+    rows by their record column — `full`, `core`, `both`, `either` for an empty cell,
+    `no_record_column` for a table with no such column, `invalid` for anything else
+    — so a `both` row wrongly flipped to `full`, which the gate cannot see (a `full`
+    row resolves against the full record only), is countable from the block; v3 (#1022,
+    #1046): a schema claim that names its own scope — the core schema, the full schema,
+    a class — is resolved against that scope only, not against every class; v2 (#990):
+    a finding on a `both` row names when the core class declares no such slot; `claims_core_cannot_hold`
+    counts them'
+  artifacts:
+    report:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_reconciliation.md
+      md5: 2276832e30cd9943414f43aaf2a62ce9
+    full:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d.yaml
+      md5: 72e687fb407f708cb83f85379a73d99d
+    core:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d_core.yaml
+      md5: dcf665ec69eacb20d7b03d50e92cb22e
+    phase1_snapshot:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_full.yaml
+      sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      state: usable
+  schema:
+    full_sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    core_sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+  dispositions_expected: true
+report_audit_totals:
+  checked: true
+  instrument_version: 2
+  reason: null
+  stated_total: null
+  stated_totals: []
+  stated_by_severity: {}
+  computed_total: 1
+  computed_by_severity:
+    medium: 1
+  mismatches: []
+  findings: []
+  status: no_total_stated
+grounding:
+  checked: true
+  instrument: 'v1 (#4090): external identifiers with ARKs, resolver-URL findings,
+    run-schema basis'
+  counts:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  findings: []
+  distinct:
+    grounded: 0
+    minted_fragment: 0
+    absent: 0
+  artifacts:
+    bundle:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt
+      md5: 364ac45e7cfd44f82bda95af5fd87b9c
+form:
+  checked: true
+  records:
+  - /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d.yaml
+  - /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_d4d_core.yaml
+  undeclared_prefixes:
+    'urn:': 2
+  undeclared_prefix_occurrences: 2
+  prefix_instrument: 'v3 (#982): ark excluded, mailto excluded on Person ids only,
+    urn by NID'
+  british_instrument: 'v4 (#1006; v3 #836/#859)'
+  british_spellings: 0
+  organisational_fragments: 0
+  gc_label_variants: {}
+  gc_label_variant_occurrences: 0
+receipts:
+  expected: true
+  non_checks:
+  - that a chunk marked nothing_relevant truly held nothing for the record — a judgement;
+    sample by chunk id in review
+  - that a verified snippet supports the value it is attached to — a snippet can be
+    real and irrelevant; sample by slot path in review
+  receipt_completion_policy:
+    registration:
+      sha256: 7ba33beee79075073569118fcd3cf45c0939abd52141724b93e2b93b6387f01a
+      raw_json: '{"condition":"generic_v10","context_limit_basis":"Synthetic fixture","context_limit_tokens":900000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"invented-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"}'
+    runtime_policy_sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+  identity_rules:
+    instrument: receipt-identity-rules-v1
+    schema_basis:
+      source: the run's schema, on disk
+      path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+      sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+    declared_bases_sha256: 69e787d99f4c94adc826383fde859f4f19801bb929db9f599450cdd8f4033438
+    bases_sha256: 85a1aaa8600f345d0133426da2895492ba6f7fb4d267ba3e66f26af6b8320ad5
+    bases:
+    - - https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#
+      - d4dpreprocessing
+    - - https://w3id.org/bridge2ai/data-sheets-schema/data-governance#
+      - d4ddatagovernance
+    - - https://w3id.org/bridge2ai/data-sheets-schema/distribution#
+      - d4ddistribution
+    - - https://w3id.org/bridge2ai/standards-datasubstrate-schema/
+      - B2AI_SUBSTRATE
+    - - https://w3id.org/bridge2ai/data-sheets-schema/composition#
+      - d4dcomposition
+    - - https://w3id.org/bridge2ai/data-sheets-schema/maintenance#
+      - d4dmaintenance
+    - - https://w3id.org/bridge2ai/standards-organization-schema/
+      - B2AI_ORG
+    - - https://w3id.org/bridge2ai/data-sheets-schema/motivation#
+      - d4dmotivation
+    - - https://w3id.org/bridge2ai/data-sheets-schema/variables#
+      - d4dvariables
+    - - https://w3id.org/bridge2ai/standards-datatopic-schema/
+      - B2AI_TOPIC
+    - - https://w3id.org/bridge2ai/data-sheets-schema/ethics#
+      - d4dethics
+    - - https://w3id.org/bridge2ai/standards-dataset-schema/
+      - B2AI_DATA
+    - - https://w3id.org/bridge2ai/data-sheets-schema/human#
+      - d4dhuman
+    - - https://w3id.org/bridge2ai/b2ai-standards-registry/
+      - B2AI_STANDARD
+    - - https://w3id.org/bridge2ai/data-sheets-schema/uses#
+      - d4duses
+    - - https://w3id.org/bridge2ai/data-sheets-schema/
+      - d4d
+    - - https://w3id.org/bridge2ai/data-sheets-schema/
+      - data_sheets_schema
+    - - https://www.iana.org/assignments/media-types/
+      - mediatypes
+    - - http://www.w3.org/2004/02/skos/core#
+      - skos
+    - - http://mlcommons.org/croissant/rai/
+      - rai
+    - - http://purl.obolibrary.org/obo/duo_
+      - DUO
+    - - http://www.w3.org/2001/xmlschema#
+      - xsd
+    - - https://w3id.org/biolink/vocab/
+      - biolink
+    - - http://qudt.org/schema/qudt/
+      - qudt
+    - - http://www.w3.org/ns/dcat#
+      - dcat
+    - - http://www.w3.org/ns/prov#
+      - prov
+    - - http://www.w3.org/ns/shex#
+      - shex
+    - - http://spdx.org/rdf/terms#
+      - spdx
+    - - http://purl.org/dc/terms/
+      - dcterms
+    - - https://w3id.org/linkml/
+      - linkml
+    - - https://w3id.org/shacl/
+      - sh
+    - - https://w3id.org/aio/
+      - AIO
+    - - https://example.org/
+      - example
+    - - http://schema.org/
+      - schema
+    - - https://orcid.org/
+      - ORCID
+    - - https://ror.org/
+      - ROR
+    - - https://doi.org/
+      - doi
+    boundary_rule: delimiter-terminated resolver bases; ordered first match
+  checked: true
+  instrument: 'v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics
+    split by declared phase1/rereceipt/unknown origin, with recorded chunk-status
+    reversals counted separately. Origin markers are accounting metadata, not proof
+    of authorship or semantic support. v3 (#1053): an entry whose identity key the
+    final list no longer carries anywhere (a minted id reconciliation stripped) is
+    located as a keyless entry — by overlap, else by position for the same shape when
+    the list kept its length (`same_key_stripped`, counted under `slots.located_after_key_stripped`)
+    — instead of declared dropped; v2 (#1123): a fragment minted on an identifier
+    the record carries for the dataset at its top level — its id in CURIE or resolver
+    form, its doi, its page — is exempt like one on its own id; `slots.exempt_on_carried_identifier`
+    counts them; v1 (#720, #721, #722, #891): snippet floors, entry-not-list coverage,
+    commentary and own-id fragments exempt, unattesting snippets counted apart'
+  rereceipt:
+    status_reversal_count: 0
+    status_reversals: []
+    unusable_prior_count: 0
+    unusable_prior_chunks: []
+  chunks:
+    total: 1
+    reviewed: 1
+    unreviewed: []
+    by_status:
+      extracted: 0
+      redundant_with: 0
+      nothing_relevant: 1
+      duplicate_of: 0
+  snippets:
+    total: 0
+    verified: 0
+    linewrap_joined: 0
+    adjacent: 0
+    elsewhere: 0
+    spans_boundary: 0
+    split_at_linebreaks: 0
+    artifact_elided: 0
+    unattesting: 0
+    unattesting_sample: []
+    mismatched: 0
+    unchecked: 0
+    no_value_overlap: 0
+    no_value_overlap_sample: []
+    entry_single_leaf: 0
+    entry_single_leaf_sample: []
+    by_origin:
+      phase1:
+        total: 0
+        no_value_overlap: 0
+        entry_single_leaf: 0
+        unattesting: 0
+      rereceipt:
+        total: 0
+        no_value_overlap: 0
+        entry_single_leaf: 0
+        unattesting: 0
+      unknown:
+        total: 0
+        no_value_overlap: 0
+        entry_single_leaf: 0
+        unattesting: 0
+  slots:
+    populated: 6
+    exempt: 1
+    exempt_on_carried_identifier: 0
+    receiptable: 5
+    with_receipt: 0
+    without_receipt:
+    - creators[0].name
+    - description
+    - keywords
+    - name
+    - title
+    without_receipt_truncated: null
+    never_receipted: 5
+    added_after_receipt: 0
+    receipt_paths: 0
+    unresolved: []
+    path_off_by_one: []
+    path_off_by_one_count: 0
+    addressing_slips: []
+    addressing_slips_count: 0
+    remapped_by_identity: []
+    remapped_by_identity_count: 0
+    value_changed_after_receipt: []
+    value_changed_after_receipt_count: 0
+    index_reused_by_another_entry: []
+    index_reused_by_another_entry_count: 0
+    located_after_key_stripped: []
+    located_after_key_stripped_count: 0
+    path_not_in_snapshot: []
+    path_not_in_snapshot_count: 0
+    reshaped_by_reconcile: []
+    receipts_to_removed_values: 0
+    receiptable_at_receipt: 5
+    with_receipt_at_receipt: 0
+  findings: []
+  findings_truncated: null
+  findings_gated: 0
+  summary: chunks 1/1 reviewed · snippets 0/0 verified · slots 0/5 with a receipt
+    (5 never receipted, 0 added after the receipt) (1 exempt)
+  coverage_floor:
+    with_receipt: 0
+    receiptable: 5
+    floor:
+      mode: diagnostic_pilot
+      state: pending
+    passed: false
+    registration_sha256: 7ba33beee79075073569118fcd3cf45c0939abd52141724b93e2b93b6387f01a
+    state: pending
+    reason: diagnostic pilot; coverage floor not registered
+  artifacts:
+    receipt:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/EXAMPLE_coverage_receipt.yaml
+      sha256: eced6a4ee4315649e4dc4bef7ee7880fca2924f29c8cd1de1773a4020976448f
+    manifest:
+      path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml
+      sha256: e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f
+  bundle_basis:
+    source: bundle on disk
+    path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt
+intermediates:
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_transcript.json
+  sha256: 2a2903262cc933e218fff4eb0202e3c72fab4e2bbbc8d896625833b9ac3569f1
+  phase: EXAMPLE_receipt_completion_transcript.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: fe1c298ea85347b5bcd67bba1a3bc093
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_full_response_fe1c298ea85347b5bcd67bba1a3bc093.txt
+  sha256: 21cdf32f428973d65b3cc4e2f56a9ee0bfd3109f296ee4eba362d0b4e0d959c9
+  phase: EXAMPLE_full_response_fe1c298ea85347b5bcd67bba1a3bc093.txt
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: fe1c298ea85347b5bcd67bba1a3bc093
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_coverage_receipt.yaml
+  sha256: eced6a4ee4315649e4dc4bef7ee7880fca2924f29c8cd1de1773a4020976448f
+  phase: EXAMPLE_coverage_receipt.yaml
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_full.yaml
+  sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+  phase: EXAMPLE_full.yaml
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: fe1c298ea85347b5bcd67bba1a3bc093
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_context.json
+  sha256: 7871aa93bb939887ce836fb36f70917194e132be1ac584e2de7d1e259362c18c
+  phase: EXAMPLE_receipt_completion_context.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_inputs.json
+  sha256: 11a160e704e1c8fe96cd9ce0d654789b35b0f70a6b5d4155fdcb6f1bd3f4be0d
+  phase: EXAMPLE_receipt_completion_inputs.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_request.json
+  sha256: 58b13710a190aaee3d432b7d8b0559d65e5228d2d1c282413a458bbb7627f9b3
+  phase: EXAMPLE_receipt_completion_request.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_response.json
+  sha256: 37885a958ceb4eb1d384c1c26013952821a352daa7e3ad00b3898fc9b62179ea
+  phase: EXAMPLE_receipt_completion_response.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: 3f5c998a3bf4499c80c549728468d929
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_receipt_completion_result.json
+  sha256: da15ee430b2805005bb5bbfb8b2c68b9d3d7107d2171c5665f4bf7db1c8f28a6
+  phase: EXAMPLE_receipt_completion_result.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: 3f5c998a3bf4499c80c549728468d929
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_core.yaml
+  sha256: ae58dbbfe0e59378f90da8e0dc54d9f278800d765a05d5801d53713f4dd5daa2
+  phase: EXAMPLE_core.yaml
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_packet.json
+  sha256: e8ba1849e84384db5bf299f0ddb3cab1f49897914ef34f14b1253076a7919aca
+  phase: EXAMPLE_typed_audit_packet.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_0_request.json
+  sha256: f3a17c5621a5f9faff55fdb41428c882905b7806ed31cada2313993f7be2207e
+  phase: EXAMPLE_typed_audit_0_request.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_0_context.json
+  sha256: a0f1fa871ee072480de1ce5e5ef95fd8293921501357f7b0013b4cb28d73c692
+  phase: EXAMPLE_typed_audit_0_context.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_0_response.json
+  sha256: 20580290dfebf51a406ba149ec03cc25b324d73ee2e94502bff829a6ef775425
+  phase: EXAMPLE_typed_audit_0_response.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: 3fa37ff157274fb99561ab9c38a99aa8
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_1_request.json
+  sha256: b6dfb4c44a9ffad9d5268ba7f75bc37b3082dd8d53473cba0da779a0da162db1
+  phase: EXAMPLE_typed_audit_1_request.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_1_context.json
+  sha256: 9d412084c164e856b394c1083669671e2fdf312453d516735c12b6059fb27cf3
+  phase: EXAMPLE_typed_audit_1_context.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_1_response.json
+  sha256: 2292b813f82577af9a00fcb868ed65de27da5aa54a38b70b2ff19c0bc3c14f7e
+  phase: EXAMPLE_typed_audit_1_response.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: 974d9158966d41f691418d40bce09a4c
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_2_request.json
+  sha256: 00f5d12e9f32bf9488deb348c369de6222464890717f903ec2cdb03416678fae
+  phase: EXAMPLE_typed_audit_2_request.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_2_context.json
+  sha256: 1a0c8e335de2871da9cfbb1941478f62313719d76affa7c5f2efc608d617a5d9
+  phase: EXAMPLE_typed_audit_2_context.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_2_response.json
+  sha256: c1b044953e788d26eefbdda68e4191aad1fe6219c901711ffce2734080d9a824
+  phase: EXAMPLE_typed_audit_2_response.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: 91dff5c425654c03988d8f7197ef9b26
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_typed_audit_assembly.json
+  sha256: 7ec564d246a308bbdbaa7355a91cc7f56ead124ae95efc15681cce42e096df1a
+  phase: EXAMPLE_typed_audit_assembly.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_audit.json
+  sha256: ba12eba93ab5a4ede5c6b2c578743ca2a1340c0ddd2ca219d6351c93875d5967
+  phase: EXAMPLE_audit.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: 91dff5c425654c03988d8f7197ef9b26
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_audit_evidence.json
+  sha256: c48f94abef3cf60211f5df35069ffaa4f388b28416237a7de3ac432e6fc3ea0a
+  phase: EXAMPLE_audit_evidence.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_reconcile_full_context.json
+  sha256: 0556a56f7e3e218406eada2f1601e136caa6a0241b0790171d89a0ee5b48018d
+  phase: EXAMPLE_reconcile_full_context.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_reconcile_full.yaml
+  sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+  phase: EXAMPLE_reconcile_full.yaml
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: 1cb8ac65bf474052807285cba05abc7c
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_reconcile_evidence.json
+  sha256: 2da1c88d3f89dd8bfac821488ca725075d77e5adf712ef002c380188c14be66c
+  phase: EXAMPLE_reconcile_evidence.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_reconcile_core.yaml
+  sha256: 9e8f2acef73ebff513e4a28b58096c46ad56e9f7b9f781785380d5a387b64cd8
+  phase: EXAMPLE_reconcile_core.yaml
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_report_context.json
+  sha256: ac6fa6986deacedf5f577949c2438f8ed6d17244e3eb459ceb7b6c4bdfe9a0fe
+  phase: EXAMPLE_report_context.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_report.md
+  sha256: 7a439bb9ef594f114178defcbc3dbd670a26db9ff237a34245c8139237a7d15d
+  phase: EXAMPLE_report.md
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: d61e5adf991a407d96be4edb23fe0416
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_report_before_regate.md
+  sha256: 7a439bb9ef594f114178defcbc3dbd670a26db9ff237a34245c8139237a7d15d
+  phase: EXAMPLE_report_before_regate.md
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_report_regate_context.json
+  sha256: 363eb767506bd619baa9847025f7887db17de3cbc11a298bfd32d7bc5d813182
+  phase: EXAMPLE_report_regate_context.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_report_regate_response_b11620f68ff94a4fafd518f8cb8c2e1e.txt
+  sha256: 4959d8f6f819db6df78b4048fa2c69c8587a03041cd2c75a2288d256de7e97dd
+  phase: EXAMPLE_report_regate_response_b11620f68ff94a4fafd518f8cb8c2e1e.txt
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  usage_id: b11620f68ff94a4fafd518f8cb8c2e1e
+- path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/output/intermediate/EXAMPLE_report_evidence.json
+  sha256: dcb8badfe4917f41a159e394032aceb9a8d6e63878a3ca608a2fcd994ff0638d
+  phase: EXAMPLE_report_evidence.json
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+shared_generation:
+  protocol: shared_generation_v1
+  generation_id: 1befa6b80da046c998ce12e8aab769a4
+  schema_context_version: 2
+  assembly_sha256: da8ebe60b9ccebda9eb8af18ea4ec49d3f5e8474dea40493e2d59ed02084c4fc
+  audit_sha256: ba12eba93ab5a4ede5c6b2c578743ca2a1340c0ddd2ca219d6351c93875d5967
+  acceptance:
+    kind: typed_audit_acceptance_v1
+    protocol:
+      batch_version: 2
+      evidence_protocol: 7
+      grammar_version: 2
+      omission_inventory_version: 1
+      output_format_version: 2
+      protocol: typed_audit_protocol_v1
+    packet_sha256: a112c373e6da95dbd855ffd34e8db9e683e6843504d89598bf92e4d62aa4e3bc
+    passed: true
+    acceptance_scope: captured identity, declaration coverage and literal source-evidence
+      checks
+    scientific_support: unverified
+    novelty: unverified
+    exhaustive_recall: unverified
+    finding_counts:
+      absence_or_self_narration: 0
+      attribution: 0
+      date_scope: 0
+      identifier_count: 0
+      omission: 1
+      other: 0
+      quotation_fidelity: 0
+      role_placement: 0
+      status_scope: 0
+      untyped: 0
+    omission_counts:
+      expected_chunks: 1
+      declared_unique_chunks: 1
+      declared_omission_chunks: 1
+      declared_candidates: 2
+      prior_negative_chunks: 1
+      retained: 2
+      dropped: 0
+    source_review:
+      instrument: source_review v2 (#2169)
+      artifact: original_full
+      sha256: c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193
+      values_required: 6
+      values_reviewed: 6
+      claims_checked: 6
+      scope: Coverage and declared evidence/scope consistency only; semantic classifications
+        and entailment require independent review.
+    revised_rows: 0
+    assertions_checked: 1
+    problem_count: 0
+    problems: []
+    problems_truncated: false
+    limitations:
+    - Scientific support, applicability, novelty and exhaustive recall are unverified.
+    - Acceptance covers captured identities, declared coverage and literal source-evidence
+      checks only.
+    - This offline packet does not register or execute a live audit or repair records.
+    - Input limits include the existing 4000000-byte original and 2097152-byte audit
+      response bounds.
+    assembly_sha256: da8ebe60b9ccebda9eb8af18ea4ec49d3f5e8474dea40493e2d59ed02084c4fc
+    independently_reconstructed: true
+  authority:
+    registration:
+      sha256: c6a3ec0a977edeb40841757b40e239c119f2e2d63d584e47b47e4cbb26daa735
+      raw_json: '{"audit_limits":{"aggregate_input_tokens":4000000,"aggregate_output_tokens":100000,"context_limit_basis":"Synthetic
+        assertion, not measured route capacity","context_limit_tokens":900000,"integration_output_tokens":4000,"max_calls":18,"max_input_tokens_per_call":850000,"max_inventory_bytes":16384,"max_paths":96,"max_request_bytes":32000000,"max_workers":16,"omission_output_tokens":4000,"worker_output_tokens":4000},"audit_transport":{"malformed_response_retries":0,"sdk_max_retries":0,"transport_attempts":1},"format":"shared_generation_registration_v1","inputs":{"bundle":{"bytes":67,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt","sha256":"8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225"},"chunk_manifest":{"bytes":519,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml","sha256":"e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f"},"context":{"bytes":268,"path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/generation-context.json","sha256":"0e6e8175a77516e034e52a27aee858ffc1b4383ad0f0032ca26b7b3c9a7c887b"},"core_schema":{"root":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sources":[{"bytes":1299200,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml","sha256":"09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"}]},"full_schema":{"root":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sources":[{"bytes":1442513,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml","sha256":"eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"}]},"profile":{"basis":"stated
+        by the caller","name":"neutral","vocabulary":null},"project":"EXAMPLE","source_manifest":null},"receipt":{"condition":"generic_v10","context_limit_basis":"Synthetic
+        fixture","context_limit_tokens":900000,"coverage_floor":{"mode":"diagnostic_pilot","state":"pending"},"format":"receipt_completion_registration_v2","max_output_tokens":4000,"max_request_bytes":32000000,"receipt_instrument_version":4,"registration_id":"invented-receipt","runtime_policy_sha256":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"},"registration_id":"invented-local-test","registration_path":"/private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/shared-registration.json","run":{"arm":"BASELINE
+        (input documents only)","label":"scope-cli-synthetic_rep1","method":"claudecode_api","project":"EXAMPLE"},"runtime":{"base_url":"https://example.invalid","config":{"bytes":6250,"path":"/private/tmp/d4d-codex-wave7-5212-a14-20261029/.github/workflows/d4d_assistant_deterministic.config","sha256":"0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"},"effort":null,"model":"claude-opus-5","provider":"Synthetic
+        offline fixture","temperature":null,"thinking":{"display":"summarized","type":"adaptive"}},"selection":{"api_playbook_version":2,"assets":{".claude/agents/d4d-provenance-guard-v2.md":"10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085",".claude/commands/d4d-agent-v2.md":"dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299",".claude/commands/d4d-full-core-v2.md":"2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124",".claude/commands/d4d-uniform-rules-v2.md":"22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e","src/download/prompts/api_playbook_v2.md":"5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719","src/download/prompts/d4d_generic_arm_prompt_v10.md":"ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db","src/download/prompts/evidence_protocol_v7.md":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","src/download/prompts/receipt_completion_runtime_v2.md":"c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c","src/download/prompts/shared_generation_v1.md":"34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"},"condition":"generic_v10","protocol":"shared_generation_v1","reader_runtime":{"packages":{"PyYAML":"6.0.2","jsonschema":"4.25.1","linkml":"1.9.3","linkml-runtime":"1.9.4","referencing":"0.31.1"},"python":[3,13]},"receipt_completion_version":2,"renderer":25,"runtime":"Claude
+        API (direct)","schema_context_trim":{"generation_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings"],"linkml_dumper_probe_sha256":"e9bdb6f458123773125f7071060083c6e5eb11f213c201484bf3574d7c76a10a","omission_all_reachable_classes":true,"omission_retained_top_keys":["classes","enums","root_class","sources"],"omission_schema_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings"],"worker_non_assigned_dropped_slot_keys":["domain_of","from_schema","alias","owner","@type","slot_uri","annotations","exact_mappings","broad_mappings","description","comments"]},"schema_context_version":2,"stage_contracts":{"api_playbook_probe_sha256":"a73b6eaa19cceb4d6817bffacbc8765454607440c416707ce4e4f23196173c87","chunk_projection_probe_sha256":"c5dffaabd9e11ef96267fb95f00a4524911f090bb24de218e268abcc8f7e2063","evidence_protocol_sha256":"72039b09bfaaa43d683c7a0ba7560aace0d5c19209f7a1e1c70c4290ee48ddb6","generation_context_header_sha256":"6215150c4f76c9ba0672b4ceafd4e009a68ce3b9bc18830bb79402e68a0f23c0","omission_assets_sha256":{"context.schema.json":"4cb51a481905d272d24726dddd22ab91ed3e3ce1e6a23f37d50d2f1cefa9c2c8","policy.md":"0b197cf8bafe1f3df53f3c23922e9e38d514cca42979b90282022b8bef4c0b0d","response.schema.json":"90d9e0fcb50b391c9345b0150af2a43f7c3581673b89f35069a70f57046e6d07"},"phase_instructions_sha256":{"audit":"2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111","core":"77ef46a9507ffd96367754b5a4af3a34354cf69399e9ff22e5b179bb2919d986","full":"2bf5bcd9ebc5b262d889ff91b7e43ac339bc54db1edc1363a589c35b9dd77283","full_readdress":"59764c2d5395aa92c111b974729a4806edfbff4570f1d375f9fd6c065deb2b27","full_receipt":"849e59da13938e260e5052ad06546325daa4e1a9fc79cf692672643df513e40a","reconcile_core":"6f895a02e5322cc2eb131c07104871dd0feefb54db481ecf0e17f38bcd924ed6","reconcile_full":"d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958","report":"1e756a9b1cb671aeff9b021eb7033cec97d2312c66d4bb16e53563903afe4853","report_regate":"bd0ee969c030e2d2e1cd34f6150ef25fc1ce95bff7334b99f4b373e1fe247592"},"phase_max_tokens_sha256":"0b9100ac3f041de8ef82ad74a385e5665ba4714e341aab41b341f25c829c3bdc","phase_system_sha256":"badb2dee31960a4a9d7c5c8374fcecedcd1b91111f1a77590decf3edfaf5fd88","readdress_header_sha256":"818baf385a68598ea659f318017d94994daf36aa257cf98f8cf607ec3a3d23bc","receipt_completion_audit_carry_sha256":"4bd93e8ca5e9130a3e954df80580ded5545a2a22e88ebc7ebacddb02c948ea1e","receipt_completion_policy_sha256":"f5be675610879e4aa50dfa03b14691ef8310cce19478daf007e9fcef557f97d0","regate_headers_sha256":"81729f9db70b3440d60870ecb1e374866d59b239bec8a5fee849b1522ece5a8d","repair_instruction_sha256":"970025c4b1af524a733e28e44ea0f4355e846d5778c34d9b3c3e7a3d5f524a83","request_code_sha256":{"src/data_sheets_schema/american_spelling.py":"cce0940a957dd6dd25ed47919aa9f3a1bbf00b02dd5e71ad562e60de6a225dba","src/data_sheets_schema/anonymous_removals.py":"7a33288b481cf76b7cfeea1fbee99ac605660560b382a191119ca4d0768b80b0","src/data_sheets_schema/api_playbook.py":"3678b690deb288bb9b2eeea3ef6b3b29399573214ab145fd4710f4e51aa1ad46","src/data_sheets_schema/api_runner.py":"3d2a62f84d8902cb262d81c2d8bbafdf37ef057425e00ba133bd97d3cb8206d7","src/data_sheets_schema/audit_batch_format.py":"5bff6225905f3c1f40f9e32dfae6de9f374742b2ee66dfe5804cdc148b77046f","src/data_sheets_schema/audit_batches.py":"c95ec83f2f730df8c9766173f4d71367dfe705b08ec4acc4a17f8ef002da4414","src/data_sheets_schema/audit_grammar.py":"234eb188c0d7938b2f7f79f8a0282deaa5b5ef3963917d0a745ccbe4d53e451d","src/data_sheets_schema/audit_omissions.py":"807f5bfbd7355d0c6b801f79ff7e2f4a969bf717b71c7234e7837df1ba45e285","src/data_sheets_schema/audit_protocol.py":"384cca650e8cbcdefb18b27a65883b081c79fdf0ba9e7863c2ca8ffcfaf5fc19","src/data_sheets_schema/cache_dependencies.py":"25b9b110878b643a9bcb56f94f2a4123d51896e0559313958f45f1c35fb0336d","src/data_sheets_schema/chunking.py":"8d10582971cd4139dbca50a4ab465488ca4604ab7d692dcf31e5963a8b11b9fc","src/data_sheets_schema/corpus.py":"16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089","src/data_sheets_schema/d4d_pair_consistency.py":"1f95b6206062522998b3eb7ea2f8bcbe479867fd88adbacfc21173adf235dbb2","src/data_sheets_schema/derive_core.py":"ea7fe9db9edef8f4b89eef19b776667a9a0e013c92245575b103c62117434701","src/data_sheets_schema/duplicate_keys.py":"22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2","src/data_sheets_schema/evidence_assertions.py":"da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583","src/data_sheets_schema/grounding.py":"701c43041f2f6aa28e889a0165fe20bf0ed33c52e4cfe5b937db4f84f606c8fe","src/data_sheets_schema/historical_digest.py":"00718e3cf15b8a947b29914837244237873fac16267d659c6a64394b5871ba96","src/data_sheets_schema/identifiers.py":"31a581fa946cec0ceffa28ec641dd0d12135ebac201d3750609982349214b0a6","src/data_sheets_schema/latch_journal.py":"625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c","src/data_sheets_schema/profile_identity.py":"5fb08098439b17e72b7a9ab5529b2fe0e700d1d3d1fcedc0ecbd8b9c1b5ab3a6","src/data_sheets_schema/profiles.py":"f461414f7e035c5502c4312ea819fcc2b45c4eabb8fef18de8e791fe27061909","src/data_sheets_schema/provenance.py":"9e6955fa7f22bc77e05e3df81a1f32cbc0308aec503495fa8e72d15cb420d5be","src/data_sheets_schema/reasoning.py":"bd3d55c4d87dcbe05fe1b329870dc84116aa878c61888d4f352b2161d043c293","src/data_sheets_schema/receipt_completion.py":"6e126e379f6f2191858a95977c3fe4b4082111df01f4bcd73497529b2b6d0b43","src/data_sheets_schema/receipt_completion_policy.py":"3c7c727213369638827af0bdfd71484ebdb66661d88ae8942a591990c91b4f23","src/data_sheets_schema/receipt_sources.py":"c12db753773fc622503074f98c75607fa3e04d9b6f3e738994fffcc0ae05b400","src/data_sheets_schema/receipts.py":"658195581a9ca6a3dcf4700d25dd90d403985c2815c423069d2603b58b33d64d","src/data_sheets_schema/record_schema.py":"878239befd37d795a5915602f8715826aa828720eb28acdc70979c8968739a98","src/data_sheets_schema/registry.py":"04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3","src/data_sheets_schema/report_claims.py":"2d005a3a371f7d2b85ca3b45de3cebc591f05cda3a710195b2932ff5e5c10776","src/data_sheets_schema/rereceipt.py":"cd34f9d880d334f97812f4ab29fb516b0e442ac05d7d4e5e1c47533c1433b15c","src/data_sheets_schema/resources.py":"7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435","src/data_sheets_schema/run_schema.py":"92ee3b52474bf5152308f45ef3b1e03f752549091ed6eeb03e9d4fcb94c7644d","src/data_sheets_schema/schema_digest.py":"150a5f005ab1ed5fdf73f927559f15a3c7dbf34a0915ff2b83896991c1fcc095","src/data_sheets_schema/schema_snapshot.py":"fca5a4ed354418a5828df661df76f535a743bed3a8e156a8aff24d01e79eff32","src/data_sheets_schema/schema_view.py":"81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff","src/data_sheets_schema/scope.py":"f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199","src/data_sheets_schema/shared_generation.py":"8c799066df941dd80d65ffdc23eee225f875383e046bbc1f88656f9897d01e47","src/data_sheets_schema/shared_generation_resources.py":"13f84a7a227532bc8c424af8737626a5ad40d2c898100299541f9ca215de70b5","src/data_sheets_schema/shared_write_footprint.py":"8522be189c935b8f6c83fc4163535d9ca9b634a36bde115388dedbeb9cda7624","src/data_sheets_schema/snapshot_store.py":"9414763d1cac8534edf7f18933f51f78b2b62879b0997548000430f0c4073a92","src/data_sheets_schema/source_heading_admission.py":"1671f568ca80672264661b414d9a456fbc9fee54da51975d799ce5ea5939b843","src/data_sheets_schema/source_heading_completed.py":"65bcbb67778282175c117559930350290f64357f63382a33d35833f54b12a839","src/data_sheets_schema/source_heading_routing.py":"72827fdefe6bcc5fe9b56660d448afe1c6e4edbc0cd4327af2855a9c1592890d","src/data_sheets_schema/source_heading_runtime.py":"651c0ee3dfd4017793b95bea91dbd46718afd1092bb02dbb0e539bef0d0ba16e","src/data_sheets_schema/source_metadata.py":"a4cb403bc56462cf22a4aa39338b7fffa27206f2d9e73f6e1369000ea68a56ae","src/data_sheets_schema/source_priority.py":"ae2b8bb514e110e5bc78200dc3dc2917abd9522d512a384467ca151f28768eb5","src/data_sheets_schema/source_review.py":"855115983efb9b0c5f653d7195bbf47901b4303725103e07d9a45fd33e940775","src/data_sheets_schema/support_targets.py":"7465f93c7b146d6858a43ff23b565b445d2a0523df7432f197c59544537dd432","src/data_sheets_schema/typed_audit.py":"b3e1bf1fa79d4e5c7d3be5bc1fe13e6f466f37967088dc240dbff66662168d27","src/data_sheets_schema/typed_audit_runtime.py":"58e85dcc5c632c0656d9a7d97d0e93c4cdf59bb86b835ed27ffb882139e6f493","src/data_sheets_schema/usage_ledger.py":"a175c6f5b5cc0bedd51bafcca51468bd4f650cb839f00dbecf741b9a23217165"},"schema_context_header_sha256":"8faa102cdffe979b766d61543a65a85c6cc28f4dcb400d61ed56e3c957d54497","shared_evidence_contract_sha256":"a0dd152ec789d9e46527873aeb0104e0b1a35f30db89df5dc7d510a14d74ae1c","typed_audit_integration_format_sha256":"de53e1d2942c1ac038390c278f906d09e23be75dfc6cdbb4ebed299054454496","typed_audit_system_sha256":"37eca2a0e868abdafd678fea6c79feab2448caac858c7645f1062d860abddb3b","typed_audit_worker_format_sha256":"f48e9910254c86fc7a06f711fc7158a244d9ab15d140f94c475a71dcabe02336","typed_binding_header_sha256":"54cab5c9129755ac184578022f3b1cf5fe23d4ee2b4848314ee48e45096dce26"},"typed_protocol":"typed_audit_protocol_v1","version":1}}'
+    files:
+    - path: /private/tmp/d4d-codex-wave7-5212-a14-20261029/.github/workflows/d4d_assistant_deterministic.config
+      sha256: 0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91
+      bytes: 6250
+    - path: /private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+      sha256: eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f
+      bytes: 1442513
+    - path: /private/tmp/d4d-codex-wave7-5212-a14-20261029/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
+      sha256: 09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a
+      bytes: 1299200
+    - path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/chunks.yaml
+      sha256: e13eb2a789e39accd22037b1ae06bd361baaa8c435800468afe5a20ff31dd91f
+      bytes: 519
+    - path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/documents.txt
+      sha256: 8ff7af92770301470d90a9ab5d8ccfd55c9cd50516940d22c47780a3fcd67225
+      bytes: 67
+    - path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/generation-context.json
+      sha256: 0e6e8175a77516e034e52a27aee858ffc1b4383ad0f0032ca26b7b3c9a7c887b
+      bytes: 268
+    - path: /private/tmp/d4d-wave7-5212-a14-canary-20261029/cases/test_actual_cli_scope_delivery0/shared-registration.json
+      sha256: c6a3ec0a977edeb40841757b40e239c119f2e2d63d584e47b47e4cbb26daa735
+      bytes: 13891
+  scientific_support: unverified evaluator declarations

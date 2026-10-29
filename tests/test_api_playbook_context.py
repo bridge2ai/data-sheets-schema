@@ -250,3 +250,7 @@ def test_historical_replay_does_not_require_new_policy_module(external, monkeypa
     if renderer == 8:
         with pytest.raises(ImportError, match="historical closure"):
             replace(external, api_playbook_version=1).render_spec()
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

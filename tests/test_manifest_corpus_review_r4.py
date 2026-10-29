@@ -103,3 +103,7 @@ def test_project_root_backfill_recovers_the_original_relative_destinations(proje
     recorded = yaml.safe_load(spec.provenance_path.read_text())["prompts"]["request"]["spec"]
     restored = api.RunSpec.from_render_spec(recorded, project=spec.project, method=spec.method, label=spec.label)
     assert restored.instruction == instruction
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

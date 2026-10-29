@@ -1,0 +1,13 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave7-5212-a14-fixed-form-20261029/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave7-5212-a14-fixed-form-20261029/pytest.xml",
+    "tests/test_source_heading_runtime_api.py::test_selected_form_captures_actual_default_instrument_per_invocation"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave7-5212-a14-20261029"
+}

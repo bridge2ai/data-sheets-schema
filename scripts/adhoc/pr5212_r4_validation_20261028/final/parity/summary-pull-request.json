@@ -1,0 +1,1369 @@
+{
+  "baseline": {
+    "counterfactual": "same tree, before_attempt callback omitted",
+    "scope": "src/data_sheets_schema"
+  },
+  "captures": {
+    "baseline": {
+      "bytes": 84043,
+      "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/capture.json",
+      "sha256": "314800a78919a156e7b8dd09bb4269b8dbe036c306b204ebf8291a36f40711a0"
+    },
+    "candidate": {
+      "bytes": 84051,
+      "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/capture.json",
+      "sha256": "66fb792c7c26c398754a9a8add699f6f8f99508c32b16dfa3e7db1f7758bed96"
+    }
+  },
+  "common_resources": {
+    "external_dependency_pins": [],
+    "same_tree_repo_resources": {
+      ".claude/agents/d4d-provenance-guard-v2.md": {
+        "bytes": 6912,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/.claude/agents/d4d-provenance-guard-v2.md",
+        "sha256": "10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085"
+      },
+      ".claude/commands/d4d-agent-v2.md": {
+        "bytes": 12698,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/.claude/commands/d4d-agent-v2.md",
+        "sha256": "dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299"
+      },
+      ".claude/commands/d4d-full-core-v2.md": {
+        "bytes": 58267,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/.claude/commands/d4d-full-core-v2.md",
+        "sha256": "2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124"
+      },
+      ".claude/commands/d4d-uniform-rules-v2.md": {
+        "bytes": 29867,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/.claude/commands/d4d-uniform-rules-v2.md",
+        "sha256": "22a553695536a822e9c7ae877663a9b251c889a6637c637e579c5c6e1c855b2e"
+      },
+      ".github/workflows/d4d_assistant_deterministic.config": {
+        "bytes": 6250,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/.github/workflows/d4d_assistant_deterministic.config",
+        "sha256": "0e0bd41dd0a3f0696050b60108de0dd469d9dfbd0f6a3274e2ad524b67d60d91"
+      },
+      "data/omission_contexts/chorus_omission_context.json": {
+        "bytes": 6476,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/data/omission_contexts/chorus_omission_context.json",
+        "sha256": "ac94a74bd0d7d6c656564d67e656c7dbcf6627dca4c147a876eded072a81a3b0"
+      },
+      "data/preprocessed/chunks/CHORUS_chunks.yaml": {
+        "bytes": 1945,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/data/preprocessed/chunks/CHORUS_chunks.yaml",
+        "sha256": "ec9d81c54758d9db78ccc98a0a1de01643d224255f11f183cfebc2cfd793108a"
+      },
+      "data/preprocessed/concatenated/CHORUS_preprocessed.txt": {
+        "bytes": 35920,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+        "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c"
+      },
+      "data/preprocessed/source_manifest.yaml": {
+        "bytes": 40612,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/data/preprocessed/source_manifest.yaml",
+        "sha256": "0c5078c84f81294488e1a32c61dfa0a468cd03bf4ca318bc3c3a24be8ea84528"
+      },
+      "scripts/build_api_registrations.py": {
+        "bytes": 50534,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/scripts/build_api_registrations.py",
+        "sha256": "e2f85e7508a8bd2f77d423b82c379b8da6f3464cfa3ef1b0f1187bf017807acb"
+      },
+      "src/data_sheets_schema/b2ai_registry_vocabularies.yaml": {
+        "bytes": 6115,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+        "sha256": "e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914"
+      },
+      "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": {
+        "bytes": 1442513,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+        "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+      },
+      "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml": {
+        "bytes": 1299200,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+        "sha256": "09907cf80a5363aab3a16b349ecc5cf04cd3ae1e72909dc524c4836fd6bd611a"
+      },
+      "src/download/prompts/api_playbook_v2.md": {
+        "bytes": 4492,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/download/prompts/api_playbook_v2.md",
+        "sha256": "5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719"
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v10.md": {
+        "bytes": 32568,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/download/prompts/d4d_generic_arm_prompt_v10.md",
+        "sha256": "ec081dbb14049449989c56169de7bcd1563076667818c12b78571b5f15acb2db"
+      },
+      "src/download/prompts/receipt_completion_runtime_v2.md": {
+        "bytes": 3158,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/download/prompts/receipt_completion_runtime_v2.md",
+        "sha256": "c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c"
+      },
+      "src/download/prompts/shared_generation_v1.md": {
+        "bytes": 3569,
+        "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/download/prompts/shared_generation_v1.md",
+        "sha256": "34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450"
+      }
+    },
+    "scope": "Both captures use identical current resource bytes and paired external dependencies."
+  },
+  "environment": {
+    "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "packages": {
+      "anthropic": "0.72.0",
+      "httpx": "0.28.1"
+    },
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]"
+  },
+  "excluded_request_branches": [
+    "full readdress and receipt after readdress",
+    "schema repair"
+  ],
+  "fixture_selection": {
+    "basis": "stated by the caller",
+    "profile": "bridge2ai",
+    "scope": "Identical explicit fixture input; automatic checkout-dependent profile-basis formatting is outside this comparison."
+  },
+  "format": "d41_chorus_request_parity_v1",
+  "helper": {
+    "bytes": 23682,
+    "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/scripts/adhoc/d41_request_parity_20261026.py",
+    "sha256": "d2951c0c574352052f5d44f9bbb74c6aa97bfa340a3772d8fba18f3bf35fbdfd"
+  },
+  "passed": true,
+  "production_sources": {
+    "src/data_sheets_schema/_version.py": {
+      "bytes": 186,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/_version.py",
+      "sha256": "f7f3e9240f34737adc2c4e7657a72c014edd3d22eea65705b2f61179baefa837"
+    },
+    "src/data_sheets_schema/absence_lint.py": {
+      "bytes": 7440,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/absence_lint.py",
+      "sha256": "f992fdccfb1184d016992417bcfba6b0389e6ffd163b619601eccd1c5e783959"
+    },
+    "src/data_sheets_schema/agent_pin.py": {
+      "bytes": 20563,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/agent_pin.py",
+      "sha256": "0cc6e0a341efbd7c34675fe71819d017df59a22987e65e40e2b94941946c5f4a"
+    },
+    "src/data_sheets_schema/agentic_observed.py": {
+      "bytes": 31924,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/agentic_observed.py",
+      "sha256": "cd56f2c60f23cd6e7b9e5f52604a471dacfb2408a0ad26d74d1056b9e3861f47"
+    },
+    "src/data_sheets_schema/agentic_runtime.py": {
+      "bytes": 7000,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/agentic_runtime.py",
+      "sha256": "f7538be6100fb2ee226019ead94dfddf3c6e77ace9697707771d493fb1ff8d1b"
+    },
+    "src/data_sheets_schema/agreement.py": {
+      "bytes": 33889,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/agreement.py",
+      "sha256": "bb4d2300c7988ed55afae741385f9949991b72916a32312141920dcd0e6c2644"
+    },
+    "src/data_sheets_schema/american_spelling.py": {
+      "bytes": 18281,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/american_spelling.py",
+      "sha256": "cce0940a957dd6dd25ed47919aa9f3a1bbf00b02dd5e71ad562e60de6a225dba"
+    },
+    "src/data_sheets_schema/anonymous_removals.py": {
+      "bytes": 10795,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/anonymous_removals.py",
+      "sha256": "7a33288b481cf76b7cfeea1fbee99ac605660560b382a191119ca4d0768b80b0"
+    },
+    "src/data_sheets_schema/api_launcher.py": {
+      "bytes": 31255,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/api_launcher.py",
+      "sha256": "be0676f934d64b4a69650f872c0bafd5a2ab894ccb0b7d29aa52ec7507bd7afc"
+    },
+    "src/data_sheets_schema/api_playbook.py": {
+      "bytes": 3751,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/api_playbook.py",
+      "sha256": "3678b690deb288bb9b2eeea3ef6b3b29399573214ab145fd4710f4e51aa1ad46"
+    },
+    "src/data_sheets_schema/api_runner.py": {
+      "bytes": 460748,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/api_runner.py",
+      "sha256": "a216ce460da65766d032799de3685b6b6541c2eec7eb71edad98389ff6e595e5"
+    },
+    "src/data_sheets_schema/attainability.py": {
+      "bytes": 78690,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/attainability.py",
+      "sha256": "b8f9afc15fe6b5a51f36a5c39a85296b25537396651122b335bcd7242012e264"
+    },
+    "src/data_sheets_schema/attainability_aggregation.py": {
+      "bytes": 49310,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/attainability_aggregation.py",
+      "sha256": "a7b4a3cde144a4e475cddf6b5e060a2e5f347b6f0263103bf9d54aca9f121f0f"
+    },
+    "src/data_sheets_schema/attainability_figure.py": {
+      "bytes": 19340,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/attainability_figure.py",
+      "sha256": "29308fc8e3ef666098071dacfd82ca6255f179313acc73a5013a9194f0b858b6"
+    },
+    "src/data_sheets_schema/audit_batch_context.py": {
+      "bytes": 27871,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/audit_batch_context.py",
+      "sha256": "874c2415d5e6d9dea0fa307973539d339e54e76afbcf7f0dc8239e96514bb8d5"
+    },
+    "src/data_sheets_schema/audit_batch_format.py": {
+      "bytes": 22239,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/audit_batch_format.py",
+      "sha256": "5bff6225905f3c1f40f9e32dfae6de9f374742b2ee66dfe5804cdc148b77046f"
+    },
+    "src/data_sheets_schema/audit_batches.py": {
+      "bytes": 28145,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/audit_batches.py",
+      "sha256": "c95ec83f2f730df8c9766173f4d71367dfe705b08ec4acc4a17f8ef002da4414"
+    },
+    "src/data_sheets_schema/audit_grammar.py": {
+      "bytes": 15089,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/audit_grammar.py",
+      "sha256": "234eb188c0d7938b2f7f79f8a0282deaa5b5ef3963917d0a745ccbe4d53e451d"
+    },
+    "src/data_sheets_schema/audit_omissions.py": {
+      "bytes": 24295,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/audit_omissions.py",
+      "sha256": "807f5bfbd7355d0c6b801f79ff7e2f4a969bf717b71c7234e7837df1ba45e285"
+    },
+    "src/data_sheets_schema/audit_protocol.py": {
+      "bytes": 1307,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/audit_protocol.py",
+      "sha256": "384cca650e8cbcdefb18b27a65883b081c79fdf0ba9e7863c2ca8ffcfaf5fc19"
+    },
+    "src/data_sheets_schema/audit_recall.py": {
+      "bytes": 29843,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/audit_recall.py",
+      "sha256": "9a4692a64f869eed2045a33ea59c5baf6c3a235ab2acdf97b8e98f76645b5080"
+    },
+    "src/data_sheets_schema/awards.py": {
+      "bytes": 5697,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/awards.py",
+      "sha256": "0899cc549772699b1f736423a56bea4a6dac73c4ddc8db68caa9fa8facc034f5"
+    },
+    "src/data_sheets_schema/backfill_checks.py": {
+      "bytes": 28447,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/backfill_checks.py",
+      "sha256": "b099224f7ebc37f59c3f5f19964ff91009521d22872dbd92be7ba00c3ad90b2f"
+    },
+    "src/data_sheets_schema/cache_dependencies.py": {
+      "bytes": 11985,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cache_dependencies.py",
+      "sha256": "25b9b110878b643a9bcb56f94f2a4123d51896e0559313958f45f1c35fb0336d"
+    },
+    "src/data_sheets_schema/canary.py": {
+      "bytes": 30127,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/canary.py",
+      "sha256": "3a876ce86a6720eab14000db5c9663a1b155288d60f191f66846577b58ee24e4"
+    },
+    "src/data_sheets_schema/chunking.py": {
+      "bytes": 20633,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/chunking.py",
+      "sha256": "8d10582971cd4139dbca50a4ab465488ca4604ab7d692dcf31e5963a8b11b9fc"
+    },
+    "src/data_sheets_schema/cli/__init__.py": {
+      "bytes": 1583,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/__init__.py",
+      "sha256": "c11d423a8fb948ca860226d4b793042e5127777d2129c6bebfe12d09dd006ac4"
+    },
+    "src/data_sheets_schema/cli/__main__.py": {
+      "bytes": 110,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/__main__.py",
+      "sha256": "0848b1c32239a50b9efd3b432181704327b749c2e470a75865baa55ed997674e"
+    },
+    "src/data_sheets_schema/cli/_repo_utils.py": {
+      "bytes": 2877,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/_repo_utils.py",
+      "sha256": "f9dcde34cf5c929047ca9dab3f5983312df30071419156345cb9b703b81c405a"
+    },
+    "src/data_sheets_schema/cli/agents.py": {
+      "bytes": 3055,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/agents.py",
+      "sha256": "958bbfab19faac7dd23f0ddcbb48150bffedf865fcc8cdf76e562fa08122e12b"
+    },
+    "src/data_sheets_schema/cli/api.py": {
+      "bytes": 96127,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/api.py",
+      "sha256": "49b8c8619fc0fe29a43dc3800f4a3f7edb1fa4e661e5cbd4b1279f36f0cdb670"
+    },
+    "src/data_sheets_schema/cli/bundle.py": {
+      "bytes": 7056,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/bundle.py",
+      "sha256": "09e687ece64da5d79506e02c931ee3f163c9c20cd4bc59502b324c04716494e3"
+    },
+    "src/data_sheets_schema/cli/cross_family_judges.py": {
+      "bytes": 5094,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/cross_family_judges.py",
+      "sha256": "358c40ffb6cc514c2f616a93a44c6225bb916db7dd98bc981041e777a24c7c6f"
+    },
+    "src/data_sheets_schema/cli/cross_family_panel.py": {
+      "bytes": 5075,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/cross_family_panel.py",
+      "sha256": "1c76be87a0526cd0b79fea5840dde36bec758480ec577d8787c237f0b2dc308e"
+    },
+    "src/data_sheets_schema/cli/derive.py": {
+      "bytes": 2710,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/derive.py",
+      "sha256": "e7e69710439bff768b367f02bbec9ea5c13f007eba7f114b8ce765af1448eba1"
+    },
+    "src/data_sheets_schema/cli/download.py": {
+      "bytes": 34217,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/download.py",
+      "sha256": "78f2ef3f0ee0c5456248c043f8724a38441747f0f2f0d71ea85c904446f6a7e6"
+    },
+    "src/data_sheets_schema/cli/enrich.py": {
+      "bytes": 2146,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/enrich.py",
+      "sha256": "e5e4c47da289f39259bf540c9b4b4a939e4992b0aeb1bc78f026dcdaf5f8265b"
+    },
+    "src/data_sheets_schema/cli/evaluate.py": {
+      "bytes": 41158,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/evaluate.py",
+      "sha256": "46f6b9aa6098e61dddbfc088f329949f516f98bec99760ffe5f828e6259ec050"
+    },
+    "src/data_sheets_schema/cli/fitness_results.py": {
+      "bytes": 4292,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/fitness_results.py",
+      "sha256": "633f2663bfa727ef8c566167ac07bdec74eaceeae38c7b2e3ac81d9af2ed6215"
+    },
+    "src/data_sheets_schema/cli/healthsheet.py": {
+      "bytes": 2615,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/healthsheet.py",
+      "sha256": "779579265bddc0c82ce1fc2377e79550c934c06f2f186fc696566744b34f609a"
+    },
+    "src/data_sheets_schema/cli/method.py": {
+      "bytes": 467,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/method.py",
+      "sha256": "22e601ef2396bae8d377bcb482ee871c3a805ebb7d4f9cda6c844db96d3a01cf"
+    },
+    "src/data_sheets_schema/cli/prompt.py": {
+      "bytes": 1364,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/prompt.py",
+      "sha256": "e9bfd7aa56691715c1d9ee44394ce3eb59e91153eaa50300d15717aa6c03ab9b"
+    },
+    "src/data_sheets_schema/cli/provenance.py": {
+      "bytes": 176421,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/provenance.py",
+      "sha256": "dc718545f0f53d4291f2beacf2827a956a149498cb6af3f6f0395aadd92b2e04"
+    },
+    "src/data_sheets_schema/cli/receipts.py": {
+      "bytes": 39740,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/receipts.py",
+      "sha256": "b2dc139d53928e00d6fe48702c5230edfcec3329e0a6b7846051dce118452e38"
+    },
+    "src/data_sheets_schema/cli/render.py": {
+      "bytes": 11107,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/render.py",
+      "sha256": "e8304b2d6b99e951ca35dee57d9c84c5ee6fb32ed9a6ffa5f0baa473c225f418"
+    },
+    "src/data_sheets_schema/cli/review.py": {
+      "bytes": 39717,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/review.py",
+      "sha256": "c12f6fdd85d2e6a2af2989c8a76cd0af6fce82d87cef87d69b8ce7af304ed34c"
+    },
+    "src/data_sheets_schema/cli/rocrate.py": {
+      "bytes": 19375,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/rocrate.py",
+      "sha256": "371a32df2dd466e9bbc74ac35ebaaa175a06b2c8f7685a37157f07350b083e80"
+    },
+    "src/data_sheets_schema/cli/runs.py": {
+      "bytes": 113975,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/runs.py",
+      "sha256": "24418f3d128fca9bc3938da49e9dca2a3ececdec3feed60b64a4e653c4602412"
+    },
+    "src/data_sheets_schema/cli/schema.py": {
+      "bytes": 7562,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/schema.py",
+      "sha256": "5c3dba2fdbbb756ae3df97c6a8545cf17a78430bbf23bbcbe648890bf6eb7c8c"
+    },
+    "src/data_sheets_schema/cli/support_calibration.py": {
+      "bytes": 2450,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/support_calibration.py",
+      "sha256": "09027c777dcb6336b735abcefa644beac79c90250d79e5fe1b256b9904407b42"
+    },
+    "src/data_sheets_schema/cli/support_execution.py": {
+      "bytes": 2488,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/support_execution.py",
+      "sha256": "424528e8308ede5308b316c54c813a29cf54d8a79011321d94ad3a9082907929"
+    },
+    "src/data_sheets_schema/cli/support_results.py": {
+      "bytes": 3521,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/support_results.py",
+      "sha256": "6e509009d5d7c1f0640a60c7b0b06cf9cbec9559757321d902b362753fc5b382"
+    },
+    "src/data_sheets_schema/cli/utils.py": {
+      "bytes": 5305,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/utils.py",
+      "sha256": "150b631211b2a6f204c998bd03f2602d9a8365f159fff39e8d0031e2f107e171"
+    },
+    "src/data_sheets_schema/cli/validate.py": {
+      "bytes": 4935,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cli/validate.py",
+      "sha256": "dff8dff82eee94e3f0adb2494ad1eb5019e731bba3834f596109b916dc56231e"
+    },
+    "src/data_sheets_schema/constants/__init__.py": {
+      "bytes": 2148,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/constants/__init__.py",
+      "sha256": "30d1d76722fa5e592fe0158cedb98e1a1a926031d99e988c2b26a537b8ad39c1"
+    },
+    "src/data_sheets_schema/constants/evaluation.py": {
+      "bytes": 1558,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/constants/evaluation.py",
+      "sha256": "8c0508bfc24f6c40676ce4c2667e3c2398dd21fde3c7239190ce5b31cb0e2b8c"
+    },
+    "src/data_sheets_schema/constants/methods.py": {
+      "bytes": 7193,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/constants/methods.py",
+      "sha256": "3e6614fc2723452ff1dfe8f22462b9d49eb8bf8b15b64649d3083f95da77d85f"
+    },
+    "src/data_sheets_schema/constants/projects.py": {
+      "bytes": 3148,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/constants/projects.py",
+      "sha256": "c34c17348d47ab8de9f490988ebf5f0cab9b10ae44e1d95768f69fc9dc3684e1"
+    },
+    "src/data_sheets_schema/constants/schemas.py": {
+      "bytes": 1344,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/constants/schemas.py",
+      "sha256": "e7caf19588488d551392b69db47b74562b18dba292537944517d8314a8d90215"
+    },
+    "src/data_sheets_schema/corpus.py": {
+      "bytes": 3469,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/corpus.py",
+      "sha256": "16b90dc728960a0d001f98a45bf250906aeae51885aee7a52b7226324f5e2089"
+    },
+    "src/data_sheets_schema/crate_generation_comparison.py": {
+      "bytes": 11094,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/crate_generation_comparison.py",
+      "sha256": "aa5bb7573edd001762654857bd8eb8803781d64bb7d6779ae7433257156b3f5e"
+    },
+    "src/data_sheets_schema/cross_family_judge_analysis.py": {
+      "bytes": 26779,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cross_family_judge_analysis.py",
+      "sha256": "cc4fe4ef1820483e5896a10af5dcf4ba30c56c54f420339a3dacc4ba5a43172b"
+    },
+    "src/data_sheets_schema/cross_family_judge_panel.py": {
+      "bytes": 35694,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cross_family_judge_panel.py",
+      "sha256": "9dc7f9b90b1779f470b4c3a69f99c3fa5fd0f8afaf2ce1bd523be2662b8d0765"
+    },
+    "src/data_sheets_schema/cross_family_panel.py": {
+      "bytes": 23418,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cross_family_panel.py",
+      "sha256": "cc21763e5c136817a06633c1999139e70a772b58453a9e43ea413108fa3dadbf"
+    },
+    "src/data_sheets_schema/cross_family_panel_analysis.py": {
+      "bytes": 42049,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cross_family_panel_analysis.py",
+      "sha256": "ddd44884c95b3574a55d3edf9d2b5c186b7337a345783b072b128807be8d313e"
+    },
+    "src/data_sheets_schema/cross_family_panel_results.py": {
+      "bytes": 15489,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/cross_family_panel_results.py",
+      "sha256": "9713c89d70a1ae16818e10f1b9b7d6cb0e47ee36bc7d163c066bf00774dc8854"
+    },
+    "src/data_sheets_schema/d4d_pair_consistency.py": {
+      "bytes": 37208,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/d4d_pair_consistency.py",
+      "sha256": "1f95b6206062522998b3eb7ea2f8bcbe479867fd88adbacfc21173adf235dbb2"
+    },
+    "src/data_sheets_schema/datamodel/__init__.py": {
+      "bytes": 34,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/datamodel/__init__.py",
+      "sha256": "dba3e477259fd5228ef32285a39ef15c780a2ec3e252d915ccb7f0815c79db40"
+    },
+    "src/data_sheets_schema/datamodel/data_sheets_schema.py": {
+      "bytes": 288228,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/datamodel/data_sheets_schema.py",
+      "sha256": "b4b63f0c1b5686e8c6fa4308474092c7ced94cc066163b98cc89cc7ca68c97d1"
+    },
+    "src/data_sheets_schema/derive_core.py": {
+      "bytes": 10798,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/derive_core.py",
+      "sha256": "ea7fe9db9edef8f4b89eef19b776667a9a0e013c92245575b103c62117434701"
+    },
+    "src/data_sheets_schema/deterministic_publication.py": {
+      "bytes": 15013,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/deterministic_publication.py",
+      "sha256": "ad148752c3c5ae8a24f1e4c04a570233d694ce4034ef76ee90daefe76c37882e"
+    },
+    "src/data_sheets_schema/dollar_readout.py": {
+      "bytes": 50405,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/dollar_readout.py",
+      "sha256": "346cce5d6b2c4298e7b29affee59de68bcf51e0941bb964a89c4db3583d61d97"
+    },
+    "src/data_sheets_schema/duplicate_keys.py": {
+      "bytes": 15690,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/duplicate_keys.py",
+      "sha256": "22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2"
+    },
+    "src/data_sheets_schema/enumeration.py": {
+      "bytes": 8671,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/enumeration.py",
+      "sha256": "174d74cea271bc51de07c1ae82923b2aaae7bedbd9ff739fe7a757e4d849b838"
+    },
+    "src/data_sheets_schema/evaluation/__init__.py": {
+      "bytes": 45,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation/__init__.py",
+      "sha256": "216a416e75fdb3561aeac7916ba0832573c6cd85d7e2f12ad0454f4955e4501b"
+    },
+    "src/data_sheets_schema/evaluation/arm_comparison.py": {
+      "bytes": 11376,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation/arm_comparison.py",
+      "sha256": "600872ee867ced71f3f136b264447b383a62b79dd8469b6da98a87f758a04292"
+    },
+    "src/data_sheets_schema/evaluation/blind_review_pack.py": {
+      "bytes": 23596,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation/blind_review_pack.py",
+      "sha256": "001256a409e51f1ac87f40a55a96443b2bda5f9bd25e63ae3246d0a0f7d4a298"
+    },
+    "src/data_sheets_schema/evaluation/evaluate_d4d.py": {
+      "bytes": 47938,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation/evaluate_d4d.py",
+      "sha256": "1ee3debcbd234f300115ec67885bac707c167ded1ef5256470b1c057f9812d41"
+    },
+    "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py": {
+      "bytes": 28180,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation/evaluate_d4d_llm.py",
+      "sha256": "1170e6bda3628424266d2b74113e7fbeff15a58e505afb40f1c189883dc0cc88"
+    },
+    "src/data_sheets_schema/evaluation/registered_eval_runner.py": {
+      "bytes": 47772,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation/registered_eval_runner.py",
+      "sha256": "62a92e8b953ec464b511930d68aca9537c283fa674c91980b350eb8a5bf395ae"
+    },
+    "src/data_sheets_schema/evaluation/validate.py": {
+      "bytes": 17165,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation/validate.py",
+      "sha256": "475bd52ef3a11a626d9d95070e99971c33093cfdb5c2171a98a7cfb70f52b952"
+    },
+    "src/data_sheets_schema/evaluation_context.py": {
+      "bytes": 9204,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation_context.py",
+      "sha256": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e"
+    },
+    "src/data_sheets_schema/evaluation_model.py": {
+      "bytes": 7254,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation_model.py",
+      "sha256": "b0821c5a33d549e895c2de6c1232d4cd9e1c7e167425ec53a0ccdcecb7cd3718"
+    },
+    "src/data_sheets_schema/evaluation_plan.py": {
+      "bytes": 11235,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evaluation_plan.py",
+      "sha256": "6a0d7ce1a1ea0417c459076f43a0c358412d65c828bb292e48ab4ff587772c41"
+    },
+    "src/data_sheets_schema/evidence_assertions.py": {
+      "bytes": 34760,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evidence_assertions.py",
+      "sha256": "da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583"
+    },
+    "src/data_sheets_schema/evidence_score.py": {
+      "bytes": 53835,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/evidence_score.py",
+      "sha256": "6b7f4496fc3efdd0272610f76178cf750d7a82144a930f5334dc0b55c14b3b02"
+    },
+    "src/data_sheets_schema/fairscape_forward_types.py": {
+      "bytes": 10843,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/fairscape_forward_types.py",
+      "sha256": "4e3aa7fd62b7006c997deff39849e712f44d906486833e5ebf9345539263b36e"
+    },
+    "src/data_sheets_schema/fairscape_route_assertions.py": {
+      "bytes": 38787,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/fairscape_route_assertions.py",
+      "sha256": "e0c433967d4573c635ee53af85d7fa6cb4e9ecb84e30d42e46219c5e4e31eb5a"
+    },
+    "src/data_sheets_schema/fetch.py": {
+      "bytes": 10838,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/fetch.py",
+      "sha256": "53a2c39a3bab201f095f992321e13cbec640396332cecc43d1c5d7835db93c4c"
+    },
+    "src/data_sheets_schema/field_agent_contract.py": {
+      "bytes": 13569,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/field_agent_contract.py",
+      "sha256": "d360aa630a0ac23bbe960bd5ae05e3b601f7b4a893c31c9128699c35c01d23fb"
+    },
+    "src/data_sheets_schema/figure_publication.py": {
+      "bytes": 4714,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/figure_publication.py",
+      "sha256": "ff55393666c68b0b582fc7536bdf664eb5b1d1e2248c41453398abe90c7c40cc"
+    },
+    "src/data_sheets_schema/fitness_schema.py": {
+      "bytes": 22255,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/fitness_schema.py",
+      "sha256": "ca11da3dcabf07102699dcc8525a96bce47fba1cab636d74ae53d08be22bded7"
+    },
+    "src/data_sheets_schema/form_defects.py": {
+      "bytes": 44347,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/form_defects.py",
+      "sha256": "5771da81488baf5e71b3439b65661448b085483a5824b00cd8f404f0b404d237"
+    },
+    "src/data_sheets_schema/grounding.py": {
+      "bytes": 36544,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/grounding.py",
+      "sha256": "701c43041f2f6aa28e889a0165fe20bf0ed33c52e4cfe5b937db4f84f606c8fe"
+    },
+    "src/data_sheets_schema/healthsheet.py": {
+      "bytes": 9213,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/healthsheet.py",
+      "sha256": "85e28e5afcf2393794695025efe93660a3c420bf982ecec3426c23493935e860"
+    },
+    "src/data_sheets_schema/historical_digest.py": {
+      "bytes": 24890,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/historical_digest.py",
+      "sha256": "00718e3cf15b8a947b29914837244237873fac16267d659c6a64394b5871ba96"
+    },
+    "src/data_sheets_schema/identifiers.py": {
+      "bytes": 14403,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/identifiers.py",
+      "sha256": "31a581fa946cec0ceffa28ec641dd0d12135ebac201d3750609982349214b0a6"
+    },
+    "src/data_sheets_schema/instance_lint.py": {
+      "bytes": 24404,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/instance_lint.py",
+      "sha256": "0aecdbd49b2e9f99c6b44c51f5d21ed7e005e420fb9ffa24d161f9f2f09584b8"
+    },
+    "src/data_sheets_schema/judge_contract.py": {
+      "bytes": 9232,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/judge_contract.py",
+      "sha256": "7905b7e942eb87c4c79418680e3ff697a70ca45102f41d4c349d3a785e24ee6a"
+    },
+    "src/data_sheets_schema/latch_journal.py": {
+      "bytes": 36558,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/latch_journal.py",
+      "sha256": "625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c"
+    },
+    "src/data_sheets_schema/legacy_creator_references.py": {
+      "bytes": 6424,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_creator_references.py",
+      "sha256": "4f8a230c1779caf256e3ad19f1364c362713bdad262844bd10f8a291afd707f0"
+    },
+    "src/data_sheets_schema/legacy_creators.py": {
+      "bytes": 6894,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_creators.py",
+      "sha256": "d1da2432ac304391b4d5bc03d8ecd99ccb2383cfb1f8410c6bacda37c3941377"
+    },
+    "src/data_sheets_schema/legacy_description_lists.py": {
+      "bytes": 3525,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_description_lists.py",
+      "sha256": "3c4d40487c96d6cd348f77dc2bdacc442b0abfb95fe718c44d625555a3522a11"
+    },
+    "src/data_sheets_schema/legacy_documentary.py": {
+      "bytes": 3104,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_documentary.py",
+      "sha256": "6e38cdb39c78c91d0db0e36218c1da1035dce55fb91e3767ab6e0982c34f1b6f"
+    },
+    "src/data_sheets_schema/legacy_doi.py": {
+      "bytes": 2148,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_doi.py",
+      "sha256": "6313c18f41feb74254834e886cb55ddb608e1872494a227150b7166cd780a606"
+    },
+    "src/data_sheets_schema/legacy_publication.py": {
+      "bytes": 6374,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_publication.py",
+      "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9"
+    },
+    "src/data_sheets_schema/legacy_root_identity.py": {
+      "bytes": 3882,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_root_identity.py",
+      "sha256": "d839ec3a8af433d30624f8fe02518b9e4ce149f5bb8ba0a32db0101ea9b6df93"
+    },
+    "src/data_sheets_schema/legacy_route_dispositions.py": {
+      "bytes": 28634,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_route_dispositions.py",
+      "sha256": "1bf8af7c24d2a27f22995f9a84c7b141d168763d617d06358be31c13fdd9daf1"
+    },
+    "src/data_sheets_schema/legacy_sensitive_elements.py": {
+      "bytes": 1804,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_sensitive_elements.py",
+      "sha256": "c86451cfc5fb455fc25c276303d14c916a2a6bec3072835d395299dcc424a3d0"
+    },
+    "src/data_sheets_schema/legacy_update_plan.py": {
+      "bytes": 1459,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/legacy_update_plan.py",
+      "sha256": "4078e94c2a412f99de7469590cda3dc327363640aa9fcacfe745d001e9218242"
+    },
+    "src/data_sheets_schema/lexicon.py": {
+      "bytes": 15911,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/lexicon.py",
+      "sha256": "9b44772e7dfbf4ae9c27b7b80e58cda5f2317715d348159dc0451c183eccca7c"
+    },
+    "src/data_sheets_schema/merge.py": {
+      "bytes": 33347,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/merge.py",
+      "sha256": "82cba138cf8f83561f777183fef0d47d9d434b43efd4863bc6a1dffe6c64e769"
+    },
+    "src/data_sheets_schema/model_disclosure.py": {
+      "bytes": 16575,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/model_disclosure.py",
+      "sha256": "4df0e91301315668a372e0020ae3ff03ae2b6edf632dd2894061bc93c5077637"
+    },
+    "src/data_sheets_schema/name_grounding.py": {
+      "bytes": 67821,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/name_grounding.py",
+      "sha256": "eccc2c21dd5a8e2ea0ff06548870272ab84547a8d87dd5cdfcd9c62ac3f7da43"
+    },
+    "src/data_sheets_schema/native_attempt_supervisor.py": {
+      "bytes": 25348,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_attempt_supervisor.py",
+      "sha256": "19976716dff684540e468f6e0508288d60f5742432ec14c6e2908701b4ed67e4"
+    },
+    "src/data_sheets_schema/native_attribution_controller.py": {
+      "bytes": 21181,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_attribution_controller.py",
+      "sha256": "1557936cda492592a98f4638e08608e7e5af35bad52aa6b71f132fa84f2dcd02"
+    },
+    "src/data_sheets_schema/native_attribution_registration.py": {
+      "bytes": 24342,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_attribution_registration.py",
+      "sha256": "135be1958e93c682a2083b53d338c44c3acf66efe74cd5da94f7c66cf72e0ab6"
+    },
+    "src/data_sheets_schema/native_attribution_results.py": {
+      "bytes": 54114,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_attribution_results.py",
+      "sha256": "303d26d22d3003d6e02298311cef1c43879af50ebd0ee3b111beb41afab3ce39"
+    },
+    "src/data_sheets_schema/native_execution.py": {
+      "bytes": 33449,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_execution.py",
+      "sha256": "9b9e71190993264bf9feae7302350645ed220ca372ee24356d3b839209eed7f6"
+    },
+    "src/data_sheets_schema/native_execution_authority.py": {
+      "bytes": 7627,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_execution_authority.py",
+      "sha256": "12aceb23529ab7d0225b519c2b40da59acdc2133415baf02449521223c150a5e"
+    },
+    "src/data_sheets_schema/native_execution_gates.py": {
+      "bytes": 22925,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_execution_gates.py",
+      "sha256": "60b30694ecee9f708d67d336a59e7c0d1d53b8381fb90edefbeb78bcff18c6f3"
+    },
+    "src/data_sheets_schema/native_execution_permissions.py": {
+      "bytes": 24358,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_execution_permissions.py",
+      "sha256": "ea6d866aca57643f647907a00f3d6a7c124f2602faace20907a9c818bd771e21"
+    },
+    "src/data_sheets_schema/native_execution_registration.py": {
+      "bytes": 20251,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_execution_registration.py",
+      "sha256": "c23421ab653d76246f82a58d53d994748f4b9771a733074c83308d3a36721c45"
+    },
+    "src/data_sheets_schema/native_neutral_runtime_v1.py": {
+      "bytes": 5370,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_neutral_runtime_v1.py",
+      "sha256": "ae77c08defcc8b9eef3aa2967f884b503d2643c511a587c125e09530e8881826"
+    },
+    "src/data_sheets_schema/native_receipt_origin.py": {
+      "bytes": 7551,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_receipt_origin.py",
+      "sha256": "f962a17958a1497b51ea2e27b5bc3e0e5f6b2cad78998c83a2fd03ff3e3b76b6"
+    },
+    "src/data_sheets_schema/native_source_attribution.py": {
+      "bytes": 3068,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_source_attribution.py",
+      "sha256": "8d2322b4b0c366a00eab5fda9dba3073acf640825d0a2f6fae353eb2ebaa6d0d"
+    },
+    "src/data_sheets_schema/native_supervisor_authority.py": {
+      "bytes": 3536,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_supervisor_authority.py",
+      "sha256": "dd48bee05889e9c9c3bc9dd933999ece38e9edba383e117ed7ec6923171f6247"
+    },
+    "src/data_sheets_schema/native_supervisor_gates.py": {
+      "bytes": 23333,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/native_supervisor_gates.py",
+      "sha256": "23b3d20b18b802370d4553b5c41a5d8bedfff4e19e630367c0406e68f0ddfe30"
+    },
+    "src/data_sheets_schema/nested_support_execution.py": {
+      "bytes": 34416,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/nested_support_execution.py",
+      "sha256": "8b5c20e1fef3e88c9846040fab99e53e63cf00164962c44ec318f4e609398750"
+    },
+    "src/data_sheets_schema/nested_support_plan.py": {
+      "bytes": 19163,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/nested_support_plan.py",
+      "sha256": "ed419cb7682c9e9b467df9009efb91d96435c1a3e2d49ab305609d9031a5cdb0"
+    },
+    "src/data_sheets_schema/nested_support_results.py": {
+      "bytes": 44336,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/nested_support_results.py",
+      "sha256": "cc3b19d664aca1af5ce79273f4e9eb91fbe488cbb70b63a6850b05130baa3ed1"
+    },
+    "src/data_sheets_schema/org_registry.py": {
+      "bytes": 4867,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/org_registry.py",
+      "sha256": "ada33f9f123f000b2e08c7654385e79e18ba6a8a93b65f6cad9fb7c91b11d3e7"
+    },
+    "src/data_sheets_schema/output_ownership.py": {
+      "bytes": 14154,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/output_ownership.py",
+      "sha256": "5f752a2e4a42b26abac81e05f5c5ab0ac0ceea6a570d76b08958923f6b28c319"
+    },
+    "src/data_sheets_schema/profile_identity.py": {
+      "bytes": 15837,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/profile_identity.py",
+      "sha256": "5fb08098439b17e72b7a9ab5529b2fe0e700d1d3d1fcedc0ecbd8b9c1b5ab3a6"
+    },
+    "src/data_sheets_schema/profiles.py": {
+      "bytes": 14513,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/profiles.py",
+      "sha256": "f461414f7e035c5502c4312ea819fcc2b45c4eabb8fef18de8e791fe27061909"
+    },
+    "src/data_sheets_schema/prompt_registry.py": {
+      "bytes": 20591,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/prompt_registry.py",
+      "sha256": "1363f04bec3aa2bdc757782a23a6e7f8bd59bf2c9ee6df24ad8445e7f1b54b19"
+    },
+    "src/data_sheets_schema/provenance.py": {
+      "bytes": 124453,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/provenance.py",
+      "sha256": "9e6955fa7f22bc77e05e3df81a1f32cbc0308aec503495fa8e72d15cb420d5be"
+    },
+    "src/data_sheets_schema/q19_rationale_lint.py": {
+      "bytes": 84968,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/q19_rationale_lint.py",
+      "sha256": "74c7dbcdab98bd77ae486b9818af8fb09f81e4628987e2e4a81084b552998744"
+    },
+    "src/data_sheets_schema/reasoning.py": {
+      "bytes": 21243,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/reasoning.py",
+      "sha256": "bd3d55c4d87dcbe05fe1b329870dc84116aa878c61888d4f352b2161d043c293"
+    },
+    "src/data_sheets_schema/receipt_completion.py": {
+      "bytes": 41488,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/receipt_completion.py",
+      "sha256": "6e126e379f6f2191858a95977c3fe4b4082111df01f4bcd73497529b2b6d0b43"
+    },
+    "src/data_sheets_schema/receipt_completion_policy.py": {
+      "bytes": 17486,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/receipt_completion_policy.py",
+      "sha256": "3c7c727213369638827af0bdfd71484ebdb66661d88ae8942a591990c91b4f23"
+    },
+    "src/data_sheets_schema/receipt_origin.py": {
+      "bytes": 234808,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/receipt_origin.py",
+      "sha256": "92bda651720370cf5abb86c92458763385c07d4ac91b0e41314180dfeac7265f"
+    },
+    "src/data_sheets_schema/receipt_origin_record.py": {
+      "bytes": 10045,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/receipt_origin_record.py",
+      "sha256": "321932ed5400da79d96be8a4afe8a3b1a91d27ab48ebd5d84555d8f4f0f571f7"
+    },
+    "src/data_sheets_schema/receipt_readdress.py": {
+      "bytes": 10399,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/receipt_readdress.py",
+      "sha256": "fd788e78c0aea5ecdbce7dbadda624d0d1932a33ad34afcb56dd4675fd85eca3"
+    },
+    "src/data_sheets_schema/receipt_sources.py": {
+      "bytes": 39815,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/receipt_sources.py",
+      "sha256": "c12db753773fc622503074f98c75607fa3e04d9b6f3e738994fffcc0ae05b400"
+    },
+    "src/data_sheets_schema/receipts.py": {
+      "bytes": 116611,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/receipts.py",
+      "sha256": "658195581a9ca6a3dcf4700d25dd90d403985c2815c423069d2603b58b33d64d"
+    },
+    "src/data_sheets_schema/reconstructed_bytes.py": {
+      "bytes": 8016,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/reconstructed_bytes.py",
+      "sha256": "8b27af4b472c2f75ca68c91dd847d0f7a24d72392acd05ea6db34c6d12855a08"
+    },
+    "src/data_sheets_schema/record_schema.py": {
+      "bytes": 4462,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/record_schema.py",
+      "sha256": "878239befd37d795a5915602f8715826aa828720eb28acdc70979c8968739a98"
+    },
+    "src/data_sheets_schema/redundancy.py": {
+      "bytes": 6898,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/redundancy.py",
+      "sha256": "cea4a32df8c1be8a1d1c61e1a93eafefb4aae26fcf123c22357b8dca93e13554"
+    },
+    "src/data_sheets_schema/registry.py": {
+      "bytes": 19704,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/registry.py",
+      "sha256": "04868fd2cd791c41e47637f638dc338d3b777d928ae7c793a696676ccacafdb3"
+    },
+    "src/data_sheets_schema/related_dataset_diagnostics.py": {
+      "bytes": 9816,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/related_dataset_diagnostics.py",
+      "sha256": "8a0ad31f8f5d13ea65a0ac1859f096c4e5c91e86b75db501d925ec44049ff3c6"
+    },
+    "src/data_sheets_schema/related_datasets.py": {
+      "bytes": 5647,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/related_datasets.py",
+      "sha256": "38b417263220d3dd525cde41e9d59bd44378d40b9545184b2b8b6d55a1dd84ef"
+    },
+    "src/data_sheets_schema/release_inventory.py": {
+      "bytes": 21156,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/release_inventory.py",
+      "sha256": "614d2a57e781ed17e314341b59ea659e55ecd2d5e314eb77d62f01c3e2dd832e"
+    },
+    "src/data_sheets_schema/removal_repair.py": {
+      "bytes": 18973,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/removal_repair.py",
+      "sha256": "d5be65ea52049d4af4d0640f3cf7b5e86bf170de99edd2af518a6b1bb19fa81b"
+    },
+    "src/data_sheets_schema/removals.py": {
+      "bytes": 136517,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/removals.py",
+      "sha256": "37bc9c9086eabf0a3c508944e056a79bfc21f8c56e7ec66a3fd27f337878f8c3"
+    },
+    "src/data_sheets_schema/rendering/__init__.py": {
+      "bytes": 44,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rendering/__init__.py",
+      "sha256": "c4a8d9be0da17a01ecd29db65f0ac6a33db0262226fc7edbe2cee67000c79b25"
+    },
+    "src/data_sheets_schema/rendering/human_readable_renderer.py": {
+      "bytes": 41752,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rendering/human_readable_renderer.py",
+      "sha256": "bffcb27e14995723abf8ca34ff59f6c01d5bfc811ca15907465acf426d0caa31"
+    },
+    "src/data_sheets_schema/rendering/normalization.py": {
+      "bytes": 2804,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rendering/normalization.py",
+      "sha256": "db7e3c1506c785939efe1936f4443a06a3e4f4a8e2b758d8bb51faf7f41cac76"
+    },
+    "src/data_sheets_schema/rendering/process_text_files.py": {
+      "bytes": 11266,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rendering/process_text_files.py",
+      "sha256": "dbaa5b1a9e87b7f66aa703879ff1aa2b452fc83e47094ee66211b6394d3d3a72"
+    },
+    "src/data_sheets_schema/rendering/rubric10_semantic.py": {
+      "bytes": 21661,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rendering/rubric10_semantic.py",
+      "sha256": "960ab6e4db38d6a0bcf8663d8f0c6cf36691f47f08b2fa85de9ddd52382efc82"
+    },
+    "src/data_sheets_schema/rendering/rubric20_semantic.py": {
+      "bytes": 20341,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rendering/rubric20_semantic.py",
+      "sha256": "15ab76025dea2fcf4a9552bc1c5686cb458abad85e634db49da19abb5cf7ec5c"
+    },
+    "src/data_sheets_schema/replicate_structure.py": {
+      "bytes": 52590,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/replicate_structure.py",
+      "sha256": "f935be79d52bc943b2c01c20ae1273012ffc153b9214972cb999c2af4de17b64"
+    },
+    "src/data_sheets_schema/report_audit_totals.py": {
+      "bytes": 19764,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/report_audit_totals.py",
+      "sha256": "4e22fd1f14c5ab0ef557a39c992ff1519a9b8b4d8252fb54d9dfcfb61331f2df"
+    },
+    "src/data_sheets_schema/report_claims.py": {
+      "bytes": 83287,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/report_claims.py",
+      "sha256": "2d005a3a371f7d2b85ca3b45de3cebc591f05cda3a710195b2932ff5e5c10776"
+    },
+    "src/data_sheets_schema/rereceipt.py": {
+      "bytes": 11179,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rereceipt.py",
+      "sha256": "cd34f9d880d334f97812f4ab29fb516b0e442ac05d7d4e5e1c47533c1433b15c"
+    },
+    "src/data_sheets_schema/resources.py": {
+      "bytes": 15272,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/resources.py",
+      "sha256": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435"
+    },
+    "src/data_sheets_schema/review_pack.py": {
+      "bytes": 72543,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/review_pack.py",
+      "sha256": "941f9ce3e4b95b5b24bea2622d52ccade4f886b1e1e14e6b3d0fe2a5ed386fa9"
+    },
+    "src/data_sheets_schema/rocrate_assertions.py": {
+      "bytes": 14550,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rocrate_assertions.py",
+      "sha256": "db29413b43226201e2c6686d2d66beb18bfef12b37176a7a0c3180e94bba533f"
+    },
+    "src/data_sheets_schema/rocrate_map.py": {
+      "bytes": 53038,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rocrate_map.py",
+      "sha256": "33bda25938c91bbf20c02b8444dc3628c174db827192480d5f6b2e232d29bf10"
+    },
+    "src/data_sheets_schema/rocrate_normalize.py": {
+      "bytes": 35343,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rocrate_normalize.py",
+      "sha256": "7a52adef2dc39cc23a9a74eadbda8709f3b6c8e460f6f7fb16967df59d35622b"
+    },
+    "src/data_sheets_schema/rocrate_parent_admission.py": {
+      "bytes": 7204,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rocrate_parent_admission.py",
+      "sha256": "490781c3fc4a6b4c7b5473c0b4b43e7e6b6f0dd6c46ad43d6c931a2fa3851aad"
+    },
+    "src/data_sheets_schema/rocrate_sources.py": {
+      "bytes": 12163,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rocrate_sources.py",
+      "sha256": "174dee5eab18a83a84b1a2381d8b1915664947c49e70ebc5711921550cd878ab"
+    },
+    "src/data_sheets_schema/routing_diagnostics.py": {
+      "bytes": 47092,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/routing_diagnostics.py",
+      "sha256": "e11f8b5951b2c3c9430d6edefabd55f96651ef45cb4df7bd880538d5f205be12"
+    },
+    "src/data_sheets_schema/rubric_association.py": {
+      "bytes": 9126,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rubric_association.py",
+      "sha256": "83f4dca6de92b029f3097960ae296892bfa0918162ab86962829a147797a9f01"
+    },
+    "src/data_sheets_schema/rubric_pooling.py": {
+      "bytes": 5896,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/rubric_pooling.py",
+      "sha256": "65a2527977cb1276bdc77d1c96bee49a12ac6ef9068ae5937685c5e61a0c134c"
+    },
+    "src/data_sheets_schema/run_guard.py": {
+      "bytes": 3981,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/run_guard.py",
+      "sha256": "0c488a756d4735821976479de2e27929a60cee8747acd0209f5e18f20acf2f55"
+    },
+    "src/data_sheets_schema/run_lock.py": {
+      "bytes": 5589,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/run_lock.py",
+      "sha256": "9a49a0b735f03708a3bf4d5936e2770eb396aecc910b594b56023e0054baaeec"
+    },
+    "src/data_sheets_schema/run_pair_schema.py": {
+      "bytes": 3468,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/run_pair_schema.py",
+      "sha256": "f242bdb908c5ff1577eeab478e860194f2657d3c60f83000416372f3779986e5"
+    },
+    "src/data_sheets_schema/run_schema.py": {
+      "bytes": 10553,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/run_schema.py",
+      "sha256": "92ee3b52474bf5152308f45ef3b1e03f752549091ed6eeb03e9d4fcb94c7644d"
+    },
+    "src/data_sheets_schema/run_telemetry.py": {
+      "bytes": 39622,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/run_telemetry.py",
+      "sha256": "a8ed020392d0108a946c5bb9ef5000436f8cac1d64d0e9c5a15576a8dd9e9a2e"
+    },
+    "src/data_sheets_schema/runs.py": {
+      "bytes": 135120,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/runs.py",
+      "sha256": "58585ea05b25d5f596c0343e87d7d71e9ec10fe762242c27a809f9dc63a1a730"
+    },
+    "src/data_sheets_schema/schema_cache.py": {
+      "bytes": 5277,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/schema_cache.py",
+      "sha256": "0c5a99b735f295e164ec300cc44fdd37e39321290baf610f518c9503a8e32183"
+    },
+    "src/data_sheets_schema/schema_digest.py": {
+      "bytes": 41908,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/schema_digest.py",
+      "sha256": "150a5f005ab1ed5fdf73f927559f15a3c7dbf34a0915ff2b83896991c1fcc095"
+    },
+    "src/data_sheets_schema/schema_semantics.py": {
+      "bytes": 24815,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/schema_semantics.py",
+      "sha256": "a8c7a06b7c107f1d26adb03e362f983f19f507deceee03bc69c025e1f48a87c7"
+    },
+    "src/data_sheets_schema/schema_snapshot.py": {
+      "bytes": 6802,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/schema_snapshot.py",
+      "sha256": "fca5a4ed354418a5828df661df76f535a743bed3a8e156a8aff24d01e79eff32"
+    },
+    "src/data_sheets_schema/schema_sync.py": {
+      "bytes": 29871,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/schema_sync.py",
+      "sha256": "28aaefb527d00f7ceb470c6e54863929928b89da369b54b750badc6ac7f9b0e2"
+    },
+    "src/data_sheets_schema/schema_view.py": {
+      "bytes": 12420,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/schema_view.py",
+      "sha256": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff"
+    },
+    "src/data_sheets_schema/scope.py": {
+      "bytes": 25356,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/scope.py",
+      "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199"
+    },
+    "src/data_sheets_schema/self_disclaimed.py": {
+      "bytes": 83848,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/self_disclaimed.py",
+      "sha256": "e9d42cc1231aabbd9c4c7cc348b9978653d71c0ddba7915aa99bc20eb5d12ac9"
+    },
+    "src/data_sheets_schema/semantic_comparison.py": {
+      "bytes": 31313,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/semantic_comparison.py",
+      "sha256": "09571862ec0c59544ff8d321cf2391ef66f33ffdc3692d2b8b216dff33292428"
+    },
+    "src/data_sheets_schema/semantic_evidence.py": {
+      "bytes": 35340,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/semantic_evidence.py",
+      "sha256": "cec091e5163d0ca3cf7fef497832146d47d398083e202fa363222b7668685b60"
+    },
+    "src/data_sheets_schema/semantic_evidence_authority.py": {
+      "bytes": 1788,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/semantic_evidence_authority.py",
+      "sha256": "5f54d279c5cfdb44b613a34b8564c2abf5a67ae0f354322521a9f8f3d0b923b8"
+    },
+    "src/data_sheets_schema/semantic_evidence_reporting.py": {
+      "bytes": 7545,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/semantic_evidence_reporting.py",
+      "sha256": "00fbbddd243a037f2158a3239b5e48752a65ffd7f90a0e9cdb376480a0a8aef8"
+    },
+    "src/data_sheets_schema/semantic_instrument.py": {
+      "bytes": 2065,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/semantic_instrument.py",
+      "sha256": "b77f2a957a7accbb17d00e39d5d03ff095c5f4cc93925dffdf3eef854685a0a7"
+    },
+    "src/data_sheets_schema/semantic_scope.py": {
+      "bytes": 9546,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/semantic_scope.py",
+      "sha256": "850f9b703cbc24e05653fe2a0c063190817d8fe36b6a1b919de7bc726e2ea7ad"
+    },
+    "src/data_sheets_schema/semantic_taxonomy_figure.py": {
+      "bytes": 22830,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/semantic_taxonomy_figure.py",
+      "sha256": "c2b8bbdcc261e64f65f742647dec5f79c020e3e2247e8df9715499e3d49fe442"
+    },
+    "src/data_sheets_schema/shared_generation.py": {
+      "bytes": 48839,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/shared_generation.py",
+      "sha256": "136b62d5f1c3e0f942812b5fedcc5b3a26a9cd5d82e9a8230a7ed08ec01e86ad"
+    },
+    "src/data_sheets_schema/shared_generation_resources.py": {
+      "bytes": 7908,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/shared_generation_resources.py",
+      "sha256": "13f84a7a227532bc8c424af8737626a5ad40d2c898100299541f9ca215de70b5"
+    },
+    "src/data_sheets_schema/shared_write_footprint.py": {
+      "bytes": 5279,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/shared_write_footprint.py",
+      "sha256": "8522be189c935b8f6c83fc4163535d9ca9b634a36bde115388dedbeb9cda7624"
+    },
+    "src/data_sheets_schema/snapshot_store.py": {
+      "bytes": 23145,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/snapshot_store.py",
+      "sha256": "9414763d1cac8534edf7f18933f51f78b2b62879b0997548000430f0c4073a92"
+    },
+    "src/data_sheets_schema/source_attribution_preflight.py": {
+      "bytes": 9411,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/source_attribution_preflight.py",
+      "sha256": "8d9f540fc9e0df08688c649e0eedd430ba262fbbd4eb2a8f6c90bb6650c87189"
+    },
+    "src/data_sheets_schema/source_heading_admission.py": {
+      "bytes": 15353,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/source_heading_admission.py",
+      "sha256": "1671f568ca80672264661b414d9a456fbc9fee54da51975d799ce5ea5939b843"
+    },
+    "src/data_sheets_schema/source_heading_completed.py": {
+      "bytes": 60378,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/source_heading_completed.py",
+      "sha256": "978292400c3bdbc0340c4e14aa32e27e4bad06106ca91cb1f9f5f6b80adbbabb"
+    },
+    "src/data_sheets_schema/source_heading_routing.py": {
+      "bytes": 35521,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/source_heading_routing.py",
+      "sha256": "72827fdefe6bcc5fe9b56660d448afe1c6e4edbc0cd4327af2855a9c1592890d"
+    },
+    "src/data_sheets_schema/source_heading_runtime.py": {
+      "bytes": 16819,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/source_heading_runtime.py",
+      "sha256": "651c0ee3dfd4017793b95bea91dbd46718afd1092bb02dbb0e539bef0d0ba16e"
+    },
+    "src/data_sheets_schema/source_metadata.py": {
+      "bytes": 8042,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/source_metadata.py",
+      "sha256": "a4cb403bc56462cf22a4aa39338b7fffa27206f2d9e73f6e1369000ea68a56ae"
+    },
+    "src/data_sheets_schema/source_priority.py": {
+      "bytes": 8738,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/source_priority.py",
+      "sha256": "ae2b8bb514e110e5bc78200dc3dc2917abd9522d512a384467ca151f28768eb5"
+    },
+    "src/data_sheets_schema/source_review.py": {
+      "bytes": 12198,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/source_review.py",
+      "sha256": "855115983efb9b0c5f653d7195bbf47901b4303725103e07d9a45fd33e940775"
+    },
+    "src/data_sheets_schema/spelling.py": {
+      "bytes": 11102,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/spelling.py",
+      "sha256": "ed7a3850bf242b9821133faf575ecca2bb4ad063d62541a361dda12d3e7ff4ec"
+    },
+    "src/data_sheets_schema/status_context.py": {
+      "bytes": 92845,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/status_context.py",
+      "sha256": "2c33da4f6405e67bed8c5245f1f0bd729c2c07f7a51c85cb48c068f37f50c092"
+    },
+    "src/data_sheets_schema/stream_evidence.py": {
+      "bytes": 5433,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/stream_evidence.py",
+      "sha256": "3f196fe08fff41b5a6faf73b4f0a24c6cc751c50b946c5e20ea5d00145cb583d"
+    },
+    "src/data_sheets_schema/support_calibration.py": {
+      "bytes": 18416,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/support_calibration.py",
+      "sha256": "9bb27765d17d8088f0e6f081fda20429eefbe743c1026c503b74e3208f33cc94"
+    },
+    "src/data_sheets_schema/support_judge.py": {
+      "bytes": 25032,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/support_judge.py",
+      "sha256": "ed463973104b81c4dca8e693cb22b40189543683fdadacf849d50a6f79d8f63b"
+    },
+    "src/data_sheets_schema/support_plan.py": {
+      "bytes": 29609,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/support_plan.py",
+      "sha256": "eafbc0885d4390b738bd8fd9f951780c4935f99c669e2dc1a9c62ea2dd4fac04"
+    },
+    "src/data_sheets_schema/support_targets.py": {
+      "bytes": 33033,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/support_targets.py",
+      "sha256": "7465f93c7b146d6858a43ff23b565b445d2a0523df7432f197c59544537dd432"
+    },
+    "src/data_sheets_schema/top_level_fitness_results.py": {
+      "bytes": 47531,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/top_level_fitness_results.py",
+      "sha256": "d59f3a6eb24b438c27eaa7c293cdc2da0139e1eccb729a50a7a44e9745ced78f"
+    },
+    "src/data_sheets_schema/typed_audit.py": {
+      "bytes": 35173,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/typed_audit.py",
+      "sha256": "e366e2d6cabda3e28c6a410fd801437ddcdf4e70aa0791527bf1ba11c9844227"
+    },
+    "src/data_sheets_schema/typed_audit_figure.py": {
+      "bytes": 15326,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/typed_audit_figure.py",
+      "sha256": "13a06dd10b9840a7c1f5a746938e0a42b90fa8aaebd3dc1aae4b2079391cd8be"
+    },
+    "src/data_sheets_schema/typed_audit_report.py": {
+      "bytes": 11378,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/typed_audit_report.py",
+      "sha256": "ddcc575b1cd6d283ca22acdf646807496a1a5164deaafa3b85403e7a838ca875"
+    },
+    "src/data_sheets_schema/typed_audit_runtime.py": {
+      "bytes": 33017,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/typed_audit_runtime.py",
+      "sha256": "bd625c80d9542bf866ad8cc127ee1b6c6e8b0a9d41a23a3e11e0eef589e85f5f"
+    },
+    "src/data_sheets_schema/usage_ledger.py": {
+      "bytes": 35880,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/usage_ledger.py",
+      "sha256": "a175c6f5b5cc0bedd51bafcca51468bd4f650cb839f00dbecf741b9a23217165"
+    },
+    "src/data_sheets_schema/verifiable.py": {
+      "bytes": 34114,
+      "path": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-r3/src/data_sheets_schema/verifiable.py",
+      "sha256": "0c72a86a6dffe50935684532cd5c0b43c929b1773f4ce858c927ad93812f5ea2"
+    }
+  },
+  "rows": {
+    "full": {
+      "baseline": {
+        "bytes": 208053,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/full.http.json",
+        "sha256": "b72c39a1c55c43bb1218c694cd3172d5c7d193e378c7c4fcdeddadfe12bdf422"
+      },
+      "bytes": 208053,
+      "candidate": {
+        "bytes": 208053,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/full.http.json",
+        "sha256": "b72c39a1c55c43bb1218c694cd3172d5c7d193e378c7c4fcdeddadfe12bdf422"
+      },
+      "identical": true,
+      "sha256": "b72c39a1c55c43bb1218c694cd3172d5c7d193e378c7c4fcdeddadfe12bdf422"
+    },
+    "full_receipt_completion": {
+      "baseline": {
+        "bytes": 215582,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/full_receipt_completion.http.json",
+        "sha256": "a6a7607b635d7e2898d4a779c7c00303d816711e6828bf7d311d9bcb440b6c6e"
+      },
+      "bytes": 215582,
+      "candidate": {
+        "bytes": 215582,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/full_receipt_completion.http.json",
+        "sha256": "a6a7607b635d7e2898d4a779c7c00303d816711e6828bf7d311d9bcb440b6c6e"
+      },
+      "identical": true,
+      "sha256": "a6a7607b635d7e2898d4a779c7c00303d816711e6828bf7d311d9bcb440b6c6e"
+    },
+    "reconcile_full": {
+      "baseline": {
+        "bytes": 209462,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/reconcile_full.http.json",
+        "sha256": "639430bccd795c708c481bce3945e39b2a3c94d4528a781c2f61a76a2329ae35"
+      },
+      "bytes": 209462,
+      "candidate": {
+        "bytes": 209462,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/reconcile_full.http.json",
+        "sha256": "639430bccd795c708c481bce3945e39b2a3c94d4528a781c2f61a76a2329ae35"
+      },
+      "identical": true,
+      "sha256": "639430bccd795c708c481bce3945e39b2a3c94d4528a781c2f61a76a2329ae35"
+    },
+    "report": {
+      "baseline": {
+        "bytes": 212016,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/report.http.json",
+        "sha256": "d74fe183b779c770d0601b0e466231e436bb9afbe31f76676fe9858a61985413"
+      },
+      "bytes": 212016,
+      "candidate": {
+        "bytes": 212016,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/report.http.json",
+        "sha256": "d74fe183b779c770d0601b0e466231e436bb9afbe31f76676fe9858a61985413"
+      },
+      "identical": true,
+      "sha256": "d74fe183b779c770d0601b0e466231e436bb9afbe31f76676fe9858a61985413"
+    },
+    "report_regate": {
+      "baseline": {
+        "bytes": 210359,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/report_regate.http.json",
+        "sha256": "2b745a2c992c26192c358ed2ff137ed31165e01a78a30bf8633aa53b313c02ad"
+      },
+      "bytes": 210359,
+      "candidate": {
+        "bytes": 210359,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/report_regate.http.json",
+        "sha256": "2b745a2c992c26192c358ed2ff137ed31165e01a78a30bf8633aa53b313c02ad"
+      },
+      "identical": true,
+      "sha256": "2b745a2c992c26192c358ed2ff137ed31165e01a78a30bf8633aa53b313c02ad"
+    },
+    "typed_audit_integration": {
+      "baseline": {
+        "bytes": 200953,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/typed_audit_integration.http.json",
+        "sha256": "d33d231b4ce952c33622f73d7d4e1b2f1c2b690d1acdbbddb480465c8a76930b"
+      },
+      "bytes": 200953,
+      "candidate": {
+        "bytes": 200953,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/typed_audit_integration.http.json",
+        "sha256": "d33d231b4ce952c33622f73d7d4e1b2f1c2b690d1acdbbddb480465c8a76930b"
+      },
+      "identical": true,
+      "sha256": "d33d231b4ce952c33622f73d7d4e1b2f1c2b690d1acdbbddb480465c8a76930b"
+    },
+    "typed_audit_omission": {
+      "baseline": {
+        "bytes": 136121,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/typed_audit_omission.http.json",
+        "sha256": "430acb5f208d39e8d8f8e48728d5df529b08d7c7586efc9722ae34e87075ea46"
+      },
+      "bytes": 136121,
+      "candidate": {
+        "bytes": 136121,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/typed_audit_omission.http.json",
+        "sha256": "430acb5f208d39e8d8f8e48728d5df529b08d7c7586efc9722ae34e87075ea46"
+      },
+      "identical": true,
+      "sha256": "430acb5f208d39e8d8f8e48728d5df529b08d7c7586efc9722ae34e87075ea46"
+    },
+    "typed_audit_worker:worker_0001": {
+      "baseline": {
+        "bytes": 183734,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/baseline/typed_audit_worker-worker_0001.http.json",
+        "sha256": "3ba1d267349d19cbbe16da74ac7b7a06c2ad405e710da0d9b56f86b64e2552f3"
+      },
+      "bytes": 183734,
+      "candidate": {
+        "bytes": 183734,
+        "path": "/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212r4-pt/test_chorus_shared_v1_exact_ba1/parity/candidate/typed_audit_worker-worker_0001.http.json",
+        "sha256": "3ba1d267349d19cbbe16da74ac7b7a06c2ad405e710da0d9b56f86b64e2552f3"
+      },
+      "identical": true,
+      "sha256": "3ba1d267349d19cbbe16da74ac7b7a06c2ad405e710da0d9b56f86b64e2552f3"
+    }
+  },
+  "scope": "Exact generic_v10/shared-v1 CHORUS request construction with explicitly selected bridge2ai profile and real SDK serialization; synthetic records/replies, no run admission or acceptance claim.",
+  "shared_v2": "Controller code identity and registration SHA must change; no normalization or shared-v2 byte-parity claim. Journal is included in ROUTING_CODE since db88ca68c."
+}

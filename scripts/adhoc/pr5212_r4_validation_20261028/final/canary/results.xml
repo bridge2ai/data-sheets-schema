@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="3.010" timestamp="2026-10-28T17:30:55.027699" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_pr5212_r3_fixes" name="test_refused_forgery_cannot_supply_the_next_monitored_resume_head" time="2.208" /></testsuite></testsuites>

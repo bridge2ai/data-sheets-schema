@@ -1,2 +1,4 @@
 # The _wcrate copies are pinned by sha256 in index.yaml; never convert line endings (#5083).
 data/_wcrate/** -text
+# Retain D41 validation output and SDK capture bytes exactly, including whitespace.
+notes/d41_validation_2026-10-26/** -text -whitespace

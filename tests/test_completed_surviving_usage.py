@@ -38,3 +38,7 @@ def test_completed_return_checks_all_surviving_accounting(external, evidence):
         api.execute(external, client=client)
     assert client.messages.calls == []
     assert external.provenance_path.read_bytes() == prior
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

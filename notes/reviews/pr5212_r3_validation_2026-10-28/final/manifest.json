@@ -1,0 +1,922 @@
+{
+  "archive": {
+    "bytes": 2279093,
+    "path": "evidence.tar.gz",
+    "sha256": "aaf2d77ef5af47b90cec5fd236e7931ca13e5f0226e1182fc6bbeeede05f8cda"
+  },
+  "archive_round_trip_verified": true,
+  "files": {
+    "a13/command.json": {
+      "bytes": 598,
+      "sha256": "0fa2fb38cba8bee25b372edbde3f0f8a57e981e8438fbbc46b21b3ce26181f85"
+    },
+    "a13/outcome.json": {
+      "bytes": 387,
+      "sha256": "f0e805f9ba1cd9326c49458cb61fdef9ee124e9e362b8ccc5f3bac0e600036ef"
+    },
+    "a13/pytest.log": {
+      "bytes": 1805,
+      "sha256": "8190866bd247705e862b9fea7a49665d0b28627f0f166199a451d2d8aa58adf7"
+    },
+    "a13/results.xml": {
+      "bytes": 61405,
+      "sha256": "29ee26a1bf3457f802490376e2bb0133266db167d7f830d5070ae6b59916b097"
+    },
+    "a13/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "5d61ded1097726153574509a690e1fab068028e864e4f94be32e806cb03483b4"
+    },
+    "canary/command.json": {
+      "bytes": 468,
+      "sha256": "4296d5b625cbf0b20ed03670ed034e048e3dfa47f999f029384f9bcc5114cf41"
+    },
+    "canary/outcome.json": {
+      "bytes": 388,
+      "sha256": "a3b18c1d5afdbf03af6d3096aefac393d94255560cfcd2a1aecbc59cd619bc7e"
+    },
+    "canary/pytest.log": {
+      "bytes": 875,
+      "sha256": "95a6a2645a8f93a31bc901b6488c2460004f0e8725b6adb09eaaac736e450dc6"
+    },
+    "canary/results.xml": {
+      "bytes": 372,
+      "sha256": "de2db1c275a994d15638f11acbb92517f3afb63965532a9a634bf867c8ca04cf"
+    },
+    "canary/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "5d61ded1097726153574509a690e1fab068028e864e4f94be32e806cb03483b4"
+    },
+    "f2/command.json": {
+      "bytes": 3579,
+      "sha256": "8cd6c6943f1ba6ce3e5f28cc5d51b8b403cc1a03b4fb3898b4bf9c616b753af3"
+    },
+    "f2/outcome.json": {
+      "bytes": 385,
+      "sha256": "3bdff25c2e603bd4a20fea55288874216e8fa4037e02c9270b9363e6987afc9b"
+    },
+    "f2/pytest.log": {
+      "bytes": 1390,
+      "sha256": "5e7920089cec163ff308f7f195f0f06162748e76f36fb4070bbf9aabf6952496"
+    },
+    "f2/results.xml": {
+      "bytes": 4470,
+      "sha256": "b8626200369be5f7c3fcee60c7d8fd53c74a4d97b77583248007b90893e0903d"
+    },
+    "f2/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "5d61ded1097726153574509a690e1fab068028e864e4f94be32e806cb03483b4"
+    },
+    "locks-rerun/command.json": {
+      "bytes": 542,
+      "sha256": "4905c827f67e768dd00746a639ce2aed6bfd6cf41687a1d4a7587b901eecd8c4"
+    },
+    "locks-rerun/outcome.json": {
+      "bytes": 393,
+      "sha256": "b6b32755df79eed1da99a127c65b3b059c1c016baefaaea5e41b5846a38d584b"
+    },
+    "locks-rerun/pytest.log": {
+      "bytes": 223,
+      "sha256": "a3868938ecd076b3bb8f9b6ec619ef9898427d350e7003f95cb3b94e9c3feae6"
+    },
+    "locks-rerun/results.xml": {
+      "bytes": 474,
+      "sha256": "25f650f449bbef18f29b92374df09a8ffa194e401e2b81729531cd005904d2d9"
+    },
+    "locks-rerun/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "6aab2de55dad7daf48dd9c7f6d4efb3c2059e38952b508ae086d9fec5403fc24"
+    },
+    "merge-tree-a14.txt": {
+      "bytes": 41,
+      "sha256": "a9d57971e35b265a1023e00bc084e5cff57982f8d222e0ab933cd0e1ad89a52f"
+    },
+    "options/command.json": {
+      "bytes": 521,
+      "sha256": "44f470bc425c01692999275f10d974594661bbf76fb7d4dfb5d2713e5c8a5981"
+    },
+    "options/outcome.json": {
+      "bytes": 391,
+      "sha256": "1dc9cb59b920567183f96ed73d31c14851acbffb4cc25da0e52e60267e4c3f6d"
+    },
+    "options/pytest.log": {
+      "bytes": 3622,
+      "sha256": "7b38e90c1f25522a23a6ec33934b84547cd44caa6e22774f7c497d918fba0290"
+    },
+    "options/results.xml": {
+      "bytes": 23004,
+      "sha256": "e8d64c242ae8348440f7ffe853e18ac2a5705ef9fd38d0641157753631a351fd"
+    },
+    "options/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "5d61ded1097726153574509a690e1fab068028e864e4f94be32e806cb03483b4"
+    },
+    "parity/command.json": {
+      "bytes": 404,
+      "sha256": "3c898b2db372f772328d9fa08e40203eebd00c751d1f12341f28ffb0217f34d5"
+    },
+    "parity/outcome.json": {
+      "bytes": 388,
+      "sha256": "8a8fa1a89e0d296dd8680863ab6f9e18e0a1dfd78ad811bb4c85c25106743514"
+    },
+    "parity/pytest.log": {
+      "bytes": 887,
+      "sha256": "2949e9a3a2a6d9d82e084ec0211097e3e8f5bf2192c4059b4f344d766e841303"
+    },
+    "parity/results.xml": {
+      "bytes": 1018,
+      "sha256": "dd6d1630f309e2d031eaff1cb9d240d4ab42120cb1abdca08494205a309729b0"
+    },
+    "parity/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "5d61ded1097726153574509a690e1fab068028e864e4f94be32e806cb03483b4"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/capture.json": {
+      "bytes": 84043,
+      "sha256": "fd62fed786973f9edaa4f9d685fba15a34e175cf1037304d2cebdf935d7783fd"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/full.http.json": {
+      "bytes": 208053,
+      "sha256": "b72c39a1c55c43bb1218c694cd3172d5c7d193e378c7c4fcdeddadfe12bdf422"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/full_receipt_completion.http.json": {
+      "bytes": 215582,
+      "sha256": "a6a7607b635d7e2898d4a779c7c00303d816711e6828bf7d311d9bcb440b6c6e"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/guard-state/CHORUS_api_usage_bcd5619ed90a410e.json": {
+      "bytes": 19417,
+      "sha256": "30de459be292ef89b1cd4f4cdf7123589906415296c6ac8cfd0e55d5afbec30e"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/guard-state/CHORUS_latch_journal.jsonl": {
+      "bytes": 792,
+      "sha256": "1681fd083bb575285a90830368aafc644e8674b38ac6abd030fce45757dd1d17"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/reconcile_full.http.json": {
+      "bytes": 209462,
+      "sha256": "639430bccd795c708c481bce3945e39b2a3c94d4528a781c2f61a76a2329ae35"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/registration.json": {
+      "bytes": 5135,
+      "sha256": "a8a7928cc6a1efff593d73a8d18b41ac675f29236043c35494253e693db18a83"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/report.http.json": {
+      "bytes": 212016,
+      "sha256": "d74fe183b779c770d0601b0e466231e436bb9afbe31f76676fe9858a61985413"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/report_regate.http.json": {
+      "bytes": 210359,
+      "sha256": "2b745a2c992c26192c358ed2ff137ed31165e01a78a30bf8633aa53b313c02ad"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/typed_audit_integration.http.json": {
+      "bytes": 200953,
+      "sha256": "5b9f71b09ef3300078fa0759537f254f4d094d95882dc1231e2ccede05ea8f01"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/typed_audit_omission.http.json": {
+      "bytes": 136121,
+      "sha256": "1266b1305cc77489c8970d3493c35ed5a161353163404e71d985c38de65130fa"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/baseline/typed_audit_worker-worker_0001.http.json": {
+      "bytes": 183734,
+      "sha256": "6cbdaa80cae15251e3e6d88f06f9ce75b24860c4dccb3506b42f639b1487275a"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/capture.json": {
+      "bytes": 84051,
+      "sha256": "85ef6166ee838577a16e5789835de1b8797114083ff699c815caae5af81b28c9"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/full.http.json": {
+      "bytes": 208053,
+      "sha256": "b72c39a1c55c43bb1218c694cd3172d5c7d193e378c7c4fcdeddadfe12bdf422"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/full_receipt_completion.http.json": {
+      "bytes": 215582,
+      "sha256": "a6a7607b635d7e2898d4a779c7c00303d816711e6828bf7d311d9bcb440b6c6e"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/guard-state/CHORUS_api_usage_bcd5619ed90a410e.json": {
+      "bytes": 19537,
+      "sha256": "4d4d43aa67f5a92b192d0e89edef2690c0d37f932ada796c8ee9ff5b6c832d2e"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/guard-state/CHORUS_latch_journal.jsonl": {
+      "bytes": 1294,
+      "sha256": "21527fd99216ad6158c0d49b97750a5cf7e9af830775cd3ebecdfb97f4f805f3"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/reconcile_full.http.json": {
+      "bytes": 209462,
+      "sha256": "639430bccd795c708c481bce3945e39b2a3c94d4528a781c2f61a76a2329ae35"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/registration.json": {
+      "bytes": 5135,
+      "sha256": "a8a7928cc6a1efff593d73a8d18b41ac675f29236043c35494253e693db18a83"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/report.http.json": {
+      "bytes": 212016,
+      "sha256": "d74fe183b779c770d0601b0e466231e436bb9afbe31f76676fe9858a61985413"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/report_regate.http.json": {
+      "bytes": 210359,
+      "sha256": "2b745a2c992c26192c358ed2ff137ed31165e01a78a30bf8633aa53b313c02ad"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/typed_audit_integration.http.json": {
+      "bytes": 200953,
+      "sha256": "5b9f71b09ef3300078fa0759537f254f4d094d95882dc1231e2ccede05ea8f01"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/typed_audit_omission.http.json": {
+      "bytes": 136121,
+      "sha256": "1266b1305cc77489c8970d3493c35ed5a161353163404e71d985c38de65130fa"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/candidate/typed_audit_worker-worker_0001.http.json": {
+      "bytes": 183734,
+      "sha256": "6cbdaa80cae15251e3e6d88f06f9ce75b24860c4dccb3506b42f639b1487275a"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/common-fixture/registration.json": {
+      "bytes": 5135,
+      "sha256": "a8a7928cc6a1efff593d73a8d18b41ac675f29236043c35494253e693db18a83"
+    },
+    "parity/test_chorus_shared_v1_exact_ba0/summary.json": {
+      "bytes": 81740,
+      "sha256": "2eddeb9d441ce0868886e2fefaded629ff9443ed0cf8a2aab663639e824c72d1"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/capture.json": {
+      "bytes": 84043,
+      "sha256": "7d840a476221e5b36d001779d754cef82c950ab9bd33a380eb90ea5ac1ada6aa"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/full.http.json": {
+      "bytes": 208053,
+      "sha256": "b72c39a1c55c43bb1218c694cd3172d5c7d193e378c7c4fcdeddadfe12bdf422"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/full_receipt_completion.http.json": {
+      "bytes": 215582,
+      "sha256": "a6a7607b635d7e2898d4a779c7c00303d816711e6828bf7d311d9bcb440b6c6e"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/guard-state/CHORUS_api_usage_bcd5619ed90a410e.json": {
+      "bytes": 19417,
+      "sha256": "71d2cc90003909f740c1319296b3e428f357b3468197695440fb43734911d13c"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/guard-state/CHORUS_latch_journal.jsonl": {
+      "bytes": 792,
+      "sha256": "c078b202de496e1e9af6872a76ba849434fb72071ab1a8e76673b7fef583fd02"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/reconcile_full.http.json": {
+      "bytes": 209462,
+      "sha256": "639430bccd795c708c481bce3945e39b2a3c94d4528a781c2f61a76a2329ae35"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/registration.json": {
+      "bytes": 5135,
+      "sha256": "ed612d72d7470d18659c4acb58c0a7c9e8aebd2ecab9700e624233997c97e415"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/report.http.json": {
+      "bytes": 212016,
+      "sha256": "d74fe183b779c770d0601b0e466231e436bb9afbe31f76676fe9858a61985413"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/report_regate.http.json": {
+      "bytes": 210359,
+      "sha256": "2b745a2c992c26192c358ed2ff137ed31165e01a78a30bf8633aa53b313c02ad"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/typed_audit_integration.http.json": {
+      "bytes": 200953,
+      "sha256": "ca265853b32371ebf22185d14d1bddb12a7c9d066a29c6bae48c4167f9bcf8d4"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/typed_audit_omission.http.json": {
+      "bytes": 136121,
+      "sha256": "24eb11c8b4206de6a4e56992a32b3dcff1134acc81fde1aafc11ef2ea474738a"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/baseline/typed_audit_worker-worker_0001.http.json": {
+      "bytes": 183734,
+      "sha256": "5657cba26391a69f1cf0de8ec1c38b4a91be766e13ab531d9741c64dae5af7d2"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/capture.json": {
+      "bytes": 84051,
+      "sha256": "74f9e3765c594e0d9cfecf34e716aa7eba53d09a08c6c4e6d52b797c48512a49"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/full.http.json": {
+      "bytes": 208053,
+      "sha256": "b72c39a1c55c43bb1218c694cd3172d5c7d193e378c7c4fcdeddadfe12bdf422"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/full_receipt_completion.http.json": {
+      "bytes": 215582,
+      "sha256": "a6a7607b635d7e2898d4a779c7c00303d816711e6828bf7d311d9bcb440b6c6e"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/guard-state/CHORUS_api_usage_bcd5619ed90a410e.json": {
+      "bytes": 19537,
+      "sha256": "69299c6376f9129122b4a66ab8a89ccf72645d657a517acba70c82c0c6434315"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/guard-state/CHORUS_latch_journal.jsonl": {
+      "bytes": 1294,
+      "sha256": "756df1ac93dd84da42e0120d625e2c4c75732b6537db3a75909244b9da6385ed"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/reconcile_full.http.json": {
+      "bytes": 209462,
+      "sha256": "639430bccd795c708c481bce3945e39b2a3c94d4528a781c2f61a76a2329ae35"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/registration.json": {
+      "bytes": 5135,
+      "sha256": "ed612d72d7470d18659c4acb58c0a7c9e8aebd2ecab9700e624233997c97e415"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/report.http.json": {
+      "bytes": 212016,
+      "sha256": "d74fe183b779c770d0601b0e466231e436bb9afbe31f76676fe9858a61985413"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/report_regate.http.json": {
+      "bytes": 210359,
+      "sha256": "2b745a2c992c26192c358ed2ff137ed31165e01a78a30bf8633aa53b313c02ad"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/typed_audit_integration.http.json": {
+      "bytes": 200953,
+      "sha256": "ca265853b32371ebf22185d14d1bddb12a7c9d066a29c6bae48c4167f9bcf8d4"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/typed_audit_omission.http.json": {
+      "bytes": 136121,
+      "sha256": "24eb11c8b4206de6a4e56992a32b3dcff1134acc81fde1aafc11ef2ea474738a"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/candidate/typed_audit_worker-worker_0001.http.json": {
+      "bytes": 183734,
+      "sha256": "5657cba26391a69f1cf0de8ec1c38b4a91be766e13ab531d9741c64dae5af7d2"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/common-fixture/registration.json": {
+      "bytes": 5135,
+      "sha256": "ed612d72d7470d18659c4acb58c0a7c9e8aebd2ecab9700e624233997c97e415"
+    },
+    "parity/test_chorus_shared_v1_exact_ba1/summary.json": {
+      "bytes": 81740,
+      "sha256": "218639a5c3c3b533beaaa98523a018ca4644f7f9a3b2acd0822556a542af8980"
+    },
+    "provenance/command.json": {
+      "bytes": 924,
+      "sha256": "1184d9926ee33bb0e1ac3c80ab82e567db3043db727250e75bd85963920bc249"
+    },
+    "provenance/outcome.json": {
+      "bytes": 394,
+      "sha256": "8f63d5354cec41846e792622c022f47d162aaf4d763939c89025e4223500a439"
+    },
+    "provenance/pytest.log": {
+      "bytes": 1826,
+      "sha256": "d3a60940b7649b3f7da3055b84e0734edd2aef576e66beeae6e1973224fea05c"
+    },
+    "provenance/results.xml": {
+      "bytes": 60663,
+      "sha256": "f13d8a42223844a30df44ff8dd377228194245c567a5d0697e0e07acaf0e50f2"
+    },
+    "provenance/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "5d61ded1097726153574509a690e1fab068028e864e4f94be32e806cb03483b4"
+    },
+    "report-wire/command.json": {
+      "bytes": 485,
+      "sha256": "65d09abde5623cf6944ffcf3b577a55ed62400381073871084c61adf7fe87fae"
+    },
+    "report-wire/outcome.json": {
+      "bytes": 393,
+      "sha256": "eae483cd6f57fe2ea6c57c5cb8a9d515d2466c3c72d931b8cf8e477301d938c0"
+    },
+    "report-wire/pytest.log": {
+      "bytes": 1401,
+      "sha256": "4f97d32bb3dc3b4cbddb9aa4d220032e377c47a2eb110e6d0913e4315da02ca2"
+    },
+    "report-wire/results.xml": {
+      "bytes": 388,
+      "sha256": "8c48df8c33461a9100f35f2ea272b5ea8153bacf74241dbd516e370b3f2064da"
+    },
+    "report-wire/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "5d61ded1097726153574509a690e1fab068028e864e4f94be32e806cb03483b4"
+    },
+    "routing/command.json": {
+      "bytes": 775,
+      "sha256": "6759ed3105ade5c22b0702e2c8122f41f4bc05d8ee868d7adf3a89e6a4dff3db"
+    },
+    "routing/outcome.json": {
+      "bytes": 389,
+      "sha256": "9063434c408983a91d1b47de73ed941f2462a41aa9d8b981befc212de3925e9b"
+    },
+    "routing/pytest.log": {
+      "bytes": 1408,
+      "sha256": "b189669d1735402487463caa06379cd0706d0af89d75fc8b00ba5d8683be0c62"
+    },
+    "routing/results.xml": {
+      "bytes": 795,
+      "sha256": "acba46f1d6c8516ed44931cf9a2ea934f2515d5f5aefe6e685e328a350a5c9e4"
+    },
+    "routing/source-pins.json": {
+      "bytes": 97016,
+      "sha256": "5d61ded1097726153574509a690e1fab068028e864e4f94be32e806cb03483b4"
+    }
+  },
+  "groups": {
+    "a13": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "a13",
+      "head": "41e1056195b186e3374de12476a3be55f7a288a7",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_receipt_completion_policy": {
+          "failed": 0,
+          "passed": 67,
+          "skipped": 0
+        },
+        "tests.test_receipt_completion_runtime": {
+          "failed": 0,
+          "passed": 85,
+          "skipped": 0
+        },
+        "tests.test_receipt_floor_basis": {
+          "failed": 0,
+          "passed": 67,
+          "skipped": 0
+        },
+        "tests.test_receipt_rereceipt": {
+          "failed": 0,
+          "passed": 23,
+          "skipped": 0
+        },
+        "tests.test_receipt_rereceipt.TestApplyRereceipt": {
+          "failed": 0,
+          "passed": 27,
+          "skipped": 0
+        },
+        "tests.test_receipt_rereceipt.TestUncoveredReceiptableLeaves": {
+          "failed": 0,
+          "passed": 8,
+          "skipped": 0
+        },
+        "tests.test_receipts.ClaimReceipts": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        },
+        "tests.test_receipts.Gate": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_receipts.IdentityRemap": {
+          "failed": 0,
+          "passed": 10,
+          "skipped": 0
+        },
+        "tests.test_receipts.Normalisation": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        },
+        "tests.test_receipts.OnDisk": {
+          "failed": 0,
+          "passed": 7,
+          "skipped": 0
+        },
+        "tests.test_receipts.Playbook": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_receipts.Validator": {
+          "failed": 0,
+          "passed": 26,
+          "skipped": 0
+        },
+        "tests.test_rereceipt_completion": {
+          "failed": 0,
+          "passed": 69,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 396
+    },
+    "canary": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "canary",
+      "head": "8cdb1951887b9221d8bca0f16c20947955e7dc38",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_pr5212_r3_fixes": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 1
+    },
+    "f2": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "f2",
+      "head": "41e1056195b186e3374de12476a3be55f7a288a7",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_anonymous_relationship_evidence": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_evidence_generation_gate": {
+          "failed": 0,
+          "passed": 6,
+          "skipped": 0
+        },
+        "tests.test_evidence_phase_contract": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        },
+        "tests.test_source_review": {
+          "failed": 0,
+          "passed": 20,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 29
+    },
+    "locks-rerun": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "locks-rerun",
+      "head": "41e1056195b186e3374de12476a3be55f7a288a7",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_run_lock.TestAgainstARealProcess": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 2
+    },
+    "options": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 2,
+      "group": "options",
+      "head": "41e1056195b186e3374de12476a3be55f7a288a7",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_api_launcher.TestCommandResolution": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_api_launcher.TestCommandValidation": {
+          "failed": 0,
+          "passed": 11,
+          "skipped": 0
+        },
+        "tests.test_api_launcher.TestImportIsolationCheck": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_api_launcher.TestLauncherCLI": {
+          "failed": 0,
+          "passed": 25,
+          "skipped": 0
+        },
+        "tests.test_api_launcher.TestLauncherEnvironment": {
+          "failed": 0,
+          "passed": 5,
+          "skipped": 0
+        },
+        "tests.test_api_launcher.TestLogPathValidation": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_api_launcher.TestWorktreeAndVenvDiscovery": {
+          "failed": 0,
+          "passed": 4,
+          "skipped": 0
+        },
+        "tests.test_run_lock.TestAcquireAndRelease": {
+          "failed": 0,
+          "passed": 7,
+          "skipped": 0
+        },
+        "tests.test_run_lock.TestAgainstARealProcess": {
+          "failed": 2,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_run_lock.TestStaleLocks": {
+          "failed": 0,
+          "passed": 4,
+          "skipped": 0
+        },
+        "tests.test_shared_generation_batch_authority": {
+          "failed": 0,
+          "passed": 22,
+          "skipped": 0
+        },
+        "tests.test_shared_generation_cli": {
+          "failed": 0,
+          "passed": 55,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 1,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 146
+    },
+    "parity": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "parity",
+      "head": "41e1056195b186e3374de12476a3be55f7a288a7",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_d41_request_parity": {
+          "failed": 0,
+          "passed": 6,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 6
+    },
+    "provenance": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "provenance",
+      "head": "41e1056195b186e3374de12476a3be55f7a288a7",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_agentic_provenance_completeness.TestArmSpelling": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_agentic_provenance_completeness.TestRecordCliSurface": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        },
+        "tests.test_agentic_provenance_completeness.TestTheCanaryRecordIsComplete": {
+          "failed": 0,
+          "passed": 8,
+          "skipped": 0
+        },
+        "tests.test_agentic_provenance_completeness.TestTheSweepPassesItsOwnGate": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_preserves_validation.BackfillSpecTest": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_preserves_validation.PhaseVocabulary": {
+          "failed": 0,
+          "passed": 11,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_preserves_validation.SchemaResolutionAwayFromRepoRoot": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_preserves_validation.TestReRecordPreservesTheVerdict": {
+          "failed": 0,
+          "passed": 5,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_preserves_validation.TestTheVerdictDoesNotOutliveItsSchema": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_prompt.TestMidnightCrossingRunDate": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_prompt.TestProvenancePromptFlag": {
+          "failed": 0,
+          "passed": 4,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_prompt.TestRunDateRecoveryPaths": {
+          "failed": 0,
+          "passed": 8,
+          "skipped": 0
+        },
+        "tests.test_cli.test_provenance_prompt.TestTheRequestIsRecordedNotJustTheFile": {
+          "failed": 0,
+          "passed": 4,
+          "skipped": 0
+        },
+        "tests.test_instrument_provenance.TestEveryEvaluationNamesItsInstrument": {
+          "failed": 0,
+          "passed": 9,
+          "skipped": 0
+        },
+        "tests.test_instrument_provenance.TestTheContractAsksForTheScoringRules": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_instrument_provenance.TestTheResolverIsReproducible": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        },
+        "tests.test_merge_selection_provenance": {
+          "failed": 0,
+          "passed": 43,
+          "skipped": 0
+        },
+        "tests.test_native_registered_provenance": {
+          "failed": 0,
+          "passed": 7,
+          "skipped": 0
+        },
+        "tests.test_provenance_header.TestEveryArtifactWriteIsStamped": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_provenance_header.TestHeaderStatesTheRequest": {
+          "failed": 0,
+          "passed": 7,
+          "skipped": 0
+        },
+        "tests.test_provenance_header.TestRunsCheckSeesTheDisagreement": {
+          "failed": 0,
+          "passed": 7,
+          "skipped": 0
+        },
+        "tests.test_provenance_reasoning_effort.TestEffortFromTheRoute": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_provenance_reasoning_effort.TestTheCLIFlag": {
+          "failed": 0,
+          "passed": 5,
+          "skipped": 0
+        },
+        "tests.test_provenance_reasoning_effort.TestTheGapIsVisibleFromTheCommandLine": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_provenance_reasoning_effort.TestWhatTheRecordSays": {
+          "failed": 0,
+          "passed": 11,
+          "skipped": 0
+        },
+        "tests.test_provenance_reasoning_message": {
+          "failed": 0,
+          "passed": 160,
+          "skipped": 0
+        },
+        "tests.test_rendered_provenance.TestProvenanceLookup": {
+          "failed": 0,
+          "passed": 6,
+          "skipped": 0
+        },
+        "tests.test_rendered_provenance.TestRenderedOutput": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestCuratedIsNotAReference": {
+          "failed": 0,
+          "passed": 5,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestHashUnification": {
+          "failed": 0,
+          "passed": 6,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestMd5IsDeprecatedInTheSchema": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestNothingToVerifyIsNotAPass": {
+          "failed": 0,
+          "passed": 4,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestOutputsDescribeRatherThanAssert": {
+          "failed": 0,
+          "passed": 4,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestProvenance": {
+          "failed": 0,
+          "passed": 12,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestSchemaArtifactsStayInSync": {
+          "failed": 0,
+          "passed": 2,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestSharedConfigConvergence": {
+          "failed": 0,
+          "passed": 4,
+          "skipped": 0
+        },
+        "tests.test_rocrate.test_provenance.TestTheEndOfRunGate": {
+          "failed": 0,
+          "passed": 3,
+          "skipped": 0
+        },
+        "tests.test_shared_generation_provenance": {
+          "failed": 0,
+          "passed": 10,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 373
+    },
+    "report-wire": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "report-wire",
+      "head": "41e1056195b186e3374de12476a3be55f7a288a7",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_report_admission": {
+          "failed": 0,
+          "passed": 1,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 1
+    },
+    "routing": {
+      "errors": 0,
+      "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+      "failures": 0,
+      "group": "routing",
+      "head": "41e1056195b186e3374de12476a3be55f7a288a7",
+      "matches_final_production": true,
+      "modules": {
+        "tests.test_source_heading_runtime_api": {
+          "failed": 0,
+          "passed": 4,
+          "skipped": 0
+        }
+      },
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+      "returncode": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "tests": 4
+    }
+  },
+  "production_sources_sha256": "55d6d46d9cfcfd1453e278e3f3825a6e5830339c23b323bd2ec65f1d1d4d2b84",
+  "purpose": "#5212 R1-R9 offline acceptance; no full-suite or CI claim"
+}

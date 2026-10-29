@@ -1,0 +1,13 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_source_heading_runtime_api": 1
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "selection_complete": true,
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 28.842487375019118
+}

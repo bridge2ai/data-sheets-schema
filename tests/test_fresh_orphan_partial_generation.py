@@ -75,3 +75,7 @@ def test_fresh_restart_does_not_accept_unrelated_archived_attempts(external):
     assert client.messages.calls == []
     assert unrelated["generation_id"] not in ledger.prior_generation_ids(external)
     assert archive.read_bytes() == prior
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

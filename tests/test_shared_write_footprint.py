@@ -264,3 +264,7 @@ def test_fresh_footprint_and_unrelated_existing_files_are_allowed(tmp_path):
     spec.metadata_dir.mkdir()
     (spec.metadata_dir / '.prior-evidence').write_text('kept')
     footprint.require_separate((authority,), (footprint.for_run(spec),))
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

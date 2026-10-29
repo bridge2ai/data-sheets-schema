@@ -420,3 +420,7 @@ def test_omitted_baseline_never_discovers_comparison_records(registered, monkeyp
     extra = ('--dry-run',) + (() if prefix is None else ('--canary-baseline', prefix))
     result = batch(reg, roster_path, count=1, extra=extra)
     assert result.exit_code == 0, result.output
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

@@ -1,0 +1,1568 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="34" skipped="0" tests="34" time="162.234" timestamp="2026-10-28T00:08:36.229678" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_evidence_generation_gate" name="test_evidence_refusal_cannot_spend_again_on_resume[options0]" time="16.067"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_evidence_refusal_cannot_s0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x120d76650&gt;
+options = {'bad_audit': True}
+
+    @pytest.mark.parametrize("options", [
+        {"bad_audit": True}, {"retained_role": True}, {"repair_report": False},
+        {"report_outcome": "truncated"}, {"report_outcome": "discarded"},
+    ])
+    def test_evidence_refusal_cannot_spend_again_on_resume(tmp_path, monkeypatch, options):
+        spec = specification(tmp_path)
+        fake = EvidenceFake(**options)
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        calls = len(fake.calls)
+        before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+        for _ in range(3):
+            with pytest.raises(RuntimeError, match="evidence assertions failed"):
+&gt;               run(spec, fake, monkeypatch)
+
+tests/test_evidence_generation_gate.py:181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_evidence_generation_gate" name="test_evidence_refusal_cannot_spend_again_on_resume[options1]" time="0.170"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_evidence_refusal_cannot_s1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x127f66060&gt;
+options = {'retained_role': True}
+
+    @pytest.mark.parametrize("options", [
+        {"bad_audit": True}, {"retained_role": True}, {"repair_report": False},
+        {"report_outcome": "truncated"}, {"report_outcome": "discarded"},
+    ])
+    def test_evidence_refusal_cannot_spend_again_on_resume(tmp_path, monkeypatch, options):
+        spec = specification(tmp_path)
+        fake = EvidenceFake(**options)
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        calls = len(fake.calls)
+        before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+        for _ in range(3):
+            with pytest.raises(RuntimeError, match="evidence assertions failed"):
+&gt;               run(spec, fake, monkeypatch)
+
+tests/test_evidence_generation_gate.py:181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_evidence_generation_gate" name="test_evidence_refusal_cannot_spend_again_on_resume[options2]" time="2.859"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_evidence_refusal_cannot_s2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1272c57f0&gt;
+options = {'repair_report': False}
+
+    @pytest.mark.parametrize("options", [
+        {"bad_audit": True}, {"retained_role": True}, {"repair_report": False},
+        {"report_outcome": "truncated"}, {"report_outcome": "discarded"},
+    ])
+    def test_evidence_refusal_cannot_spend_again_on_resume(tmp_path, monkeypatch, options):
+        spec = specification(tmp_path)
+        fake = EvidenceFake(**options)
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        calls = len(fake.calls)
+        before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+        for _ in range(3):
+            with pytest.raises(RuntimeError, match="evidence assertions failed"):
+&gt;               run(spec, fake, monkeypatch)
+
+tests/test_evidence_generation_gate.py:181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_evidence_generation_gate" name="test_evidence_refusal_cannot_spend_again_on_resume[options3]" time="1.010"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_evidence_refusal_cannot_s3')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1312ff9b0&gt;
+options = {'report_outcome': 'truncated'}
+
+    @pytest.mark.parametrize("options", [
+        {"bad_audit": True}, {"retained_role": True}, {"repair_report": False},
+        {"report_outcome": "truncated"}, {"report_outcome": "discarded"},
+    ])
+    def test_evidence_refusal_cannot_spend_again_on_resume(tmp_path, monkeypatch, options):
+        spec = specification(tmp_path)
+        fake = EvidenceFake(**options)
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        calls = len(fake.calls)
+        before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+        for _ in range(3):
+            with pytest.raises(RuntimeError, match="evidence assertions failed"):
+&gt;               run(spec, fake, monkeypatch)
+
+tests/test_evidence_generation_gate.py:181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_evidence_generation_gate" name="test_evidence_refusal_cannot_spend_again_on_resume[options4]" time="0.979"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_evidence_refusal_cannot_s4')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x127f33df0&gt;
+options = {'report_outcome': 'discarded'}
+
+    @pytest.mark.parametrize("options", [
+        {"bad_audit": True}, {"retained_role": True}, {"repair_report": False},
+        {"report_outcome": "truncated"}, {"report_outcome": "discarded"},
+    ])
+    def test_evidence_refusal_cannot_spend_again_on_resume(tmp_path, monkeypatch, options):
+        spec = specification(tmp_path)
+        fake = EvidenceFake(**options)
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        calls = len(fake.calls)
+        before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+        for _ in range(3):
+            with pytest.raises(RuntimeError, match="evidence assertions failed"):
+&gt;               run(spec, fake, monkeypatch)
+
+tests/test_evidence_generation_gate.py:181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_evidence_generation_gate" name="test_shape_repair_then_evidence_refusal_is_terminal_before_phase_invalidation" time="1.232"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_shape_repair_then_evidenc0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130a89e50&gt;
+
+    def test_shape_repair_then_evidence_refusal_is_terminal_before_phase_invalidation(tmp_path, monkeypatch):
+        spec = specification(tmp_path)
+        fake = EvidenceFake(repair_report=False)
+        monkeypatch.setattr(api_runner, "_client", lambda: SimpleNamespace(messages=fake))
+        state = {"repaired": False}
+        monkeypatch.setattr(api_runner, "_validator_lines",
+                            lambda *args: ([], None) if state["repaired"] else (["synthetic shape error"], None))
+        def repair(*args):
+            # Exercise the real post-repair controller with changed full/core
+            # bytes. This control needs no remote model or LinkML subprocess.
+            state["repaired"] = True
+            spec.full_path.write_text(spec.full_path.read_text() + "\n# shape repaired\n")
+            from data_sheets_schema.derive_core import core_text
+            spec.core_path.write_text(core_text(spec.full_path, phase4_complete=True)[0])
+            return [{"record": "full", "round": 1, "accepted": True}]
+        monkeypatch.setattr(api_runner, "_repair_invalid", repair)
+        with pytest.raises(RuntimeError, match="report evidence assertions failed"):
+            api_runner.execute(spec)
+        assert state["repaired"]
+        from data_sheets_schema.provenance import _md5
+        progress = api_runner._load_progress(spec)
+        assert progress["artifact_md5"] == {"full": _md5(spec.full_path), "core": _md5(spec.core_path)}
+        calls = len(fake.calls)
+        # Refusal is independent of progress and remains after further local
+        # drift. Neither can authorize new paid originals for this generation.
+        api_runner._progress_path(spec).unlink()
+        spec.full_path.write_text(spec.full_path.read_text() + "\n# later local drift\n")
+        before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+        for _ in range(3):
+            with pytest.raises(RuntimeError, match="report evidence assertions failed"):
+&gt;               api_runner.execute(spec)
+
+tests/test_evidence_generation_gate.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_evidence_phase_contract" name="test_missing_evidence_still_stops_v10_before_reconciliation_and_resume" time="0.171"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_missing_evidence_still_st0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130a89650&gt;
+
+    def test_missing_evidence_still_stops_v10_before_reconciliation_and_resume(tmp_path, monkeypatch):
+        spec = replace(specification(tmp_path), render_version=10)
+        fake = PhaseContractFake(omit_evidence=True)
+        with pytest.raises(RuntimeError, match="audit evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        assert len(fake.calls) == 2
+        terminal = fake.calls[-1]["messages"][0]["content"][-1]["text"]
+        assert "evidence array on every finding" in terminal
+        evidence = json.loads((spec.metadata_dir / "intermediate/EXAMPLE_audit_evidence.json").read_text())
+        assert evidence["findings"][0]["kind"] == "evidence_contract"
+        originals = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+&gt;           run(spec, fake, monkeypatch)
+
+tests/test_evidence_phase_contract.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_anonymous_relationship_evidence" name="test_unactionable_v11_audit_stops_before_reconciliation" time="0.154"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unactionable_v11_audit_st0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130b0df40&gt;
+
+    def test_unactionable_v11_audit_stops_before_reconciliation(tmp_path, monkeypatch):
+        spec = replace(specification(tmp_path), render_version=11)
+        fake = AnonymousFake(ambiguous=True)
+        with pytest.raises(RuntimeError, match="audit evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        assert len(fake.calls) == 2
+        before = {p: p.read_bytes() for p in spec.metadata_dir.rglob("*") if p.is_file()}
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+&gt;           run(spec, fake, monkeypatch)
+
+tests/test_anonymous_relationship_evidence.py:293: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_anonymous_relationship_evidence" name="test_plan_that_would_erase_anchors_stops_before_paid_reconciliation" time="0.207"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_plan_that_would_erase_anc0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130b0e8a0&gt;
+
+    def test_plan_that_would_erase_anchors_stops_before_paid_reconciliation(tmp_path, monkeypatch):
+        spec = replace(specification(tmp_path), render_version=11)
+        fake = AnonymousFake()
+        fake.audit, fake.original = collapsing_audit()
+        with pytest.raises(RuntimeError, match="audit evidence assertions failed"):
+            run(spec, fake, monkeypatch)
+        assert len(fake.calls) == 2
+        with pytest.raises(RuntimeError, match="evidence assertions failed"):
+&gt;           run(spec, fake, monkeypatch)
+
+tests/test_anonymous_relationship_evidence.py:306: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[missing_audit-2]" time="0.134"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_real_api_flow_stops_on_so0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130af5550&gt;
+mode = 'missing_audit', calls = 2
+
+    @pytest.mark.parametrize('mode,calls',[('missing_audit',2),('audit_status',2),('final_status',4)])
+    def test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume(tmp_path,monkeypatch,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        fake=SourceReviewFake(mode)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):run(spec,fake,monkeypatch)
+        assert len(fake.calls)==calls
+        before={p:p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
+&gt;       with pytest.raises(RuntimeError,match='evidence assertions failed'):run(spec,fake,monkeypatch)
+
+tests/test_source_review.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[audit_status-2]" time="0.124"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_real_api_flow_stops_on_so1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130af4910&gt;
+mode = 'audit_status', calls = 2
+
+    @pytest.mark.parametrize('mode,calls',[('missing_audit',2),('audit_status',2),('final_status',4)])
+    def test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume(tmp_path,monkeypatch,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        fake=SourceReviewFake(mode)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):run(spec,fake,monkeypatch)
+        assert len(fake.calls)==calls
+        before={p:p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
+&gt;       with pytest.raises(RuntimeError,match='evidence assertions failed'):run(spec,fake,monkeypatch)
+
+tests/test_source_review.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume[final_status-4]" time="0.264"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_real_api_flow_stops_on_so2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x131cbeb60&gt;
+mode = 'final_status', calls = 4
+
+    @pytest.mark.parametrize('mode,calls',[('missing_audit',2),('audit_status',2),('final_status',4)])
+    def test_real_api_flow_stops_on_source_defects_and_cannot_spend_on_resume(tmp_path,monkeypatch,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        fake=SourceReviewFake(mode)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):run(spec,fake,monkeypatch)
+        assert len(fake.calls)==calls
+        before={p:p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
+&gt;       with pytest.raises(RuntimeError,match='evidence assertions failed'):run(spec,fake,monkeypatch)
+
+tests/test_source_review.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_evidence_generation_gate.py:120: in run
+    return api_runner.execute(spec)
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_source_review_precedes_shape_repair_and_fresh_report[True]" time="0.209"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_source_review_precedes_sh0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130ad4350&gt;
+rejected = True
+
+    @pytest.mark.parametrize('rejected',[False,True])
+    def test_source_review_precedes_shape_repair_and_fresh_report(tmp_path,monkeypatch,rejected):
+        spec=replace(specification(tmp_path),render_version=12)
+        fake=ShapeRepairFake(spec,'final_status' if rejected else 'valid')
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if not fake.repaired else ([],None))
+        if rejected:
+            with pytest.raises(RuntimeError,match='report evidence assertions failed'):
+                api.execute(spec,client=SimpleNamespace(messages=fake))
+            assert not fake.repaired
+&gt;           assert_resume_refuses_unchanged(spec,fake,4)
+
+tests/test_source_review.py:245: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[audit-malformed-2]" time="0.126"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130ad4d10&gt;
+phase = 'audit', kind = 'malformed', calls = 2
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[audit-empty-2]" time="0.127"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130aa8520&gt;
+phase = 'audit', kind = 'empty', calls = 2
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[audit-truncated-2]" time="0.122"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x135713490&gt;
+phase = 'audit', kind = 'truncated', calls = 2
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[report-empty-4]" time="0.218"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re3')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x134a2ea30&gt;
+phase = 'report', kind = 'empty', calls = 4
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[report-truncated-4]" time="0.205"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re4')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1357980f0&gt;
+phase = 'report', kind = 'truncated', calls = 4
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[report_regate-empty-5]" time="0.709"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re5')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130aefec0&gt;
+phase = 'report_regate', kind = 'empty', calls = 5
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[report_regate-truncated-5]" time="0.709"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re6')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x131d5e350&gt;
+phase = 'report_regate', kind = 'truncated', calls = 5
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[report_after_repair-empty-6]" time="0.648"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re7')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1311827d0&gt;
+phase = 'report_after_repair', kind = 'empty', calls = 6
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_unusable_reviews_never_retry_or_resume[report_after_repair-truncated-6]" time="0.732"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_unusable_reviews_never_re8')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1307f5da0&gt;
+phase = 'report_after_repair', kind = 'truncated', calls = 6
+
+    @pytest.mark.parametrize('phase,kind,calls',[
+        ('audit','malformed',2),('audit','empty',2),('audit','truncated',2),
+        ('report','empty',4),('report','truncated',4),
+        ('report_regate','empty',5),('report_regate','truncated',5),
+        ('report_after_repair','empty',6),('report_after_repair','truncated',6),
+    ])
+    def test_unusable_reviews_never_retry_or_resume(tmp_path,monkeypatch,phase,kind,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class UnusableReviewFake(ShapeRepairFake):
+            def create(self, **kwargs):
+                terminal=kwargs['messages'][0]['content'][-1]['text']
+                target={'audit':'Phase 3.','report':'Phase 4c.',
+                        'report_regate':'Report re-check.','report_after_repair':'Phase 4c.'}[phase]
+                if terminal.startswith(target) and (phase!='report_after_repair' or self.repaired):
+                    self.calls.append(kwargs)
+                    response=FakeResponse('' if kind=='empty' else '{"source_review":')
+                    if kind=='truncated':response.stop_reason='max_tokens'
+                    return response
+                return super().create(**kwargs)
+        fake=UnusableReviewFake(spec,'header_fix' if phase=='report_regate' else 'valid')
+        monkeypatch.setattr(api,'MAX_ATTEMPTS',2)
+        monkeypatch.setattr(api.time,'sleep',lambda _:None)
+        monkeypatch.setattr(api,'_validator_lines',lambda *args:
+            (['Synthetic shape finding'],None) if phase=='report_after_repair' and not fake.repaired else ([],None))
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            api.execute(spec,client=SimpleNamespace(messages=fake))
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-reasoning]" time="0.124"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_rejected_response_is_latc0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1308678c0&gt;
+writer = 'reasoning', mode = 'empty_audit', calls = 2
+
+    @pytest.mark.parametrize('writer',['reasoning','progress','phase_snapshot'])
+    @pytest.mark.parametrize('mode,calls',[('empty_audit',2),('final_status',4)])
+    def test_rejected_response_is_latched_before_ancillary_write_failures(tmp_path,monkeypatch,writer,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class FailingReviewFake(SourceReviewFake):
+            def create(self, **kwargs):
+                if mode=='empty_audit' and kwargs['messages'][0]['content'][-1]['text'].startswith('Phase 3.'):
+                    self.calls.append(kwargs);return FakeResponse('')
+                return super().create(**kwargs)
+        fake=FailingReviewFake('final_status' if mode=='final_status' else 'valid')
+        target='audit' if mode=='empty_audit' else 'report'
+        reached=[]
+        def fail():
+            reached.append(writer)
+            raise OSError('Synthetic ancillary write failure')
+        if writer=='reasoning':
+            original=api.reasoning.append
+            def write(path,entry):
+                if entry['phase']==target:fail()
+                return original(path,entry)
+            monkeypatch.setattr(api.reasoning,'append',write)
+        elif writer=='progress':
+            original=api._save_progress
+            def write(spec,completed,*args,**kwargs):
+                if target in completed:fail()
+                return original(spec,completed,*args,**kwargs)
+            monkeypatch.setattr(api,'_save_progress',write)
+        else:
+            original=api._snapshot
+            def write(spec,name,*args,**kwargs):
+                if name==f'EXAMPLE_{target}.'+('json' if target=='audit' else 'md'):fail()
+                return original(spec,name,*args,**kwargs)
+            monkeypatch.setattr(api,'_snapshot',write)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            run(spec,fake,monkeypatch)
+        assert reached==[]  # rejection precedes the failing write, rather than relying on it
+        fake.mode='valid'
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-progress]" time="0.131"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_rejected_response_is_latc1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1308679a0&gt;
+writer = 'progress', mode = 'empty_audit', calls = 2
+
+    @pytest.mark.parametrize('writer',['reasoning','progress','phase_snapshot'])
+    @pytest.mark.parametrize('mode,calls',[('empty_audit',2),('final_status',4)])
+    def test_rejected_response_is_latched_before_ancillary_write_failures(tmp_path,monkeypatch,writer,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class FailingReviewFake(SourceReviewFake):
+            def create(self, **kwargs):
+                if mode=='empty_audit' and kwargs['messages'][0]['content'][-1]['text'].startswith('Phase 3.'):
+                    self.calls.append(kwargs);return FakeResponse('')
+                return super().create(**kwargs)
+        fake=FailingReviewFake('final_status' if mode=='final_status' else 'valid')
+        target='audit' if mode=='empty_audit' else 'report'
+        reached=[]
+        def fail():
+            reached.append(writer)
+            raise OSError('Synthetic ancillary write failure')
+        if writer=='reasoning':
+            original=api.reasoning.append
+            def write(path,entry):
+                if entry['phase']==target:fail()
+                return original(path,entry)
+            monkeypatch.setattr(api.reasoning,'append',write)
+        elif writer=='progress':
+            original=api._save_progress
+            def write(spec,completed,*args,**kwargs):
+                if target in completed:fail()
+                return original(spec,completed,*args,**kwargs)
+            monkeypatch.setattr(api,'_save_progress',write)
+        else:
+            original=api._snapshot
+            def write(spec,name,*args,**kwargs):
+                if name==f'EXAMPLE_{target}.'+('json' if target=='audit' else 'md'):fail()
+                return original(spec,name,*args,**kwargs)
+            monkeypatch.setattr(api,'_snapshot',write)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            run(spec,fake,monkeypatch)
+        assert reached==[]  # rejection precedes the failing write, rather than relying on it
+        fake.mode='valid'
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_rejected_response_is_latched_before_ancillary_write_failures[empty_audit-2-phase_snapshot]" time="0.169"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_rejected_response_is_latc2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x13082dcc0&gt;
+writer = 'phase_snapshot', mode = 'empty_audit', calls = 2
+
+    @pytest.mark.parametrize('writer',['reasoning','progress','phase_snapshot'])
+    @pytest.mark.parametrize('mode,calls',[('empty_audit',2),('final_status',4)])
+    def test_rejected_response_is_latched_before_ancillary_write_failures(tmp_path,monkeypatch,writer,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class FailingReviewFake(SourceReviewFake):
+            def create(self, **kwargs):
+                if mode=='empty_audit' and kwargs['messages'][0]['content'][-1]['text'].startswith('Phase 3.'):
+                    self.calls.append(kwargs);return FakeResponse('')
+                return super().create(**kwargs)
+        fake=FailingReviewFake('final_status' if mode=='final_status' else 'valid')
+        target='audit' if mode=='empty_audit' else 'report'
+        reached=[]
+        def fail():
+            reached.append(writer)
+            raise OSError('Synthetic ancillary write failure')
+        if writer=='reasoning':
+            original=api.reasoning.append
+            def write(path,entry):
+                if entry['phase']==target:fail()
+                return original(path,entry)
+            monkeypatch.setattr(api.reasoning,'append',write)
+        elif writer=='progress':
+            original=api._save_progress
+            def write(spec,completed,*args,**kwargs):
+                if target in completed:fail()
+                return original(spec,completed,*args,**kwargs)
+            monkeypatch.setattr(api,'_save_progress',write)
+        else:
+            original=api._snapshot
+            def write(spec,name,*args,**kwargs):
+                if name==f'EXAMPLE_{target}.'+('json' if target=='audit' else 'md'):fail()
+                return original(spec,name,*args,**kwargs)
+            monkeypatch.setattr(api,'_snapshot',write)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            run(spec,fake,monkeypatch)
+        assert reached==[]  # rejection precedes the failing write, rather than relying on it
+        fake.mode='valid'
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-reasoning]" time="0.230"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_rejected_response_is_latc3')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x13081f310&gt;
+writer = 'reasoning', mode = 'final_status', calls = 4
+
+    @pytest.mark.parametrize('writer',['reasoning','progress','phase_snapshot'])
+    @pytest.mark.parametrize('mode,calls',[('empty_audit',2),('final_status',4)])
+    def test_rejected_response_is_latched_before_ancillary_write_failures(tmp_path,monkeypatch,writer,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class FailingReviewFake(SourceReviewFake):
+            def create(self, **kwargs):
+                if mode=='empty_audit' and kwargs['messages'][0]['content'][-1]['text'].startswith('Phase 3.'):
+                    self.calls.append(kwargs);return FakeResponse('')
+                return super().create(**kwargs)
+        fake=FailingReviewFake('final_status' if mode=='final_status' else 'valid')
+        target='audit' if mode=='empty_audit' else 'report'
+        reached=[]
+        def fail():
+            reached.append(writer)
+            raise OSError('Synthetic ancillary write failure')
+        if writer=='reasoning':
+            original=api.reasoning.append
+            def write(path,entry):
+                if entry['phase']==target:fail()
+                return original(path,entry)
+            monkeypatch.setattr(api.reasoning,'append',write)
+        elif writer=='progress':
+            original=api._save_progress
+            def write(spec,completed,*args,**kwargs):
+                if target in completed:fail()
+                return original(spec,completed,*args,**kwargs)
+            monkeypatch.setattr(api,'_save_progress',write)
+        else:
+            original=api._snapshot
+            def write(spec,name,*args,**kwargs):
+                if name==f'EXAMPLE_{target}.'+('json' if target=='audit' else 'md'):fail()
+                return original(spec,name,*args,**kwargs)
+            monkeypatch.setattr(api,'_snapshot',write)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            run(spec,fake,monkeypatch)
+        assert reached==[]  # rejection precedes the failing write, rather than relying on it
+        fake.mode='valid'
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-progress]" time="0.238"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_rejected_response_is_latc4')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1307f5780&gt;
+writer = 'progress', mode = 'final_status', calls = 4
+
+    @pytest.mark.parametrize('writer',['reasoning','progress','phase_snapshot'])
+    @pytest.mark.parametrize('mode,calls',[('empty_audit',2),('final_status',4)])
+    def test_rejected_response_is_latched_before_ancillary_write_failures(tmp_path,monkeypatch,writer,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class FailingReviewFake(SourceReviewFake):
+            def create(self, **kwargs):
+                if mode=='empty_audit' and kwargs['messages'][0]['content'][-1]['text'].startswith('Phase 3.'):
+                    self.calls.append(kwargs);return FakeResponse('')
+                return super().create(**kwargs)
+        fake=FailingReviewFake('final_status' if mode=='final_status' else 'valid')
+        target='audit' if mode=='empty_audit' else 'report'
+        reached=[]
+        def fail():
+            reached.append(writer)
+            raise OSError('Synthetic ancillary write failure')
+        if writer=='reasoning':
+            original=api.reasoning.append
+            def write(path,entry):
+                if entry['phase']==target:fail()
+                return original(path,entry)
+            monkeypatch.setattr(api.reasoning,'append',write)
+        elif writer=='progress':
+            original=api._save_progress
+            def write(spec,completed,*args,**kwargs):
+                if target in completed:fail()
+                return original(spec,completed,*args,**kwargs)
+            monkeypatch.setattr(api,'_save_progress',write)
+        else:
+            original=api._snapshot
+            def write(spec,name,*args,**kwargs):
+                if name==f'EXAMPLE_{target}.'+('json' if target=='audit' else 'md'):fail()
+                return original(spec,name,*args,**kwargs)
+            monkeypatch.setattr(api,'_snapshot',write)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            run(spec,fake,monkeypatch)
+        assert reached==[]  # rejection precedes the failing write, rather than relying on it
+        fake.mode='valid'
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_rejected_response_is_latched_before_ancillary_write_failures[final_status-4-phase_snapshot]" time="0.237"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_rejected_response_is_latc5')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1306db540&gt;
+writer = 'phase_snapshot', mode = 'final_status', calls = 4
+
+    @pytest.mark.parametrize('writer',['reasoning','progress','phase_snapshot'])
+    @pytest.mark.parametrize('mode,calls',[('empty_audit',2),('final_status',4)])
+    def test_rejected_response_is_latched_before_ancillary_write_failures(tmp_path,monkeypatch,writer,mode,calls):
+        spec=replace(specification(tmp_path),render_version=12)
+        class FailingReviewFake(SourceReviewFake):
+            def create(self, **kwargs):
+                if mode=='empty_audit' and kwargs['messages'][0]['content'][-1]['text'].startswith('Phase 3.'):
+                    self.calls.append(kwargs);return FakeResponse('')
+                return super().create(**kwargs)
+        fake=FailingReviewFake('final_status' if mode=='final_status' else 'valid')
+        target='audit' if mode=='empty_audit' else 'report'
+        reached=[]
+        def fail():
+            reached.append(writer)
+            raise OSError('Synthetic ancillary write failure')
+        if writer=='reasoning':
+            original=api.reasoning.append
+            def write(path,entry):
+                if entry['phase']==target:fail()
+                return original(path,entry)
+            monkeypatch.setattr(api.reasoning,'append',write)
+        elif writer=='progress':
+            original=api._save_progress
+            def write(spec,completed,*args,**kwargs):
+                if target in completed:fail()
+                return original(spec,completed,*args,**kwargs)
+            monkeypatch.setattr(api,'_save_progress',write)
+        else:
+            original=api._snapshot
+            def write(spec,name,*args,**kwargs):
+                if name==f'EXAMPLE_{target}.'+('json' if target=='audit' else 'md'):fail()
+                return original(spec,name,*args,**kwargs)
+            monkeypatch.setattr(api,'_snapshot',write)
+        with pytest.raises(RuntimeError,match='evidence assertions failed'):
+            run(spec,fake,monkeypatch)
+        assert reached==[]  # rejection precedes the failing write, rather than relying on it
+        fake.mode='valid'
+&gt;       assert_resume_refuses_unchanged(spec,fake,calls)
+
+tests/test_source_review.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_review" name="test_refusal_survives_failure_to_preserve_its_response_snapshot" time="0.222"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_refusal_survives_failure_0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130809b70&gt;
+
+    def test_refusal_survives_failure_to_preserve_its_response_snapshot(tmp_path,monkeypatch):
+        spec=replace(specification(tmp_path),render_version=12)
+        fake=SourceReviewFake('final_status')
+        original=api._snapshot
+        def fail(spec,name,*args,**kwargs):
+            if '_rejected_response_' in name:raise OSError('Synthetic refusal snapshot failure')
+            return original(spec,name,*args,**kwargs)
+        monkeypatch.setattr(api,'_snapshot',fail)
+        with pytest.raises(OSError,match='refusal snapshot failure'):run(spec,fake,monkeypatch)
+        from data_sheets_schema.usage_ledger import evidence_refusal
+        refusal=evidence_refusal(spec)
+        assert refusal['reading']['response_sha256']
+        assert refusal['reading']['source_review_final']['findings']
+        fake.mode='valid'
+&gt;       assert_resume_refuses_unchanged(spec,fake,4)
+
+tests/test_source_review.py:342: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_source_review.py:218: in assert_resume_refuses_unchanged
+    api.execute(spec,client=SimpleNamespace(messages=fake))
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6872: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:414: in _validated
+    _fail("historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: historical terminal failure or evidence rejection remains latched; acknowledgement does not authorize another call
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_heading_runtime_api" name="test_actual_sent_routing_counts_usage_and_completed_zero_calls" time="31.436"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:b67483b7b178c237d306452e44f285ee7e19b7d6f57e268aec37917aa85b3f1f">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_actual_sent_routing_count0')
+draft_files = {'base.txt': b'', 'catalog.json': b'{"authority_warnings":["unsettled TTL/schema disagreement on conforms_to: the TTL ...HBsYW5uZWQuIn1dfQ==","bytes":211,"sha256":"5c574327536ae34ad2a92ed23c2e6a2b9a445c199a81c539b3770a5cc77304fc"}}\n', ...}
+
+    def test_actual_sent_routing_counts_usage_and_completed_zero_calls(tmp_path, draft_files):
+        spec = selected_spec(tmp_path, draft_files)
+        c = client(spec)
+&gt;       result = api.execute(spec, client=c)
+
+tests/test_source_heading_runtime_api.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:7362: in _execute
+    body = _generate_phase(spec, ph, needed, client, settings, usage)
+src/data_sheets_schema/api_runner.py:6545: in _generate_phase
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5638: in _call_with_usage
+    routing_admission.remember_response(spec, phase, identifier, response)
+src/data_sheets_schema/source_heading_admission.py:251: in remember_response
+    ledger._write(spec, data)
+src/data_sheets_schema/usage_ledger.py:620: in _write
+    latch_journal.before_ledger_write(spec, data)
+src/data_sheets_schema/latch_journal.py:472: in before_ledger_write
+    _fail(f"attempted removal or rewrite of immutable latch: {key}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'attempted removal or rewrite of immutable latch: snapshot:b67483b7b178c237d306452e44f285ee7e19b7d6f57e268aec37917aa85b3f1f'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:b67483b7b178c237d306452e44f285ee7e19b7d6f57e268aec37917aa85b3f1f
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_heading_runtime_api" name="test_actual_completed_capture_is_portable_and_refuses_changed_bytes" time="25.027"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:6000f9364708ceda8651d97833a873192e274336f5e0e5653fd77c983b1a2522">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_actual_completed_capture_0')
+draft_files = {'base.txt': b'', 'catalog.json': b'{"authority_warnings":["unsettled TTL/schema disagreement on conforms_to: the TTL ...HBsYW5uZWQuIn1dfQ==","bytes":211,"sha256":"5c574327536ae34ad2a92ed23c2e6a2b9a445c199a81c539b3770a5cc77304fc"}}\n', ...}
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x130d819b0&gt;
+
+    def test_actual_completed_capture_is_portable_and_refuses_changed_bytes(tmp_path, draft_files, monkeypatch):
+        import base64
+        import builtins
+        import io
+        import os
+        import socket
+        import subprocess
+        from click.testing import CliRunner
+        from data_sheets_schema.cli import cli
+        from data_sheets_schema import source_heading_completed as complete
+        spec = selected_spec(tmp_path, draft_files)
+        c = client(spec)
+&gt;       result = api.execute(spec, client=c)
+
+tests/test_source_heading_runtime_api.py:270: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:7362: in _execute
+    body = _generate_phase(spec, ph, needed, client, settings, usage)
+src/data_sheets_schema/api_runner.py:6545: in _generate_phase
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5638: in _call_with_usage
+    routing_admission.remember_response(spec, phase, identifier, response)
+src/data_sheets_schema/source_heading_admission.py:251: in remember_response
+    ledger._write(spec, data)
+src/data_sheets_schema/usage_ledger.py:620: in _write
+    latch_journal.before_ledger_write(spec, data)
+src/data_sheets_schema/latch_journal.py:472: in before_ledger_write
+    _fail(f"attempted removal or rewrite of immutable latch: {key}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'attempted removal or rewrite of immutable latch: snapshot:6000f9364708ceda8651d97833a873192e274336f5e0e5653fd77c983b1a2522'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:6000f9364708ceda8651d97833a873192e274336f5e0e5653fd77c983b1a2522
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_heading_runtime_api" name="test_actual_regated_report_captured_lineage" time="24.479"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:044a2c55664da864c32bf0c069616d87d72f32425c002e687679622df73b5993">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_actual_regated_report_cap0')
+draft_files = {'base.txt': b'', 'catalog.json': b'{"authority_warnings":["unsettled TTL/schema disagreement on conforms_to: the TTL ...HBsYW5uZWQuIn1dfQ==","bytes":211,"sha256":"5c574327536ae34ad2a92ed23c2e6a2b9a445c199a81c539b3770a5cc77304fc"}}\n', ...}
+
+    def test_actual_regated_report_captured_lineage(tmp_path, draft_files):
+        from data_sheets_schema import source_heading_completed as complete
+        spec = selected_spec(tmp_path, draft_files)
+        c = client(spec)
+        c.messages.bad_report = True
+&gt;       result = api.execute(spec, client=c)
+
+tests/test_source_heading_runtime_api.py:398: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:7362: in _execute
+    body = _generate_phase(spec, ph, needed, client, settings, usage)
+src/data_sheets_schema/api_runner.py:6545: in _generate_phase
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5638: in _call_with_usage
+    routing_admission.remember_response(spec, phase, identifier, response)
+src/data_sheets_schema/source_heading_admission.py:251: in remember_response
+    ledger._write(spec, data)
+src/data_sheets_schema/usage_ledger.py:620: in _write
+    latch_journal.before_ledger_write(spec, data)
+src/data_sheets_schema/latch_journal.py:472: in before_ledger_write
+    _fail(f"attempted removal or rewrite of immutable latch: {key}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'attempted removal or rewrite of immutable latch: snapshot:044a2c55664da864c32bf0c069616d87d72f32425c002e687679622df73b5993'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:044a2c55664da864c32bf0c069616d87d72f32425c002e687679622df73b5993
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="tests.test_source_heading_runtime_api" name="test_actual_default_layout_completed_capture" time="45.472"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:5e2344e158f34a52b2b2a199076dac62b1a94ad482733033397262429a47ddb4">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_actual_default_layout_com0')
+draft_files = {'base.txt': b'', 'catalog.json': b'{"authority_warnings":["unsettled TTL/schema disagreement on conforms_to: the TTL ...HBsYW5uZWQuIn1dfQ==","bytes":211,"sha256":"5c574327536ae34ad2a92ed23c2e6a2b9a445c199a81c539b3770a5cc77304fc"}}\n', ...}
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x131aa3000&gt;
+
+    def test_actual_default_layout_completed_capture(tmp_path, draft_files, monkeypatch):
+        """Genuine split-output default layout and captured public readback."""
+        import base64
+        import builtins
+        import io
+        import os
+        import socket
+        import subprocess
+        from click.testing import CliRunner
+        from data_sheets_schema.cli import cli
+        from data_sheets_schema import source_heading_completed as complete
+    
+        base = selected_spec(tmp_path, draft_files)
+        launch = tmp_path / 'launch'; launch.mkdir()
+        monkeypatch.chdir(launch)
+        spec = replace(base, out_dir=None)
+        assert spec.out_dir is None and spec.manifest is None
+        assert spec.full_path.parent != spec.core_path.parent
+        assert spec.output_root == launch / api.CONCAT_DIR
+        c = client(spec)
+&gt;       result = api.execute(spec, client=c)
+
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/tests/test_source_heading_runtime_api.py:551: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py:6695: in execute
+    result = _execute(spec, resume=resume, client=client)
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py:7362: in _execute
+    body = _generate_phase(spec, ph, needed, client, settings, usage)
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py:6545: in _generate_phase
+    resp, call_id = _call_with_usage(
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/api_runner.py:5638: in _call_with_usage
+    routing_admission.remember_response(spec, phase, identifier, response)
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/source_heading_admission.py:251: in remember_response
+    ledger._write(spec, data)
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/usage_ledger.py:620: in _write
+    latch_journal.before_ledger_write(spec, data)
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py:472: in before_ledger_write
+    _fail(f"attempted removal or rewrite of immutable latch: {key}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'attempted removal or rewrite of immutable latch: snapshot:5e2344e158f34a52b2b2a199076dac62b1a94ad482733033397262429a47ddb4'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: attempted removal or rewrite of immutable latch: snapshot:5e2344e158f34a52b2b2a199076dac62b1a94ad482733033397262429a47ddb4
+
+/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/codex-x-5212-fix/src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase><testcase classname="notes.matched_cborg_2026-09-13.test_budgeted_cborg" name="test_real_repair_catch_cannot_allow_a_cheaper_report" time="0.005"><failure message="data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_real_repair_catch_cannot_0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x13000e820&gt;
+
+    def test_real_repair_catch_cannot_allow_a_cheaper_report(tmp_path, monkeypatch):
+        from data_sheets_schema import api_runner as api
+        from tests.test_download.test_api_runner import spec
+        bundle = tmp_path / "bundle.txt"
+        bundle.write_text("Synthetic input\n")
+        run = spec(project="EXTERNAL", bundle=bundle, manifest=None, profile="neutral", out_dir=tmp_path)
+        body = "id: x\nname: n\ntitle: T\ndescription: d\n"
+        run.full_path.write_text(body)
+        provider, capped, ledger = client(tmp_path, cap=0.1)
+        monkeypatch.setattr(api, "MAX_ATTEMPTS", 1)
+        monkeypatch.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+        monkeypatch.setattr(api, "phase_max_tokens", lambda spec, phase, *args, **kw: 1000 if phase == "report" else 100000)
+        settings = {"name": "claude-opus-5", "temperature": None, "temperature_applies": False, "max_tokens": 1000}
+&gt;       log = api._repair_invalid(run, capped, settings, [])
+
+notes/matched_cborg_2026-09-13/test_budgeted_cborg.py:156: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:5408: in _repair_invalid
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5609: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:518: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+&gt;       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError</failure></testcase></testsuite></testsuites>

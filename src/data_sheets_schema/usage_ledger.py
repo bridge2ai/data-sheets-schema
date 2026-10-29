@@ -63,6 +63,10 @@ def recovery_files(directory: Path, project: str) -> list[Path]:
     """API journals that generic provenance reconstruction cannot replace."""
     progress = directory / f"{project}_api_progress.json"
     found = [progress] if progress.exists() or progress.is_symlink() else []
+    for suffix in ("latch_journal.jsonl", "latch_override.json"):
+        path = directory / f"{project}_{suffix}"
+        if path.exists() or path.is_symlink():
+            found.append(path)
     if directory.is_dir():
         pattern = re.compile(re.escape(project) + r"_api_usage_[0-9a-f]{16}\.json")
         found.extend(path for path in directory.iterdir() if pattern.fullmatch(path.name))
@@ -310,11 +314,17 @@ def require_resolved(spec) -> None:
 
 def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     """Commit intent before a request so response persistence can fail safely."""
+    from data_sheets_schema import latch_journal
+    latch_journal.check(spec)
     require_resolved(spec)
     require_source_review_admission(spec)
     data = _read(spec)
     if data.get("evidence_refusal") is not None:
         raise UsageLedgerError("this generation has a terminal evidence refusal; no further calls are allowed")
+    refresh = validator_refresh(spec)
+    if refresh is not None and refresh["state"] != "accepted":
+        if refresh["state"] != "pending" or phase != "report_after_repair":
+            raise UsageLedgerError("validator repair requires its pending report refresh; other calls cannot restart")
     require_removal_repair_admission(spec, phase=phase)
     if getattr(spec, "receipt_completion_version", 0):
         from data_sheets_schema.receipt_completion import require_admission, PHASE as RECEIPT_PHASE
@@ -343,10 +353,71 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     if getattr(spec, "shared_generation_version", 0) == 2:
         from .source_heading_admission import bind_admission
         bind_admission(spec, phase, attempt, data=data, usage_id=identifier)
+    if refresh is not None and refresh["state"] == "pending":
+        data["validator_repair_refresh"] = {**refresh, "state": "in_flight", "usage_id": identifier}
     data["pending_call"] = {"usage_id": identifier, "phase": phase,
                             "attempt": attempt, "started_at": started_at}
     _write(spec, data)
     return identifier
+
+
+def validator_refresh(spec) -> dict | None:
+    """A validator repair's report obligation, distinct from a report regate.
+
+    The obligation survives absent/corrupt progress. Admission is consumed at
+    begin_call, so an interruption before call admission remains pending; a delivery
+    whose accepted report checkpoint is missing cannot silently be billed again.
+    """
+    if not ledger_path(spec).exists():
+        return None
+    data = _read(spec)
+    if "validator_repair_refresh" not in data:
+        return None
+    value = data["validator_repair_refresh"]
+    if not isinstance(value, dict) or value.get("state") not in {"pending", "in_flight", "accepted"}:
+        raise UsageLedgerError("invalid validator repair report refresh state; restore its evidence")
+    fields = {"state", "checkpoint"}
+    if value["state"] != "pending":
+        fields.add("usage_id")
+        if not isinstance(value.get("usage_id"), str) or not value["usage_id"]:
+            raise UsageLedgerError("validator repair report refresh lost its call identity")
+    if value["state"] == "accepted":
+        fields.add("report_sha256")
+        if not re.fullmatch(r"[a-f0-9]{64}", str(value.get("report_sha256", ""))):
+            raise UsageLedgerError("validator repair report refresh lost its accepted report hash")
+        if not any(row["usage_id"] == value["usage_id"] and row.get("phase") == "report_after_repair"
+                   for row in data["rows"]):
+            raise UsageLedgerError("validator repair report refresh lost its completed usage")
+    if set(value) != fields or not isinstance(value.get("checkpoint"), dict):
+        raise UsageLedgerError("invalid validator repair report refresh checkpoint")
+    return value
+
+
+def prepare_validator_refresh(spec, checkpoint: dict) -> None:
+    require_resolved(spec)
+    if not ledger_path(spec).exists():
+        raise UsageLedgerError("validator repair needs its generation ledger")
+    previous = validator_refresh(spec)
+    data = _read(spec)
+    if data.get("evidence_refusal") is not None or previous is not None and previous["state"] != "accepted":
+        raise UsageLedgerError("cannot replace an unfinished validator repair report refresh")
+    data["validator_repair_refresh"] = {"state": "pending", "checkpoint": checkpoint}
+    _write(spec, data)
+
+
+def finish_validator_refresh(spec) -> None:
+    """Called only after the report write and normal source-review gates pass."""
+    value = validator_refresh(spec)
+    data = _read(spec)
+    if (value is None or value["state"] != "in_flight" or data.get("pending_call") is not None
+            or data.get("evidence_refusal") is not None or not spec.report_path.is_file()
+            or not any(row["usage_id"] == value["usage_id"] and row.get("phase") == "report_after_repair"
+                       for row in data["rows"])):
+        raise UsageLedgerError("cannot accept an unfinished validator repair report refresh")
+    require_source_review_admission(spec)
+    data["validator_repair_refresh"] = {**value, "state": "accepted",
+        "report_sha256": hashlib.sha256(spec.report_path.read_bytes()).hexdigest()}
+    _write(spec, data)
 
 
 def removal_repair_attempted(spec) -> bool:
@@ -448,6 +519,24 @@ def record_evidence_refusal(spec, stage: str, reading: dict) -> None:
     if data.get("evidence_refusal") is None:
         data["evidence_refusal"] = {"stage": stage, "reading": reading}
         _write(spec, data)
+
+
+def record_report_rejection(spec, stage: str, report_sha256: str, reading: dict,
+                            usage_id: str | None = None, reason: str | None = None) -> None:
+    """Retain every report rejection without consuming or expanding regate allowance."""
+    if not re.fullmatch(r"[a-f0-9]{64}", str(report_sha256)):
+        raise UsageLedgerError("report rejection requires the exact rejected report hash")
+    if not ledger_path(spec).exists():
+        raise UsageLedgerError("cannot record report rejection without the generation ledger")
+    data = _read(spec)
+    rejection = {"rejection_id": uuid.uuid4().hex, "stage": stage,
+                 "report_sha256": report_sha256, "reading": reading}
+    if usage_id is not None:
+        rejection["usage_id"] = usage_id
+    if reason is not None:
+        rejection["reason"] = reason
+    data.setdefault("report_rejections", []).append(rejection)
+    _write(spec, data)
 
 
 def require_source_review_admission(spec) -> None:
@@ -592,6 +681,13 @@ def persist_usage(spec, row: dict) -> None:
 
 
 def _write(spec, data: dict) -> None:
+    from data_sheets_schema import latch_journal
+    latch_journal.before_ledger_write(spec, data)
+    _write_unlatched(spec, data)
+
+
+def _write_unlatched(spec, data: dict) -> None:
+    """Atomic storage primitive, also used to persist journal acknowledgements."""
     path = ledger_path(spec)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = None
