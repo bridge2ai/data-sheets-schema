@@ -36,6 +36,7 @@ from data_sheets_schema.evaluation.run_identity import same_run, blinding_identi
 
 CBORG_BASE_URL = "https://api.cborg.lbl.gov"
 FORMAT = "registered_semantic_evaluation_v1"
+RECEIPT_FORMAT = "registered_evaluation_receipt_v2"
 MAX_FILE_BYTES = shared.MAX_AUTHORITY_BYTES
 MAX_TRACE_BYTES = 32_000_000
 
@@ -511,6 +512,11 @@ def _accept(prepared: PreparedEvaluation, events: list[dict]) -> tuple[dict, Dec
     """Authenticate route, completed result, challenge, identity and every score."""
     plan = prepared.document()
     runtime, instrument = plan["runtime"], plan["instrument"]
+    if any(not isinstance(event, dict) or not (
+        event.get("type") in {"assistant", "result"}
+        or (event.get("type") == "system" and event.get("subtype") == "init")
+    ) for event in events):
+        raise ValueError("event type is not allowed in an isolated no-tools run")
     init = [e for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     if len(init) != 1 or init[0].get("apiKeySource") != "ANTHROPIC_API_KEY":
         raise ValueError("runtime init must prove ANTHROPIC_API_KEY auth, never subscription")
@@ -687,7 +693,8 @@ def execute(
     lock_dir.mkdir(parents=True, exist_ok=True)
     receipt_path = (destination / "receipt.json").resolve()
     receipt = {
-        **summary, "status": "incomplete", "ratings": [], "attempts": [], "total_cost_usd": "0",
+        **summary, "format": RECEIPT_FORMAT,
+        "status": "incomplete", "ratings": [], "attempts": [], "total_cost_usd": "0",
         "unaccounted_reserved_usd": "0", "cost_accounting_complete": False, "runtime_attempts": 0,
         "model_calls": None, "max_overshoot_calls": 1,
         "prior_receipt": prior_receipt_resolved, "authorization_basis": authorization_basis,
@@ -696,6 +703,15 @@ def execute(
     per_attempt_cap = Decimal(plan["reserved_cost_dollars_per_attempt"])
 
     def _write_receipt_and_lock() -> None:
+        for attempt in receipt["attempts"]:
+            folder = destination / f'rating-{attempt["rating"]:03d}'
+            attempt["files"] = sorted(p.name for p in folder.iterdir()) if folder.is_dir() else []
+            for name, field in (("transcript.jsonl", "transcript_sha256"), ("stderr.txt", "stderr_sha256")):
+                if attempt.get(field) is None:
+                    attempt[field] = _sha(_read(folder / name, MAX_TRACE_BYTES)) if (folder / name).is_file() else None
+            for rating in receipt["ratings"]:
+                if rating["rating"] == attempt["rating"]:
+                    rating.update({key: attempt[key] for key in ("files", "transcript_sha256", "stderr_sha256")})
         receipt_bytes = shared.canonical(receipt)
         (destination / "receipt.json").write_bytes(receipt_bytes)
         lock_payload = shared.canonical({
@@ -703,6 +719,7 @@ def execute(
             "destination": str(destination),
             "receipt_path": str(receipt_path),
             "receipt_sha256": _sha(receipt_bytes),
+            "attempts": receipt["attempts"], "ratings": receipt["ratings"],
             "prior_receipt": prior_receipt_resolved,
             "authorization_basis": authorization_basis,
         })
@@ -718,6 +735,7 @@ def execute(
             "destination": str(destination),
             "receipt_path": str(receipt_path),
             "receipt_sha256": _sha(initial_receipt_bytes),
+            "attempts": [], "ratings": [],
             "prior_receipt": prior_receipt_resolved,
             "authorization_basis": authorization_basis,
         })
@@ -789,6 +807,8 @@ def execute(
                                                stderr=stderr, timeout=900)
                 attempt_receipt["exit_code"] = completed.returncode
             raw = _read(attempt / "transcript.jsonl", MAX_TRACE_BYTES)
+            attempt_receipt["transcript_sha256"] = _sha(raw)
+            attempt_receipt["stderr_sha256"] = _sha(_read(attempt / "stderr.txt", MAX_TRACE_BYTES))
             events = [_json(line) for line in raw.splitlines() if line.strip()]
             if any(not isinstance(event, dict) for event in events):
                 raise ValueError("transcript events must be objects")

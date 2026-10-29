@@ -459,6 +459,18 @@ def rewrite_plan(output, callback):
     (output / "receipt.json").write_bytes(runner.shared.canonical(receipt))
 
 
+def anchor_synthetic_receipt(output):
+    """Explicit test-only anchor for intentionally reconstructed fixture evidence."""
+    from data_sheets_schema.evaluation import registered_eval_runner as runner
+    raw = (output / "receipt.json").read_bytes()
+    receipt = json.loads(raw)
+    path = runner.LOCK_DIR / (receipt["plan_sha256"] + ".json")
+    path.write_bytes(runner.shared.canonical({
+        "plan_sha256": receipt["plan_sha256"], "receipt_sha256": audit.sha(raw),
+        "attempts": receipt["attempts"], "ratings": receipt["ratings"],
+    }))
+
+
 def registered_problem(result):
     return result["registered_evaluations"][0]["reasons"]
 
@@ -705,6 +717,7 @@ def test_genuine_conflicting_provenance_identities_still_refuse_same_tuple(regis
         plan["generation_provenance"] = new
         plan["authorities"] = [new if entry == old else entry for entry in plan["authorities"]]
     rewrite_plan(other, mutate)
+    anchor_synthetic_receipt(other)
     assert not registered_problem(registered_audit(registered_case, directories=[("explicit-v10", other)]))
     result = registered_audit(registered_case, directories=[("explicit-v10", output), ("explicit-v10", other)])
     assert "registered_record_linkage_conflict" in block(result, "rubric20")["reasons"]
@@ -731,6 +744,7 @@ def test_historical_code_pin_is_condition_evidence_not_executed_current_code_gat
                     if entry["path"].endswith("/evaluation/registered_eval_runner.py"))
         code["sha256"] = "1" * 64
     rewrite_plan(output, mutate)
+    anchor_synthetic_receipt(output)
     result = registered_audit(registered_case)
     assert not registered_problem(result), result["registered_evaluations"]
     pins = block(result, "rubric20")["files"][0]["input_condition"]["implementation_pins"]
@@ -800,9 +814,11 @@ def test_registered_failed_later_attempt_retains_only_actual_validated_rating(re
     receipt = json.loads(path.read_bytes())
     receipt.update(status="incomplete", ratings=receipt["ratings"][:1], attempts=receipt["attempts"][:2])
     receipt["attempts"][1].update(status="failed", exit_code=1)
+    receipt["attempts"][1]["files"] = ["stderr.txt", "transcript.jsonl"]
     save(path, receipt)
     shutil.rmtree(output / "rating-003")
     (output / "rating-002/evaluation.json").unlink()
+    anchor_synthetic_receipt(output)
     result = registered_audit(registered_case)
     assert not registered_problem(result), result["registered_evaluations"]
     assert block(result, "rubric20")["file_count"] == 1

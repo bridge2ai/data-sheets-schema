@@ -49,6 +49,9 @@ def test_kill_I4_same_session_twice_in_one_package(registered_case):
     path.write_text("\n".join(json.dumps(e) for e in events) + "\n")
     receipt = _receipt(output)
     receipt["ratings"][1]["session_id"] = "synthetic-session-1"
+    # Isolate session reuse from the independent retained-byte guard.
+    for row in (receipt["ratings"][1], receipt["attempts"][1]):
+        row["transcript_sha256"] = audit.sha(path.read_bytes())
     save(output / "receipt.json", receipt)
     assert "registered_session_reused_or_mismatched" in registered_problem(registered_audit(registered_case))
 

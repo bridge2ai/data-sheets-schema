@@ -19,6 +19,7 @@ import os
 from pathlib import Path
 import re
 import stat
+import subprocess
 import sys
 
 import yaml
@@ -295,7 +296,7 @@ class RegisteredCapture:
             fd = os.open(parts[-1], os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW, dir_fd=directories[-1])
             with os.fdopen(fd, "rb") as stream:
                 before = os.fstat(stream.fileno())
-                require(stat.S_ISREG(before.st_mode) and 0 < before.st_size <= MAX_BYTES,
+                require(stat.S_ISREG(before.st_mode) and 0 <= before.st_size <= MAX_BYTES,
                         "registered_file_not_bounded_regular")
                 raw = stream.read(MAX_BYTES + 1)
                 after = os.fstat(stream.fileno())
@@ -362,7 +363,26 @@ def registered_attempt_names(directory, count):
     return sorted(names)
 
 
-def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts, authority_roots=()):
+def committed_package(capture):
+    """Check the captured package bytes against HEAD, not merely the index."""
+    try:
+        result = subprocess.run(["git", "-C", str(capture.root), "rev-parse", "--show-toplevel"],
+                                capture_output=True, text=True, check=True, timeout=5)
+        git_root = Path(result.stdout.strip()).resolve()
+        for path, raw in capture.files.items():
+            if path.is_relative_to(capture.directory):
+                result = subprocess.run(["git", "-C", str(git_root), "show",
+                                         "HEAD:" + path.relative_to(git_root).as_posix()],
+                                        capture_output=True, check=True, timeout=5)
+                if result.stdout != raw:
+                    return False
+        return True
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return False
+
+
+def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts, authority_roots=(),
+                   execution_lock_root=None):
     """Read saved E1 evidence, then reuse its actual offline acceptance validator.
 
     This does not call prepare/assert_current, execute historical code, read a
@@ -374,12 +394,15 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
 
     capture = RegisteredCapture(root, directory, authority_roots)
     package = {"arm": arm, "path": relative(root, capture.directory), "reasons": [],
-               "attempts": [], "record": None, "rows": [], "generation_acceptance_verified": False}
+               "attempts": [], "record": None, "rows": [], "generation_acceptance_verified": False,
+               "lock_verified": False, "lock_status": "not_checked", "committed_package": False}
     try:
         manifest_raw = capture.take("registration.json")
         plan = document(manifest_raw, json_only=True)
         receipt_raw = capture.take("receipt.json")
         receipt = document(receipt_raw, json_only=True)
+        require(receipt.get("format") in (None, runner.RECEIPT_FORMAT), "registered_receipt_format_unsupported")
+        marked_receipt = receipt.get("format") is not None
         package.update(manifest_sha256=sha(manifest_raw), receipt_sha256=sha(receipt_raw))
         require(plan.get("format") == runner.FORMAT and runner.shared.canonical(plan) == manifest_raw,
                 "registered_manifest_format_or_encoding")
@@ -593,6 +616,15 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
                     "registered_evaluation_pin_mismatch")
             require(rating.get("transcript_sha256", sha(trace_raw)) == sha(trace_raw),
                     "registered_transcript_pin_mismatch")
+            if marked_receipt:
+                require(rating.get("transcript_sha256") == attempt.get("transcript_sha256") == sha(trace_raw),
+                        "registered_transcript_pin_mismatch")
+                stderr_raw = capture.take(prefix + "stderr.txt")
+                require(rating.get("stderr_sha256") == attempt.get("stderr_sha256") == sha(stderr_raw),
+                        "registered_stderr_pin_mismatch")
+                require(rating.get("files") == attempt.get("files") == ["evaluation.json", "stderr.txt", "transcript.jsonl"]
+                        and sorted(p.name for p in (capture.directory / prefix).iterdir()) == rating["files"],
+                        "registered_attempt_files_mismatch")
             events = [document(line, json_only=True) for line in trace_raw.splitlines() if line.strip()]
             accepted, cost = runner._accept(prepared, events)
             require(accepted == doc, "registered_transcript_evaluation_mismatch")
@@ -635,6 +667,32 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
             require(len(ratings) == plan["repeat_count"], "registered_validated_panel_incomplete")
         actual = registered_attempt_names(capture.directory, len(attempts))
         require(actual == [f"rating-{index:03d}" for index in by_index], "registered_attempt_directories_mismatch")
+        if marked_receipt:
+            for index, attempt in by_index.items():
+                if index in seen_ratings or attempt.get("status") == "started":
+                    continue
+                folder = capture.directory / f"rating-{index:03d}"
+                names = sorted(p.name for p in folder.iterdir())
+                require(attempt.get("files") == names and set(names) <= {"evaluation.json", "transcript.jsonl", "stderr.txt"},
+                        "registered_attempt_files_mismatch")
+                for name, field in (("transcript.jsonl", "transcript_sha256"), ("stderr.txt", "stderr_sha256")):
+                    expected = sha(capture.take(f"rating-{index:03d}/" + name)) if name in names else None
+                    require(attempt.get(field) == expected, "registered_" + field.replace("sha256", "pin_mismatch"))
+        lock_root = (Path(execution_lock_root) if execution_lock_root is not None else Path(runner.LOCK_DIR)).resolve()
+        package["lock_status"] = "store_unavailable"
+        if lock_root.is_dir():
+            package["lock_status"] = "missing"
+            lock_path = lock_root / (sha(manifest_raw) + ".json")
+            require(lock_path.is_file(), "registered_execution_lock_missing")
+            lock_capture = RegisteredCapture(lock_root.resolve(), lock_root.resolve())
+            lock = document(lock_capture.take(lock_path), json_only=True)
+            package["lock_status"] = "mismatched"
+            require(lock.get("plan_sha256") == sha(manifest_raw) and lock.get("receipt_sha256") == sha(receipt_raw)
+                    and (not marked_receipt or (lock.get("attempts") == attempts and lock.get("ratings") == ratings)),
+                    "registered_execution_lock_mismatch")
+            lock_capture.unchanged()
+            package.update(lock_verified=True, lock_status="verified")
+        package["committed_package"] = committed_package(capture)
         capture.unchanged()
         require(registered_attempt_names(capture.directory, len(attempts)) == actual,
                 "registered_attempt_directories_changed")
@@ -776,7 +834,7 @@ def repeat_panel(rows):
 
 
 def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None, contexts=None,
-          registered_evaluations=(), authority_roots=()):
+          registered_evaluations=(), authority_roots=(), execution_lock_root=None):
     root = Path(root).resolve()
     roster, roster_pin = read_cohort(roster_manifest)
     if rubric20_version not in ("3.0", "4.0"):
@@ -834,7 +892,7 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
                 seen_directories.add(identity)
             package = registered_run(root, arm, directory, snapshots=snapshots,
                                      evaluator_model=evaluator_model, contexts=normalized_contexts,
-                                     authority_roots=authority_roots)
+                                     authority_roots=authority_roots, execution_lock_root=execution_lock_root)
         except (OSError, ValueError) as exc:
             package = {"arm": arm, "path": str(directory), "status": "refused", "record": None,
                 "rows": [], "attempts": [], "reasons": [str(exc) if isinstance(exc, RegisteredRefusal)
@@ -960,7 +1018,7 @@ def audit(root, *, roster_manifest, rubric20_version="3.0", evaluator_model=None
         "excluded_records": excluded, "unreadable_evaluations": problems,
         "unassociated_evaluations": [{key: row[key] for key in ("path", "store", "sha256")}
                                     for row in evaluations_found if row["path"] not in associated],
-        "interpretation": "Inventory and deterministic contract checks only. Presence, hashes, model names and reported repeat counts do not establish human approval, runtime authenticity, independence or scientific comparability. Review retained ratings outside these stores before commissioning rescoring."}
+        "interpretation": "Bound means internally consistent retained evidence, not proof of provider execution. Final claims require committed, unchanged packages plus separate scientific and independence review. Presence, hashes, model names and repeat counts do not establish human approval, runtime authenticity or scientific comparability. Review retained ratings outside these stores before commissioning rescoring."}
 
 
 def markdown(result):
@@ -1006,7 +1064,9 @@ def markdown(result):
                   "Captured transcript hashes and joins are audit evidence, not producer signatures or human approval.", ""]
         for row in result["registered_evaluations"]:
             lines.append(f"- {esc(row['arm'])} / {esc(row['path'])}: {esc(row['status'])}; "
-                         f"{esc('; '.join(row['reasons']) or 'no package-level refusal')}")
+                         f"{esc('; '.join(row['reasons']) or 'no package-level refusal')}; "
+                         f"lock_verified={row.get('lock_verified', False)} ({row.get('lock_status', 'not_checked')}); "
+                         f"committed_package={row.get('committed_package', False)}")
     lines.append("")
     return "\n".join(lines)
 
@@ -1018,6 +1078,8 @@ def main(argv=None):
                         help="Explicit evaluation_cohort_v1 manifest; no default campaign")
     parser.add_argument("--authority-root", type=Path, action="append", default=[],
                         help="Additional trusted authority directory; repeatable, read-only")
+    parser.add_argument("--execution-lock-root", type=Path,
+                        help="Execution lock store; defaults to the runner's local Git-common-dir store")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
     parser.add_argument("--rubric20-version", choices=("3.0", "4.0"), default="3.0")
     parser.add_argument("--evaluator-model", help="Explicit final-condition evaluator; no alias equivalence inferred")
@@ -1044,7 +1106,7 @@ def main(argv=None):
         registered.append((arm, name))
     result = audit(root, roster_manifest=args.roster_manifest, rubric20_version=args.rubric20_version,
                    evaluator_model=args.evaluator_model, contexts=contexts, registered_evaluations=registered,
-                   authority_roots=args.authority_root)
+                   authority_roots=args.authority_root, execution_lock_root=args.execution_lock_root)
     print(json.dumps(result, sort_keys=True, indent=2, allow_nan=False) if args.format == "json" else markdown(result), end="\n")
     return 0
 
