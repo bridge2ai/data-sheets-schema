@@ -48,8 +48,11 @@ here the chunk *is* the source bytes.
 from __future__ import annotations
 
 import copy
+import json
 import math
 import re
+import subprocess
+import sys
 import unicodedata
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
@@ -1324,6 +1327,8 @@ def check_fast_entailment(
 
 
 _UNSAFE_REGEX_RE = re.compile(r"\([^)]*[+*][^)]*\)[+*?]")
+_REGEX_TEXT_LIMIT = 48 * 1024
+_REGEX_TIMEOUT_SECONDS = 0.25
 
 
 def _resolve_wildcard_values(record: Any, path: str) -> list[Any]:
@@ -1442,10 +1447,28 @@ def verify_tool_receipt(
             return False, "regex_count pattern rejected due to nested quantifiers", None
         if source_text is None:
             return False, f"chunk {chunk_id!r} text unavailable for regex_count", None
+        if len(source_text) > _REGEX_TEXT_LIMIT:
+            return False, "regex_count source exceeds 48 Ki characters", None
+        # The length/quantifier screens are not a runtime proof: even the
+        # nine-character .*.*.*.*x is polynomial. Compile AND match in an
+        # isolated stdlib worker; run() kills and reaps it on timeout. No
+        # model-written pattern is executed by this process's regex engine.
         try:
-            computed = len(re.findall(pattern, source_text))
-        except re.error as exc:
-            return False, f"invalid regex pattern: {exc}", None
+            result = subprocess.run(
+                [sys.executable, "-I", "-S", "-B", str(Path(__file__).with_name("_receipt_regex.py"))],
+                input=json.dumps([pattern, source_text]), text=True, capture_output=True,
+                timeout=_REGEX_TIMEOUT_SECONDS, check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return False, "regex_count exceeded its 0.25 second time budget", None
+        except OSError as exc:
+            return False, f"regex_count worker unavailable: {exc}", None
+        if result.returncode:
+            return False, f"regex_count worker refused: {result.stderr.strip()[:300]}", None
+        try:
+            computed = int(result.stdout)
+        except ValueError:
+            return False, "regex_count worker returned an invalid count", None
     elif name == "manifest_chunk_count":
         computed = len(manifest.get("chunks") or [])
         if "chunk_count" in manifest and (type(manifest["chunk_count"]) is not int or manifest["chunk_count"] != computed):
