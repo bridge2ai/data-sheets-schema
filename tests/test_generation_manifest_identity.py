@@ -217,15 +217,31 @@ def test_canonical_gaps_follow_selected_registry(external, monkeypatch, selected
 
 def test_changed_inputs_in_portable_record_are_refused_without_a_ledger(external):
     api.execute(external, client=FakeClient())
+    account = json.loads(ledger.ledger_path(external).read_text())
+    record = yaml.safe_load(external.provenance_path.read_text())
     ledger.ledger_path(external).unlink()
-    before = external.provenance_path.read_bytes()
+    before = snapshot(external.out_dir)
     alternate = external.manifest.with_name("alternate.yaml")
     alternate.write_bytes(external.manifest.read_bytes())
+    changed = replace(external, manifest=alternate)
+    # Portable input binding remains independently checked even though the
+    # public journal guard now refuses this damaged account before reading it.
+    assert api._require_recorded_inputs(external, record) is None
+    with pytest.raises(ledger.UsageLedgerError) as binding:
+        api._require_recorded_inputs(changed, record)
+    assert str(binding.value) == (
+        "generation input identity changed for source_manifest; restore the "
+        "recorded inputs or use --no-resume for an explicit new generation")
+    assert snapshot(external.out_dir) == before
     client = FakeClient()
-    with pytest.raises(ledger.UsageLedgerError, match="input identity changed for source_manifest"):
-        api.execute(replace(external, manifest=alternate), client=client)
+    with pytest.raises(ledger.UsageLedgerError) as guarded:
+        api.execute(changed, client=client)
+    assert str(guarded.value) == (
+        "latch journal: usage ledger deleted while its generation journal survives: "
+        f"expected generation={account['generation_id']}; found=missing ledger")
     assert client.messages.calls == []
-    assert external.provenance_path.read_bytes() == before
+    assert not ledger.ledger_path(external).exists()
+    assert snapshot(external.out_dir) == before
 
 
 def test_legacy_progress_without_input_evidence_requires_explicit_restart(external):

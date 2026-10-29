@@ -13,7 +13,11 @@ reproduced18 of21 saved failures; three passed. Own-head controls at
 `39d6c33b5abdcd05bd8ec830211adb9caf013acb` are recorded separately.
 The first commit addresses six fixture defects. A second change updates two
 specific diagnostics to the earlier D41 guard while retaining their original
-invariants. Ten other locally reproduced cases remain unresolved.
+invariants. A third change preserves two portable-record input/instruction
+invariants directly while requiring the exact public deleted-ledger guard.
+Eight other locally reproduced cases remain unresolved. The owner explicitly
+kept genuine legacy recovery as a #5212 blocker on 2026-10-29; its positive
+assertions and all production guards remain unchanged.
 
 | Cases | Reviewed repair | Assertions retained |
 |---|---|---|
@@ -23,6 +27,7 @@ invariants. Ten other locally reproduced cases remain unresolved.
 | Two thinking-display wire units | Isolate the per-attempt latch at the already-stubbed accounting boundary; assert exactly one call with the spec | Real SDK MockTransport, count and stream bodies, summarized display, bounded-client identity and zero retries |
 | Validator-refresh checkpoint counterfactuals | Require the precise earlier latch-journal diagnostic for the three ledger mutations, including independently computed canonical expected/found values | All first ten progress/output assertions, untouched journal bytes, zero dispatch and the final real refresh positive |
 | Changed input snapshot | Require the precise public latch-journal byte discrepancy, tied to the saved event SHA and independently hashed original/tampered bytes | Direct writer's original diagnostic, generation isolation, archives, untouched ledger/journal/progress and zero dispatch |
+| Two portable-record identity negatives | Check the unchanged identity directly, preserve the precise changed-manifest/renderer rejection, then require the earlier public deleted-ledger diagnostic with its actual generation ID | Original input/instruction invariant, no dispatch, absent ledger and byte-identical output/journal/provenance tree; direct parser checks grant no replay permission |
 
 Independent root review read the complete diff before this commit. The changes
 do not re-anchor a monitor from mutated disk, change a recovery success into a
