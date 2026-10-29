@@ -55,6 +55,15 @@ if target == '-c':
     source, *args = args
     sys.argv = ['-c', *args]
     exec(compile(source, '<isolated-child>', 'exec'), {'__name__': '__main__'})
+elif target == 'pytest':
+    import pytest
+
+    class ImmediateFailures:
+        def pytest_runtest_logreport(self, report):
+            if report.failed:
+                print('\nG1 immediate failure:', report.nodeid, '\n', report.longreprtext, flush=True)
+
+    raise SystemExit(pytest.main(args, plugins=[ImmediateFailures()]))
 elif target.endswith('.py'):
     runpy.run_path(target, run_name='__main__')
 elif target in {'gen-linkml', 'gen-project', 'd4d', 'linkml-validate'}:
