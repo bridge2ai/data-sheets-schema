@@ -232,12 +232,16 @@ def test_legacy_yaml_exception_envelope_keeps_flags_without_accepting_record(ext
     assert inventory(external) == before
 
 
-def assert_completed_replay_authority(spec):
+def assert_completed_replay_authority(spec, journal_heads):
     """Reuse the existing pipeline test's completed fixture, never generate another.
 
     All acceptance/readers stay real. Only OS lock acquisition is inert so
     replay may be asserted read-only; generation and durable writers are traps.
     """
+    from data_sheets_schema import latch_journal
+    monitor_key = str(latch_journal.journal_path(spec))
+    assert monitor_key in journal_heads
+    trusted_head = journal_heads[monitor_key]
     record = yaml.safe_load(spec.provenance_path.read_bytes())
     index_path = snapshots.index_path(spec.metadata_dir, spec.project)
     index = json.loads(index_path.read_bytes())
@@ -275,8 +279,16 @@ def assert_completed_replay_authority(spec):
                 client = SimpleNamespace(base_url=sg.capture(spec).document()['runtime']['base_url'],
                     messages=SimpleNamespace(create=forbidden, stream=forbidden, count_tokens=forbidden))
                 if case in ('different_bytes', 'missing_intermediates'):
-                    with pytest.raises(ledger.UsageLedgerError, match='original|attestation|packet'):
+                    with pytest.raises(ledger.UsageLedgerError, match='original|attestation|packet') as refused:
                         api.execute(replace(spec), resume=True, client=client)
+                    assert 'resume journal head:' not in str(refused.value)
+                elif case == 'missing_core_index':
+                    # The portable reader may use the explicit record. API
+                    # resume must still refuse a changed journaled index.
+                    assert runtime.completion_check(spec, record=record) == record['shared_generation']
+                    with pytest.raises(ledger.UsageLedgerError, match='latch journal') as refused:
+                        api.execute(replace(spec), resume=True, client=client)
+                    assert 'resume journal head:' not in str(refused.value)
                 else:
                     result = api.execute(replace(spec), resume=True, client=client)
                     assert result['already_complete'] and result['validation_problems'] == []
@@ -285,7 +297,9 @@ def assert_completed_replay_authority(spec):
         finally:
             for path, raw in baseline.items():
                 Path(path).write_bytes(raw)
+            journal_heads[monitor_key] = trusted_head
     assert inventory(spec) == baseline
+    assert journal_heads[monitor_key] == trusted_head
 
 
 # D57: retain externally observed journal heads across fixture resumes.

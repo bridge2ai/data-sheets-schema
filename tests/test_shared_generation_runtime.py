@@ -137,7 +137,7 @@ def files(spec):
     return {str(p): p.read_bytes() for p in spec.metadata_dir.rglob('*') if p.is_file()}
 
 
-def test_real_complete_api_pipeline_and_completed_recheck(selected):
+def test_real_complete_api_pipeline_and_completed_recheck(selected, journal_launch_monitor):
     c = client(selected)
     result = api.execute(selected, client=c)
     assert result['validation_problems'] == []
@@ -169,10 +169,10 @@ def test_real_complete_api_pipeline_and_completed_recheck(selected):
     repeated = api.execute(replace(selected), client=again)
     assert repeated['already_complete'] and not again.messages.calls
     assert before == files(selected)
-    assert_completed_mutations_refuse_without_calls(selected)
-    assert_snapshot_attribution_checks_without_calls(selected)
+    assert_completed_mutations_refuse_without_calls(selected, journal_launch_monitor)
+    assert_snapshot_attribution_checks_without_calls(selected, journal_launch_monitor)
     from tests.test_shared_generation_completed_replay import assert_completed_replay_authority
-    assert_completed_replay_authority(selected)
+    assert_completed_replay_authority(selected, journal_launch_monitor)
 # Draft to apply only after immutable pipeline process ends.
 class CandidatesScript(Script):
     def __init__(self, spec, *, drop=False, **kwargs):
@@ -317,8 +317,12 @@ def test_actual_consumed_failure_retains_evidence_and_never_repurchases(selected
     assert files(selected) == before
 
 
-def assert_completed_mutations_refuse_without_calls(spec):
+def assert_completed_mutations_refuse_without_calls(spec, journal_heads):
     """Every mutation uses only the test's owned captured artifacts/inputs."""
+    from data_sheets_schema import latch_journal
+    monitor_key = str(latch_journal.journal_path(spec))
+    assert monitor_key in journal_heads
+    trusted_head = journal_heads[monitor_key]  # Observed before any counterfactual.
     baseline = files(spec)
     source_context = Path(sg.capture(spec).document()['inputs']['context']['path'])
     input_bytes = {spec.bundle: spec.bundle.read_bytes(), source_context: source_context.read_bytes()}
@@ -351,14 +355,19 @@ def assert_completed_mutations_refuse_without_calls(spec):
         before = files(spec)
         retry = client(spec)
         try:
-            with pytest.raises((ValueError, RuntimeError, ledger.UsageLedgerError)):
+            with pytest.raises((ValueError, RuntimeError, ledger.UsageLedgerError)) as refused:
                 api.execute(replace(spec), client=retry)
+            assert 'resume journal head:' not in str(refused.value)
             assert not retry.messages.calls
             assert files(spec) == before
         finally:
             for path, raw in input_bytes.items(): path.write_bytes(raw)
             for path, raw in baseline.items(): Path(path).write_bytes(raw)
+            # Reset the owned counterfactual and its saved external checkpoint
+            # together, only after assertions; never infer trust from disk.
+            journal_heads[monitor_key] = trusted_head
     assert files(spec) == baseline
+    assert journal_heads[monitor_key] == trusted_head
 
 
 def test_actual_cli_executes_then_refuses_reuse_without_calls(tmp_path, monkeypatch):
@@ -395,9 +404,12 @@ def test_actual_cli_executes_then_refuses_reuse_without_calls(tmp_path, monkeypa
     assert all(p.read_bytes() == raw for p,raw in inputs.items())
 
 
-def assert_snapshot_attribution_checks_without_calls(spec):
+def assert_snapshot_attribution_checks_without_calls(spec, journal_heads):
     """Actual completed consumers bind their selected snapshot to integration."""
-    from data_sheets_schema import snapshot_store
+    from data_sheets_schema import latch_journal, snapshot_store
+    monitor_key = str(latch_journal.journal_path(spec))
+    assert monitor_key in journal_heads
+    trusted_head = journal_heads[monitor_key]
     baseline = files(spec)
     index_path = snapshot_store.index_path(spec.metadata_dir, spec.project)
     original_index = json.loads(index_path.read_bytes())
@@ -428,8 +440,9 @@ def assert_snapshot_attribution_checks_without_calls(spec):
         try:
             # A portable record can remain readable while the live index is
             # altered; D41 requires that discrepancy to stop API resume too.
-            with pytest.raises(ledger.UsageLedgerError):
+            with pytest.raises(ledger.UsageLedgerError) as refused:
                 api.execute(replace(spec), client=retry)
+            assert 'resume journal head:' not in str(refused.value)
             assert not retry.messages.calls and not retry.messages.count_calls
             assert files(spec) == before
             if change == 'index-only-worker':
@@ -439,6 +452,7 @@ def assert_snapshot_attribution_checks_without_calls(spec):
                     runtime.completion_check(spec)
         finally:
             for path, raw in baseline.items(): Path(path).write_bytes(raw)
+            journal_heads[monitor_key] = trusted_head
     # The portable reader retains its missing-index fallback. API resume must
     # instead refuse removal of the index pinned by this generation's journal.
     index_path.unlink()
@@ -447,13 +461,16 @@ def assert_snapshot_attribution_checks_without_calls(spec):
         assert runtime.completion_check(spec) == original_record['shared_generation']
         assert files(spec) == absent
         retry = client(spec)
-        with pytest.raises(ledger.UsageLedgerError, match='latch journal'):
+        with pytest.raises(ledger.UsageLedgerError, match='latch journal') as refused:
             api.execute(replace(spec), client=retry)
+        assert 'resume journal head:' not in str(refused.value)
         assert not retry.messages.calls and not retry.messages.count_calls
         assert files(spec) == absent
     finally:
         for path, raw in baseline.items(): Path(path).write_bytes(raw)
+        journal_heads[monitor_key] = trusted_head
     assert files(spec) == baseline
+    assert journal_heads[monitor_key] == trusted_head
 
 
 # D57: retain externally observed journal heads across fixture resumes.
