@@ -17,7 +17,6 @@ if str(ROOT) not in sys.path:
 
 from scripts.build_api_registrations import (
     DEFAULT_AUDIT_LIMITS,
-    DEFAULT_PROJECTS,
     DEFAULT_RECEIPT_LIMITS,
     SizingRecord,
     build_draft_context,

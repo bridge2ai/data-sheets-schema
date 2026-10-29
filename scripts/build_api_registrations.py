@@ -101,7 +101,6 @@ from data_sheets_schema.registry import AUTO, load_registry, select_manifest, de
 from data_sheets_schema.resources import checkout_at, resource_path
 from data_sheets_schema.schema_snapshot import capture_schema
 
-DEFAULT_PROJECTS = tuple(load_registry(default_manifest_path()).projects())
 DEFAULT_CONDITION = "generic_v10"
 DEFAULT_ID_PREFIX = "generic-v10"
 DEFAULT_RECEIPT_ID = "generic-v10-receipt"

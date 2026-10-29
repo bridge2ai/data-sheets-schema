@@ -7,6 +7,22 @@ import yaml
 from scripts import build_draft_contexts as contexts, build_api_registrations as builder
 
 
+def test_import_does_not_select_a_manifest_before_the_caller_can(monkeypatch):
+    import importlib.util
+    import sys
+    from data_sheets_schema import registry
+    name = 'generality_manifest_import_probe'
+    spec = importlib.util.spec_from_file_location(name, builder.__file__)
+    module = importlib.util.module_from_spec(spec)
+    try:
+        with monkeypatch.context() as patch:
+            patch.setattr(registry, 'load_registry', lambda *a, **k: pytest.fail('import read a manifest'))
+            patch.setitem(sys.modules, name, module)
+            spec.loader.exec_module(module)
+    finally:
+        sys.modules.pop(name, None)
+
+
 @pytest.mark.parametrize('name', ['NEWPROJ', 'KIDS_FIRST', 'CHORUS'])
 def test_undeclared_profile_and_ranking_are_neutral_for_every_name(tmp_path, monkeypatch, name):
     monkeypatch.delenv('D4D_PROFILE', raising=False)
