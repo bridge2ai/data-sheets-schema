@@ -71,3 +71,7 @@ def test_interrupted_archive_initialization_recovers_without_losing_bytes(extern
     assert len(final["reasoning_archives"]) == 1
     archive = source.with_name(final["reasoning_archives"][0]["name"])
     assert archive.read_bytes() == predecessor
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

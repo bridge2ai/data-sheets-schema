@@ -159,3 +159,24 @@ execution. Full attributes/path/mode preflight and protected postcheck pass.
 The merge is clean, with no ordinary conflict or manual source resolution.
 Evidence: `wave7_bc1_merge_evidence_2026-10-29/04-5210-{preflight,postflight}.json`.
 No tests, protected edits, calibration changes or publication occurred.
+
+#5210 merge commit: `c76b01c123de75de9d1008e1fb94d080528758aa`.
+
+## Merge 5: #5212 accounting guards
+
+First parent `c76b01c123de75de9d1008e1fb94d080528758aa`; incoming
+`20def9d63a3131ef9b56eca39b61fbf5f6aaab49`. Actual bases are
+`fba016d92fd292c66d580006e848b8c43eb59505` (protected C) and
+`8b885ee68262474275316755c3fc55dc05517dcb` (A), with sole common base
+`cd07f2a3738e146eeaa30ae86d35d3161eb3413b` (C). The file-level virtual base
+is A; incoming D adds only the `latch_journal.py` routing identity line to A.
+The parent independently verified these bases/blobs before execution. Both
+current B and incoming D differ from A, so the scoped driver retained B.
+
+Ordinary files merged cleanly. Full attributes/path/mode preflight and
+protected postcheck passed; evidence is
+`wave7_bc1_merge_evidence_2026-10-29/05-5212-{preflight,postflight}.json`.
+No guard was manually changed. The legacy-recovery production question is
+still an explicit owner blocker, and this merge neither resolves it nor
+claims readiness. The protected proposal must later carry the routing line;
+the branch intentionally does not yet contain it. No tests ran.

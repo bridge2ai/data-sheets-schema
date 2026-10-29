@@ -5594,6 +5594,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 "max_tokens": phase_max_tokens(spec, ph, DEFAULT_MAX_TOKENS, model=settings["name"]),
                 "stop_reason": getattr(resp, "stop_reason", None),
             })
+            text = "".join(b.text for b in resp.content
+                           if getattr(b, "type", "") == "text")
+            # A billed repair is evidence even when reasoning, truncation or
+            # extraction rejects it. Bind the raw delivery before those steps.
+            _snapshot(spec, f"{spec.project}_{ph}_response_{call_id}.txt", text,
+                      usage_id=call_id)
             cap = reasoning.capture(resp)
             reasoning.append(_reasoning_path(spec),
                              {"phase": ph, "label": spec.label,
@@ -5604,8 +5610,6 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 log.append({"phase": ph, "round": rnd,
                             "outcome": "truncated; record left as it was"})
                 continue
-            text = "".join(b.text for b in resp.content
-                           if getattr(b, "type", "") == "text")
             try:
                 body = _extract(text, "yaml", schema, cls)
             except RuntimeError as exc:
@@ -5623,7 +5627,8 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # repaired output changes its readability (#1747).
             repaired_from_class = _finding_class(errors, path)
             path.write_text(body, encoding="utf-8")
-            _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body)
+            _snapshot(spec, f"{spec.project}_{ph}_r{rnd}.yaml", body,
+                      usage_id=call_id)
             applied_from = len(errors)
             applied_class = repaired_from_class
             log.append({"phase": ph, "round": rnd, "outcome": "applied",
@@ -5891,7 +5896,8 @@ def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, c
         routing_admission.require_wire(spec, phase, identifier, kwargs)
     call_started = time.monotonic()
     try:
-        response = _call_with_retry(client, **kwargs)
+        from .latch_journal import check as check_latches
+        response = _call_with_retry(client, before_attempt=lambda: check_latches(spec), **kwargs)
     except UsageLedgerError:
         raise
     except Exception:
@@ -5921,7 +5927,7 @@ def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, c
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
                      sleep=time.sleep, wall_clock: float | None = None,
                      thinking: dict[str, Any] | None = None, effort: str | None = None,
-                     transport_attempts: int | None = None):
+                     transport_attempts: int | None = None, before_attempt=None):
     """One API call, retrying transient failures.
 
     Retries rate limits, connection errors and 5xx. Does not retry 4xx other
@@ -5993,6 +5999,11 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             def _run(box: dict[str, Any] = box, holder: dict[str, Any] = holder,
                      trace: StreamTrace = trace) -> None:
                 try:
+                    # Controller authority only. Check each physical attempt,
+                    # including transport retries, immediately before dispatch.
+                    # This callback never enters the provider request kwargs.
+                    if before_attempt is not None:
+                        before_attempt()
                     with client.messages.stream(**kwargs) as stream:
                         holder["stream"] = stream
                         # The proxy's thinking-token count rides on the
@@ -6263,6 +6274,10 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                   "stop_reason": getattr(resp, "stop_reason", None)})
     text = "".join(getattr(b, "text", "") for b in getattr(resp, "content", [])
                    if getattr(b, "type", None) == "text")
+    # Keep the delivered bytes even when the report gate restores an older
+    # report. The journal pins this raw response to its recorded usage ID.
+    _snapshot(spec, f"{spec.project}_{phase}_response_{call_id}.txt", text,
+              usage_id=call_id)
     _admit_source_response(spec, phase, text, getattr(resp, "stop_reason", None), call_usage, needed)
     cap = reasoning.capture(resp)
     reasoning.append(_reasoning_path(spec),
@@ -6367,6 +6382,11 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
                     "findings_after": out["findings_before"],
                     "remaining": (before.get("findings") or [])[:20]})
         return out
+    from .usage_ledger import record_report_rejection
+    record_report_rejection(spec, stage="report_gate_before",
+        report_sha256=hashlib.sha256(spec.report_path.read_bytes() if spec.report_path.exists() else b"").hexdigest(),
+        reading={**before, "findings": contradictions},
+        reason="report claims or required dispositions rejected")
     as_written = spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else ""
     _snapshot(spec, f"{spec.project}_report_before_regate.md", as_written)
     try:
@@ -6386,6 +6406,12 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
         (before.get("disposition_rows") and not after.get("disposition_rows"))
         or len(after.get("findings") or []) > len(before.get("findings") or [])
         or after.get("_core_findings_count", 0) > before.get("_core_findings_count", 0)))
+    if out["regenerated"] and after.get("checked") and (
+            worse or after.get("findings") or not after.get("disposition_rows")):
+        record_report_rejection(spec, stage="report_gate_after",
+            report_sha256=hashlib.sha256(spec.report_path.read_bytes() if spec.report_path.exists() else b"").hexdigest(),
+            reading=after, reason="regenerated report rejected; original retained" if worse else
+                "regenerated report retains contradictions or lacks dispositions")
     if worse:
         # A prose reply that drops the table, or a rewrite with more
         # contradictions than before, is not an improvement (#965/#967). The
@@ -6547,7 +6573,7 @@ def _record_unusable_response(spec: RunSpec, ph: str, attempt: int,
             f"stop_reason: {(usage_row or {}).get('stop_reason')}\n"
             + extent + kept)
     return _snapshot(spec, f"{spec.project}_{ph}_unusable_attempt{attempt}.txt",
-                     body)
+                     body, usage_id=(usage_row or {}).get("usage_id"))
 
 
 def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: str,
@@ -6565,10 +6591,15 @@ def _record_incomplete_stream(spec: RunSpec, ph: str, attempt: int, started_at: 
             + (f"# stream trace: {json.dumps(info['stream_trace'], ensure_ascii=True)}\n"
                if "stream_trace" in info else "") +
             f"# last {INCOMPLETE_TAIL_CHARS} characters as delivered:\n" + (info.get("tail") or ""))
-    path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt", body)
+    # The abandoned row and its saved partial delivery have one identity.
+    # Preserve the snapshot before appending that row, as before; it is not a
+    # completed response and must not be synthesized into the completed ledger.
+    usage_id = uuid.uuid4().hex
+    path = _snapshot(spec, f"{spec.project}_{ph}_incomplete_attempt{attempt}_{n}.txt",
+                     body, usage_id=usage_id)
     snap_usage = info.get("usage") or {}
     row = {"phase": ph, "attempt": attempt, "transport_attempt": n,
-                  "usage_id": uuid.uuid4().hex,
+                  "usage_id": usage_id,
                   "run_identity": _usage_identity(spec),
                   # The retry ladder's own count (a rate limit before the cut
                   # advances it; the transport count does not).
@@ -6859,11 +6890,9 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         # Before the retry, and before the last-attempt raise: the final
         # attempt's body is evidence too, and raising without it loses the
         # one that actually ended the run (#1048).
-        # Both the phase and the attempt: `_readdress_receipt` appends a
-        # `full_readdress` row with attempt 1, which an attempt-only guard
-        # would stamp on loop attempt 1 (round-3 finding 3).
-        own_row = (usage[-1] if usage and usage[-1].get("attempt") == attempt
-                   and usage[-1].get("phase") == ph else None)
+        # Retain this delivery's row. Re-addressing can append another billed
+        # row before failing; the last row then belongs to a different call.
+        own_row = call_usage
         kept = _record_unusable_response(spec, ph, attempt, problem, response_text, own_row)
         if kept is not None and own_row is not None:
             # A distinct key, never `outcome` (#1048 review). `outcome` is
@@ -6894,12 +6923,14 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
 
 
 def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
-            client=None) -> dict[str, Any]:
+            client=None, expect_journal_head_sha256: str | None = None) -> dict[str, Any]:
     """Run the phases, writing each artifact as it completes.
 
     ``resume`` skips phases whose artifact already exists, so a run that failed
     at phase 5 costs one call to finish rather than six. Set it False to force
-    a clean regeneration.
+    a clean regeneration. An existing journal requires its head from the prior
+    launch/monitor record as ``expect_journal_head_sha256``, even on a fresh
+    generation request. Start/stop heads are printed to stderr for that record.
     """
     if spec._replay_only:
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
@@ -6919,7 +6950,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         from .output_ownership import require_selected_resume_owner
         assert_current(spec)  # authority isolation precedes even sidecar lock writes
         require_selected_resume_owner(spec, resume=resume)
-    with _exclusive_run(spec):
+    from .latch_journal import launch_record
+    with _exclusive_run(spec), launch_record(spec, expect_journal_head_sha256):
         if getattr(spec, 'shared_generation_version', 0):
             # Another sequential writer may have changed ownership while we waited.
             require_selected_resume_owner(spec, resume=resume)
@@ -7098,6 +7130,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                          "generation execution is not supported")
     if spec.native_source_attribution_version:
         raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
+
+    # Before recovery can rewrite a ledger or settle a saved delivery. A
+    # missing journal on spent work is not permission to adopt edited state.
+    from . import latch_journal
+    latch_journal.check(spec, spending=resume, startup=True)
 
     # Before a token is spent. The digest this run is about to send, the schema
     # it validates against and the identity slots its pair check uses all come
@@ -7285,7 +7322,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                "restore the ledger before resuming")
     from data_sheets_schema import snapshot_store
     if resume:
-        snapshot_store.require_accounted(spec, prior_record)
+        # Partial deliveries are owned by real abandoned rows, not completed
+        # charges. An unfinished run may have no provenance record yet.
+        accounting_proof = {**prior_record, "api_usage": merge_abandoned_rows(
+            spec, list(prior_record.get("api_usage") or []))}
+        snapshot_store.require_accounted(spec, accounting_proof)
         if generation is not None:
             _require_surviving_accounting(spec, prior_record.get("api_usage") or [])
     # A *finished* run has no progress file — success deletes it — so resuming
@@ -7378,10 +7419,16 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                 completion_check_result = recover(spec)
             if completed_context is not None:
                 _require_same_resume_record(spec, completed_context)
+            runtime_integrity = latch_journal.provenance(spec)
+            if runtime_integrity["assisted"] and (
+                    (existing.get("model") or {}).get("runtime_integrity") != runtime_integrity):
+                raise UsageLedgerError("completed provenance does not disclose the applied D41 override; "
+                                       "it cannot be returned as an unassisted completed run")
             return {"label": spec.label, "project": spec.project,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
                     "checks": {"pair": pair_consistency(spec),
+                               "runtime_integrity": runtime_integrity,
                                "validation": validation_block(spec, problems),
                                # A run this runner produced asked for the
                                # dispositions table (#929); its record says so.
@@ -7978,6 +8025,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     if spec.shared_generation_version:
         from .typed_audit_runtime import completion_check
         rec.data["shared_generation"] = completion_check(spec, carry, record=rec.data)
+    rec.data.setdefault("model", {})["runtime_integrity"] = latch_journal.provenance(spec)
     rec.write(spec.provenance_path)
     # Persist the one-time report regeneration and its usage before refusing
     # completion; otherwise resume could admit that same call again (#1818).
@@ -8045,6 +8093,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             # a run with 11 pair errors and 19 ungrounded identifiers as a
             # success, which is how the v4 arm swept clean.
             "checks": {"pair": rec.data.get("pair_consistency"),
+                       "runtime_integrity": rec.data["model"]["runtime_integrity"],
                        "validation": rec.data.get("validation"),
                        "report": rec.data.get("report_claims"),
                        "report_audit_totals": rec.data.get("report_audit_totals"),

@@ -305,3 +305,7 @@ def test_plan_that_would_erase_anchors_stops_before_paid_reconciliation(tmp_path
     with pytest.raises(RuntimeError, match="evidence assertions failed"):
         run(spec, fake, monkeypatch)
     assert len(fake.calls) == 2
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

@@ -254,3 +254,7 @@ def test_current_and_legacy_prompt_specs_both_verify_against_their_own_hash(exte
         path.write_text(yaml.safe_dump(record))
         status, detail = runs.verify_request(spec.method, spec.label, spec.project, concat_dir=external.out_dir)
         assert status == "match", detail
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

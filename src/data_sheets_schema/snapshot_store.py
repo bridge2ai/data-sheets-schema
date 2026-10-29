@@ -261,6 +261,8 @@ def record(spec, name: str, path: Path, *, usage_id: str | None = None) -> None:
              "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
     if usage_id is not None:
         entry["usage_id"] = usage_id
+    from data_sheets_schema import latch_journal
+    latch_journal.remember_snapshot(spec, entry, index_path=index_path(directory, spec.project))
     data["snapshots"].append(entry)
     _write(index_path(directory, spec.project), data)
 

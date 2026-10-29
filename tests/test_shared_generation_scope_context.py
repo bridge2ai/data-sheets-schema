@@ -8,6 +8,9 @@ from pathlib import Path
 import pytest
 import yaml
 
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")
+
 from data_sheets_schema import api_runner as api, shared_generation as sg
 from data_sheets_schema import typed_audit_runtime as runtime, usage_ledger as ledger
 from tests.test_shared_generation_selection import external, offline, selected  # noqa: F401

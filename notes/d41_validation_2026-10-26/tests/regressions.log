@@ -1,0 +1,885 @@
+..F........................FFFF........FFF.FFFF...
+=================================== FAILURES ===================================
+________________ test_chorus_shared_v1_exact_baseline_sdk_bytes ________________
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_chorus_shared_v1_exact_ba0')
+
+    def test_chorus_shared_v1_exact_baseline_sdk_bytes(tmp_path):
+        available = subprocess.run(['git', 'cat-file', '-e', parity.BASE + '^{commit}'], cwd=ROOT,
+                                   capture_output=True).returncode == 0
+        if not available:
+            pytest.skip('Pinned f8c5ac73c Git object unavailable; local D41 parity artifact is still required.')
+>       result = parity.compare(ROOT, tmp_path / 'parity')
+
+tests/test_d41_request_parity.py:48: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/Users/marcin/Documents/VIMSS/ontology/bridge2ai/d4d-executions/claude-guard')
+workdir = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_chorus_shared_v1_exact_ba0/parity')
+
+    def compare(root, workdir):
+        root, workdir = root.resolve(), workdir.resolve()
+        workdir.mkdir(parents=True, exist_ok=False)
+        baseline = unpack_baseline(root, workdir / 'baseline-code')
+        fixture = workdir / 'common-fixture'
+        fixture.mkdir()
+        helper_before = pin(__file__)
+        production_before = {str(p.relative_to(root)): pin(p) for p in (root / PACKAGE).rglob('*.py')}
+        captures = {}
+        for mode, code_root in [('baseline', workdir / 'baseline-code'), ('candidate', root)]:
+            out = workdir / mode
+            env = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONPATH': str(code_root / 'src') + os.pathsep + str(root)}
+            command = [sys.executable, str(Path(__file__).resolve()), '--capture', mode, '--root', str(root),
+                       '--code-root', str(code_root), '--fixture', str(fixture), '--out', str(out)]
+            completed = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True, timeout=300)
+            save(workdir / (mode + '.log'), (completed.stdout + completed.stderr).encode())
+            if completed.returncode:
+>               raise RuntimeError(f'{mode} capture failed; see {workdir / (mode + ".log")}')
+E               RuntimeError: candidate capture failed; see /private/tmp/d4d-h3-regressions-20261026/test_chorus_shared_v1_exact_ba0/parity/candidate.log
+
+scripts/adhoc/d41_request_parity_20261026.py:382: RuntimeError
+______ test_response_persistence_failure_blocks_the_next_invocation[full] ______
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_response_persistence_fail0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ad34d50>
+phase = 'full'
+
+    @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+    def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, usage, settings = FakeClient(), [], api._model_settings()
+        original_replace = ledger.os.replace
+    
+        def fail_after_response(source, destination):
+            if client.messages.calls:
+                raise OSError("response storage failed")
+            return original_replace(source, destination)
+    
+        with monkeypatch.context() as failing:
+            failing.setattr(ledger.os, "replace", fail_after_response)
+            with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+                if phase == "full":
+>                   api._generate_phase(s, phase, {}, client, settings, usage)
+
+tests/test_usage_ledger.py:181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6535: in _generate_phase
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_response_persistence_fail0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ad34d50>
+phase = 'full'
+
+    @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+    def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, usage, settings = FakeClient(), [], api._model_settings()
+        original_replace = ledger.os.replace
+    
+        def fail_after_response(source, destination):
+            if client.messages.calls:
+                raise OSError("response storage failed")
+            return original_replace(source, destination)
+    
+        with monkeypatch.context() as failing:
+            failing.setattr(ledger.os, "replace", fail_after_response)
+>           with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+E           AssertionError: Regex pattern did not match.
+E            Regex: 'response storage failed'
+E            Input: 'latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+tests/test_usage_ledger.py:179: AssertionError
+__ test_response_persistence_failure_blocks_the_next_invocation[repair_full] ___
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_response_persistence_fail1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x107d46a80>
+phase = 'repair_full'
+
+    @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+    def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, usage, settings = FakeClient(), [], api._model_settings()
+        original_replace = ledger.os.replace
+    
+        def fail_after_response(source, destination):
+            if client.messages.calls:
+                raise OSError("response storage failed")
+            return original_replace(source, destination)
+    
+        with monkeypatch.context() as failing:
+            failing.setattr(ledger.os, "replace", fail_after_response)
+            with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+                if phase == "full":
+                    api._generate_phase(s, phase, {}, client, settings, usage)
+                elif phase == "repair_full":
+                    failing.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+>                   api._repair_invalid(s, client, settings, usage)
+
+tests/test_usage_ledger.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:5408: in _repair_invalid
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_response_persistence_fail1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x107d46a80>
+phase = 'repair_full'
+
+    @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+    def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, usage, settings = FakeClient(), [], api._model_settings()
+        original_replace = ledger.os.replace
+    
+        def fail_after_response(source, destination):
+            if client.messages.calls:
+                raise OSError("response storage failed")
+            return original_replace(source, destination)
+    
+        with monkeypatch.context() as failing:
+            failing.setattr(ledger.os, "replace", fail_after_response)
+>           with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+E           AssertionError: Regex pattern did not match.
+E            Regex: 'response storage failed'
+E            Input: 'latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+tests/test_usage_ledger.py:179: AssertionError
+_ test_response_persistence_failure_blocks_the_next_invocation[report_after_repair] _
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_response_persistence_fail2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a419fd0>
+phase = 'report_after_repair'
+
+    @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+    def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, usage, settings = FakeClient(), [], api._model_settings()
+        original_replace = ledger.os.replace
+    
+        def fail_after_response(source, destination):
+            if client.messages.calls:
+                raise OSError("response storage failed")
+            return original_replace(source, destination)
+    
+        with monkeypatch.context() as failing:
+            failing.setattr(ledger.os, "replace", fail_after_response)
+            with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+                if phase == "full":
+                    api._generate_phase(s, phase, {}, client, settings, usage)
+                elif phase == "repair_full":
+                    failing.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+                    api._repair_invalid(s, client, settings, usage)
+                elif phase == "report_after_repair":
+                    carry = {key: body for key in api.PHASE_NEEDS["report"]}
+>                   api._regenerate_report(s, client, settings, usage, carry)
+
+tests/test_usage_ledger.py:187: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:5989: in _regenerate_report
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_response_persistence_fail2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a419fd0>
+phase = 'report_after_repair'
+
+    @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+    def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, usage, settings = FakeClient(), [], api._model_settings()
+        original_replace = ledger.os.replace
+    
+        def fail_after_response(source, destination):
+            if client.messages.calls:
+                raise OSError("response storage failed")
+            return original_replace(source, destination)
+    
+        with monkeypatch.context() as failing:
+            failing.setattr(ledger.os, "replace", fail_after_response)
+>           with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+E           AssertionError: Regex pattern did not match.
+E            Regex: 'response storage failed'
+E            Input: 'latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+tests/test_usage_ledger.py:179: AssertionError
+_ test_response_persistence_failure_blocks_the_next_invocation[full_readdress] _
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_response_persistence_fail3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106fb34d0>
+phase = 'full_readdress'
+
+    @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+    def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, usage, settings = FakeClient(), [], api._model_settings()
+        original_replace = ledger.os.replace
+    
+        def fail_after_response(source, destination):
+            if client.messages.calls:
+                raise OSError("response storage failed")
+            return original_replace(source, destination)
+    
+        with monkeypatch.context() as failing:
+            failing.setattr(ledger.os, "replace", fail_after_response)
+            with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+                if phase == "full":
+                    api._generate_phase(s, phase, {}, client, settings, usage)
+                elif phase == "repair_full":
+                    failing.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+                    api._repair_invalid(s, client, settings, usage)
+                elif phase == "report_after_repair":
+                    carry = {key: body for key in api.PHASE_NEEDS["report"]}
+                    api._regenerate_report(s, client, settings, usage, carry)
+                else:
+                    from tests.test_download.test_receipt_readdress import _receipt
+                    receipt = yaml.safe_dump(_receipt({"slot": "unknown_slot", "snippet": "a"}))
+>                   api._readdress_receipt(s, api.build_phase(s, "full", carry={}), body,
+                                          body, receipt, client, settings, usage)
+
+tests/test_usage_ledger.py:191: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:3479: in _readdress_receipt
+    resp, entry["usage_id"] = _call_with_usage(spec, "full_readdress", 1, started,
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_response_persistence_fail3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106fb34d0>
+phase = 'full_readdress'
+
+    @pytest.mark.parametrize("phase", ["full", "repair_full", "report_after_repair", "full_readdress"])
+    def test_response_persistence_failure_blocks_the_next_invocation(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, usage, settings = FakeClient(), [], api._model_settings()
+        original_replace = ledger.os.replace
+    
+        def fail_after_response(source, destination):
+            if client.messages.calls:
+                raise OSError("response storage failed")
+            return original_replace(source, destination)
+    
+        with monkeypatch.context() as failing:
+            failing.setattr(ledger.os, "replace", fail_after_response)
+>           with pytest.raises(ledger.UsageLedgerError, match="response storage failed"):
+E           AssertionError: Regex pattern did not match.
+E            Regex: 'response storage failed'
+E            Input: 'latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+tests/test_usage_ledger.py:179: AssertionError
+_ test_auxiliary_calls_are_durable_before_later_processing_fails[repair_full] __
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_auxiliary_calls_are_durab0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10fd15e50>
+phase = 'repair_full'
+
+    @pytest.mark.parametrize("phase", ["repair_full", "report_after_repair", "full_readdress"])
+    def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, current, settings = FakeClient(), [], api._model_settings()
+        attempted_reasoning = []
+    
+        def fail(path, entry):
+            attempted_reasoning.append(entry)
+            raise OSError("reasoning disk failure")
+    
+        monkeypatch.setattr(api.reasoning, "append", fail)
+        if phase == "repair_full":
+            monkeypatch.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+            with pytest.raises(OSError, match="reasoning disk failure"):
+>               api._repair_invalid(s, client, settings, current)
+
+tests/test_usage_ledger.py:377: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:5408: in _repair_invalid
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_auxiliary_calls_are_durab0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10fd15e50>
+phase = 'repair_full'
+
+    @pytest.mark.parametrize("phase", ["repair_full", "report_after_repair", "full_readdress"])
+    def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, current, settings = FakeClient(), [], api._model_settings()
+        attempted_reasoning = []
+    
+        def fail(path, entry):
+            attempted_reasoning.append(entry)
+            raise OSError("reasoning disk failure")
+    
+        monkeypatch.setattr(api.reasoning, "append", fail)
+        if phase == "repair_full":
+            monkeypatch.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+>           with pytest.raises(OSError, match="reasoning disk failure"):
+E           AssertionError: Regex pattern did not match.
+E            Regex: 'reasoning disk failure'
+E            Input: 'latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+tests/test_usage_ledger.py:376: AssertionError
+_ test_auxiliary_calls_are_durable_before_later_processing_fails[report_after_repair] _
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_auxiliary_calls_are_durab1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10886fdd0>
+phase = 'report_after_repair'
+
+    @pytest.mark.parametrize("phase", ["repair_full", "report_after_repair", "full_readdress"])
+    def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, current, settings = FakeClient(), [], api._model_settings()
+        attempted_reasoning = []
+    
+        def fail(path, entry):
+            attempted_reasoning.append(entry)
+            raise OSError("reasoning disk failure")
+    
+        monkeypatch.setattr(api.reasoning, "append", fail)
+        if phase == "repair_full":
+            monkeypatch.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+            with pytest.raises(OSError, match="reasoning disk failure"):
+                api._repair_invalid(s, client, settings, current)
+        elif phase == "report_after_repair":
+            carry = {k: body for k in api.PHASE_NEEDS["report"]}
+            with pytest.raises(OSError, match="reasoning disk failure"):
+>               api._regenerate_report(s, client, settings, current, carry)
+
+tests/test_usage_ledger.py:381: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:5989: in _regenerate_report
+    resp, call_id = _call_with_usage(
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_auxiliary_calls_are_durab1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10886fdd0>
+phase = 'report_after_repair'
+
+    @pytest.mark.parametrize("phase", ["repair_full", "report_after_repair", "full_readdress"])
+    def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, current, settings = FakeClient(), [], api._model_settings()
+        attempted_reasoning = []
+    
+        def fail(path, entry):
+            attempted_reasoning.append(entry)
+            raise OSError("reasoning disk failure")
+    
+        monkeypatch.setattr(api.reasoning, "append", fail)
+        if phase == "repair_full":
+            monkeypatch.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+            with pytest.raises(OSError, match="reasoning disk failure"):
+                api._repair_invalid(s, client, settings, current)
+        elif phase == "report_after_repair":
+            carry = {k: body for k in api.PHASE_NEEDS["report"]}
+>           with pytest.raises(OSError, match="reasoning disk failure"):
+E           AssertionError: Regex pattern did not match.
+E            Regex: 'reasoning disk failure'
+E            Input: 'latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+tests/test_usage_ledger.py:380: AssertionError
+_ test_auxiliary_calls_are_durable_before_later_processing_fails[full_readdress] _
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_auxiliary_calls_are_durab2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10eb26ac0>
+phase = 'full_readdress'
+
+    @pytest.mark.parametrize("phase", ["repair_full", "report_after_repair", "full_readdress"])
+    def test_auxiliary_calls_are_durable_before_later_processing_fails(tmp_path, monkeypatch, phase):
+        s = spec(out_dir=tmp_path)
+        body = "id: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n"
+        s.full_path.write_text(body)
+        s.core_path.write_text(body)
+        client, current, settings = FakeClient(), [], api._model_settings()
+        attempted_reasoning = []
+    
+        def fail(path, entry):
+            attempted_reasoning.append(entry)
+            raise OSError("reasoning disk failure")
+    
+        monkeypatch.setattr(api.reasoning, "append", fail)
+        if phase == "repair_full":
+            monkeypatch.setattr(api, "_validator_lines", lambda *args: (["bad shape"], None))
+            with pytest.raises(OSError, match="reasoning disk failure"):
+                api._repair_invalid(s, client, settings, current)
+        elif phase == "report_after_repair":
+            carry = {k: body for k in api.PHASE_NEEDS["report"]}
+            with pytest.raises(OSError, match="reasoning disk failure"):
+                api._regenerate_report(s, client, settings, current, carry)
+        else:
+            from tests.test_download.test_receipt_readdress import _receipt
+            receipt = yaml.safe_dump(_receipt({"slot": "unknown_slot", "snippet": "a"}))
+>           _, summary = api._readdress_receipt(s, api.build_phase(s, "full", carry={}), body,
+                                                body, receipt, client, settings, current)
+
+tests/test_usage_ledger.py:385: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:3479: in _readdress_receipt
+    resp, entry["usage_id"] = _call_with_usage(spec, "full_readdress", 1, started,
+src/data_sheets_schema/api_runner.py:5604: in _call_with_usage
+    identifier = _begin_usage_call(spec, phase, attempt, started_at)
+src/data_sheets_schema/usage_ledger.py:318: in begin_call
+    latch_journal.check(spec)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:391: in _validated
+    _fail("surviving historical outputs/progress have no usage ledger or latch history; "
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: surviving historical outputs/progress have no usage ledger or latch history; restore accounting or explicitly start a new generation; historical evidence cannot become a clean resume
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+_______ test_hard_exit_then_resume_preserves_completed_call_usage[full] ________
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_hard_exit_then_resume_pre0')
+completed_phase = 'full'
+
+    @pytest.mark.parametrize("completed_phase", ["full", "core"])
+    def test_hard_exit_then_resume_preserves_completed_call_usage(tmp_path, completed_phase):
+        s = spec(out_dir=tmp_path)
+        root = Path(__file__).resolve().parents[1]
+        code = """
+    import os, sys
+    from pathlib import Path
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import FakeClient, spec
+    save = api._save_progress
+    def exit_after_progress(run, completed, audit):
+        save(run, completed, audit)
+        if sys.argv[2] in completed:
+            os._exit(23)
+    api._save_progress = exit_after_progress
+    api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
+    """
+        environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+        killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), completed_phase],
+                                cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
+        assert killed.returncode == 23, killed.stdout + killed.stderr
+        assert not s.provenance_path.exists()
+        assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
+        completed = ledger.merge_usage(s, [])
+        assert len(completed) == 1 and completed[0]["phase"] == "full"
+        saved_ledger = ledger.ledger_path(s).read_bytes()
+        ledger.ledger_path(s).unlink()
+        blocked = FakeClient()
+        with pytest.raises(ledger.UsageLedgerError, match="ledger is missing"):
+>           api.execute(s, client=blocked)
+
+tests/test_usage_ledger.py:462: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6687: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6864: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:389: in _validated
+    _fail("usage ledger deleted while its generation journal survives")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'usage ledger deleted while its generation journal survives'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_hard_exit_then_resume_pre0')
+completed_phase = 'full'
+
+    @pytest.mark.parametrize("completed_phase", ["full", "core"])
+    def test_hard_exit_then_resume_preserves_completed_call_usage(tmp_path, completed_phase):
+        s = spec(out_dir=tmp_path)
+        root = Path(__file__).resolve().parents[1]
+        code = """
+    import os, sys
+    from pathlib import Path
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import FakeClient, spec
+    save = api._save_progress
+    def exit_after_progress(run, completed, audit):
+        save(run, completed, audit)
+        if sys.argv[2] in completed:
+            os._exit(23)
+    api._save_progress = exit_after_progress
+    api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
+    """
+        environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+        killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), completed_phase],
+                                cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
+        assert killed.returncode == 23, killed.stdout + killed.stderr
+        assert not s.provenance_path.exists()
+        assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
+        completed = ledger.merge_usage(s, [])
+        assert len(completed) == 1 and completed[0]["phase"] == "full"
+        saved_ledger = ledger.ledger_path(s).read_bytes()
+        ledger.ledger_path(s).unlink()
+        blocked = FakeClient()
+>       with pytest.raises(ledger.UsageLedgerError, match="ledger is missing"):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'ledger is missing'
+E        Input: 'latch journal: usage ledger deleted while its generation journal survives'
+
+tests/test_usage_ledger.py:461: AssertionError
+_______ test_hard_exit_then_resume_preserves_completed_call_usage[core] ________
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_hard_exit_then_resume_pre1')
+completed_phase = 'core'
+
+    @pytest.mark.parametrize("completed_phase", ["full", "core"])
+    def test_hard_exit_then_resume_preserves_completed_call_usage(tmp_path, completed_phase):
+        s = spec(out_dir=tmp_path)
+        root = Path(__file__).resolve().parents[1]
+        code = """
+    import os, sys
+    from pathlib import Path
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import FakeClient, spec
+    save = api._save_progress
+    def exit_after_progress(run, completed, audit):
+        save(run, completed, audit)
+        if sys.argv[2] in completed:
+            os._exit(23)
+    api._save_progress = exit_after_progress
+    api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
+    """
+        environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+        killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), completed_phase],
+                                cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
+        assert killed.returncode == 23, killed.stdout + killed.stderr
+        assert not s.provenance_path.exists()
+        assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
+        completed = ledger.merge_usage(s, [])
+        assert len(completed) == 1 and completed[0]["phase"] == "full"
+        saved_ledger = ledger.ledger_path(s).read_bytes()
+        ledger.ledger_path(s).unlink()
+        blocked = FakeClient()
+        with pytest.raises(ledger.UsageLedgerError, match="ledger is missing"):
+>           api.execute(s, client=blocked)
+
+tests/test_usage_ledger.py:462: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6687: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6864: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:389: in _validated
+    _fail("usage ledger deleted while its generation journal survives")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'usage ledger deleted while its generation journal survives'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_hard_exit_then_resume_pre1')
+completed_phase = 'core'
+
+    @pytest.mark.parametrize("completed_phase", ["full", "core"])
+    def test_hard_exit_then_resume_preserves_completed_call_usage(tmp_path, completed_phase):
+        s = spec(out_dir=tmp_path)
+        root = Path(__file__).resolve().parents[1]
+        code = """
+    import os, sys
+    from pathlib import Path
+    from data_sheets_schema import api_runner as api
+    from tests.test_download.test_api_runner import FakeClient, spec
+    save = api._save_progress
+    def exit_after_progress(run, completed, audit):
+        save(run, completed, audit)
+        if sys.argv[2] in completed:
+            os._exit(23)
+    api._save_progress = exit_after_progress
+    api.execute(spec(out_dir=Path(sys.argv[1])), client=FakeClient())
+    """
+        environment = {**os.environ, "PYTHONPATH": os.pathsep.join([str(root / "src"), str(root)])}
+        killed = subprocess.run([sys.executable, "-c", code, str(tmp_path), completed_phase],
+                                cwd=root, env=environment, capture_output=True, text=True, timeout=HANG_GUARD_SECONDS)
+        assert killed.returncode == 23, killed.stdout + killed.stderr
+        assert not s.provenance_path.exists()
+        assert completed_phase in json.loads(api._progress_path(s).read_text())["completed"]
+        completed = ledger.merge_usage(s, [])
+        assert len(completed) == 1 and completed[0]["phase"] == "full"
+        saved_ledger = ledger.ledger_path(s).read_bytes()
+        ledger.ledger_path(s).unlink()
+        blocked = FakeClient()
+>       with pytest.raises(ledger.UsageLedgerError, match="ledger is missing"):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'ledger is missing'
+E        Input: 'latch journal: usage ledger deleted while its generation journal survives'
+
+tests/test_usage_ledger.py:461: AssertionError
+_____ test_explicit_fresh_execution_does_not_import_previous_usage[False] ______
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_explicit_fresh_execution_0')
+portable_prior = False
+
+    @pytest.mark.parametrize("portable_prior", [False, True])
+    def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path, portable_prior):
+        from data_sheets_schema.run_telemetry import run_telemetry
+        s = spec(out_dir=tmp_path)
+        old = api.execute(s, client=FakeClient())["usage"]
+        previous_generation = ledger.generation_id(s)
+        # Even a stale progress file must not defeat an explicit fresh request.
+        api._save_progress(s, list(api.PHASES), None)
+        if portable_prior:
+            ledger.ledger_path(s).unlink()
+        new = api.execute(s, resume=False, client=FakeClient())["usage"]
+        assert len(old) == len(new) == 4
+        assert {r["usage_id"] for r in old}.isdisjoint(r["usage_id"] for r in new)
+        archived = list(tmp_path.glob("*.previous-*.json"))
+        if portable_prior:
+            assert archived == []
+        else:
+            assert len(archived) == 1 and json.loads(archived[0].read_text())["rows"] == old
+        assert yaml.safe_load(s.provenance_path.read_text())["run"]["prior_generation_ids"] == [previous_generation]
+        entries = [json.loads(line) for line in api._reasoning_path(s).read_text().splitlines()]
+        current_ids = {r["usage_id"] for r in new}
+        expected = sum(e["reasoning_tokens_estimate"] or 0 for e in entries if e["usage_id"] in current_ids)
+        assert expected > 0
+        assert run_telemetry(tmp_path, s.project)["total_reasoning_tokens_estimate"] == expected
+        # A finished portable record is sufficient for the no-call exit even if
+        # its recovery ledger is not copied alongside it.
+        ledger.ledger_path(s).unlink()
+        complete = FakeClient()
+>       assert api.execute(s, client=complete)["already_complete"]
+
+tests/test_usage_ledger.py:508: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6687: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6864: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:389: in _validated
+    _fail("usage ledger deleted while its generation journal survives")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'usage ledger deleted while its generation journal survives'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+______ test_explicit_fresh_execution_does_not_import_previous_usage[True] ______
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-regressions-20261026/test_explicit_fresh_execution_1')
+portable_prior = True
+
+    @pytest.mark.parametrize("portable_prior", [False, True])
+    def test_explicit_fresh_execution_does_not_import_previous_usage(tmp_path, portable_prior):
+        from data_sheets_schema.run_telemetry import run_telemetry
+        s = spec(out_dir=tmp_path)
+        old = api.execute(s, client=FakeClient())["usage"]
+        previous_generation = ledger.generation_id(s)
+        # Even a stale progress file must not defeat an explicit fresh request.
+        api._save_progress(s, list(api.PHASES), None)
+        if portable_prior:
+            ledger.ledger_path(s).unlink()
+>       new = api.execute(s, resume=False, client=FakeClient())["usage"]
+
+tests/test_usage_ledger.py:490: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/api_runner.py:6687: in execute
+    result = _execute(spec, resume=resume, client=client)
+src/data_sheets_schema/api_runner.py:6864: in _execute
+    latch_journal.check(spec, spending=resume)
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:389: in _validated
+    _fail("usage ledger deleted while its generation journal survives")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'usage ledger deleted while its generation journal survives'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: usage ledger deleted while its generation journal survives
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+tests/test_usage_ledger.py: 12 warnings
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/linkml/generators/pydanticgen/template.py:553: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    imports=imports, **{k: getattr(self, k, None) for k in self.model_fields if k != "imports"}
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+------- generated xml file: /private/tmp/d4d-h3-regressions-20261026.xml -------
+=========================== short test summary info ============================
+FAILED tests/test_d41_request_parity.py::test_chorus_shared_v1_exact_baseline_sdk_bytes
+FAILED tests/test_usage_ledger.py::test_response_persistence_failure_blocks_the_next_invocation[full]
+FAILED tests/test_usage_ledger.py::test_response_persistence_failure_blocks_the_next_invocation[repair_full]
+FAILED tests/test_usage_ledger.py::test_response_persistence_failure_blocks_the_next_invocation[report_after_repair]
+FAILED tests/test_usage_ledger.py::test_response_persistence_failure_blocks_the_next_invocation[full_readdress]
+FAILED tests/test_usage_ledger.py::test_auxiliary_calls_are_durable_before_later_processing_fails[repair_full]
+FAILED tests/test_usage_ledger.py::test_auxiliary_calls_are_durable_before_later_processing_fails[report_after_repair]
+FAILED tests/test_usage_ledger.py::test_auxiliary_calls_are_durable_before_later_processing_fails[full_readdress]
+FAILED tests/test_usage_ledger.py::test_hard_exit_then_resume_preserves_completed_call_usage[full]
+FAILED tests/test_usage_ledger.py::test_hard_exit_then_resume_preserves_completed_call_usage[core]
+FAILED tests/test_usage_ledger.py::test_explicit_fresh_execution_does_not_import_previous_usage[False]
+FAILED tests/test_usage_ledger.py::test_explicit_fresh_execution_does_not_import_previous_usage[True]
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/opt/homebrew/Caskroom/miniforge/base/lib/python3.13/selectors.py:398: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+12 failed, 38 passed, 13 warnings in 237.61s (0:03:57)

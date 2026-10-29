@@ -388,3 +388,7 @@ def test_a_one_byte_fragment_just_before_the_boundary_is_a_predecessors(tmp_path
     else:
         ledger.ledger_path(s).unlink()
     assert api._abandoned_rows(s) == [old]
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

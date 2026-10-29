@@ -37,12 +37,14 @@ class UnusableSnapshotTest(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.spec = _Spec(self.tmp.name)
         self.written = {}
+        self.usage_ids = {}
 
-        def fake_snapshot(spec, name, body):
+        def fake_snapshot(spec, name, body, *, usage_id=None):
             path = Path(self.tmp.name) / "intermediate" / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(body, encoding="utf-8")
             self.written[name] = body
+            self.usage_ids[name] = usage_id
             return path
 
         patcher = mock.patch("data_sheets_schema.api_runner._snapshot",
@@ -208,19 +210,10 @@ class UnusableSnapshotTest(unittest.TestCase):
         self.assertIn("short prose", body)
         self.assertNotIn("characters elided", body)
 
-    def test_a_readdress_row_of_the_same_attempt_number_is_not_stamped(self):
-        """Round-3 finding 3: `_readdress_receipt` appends a `full_readdress`
-        row with attempt 1; the guard must check the phase, not only the
-        attempt number, or that row is overwritten."""
-        from data_sheets_schema.api_runner import _record_unusable_response
-        own = {"phase": "full", "attempt": 1, "output_tokens": 7}
-        foreign = {"phase": "full_readdress", "attempt": 1, "output_tokens": 9}
-        # the call-site guard, reproduced: the row is passed only when phase and attempt match
-        for row, expect in ((own, "output_tokens: 7"), (foreign, "output_tokens: None")):
-            self.written.clear()
-            usage_row = row if row.get("attempt") == 1 and row.get("phase") == "full" else None
-            _record_unusable_response(self.spec, "full", 1, "p", "some text", usage_row)
-            self.assertIn(expect, self.written["CHORUS_full_unusable_attempt1.txt"])
+    def test_the_snapshot_carries_its_actual_delivery_usage_id(self):
+        self._write("some text", usage_row={"usage_id": "delivered-full", "output_tokens": 7})
+        self.assertEqual(self.usage_ids["CHORUS_full_unusable_attempt1.txt"], "delivered-full")
+        self.assertIn("output_tokens: 7", self.written["CHORUS_full_unusable_attempt1.txt"])
 
     def test_an_empty_response_writes_nothing(self):
         """There is no evidence in an empty body, and a file full of header
@@ -296,6 +289,62 @@ class ThroughThePhaseLoop(unittest.TestCase):
             self.assertIn("unusable_reason", row)
             self.assertIn("unusable_snapshot", row)
             self.assertNotIn("outcome", row, "a billed attempt is not an abandoned one")
+        from data_sheets_schema import latch_journal, snapshot_store, usage_ledger
+        entries = snapshot_store.entries(s)
+        pins = usage_ledger._read(s)["latch_snapshots"]
+        for row in usage:
+            entry = next(e for e in entries if Path(e["path"]).name == row["unusable_snapshot"])
+            pin = next(p for p in pins if p["path"] == entry["path"])
+            self.assertEqual(entry["usage_id"], row["usage_id"])
+            self.assertEqual(pin["usage_id"], row["usage_id"])
+            self.assertEqual(pin["sha256"], hashlib.sha256(Path(entry["path"]).read_bytes()).hexdigest())
+        self.assertTrue(latch_journal.check(s)["verified"])
+
+    def test_readdress_failure_keeps_unusable_evidence_on_the_original_full_delivery(self):
+        import tempfile
+        from data_sheets_schema import api_runner as api, latch_journal, snapshot_store, usage_ledger
+        from tests.test_download.test_api_runner import FakeResponse, spec
+        from types import SimpleNamespace
+        from contextlib import contextmanager
+
+        response = ("```yaml\nid: x\ntitle: T\nname: n\ndescription: d\nkeywords: [a]\n```\n"
+                    + api.RECEIPT_MARK + "\nchunks:\n- id: c001\n  status: extracted\n"
+                    "  extracted:\n  - slot: absent_field\n    value: d\n")
+
+        @contextmanager
+        def stream(**kwargs):
+            yield SimpleNamespace(get_final_message=lambda: FakeResponse(response))
+
+        with tempfile.TemporaryDirectory() as tmp:
+            selected = spec(out_dir=Path(tmp) / "out", condition="generic_v8")
+            usage = []
+
+            def failed_readdress(spec_, req, full_text, body, receipt, client, settings, rows):
+                identifier = usage_ledger.begin_call(spec_, "full_readdress", 1, "fixture")
+                usage_ledger.append_usage(spec_, rows, {"usage_id": identifier,
+                    "phase": "full_readdress", "attempt": 1, "output_tokens": 99})
+                raise RuntimeError("synthetic failure after the readdress delivery")
+
+            with mock.patch.object(api, "MAX_ATTEMPTS", 1), \
+                    mock.patch.object(api, "_readdress_receipt", side_effect=failed_readdress) as readdress_call, \
+                    self.assertRaisesRegex(RuntimeError, "synthetic failure after the readdress delivery"):
+                api._generate_phase(selected, "full", {}, SimpleNamespace(messages=SimpleNamespace(stream=stream)),
+                                    api._model_settings(), usage)
+            readdress_call.assert_called_once()
+            own, readdress = usage
+            self.assertEqual((own["phase"], readdress["phase"]), ("full", "full_readdress"))
+            self.assertIn("unusable_snapshot", own)
+            self.assertNotIn("unusable_snapshot", readdress)
+            self.assertNotIn("unusable_reason", readdress)
+            self.assertEqual(usage_ledger.merge_usage(selected, []), usage)
+            entry = next(e for e in snapshot_store.entries(selected)
+                         if Path(e["path"]).name == own["unusable_snapshot"])
+            self.assertEqual(entry["usage_id"], own["usage_id"])
+            self.assertNotEqual(entry["usage_id"], readdress["usage_id"])
+            text = Path(entry["path"]).read_text()
+            self.assertIn(f"output_tokens: {own['output_tokens']}", text)
+            self.assertIn(response, text)
+            self.assertTrue(latch_journal.check(selected)["verified"])
 
 
 if __name__ == "__main__":

@@ -321,6 +321,12 @@ def prepare(
         key: prior["run"].get(key) for key in reg["run"]
     } != reg["run"]:
         raise ValueError("record provenance identifies another registered run")
+    model_facts = prior.get("model")
+    if isinstance(model_facts, dict) and "runtime_integrity" in model_facts:
+        from data_sheets_schema.latch_journal import eligibility_problem
+        problem = eligibility_problem(model_facts["runtime_integrity"])
+        if problem:
+            raise ValueError(f"generation runtime integrity is ineligible for registered evaluation: {problem}")
     if (not isinstance(prior.get("shared_generation"), dict)
             or prior["shared_generation"].get("authority") != captured.identity()):
         raise ValueError("record provenance is not bound to this generation registration")
@@ -372,7 +378,7 @@ def prepare(
         "evaluation/registered_eval_runner.py", "evaluation/validate.py",
         "evaluation_context.py", "semantic_scope.py", "semantic_instrument.py",
         "semantic_evidence.py", "semantic_evidence_authority.py", "judge_contract.py",
-        "agent_pin.py", "provenance.py",
+        "agent_pin.py", "provenance.py", "latch_journal.py",
     ):
         take(Path(__file__).parents[1] / module)
     manifest = {

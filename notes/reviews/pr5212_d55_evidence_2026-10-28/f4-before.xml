@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.676" timestamp="2026-10-28T01:06:49.995845" hostname="marcins-MacBook-Pro.local"><testcase classname="tests.test_pr5212_d55_fixes" name="test_interrupted_intent_requires_exact_acknowledgement_and_can_continue" time="2.172"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'required event_sha256s='&#10; Input: 'latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)'">tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_intent_requir0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1119fbce0&gt;
+
+    def test_interrupted_intent_requires_exact_acknowledgement_and_can_continue(tmp_path, monkeypatch):
+        selected = start(tmp_path)
+        original = ledger._write_unlatched
+        def interrupt_intent(spec, data):
+            if data.get('pending_call'):
+                raise KeyboardInterrupt()
+            return original(spec, data)
+        with monkeypatch.context() as m:
+            m.setattr(ledger, '_write_unlatched', interrupt_intent)
+            with pytest.raises(KeyboardInterrupt):
+                ledger.begin_call(selected, 'audit', 1, '2026-10-28T07:02:00Z')
+        suffix = raw_events(selected)[-1]
+        with pytest.raises(ledger.UsageLedgerError, match='required event_sha256s='):
+&gt;           journal.check(selected)
+
+tests/test_pr5212_d55_fixes.py:131: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+&lt;db88ca68c latch_journal&gt;:518: in check
+    ???
+&lt;db88ca68c latch_journal&gt;:408: in _validated
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'ledger checkpoint does not match journal head (deletion, truncation or interrupted update)'
+
+&gt;   ???
+E   data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)
+
+&lt;db88ca68c latch_journal&gt;:35: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/var/folders/7w/ksxs106s7_sg14v6cb2y70vr0000gn/T/codex-5212-pt/test_interrupted_intent_requir0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1119fbce0&gt;
+
+    def test_interrupted_intent_requires_exact_acknowledgement_and_can_continue(tmp_path, monkeypatch):
+        selected = start(tmp_path)
+        original = ledger._write_unlatched
+        def interrupt_intent(spec, data):
+            if data.get('pending_call'):
+                raise KeyboardInterrupt()
+            return original(spec, data)
+        with monkeypatch.context() as m:
+            m.setattr(ledger, '_write_unlatched', interrupt_intent)
+            with pytest.raises(KeyboardInterrupt):
+                ledger.begin_call(selected, 'audit', 1, '2026-10-28T07:02:00Z')
+        suffix = raw_events(selected)[-1]
+&gt;       with pytest.raises(ledger.UsageLedgerError, match='required event_sha256s='):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'required event_sha256s='
+E        Input: 'latch journal: ledger checkpoint does not match journal head (deletion, truncation or interrupted update)'
+
+tests/test_pr5212_d55_fixes.py:130: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,23 @@
+{
+  "group": "canary",
+  "returncode": 0,
+  "collect_only": false,
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "executable": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+  "base_head": "5c407c87fd895dfd1b96b160b48399ec9d1713cb",
+  "source_sha256": {
+    "src/data_sheets_schema/latch_journal.py": "625ac764fd0956fb96afe4c187119304f168d5767a4dcf9a97338830576b8d1c",
+    "poetry.lock": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+    "tests/test_latch_journal.py": "f4e1cdc9e9649f654d42b4110c945246f95954cdaa72d8f72c4028d60d558438",
+    "tests/test_api_latch_guard.py": "261e4a1b7dd8186f72ef7ea989f8bc8ef0069f18adb6f5270aeba2443ffea5db",
+    "tests/test_pr5212_d55_fixes.py": "d10aa88e6520491e452a3565a286d9306cfde9dcc12eae73c7806fbfeac9887c",
+    "tests/test_pr5212_r3_fixes.py": "65d7b021c4fa5dc6aeb92a74b0d1a844195dfa7141d2065f17c926dbac5a3d57",
+    "tests/test_pr5212_r4_fixes.py": "7698a5f44b7d3ea104cdcf263f7a962d91bf6873a839b86182b36b44bbfa9076",
+    "scripts/adhoc/pr5212_r4_checks_20261028.py": "43aaf3efb8542c9fdfbee09a139da532eed771d5956b4bb680de7b8f83c483b9"
+  },
+  "source_unchanged": true,
+  "tests": 1,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+}

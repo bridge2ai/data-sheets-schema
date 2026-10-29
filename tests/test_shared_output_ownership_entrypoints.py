@@ -433,3 +433,7 @@ def test_actual_batch_refuses_inventory_alias_to_control(registered, tmp_path, m
     assert seen == {'lock': [], 'execute': []} and control.samefile(inventory)
     assert tree(tmp_path) == before
     assert {p: p.read_bytes() for p in authorities} == authorities
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

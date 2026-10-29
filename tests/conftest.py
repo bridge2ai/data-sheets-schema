@@ -34,6 +34,34 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 NOTES = ROOT / "notes"
 
+
+@pytest.fixture
+def journal_launch_monitor(monkeypatch):
+    """Explicit opt-in launch record for pre-D57 runner regression fixtures.
+
+    Capture heads at durable appends, independently of mutable ledger reads.
+    A raw journal rewrite/deletion cannot change this monitor's expected head.
+    Tests of missing/wrong CLI or runner expectations do not use this fixture.
+    """
+    from functools import wraps
+    from data_sheets_schema import api_runner, latch_journal
+    heads = {}
+    append = latch_journal._append
+    execute = api_runner.execute
+
+    def observed_append(spec, events, event):
+        append(spec, events, event)
+        heads[str(latch_journal.journal_path(spec))] = event['sha256']
+
+    @wraps(execute)
+    def monitored_execute(spec, **kwargs):
+        kwargs.setdefault('expect_journal_head_sha256', heads.get(str(latch_journal.journal_path(spec))))
+        return execute(spec, **kwargs)
+
+    monkeypatch.setattr(latch_journal, '_append', observed_append)
+    monkeypatch.setattr(api_runner, 'execute', monitored_execute)
+    return heads
+
 if sys.pycache_prefix is None:
     sys.pycache_prefix = str(Path(tempfile.gettempdir()) / "d4d-tests-pycache")
 os.environ.setdefault("PYTHONPYCACHEPREFIX", sys.pycache_prefix)

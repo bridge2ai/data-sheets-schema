@@ -136,3 +136,7 @@ def test_backfill_recovers_v8_headers_from_recorded_execution(external, monkeypa
     assert recovered["render_version"] == 8
     assert recovered["api_header_values"] == external.render_spec()["api_header_values"]
     assert verify_request(external.method, external.label, external.project, external.out_dir) == ("match", None)
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

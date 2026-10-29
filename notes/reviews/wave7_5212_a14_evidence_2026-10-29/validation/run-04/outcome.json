@@ -1,0 +1,13 @@
+{
+  "invalid_junit_cases": [],
+  "passed": true,
+  "passed_cases_by_module": {
+    "test_typed_audit_omission_wire": 21
+  },
+  "returncode": 0,
+  "scientific_acceptance": "not_assessed",
+  "selection_complete": true,
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 6.205300792003982
+}

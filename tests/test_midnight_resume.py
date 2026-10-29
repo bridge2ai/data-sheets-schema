@@ -125,3 +125,7 @@ def test_batch_reconstructs_an_automatic_date_and_resumes_next_day(external, mon
     second = CliRunner().invoke(cli, args)
     assert second.exit_code == 0, second.output
     assert len(client.messages.calls) == (0 if completed else 3)
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")

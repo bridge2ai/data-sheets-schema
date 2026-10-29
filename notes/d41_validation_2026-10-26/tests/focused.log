@@ -1,0 +1,139 @@
+..............F......................................................... [ 96%]
+...                                                                      [100%]
+=================================== FAILURES ===================================
+_____ test_terminal_override_preserves_evidence_but_never_authorizes_retry _____
+
+spec = RunSpec(project='CHORUS', arm='BASELINE (input documents only)', method='claudecode_agent', bundle=PosixPath('data/pre...tion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None)
+data = {'abandoned_journal_offset': 0, 'accept_legacy': False, 'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity...eneric', 'label': '2026-07-29_claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, ...}
+required = {'1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477', '6fb398ced816ef5bda28c30f71ae2f30abf2154b5b5bacb0c33b1733ee2dc2f7', '94bc9e3e11c17d5d275c74407e81dcfcbcb78b92ccb6c0ab116d7d7fb2d808ea'}
+
+    def _override(spec, data, required):
+        path = override_path(spec)
+        if not path.exists() and not path.is_symlink():
+            _fail("unacknowledged discrepancy; required event_sha256s=" + ",".join(sorted(required)))
+        try:
+            raw = _bytes(path)
+            value = _json(raw)
+            keys = {"format", "identity", "generation_id", "event_sha256s", "authorization", "authorized_by", "authorized_at"}
+            if (not isinstance(value, dict) or set(value) != keys
+                    or value["format"] != OVERRIDE_FORMAT or value["identity"] != data["identity"]
+                    or value["generation_id"] != data["generation_id"]
+                    or not isinstance(value["event_sha256s"], list)
+                    or any(not isinstance(item, str) or not _HEX.fullmatch(item) for item in value["event_sha256s"])
+                    or len(set(value["event_sha256s"])) != len(value["event_sha256s"])
+                    or set(value["event_sha256s"]) != set(required)
+                    or any(not isinstance(value[key], str) or not value[key].strip()
+                           for key in ("authorization", "authorized_by", "authorized_at"))):
+>               raise ValueError("override does not name exactly this identity, generation and discrepancy set")
+E               ValueError: override does not name exactly this identity, generation and discrepancy set
+
+src/data_sheets_schema/latch_journal.py:290: ValueError
+
+During handling of the above exception, another exception occurred:
+
+spec = RunSpec(project='CHORUS', arm='BASELINE (input documents only)', method='claudecode_agent', bundle=PosixPath('data/pre...tion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None)
+data = {'abandoned_journal_offset': 0, 'accept_legacy': False, 'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity...eneric', 'label': '2026-07-29_claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, ...}
+events = [{'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity': {'condition': 'generic', 'label': '2026-07-29_claud..._claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, 'kind': 'latch', 'line': 6, ...}]
+mine = [{'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity': {'condition': 'generic', 'label': '2026-07-29_claud..._claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, 'kind': 'latch', 'line': 6, ...}]
+discrepancies = [{'event_sha256': '1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477', 'expected': {'failure_type': 'Va...lure_type': 'ValueError', 'state': 'failed'}, 'found': {'__d4d_latch_missing__': True}, 'key': 'terminal:typed_audit'}]
+
+    def _apply_override(spec, data, events, mine, discrepancies):
+        prior = _acknowledgements(mine)
+        covered = [item for record in prior for item in record.get("discrepancies", [])]
+        pending = [item for item in discrepancies if item not in covered]
+        if pending:
+            try:
+>               acknowledgement = _override(spec, data, {item["event_sha256"] for item in pending})
+
+src/data_sheets_schema/latch_journal.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/latch_journal.py:295: in _override
+    _fail(f"invalid explicit override: {exc}")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+message = 'invalid explicit override: override does not name exactly this identity, generation and discrepancy set'
+
+    def _fail(message):
+>       raise ledger.UsageLedgerError(f"latch journal: {message}")
+E       data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set
+
+src/data_sheets_schema/latch_journal.py:35: UsageLedgerError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-focused-20261026/test_terminal_override_preserv0')
+
+    def test_terminal_override_preserves_evidence_but_never_authorizes_retry(tmp_path):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        data['typed_audit'] = {'state': 'failed', 'failure_type': 'ValueError'}
+        ledger._write(selected, data)
+        event = latch_event(selected, 'terminal:typed_audit')
+        disk_edit(selected, lambda account: account['typed_audit'].update(state='running'))
+        acknowledge(selected, [event['sha256']])
+        with pytest.raises(ledger.UsageLedgerError, match='historical terminal failure'):
+>           journal.check(selected)
+
+tests/test_latch_journal.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/data_sheets_schema/latch_journal.py:498: in check
+    _, events, mine = _validated(spec, spending=spending, allow_new=not spending)
+src/data_sheets_schema/latch_journal.py:412: in _validated
+    mine = _apply_override(spec, data, events, mine, discrepancies)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+spec = RunSpec(project='CHORUS', arm='BASELINE (input documents only)', method='claudecode_agent', bundle=PosixPath('data/pre...tion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None)
+data = {'abandoned_journal_offset': 0, 'accept_legacy': False, 'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity...eneric', 'label': '2026-07-29_claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, ...}
+events = [{'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity': {'condition': 'generic', 'label': '2026-07-29_claud..._claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, 'kind': 'latch', 'line': 6, ...}]
+mine = [{'generation_id': '2d7eb88253314eebadf8e42872ddab0c', 'identity': {'condition': 'generic', 'label': '2026-07-29_claud..._claude-opus-5-api-generic_rep1', 'method': 'claudecode_agent', 'project': 'CHORUS'}, 'kind': 'latch', 'line': 6, ...}]
+discrepancies = [{'event_sha256': '1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477', 'expected': {'failure_type': 'Va...lure_type': 'ValueError', 'state': 'failed'}, 'found': {'__d4d_latch_missing__': True}, 'key': 'terminal:typed_audit'}]
+
+    def _apply_override(spec, data, events, mine, discrepancies):
+        prior = _acknowledgements(mine)
+        covered = [item for record in prior for item in record.get("discrepancies", [])]
+        pending = [item for item in discrepancies if item not in covered]
+        if pending:
+            try:
+                acknowledgement = _override(spec, data, {item["event_sha256"] for item in pending})
+            except ledger.UsageLedgerError as exc:
+                def bounded(value):
+                    raw = _canonical(value)
+                    return value if len(raw) <= 240 else {"type": type(value).__name__,
+                        "canonical_bytes": len(raw), "canonical_sha256": _sha(raw)}
+                summary = [{"event_sha256": item["event_sha256"], "key": item["key"],
+                            "expected": bounded(item["expected"]), "found": bounded(item["found"])}
+                           for item in pending[:4]]
+>               raise ledger.UsageLedgerError(str(exc) + "; discrepancies=" + _canonical(summary).decode()
+                                             + (f"; {len(pending) - 4} further discrepancies" if len(pending) > 4 else "")) from exc
+E               data_sheets_schema.usage_ledger.UsageLedgerError: latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set; discrepancies=[{"event_sha256":"1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477","expected":{"failure_type":"ValueError","state":"failed"},"found":{"failure_type":"ValueError","state":"running"},"key":"controller:typed_audit"},{"event_sha256":"6fb398ced816ef5bda28c30f71ae2f30abf2154b5b5bacb0c33b1733ee2dc2f7","expected":"failed","found":{"__d4d_latch_missing__":true},"key":"terminal:field:[\"typed_audit\",\"state\"]"},{"event_sha256":"94bc9e3e11c17d5d275c74407e81dcfcbcb78b92ccb6c0ab116d7d7fb2d808ea","expected":{"failure_type":"ValueError","state":"failed"},"found":{"__d4d_latch_missing__":true},"key":"terminal:typed_audit"}]
+
+src/data_sheets_schema/latch_journal.py:314: UsageLedgerError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/private/tmp/d4d-h3-focused-20261026/test_terminal_override_preserv0')
+
+    def test_terminal_override_preserves_evidence_but_never_authorizes_retry(tmp_path):
+        selected = start(tmp_path)
+        data = ledger._read(selected)
+        data['typed_audit'] = {'state': 'failed', 'failure_type': 'ValueError'}
+        ledger._write(selected, data)
+        event = latch_event(selected, 'terminal:typed_audit')
+        disk_edit(selected, lambda account: account['typed_audit'].update(state='running'))
+        acknowledge(selected, [event['sha256']])
+>       with pytest.raises(ledger.UsageLedgerError, match='historical terminal failure'):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'historical terminal failure'
+E        Input: 'latch journal: invalid explicit override: override does not name exactly this identity, generation and discrepancy set; discrepancies=[{"event_sha256":"1054c700df6f49c30aecd9f7e2ce41cc9f6d1ed722d9157de5bb0805542cf477","expected":{"failure_type":"ValueError","state":"failed"},"found":{"failure_type":"ValueError","state":"running"},"key":"controller:typed_audit"},{"event_sha256":"6fb398ced816ef5bda28c30f71ae2f30abf2154b5b5bacb0c33b1733ee2dc2f7","expected":"failed","found":{"__d4d_latch_missing__":true},"key":"terminal:field:[\\"typed_audit\\",\\"state\\"]"},{"event_sha256":"94bc9e3e11c17d5d275c74407e81dcfcbcb78b92ccb6c0ab116d7d7fb2d808ea","expected":{"failure_type":"ValueError","state":"failed"},"found":{"__d4d_latch_missing__":true},"key":"terminal:typed_audit"}]'
+
+tests/test_latch_journal.py:121: AssertionError
+=============================== warnings summary ===============================
+../../data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37
+  /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/lib/python3.13/site-packages/dateutil/tz/tz.py:37: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    EPOCH = datetime.datetime.utcfromtimestamp(0)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--------- generated xml file: /private/tmp/d4d-h3-focused-20261026.xml ---------
+=========================== short test summary info ============================
+FAILED tests/test_latch_journal.py::test_terminal_override_preserves_evidence_but_never_authorizes_retry
+1 failed, 74 passed, 125 deselected, 1 warning in 10.18s

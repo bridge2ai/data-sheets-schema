@@ -98,3 +98,7 @@ def test_activation_recovers_after_index_publication_before_ledger_ack(external,
     client = FakeClient()
     result = api.execute(new, client=client)
     assert len(result["usage"]) == len(client.messages.calls) == 4
+
+
+# D57: retain externally observed journal heads across fixture resumes.
+pytestmark = pytest.mark.usefixtures("journal_launch_monitor")
