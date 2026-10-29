@@ -1,5 +1,11 @@
 # Receipts v5 merge fixes: N1, N3, N4
 
+The subsequent R4/R6 follow-up is recorded in [r4_r6/README.md](r4_r6/README.md):
+five causal tests pass, the selected acceptance suite has 899 passed / 19
+skipped, and all four inertness slices were rebuilt and passed against A13.
+The original N1/N3/N4 evidence below is retained unchanged except for the
+R2 lifetime qualification and the updated proof reproduction instructions.
+
 Offline remediation of claude's independent review of
 `562ca36b29c907bd64f1a2ac63c70baf24d8e2cf`, dated 2026-10-29.
 Acceptance source/test head: `955af2bfe` (the subsequent evidence commit changes
@@ -26,7 +32,7 @@ outside the v5-only guard.
 The original remediation's 15 modules plus the three new causal modules give
 **894 passed, 19 skipped**, no failures, in one offline serial run. The skips
 are the existing native-runtime-only cases. This is the selected 18-module
-acceptance suite, not the entire repository suite. All pytest invocations used
+acceptance suite, not the entire repository suite. Original pytest invocations used
 `--basetemp="$TMPDIR/codex-v5-pt"` and disabled pytest's cache provider.
 
 `validation.json` and `inertness.json` hold the checked counts and SHA-256
@@ -74,7 +80,9 @@ Scripts are committed in `scripts/adhoc/`:
   `r4_r6/`, preserving the original evidence. No prior temporary tree is needed.
 - `receipts_v5_merge_probes_20261029/`: the four adapted reviewer probes.
 - `summarize_receipts_v5_merge_20261029.py`: assert causal transitions,
-  acceptance counts, four equal comparisons and unchanged protected paths.
+  acceptance counts, four equal comparisons and unchanged protected paths at
+  the original remediation head. Use `validate_receipts_v5_r4_r6_20261029.py`
+  for the R4/R6 follow-up.
 
 Run each script with the local project virtualenv's Python and `-S -B`.
 The committed XML, logs and JSON contain durable evidence; exact raw comparison
