@@ -523,6 +523,10 @@ def _reported_cost(events: list[dict]) -> Decimal:
     return Decimal(str(value))
 
 
+class EventTypeNotAllowed(ValueError):
+    """Retained stream contains an event outside the isolated-run allowlist."""
+
+
 def _accept(prepared: PreparedEvaluation, events: list[dict]) -> tuple[dict, Decimal]:
     """Authenticate route, completed result, challenge, identity and every score."""
     plan = prepared.document()
@@ -531,7 +535,7 @@ def _accept(prepared: PreparedEvaluation, events: list[dict]) -> tuple[dict, Dec
         event.get("type") in {"assistant", "result"}
         or (event.get("type") == "system" and event.get("subtype") in {"init", "status"})
     ) for event in events):
-        raise ValueError("event type is not allowed in an isolated no-tools run")
+        raise EventTypeNotAllowed("event type is not allowed in an isolated no-tools run")
     init = [e for e in events if e.get("type") == "system" and e.get("subtype") == "init"]
     if len(init) != 1 or init[0].get("apiKeySource") != "ANTHROPIC_API_KEY":
         raise ValueError("runtime init must prove ANTHROPIC_API_KEY auth, never subscription")

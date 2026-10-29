@@ -735,6 +735,8 @@ def registered_run(root, arm, directory, *, snapshots, evaluator_model, contexts
     except (OSError, ValueError, TypeError, KeyError, UnicodeError, yaml.YAMLError, RuntimeError,
             agent_pin.StaleAgentDefinition, agent_pin.NoDiscriminatingChallenge) as exc:
         reason = str(exc) if isinstance(exc, RegisteredRefusal) else "registered_evidence_invalid_or_unavailable"
+        if isinstance(exc, runner.EventTypeNotAllowed):
+            reason = "registered_event_type_not_allowed"
         package["reasons"] = [reason]
         package["rows"] = []
         package["status"] = "refused"

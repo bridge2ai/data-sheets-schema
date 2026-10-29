@@ -7,7 +7,7 @@ import pytest
 from tests.test_audit_evaluation_comparability import (
     audit, isolated_execution_locks, no_network, no_unmocked_runtime,
     registered_audit, registered_case, registered_generation_inputs, registered_prepared,
-    registered_problem, registered_roster, rewrite_plan, save,
+    registered_problem, registered_roster, rewrite_plan, save, anchor_synthetic_receipt,
 )
 
 
@@ -75,3 +75,20 @@ def test_r1_provenance_outside_root_is_refused_without_crashing(registered_case,
     result = registered_audit(registered_case, authority_roots=[tmp_path])
     assert registered_problem(result) == ["registered_provenance_outside_root"]
     assert result["totals"]["bound_registered_rating_files"] == 0
+
+
+@pytest.mark.parametrize("event", [{"type": "user"}, {"type": "tool_result"},
+                                   {"type": "system", "subtype": "compact_boundary"},
+                                   {"type": "unexpected"}])
+def test_r4_disallowed_event_has_specific_refusal_after_repinning(registered_case, event):
+    _, output, _ = registered_case
+    path = output / "rating-001" / "transcript.jsonl"
+    events = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    events.insert(1, {**event, "session_id": events[0]["session_id"]})
+    path.write_text("\n".join(json.dumps(row) for row in events) + "\n")
+    receipt = json.loads((output / "receipt.json").read_bytes())
+    for row in (receipt["attempts"][0], receipt["ratings"][0]):
+        row["transcript_sha256"] = audit.sha(path.read_bytes())
+    save(output / "receipt.json", receipt)
+    anchor_synthetic_receipt(output)
+    assert registered_problem(registered_audit(registered_case)) == ["registered_event_type_not_allowed"]
