@@ -2502,6 +2502,8 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # latent on main via the adjacent/elsewhere kinds).
     reported_kinds = {"snippet_mismatch", "snippet_empty", "snippet_adjacent_chunk",
                       "snippet_elsewhere_chunk", "snippet_spans_boundary"}
+    if instrument_version != 5:
+        reported_kinds.add("receipt_format_version_mismatch")
     findings_gated = sum(1 for f in findings if f.get("kind") not in reported_kinds)
     extra = {}
     if instrument_version in (4, 5):

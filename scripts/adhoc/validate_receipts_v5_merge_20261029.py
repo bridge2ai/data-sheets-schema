@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Purpose: offline N1/N3/N4 validation using a selected source tree and local dependencies.
 # Inputs: --tree checkout and pytest arguments or --script probe plus its arguments.
-# Outputs: stdout / caller-selected evidence; pytest scratch only in $TMPDIR/codex-v5-pt.
+# Outputs: stdout / caller-selected evidence; pytest scratch in $TMPDIR/codex-v5r4-pt.
 # Review: receipts_v5_562ca36b2_claude_review_2026-10-29, 2026-10-29.
 import argparse
 import os
@@ -51,7 +51,7 @@ def main():
         return 0
     import pytest
     return pytest.main(["-q", "-p", "no:cacheprovider", "--basetemp",
-                        str(Path(os.environ["TMPDIR"]) / "codex-v5-pt"), *args])
+                        str(Path(os.environ["TMPDIR"]) / "codex-v5r4-pt"), *args])
 
 
 if __name__ == "__main__":
