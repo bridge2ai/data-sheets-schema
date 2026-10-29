@@ -1528,12 +1528,15 @@ def verify_tool_receipt(
             return False, f"unsupported unit_convert units: {from_unit!r} -> {to_unit!r}", None
         if source_text is None:
             return False, f"chunk {chunk_id!r} text unavailable for unit_convert", None
-        observed = any(
-            m.group("unit").lower() in _BYTE_UNITS_FACTORS
-            and _BYTE_UNITS_FACTORS[m.group("unit").lower()] == _BYTE_UNITS_FACTORS[from_unit]
-            and Decimal(m.group("num").replace(",", "")) == Decimal(str(raw_val))
-            for m in _QTY_UNIT_RE.finditer(source_text)
-        )
+        observed = False
+        for quantity_match in _QTY_UNIT_RE.finditer(source_text):
+            if (
+                quantity_match.group("unit").lower() in _BYTE_UNITS_FACTORS
+                and _BYTE_UNITS_FACTORS[quantity_match.group("unit").lower()] == _BYTE_UNITS_FACTORS[from_unit]
+                and Decimal(quantity_match.group("num").replace(",", "")) == Decimal(str(raw_val))
+            ):
+                observed = True
+                break
         if not observed:
             return False, "unit_convert source quantity/unit is absent from referenced source", None
         binary = args.get("binary", from_unit.endswith("ib") or to_unit.endswith("ib"))
