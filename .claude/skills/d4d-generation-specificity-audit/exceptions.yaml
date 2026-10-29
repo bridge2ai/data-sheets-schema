@@ -33,7 +33,7 @@ exceptions:
       Quarantined historical generators raise before imports or side effects;
       their associated historical prompts explicitly refuse new generation.
       Project tables/examples are retained as provenance, not active defaults.
-    decision: 'Owner-authorized F16 quarantine in Generality G1, 2026-10-29'
+    decision: "Owner's 23:37Z standing generality rule; F16 quarantine under Generality G1, 2026-10-29"
   # ---- designed homes of the study's facts -----------------------------------
   - path: src/data_sheets_schema/profiles.py
     category: [gc_project, bridge2ai_program, biomedical_clinical]

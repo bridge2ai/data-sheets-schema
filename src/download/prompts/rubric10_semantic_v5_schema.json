@@ -342,15 +342,15 @@
         },
         "correctness_validations": {
           "type": "object",
-          "description": "Format validation results (valid/invalid/not_applicable/not_present, may include specific validators like valid_nih, valid_zenodo)",
+          "description": "Format validation results (valid/invalid/not_applicable/not_present)",
           "properties": {
             "doi_format": {
               "type": "string",
-              "description": "DOI format validation (e.g., valid, valid_zenodo, invalid, not_applicable, not_present)"
+              "description": "DOI format validation (e.g., valid, invalid, not_applicable, not_present)"
             },
             "grant_number_format": {
               "type": "string",
-              "description": "Grant number format validation (e.g., valid, valid_nih, invalid, not_applicable, not_present)"
+              "description": "Grant number format validation (e.g., valid, invalid, not_applicable, not_present)"
             },
             "rrid_format": {
               "type": "string",
