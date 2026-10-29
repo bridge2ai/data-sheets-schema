@@ -32,3 +32,15 @@ untouched; negative assertions exclude stale-head refusals; and portable-reader
 success remains distinct from API index refusal. Production and conftest files
 are unchanged, and `git diff --check` passed. Focused validation follows this
 review; no post-fix test result is asserted here.
+
+The targeted run then disproved the newly added blanket core-row refusal:
+deterministic core entries have no usage ID and are not delivered-snapshot
+latches. The orchestrator independently confirmed the production policy and
+approved correcting the test hypothesis; the failed run and correction are
+retained in the issue-ready record. `/root/wave4_a23_review` independently reviewed
+the actual correction at `fc0552e9ec873d77da501e435d22b8818cb8535a` against
+`503f9c0d5`: it proves a unique unlatched core row and a one-row removal, restores
+the original API-positive check alongside portable readback, and preserves
+latched-snapshot/whole-index refusal, no-call/no-write traps, stale-head exclusions
+and saved monitor restoration. No blocker was found for targeted rerun; no
+production edit was involved.
