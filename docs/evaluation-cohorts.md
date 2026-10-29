@@ -44,3 +44,22 @@ The audit confines packages and records to `--root`. A repeatable
 `--authority-root DIRECTORY` explicitly permits external pinned authorities,
 such as generation registrations. These reads retain byte limits and snapshot
 checks. The registration is never rewritten or relocated.
+
+New evaluation receipts use `registered_evaluation_receipt_v2`. Each attempt
+and validated rating pins its transcript, stderr and file roster; the execution
+lock retains the same evidence and the receipt hash. The audit checks the local
+runner lock store, or `--execution-lock-root`, when present. A missing plan lock
+in an available store refuses ingestion. An unavailable store is disclosed as
+`lock_verified=false`, `lock_status=store_unavailable`.
+
+Bound ratings are internally consistent retained evidence. They do not prove
+provider execution or evaluator independence. Final claims require committed,
+unchanged package bytes and separate scientific review. Without explicit
+evaluator and applicability-context targets, rated tuples remain in the queue
+as `pending_target_selection`.
+
+The private review key reports slot structure, key paths, blinded sizes and
+per-project separability. These are descriptive diagnostics for the owner's
+review decision. Scientific content is preserved, and leaked declared
+identities cause refusal. The reviewer directory never includes these private
+diagnostics.
