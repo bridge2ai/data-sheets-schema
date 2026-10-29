@@ -20,6 +20,20 @@
 # in the manifest or profile. Do not add one to make a run pass.
 
 exceptions:
+  - path:
+      - src/download/interactive_d4d_wrapper.py
+      - src/download/claude_max_d4d_processor.py
+      - scripts/fix_failed_extractions.py
+      - src/schema_extract/process_d4d_claude_API_temp0.py
+      - src/download/prompts/claudecode/d4d_generate_from_sources.md
+      - src/download/prompts/claudecode/d4d_deterministic_create.md
+      - src/download/prompts/gpt5/d4d_assistant_create.md
+    category: [gc_project, bridge2ai_program, biomedical_clinical]
+    reason: >-
+      Quarantined historical generators raise before imports or side effects;
+      their associated historical prompts explicitly refuse new generation.
+      Project tables/examples are retained as provenance, not active defaults.
+    decision: 'Owner-authorized F16 quarantine in Generality G1, 2026-10-29'
   # ---- designed homes of the study's facts -----------------------------------
   - path: src/data_sheets_schema/profiles.py
     category: [gc_project, bridge2ai_program, biomedical_clinical]

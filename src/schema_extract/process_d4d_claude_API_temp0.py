@@ -33,6 +33,9 @@ Alternative:
     - Manual approach provides same deterministic principles without API costs
 """
 
+# Historical source retained for provenance; no new invocation is supported (F16).
+raise RuntimeError('Historical D4D generator retired (F16); use the manifest-driven registered pipeline')
+
 import argparse
 import os
 import sys
