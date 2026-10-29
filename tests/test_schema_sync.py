@@ -129,12 +129,16 @@ class DigestIsAFunctionOfContentTest(unittest.TestCase):
         `029c2abc` to `94859bbb`. Schema bytes and inventories are unchanged;
         the failed v10 CHORUS canary retains its prior `cd3c79f2` instrument.
         Both previous profile inventories remain in the historical ledger.
+
+        `6be15822` -> `b2d80be0`, 2026-10-29 (3.1.0/D66, G1 F6/N1):
+        the schema declares neutral substrate term sources and describes
+        type or format. No inventory or validation constraint changes.
         """
         if not self.SCHEMA.exists():
             self.skipTest("merged schema not present in this checkout")
         self.assertEqual(
             schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=BRIDGE2AI)),
-            "6be1582236d9320bac6040b9a8b92da9")
+            "b2d80be089a79aab0ef1a88002b94ca6")
 
 
 class SyncCheckTest(unittest.TestCase):

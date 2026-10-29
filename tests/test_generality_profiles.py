@@ -4,8 +4,15 @@ from data_sheets_schema.profiles import for_record, NEUTRAL, BRIDGE2AI
 
 
 @pytest.mark.parametrize('when', [None, 'not-a-date', '2026-09-12not-a-timestamp',
-                                 '2026-09-12T99:00:00Z', '2026-09-13', '2026-10-29'])
-def test_undated_or_contemporary_missing_profile_is_neutral(when, monkeypatch):
+                                 '2026-09-12T99:00:00Z'])
+def test_undated_missing_profile_refuses(when, monkeypatch):
+    monkeypatch.setenv('D4D_PROFILE', 'bridge2ai')
+    with pytest.raises(ValueError, match='profile absent: a valid record_generated_at is required'):
+        for_record({'record_generated_at': when})
+
+
+@pytest.mark.parametrize('when', ['2026-09-13', '2026-10-29'])
+def test_contemporary_missing_profile_is_neutral(when, monkeypatch):
     monkeypatch.setenv('D4D_PROFILE', 'bridge2ai')
     assert for_record({'record_generated_at': when}) is NEUTRAL
 

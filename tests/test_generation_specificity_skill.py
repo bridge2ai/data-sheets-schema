@@ -6457,12 +6457,9 @@ class TestWhatTextsRun(unittest.TestCase):
         self.assertNotIn("src/data_sheets_schema/cli/evaluate.py", self.surfaces.files)
 
     def test_a_code_table_in_what_a_run_script_imports_is_a_violation(self):
-        """The 'Diabetes Status' table of AI-READI's study groups gates, and a
-        project list planted in the module does too."""
+        """A planted topic table and project list in a run import both gate."""
         rel = "src/data_sheets_schema/rendering/human_readable_renderer.py"
-        lines = (ROOT / rel).read_text(encoding="utf-8").splitlines()
-        at = next(i for i, x in enumerate(lines, 1) if "'diabetes', 'dm'" in x)
-        hits = [h for h in _scan_text(rel, "\n".join(lines) + "\n", self.surfaces.files[rel]) if h["line"] == at]
+        hits, _ = _plant(rel, "STUDY_GROUPS = ['diabetes', 'dm']")
         self.assertEqual({(h["match"].lower(), h["context"]) for h in hits}, {("diabet", "code_table")})
         self.assertTrue(all(h["violation"] and h["gates_in"] == ["native_agentic"] for h in hits))
         planted, _ = _plant(rel, 'RENDER_PROJECTS_4091 = ["CHORUS"]')

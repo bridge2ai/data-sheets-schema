@@ -682,8 +682,9 @@ class TestRoundFour(_Clean):
         from data_sheets_schema.profiles import BRIDGE2AI, NEUTRAL, for_record
         os.environ["D4D_PROFILE"] = "neutral"
         self.assertIs(for_record({"record_generated_at": "2026-09-01", "schema": {"digest_md5": "34d24ff30fb6ad0f10d82af09ddc1fba"}}), BRIDGE2AI)
-        self.assertIs(for_record({"schema": {}}), NEUTRAL)
-        self.assertIs(for_record({"schema": "not a mapping"}), NEUTRAL)
+        for schema in ({}, "not a mapping"):
+            with self.assertRaisesRegex(ValueError, 'record_generated_at is required'):
+                for_record({"schema": schema})
         import warnings
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")

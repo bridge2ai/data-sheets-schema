@@ -236,12 +236,13 @@ def test_cli_retains_historical_profile_absence_with_real_saved_scores(saved, tm
     saved[2].write_text("".join(json.dumps({**row, **context.as_entry()}) + "\n" for row in saved[3]))
     root = tmp_path / "d4d_concatenated"
     paths = _sources(root, RECORDS)
-    if declaration == "null":
-        for label in RECORDS:
-            path = root / "claudecode_agent_core" / label / "P_provenance.yaml"
-            document = yaml.safe_load(path.read_text())
+    for label in RECORDS:
+        path = root / "claudecode_agent_core" / label / "P_provenance.yaml"
+        document = yaml.safe_load(path.read_text())
+        document['record_generated_at'] = '2026-09-01T00:00:00Z'
+        if declaration == "null":
             document["schema"] = {"profile": None}
-            path.write_text(yaml.safe_dump(document))
+        path.write_text(yaml.safe_dump(document))
     monkeypatch.setattr(runs, "CONCAT_DIR", root)
     # Neither unscored default nor the historical profile follows this override.
     monkeypatch.setenv("D4D_PROFILE", "neutral")

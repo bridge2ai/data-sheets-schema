@@ -274,7 +274,7 @@ def for_record(record: dict[str, Any] | None) -> Profile:
 
     Only a record dated before profiles were introduced (2026-09-13,
     e78e4bb5699af0ecaca28cdc5c328e5c908ae959) inherits the historical study
-    profile, with a warning stating that basis. Missing/unproven dates and
+    profile, with a warning stating that basis. Missing/unproven dates refuse;
     contemporary profile-less records are neutral, independent of environment.
     """
     schema = (record or {}).get("schema") if isinstance(record, dict) else None
@@ -289,6 +289,9 @@ def for_record(record: dict[str, Any] | None) -> Profile:
         recorded_date = datetime.fromisoformat(str(raw_date)).date()
     except (TypeError, ValueError):
         recorded_date = None
+    if recorded_date is None:
+        raise ValueError('profile absent: a valid record_generated_at is required '
+                         'to distinguish historical from contemporary records')
     if recorded_date is not None and recorded_date < date(2026, 9, 13):
         import warnings
         warnings.warn('profile absent: record predates profiles (2026-09-13); '

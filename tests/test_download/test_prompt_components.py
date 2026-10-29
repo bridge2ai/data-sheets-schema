@@ -153,7 +153,7 @@ class TestTunedPromptIsGenericPlusBlock(unittest.TestCase):
 
 
 class TestTunedRendersForEveryProject(unittest.TestCase):
-    """The tuned condition must be runnable for every project (#478).
+    """Historical tuned instructions remain replayable for every project (#478).
 
     File existence is not the property that matters — reaching the instruction
     is. VOICE_PEDIATRIC had no component, so `--condition tuned` could not be
@@ -166,10 +166,13 @@ class TestTunedRendersForEveryProject(unittest.TestCase):
         bundle = Path(f"data/preprocessed/concatenated/{project}_preprocessed.txt")
         if not bundle.exists():
             self.skipTest(f"{project} bundle not present")
+        with self.assertRaisesRegex(ValueError, 'tuned'):
+            RunSpec(project=project, arm='BASELINE', method='claudecode_agent',
+                    bundle=bundle, label='L', condition='tuned')
         return resolve_prompt(RunSpec(
             project=project, arm="BASELINE (input documents only)",
             method="claudecode_agent", bundle=bundle, label="L",
-            condition="tuned", runtime="Claude API (direct)",
+            condition="tuned", _replay_only=True, render_version=7, runtime="Claude API (direct)",
             provider="Anthropic"))
 
     def test_every_project_renders_under_tuned(self):
