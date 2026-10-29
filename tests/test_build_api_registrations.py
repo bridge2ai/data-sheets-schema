@@ -142,7 +142,7 @@ def test_build_draft_context_valid_schema(tmp_path: Path) -> None:
     assert doc["root_class"] == "Dataset"
     assert len(doc["scopes"]) == 1
     assert doc["scopes"][0]["owner"] == ""
-    assert "CHORUS" in doc["scopes"][0]["referent"]
+    assert "CHoRUS" in doc["scopes"][0]["referent"]
 
     # Validate against context.schema.json
     schema_file = audit_omissions.ASSETS / "context.schema.json"
