@@ -532,6 +532,7 @@ def render_typed_audit_inputs(
     catalog = _SIZING_CATALOGS[identity]
     document = yaml.safe_load(record_text)
     owner_note = None
+    owner_warning = None
     try:
         owners = omissions._owners(document, catalog, context_doc["vocabulary"])
     except ValueError as exc:
@@ -551,7 +552,14 @@ def render_typed_audit_inputs(
                     mappings(child, f"{pointer}/{index}")
 
         mappings(document, "")
-        owner_note = (f"historical sizing record has no current typed owner traversal ({exc}); "
+        cause = "historical sizing record has no current typed owner traversal"
+        if str(exc) == "missing explicitly supplied vocabulary":
+            cause = "registered context vocabulary prevents typed owner traversal"
+            owner_warning = (
+                "registered context is missing explicitly supplied vocabulary required by the sizing record's "
+                "schema slots; a live record carrying those slots (including null values) would be refused "
+                "during typed owner traversal, after `full` and receipt completion may already be billed")
+        owner_note = (f"{cause} ({exc}); "
                       f"omission owner classes use a {width}-byte name allowance for every mapping; "
                       "this is an estimate, not validation of an executable packet")
     prepared = omissions._render_prepared(record=record, bundle=bundle, manifest=manifest, receipt=receipt,
@@ -583,6 +591,7 @@ def render_typed_audit_inputs(
             "integration_largest_base_bytes": call({"phase": runtime.INTEGRATION_PHASE},
                                                    integration_request(limits["max_workers"])),
             "carry_allowance_bytes": carry, "owner_allowance_note": owner_note,
+            "owner_allowance_warning": owner_warning,
             "shared_context": shared, "requests": requests}
 
 
@@ -655,6 +664,8 @@ def size_typed_audit_input(
     if worst > admissible["integration"]:
         warnings.append(f"at worst, {workers} worker responses and the omission's at their caps, the integration "
                         f"call would need {worst:,} input tokens, over the {admissible['integration']:,} it may take")
+    if rendered.get("owner_allowance_warning"):
+        warnings.append(rendered["owner_allowance_warning"])
     return {"instrument": SIZING_INSTRUMENT, "sizing_record": {name: sg.file_pin(path) for name, path in files.items()},
             "stand_in": not own,
             "bytes_per_token": SIZING_BYTES_PER_TOKEN,
