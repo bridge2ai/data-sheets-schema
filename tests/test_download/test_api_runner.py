@@ -388,14 +388,14 @@ class TestPromptResolution(unittest.TestCase):
     def test_tuned_adds_the_component_block_and_nothing_else(self):
         g = resolve_prompt(spec(project="VOICE", condition="generic",
                                 bundle=Path("data/preprocessed/concatenated/VOICE_preprocessed.txt")))
-        t = resolve_prompt(spec(project="VOICE", condition="tuned",
+        t = resolve_prompt(spec(project="VOICE", condition="tuned", _replay_only=True, render_version=7,
                                 bundle=Path("data/preprocessed/concatenated/VOICE_preprocessed.txt")))
         self.assertGreater(len(t), len(g))
         self.assertIn("pediatric", t)
         self.assertNotIn("pediatric", g)
 
     def test_tuned_declares_its_components_in_the_header(self):
-        t = resolve_prompt(spec(project="VOICE", condition="tuned",
+        t = resolve_prompt(spec(project="VOICE", condition="tuned", _replay_only=True, render_version=7,
                                 bundle=Path("data/preprocessed/concatenated/VOICE_preprocessed.txt")))
         self.assertIn("tuned prompt", t)
         self.assertIn("components/VOICE.md", t)
@@ -410,7 +410,7 @@ class TestPromptResolution(unittest.TestCase):
 
     def test_prompt_files_reflect_the_condition(self):
         self.assertEqual(spec().prompt_files, [GENERIC_PROMPT])
-        self.assertEqual(len(spec(condition="tuned").prompt_files), 3)
+        self.assertEqual(len(spec(condition="tuned", _replay_only=True).prompt_files), 3)
 
 
 class TestPhaseAssembly(unittest.TestCase):

@@ -6089,8 +6089,11 @@ class TestApiMeaning(unittest.TestCase):
         self.assertEqual(surface.roles["api"], "run_shaping")
         bundle = _write(Path(self.tmp.name) / "CHORUS_preprocessed.txt", "hello\n")
         from data_sheets_schema.cli import api as cli_api
-        text = cli_api._spec("CHORUS", "baseline", "2026-09-30_probe", "tuned", bundle=str(bundle),
-                             manifest=None).instruction
+        with self.assertRaisesRegex(ValueError, "tuned is retired"):
+            cli_api._spec("CHORUS", "baseline", "2026-09-30_probe", "tuned", bundle=str(bundle), manifest=None)
+        text = api_runner.RunSpec(project="CHORUS", arm="BASELINE (input documents only)",
+            method="claudecode_api", label="2026-09-30_probe", condition="tuned", bundle=bundle,
+            manifest=None, render_version=7, _replay_only=True).instruction
         component = (ROOT / api_runner.COMPONENTS / "CHORUS.md").read_text(encoding="utf-8").strip()
         self.assertIn(component[:80], text)
         prompt = (ROOT / api_runner.TUNED_PROMPT).read_text(encoding="utf-8")

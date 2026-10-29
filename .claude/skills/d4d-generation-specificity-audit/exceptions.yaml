@@ -49,10 +49,10 @@ exceptions:
       - src/download/prompts/d4d_tuned_arm_prompt.md
     category: [gc_project, bridge2ai_program, biomedical_clinical]
     reason: >-
-      The `tuned` condition exists to carry project-specific evidence; its
-      files are pinned (#432) and define the 2026-07-27 tuned series. Running
-      `tuned` on a non-study dataset has no component and is refused.
-    decision: '#432 (prompt pins); retirement of `tuned` is a follow-up of #4007'
+      Historical pinned files define the 2026-07-27 tuned series. D67 retires
+      tuned for every new registration and execution; read-only reconstruction
+      retains the historical prompt and component bytes.
+    decision: 'D67 (2026-10-29); F17 retirement; #432 historical prompt pins'
   - path: src/download/prompts/d4d_generic_arm_prompt_v*.md
     context: header
     reason: >-
