@@ -283,10 +283,10 @@ def for_record(record: dict[str, Any] | None) -> Profile:
     name = schema.get("profile")
     if name is not None:
         return profile_named(str(name))
-    from datetime import date
+    from datetime import date, datetime
     raw_date = record.get('record_generated_at') if isinstance(record, dict) else None
     try:
-        recorded_date = date.fromisoformat(str(raw_date)[:10])
+        recorded_date = datetime.fromisoformat(str(raw_date)).date()
     except (TypeError, ValueError):
         recorded_date = None
     if recorded_date is not None and recorded_date < date(2026, 9, 13):
