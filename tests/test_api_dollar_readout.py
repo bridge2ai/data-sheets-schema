@@ -792,7 +792,7 @@ def test_no_project_baseline_is_inferred_without_declared_or_measured_inputs(tmp
     formatted = format_readout(summary)
     assert 'UNKNOWN' in formatted
 
-    # An unmeasured abandoned attempt that falls back to baseline[CHORUS][full] also warns (N8).
+    # An unmeasured abandoned attempt must not treat missing input as free.
     meta = tmp_path / "run_abandoned_static"
     meta.mkdir()
     (meta / "CHORUS_abandoned_attempts.jsonl").write_text(
@@ -809,9 +809,21 @@ def test_no_project_baseline_is_inferred_without_declared_or_measured_inputs(tmp
         }),
         encoding="utf-8",
     )
-    aband_summary = compute_readout(ledger_file)
+    aband_summary = compute_readout(ledger_file, cap=100, trigger=50)
     assert aband_summary["abandoned_input_bound_static"] is False
     assert aband_summary["abandoned_attempts"][0]["input_source"] == 'unknown'
+    assert aband_summary["abandoned_attempts"][0]["dollars"] is None
+    assert aband_summary["abandoned_input_bound_unknown"] is True
+    assert aband_summary["settled_dollars"] is None
+    assert aband_summary["abandoned_dollars"] is None
+    assert aband_summary["total_projected_dollars"] is None
+    assert aband_summary["remaining_headroom_dollars"] is None
+    assert aband_summary["cap_reached"] and aband_summary["trigger_reached"]
+    assert 'abandoned full input is UNKNOWN' in format_readout(aband_summary)
+    bounded = compute_readout(ledger_file, custom_bounds={'full': 1234}, cap=100)
+    assert bounded['settled_dollars'] > 0
+    assert bounded['total_projected_dollars'] == bounded['settled_dollars']
+    assert not bounded['abandoned_input_bound_unknown']
 
 
 @pytest.mark.parametrize('project', ['CHORUS', 'AI_READI', 'NEWPROJ'])
