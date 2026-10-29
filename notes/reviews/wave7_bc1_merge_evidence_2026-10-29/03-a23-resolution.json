@@ -1,0 +1,11 @@
+{
+  "after_sha256": "38120f08e6b29849872ad8a35f0238e7f1c1c58a0471dbba950e6a7da41d7c5d",
+  "before_sha256": "2b683188a5fbe15197859cec6d577ee22aac19456dbc06abe50de37b2d547e5c",
+  "helper_sha256": "9726ce74ab1e8599f2a25878a0369d1a24080300984a70a6c2e981840dc00c3c",
+  "incoming": "90312e30e8d957e3b79510abe9ea768967983224",
+  "merge": "a23",
+  "path": "scripts/build_api_registrations.py",
+  "protected_sha256": "1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6",
+  "review": "Codex parent read-only review before application",
+  "scope": "ordinary conflict union only; no tests or protected edits"
+}

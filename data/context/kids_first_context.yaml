@@ -1,31 +1,40 @@
 # Evaluation applicability context for KIDS_FIRST (Gabriella Miller Kids First Pediatric Research Program)
 # External Clinical/Genomic Holdout: pediatric cancer and structural birth defects cohort
 # Format: d4d-evaluation-context-1
+# Bundle chunks: notes/matched_cborg_2026-09-13/kids_first/chunks.yaml (rule.version: 2, 58 chunks)
 
 human_subjects:
   value: true
-  evidence: "KIDS_FIRST aggregates genomic sequencing and clinical phenotypic data from pediatric patients and family trios across childhood cancer and structural birth defect cohorts."
+  # chunks: [c002, c003, c014, c021]
+  evidence: "[chunks: c002, c003, c014, c021] Gabriella Miller Kids First Pediatric Research Program (Kids First) collects whole-genome sequencing, RNA-seq, and clinical/phenotypic data from human pediatric patients with childhood cancers and structural birth defects (e.g., PCGC congenital heart defect trios in phs001138/phs001110, c002, c003, c014, c021) and their parents."
 
 regulated_access:
   value: true
-  evidence: "Individual-level genomic and clinical data require controlled dbGaP / Cavatica authorized access and Data Use Certification (DUC) compliance."
+  # chunks: [c005, c008, c010, c012, c021]
+  evidence: "[chunks: c005, c008, c010, c012, c021] Individual-level genomic and clinical data require controlled-access authorization through NIH dbGaP (eRA Commons authentication, Data Access Request review by a NIH Data Access Committee, signing a Data Use Certification agreement, and adherence to study-specific consent groups such as GRU/HMB/DS, c005, c008, c010, c012, c021) under FISMA/NIST SP 800-53 security controls (c008)."
 
 shared_dataset:
   value: true
-  evidence: "KIDS_FIRST disseminates harmonized clinical and genomic datasets through the Kids First Data Resource Portal and Cavatica."
+  # chunks: [c002, c003, c004, c009, c011]
+  evidence: "[chunks: c002, c003, c004, c009, c011] Kids First shares harmonized clinical and genomic datasets from over 34,000 patients and family members across 36+ studies via the Kids First Data Resource Portal (portal.kidsfirstdrc.org), CAVATICA cloud analysis workspace, PedcBioPortal, and NIH dbGaP (c002, c003, c004, c009, c011)."
 
 data_collection:
   value: true
-  evidence: "KIDS_FIRST collects whole-genome sequencing, RNA-seq, and HPO/MONDO/NCIt harmonized clinical phenotypes from participating pediatric cohorts."
+  # chunks: [c002, c006, c012, c014, c021]
+  evidence: "[chunks: c002, c006, c012, c014, c021] Kids First X01 cohort studies and sequencing centers (Broad Institute, Baylor HGSC, HudsonAlpha, WashU McDonnell Genome Institute) collect biospecimens (blood, saliva, tumor/normal tissue) and clinical/phenotypic records to generate whole-genome sequencing (WGS), whole-exome sequencing (WES), and RNA-seq data (c002, c006, c012, c014, c021)."
 
 data_processing:
   value: true
-  evidence: "KIDS_FIRST applies standardized bioinformatics alignment, variant calling, and clinical phenotype harmonization pipelines."
+  # chunks: [c002, c006, c007]
+  evidence: "[chunks: c002, c006, c007] Raw sequencing reads and clinical records are processed and harmonized by the Kids First DRC: clinical phenotypes are standardized to Human Phenotype Ontology (HPO), MONDO, and NCIt terms across the DRC Data Dictionary, and genomic reads are aligned to GRCh38 with joint variant calling (gVCF/VCF) and RNA-seq quantification (c002, c006, c007)."
 
 processing_software:
   value: true
-  evidence: "KIDS_FIRST publishes and executes CWL/Cavatica genomics workflows and FHIR/phenotype harmonization tools."
+  # chunks: [c002, c004, c006, c009, c013]
+  evidence: "[chunks: c002, c004, c006, c009, c013] The Kids First DRC provides open-source CWL (c013) bioinformatics workflows on GitHub and CAVATICA (c006) including alignment/re-alignment to a bwa-indexed reference fasta, GATK Base Quality Score Recalibration, HaplotypeCaller and joint genotyping, STAR alignment, RSEM quantification, Arriba and STAR-Fusion callers, and FHIR/Kids First data model tooling (c002, c004, c006, c009, c013)."
 
 ml_training_dataset:
-  value: true
-  evidence: "KIDS_FIRST harmonized multimodal genomic and phenotypic datasets support machine learning and discovery analytics across pediatric cohorts."
+  value: false
+  # chunks: [c003, c004, c011, c012]
+  # curator_assertion: true
+  evidence: "[chunks: c003, c004, c011, c012] [curator_assertion: true; set to false by the owner's human review, D52, 2026-10-27] Kids First DRC curates large-scale harmonized multi-modal pediatric genomic and HPO-coded phenotypic datasets in cloud-ready CAVATICA / FHIR formats to support computational discovery, cross-disease integrative analysis, and downstream machine learning / AI modeling in pediatric cancer and structural birth defects (c003, c004, c011, c012). It is a research data resource for which ML is one possible downstream use, not a dataset released as an ML training set."

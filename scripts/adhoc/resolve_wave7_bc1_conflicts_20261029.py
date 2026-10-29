@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PROTECTED = ROOT / 'src/data_sheets_schema/shared_generation.py'
 PROTECTED_SHA = '1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6'
 A13 = 'cd07f2a3738e146eeaa30ae86d35d3161eb3413b'
+A23 = '90312e30e8d957e3b79510abe9ea768967983224'
 
 
 def sha(raw):
@@ -69,9 +70,20 @@ def a13(text):
     return resolved
 
 
+def a23(text):
+    return once(text,
+        '<<<<<<< HEAD\n'
+        '            # Written with the registration, once every check has passed.\n'
+        '=======\n'
+        '            from scripts.build_draft_contexts import serialize_draft_context\n\n'
+        '>>>>>>> ' + A23 + '\n',
+        '            from scripts.build_draft_contexts import serialize_draft_context\n\n'
+        '            # Written with the registration, once every check has passed.\n')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('merge', choices=['a13'])
+    parser.add_argument('merge', choices=['a13', 'a23'])
     parser.add_argument('--expected-input-sha256', required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
@@ -84,10 +96,11 @@ def main():
     out = args.output
     if not out.is_absolute() or out.resolve() != out or out.exists() or out.is_relative_to(ROOT):
         raise ValueError('fresh external physical evidence path required')
-    resolved = a13(raw.decode()).encode()
+    incoming, resolve = {'a13': (A13, a13), 'a23': (A23, a23)}[args.merge]
+    resolved = resolve(raw.decode()).encode()
     if any(line.startswith((b'<<<<<<< ', b'=======', b'>>>>>>> ')) for line in resolved.splitlines()):
         raise ValueError('unresolved conflict marker')
-    proof = {'merge': args.merge, 'incoming': A13, 'path': str(target.relative_to(ROOT)),
+    proof = {'merge': args.merge, 'incoming': incoming, 'path': str(target.relative_to(ROOT)),
              'before_sha256': sha(raw), 'after_sha256': sha(resolved),
              'helper_sha256': sha(Path(__file__).read_bytes()),
              'protected_sha256': PROTECTED_SHA, 'review': 'Codex parent read-only review before application',

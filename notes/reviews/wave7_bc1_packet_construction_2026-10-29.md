@@ -121,3 +121,24 @@ lineage and postflight HEAD/index/worktree checks passed. Evidence:
 `wave7_bc1_merge_evidence_2026-10-29/02-a14-{preflight,postflight}.json`.
 The branch still deliberately lacks A14's protected-file changes until the
 separate proposal is applied in a validation archive. No tests have run.
+
+A14 merge commit: `e18c3319e7051ef6f1ec9ce34d7ddecbe67c6247`.
+
+## Merge 3: A23 / #5164
+
+First parent `e18c3319e7051ef6f1ec9ce34d7ddecbe67c6247`; incoming
+`90312e30e8d957e3b79510abe9ea768967983224`; sole actual base
+`cf01eb12bbbbde04854163ecb1036cf9a5431e6e`. Incoming and base both have
+protected C, so Git preserves current B without invoking the driver. The
+pre/post checks passed. Evidence:
+`wave7_bc1_merge_evidence_2026-10-29/03-a23-{preflight,postflight}.json`.
+
+The only ordinary conflict is F3: the deferred-write comment versus the
+`serialize_draft_context` import. The proposed union sent before resolution
+keeps the import, a blank line, and the comment. The adjacent existing
+`write_to_disk=False`, worktree forwarding, and A23 serializer invocation
+remain. All context/decision changes are inherited automatically from A23.
+
+The parent independently reviewed the actual hunk and approved this exact
+union. Retained resolver mode `a23` applies it with a preimage SHA check;
+`03-a23-resolution.json` pins the source and helper bytes. No tests ran.
