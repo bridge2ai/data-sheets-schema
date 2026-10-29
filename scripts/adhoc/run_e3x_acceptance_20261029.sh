@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Purpose: E3x review F1-F12 final acceptance, 2026-10-29.
+# Purpose: E3x review F1-F12 and re-review R1-R6 acceptance, 2026-10-29.
 # Inputs: Python interpreter, external pytest basetemp. Output: serial pytest log.
 # Run in the selected real git checkout; no providers, fetches or rating runs.
 set -euo pipefail
@@ -19,4 +19,5 @@ env -u ANTHROPIC_API_KEY -u CBORG_API_KEY -u OPENAI_API_KEY \
     tests/test_evaluation/test_rubric20_scoring.py tests/test_evaluation/test_general_context.py \
     tests/test_evaluation/test_explicit_dataset_scope.py tests/test_d52_publication_labels.py \
     tests/test_e3x_fixes.py tests/test_e3x_blinding_fixes.py \
-    tests/test_e3x_receipt_fixes.py tests/test_e3x_guard_kills.py
+    tests/test_e3x_receipt_fixes.py tests/test_e3x_guard_kills.py \
+    tests/test_e3x_rereview_fixes.py tests/test_e3x_rereview_kills.py
