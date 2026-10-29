@@ -500,6 +500,7 @@ class D4DEvaluator:
         field_paths = [paths] if isinstance(paths, str) else list(paths)
         decision = applicability(question.get('applies_to'), self.context)
         applicability_evidence = decision.evidence
+        omitted = []
         if question['id'] == 9:
             regulated = applicability('regulated_access', self.context)
             if regulated.value is False:
@@ -522,6 +523,12 @@ class D4DEvaluator:
                 score, label = int(present), "Pass" if present else "Fail"
             else:
                 score, label = self._score_numeric_rubric20(question, unit, field_paths, present, values)
+                if omitted:
+                    # D52 changes applicability, not the evidence. The original
+                    # rubric band can describe criteria that were not measured.
+                    populated = sum(self._is_field_present(unit, [path])[0] for path in field_paths)
+                    label = (f"Applicable-field coverage ({populated}/{len(field_paths)} fields populated; "
+                             f"{len(omitted)} regulated-access criteria excluded under D52)")
             unit_scores.append({"path": pointer, "score": score, "label": label})
             evidence.extend(pointer + value for value in values)
         selected = min(unit_scores, key=lambda row: row['score'] or 0)
