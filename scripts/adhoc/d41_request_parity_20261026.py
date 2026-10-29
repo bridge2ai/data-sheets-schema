@@ -219,10 +219,11 @@ def _requests(spec, reg, settings):
         if not checked['passed']:
             raise ValueError('invalid synthetic worker: ' + json.dumps(checked, sort_keys=True))
         worker_checks[worker['id']] = checked
+    omission_request = typed.omission_wire_request(packet, derivations=runtime._derivations(spec))
     omission = canonical({'format': 'omission_inventory_v1',
-        'request_sha256': packet['omission_request']['request_sha256'],
+        'request_sha256': omission_request['request_sha256'],
         'chunks': [{'chunk': row['chunk'], 'status': 'no_omission', 'reason': 'Synthetic parity only.', 'candidates': []}
-                   for row in packet['omission_request']['payload']['chunks']]})
+                   for row in omission_request['payload']['chunks']]})
     for stage in runtime.roster(packet):
         req, payload, _ = runtime._build_request_bytes(spec, capture, packet, stage,
             workers=workers, omission=omission, settings=settings,
