@@ -80,7 +80,7 @@ def test_released_resource_selection(rubric, version):
     assert bool(selected.evidence_authority_path) == (version == '3.0')
 
 
-@pytest.mark.parametrize('rubric, version', [('rubric10', '4.0'), ('rubric20', '5.0'), ('../rubric20', '4.0'),
+@pytest.mark.parametrize('rubric, version', [('rubric10', '4.0'), ('rubric20', '6.0'), ('../rubric20', '4.0'),
                                            ('rubric20', 4), ('rubric20', None), (None, '4.0')])
 def test_no_unregistered_instrument_or_path_selection(rubric, version):
     with pytest.raises(ValueError):
