@@ -1,0 +1,12 @@
+# Reconciliation
+
+## Evidence assertions
+```json
+{"claims": [], "source_review": {"artifact": "final_full", "sha256": "c4c99f5cae353486069209f3d27a90cbd684266e625451c3b864a5f58f9fa193", "values": [{"path": "/creators/0/name", "claims": [{"text": "sample", "verdict": "supported", "attributed_to": [], "claim_status": "fact", "source_status": "fact", "evidence": [{"source": "protocol.txt", "chunk": "c001", "quote": "A sample dataset is planned."}], "reason": "Synthetic structural harness; this does not measure semantic accuracy."}]}, {"path": "/description", "claims": [{"text": "A sample dataset is planned.", "verdict": "supported", "attributed_to": [], "claim_status": "fact", "source_status": "fact", "evidence": [{"source": "protocol.txt", "chunk": "c001", "quote": "A sample dataset is planned."}], "reason": "Synthetic structural harness; this does not measure semantic accuracy."}]}, {"path": "/id", "claims": [{"text": "urn:sample", "verdict": "supported", "attributed_to": [], "claim_status": "fact", "source_status": "fact", "evidence": [{"source": "protocol.txt", "chunk": "c001", "quote": "A sample dataset is planned."}], "reason": "Synthetic structural harness; this does not measure semantic accuracy."}]}, {"path": "/keywords/0", "claims": [{"text": "sample", "verdict": "supported", "attributed_to": [], "claim_status": "fact", "source_status": "fact", "evidence": [{"source": "protocol.txt", "chunk": "c001", "quote": "A sample dataset is planned."}], "reason": "Synthetic structural harness; this does not measure semantic accuracy."}]}, {"path": "/name", "claims": [{"text": "sample", "verdict": "supported", "attributed_to": [], "claim_status": "fact", "source_status": "fact", "evidence": [{"source": "protocol.txt", "chunk": "c001", "quote": "A sample dataset is planned."}], "reason": "Synthetic structural harness; this does not measure semantic accuracy."}]}, {"path": "/title", "claims": [{"text": "Sample dataset", "verdict": "supported", "attributed_to": [], "claim_status": "fact", "source_status": "fact", "evidence": [{"source": "protocol.txt", "chunk": "c001", "quote": "A sample dataset is planned."}], "reason": "Synthetic structural harness; this does not measure semantic accuracy."}]}]}}
+```
+
+## Dispositions
+
+| slot | disposition | record | reason |
+|---|---|---|---|
+| `keywords` | retained | full | kept |

@@ -1,0 +1,33 @@
+{
+  "base": "c119d58ddf18cc7c4a77bc8293d09335ab24f921",
+  "changed_paths": [
+    "notes/reviews/wave7_5212_a14_merge_proof_2026-10-29.json",
+    "scripts/adhoc/validate_wave7_5212_a14_20261029.py",
+    "scripts/adhoc/verify_wave7_5212_a14_merge_20261029.py"
+  ],
+  "command": [
+    "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+    "-S",
+    "-P",
+    "-B",
+    "/private/tmp/d4d-codex-wave7-5212-a14-20261029/scripts/adhoc/validate_wave7_5212_a14_20261029.py",
+    "--child",
+    "--output",
+    "/private/tmp/d4d-wave7-5212-a14-canary-20261029",
+    "--module",
+    "test_shared_generation_scope_context",
+    "--test-node",
+    "test_actual_cli_scope_delivery_regate_and_completed_replay"
+  ],
+  "credential_names_removed": [
+    "GIT_PAGER",
+    "KB_AUTH_TOKEN",
+    "OPENSCIENTIST_API_KEY"
+  ],
+  "head": "fc3417be63b55c579c48df13fb54ae33437a3977",
+  "modules": [
+    "test_shared_generation_scope_context"
+  ],
+  "scope": "Offline selected modules; Python audit guard does not isolate arbitrary child binaries.",
+  "test_node": "test_actual_cli_scope_delivery_regate_and_completed_replay"
+}

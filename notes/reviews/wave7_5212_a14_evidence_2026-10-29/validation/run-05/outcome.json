@@ -1,0 +1,23 @@
+{
+  "invalid_junit_cases": [
+    {
+      "identity": [
+        "tests.test_source_heading_runtime_api",
+        "test_selected_form_captures_actual_default_instrument_per_invocation"
+      ],
+      "tags": [
+        "failure"
+      ]
+    }
+  ],
+  "passed": false,
+  "passed_cases_by_module": {
+    "test_source_heading_runtime_api": 0
+  },
+  "returncode": 1,
+  "scientific_acceptance": "not_assessed",
+  "selection_complete": true,
+  "skipped": [],
+  "source_unchanged": true,
+  "wall_seconds": 28.710916540992912
+}
