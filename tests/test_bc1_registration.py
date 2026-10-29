@@ -1,5 +1,6 @@
 """BC1 own-record sizing/roster regressions; no provider (2026-10-27)."""
 from copy import deepcopy
+from fractions import Fraction
 import hashlib
 import json
 import math
@@ -210,20 +211,21 @@ def test_fit_gate_accepts_exact_aggregate_and_input_boundaries(sizing_fixture):
     assert result['own_plan_scenarios']['visible_cap_escaped_bound']['estimated_input_tokens'] > total
 
 
-def test_d62_split_applies_to_every_call_and_measured_escaping_only_to_future(sizing_fixture):
+def test_d63_split_applies_to_every_call_and_d62_escaping_only_to_future(sizing_fixture):
     registration, files, inputs = sizing_fixture
     result = reg.size_inputs(registration, sizing_record=files,
         context_raw=inputs['context'], schema_snapshot=inputs['schema_snapshot'])
     for row in result['rows']:
         if row['scenario'] in ('captured_record', reg.FLOOR):
-            assert row['estimated_input_tokens'] == math.ceil(row['wire_bytes'] / 2.48)
+            assert row['estimated_input_tokens'] == math.ceil(Fraction(row['wire_bytes'] * 432784, 1185329))
             assert row['future_wire_bytes'] == 0
         if row['scenario'] == reg.CAPS:
             floor = next(r for r in result['rows'] if r['stage'] == row['stage'] and r['scenario'] == reg.FLOOR)
             assert row['request_bytes'] == floor['wire_bytes']
-            assert row['planning_future_wire_bytes'] == math.ceil(row['future_wire_bytes'] * 1.25)
+            assert row['planning_future_wire_bytes'] == math.ceil(Fraction(row['future_wire_bytes'] * 5, 4))
             assert row['estimated_input_tokens'] == math.ceil(
-                floor['wire_bytes'] / 2.48 + math.ceil(row['future_wire_bytes'] * 1.25) / 1.75)
+                Fraction(floor['wire_bytes'] * 432784, 1185329)
+                + Fraction(math.ceil(Fraction(row['future_wire_bytes'] * 5, 4)) * 4, 7))
     forged = deepcopy(result)
     forged['calibration']['future_response_escape_factor'] = 1.0
     with pytest.raises(ValueError, match='component calibration'):

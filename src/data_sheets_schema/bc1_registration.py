@@ -11,13 +11,12 @@ from copy import deepcopy
 from dataclasses import dataclass
 import hashlib
 import json
-import math
 from pathlib import Path
 from types import SimpleNamespace
 
 from . import bc1_context as context, bc1_selection as selection
 
-FORMAT = "bc1_input_sizing_v3"
+FORMAT = "bc1_input_sizing_v4"
 FLOOR = "empty_future_floor"
 CAPS = "visible_cap_measured_escape"
 GATED_SCENARIOS = (FLOOR, CAPS)
@@ -25,25 +24,40 @@ PROJECTS = ("CHORUS", "AI_READI", "CM4AI", "VOICE", "VOICE_PEDIATRIC", "KIDS_FIR
 
 
 def calibration():
-    """D62: recorded component policy; historical extrapolation, not BC1 counts."""
-    return {"request_bytes_per_token": 2.48,
+    """D63 request observation with D62 response/escaping planning assumptions."""
+    return {"policy": "d63_exact_request_pair_d62_future_v1",
+        "request_bytes_per_token": 1185329 / 432784,
+        "request_measurement": {
+            "canonical_payload_bytes": 1185329, "input_tokens": 432784,
+            "request_sha256": "c2087a5a3ad9eddae8d42393a96d71a9d200bee749d02b76e75ee286311f70c9",
+            "reported_at": "2026-10-29T04:48:47Z",
+            "base_url": "https://api.cborg.lbl.gov", "operation": "messages.count_tokens",
+            "model": "claude-opus-5",
+            "provenance": "Reported agy D63 observation in notes/coordination/STATUS.md; "
+                          "fixed request retained in notes/reviews/d63_count_tokens_request_2026-10-28.json. "
+                          "Not an independently retained raw SDK response.",
+            "scope": "One canonical worker payload / endpoint pre-call input-token count; "
+                     "not HTTP framing, settled usage, or measured future-request counts."},
         "future_response_bytes_per_token": 1.75,
         "future_response_escape_factor": 1.25,
         "gated_scenarios": list(GATED_SCENARIOS),
         "advisory_scenarios": ["visible_cap_ascii_scenario", "visible_cap_escaped_bound",
                                "caller_expected_visible_scenario"],
-        "decision": "D62 (2026-10-28): floor + caps with measured escaping; escaped bound reported only",
+        "decision": "D63 (2026-10-29): exact reported request ratio replaces D62's 2.48; "
+                    "D62 floor + measured-escape caps gating and future-response terms retained",
         "source": "bc1_fit_calibration_claude_2026-10-28.md sections 2 and 4.4 (F5-F7)",
         "source_sha256": "7024eec029a77745b76c75273d2b9189c1844c1d81f0e44f8a77e17f0a9678df",
-        "basis": "Canonical request bytes / settled input_tokens + cache_read + cache_write; "
-                 "worker minimum 2.482 rounded down to 2.48 for request bytes in EVERY call, "
-                 "integration included. Future-response bytes use 1.75, with 1.25x measured "
-                 "twice-encoding expansion at the caps. BC1 extrapolation, not provider counts.",
+        "basis": "Exact integer pair 1185329 canonical payload bytes / 432784 endpoint input tokens "
+                 "controls the request term in EVERY call, integration included; the decimal is display only. "
+                 "D62's preceding 2.48 used settled usage and is not the same measurement definition. "
+                 "Future-response bytes retain 1.75 and 1.25x measured twice-encoding expansion at the caps. "
+                 "Transfer to new requests is a planning extrapolation, not their provider counts.",
         "escape_basis": "bc1_8f83d6cb3_claude_review_2026-10-28.md section 4: 10-22a responses expand 1.11-1.25x",
         "escape_source_sha256": "c705afbb8beecad171d141a41fcc95cb148e3c899ed6e58d8903a35a7d5952e1",
         "component_basis": "Request = exact empty-future floor wire for that stage; future = wire delta from floor. "
                            "Measured-escape scenario renders ASCII caps then scales ONLY that delta by 1.25. "
-                           "Token estimate = ceil(request/2.48 + planning_future/1.75).",
+                           "Token estimate = ceil(request*432784/1185329 + planning_future*4/7). "
+                           "Ceil planning_future first; ceil the sum once, not its components separately.",
         "future_wire_bound": "Four wire bytes per byte of valid UTF-8 JSON carried through two string encodings; "
                              "backslash fill bounds quotes, escapes and JSON whitespace. Bytes only, not token density.",
         "receipt_carry": "Exact BC1 projection of the pinned historical receipt-completion result; no placeholder."}
@@ -260,15 +274,17 @@ def size_inputs(registration, *, sizing_record, context_raw, schema_snapshot,
 
 
 def _components(wire_bytes, request_bytes, scenario, policy):
-    """Keep concrete render bytes distinct from D62's planning expansion."""
+    """Exact D63 request arithmetic; retain D62's future-only expansion."""
     future = wire_bytes - request_bytes
-    factor = policy["future_response_escape_factor"] if scenario == CAPS else 1.0
-    planning_future = math.ceil(future * factor)
+    planning_future = (5 * future + 3) // 4 if scenario == CAPS else future
+    measured = policy["request_measurement"]
+    denominator = 7 * measured["canonical_payload_bytes"]
+    numerator = (7 * request_bytes * measured["input_tokens"]
+                 + 4 * planning_future * measured["canonical_payload_bytes"])
     return {"request_bytes": request_bytes, "future_wire_bytes": future,
             "planning_future_wire_bytes": planning_future,
             "planning_wire_bytes": request_bytes + planning_future,
-            "estimated_input_tokens": math.ceil(request_bytes / policy["request_bytes_per_token"] +
-                                                 planning_future / policy["future_response_bytes_per_token"])}
+            "estimated_input_tokens": (numerator + denominator - 1) // denominator}
 
 
 def draft_candidate(registration, *, sizing_record, context_raw, schema_snapshot, fan_in=2,
@@ -368,7 +384,7 @@ def check_sizing_record(registration, sizing):
             raise ValueError("BC1 sizing wire exceeds registered bytes; registration refused before writing")
         if gated and estimate > room:
             raise ValueError(f"BC1 {row['stage']} ({row['scenario']}) needs {estimate:,} input tokens, "
-                             f"over per-call room {room:,} with D62 component ratios; registration refused before writing")
+                             f"over per-call room {room:,} with D63 request / D62 future components; registration refused before writing")
     for name, total in totals.items():
         future = [row for row in rows if row["scenario"] == name]
         if [row.get("stage") for row in future] != expected_stages:
