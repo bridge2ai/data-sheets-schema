@@ -180,3 +180,50 @@ No guard was manually changed. The legacy-recovery production question is
 still an explicit owner blocker, and this merge neither resolves it nor
 claims readiness. The protected proposal must later carry the routing line;
 the branch intentionally does not yet contain it. No tests ran.
+
+#5212 merge commit: `6701408b4adfbad3c6aec1141a0bfd25d247ef5e`.
+
+## Merge 6: final #5211 / A14 × A17 sizing
+
+First parent `6701408b4adfbad3c6aec1141a0bfd25d247ef5e`; incoming
+`3c41133fcdcdb6db4d09564dc365b8b42b39c390`. Its ancestors include the required
+`b369529b93b3d54a1730066003b8b8e799ab24bf` fixture correction, final A17
+`36b230d69d3a53b54b53336fc53abd8d5273a0d5`, and sizing
+`c4772694588b2b14c6377803cceeffb8c80b1392`; these are inherited, not duplicated.
+
+The three actual merge bases are A23 `90312e30e8d957e3b79510abe9ea768967983224`
+(protected C), A14 `8b885ee68262474275316755c3fc55dc05517dcb` (A), and old A17
+`fc9e1a5d89a7223d75fa1dc1c46f524fb51dea03` (F). A23/A14's common base is
+`cf01eb12bbbbde04854163ecb1036cf9a5431e6e` (C), yielding file union A.
+The old A17 head against that hypothetical merge has common base
+`f8c5ac73caba610d40c49aaceddb31ead3590a72` (F); adding unchanged F leaves A.
+The parent independently verified this reasoning and the actual blobs.
+Incoming also has A, so the current B is preserved without invoking the driver.
+All preflight and protected postchecks passed. Evidence:
+`wave7_bc1_merge_evidence_2026-10-29/06-5211-{preflight,postflight}.json`.
+
+Four builder hunks and one omission-formatter hunk were sent for independent
+review before resolution. The proposed builder union keeps BC1 parameters,
+forwarding and diagnostics; uses incoming `context_dir=context_dir` (the
+explicit #5122 correction at `af86168305ceb92c78fbcaaca4ab7571842264d4`) with
+BC1's `source_manifest_path=selected_manifest`; preserves all automatically
+merged staged-roster handling (`pending_registration_writes=True`) and F7
+warnings. The context-directory correction removes the old implicit output
+directory search without adding a project-specific condition.
+
+F6's proposed union keeps strict policy/context validation and owner traversal,
+passes `term_policy` into `_render_prepared`, adds its optional parameter, and
+appends the policy last before constructing `Prepared`. The validating public
+`prepare` retains its complete-request size check after formatting. The old
+duplicated check inside the now-pure formatter is not copied. No cache repair
+is included: its separate causal regression and evidence are still required.
+
+The parent reviewed the actual hunks and surrounding validation and approved
+the exact proposed unions. Retained resolver modes `5211-builder` and
+`5211-omission` applied them against separately pinned conflict bytes; their
+JSON proofs retain both file hashes and the resolver hash. The cumulative
+driver log contains three protected-file invocations (A13, A14, #5212);
+A23, #5210 and final #5211 keep B through their unchanged-incoming fast paths.
+No application tests or provider calls have run. D63 code and the protected
+proposal are the next separately reviewed changes; archive validation, full
+collection/CI-shard testing, Claude review and AGY publication remain pending.

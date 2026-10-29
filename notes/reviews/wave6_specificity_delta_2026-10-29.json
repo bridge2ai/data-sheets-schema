@@ -1,0 +1,44 @@
+{
+  "added_violations": [],
+  "api_meaning_unchanged": true,
+  "before_commit": "862ace0fdcb230023b42ecfe443c572e9e3fe953",
+  "exit_codes": {
+    "after": 1,
+    "before": 1
+  },
+  "newly_derived_modules": [
+    "typed_audit"
+  ],
+  "no_longer_derived_modules": [],
+  "removed_violations": [],
+  "self_tests": {
+    "after": {
+      "imported_from_neutrality_test": 36,
+      "passed": true,
+      "problems": [],
+      "token_counts": {
+        "biomedical_clinical": 25,
+        "bridge2ai_program": 9,
+        "gc_project": 65
+      }
+    },
+    "before": {
+      "imported_from_neutrality_test": 36,
+      "passed": true,
+      "problems": [],
+      "token_counts": {
+        "biomedical_clinical": 25,
+        "bridge2ai_program": 9,
+        "gc_project": 65
+      }
+    }
+  },
+  "source_sha256": {
+    "after": "604a4678c79538ca13df1b6d874294b40863aa0bb14e73258abb734584fbbaeb",
+    "before": "6a5a270356caa6e52c7649400f0db32bf2af3282cb596de4bf665231e7d3ebca"
+  },
+  "violation_counts": {
+    "after": 96,
+    "before": 96
+  }
+}

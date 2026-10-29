@@ -1,0 +1,134 @@
+{
+  "format": "wave5_compact_validation_evidence_v1",
+  "helpers": [
+    {
+      "name": "preserve_wave5_validation_20261028.py",
+      "sha256": "e2057f41cc3022202918321e3dd6047e1348581a63f9d133d7f0ae04e7939f05"
+    },
+    {
+      "name": "archive_n2_restack_validation_20261027.py",
+      "sha256": "58ed839ba30d30f1089741c0e233fba01477bade741ea6a0a3b8a6a59284f187"
+    }
+  ],
+  "runs": [
+    {
+      "files": [
+        {
+          "bytes": 406,
+          "name": "bootstrap.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "42d2c82a0ffc70e8564e99e3aec26158c9e1c8a0b47181424953446fc6adf854"
+        },
+        {
+          "bytes": 15985,
+          "name": "origins-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "ff3043dc8662a9396bd0f7a9bb7c1aa70caae171b573d1071fcbed029a86b034"
+        },
+        {
+          "bytes": 14811,
+          "name": "origins-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "25cbdcbd0fe320f4ed12434e815ba3e2f16a12ff255a9ed561661ad7e33000c7"
+        },
+        {
+          "bytes": 1090,
+          "name": "outcome.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "80d3c184205aca3f468e8f811470e773ea3c4bd4b4f677e3a4930d26f5892615"
+        },
+        {
+          "bytes": 2810,
+          "name": "plan.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "68d15a68924e254ced82d24f30a71ef04b4a99370ca31b1767fdca7a15fca80e"
+        },
+        {
+          "bytes": 705,
+          "name": "pytest-command.json",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "69bc90929074b9060776873c36271b9bfdd783513beaec039d7f753ad8a83fa7"
+        },
+        {
+          "bytes": 446,
+          "name": "pytest.log",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "86fe296412deb200724e13abfc0e159269222032b2f3721c1bc1c75a50289bb3"
+        },
+        {
+          "bytes": 41503,
+          "name": "pytest.xml",
+          "reason": "compact result evidence",
+          "retention": "copied_verbatim",
+          "sha256": "6526c896d6c1263fc81bc8da09fe5ac96e70e6d0437507e8b0f71cc500dc7693"
+        },
+        {
+          "bytes": 2986542,
+          "name": "source-after.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "aed5650fb0f0cc625c4b5e993554dbf243ce29bd909dc588b2764e04a45ae691"
+        },
+        {
+          "bytes": 2986542,
+          "name": "source-before.json",
+          "reason": "full source/origin inventories stay external; regenerate using retained plan and helper",
+          "retention": "external_hash_reference",
+          "sha256": "aed5650fb0f0cc625c4b5e993554dbf243ce29bd909dc588b2764e04a45ae691"
+        }
+      ],
+      "original_outcome": {
+        "invalid_junit_cases": [],
+        "passed": true,
+        "passed_cases_by_module": {
+          "test_audit_batches": 95,
+          "test_audit_batches_split": 42,
+          "test_audit_batches_v2": 28,
+          "test_audit_typed_format": 7,
+          "test_build_api_registrations": 34,
+          "test_build_draft_contexts": 9,
+          "test_preflight_resource_authority": 31,
+          "test_registration_input_sizing": 16,
+          "test_wave4_5095_review": 5,
+          "test_wave4_a17_a13_integration": 3
+        },
+        "returncode": 0,
+        "scientific_acceptance": "not_assessed",
+        "skipped": [
+          {
+            "identity": [
+              "tests.test_registration_input_sizing",
+              "test_rendering_reproduces_the_chorus_v10_wire"
+            ],
+            "reason": "set D4D_CHORUS_V10_TYPED_RUN to the 2026-10-22a intermediate directory"
+          },
+          {
+            "identity": [
+              "tests.test_audit_batches_split",
+              "test_chorus_v10_saved_run_differs_only_by_the_reworded_worker_sentence"
+            ],
+            "reason": "set D4D_CHORUS_V10_TYPED_RUN to the 2026-10-22a intermediate directory"
+          }
+        ],
+        "source_unchanged": true,
+        "wall_seconds": 151.50641354097752
+      },
+      "original_root": "/private/tmp/d4d-wave5-5211-validation-20261028",
+      "packet_directory": "run-01",
+      "pass_claim": "copied outcome only; no new acceptance inferred",
+      "unread_external_directories": [
+        "cases"
+      ]
+    }
+  ],
+  "scope": "compact results, external raw inventory digests, no historical score changes",
+  "selection": "explicit top-level regular JSON/log/XML files, including ignored files",
+  "source_and_origin_inventories_embedded": false
+}

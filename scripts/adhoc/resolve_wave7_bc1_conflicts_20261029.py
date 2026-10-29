@@ -14,6 +14,7 @@ PROTECTED = ROOT / 'src/data_sheets_schema/shared_generation.py'
 PROTECTED_SHA = '1c4436b5ea689fcd674c848a722dd9a86495692ad83401682f3d805f49acb6d6'
 A13 = 'cd07f2a3738e146eeaa30ae86d35d3161eb3413b'
 A23 = '90312e30e8d957e3b79510abe9ea768967983224'
+A17 = '3c41133fcdcdb6db4d09564dc365b8b42b39c390'
 
 
 def sha(raw):
@@ -81,13 +82,53 @@ def a23(text):
         '            # Written with the registration, once every check has passed.\n')
 
 
+def a17_builder(text):
+    pattern = re.compile(r'^<<<<<<< HEAD\n(.*?)^=======\n(.*?)^>>>>>>> ' + A17 + r'\n', re.M | re.S)
+    hunks = list(pattern.finditer(text))
+    if len(hunks) != 4:
+        raise ValueError('A17 builder requires exactly the four reviewed hunks')
+    replacements = [h.group(1) for h in hunks]
+    replacements[1] = ('                    context_dir=context_dir,\n'
+                       '                    source_manifest_path=selected_manifest,\n')
+    result, offset = [], 0
+    for match, replacement in zip(hunks, replacements):
+        result.extend((text[offset:match.start()], replacement))
+        offset = match.end()
+    return ''.join([*result, text[offset:]])
+
+
+def a17_omission(text):
+    pattern = re.compile(r'^<<<<<<< HEAD\n(.*?)^=======\n(.*?)^>>>>>>> ' + A17 + r'\n', re.M | re.S)
+    hunks = list(pattern.finditer(text))
+    if len(hunks) != 1:
+        raise ValueError('A17 omission requires exactly the reviewed F6 hunk')
+    replacement = ('    if term_policy is not None:\n'
+                   '        payload["term_policy"] = term_policy\n'
+                   '    return Prepared(_json(payload))\n')
+    resolved = text[:hunks[0].start()] + replacement + text[hunks[0].end():]
+    resolved = once(resolved,
+        '        max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes)\n',
+        '        max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes, term_policy=term_policy)\n')
+    resolved = once(resolved,
+        '                     chunks, prior, max_output_tokens, max_request_bytes):\n',
+        '                     chunks, prior, max_output_tokens, max_request_bytes, term_policy=None):\n')
+    return resolved
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('merge', choices=['a13', 'a23'])
+    cases = {
+        'a13': (A13, 'scripts/build_api_registrations.py', a13),
+        'a23': (A23, 'scripts/build_api_registrations.py', a23),
+        '5211-builder': (A17, 'scripts/build_api_registrations.py', a17_builder),
+        '5211-omission': (A17, 'src/data_sheets_schema/audit_omissions.py', a17_omission),
+    }
+    parser.add_argument('merge', choices=list(cases))
     parser.add_argument('--expected-input-sha256', required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    target = ROOT / 'scripts/build_api_registrations.py'
+    incoming, relative, resolve = cases[args.merge]
+    target = ROOT / relative
     raw = target.read_bytes()
     if target.is_symlink() or sha(raw) != args.expected_input_sha256:
         raise ValueError('source differs from the reviewed conflict file')
@@ -96,7 +137,6 @@ def main():
     out = args.output
     if not out.is_absolute() or out.resolve() != out or out.exists() or out.is_relative_to(ROOT):
         raise ValueError('fresh external physical evidence path required')
-    incoming, resolve = {'a13': (A13, a13), 'a23': (A23, a23)}[args.merge]
     resolved = resolve(raw.decode()).encode()
     if any(line.startswith((b'<<<<<<< ', b'=======', b'>>>>>>> ')) for line in resolved.splitlines()):
         raise ValueError('unresolved conflict marker')

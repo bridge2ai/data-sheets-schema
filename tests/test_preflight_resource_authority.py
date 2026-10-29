@@ -109,8 +109,14 @@ def test_default_kids_first_manifest_comes_from_selected_tree(selected_resources
     args.pop("source_manifest_path")
     args["project"] = "KIDS_FIRST"
     args.pop("partition")
-    # Mechanics-only fixture limits, not a scientific Kids First sizing claim.
-    args["audit_limits"] = {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4}
+    # Mechanics-only manifest/authority fixture, not a Kids First sizing claim.
+    # A17 requires explicit input sizing outside the CHORUS profile; deliberately
+    # declare this fixture's CHORUS record as a stand-in rather than bypassing it.
+    args["audit_limits"] = {"max_paths": 80, "max_inventory_bytes": 12288, "max_workers": 4,
+                            "aggregate_input_tokens": 4000000}
+    args["sizing_record"] = builder.SizingRecord.in_directory(
+        ROOT / "tests/fixtures/audit_batches/chorus_v10_2026-10-22a", "CHORUS")
+    args["sizing_stand_in"] = True
     reg = builder.build_registration(**args)
     assert reg["inputs"]["source_manifest"] == sg.file_pin(manifest)
     assert reg["inputs"]["profile"]["name"] == "neutral"
@@ -365,8 +371,8 @@ def test_synthesized_context_requires_selected_vocabulary(selected_resources, tm
         args.extend([option, original["inputs"][key]["path"]])
     before = Path.cwd()
     result = CliRunner().invoke(builder.cli, args)
-    assert result.exit_code != 0
-    assert isinstance(result.exception, FileNotFoundError)
-    assert "selected worktree vocabulary is missing:" in str(result.exception)
+    # A17's prepare-then-write CLI reports preparation failures as Click errors.
+    assert result.exit_code == 1, result.output
+    assert "selected worktree vocabulary is missing:" in result.output
     assert not out_dir.exists(), "refusal must precede writing a draft context"
     assert Path.cwd() == before

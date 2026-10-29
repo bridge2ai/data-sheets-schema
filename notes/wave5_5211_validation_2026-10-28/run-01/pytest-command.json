@@ -1,0 +1,22 @@
+{
+  "args": [
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "--basetemp",
+    "/private/tmp/d4d-wave5-5211-validation-20261028/cases",
+    "--junitxml",
+    "/private/tmp/d4d-wave5-5211-validation-20261028/pytest.xml",
+    "tests/test_build_api_registrations.py",
+    "tests/test_registration_input_sizing.py",
+    "tests/test_audit_batches.py",
+    "tests/test_audit_batches_split.py",
+    "tests/test_audit_batches_v2.py",
+    "tests/test_audit_typed_format.py",
+    "tests/test_preflight_resource_authority.py",
+    "tests/test_wave4_5095_review.py",
+    "tests/test_wave4_a17_a13_integration.py",
+    "tests/test_build_draft_contexts.py"
+  ],
+  "cwd": "/private/tmp/d4d-codex-wave5-5211-20261028"
+}
